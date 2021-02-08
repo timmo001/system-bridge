@@ -4,6 +4,7 @@
     "outDir": "dist",
     "module": "commonjs",
     "moduleResolution": "node",
+    "target": "es2018",
     "paths": {
       "*": ["node_modules/*"]
     },

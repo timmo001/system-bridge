@@ -1,4 +1,9 @@
 import { ipcMain } from "electron";
+import feathers from "@feathersjs/feathers";
+import "@feathersjs/transport-commons";
+import express from "@feathersjs/express";
+import socketio from "@feathersjs/socketio";
+import swagger from "feathers-swagger";
 
 import { Configuration } from "../configuration";
 import { getSettings } from "../utils";
