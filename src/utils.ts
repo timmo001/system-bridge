@@ -7,9 +7,9 @@ export function getSettings(): Configuration {
   Object.keys(defaultConfiguration).forEach((sectionKey: string) => {
     Object.keys(defaultConfiguration[sectionKey].items).forEach(
       (itemKey: string) => {
-        settings[sectionKey].items[itemKey].value = electronSettings.getSync(
-          `${sectionKey}-items-${itemKey}-value`
-        );
+        settings[sectionKey].items[itemKey].value =
+          electronSettings.getSync(`${sectionKey}-items-${itemKey}-value`) ||
+          settings[sectionKey].items[itemKey].defaultValue;
       }
     );
   });
