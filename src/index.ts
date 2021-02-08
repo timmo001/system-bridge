@@ -15,7 +15,7 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow, tray: Tray;
 const createWindow = (): void => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -42,15 +42,16 @@ const showWindow = (): void => {
 
   mainWindow.show();
 
-  // Open the DevTools.
   if (process.env.NODE_ENV === "development") {
+    // Open the DevTools.
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();
   }
 };
 
 const quitApp = (): void => {
-  mainWindow.destroy();
+  tray?.destroy();
+  mainWindow?.destroy();
   app.quit();
 };
 
@@ -58,15 +59,6 @@ const quitApp = (): void => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", createWindow);
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on("window-all-closed", (): void => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
 
 app.on("activate", (): void => {
   // On OS X it's common to re-create a window in the app when the
@@ -76,19 +68,28 @@ app.on("activate", (): void => {
   }
 });
 
-app.whenReady().then(() => {
-  const appIcon = new Tray(join(__dirname, icon));
+app.whenReady().then((): void => {
+  tray = new Tray(join(__dirname, icon));
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
     { type: "separator" },
     { label: "Quit", type: "normal", click: quitApp },
   ]);
-  appIcon.setToolTip("System Bridge");
-  appIcon.setContextMenu(contextMenu);
-  appIcon.on("double-click", showWindow);
+  tray.setToolTip("System Bridge");
+  tray.setContextMenu(contextMenu);
+  tray.setIgnoreDoubleClickEvents(true);
+  tray.on("double-click", showWindow);
 
   new Main();
 });
+
+ipcMain.on(
+  "open-settings",
+  async (event): Promise<void> => {
+    showWindow();
+    event?.sender?.send("opened-settings");
+  }
+);
 
 ipcMain.on(
   "get-settings",
