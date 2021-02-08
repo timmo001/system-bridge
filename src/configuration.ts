@@ -1,4 +1,4 @@
-import { mdiRocketLaunch } from "@mdi/js";
+import { mdiProtocol, mdiRocketLaunch } from "@mdi/js";
 
 export type SettingsValue =
   | null
@@ -43,6 +43,19 @@ const defaultConfiguration: Configuration = {
         defaultValue: false,
         value: null,
         icon: mdiRocketLaunch,
+      },
+    },
+  },
+  api: {
+    name: "API",
+    description: "API and WebSocket specific settings.",
+    items: {
+      port: {
+        name: "Port",
+        description: "The port the app runs on.",
+        defaultValue: 9170,
+        value: null,
+        icon: mdiProtocol,
       },
     },
   },
