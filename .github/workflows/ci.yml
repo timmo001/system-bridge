@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out files from GitHub
+        uses: actions/checkout@v2
+      - name: Setup
+        run: |
+          sudo apt install -y jsonlint
+          find . -type f -print0 | xargs -0 sed -i 's:#!/usr/bin/with-contenv bash:#!/bin/bash:g'
+      - name: JSONLint
+        run: |
+          for file in $(find ./ -type f -name "*.json"); do
+            if ! jsonlint-php -q $file; then
+              export FAILED=1
+            else
+              echo "$file OK"
+            fi
+          done
+          if [ "${FAILED}" = "1" ]; then
+            exit 1
+          fi
+      - name: Markdown Links
+        uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
+        with:
+          use-quiet-mode: no
+          use-verbose-mode: no
+          config-file: mlc_config.json
+          folder-path: .github
+          file-path: "./README.md"
+          max-depth: -1
+          check-modified-files-only: no
+          base-branch: master
+          file-extension: .md
+  build:
+    runs-on: ${{ matrix.os.server }}
+    strategy:
+      matrix:
+        os:
+          - name: windows
+            server: windows-latest
+          - name: linux
+            server: ubuntu-latest
+          - name: macos
+            server: macos-latest
+    steps:
+      - name: Check out files from GitHub
+        uses: actions/checkout@v2
+      - name: Setting up Node.js
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 14.x
+      - name: Get yarn cache path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Fetch Yarn cache
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: "Install dependencies"
+        run: yarn install
+        env:
+          CI: true
+      - name: "Make"
+        run: yarn make
+        env:
+          CI: true
+          NODE_ENV: "production"
+          INLINE_RUNTIME_CHUNK: false
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v2
+        with:
+          name: out-${{ matrix.os.name }}
+          path: out/

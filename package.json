@@ -1,0 +1,102 @@
+{
+  "name": "system-bridge",
+  "productName": "system-bridge",
+  "version": "1.0.0",
+  "description": "System Bridge",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Timmo",
+    "email": "contact@timmo.xyz"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "home_assistant_desktop"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/renderer.tsx",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/preload.ts"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "6.0.0-beta.54",
+    "@electron-forge/maker-deb": "6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.54",
+    "@electron-forge/maker-zip": "6.0.0-beta.54",
+    "@electron-forge/plugin-webpack": "6.0.0-beta.54",
+    "@marshallofsound/webpack-asset-relocator-loader": "0.5.0",
+    "@types/react": "17.0.1",
+    "@types/react-dom": "17.0.0",
+    "@typescript-eslint/eslint-plugin": "4.0.1",
+    "@typescript-eslint/parser": "4.0.1",
+    "css-loader": "5.0.1",
+    "electron": "11.2.3",
+    "eslint": "7.6.0",
+    "eslint-plugin-import": "2.20.0",
+    "file-loader": "6.2.0",
+    "fork-ts-checker-webpack-plugin": "6.1.0",
+    "node-loader": "1.0.1",
+    "style-loader": "2.0.0",
+    "ts-loader": "8.0.2",
+    "typescript": "4.0.2"
+  },
+  "dependencies": {
+    "@material-ui/core": "4.11.3",
+    "@mdi/js": "5.9.55",
+    "@mdi/react": "1.4.0",
+    "electron-settings": "4.0.2",
+    "electron-squirrel-startup": "1.0.0",
+    "fontsource-roboto": "4.0.0",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-hot-loader": "4.13.0"
+  }
+}
