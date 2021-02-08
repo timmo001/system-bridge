@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 
-import { Configuration } from "./configuration";
-import { getSettings } from "./utils";
+import { Configuration } from "../configuration";
+import { getSettings } from "../utils";
 
 class Main {
   private settings?: Configuration;
