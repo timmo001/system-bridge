@@ -1,17 +1,10 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
+    "target": "es2018",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "paths": {
-      "*": ["node_modules/*"]
-    },
-    "allowJs": true,
+    "outDir": "./lib",
+    "rootDir": "./src",
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -21,5 +14,5 @@
     "sourceMap": true,
     "strict": true
   },
-  "include": ["src/**/*"]
+  "exclude": ["test"]
 }
