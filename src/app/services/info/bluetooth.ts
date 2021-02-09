@@ -1,4 +1,4 @@
-import si, { Systeminformation } from "systeminformation";
+import si from "systeminformation";
 
 export default class BluetoothInfoService {
   // BUSTED: async find(): Promise<Systeminformation.BluetoothDeviceData> {
