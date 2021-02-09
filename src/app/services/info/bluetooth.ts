@@ -1,7 +1,9 @@
 import si, { Systeminformation } from "systeminformation";
 
 export default class BluetoothInfoService {
-  async find(): Promise<Systeminformation.BluetoothDeviceData[]> {
+  // BUSTED: async find(): Promise<Systeminformation.BluetoothDeviceData> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async find(): Promise<any> {
     return await si.bluetoothDevices();
   }
 }
