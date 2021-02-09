@@ -7,8 +7,16 @@ import swagger from "feathers-swagger";
 
 import { Configuration } from "../configuration";
 import { getSettings } from "../utils";
-import SystemInfoService from "./services/info/system";
+import AudioInfoService from "./services/info/audio";
+import BatteryInfoService from "./services/info/battery";
+import BluetoothInfoService from "./services/info/bluetooth";
 import CpuInfoService from "./services/info/cpu";
+import FilesystemInfoService from "./services/info/filesystem";
+import GraphicsInfoService from "./services/info/graphics";
+import MemoryInfoService from "./services/info/memory";
+import NetworkInfoService from "./services/info/network";
+import OsInfoService from "./services/info/os";
+import SystemInfoService from "./services/info/system";
 
 class Main {
   private settings?: Configuration;
@@ -54,8 +62,16 @@ class Main {
     );
 
     // Register services
-    app.use("/info/system", new SystemInfoService());
+    app.use("/info/audio", new AudioInfoService());
+    app.use("/info/battery", new BatteryInfoService());
+    app.use("/info/bluetooth", new BluetoothInfoService());
     app.use("/info/cpu", new CpuInfoService());
+    app.use("/info/filesystem", new FilesystemInfoService());
+    app.use("/info/graphics", new GraphicsInfoService());
+    app.use("/info/memory", new MemoryInfoService());
+    app.use("/info/network", new NetworkInfoService());
+    app.use("/info/os", new OsInfoService());
+    app.use("/info/system", new SystemInfoService());
 
     // Express middleware with a nicer error handler
     app.use(express.errorHandler());
