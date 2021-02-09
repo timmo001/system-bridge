@@ -16,6 +16,7 @@ import GraphicsInfoService from "./services/info/graphics";
 import MemoryInfoService from "./services/info/memory";
 import NetworkInfoService from "./services/info/network";
 import OsInfoService from "./services/info/os";
+import ProcessCommandService from "./services/command/process";
 import SystemInfoService from "./services/info/system";
 
 class Main {
@@ -62,6 +63,7 @@ class Main {
     );
 
     // Register services
+    app.use("/command/process", new ProcessCommandService());
     app.use("/info/audio", new AudioInfoService());
     app.use("/info/battery", new BatteryInfoService());
     app.use("/info/bluetooth", new BluetoothInfoService());

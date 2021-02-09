@@ -97,6 +97,7 @@
     "@mdi/react": "1.4.0",
     "electron-settings": "4.0.2",
     "electron-squirrel-startup": "1.0.0",
+    "execa": "5.0.0",
     "express": "4.17.1",
     "feathers-swagger": "1.2.1",
     "fontsource-roboto": "4.0.0",
