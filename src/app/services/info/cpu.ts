@@ -1,8 +1,8 @@
 import si, { Systeminformation } from "systeminformation";
 
 export interface CpuInfo {
+  cache: Systeminformation.CpuCacheData;
   cpu: Systeminformation.CpuData;
-  flags: string;
   currentSpeed: Systeminformation.CpuCurrentSpeedData;
   temperature: Systeminformation.CpuTemperatureData;
 }
@@ -10,8 +10,8 @@ export interface CpuInfo {
 export default class CpuInfoService {
   async find(): Promise<CpuInfo> {
     return {
+      cache: await si.cpuCache(),
       cpu: await si.cpu(),
-      flags: await si.cpuFlags(),
       currentSpeed: await si.cpuCurrentSpeed(),
       temperature: await si.cpuTemperature(),
     };
