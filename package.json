@@ -75,6 +75,7 @@
     "@feathersjs/feathers": "4.5.11",
     "@feathersjs/socketio": "4.5.11",
     "@mdi/js": "5.9.55",
+    "electron-is-dev": "1.2.0",
     "electron-settings": "4.0.2",
     "electron-squirrel-startup": "1.0.0",
     "execa": "5.0.0",

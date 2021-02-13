@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
+import { Configuration } from "../configuration";
 import { useSettings } from "../Utils";
 import Section from "./Section";
 
@@ -26,12 +27,12 @@ function Main(): ReactElement {
 
   useEffect(() => {
     if (!settings) {
-      // window.api.ipcRendererOn("set-settings", (_event, args) => {
-      //   console.log("set-settings:", args);
-      //   const s: Configuration = args;
-      //   setSettings(s);
-      // });
-      // window.api.ipcRendererSend("get-settings");
+      window.api.ipcRendererOn("set-settings", (_event, args) => {
+        console.log("set-settings:", args);
+        const s: Configuration = args;
+        setSettings(s);
+      });
+      window.api.ipcRendererSend("get-settings");
     }
   }, [settings, setSettings]);
 

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
 import { join } from "path";
 import electronSettings from "electron-settings";
+import isDev from "electron-is-dev";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
@@ -37,11 +38,15 @@ const createWindow = (): void => {
 };
 
 const showWindow = async (): Promise<void> => {
-  mainWindow.loadURL(join(__dirname, "../src/index.html"));
+  mainWindow.loadURL(
+    isDev
+      ? "http://localhost:3000"
+      : `file://${join(__dirname, "../configuration/build/index.html")}`
+  );
 
   mainWindow.show();
 
-  if (process.env.NODE_ENV === "development") {
+  if (isDev) {
     try {
       await devTools(REACT_DEVELOPER_TOOLS);
       console.log(`Added Extension:  ${name}`);
