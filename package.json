@@ -7,6 +7,7 @@
   "scripts": {
     "build:configuration": "cd configuration && yarn build",
     "compile": "shx rm -rf dist/ && tsc",
+    "install:all": "yarn install && cd configuration && yarn install",
     "make": "yarn build:configuration && electron-forge make",
     "package": "yarn build:configuration && electron-forge package",
     "publish": "yarn build:configuration && electron-forge publish",

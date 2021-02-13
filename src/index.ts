@@ -16,7 +16,7 @@ if (require("electron-squirrel-startup")) {
 }
 
 let mainWindow: BrowserWindow, tray: Tray;
-const createWindow = (): void => {
+const createWindow = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -30,6 +30,15 @@ const createWindow = (): void => {
       preload: join(__dirname, "./preload.js"),
     },
   });
+
+  if (isDev) {
+    try {
+      const extName = await devTools(REACT_DEVELOPER_TOOLS);
+      console.log("Added Extension:", extName);
+    } catch (error) {
+      console.log("An error occurred:", error);
+    }
+  }
 
   mainWindow.on("close", (event) => {
     event.preventDefault();
@@ -47,13 +56,6 @@ const showWindow = async (): Promise<void> => {
   mainWindow.show();
 
   if (isDev) {
-    try {
-      await devTools(REACT_DEVELOPER_TOOLS);
-      console.log(`Added Extension:  ${name}`);
-    } catch (error) {
-      console.log(`An error occurred: , ${error}`);
-    }
-
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();
