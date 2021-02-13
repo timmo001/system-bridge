@@ -1,5 +1,10 @@
 import { ipcMain } from "electron";
 import { join } from "path";
+import favicon from "serve-favicon";
+import compress from "compression";
+import helmet from "helmet";
+import cors from "cors";
+
 import feathers from "@feathersjs/feathers";
 import "@feathersjs/transport-commons";
 import express from "@feathersjs/express";
@@ -39,13 +44,20 @@ class API {
 
     // Creates an ExpressJS compatible Feathers application
     const app = express(feathers());
-
+    app.use(
+      helmet({
+        contentSecurityPolicy: false,
+      })
+    );
+    app.use(cors());
+    app.use(compress());
     // Express middleware to parse HTTP JSON bodies
     app.use(express.json());
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
-    // Express middleware to to host static files from the current folder
-    app.use(express.static(join(__dirname, "./public")));
+    app.use(favicon(join(__dirname, "../../public/favicon.ico")));
+    // Host the public folder
+    app.use(express.static(join(__dirname, "../../public")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
