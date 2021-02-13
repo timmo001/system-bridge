@@ -1,8 +1,10 @@
-// Application hooks that run for every service
+import * as authentication from "@feathersjs/authentication";
+
+const { authenticate } = authentication.hooks;
 
 export default {
   before: {
-    all: [],
+    all: [authenticate("jwt")],
     find: [],
     get: [],
     create: [],

@@ -114,13 +114,6 @@ class API {
     // app.use("/info/os", new OsInfoService());
     // app.use("/info/system", new SystemInfoService());
 
-    app.get(
-      "/*",
-      (_req: Request, res: { sendFile: (arg0: string) => void }) => {
-        res.sendFile(join(app.get("public"), "index.html"));
-      }
-    );
-
     // Configure a middleware for 404s and the error handler
     app.use(express.notFound());
     // Express middleware with a nicer error handler
