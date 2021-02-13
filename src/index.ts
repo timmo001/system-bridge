@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
 import { join } from "path";
 import electronSettings from "electron-settings";
+import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
 import Main from "./app/main";
@@ -35,12 +36,19 @@ const createWindow = (): void => {
   });
 };
 
-const showWindow = (): void => {
+const showWindow = async (): Promise<void> => {
   mainWindow.loadURL(join(__dirname, "../src/index.html"));
 
   mainWindow.show();
 
   if (process.env.NODE_ENV === "development") {
+    try {
+      await devTools(REACT_DEVELOPER_TOOLS);
+      console.log(`Added Extension:  ${name}`);
+    } catch (error) {
+      console.log(`An error occurred: , ${error}`);
+    }
+
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();

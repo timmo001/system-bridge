@@ -9,13 +9,9 @@ import {
 } from "@material-ui/core";
 import Icon from "@mdi/react";
 
-import {
-  Configuration,
-  ConfigurationItem,
-  SettingsValue,
-} from "../configuration";
+import { Configuration, ConfigurationItem } from "../configuration";
 import { SectionProps } from "./Section";
-import { useSettings } from "./Utils";
+import { useSettings } from "../Utils";
 
 interface ItemProps extends SectionProps {
   itemKey: string;
@@ -50,13 +46,13 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
     handleSetSetting(checked);
   }
 
-  if (!item) return <></>;
-  const { name, defaultValue, description, icon }: ConfigurationItem = item;
-
-  const value: SettingsValue = useMemo(
-    () => (item.value === undefined ? defaultValue : item.value),
-    [item.value]
+  const value = useMemo(
+    () => (item?.value === undefined ? item?.defaultValue : item.value),
+    [item?.value, item?.defaultValue]
   );
+
+  if (!item) return <></>;
+  const { name, description, icon }: ConfigurationItem = item;
 
   return (
     <ListItem>
