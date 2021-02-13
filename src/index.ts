@@ -5,7 +5,7 @@ import isDev from "electron-is-dev";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
-import Main from "./app/main";
+import API from "./app";
 
 const iconPath = "../src/resources/icons/icon.png";
 
@@ -93,7 +93,7 @@ app.whenReady().then((): void => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showWindow);
 
-  new Main();
+  new API();
 });
 
 ipcMain.on(

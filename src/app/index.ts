@@ -19,7 +19,7 @@ import OsInfoService from "./services/info/os";
 import ProcessCommandService from "./services/command/process";
 import SystemInfoService from "./services/info/system";
 
-class Main {
+class API {
   private settings?: Configuration;
 
   constructor() {
@@ -94,4 +94,4 @@ class Main {
   }
 }
 
-export default Main;
+export default API;
