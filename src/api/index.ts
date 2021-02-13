@@ -6,24 +6,33 @@ import helmet from "helmet";
 import cors from "cors";
 
 import feathers from "@feathersjs/feathers";
+import configuration from "@feathersjs/configuration";
 import "@feathersjs/transport-commons";
 import express from "@feathersjs/express";
 import socketio from "@feathersjs/socketio";
 import swagger from "feathers-swagger";
 
+import { Application } from "./declarations";
 import { Configuration } from "../configuration";
 import { getSettings } from "../utils";
-import AudioInfoService from "./services/info/audio";
-import BatteryInfoService from "./services/info/battery";
-import BluetoothInfoService from "./services/info/bluetooth";
-import CpuInfoService from "./services/info/cpu";
-import FilesystemInfoService from "./services/info/filesystem";
-import GraphicsInfoService from "./services/info/graphics";
-import MemoryInfoService from "./services/info/memory";
-import NetworkInfoService from "./services/info/network";
-import OsInfoService from "./services/info/os";
-import ProcessCommandService from "./services/command/process";
-import SystemInfoService from "./services/info/system";
+import logger from "./logger";
+import middleware from "./middleware";
+import services from "./services";
+import appHooks from "./app.hooks";
+import channels from "./channels";
+import authentication from "./authentication";
+
+// import AudioInfoService from "./services/info/audio";
+// import BatteryInfoService from "./services/info/battery";
+// import BluetoothInfoService from "./services/info/bluetooth";
+// import CpuInfoService from "./services/info/cpu";
+// import FilesystemInfoService from "./services/info/filesystem";
+// import GraphicsInfoService from "./services/info/graphics";
+// import MemoryInfoService from "./services/info/memory";
+// import NetworkInfoService from "./services/info/network";
+// import OsInfoService from "./services/info/os";
+// import ProcessCommandService from "./services/command/process";
+// import SystemInfoService from "./services/info/system";
 
 class API {
   private settings?: Configuration;
@@ -43,7 +52,10 @@ class API {
     const apiSettings = this.settings?.api.items;
 
     // Creates an ExpressJS compatible Feathers application
-    const app = express(feathers());
+    const app: Application = express(feathers());
+    // Load app configuration
+    app.configure(configuration());
+    // Enable security, CORS, compression, favicon and body parsing
     app.use(
       helmet({
         contentSecurityPolicy: false,
@@ -55,9 +67,9 @@ class API {
     app.use(express.json());
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
-    app.use(favicon(join(__dirname, "../../public/favicon.ico")));
+    app.use(favicon(join(app.get("public"), "favicon.ico")));
     // Host the public folder
-    app.use(express.static(join(__dirname, "../../public")));
+    app.use(express.static(app.get("public")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
@@ -65,6 +77,9 @@ class API {
     // Create OpenAPI docs
     app.configure(
       swagger({
+        docsPath: "/api/docs",
+        openApiVersion: 3.0,
+        uiIndex: true,
         specs: {
           info: {
             title: "System Bridge",
@@ -75,21 +90,41 @@ class API {
       })
     );
 
-    // Register services
-    app.use("/command/process", new ProcessCommandService());
-    app.use("/info/audio", new AudioInfoService());
-    app.use("/info/battery", new BatteryInfoService());
-    app.use("/info/bluetooth", new BluetoothInfoService());
-    app.use("/info/cpu", new CpuInfoService());
-    app.use("/info/filesystem", new FilesystemInfoService());
-    app.use("/info/graphics", new GraphicsInfoService());
-    app.use("/info/memory", new MemoryInfoService());
-    app.use("/info/network", new NetworkInfoService());
-    app.use("/info/os", new OsInfoService());
-    app.use("/info/system", new SystemInfoService());
+    // Configure other middleware (see `middleware/index.js`)
+    app.configure(middleware);
+    // Configure authentication
+    app.configure(authentication);
+    // Set up our services (see `services/index.js`)
+    app.configure(services);
+    // Set up event channels (see channels.js)
+    app.configure(channels);
 
+    app.hooks(appHooks);
+
+    // Register services
+    // app.use("/command/process", new ProcessCommandService());
+    // app.use("/info/audio", new AudioInfoService());
+    // app.use("/info/battery", new BatteryInfoService());
+    // app.use("/info/bluetooth", new BluetoothInfoService());
+    // app.use("/info/cpu", new CpuInfoService());
+    // app.use("/info/filesystem", new FilesystemInfoService());
+    // app.use("/info/graphics", new GraphicsInfoService());
+    // app.use("/info/memory", new MemoryInfoService());
+    // app.use("/info/network", new NetworkInfoService());
+    // app.use("/info/os", new OsInfoService());
+    // app.use("/info/system", new SystemInfoService());
+
+    app.get(
+      "/*",
+      (_req: Request, res: { sendFile: (arg0: string) => void }) => {
+        res.sendFile(join(app.get("public"), "index.html"));
+      }
+    );
+
+    // Configure a middleware for 404s and the error handler
+    app.use(express.notFound());
     // Express middleware with a nicer error handler
-    app.use(express.errorHandler());
+    app.use(express.errorHandler({ logger }));
 
     // Add any new real-time connection to the `everybody` channel
     app.on("connection", (connection) =>
@@ -98,11 +133,15 @@ class API {
     // Publish all events to the `everybody` channel
     app.publish(() => app.channel("everybody"));
 
+    process.on("unhandledRejection", (reason, p) =>
+      logger.error("Unhandled Rejection at: Promise ", p, reason)
+    );
+
     // Start the server
     app
       .listen(apiSettings?.port?.value)
       .on("listening", () =>
-        console.log(`Server listening on port ${apiSettings?.port?.value}`)
+        logger.info(`API started on port ${apiSettings?.port?.value}`)
       );
   }
 }
