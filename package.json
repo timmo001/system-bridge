@@ -3,9 +3,9 @@
   "productName": "system-bridge",
   "version": "1.0.0",
   "description": "System Bridge",
-  "main": ".webpack/main",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "tsc && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Timmo",
+    "name": "Aidan Timson",
     "email": "contact@timmo.xyz"
   },
   "license": "MIT",
@@ -24,7 +24,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "home_assistant_desktop"
+            "name": "ts_only_electron"
           }
         },
         {
@@ -41,27 +41,6 @@
           "name": "@electron-forge/maker-rpm",
           "config": {}
         }
-      ],
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "mainConfig": "./webpack.main.config.js",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "./src/index.html",
-                  "js": "./src/renderer.tsx",
-                  "name": "main_window",
-                  "preload": {
-                    "js": "./src/preload.ts"
-                  }
-                }
-              ]
-            }
-          }
-        ]
       ]
     }
   },
@@ -71,21 +50,13 @@
     "@electron-forge/maker-rpm": "6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "6.0.0-beta.54",
     "@electron-forge/maker-zip": "6.0.0-beta.54",
-    "@electron-forge/plugin-webpack": "6.0.0-beta.54",
-    "@marshallofsound/webpack-asset-relocator-loader": "0.5.0",
     "@types/react": "17.0.1",
     "@types/react-dom": "17.0.0",
     "@typescript-eslint/eslint-plugin": "4.0.1",
     "@typescript-eslint/parser": "4.0.1",
-    "css-loader": "5.0.1",
     "electron": "11.2.3",
     "eslint": "7.6.0",
     "eslint-plugin-import": "2.20.0",
-    "file-loader": "6.2.0",
-    "fork-ts-checker-webpack-plugin": "6.1.0",
-    "node-loader": "1.0.1",
-    "style-loader": "2.0.0",
-    "ts-loader": "8.0.2",
     "typescript": "4.0.2"
   },
   "dependencies": {

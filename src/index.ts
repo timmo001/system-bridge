@@ -3,11 +3,9 @@ import { join } from "path";
 import electronSettings from "electron-settings";
 
 import { getSettings } from "./utils";
-import icon from "./resources/icons/icon.png";
 import Main from "./app/main";
 
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+const iconPath = "../src/resources/icons/icon.png";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -22,12 +20,12 @@ const createWindow = (): void => {
     width: 1280,
     height: 720,
     autoHideMenuBar: true,
-    icon: join(__dirname, icon),
+    icon: join(__dirname, iconPath),
     maximizable: true,
     show: false,
     webPreferences: {
       contextIsolation: true,
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: join(__dirname, "./preload.js"),
     },
   });
 
@@ -38,7 +36,7 @@ const createWindow = (): void => {
 };
 
 const showWindow = (): void => {
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.loadURL(join(__dirname, "../src/index.html"));
 
   mainWindow.show();
 
@@ -69,7 +67,7 @@ app.on("activate", (): void => {
 });
 
 app.whenReady().then((): void => {
-  tray = new Tray(join(__dirname, icon));
+  tray = new Tray(join(__dirname, iconPath));
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
     { type: "separator" },
