@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+import { join } from "path";
 import feathers from "@feathersjs/feathers";
 import "@feathersjs/transport-commons";
 import express from "@feathersjs/express";
@@ -44,7 +45,7 @@ class API {
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
     // Express middleware to to host static files from the current folder
-    // app.use(express.static(__dirname));
+    app.use(express.static(join(__dirname, "./public")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs

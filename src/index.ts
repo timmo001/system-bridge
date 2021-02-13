@@ -5,7 +5,7 @@ import isDev from "electron-is-dev";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
-import API from "./app";
+import API from "./api";
 
 const iconPath = "../src/resources/icons/icon.png";
 
