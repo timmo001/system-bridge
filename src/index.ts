@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray } from "electron";
 import { join } from "path";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
@@ -29,17 +29,69 @@ const setupApp = async (): Promise<void> => {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     icon: join(__dirname, iconPath),
     maximizable: true,
     show: false,
     webPreferences: {
       contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
+      devTools: isDev,
     },
   });
 
   setAppConfig();
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "Close Settings",
+          type: "normal",
+          click: () => mainWindow.close(),
+        },
+        { type: "separator" },
+        { label: "Quit Application", type: "normal", click: quitApp },
+      ],
+    },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "Suggest a Feature",
+          type: "normal",
+          click: () =>
+            shell.openExternal(
+              "https://github.com/timmo001/system-bridge/issues/new/choose"
+            ),
+        },
+        {
+          label: "Report an issue",
+          type: "normal",
+          click: () =>
+            shell.openExternal(
+              "https://github.com/timmo001/system-bridge/issues/new/choose"
+            ),
+        },
+        {
+          label: "Discussions",
+          type: "normal",
+          click: () =>
+            shell.openExternal(
+              "https://github.com/timmo001/system-bridge/discussions"
+            ),
+        },
+        { type: "separator" },
+        {
+          label: "About",
+          type: "normal",
+          click: () => app.showAboutPanel(),
+        },
+      ],
+    },
+  ]);
+  Menu.setApplicationMenu(menu);
 
   if (isDev) {
     try {
