@@ -1,9 +1,10 @@
 import { ipcMain } from "electron";
 import { join } from "path";
-import favicon from "serve-favicon";
 import compress from "compression";
-import helmet from "helmet";
 import cors from "cors";
+import favicon from "serve-favicon";
+import helmet from "helmet";
+import http from "http";
 
 import feathers from "@feathersjs/feathers";
 import configuration from "@feathersjs/configuration";
@@ -23,11 +24,14 @@ import channels from "./channels";
 import authentication from "./authentication";
 
 class API {
-  private app?: Application;
+  private server?: http.Server;
   private settings?: Configuration;
 
   constructor() {
     ipcMain.on("updated-setting", this.getSettings);
+
+    process.on("unhandledRejection", (error: Error) => logger.error(error));
+    process.on("uncaughtException", (error: Error) => logger.error(error));
 
     this.getSettings();
     this.setupConnection();
@@ -41,30 +45,30 @@ class API {
     const networkSettings = this.settings?.network.items;
 
     // Creates an ExpressJS compatible Feathers application
-    this.app = express(feathers());
+    const app: Application = express(feathers());
     // Load app configuration
-    this.app.configure(configuration());
+    app.configure(configuration());
     // Enable security, CORS, compression, favicon and body parsing
-    this.app.use(
+    app.use(
       helmet({
         contentSecurityPolicy: false,
       })
     );
-    this.app.use(cors());
-    this.app.use(compress());
+    app.use(cors());
+    app.use(compress());
     // Express middleware to parse HTTP JSON bodies
-    this.app.use(express.json());
+    app.use(express.json());
     // Express middleware to parse URL-encoded params
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(favicon(join(this.app.get("public"), "favicon.ico")));
+    app.use(express.urlencoded({ extended: true }));
+    app.use(favicon(join(app.get("public"), "favicon.ico")));
     // Host the public folder
-    this.app.use(express.static(this.app.get("public")));
+    app.use(express.static(app.get("public")));
     // Add REST API support
-    this.app.configure(express.rest());
+    app.configure(express.rest());
     // Configure Socket.io real-time APIs
-    this.app.configure(socketio());
+    app.configure(socketio());
     // Create OpenAPI docs
-    this.app.configure(
+    app.configure(
       swagger({
         docsPath: "/docs",
         openApiVersion: 3.0,
@@ -80,41 +84,47 @@ class API {
     );
 
     // Configure other middleware (see `middleware/index.js`)
-    this.app.configure(middleware);
+    app.configure(middleware);
     // Configure authentication
-    this.app.configure(authentication);
+    app.configure(authentication);
     // Set up our services (see `services/index.js`)
-    this.app.configure(services);
+    app.configure(services);
     // Set up event channels (see channels.js)
-    this.app.configure(channels);
+    app.configure(channels);
 
-    this.app.hooks(appHooks);
+    app.hooks(appHooks);
 
     // Configure a middleware for 404s and the error handler
-    this.app.use(express.notFound());
+    app.use(express.notFound());
     // Express middleware with a nicer error handler
-    this.app.use(express.errorHandler({ logger }));
+    app.use(express.errorHandler({ logger }));
 
     // Add any new real-time connection to the `everybody` channel
-    this.app.on("connection", (connection) =>
-      this.app?.channel("everybody").join(connection)
+    app.on("connection", (connection) =>
+      app?.channel("everybody").join(connection)
     );
     // Publish all events to the `everybody` channel
-    this.app.publish(() => this.app?.channel("everybody"));
+    app.publish(() => app?.channel("everybody"));
 
-    process.on("unhandledRejection", (error: Error) => logger.error(error));
+    app.setup(this.server);
 
     // Start the server
-    this.app
-      .listen(networkSettings?.port?.value)
-      .on("listening", () =>
-        logger.info(`API started on port ${networkSettings?.port?.value}`)
-      );
+    this.server = http.createServer(app);
+    this.server.on("error", (err) => logger.error(err));
+    this.server.listen(networkSettings?.port?.value);
+
+    this.server.on("listening", () =>
+      logger.info(`API started on port ${networkSettings?.port?.value}`)
+    );
   }
 
   async cleanup(): Promise<void> {
-    this.app?.removeAllListeners();
-    this.app = undefined;
+    if (this.server)
+      this.server.close((err) => {
+        if (err) logger.error(err);
+        logger.info("Server closed.");
+        this.server = undefined;
+      });
   }
 }
 
