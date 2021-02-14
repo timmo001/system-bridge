@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import { Configuration } from "../configuration";
+import { Configuration } from "../../../src/configuration";
 import { useSettings } from "../Utils";
 import Section from "./Section";
 

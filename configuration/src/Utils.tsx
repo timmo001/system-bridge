@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { Configuration } from "./configuration";
+import { Configuration } from "../../src/configuration";
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<

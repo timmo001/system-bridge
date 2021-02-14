@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import Icon from "@mdi/react";
 
-import { Configuration, ConfigurationItem } from "../configuration";
+import { Configuration, ConfigurationItem } from "../../../src/configuration";
 import { SectionProps } from "./Section";
 import { useSettings } from "../Utils";
 
