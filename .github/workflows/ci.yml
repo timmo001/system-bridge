@@ -89,4 +89,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: out-${{ matrix.os.name }}
-          path: out/
+          path: out/system-bridge-*
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v2
+        with:
+          name: pkg-${{ matrix.os.name }}
+          path: out/make/**/**
