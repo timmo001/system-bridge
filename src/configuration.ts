@@ -1,4 +1,4 @@
-import { mdiProtocol, mdiRocketLaunch } from "@mdi/js";
+import { mdiKey, mdiProtocol, mdiRocketLaunch } from "@mdi/js";
 
 export type SettingsValue =
   | null
@@ -56,6 +56,13 @@ const defaultConfiguration: Configuration = {
         defaultValue: 9170,
         value: null,
         icon: mdiProtocol,
+      },
+      apiKey: {
+        name: "API Key",
+        description: "The API key to authenticate with the API.",
+        defaultValue: "",
+        value: null,
+        icon: mdiKey,
       },
     },
   },

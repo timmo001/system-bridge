@@ -8,6 +8,7 @@ import {
 import { IncomingMessage } from "http";
 
 import { Application } from "./declarations";
+import { getSettings } from "./utils";
 
 declare module "./declarations" {
   interface ServiceTypes {
@@ -19,8 +20,11 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
   async authenticate(authentication: AuthenticationResult) {
     const { apiKey } = authentication;
 
-    console.log("authenticate:", apiKey);
-    if (apiKey !== "abc235") throw new NotAuthenticated("Invalid API Key");
+    const settings = getSettings();
+    const settingsAPiKey = settings.api.items.apiKey.value;
+
+    if (apiKey !== settingsAPiKey)
+      throw new NotAuthenticated("Invalid API Key");
 
     return {
       apiKey: true,
@@ -29,7 +33,6 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
 
   async parse(req: IncomingMessage) {
     const apiKey = req.headers["api-key"];
-    console.log("parse:", apiKey);
     if (apiKey) {
       return {
         strategy: this.name,
