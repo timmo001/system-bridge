@@ -23,6 +23,7 @@ import channels from "./channels";
 import authentication from "./authentication";
 
 class API {
+  private app?: Application;
   private settings?: Configuration;
 
   constructor() {
@@ -40,30 +41,30 @@ class API {
     const networkSettings = this.settings?.network.items;
 
     // Creates an ExpressJS compatible Feathers application
-    const app: Application = express(feathers());
+    this.app = express(feathers());
     // Load app configuration
-    app.configure(configuration());
+    this.app.configure(configuration());
     // Enable security, CORS, compression, favicon and body parsing
-    app.use(
+    this.app.use(
       helmet({
         contentSecurityPolicy: false,
       })
     );
-    app.use(cors());
-    app.use(compress());
+    this.app.use(cors());
+    this.app.use(compress());
     // Express middleware to parse HTTP JSON bodies
-    app.use(express.json());
+    this.app.use(express.json());
     // Express middleware to parse URL-encoded params
-    app.use(express.urlencoded({ extended: true }));
-    app.use(favicon(join(app.get("public"), "favicon.ico")));
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(favicon(join(this.app.get("public"), "favicon.ico")));
     // Host the public folder
-    app.use(express.static(app.get("public")));
+    this.app.use(express.static(this.app.get("public")));
     // Add REST API support
-    app.configure(express.rest());
+    this.app.configure(express.rest());
     // Configure Socket.io real-time APIs
-    app.configure(socketio());
+    this.app.configure(socketio());
     // Create OpenAPI docs
-    app.configure(
+    this.app.configure(
       swagger({
         docsPath: "/docs",
         openApiVersion: 3.0,
@@ -79,38 +80,41 @@ class API {
     );
 
     // Configure other middleware (see `middleware/index.js`)
-    app.configure(middleware);
+    this.app.configure(middleware);
     // Configure authentication
-    app.configure(authentication);
+    this.app.configure(authentication);
     // Set up our services (see `services/index.js`)
-    app.configure(services);
+    this.app.configure(services);
     // Set up event channels (see channels.js)
-    app.configure(channels);
+    this.app.configure(channels);
 
-    app.hooks(appHooks);
+    this.app.hooks(appHooks);
 
     // Configure a middleware for 404s and the error handler
-    app.use(express.notFound());
+    this.app.use(express.notFound());
     // Express middleware with a nicer error handler
-    app.use(express.errorHandler({ logger }));
+    this.app.use(express.errorHandler({ logger }));
 
     // Add any new real-time connection to the `everybody` channel
-    app.on("connection", (connection) =>
-      app.channel("everybody").join(connection)
+    this.app.on("connection", (connection) =>
+      this.app?.channel("everybody").join(connection)
     );
     // Publish all events to the `everybody` channel
-    app.publish(() => app.channel("everybody"));
+    this.app.publish(() => this.app?.channel("everybody"));
 
-    process.on("unhandledRejection", (reason, p) =>
-      logger.error("Unhandled Rejection at: Promise ", p, reason)
-    );
+    process.on("unhandledRejection", (error: Error) => logger.error(error));
 
     // Start the server
-    app
+    this.app
       .listen(networkSettings?.port?.value)
       .on("listening", () =>
         logger.info(`API started on port ${networkSettings?.port?.value}`)
       );
+  }
+
+  async cleanup(): Promise<void> {
+    this.app?.removeAllListeners();
+    this.app = undefined;
   }
 }
 

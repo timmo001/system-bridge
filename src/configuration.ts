@@ -18,6 +18,7 @@ export interface ConfigurationItem {
   icon: string;
   defaultValue: SettingsValue;
   value: SettingsValue;
+  requiresServerRestart?: boolean;
 }
 
 export interface ConfigurationSection {
@@ -52,10 +53,11 @@ const defaultConfiguration: Configuration = {
     items: {
       port: {
         name: "Port",
-        description: "The port the app runs on.",
+        description: "The port the application's server runs on.",
         defaultValue: 9170,
         value: null,
         icon: mdiProtocol,
+        requiresServerRestart: true,
       },
       apiKey: {
         name: "API Key",

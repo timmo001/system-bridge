@@ -14,6 +14,7 @@ import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
 import API from "./api";
+import logger from "./logger";
 
 const iconPath = "../src/resources/icons/icon.png";
 
@@ -69,7 +70,7 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow, tray: Tray;
+let mainWindow: BrowserWindow, tray: Tray, api: API;
 const setupApp = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -108,9 +109,9 @@ const setupApp = async (): Promise<void> => {
   if (isDev) {
     try {
       const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      console.log("Added Extension:", extName);
+      logger.debug("Added Extension:", extName);
     } catch (error) {
-      console.log("An error occurred:", error);
+      logger.error("An error occurred:", error);
     }
   }
 
@@ -169,7 +170,7 @@ app.whenReady().then((): void => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showWindow);
 
-  new API();
+  api = new API();
 });
 
 ipcMain.on(
@@ -189,9 +190,31 @@ ipcMain.on(
 
 ipcMain.on(
   "update-setting",
-  async (_event, args): Promise<void> => {
+  async (event, args): Promise<void> => {
     await electronSettings.set(args[0], args[1]);
+    await setAppConfig();
+    event.sender.send("updated-setting", args);
     ipcMain.emit("updated-setting", args);
-    setAppConfig();
+  }
+);
+
+ipcMain.on(
+  "restart-app",
+  async (event): Promise<void> => {
+    event.sender.send("restarting-app");
+    ipcMain.emit("restarting-app");
+    logger.debug("restarting-app");
+    app.relaunch();
+  }
+);
+
+ipcMain.on(
+  "restart-server",
+  async (event): Promise<void> => {
+    event.sender.send("restarting-server");
+    ipcMain.emit("restarting-server");
+    logger.debug("restarting-server");
+    if (api) await api.cleanup();
+    setTimeout(() => (api = new API()), 2000);
   }
 );

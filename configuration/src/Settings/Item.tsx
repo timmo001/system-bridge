@@ -1,4 +1,10 @@
-import React, { ChangeEvent, ReactElement, useMemo } from "react";
+import React, {
+  ChangeEvent,
+  ReactElement,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   ListItem,
   ListItemIcon,
@@ -22,7 +28,20 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
   const item: ConfigurationItem | undefined =
     settings?.[sectionKey].items[itemKey];
 
+  const [originalItem, setOriginalItem] = useState<ConfigurationItem>();
+
+  useEffect(() => {
+    if (!originalItem && item) setOriginalItem(item);
+  }, [originalItem, item]);
+
+  function handleRestartServer() {
+    if (process.env.NODE_ENV === "development")
+      console.log("Restarting Server..");
+    window.api.ipcRendererSend("restart-server");
+  }
+
   function handleSetSetting(value: string | number | boolean) {
+    if (!Number.isNaN(Number(value))) value = Number(value);
     console.log("handleSetSetting:", { sectionKey, itemKey, value });
     if (settings) {
       const newSettings: Configuration = settings;
@@ -32,6 +51,14 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
         `${sectionKey}-items-${itemKey}-value`,
         value,
       ]);
+      window.api.ipcRendererOn("updated-setting", (_event, _args) => {
+        console.log(
+          "updated-setting:",
+          settings[sectionKey].items[itemKey].requiresServerRestart
+        );
+        if (settings[sectionKey].items[itemKey].requiresServerRestart)
+          handleRestartServer();
+      });
     }
   }
 

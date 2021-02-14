@@ -8,6 +8,9 @@
   },
   "ts": true,
   "authentication": {
+    "entity": null,
+    "service": null,
+    "secret": "secret",
     "authStrategies": ["api-key"]
   }
 }
