@@ -2,22 +2,22 @@
 import { ServiceAddons } from "@feathersjs/feathers";
 
 import { Application } from "../../declarations";
-import { Information } from "./information.class";
-import hooks from "./information.hooks";
+import { Os } from "./os.class";
+import hooks from "./os.hooks";
 
 // Add this service to the service type index
 declare module "../../declarations" {
   interface ServiceTypes {
-    information: Information & ServiceAddons<unknown>;
+    os: Os & ServiceAddons<unknown>;
   }
 }
 
 export default function (app: Application): void {
   // Initialize our service with any options it requires
-  app.use("/information", new Information({}, app));
+  app.use("/os", new Os({}, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service("information");
+  const service = app.service("os");
 
   service.hooks(hooks);
 }

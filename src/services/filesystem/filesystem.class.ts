@@ -1,5 +1,10 @@
 import si, { Systeminformation } from "systeminformation";
 
+import { Application } from "../../declarations";
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ServiceOptions {}
+
 export interface FilesystemInfo {
   blockDevices: Systeminformation.BlockDevicesData[];
   diskLayout: Systeminformation.DiskLayoutData[];
@@ -7,7 +12,15 @@ export interface FilesystemInfo {
   fsSize: Systeminformation.FsSizeData[];
 }
 
-export default class FilesystemInfoService {
+export class Filesystem {
+  app: Application;
+  options: ServiceOptions;
+
+  constructor(options: ServiceOptions = {}, app: Application) {
+    this.options = options;
+    this.app = app;
+  }
+
   async find(): Promise<FilesystemInfo> {
     return {
       blockDevices: await si.blockDevices(),

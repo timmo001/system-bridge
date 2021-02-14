@@ -1,5 +1,10 @@
 import si, { Systeminformation } from "systeminformation";
 
+import { Application } from "../../declarations";
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ServiceOptions {}
+
 export interface SystemInfo {
   baseboard: Systeminformation.BaseboardData;
   bios: Systeminformation.BiosData;
@@ -8,7 +13,15 @@ export interface SystemInfo {
   uuid: Systeminformation.UuidData;
 }
 
-export default class SystemInfoService {
+export class System {
+  app: Application;
+  options: ServiceOptions;
+
+  constructor(options: ServiceOptions = {}, app: Application) {
+    this.options = options;
+    this.app = app;
+  }
+
   async find(): Promise<SystemInfo> {
     return {
       baseboard: await si.baseboard(),

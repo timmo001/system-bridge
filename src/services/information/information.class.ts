@@ -1,4 +1,3 @@
-import { Params } from "@feathersjs/feathers";
 import { Application } from "../../declarations";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -16,18 +15,18 @@ export class Information {
     this.app = app;
   }
 
-  async find(params: Params): Promise<Data> {
+  async find(): Promise<Data> {
     return {
-      audio: `${params.route}/audio`,
-      battery: `${params.route}/battery`,
-      bluetooth: `${params.route}/bluetooth`,
-      cpu: `${params.route}/cpu`,
-      filesystem: `${params.route}/filesystem`,
-      graphics: `${params.route}/graphics`,
-      memory: `${params.route}/memory`,
-      network: `${params.route}/network`,
-      os: `${params.route}/os`,
-      system: `${params.route}/system`,
+      audio: "/audio",
+      battery: "/battery",
+      bluetooth: "/bluetooth",
+      cpu: "/cpu",
+      filesystem: "/filesystem",
+      graphics: "/graphics",
+      memory: "/memory",
+      network: "/network",
+      os: "/os",
+      system: "/system",
     };
   }
 }
