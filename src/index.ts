@@ -16,7 +16,7 @@ import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
 
-const iconPath = "../src/resources/icons/icon.png";
+export const appIconPath = join(__dirname, "../src/resources/icons/icon.png");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -77,7 +77,7 @@ const setupApp = async (): Promise<void> => {
     width: 1280,
     height: 720,
     autoHideMenuBar: false,
-    icon: join(__dirname, iconPath),
+    icon: appIconPath,
     maximizable: true,
     show: false,
     webPreferences: {
@@ -157,7 +157,7 @@ app.on("activate", (): void => {
 });
 
 app.whenReady().then((): void => {
-  tray = new Tray(join(__dirname, iconPath));
+  tray = new Tray(appIconPath);
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
     { type: "separator" },
