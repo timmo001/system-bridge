@@ -27,7 +27,8 @@
   ],
   "author": {
     "name": "Timmo",
-    "email": "contact@timmo.xyz"
+    "email": "contact@timmo.xyz",
+    "url": "https://system-bridge.timmo.dev"
   },
   "license": "MIT",
   "config": {
