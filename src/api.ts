@@ -4,7 +4,7 @@ import compress from "compression";
 import cors from "cors";
 import favicon from "serve-favicon";
 import helmet from "helmet";
-import http from "http";
+import { createServer, Server } from "http";
 
 import feathers from "@feathersjs/feathers";
 import configuration from "@feathersjs/configuration";
@@ -24,7 +24,7 @@ import channels from "./channels";
 import authentication from "./authentication";
 
 class API {
-  private server?: http.Server;
+  private server?: Server;
   private settings?: Configuration;
 
   constructor() {
@@ -109,22 +109,25 @@ class API {
     app.setup(this.server);
 
     // Start the server
-    this.server = http.createServer(app);
+    this.server = createServer(app);
     this.server.on("error", (err) => logger.error(err));
-    this.server.listen(networkSettings?.port?.value);
-
     this.server.on("listening", () =>
       logger.info(`API started on port ${networkSettings?.port?.value}`)
     );
+    this.server.on("close", () => logger.info("Server closing."));
+    this.server.listen(networkSettings?.port?.value);
   }
 
   async cleanup(): Promise<void> {
-    if (this.server)
-      this.server.close((err) => {
-        if (err) logger.error(err);
-        logger.info("Server closed.");
-        this.server = undefined;
-      });
+    return await new Promise<void>((resolve) => {
+      if (this.server)
+        this.server.close((err) => {
+          if (err) logger.error(err);
+          logger.info("Server closed.");
+          this.server = undefined;
+          resolve();
+        });
+    });
   }
 }
 

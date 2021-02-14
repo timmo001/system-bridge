@@ -70,7 +70,7 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow, tray: Tray, api: API;
+let mainWindow: BrowserWindow, tray: Tray, api: API | undefined;
 const setupApp = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -213,8 +213,10 @@ ipcMain.on(
   async (event): Promise<void> => {
     event.sender.send("restarting-server");
     ipcMain.emit("restarting-server");
-    logger.debug("restarting-server");
-    if (api) await api.cleanup();
-    setTimeout(() => (api = new API()), 2000);
+    if (api) {
+      await api.cleanup();
+      api = undefined;
+      setTimeout(() => (api = new API()), 2000);
+    }
   }
 );
