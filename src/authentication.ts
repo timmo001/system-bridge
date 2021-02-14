@@ -47,6 +47,4 @@ export default function (app: Application): void {
   const authentication = new AuthenticationService(app);
 
   authentication.register("api-key", new ApiKeyStrategy());
-
-  app.use("/authentication", authentication);
 }

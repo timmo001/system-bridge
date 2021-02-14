@@ -9,6 +9,5 @@
   "ts": true,
   "authentication": {
     "authStrategies": ["api-key"]
-  },
-  "nedb": "../da"
+  }
 }
