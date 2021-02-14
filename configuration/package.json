@@ -2,6 +2,7 @@
   "name": "system-bridge-configuration",
   "version": "1.0.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@material-ui/core": "4.11.3",
     "@mdi/js": "5.9.55",
