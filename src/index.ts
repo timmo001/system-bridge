@@ -15,8 +15,16 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+const setAppConfig = async (): Promise<void> => {
+  const config = getSettings();
+  const launchOnStartup = config.general?.items.launchOnStartup?.value;
+  app.setLoginItemSettings({
+    openAtLogin: typeof launchOnStartup === "boolean" ? launchOnStartup : false,
+  });
+};
+
 let mainWindow: BrowserWindow, tray: Tray;
-const createWindow = async (): Promise<void> => {
+const setupApp = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -30,6 +38,8 @@ const createWindow = async (): Promise<void> => {
       preload: join(__dirname, "./preload.js"),
     },
   });
+
+  setAppConfig();
 
   if (isDev) {
     try {
@@ -71,13 +81,13 @@ const quitApp = (): void => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", setupApp);
 
 app.on("activate", (): void => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    setupApp();
   }
 });
 
@@ -116,5 +126,6 @@ ipcMain.on(
   async (_event, args): Promise<void> => {
     await electronSettings.set(args[0], args[1]);
     ipcMain.emit("updated-setting", args);
+    setAppConfig();
   }
 );
