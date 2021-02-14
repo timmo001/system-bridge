@@ -60,9 +60,8 @@ class API {
     app.use(express.json());
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
+    // Set favicon
     app.use(favicon(join(app.get("public"), "favicon.ico")));
-    // Host the public folder
-    app.use(express.static(app.get("public")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
