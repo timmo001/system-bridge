@@ -1,6 +1,6 @@
 {
   "name": "system-bridge",
-  "productName": "system-bridge",
+  "productName": "System Bridge",
   "version": "1.0.0",
   "description": "System Bridge",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Aidan Timson",
+    "name": "Timmo",
     "email": "contact@timmo.xyz"
   },
   "license": "MIT",
