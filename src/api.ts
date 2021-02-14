@@ -13,8 +13,8 @@ import socketio from "@feathersjs/socketio";
 import swagger from "feathers-swagger";
 
 import { Application } from "./declarations";
-import { Configuration } from "../configuration";
-import { getSettings } from "../utils";
+import { Configuration } from "./configuration";
+import { getSettings } from "./utils";
 import logger from "./logger";
 import middleware from "./middleware";
 import services from "./services";

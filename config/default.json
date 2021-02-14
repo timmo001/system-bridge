@@ -8,23 +8,7 @@
   },
   "ts": true,
   "authentication": {
-    "entity": "user",
-    "service": "users",
-    "secret": "API_AUTH_SECRET",
-    "authStrategies": ["jwt", "local"],
-    "jwtOptions": {
-      "header": {
-        "typ": "access"
-      },
-      "audience": "https://system-bridge.timmo.dev",
-      "issuer": "feathers",
-      "algorithm": "HS256",
-      "expiresIn": "1d"
-    },
-    "local": {
-      "usernameField": "username",
-      "passwordField": "password"
-    }
+    "authStrategies": ["api-key"]
   },
-  "nedb": "../db"
+  "nedb": "../da"
 }
