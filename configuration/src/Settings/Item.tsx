@@ -52,10 +52,6 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
         value,
       ]);
       window.api.ipcRendererOn("updated-setting", (_event, _args) => {
-        console.log(
-          "updated-setting:",
-          settings[sectionKey].items[itemKey].requiresServerRestart
-        );
         if (settings[sectionKey].items[itemKey].requiresServerRestart)
           handleRestartServer();
       });
