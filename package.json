@@ -39,21 +39,30 @@
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {}
+          "config": {
+            "executableName": "system-bridge"
+          }
         },
         {
           "name": "@electron-forge/maker-zip",
+          "config": {
+            "executableName": "system-bridge"
+          },
           "platforms": [
             "darwin"
           ]
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "executableName": "system-bridge"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "executableName": "system-bridge"
+          }
         }
       ]
     }
