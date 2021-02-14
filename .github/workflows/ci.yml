@@ -85,12 +85,12 @@ jobs:
           CI: true
           NODE_ENV: "production"
           INLINE_RUNTIME_CHUNK: false
-      - name: "Upload Artifacts"
+      - name: "Upload Artifacts - Output"
         uses: actions/upload-artifact@v2
         with:
           name: out-${{ matrix.os.name }}
           path: out/system-bridge-*
-      - name: "Upload Artifacts"
+      - name: "Upload Artifacts - Packages"
         uses: actions/upload-artifact@v2
         with:
           name: pkg-${{ matrix.os.name }}
