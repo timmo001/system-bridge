@@ -2,6 +2,8 @@
 
 WIP
 
+![CI](https://github.com/timmo001/system-bridge/workflows/CI/badge.svg) ![CodeQL](https://github.com/timmo001/system-bridge/workflows/CodeQL/badge.svg)
+
 ## Endpoints
 
 | Name                   | endpoint     |
