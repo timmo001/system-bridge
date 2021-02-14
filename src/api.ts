@@ -37,7 +37,7 @@ class API {
   }
 
   private async setupConnection(): Promise<void> {
-    const apiSettings = this.settings?.api.items;
+    const networkSettings = this.settings?.network.items;
 
     // Creates an ExpressJS compatible Feathers application
     const app: Application = express(feathers());
@@ -107,9 +107,9 @@ class API {
 
     // Start the server
     app
-      .listen(apiSettings?.port?.value)
+      .listen(networkSettings?.port?.value)
       .on("listening", () =>
-        logger.info(`API started on port ${apiSettings?.port?.value}`)
+        logger.info(`API started on port ${networkSettings?.port?.value}`)
       );
   }
 }

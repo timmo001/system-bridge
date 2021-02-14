@@ -46,8 +46,8 @@ const defaultConfiguration: Configuration = {
       },
     },
   },
-  api: {
-    name: "API",
+  network: {
+    name: "Network",
     description: "API and WebSocket specific settings.",
     items: {
       port: {

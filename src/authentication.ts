@@ -21,7 +21,7 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
     const { apiKey } = authentication;
 
     const settings = getSettings();
-    const settingsAPiKey = settings.api.items.apiKey.value;
+    const settingsAPiKey = settings.network.items.apiKey.value;
 
     if (apiKey !== settingsAPiKey)
       throw new NotAuthenticated("Invalid API Key");
