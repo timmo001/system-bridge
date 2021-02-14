@@ -23,7 +23,7 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
     const settings = getSettings();
     const settingsAPiKey = settings.api.items.apiKey.value;
 
-    console.log({ apiKey, settingsAPiKey });
+    console.log("authenticate:", { apiKey, settingsAPiKey });
 
     if (apiKey !== settingsAPiKey)
       throw new NotAuthenticated("Invalid API Key");
@@ -35,6 +35,7 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
 
   async parse(req: IncomingMessage) {
     const apiKey = req.headers["api-key"];
+    console.log("parse:", apiKey);
     if (apiKey) {
       return {
         strategy: this.name,
@@ -49,4 +50,6 @@ export default function (app: Application): void {
   const authentication = new AuthenticationService(app);
 
   authentication.register("api-key", new ApiKeyStrategy());
+
+  app.use("/authentication", authentication);
 }
