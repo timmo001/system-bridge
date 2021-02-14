@@ -18,7 +18,13 @@
     "start:configuration": "cd configuration && cross-env BROWSER=none yarn start",
     "lint": "eslint --ext .ts ."
   },
-  "keywords": [],
+  "keywords": [
+    "system",
+    "bridge",
+    "api",
+    "rest",
+    "websocket"
+  ],
   "author": {
     "name": "Timmo",
     "email": "contact@timmo.xyz"
