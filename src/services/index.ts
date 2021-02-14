@@ -1,6 +1,8 @@
 import { Application } from "../declarations";
-import system from "./system/system.service";
+import command from "./command/command.service";
+import information from "./information/information.service";
 
 export default function (app: Application): void {
-  app.configure(system);
+  app.configure(command);
+  app.configure(information);
 }

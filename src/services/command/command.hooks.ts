@@ -4,7 +4,7 @@ const { authenticate } = authentication.hooks;
 
 export default {
   before: {
-    all: [authenticate("jwt")],
+    all: [authenticate("api-key")],
     find: [],
     get: [],
     create: [],
@@ -12,7 +12,6 @@ export default {
     patch: [],
     remove: [],
   },
-
   after: {
     all: [],
     find: [],
@@ -22,7 +21,6 @@ export default {
     patch: [],
     remove: [],
   },
-
   error: {
     all: [],
     find: [],

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
-import { Id, NullableId, Params, ServiceMethods } from "@feathersjs/feathers";
 import execa from "execa";
 
 import { Application } from "../../declarations";
@@ -15,7 +13,7 @@ interface Data {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
 
-export class Command implements ServiceMethods<Data | void> {
+export class Command {
   app: Application;
   options: ServiceOptions;
 
@@ -24,13 +22,7 @@ export class Command implements ServiceMethods<Data | void> {
     this.app = app;
   }
 
-  async find(_params: Params) {
-    return [];
-  }
-
-  async get(_id: Id, _params: Params): Promise<Data | void> {}
-
-  async create(data: Data): Promise<Data | void> {
+  async create(data: Data): Promise<Data> {
     const { stdout, stderr } = await execa(data.command, data.arguments);
     logger.debug({ stdout, stderr });
     return {
@@ -39,18 +31,4 @@ export class Command implements ServiceMethods<Data | void> {
       message: stdout,
     };
   }
-
-  async update(
-    _id: NullableId,
-    _data: Data,
-    _params: Params
-  ): Promise<Data | void> {}
-
-  async patch(
-    _id: NullableId,
-    _data: Data,
-    _params: Params
-  ): Promise<Data | void> {}
-
-  async remove(_id: NullableId, _params: Params): Promise<Data | void> {}
 }

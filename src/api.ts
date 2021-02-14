@@ -22,18 +22,6 @@ import appHooks from "./app.hooks";
 import channels from "./channels";
 import authentication from "./authentication";
 
-// import AudioInfoService from "./services/info/audio";
-// import BatteryInfoService from "./services/info/battery";
-// import BluetoothInfoService from "./services/info/bluetooth";
-// import CpuInfoService from "./services/info/cpu";
-// import FilesystemInfoService from "./services/info/filesystem";
-// import GraphicsInfoService from "./services/info/graphics";
-// import MemoryInfoService from "./services/info/memory";
-// import NetworkInfoService from "./services/info/network";
-// import OsInfoService from "./services/info/os";
-// import ProcessCommandService from "./services/command/process";
-// import SystemInfoService from "./services/info/system";
-
 class API {
   private settings?: Configuration;
 
@@ -77,7 +65,7 @@ class API {
     // Create OpenAPI docs
     app.configure(
       swagger({
-        docsPath: "/api/docs",
+        docsPath: "/docs",
         openApiVersion: 3.0,
         uiIndex: true,
         specs: {
@@ -100,19 +88,6 @@ class API {
     app.configure(channels);
 
     app.hooks(appHooks);
-
-    // Register services
-    // app.use("/command/process", new ProcessCommandService());
-    // app.use("/info/audio", new AudioInfoService());
-    // app.use("/info/battery", new BatteryInfoService());
-    // app.use("/info/bluetooth", new BluetoothInfoService());
-    // app.use("/info/cpu", new CpuInfoService());
-    // app.use("/info/filesystem", new FilesystemInfoService());
-    // app.use("/info/graphics", new GraphicsInfoService());
-    // app.use("/info/memory", new MemoryInfoService());
-    // app.use("/info/network", new NetworkInfoService());
-    // app.use("/info/os", new OsInfoService());
-    // app.use("/info/system", new SystemInfoService());
 
     // Configure a middleware for 404s and the error handler
     app.use(express.notFound());
