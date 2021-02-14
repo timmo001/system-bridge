@@ -17,16 +17,28 @@ export class Information {
 
   async find(): Promise<Data> {
     return {
-      audio: "/audio",
-      battery: "/battery",
-      bluetooth: "/bluetooth",
-      cpu: "/cpu",
-      filesystem: "/filesystem",
-      graphics: "/graphics",
-      memory: "/memory",
-      network: "/network",
-      os: "/os",
-      system: "/system",
+      audio: { description: "Audio Information", endpoint: "/audio" },
+      battery: { description: "Battery Information", endpoint: "/battery" },
+      bluetooth: {
+        description: "Bluetooth Information",
+        endpoint: "/bluetooth",
+      },
+      command: { description: "Run a System Command", endpoint: "/command" },
+      cpu: { description: "CPU Information", endpoint: "/cpu" },
+      docs: { description: "OpenAPI Docs", endpoint: "/docs" },
+      filesystem: {
+        description: "Filesystem Information",
+        endpoint: "/filesystem",
+      },
+      graphics: { description: "Graphics Information", endpoint: "/graphics" },
+      information: {
+        description: "Endpoint Information (You are Here)",
+        endpoint: "/information",
+      },
+      memory: { description: "Memory Information", endpoint: "/memory" },
+      network: { description: "Network Information", endpoint: "/network" },
+      os: { description: "OS Information", endpoint: "/os" },
+      system: { description: "System Information", endpoint: "/system" },
     };
   }
 }
