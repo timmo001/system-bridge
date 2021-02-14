@@ -1,0 +1,13 @@
+{
+  "host": "localhost",
+  "port": 9170,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "ts": true,
+  "authentication": {
+    "authStrategies": ["api-key"]
+  }
+}

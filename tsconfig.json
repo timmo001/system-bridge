@@ -12,7 +12,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,

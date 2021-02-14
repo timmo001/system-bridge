@@ -74,6 +74,11 @@ jobs:
         run: yarn install
         env:
           CI: true
+      - name: "Install configuration dependencies"
+        run: yarn install
+        env:
+          CI: true
+        working-directory: configuration
       - name: "Make"
         run: yarn make
         env:

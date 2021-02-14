@@ -87,3 +87,9 @@ typings/
 
 # Electron-Forge
 out/
+
+# Dist
+dist/
+
+# Databases
+data/

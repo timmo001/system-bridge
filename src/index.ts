@@ -1,13 +1,13 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray } from "electron";
 import { join } from "path";
 import electronSettings from "electron-settings";
+import isDev from "electron-is-dev";
+import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import { getSettings } from "./utils";
-import icon from "./resources/icons/icon.png";
-import Main from "./app/main";
+import API from "./api";
 
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+const iconPath = "../src/resources/icons/icon.png";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -16,20 +16,29 @@ if (require("electron-squirrel-startup")) {
 }
 
 let mainWindow: BrowserWindow, tray: Tray;
-const createWindow = (): void => {
+const createWindow = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     autoHideMenuBar: true,
-    icon: join(__dirname, icon),
+    icon: join(__dirname, iconPath),
     maximizable: true,
     show: false,
     webPreferences: {
       contextIsolation: true,
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: join(__dirname, "./preload.js"),
     },
   });
+
+  if (isDev) {
+    try {
+      const extName = await devTools(REACT_DEVELOPER_TOOLS);
+      console.log("Added Extension:", extName);
+    } catch (error) {
+      console.log("An error occurred:", error);
+    }
+  }
 
   mainWindow.on("close", (event) => {
     event.preventDefault();
@@ -37,12 +46,16 @@ const createWindow = (): void => {
   });
 };
 
-const showWindow = (): void => {
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+const showWindow = async (): Promise<void> => {
+  mainWindow.loadURL(
+    isDev
+      ? "http://localhost:3000"
+      : `file://${join(__dirname, "../configuration/build/index.html")}`
+  );
 
   mainWindow.show();
 
-  if (process.env.NODE_ENV === "development") {
+  if (isDev) {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();
@@ -69,7 +82,7 @@ app.on("activate", (): void => {
 });
 
 app.whenReady().then((): void => {
-  tray = new Tray(join(__dirname, icon));
+  tray = new Tray(join(__dirname, iconPath));
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
     { type: "separator" },
@@ -80,7 +93,7 @@ app.whenReady().then((): void => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showWindow);
 
-  new Main();
+  new API();
 });
 
 ipcMain.on(
