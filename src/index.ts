@@ -1,4 +1,12 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, Tray } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  MenuItemConstructorOptions,
+  shell,
+  Tray,
+} from "electron";
 import { join } from "path";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
@@ -14,6 +22,44 @@ if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
   app.quit();
 }
+
+const helpMenu: Array<MenuItemConstructorOptions> = [
+  {
+    label: "Help",
+    submenu: [
+      {
+        label: "Suggest a Feature",
+        type: "normal",
+        click: () =>
+          shell.openExternal(
+            "https://github.com/timmo001/system-bridge/issues/new/choose"
+          ),
+      },
+      {
+        label: "Report an issue",
+        type: "normal",
+        click: () =>
+          shell.openExternal(
+            "https://github.com/timmo001/system-bridge/issues/new/choose"
+          ),
+      },
+      {
+        label: "Discussions",
+        type: "normal",
+        click: () =>
+          shell.openExternal(
+            "https://github.com/timmo001/system-bridge/discussions"
+          ),
+      },
+      { type: "separator" },
+      {
+        label: "About",
+        type: "normal",
+        click: () => app.showAboutPanel(),
+      },
+    ],
+  },
+];
 
 const setAppConfig = async (): Promise<void> => {
   const config = getSettings();
@@ -55,41 +101,7 @@ const setupApp = async (): Promise<void> => {
         { label: "Quit Application", type: "normal", click: quitApp },
       ],
     },
-    {
-      label: "Help",
-      submenu: [
-        {
-          label: "Suggest a Feature",
-          type: "normal",
-          click: () =>
-            shell.openExternal(
-              "https://github.com/timmo001/system-bridge/issues/new/choose"
-            ),
-        },
-        {
-          label: "Report an issue",
-          type: "normal",
-          click: () =>
-            shell.openExternal(
-              "https://github.com/timmo001/system-bridge/issues/new/choose"
-            ),
-        },
-        {
-          label: "Discussions",
-          type: "normal",
-          click: () =>
-            shell.openExternal(
-              "https://github.com/timmo001/system-bridge/discussions"
-            ),
-        },
-        { type: "separator" },
-        {
-          label: "About",
-          type: "normal",
-          click: () => app.showAboutPanel(),
-        },
-      ],
-    },
+    ...helpMenu,
   ]);
   Menu.setApplicationMenu(menu);
 
@@ -147,6 +159,8 @@ app.whenReady().then((): void => {
   tray = new Tray(join(__dirname, iconPath));
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
+    { type: "separator" },
+    ...helpMenu,
     { type: "separator" },
     { label: "Quit", type: "normal", click: quitApp },
   ]);
