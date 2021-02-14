@@ -34,35 +34,29 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "asar": true
+        "asar": true,
+        "name": "system-bridge",
+        "executableName": "system-bridge"
       },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "executableName": "system-bridge"
-          }
+          "config": {}
         },
         {
           "name": "@electron-forge/maker-zip",
-          "config": {
-            "executableName": "system-bridge"
-          },
+          "config": {},
           "platforms": [
             "darwin"
           ]
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {
-            "executableName": "system-bridge"
-          }
+          "config": {}
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {
-            "executableName": "system-bridge"
-          }
+          "config": {}
         }
       ]
     }
