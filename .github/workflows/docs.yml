@@ -1,0 +1,25 @@
+---
+name: Docs
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out files from GitHub
+        uses: actions/checkout@v2
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install Packages
+        run: |
+          pip install mkdocs mkdocs-material pymdown-extensions
+      - name: Run MkDocs
+        run: mkdocs gh-deploy -v -c -m "📚 Update docs"
+        working-directory: documentation

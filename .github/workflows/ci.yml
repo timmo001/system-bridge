@@ -1,25 +1,61 @@
 name: CI
 
+# yamllint disable-line rule:truthy
 on:
   push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
 
 jobs:
-  lint:
+  lint-eslint:
+    name: 👕 ESLint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out files from GitHub
-        uses: actions/checkout@v2
-      - name: Setup
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 14.x
+      - name: ⤵️ Get yarn cache path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: ⤵️ Fetch Yarn cache
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: ⤵️ Install dependencies
+        run: yarn install
+        env:
+          CI: true
+      - name: 🚀 Run ESLint
+        run: yarn eslint
+  lint-hadolint:
+    name: 👕 Hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: Hadolint
+        uses: brpaz/hadolint-action@v1.3.1
+        with:
+          dockerfile: Dockerfile
+  lint-jsonlint:
+    name: 👕 JSONLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🚀 Run JSONLint
         run: |
           sudo apt install -y jsonlint
-          find . -type f -print0 | xargs -0 sed -i 's:#!/usr/bin/with-contenv bash:#!/bin/bash:g'
-      - name: JSONLint
-        run: |
           for file in $(find ./ -type f -name "*.json"); do
             if ! jsonlint-php -q $file; then
               export FAILED=1
@@ -30,67 +66,93 @@ jobs:
           if [ "${FAILED}" = "1" ]; then
             exit 1
           fi
-      - name: Markdown Links
+  lint-markdownlint:
+    name: 👕 MarkdownLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🚀 Run mdl
+        uses: actionshub/markdownlint@2.0.2
+  lint-markdown-links:
+    name: 👕 Markdown Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🚀 Run Markdown Links
         uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
         with:
           use-quiet-mode: no
           use-verbose-mode: no
           config-file: mlc_config.json
-          folder-path: .github
-          file-path: "./README.md"
+          folder-path: documentation, backend, frontend, rootfs, .github
+          file-path: "./README.md, ./LICENSE.md"
           max-depth: -1
           check-modified-files-only: no
           base-branch: master
           file-extension: .md
-  build:
-    runs-on: ${{ matrix.os.server }}
-    strategy:
-      matrix:
-        os:
-          - name: windows
-            server: windows-latest
-          - name: linux
-            server: ubuntu-latest
-          - name: macos
-            server: macos-latest
+  lint-prettier:
+    name: 👕 Prettier
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out files from GitHub
-        uses: actions/checkout@v2
-      - name: Setting up Node.js
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🚀 Run Prettier
+        uses: creyD/prettier_action@v3.3
+        with:
+          prettier_options: --write **/*.{js,json,ts,tsx,yml,yaml}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  lint-yamllint:
+    name: 👕 YAMLLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🚀 Run YAMLLint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .
+          config_file: .yamllint.yml
+          format: colored
+          strict: false
+  build-app:
+    name: 🚀 Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.4
         with:
           node-version: 14.x
-      - name: Get yarn cache path
+      - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Fetch Yarn cache
+      - name: ⤵️ Fetch Yarn cache
         uses: actions/cache@v2.1.4
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: "Install dependencies"
+      - name: ⤵️ Install dependencies
         run: yarn install
         env:
           CI: true
-      - name: "Install configuration dependencies"
-        run: yarn install
-        env:
-          CI: true
-        working-directory: configuration
-      - name: "Make"
+      - name: 🚀 Make
         run: yarn make
         env:
           CI: true
-          NODE_ENV: "production"
+          NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
-      - name: "Upload Artifacts - Output"
+      - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
           name: out-${{ matrix.os.name }}
           path: out/system-bridge-*/*
-      - name: "Upload Artifacts - Packages"
+      - name: ⬆ Upload Artifacts - Packages
         uses: actions/upload-artifact@v2
         with:
           name: pkg-${{ matrix.os.name }}
