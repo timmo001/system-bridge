@@ -108,7 +108,7 @@
     "feathers-swagger": "1.2.1",
     "helmet": "4.4.1",
     "serve-favicon": "2.5.0",
-    "systeminformation": "5.3.3",
+    "systeminformation": "5.3.4",
     "winston": "3.3.3"
   }
 }
