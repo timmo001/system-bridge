@@ -13,7 +13,9 @@ export interface NetworkInfo {
   interfaces: {
     [iface: string]: Systeminformation.NetworkInterfacesData;
   };
-  stats: Systeminformation.NetworkStatsData[];
+  stats: {
+    [iface: string]: Systeminformation.NetworkStatsData;
+  };
 }
 
 export class Network {
@@ -31,7 +33,7 @@ export class Network {
       gatewayDefault: await si.networkGatewayDefault(),
       interfaceDefault: await si.networkInterfaceDefault(),
       interfaces: convertArrayToObject(await si.networkInterfaces(), "iface"),
-      stats: await si.networkStats(),
+      stats: convertArrayToObject(await si.networkStats(), "iface"),
     };
   }
 }
