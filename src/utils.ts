@@ -15,3 +15,13 @@ export function getSettings(): Configuration {
   });
   return settings;
 }
+
+export function convertArrayToObject(array: any[], key: string): any {
+  return array.reduce(
+    (obj, item) => ({
+      ...obj,
+      [item[key]]: item,
+    }),
+    {}
+  );
+}

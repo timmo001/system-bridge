@@ -1,6 +1,7 @@
 import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
+import { convertArrayToObject } from "../../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
@@ -9,7 +10,9 @@ export interface NetworkInfo {
   connections: Systeminformation.NetworkConnectionsData[];
   gatewayDefault: string;
   interfaceDefault: string;
-  interfaces: Systeminformation.NetworkInterfacesData[];
+  interfaces: {
+    [iface: string]: Systeminformation.NetworkInterfacesData;
+  };
   stats: Systeminformation.NetworkStatsData[];
 }
 
@@ -27,7 +30,7 @@ export class Network {
       connections: await si.networkConnections(),
       gatewayDefault: await si.networkGatewayDefault(),
       interfaceDefault: await si.networkInterfaceDefault(),
-      interfaces: await si.networkInterfaces(),
+      interfaces: convertArrayToObject(await si.networkInterfaces(), "iface"),
       stats: await si.networkStats(),
     };
   }
