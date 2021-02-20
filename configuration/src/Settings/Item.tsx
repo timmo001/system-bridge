@@ -69,10 +69,13 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
     handleSetSetting(checked);
   }
 
-  const value = useMemo(
-    () => (item?.value === undefined ? item?.defaultValue : item.value),
-    [item?.value, item?.defaultValue]
-  );
+  const value = useMemo(() => {
+    const value = item?.value === undefined ? item?.defaultValue : item.value;
+    if (typeof item?.defaultValue === "boolean") return Boolean(value);
+    if (typeof item?.defaultValue === "number") return Number(value);
+    if (typeof item?.defaultValue === "string") return String(value);
+    return value;
+  }, [item?.value, item?.defaultValue]);
 
   if (!item) return <></>;
   const { name, description, icon }: ConfigurationItem = item;
