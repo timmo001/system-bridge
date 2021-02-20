@@ -20,7 +20,7 @@ jobs:
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.4
         with:
-          node-version: 14.x
+          node-version: 15.x
       - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -77,7 +77,7 @@ jobs:
           use-verbose-mode: no
           config-file: mlc_config.json
           folder-path: configuration, .github
-          file-path: "./README.md, ./LICENSE.md"
+          file-path: ./README.md
           max-depth: -1
           check-modified-files-only: no
           base-branch: master
@@ -116,7 +116,7 @@ jobs:
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.4
         with:
-          node-version: 14.x
+          node-version: 15.x
       - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
