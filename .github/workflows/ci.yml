@@ -128,7 +128,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
-        run: yarn install
+        run: yarn install:all
         env:
           CI: true
       - name: 🚀 Make
