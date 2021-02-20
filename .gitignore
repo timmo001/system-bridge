@@ -93,3 +93,6 @@ dist/
 
 # Databases
 data/
+
+# Local VS Code Settings
+.vscode/settings.json
