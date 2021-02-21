@@ -111,7 +111,16 @@ jobs:
           strict: false
   build-app:
     name: 🚀 Build Application
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os.server }}
+    strategy:
+      matrix:
+        os:
+          - name: windows
+            server: windows-latest
+          - name: linux
+            server: ubuntu-latest
+          - name: macos
+            server: macos-latest
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
