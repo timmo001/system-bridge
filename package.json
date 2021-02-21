@@ -76,6 +76,7 @@
     "@types/cors": "2.8.10",
     "@types/electron-devtools-installer": "2.2.0",
     "@types/helmet": "4.0.0",
+    "@types/mdns": "0.0.33",
     "@types/serve-favicon": "2.5.2",
     "@types/winston": "2.4.4",
     "@typescript-eslint/eslint-plugin": "4.15.1",
@@ -107,6 +108,7 @@
     "express": "4.17.1",
     "feathers-swagger": "1.2.1",
     "helmet": "4.4.1",
+    "mdns": "2.7.2",
     "serve-favicon": "2.5.0",
     "systeminformation": "5.3.4",
     "winston": "3.3.3"

@@ -5,6 +5,8 @@ import cors from "cors";
 import favicon from "serve-favicon";
 import helmet from "helmet";
 import { createServer, Server } from "http";
+import { createAdvertisement, tcp } from "mdns";
+import si, { Systeminformation } from "systeminformation";
 
 import feathers from "@feathersjs/feathers";
 import configuration from "@feathersjs/configuration";
@@ -108,13 +110,38 @@ class API {
     app.setup(this.server);
 
     // Start the server
+    const port: number =
+      typeof networkSettings?.port?.value === "number"
+        ? networkSettings?.port?.value
+        : 9;
+    const mdnsPort = Number(`4${port}`);
     this.server = createServer(app);
     this.server.on("error", (err) => logger.error(err));
-    this.server.on("listening", () =>
-      logger.info(`API started on port ${networkSettings?.port?.value}`)
-    );
+    this.server.on("listening", async () => {
+      logger.info(`API started on port ${port}`);
+      const osInfo: Systeminformation.OsData = await si.osInfo();
+      const defaultInterface: string = await si.networkInterfaceDefault();
+      const networkInterface:
+        | Systeminformation.NetworkInterfacesData
+        | undefined = (await si.networkInterfaces()).find(
+        (ni: Systeminformation.NetworkInterfacesData) =>
+          ni.iface === defaultInterface
+      );
+      createAdvertisement(tcp("system-bridge"), mdnsPort, {
+        name: `System Bridge - ${osInfo.fqdn}`,
+        txtRecord: {
+          address: `http://${osInfo.fqdn}:${port}`,
+          fqdn: osInfo.fqdn,
+          host: osInfo.hostname,
+          ip: networkInterface?.ip4,
+          mac: networkInterface?.mac,
+          port,
+        },
+      });
+      logger.info(`Sent mdns advertisement for port ${mdnsPort}`);
+    });
     this.server.on("close", () => logger.info("Server closing."));
-    this.server.listen(networkSettings?.port?.value);
+    this.server.listen(port);
   }
 
   async cleanup(): Promise<void> {
