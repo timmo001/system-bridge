@@ -32,7 +32,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
-        run: yarn install
+        run: |
+          sudo apt install libavahi-compat-libdnssd-dev
+          yarn install
         env:
           CI: true
       - name: 🚀 Run ESLint
@@ -128,7 +130,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
-        run: yarn install:all
+        run: |
+          sudo apt install libavahi-compat-libdnssd-dev
+          yarn install:all
         env:
           CI: true
       - name: 🚀 Make
