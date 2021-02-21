@@ -10,6 +10,7 @@ import information from "./information/information.service";
 import memory from "./memory/memory.service";
 import network from "./network/network.service";
 import os from "./os/os.service";
+import processes from "./processes/processes.service";
 import system from "./system/system.service";
 
 export default function (app: Application): void {
@@ -24,5 +25,6 @@ export default function (app: Application): void {
   app.configure(memory);
   app.configure(network);
   app.configure(os);
+  app.configure(processes);
   app.configure(system);
 }
