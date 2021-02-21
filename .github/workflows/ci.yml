@@ -141,8 +141,9 @@ jobs:
       - name: ⤵️ Install windows dependencies
         if: matrix.os.name == 'windows'
         run: |
-          Invoke-WebRequest -OutFile .\mdnsinstall.msm -Uri https://github.com/ETCLabs/mDNSWindows/releases/download/v1.1.1/ETC_mDNSInstall.msm
-          .\mdnsinstall.msm
+          Invoke-WebRequest -OutFile mdns.zip -Uri https://github.com/ETCLabs/mDNSWindows/releases/download/v1.1.1/mDNSWindows_x64.zip
+          Expand-Archive -Force -Path mdns.zip -DestinationPath C:\mdns
+          $env:BONJOUR_SDK_HOME = "C:\mdns"
         env:
           CI: true
       - name: ⤵️ Install linux dependencies
