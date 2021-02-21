@@ -1,15 +1,16 @@
 import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
+import { convertArrayToObject } from "../../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
 
 export interface FilesystemInfo {
-  blockDevices: Systeminformation.BlockDevicesData[];
-  diskLayout: Systeminformation.DiskLayoutData[];
+  blockDevices: { [name: string]: Systeminformation.BlockDevicesData };
+  diskLayout: { [device: string]: Systeminformation.DiskLayoutData };
   disksIO: Systeminformation.DisksIoData;
-  fsSize: Systeminformation.FsSizeData[];
+  fsSize: { [mount: string]: Systeminformation.FsSizeData };
 }
 
 export class Filesystem {
@@ -23,10 +24,10 @@ export class Filesystem {
 
   async find(): Promise<FilesystemInfo> {
     return {
-      blockDevices: await si.blockDevices(),
-      diskLayout: await si.diskLayout(),
+      blockDevices: convertArrayToObject(await si.blockDevices(), "name"),
+      diskLayout: convertArrayToObject(await si.diskLayout(), "device"),
       disksIO: await si.disksIO(),
-      fsSize: await si.fsSize(),
+      fsSize: convertArrayToObject(await si.fsSize(), "mount"),
     };
   }
 }

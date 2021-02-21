@@ -138,7 +138,7 @@ class API {
           port,
         },
       });
-      logger.info(`Sent mdns advertisement for port ${mdnsPort}`);
+      logger.info(`Sent mdns advertisement on port ${mdnsPort}`);
     });
     this.server.on("close", () => logger.info("Server closing."));
     this.server.listen(port);
