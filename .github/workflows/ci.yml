@@ -115,8 +115,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - name: windows
-            server: windows-latest
+          # - name: windows
+          #   server: windows-latest
           - name: linux
             server: ubuntu-latest
           - name: macos
@@ -138,12 +138,12 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: ⤵️ Install windows dependencies
-        if: matrix.os.name == 'windows'
-        run: |
-          choco install bonjour
-        env:
-          CI: true
+      # - name: ⤵️ Install windows dependencies
+      #   if: matrix.os.name == 'windows'
+      #   run: |
+      #     echo "something"
+      #   env:
+      #     CI: true
       - name: ⤵️ Install linux dependencies
         if: matrix.os.name == 'linux'
         run: |
