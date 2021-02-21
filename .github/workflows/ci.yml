@@ -141,7 +141,8 @@ jobs:
       - name: ⤵️ Install windows dependencies
         if: matrix.os.name == 'windows'
         run: |
-          REG ADD "HKLM\Software\Policies\Microsoft\Windows NT\DNSClient" /V "EnableMulticast" /D "0" /T REG_DWORD /F
+          Invoke-WebRequest -OutFile .\mdnsinstall.msm -Uri https://github.com/ETCLabs/mDNSWindows/releases/download/v1.1.1/ETC_mDNSInstall.msm
+          .\mdnsinstall.msm
         env:
           CI: true
       - name: ⤵️ Install linux dependencies
