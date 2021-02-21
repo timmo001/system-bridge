@@ -138,13 +138,21 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+      - name: ⤵️ Install windows dependencies
+        if: matrix.os.name == 'windows'
+        run: |
+          REG ADD "HKLM\Software\Policies\Microsoft\Windows NT\DNSClient" /V "EnableMulticast" /D "0" /T REG_DWORD /F
+        env:
+          CI: true
       - name: ⤵️ Install linux dependencies
         if: matrix.os.name == 'linux'
-        run: sudo apt install libavahi-compat-libdnssd-dev
+        run: |
+          sudo apt install libavahi-compat-libdnssd-dev
         env:
           CI: true
       - name: ⤵️ Install dependencies
-        run: yarn install:all
+        run: |
+          yarn install:all
         env:
           CI: true
       - name: 🚀 Make
