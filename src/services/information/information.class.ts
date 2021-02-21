@@ -38,7 +38,10 @@ export class Information {
       memory: { description: "Memory Information", endpoint: "/memory" },
       network: { description: "Network Information", endpoint: "/network" },
       os: { description: "OS Information", endpoint: "/os" },
-      processes: { description: "Processes Information", endpoint: "/processes" },
+      processes: {
+        description: "Processes Information",
+        endpoint: "/processes",
+      },
       system: { description: "System Information", endpoint: "/system" },
     };
   }
