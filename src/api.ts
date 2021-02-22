@@ -6,7 +6,7 @@ import favicon from "serve-favicon";
 import helmet from "helmet";
 import { createServer, Server } from "http";
 import si, { Systeminformation } from "systeminformation";
-import bonjour from "bonjour";
+import { createAdvertisement, tcp } from "mdns";
 
 import feathers from "@feathersjs/feathers";
 import configuration from "@feathersjs/configuration";
@@ -113,19 +113,32 @@ class API {
     const port: number =
       typeof networkSettings?.port?.value === "number"
         ? networkSettings?.port?.value
-        : 9;
+        : 9170;
+    const mdnsPort = Number(`4${port}`);
     this.server = createServer(app);
     this.server.on("error", (err) => logger.error(err));
     this.server.on("listening", async () => {
       logger.info(`API started on port ${port}`);
-      // const osInfo: Systeminformation.OsData = await si.osInfo();
-      // const defaultInterface: string = await si.networkInterfaceDefault();
-      // const networkInterface:
-      //   | Systeminformation.NetworkInterfacesData
-      //   | undefined = (await si.networkInterfaces()).find(
-      //   (ni: Systeminformation.NetworkInterfacesData) =>
-      //     ni.iface === defaultInterface
-      // );
+      const osInfo: Systeminformation.OsData = await si.osInfo();
+      const defaultInterface: string = await si.networkInterfaceDefault();
+      const networkInterface:
+        | Systeminformation.NetworkInterfacesData
+        | undefined = (await si.networkInterfaces()).find(
+        (ni: Systeminformation.NetworkInterfacesData) =>
+          ni.iface === defaultInterface
+      );
+      createAdvertisement(tcp("system-bridge"), mdnsPort, {
+        name: `System Bridge - ${osInfo.fqdn}`,
+        txtRecord: {
+          address: `http://${osInfo.fqdn}:${port}`,
+          fqdn: osInfo.fqdn,
+          host: osInfo.hostname,
+          ip: networkInterface?.ip4,
+          mac: networkInterface?.mac,
+          port,
+        },
+      });
+      logger.info(`Sent mdns advertisement on port ${mdnsPort}`);
     });
     this.server.on("close", () => logger.info("Server closing."));
     this.server.listen(port);
