@@ -138,6 +138,11 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+      - name: ⤵️ Install linux dependencies
+        if: matrix.os.name == 'linux'
+        run: sudo apt install libavahi-compat-libdnssd-dev
+        env:
+          CI: true
       - name: ⤵️ Install dependencies
         run: |
           yarn install:all
