@@ -15,27 +15,24 @@ on:
 jobs:
   deploy-release:
     name: 👷 Deploy to Release
-    runs-on: ${{ matrix.os.server }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os:
           - name: windows
-            server: windows-latest
           - name: linux
-            server: ubuntu-latest
           - name: macos
-            server: macos-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: ⤵️ Download Artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           name: pkg-${{ matrix.os.name }}
-          path: ./
+          path: out/make/**/**
           workflow: ci.yml
           workflow_conclusion: success
       - name: ⬆ Upload Artifacts to Release
         uses: fnkr/github-action-ghr@v1
         env:
-          GHR_PATH: ./
+          GHR_PATH: out/make/**/**
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
