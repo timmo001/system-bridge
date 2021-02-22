@@ -114,34 +114,18 @@ class API {
       typeof networkSettings?.port?.value === "number"
         ? networkSettings?.port?.value
         : 9;
-    const mdnsPort = Number(`4${port}`);
     this.server = createServer(app);
     this.server.on("error", (err) => logger.error(err));
     this.server.on("listening", async () => {
       logger.info(`API started on port ${port}`);
-      const osInfo: Systeminformation.OsData = await si.osInfo();
-      const defaultInterface: string = await si.networkInterfaceDefault();
-      const networkInterface:
-        | Systeminformation.NetworkInterfacesData
-        | undefined = (await si.networkInterfaces()).find(
-        (ni: Systeminformation.NetworkInterfacesData) =>
-          ni.iface === defaultInterface
-      );
-      const mdnsServer = bonjour().publish({
-        name: `System Bridge - ${osInfo.fqdn}`,
-        type: "system-bridge",
-        port: mdnsPort,
-        txt: {
-          address: `http://${osInfo.fqdn}:${port}`,
-          fqdn: osInfo.fqdn,
-          host: osInfo.hostname,
-          ip: networkInterface?.ip4 || "",
-          mac: networkInterface?.mac || "",
-          port: String(port),
-        },
-      });
-      mdnsServer.start();
-      logger.info(`Sent mdns advertisement on port ${mdnsPort}`);
+      // const osInfo: Systeminformation.OsData = await si.osInfo();
+      // const defaultInterface: string = await si.networkInterfaceDefault();
+      // const networkInterface:
+      //   | Systeminformation.NetworkInterfacesData
+      //   | undefined = (await si.networkInterfaces()).find(
+      //   (ni: Systeminformation.NetworkInterfacesData) =>
+      //     ni.iface === defaultInterface
+      // );
     });
     this.server.on("close", () => logger.info("Server closing."));
     this.server.listen(port);
