@@ -1,0 +1,42 @@
+---
+name: Deploy
+
+# yamllint disable-line rule:truthy
+on:
+  release:
+    types:
+      - published
+  workflow_run:
+    workflows: ["CI"]
+    branches: [master]
+    types:
+      - completed
+
+jobs:
+  deploy-release:
+    name: 👷 Deploy to Release
+    runs-on: ${{ matrix.os.server }}
+    strategy:
+      matrix:
+        os:
+          - name: windows
+            server: windows-latest
+          - name: linux
+            server: ubuntu-latest
+          - name: macos
+            server: macos-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: ⤵️ Download Artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: pkg-${{ matrix.os.name }}
+          workflow: ci.yml
+          workflow_conclusion: success
+      - name: ⬆ Upload Artifacts to Release
+        uses: fnkr/github-action-ghr@v1
+        env:
+          GHR_PATH: home-panel.tar.gz
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
