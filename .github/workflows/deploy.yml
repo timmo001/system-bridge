@@ -38,5 +38,5 @@ jobs:
       - name: ⬆ Upload Artifacts to Release
         uses: fnkr/github-action-ghr@v1
         env:
-          GHR_PATH: home-panel.tar.gz
+          GHR_PATH: ./
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
