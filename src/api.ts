@@ -127,10 +127,9 @@ class API {
         (ni: Systeminformation.NetworkInterfacesData) =>
           ni.iface === defaultInterface
       );
-      bonjour().publish({
+      const mdnsServer = bonjour().publish({
         name: `System Bridge - ${osInfo.fqdn}`,
         type: "system-bridge",
-        protocol: "tcp",
         port: mdnsPort,
         txt: {
           address: `http://${osInfo.fqdn}:${port}`,
@@ -141,6 +140,7 @@ class API {
           port: String(port),
         },
       });
+      mdnsServer.start();
       logger.info(`Sent mdns advertisement on port ${mdnsPort}`);
     });
     this.server.on("close", () => logger.info("Server closing."));
