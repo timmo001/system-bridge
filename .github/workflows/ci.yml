@@ -143,7 +143,7 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install macos dependencies
         if: matrix.os.server == 'macos-latest'
-        run:
+        run: |
           brew install --cask xquartz
           brew tap homebrew/cask-versions
           brew install --cask --no-quarantine wine-staging
