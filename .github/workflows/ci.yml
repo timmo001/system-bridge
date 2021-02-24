@@ -152,7 +152,7 @@ jobs:
         env:
           CI: true
       - name: 🚀 Make
-        run: yarn make --platform ${{ matrix.platform }}
+        run: yarn make --platform ${{ matrix.os.platform }}
         env:
           CI: true
           NODE_ENV: production
