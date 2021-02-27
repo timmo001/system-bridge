@@ -42,7 +42,13 @@
       "makers": [
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "options": {
+              "categories": [
+                "Utility"
+              ]
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-dmg",
@@ -50,7 +56,13 @@
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "options": {
+              "categories": [
+                "Utility"
+              ]
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-squirrel",
