@@ -21,12 +21,25 @@ jobs:
         os:
           - server: ubuntu-latest
             platform: win32
+            arch: amd64
+          - server: ubuntu-latest
+            platform: win32
+            arch: armv7
+          - server: ubuntu-latest
+            platform: win32
+            arch: aarch64
           - server: ubuntu-latest
             platform: linux
+            arch: amd64
           - server: ubuntu-latest
             platform: linux
+            arch: armv7
+          - server: ubuntu-latest
+            platform: linux
+            arch: aarch64
           - server: macos-latest
             platform: darwin
+            arch: amd64
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: ⤵️ Check out code from GitHub
