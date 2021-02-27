@@ -34,6 +34,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
+        "asar": true,
         "name": "system-bridge",
         "executableName": "system-bridge"
       },
