@@ -169,6 +169,40 @@ jobs:
           CI: true
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
+      - name: 🚀 Make - armv7
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'linux' || matrix.os.platform == 'win32'
+        uses: uraimo/run-on-arch-action@v2.0.9
+        with:
+          arch: armv7
+          distro: ubuntu20.04
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          install: |
+            sudo apt update
+            sudo apt install libavahi-compat-libdnssd-dev
+          run: |
+            yarn make --platform ${{ matrix.os.platform }}
+          env: |
+            CI: true
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            INLINE_RUNTIME_CHUNK: false
+            NODE_ENV: production
+      - name: 🚀 Make - aarch64
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'linux' || matrix.os.platform == 'win32'
+        uses: uraimo/run-on-arch-action@v2.0.9
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          install: |
+            sudo apt update
+            sudo apt install libavahi-compat-libdnssd-dev
+          run: |
+            yarn make --platform ${{ matrix.os.platform }}
+          env: |
+            CI: true
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            INLINE_RUNTIME_CHUNK: false
+            NODE_ENV: production
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
