@@ -143,14 +143,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: ⤵️ Install macos dependencies
-        if: matrix.os.server == 'macos-latest'
-        run: |
-          brew install --cask xquartz
-          brew tap homebrew/cask-versions
-          brew install --cask --no-quarantine wine-staging
-        env:
-          CI: true
       - name: ⤵️ Install linux dependencies
         if: matrix.os.server == 'ubuntu-latest'
         run: |
