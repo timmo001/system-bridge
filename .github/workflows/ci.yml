@@ -177,8 +177,8 @@ jobs:
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           install: |
-            apt update
-            apt install libavahi-compat-libdnssd-dev
+            apt update -q -y
+            apt install -q -y libavahi-compat-libdnssd-dev
           run: |
             yarn make --platform ${{ matrix.os.platform }}
           env: |
@@ -194,8 +194,8 @@ jobs:
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           install: |
-            apt update
-            apt install libavahi-compat-libdnssd-dev
+            apt update -q -y
+            apt install -q -y libavahi-compat-libdnssd-dev
           run: |
             yarn make --platform ${{ matrix.os.platform }}
           env: |
