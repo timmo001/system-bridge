@@ -20,19 +20,56 @@ jobs:
       matrix:
         os:
           - name: windows
+            server: ubuntu-latest
+            platform: win32
           - name: linux
+            server: ubuntu-latest
+            platform: linux
           - name: macos
+            server: macos-latest
+            platform: darwin
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: ⤵️ Download Artifacts
-        uses: dawidd6/action-download-artifact@v2
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v2.1.5
         with:
-          name: pkg-${{ matrix.os.name }}
-          path: out/make/**/**
-          workflow: ci.yml
-          workflow_conclusion: success
-      - name: ⬆ Upload Artifacts to Release
-        uses: fnkr/github-action-ghr@v1
+          node-version: 15.x
+      - name: ⤵️ Get yarn cache path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: ⤵️ Fetch Yarn cache
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: 🏗 Install linux dependencies
+        if: matrix.os.server == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev
         env:
-          GHR_PATH: out/make/**/**
+          CI: true
+      - name: 🏗 Install linux wine dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine64 wine32
+        env:
+          CI: true
+      - name: 🏗 Install dependencies
+        run: |
+          yarn install:all
+        env:
+          CI: true
+      - name: 🚀 Publish
+        run: yarn run publish --platform ${{ matrix.os.platform }}
+        env:
+          CI: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INLINE_RUNTIME_CHUNK: false
+          NODE_ENV: production

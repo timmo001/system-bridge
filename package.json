@@ -83,8 +83,6 @@
         {
           "name": "@electron-forge/publisher-github",
           "config": {
-            "draft": true,
-            "prerelease": true,
             "repository": {
               "owner": "timmo001",
               "name": "system-bridge"
