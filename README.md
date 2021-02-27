@@ -4,6 +4,33 @@ A bridge for your systems.
 
 ![CI](https://github.com/timmo001/system-bridge/workflows/CI/badge.svg) ![CodeQL](https://github.com/timmo001/system-bridge/workflows/CodeQL/badge.svg)
 
+## Features
+
+- Cross-Platform (Supported on Windows, Linux and Mac OS)
+- API
+- Websocket
+- Built using Electron
+- TBD
+
+### API Endpoints
+
+| endpoint     | Description           |
+| ------------ | ----------------------|
+| /audio       | Audio Information     |
+| /battery     | Battery Information   |
+| /bluetooth   | Bluetooth Information |
+| /command     | Run a System Command  |
+| /cpu         | CPU Information       |
+| /docs        | OpenAPI Docs          |
+| /filesystem  | Filesystem Information|
+| /graphics    | Graphics Information  |
+| /information | Endpoint Information  |
+| /memory      | Memory Information    |
+| /network     | Network Information   |
+| /os          | OS Information        |
+| /processes   | Processes Information |
+| /system      | System Information    |
+
 ## Download
 
 You can download the latest version of the application [here](https://github.com/timmo001/system-bridge/releases).
@@ -89,20 +116,3 @@ yarn [package|make] --platform [darwin|linux|win32]
 
 The deploy workflow will then publish the release for each platform.
 
-## Endpoints
-
-| Name                   | endpoint     |
-| ---------------------- | ------------ |
-| Audio Information      | /audio       |
-| Battery Information    | /battery     |
-| Bluetooth Information  | /bluetooth   |
-| Run a System Command   | /command     |
-| CPU Information        | /cpu         |
-| OpenAPI Docs           | /docs        |
-| Filesystem Information | /filesystem  |
-| Graphics Information   | /graphics    |
-| Endpoint Information   | /information |
-| Memory Information     | /memory      |
-| Network Information    | /network     |
-| OS Information         | /os          |
-| System Information     | /system      |
