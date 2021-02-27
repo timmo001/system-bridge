@@ -35,7 +35,7 @@ export class Command {
     }
     execa(data.command, data.arguments)
       .then((stdout) => logger.info(JSON.stringify({ stdout })))
-      .catch((stderr) => logger.warning(JSON.stringify({ stderr })));
+      .catch((stderr) => logger.warn(JSON.stringify({ stderr })));
     return data;
   }
 }

@@ -44,7 +44,12 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
 }
 
 export default function (app: Application): void {
-  const authentication = new AuthenticationService(app);
+  const authentication = new AuthenticationService(app, "api-key", {
+    entity: null,
+    service: null,
+    secret: "S0Can9hFxEblnG+oGXtht/qrrPg=",
+    authStrategies: ["api-key"],
+  });
 
   authentication.register("api-key", new ApiKeyStrategy());
 

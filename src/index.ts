@@ -7,22 +7,33 @@ import {
   shell,
   Tray,
 } from "electron";
-import { join } from "path";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
+import { join } from "path";
 
 import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
 
-export const appIconPath = join(__dirname, "../src/resources/icons/icon.png");
+export const appIconPath = join(
+  app.getAppPath(),
+  "./src/resources/icons/icon.png"
+);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
   app.quit();
 }
+
+process.on("unhandledRejection", (error: Error) =>
+  logger.error("unhandledRejection:", error)
+);
+
+process.on("uncaughtException", (error: Error) =>
+  logger.error("uncaughtException:", error)
+);
 
 const helpMenu: Array<MenuItemConstructorOptions> = [
   {
@@ -125,7 +136,7 @@ const showWindow = async (): Promise<void> => {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:3000"
-      : `file://${join(__dirname, "../configuration/build/index.html")}`
+      : `file://${join(app.getAppPath(), "./configuration/build/index.html")}`
   );
 
   mainWindow.show();
