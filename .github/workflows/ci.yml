@@ -3,6 +3,8 @@ name: CI
 # yamllint disable-line rule:truthy
 on:
   push:
+    branches:
+      - master
   pull_request:
     types:
       - opened
@@ -116,11 +118,14 @@ jobs:
       matrix:
         os:
           - name: windows
-            server: windows-latest
+            server: ubuntu-latest
+            platform: win32
           - name: linux
             server: ubuntu-latest
+            platform: linux
           - name: macos
             server: macos-latest
+            platform: darwin
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
@@ -138,18 +143,28 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: ⤵️ Install linux dependencies
-        if: matrix.os.name == 'linux'
-        run: sudo apt install libavahi-compat-libdnssd-dev
+      - name: 🏗 Install linux dependencies
+        if: matrix.os.server == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev
         env:
           CI: true
-      - name: ⤵️ Install dependencies
+      - name: 🏗 Install linux wine dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine64 wine32
+        env:
+          CI: true
+      - name: 🏗 Install dependencies
         run: |
           yarn install:all
         env:
           CI: true
       - name: 🚀 Make
-        run: yarn make
+        run: yarn make --platform ${{ matrix.os.platform }}
         env:
           CI: true
           NODE_ENV: production
