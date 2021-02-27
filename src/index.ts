@@ -7,10 +7,11 @@ import {
   shell,
   Tray,
 } from "electron";
+import { join } from "path";
+import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
-import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
-import { join } from "path";
+import updateApp from "update-electron-app";
 
 import { getSettings } from "./utils";
 import API from "./api";
@@ -124,6 +125,8 @@ const setupApp = async (): Promise<void> => {
     } catch (error) {
       logger.error("An error occurred:", error);
     }
+  } else {
+    updateApp({ logger });
   }
 
   mainWindow.on("close", (event) => {
