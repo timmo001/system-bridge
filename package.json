@@ -1,7 +1,7 @@
 {
   "name": "system-bridge",
   "productName": "System Bridge",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "System Bridge",
   "main": "dist/index.js",
   "scripts": {
@@ -29,6 +29,10 @@
     "name": "Timmo",
     "email": "contact@timmo.xyz",
     "url": "https://system-bridge.timmo.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
   "config": {
@@ -75,7 +79,19 @@
           "config": {}
         }
       ],
-      "publishers": []
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "draft": true,
+            "prerelease": true,
+            "repository": {
+              "owner": "timmo001",
+              "name": "system-bridge"
+            }
+          }
+        }
+      ]
     }
   },
   "directories": {
@@ -90,6 +106,7 @@
     "@electron-forge/maker-rpm": "6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "6.0.0-beta.54",
     "@electron-forge/maker-zip": "6.0.0-beta.54",
+    "@electron-forge/publisher-github": "6.0.0-beta.54",
     "@types/compression": "1.7.0",
     "@types/cors": "2.8.10",
     "@types/electron-devtools-installer": "2.2.0",
@@ -128,6 +145,7 @@
     "helmet": "4.4.1",
     "serve-favicon": "2.5.0",
     "systeminformation": "5.5.0",
+    "update-electron-app": "2.0.1",
     "winston": "3.3.3"
   },
   "optionalDependencies": {
