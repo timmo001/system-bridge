@@ -126,7 +126,7 @@ const setupApp = async (): Promise<void> => {
       logger.error("An error occurred:", error);
     }
   } else {
-    updateApp({ logger });
+    updateApp();
   }
 
   mainWindow.on("close", (event) => {
