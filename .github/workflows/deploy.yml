@@ -73,9 +73,10 @@ jobs:
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           install: |
-            curl -fsSL https://deb.nodesource.com/setup_current.x | -E bash -
             apt update -q -y
-            apt install -q -y nodejs build-essential libavahi-compat-libdnssd-dev
+            apt install -q -y curl build-essential libavahi-compat-libdnssd-dev
+            curl -fsSL https://deb.nodesource.com/setup_current.x | -E bash -
+            apt install -q -y nodejs
             npm -g install yarn
           run: |
             yarn install:all
