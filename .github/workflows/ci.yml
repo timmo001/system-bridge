@@ -121,12 +121,31 @@ jobs:
           - name: windows
             server: ubuntu-latest
             platform: win32
+            arch: amd64
+          - name: windows
+            server: ubuntu-latest
+            platform: win32
+            arch: armv7
+          - name: windows
+            server: ubuntu-latest
+            platform: win32
+            arch: aarch64
           - name: linux
             server: ubuntu-latest
             platform: linux
+            arch: amd64
+          - name: linux
+            server: ubuntu-latest
+            platform: linux
+            arch: armv7
+          - name: linux
+            server: ubuntu-latest
+            platform: linux
+            arch: aarch64
           - name: macos
             server: macos-latest
             platform: darwin
+            arch: amd64
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
@@ -145,31 +164,45 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: 🏗 Install linux dependencies
-        if: matrix.os.server == 'ubuntu-latest'
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.arch == 'amd64' && matrix.os.arch == 'amd64'
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev
-        env:
-          CI: true
       - name: 🏗 Install linux wine dependencies
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32' && matrix.os.arch == 'amd64'
         run: |
           sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install wine64 wine32
-        env:
-          CI: true
-      - name: 🏗 Install dependencies
+      - name: 🚀 Install & Make - amd64
+        if: matrix.os.arch == 'amd64'
         run: |
           yarn install:all
+          yarn make --platform ${{ matrix.os.platform }}
         env:
-          CI: true
-      - name: 🚀 Make
-        run: yarn make --platform ${{ matrix.os.platform }}
-        env:
-          CI: true
-          NODE_ENV: production
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INLINE_RUNTIME_CHUNK: false
+          NODE_ENV: production
+      - name: 🚀 Install & Make multiarch - ${{ matrix.os.arch }}
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.arch != 'amd64'
+        uses: uraimo/run-on-arch-action@v2.0.9
+        with:
+          arch: ${{ matrix.os.arch }}
+          distro: ubuntu20.04
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          install: |
+            apt update -q -y
+            apt install -q -y curl build-essential libavahi-compat-libdnssd-dev
+            curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
+            apt install -q -y nodejs
+            npm -g install yarn
+          run: |
+            yarn install:all
+            yarn make --platform ${{ matrix.os.platform }}
+          env: |
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            INLINE_RUNTIME_CHUNK: false
+            NODE_ENV: production
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
