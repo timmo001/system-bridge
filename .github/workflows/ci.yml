@@ -154,7 +154,7 @@ jobs:
       - name: ⤵️ Install linux dependencies
         if: matrix.os.server == 'ubuntu-latest'
         run: |
-          sudo apt install libavahi-compat-libdnssd-dev
+          sudo apt install libavahi-compat-libdnssd-dev wine64
         env:
           CI: true
       - name: ⤵️ Install dependencies
