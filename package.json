@@ -36,29 +36,46 @@
       "packagerConfig": {
         "asar": true,
         "name": "system-bridge",
-        "executableName": "system-bridge"
+        "executableName": "system-bridge",
+        "icon": "./public/favicon.ico"
       },
       "makers": [
         {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "config": {},
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
           "name": "@electron-forge/maker-deb",
+          "config": {
+            "options": {
+              "categories": [
+                "Utility"
+              ]
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
           "config": {}
         },
         {
           "name": "@electron-forge/maker-rpm",
+          "config": {
+            "options": {
+              "categories": [
+                "Utility"
+              ]
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "loadingGif": "./public/loading.gif"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
           "config": {}
         }
-      ]
+      ],
+      "publishers": []
     }
   },
   "directories": {
@@ -69,6 +86,7 @@
   "devDependencies": {
     "@electron-forge/cli": "6.0.0-beta.54",
     "@electron-forge/maker-deb": "6.0.0-beta.54",
+    "@electron-forge/maker-dmg": "6.0.0-beta.54",
     "@electron-forge/maker-rpm": "6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "6.0.0-beta.54",
     "@electron-forge/maker-zip": "6.0.0-beta.54",
