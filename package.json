@@ -54,7 +54,9 @@
         },
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {}
+          "config": {
+            "loadingGif": "./public/loading.gif"
+          }
         },
         {
           "name": "@electron-forge/maker-zip",
