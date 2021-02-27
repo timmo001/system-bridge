@@ -2,7 +2,7 @@
   "name": "system-bridge",
   "productName": "System Bridge",
   "version": "0.1.2",
-  "description": "System Bridge",
+  "description": "A bridge for your systems",
   "main": "dist/index.js",
   "scripts": {
     "build:configuration": "cd configuration && yarn build",
