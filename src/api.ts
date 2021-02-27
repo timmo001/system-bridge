@@ -1,12 +1,10 @@
 import { ipcMain } from "electron";
-import { join } from "path";
 import compress from "compression";
 import cors from "cors";
-import favicon from "serve-favicon";
+// import favicon from "serve-favicon";
 import helmet from "helmet";
 import { createServer, Server } from "http";
 import si, { Systeminformation } from "systeminformation";
-import MDNS, { createAdvertisement, udp } from "mdns";
 
 import feathers from "@feathersjs/feathers";
 import configuration from "@feathersjs/configuration";
@@ -31,9 +29,6 @@ class API {
 
   constructor() {
     ipcMain.on("updated-setting", this.getSettings);
-
-    process.on("unhandledRejection", (error: Error) => logger.error(error));
-    process.on("uncaughtException", (error: Error) => logger.error(error));
 
     this.getSettings();
     this.setupConnection();
@@ -63,7 +58,7 @@ class API {
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
     // Set favicon
-    app.use(favicon(join(app.get("public"), "favicon.ico")));
+    // app.use(favicon(join(app.get("public"), "favicon.ico")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
@@ -115,7 +110,7 @@ class API {
         ? networkSettings?.port?.value
         : 9170;
     this.server = createServer(app);
-    this.server.on("error", (err) => logger.error(err));
+    this.server.on("error", (err) => logger.error("Server error:", err));
     this.server.on("listening", async () => {
       logger.info(`API started on port ${port}`);
       const osInfo: Systeminformation.OsData = await si.osInfo();
@@ -126,28 +121,33 @@ class API {
         (ni: Systeminformation.NetworkInterfacesData) =>
           ni.iface === defaultInterface
       );
-      createAdvertisement(
-        udp("system-bridge"),
-        port,
-        {
-          name: `System Bridge - ${osInfo.fqdn}`,
-          txtRecord: {
-            address: `http://${osInfo.fqdn}:${port}`,
-            fqdn: osInfo.fqdn,
-            host: osInfo.hostname,
-            ip: networkInterface?.ip4,
-            mac: networkInterface?.mac,
-            port,
+      try {
+        const MDNS = await import("mdns");
+        MDNS.createAdvertisement(
+          MDNS.udp("system-bridge"),
+          port,
+          {
+            name: `System Bridge - ${osInfo.fqdn}`,
+            txtRecord: {
+              address: `http://${osInfo.fqdn}:${port}`,
+              fqdn: osInfo.fqdn,
+              host: osInfo.hostname,
+              ip: networkInterface?.ip4,
+              mac: networkInterface?.mac,
+              port,
+            },
           },
-        },
-        (error: MDNS.DnsSdError, service: MDNS.Service) => {
-          if (error) logger.warning(error);
-          else
-            logger.info(
-              `Sent mdns advertisement on port ${service.fullname}:${service.port}`
-            );
-        }
-      );
+          (error, service) => {
+            if (error) logger.warn(error);
+            else
+              logger.info(
+                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
+              );
+          }
+        );
+      } catch (e) {
+        logger.warn("MDNS error:", e);
+      }
     });
     this.server.on("close", () => logger.info("Server closing."));
     this.server.listen(port);
@@ -157,7 +157,7 @@ class API {
     return await new Promise<void>((resolve) => {
       if (this.server)
         this.server.close((err) => {
-          if (err) logger.error(err);
+          if (err) logger.error("Error closing server:", err);
           logger.info("Server closed.");
           this.server = undefined;
           resolve();

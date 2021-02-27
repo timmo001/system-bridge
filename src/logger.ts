@@ -39,7 +39,8 @@ const logger = createLogger({
     }),
     new transports.File({
       filename: "logs/app.log",
-      format: format.combine(format.json()),
+      format: format.combine(format.errors({ stack: true }), logFormat),
+      handleExceptions: true,
     }),
   ],
 });
