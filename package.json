@@ -30,6 +30,10 @@
     "email": "contact@timmo.xyz",
     "url": "https://system-bridge.timmo.dev"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timmo001/system-bridge"
+  },
   "license": "MIT",
   "config": {
     "forge": {
