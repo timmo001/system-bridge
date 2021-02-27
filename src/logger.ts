@@ -1,8 +1,5 @@
-import { Notification } from "electron";
 import isDev from "electron-is-dev";
 import { createLogger, format, transports } from "winston";
-
-import { appIconPath } from ".";
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;
@@ -14,12 +11,6 @@ const logFormat = format.printf((info) => {
   } catch (e) {
     console.log(e);
   }
-  if (level.includes("error"))
-    new Notification({
-      title: "An error occured",
-      body: message,
-      icon: appIconPath,
-    }).show();
   return `${timestamp} ${level}: ${message}`;
 });
 
