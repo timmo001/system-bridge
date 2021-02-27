@@ -118,7 +118,7 @@ jobs:
       matrix:
         os:
           - name: windows
-            server: macos-latest
+            server: ubuntu-latest
             platform: win32
           - name: linux
             server: ubuntu-latest
