@@ -192,7 +192,7 @@ jobs:
           install: |
             apt update -q -y
             apt install -q -y curl build-essential libavahi-compat-libdnssd-dev
-            curl -fsSL https://deb.nodesource.com/setup_current.x | -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
             apt install -q -y nodejs
             npm -g install yarn
           run: |
