@@ -1,9 +1,10 @@
-import { ipcMain } from "electron";
+import { app as electronApp, ipcMain } from "electron";
+import { createServer, Server } from "http";
+import { join } from "path";
 import compress from "compression";
 import cors from "cors";
-// import favicon from "serve-favicon";
+import favicon from "serve-favicon";
 import helmet from "helmet";
-import { createServer, Server } from "http";
 import si, { Systeminformation } from "systeminformation";
 
 import feathers from "@feathersjs/feathers";
@@ -55,7 +56,7 @@ class API {
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
     // Set favicon
-    // app.use(favicon(join(app.get("public"), "favicon.ico")));
+    app.use(favicon(join(electronApp.getAppPath(), "./public/favicon.ico")));
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
