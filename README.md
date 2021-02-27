@@ -10,7 +10,8 @@ You can download the latest version of the application [here](https://github.com
 
 ## Updates
 
-The application will automatically update whenever a new version is released in this repository.
+The application will automatically update whenever a new version is released in
+this repository.
 
 ## Developing
 
@@ -25,11 +26,13 @@ To make changes to the application, you will need:
 
 #### MDNS
 
-You will only need this if you want to be able to discover the app over mdns. The app will warn you if there are missing dependencies.
+You will only need this if you want to be able to discover the app over mdns.
+The app will warn you if there are missing dependencies.
 
 ##### MDNS - Windows
 
-You will need the "Bonjour SDK for Windows". This is not used when building the app, as linux builds using avahi lib with wine.
+You will need the "Bonjour SDK for Windows". This is not used when building the
+app, as linux builds using avahi lib with wine.
 
 ##### MDNS - Linux
 
