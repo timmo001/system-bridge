@@ -45,31 +45,31 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: 🏗 Install wine dependencies
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+      - name: 🏗 Install linux dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.arch == 'amd64' && matrix.os.arch == 'amd64'
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev
+      - name: 🏗 Install linux wine dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32' && matrix.os.arch == 'amd64'
         run: |
           sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install wine64 wine32
-        env:
-          CI: true
-      - name: 🏗 Install dependencies
+      - name: 🚀 Install & Make - amd64
+        if: matrix.os.arch == 'amd64'
         run: |
           yarn install:all
+          yarn run publish --platform ${{ matrix.os.platform }}
         env:
-          CI: true
-      - name: 🚀 Publish
-        run: yarn run publish --platform ${{ matrix.os.platform }}
-        env:
-          CI: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INLINE_RUNTIME_CHUNK: false
           NODE_ENV: production
-      - name: 🚀 Publish - armv7
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'linux' || matrix.os.platform == 'win32'
+      - name: 🚀 Install & Make multiarch - ${{ matrix.os.arch }}
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.arch != 'amd64'
         uses: uraimo/run-on-arch-action@v2.0.9
         with:
-          arch: armv7
+          arch: ${{ matrix.os.arch }}
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           install: |
@@ -81,27 +81,6 @@ jobs:
             yarn install:all
             yarn run publish --platform ${{ matrix.os.platform }}
           env: |
-            CI: true
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            INLINE_RUNTIME_CHUNK: false
-            NODE_ENV: production
-      - name: 🚀 Publish - aarch64
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'linux' || matrix.os.platform == 'win32'
-        uses: uraimo/run-on-arch-action@v2.0.9
-        with:
-          arch: aarch64
-          distro: ubuntu20.04
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          install: |
-            curl -fsSL https://deb.nodesource.com/setup_current.x | -E bash -
-            apt update -q -y
-            apt install -q -y nodejs build-essential libavahi-compat-libdnssd-dev
-            npm -g install yarn
-          run: |
-            yarn install:all
-            yarn run publish --platform ${{ matrix.os.platform }}
-          env: |
-            CI: true
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             INLINE_RUNTIME_CHUNK: false
             NODE_ENV: production
