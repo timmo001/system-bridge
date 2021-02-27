@@ -7,7 +7,6 @@ import { createServer, Server } from "http";
 import si, { Systeminformation } from "systeminformation";
 
 import feathers from "@feathersjs/feathers";
-import configuration from "@feathersjs/configuration";
 import "@feathersjs/transport-commons";
 import express from "@feathersjs/express";
 import socketio from "@feathersjs/socketio";
@@ -43,8 +42,6 @@ class API {
 
     // Creates an ExpressJS compatible Feathers application
     const app: Application = express(feathers());
-    // Load app configuration
-    app.configure(configuration());
     // Enable security, CORS, compression, favicon and body parsing
     app.use(
       helmet({
