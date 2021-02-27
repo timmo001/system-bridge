@@ -143,15 +143,22 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: ⤵️ Install linux dependencies
+      - name: 🏗 Install linux dependencies
         if: matrix.os.server == 'ubuntu-latest'
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt install libavahi-compat-libdnssd-dev wine64 wine32
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev
         env:
           CI: true
-      - name: ⤵️ Install dependencies
+      - name: 🏗 Install linux wine dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine64 wine32
+        env:
+          CI: true
+      - name: 🏗 Install dependencies
         run: |
           yarn install:all
         env:
