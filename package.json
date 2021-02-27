@@ -36,7 +36,8 @@
       "packagerConfig": {
         "asar": true,
         "name": "system-bridge",
-        "executableName": "system-bridge"
+        "executableName": "system-bridge",
+        "icon": "./public/favicon.ico"
       },
       "makers": [
         {
