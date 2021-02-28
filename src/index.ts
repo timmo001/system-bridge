@@ -25,7 +25,7 @@ if (require("electron-squirrel-startup")) {
 
 export const appIconPath = join(
   app.getAppPath(),
-  "./src/resources/icons/icon.png"
+  "./public/system-bridge-circle.png"
 );
 
 process.on("unhandledRejection", (error: Error) =>
