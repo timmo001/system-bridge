@@ -16,22 +16,22 @@ A bridge for your systems.
 
 ### API Endpoints
 
-| Endpoint     | Description           |
-| ------------ | ----------------------|
-| /audio       | Audio Information     |
-| /battery     | Battery Information   |
-| /bluetooth   | Bluetooth Information |
-| /command     | Run a System Command  |
-| /cpu         | CPU Information       |
-| /docs        | OpenAPI Docs          |
-| /filesystem  | Filesystem Information|
-| /graphics    | Graphics Information  |
-| /information | Endpoint Information  |
-| /memory      | Memory Information    |
-| /network     | Network Information   |
-| /os          | OS Information        |
-| /processes   | Processes Information |
-| /system      | System Information    |
+| Endpoint     | Description            | Method |
+| ------------ | ---------------------- | ------ |
+| /audio       | Audio Information      | GET    |
+| /battery     | Battery Information    | GET    |
+| /bluetooth   | Bluetooth Information  | GET    |
+| /command     | Run a System Command   | POST   |
+| /cpu         | CPU Information        | GET    |
+| /docs        | OpenAPI Docs           | GET    |
+| /filesystem  | Filesystem Information | GET    |
+| /graphics    | Graphics Information   | GET    |
+| /information | Endpoint Information   | GET    |
+| /memory      | Memory Information     | GET    |
+| /network     | Network Information    | GET    |
+| /os          | OS Information         | GET    |
+| /processes   | Processes Information  | GET    |
+| /system      | System Information     | GET    |
 
 ## Download
 
