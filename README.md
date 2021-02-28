@@ -16,7 +16,7 @@ A bridge for your systems.
 
 ### API Endpoints
 
-| endpoint     | Description           |
+| Endpoint     | Description           |
 | ------------ | ----------------------|
 | /audio       | Audio Information     |
 | /battery     | Battery Information   |
