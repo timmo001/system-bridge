@@ -4,6 +4,8 @@ A bridge for your systems.
 
 ![CI](https://github.com/timmo001/system-bridge/workflows/CI/badge.svg) ![CodeQL](https://github.com/timmo001/system-bridge/workflows/CodeQL/badge.svg)
 
+![Logo](./public/system-bridge-rect.png)
+
 ## Features
 
 - Cross-Platform (Supported on Windows, Linux and Mac OS)
