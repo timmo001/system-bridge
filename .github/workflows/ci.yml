@@ -115,6 +115,7 @@ jobs:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - name: windows
