@@ -1,7 +1,7 @@
 {
   "name": "system-bridge",
   "productName": "System Bridge",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A bridge for your systems",
   "main": "dist/index.js",
   "scripts": {

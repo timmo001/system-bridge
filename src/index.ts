@@ -66,6 +66,12 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
       },
       { type: "separator" },
       {
+        label: "Logs",
+        type: "normal",
+        click: () => shell.openPath(join(app.getAppPath(), "./logs/app.log")),
+      },
+      { type: "separator" },
+      {
         label: "About",
         type: "normal",
         click: () => app.showAboutPanel(),
