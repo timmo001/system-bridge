@@ -51,6 +51,7 @@
               "categories": [
                 "Utility"
               ],
+              "description": "A bridge for your systems",
               "icon": "./public/favicon.ico"
             }
           }
@@ -66,6 +67,7 @@
               "categories": [
                 "Utility"
               ],
+              "description": "A bridge for your systems",
               "icon": "./public/favicon.ico"
             }
           }
