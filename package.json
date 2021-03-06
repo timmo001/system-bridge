@@ -50,7 +50,8 @@
             "options": {
               "categories": [
                 "Utility"
-              ]
+              ],
+              "icon": "./public/favicon.ico"
             }
           }
         },
@@ -64,7 +65,8 @@
             "options": {
               "categories": [
                 "Utility"
-              ]
+              ],
+              "icon": "./public/favicon.ico"
             }
           }
         },
