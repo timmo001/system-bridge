@@ -50,7 +50,9 @@
             "options": {
               "categories": [
                 "Utility"
-              ]
+              ],
+              "description": "A bridge for your systems",
+              "icon": "./public/favicon.ico"
             }
           }
         },
@@ -64,7 +66,9 @@
             "options": {
               "categories": [
                 "Utility"
-              ]
+              ],
+              "description": "A bridge for your systems",
+              "icon": "./public/favicon.ico"
             }
           }
         },
