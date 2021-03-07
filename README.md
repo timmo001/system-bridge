@@ -12,26 +12,27 @@ A bridge for your systems.
 - API
 - Websocket
 - Built using Electron
-- TBD
+- __TODO__
 
 ### API Endpoints
 
-| Endpoint     | Description            | Method |
-| ------------ | ---------------------- | ------ |
-| /audio       | Audio Information      | GET    |
-| /battery     | Battery Information    | GET    |
-| /bluetooth   | Bluetooth Information  | GET    |
-| /command     | Run a System Command   | POST   |
-| /cpu         | CPU Information        | GET    |
-| /docs        | OpenAPI Docs           | GET    |
-| /filesystem  | Filesystem Information | GET    |
-| /graphics    | Graphics Information   | GET    |
-| /information | Endpoint Information   | GET    |
-| /memory      | Memory Information     | GET    |
-| /network     | Network Information    | GET    |
-| /os          | OS Information         | GET    |
-| /processes   | Processes Information  | GET    |
-| /system      | System Information     | GET    |
+| Endpoint     | Description                                      | Method |
+| ------------ | ----------------------                           | ------ |
+| /audio       | Audio Information                                | GET    |
+| /battery     | Battery Information                              | GET    |
+| /bluetooth   | Bluetooth Information                            | GET    |
+| /command     | Run a System Command                             | POST   |
+| /cpu         | CPU Information                                  | GET    |
+| /docs        | OpenAPI Docs                                     | GET    |
+| /filesystem  | Filesystem Information                           | GET    |
+| /graphics    | Graphics Information                             | GET    |
+| /information | Endpoint Information                             | GET    |
+| /memory      | Memory Information                               | GET    |
+| /network     | Network Information                              | GET    |
+| /open        | Open a URL or file using the default application | GET    |
+| /os          | OS Information                                   | GET    |
+| /processes   | Processes Information                            | GET    |
+| /system      | System Information                               | GET    |
 
 ## Download
 
