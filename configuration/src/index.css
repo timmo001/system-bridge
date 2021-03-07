@@ -3,3 +3,40 @@ body {
   background-color: #121212;
   color: #ffffff;
 }
+
+a {
+  color: #9a9a9a;
+  text-decoration: none;
+}
+
+a:hover {
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 0.68rem;
+  height: 0.68rem;
+}
+
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  background: rgba(97, 97, 97, 0.4);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(97, 97, 97, 0.4);
+}
+
+#root {
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

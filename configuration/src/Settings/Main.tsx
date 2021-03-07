@@ -69,6 +69,59 @@ function Main(): ReactElement {
           ))
         )}
       </Grid>
+      <Box className={classes.spacer} />
+      <Grid container direction="row" justify="center">
+        <Typography component="span" variant="body1">
+          Found an issue? Report it{" "}
+          <a
+            href="self"
+            onClick={() =>
+              window.api.ipcRendererSend(
+                "open-url",
+                "https://github.com/timmo001/system-bridge/issues/new/choose"
+              )
+            }
+          >
+            here
+          </a>
+          .
+        </Typography>
+      </Grid>
+      <Grid container direction="row" justify="center">
+        <Typography component="span" variant="body1">
+          Thought of a feature that could be added? Suggest it{" "}
+          <a
+            href="self"
+            onClick={() =>
+              window.api.ipcRendererSend(
+                "open-url",
+                "https://github.com/timmo001/system-bridge/issues/new/choose"
+              )
+            }
+          >
+            here
+          </a>
+          .
+        </Typography>
+      </Grid>
+      <Box className={classes.spacer} />
+      <Grid container direction="row" justify="center">
+        <Typography component="span" variant="body1">
+          Participate in discussions and get help{" "}
+          <a
+            href="self"
+            onClick={() =>
+              window.api.ipcRendererSend(
+                "open-url",
+                "https://github.com/timmo001/system-bridge/discussions"
+              )
+            }
+          >
+            here
+          </a>
+          .
+        </Typography>
+      </Grid>
     </Container>
   );
 }
