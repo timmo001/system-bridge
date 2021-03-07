@@ -41,7 +41,7 @@ You can download the latest version of the application [here](https://github.com
 ## Updates
 
 The application will automatically update whenever a new version is released in
-this repository.
+this repository. You can also download the latest version manually from [here](https://github.com/timmo001/system-bridge/releases).
 
 ## Developing
 
@@ -118,4 +118,3 @@ yarn [package|make] --platform [darwin|linux|win32]
 1. Publish the release.
 
 The deploy workflow will then publish the release for each platform.
-
