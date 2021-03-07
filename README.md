@@ -29,7 +29,7 @@ A bridge for your systems.
 | /information | Endpoint Information                             | GET    |
 | /memory      | Memory Information                               | GET    |
 | /network     | Network Information                              | GET    |
-| /open        | Open a URL or file using the default application | GET    |
+| /open        | Open a URL or file using the default application | POST   |
 | /os          | OS Information                                   | GET    |
 | /processes   | Processes Information                            | GET    |
 | /system      | System Information                               | GET    |
