@@ -11,10 +11,10 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import { Configuration } from "../../../src/configuration";
-import { useSettings } from "../Utils";
-import Section from "./Section";
-import logo from "../resources/system-bridge.svg";
+import { Configuration } from "../../src/configuration";
+import { useSettings } from "./Utils";
+import Section from "./Settings/Section";
+import logo from "./resources/system-bridge.svg";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
