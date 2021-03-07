@@ -1,4 +1,5 @@
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import clsx from "clsx";
 import {
   Box,
   CircularProgress,
@@ -20,14 +21,22 @@ const useStyles = makeStyles((theme: Theme) =>
     spacer: {
       height: theme.spacing(6),
     },
-    logo: {
+    headerItem: {
       margin: theme.spacing(1, 1, 0),
+    },
+    version: {
+      margin: theme.spacing(3, 2, 0),
     },
   })
 );
 
+interface AppInfo {
+  version: string;
+}
+
 function Main(): ReactElement {
   const [settings, setSettings] = useSettings();
+  const [appInfo, setAppInfo] = useState<AppInfo>();
 
   useEffect(() => {
     if (!settings) {
@@ -37,6 +46,12 @@ function Main(): ReactElement {
         setSettings(s);
       });
       window.api.ipcRendererSend("get-settings");
+
+      window.api.ipcRendererOn("app-information", (_event, args) => {
+        console.log("set-app-info:", args);
+        setAppInfo(args);
+      });
+      window.api.ipcRendererSend("get-app-information");
     }
   }, [settings, setSettings]);
 
@@ -44,7 +59,7 @@ function Main(): ReactElement {
 
   return (
     <Container maxWidth="lg">
-      <Grid container justify="space-between">
+      <Grid container alignItems="flex-start" justify="flex-start">
         <Grid item>
           <Typography component="h1" variant="h2">
             System Bridge
@@ -53,8 +68,13 @@ function Main(): ReactElement {
             Settings
           </Typography>
         </Grid>
-        <Grid item>
-          <img className={classes.logo} src={logo} alt="System Bridge Logo" />
+        <Grid className={clsx(classes.headerItem, classes.version)} item xs>
+          <Typography component="h3" variant="h5">
+            v{appInfo?.version}
+          </Typography>
+        </Grid>
+        <Grid className={classes.headerItem} item>
+          <img src={logo} alt="System Bridge Logo" />
         </Grid>
       </Grid>
       <Box className={classes.spacer} />
