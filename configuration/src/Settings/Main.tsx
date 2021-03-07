@@ -94,7 +94,7 @@ function Main(): ReactElement {
         <Typography component="span" variant="body1">
           Found an issue? Report it{" "}
           <a
-            href="self"
+            href={window.location.href}
             onClick={() =>
               window.api.ipcRendererSend(
                 "open-url",
@@ -111,7 +111,7 @@ function Main(): ReactElement {
         <Typography component="span" variant="body1">
           Thought of a feature that could be added? Suggest it{" "}
           <a
-            href="self"
+            href={window.location.href}
             onClick={() =>
               window.api.ipcRendererSend(
                 "open-url",
@@ -129,7 +129,7 @@ function Main(): ReactElement {
         <Typography component="span" variant="body1">
           Participate in discussions and get help{" "}
           <a
-            href="self"
+            href={window.location.href}
             onClick={() =>
               window.api.ipcRendererSend(
                 "open-url",
