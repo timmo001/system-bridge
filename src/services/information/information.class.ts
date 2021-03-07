@@ -37,6 +37,10 @@ export class Information {
       },
       memory: { description: "Memory Information", endpoint: "/memory" },
       network: { description: "Network Information", endpoint: "/network" },
+      open: {
+        description: "Open a URL or file using the default application",
+        endpoint: "/open",
+      },
       os: { description: "OS Information", endpoint: "/os" },
       processes: {
         description: "Processes Information",
