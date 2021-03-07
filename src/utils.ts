@@ -25,6 +25,7 @@ export function getSettings(): Configuration {
   return settings;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertArrayToObject(array: any[], key: string): any {
   return array.reduce(
     (obj, item) => ({
