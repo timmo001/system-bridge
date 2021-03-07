@@ -12,6 +12,7 @@ import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
 import updateApp from "update-electron-app";
+import si, { Systeminformation } from "systeminformation";
 
 import { getSettings } from "./utils";
 import API from "./api";
@@ -196,8 +197,30 @@ app.whenReady().then((): void => {
 ipcMain.on(
   "get-app-information",
   async (event): Promise<void> => {
-    const data = { version: app.getVersion() };
-    logger.info("App Information:", data);
+    const settings = getSettings();
+    const port: number =
+      typeof settings?.network.items?.port?.value === "number"
+        ? settings?.network.items?.port?.value
+        : 9170;
+    const osInfo: Systeminformation.OsData = await si.osInfo();
+    const defaultInterface: string = await si.networkInterfaceDefault();
+    const networkInterface:
+      | Systeminformation.NetworkInterfacesData
+      | undefined = (await si.networkInterfaces()).find(
+      (ni: Systeminformation.NetworkInterfacesData) =>
+        ni.iface === defaultInterface
+    );
+
+    const data = {
+      address: `http://${osInfo.fqdn}:${port}`,
+      fqdn: osInfo.fqdn,
+      host: osInfo.hostname,
+      ip: networkInterface?.ip4,
+      mac: networkInterface?.mac,
+      port,
+      version: app.getVersion(),
+    };
+    logger.info(`App Information: ${JSON.stringify(data)}`);
     event.sender.send("app-information", data);
   }
 );

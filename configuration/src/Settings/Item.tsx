@@ -22,16 +22,19 @@ import {
   Theme,
 } from "@material-ui/core";
 import Icon from "@mdi/react";
-import { mdiCached } from "@mdi/js";
+import { mdiCached, mdiContentCopy } from "@mdi/js";
 
 import { Configuration, ConfigurationItem } from "../../../src/configuration";
 import { SectionProps } from "./Section";
-import { useSettings } from "../Utils";
+import { handleCopyToClipboard, useSettings } from "../Utils";
 
-const useStyles = makeStyles((_theme: Theme) =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    button: {
+      margin: theme.spacing(-1, -0.5),
+    },
     secondaryAction: {
-      width: 352,
+      width: 400,
       textAlign: "end",
     },
   })
@@ -76,7 +79,6 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
           value,
         ]);
         window.api.ipcRendererOn("updated-setting", (_event, _args) => {
-          console.log("requiresServerRestart:", item.requiresServerRestart);
           if (item.requiresServerRestart) handleRestartServer();
         });
       }
@@ -135,11 +137,23 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
+                    className={classes.button}
                     aria-label="Generate Api Key"
                     onClick={handleGenerateApiKey}
                     edge="end"
                   >
                     <Icon title="Generate API Key" size={1} path={mdiCached} />
+                  </IconButton>
+                  <IconButton
+                    className={classes.button}
+                    aria-label="Copy to clipboard"
+                    onClick={() => handleCopyToClipboard(value)}
+                  >
+                    <Icon
+                      title="Copy to clipboard"
+                      size={0.8}
+                      path={mdiContentCopy}
+                    />
                   </IconButton>
                 </InputAdornment>
               }

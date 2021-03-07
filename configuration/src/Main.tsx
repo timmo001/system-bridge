@@ -6,18 +6,27 @@ import {
   Container,
   createStyles,
   Grid,
+  IconButton,
   makeStyles,
   Theme,
   Typography,
 } from "@material-ui/core";
+import Icon from "@mdi/react";
+import { mdiContentCopy } from "@mdi/js";
 
 import { Configuration } from "../../src/configuration";
-import { useSettings } from "./Utils";
+import { handleCopyToClipboard, useSettings } from "./Utils";
 import Section from "./Settings/Section";
 import logo from "./resources/system-bridge.svg";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    disabled: {
+      userSelect: "none",
+    },
+    smallButton: {
+      margin: theme.spacing(-1, -0.5),
+    },
     spacer: {
       height: theme.spacing(6),
     },
@@ -31,6 +40,12 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface AppInfo {
+  address: string;
+  fqdn: string;
+  host: string;
+  ip: string;
+  mac: string;
+  port: number;
   version: string;
 }
 
@@ -60,7 +75,7 @@ function Main(): ReactElement {
   return (
     <Container maxWidth="lg">
       <Grid container alignItems="flex-start" justify="flex-start">
-        <Grid item>
+        <Grid className={classes.disabled} item>
           <Typography component="h1" variant="h2">
             System Bridge
           </Typography>
@@ -68,10 +83,62 @@ function Main(): ReactElement {
             Settings
           </Typography>
         </Grid>
+        <Grid
+          className={clsx(
+            classes.disabled,
+            classes.headerItem,
+            classes.version
+          )}
+          item
+          xs
+        >
+          {appInfo?.version ? (
+            <Typography component="h3" variant="h5">
+              v{appInfo.version}
+            </Typography>
+          ) : (
+            ""
+          )}
+        </Grid>
         <Grid className={clsx(classes.headerItem, classes.version)} item xs>
-          <Typography component="h3" variant="h5">
-            v{appInfo?.version}
-          </Typography>
+          {appInfo?.host ? (
+            <Typography component="h5" variant="subtitle1">
+              <span className={classes.disabled}>Host: </span>
+              {appInfo.host}
+              <IconButton
+                className={classes.smallButton}
+                aria-label="Copy to clipboard"
+                onClick={() => handleCopyToClipboard(appInfo.host)}
+              >
+                <Icon
+                  title="Copy to clipboard"
+                  size={0.8}
+                  path={mdiContentCopy}
+                />
+              </IconButton>
+            </Typography>
+          ) : (
+            ""
+          )}
+          {appInfo?.ip ? (
+            <Typography component="h5" variant="subtitle1">
+              <span className={classes.disabled}>IP: </span>
+              {appInfo.ip}
+              <IconButton
+                className={classes.smallButton}
+                aria-label="Copy to clipboard"
+                onClick={() => handleCopyToClipboard(appInfo.ip)}
+              >
+                <Icon
+                  title="Copy to clipboard"
+                  size={0.8}
+                  path={mdiContentCopy}
+                />
+              </IconButton>
+            </Typography>
+          ) : (
+            ""
+          )}
         </Grid>
         <Grid className={classes.headerItem} item>
           <img src={logo} alt="System Bridge Logo" />

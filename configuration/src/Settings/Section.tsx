@@ -16,13 +16,13 @@ function Section({ sectionKey }: SectionProps): ReactElement {
 
   return (
     <Grid container direction="row" item xs={12}>
-      <Grid item xs={5}>
+      <Grid item xs={4}>
         <Typography component="h3" variant="h5">
           {section?.name}
         </Typography>
         <Typography variant="subtitle1">{section?.description}</Typography>
       </Grid>
-      <Grid item xs={7}>
+      <Grid item xs={8}>
         <Paper>
           <List>
             {section
