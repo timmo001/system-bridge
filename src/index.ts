@@ -194,6 +194,23 @@ app.whenReady().then((): void => {
 });
 
 ipcMain.on(
+  "get-app-information",
+  async (event): Promise<void> => {
+    const data = { version: app.getVersion() };
+    logger.info("App Information:", data);
+    event.sender.send("app-information", data);
+  }
+);
+
+ipcMain.on(
+  "open-url",
+  async (event, arg): Promise<void> => {
+    shell.openExternal(arg);
+    event?.sender?.send("opened-url", arg);
+  }
+);
+
+ipcMain.on(
   "open-settings",
   async (event): Promise<void> => {
     showWindow();
