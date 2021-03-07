@@ -41,7 +41,8 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
   }
 
   function handleSetSetting(value: string | number | boolean) {
-    if (!Number.isNaN(Number(value))) value = Number(value);
+    if (typeof value !== "boolean" && !Number.isNaN(Number(value)))
+      value = Number(value);
     console.log("handleSetSetting:", { sectionKey, itemKey, value });
     if (settings) {
       const newSettings: Configuration = settings;
