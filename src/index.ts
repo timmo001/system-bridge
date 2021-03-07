@@ -7,7 +7,7 @@ import {
   shell,
   Tray,
 } from "electron";
-import { join } from "path";
+import { join, resolve } from "path";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
@@ -68,7 +68,7 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
       {
         label: "Logs",
         type: "normal",
-        click: () => shell.openPath(join(app.getAppPath(), "./logs/app.log")),
+        click: () => shell.openPath(resolve("./logs/app.log")),
       },
       { type: "separator" },
       {
