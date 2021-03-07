@@ -16,7 +16,7 @@ const logFormat = format.printf((info) => {
 
 // Configure the Winston logger.
 const logger = createLogger({
-  level: isDev ? "info" : "debug",
+  level: isDev ? "debug" : "info",
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     // Format the metadata object
