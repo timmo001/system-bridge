@@ -228,6 +228,7 @@ ipcMain.on(
 ipcMain.on(
   "update-setting",
   async (event, args): Promise<void> => {
+    logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
     await electronSettings.set(args[0], args[1]);
     await setAppConfig();
     event.sender.send("updated-setting", args);

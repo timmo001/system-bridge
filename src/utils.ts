@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import electronSettings from "electron-settings";
 
 import defaultConfiguration, { Configuration } from "./configuration";
@@ -10,6 +11,14 @@ export function getSettings(): Configuration {
         settings[sectionKey].items[itemKey].value =
           electronSettings.getSync(`${sectionKey}-items-${itemKey}-value`) ||
           settings[sectionKey].items[itemKey].defaultValue;
+        if (
+          itemKey === "apiKey" &&
+          !settings[sectionKey].items[itemKey].value
+        ) {
+          const key = uuidv4();
+          electronSettings.set(`${sectionKey}-items-${itemKey}-value`, key);
+          settings[sectionKey].items[itemKey].value = key;
+        }
       }
     );
   });
