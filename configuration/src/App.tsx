@@ -8,7 +8,7 @@ import { cyan, blue, grey } from "@material-ui/core/colors";
 
 import "typeface-roboto";
 
-import Main from "./Settings/Main";
+import Main from "./Main";
 import { SettingsProvider } from "./Utils";
 
 const theme = responsiveFontSizes(
