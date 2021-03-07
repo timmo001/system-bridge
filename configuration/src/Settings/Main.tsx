@@ -13,11 +13,15 @@ import {
 import { Configuration } from "../../../src/configuration";
 import { useSettings } from "../Utils";
 import Section from "./Section";
+import logo from "../resources/system-bridge.svg";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     spacer: {
       height: theme.spacing(6),
+    },
+    logo: {
+      margin: theme.spacing(1, 1, 0),
     },
   })
 );
@@ -40,12 +44,19 @@ function Main(): ReactElement {
 
   return (
     <Container maxWidth="lg">
-      <Typography component="h1" variant="h2">
-        System Bridge
-      </Typography>
-      <Typography component="h2" variant="h4">
-        Configuration
-      </Typography>
+      <Grid container justify="space-between">
+        <Grid item>
+          <Typography component="h1" variant="h2">
+            System Bridge
+          </Typography>
+          <Typography component="h2" variant="h4">
+            Settings
+          </Typography>
+        </Grid>
+        <Grid item>
+          <img className={classes.logo} src={logo} alt="System Bridge Logo" />
+        </Grid>
+      </Grid>
       <Box className={classes.spacer} />
       <Grid container direction="column" spacing={2} alignItems="stretch">
         {!settings ? (
