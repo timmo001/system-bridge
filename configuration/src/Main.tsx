@@ -15,7 +15,7 @@ import Icon from "@mdi/react";
 import { mdiContentCopy } from "@mdi/js";
 
 import { Configuration } from "../../src/configuration";
-import { useSettings } from "./Utils";
+import { handleCopyToClipboard, useSettings } from "./Utils";
 import Section from "./Settings/Section";
 import logo from "./resources/system-bridge.svg";
 
@@ -107,6 +107,7 @@ function Main(): ReactElement {
               {appInfo.host}
               <IconButton
                 className={classes.smallButton}
+                aria-label="Copy to clipboard"
                 onClick={() => handleCopyToClipboard(appInfo.host)}
               >
                 <Icon
@@ -125,6 +126,7 @@ function Main(): ReactElement {
               {appInfo.ip}
               <IconButton
                 className={classes.smallButton}
+                aria-label="Copy to clipboard"
                 onClick={() => handleCopyToClipboard(appInfo.ip)}
               >
                 <Icon
