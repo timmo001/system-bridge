@@ -7,7 +7,8 @@ import {
   shell,
   Tray,
 } from "electron";
-import { join, resolve } from "path";
+import { join, resolve, basename } from "path";
+import childProcess from "child_process";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
@@ -20,8 +21,76 @@ import logger from "./logger";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
-  // eslint-disable-line global-require
   app.quit();
+}
+
+if (handleSquirrelEvent()) {
+  // squirrel event handled and app will exit in 1000ms, so don't do anything else
+  app.quit();
+}
+
+function handleSquirrelEvent(): any {
+  if (process.argv.length === 1) {
+    return false;
+  }
+
+  const appFolder = resolve(process.execPath, "..");
+  const rootAtomFolder = resolve(appFolder, "..");
+  const updateDotExe = resolve(join(rootAtomFolder, "Update.exe"));
+  const exeName = basename(process.execPath);
+
+  const spawn = (
+    command: string,
+    args: any[] | readonly string[] | undefined
+  ) => {
+    let spawnedProcess;
+
+    try {
+      spawnedProcess = childProcess.spawn(command, args, { detached: true });
+    } catch (error) {
+      logger.error(error);
+    }
+
+    return spawnedProcess;
+  };
+
+  const spawnUpdate = function (args: any[]) {
+    return spawn(updateDotExe, args);
+  };
+
+  const squirrelEvent = process.argv[1];
+  switch (squirrelEvent) {
+    case "--squirrel-install":
+    case "--squirrel-updated":
+      // Optionally do things such as:
+      // - Add your .exe to the PATH
+      // - Write to the registry for things like file associations and
+      //   explorer context menus
+
+      // Install desktop and start menu shortcuts
+      spawnUpdate(["--createShortcut", exeName]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case "--squirrel-uninstall":
+      // Undo anything you did in the --squirrel-install and
+      // --squirrel-updated handlers
+
+      // Remove desktop and start menu shortcuts
+      spawnUpdate(["--removeShortcut", exeName]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case "--squirrel-obsolete":
+      // This is called on the outgoing version of your app before
+      // we update to the new version - it's the opposite of
+      // --squirrel-updated
+
+      app.quit();
+      return true;
+  }
 }
 
 export const appIconPath = join(
