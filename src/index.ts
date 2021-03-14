@@ -33,7 +33,7 @@ if (handleSquirrelEvent()) {
   app.quit();
 }
 
-function handleSquirrelEvent(): any {
+function handleSquirrelEvent() {
   if (process.argv.length === 1) {
     return false;
   }
@@ -65,6 +65,8 @@ function handleSquirrelEvent(): any {
 
   const squirrelEvent = process.argv[1];
   switch (squirrelEvent) {
+    default:
+      return false;
     case "--squirrel-install":
     case "--squirrel-updated":
       // Install desktop and start menu shortcuts
@@ -72,14 +74,12 @@ function handleSquirrelEvent(): any {
 
       setTimeout(app.quit, 1000);
       return true;
-
     case "--squirrel-uninstall":
       // Remove desktop and start menu shortcuts
       spawnUpdate(["--removeShortcut", exeName]);
 
       setTimeout(app.quit, 1000);
       return true;
-
     case "--squirrel-obsolete":
       app.quit();
       return true;
