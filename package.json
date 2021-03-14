@@ -39,7 +39,7 @@
     "forge": {
       "packagerConfig": {
         "asar": true,
-        "name": "system-bridge",
+        "name": "System Bridge",
         "executableName": "system-bridge",
         "icon": "./public/favicon.ico"
       },
