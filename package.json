@@ -1,8 +1,8 @@
 {
   "name": "system-bridge",
   "productName": "System Bridge",
-  "version": "1.0.3",
   "description": "A bridge for your systems",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "scripts": {
     "build:configuration": "cd configuration && yarn build",
@@ -39,7 +39,7 @@
     "forge": {
       "packagerConfig": {
         "asar": true,
-        "name": "System Bridge",
+        "name": "system-bridge",
         "executableName": "system-bridge",
         "icon": "./public/favicon.ico"
       },
@@ -52,7 +52,7 @@
                 "Utility"
               ],
               "description": "A bridge for your systems",
-              "icon": "./public/favicon.ico"
+              "icon": "./public/system-bridge-circle.png"
             }
           }
         },
@@ -68,7 +68,7 @@
                 "Utility"
               ],
               "description": "A bridge for your systems",
-              "icon": "./public/favicon.ico"
+              "icon": "./public/system-bridge-circle.png"
             }
           }
         },
@@ -147,7 +147,7 @@
     "feathers-swagger": "1.2.1",
     "helmet": "4.4.1",
     "serve-favicon": "2.5.0",
-    "systeminformation": "5.6.2",
+    "systeminformation": "5.6.1",
     "update-electron-app": "2.0.1",
     "uuid": "8.3.2",
     "winston": "3.3.3"
