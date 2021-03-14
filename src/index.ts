@@ -65,7 +65,6 @@ function handleSquirrelEvent() {
       return false;
     case "--squirrel-install":
     case "--squirrel-updated":
-    case "--squirrel-firstrun":
       // Install desktop and start menu shortcuts
       spawnUpdate(["--createShortcut", exeName]);
 
