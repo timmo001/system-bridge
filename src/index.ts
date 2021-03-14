@@ -24,12 +24,10 @@ logger.info(
 );
 
 // // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-// if (require("electron-squirrel-startup")) {
-//   app.quit();
-// }
+if (require("electron-squirrel-startup")) app.exit();
 
+// squirrel event handled and app will exit in 1000ms, so don't do anything else
 if (handleSquirrelEvent()) {
-  // squirrel event handled and app will exit in 1000ms, so don't do anything else
   app.quit();
 }
 
@@ -59,9 +57,7 @@ function handleSquirrelEvent() {
     return spawnedProcess;
   };
 
-  const spawnUpdate = function (args: any[]) {
-    return spawn(updateDotExe, args);
-  };
+  const spawnUpdate = (args: any[]) => spawn(updateDotExe, args);
 
   const squirrelEvent = process.argv[1];
   switch (squirrelEvent) {
@@ -69,6 +65,7 @@ function handleSquirrelEvent() {
       return false;
     case "--squirrel-install":
     case "--squirrel-updated":
+    case "--squirrel-firstrun":
       // Install desktop and start menu shortcuts
       spawnUpdate(["--createShortcut", exeName]);
 
@@ -83,6 +80,10 @@ function handleSquirrelEvent() {
     case "--squirrel-obsolete":
       app.quit();
       return true;
+    case "--squirrel-firstrun":
+      // Install desktop and start menu shortcuts
+      spawnUpdate(["--createShortcut", exeName]);
+      return false;
   }
 }
 
