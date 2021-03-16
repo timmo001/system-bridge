@@ -41,7 +41,8 @@
         "asar": true,
         "name": "system-bridge",
         "executableName": "system-bridge",
-        "icon": "./public/favicon.ico",
+        "icon": "public/favicon.ico",
+        "setupIcon": "public/favicon.ico",
         "win32metadata": {
           "requested-execution-level": "highestAvailable"
         }
@@ -55,7 +56,7 @@
                 "Utility"
               ],
               "description": "A bridge for your systems",
-              "icon": "./public/system-bridge-circle.png"
+              "icon": "public/system-bridge-circle.png"
             }
           }
         },
@@ -71,14 +72,17 @@
                 "Utility"
               ],
               "description": "A bridge for your systems",
-              "icon": "./public/system-bridge-circle.png"
+              "icon": "public/system-bridge-circle.png"
             }
           }
         },
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "loadingGif": "./public/loading.gif"
+            "executableName": "SystemBridge",
+            "icon": "public/favicon.ico",
+            "setupIcon": "public/favicon.ico",
+            "loadingGif": "public/loading.gif"
           }
         },
         {

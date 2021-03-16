@@ -19,17 +19,19 @@ import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
-  app.quit();
-}
+logger.info(
+  `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
+);
 
+// // Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require("electron-squirrel-startup")) app.exit();
+
+// squirrel event handled and app will exit in 1000ms, so don't do anything else
 if (handleSquirrelEvent()) {
-  // squirrel event handled and app will exit in 1000ms, so don't do anything else
   app.quit();
 }
 
-function handleSquirrelEvent(): any {
+function handleSquirrelEvent() {
   if (process.argv.length === 1) {
     return false;
   }
@@ -43,6 +45,7 @@ function handleSquirrelEvent(): any {
     command: string,
     args: any[] | readonly string[] | undefined
   ) => {
+    logger.info(`spawn: ${command} ${JSON.stringify(args)}`);
     let spawnedProcess;
 
     try {
@@ -54,42 +57,32 @@ function handleSquirrelEvent(): any {
     return spawnedProcess;
   };
 
-  const spawnUpdate = function (args: any[]) {
-    return spawn(updateDotExe, args);
-  };
+  const spawnUpdate = (args: any[]) => spawn(updateDotExe, args);
 
   const squirrelEvent = process.argv[1];
   switch (squirrelEvent) {
+    default:
+      return false;
     case "--squirrel-install":
     case "--squirrel-updated":
-      // Optionally do things such as:
-      // - Add your .exe to the PATH
-      // - Write to the registry for things like file associations and
-      //   explorer context menus
-
       // Install desktop and start menu shortcuts
       spawnUpdate(["--createShortcut", exeName]);
 
       setTimeout(app.quit, 1000);
       return true;
-
     case "--squirrel-uninstall":
-      // Undo anything you did in the --squirrel-install and
-      // --squirrel-updated handlers
-
       // Remove desktop and start menu shortcuts
       spawnUpdate(["--removeShortcut", exeName]);
 
       setTimeout(app.quit, 1000);
       return true;
-
     case "--squirrel-obsolete":
-      // This is called on the outgoing version of your app before
-      // we update to the new version - it's the opposite of
-      // --squirrel-updated
-
       app.quit();
       return true;
+    case "--squirrel-firstrun":
+      // Install desktop and start menu shortcuts
+      spawnUpdate(["--createShortcut", exeName]);
+      return false;
   }
 }
 
@@ -289,7 +282,7 @@ ipcMain.on(
       port,
       version: app.getVersion(),
     };
-    logger.info(`App Information: ${JSON.stringify(data)}`);
+    logger.info(`App information: ${JSON.stringify(data)}`);
     event.sender.send("app-information", data);
   }
 );
