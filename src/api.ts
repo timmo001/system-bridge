@@ -119,32 +119,34 @@ class API {
         (ni: Systeminformation.NetworkInterfacesData) =>
           ni.iface === defaultInterface
       );
-      try {
-        const MDNS = await import("mdns");
-        MDNS.createAdvertisement(
-          MDNS.udp("system-bridge"),
-          port,
-          {
-            name: `System Bridge - ${osInfo.fqdn}`,
-            txtRecord: {
-              address: `http://${osInfo.fqdn}:${port}`,
-              fqdn: osInfo.fqdn,
-              host: osInfo.hostname,
-              ip: networkInterface?.ip4,
-              mac: networkInterface?.mac,
-              port,
+      if (networkInterface) {
+        try {
+          const MDNS = await import("mdns");
+          MDNS.createAdvertisement(
+            MDNS.udp("system-bridge"),
+            port,
+            {
+              name: `System Bridge - ${osInfo.fqdn}`,
+              txtRecord: {
+                address: `http://${osInfo.fqdn}:${port}`,
+                fqdn: osInfo.fqdn,
+                host: osInfo.hostname,
+                ip: networkInterface.ip4,
+                mac: networkInterface.mac,
+                port,
+              },
             },
-          },
-          (error, service) => {
-            if (error) logger.warn(error);
-            else
-              logger.info(
-                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
-              );
-          }
-        );
-      } catch (e) {
-        logger.warn("MDNS error:", e);
+            (error, service) => {
+              if (error) logger.warn(error);
+              else
+                logger.info(
+                  `Sent mdns advertisement on port ${service.fullname}:${service.port}`
+                );
+            }
+          );
+        } catch (e) {
+          logger.warn("MDNS error:", e);
+        }
       }
     });
     this.server.on("close", () => logger.info("Server closing."));
