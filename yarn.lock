@@ -5855,10 +5855,10 @@ swagger-ui-dist@^3.22.1:
   resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.43.0.tgz#b064a2cec1d27776f9a124bc70423cfa0bbc0d3f"
   integrity sha512-PtE+g23bNbYv8qqAVoPBqNQth8hU5Sl5ZsQ7gHXlO5jlCt31dVTiKI9ArHIT1b23ZzUYTnKsFgPYYFoiWyNCAw==
 
-systeminformation@5.6.5:
-  version "5.6.5"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.5.tgz#d477d66c74d6d78e85c95c9815dafe4af8908c27"
-  integrity sha512-XIezA8mQCwFWe1jJ99FrYMJM2DRk4XyFIqowuHSqBThQ+delD+vUTObgOuLXCOM7lmul21yHbFhE9DlzUjgiJg==
+systeminformation@5.6.7:
+  version "5.6.7"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.7.tgz#f56bbc89cac2de4bcb085b96a93b9d627bd6aba8"
+  integrity sha512-NTgaL6AsRoXKbfZs6t+BkCUwLZjqIiT4IwqGUV2f7PgvDz8359HzOF0xYgDlTHCBR2GeWhFQAfo2wmoYTpz/og==
 
 table@^6.0.4:
   version "6.0.7"
