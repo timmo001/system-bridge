@@ -112,7 +112,7 @@ jobs:
           format: colored
           strict: false
   build-app-amd64:
-    name: 🚀 Build Application - amd64
+    name: 🚀 Build Application - ${{ matrix.os.name }} - amd64
     runs-on: ${{ matrix.os.server }}
     strategy:
       fail-fast: false
@@ -178,7 +178,7 @@ jobs:
           name: pkg-${{ matrix.os.name }}-amd64
           path: out/make/**/**
   build-app-multiarch:
-    name: 🚀 Build Application - ${{ matrix.os.arch }}
+    name: 🚀 Build Application - ${{ matrix.os.name }} - ${{ matrix.os.arch }}
     runs-on: ${{ matrix.os.server }}
     strategy:
       fail-fast: false
