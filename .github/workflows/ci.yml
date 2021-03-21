@@ -162,7 +162,6 @@ jobs:
           CI: true
       - name: 🚀 Make - amd64
         run: |
-          yarn install:all
           yarn make --platform ${{ matrix.os.platform }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
