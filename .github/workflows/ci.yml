@@ -111,8 +111,8 @@ jobs:
           config_file: .yamllint.yml
           format: colored
           strict: false
-  build-app:
-    name: 🚀 Build Application
+  build-app-amd64:
+    name: 🚀 Build Application - amd64
     runs-on: ${{ matrix.os.server }}
     strategy:
       fail-fast: false
@@ -167,8 +167,53 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INLINE_RUNTIME_CHUNK: false
           NODE_ENV: production
-      - name: 🚀 Install & Make - aarch64
-        if: matrix.os.server == 'ubuntu-latest'
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: out-${{ matrix.os.name }}-amd64
+          path: out/system-bridge-*/*
+      - name: ⬆ Upload Artifacts - Packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: pkg-${{ matrix.os.name }}-amd64
+          path: out/make/**/**
+  build-app-multiarch:
+    name: 🚀 Build Application - ${{ matrix.os.arch }}
+    runs-on: ${{ matrix.os.server }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: windows
+            server: ubuntu-latest
+            platform: win32
+            arch: aarch64
+          - name: windows
+            server: ubuntu-latest
+            platform: win32
+            arch: armv7
+          - name: linux
+            server: ubuntu-latest
+            platform: linux
+            arch: aarch64
+          - name: linux
+            server: ubuntu-latest
+            platform: linux
+            arch: armv7
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: ⤵️ Get yarn cache path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: ⤵️ Fetch Yarn cache
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: 🚀 Install & Make - ${{ matrix.os.arch }}
         uses: uraimo/run-on-arch-action@v2.0.9
         with:
           arch: aarch64
@@ -194,10 +239,10 @@ jobs:
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
-          name: out-${{ matrix.os.name }}
+          name: out-${{ matrix.os.name }}-${{ matrix.os.arch }}
           path: out/system-bridge-*/*
       - name: ⬆ Upload Artifacts - Packages
         uses: actions/upload-artifact@v2
         with:
-          name: pkg-${{ matrix.os.name }}
+          name: pkg-${{ matrix.os.name }}-${{ matrix.os.arch }}
           path: out/make/**/**
