@@ -168,6 +168,7 @@ jobs:
           INLINE_RUNTIME_CHUNK: false
           NODE_ENV: production
       - name: 🚀 Install & Make - aarch64
+        if: matrix.os.server == 'ubuntu-latest'
         uses: uraimo/run-on-arch-action@v2.0.9
         with:
           arch: aarch64
