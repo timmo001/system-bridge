@@ -102,7 +102,7 @@ jobs:
           branch: master
           email: contact@timmo.xyz
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          user: 'Aidan Timson'
+          user: "Aidan Timson"
       - name: ↗ Push changes
         uses: ad-m/github-push-action@master
         with:
