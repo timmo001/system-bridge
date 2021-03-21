@@ -99,8 +99,8 @@ jobs:
       - name: 👷 Bump version in package.json
         uses: tool3/bump@v1
         with:
-          branch: master
-          email: contact@timmo.xyz
+          branch: "master"
+          email: "contact@timmo.xyz"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user: "Aidan Timson"
       - name: ↗ Push changes
