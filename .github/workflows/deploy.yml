@@ -81,6 +81,8 @@ jobs:
   bump-version:
     name: 👷 Bump version
     runs-on: ubuntu-latest
+    needs:
+      - deploy-release
     if: |
       github.event_name == 'release'
       || (
@@ -94,11 +96,11 @@ jobs:
         uses: actions/setup-node@v2.1.5
         with:
           node-version: 15.x
-      - name: 👷 Bump version
-        run: |
-          npm version patch
-      - name: ↗ Push changes
-        uses: ad-m/github-push-action@master
+      - name: 👷 Bump version in package.json
+        uses: bcomnes/npm-bump@v1.0.4
         with:
+          git_email: contact@timmo.xyz
+          git_username: ${{ github.actor }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          newversion: patch
+          push_version_commit: true
