@@ -167,7 +167,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INLINE_RUNTIME_CHUNK: false
           NODE_ENV: production
-      - name: 🚀 Install & Make multiarch - aarch64
+      - name: 🚀 Install & Make - aarch64
         uses: uraimo/run-on-arch-action@v2.0.9
         with:
           arch: aarch64
