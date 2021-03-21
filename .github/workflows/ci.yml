@@ -175,7 +175,7 @@ jobs:
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           dockerRunArgs: |
-            --volume "${PWD}/out:/out"
+            --volume "${PWD}/out:/root/out"
           shell: /bin/bash
           install: |
             apt update -q -y
