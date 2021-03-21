@@ -97,10 +97,14 @@ jobs:
         with:
           node-version: 15.x
       - name: 👷 Bump version in package.json
-        uses: bcomnes/npm-bump@v1.0.4
+        uses: tool3/bump@v1
         with:
-          git_email: contact@timmo.xyz
-          git_username: ${{ github.actor }}
+          branch: master
+          email: contact@timmo.xyz
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          newversion: patch
-          push_version_commit: true
+          user: 'Aidan Timson'
+      - name: ↗ Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
