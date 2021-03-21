@@ -8,11 +8,11 @@ import {
   Tray,
 } from "electron";
 import { join, resolve, basename } from "path";
-import childProcess from "child_process";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import isDev from "electron-is-dev";
 import updateApp from "update-electron-app";
+import execa from "execa";
 import si, { Systeminformation } from "systeminformation";
 
 import { getSettings } from "./utils";
@@ -23,17 +23,11 @@ logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
 );
 
-// // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) app.exit();
+handleSquirrelEvent();
 
-// squirrel event handled and app will exit in 1000ms, so don't do anything else
-if (handleSquirrelEvent()) {
-  app.quit();
-}
-
-function handleSquirrelEvent() {
+async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
-    return false;
+    return;
   }
 
   const appFolder = resolve(process.execPath, "..");
@@ -41,48 +35,50 @@ function handleSquirrelEvent() {
   const updateDotExe = resolve(join(rootAtomFolder, "Update.exe"));
   const exeName = basename(process.execPath);
 
-  const spawn = (
+  async function spawn(
     command: string,
     args: any[] | readonly string[] | undefined
-  ) => {
+  ) {
     logger.info(`spawn: ${command} ${JSON.stringify(args)}`);
-    let spawnedProcess;
+    let stdout, stderr;
 
     try {
-      spawnedProcess = childProcess.spawn(command, args, { detached: true });
+      const { stdout, stderr } = await execa(command, args);
+      logger.info(JSON.stringify({ stdout, stderr }));
     } catch (error) {
       logger.error(error);
     }
 
-    return spawnedProcess;
-  };
+    return { stdout, stderr };
+  }
 
-  const spawnUpdate = (args: any[]) => spawn(updateDotExe, args);
+  async function spawnUpdate(args: any[] | readonly string[] | undefined) {
+    return await spawn(updateDotExe, args);
+  }
 
   const squirrelEvent = process.argv[1];
+  logger.info(`squirrelEvent: ${squirrelEvent}`);
   switch (squirrelEvent) {
     default:
-      return false;
+      break;
     case "--squirrel-install":
     case "--squirrel-updated":
       // Install desktop and start menu shortcuts
-      spawnUpdate(["--createShortcut", exeName]);
-
-      setTimeout(app.quit, 1000);
-      return true;
+      await spawnUpdate(["--createShortcut", exeName]);
+      app.quit();
+      break;
     case "--squirrel-uninstall":
       // Remove desktop and start menu shortcuts
-      spawnUpdate(["--removeShortcut", exeName]);
-
-      setTimeout(app.quit, 1000);
-      return true;
+      await spawnUpdate(["--removeShortcut", exeName]);
+      app.quit();
+      break;
     case "--squirrel-obsolete":
       app.quit();
-      return true;
+      break;
     case "--squirrel-firstrun":
       // Install desktop and start menu shortcuts
       spawnUpdate(["--createShortcut", exeName]);
-      return false;
+      break;
   }
 }
 
