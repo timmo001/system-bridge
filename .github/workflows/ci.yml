@@ -174,10 +174,14 @@ jobs:
           arch: aarch64
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          dockerRunArgs: |
+            --volume "${PWD}/out:/out"
+          shell: /bin/bash
           install: |
             apt update -q -y
             apt install -q -y curl build-essential libavahi-compat-libdnssd-dev
             curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
+            apt update -q -y
             apt install -q -y nodejs
             npm -g install yarn
           run: |
