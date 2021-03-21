@@ -121,31 +121,12 @@ jobs:
           - name: windows
             server: ubuntu-latest
             platform: win32
-            arch: amd64
-          - name: windows
-            server: ubuntu-latest
-            platform: win32
-            arch: armv7
-          - name: windows
-            server: ubuntu-latest
-            platform: win32
-            arch: aarch64
           - name: linux
             server: ubuntu-latest
             platform: linux
-            arch: amd64
-          - name: linux
-            server: ubuntu-latest
-            platform: linux
-            arch: armv7
-          - name: linux
-            server: ubuntu-latest
-            platform: linux
-            arch: aarch64
           - name: macos
             server: macos-latest
             platform: darwin
-            arch: amd64
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
@@ -174,7 +155,12 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install wine64 wine32
-      - name: 🚀 Install & Make - amd64
+      - name: 🏗 Install dependencies
+        run: |
+          yarn install:all
+        env:
+          CI: true
+      - name: 🚀 Make - amd64
         if: matrix.os.arch == 'amd64'
         run: |
           yarn install:all
@@ -183,11 +169,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INLINE_RUNTIME_CHUNK: false
           NODE_ENV: production
-      - name: 🚀 Install & Make multiarch - ${{ matrix.os.arch }}
+      - name: 🚀 Install & Make multiarch - aarch64
         if: matrix.os.server == 'ubuntu-latest' && matrix.os.arch != 'amd64'
         uses: uraimo/run-on-arch-action@v2.0.9
         with:
-          arch: ${{ matrix.os.arch }}
+          arch: aarch64
           distro: ubuntu20.04
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           install: |
