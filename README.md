@@ -8,11 +8,15 @@ A bridge for your systems.
 
 ## Features
 
-- Cross-Platform (Supported on Windows, Linux and Mac OS)
+- System Information - Access your system's Audio, Battery, Bluetooth, CPU,
+ Filesystems, Graphics, Memory, Networking, OS, and Process information via the
+ API.
+- Send Commands - Automate your system by sending a command or opening a URL or
+ path via the API.
+- Cross-Platform - Compatible with Windows, Mac and Linux.
 - API
 - Websocket
 - Built using Electron
-- __TODO__
 
 ### API Endpoints
 
