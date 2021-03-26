@@ -31,7 +31,7 @@ const logger = createLogger({
       handleExceptions: true,
     }),
     new transports.File({
-      filename: join(app.getAppPath(), "logs/app.log"),
+      filename: join(app.getPath("userData"), "system-bridge.log"),
       format: format.combine(format.errors({ stack: true }), logFormat),
       handleExceptions: true,
     }),

@@ -127,7 +127,8 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
       {
         label: "Logs",
         type: "normal",
-        click: () => shell.openPath(join(app.getAppPath(), "logs/app.log")),
+        click: () =>
+          shell.openPath(join(app.getPath("userData"), "system-bridge.log")),
       },
       { type: "separator" },
       {
