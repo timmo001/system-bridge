@@ -97,7 +97,7 @@ jobs:
         with:
           node-version: 15.x
       - name: 👷 Bump version in package.json
-        uses: tool3/bump@v1
+        uses: tool3/bump@v1.2
         with:
           branch: "master"
           email: "contact@timmo.xyz"
