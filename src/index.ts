@@ -127,7 +127,7 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
       {
         label: "Logs",
         type: "normal",
-        click: () => shell.openPath(resolve("./logs/app.log")),
+        click: () => shell.openPath(join(app.getAppPath(), "logs/app.log")),
       },
       { type: "separator" },
       {

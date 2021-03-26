@@ -1,3 +1,5 @@
+import { app } from "electron";
+import { join } from "path";
 import isDev from "electron-is-dev";
 import { createLogger, format, transports } from "winston";
 
@@ -29,7 +31,7 @@ const logger = createLogger({
       handleExceptions: true,
     }),
     new transports.File({
-      filename: "logs/app.log",
+      filename: join(app.getAppPath(), "logs/app.log"),
       format: format.combine(format.errors({ stack: true }), logFormat),
       handleExceptions: true,
     }),
