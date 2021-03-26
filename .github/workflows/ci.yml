@@ -229,8 +229,8 @@ jobs:
             apt update -q -y
             apt install -q -y nodejs
             npm -g install yarn
-          run: |
             yarn install:all
+          run: |
             yarn make --platform ${{ matrix.os.platform }}
           env: |
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
