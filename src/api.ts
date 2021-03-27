@@ -56,7 +56,11 @@ class API {
     // Express middleware to parse URL-encoded params
     app.use(express.urlencoded({ extended: true }));
     // Set favicon
-    app.use(favicon(join(electronApp.getAppPath(), "./public/system-bridge-circle.ico")));
+    app.use(
+      favicon(
+        join(electronApp.getAppPath(), "./public/system-bridge-circle.ico")
+      )
+    );
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
