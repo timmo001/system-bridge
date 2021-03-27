@@ -18,9 +18,9 @@ export class Information {
   async find(): Promise<Data> {
     return {
       audio: {
-        description: "Audio Information",
+        description: "Audio Information and controls",
         endpoint: "/audio",
-        supportedMethods: ["GET"],
+        supportedMethods: ["GET", "PUT"],
       },
       battery: { description: "Battery Information", endpoint: "/battery" },
       bluetooth: {
@@ -67,6 +67,11 @@ export class Information {
         description: "Network Information",
         endpoint: "/network",
         supportedMethods: ["GET"],
+      },
+      notification: {
+        description: "Create a system notification",
+        endpoint: "/notification",
+        supportedMethods: ["POST"],
       },
       open: {
         description: "Open a URL or file using the default application",
