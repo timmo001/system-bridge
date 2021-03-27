@@ -165,8 +165,6 @@ const setupApp = async (): Promise<void> => {
     },
   });
 
-  app.dock.hide();
-
   setAppConfig();
 
   const menu = Menu.buildFromTemplate([
@@ -201,6 +199,8 @@ const setupApp = async (): Promise<void> => {
     event.preventDefault();
     mainWindow.hide();
   });
+
+  app.dock.hide();
 };
 
 const showWindow = async (): Promise<void> => {
