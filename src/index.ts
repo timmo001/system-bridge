@@ -84,6 +84,11 @@ async function handleSquirrelEvent(): Promise<void> {
 
 export const appIconPath = join(
   app.getAppPath(),
+  "./public/system-bridge-circle.png"
+);
+
+export const appSmallIconPath = join(
+  app.getAppPath(),
   "./public/system-bridge-circle-32x32.png"
 );
 
@@ -243,7 +248,7 @@ app.on("activate", (): void => {
 });
 
 app.whenReady().then((): void => {
-  tray = new Tray(appIconPath);
+  tray = new Tray(appSmallIconPath);
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showWindow },
     { type: "separator" },
