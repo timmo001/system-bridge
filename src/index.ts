@@ -262,6 +262,7 @@ ipcMain.on(
         ? settings?.network.items?.port?.value
         : 9170;
     const osInfo: Systeminformation.OsData = await si.osInfo();
+    const uuidInfo: Systeminformation.UuidData = await si.uuid();
     const defaultInterface: string = await si.networkInterfaceDefault();
     const networkInterface:
       | Systeminformation.NetworkInterfacesData
@@ -277,6 +278,7 @@ ipcMain.on(
       ip: networkInterface?.ip4,
       mac: networkInterface?.mac,
       port,
+      uuid: uuidInfo.os,
       version: app.getVersion(),
     };
     logger.info(`App information: ${JSON.stringify(data)}`);
