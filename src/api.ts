@@ -116,7 +116,8 @@ class API {
     this.server.on("listening", async () => {
       logger.info(`API started on port ${port}`);
       const osInfo: Systeminformation.OsData = await si.osInfo();
-      const defaultInterface: string = await si.networkInterfaceDefault();
+      const uuidInfo: Systeminformation.UuidData = await si.uuid();
+        const defaultInterface: string = await si.networkInterfaceDefault();
       const networkInterface:
         | Systeminformation.NetworkInterfacesData
         | undefined = (await si.networkInterfaces()).find(
@@ -138,6 +139,7 @@ class API {
                 ip: networkInterface.ip4,
                 mac: networkInterface.mac,
                 port,
+                uuid: uuidInfo.os,
               },
             },
             (error, service) => {
