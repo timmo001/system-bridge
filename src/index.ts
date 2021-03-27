@@ -84,7 +84,7 @@ async function handleSquirrelEvent(): Promise<void> {
 
 export const appIconPath = join(
   app.getAppPath(),
-  "./public/system-bridge-circle.png"
+  "./public/system-bridge-circle.ico"
 );
 
 process.on("unhandledRejection", (error: Error) =>

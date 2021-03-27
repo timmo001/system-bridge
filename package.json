@@ -82,8 +82,8 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "executableName": "SystemBridge",
-            "icon": "public/favicon.ico",
-            "setupIcon": "public/favicon.ico",
+            "icon": "public/system-bridge-circle.ico",
+            "setupIcon": "public/system-bridge-circle.ico",
             "loadingGif": "public/loading.gif"
           }
         },
