@@ -1,7 +1,4 @@
-import { app } from "electron";
-import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
-import execa, { ExecaChildProcess } from "execa";
 import electronSettings from "electron-settings";
 
 import defaultConfiguration, { Configuration } from "./configuration";
