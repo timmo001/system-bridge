@@ -38,18 +38,3 @@ export function convertArrayToObject(array: any[], key: string): any {
     {}
   );
 }
-
-export async function getNode(): Promise<string | null> {
-  const { stdout, stderr } = await execa("which", ["node"]);
-  console.log({ stdout, stderr });
-  return stdout ? stdout : null;
-}
-
-export async function runAsSudo(
-  path: string,
-  args: string[]
-): Promise<ExecaChildProcess<string> | void> {
-  const node = await getNode();
-  if (node)
-    return await execa("sudo", [node, join(app.getAppPath(), path), ...args]);
-}
