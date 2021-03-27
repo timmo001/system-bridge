@@ -41,8 +41,8 @@
         "asar": true,
         "name": "system-bridge",
         "executableName": "system-bridge",
-        "icon": "public/favicon.ico",
-        "setupIcon": "public/favicon.ico",
+        "icon": "public/system-bridge-circle.icns",
+        "setupIcon": "public/system-bridge-circle.icns",
         "win32metadata": {
           "requested-execution-level": "highestAvailable"
         }
