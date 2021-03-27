@@ -4,6 +4,7 @@ import battery from "./battery/battery.service";
 import bluetooth from "./bluetooth/bluetooth.service";
 import command from "./command/command.service";
 import cpu from "./cpu/cpu.service";
+import display from "./display/display.service";
 import filesystem from "./filesystem/filesystem.service";
 import graphics from "./graphics/graphics.service";
 import information from "./information/information.service";
@@ -20,6 +21,7 @@ export default function (app: Application): void {
   app.configure(bluetooth);
   app.configure(command);
   app.configure(cpu);
+  app.configure(display);
   app.configure(filesystem);
   app.configure(graphics);
   app.configure(information);

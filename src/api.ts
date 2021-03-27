@@ -92,8 +92,6 @@ class API {
 
     app.hooks(appHooks);
 
-    // Configure a middleware for 404s and the error handler
-    app.use(express.notFound());
     // Express middleware with a nicer error handler
     app.use(express.errorHandler({ logger }));
 
