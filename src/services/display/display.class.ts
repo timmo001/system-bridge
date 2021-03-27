@@ -1,5 +1,4 @@
 import brightness from "brightness";
-import execa from "execa";
 
 import { Application } from "../../declarations";
 
