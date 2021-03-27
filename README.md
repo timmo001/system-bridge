@@ -20,23 +20,23 @@ A bridge for your systems.
 
 ### API Endpoints
 
-| Endpoint     | Description                                      | Method |
-| ------------ | ----------------------                           | ------ |
-| /audio       | Audio Information                                | GET    |
-| /battery     | Battery Information                              | GET    |
-| /bluetooth   | Bluetooth Information                            | GET    |
-| /command     | Run a System Command                             | POST   |
-| /cpu         | CPU Information                                  | GET    |
-| /docs        | OpenAPI Docs                                     | GET    |
-| /filesystem  | Filesystem Information                           | GET    |
-| /graphics    | Graphics Information                             | GET    |
-| /information | Endpoint Information                             | GET    |
-| /memory      | Memory Information                               | GET    |
-| /network     | Network Information                              | GET    |
-| /open        | Open a URL or file using the default application | POST   |
-| /os          | OS Information                                   | GET    |
-| /processes   | Processes Information                            | GET    |
-| /system      | System Information                               | GET    |
+| Endpoint     | Description                                      | Method   |
+| ------------ | ------------------------------------------------ | -------- |
+| /audio       | Audio Information                                | GET, PUT |
+| /battery     | Battery Information                              | GET      |
+| /bluetooth   | Bluetooth Information                            | GET      |
+| /command     | Run a System Command                             | POST     |
+| /cpu         | CPU Information                                  | GET      |
+| /docs        | OpenAPI Docs                                     | GET      |
+| /filesystem  | Filesystem Information                           | GET      |
+| /graphics    | Graphics Information                             | GET      |
+| /information | Endpoint Information                             | GET      |
+| /memory      | Memory Information                               | GET      |
+| /network     | Network Information                              | GET      |
+| /open        | Open a URL or file using the default application | POST     |
+| /os          | OS Information                                   | GET      |
+| /processes   | Processes Information                            | GET      |
+| /system      | System Information                               | GET      |
 
 ## Download
 
