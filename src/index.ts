@@ -200,7 +200,11 @@ const setupApp = async (): Promise<void> => {
     mainWindow.hide();
   });
 
-  app.dock.hide();
+  try {
+    app.dock.hide();
+  } catch (e) {
+    logger.warning(e);
+  }
 };
 
 const showWindow = async (): Promise<void> => {
