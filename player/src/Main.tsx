@@ -45,13 +45,13 @@ function Main(): ReactElement {
         container
         direction="row"
         alignItems="center"
-        justify="center"
+        justify="flex-start"
         spacing={2}
       >
         <Grid item>
           <img src={logo} alt="Album" />
         </Grid>
-        <Grid item>
+        <Grid item xs>
           <Grid
             container
             direction="column"
@@ -59,7 +59,7 @@ function Main(): ReactElement {
             justify="space-around"
           >
             <Grid item>
-              <Typography color="textPrimary" component="span" variant="body1">
+              <Typography color="textPrimary" component="span" variant="h5">
                 Artist - Track
               </Typography>
             </Grid>
@@ -67,7 +67,7 @@ function Main(): ReactElement {
               <Typography
                 color="textSecondary"
                 component="span"
-                variant="body2"
+                variant="subtitle1"
               >
                 Album
               </Typography>
