@@ -1,7 +1,7 @@
 import { app } from "electron";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
-import execa from "execa";
+import execa, { ExecaChildProcess } from "execa";
 import electronSettings from "electron-settings";
 
 import defaultConfiguration, { Configuration } from "./configuration";
@@ -45,9 +45,11 @@ export async function getNode(): Promise<string | null> {
   return stdout ? stdout : null;
 }
 
-export async function runAsSudo(path: string, args: string[]): Promise<void> {
+export async function runAsSudo(
+  path: string,
+  args: string[]
+): Promise<ExecaChildProcess<string> | void> {
   const node = await getNode();
-  if (node) {
-    await execa("sudo", [node, join(app.getAppPath(), path), ...args]);
-  }
+  if (node)
+    return await execa("sudo", [node, join(app.getAppPath(), path), ...args]);
 }
