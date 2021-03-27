@@ -1,6 +1,7 @@
 import brightness from "brightness";
 
 import { Application } from "../../declarations";
+import { runAsSudo } from "../../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
@@ -40,17 +41,27 @@ export class Display {
         break;
       case "brightness":
         if (typeof data.value === "number")
-          await brightness.set(data.value / 100);
+          if (process.platform === "linux")
+            await runAsSudo("dist/scripts/setBrightness.js", [
+              String(data.value / 100),
+            ]);
+          else await brightness.set(data.value / 100);
         break;
       case "brightnessDown":
         if (typeof data.value === "number")
-          await brightness.set((currentBrightness - data.value) / 100);
-        else await brightness.set((currentBrightness - 5) / 100);
+          if (process.platform === "linux")
+            await runAsSudo("dist/scripts/setBrightness.js", [
+              String((currentBrightness - data.value) / 100),
+            ]);
+          else await brightness.set((currentBrightness - data.value) / 100);
         break;
       case "brightnessUp":
         if (typeof data.value === "number")
-          await brightness.set((currentBrightness + data.value) / 100);
-        else await brightness.set((currentBrightness + 5) / 100);
+          if (process.platform === "linux")
+            await runAsSudo("dist/scripts/setBrightness.js", [
+              String((currentBrightness + data.value) / 100),
+            ]);
+          else await brightness.set((currentBrightness + data.value) / 100);
         break;
     }
     return {

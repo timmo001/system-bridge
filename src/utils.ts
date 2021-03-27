@@ -1,7 +1,11 @@
+import { app } from "electron";
+import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
+import execa from "execa";
 import electronSettings from "electron-settings";
 
 import defaultConfiguration, { Configuration } from "./configuration";
+import logger from "./logger";
 
 export function getSettings(): Configuration {
   const settings: Configuration = defaultConfiguration;
@@ -34,4 +38,22 @@ export function convertArrayToObject(array: any[], key: string): any {
     }),
     {}
   );
+}
+
+export async function getNode(): Promise<string | null> {
+  const { stdout, stderr } = await execa("which", ["node"]);
+  console.log({ stdout, stderr });
+  return stdout ? stdout : null;
+}
+
+export async function runAsSudo(path: string, args: string[]): Promise<void> {
+  const node = await getNode();
+  if (node) {
+    const { stdout, stderr } = await execa("sudo", [
+      node,
+      join(app.getAppPath(), path),
+      ...args,
+    ]);
+    logger.info(JSON.stringify({ stdout, stderr }));
+  }
 }
