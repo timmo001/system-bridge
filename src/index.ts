@@ -203,7 +203,7 @@ const setupApp = async (): Promise<void> => {
   try {
     app.dock.hide();
   } catch (e) {
-    logger.warning(e);
+    logger.warn(e);
   }
 };
 
