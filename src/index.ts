@@ -210,9 +210,11 @@ const setupApp = async (): Promise<void> => {
   } catch (e) {
     logger.warn(e);
   }
+
+  createPlayerWindow();
 };
 
-const showWindow = async (): Promise<void> => {
+const showConfigurationWindow = async (): Promise<void> => {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:3000"
@@ -225,6 +227,36 @@ const showWindow = async (): Promise<void> => {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();
+  }
+};
+
+const createPlayerWindow = async (): Promise<void> => {
+  const playerWindow = new BrowserWindow({
+    width: 1280,
+    height: 720,
+    autoHideMenuBar: true,
+    icon: appIconPath,
+    maximizable: true,
+    show: true,
+    webPreferences: {
+      contextIsolation: true,
+      preload: join(__dirname, "./preload.js"),
+      devTools: isDev,
+    },
+  });
+
+  playerWindow.loadURL(
+    isDev
+      ? "http://localhost:3001"
+      : `file://${join(app.getAppPath(), "./player/build/index.html")}`
+  );
+
+  playerWindow.show();
+
+  if (isDev) {
+    // Open the DevTools.
+    playerWindow.webContents.openDevTools();
+    playerWindow.maximize();
   }
 };
 
@@ -250,7 +282,7 @@ app.on("activate", (): void => {
 app.whenReady().then((): void => {
   tray = new Tray(appSmallIconPath);
   const contextMenu = Menu.buildFromTemplate([
-    { label: "Settings", type: "normal", click: showWindow },
+    { label: "Settings", type: "normal", click: showConfigurationWindow },
     { type: "separator" },
     ...helpMenu,
     { type: "separator" },
@@ -259,7 +291,7 @@ app.whenReady().then((): void => {
   tray.setToolTip("System Bridge");
   tray.setContextMenu(contextMenu);
   tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showWindow);
+  tray.on("double-click", showConfigurationWindow);
 
   api = new API();
 });
@@ -308,7 +340,7 @@ ipcMain.on(
 ipcMain.on(
   "open-settings",
   async (event): Promise<void> => {
-    showWindow();
+    showConfigurationWindow();
     event?.sender?.send("opened-settings");
   }
 );
