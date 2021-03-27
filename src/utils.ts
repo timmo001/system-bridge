@@ -5,7 +5,6 @@ import execa from "execa";
 import electronSettings from "electron-settings";
 
 import defaultConfiguration, { Configuration } from "./configuration";
-import logger from "./logger";
 
 export function getSettings(): Configuration {
   const settings: Configuration = defaultConfiguration;
@@ -49,11 +48,6 @@ export async function getNode(): Promise<string | null> {
 export async function runAsSudo(path: string, args: string[]): Promise<void> {
   const node = await getNode();
   if (node) {
-    const { stdout, stderr } = await execa("sudo", [
-      node,
-      join(app.getAppPath(), path),
-      ...args,
-    ]);
-    logger.info(JSON.stringify({ stdout, stderr }));
+    await execa("sudo", [node, join(app.getAppPath(), path), ...args]);
   }
 }
