@@ -62,7 +62,9 @@
         },
         {
           "name": "@electron-forge/maker-dmg",
-          "config": {}
+          "config": {
+            "icon": "public/system-bridge-circle.icns"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
