@@ -117,7 +117,7 @@ class API {
       logger.info(`API started on port ${port}`);
       const osInfo: Systeminformation.OsData = await si.osInfo();
       const uuidInfo: Systeminformation.UuidData = await si.uuid();
-        const defaultInterface: string = await si.networkInterfaceDefault();
+      const defaultInterface: string = await si.networkInterfaceDefault();
       const networkInterface:
         | Systeminformation.NetworkInterfacesData
         | undefined = (await si.networkInterfaces()).find(
