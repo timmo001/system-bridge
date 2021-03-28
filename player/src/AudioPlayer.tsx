@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
-import { Grid, IconButton, Slider, Typography } from "@material-ui/core";
-import { Audiotrack, Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
+import {
+  createStyles,
+  Fade,
+  Grid,
+  IconButton,
+  makeStyles,
+  Slider,
+  Typography,
+} from "@material-ui/core";
+import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 
 import { Source } from "./Main";
 
@@ -8,14 +16,33 @@ interface AudioPlayerProps {
   track: Source;
 }
 
+const useStyles = makeStyles(() =>
+  createStyles({
+    overlay: {
+      position: "absolute",
+      display: "flex",
+      background: "rgba(18, 18, 18, 0.6)",
+      height: "100%",
+      width: "100%",
+      zIndex: 100,
+    },
+    overlayInner: {
+      position: "relative",
+      margin: "auto",
+      fontSize: 82,
+    },
+  })
+);
+
 let audioTimer: NodeJS.Timeout;
 
 function AudioPlayer({ track }: AudioPlayerProps) {
   const { title, artist, album, image, audioSrc, volumeInitial } = track;
 
-  const [trackProgress, setTrackProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(volumeInitial);
+  const [trackProgress, setTrackProgress] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(volumeInitial);
+  const [hovering, setHovering] = useState<boolean>(false);
 
   const audioRef = useRef(new Audio(audioSrc));
   const isReady = useRef(false);
@@ -89,6 +116,8 @@ function AudioPlayer({ track }: AudioPlayerProps) {
     setVolume(value);
   }
 
+  const classes = useStyles();
+
   return (
     <Grid
       container
@@ -98,20 +127,22 @@ function AudioPlayer({ track }: AudioPlayerProps) {
       spacing={2}
     >
       <Grid item>
-        {isPlaying ? (
-          <IconButton aria-label="Pause" onClick={() => setIsPlaying(false)}>
-            <Pause />
-          </IconButton>
-        ) : (
-          <IconButton aria-label="Play" onClick={() => setIsPlaying(true)}>
-            <PlayArrow />
-          </IconButton>
-        )}
         <IconButton
           aria-label={isPlaying ? "Pause" : "Play"}
           onClick={() => setIsPlaying(!isPlaying)}
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
         >
           <img src={image} alt={`${artist} - ${album}`} />
+          <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
+            <div className={classes.overlay}>
+              {isPlaying ? (
+                <Pause className={classes.overlayInner} fontSize="large" />
+              ) : (
+                <PlayArrow className={classes.overlayInner} fontSize="large" />
+              )}
+            </div>
+          </Fade>
         </IconButton>
       </Grid>
       <Grid item xs>
