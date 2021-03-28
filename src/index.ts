@@ -154,7 +154,10 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow, tray: Tray, api: API | undefined;
+let mainWindow: BrowserWindow,
+  playerWindow: BrowserWindow,
+  tray: Tray,
+  api: API | undefined;
 const setupApp = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -211,8 +214,6 @@ const setupApp = async (): Promise<void> => {
   } catch (e) {
     logger.warn(e);
   }
-
-  createPlayerWindow();
 };
 
 const showConfigurationWindow = async (): Promise<void> => {
@@ -231,11 +232,14 @@ const showConfigurationWindow = async (): Promise<void> => {
   }
 };
 
-const createPlayerWindow = async (): Promise<void> => {
+export const createPlayerWindow = async (
+  artist: string,
+  album: string,
+  title: string,
+  url: string
+): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  console.log({ width, height });
-
-  const playerWindow = new BrowserWindow({
+  playerWindow = new BrowserWindow({
     width: 460,
     height: 130,
     x: width - 480,
@@ -260,8 +264,11 @@ const createPlayerWindow = async (): Promise<void> => {
 
   playerWindow.loadURL(
     isDev
-      ? "http://localhost:3001"
-      : `file://${join(app.getAppPath(), "./player/build/index.html")}`
+      ? `http://localhost:3001/?artist=${artist}&album=${album}&title=${title}&url=${url}`
+      : `file://${join(
+          app.getAppPath(),
+          `./player/build/index.html?artist=${artist}&album=${album}&title=${title}&url=${url}`
+        )}`
   );
 
   playerWindow.show();

@@ -176,7 +176,12 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
           justify="space-around"
         >
           <Grid item>
-            <Typography color="textPrimary" component="span" variant="h5">
+            <Typography
+              color="textPrimary"
+              component="span"
+              variant="subtitle1"
+              noWrap
+            >
               {artist} - {title}
             </Typography>
           </Grid>
@@ -184,7 +189,8 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
             <Typography
               color="textSecondary"
               component="span"
-              variant="subtitle1"
+              variant="subtitle2"
+              noWrap
             >
               {album}
             </Typography>

@@ -1,10 +1,12 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { Button, ButtonBase, Container, Fade, Grid } from "@material-ui/core";
+import { ButtonBase, Container, Fade } from "@material-ui/core";
+import queryString from "query-string";
 
-import { useSettings } from "./Utils";
-import logo from "./resources/system-bridge.svg";
-import AudioPlayer from "./AudioPlayer";
 import { Close, Minimize } from "@material-ui/icons";
+import { Configuration } from "../../src/configuration";
+import { useSettings } from "./Utils";
+import AudioPlayer from "./AudioPlayer";
+import logo from "./resources/system-bridge.svg";
 
 export interface Source {
   album: string;
@@ -16,24 +18,9 @@ export interface Source {
 }
 
 function Main(): ReactElement {
-  const [source, setSource] = useState<Source>();
   const [entered, setEntered] = useState<boolean>(false);
   const [settings, setSettings] = useSettings();
-
-  useEffect(() => {
-    if (!source) {
-      window.api.ipcRendererSend("get-audio-file");
-      setSource({
-        audioSrc:
-          "https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3",
-        artist: "Some Artist",
-        album: "Some Album",
-        image: logo,
-        title: "Some Track",
-        volumeInitial: 10,
-      });
-    }
-  }, [source, setSource]);
+  const [source, setSource] = useState<Source>();
 
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
@@ -42,9 +29,29 @@ function Main(): ReactElement {
 
   useEffect(() => {
     if (!settings) {
+      window.api.ipcRendererOn("set-settings", (_event, args) => {
+        console.log("set-settings:", args);
+        const s: Configuration = args;
+        setSettings(s);
+      });
       window.api.ipcRendererSend("get-settings");
     }
   }, [settings, setSettings]);
+
+  useEffect(() => {
+    if (settings && !source) {
+      const query = queryString.parse(window.location.search);
+      console.log(query);
+      setSource({
+        audioSrc: `http://localhost:${settings.network.items.port.value}${query.url}`,
+        artist: String(query.artist),
+        album: String(query.album),
+        image: logo,
+        title: String(query.title),
+        volumeInitial: 10,
+      });
+    }
+  }, [settings, source, setSource]);
 
   return (
     <>
