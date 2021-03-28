@@ -8,6 +8,7 @@
     "@material-ui/icons": "4.11.2",
     "@mdi/js": "5.9.55",
     "@mdi/react": "1.4.0",
+    "moment": "2.29.1",
     "react": "17.0.2",
     "react-audio-player": "0.14.0",
     "react-dom": "17.0.2",

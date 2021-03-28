@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  useMemo,
+} from "react";
 import {
   createStyles,
   Fade,
@@ -9,7 +15,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
-import Moment from "react-moment";
+import moment from "moment";
 
 import { Source } from "./Main";
 
@@ -65,9 +71,8 @@ function AudioPlayer({ track }: AudioPlayerProps) {
     audioRef.current.volume = volumeInitial / 100;
 
     if (isReady.current) {
-      audioRef.current.play();
-      setIsPlaying(true);
-      startTimer();
+      audioRef.current.pause();
+      setIsPlaying(false);
     } else {
       // Set the isReady ref as true for the next pass
       isReady.current = true;
@@ -88,7 +93,7 @@ function AudioPlayer({ track }: AudioPlayerProps) {
 
     audioTimer = setInterval(() => {
       if (audioRef.current.ended) {
-        // setIsPlaying(false);
+        setIsPlaying(false);
       } else {
         setTrackProgress(audioRef.current.currentTime);
       }
@@ -114,6 +119,16 @@ function AudioPlayer({ track }: AudioPlayerProps) {
     audioRef.current.volume = value / 100;
     setVolume(value);
   }
+
+  const formattedDuration = useMemo(() => {
+    const md = moment.duration(trackProgress, "seconds");
+    return `${md
+      .minutes()
+      .toString()
+      .padStart(2, "0")}:${md.seconds().toString().padStart(2, "0")}`;
+  }, [trackProgress]);
+
+  console.log();
 
   const classes = useStyles();
 
@@ -208,7 +223,7 @@ function AudioPlayer({ track }: AudioPlayerProps) {
             </Grid>
             <Grid item>
               <Typography component="span" variant="body2">
-                {moment.duration(trackProgress, "seconds").format("mm:ss")}
+                {formattedDuration}
               </Typography>
             </Grid>
           </Grid>
