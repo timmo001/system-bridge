@@ -42,8 +42,8 @@ const useStyles = makeStyles(() =>
       alignSelf: "center",
     },
     image: {
-      height: 120,
-      width: 120,
+      height: 110,
+      width: 110,
     },
   })
 );

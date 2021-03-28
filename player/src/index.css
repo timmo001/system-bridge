@@ -6,6 +6,10 @@ body {
   color: #ffffff;
 }
 
+span {
+  user-select: none;
+}
+
 a {
   color: #9a9a9a;
   text-decoration: none;

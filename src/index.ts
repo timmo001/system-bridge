@@ -236,12 +236,13 @@ const createPlayerWindow = async (): Promise<void> => {
   console.log({ width, height });
 
   const playerWindow = new BrowserWindow({
-    width: 462,
-    height: 152,
-    x: width - 478,
-    y: height - 168,
+    width: 460,
+    height: 130,
+    x: width - 480,
+    y: height - 150,
     alwaysOnTop: true,
     autoHideMenuBar: true,
+    // backgroundColor: "#121212",
     frame: false,
     fullscreenable: false,
     icon: appIconPath,
