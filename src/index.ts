@@ -254,6 +254,12 @@ const createPlayerWindow = async (): Promise<void> => {
   playerWindow.show();
 
   if (isDev) {
+    try {
+      const extName = await devTools(REACT_DEVELOPER_TOOLS);
+      logger.debug("Added Extension:", extName);
+    } catch (error) {
+      logger.error("An error occurred:", error);
+    }
     // Open the DevTools.
     playerWindow.webContents.openDevTools();
   }

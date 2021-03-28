@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
+import Moment from "react-moment";
 
 import { Source } from "./Main";
 
@@ -59,8 +60,6 @@ function AudioPlayer({ track }: AudioPlayerProps) {
   }, [isPlaying]);
 
   useEffect(() => {
-    audioRef.current.pause();
-
     audioRef.current = new Audio(audioSrc);
     setTrackProgress(audioRef.current.currentTime);
     audioRef.current.volume = volumeInitial / 100;
@@ -85,15 +84,15 @@ function AudioPlayer({ track }: AudioPlayerProps) {
 
   function startTimer() {
     // Clear any timers already running
-    clearInterval(audioTimer);
+    if (audioTimer) clearInterval(audioTimer);
 
-    if (audioTimer)
-      audioTimer = setInterval(() => {
-        if (audioRef.current.ended) {
-        } else {
-          setTrackProgress(audioRef.current.currentTime);
-        }
-      }, 1000);
+    audioTimer = setInterval(() => {
+      if (audioRef.current.ended) {
+        // setIsPlaying(false);
+      } else {
+        setTrackProgress(audioRef.current.currentTime);
+      }
+    }, 1000);
   }
 
   function handleScrub(value: number) {
@@ -206,6 +205,11 @@ function AudioPlayer({ track }: AudioPlayerProps) {
                 onMouseUp={handleScrubEnd}
                 onKeyUp={handleScrubEnd}
               />
+            </Grid>
+            <Grid item>
+              <Typography component="span" variant="body2">
+                {moment.duration(trackProgress, "seconds").format("mm:ss")}
+              </Typography>
             </Grid>
           </Grid>
         </Grid>
