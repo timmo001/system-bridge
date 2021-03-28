@@ -1,6 +1,5 @@
 import { resolve } from "path";
 import { v4 as uuidv4 } from "uuid";
-import { IAudioMetadata, ICommonTagsResult, parseFile } from "music-metadata";
 import express from "@feathersjs/express";
 import loudness from "loudness";
 import si, { Systeminformation } from "systeminformation";
@@ -24,7 +23,6 @@ interface AudioCreateData {
 }
 
 interface AudioCreateDataResult extends AudioCreateData {
-  metadata: ICommonTagsResult;
   url: string;
 }
 
@@ -46,15 +44,8 @@ export class Audio {
     logger.info(`url: ${url}`);
     this.app.use(url, express.static(resolve(data.path)));
 
-    const metadata: IAudioMetadata = await parseFile(data.path);
-
-    createPlayerWindow(
-      metadata.common.artist || metadata.common.albumartist || "",
-      metadata.common.album || "",
-      metadata.common.title || "",
-      url
-    );
-    return { ...data, metadata: metadata.common, url };
+    createPlayerWindow(data.path, url);
+    return { ...data, url };
   }
 
   async find(): Promise<AudioInfo> {

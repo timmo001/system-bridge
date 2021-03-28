@@ -12,7 +12,7 @@ export interface Source {
   album: string;
   artist: string;
   audioSrc: any;
-  image: string;
+  cover: string;
   title: string;
   volumeInitial: number;
 }
@@ -42,14 +42,19 @@ function Main(): ReactElement {
     if (settings && !source) {
       const query = queryString.parse(window.location.search);
       console.log(query);
-      setSource({
-        audioSrc: `http://localhost:${settings.network.items.port.value}${query.url}`,
-        artist: String(query.artist),
-        album: String(query.album),
-        image: logo,
-        title: String(query.title),
-        volumeInitial: 10,
+
+      window.api.ipcRendererOn("audio-metadata", (_event, data) => {
+        console.log(data);
+        setSource({
+          audioSrc: `http://localhost:${settings.network.items.port.value}${query.url}`,
+          album: data.album,
+          artist: data.artist,
+          cover: data.cover || logo,
+          title: data.title,
+          volumeInitial: 10,
+        });
       });
+      window.api.ipcRendererSend("get-audio-metadata", query.path);
     }
   }, [settings, source, setSource]);
 

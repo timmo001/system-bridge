@@ -52,7 +52,7 @@ const useStyles = makeStyles(() =>
 let audioTimer: NodeJS.Timeout;
 
 function AudioPlayer({ hovering, track }: AudioPlayerProps) {
-  const { title, artist, album, image, audioSrc, volumeInitial } = track;
+  const { title, artist, album, cover, audioSrc, volumeInitial } = track;
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -154,7 +154,7 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
         >
           <img
             className={classes.image}
-            src={image}
+            src={cover}
             alt={`${artist} - ${album}`}
           />
           <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>

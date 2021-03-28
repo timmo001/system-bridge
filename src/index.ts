@@ -8,13 +8,14 @@ import {
   shell,
   Tray,
 } from "electron";
+import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
-import isDev from "electron-is-dev";
-import updateApp from "update-electron-app";
 import execa from "execa";
+import isDev from "electron-is-dev";
 import si, { Systeminformation } from "systeminformation";
+import updateApp from "update-electron-app";
 
 import { getSettings } from "./utils";
 import API from "./api";
@@ -233,9 +234,7 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 export const createPlayerWindow = async (
-  artist: string,
-  album: string,
-  title: string,
+  path: string,
   url: string
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -264,11 +263,11 @@ export const createPlayerWindow = async (
 
   playerWindow.loadURL(
     isDev
-      ? `http://localhost:3001/?artist=${artist}&album=${album}&title=${title}&url=${url}`
+      ? `http://localhost:3001/?path=${path}&url=${url}`
       : `file://${join(
           app.getAppPath(),
-          `./player/build/index.html?artist=${artist}&album=${album}&title=${title}&url=${url}`
-        )}`
+          "./player/build/index.html"
+        )}?path=${path}&url=${url}`
   );
 
   playerWindow.show();
@@ -417,4 +416,17 @@ ipcMain.on("window-minimize", (event) => {
 
 ipcMain.on("window-close", (event) => {
   BrowserWindow.fromWebContents(event.sender)?.close();
+});
+
+ipcMain.on("get-audio-metadata", async (event, path: string) => {
+  const metadata: IAudioMetadata = await parseFile(path);
+
+  event.sender.send("audio-metadata", {
+    album: metadata.common.album || "",
+    artist: metadata.common.artist || metadata.common.albumartist || "",
+    cover: `data:image/png;base64, ${selectCover(
+      metadata.common.picture
+    )?.data.toString("base64")}`,
+    title: metadata.common.title || "",
+  });
 });
