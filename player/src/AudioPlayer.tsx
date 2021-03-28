@@ -6,10 +6,10 @@ import React, {
   useMemo,
 } from "react";
 import {
+  ButtonBase,
   createStyles,
   Fade,
   Grid,
-  IconButton,
   makeStyles,
   Slider,
   Typography,
@@ -40,6 +40,10 @@ const useStyles = makeStyles(() =>
     },
     centered: {
       alignSelf: "center",
+    },
+    image: {
+      height: 120,
+      width: 120,
     },
   })
 );
@@ -144,13 +148,17 @@ function AudioPlayer({ track }: AudioPlayerProps) {
       spacing={2}
     >
       <Grid item>
-        <IconButton
+        <ButtonBase
           aria-label={isPlaying ? "Pause" : "Play"}
           onClick={() => setIsPlaying(!isPlaying)}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
-          <img src={image} alt={`${artist} - ${album}`} />
+          <img
+            className={classes.image}
+            src={image}
+            alt={`${artist} - ${album}`}
+          />
           <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
             <div className={classes.overlay}>
               {isPlaying ? (
@@ -160,7 +168,7 @@ function AudioPlayer({ track }: AudioPlayerProps) {
               )}
             </div>
           </Fade>
-        </IconButton>
+        </ButtonBase>
       </Grid>
       <Grid item xs>
         <Grid

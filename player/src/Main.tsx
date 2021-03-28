@@ -40,9 +40,12 @@ function Main(): ReactElement {
   }, [settings, setSettings]);
 
   return (
-    <Container maxWidth="sm">
-      {source ? <AudioPlayer track={source} /> : ""}
-    </Container>
+    <>
+      <div className="draggable-region" />
+      <Container className="center" maxWidth="sm">
+        {source ? <AudioPlayer track={source} /> : ""}
+      </Container>
+    </>
   );
 }
 

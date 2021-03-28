@@ -1,6 +1,8 @@
 html,
 body {
-  background-color: #121212;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   color: #ffffff;
 }
 
@@ -31,6 +33,7 @@ a:hover {
 
 #root {
   height: 100%;
+  min-height: 100%;
   max-height: 100%;
   overflow: hidden;
 }
@@ -39,4 +42,22 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.draggable-region {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+  user-select: none;
+  position: absolute;
+  height: 24px;
+  width: 100%;
+  cursor: grab;
+  z-index: 10000;
+}
+
+.center {
+  position: relative;
+  display: flex !important;
+  height: 100%;
+  align-items: center;
 }

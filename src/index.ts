@@ -4,6 +4,7 @@ import {
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
+  screen,
   shell,
   Tray,
 } from "electron";
@@ -231,13 +232,25 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 const createPlayerWindow = async (): Promise<void> => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  console.log({ width, height });
+
   const playerWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: 462,
+    height: 152,
+    x: width - 478,
+    y: height - 168,
+    alwaysOnTop: true,
     autoHideMenuBar: true,
+    frame: false,
+    fullscreenable: false,
     icon: appIconPath,
-    maximizable: true,
+    maximizable: false,
     show: true,
+    skipTaskbar: true,
+    thickFrame: true,
+    titleBarStyle: "customButtonsOnHover",
+    transparent: true,
     webPreferences: {
       contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
@@ -261,7 +274,7 @@ const createPlayerWindow = async (): Promise<void> => {
       logger.error("An error occurred:", error);
     }
     // Open the DevTools.
-    playerWindow.webContents.openDevTools();
+    playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   }
 };
 
