@@ -256,7 +256,6 @@ const createPlayerWindow = async (): Promise<void> => {
   if (isDev) {
     // Open the DevTools.
     playerWindow.webContents.openDevTools();
-    playerWindow.maximize();
   }
 };
 
