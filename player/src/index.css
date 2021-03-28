@@ -53,10 +53,15 @@ input::-webkit-inner-spin-button {
   -webkit-user-select: none;
   user-select: none;
   position: absolute;
-  height: 24px;
-  width: 100%;
+  height: 28px;
+  width: calc(100% - 72px);
   cursor: grab;
-  z-index: 10000;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 .center {

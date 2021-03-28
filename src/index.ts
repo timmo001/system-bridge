@@ -242,15 +242,14 @@ const createPlayerWindow = async (): Promise<void> => {
     y: height - 150,
     alwaysOnTop: true,
     autoHideMenuBar: true,
-    // backgroundColor: "#121212",
+    backgroundColor: "#121212",
     frame: false,
     fullscreenable: false,
     icon: appIconPath,
     maximizable: false,
-    show: true,
-    skipTaskbar: true,
+    show: false,
     thickFrame: true,
-    titleBarStyle: "customButtonsOnHover",
+    titleBarStyle: "hidden",
     transparent: true,
     webPreferences: {
       contextIsolation: true,
@@ -404,3 +403,11 @@ ipcMain.on(
     }
   }
 );
+
+ipcMain.on("window-minimize", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.minimize();
+});
+
+ipcMain.on("window-close", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.close();
+});
