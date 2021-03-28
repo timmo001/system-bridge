@@ -4,7 +4,7 @@ import {
   responsiveFontSizes,
   ThemeProvider,
 } from "@material-ui/core/styles";
-import { cyan, blue, grey } from "@material-ui/core/colors";
+import { grey, deepPurple } from "@material-ui/core/colors";
 
 import "typeface-roboto";
 
@@ -15,17 +15,18 @@ const theme = responsiveFontSizes(
   createMuiTheme({
     palette: {
       type: "dark",
-      primary: blue,
-      secondary: cyan,
-      text: {
-        primary: grey[100],
-        secondary: grey[200],
-        disabled: grey[400],
+      primary: {
+        dark: deepPurple[800],
+        main: deepPurple[700],
+        light: deepPurple[600],
       },
+      secondary: deepPurple,
       background: {
         default: "#121212",
         paper: grey[900],
       },
+      contrastThreshold: 3,
+      tonalOffset: 0.2,
     },
   })
 );
