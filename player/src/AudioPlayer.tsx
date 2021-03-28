@@ -38,6 +38,9 @@ const useStyles = makeStyles(() =>
       margin: "auto",
       fontSize: 82,
     },
+    centered: {
+      alignSelf: "center",
+    },
   })
 );
 
@@ -221,7 +224,7 @@ function AudioPlayer({ track }: AudioPlayerProps) {
                 onKeyUp={handleScrubEnd}
               />
             </Grid>
-            <Grid item>
+            <Grid className={classes.centered} item>
               <Typography component="span" variant="body2">
                 {formattedDuration}
               </Typography>
