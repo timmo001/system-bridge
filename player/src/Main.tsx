@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { Button, ButtonBase, Container, Grid } from "@material-ui/core";
+import { Button, ButtonBase, Container, Fade, Grid } from "@material-ui/core";
 
 import { useSettings } from "./Utils";
 import logo from "./resources/system-bridge.svg";
@@ -17,6 +17,7 @@ export interface Source {
 
 function Main(): ReactElement {
   const [source, setSource] = useState<Source>();
+  const [entered, setEntered] = useState<boolean>(false);
   const [settings, setSettings] = useSettings();
 
   useEffect(() => {
@@ -35,6 +36,11 @@ function Main(): ReactElement {
   }, [source, setSource]);
 
   useEffect(() => {
+    document.addEventListener("mouseenter", () => setEntered(true));
+    document.addEventListener("mouseleave", () => setEntered(false));
+  }, []);
+
+  useEffect(() => {
     if (!settings) {
       window.api.ipcRendererSend("get-settings");
     }
@@ -43,30 +49,32 @@ function Main(): ReactElement {
   return (
     <>
       <div className="draggable-region" />
-      <div
-        style={{
-          position: "absolute",
-          display: "flex",
-          top: 0,
-          right: 0,
-          zIndex: 10000,
-        }}
-      >
-        <ButtonBase
-          style={{ width: 36, height: 28 }}
-          onClick={() => window.api.ipcRendererSend("window-minimize")}
+      <Fade in={entered} timeout={{ enter: 200, exit: 400 }}>
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            top: 0,
+            right: 0,
+            zIndex: 10000,
+          }}
         >
-          <Minimize fontSize="small" style={{ marginTop: -12 }} />
-        </ButtonBase>
-        <ButtonBase
-          style={{ width: 36, height: 28 }}
-          onClick={() => window.api.ipcRendererSend("window-close")}
-        >
-          <Close fontSize="small" />
-        </ButtonBase>
-      </div>
+          <ButtonBase
+            style={{ width: 36, height: 28 }}
+            onClick={() => window.api.ipcRendererSend("window-minimize")}
+          >
+            <Minimize fontSize="small" style={{ marginTop: -12 }} />
+          </ButtonBase>
+          <ButtonBase
+            style={{ width: 36, height: 28 }}
+            onClick={() => window.api.ipcRendererSend("window-close")}
+          >
+            <Close fontSize="small" />
+          </ButtonBase>
+        </div>
+      </Fade>
       <Container className="center" maxWidth="sm">
-        {source ? <AudioPlayer track={source} /> : ""}
+        {source ? <AudioPlayer hovering={entered} track={source} /> : ""}
       </Container>
     </>
   );

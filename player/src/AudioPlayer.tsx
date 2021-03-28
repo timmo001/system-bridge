@@ -20,6 +20,7 @@ import moment from "moment";
 import { Source } from "./Main";
 
 interface AudioPlayerProps {
+  hovering: boolean;
   track: Source;
 }
 
@@ -50,13 +51,12 @@ const useStyles = makeStyles(() =>
 
 let audioTimer: NodeJS.Timeout;
 
-function AudioPlayer({ track }: AudioPlayerProps) {
+function AudioPlayer({ hovering, track }: AudioPlayerProps) {
   const { title, artist, album, image, audioSrc, volumeInitial } = track;
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(volumeInitial);
-  const [hovering, setHovering] = useState<boolean>(false);
 
   const audioRef = useRef(new Audio(audioSrc));
   const isReady = useRef(false);
@@ -151,8 +151,6 @@ function AudioPlayer({ track }: AudioPlayerProps) {
         <ButtonBase
           aria-label={isPlaying ? "Pause" : "Play"}
           onClick={() => setIsPlaying(!isPlaying)}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
         >
           <img
             className={classes.image}

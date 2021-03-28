@@ -50,8 +50,6 @@ input::-webkit-inner-spin-button {
 
 .draggable-region {
   -webkit-app-region: drag;
-  -webkit-user-select: none;
-  user-select: none;
   position: absolute;
   height: 28px;
   width: calc(100% - 72px);
