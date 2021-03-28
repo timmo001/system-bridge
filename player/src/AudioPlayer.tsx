@@ -167,7 +167,8 @@ function AudioPlayer({ track }: AudioPlayerProps) {
             </Typography>
           </Grid>
 
-          <Grid container spacing={2}>
+          <Grid item container spacing={2}>
+            <Grid item xs={4} />
             <Grid item>
               <VolumeUp />
             </Grid>
