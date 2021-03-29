@@ -40,8 +40,12 @@ function Main(): ReactElement {
 
   useEffect(() => {
     if (settings && !source) {
-      const query = queryString.parse(window.location.search);
+      const query = queryString.parse(window.location.search, {
+        parseNumbers: true,
+      });
       console.log(query);
+
+      const volume = Number(query.volume);
 
       window.api.ipcRendererOn("audio-metadata", (_event, data) => {
         console.log(data);
@@ -51,7 +55,7 @@ function Main(): ReactElement {
           artist: data.artist,
           cover: data.cover || logo,
           title: data.title,
-          volumeInitial: 10,
+          volumeInitial: volume > 0 ? volume : 40,
         });
       });
       window.api.ipcRendererSend("get-audio-metadata", query.path);

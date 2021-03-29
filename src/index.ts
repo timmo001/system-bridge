@@ -14,12 +14,14 @@ import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import execa from "execa";
 import isDev from "electron-is-dev";
+import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
 import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
+import { AudioCreateDataResult } from "./services/audio/audio.class";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -234,8 +236,7 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 export const createPlayerWindow = async (
-  path: string,
-  url: string
+  query: AudioCreateDataResult
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   playerWindow = new BrowserWindow({
@@ -261,14 +262,16 @@ export const createPlayerWindow = async (
     },
   });
 
-  playerWindow.loadURL(
-    isDev
-      ? `http://localhost:3001/?path=${path}&url=${url}`
-      : `file://${join(
-          app.getAppPath(),
-          "./player/build/index.html"
-        )}?path=${path}&url=${url}`
-  );
+  const url = isDev
+    ? `http://localhost:3001/?${queryString.stringify(query)}`
+    : `file://${join(
+        app.getAppPath(),
+        "./player/build/index.html"
+      )}?${queryString.stringify(query)}`;
+
+  logger.info(`Player URL: ${url}`);
+
+  playerWindow.loadURL(url);
 
   playerWindow.show();
 

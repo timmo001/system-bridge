@@ -20,9 +20,10 @@ export type AudioUpdateId = "mute" | "volume" | "volumeDown" | "volumeUp";
 
 interface AudioCreateData {
   path: string;
+  volume?: number;
 }
 
-interface AudioCreateDataResult extends AudioCreateData {
+export interface AudioCreateDataResult extends AudioCreateData {
   url: string;
 }
 
@@ -41,10 +42,10 @@ export class Audio {
 
   async create(data: AudioCreateData): Promise<AudioCreateDataResult> {
     const url = `/audio-${uuidv4()}`;
-    logger.info(`url: ${url}`);
+    logger.info(`URL: ${url}`);
     this.app.use(url, express.static(resolve(data.path)));
 
-    createPlayerWindow(data.path, url);
+    createPlayerWindow({ ...data, url });
     return { ...data, url };
   }
 
