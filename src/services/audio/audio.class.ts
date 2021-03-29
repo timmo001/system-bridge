@@ -9,7 +9,13 @@ import loudness from "loudness";
 import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
-import { createPlayerWindow, closePlayerWindow } from "../../index";
+import {
+  createPlayerWindow,
+  closePlayerWindow,
+  pausePlayerWindow,
+  playPlayerWindow,
+  playpausePlayerWindow,
+} from "../../index";
 import logger from "../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -22,6 +28,9 @@ export interface AudioInfo {
 
 export type AudioUpdateId =
   | "mute"
+  | "pause"
+  | "play"
+  | "playpause"
   | "stop"
   | "volume"
   | "volumeDown"
@@ -40,7 +49,7 @@ export interface AudioCreateData {
 }
 
 interface AudioDeleteResponse {
-  stopped: boolean;
+  successful: boolean;
 }
 
 export interface AudioUpdateData {
@@ -91,7 +100,7 @@ export class Audio {
   }
 
   async remove(): Promise<AudioDeleteResponse> {
-    return { stopped: closePlayerWindow() };
+    return { successful: closePlayerWindow() };
   }
 
   async find(): Promise<AudioInfo> {
@@ -116,8 +125,14 @@ export class Audio {
         if (typeof data.value === "boolean")
           await loudness.setMuted(data.value);
         break;
+      case "pause":
+        return { successful: pausePlayerWindow() };
+      case "play":
+        return { successful: playPlayerWindow() };
+      case "playpause":
+        return { successful: playpausePlayerWindow() };
       case "stop":
-        return { stopped: closePlayerWindow() };
+        return { successful: closePlayerWindow() };
       case "volume":
         if (typeof data.value === "number")
           await loudness.setVolume(data.value);

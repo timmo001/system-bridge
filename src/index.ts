@@ -305,6 +305,31 @@ export const closePlayerWindow = (): boolean => {
   return false;
 };
 
+export const pausePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-pause");
+    playerWindow.webContents.send("player-pause");
+    return true;
+  }
+  return false;
+};
+export const playPlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-play");
+    playerWindow.webContents.send("player-play");
+    return true;
+  }
+  return false;
+};
+export const playpausePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-playpause");
+    playerWindow.webContents.send("player-playpause");
+    return true;
+  }
+  return false;
+};
+
 const quitApp = (): void => {
   tray?.destroy();
   mainWindow?.destroy();
