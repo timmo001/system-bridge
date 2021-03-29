@@ -159,7 +159,7 @@ const setAppConfig = async (): Promise<void> => {
 };
 
 let mainWindow: BrowserWindow,
-  playerWindow: BrowserWindow,
+  playerWindow: BrowserWindow | undefined,
   tray: Tray,
   api: API | undefined;
 const setupApp = async (): Promise<void> => {
@@ -296,8 +296,13 @@ export const createPlayerWindow = async (
   }
 };
 
-export const closePlayerWindow = (): void => {
-  if (playerWindow) playerWindow.close();
+export const closePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    playerWindow.close();
+    playerWindow = undefined;
+    return true;
+  }
+  return false;
 };
 
 const quitApp = (): void => {
