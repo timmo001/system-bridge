@@ -1,6 +1,10 @@
+import { app } from "electron";
+import { BadRequest } from "@feathersjs/errors";
 import { resolve } from "path";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 import express from "@feathersjs/express";
+import fs from "fs";
 import loudness from "loudness";
 import si, { Systeminformation } from "systeminformation";
 
@@ -18,13 +22,10 @@ export interface AudioInfo {
 
 export type AudioUpdateId = "mute" | "volume" | "volumeDown" | "volumeUp";
 
-interface AudioCreateData {
-  path: string;
+export interface AudioCreateData {
+  path?: string;
+  url?: string;
   volume?: number;
-}
-
-export interface AudioCreateDataResult extends AudioCreateData {
-  url: string;
 }
 
 export interface AudioUpdateData {
@@ -40,8 +41,29 @@ export class Audio {
     this.app = app;
   }
 
-  async create(data: AudioCreateData): Promise<AudioCreateDataResult> {
+  async create(data: AudioCreateData): Promise<AudioCreateData> {
     const url = `/audio-${uuidv4()}`;
+
+    if (data.url) {
+      data.path = app.getPath("temp") + url;
+      logger.info(`Downloading: ${data.url}`);
+      (async () => {
+        if (data.path && data.url) {
+          const response = await axios.get(data.url, {
+            responseType: "stream",
+          });
+          const writer = fs.createWriteStream(data.path);
+          response.data.pipe(writer);
+          await new Promise((resolve, reject) => {
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+          });
+        }
+      })();
+    } else if (!data.path)
+      throw new BadRequest("You must provide a path or url.");
+
+    logger.info(`Path: ${data.path}`);
     logger.info(`URL: ${url}`);
     this.app.use(url, express.static(resolve(data.path)));
 

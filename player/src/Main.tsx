@@ -50,7 +50,9 @@ function Main(): ReactElement {
       window.api.ipcRendererOn("audio-metadata", (_event, data) => {
         console.log(data);
         setSource({
-          audioSrc: `http://localhost:${settings.network.items.port.value}${query.url}`,
+          audioSrc: query.path
+            ? `http://localhost:${settings.network.items.port.value}${query.url}`
+            : query.url,
           album: data.album,
           artist: data.artist,
           cover: data.cover || logo,
@@ -58,7 +60,7 @@ function Main(): ReactElement {
           volumeInitial: volume > 0 ? volume : 40,
         });
       });
-      window.api.ipcRendererSend("get-audio-metadata", query.path);
+      window.api.ipcRendererSend("get-audio-metadata", query.path || query.url);
     }
   }, [settings, source, setSource]);
 

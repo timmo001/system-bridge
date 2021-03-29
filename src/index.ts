@@ -18,10 +18,10 @@ import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
+import { AudioCreateData } from "./services/audio/audio.class";
 import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
-import { AudioCreateDataResult } from "./services/audio/audio.class";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -236,7 +236,7 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 export const createPlayerWindow = async (
-  query: AudioCreateDataResult
+  query: AudioCreateData
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   playerWindow = new BrowserWindow({
