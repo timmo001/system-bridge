@@ -156,7 +156,7 @@
     "helmet": "4.4.1",
     "loudness": "0.4.1",
     "serve-favicon": "2.5.0",
-    "systeminformation": "5.6.8",
+    "systeminformation": "5.6.9",
     "update-electron-app": "2.0.1",
     "uuid": "8.3.2",
     "winston": "3.3.3"
