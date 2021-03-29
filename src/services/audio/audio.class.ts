@@ -20,7 +20,12 @@ export interface AudioInfo {
   devices: Systeminformation.AudioData[];
 }
 
-export type AudioUpdateId = "mute" | "volume" | "volumeDown" | "volumeUp";
+export type AudioUpdateId =
+  | "mute"
+  | "stop"
+  | "volume"
+  | "volumeDown"
+  | "volumeUp";
 
 export interface AudioCreateData {
   backgroundColor?: string;
@@ -32,6 +37,10 @@ export interface AudioCreateData {
   volume?: number;
   x?: number;
   y?: number;
+}
+
+interface AudioDeleteResponse {
+  stopped: boolean;
 }
 
 export interface AudioUpdateData {
@@ -48,34 +57,41 @@ export class Audio {
   }
 
   async create(data: AudioCreateData): Promise<AudioCreateData> {
-    const url = `/audio-${uuidv4()}`;
-
-    if (data.url) {
-      data.path = app.getPath("temp") + url;
-      logger.info(`Downloading: ${data.url}`);
-      (async () => {
-        closePlayerWindow();
-        if (data.path && data.url) {
-          const response = await axios.get(data.url, {
-            responseType: "stream",
-          });
-          const writer = fs.createWriteStream(data.path);
-          response.data.pipe(writer);
-          await new Promise((resolve, reject) => {
-            writer.on("finish", resolve);
-            writer.on("error", reject);
-          });
-        }
-      })();
-    } else if (!data.path)
+    if (!data.path && !data.url)
       throw new BadRequest("You must provide a path or url.");
 
-    logger.info(`Path: ${data.path}`);
-    logger.info(`URL: ${url}`);
-    this.app.use(url, express.static(resolve(data.path)));
+    const url = `/audio-${uuidv4()}`;
 
-    createPlayerWindow({ ...data, url });
+    (async () => {
+      closePlayerWindow();
+      if (data.url) {
+        data.path = app.getPath("temp") + url;
+        logger.info(`Downloading: ${data.url}`);
+        const response = await axios.get(data.url, {
+          responseType: "stream",
+        });
+        const writer = fs.createWriteStream(data.path);
+        response.data.pipe(writer);
+        await new Promise((resolve, reject) => {
+          writer.on("finish", resolve);
+          writer.on("error", reject);
+        });
+      }
+
+      if (data.path) {
+        logger.info(`Path: ${data.path}`);
+        logger.info(`URL: ${url}`);
+        this.app.use(url, express.static(resolve(data.path)));
+
+        createPlayerWindow({ ...data, url });
+      }
+    })();
+
     return { ...data, url };
+  }
+
+  async remove(): Promise<AudioDeleteResponse> {
+    return { stopped: closePlayerWindow() };
   }
 
   async find(): Promise<AudioInfo> {
@@ -88,7 +104,10 @@ export class Audio {
     };
   }
 
-  async update(id: AudioUpdateId, data: AudioUpdateData): Promise<AudioInfo> {
+  async update(
+    id: AudioUpdateId,
+    data: AudioUpdateData
+  ): Promise<AudioInfo | AudioDeleteResponse> {
     const currentVolume: number = await loudness.getVolume();
     switch (id) {
       default:
@@ -97,6 +116,8 @@ export class Audio {
         if (typeof data.value === "boolean")
           await loudness.setMuted(data.value);
         break;
+      case "stop":
+        return { stopped: closePlayerWindow() };
       case "volume":
         if (typeof data.value === "number")
           await loudness.setVolume(data.value);
