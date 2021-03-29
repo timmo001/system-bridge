@@ -296,6 +296,10 @@ export const createPlayerWindow = async (
   }
 };
 
+export const closePlayerWindow = (): void => {
+  if (playerWindow) playerWindow.close();
+};
+
 const quitApp = (): void => {
   tray?.destroy();
   mainWindow?.destroy();
@@ -319,6 +323,12 @@ app.whenReady().then((): void => {
   tray = new Tray(appSmallIconPath);
   const contextMenu = Menu.buildFromTemplate([
     { label: "Settings", type: "normal", click: showConfigurationWindow },
+    { type: "separator" },
+    {
+      label: "Close Active Media Player",
+      type: "normal",
+      click: closePlayerWindow,
+    },
     { type: "separator" },
     ...helpMenu,
     { type: "separator" },

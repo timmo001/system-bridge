@@ -9,7 +9,7 @@ import loudness from "loudness";
 import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
-import { createPlayerWindow } from "../../index";
+import { createPlayerWindow, closePlayerWindow } from "../../index";
 import logger from "../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -54,6 +54,7 @@ export class Audio {
       data.path = app.getPath("temp") + url;
       logger.info(`Downloading: ${data.url}`);
       (async () => {
+        closePlayerWindow();
         if (data.path && data.url) {
           const response = await axios.get(data.url, {
             responseType: "stream",
