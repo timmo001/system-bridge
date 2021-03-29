@@ -59,7 +59,6 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
   const [volume, setVolume] = useState<number>(volumeInitial);
 
   const audioRef = useRef(new Audio(audioSrc));
-  const isReady = useRef(false);
 
   const { duration } = audioRef.current;
 
@@ -76,14 +75,7 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
     audioRef.current = new Audio(audioSrc);
     setTrackProgress(audioRef.current.currentTime);
     audioRef.current.volume = volumeInitial / 100;
-
-    if (isReady.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      // Set the isReady ref as true for the next pass
-      isReady.current = true;
-    }
+    setIsPlaying(true);
   }, [audioSrc, volumeInitial]);
 
   useEffect(() => {
