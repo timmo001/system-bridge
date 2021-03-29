@@ -423,13 +423,12 @@ ipcMain.on("window-close", (event) => {
 
 ipcMain.on("get-audio-metadata", async (event, path: string) => {
   const metadata: IAudioMetadata = await parseFile(path);
+  const cover = selectCover(metadata.common.picture)?.data.toString("base64");
 
   event.sender.send("audio-metadata", {
     album: metadata.common.album || "",
     artist: metadata.common.artist || metadata.common.albumartist || "",
-    cover: `data:image/png;base64, ${selectCover(
-      metadata.common.picture
-    )?.data.toString("base64")}`,
+    cover: cover && `data:image/png;base64, ${cover}`,
     title: metadata.common.title || "",
   });
 });
