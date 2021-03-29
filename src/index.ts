@@ -22,6 +22,7 @@ import { AudioCreateData } from "./services/audio/audio.class";
 import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
+import { BrowserWindowConstructorOptions } from "electron/main";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -236,21 +237,24 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 export const createPlayerWindow = async (
-  query: AudioCreateData
+  data: AudioCreateData
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  playerWindow = new BrowserWindow({
+  const windowOpts: BrowserWindowConstructorOptions = {
     width: 460,
     height: 130,
-    x: width - 480,
-    y: height - 150,
+    x: data.x || width - 480,
+    y: data.y || height - 150,
     alwaysOnTop: true,
     autoHideMenuBar: true,
-    backgroundColor: "#121212",
+    backgroundColor: data.transparent
+      ? undefined
+      : data.backgroundColor || "#121212",
     frame: false,
     fullscreenable: false,
     icon: appIconPath,
     maximizable: false,
+    opacity: data.opacity,
     show: false,
     thickFrame: true,
     titleBarStyle: "hidden",
@@ -260,20 +264,25 @@ export const createPlayerWindow = async (
       preload: join(__dirname, "./preload.js"),
       devTools: isDev,
     },
-  });
+  };
+
+  logger.debug(JSON.stringify(windowOpts));
+
+  playerWindow = new BrowserWindow(windowOpts);
 
   const url = isDev
-    ? `http://localhost:3001/?${queryString.stringify(query)}`
+    ? `http://localhost:3001/?${queryString.stringify(data)}`
     : `file://${join(
         app.getAppPath(),
         "./player/build/index.html"
-      )}?${queryString.stringify(query)}`;
+      )}?${queryString.stringify(data)}`;
 
   logger.info(`Player URL: ${url}`);
 
   playerWindow.loadURL(url);
 
-  playerWindow.show();
+  if (data.hidden) playerWindow.hide();
+  else playerWindow.show();
 
   if (isDev) {
     try {

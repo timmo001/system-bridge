@@ -23,9 +23,15 @@ export interface AudioInfo {
 export type AudioUpdateId = "mute" | "volume" | "volumeDown" | "volumeUp";
 
 export interface AudioCreateData {
+  backgroundColor?: string;
+  hidden?: boolean;
+  opacity?: number;
   path?: string;
+  transparent?: boolean;
   url?: string;
   volume?: number;
+  x?: number;
+  y?: number;
 }
 
 export interface AudioUpdateData {
