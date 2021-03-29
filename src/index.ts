@@ -4,20 +4,25 @@ import {
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
+  screen,
   shell,
   Tray,
 } from "electron";
+import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
-import isDev from "electron-is-dev";
-import updateApp from "update-electron-app";
 import execa from "execa";
+import isDev from "electron-is-dev";
+import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
+import updateApp from "update-electron-app";
 
+import { AudioCreateData } from "./services/audio/audio.class";
 import { getSettings } from "./utils";
 import API from "./api";
 import logger from "./logger";
+import { BrowserWindowConstructorOptions } from "electron/main";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -153,7 +158,10 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow, tray: Tray, api: API | undefined;
+let mainWindow: BrowserWindow,
+  playerWindow: BrowserWindow | undefined,
+  tray: Tray,
+  api: API | undefined;
 const setupApp = async (): Promise<void> => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -212,7 +220,7 @@ const setupApp = async (): Promise<void> => {
   }
 };
 
-const showWindow = async (): Promise<void> => {
+const showConfigurationWindow = async (): Promise<void> => {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:3000"
@@ -226,6 +234,100 @@ const showWindow = async (): Promise<void> => {
     mainWindow.webContents.openDevTools();
     mainWindow.maximize();
   }
+};
+
+export const createPlayerWindow = async (
+  data: AudioCreateData
+): Promise<void> => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const windowOpts: BrowserWindowConstructorOptions = {
+    width: 460,
+    height: 130,
+    x: data.x || width - 480,
+    y: data.y || height - 150,
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
+    backgroundColor: data.transparent
+      ? undefined
+      : data.backgroundColor || "#121212",
+    frame: false,
+    fullscreenable: false,
+    icon: appIconPath,
+    maximizable: false,
+    opacity: data.opacity,
+    show: false,
+    thickFrame: true,
+    titleBarStyle: "hidden",
+    transparent: true,
+    webPreferences: {
+      contextIsolation: true,
+      preload: join(__dirname, "./preload.js"),
+      devTools: isDev,
+    },
+  };
+
+  logger.debug(JSON.stringify(windowOpts));
+
+  playerWindow = new BrowserWindow(windowOpts);
+
+  const url = isDev
+    ? `http://localhost:3001/?${queryString.stringify(data)}`
+    : `file://${join(
+        app.getAppPath(),
+        "./player/build/index.html"
+      )}?${queryString.stringify(data)}`;
+
+  logger.info(`Player URL: ${url}`);
+
+  playerWindow.loadURL(url);
+
+  if (data.hidden) playerWindow.hide();
+  else playerWindow.show();
+
+  if (isDev) {
+    try {
+      const extName = await devTools(REACT_DEVELOPER_TOOLS);
+      logger.debug("Added Extension:", extName);
+    } catch (error) {
+      logger.error("An error occurred:", error);
+    }
+    // Open the DevTools.
+    playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  }
+};
+
+export const closePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    playerWindow.close();
+    playerWindow = undefined;
+    return true;
+  }
+  return false;
+};
+
+export const pausePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-pause");
+    playerWindow.webContents.send("player-pause");
+    return true;
+  }
+  return false;
+};
+export const playPlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-play");
+    playerWindow.webContents.send("player-play");
+    return true;
+  }
+  return false;
+};
+export const playpausePlayerWindow = (): boolean => {
+  if (playerWindow) {
+    logger.debug("player-playpause");
+    playerWindow.webContents.send("player-playpause");
+    return true;
+  }
+  return false;
 };
 
 const quitApp = (): void => {
@@ -250,7 +352,13 @@ app.on("activate", (): void => {
 app.whenReady().then((): void => {
   tray = new Tray(appSmallIconPath);
   const contextMenu = Menu.buildFromTemplate([
-    { label: "Settings", type: "normal", click: showWindow },
+    { label: "Settings", type: "normal", click: showConfigurationWindow },
+    { type: "separator" },
+    {
+      label: "Close Active Media Player",
+      type: "normal",
+      click: closePlayerWindow,
+    },
     { type: "separator" },
     ...helpMenu,
     { type: "separator" },
@@ -259,7 +367,7 @@ app.whenReady().then((): void => {
   tray.setToolTip("System Bridge");
   tray.setContextMenu(contextMenu);
   tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showWindow);
+  tray.on("double-click", showConfigurationWindow);
 
   api = new API();
 });
@@ -308,7 +416,7 @@ ipcMain.on(
 ipcMain.on(
   "open-settings",
   async (event): Promise<void> => {
-    showWindow();
+    showConfigurationWindow();
     event?.sender?.send("opened-settings");
   }
 );
@@ -353,3 +461,23 @@ ipcMain.on(
     }
   }
 );
+
+ipcMain.on("window-minimize", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.minimize();
+});
+
+ipcMain.on("window-close", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.close();
+});
+
+ipcMain.on("get-audio-metadata", async (event, path: string) => {
+  const metadata: IAudioMetadata = await parseFile(path);
+  const cover = selectCover(metadata.common.picture)?.data.toString("base64");
+
+  event.sender.send("audio-metadata", {
+    album: metadata.common.album || "",
+    artist: metadata.common.artist || metadata.common.albumartist || "",
+    cover: cover && `data:image/png;base64, ${cover}`,
+    title: metadata.common.title || "",
+  });
+});

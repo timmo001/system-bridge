@@ -80,7 +80,7 @@ jobs:
           use-quiet-mode: no
           use-verbose-mode: no
           config-file: mlc_config.json
-          folder-path: configuration, .github
+          folder-path: .github, configuration, player
           file-path: ./README.md
           max-depth: -1
           check-modified-files-only: no

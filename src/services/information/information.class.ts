@@ -20,7 +20,7 @@ export class Information {
       audio: {
         description: "Audio Information and controls",
         endpoint: "/audio",
-        supportedMethods: ["GET", "PUT"],
+        supportedMethods: ["DELETE", "GET", "POST", "PUT"],
       },
       battery: { description: "Battery Information", endpoint: "/battery" },
       bluetooth: {
