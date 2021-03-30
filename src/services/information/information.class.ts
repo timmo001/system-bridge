@@ -22,7 +22,11 @@ export class Information {
         endpoint: "/audio",
         supportedMethods: ["DELETE", "GET", "POST", "PUT"],
       },
-      battery: { description: "Battery Information", endpoint: "/battery" },
+      battery: {
+        description: "Battery Information",
+        endpoint: "/battery",
+        supportedMethods: ["GET"],
+      },
       bluetooth: {
         description: "Bluetooth Information",
         endpoint: "/bluetooth",
