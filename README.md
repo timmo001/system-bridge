@@ -11,13 +11,10 @@ A bridge for your systems.
 - System Information - Access your system's Audio, Battery, Bluetooth, CPU,
  Filesystems, Graphics, Memory, Networking, OS, and Process information via the
  API.
-- Audio Controls - Change the volume of your device via the API.
+- Audio Player and Controls - Play music or sounds and change the volume of your device via the API.
 - Send Commands - Automate your system by sending a command or opening a URL or
  path via the API.
 - Cross-Platform - Compatible with Windows, Mac and Linux.
-- API
-- Websocket
-- Built using Electron
 
 ### API Endpoints
 
