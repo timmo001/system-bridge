@@ -23,7 +23,7 @@ A bridge for your systems.
 
 | Endpoint      | Description                                      | Method                 |
 | ------------  | ------------------------------------------------ | ---------------------- |
-| /audio        | Play audio and get information                   | DELETE, GET, POST, PUT |
+| /audio        | Play audio, change volume, and get information   | DELETE, GET, POST, PUT |
 | /battery      | Battery Information                              | GET                    |
 | /bluetooth    | Bluetooth Information                            | GET                    |
 | /command      | Run a System Command                             | POST                   |

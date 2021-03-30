@@ -18,7 +18,7 @@ export class Information {
   async find(): Promise<Data> {
     return {
       audio: {
-        description: "Audio Information and controls",
+        description: "Play audio, change volume, and get information",
         endpoint: "/audio",
         supportedMethods: ["DELETE", "GET", "POST", "PUT"],
       },
