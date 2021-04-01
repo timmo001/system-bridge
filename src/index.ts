@@ -8,6 +8,7 @@ import {
   shell,
   Tray,
 } from "electron";
+import { BrowserWindowConstructorOptions } from "electron/main";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
@@ -18,11 +19,10 @@ import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
-import { AudioCreateData } from "./services/audio/audio.class";
 import { getSettings } from "./utils";
+import { MediaCreateData } from "./types/media";
 import API from "./api";
 import logger from "./logger";
-import { BrowserWindowConstructorOptions } from "electron/main";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -237,14 +237,14 @@ const showConfigurationWindow = async (): Promise<void> => {
 };
 
 export const createPlayerWindow = async (
-  data: AudioCreateData
+  data: MediaCreateData
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
-    width: 460,
-    height: 130,
-    x: data.x || width - 480,
-    y: data.y || height - 150,
+    width: data.type === "audio" ? 460 : 480,
+    height: data.type === "audio" ? 130 : 270,
+    x: data.x || width - (data.type === "audio" ? 480 : 500),
+    y: data.y || height - (data.type === "audio" ? 150 : 290),
     alwaysOnTop: true,
     autoHideMenuBar: true,
     backgroundColor: data.transparent
