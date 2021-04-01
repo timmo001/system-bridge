@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { ButtonBase, Container, Fade } from "@material-ui/core";
+import { ButtonBase, Fade } from "@material-ui/core";
 import queryString from "query-string";
 import { Close, Minimize } from "@material-ui/icons";
 
@@ -122,9 +122,7 @@ function Main(): ReactElement {
         </div>
       </Fade>
       {source?.type === "audio" ? (
-        <Container className="center" maxWidth="sm">
-          <AudioPlayer hovering={entered} source={source} />
-        </Container>
+        <AudioPlayer hovering={entered} source={source} />
       ) : source?.type === "video" ? (
         <VideoPlayer source={source} />
       ) : (

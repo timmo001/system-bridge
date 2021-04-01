@@ -13,6 +13,7 @@ import {
   Grid,
   makeStyles,
   Slider,
+  Theme,
   Typography,
 } from "@material-ui/core";
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
@@ -25,8 +26,18 @@ interface AudioPlayerProps {
   source: AudioSource;
 }
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      height: "100%",
+    },
+    center: {
+      alignSelf: "center",
+    },
+    gridItem: {
+      alignSelf: "center",
+      margin: theme.spacing(0, 1, 0, 0),
+    },
     overlay: {
       position: "absolute",
       display: "flex",
@@ -39,9 +50,6 @@ const useStyles = makeStyles(() =>
       position: "relative",
       margin: "auto",
       fontSize: 82,
-    },
-    centered: {
-      alignSelf: "center",
     },
     image: {
       height: 110,
@@ -151,14 +159,14 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
 
   return (
     <Grid
+      className={classes.root}
       container
       direction="row"
       alignItems="center"
-      justify="flex-start"
-      spacing={2}
+      justify="center"
       wrap="nowrap"
     >
-      <Grid item>
+      <Grid className={classes.gridItem} item>
         <ButtonBase
           aria-label={isPlaying ? "Pause" : "Play"}
           onClick={() => setIsPlaying(!isPlaying)}
@@ -209,10 +217,10 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
 
           <Grid item container spacing={2}>
             <Grid item xs={4} />
-            <Grid item>
+            <Grid className={classes.center} item>
               <VolumeUp />
             </Grid>
-            <Grid item xs>
+            <Grid className={classes.gridItem} item xs>
               <Slider
                 min={0}
                 max={100}
@@ -229,8 +237,9 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2}>
-            <Grid item xs>
+          <Grid container>
+            <Grid className={classes.gridItem} item />
+            <Grid className={classes.gridItem} item xs>
               <Slider
                 min={0}
                 max={duration ? duration : 1}
@@ -247,7 +256,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
                 onKeyUp={handleScrubEnd}
               />
             </Grid>
-            <Grid className={classes.centered} item>
+            <Grid className={classes.gridItem} item>
               <Typography component="span" variant="body2">
                 {formattedDuration}
               </Typography>
