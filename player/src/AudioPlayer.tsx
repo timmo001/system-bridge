@@ -156,6 +156,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
       alignItems="center"
       justify="flex-start"
       spacing={2}
+      wrap="nowrap"
     >
       <Grid item>
         <ButtonBase
@@ -178,7 +179,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
           </Fade>
         </ButtonBase>
       </Grid>
-      <Grid item xs>
+      <Grid item xs={8}>
         <Grid
           container
           direction="column"
