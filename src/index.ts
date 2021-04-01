@@ -298,7 +298,9 @@ export const createPlayerWindow = async (
 
 export const closePlayerWindow = (): boolean => {
   if (playerWindow) {
-    playerWindow.close();
+    if (!playerWindow.isDestroyed()) {
+      playerWindow.close();
+    }
     playerWindow = undefined;
     return true;
   }
