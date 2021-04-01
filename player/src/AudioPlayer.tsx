@@ -18,11 +18,11 @@ import {
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 import moment from "moment";
 
-import { Source } from "./Main";
+import { AudioSource } from "./Main";
 
 interface AudioPlayerProps {
   hovering: boolean;
-  track: Source;
+  source: AudioSource;
 }
 
 const useStyles = makeStyles(() =>
@@ -52,8 +52,15 @@ const useStyles = makeStyles(() =>
 
 let audioTimer: NodeJS.Timeout;
 
-function AudioPlayer({ hovering, track }: AudioPlayerProps) {
-  const { title, artist, album, cover, audioSrc, volumeInitial } = track;
+function AudioPlayer({ hovering, source }: AudioPlayerProps) {
+  const {
+    title,
+    artist,
+    album,
+    cover,
+    source: audioSrc,
+    volumeInitial,
+  } = source;
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -68,10 +75,7 @@ function AudioPlayer({ hovering, track }: AudioPlayerProps) {
   ]);
 
   useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => {
-      console.log("player-pause");
-      setIsPlaying(false);
-    });
+    window.api.ipcRendererOn("player-pause", () => setIsPlaying(false));
     window.api.ipcRendererOn("player-play", () => setIsPlaying(true));
     window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
   }, [handleTogglePlaying]);

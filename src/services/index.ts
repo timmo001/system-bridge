@@ -15,6 +15,7 @@ import open from "./open/open.service";
 import os from "./os/os.service";
 import processes from "./processes/processes.service";
 import system from "./system/system.service";
+import video from "./video/video.service";
 
 export default function (app: Application): void {
   app.configure(audio);
@@ -33,4 +34,5 @@ export default function (app: Application): void {
   app.configure(os);
   app.configure(processes);
   app.configure(system);
+  app.configure(video);
 }

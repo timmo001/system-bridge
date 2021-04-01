@@ -16,6 +16,7 @@ import {
   playPlayerWindow,
   playpausePlayerWindow,
 } from "../../index";
+import { MediaCreateData } from "../../types/media";
 import logger from "../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,18 +37,6 @@ export type AudioUpdateId =
   | "volumeDown"
   | "volumeUp";
 
-export interface AudioCreateData {
-  backgroundColor?: string;
-  hidden?: boolean;
-  opacity?: number;
-  path?: string;
-  transparent?: boolean;
-  url?: string;
-  volume?: number;
-  x?: number;
-  y?: number;
-}
-
 interface AudioDeleteResponse {
   successful: boolean;
 }
@@ -65,7 +54,7 @@ export class Audio {
     this.app = app;
   }
 
-  async create(data: AudioCreateData): Promise<AudioCreateData> {
+  async create(data: MediaCreateData): Promise<MediaCreateData> {
     if (!data.path && !data.url)
       throw new BadRequest("You must provide a path or url.");
 
@@ -92,11 +81,11 @@ export class Audio {
         logger.info(`URL: ${url}`);
         this.app.use(url, express.static(resolve(data.path)));
 
-        createPlayerWindow({ ...data, url });
+        createPlayerWindow({ ...data, type: "audio", url });
       }
     })();
 
-    return { ...data, url };
+    return { ...data, type: "audio", url };
   }
 
   async remove(): Promise<AudioDeleteResponse> {

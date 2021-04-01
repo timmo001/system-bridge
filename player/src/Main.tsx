@@ -1,26 +1,36 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { ButtonBase, Container, Fade } from "@material-ui/core";
 import queryString from "query-string";
-
 import { Close, Minimize } from "@material-ui/icons";
+
 import { Configuration } from "../../src/configuration";
 import { useSettings } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "./resources/system-bridge.svg";
+import VideoPlayer from "./VideoPlayer";
 
 export interface Source {
+  type: "audio" | "video";
+  source: string;
+  volumeInitial: number;
+}
+
+export interface AudioSource extends Source {
+  type: "audio";
   album: string;
   artist: string;
-  audioSrc: any;
   cover: string;
   title: string;
-  volumeInitial: number;
+}
+
+export interface VideoSource extends Source {
+  type: "video";
 }
 
 function Main(): ReactElement {
   const [entered, setEntered] = useState<boolean>(false);
   const [settings, setSettings] = useSettings();
-  const [source, setSource] = useState<Source>();
+  const [source, setSource] = useState<AudioSource | VideoSource>();
 
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
@@ -50,9 +60,10 @@ function Main(): ReactElement {
       window.api.ipcRendererOn("audio-metadata", (_event, data) => {
         console.log(data);
         setSource({
-          audioSrc: query.path
-            ? `http://localhost:${settings.network.items.port.value}${query.url}`
-            : query.url,
+          type: "audio",
+          source: String(query.path)
+            ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+            : String(query.url),
           album: data.album,
           artist: data.artist,
           cover: data.cover || logo,
@@ -60,7 +71,26 @@ function Main(): ReactElement {
           volumeInitial: volume > 0 ? volume : 40,
         });
       });
-      window.api.ipcRendererSend("get-audio-metadata", query.path || query.url);
+
+      switch (query.type) {
+        default:
+          break;
+        case "audio":
+          window.api.ipcRendererSend(
+            "get-audio-metadata",
+            query.path || query.url
+          );
+          break;
+        case "video":
+          setSource({
+            type: "video",
+            source: String(query.path)
+              ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+              : String(query.url),
+            volumeInitial: volume > 0 ? volume : 60,
+          });
+          break;
+      }
     }
   }, [settings, source, setSource]);
 
@@ -91,9 +121,15 @@ function Main(): ReactElement {
           </ButtonBase>
         </div>
       </Fade>
-      <Container className="center" maxWidth="sm">
-        {source ? <AudioPlayer hovering={entered} track={source} /> : ""}
-      </Container>
+      {source?.type === "audio" ? (
+        <Container className="center" maxWidth="sm">
+          <AudioPlayer hovering={entered} source={source} />
+        </Container>
+      ) : source?.type === "video" ? (
+        <VideoPlayer source={source} />
+      ) : (
+        ""
+      )}
     </>
   );
 }
