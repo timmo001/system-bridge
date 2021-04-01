@@ -60,6 +60,20 @@ export class Audio {
 
     const url = `/audio-${uuidv4()}`;
 
+    if (data.path) {
+      logger.info(`Path: ${data.path}`);
+
+      if (
+        !(await new Promise<boolean>((resolve) => {
+          if (data.path)
+            fs.access(data.path, (err: NodeJS.ErrnoException | null) =>
+              resolve(err ? false : true)
+            );
+        }))
+      )
+        throw new BadRequest("Path provided does not exist.");
+    }
+
     (async () => {
       closePlayerWindow();
       if (data.url) {
@@ -77,7 +91,6 @@ export class Audio {
       }
 
       if (data.path) {
-        logger.info(`Path: ${data.path}`);
         logger.info(`URL: ${url}`);
         this.app.use(url, express.static(resolve(data.path)));
 
