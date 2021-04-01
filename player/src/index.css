@@ -20,6 +20,10 @@ a:hover {
   font-weight: 500;
 }
 
+*:focus {
+  outline: none;
+}
+
 ::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 0.68rem;
