@@ -9,25 +9,28 @@ import AudioPlayer from "./AudioPlayer";
 import logo from "./resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
-export interface AudioSource {
-  album: string;
-  artist: string;
+export interface Source {
+  type: "audio" | "video";
   source: string;
-  cover: string;
-  title: string;
   volumeInitial: number;
 }
 
-export interface VideoSource {
-  source: string;
-  volumeInitial: number;
+export interface AudioSource extends Source {
+  type: "audio";
+  album: string;
+  artist: string;
+  cover: string;
+  title: string;
+}
+
+export interface VideoSource extends Source {
+  type: "video";
 }
 
 function Main(): ReactElement {
   const [entered, setEntered] = useState<boolean>(false);
   const [settings, setSettings] = useSettings();
-  const [audioSource, setAudioSource] = useState<AudioSource>();
-  const [videoSource, setVideoSource] = useState<VideoSource>();
+  const [source, setSource] = useState<AudioSource | VideoSource>();
 
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
@@ -46,7 +49,7 @@ function Main(): ReactElement {
   }, [settings, setSettings]);
 
   useEffect(() => {
-    if ((settings && !audioSource) || !videoSource) {
+    if (settings && !source) {
       const query = queryString.parse(window.location.search, {
         parseNumbers: true,
       });
@@ -56,7 +59,8 @@ function Main(): ReactElement {
 
       window.api.ipcRendererOn("audio-metadata", (_event, data) => {
         console.log(data);
-        setAudioSource({
+        setSource({
+          type: "audio",
           source: String(query.path)
             ? `http://localhost:${settings?.network.items.port.value}${query.url}`
             : String(query.url),
@@ -82,7 +86,8 @@ function Main(): ReactElement {
             "get-video-metadata",
             query.path || query.url
           );
-          setVideoSource({
+          setSource({
+            type: "video",
             source: String(query.path)
               ? `http://localhost:${settings?.network.items.port.value}${query.url}`
               : String(query.url),
@@ -91,7 +96,7 @@ function Main(): ReactElement {
           break;
       }
     }
-  }, [settings, audioSource, setAudioSource, videoSource, setVideoSource]);
+  }, [settings, source, setSource]);
 
   return (
     <>
@@ -120,15 +125,15 @@ function Main(): ReactElement {
           </ButtonBase>
         </div>
       </Fade>
-      <Container className="center" maxWidth="sm">
-        {audioSource ? (
-          <AudioPlayer hovering={entered} source={audioSource} />
-        ) : videoSource ? (
-          <VideoPlayer hovering={entered} source={videoSource} />
-        ) : (
-          ""
-        )}
-      </Container>
+      {source?.type === "audio" ? (
+        <Container className="center" maxWidth="sm">
+          <AudioPlayer hovering={entered} source={source} />
+        </Container>
+      ) : source?.type === "video" ? (
+        <VideoPlayer hovering={entered} source={source} />
+      ) : (
+        ""
+      )}
     </>
   );
 }

@@ -17,6 +17,7 @@ function AudioPlayer({ hovering, source }: VideoPlayerProps) {
     <>
       <ReactPlayer
         controls
+        playing
         height="100%"
         width="100%"
         url={videoSrc}
