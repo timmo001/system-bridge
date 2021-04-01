@@ -81,7 +81,7 @@ export class Audio {
         logger.info(`URL: ${url}`);
         this.app.use(url, express.static(resolve(data.path)));
 
-        createPlayerWindow({ ...data, url });
+        createPlayerWindow({ ...data, type: "audio", url });
       }
     })();
 
