@@ -75,10 +75,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
   ]);
 
   useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => {
-      console.log("player-pause");
-      setIsPlaying(false);
-    });
+    window.api.ipcRendererOn("player-pause", () => setIsPlaying(false));
     window.api.ipcRendererOn("player-play", () => setIsPlaying(true));
     window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
   }, [handleTogglePlaying]);

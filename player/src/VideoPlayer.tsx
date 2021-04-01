@@ -1,15 +1,26 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactPlayer from "react-player/lazy";
 
 import { VideoSource } from "./Main";
 
 interface VideoPlayerProps {
-  hovering: boolean;
   source: VideoSource;
 }
 
-function AudioPlayer({ hovering, source }: VideoPlayerProps) {
+function AudioPlayer({ source }: VideoPlayerProps) {
   const { source: videoSrc, volumeInitial } = source;
+
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+
+  const handleTogglePlaying = useCallback(() => setIsPlaying(!isPlaying), [
+    isPlaying,
+  ]);
+
+  useEffect(() => {
+    window.api.ipcRendererOn("player-pause", () => setIsPlaying(false));
+    window.api.ipcRendererOn("player-play", () => setIsPlaying(true));
+    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+  }, [handleTogglePlaying]);
 
   const volume = useMemo(() => volumeInitial / 100, [volumeInitial]);
 
@@ -18,7 +29,7 @@ function AudioPlayer({ hovering, source }: VideoPlayerProps) {
       <ReactPlayer
         controls
         pip
-        playing
+        playing={isPlaying}
         height="100%"
         width="100%"
         url={videoSrc}

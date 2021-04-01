@@ -126,7 +126,7 @@ function Main(): ReactElement {
           <AudioPlayer hovering={entered} source={source} />
         </Container>
       ) : source?.type === "video" ? (
-        <VideoPlayer hovering={entered} source={source} />
+        <VideoPlayer source={source} />
       ) : (
         ""
       )}

@@ -311,7 +311,7 @@ export const closePlayerWindow = (): boolean => {
 };
 
 export const pausePlayerWindow = (): boolean => {
-  if (playerWindow) {
+  if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-pause");
     playerWindow.webContents.send("player-pause");
     return true;
@@ -319,7 +319,7 @@ export const pausePlayerWindow = (): boolean => {
   return false;
 };
 export const playPlayerWindow = (): boolean => {
-  if (playerWindow) {
+  if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-play");
     playerWindow.webContents.send("player-play");
     return true;
@@ -327,7 +327,7 @@ export const playPlayerWindow = (): boolean => {
   return false;
 };
 export const playpausePlayerWindow = (): boolean => {
-  if (playerWindow) {
+  if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-playpause");
     playerWindow.webContents.send("player-playpause");
     return true;
