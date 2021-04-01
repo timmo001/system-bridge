@@ -273,6 +273,14 @@ export const createPlayerWindow = async (
 
   playerWindow = new BrowserWindow(windowOpts);
 
+  playerWindow.webContents.setWindowOpenHandler(() => ({
+    action: "deny",
+  }));
+
+  playerWindow.webContents.on("will-navigate", (event: Event) =>
+    event.preventDefault()
+  );
+
   const url = isDev
     ? `http://localhost:3001/?${queryString.stringify(data)}`
     : `file://${join(
