@@ -102,6 +102,11 @@ export class Information {
         endpoint: "/system",
         supportedMethods: ["GET"],
       },
+      video: {
+        description: "Play videos and control playback",
+        endpoint: "/video",
+        supportedMethods: ["DELETE", "POST", "PUT"],
+      },
     };
   }
 }
