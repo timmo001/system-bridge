@@ -251,7 +251,7 @@ export const createPlayerWindow = async (
       ? undefined
       : data.backgroundColor || "#121212",
     frame: false,
-    fullscreenable: false,
+    fullscreenable: data.type === "video",
     icon: appIconPath,
     maximizable: false,
     opacity: data.opacity,
