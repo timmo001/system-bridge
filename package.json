@@ -159,7 +159,6 @@
     "feathers-swagger": "1.2.1",
     "helmet": "4.4.1",
     "loudness": "0.4.1",
-    "mediainfo-wrapper": "1.2.0",
     "music-metadata": "7.8.1",
     "query-string": "7.0.0",
     "serve-favicon": "2.5.0",
