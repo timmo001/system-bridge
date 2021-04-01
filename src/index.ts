@@ -254,6 +254,8 @@ export const createPlayerWindow = async (
     fullscreenable: data.type === "video",
     icon: appIconPath,
     maximizable: false,
+    minHeight: 100,
+    minWidth: 120,
     opacity: data.opacity,
     show: false,
     thickFrame: true,
