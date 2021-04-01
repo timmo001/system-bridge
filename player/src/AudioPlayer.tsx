@@ -47,6 +47,10 @@ const useStyles = makeStyles(() =>
       height: 110,
       width: 110,
     },
+    text: {
+      width: "100%",
+      maxWidth: "100%",
+    },
   })
 );
 
@@ -156,6 +160,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
       alignItems="center"
       justify="flex-start"
       spacing={2}
+      wrap="nowrap"
     >
       <Grid item>
         <ButtonBase
@@ -178,7 +183,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
           </Fade>
         </ButtonBase>
       </Grid>
-      <Grid item xs>
+      <Grid item xs={8}>
         <Grid
           container
           direction="column"
@@ -187,6 +192,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
         >
           <Grid item>
             <Typography
+              className={classes.text}
               color="textPrimary"
               component="span"
               variant="subtitle1"
@@ -197,6 +203,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
           </Grid>
           <Grid item>
             <Typography
+              className={classes.text}
               color="textSecondary"
               component="span"
               variant="subtitle2"
