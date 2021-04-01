@@ -82,16 +82,12 @@ function Main(): ReactElement {
           );
           break;
         case "video":
-          window.api.ipcRendererSend(
-            "get-video-metadata",
-            query.path || query.url
-          );
           setSource({
             type: "video",
             source: String(query.path)
               ? `http://localhost:${settings?.network.items.port.value}${query.url}`
               : String(query.url),
-            volumeInitial: volume > 0 ? volume : 40,
+            volumeInitial: volume > 0 ? volume : 60,
           });
           break;
       }

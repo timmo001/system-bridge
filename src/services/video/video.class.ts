@@ -72,8 +72,9 @@ export class Video {
         logger.info(`Path: ${data.path}`);
         logger.info(`URL: ${url}`);
         this.app.use(url, express.static(resolve(data.path)));
-
         createPlayerWindow({ ...data, type: "video", url });
+      } else if (data.url) {
+        createPlayerWindow({ ...data, type: "video", url: data.url });
       }
     })();
 
