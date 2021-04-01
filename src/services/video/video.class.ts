@@ -1,10 +1,8 @@
-// import { app } from "electron";
 import { BadRequest } from "@feathersjs/errors";
 import { resolve } from "path";
 import { v4 as uuidv4 } from "uuid";
-// import axios from "axios";
 import express from "@feathersjs/express";
-// import fs from "fs";
+import fs from "fs";
 
 import { Application } from "../../declarations";
 import {
@@ -56,6 +54,17 @@ export class Video {
 
     if (data.path) {
       logger.info(`Path: ${data.path}`);
+
+      if (
+        !(await new Promise<boolean>((resolve) => {
+          if (data.path)
+            fs.access(data.path, (err: NodeJS.ErrnoException | null) =>
+              resolve(err ? false : true)
+            );
+        }))
+      )
+        throw new BadRequest("Path provided does not exist.");
+
       logger.info(`URL: ${url}`);
       this.app.use(url, express.static(resolve(data.path)));
       createPlayerWindow({ ...data, type: "video", url });
