@@ -1,12 +1,15 @@
+import { screen } from "electron";
 import brightness from "brightness";
 
 import { Application } from "../../declarations";
+import logger from "../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
 
 export interface DisplayInfo {
   brightness: number;
+  displays: Electron.Display[];
 }
 
 export type DisplayUpdateId = "brightness" | "brightnessDown" | "brightnessUp";
@@ -25,9 +28,18 @@ export class Display {
   }
 
   async find(): Promise<DisplayInfo> {
-    return {
-      brightness: Math.round((await brightness.get()) * 100),
-    };
+    try {
+      return {
+        brightness: Math.round((await brightness.get()) * 100),
+        displays: screen.getAllDisplays(),
+      };
+    } catch (e) {
+      logger.info(`Couldnt get brightness. ${e.message}`);
+      return {
+        brightness: -1,
+        displays: screen.getAllDisplays(),
+      };
+    }
   }
 
   async update(
@@ -51,8 +63,6 @@ export class Display {
           await brightness.set((currentBrightness + data.value) / 100);
         break;
     }
-    return {
-      brightness: Math.round((await brightness.get()) * 100),
-    };
+    return await this.find();
   }
 }
