@@ -42,6 +42,11 @@ export class Information {
         endpoint: "/cpu",
         supportedMethods: ["GET"],
       },
+      display: {
+        description: "Control and get display information",
+        endpoint: "/display",
+        supportedMethods: ["GET", "PUT"],
+      },
       docs: {
         description: "OpenAPI Docs",
         endpoint: "/docs",
