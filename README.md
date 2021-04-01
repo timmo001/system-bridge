@@ -26,6 +26,7 @@ A bridge for your systems.
 | /bluetooth    | Bluetooth Information                            | GET                    |
 | /command      | Run a System Command                             | POST                   |
 | /cpu          | CPU Information                                  | GET                    |
+| /display      | Control and get display information              | GET, PUT               |
 | /docs         | OpenAPI Docs                                     | GET                    |
 | /filesystem   | Filesystem Information                           | GET                    |
 | /graphics     | Graphics Information                             | GET                    |
