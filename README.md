@@ -13,6 +13,7 @@ A bridge for your systems.
  API.
 - Audio Player and Controls - Play music or sounds and change the volume of
  your device via the API.
+- Video Player - Play local or hosted videos on your device via the API.
 - Send Commands - Automate your system by sending a command or opening a URL or
  path via the API.
 - Cross-Platform - Compatible with Windows, Mac and Linux.
@@ -38,6 +39,7 @@ A bridge for your systems.
 | /os           | OS Information                                   | GET                    |
 | /processes    | Processes Information                            | GET                    |
 | /system       | System Information                               | GET                    |
+| /video        | Play videos and control playback                 | DELETE, POST, PUT      |
 
 ## Download
 
