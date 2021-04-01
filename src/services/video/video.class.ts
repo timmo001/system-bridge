@@ -52,32 +52,17 @@ export class Video {
 
     const url = `/video-${uuidv4()}`;
 
-    (async () => {
-      closePlayerWindow();
-      //   if (data.url) {
-      //     data.path = app.getPath("temp") + url;
-      //     logger.info(`Downloading: ${data.url}`);
-      //     const response = await axios.get(data.url, {
-      //       responseType: "stream",
-      //     });
-      //     const writer = fs.createWriteStream(data.path);
-      //     response.data.pipe(writer);
-      //     await new Promise((resolve, reject) => {
-      //       writer.on("finish", resolve);
-      //       writer.on("error", reject);
-      //     });
-      //   }
+    closePlayerWindow();
 
-      if (data.path) {
-        logger.info(`Path: ${data.path}`);
-        logger.info(`URL: ${url}`);
-        this.app.use(url, express.static(resolve(data.path)));
-        createPlayerWindow({ ...data, type: "video", url });
-      } else if (data.url) {
-        createPlayerWindow({ ...data, type: "video", url: data.url });
-      }
-    })();
-
+    if (data.path) {
+      logger.info(`Path: ${data.path}`);
+      logger.info(`URL: ${url}`);
+      this.app.use(url, express.static(resolve(data.path)));
+      createPlayerWindow({ ...data, type: "video", url });
+    } else if (data.url) {
+      createPlayerWindow({ ...data, type: "video", url: data.url });
+      return data;
+    }
     return { ...data, url };
   }
 
