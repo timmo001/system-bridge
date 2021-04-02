@@ -1,8 +1,8 @@
 # System Bridge
 
-A bridge for your systems.
-
 ![CI](https://github.com/timmo001/system-bridge/workflows/CI/badge.svg) ![CodeQL](https://github.com/timmo001/system-bridge/workflows/CodeQL/badge.svg)
+
+A bridge for your systems.
 
 ![Logo](./public/system-bridge-rect.png)
 
