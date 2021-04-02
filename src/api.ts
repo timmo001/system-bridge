@@ -81,13 +81,13 @@ class API {
       })
     );
 
-    // Configure other middleware (see `middleware/index.js`)
+    // Configure other middleware (see `middleware/index.ts`)
     app.configure(middleware);
     // Configure authentication
     app.configure(authentication);
-    // Set up our services (see `services/index.js`)
+    // Set up our services (see `services/index.ts`)
     app.configure(services);
-    // Set up event channels (see channels.js)
+    // Set up event channels (see channels.ts)
     app.configure(channels);
 
     app.hooks(appHooks);
