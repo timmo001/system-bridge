@@ -8,11 +8,10 @@ import { useSettings } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "./resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
+import Webcam from "./Webcam";
 
 export interface Source {
-  type: "audio" | "video";
-  source: string;
-  volumeInitial: number;
+  type: "audio" | "video" | "webcam";
 }
 
 export interface AudioSource extends Source {
@@ -20,17 +19,27 @@ export interface AudioSource extends Source {
   album: string;
   artist: string;
   cover: string;
+  source: string;
   title: string;
+  volumeInitial: number;
 }
 
 export interface VideoSource extends Source {
   type: "video";
+  source: string;
+  volumeInitial: number;
+}
+
+export interface WebcamSource extends Source {
+  type: "webcam";
 }
 
 function Main(): ReactElement {
   const [entered, setEntered] = useState<boolean>(false);
   const [settings, setSettings] = useSettings();
-  const [source, setSource] = useState<AudioSource | VideoSource>();
+  const [source, setSource] = useState<
+    AudioSource | VideoSource | WebcamSource
+  >();
 
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
@@ -57,25 +66,24 @@ function Main(): ReactElement {
 
       const volume = Number(query.volume);
 
-      window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-        console.log(data);
-        setSource({
-          type: "audio",
-          source: String(query.path)
-            ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-            : String(query.url),
-          album: data.album,
-          artist: data.artist,
-          cover: data.cover || logo,
-          title: data.title,
-          volumeInitial: volume > 0 ? volume : 40,
-        });
-      });
-
       switch (query.type) {
         default:
           break;
         case "audio":
+          window.api.ipcRendererOn("audio-metadata", (_event, data) => {
+            console.log(data);
+            setSource({
+              type: "audio",
+              source: String(query.path)
+                ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+                : String(query.url),
+              album: data.album,
+              artist: data.artist,
+              cover: data.cover || logo,
+              title: data.title,
+              volumeInitial: volume > 0 ? volume : 40,
+            });
+          });
           window.api.ipcRendererSend(
             "get-audio-metadata",
             query.path || query.url
@@ -88,6 +96,11 @@ function Main(): ReactElement {
               ? `http://localhost:${settings?.network.items.port.value}${query.url}`
               : String(query.url),
             volumeInitial: volume > 0 ? volume : 60,
+          });
+          break;
+        case "webcam":
+          setSource({
+            type: "webcam",
           });
           break;
       }
@@ -125,6 +138,8 @@ function Main(): ReactElement {
         <AudioPlayer hovering={entered} source={source} />
       ) : source?.type === "video" ? (
         <VideoPlayer source={source} />
+      ) : source?.type === "webcam" ? (
+        <Webcam />
       ) : (
         ""
       )}

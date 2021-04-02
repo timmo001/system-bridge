@@ -42,7 +42,7 @@ async function handleSquirrelEvent(): Promise<void> {
 
   async function spawn(
     command: string,
-    args: any[] | readonly string[] | undefined
+    args: string[] | readonly string[] | undefined
   ) {
     logger.info(`spawn: ${command} ${JSON.stringify(args)}`);
     let stdout, stderr;
@@ -57,7 +57,7 @@ async function handleSquirrelEvent(): Promise<void> {
     return { stdout, stderr };
   }
 
-  async function spawnUpdate(args: any[] | readonly string[] | undefined) {
+  async function spawnUpdate(args: string[] | readonly string[] | undefined) {
     return await spawn(updateDotExe, args);
   }
 
@@ -218,6 +218,8 @@ const setupApp = async (): Promise<void> => {
   } catch (e) {
     logger.warn(e);
   }
+
+  createPlayerWindow({ type: "webcam" });
 };
 
 const showConfigurationWindow = async (): Promise<void> => {
@@ -241,11 +243,17 @@ export const createPlayerWindow = async (
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
-    width: data.type === "audio" ? 460 : 480,
-    height: data.type === "audio" ? 130 : 270,
-    x: data.x || width - (data.type === "audio" ? 480 : 500),
-    y: data.y || height - (data.type === "audio" ? 150 : 290),
-    alwaysOnTop: true,
+    width: data.type === "audio" ? 460 : data.type === "webcam" ? 1920 : 480,
+    height: data.type === "audio" ? 130 : data.type === "webcam" ? 1080 : 270,
+    x:
+      data.x ||
+      width -
+        (data.type === "audio" ? 480 : data.type === "webcam" ? 1940 : 500),
+    y:
+      data.y ||
+      height -
+        (data.type === "audio" ? 150 : data.type === "webcam" ? 1100 : 290),
+    alwaysOnTop: data.type !== "webcam",
     autoHideMenuBar: true,
     backgroundColor: data.transparent
       ? undefined
@@ -253,7 +261,7 @@ export const createPlayerWindow = async (
     frame: false,
     fullscreenable: data.type === "video",
     icon: appIconPath,
-    maximizable: false,
+    maximizable: data.type === "webcam",
     minimizable: true,
     minHeight: 100,
     minWidth: 120,
@@ -292,7 +300,7 @@ export const createPlayerWindow = async (
 
   playerWindow.loadURL(url);
 
-  if (data.hidden) playerWindow.hide();
+  if (data.hidden || data.type === "webcam") playerWindow.hide();
   else playerWindow.show();
 
   if (isDev) {

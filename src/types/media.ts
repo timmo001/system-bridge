@@ -4,7 +4,7 @@ export interface MediaCreateData {
   opacity?: number;
   path?: string;
   transparent?: boolean;
-  type: "audio" | "video";
+  type: "audio" | "video" | "webcam";
   url?: string;
   volume?: number;
   x?: number;
