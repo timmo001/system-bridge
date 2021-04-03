@@ -3,10 +3,9 @@ import { ButtonBase, Fade } from "@material-ui/core";
 import queryString from "query-string";
 import { Close, Minimize } from "@material-ui/icons";
 
-import { Configuration } from "../../src/configuration";
-import { useSettings } from "./Utils";
+import { useSettings } from "../Utils";
 import AudioPlayer from "./AudioPlayer";
-import logo from "./resources/system-bridge.svg";
+import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
 export interface Source {
@@ -27,26 +26,15 @@ export interface VideoSource extends Source {
   type: "video";
 }
 
-function Main(): ReactElement {
+function Player(): ReactElement {
   const [entered, setEntered] = useState<boolean>(false);
-  const [settings, setSettings] = useSettings();
+  const [settings] = useSettings();
   const [source, setSource] = useState<AudioSource | VideoSource>();
 
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
     document.addEventListener("mouseleave", () => setEntered(false));
   }, []);
-
-  useEffect(() => {
-    if (!settings) {
-      window.api.ipcRendererOn("set-settings", (_event, args) => {
-        console.log("set-settings:", args);
-        const s: Configuration = args;
-        setSettings(s);
-      });
-      window.api.ipcRendererSend("get-settings");
-    }
-  }, [settings, setSettings]);
 
   useEffect(() => {
     if (settings && !source) {
@@ -131,4 +119,4 @@ function Main(): ReactElement {
   );
 }
 
-export default Main;
+export default Player;

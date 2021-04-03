@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
 import {
   createMuiTheme,
   responsiveFontSizes,
@@ -8,8 +9,8 @@ import { grey, deepPurple } from "@material-ui/core/colors";
 
 import "typeface-roboto";
 
-import Main from "./Main";
 import { SettingsProvider } from "./Utils";
+import Main from "./Main";
 
 const theme = responsiveFontSizes(
   createMuiTheme({
@@ -34,9 +35,11 @@ const theme = responsiveFontSizes(
 function App(): ReactElement {
   return (
     <ThemeProvider theme={theme}>
-      <SettingsProvider>
-        <Main />
-      </SettingsProvider>
+      <Router>
+        <SettingsProvider>
+          <Main />
+        </SettingsProvider>
+      </Router>
     </ThemeProvider>
   );
 }

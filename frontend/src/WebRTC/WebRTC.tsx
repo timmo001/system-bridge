@@ -2,8 +2,8 @@ import React, { ReactElement, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 
-import { Configuration } from "../../src/configuration";
-import { useSettings } from "./Utils";
+import { Configuration } from "../../../src/configuration";
+import { useSettings } from "../Utils";
 
 let peer: Peer,
   peerConnectionInterval: NodeJS.Timeout,

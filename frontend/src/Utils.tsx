@@ -4,7 +4,7 @@ import React, {
   useContext,
   useState,
 } from "react";
-
+import { useLocation } from "react-router-dom";
 import { Configuration } from "../../src/configuration";
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
@@ -44,4 +44,8 @@ export function handleCopyToClipboard(value: string) {
       navigator.clipboard.writeText(value);
     }
   });
+}
+
+export function useQuery() {
+  return new URLSearchParams(useLocation().search);
 }
