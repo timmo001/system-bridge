@@ -97,13 +97,15 @@ export const appSmallIconPath = join(
   "./public/system-bridge-circle-32x32.png"
 );
 
-process.on("unhandledRejection", (error: Error) =>
-  logger.error("unhandledRejection:", error)
-);
+if (!isDev) {
+  process.on("unhandledRejection", (error: Error) =>
+    logger.error("unhandledRejection:", error)
+  );
 
-process.on("uncaughtException", (error: Error) =>
-  logger.error("uncaughtException:", error)
-);
+  process.on("uncaughtException", (error: Error) =>
+    logger.error("uncaughtException:", error)
+  );
+}
 
 const helpMenu: Array<MenuItemConstructorOptions> = [
   {
@@ -388,8 +390,6 @@ export const createRTCWindow = async (): Promise<void> => {
     ? `http://localhost:3002`
     : `file://${join(app.getAppPath(), "./rtc/build/index.html")}`;
 
-  logger.info(`RTC URL: ${url}`);
-
   rtcWindow.loadURL(url);
 
   rtcWindow.hide();
@@ -446,8 +446,6 @@ app.whenReady().then((): void => {
   tray.on("double-click", showConfigurationWindow);
 
   api = new API();
-
-  createRTCWindow();
 });
 
 ipcMain.on(

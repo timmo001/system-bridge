@@ -1,5 +1,6 @@
 import { app as electronApp, ipcMain } from "electron";
 import { createServer, Server } from "http";
+import { ExpressPeerServer } from "peer";
 import { join } from "path";
 import compress from "compression";
 import cors from "cors";
@@ -15,13 +16,14 @@ import swagger from "feathers-swagger";
 
 import { Application } from "./declarations";
 import { Configuration } from "./configuration";
+import { createRTCWindow } from ".";
 import { getSettings } from "./utils";
+import appHooks from "./app.hooks";
+import authentication from "./authentication";
+import channels from "./channels";
 import logger from "./logger";
 import middleware from "./middleware";
 import services from "./services";
-import appHooks from "./app.hooks";
-import channels from "./channels";
-import authentication from "./authentication";
 
 class API {
   private server?: Server;
@@ -85,10 +87,10 @@ class API {
     app.configure(middleware);
     // Configure authentication
     app.configure(authentication);
-    // Set up our services (see `services/index.ts`)
-    app.configure(services);
     // Set up event channels (see channels.ts)
     app.configure(channels);
+    // Set up our services (see `services/index.ts`)
+    app.configure(services);
 
     app.hooks(appHooks);
 
@@ -112,6 +114,25 @@ class API {
         ? networkSettings?.port?.value
         : 9170;
     this.server = createServer(app);
+
+    // Set up RTC Broker
+    const key = networkSettings?.apiKey.value;
+    if (typeof key === "string") {
+      const broker = ExpressPeerServer(this.server, {
+        allow_discovery: true,
+        key,
+      });
+      broker.on("connection", (client) => {
+        logger.info(`Broker peer connected: ${client.getId()}`);
+      });
+      broker.on("disconnect", (client) => {
+        logger.info(`Broker peer disconnected: ${client.getId()}`);
+      });
+      app.use("/rtc", broker);
+      logger.info(`RTC broker created on path ${broker.path()}`);
+      createRTCWindow();
+    }
+
     this.server.on("error", (err) => logger.error("Server error:", err));
     this.server.on("listening", async () => {
       logger.info(`API started on port ${port}`);
