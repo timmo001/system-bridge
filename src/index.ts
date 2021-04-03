@@ -389,7 +389,7 @@ export const createRTCWindow = async (): Promise<void> => {
       logger.warning("Error adding dev tools:", error);
     }
     // Open the DevTools.
-    rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+    // rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   }
 };
 
