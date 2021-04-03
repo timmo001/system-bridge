@@ -49,33 +49,41 @@ function Player(): ReactElement {
         default:
           break;
         case "audio":
-          window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-            console.log(data);
+          try {
+            window.api.ipcRendererOn("audio-metadata", (_event, data) => {
+              console.log(data);
+              setSource({
+                type: "audio",
+                source: String(query.path)
+                  ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+                  : String(query.url),
+                album: data.album,
+                artist: data.artist,
+                cover: data.cover || logo,
+                title: data.title,
+                volumeInitial: volume > 0 ? volume : 40,
+              });
+            });
+            window.api.ipcRendererSend(
+              "get-audio-metadata",
+              query.path || query.url
+            );
+          } catch (e) {
+            console.warn("Error calling window.api:", e);
+          }
+          break;
+        case "video":
+          try {
             setSource({
-              type: "audio",
+              type: "video",
               source: String(query.path)
                 ? `http://localhost:${settings?.network.items.port.value}${query.url}`
                 : String(query.url),
-              album: data.album,
-              artist: data.artist,
-              cover: data.cover || logo,
-              title: data.title,
-              volumeInitial: volume > 0 ? volume : 40,
+              volumeInitial: volume > 0 ? volume : 60,
             });
-          });
-          window.api.ipcRendererSend(
-            "get-audio-metadata",
-            query.path || query.url
-          );
-          break;
-        case "video":
-          setSource({
-            type: "video",
-            source: String(query.path)
-              ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-              : String(query.url),
-            volumeInitial: volume > 0 ? volume : 60,
-          });
+          } catch (e) {
+            console.warn("Error calling window.api:", e);
+          }
           break;
       }
     }
@@ -96,13 +104,25 @@ function Player(): ReactElement {
         >
           <ButtonBase
             style={{ width: 36, height: 28 }}
-            onClick={() => window.api.ipcRendererSend("window-minimize")}
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend("window-minimize");
+              } catch (e) {
+                console.warn("Error calling window-minimize:", e);
+              }
+            }}
           >
             <Minimize fontSize="small" style={{ marginTop: -12 }} />
           </ButtonBase>
           <ButtonBase
             style={{ width: 36, height: 28 }}
-            onClick={() => window.api.ipcRendererSend("window-close")}
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend("window-close");
+              } catch (e) {
+                console.warn("Error calling window-close:", e);
+              }
+            }}
           >
             <Close fontSize="small" />
           </ButtonBase>

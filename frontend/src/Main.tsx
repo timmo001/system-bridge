@@ -43,14 +43,23 @@ function Main(): ReactElement {
   const classes = useStyles();
 
   return (
-    <Switch>
-      <Route path="/">
-        <div
-          className={classes.root}
-          style={{
-            background: query.get("background") || "#121212",
-          }}
-        >
+    <div
+      className={classes.root}
+      style={{
+        background: query.get("background") || "#121212",
+      }}
+    >
+      <Switch>
+        <Route path="/configuration">
+          <Configuration />
+        </Route>
+        <Route path="/player">
+          <Player />
+        </Route>
+        <Route path="/webrtc">
+          <WebRTC />
+        </Route>
+        <Route path="/">
           <Grid
             className={classes.root}
             container
@@ -61,18 +70,9 @@ function Main(): ReactElement {
               Page not found
             </Typography>
           </Grid>
-        </div>
-      </Route>
-      <Route path="/configuration">
-        <Configuration />
-      </Route>
-      <Route path="/player">
-        <Player />
-      </Route>
-      <Route path="/webrtc">
-        <WebRTC />
-      </Route>
-    </Switch>
+        </Route>
+      </Switch>
+    </div>
   );
 }
 
