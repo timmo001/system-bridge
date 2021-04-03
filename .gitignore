@@ -98,4 +98,3 @@ data/
 
 # Frontend
 public/frontend/*
-!public/frontend/.gitkeep
