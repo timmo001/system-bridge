@@ -63,6 +63,11 @@ class API {
         join(electronApp.getAppPath(), "./public/system-bridge-circle.ico")
       )
     );
+    // Host the public folder
+    app.use(
+      "/frontend",
+      express.static(join(electronApp.getAppPath(), "./public/frontend"))
+    );
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
