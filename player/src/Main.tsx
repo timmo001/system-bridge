@@ -11,6 +11,8 @@ import VideoPlayer from "./VideoPlayer";
 
 export interface Source {
   type: "audio" | "video";
+  source: string;
+  volumeInitial: number;
 }
 
 export interface AudioSource extends Source {
@@ -18,15 +20,11 @@ export interface AudioSource extends Source {
   album: string;
   artist: string;
   cover: string;
-  source: string;
   title: string;
-  volumeInitial: number;
 }
 
 export interface VideoSource extends Source {
   type: "video";
-  source: string;
-  volumeInitial: number;
 }
 
 function Main(): ReactElement {
