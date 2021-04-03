@@ -50,13 +50,13 @@ function Main(): ReactElement {
       }}
     >
       <Switch>
-        <Route path="/configuration">
+        <Route path="/frontend/configuration">
           <Configuration />
         </Route>
-        <Route path="/player">
+        <Route path="/frontend/player">
           <Player />
         </Route>
-        <Route path="/webrtc">
+        <Route path="/frontend/webrtc">
           <WebRTC />
         </Route>
         <Route path="/">

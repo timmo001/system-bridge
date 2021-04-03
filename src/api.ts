@@ -64,10 +64,18 @@ class API {
       )
     );
     // Host the public folder
-    app.use(
-      "/frontend",
-      express.static(join(electronApp.getAppPath(), "./public/frontend"))
+    app.use(express.static(join(electronApp.getAppPath(), "public")));
+    // Redirect any requests after frontend to index.html
+    app.get(
+      ["/frontend(/*)?", "/frontend/*/*"],
+      (_req: Request, res: { sendFile: (arg0: string) => void }) => {
+        res.sendFile(
+          join(electronApp.getAppPath(), "public/frontend/index.html")
+        );
+      }
     );
+    // Trust proxy (reverse proxy)
+    app.set("trust proxy", true);
     // Add REST API support
     app.configure(express.rest());
     // Configure Socket.io real-time APIs
