@@ -158,13 +158,13 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow,
+let configurationWindow: BrowserWindow,
   playerWindow: BrowserWindow | undefined,
+  rtcWindow: BrowserWindow | undefined,
   tray: Tray,
   api: API | undefined;
 const setupApp = async (): Promise<void> => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
+  configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     autoHideMenuBar: false,
@@ -187,7 +187,7 @@ const setupApp = async (): Promise<void> => {
         {
           label: "Close Settings",
           type: "normal",
-          click: () => mainWindow.close(),
+          click: () => configurationWindow.close(),
         },
         { type: "separator" },
         { label: "Quit Application", type: "normal", click: quitApp },
@@ -208,9 +208,9 @@ const setupApp = async (): Promise<void> => {
     updateApp();
   }
 
-  mainWindow.on("close", (event) => {
+  configurationWindow.on("close", (event) => {
     event.preventDefault();
-    mainWindow.hide();
+    configurationWindow.hide();
   });
 
   try {
@@ -218,23 +218,21 @@ const setupApp = async (): Promise<void> => {
   } catch (e) {
     logger.warn(e);
   }
-
-  createPlayerWindow({ type: "webcam" });
 };
 
 const showConfigurationWindow = async (): Promise<void> => {
-  mainWindow.loadURL(
+  configurationWindow.loadURL(
     isDev
       ? "http://localhost:3000"
       : `file://${join(app.getAppPath(), "./configuration/build/index.html")}`
   );
 
-  mainWindow.show();
+  configurationWindow.show();
 
   if (isDev) {
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
-    mainWindow.maximize();
+    configurationWindow.webContents.openDevTools();
+    configurationWindow.maximize();
   }
 };
 
@@ -243,17 +241,11 @@ export const createPlayerWindow = async (
 ): Promise<void> => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
-    width: data.type === "audio" ? 460 : data.type === "webcam" ? 1920 : 480,
-    height: data.type === "audio" ? 130 : data.type === "webcam" ? 1080 : 270,
-    x:
-      data.x ||
-      width -
-        (data.type === "audio" ? 480 : data.type === "webcam" ? 1940 : 500),
-    y:
-      data.y ||
-      height -
-        (data.type === "audio" ? 150 : data.type === "webcam" ? 1100 : 290),
-    alwaysOnTop: data.type !== "webcam",
+    width: data.type === "audio" ? 460 : 480,
+    height: data.type === "audio" ? 130 : 270,
+    x: data.x || width - (data.type === "audio" ? 480 : 500),
+    y: data.y || height - (data.type === "audio" ? 150 : 290),
+    alwaysOnTop: true,
     autoHideMenuBar: true,
     backgroundColor: data.transparent
       ? undefined
@@ -261,7 +253,7 @@ export const createPlayerWindow = async (
     frame: false,
     fullscreenable: data.type === "video",
     icon: appIconPath,
-    maximizable: data.type === "webcam",
+    maximizable: false,
     minimizable: true,
     minHeight: 100,
     minWidth: 120,
@@ -300,7 +292,7 @@ export const createPlayerWindow = async (
 
   playerWindow.loadURL(url);
 
-  if (data.hidden || data.type === "webcam") playerWindow.hide();
+  if (data.hidden) playerWindow.hide();
   else playerWindow.show();
 
   if (isDev) {
@@ -334,6 +326,7 @@ export const pausePlayerWindow = (): boolean => {
   }
   return false;
 };
+
 export const playPlayerWindow = (): boolean => {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-play");
@@ -342,6 +335,7 @@ export const playPlayerWindow = (): boolean => {
   }
   return false;
 };
+
 export const playpausePlayerWindow = (): boolean => {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-playpause");
@@ -351,9 +345,70 @@ export const playpausePlayerWindow = (): boolean => {
   return false;
 };
 
+export const createRTCWindow = async (): Promise<void> => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const windowOpts: BrowserWindowConstructorOptions = {
+    width: 1920,
+    height: 1080,
+    x: width - 1940,
+    y: height - 1100,
+    alwaysOnTop: false,
+    autoHideMenuBar: true,
+    backgroundColor: "#121212",
+    frame: true,
+    fullscreenable: true,
+    icon: appIconPath,
+    maximizable: true,
+    minimizable: true,
+    minHeight: 100,
+    minWidth: 120,
+    show: false,
+    thickFrame: true,
+    titleBarStyle: "default",
+    webPreferences: {
+      contextIsolation: true,
+      preload: join(__dirname, "./preload.js"),
+      devTools: isDev,
+    },
+  };
+
+  logger.debug(JSON.stringify(windowOpts));
+
+  rtcWindow = new BrowserWindow(windowOpts);
+
+  rtcWindow.webContents.setWindowOpenHandler(() => ({
+    action: "deny",
+  }));
+
+  rtcWindow.webContents.on("will-navigate", (event: Event) =>
+    event.preventDefault()
+  );
+
+  const url = isDev
+    ? `http://localhost:3002`
+    : `file://${join(app.getAppPath(), "./rtc/build/index.html")}`;
+
+  logger.info(`RTC URL: ${url}`);
+
+  rtcWindow.loadURL(url);
+
+  rtcWindow.hide();
+
+  if (isDev) {
+    try {
+      const extName = await devTools(REACT_DEVELOPER_TOOLS);
+      logger.debug("Added Extension:", extName);
+    } catch (error) {
+      logger.error("An error occurred:", error);
+    }
+    // Open the DevTools.
+    rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  }
+};
+
 const quitApp = (): void => {
   tray?.destroy();
-  mainWindow?.destroy();
+  configurationWindow?.destroy();
   app.quit();
 };
 
@@ -391,6 +446,8 @@ app.whenReady().then((): void => {
   tray.on("double-click", showConfigurationWindow);
 
   api = new API();
+
+  createRTCWindow();
 });
 
 ipcMain.on(
