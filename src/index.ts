@@ -42,7 +42,7 @@ async function handleSquirrelEvent(): Promise<void> {
 
   async function spawn(
     command: string,
-    args: any[] | readonly string[] | undefined
+    args: string[] | readonly string[] | undefined
   ) {
     logger.info(`spawn: ${command} ${JSON.stringify(args)}`);
     let stdout, stderr;
@@ -57,7 +57,7 @@ async function handleSquirrelEvent(): Promise<void> {
     return { stdout, stderr };
   }
 
-  async function spawnUpdate(args: any[] | readonly string[] | undefined) {
+  async function spawnUpdate(args: string[] | readonly string[] | undefined) {
     return await spawn(updateDotExe, args);
   }
 
@@ -97,13 +97,15 @@ export const appSmallIconPath = join(
   "./public/system-bridge-circle-32x32.png"
 );
 
-process.on("unhandledRejection", (error: Error) =>
-  logger.error("unhandledRejection:", error)
-);
+if (!isDev) {
+  process.on("unhandledRejection", (error: Error) =>
+    logger.error("unhandledRejection:", error)
+  );
 
-process.on("uncaughtException", (error: Error) =>
-  logger.error("uncaughtException:", error)
-);
+  process.on("uncaughtException", (error: Error) =>
+    logger.error("uncaughtException:", error)
+  );
+}
 
 const helpMenu: Array<MenuItemConstructorOptions> = [
   {
@@ -158,13 +160,13 @@ const setAppConfig = async (): Promise<void> => {
   });
 };
 
-let mainWindow: BrowserWindow,
+let configurationWindow: BrowserWindow,
   playerWindow: BrowserWindow | undefined,
+  rtcWindow: BrowserWindow | undefined,
   tray: Tray,
   api: API | undefined;
 const setupApp = async (): Promise<void> => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
+  configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     autoHideMenuBar: false,
@@ -187,7 +189,7 @@ const setupApp = async (): Promise<void> => {
         {
           label: "Close Settings",
           type: "normal",
-          click: () => mainWindow.close(),
+          click: () => configurationWindow.close(),
         },
         { type: "separator" },
         { label: "Quit Application", type: "normal", click: quitApp },
@@ -199,18 +201,17 @@ const setupApp = async (): Promise<void> => {
 
   if (isDev) {
     try {
-      const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      logger.debug("Added Extension:", extName);
+      await devTools(REACT_DEVELOPER_TOOLS);
     } catch (error) {
-      logger.error("An error occurred:", error);
+      logger.warning("Error adding dev tools:", error);
     }
   } else {
     updateApp();
   }
 
-  mainWindow.on("close", (event) => {
+  configurationWindow.on("close", (event) => {
     event.preventDefault();
-    mainWindow.hide();
+    configurationWindow.hide();
   });
 
   try {
@@ -221,18 +222,18 @@ const setupApp = async (): Promise<void> => {
 };
 
 const showConfigurationWindow = async (): Promise<void> => {
-  mainWindow.loadURL(
+  configurationWindow.loadURL(
     isDev
       ? "http://localhost:3000"
       : `file://${join(app.getAppPath(), "./configuration/build/index.html")}`
   );
 
-  mainWindow.show();
+  configurationWindow.show();
 
   if (isDev) {
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
-    mainWindow.maximize();
+    configurationWindow.webContents.openDevTools();
+    configurationWindow.maximize();
   }
 };
 
@@ -297,10 +298,9 @@ export const createPlayerWindow = async (
 
   if (isDev) {
     try {
-      const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      logger.debug("Added Extension:", extName);
+      await devTools(REACT_DEVELOPER_TOOLS);
     } catch (error) {
-      logger.error("An error occurred:", error);
+      logger.warning("Error adding dev tools:", error);
     }
     // Open the DevTools.
     playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
@@ -326,6 +326,7 @@ export const pausePlayerWindow = (): boolean => {
   }
   return false;
 };
+
 export const playPlayerWindow = (): boolean => {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-play");
@@ -334,6 +335,7 @@ export const playPlayerWindow = (): boolean => {
   }
   return false;
 };
+
 export const playpausePlayerWindow = (): boolean => {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-playpause");
@@ -343,9 +345,57 @@ export const playpausePlayerWindow = (): boolean => {
   return false;
 };
 
+export const createRTCWindow = async (): Promise<void> => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const windowOpts: BrowserWindowConstructorOptions = {
+    width: 1920,
+    height: 1080,
+    x: width - 1940,
+    y: height - 1100,
+    alwaysOnTop: false,
+    autoHideMenuBar: true,
+    backgroundColor: "#121212",
+    frame: true,
+    fullscreenable: true,
+    icon: appIconPath,
+    maximizable: true,
+    minimizable: true,
+    minHeight: 100,
+    minWidth: 120,
+    show: false,
+    thickFrame: true,
+    titleBarStyle: "default",
+    webPreferences: {
+      contextIsolation: true,
+      preload: join(__dirname, "./preload.js"),
+      devTools: isDev,
+    },
+  };
+
+  rtcWindow = new BrowserWindow(windowOpts);
+
+  const url = isDev
+    ? `http://localhost:3002`
+    : `file://${join(app.getAppPath(), "./rtc/build/index.html")}`;
+
+  rtcWindow.loadURL(url);
+
+  rtcWindow.hide();
+
+  if (isDev) {
+    try {
+      await devTools(REACT_DEVELOPER_TOOLS);
+    } catch (error) {
+      logger.warning("Error adding dev tools:", error);
+    }
+    // Open the DevTools.
+    // rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  }
+};
+
 const quitApp = (): void => {
   tray?.destroy();
-  mainWindow?.destroy();
+  configurationWindow?.destroy();
   app.quit();
 };
 

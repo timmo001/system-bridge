@@ -7,7 +7,7 @@ interface VideoPlayerProps {
   source: VideoSource;
 }
 
-function AudioPlayer({ source }: VideoPlayerProps) {
+function VideoPlayer({ source }: VideoPlayerProps) {
   const { source: videoSrc, volumeInitial } = source;
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
@@ -39,4 +39,4 @@ function AudioPlayer({ source }: VideoPlayerProps) {
   );
 }
 
-export default AudioPlayer;
+export default VideoPlayer;

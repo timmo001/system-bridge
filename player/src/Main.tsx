@@ -57,25 +57,24 @@ function Main(): ReactElement {
 
       const volume = Number(query.volume);
 
-      window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-        console.log(data);
-        setSource({
-          type: "audio",
-          source: String(query.path)
-            ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-            : String(query.url),
-          album: data.album,
-          artist: data.artist,
-          cover: data.cover || logo,
-          title: data.title,
-          volumeInitial: volume > 0 ? volume : 40,
-        });
-      });
-
       switch (query.type) {
         default:
           break;
         case "audio":
+          window.api.ipcRendererOn("audio-metadata", (_event, data) => {
+            console.log(data);
+            setSource({
+              type: "audio",
+              source: String(query.path)
+                ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+                : String(query.url),
+              album: data.album,
+              artist: data.artist,
+              cover: data.cover || logo,
+              title: data.title,
+              volumeInitial: volume > 0 ? volume : 40,
+            });
+          });
           window.api.ipcRendererSend(
             "get-audio-metadata",
             query.path || query.url
