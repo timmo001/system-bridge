@@ -5,7 +5,7 @@
   "version": "1.3.0",
   "main": "dist/index.js",
   "scripts": {
-    "build:frontend": "cd frontend && yarn build",
+    "build:frontend": "cd frontend && yarn build && cd ../ && shx rm -rf public/frontend && node scripts/copy-frontend-to-public.js",
     "compile": "shx rm -rf dist/ && tsc",
     "install:all": "yarn install && cd frontend && yarn install",
     "make": "yarn compile && yarn build:frontend && electron-forge make",
