@@ -201,10 +201,9 @@ const setupApp = async (): Promise<void> => {
 
   if (isDev) {
     try {
-      const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      logger.debug("Added Extension:", extName);
+      await devTools(REACT_DEVELOPER_TOOLS);
     } catch (error) {
-      logger.error("An error occurred:", error);
+      logger.warning("Error adding dev tools:", error);
     }
   } else {
     updateApp();
@@ -299,10 +298,9 @@ export const createPlayerWindow = async (
 
   if (isDev) {
     try {
-      const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      logger.debug("Added Extension:", extName);
+      await devTools(REACT_DEVELOPER_TOOLS);
     } catch (error) {
-      logger.error("An error occurred:", error);
+      logger.warning("Error adding dev tools:", error);
     }
     // Open the DevTools.
     playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
@@ -374,8 +372,6 @@ export const createRTCWindow = async (): Promise<void> => {
     },
   };
 
-  logger.debug(JSON.stringify(windowOpts));
-
   rtcWindow = new BrowserWindow(windowOpts);
 
   rtcWindow.webContents.setWindowOpenHandler(() => ({
@@ -396,10 +392,9 @@ export const createRTCWindow = async (): Promise<void> => {
 
   if (isDev) {
     try {
-      const extName = await devTools(REACT_DEVELOPER_TOOLS);
-      logger.debug("Added Extension:", extName);
+      await devTools(REACT_DEVELOPER_TOOLS);
     } catch (error) {
-      logger.error("An error occurred:", error);
+      logger.warning("Error adding dev tools:", error);
     }
     // Open the DevTools.
     rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
