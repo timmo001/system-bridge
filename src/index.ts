@@ -374,14 +374,6 @@ export const createRTCWindow = async (): Promise<void> => {
 
   rtcWindow = new BrowserWindow(windowOpts);
 
-  rtcWindow.webContents.setWindowOpenHandler(() => ({
-    action: "deny",
-  }));
-
-  rtcWindow.webContents.on("will-navigate", (event: Event) =>
-    event.preventDefault()
-  );
-
   const url = isDev
     ? `http://localhost:3002`
     : `file://${join(app.getAppPath(), "./rtc/build/index.html")}`;
