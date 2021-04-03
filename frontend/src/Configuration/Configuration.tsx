@@ -55,11 +55,15 @@ function Configuration(): ReactElement {
 
   useEffect(() => {
     if (!appInfo) {
-      window.api.ipcRendererOn("app-information", (_event, args) => {
-        console.log("set-app-info:", args);
-        setAppInfo(args);
-      });
-      window.api.ipcRendererSend("get-app-information");
+      try {
+        window.api.ipcRendererOn("app-information", (_event, args) => {
+          console.log("set-app-info:", args);
+          setAppInfo(args);
+        });
+        window.api.ipcRendererSend("get-app-information");
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
     }
   }, [appInfo, setAppInfo]);
 
@@ -155,12 +159,16 @@ function Configuration(): ReactElement {
           Found an issue? Report it{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/issues/new/choose"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/issues/new/choose"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>
@@ -172,12 +180,16 @@ function Configuration(): ReactElement {
           Thought of a feature that could be added? Suggest it{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/issues/new/choose"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/issues/new/choose"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>
@@ -190,12 +202,16 @@ function Configuration(): ReactElement {
           Participate in discussions and get help{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/discussions"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/discussions"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>

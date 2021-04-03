@@ -13,12 +13,16 @@ function Main(): ReactElement {
 
   useEffect(() => {
     if (!settings) {
-      window.api.ipcRendererOn("set-settings", (_event, args) => {
-        console.log("set-settings:", args);
-        const s: Configuration = args;
-        setSettings(s);
-      });
-      window.api.ipcRendererSend("get-settings");
+      try {
+        window.api.ipcRendererOn("set-settings", (_event, args) => {
+          console.log("set-settings:", args);
+          const s: Configuration = args;
+          setSettings(s);
+        });
+        window.api.ipcRendererSend("get-settings");
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
     }
   }, [settings, setSettings]);
 
