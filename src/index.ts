@@ -11,6 +11,7 @@ import {
 import { BrowserWindowConstructorOptions } from "electron/main";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
+import debug from "electron-debug";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import execa from "execa";
@@ -29,6 +30,9 @@ logger.info(
 );
 
 handleSquirrelEvent();
+
+if (isDev)
+  debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
 
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
@@ -177,6 +181,7 @@ async function setupApp(): Promise<void> {
     maximizable: true,
     show: false,
     webPreferences: {
+      contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
       devTools: isDev,
     },
@@ -187,15 +192,7 @@ async function setupApp(): Promise<void> {
   const menu = Menu.buildFromTemplate([
     {
       label: "File",
-      submenu: [
-        {
-          label: "Close Settings",
-          type: "normal",
-          click: () => configurationWindow.close(),
-        },
-        { type: "separator" },
-        { label: "Quit Application", type: "normal", click: quitApp },
-      ],
+      submenu: [{ label: "Quit Application", type: "normal", click: quitApp }],
     },
     ...helpMenu,
   ]);
