@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 let peer: Peer,
-  peerConnectionInterval: NodeJS.Timeout,
+  peerConnectionInterval: NodeJS.Timeout | null,
   mediaStream: MediaStream | null;
 function WebRTC(): ReactElement {
   const [settings] = useSettings();
@@ -71,12 +71,14 @@ function WebRTC(): ReactElement {
                 video.srcObject = null;
                 mediaStream?.getTracks().forEach((track) => track.stop());
                 mediaStream = null;
+                if (peerConnectionInterval)
+                  clearInterval(peerConnectionInterval);
+                peerConnectionInterval = null;
                 try {
                   window.api.ipcRendererSend("window-hide");
                 } catch (e) {
                   console.warn("Error calling window.api:", e);
                 }
-                clearInterval(peerConnectionInterval);
               }
             });
           }, 2000);
@@ -84,7 +86,10 @@ function WebRTC(): ReactElement {
       })();
     return () => {
       if (peer) {
-        if (peerConnectionInterval) clearInterval(peerConnectionInterval);
+        if (peerConnectionInterval) {
+          clearInterval(peerConnectionInterval);
+          peerConnectionInterval = null;
+        }
         peer.disconnect();
         peer.destroy();
       }
