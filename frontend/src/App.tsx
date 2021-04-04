@@ -8,8 +8,8 @@ import { grey, deepPurple } from "@material-ui/core/colors";
 
 import "typeface-roboto";
 
-import Main from "./Main";
 import { SettingsProvider } from "./Utils";
+import Main from "./Main";
 
 const theme = responsiveFontSizes(
   createMuiTheme({

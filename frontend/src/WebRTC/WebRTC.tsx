@@ -2,8 +2,8 @@ import React, { ReactElement, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 
-import { Configuration } from "../../src/configuration";
-import { useSettings } from "./Utils";
+import { Configuration } from "../../../src/configuration";
+import { useSettings } from "../Utils";
 
 let peer: Peer,
   peerConnectionInterval: NodeJS.Timeout,
@@ -13,12 +13,16 @@ function Main(): ReactElement {
 
   useEffect(() => {
     if (!settings) {
-      window.api.ipcRendererOn("set-settings", (_event, args) => {
-        console.log("set-settings:", args);
-        const s: Configuration = args;
-        setSettings(s);
-      });
-      window.api.ipcRendererSend("get-settings");
+      try {
+        window.api.ipcRendererOn("set-settings", (_event, args) => {
+          console.log("set-settings:", args);
+          const s: Configuration = args;
+          setSettings(s);
+        });
+        window.api.ipcRendererSend("get-settings");
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
     }
   }, [settings, setSettings]);
 

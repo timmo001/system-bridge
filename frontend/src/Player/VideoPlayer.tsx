@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ReactPlayer from "react-player/lazy";
 
-import { VideoSource } from "./Main";
+import { VideoSource } from "./Player";
 
 interface VideoPlayerProps {
   source: VideoSource;

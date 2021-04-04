@@ -95,3 +95,6 @@ data/
 
 # Local VS Code Settings
 .vscode/settings.json
+
+# Frontend
+public/frontend/*

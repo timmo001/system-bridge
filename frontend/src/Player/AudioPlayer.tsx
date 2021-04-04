@@ -19,7 +19,7 @@ import {
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 import moment from "moment";
 
-import { AudioSource } from "./Main";
+import { AudioSource } from "./Player";
 
 interface AudioPlayerProps {
   hovering: boolean;

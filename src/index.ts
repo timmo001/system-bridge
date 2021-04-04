@@ -152,20 +152,23 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
   },
 ];
 
-const setAppConfig = async (): Promise<void> => {
+async function setAppConfig(): Promise<void> {
   const config = getSettings();
-  const launchOnStartup = config.general?.items.launchOnStartup?.value;
-  app.setLoginItemSettings({
-    openAtLogin: typeof launchOnStartup === "boolean" ? launchOnStartup : false,
-  });
-};
+  if (!isDev) {
+    const launchOnStartup = config.general?.items.launchOnStartup?.value;
+    app.setLoginItemSettings({
+      openAtLogin:
+        typeof launchOnStartup === "boolean" ? launchOnStartup : false,
+    });
+  }
+}
 
 let configurationWindow: BrowserWindow,
   playerWindow: BrowserWindow | undefined,
   rtcWindow: BrowserWindow | undefined,
   tray: Tray,
   api: API | undefined;
-const setupApp = async (): Promise<void> => {
+async function setupApp(): Promise<void> {
   configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -174,7 +177,6 @@ const setupApp = async (): Promise<void> => {
     maximizable: true,
     show: false,
     webPreferences: {
-      contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
       devTools: isDev,
     },
@@ -219,15 +221,17 @@ const setupApp = async (): Promise<void> => {
   } catch (e) {
     logger.warn(e);
   }
-};
+}
 
-const showConfigurationWindow = async (): Promise<void> => {
-  configurationWindow.loadURL(
+async function showConfigurationWindow(): Promise<void> {
+  const url = `${
     isDev
-      ? "http://localhost:3000"
-      : `file://${join(app.getAppPath(), "./configuration/build/index.html")}`
-  );
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
+  }?${queryString.stringify({ id: "configuration" })}`;
+  logger.info(`Configuration URL: ${url}`);
 
+  configurationWindow.loadURL(url);
   configurationWindow.show();
 
   if (isDev) {
@@ -235,11 +239,9 @@ const showConfigurationWindow = async (): Promise<void> => {
     configurationWindow.webContents.openDevTools();
     configurationWindow.maximize();
   }
-};
+}
 
-export const createPlayerWindow = async (
-  data: MediaCreateData
-): Promise<void> => {
+export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: data.type === "audio" ? 460 : 480,
@@ -282,17 +284,14 @@ export const createPlayerWindow = async (
     event.preventDefault()
   );
 
-  const url = isDev
-    ? `http://localhost:3001/?${queryString.stringify(data)}`
-    : `file://${join(
-        app.getAppPath(),
-        "./player/build/index.html"
-      )}?${queryString.stringify(data)}`;
-
+  const url = `${
+    isDev
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
+  }?${queryString.stringify({ ...data, id: "player" })}`;
   logger.info(`Player URL: ${url}`);
 
   playerWindow.loadURL(url);
-
   if (data.hidden) playerWindow.hide();
   else playerWindow.show();
 
@@ -305,9 +304,9 @@ export const createPlayerWindow = async (
     // Open the DevTools.
     playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   }
-};
+}
 
-export const closePlayerWindow = (): boolean => {
+export function closePlayerWindow(): boolean {
   if (playerWindow) {
     if (!playerWindow.isDestroyed()) {
       playerWindow.close();
@@ -316,36 +315,36 @@ export const closePlayerWindow = (): boolean => {
     return true;
   }
   return false;
-};
+}
 
-export const pausePlayerWindow = (): boolean => {
+export function pausePlayerWindow(): boolean {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-pause");
     playerWindow.webContents.send("player-pause");
     return true;
   }
   return false;
-};
+}
 
-export const playPlayerWindow = (): boolean => {
+export function playPlayerWindow(): boolean {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-play");
     playerWindow.webContents.send("player-play");
     return true;
   }
   return false;
-};
+}
 
-export const playpausePlayerWindow = (): boolean => {
+export function playpausePlayerWindow(): boolean {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-playpause");
     playerWindow.webContents.send("player-playpause");
     return true;
   }
   return false;
-};
+}
 
-export const createRTCWindow = async (): Promise<void> => {
+export async function createRTCWindow(): Promise<void> {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: 1920,
@@ -374,12 +373,14 @@ export const createRTCWindow = async (): Promise<void> => {
 
   rtcWindow = new BrowserWindow(windowOpts);
 
-  const url = isDev
-    ? `http://localhost:3002`
-    : `file://${join(app.getAppPath(), "./rtc/build/index.html")}`;
+  const url = `${
+    isDev
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
+  }?${queryString.stringify({ id: "webrtc" })}`;
+  logger.info(`WebRTC URL: ${url}`);
 
   rtcWindow.loadURL(url);
-
   rtcWindow.hide();
 
   if (isDev) {
@@ -391,13 +392,13 @@ export const createRTCWindow = async (): Promise<void> => {
     // Open the DevTools.
     // rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   }
-};
+}
 
-const quitApp = (): void => {
+function quitApp(): void {
   tray?.destroy();
   configurationWindow?.destroy();
   app.quit();
-};
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

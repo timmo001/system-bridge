@@ -14,10 +14,10 @@ import {
 import Icon from "@mdi/react";
 import { mdiContentCopy } from "@mdi/js";
 
-import { Configuration } from "../../src/configuration";
-import { handleCopyToClipboard, useSettings } from "./Utils";
-import Section from "./Settings/Section";
-import logo from "./resources/system-bridge.svg";
+import { handleCopyToClipboard } from "../Utils";
+import { useSettings } from "../Utils";
+import logo from "../resources/system-bridge.svg";
+import Section from "./Section";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -49,26 +49,23 @@ interface AppInfo {
   version: string;
 }
 
-function Main(): ReactElement {
-  const [settings, setSettings] = useSettings();
+function Configuration(): ReactElement {
   const [appInfo, setAppInfo] = useState<AppInfo>();
+  const [settings] = useSettings();
 
   useEffect(() => {
-    if (!settings) {
-      window.api.ipcRendererOn("set-settings", (_event, args) => {
-        console.log("set-settings:", args);
-        const s: Configuration = args;
-        setSettings(s);
-      });
-      window.api.ipcRendererSend("get-settings");
-
-      window.api.ipcRendererOn("app-information", (_event, args) => {
-        console.log("set-app-info:", args);
-        setAppInfo(args);
-      });
-      window.api.ipcRendererSend("get-app-information");
+    if (!appInfo) {
+      try {
+        window.api.ipcRendererOn("app-information", (_event, args) => {
+          console.log("set-app-info:", args);
+          setAppInfo(args);
+        });
+        window.api.ipcRendererSend("get-app-information");
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
     }
-  }, [settings, setSettings]);
+  }, [appInfo, setAppInfo]);
 
   const classes = useStyles();
 
@@ -162,12 +159,16 @@ function Main(): ReactElement {
           Found an issue? Report it{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/issues/new/choose"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/issues/new/choose"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>
@@ -179,12 +180,16 @@ function Main(): ReactElement {
           Thought of a feature that could be added? Suggest it{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/issues/new/choose"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/issues/new/choose"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>
@@ -197,12 +202,16 @@ function Main(): ReactElement {
           Participate in discussions and get help{" "}
           <a
             href={window.location.href}
-            onClick={() =>
-              window.api.ipcRendererSend(
-                "open-url",
-                "https://github.com/timmo001/system-bridge/discussions"
-              )
-            }
+            onClick={() => {
+              try {
+                window.api.ipcRendererSend(
+                  "open-url",
+                  "https://github.com/timmo001/system-bridge/discussions"
+                );
+              } catch (e) {
+                console.warn("Error calling window.api:", e);
+              }
+            }}
           >
             here
           </a>
@@ -213,4 +222,4 @@ function Main(): ReactElement {
   );
 }
 
-export default Main;
+export default Configuration;

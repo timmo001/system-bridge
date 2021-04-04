@@ -2,10 +2,12 @@ import React, {
   createContext,
   ReactElement,
   useContext,
+  useMemo,
   useState,
 } from "react";
-
 import { Configuration } from "../../src/configuration";
+import { useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<
@@ -45,3 +47,8 @@ export function handleCopyToClipboard(value: string) {
     }
   });
 }
+
+export const parsedQuery = queryString.parse(window.location.search, {
+  parseBooleans: true,
+  parseNumbers: true,
+});

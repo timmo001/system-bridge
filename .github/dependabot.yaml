@@ -11,17 +11,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
-    directory: "/configuration"
-    open-pull-requests-limit: 20
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/player"
-    open-pull-requests-limit: 20
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/rtc"
+    directory: "/frontend"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"

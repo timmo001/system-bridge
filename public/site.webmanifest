@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "System Bridge",
+  "short_name": "System Bridge",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#512da8",
+  "background_color": "#121212",
   "display": "standalone"
 }
