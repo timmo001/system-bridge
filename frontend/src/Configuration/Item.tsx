@@ -113,8 +113,6 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
   if (!item) return <></>;
   const { name, description, icon }: ConfigurationItem = item;
 
-  console.log(item);
-
   return (
     <ListItem>
       <ListItemIcon>

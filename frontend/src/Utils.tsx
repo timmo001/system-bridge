@@ -2,11 +2,9 @@ import React, {
   createContext,
   ReactElement,
   useContext,
-  useMemo,
   useState,
 } from "react";
 import { Configuration } from "../../src/configuration";
-import { useLocation } from "react-router-dom";
 import queryString from "query-string";
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
