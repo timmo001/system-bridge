@@ -18,22 +18,7 @@ let peer: Peer,
   peerConnectionInterval: NodeJS.Timeout,
   mediaStream: MediaStream | null;
 function WebRTC(): ReactElement {
-  const [settings, setSettings] = useSettings();
-
-  useEffect(() => {
-    if (!settings) {
-      try {
-        window.api.ipcRendererOn("set-settings", (_event, args) => {
-          console.log("set-settings:", args);
-          const s: Configuration = args;
-          setSettings(s);
-        });
-        window.api.ipcRendererSend("get-settings");
-      } catch (e) {
-        console.warn("Error calling window.api:", e);
-      }
-    }
-  }, [settings, setSettings]);
+  const [settings] = useSettings();
 
   const classes = useStyles();
 
