@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo } from "react";
+import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 import {
   createStyles,
   Grid,
@@ -25,19 +25,53 @@ function Main(): ReactElement {
 
   const query = useMemo(() => parsedQuery, []);
 
+  const sendLog = useCallback(
+    (
+      level: string,
+      message: any,
+      args: string[] | readonly string[] | undefined
+    ): void => {
+      try {
+        window.api.ipcRendererSend("log", {
+          level,
+          message: `${query.id} - ${JSON.stringify(message)} ${
+            Array.isArray(args)
+              ? args.toString()
+              : typeof args === "object"
+              ? JSON.stringify(args)
+              : ""
+          }`,
+        });
+      } catch (e) {}
+    },
+    [query.id]
+  );
+
   useEffect(() => {
     try {
       if (!settings) {
-        window.api.ipcRendererOn("set-settings", (_event, args) => {
-          console.log("set-settings:", args);
-          setSettings(args);
-        });
+        window.console.log = (
+          msg: string,
+          args: string[] | readonly string[] | undefined
+        ) => sendLog("info", msg, args);
+        window.console.warn = (
+          msg: string,
+          args: string[] | readonly string[] | undefined
+        ) => sendLog("warn", msg, args);
+        window.console.error = (
+          msg: string,
+          args: string[] | readonly string[] | undefined
+        ) => sendLog("error", msg, args);
+
+        window.api.ipcRendererOn("set-settings", (_event, args) =>
+          setSettings(args)
+        );
         window.api.ipcRendererSend("get-settings");
       }
     } catch (e) {
       console.warn("Error getting settings:", e);
     }
-  }, [settings, setSettings]);
+  }, [settings, setSettings, sendLog]);
 
   const classes = useStyles();
 

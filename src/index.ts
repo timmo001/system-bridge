@@ -234,11 +234,11 @@ async function showConfigurationWindow(): Promise<void> {
   configurationWindow.loadURL(url);
   configurationWindow.show();
 
-  if (isDev) {
-    // Open the DevTools.
-    configurationWindow.webContents.openDevTools();
-    configurationWindow.maximize();
-  }
+  // if (isDev) {
+  //   // Open the DevTools.
+  //   configurationWindow.webContents.openDevTools();
+  //   configurationWindow.maximize();
+  // }
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
@@ -302,7 +302,7 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
       logger.warning("Error adding dev tools:", error);
     }
     // Open the DevTools.
-    playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+    // playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   }
 }
 
@@ -533,6 +533,13 @@ ipcMain.on("window-minimize", (event) => {
 ipcMain.on("window-close", (event) => {
   BrowserWindow.fromWebContents(event.sender)?.close();
 });
+
+ipcMain.on(
+  "log",
+  (_event, { message, level }: { message: string; level: string }) => {
+    logger.log(level, message);
+  }
+);
 
 ipcMain.on("get-audio-metadata", async (event, path: string) => {
   const metadata: IAudioMetadata = await parseFile(path);
