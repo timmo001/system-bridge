@@ -178,7 +178,7 @@ async function setupApp(): Promise<void> {
     show: false,
     webPreferences: {
       preload: join(__dirname, "./preload.js"),
-      devTools: true,
+      devTools: isDev,
     },
   });
 
@@ -234,11 +234,11 @@ async function showConfigurationWindow(): Promise<void> {
   configurationWindow.loadURL(url);
   configurationWindow.show();
 
-  // if (isDev) {
-  // Open the DevTools.
-  configurationWindow.webContents.openDevTools();
-  configurationWindow.maximize();
-  // }
+  if (isDev) {
+    // Open the DevTools.
+    configurationWindow.webContents.openDevTools();
+    configurationWindow.maximize();
+  }
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
