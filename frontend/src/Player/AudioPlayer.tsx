@@ -153,8 +153,6 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
       .padStart(2, "0")}:${md.seconds().toString().padStart(2, "0")}`;
   }, [trackProgress]);
 
-  console.log();
-
   const classes = useStyles();
 
   return (

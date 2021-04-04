@@ -172,7 +172,7 @@ async function setupApp(): Promise<void> {
   configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     icon: appIconPath,
     maximizable: true,
     show: false,
