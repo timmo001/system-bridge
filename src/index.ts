@@ -227,7 +227,7 @@ async function showConfigurationWindow(): Promise<void> {
   const url = `${
     isDev
       ? "http://localhost:3000/"
-      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
   }?${queryString.stringify({ id: "configuration" })}`;
   logger.info(`Configuration URL: ${url}`);
 
@@ -287,7 +287,7 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   const url = `${
     isDev
       ? "http://localhost:3000/"
-      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
   }?${queryString.stringify({ ...data, id: "player" })}`;
   logger.info(`Player URL: ${url}`);
 
@@ -376,7 +376,7 @@ export async function createRTCWindow(): Promise<void> {
   const url = `${
     isDev
       ? "http://localhost:3000/"
-      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
   }?${queryString.stringify({ id: "webrtc" })}`;
   logger.info(`WebRTC URL: ${url}`);
 
