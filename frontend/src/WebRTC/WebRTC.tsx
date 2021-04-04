@@ -3,7 +3,6 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 
-import { Configuration } from "../../../src/configuration";
 import { useSettings } from "../Utils";
 
 const useStyles = makeStyles((theme: Theme) =>

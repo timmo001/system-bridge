@@ -78,7 +78,7 @@ function Player(): ReactElement {
           break;
       }
     }
-  }, [settings, source, setSource]);
+  }, [settings, source, setSource, query]);
 
   return (
     <>
