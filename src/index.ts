@@ -526,6 +526,14 @@ ipcMain.on(
   }
 );
 
+ipcMain.on("window-show", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.show();
+});
+
+ipcMain.on("window-hide", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.hide();
+});
+
 ipcMain.on("window-minimize", (event) => {
   BrowserWindow.fromWebContents(event.sender)?.minimize();
 });

@@ -1,14 +1,23 @@
 import React, { ReactElement, useEffect } from "react";
+import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 
 import { Configuration } from "../../../src/configuration";
 import { useSettings } from "../Utils";
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    stream: {
+      flex: 1,
+    },
+  })
+);
+
 let peer: Peer,
   peerConnectionInterval: NodeJS.Timeout,
   mediaStream: MediaStream | null;
-function Main(): ReactElement {
+function WebRTC(): ReactElement {
   const [settings, setSettings] = useSettings();
 
   useEffect(() => {
@@ -26,6 +35,8 @@ function Main(): ReactElement {
     }
   }, [settings, setSettings]);
 
+  const classes = useStyles();
+
   useEffect(() => {
     if (settings)
       (async () => {
@@ -35,7 +46,6 @@ function Main(): ReactElement {
           path: "/rtc",
           port: Number(settings?.network.items.port.value),
         };
-        console.log("Create peer:", config);
         peer = new Peer(`host-${uuidv4()}`, config);
 
         peer.on("open", (id) => {
@@ -45,6 +55,11 @@ function Main(): ReactElement {
           console.log("New connection from ", dataConnection.peer);
         });
         peer.on("call", async (mediaConnection: Peer.MediaConnection) => {
+          try {
+            window.api.ipcRendererSend("window-show");
+          } catch (e) {
+            console.warn("Error calling window.api:", e);
+          }
           try {
             mediaStream = await navigator.mediaDevices.getUserMedia({
               audio: true,
@@ -72,6 +87,11 @@ function Main(): ReactElement {
                 video.srcObject = null;
                 mediaStream?.getTracks().forEach((track) => track.stop());
                 mediaStream = null;
+                try {
+                  window.api.ipcRendererSend("window-hide");
+                } catch (e) {
+                  console.warn("Error calling window.api:", e);
+                }
                 clearInterval(peerConnectionInterval);
               }
             });
@@ -89,9 +109,9 @@ function Main(): ReactElement {
 
   return (
     <>
-      <video id="video-stream" />
+      <video className={classes.stream} id="video-stream" />
     </>
   );
 }
 
-export default Main;
+export default WebRTC;
