@@ -233,6 +233,7 @@ async function showConfigurationWindow(): Promise<void> {
 
   configurationWindow.loadURL(url);
   configurationWindow.show();
+  configurationWindow.focus();
 
   // if (isDev) {
   //   // Open the DevTools.
@@ -293,7 +294,10 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
 
   playerWindow.loadURL(url);
   if (data.hidden) playerWindow.hide();
-  else playerWindow.show();
+  else {
+    playerWindow.show();
+    playerWindow.focus();
+  }
 
   if (isDev) {
     try {
@@ -527,7 +531,9 @@ ipcMain.on(
 );
 
 ipcMain.on("window-show", (event) => {
-  BrowserWindow.fromWebContents(event.sender)?.show();
+  const window = BrowserWindow.fromWebContents(event.sender);
+  window?.show();
+  window?.focus();
 });
 
 ipcMain.on("window-hide", (event) => {
