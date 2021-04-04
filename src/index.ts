@@ -355,6 +355,7 @@ export async function createRTCWindow(): Promise<void> {
     alwaysOnTop: false,
     autoHideMenuBar: true,
     backgroundColor: "#121212",
+    closable: false,
     frame: true,
     fullscreenable: true,
     icon: appIconPath,

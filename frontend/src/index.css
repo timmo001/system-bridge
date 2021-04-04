@@ -72,3 +72,14 @@ input::-webkit-inner-spin-button {
   height: 100%;
   align-items: center;
 }
+
+@keyframes show {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
