@@ -5,7 +5,7 @@
   "version": "1.3.0",
   "main": "dist/index.js",
   "scripts": {
-    "build:frontend": "cd frontend && yarn build && shx rm -rf ../public/frontend && shx mv build ../public/frontend",
+    "build:frontend": "cd frontend && yarn build",
     "compile": "shx rm -rf dist/ && tsc",
     "install:all": "yarn install && cd frontend && yarn install",
     "make": "yarn compile && yarn build:frontend && electron-forge make",
@@ -13,8 +13,10 @@
     "publish": "yarn compile && yarn build:frontend && yarn build:player && electron-forge publish",
     "start": "concurrently -k \"yarn start:frontend\" \"wait-on tcp:3000 && yarn start:app\"",
     "start:dev": "concurrently -k \"yarn start:frontend\" \"wait-on tcp:3000 && yarn start:app:dev\"",
-    "start:app": "yarn compile && cross-env ELECTRON_IS_DEV=false electron-forge start",
+    "start:prod": "yarn build:frontend && yarn start:app:prod",
+    "start:app": "yarn compile && electron-forge start",
     "start:app:dev": "nodemon --ext ts,js --watch src --exec \"yarn start:app\"",
+    "start:app:prod": "yarn compile && cross-env ELECTRON_IS_DEV=false electron-forge start",
     "start:frontend": "cd frontend && cross-env BROWSER=none yarn start",
     "lint": "eslint --ext .ts ."
   },

@@ -1,5 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
-import { Switch, Route } from "react-router-dom";
+import React, { ReactElement, useEffect, useMemo } from "react";
 import {
   createStyles,
   Grid,
@@ -8,7 +7,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import { useQuery, useSettings } from "./Utils";
+import { parsedQuery, useSettings } from "./Utils";
 import Configuration from "./Configuration/Configuration";
 import WebRTC from "./WebRTC/WebRTC";
 import Player from "./Player/Player";
@@ -22,9 +21,9 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function Main(): ReactElement {
-  const query = useQuery();
-
   const [settings, setSettings] = useSettings();
+
+  const query = useMemo(() => parsedQuery, []);
 
   useEffect(() => {
     try {
@@ -46,32 +45,28 @@ function Main(): ReactElement {
     <div
       className={classes.root}
       style={{
-        background: query.get("background") || "#121212",
+        background:
+          typeof query.background === "string" ? query.background : "#121212",
       }}
     >
-      <Switch>
-        <Route path="/frontend/configuration">
-          <Configuration />
-        </Route>
-        <Route path="/frontend/player">
-          <Player />
-        </Route>
-        <Route path="/frontend/webrtc">
-          <WebRTC />
-        </Route>
-        <Route path="/">
-          <Grid
-            className={classes.root}
-            container
-            alignItems="center"
-            justify="center"
-          >
-            <Typography color="textPrimary" component="h2" variant="h4">
-              Page not found
-            </Typography>
-          </Grid>
-        </Route>
-      </Switch>
+      {query.id === "configuration" ? (
+        <Configuration />
+      ) : query.id === "player" ? (
+        <Player />
+      ) : query.id === "webrtc" ? (
+        <WebRTC />
+      ) : (
+        <Grid
+          className={classes.root}
+          container
+          alignItems="center"
+          justify="center"
+        >
+          <Typography color="textPrimary" component="h2" variant="h4">
+            Page not found
+          </Typography>
+        </Grid>
+      )}
     </div>
   );
 }

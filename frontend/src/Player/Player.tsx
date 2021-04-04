@@ -73,17 +73,13 @@ function Player(): ReactElement {
           }
           break;
         case "video":
-          try {
-            setSource({
-              type: "video",
-              source: String(query.path)
-                ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-                : String(query.url),
-              volumeInitial: volume > 0 ? volume : 60,
-            });
-          } catch (e) {
-            console.warn("Error calling window.api:", e);
-          }
+          setSource({
+            type: "video",
+            source: String(query.path)
+              ? `http://localhost:${settings?.network.items.port.value}${query.url}`
+              : String(query.url),
+            volumeInitial: volume > 0 ? volume : 60,
+          });
           break;
       }
     }

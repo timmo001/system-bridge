@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
 import {
   createMuiTheme,
   responsiveFontSizes,
@@ -35,11 +34,9 @@ const theme = responsiveFontSizes(
 function App(): ReactElement {
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        <SettingsProvider>
-          <Main />
-        </SettingsProvider>
-      </Router>
+      <SettingsProvider>
+        <Main />
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

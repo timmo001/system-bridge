@@ -97,12 +97,6 @@ export const appSmallIconPath = join(
   "./public/system-bridge-circle-32x32.png"
 );
 
-export function getFrontendPort(): number {
-  if (isDev) return 3000;
-  const port = getSettings().network.items?.port?.value;
-  return typeof port === "number" ? port : 9170;
-}
-
 if (!isDev) {
   process.on("unhandledRejection", (error: Error) =>
     logger.error("unhandledRejection:", error)
@@ -160,10 +154,13 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
 
 async function setAppConfig(): Promise<void> {
   const config = getSettings();
-  const launchOnStartup = config.general?.items.launchOnStartup?.value;
-  app.setLoginItemSettings({
-    openAtLogin: typeof launchOnStartup === "boolean" ? launchOnStartup : false,
-  });
+  if (!isDev) {
+    const launchOnStartup = config.general?.items.launchOnStartup?.value;
+    app.setLoginItemSettings({
+      openAtLogin:
+        typeof launchOnStartup === "boolean" ? launchOnStartup : false,
+    });
+  }
 }
 
 let configurationWindow: BrowserWindow,
@@ -180,9 +177,8 @@ async function setupApp(): Promise<void> {
     maximizable: true,
     show: false,
     webPreferences: {
-      contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
-      devTools: isDev,
+      devTools: true,
     },
   });
 
@@ -228,18 +224,21 @@ async function setupApp(): Promise<void> {
 }
 
 async function showConfigurationWindow(): Promise<void> {
-  configurationWindow.loadURL(
-    `http://localhost:${getFrontendPort()}${
-      isDev ? "" : "/frontend"
-    }/configuration`
-  );
+  const url = `${
+    isDev
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+  }?${queryString.stringify({ id: "configuration" })}`;
+  logger.info(`Configuration URL: ${url}`);
+
+  configurationWindow.loadURL(url);
   configurationWindow.show();
 
-  if (isDev) {
-    // Open the DevTools.
-    configurationWindow.webContents.openDevTools();
-    configurationWindow.maximize();
-  }
+  // if (isDev) {
+  // Open the DevTools.
+  configurationWindow.webContents.openDevTools();
+  configurationWindow.maximize();
+  // }
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
@@ -285,12 +284,14 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     event.preventDefault()
   );
 
-  const url = `http://localhost:${getFrontendPort()}${
-    isDev ? "" : "/frontend"
-  }/player?${queryString.stringify(data)}`;
+  const url = `${
+    isDev
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+  }?${queryString.stringify({ ...data, id: "player" })}`;
   logger.info(`Player URL: ${url}`);
-  playerWindow.loadURL(url);
 
+  playerWindow.loadURL(url);
   if (data.hidden) playerWindow.hide();
   else playerWindow.show();
 
@@ -371,9 +372,15 @@ export async function createRTCWindow(): Promise<void> {
   };
 
   rtcWindow = new BrowserWindow(windowOpts);
-  rtcWindow.loadURL(
-    `http://localhost:${getFrontendPort()}${isDev ? "" : "/frontend"}/webrtc`
-  );
+
+  const url = `${
+    isDev
+      ? "http://localhost:3000/"
+      : `file://${join(app.getAppPath(), "configuration/build/index.html")}`
+  }?${queryString.stringify({ id: "webrtc" })}`;
+  logger.info(`WebRTC URL: ${url}`);
+
+  rtcWindow.loadURL(url);
   rtcWindow.hide();
 
   if (isDev) {
