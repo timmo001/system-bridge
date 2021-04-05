@@ -2760,7 +2760,7 @@ file-entry-cache@^6.0.1:
   dependencies:
     flat-cache "^3.0.4"
 
-file-type@^16.2.0:
+file-type@^16.3.0:
   version "16.3.0"
   resolved "https://registry.yarnpkg.com/file-type/-/file-type-16.3.0.tgz#f03af91db30f92cc9a0b335c0644c46101522f6d"
   integrity sha512-ZA0hV64611vJT42ltw0T9IDwHApQuxRdrmQZWTeDmeAUtZBBVSQW3nSQqhhW1cAgpXgqcJvm410BYHXJQ9AymA==
@@ -4429,14 +4429,14 @@ multi-typeof@^1.0.0:
     fmix "^0.1.0"
     imul "^1.0.0"
 
-music-metadata@7.8.1:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.1.tgz#09d493b1b370c8313489a10786e75fe5e83e09de"
-  integrity sha512-Q4PhR788jp2VDh/JgPvEUZ3NCqxgW4+hV0H2XrYKfGwq5aGagm1ek9kbCJvUCvejVnmyn6Rb+ggIPxrIVPfzww==
+music-metadata@7.8.3:
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.3.tgz#876c46f0c3f4cf27f40b2c0393463e6a71700f69"
+  integrity sha512-sF0oEmN88IJCuAR+1ZwyPqDvIrACddBJbWfRUQo3KZ6YN+V/EAex5AVWwlQxvY2XMcMJ+pPZEnALVnz9IXvU4A==
   dependencies:
     content-type "^1.0.4"
     debug "^4.3.1"
-    file-type "^16.2.0"
+    file-type "^16.3.0"
     media-typer "^1.1.0"
     strtok3 "^6.0.8"
     token-types "^2.1.1"
