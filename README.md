@@ -20,7 +20,7 @@ A bridge for your systems.
 
 ### API Endpoints
 
-You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api)
+You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api).
 
 ## Download
 
