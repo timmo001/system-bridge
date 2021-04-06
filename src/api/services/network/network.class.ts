@@ -1,7 +1,7 @@
 import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
-import { convertArrayToObject } from "../../common";
+import { convertArrayToObject } from "../../../common";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}

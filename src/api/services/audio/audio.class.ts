@@ -15,9 +15,9 @@ import {
   pausePlayerWindow,
   playpausePlayerWindow,
   playPlayerWindow,
-} from "../../player";
-import { MediaCreateData } from "../../types/media";
-import logger from "../../logger";
+} from "../../../player";
+import { MediaCreateData } from "../../../types/media";
+import logger from "../../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}

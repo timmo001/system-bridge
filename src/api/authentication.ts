@@ -8,7 +8,7 @@ import {
 import { IncomingMessage } from "http";
 
 import { Application } from "./declarations";
-import logger from "./logger";
+import logger from "../logger";
 
 declare module "./declarations" {
   interface ServiceTypes {
@@ -22,9 +22,9 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
 
     let settings;
     try {
-      settings = (await import("./common")).getSettings();
+      settings = (await import("../common")).getSettings();
     } catch (e) {
-      logger.error("Failed to get settings", e);
+      logger.error("Failed to get settings for authentication:", e);
     }
 
     if (!settings || apiKey !== settings.network.items.apiKey.value)

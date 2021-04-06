@@ -2,7 +2,7 @@ import fs from "fs";
 import si from "systeminformation";
 
 import { Application } from "../../declarations";
-import logger from "../../logger";
+import logger from "../../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}

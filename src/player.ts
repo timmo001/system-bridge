@@ -70,10 +70,7 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   playerWindow.setVisibleOnAllWorkspaces(true);
   playerWindow.loadURL(url);
   if (data.hidden) playerWindow.hide();
-  else {
-    playerWindow.show();
-    playerWindow.focus();
-  }
+  else playerWindow.show();
 
   // if (isDev) {
   //   try {

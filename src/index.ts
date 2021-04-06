@@ -19,7 +19,7 @@ import updateApp from "update-electron-app";
 
 import { appIconPath, appSmallIconPath, getSettings } from "./common";
 import { closePlayerWindow } from "./player";
-import API from "./api";
+import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
@@ -157,7 +157,7 @@ async function setAppConfig(): Promise<void> {
   }
 }
 
-let configurationWindow: BrowserWindow, tray: Tray, api: API | undefined;
+let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
   configurationWindow = new BrowserWindow({
     width: 1280,
@@ -218,7 +218,6 @@ async function showConfigurationWindow(): Promise<void> {
 
   configurationWindow.loadURL(url);
   configurationWindow.show();
-  configurationWindow.focus();
 
   // if (isDev) {
   //   // Open the DevTools.
@@ -266,7 +265,7 @@ app.whenReady().then((): void => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showConfigurationWindow);
 
-  api = new API();
+  startServer();
 });
 
 ipcMain.on(
@@ -351,11 +350,8 @@ ipcMain.on(
   async (event): Promise<void> => {
     event.sender.send("restarting-server");
     ipcMain.emit("restarting-server");
-    if (api) {
-      await api.cleanup();
-      api = undefined;
-      setTimeout(() => (api = new API()), 2000);
-    }
+    await stopServer();
+    setTimeout(() => startServer(), 2000);
   }
 );
 

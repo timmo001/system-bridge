@@ -1,6 +1,6 @@
 import { HookContext } from "@feathersjs/feathers";
 import { Application } from "./declarations";
-import logger from "./logger";
+import logger from "../logger";
 
 export default function (app: Application): void {
   if (typeof app.channel !== "function") {

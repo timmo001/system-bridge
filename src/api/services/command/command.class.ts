@@ -1,7 +1,7 @@
 import execa from "execa";
 
 import { Application } from "../../declarations";
-import logger from "../../logger";
+import logger from "../../../logger";
 
 interface Data {
   command: string;

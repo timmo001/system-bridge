@@ -38,12 +38,10 @@ export function convertArrayToObject(array: any[], key: string): any {
   );
 }
 
-export const appIconPath = join(
-  app?.getAppPath() || "",
-  "./public/system-bridge-circle.png"
-);
+export const appIconPath = app
+  ? join(app.getAppPath(), "public/system-bridge-circle.png")
+  : "";
 
-export const appSmallIconPath = join(
-  app?.getAppPath() || "",
-  "./public/system-bridge-circle-32x32.png"
-);
+export const appSmallIconPath = app
+  ? join(app.getAppPath(), "public/system-bridge-circle-32x32.png")
+  : "";

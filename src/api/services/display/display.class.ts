@@ -2,7 +2,7 @@ import { screen } from "electron";
 import brightness from "brightness";
 
 import { Application } from "../../declarations";
-import logger from "../../logger";
+import logger from "../../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ServiceOptions {}
