@@ -8,7 +8,7 @@ import {
 import { IncomingMessage } from "http";
 
 import { Application } from "./declarations";
-import { getSettings } from "./utils";
+import logger from "./logger";
 
 declare module "./declarations" {
   interface ServiceTypes {
@@ -20,10 +20,14 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
   async authenticate(authentication: AuthenticationResult) {
     const { apiKey } = authentication;
 
-    const settings = getSettings();
-    const settingsAPiKey = settings.network.items.apiKey.value;
+    let settings;
+    try {
+      settings = (await import("./common")).getSettings();
+    } catch (e) {
+      logger.error("Failed to get settings", e);
+    }
 
-    if (apiKey !== settingsAPiKey)
+    if (!settings || apiKey !== settings.network.items.apiKey.value)
       throw new NotAuthenticated("Invalid API Key");
 
     return {

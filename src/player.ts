@@ -7,8 +7,9 @@ import {
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath, electronIsDev } from "./utils";
+import { appIconPath } from "./common";
 import { MediaCreateData } from "./types/media";
+import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
 const isDev = electronIsDev();

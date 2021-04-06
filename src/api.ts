@@ -16,8 +16,6 @@ import swagger from "feathers-swagger";
 
 import { Application } from "./declarations";
 import { Configuration } from "./configuration";
-import { createRTCWindow } from "./rtc";
-import { getSettings } from "./utils";
 import appHooks from "./app.hooks";
 import authentication from "./authentication";
 import channels from "./channels";
@@ -28,17 +26,22 @@ import services from "./services";
 class API {
   private server?: Server;
   private settings?: Configuration;
+
   app?: Application;
 
   constructor() {
-    ipcMain.on("updated-setting", this.getSettings);
+    ipcMain?.on("updated-setting", this.getSettings);
 
     this.getSettings();
     this.setupConnection();
   }
 
-  private getSettings(): void {
-    this.settings = getSettings();
+  private async getSettings(): Promise<void> {
+    try {
+      this.settings = (await import("./common")).getSettings();
+    } catch (e) {
+      logger.error("Failed to get settings", e);
+    }
   }
 
   private async setupConnection(): Promise<void> {
@@ -135,7 +138,11 @@ class API {
       });
       this.app.use("/rtc", broker);
       logger.info(`RTC broker created on path ${broker.path()}`);
-      createRTCWindow();
+      try {
+        (await import("./rtc")).createRTCWindow();
+      } catch (e) {
+        logger.warn("Couldn't create RTC window: ", e);
+      }
     }
 
     this.server.on("error", (err) => logger.error("Server error:", err));

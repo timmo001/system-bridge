@@ -2,7 +2,8 @@ import { app, BrowserWindow, BrowserWindowConstructorOptions } from "electron";
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath, electronIsDev } from "./utils";
+import { appIconPath } from "./common";
+import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
 const isDev = electronIsDev();

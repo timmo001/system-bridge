@@ -17,14 +17,10 @@ import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
-import {
-  appIconPath,
-  appSmallIconPath,
-  electronIsDev,
-  getSettings,
-} from "./utils";
+import { appIconPath, appSmallIconPath, getSettings } from "./common";
 import { closePlayerWindow } from "./player";
 import API from "./api";
+import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
 logger.info(
@@ -175,7 +171,7 @@ async function setupApp(): Promise<void> {
     webPreferences: {
       contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
-      devTools: isDev,
+      // devTools: electronIsDev(),
     },
   });
 
