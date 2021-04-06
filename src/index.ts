@@ -177,8 +177,10 @@ async function setupApp(): Promise<void> {
     width: 1280,
     height: 720,
     autoHideMenuBar: true,
+    focusable: true,
     icon: appIconPath,
     maximizable: true,
+    minimizable: true,
     show: false,
     webPreferences: {
       contextIsolation: true,
@@ -246,18 +248,19 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     height: data.type === "audio" ? 130 : 270,
     x: data.x || width - (data.type === "audio" ? 480 : 500),
     y: data.y || height - (data.type === "audio" ? 150 : 290),
+    minHeight: 100,
+    minWidth: 120,
     alwaysOnTop: true,
     autoHideMenuBar: true,
     backgroundColor: data.transparent
       ? undefined
       : data.backgroundColor || "#121212",
+    focusable: true,
     frame: false,
     fullscreenable: data.type === "video",
     icon: appIconPath,
     maximizable: false,
     minimizable: true,
-    minHeight: 100,
-    minWidth: 120,
     opacity: data.opacity,
     show: false,
     thickFrame: true,
@@ -352,17 +355,18 @@ export async function createRTCWindow(): Promise<void> {
     height: 1080,
     x: width - 1940,
     y: height - 1100,
+    minHeight: 100,
+    minWidth: 120,
     alwaysOnTop: false,
     autoHideMenuBar: true,
     backgroundColor: "#121212",
     closable: false,
+    focusable: true,
     frame: true,
     fullscreenable: true,
     icon: appIconPath,
     maximizable: true,
     minimizable: true,
-    minHeight: 100,
-    minWidth: 120,
     show: false,
     thickFrame: true,
     titleBarStyle: "default",
@@ -531,7 +535,6 @@ ipcMain.on(
 ipcMain.on("window-show", (event) => {
   const window = BrowserWindow.fromWebContents(event.sender);
   window?.show();
-  window?.focus();
 });
 
 ipcMain.on("window-hide", (event) => {

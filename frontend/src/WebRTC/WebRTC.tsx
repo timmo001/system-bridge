@@ -13,21 +13,15 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       maxWidth: "calc(var(--width) * var(--cols))",
-      display: "flex",
-      flexWrap: "wrap",
-      alignContent: "center",
-      alignItems: "center",
-      justifyContent: "center",
-      verticalAlign: "middle",
+      margin: "auto",
     },
     stream: {
       width: "var(--width)",
       height: "var(--height)",
       display: "inline-block",
-      verticalAlign: "middle",
-      alignSelf: "center",
       animation: "show 0.4s ease",
       overflow: "hidden",
+      margin: "auto",
     },
     button: {
       position: "absolute",
