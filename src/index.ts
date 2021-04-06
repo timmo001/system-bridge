@@ -292,6 +292,7 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   }?${queryString.stringify({ ...data, id: "player", title: "Player" })}`;
   logger.info(`Player URL: ${url}`);
 
+  playerWindow.setVisibleOnAllWorkspaces(true);
   playerWindow.loadURL(url);
   if (data.hidden) playerWindow.hide();
   else {
@@ -383,6 +384,7 @@ export async function createRTCWindow(): Promise<void> {
   }?${queryString.stringify({ id: "webrtc", title: "Video Chat" })}`;
   logger.info(`WebRTC URL: ${url}`);
 
+  rtcWindow.setVisibleOnAllWorkspaces(true);
   rtcWindow.loadURL(url);
   rtcWindow.hide();
 
