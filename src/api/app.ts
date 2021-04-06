@@ -41,10 +41,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Set favicon
 app.use(
-  favicon(join(electronApp.getAppPath(), "./public/system-bridge-circle.ico"))
+  favicon(
+    join(electronApp?.getAppPath() || "", "public/system-bridge-circle.ico")
+  )
 );
 // Host the public folder
-app.use(express.static(join(electronApp.getAppPath(), "public")));
+app.use(express.static(join(electronApp?.getAppPath() || "", "public")));
 // Trust proxy (reverse proxy)
 app.set("trust proxy", true);
 // Add REST API support
