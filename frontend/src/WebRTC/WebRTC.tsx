@@ -101,6 +101,7 @@ function WebRTC(): ReactElement {
             video.id = "stream-host";
             video.className = classes.stream;
             video.srcObject = mediaStream;
+            video.muted = true;
             streamContainer.appendChild(video);
             video.play();
             debouncedRecalculateLayout();
