@@ -7,7 +7,6 @@ import cpu from "./cpu/cpu.service";
 import display from "./display/display.service";
 import filesystem from "./filesystem/filesystem.service";
 import graphics from "./graphics/graphics.service";
-import information from "./information/information.service";
 import memory from "./memory/memory.service";
 import network from "./network/network.service";
 import notification from "./notification/notification.service";
@@ -26,7 +25,6 @@ export default function (app: Application): void {
   app.configure(display);
   app.configure(filesystem);
   app.configure(graphics);
-  app.configure(information);
   app.configure(memory);
   app.configure(network);
   app.configure(notification);
