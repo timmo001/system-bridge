@@ -108,6 +108,7 @@ function WebRTC(): ReactElement {
             console.error(err);
           }
 
+          if (peerConnectionInterval) clearInterval(peerConnectionInterval);
           peerConnectionInterval = setInterval(() => {
             peer.listAllPeers((peerIds: string[]) => {
               const streams = document.getElementsByClassName(
