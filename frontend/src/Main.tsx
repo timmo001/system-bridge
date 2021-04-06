@@ -1,21 +1,16 @@
 import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
-import {
-  createStyles,
-  Grid,
-  makeStyles,
-  Theme,
-  Typography,
-} from "@material-ui/core";
+import { createStyles, Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { parsedQuery, useSettings } from "./Utils";
 import Configuration from "./Configuration/Configuration";
 import WebRTC from "./WebRTC/WebRTC";
 import Player from "./Player/Player";
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       height: "100%",
+      display: "flex",
     },
   })
 );
@@ -50,6 +45,10 @@ function Main(): ReactElement {
   useEffect(() => {
     try {
       if (!settings) {
+        document.title = query.title
+          ? `${query.title} - System Bridge`
+          : "System Bridge";
+
         window.console.log = (
           msg: string,
           args: string[] | readonly string[] | undefined
@@ -71,7 +70,7 @@ function Main(): ReactElement {
     } catch (e) {
       console.warn("Error getting settings:", e);
     }
-  }, [settings, setSettings, sendLog]);
+  }, [settings, setSettings, sendLog, query]);
 
   const classes = useStyles();
 

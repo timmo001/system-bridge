@@ -11,6 +11,7 @@ import {
 import { BrowserWindowConstructorOptions } from "electron/main";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
+import debug from "electron-debug";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import execa from "execa";
@@ -29,6 +30,9 @@ logger.info(
 );
 
 handleSquirrelEvent();
+
+if (isDev)
+  debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
 
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
@@ -172,11 +176,14 @@ async function setupApp(): Promise<void> {
   configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
+    focusable: true,
     icon: appIconPath,
     maximizable: true,
+    minimizable: true,
     show: false,
     webPreferences: {
+      contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
       devTools: isDev,
     },
@@ -187,15 +194,7 @@ async function setupApp(): Promise<void> {
   const menu = Menu.buildFromTemplate([
     {
       label: "File",
-      submenu: [
-        {
-          label: "Close Settings",
-          type: "normal",
-          click: () => configurationWindow.close(),
-        },
-        { type: "separator" },
-        { label: "Quit Application", type: "normal", click: quitApp },
-      ],
+      submenu: [{ label: "Quit Application", type: "normal", click: quitApp }],
     },
     ...helpMenu,
   ]);
@@ -228,11 +227,12 @@ async function showConfigurationWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "configuration" })}`;
+  }?${queryString.stringify({ id: "configuration", title: "Settings" })}`;
   logger.info(`Configuration URL: ${url}`);
 
   configurationWindow.loadURL(url);
   configurationWindow.show();
+  configurationWindow.focus();
 
   // if (isDev) {
   //   // Open the DevTools.
@@ -248,18 +248,19 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     height: data.type === "audio" ? 130 : 270,
     x: data.x || width - (data.type === "audio" ? 480 : 500),
     y: data.y || height - (data.type === "audio" ? 150 : 290),
+    minHeight: 100,
+    minWidth: 120,
     alwaysOnTop: true,
     autoHideMenuBar: true,
     backgroundColor: data.transparent
       ? undefined
       : data.backgroundColor || "#121212",
+    focusable: true,
     frame: false,
     fullscreenable: data.type === "video",
     icon: appIconPath,
     maximizable: false,
     minimizable: true,
-    minHeight: 100,
-    minWidth: 120,
     opacity: data.opacity,
     show: false,
     thickFrame: true,
@@ -288,12 +289,16 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ ...data, id: "player" })}`;
+  }?${queryString.stringify({ ...data, id: "player", title: "Player" })}`;
   logger.info(`Player URL: ${url}`);
 
+  playerWindow.setVisibleOnAllWorkspaces(true);
   playerWindow.loadURL(url);
   if (data.hidden) playerWindow.hide();
-  else playerWindow.show();
+  else {
+    playerWindow.show();
+    playerWindow.focus();
+  }
 
   if (isDev) {
     try {
@@ -345,22 +350,21 @@ export function playpausePlayerWindow(): boolean {
 }
 
 export async function createRTCWindow(): Promise<void> {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: 1920,
     height: 1080,
-    x: width - 1940,
-    y: height - 1100,
+    minHeight: 100,
+    minWidth: 120,
     alwaysOnTop: false,
     autoHideMenuBar: true,
     backgroundColor: "#121212",
+    closable: false,
+    focusable: true,
     frame: true,
     fullscreenable: true,
     icon: appIconPath,
     maximizable: true,
     minimizable: true,
-    minHeight: 100,
-    minWidth: 120,
     show: false,
     thickFrame: true,
     titleBarStyle: "default",
@@ -377,11 +381,17 @@ export async function createRTCWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "webrtc" })}`;
+  }?${queryString.stringify({ id: "webrtc", title: "Video Chat" })}`;
   logger.info(`WebRTC URL: ${url}`);
 
+  rtcWindow.setVisibleOnAllWorkspaces(true);
   rtcWindow.loadURL(url);
   rtcWindow.hide();
+
+  rtcWindow.on("closed", () => {
+    if (rtcWindow && !rtcWindow.isDestroyed()) rtcWindow.destroy();
+    createRTCWindow();
+  });
 
   if (isDev) {
     try {
@@ -525,6 +535,15 @@ ipcMain.on(
     }
   }
 );
+
+ipcMain.on("window-show", (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  window?.show();
+});
+
+ipcMain.on("window-hide", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.hide();
+});
 
 ipcMain.on("window-minimize", (event) => {
   BrowserWindow.fromWebContents(event.sender)?.minimize();

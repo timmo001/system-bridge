@@ -1,9 +1,8 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { ButtonBase, Fade } from "@material-ui/core";
-import queryString from "query-string";
 import { Close, Minimize } from "@material-ui/icons";
 
-import { useSettings } from "../Utils";
+import { parsedQuery, useSettings } from "../Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
@@ -31,6 +30,8 @@ function Player(): ReactElement {
   const [settings] = useSettings();
   const [source, setSource] = useState<AudioSource | VideoSource>();
 
+  const query = useMemo(() => parsedQuery, []);
+
   useEffect(() => {
     document.addEventListener("mouseenter", () => setEntered(true));
     document.addEventListener("mouseleave", () => setEntered(false));
@@ -38,20 +39,14 @@ function Player(): ReactElement {
 
   useEffect(() => {
     if (settings && !source) {
-      const query = queryString.parse(window.location.search, {
-        parseNumbers: true,
-      });
       console.log(query);
-
       const volume = Number(query.volume);
-
       switch (query.type) {
         default:
           break;
         case "audio":
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-              console.log(data);
               setSource({
                 type: "audio",
                 source: String(query.path)
@@ -83,7 +78,7 @@ function Player(): ReactElement {
           break;
       }
     }
-  }, [settings, source, setSource]);
+  }, [settings, source, setSource, query]);
 
   return (
     <>

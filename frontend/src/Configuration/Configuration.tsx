@@ -56,10 +56,9 @@ function Configuration(): ReactElement {
   useEffect(() => {
     if (!appInfo) {
       try {
-        window.api.ipcRendererOn("app-information", (_event, args) => {
-          console.log("set-app-info:", args);
-          setAppInfo(args);
-        });
+        window.api.ipcRendererOn("app-information", (_event, args) =>
+          setAppInfo(args)
+        );
         window.api.ipcRendererSend("get-app-information");
       } catch (e) {
         console.warn("Error calling window.api:", e);
