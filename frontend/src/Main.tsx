@@ -5,7 +5,6 @@ import { parsedQuery, useSettings } from "./Utils";
 import Configuration from "./Configuration/Configuration";
 import WebRTC from "./WebRTC/WebRTC";
 import Player from "./Player/Player";
-import { query } from "express";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -71,7 +70,7 @@ function Main(): ReactElement {
     } catch (e) {
       console.warn("Error getting settings:", e);
     }
-  }, [settings, setSettings, sendLog]);
+  }, [settings, setSettings, sendLog, query]);
 
   const classes = useStyles();
 

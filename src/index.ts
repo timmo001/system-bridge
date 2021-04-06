@@ -388,6 +388,11 @@ export async function createRTCWindow(): Promise<void> {
   rtcWindow.loadURL(url);
   rtcWindow.hide();
 
+  rtcWindow.on("closed", () => {
+    if (rtcWindow && !rtcWindow.isDestroyed()) rtcWindow.destroy();
+    createRTCWindow();
+  });
+
   if (isDev) {
     try {
       await devTools(REACT_DEVELOPER_TOOLS);
