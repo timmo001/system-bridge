@@ -5,6 +5,7 @@ import { parsedQuery, useSettings } from "./Utils";
 import Configuration from "./Configuration/Configuration";
 import WebRTC from "./WebRTC/WebRTC";
 import Player from "./Player/Player";
+import { query } from "express";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -45,6 +46,10 @@ function Main(): ReactElement {
   useEffect(() => {
     try {
       if (!settings) {
+        document.title = query.title
+          ? `${query.title} - System Bridge`
+          : "System Bridge";
+
         window.console.log = (
           msg: string,
           args: string[] | readonly string[] | undefined

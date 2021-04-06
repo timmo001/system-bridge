@@ -227,7 +227,7 @@ async function showConfigurationWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "configuration" })}`;
+  }?${queryString.stringify({ id: "configuration", title: "Settings" })}`;
   logger.info(`Configuration URL: ${url}`);
 
   configurationWindow.loadURL(url);
@@ -289,7 +289,7 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ ...data, id: "player" })}`;
+  }?${queryString.stringify({ ...data, id: "player", title: "Player" })}`;
   logger.info(`Player URL: ${url}`);
 
   playerWindow.loadURL(url);
@@ -349,12 +349,9 @@ export function playpausePlayerWindow(): boolean {
 }
 
 export async function createRTCWindow(): Promise<void> {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: 1920,
     height: 1080,
-    x: width - 1940,
-    y: height - 1100,
     minHeight: 100,
     minWidth: 120,
     alwaysOnTop: false,
@@ -383,7 +380,7 @@ export async function createRTCWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "webrtc" })}`;
+  }?${queryString.stringify({ id: "webrtc", title: "Video Chat" })}`;
   logger.info(`WebRTC URL: ${url}`);
 
   rtcWindow.loadURL(url);
