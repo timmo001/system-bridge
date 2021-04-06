@@ -147,6 +147,7 @@ jobs:
           path: test/output/coverage/jest/cobertura-coverage.xml
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           minimum_coverage: 60
+          show_missing: true
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
