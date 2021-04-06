@@ -1,13 +1,15 @@
-import React, { ReactElement, useEffect } from "react";
-import { createStyles, makeStyles } from "@material-ui/core";
+import React, { ReactElement, useCallback, useEffect } from "react";
+import { createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 import debounce from "lodash/debounce";
 import { largestRect } from "rect-scaler";
+import { Icon } from "@mdi/react";
+import { mdiPhoneHangup } from "@mdi/js";
 
 import { useSettings } from "../Utils";
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       maxWidth: "calc(var(--width) * var(--cols))",
@@ -27,10 +29,15 @@ const useStyles = makeStyles(() =>
       animation: "show 0.4s ease",
       overflow: "hidden",
     },
+    button: {
+      position: "absolute",
+      bottom: theme.spacing(1),
+      left: "calc(50% - 28px)",
+    },
   })
 );
 
-let peer: Peer,
+let peer: Peer | null,
   peerConnectionInterval: NodeJS.Timeout | null,
   mediaStream: MediaStream | null;
 
@@ -39,135 +46,142 @@ function WebRTC(): ReactElement {
 
   const classes = useStyles();
 
-  useEffect(() => {
-    if (settings)
-      (async () => {
-        const debouncedRecalculateLayout = debounce(recalculateLayout, 50);
-        window.addEventListener("resize", debouncedRecalculateLayout);
+  const recalculateLayout = useCallback(() => {
+    const streamContainer = document.getElementById(
+      "stream-container"
+    ) as HTMLDivElement;
+    const screenWidth = document.body.getBoundingClientRect().width;
+    const screenHeight = document.body.getBoundingClientRect().height;
+    const videoCount = document.getElementsByTagName("video").length;
 
-        const config = {
-          host: "localhost",
-          key: String(settings?.network.items.apiKey.value),
-          path: "/rtc",
-          port: Number(settings?.network.items.port.value),
-        };
-        peer = new Peer(`host-${uuidv4()}`, config);
+    const { width, height, cols } = largestRect(
+      screenWidth,
+      screenHeight,
+      videoCount || 2,
+      16 / 9
+    );
 
-        peer.on("open", (id) => {
-          console.log("My peer ID is: " + id);
-        });
-        peer.on("connection", (dataConnection: Peer.DataConnection) => {
-          console.log(`New connection from: ${dataConnection.peer}`);
-        });
-        peer.on("call", async (mediaConnection: Peer.MediaConnection) => {
+    streamContainer.style.setProperty("--width", width + "px");
+    streamContainer.style.setProperty("--height", height + "px");
+    streamContainer.style.setProperty("--cols", cols + "");
+  }, []);
+
+  const debouncedRecalculateLayout = debounce(recalculateLayout, 50);
+
+  const updateStreams = useCallback(async () => {
+    if (peer)
+      peer.listAllPeers((peerIds: string[]) => {
+        const streams = document.getElementsByTagName(
+          "video"
+        ) as HTMLCollectionOf<HTMLMediaElement>;
+        for (let i = 0; i <= streams.length; i++) {
+          const video = streams[i];
+          if (video) {
+            if (
+              video.id !== "stream-host" &&
+              !peerIds.includes(video.id.replace("stream-", ""))
+            )
+              video.remove();
+            if (!video.srcObject) video.remove();
+          }
+        }
+        debouncedRecalculateLayout();
+
+        if (peerIds.length === 1) {
+          console.log("No more peers. Closing stream");
+          if (peerConnectionInterval) clearInterval(peerConnectionInterval);
+          peerConnectionInterval = null;
           try {
-            window.api.ipcRendererSend("window-show");
+            window.api.ipcRendererSend("window-hide");
           } catch (e) {
             console.warn("Error calling window.api:", e);
           }
-          try {
-            mediaStream = await navigator.mediaDevices.getUserMedia({
-              audio: true,
-              video: true,
-            });
-            // Answer the call, providing our mediaStream
-            mediaConnection.answer(mediaStream);
+          if (mediaStream)
+            mediaStream.getTracks().forEach((track) => track.stop());
+          mediaStream = null;
+          const video = document.getElementById(
+            "stream-host"
+          ) as HTMLMediaElement;
+          video.remove();
+        }
+        debouncedRecalculateLayout();
+      });
+  }, [debouncedRecalculateLayout]);
 
-            const streamContainer = document.getElementById(
-              "stream-container"
-            ) as HTMLDivElement;
+  const handleConnect = useCallback(async () => {
+    window.addEventListener("resize", debouncedRecalculateLayout);
 
-            mediaConnection.on("stream", (stream: MediaStream) => {
-              let video: HTMLMediaElement;
-              const existingVideo = document.getElementById(
-                `stream-${mediaConnection.peer}`
-              ) as HTMLMediaElement | null;
-              if (existingVideo) video = existingVideo;
-              else video = document.createElement("video") as HTMLMediaElement;
-              video.id = `stream-${mediaConnection.peer}`;
-              video.className = classes.stream;
-              video.srcObject = stream;
-              streamContainer.appendChild(video);
-              video.play();
-              debouncedRecalculateLayout();
-            });
+    const config = {
+      host: "localhost",
+      key: String(settings?.network.items.apiKey.value),
+      path: "/rtc",
+      port: Number(settings?.network.items.port.value),
+    };
+    peer = new Peer(`host-${uuidv4()}`, config);
 
-            let video: HTMLMediaElement;
-            const existingVideo = document.getElementById(
-              "stream-host"
-            ) as HTMLMediaElement | null;
-            if (existingVideo) video = existingVideo;
-            else video = document.createElement("video") as HTMLMediaElement;
-            video.id = "stream-host";
-            video.className = classes.stream;
-            video.srcObject = mediaStream;
-            video.muted = true;
-            streamContainer.appendChild(video);
-            video.play();
-            debouncedRecalculateLayout();
-          } catch (err) {
-            console.error(err);
-          }
-
-          if (peerConnectionInterval) clearInterval(peerConnectionInterval);
-          peerConnectionInterval = setInterval(() => {
-            peer.listAllPeers((peerIds: string[]) => {
-              const streams = document.getElementsByClassName(
-                classes.stream
-              ) as HTMLCollectionOf<HTMLMediaElement>;
-              for (let i = 0; i < streams.length; i++) {
-                const video = streams.item(i);
-                if (
-                  video &&
-                  video?.id !== "stream-host" &&
-                  !peerIds.includes(video.id.replace("stream-", ""))
-                )
-                  video.remove();
-              }
-
-              if (peerIds.length === 1) {
-                console.log("No more peers. Closing stream");
-                mediaStream?.getTracks().forEach((track) => track.stop());
-                mediaStream = null;
-                const video = document.getElementById(
-                  "stream-host"
-                ) as HTMLMediaElement;
-                video.remove();
-                if (peerConnectionInterval)
-                  clearInterval(peerConnectionInterval);
-                peerConnectionInterval = null;
-                try {
-                  window.api.ipcRendererSend("window-hide");
-                } catch (e) {
-                  console.warn("Error calling window.api:", e);
-                }
-              }
-            });
-          }, 2000);
+    peer.on("open", (id) => {
+      console.log("My peer ID is: " + id);
+    });
+    peer.on("connection", (dataConnection: Peer.DataConnection) => {
+      console.log(`New connection from: ${dataConnection.peer}`);
+    });
+    peer.on("call", async (mediaConnection: Peer.MediaConnection) => {
+      try {
+        window.api.ipcRendererSend("window-show");
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
         });
-      })();
+        // Answer the call, providing our mediaStream
+        mediaConnection.answer(mediaStream);
 
-    function recalculateLayout() {
-      const streamContainer = document.getElementById(
-        "stream-container"
-      ) as HTMLDivElement;
-      const aspectRatio = 16 / 9;
-      const screenWidth = document.body.getBoundingClientRect().width;
-      const screenHeight = document.body.getBoundingClientRect().height;
-      const videoCount = document.getElementsByClassName(classes.stream).length;
+        const streamContainer = document.getElementById(
+          "stream-container"
+        ) as HTMLDivElement;
 
-      const { width, height, cols } = largestRect(
-        screenWidth,
-        screenHeight,
-        videoCount,
-        aspectRatio
-      );
+        mediaConnection.on("stream", (stream: MediaStream) => {
+          let video: HTMLMediaElement;
+          const existingVideo = document.getElementById(
+            `stream-${mediaConnection.peer}`
+          ) as HTMLMediaElement | null;
+          if (existingVideo) video = existingVideo;
+          else video = document.createElement("video") as HTMLMediaElement;
+          video.id = `stream-${mediaConnection.peer}`;
+          video.className = classes.stream;
+          video.srcObject = stream;
+          streamContainer.appendChild(video);
+          video.play();
+          debouncedRecalculateLayout();
+        });
 
-      streamContainer.style.setProperty("--width", width + "px");
-      streamContainer.style.setProperty("--height", height + "px");
-      streamContainer.style.setProperty("--cols", cols + "");
-    }
+        let video: HTMLMediaElement;
+        const existingVideo = document.getElementById(
+          "stream-host"
+        ) as HTMLMediaElement | null;
+        if (existingVideo) video = existingVideo;
+        else video = document.createElement("video") as HTMLMediaElement;
+        video.id = "stream-host";
+        video.className = classes.stream;
+        video.srcObject = mediaStream;
+        video.muted = true;
+        streamContainer.appendChild(video);
+        video.play();
+        debouncedRecalculateLayout();
+      } catch (err) {
+        console.error(err);
+      }
 
+      if (peerConnectionInterval) clearInterval(peerConnectionInterval);
+      peerConnectionInterval = setInterval(updateStreams, 1000);
+    });
+  }, [classes.stream, debouncedRecalculateLayout, settings, updateStreams]);
+
+  useEffect(() => {
+    if (settings) handleConnect();
     return () => {
       if (peer) {
         if (peerConnectionInterval) {
@@ -176,11 +190,49 @@ function WebRTC(): ReactElement {
         }
         peer.disconnect();
         peer.destroy();
+        peer = null;
       }
     };
-  }, [classes.stream, settings]);
+  }, [handleConnect, recalculateLayout, settings]);
 
-  return <div className={classes.root} id="stream-container" />;
+  function handleDisconnect() {
+    const streams = document.getElementsByTagName(
+      "video"
+    ) as HTMLCollectionOf<HTMLMediaElement>;
+    for (let i = 0; i <= streams.length; i++) {
+      const stream = streams[i];
+      if (stream) {
+        stream.remove();
+        console.log(`Stream removed: ${stream.id}`);
+      }
+    }
+    debouncedRecalculateLayout();
+    mediaStream?.getTracks().forEach((track) => track.stop());
+    mediaStream = null;
+    if (peer) {
+      peer.disconnect();
+      peer.destroy();
+      updateStreams();
+    }
+    setTimeout(() => {
+      peer = null;
+      handleConnect();
+    }, 2000);
+  }
+
+  return (
+    <>
+      <div className={classes.root} id="stream-container" />
+      <Fab
+        className={classes.button}
+        aria-label="End Call"
+        color="primary"
+        onClick={handleDisconnect}
+      >
+        <Icon title="End Call" size={1} path={mdiPhoneHangup} />
+      </Fab>
+    </>
+  );
 }
 
 export default WebRTC;
