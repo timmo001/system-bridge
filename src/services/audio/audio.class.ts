@@ -10,12 +10,12 @@ import si, { Systeminformation } from "systeminformation";
 
 import { Application } from "../../declarations";
 import {
-  createPlayerWindow,
   closePlayerWindow,
+  createPlayerWindow,
   pausePlayerWindow,
-  playPlayerWindow,
   playpausePlayerWindow,
-} from "../../index";
+  playPlayerWindow,
+} from "../../player";
 import { MediaCreateData } from "../../types/media";
 import logger from "../../logger";
 

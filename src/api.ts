@@ -16,7 +16,7 @@ import swagger from "feathers-swagger";
 
 import { Application } from "./declarations";
 import { Configuration } from "./configuration";
-import { createRTCWindow } from ".";
+import { createRTCWindow } from "./rtc";
 import { getSettings } from "./utils";
 import appHooks from "./app.hooks";
 import authentication from "./authentication";
@@ -28,6 +28,7 @@ import services from "./services";
 class API {
   private server?: Server;
   private settings?: Configuration;
+  app?: Application;
 
   constructor() {
     ipcMain.on("updated-setting", this.getSettings);
@@ -44,35 +45,35 @@ class API {
     const networkSettings = this.settings?.network.items;
 
     // Creates an ExpressJS compatible Feathers application
-    const app: Application = express(feathers());
+    this.app = express(feathers());
     // Enable security, CORS, compression, favicon and body parsing
-    app.use(
+    this.app.use(
       helmet({
         contentSecurityPolicy: false,
       })
     );
-    app.use(cors());
-    app.use(compress());
+    this.app.use(cors());
+    this.app.use(compress());
     // Express middleware to parse HTTP JSON bodies
-    app.use(express.json());
+    this.app.use(express.json());
     // Express middleware to parse URL-encoded params
-    app.use(express.urlencoded({ extended: true }));
+    this.app.use(express.urlencoded({ extended: true }));
     // Set favicon
-    app.use(
+    this.app.use(
       favicon(
         join(electronApp.getAppPath(), "./public/system-bridge-circle.ico")
       )
     );
     // Host the public folder
-    app.use(express.static(join(electronApp.getAppPath(), "public")));
+    this.app.use(express.static(join(electronApp.getAppPath(), "public")));
     // Trust proxy (reverse proxy)
-    app.set("trust proxy", true);
+    this.app.set("trust proxy", true);
     // Add REST API support
-    app.configure(express.rest());
+    this.app.configure(express.rest());
     // Configure Socket.io real-time APIs
-    app.configure(socketio());
+    this.app.configure(socketio());
     // Create OpenAPI docs
-    app.configure(
+    this.app.configure(
       swagger({
         docsPath: "/docs",
         openApiVersion: 3.0,
@@ -88,36 +89,36 @@ class API {
     );
 
     // Configure other middleware (see `middleware/index.ts`)
-    app.configure(middleware);
+    this.app.configure(middleware);
     // Configure authentication
-    app.configure(authentication);
+    this.app.configure(authentication);
     // Set up event channels (see channels.ts)
-    app.configure(channels);
+    this.app.configure(channels);
     // Set up our services (see `services/index.ts`)
-    app.configure(services);
+    this.app.configure(services);
 
-    app.hooks(appHooks);
+    this.app.hooks(appHooks);
 
     // Configure a middleware for 404s and the error handler
-    // app.use(express.notFound());
+    // this.app.use(express.notFound());
     // Express middleware with a nicer error handler
-    app.use(express.errorHandler({ logger }));
+    this.app.use(express.errorHandler({ logger }));
 
     // Add any new real-time connection to the `everybody` channel
-    app.on("connection", (connection) =>
-      app?.channel("everybody").join(connection)
+    this.app.on("connection", (connection) =>
+      this.app?.channel("everybody").join(connection)
     );
     // Publish all events to the `everybody` channel
-    app.publish(() => app?.channel("everybody"));
+    this.app.publish(() => this.app?.channel("everybody"));
 
-    app.setup(this.server);
+    this.app.setup(this.server);
 
     // Start the server
     const port: number =
       typeof networkSettings?.port?.value === "number"
         ? networkSettings?.port?.value
         : 9170;
-    this.server = createServer(app);
+    this.server = createServer(this.app);
 
     // Set up RTC Broker
     const key = networkSettings?.apiKey.value;
@@ -132,7 +133,7 @@ class API {
       broker.on("disconnect", (client) => {
         logger.info(`Broker peer disconnected: ${client.getId()}`);
       });
-      app.use("/rtc", broker);
+      this.app.use("/rtc", broker);
       logger.info(`RTC broker created on path ${broker.path()}`);
       createRTCWindow();
     }

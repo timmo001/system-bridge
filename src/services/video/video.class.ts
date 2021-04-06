@@ -6,12 +6,12 @@ import fs from "fs";
 
 import { Application } from "../../declarations";
 import {
-  createPlayerWindow,
   closePlayerWindow,
+  createPlayerWindow,
   pausePlayerWindow,
-  playPlayerWindow,
   playpausePlayerWindow,
-} from "../../index";
+  playPlayerWindow,
+} from "../../player";
 import logger from "../../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

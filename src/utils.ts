@@ -1,5 +1,8 @@
+import { app } from "electron";
+import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import electronSettings from "electron-settings";
+import isDev from "electron-is-dev";
 
 import defaultConfiguration, { Configuration } from "./configuration";
 
@@ -35,3 +38,21 @@ export function convertArrayToObject(array: any[], key: string): any {
     {}
   );
 }
+
+export const appIconPath = join(
+  app.getAppPath(),
+  "./public/system-bridge-circle.png"
+);
+
+export const appSmallIconPath = join(
+  app.getAppPath(),
+  "./public/system-bridge-circle-32x32.png"
+);
+
+export const electronIsDev = (): boolean => {
+  try {
+    return isDev;
+  } catch (e) {
+    return false;
+  }
+};
