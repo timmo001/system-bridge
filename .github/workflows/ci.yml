@@ -140,7 +140,7 @@ jobs:
       - name: ↗ Publish Tests
         uses: EnricoMi/publish-unit-test-result-action@v1.10
         with:
-          files: junit.xml
+          files: test-results.xml
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}

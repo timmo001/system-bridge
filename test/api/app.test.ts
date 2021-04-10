@@ -40,7 +40,6 @@ describe("Feathers application tests", () => {
         const { response } = error;
 
         assert.strictEqual(response.status, 404);
-        console.log(response.data);
         assert.ok(response.data.indexOf("<html>") !== -1);
       }
     });
