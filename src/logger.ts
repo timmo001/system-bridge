@@ -41,7 +41,11 @@ if (app)
 // Configure the Winston logger.
 const logger = createLogger({
   level: electronIsDev() ? "debug" : "info",
-  format: format.combine(format.splat(), format.simple()),
+  format: format.combine(
+    format.splat(),
+    format.simple(),
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
+  ),
   transports: tps,
 });
 
