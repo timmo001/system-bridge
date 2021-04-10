@@ -73,17 +73,17 @@ app.configure(
 app.configure(middleware);
 // Configure authentication
 app.configure(authentication);
-// Set up event channels (see channels.ts)
-app.configure(channels);
 // Set up our services (see `services/index.ts`)
 app.configure(services);
-
-app.hooks(appHooks);
+// Set up event channels (see channels.ts)
+app.configure(channels);
 
 // Configure a middleware for 404s and the error handler
-// app.use(express.notFound());
+app.use(express.notFound());
 // Express middleware with a nicer error handler
 app.use(express.errorHandler({ logger }));
+
+app.hooks(appHooks);
 
 // Add any new real-time connection to the `everybody` channel
 app.on("connection", (connection) =>

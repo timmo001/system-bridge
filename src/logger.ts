@@ -20,7 +20,12 @@ const logFormat = format.printf((info) => {
 const tps = [];
 tps.push(
   new transports.Console({
-    format: format.combine(format.colorize(), logFormat),
+    format: format.combine(
+      format.splat(),
+      format.simple(),
+      format.colorize(),
+      logFormat
+    ),
     handleExceptions: true,
   })
 );
@@ -36,12 +41,7 @@ if (app)
 // Configure the Winston logger.
 const logger = createLogger({
   level: electronIsDev() ? "debug" : "info",
-  format: format.combine(
-    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    // Format the metadata object
-    format.metadata({ fillExcept: ["message", "level", "timestamp", "label"] }),
-    format.errors({ stack: true })
-  ),
+  format: format.combine(format.splat(), format.simple()),
   transports: tps,
 });
 
