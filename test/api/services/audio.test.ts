@@ -34,7 +34,6 @@ describe("audio service", () => {
       assert.fail("should never get here");
     } catch (error) {
       const { response } = error;
-
       assert.strictEqual(response.status, 401);
       assert.strictEqual(response.data.code, 401);
       assert.strictEqual(response.data.message, "Not authenticated");
@@ -48,7 +47,6 @@ describe("audio service", () => {
       assert.fail("should never get here");
     } catch (error) {
       const { response } = error;
-
       assert.strictEqual(response.status, 400);
       assert.strictEqual(response.data.code, 400);
       assert.strictEqual(
