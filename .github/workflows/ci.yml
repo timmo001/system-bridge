@@ -111,6 +111,36 @@ jobs:
           config_file: .yamllint.yml
           format: colored
           strict: false
+  test-app:
+    name: 🧪 Test App
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 15.x
+      - name: ⤵️ Get yarn cache path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: ⤵️ Fetch Yarn cache
+        uses: actions/cache@v2.1.4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: ⤵️ Install dependencies
+        run: |
+          sudo apt install libavahi-compat-libdnssd-dev
+          yarn install
+      - name: 🧪 Run Tests
+        run: yarn test:junit
+      - name: ↗ Publish Tests
+        uses: EnricoMi/publish-unit-test-result-action@v1.10
+        with:
+          files: test-results.xml
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}

@@ -4,30 +4,30 @@ import {
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
-  screen,
   shell,
   Tray,
 } from "electron";
-import { BrowserWindowConstructorOptions } from "electron/main";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
 import debug from "electron-debug";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import execa from "execa";
-import isDev from "electron-is-dev";
 import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
-import { getSettings } from "./utils";
-import { MediaCreateData } from "./types/media";
-import API from "./api";
+import { appIconPath, appSmallIconPath, getSettings } from "./common";
+import { closePlayerWindow } from "./player";
+import { startServer, stopServer } from "./api";
+import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
 );
+
+const isDev = electronIsDev();
 
 handleSquirrelEvent();
 
@@ -90,16 +90,6 @@ async function handleSquirrelEvent(): Promise<void> {
       break;
   }
 }
-
-export const appIconPath = join(
-  app.getAppPath(),
-  "./public/system-bridge-circle.png"
-);
-
-export const appSmallIconPath = join(
-  app.getAppPath(),
-  "./public/system-bridge-circle-32x32.png"
-);
 
 if (!isDev) {
   process.on("unhandledRejection", (error: Error) =>
@@ -167,11 +157,7 @@ async function setAppConfig(): Promise<void> {
   }
 }
 
-let configurationWindow: BrowserWindow,
-  playerWindow: BrowserWindow | undefined,
-  rtcWindow: BrowserWindow | undefined,
-  tray: Tray,
-  api: API | undefined;
+let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
   configurationWindow = new BrowserWindow({
     width: 1280,
@@ -185,7 +171,7 @@ async function setupApp(): Promise<void> {
     webPreferences: {
       contextIsolation: true,
       preload: join(__dirname, "./preload.js"),
-      devTools: isDev,
+      // devTools: electronIsDev(),
     },
   });
 
@@ -232,176 +218,12 @@ async function showConfigurationWindow(): Promise<void> {
 
   configurationWindow.loadURL(url);
   configurationWindow.show();
-  configurationWindow.focus();
 
   // if (isDev) {
   //   // Open the DevTools.
   //   configurationWindow.webContents.openDevTools();
   //   configurationWindow.maximize();
   // }
-}
-
-export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const windowOpts: BrowserWindowConstructorOptions = {
-    width: data.type === "audio" ? 460 : 480,
-    height: data.type === "audio" ? 130 : 270,
-    x: data.x || width - (data.type === "audio" ? 480 : 500),
-    y: data.y || height - (data.type === "audio" ? 150 : 290),
-    minHeight: 100,
-    minWidth: 120,
-    alwaysOnTop: true,
-    autoHideMenuBar: true,
-    backgroundColor: data.transparent
-      ? undefined
-      : data.backgroundColor || "#121212",
-    focusable: true,
-    frame: false,
-    fullscreenable: data.type === "video",
-    icon: appIconPath,
-    maximizable: false,
-    minimizable: true,
-    opacity: data.opacity,
-    show: false,
-    thickFrame: true,
-    titleBarStyle: "hidden",
-    transparent: true,
-    webPreferences: {
-      contextIsolation: true,
-      preload: join(__dirname, "./preload.js"),
-      devTools: isDev,
-    },
-  };
-
-  logger.debug(JSON.stringify(windowOpts));
-
-  playerWindow = new BrowserWindow(windowOpts);
-
-  playerWindow.webContents.setWindowOpenHandler(() => ({
-    action: "deny",
-  }));
-
-  playerWindow.webContents.on("will-navigate", (event: Event) =>
-    event.preventDefault()
-  );
-
-  const url = `${
-    isDev
-      ? "http://localhost:3000/"
-      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ ...data, id: "player", title: "Player" })}`;
-  logger.info(`Player URL: ${url}`);
-
-  playerWindow.setVisibleOnAllWorkspaces(true);
-  playerWindow.loadURL(url);
-  if (data.hidden) playerWindow.hide();
-  else {
-    playerWindow.show();
-    playerWindow.focus();
-  }
-
-  if (isDev) {
-    try {
-      await devTools(REACT_DEVELOPER_TOOLS);
-    } catch (error) {
-      logger.warning("Error adding dev tools:", error);
-    }
-    // Open the DevTools.
-    // playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
-  }
-}
-
-export function closePlayerWindow(): boolean {
-  if (playerWindow) {
-    if (!playerWindow.isDestroyed()) {
-      playerWindow.close();
-    }
-    playerWindow = undefined;
-    return true;
-  }
-  return false;
-}
-
-export function pausePlayerWindow(): boolean {
-  if (playerWindow && !playerWindow.isDestroyed()) {
-    logger.debug("player-pause");
-    playerWindow.webContents.send("player-pause");
-    return true;
-  }
-  return false;
-}
-
-export function playPlayerWindow(): boolean {
-  if (playerWindow && !playerWindow.isDestroyed()) {
-    logger.debug("player-play");
-    playerWindow.webContents.send("player-play");
-    return true;
-  }
-  return false;
-}
-
-export function playpausePlayerWindow(): boolean {
-  if (playerWindow && !playerWindow.isDestroyed()) {
-    logger.debug("player-playpause");
-    playerWindow.webContents.send("player-playpause");
-    return true;
-  }
-  return false;
-}
-
-export async function createRTCWindow(): Promise<void> {
-  const windowOpts: BrowserWindowConstructorOptions = {
-    width: 1920,
-    height: 1080,
-    minHeight: 100,
-    minWidth: 120,
-    alwaysOnTop: false,
-    autoHideMenuBar: true,
-    backgroundColor: "#121212",
-    closable: false,
-    focusable: true,
-    frame: true,
-    fullscreenable: true,
-    icon: appIconPath,
-    maximizable: true,
-    minimizable: true,
-    show: false,
-    thickFrame: true,
-    titleBarStyle: "default",
-    webPreferences: {
-      contextIsolation: true,
-      preload: join(__dirname, "./preload.js"),
-      devTools: isDev,
-    },
-  };
-
-  rtcWindow = new BrowserWindow(windowOpts);
-
-  const url = `${
-    isDev
-      ? "http://localhost:3000/"
-      : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "webrtc", title: "Video Chat" })}`;
-  logger.info(`WebRTC URL: ${url}`);
-
-  rtcWindow.setVisibleOnAllWorkspaces(true);
-  rtcWindow.loadURL(url);
-  rtcWindow.hide();
-
-  rtcWindow.on("closed", () => {
-    if (rtcWindow && !rtcWindow.isDestroyed()) rtcWindow.destroy();
-    createRTCWindow();
-  });
-
-  if (isDev) {
-    try {
-      await devTools(REACT_DEVELOPER_TOOLS);
-    } catch (error) {
-      logger.warning("Error adding dev tools:", error);
-    }
-    // Open the DevTools.
-    // rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
-  }
 }
 
 function quitApp(): void {
@@ -443,7 +265,7 @@ app.whenReady().then((): void => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showConfigurationWindow);
 
-  api = new API();
+  startServer();
 });
 
 ipcMain.on(
@@ -528,11 +350,8 @@ ipcMain.on(
   async (event): Promise<void> => {
     event.sender.send("restarting-server");
     ipcMain.emit("restarting-server");
-    if (api) {
-      await api.cleanup();
-      api = undefined;
-      setTimeout(() => (api = new API()), 2000);
-    }
+    await stopServer();
+    setTimeout(() => startServer(), 2000);
   }
 );
 

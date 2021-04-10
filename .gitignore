@@ -98,3 +98,7 @@ data/
 
 # Frontend
 public/frontend/*
+
+# Tests
+junit.xml
+test-results.xml
