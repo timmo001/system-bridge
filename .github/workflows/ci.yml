@@ -141,13 +141,6 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1.10
         with:
           files: junit.xml
-      - name: 📈 Publish Coverage
-        uses: 5monkeys/cobertura-action@v8
-        with:
-          path: test/output/coverage/jest/cobertura-coverage.xml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          minimum_coverage: 60
-          show_missing: true
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
