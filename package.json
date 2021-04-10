@@ -10,7 +10,7 @@
     "compile": "shx rm -rf dist/ && tsc",
     "install:all": "yarn install && cd frontend && yarn install",
     "test": "yarn compile && yarn mocha",
-    "mocha": "ts-mocha \"test/**/*.ts\" --recursive --exit",
+    "mocha": "ts-mocha \"test/**/*.ts\" --recursive --exit --timeout 10000",
     "make": "yarn compile && yarn build:frontend && electron-forge make",
     "package": "yarn compile && yarn build:frontend && electron-forge package",
     "publish": "yarn compile && yarn build:frontend && yarn build:player && electron-forge publish",
