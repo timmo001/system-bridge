@@ -2,8 +2,8 @@ import { Server } from "http";
 import assert from "assert";
 import axios from "axios";
 
-import app from "../../../src/api/app";
 import { authenticatedRequest, getUrl } from "../app.test";
+import app from "../../../src/api/app";
 
 describe("audio service", () => {
   let server: Server;
