@@ -13,12 +13,12 @@ const getUrl = (pathname?: string): string => {
 describe("Feathers application tests", () => {
   let server: Server;
 
-  before(function (done) {
+  before((done) => {
     server = app.listen(9170);
     server.once("listening", () => done());
   });
 
-  after(function (done) {
+  after((done) => {
     server.close(done);
   });
 
@@ -27,7 +27,7 @@ describe("Feathers application tests", () => {
   //   assert.ok(data.indexOf('<html lang="en">') !== -1);
   // });
 
-  describe("404", function () {
+  describe("404", () => {
     it("shows a 404 HTML page", async () => {
       try {
         await axios.get(getUrl("path/to/nowhere"), {
