@@ -1,4 +1,5 @@
 import assert from "assert";
+
 import app from "../../../src/api/app";
 
 describe("video service", () => {
