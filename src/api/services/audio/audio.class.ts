@@ -106,11 +106,20 @@ export class Audio {
   }
 
   async find(): Promise<AudioInfo> {
-    return {
-      current: {
+    let current = {
+      muted: false,
+      volume: -1,
+    };
+    try {
+      current = {
         muted: await loudness.getMuted(),
         volume: await loudness.getVolume(),
-      },
+      };
+    } catch (e) {
+      logger.info(`Cannot get audio from loudness module: ${e.message}`);
+    }
+    return {
+      current,
       devices: await si.audio(),
     };
   }
