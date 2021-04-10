@@ -10,6 +10,8 @@ import { IncomingMessage } from "http";
 import { Application } from "./declarations";
 import logger from "../logger";
 
+export const testKey = "dec59a3f-ab58-40b4-a453-3b8340fc8b44";
+
 declare module "./declarations" {
   interface ServiceTypes {
     authentication: AuthenticationService & ServiceAddons<unknown>;
@@ -25,9 +27,15 @@ class ApiKeyStrategy extends AuthenticationBaseStrategy {
       settings = (await import("../common")).getSettings();
     } catch (e) {
       logger.error("Failed to get settings for authentication:", e);
+      // Use default (only valid for tests)
+      settings = {
+        network: {
+          items: { apiKey: { value: testKey } },
+        },
+      };
     }
 
-    if (!settings || apiKey !== settings.network.items.apiKey.value)
+    if (apiKey !== settings.network.items.apiKey.value)
       throw new NotAuthenticated("Invalid API Key");
 
     return {

@@ -136,7 +136,7 @@ jobs:
           sudo apt install libavahi-compat-libdnssd-dev
           yarn install
       - name: 🧪 Run Tests
-        run: yarn test
+        run: yarn test:junit
       - name: ↗ Publish Tests
         uses: EnricoMi/publish-unit-test-result-action@v1.10
         with:

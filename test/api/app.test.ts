@@ -1,13 +1,20 @@
 import { Server } from "http";
 import assert from "assert";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 import app from "../../src/api/app";
+import { testKey } from "../../src/api/authentication";
 
-const getUrl = (pathname?: string): string => {
-  const u = new URL("http://localhost:9170");
-  u.pathname = pathname;
-  return u.toString();
+export const getUrl = (pathname?: string): string => {
+  const url = new URL("http://localhost:9170");
+  if (pathname) url.pathname = pathname;
+  return url.toString();
+};
+
+export const authenticatedRequest: AxiosRequestConfig = {
+  headers: {
+    "api-key": testKey,
+  },
 };
 
 describe("Feathers application tests", () => {

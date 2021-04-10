@@ -46,7 +46,7 @@ export class Video {
 
   async create(data: VideoCreateData): Promise<VideoCreateData> {
     if (!data.path && !data.url)
-      throw new BadRequest("You must provide a path or url.");
+      throw new BadRequest("You must provide a path or url");
 
     const url = `/video-${uuidv4()}`;
 

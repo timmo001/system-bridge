@@ -8,9 +8,9 @@ describe("battery service", () => {
     assert.ok(service, "Registered the service");
   });
 
-  it("responds", async () => {
+  it("find responds", async () => {
     const service = app.service("battery");
     const response = await service.find();
-    assert.ok(response, "Responds");
+    assert.ok(response, "responds");
   });
 });

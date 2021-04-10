@@ -56,7 +56,7 @@ export class Audio {
 
   async create(data: MediaCreateData): Promise<MediaCreateData> {
     if (!data.path && !data.url)
-      throw new BadRequest("You must provide a path or url.");
+      throw new BadRequest("You must provide a path or url");
 
     const url = `/audio-${uuidv4()}`;
 
@@ -71,7 +71,7 @@ export class Audio {
             );
         }))
       )
-        throw new BadRequest("Path provided does not exist.");
+        throw new BadRequest("Path provided does not exist");
     }
 
     (async () => {
