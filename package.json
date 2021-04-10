@@ -164,7 +164,7 @@
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "serve-favicon": "2.5.0",
-    "systeminformation": "5.6.10",
+    "systeminformation": "5.6.12",
     "update-electron-app": "2.0.1",
     "uuid": "8.3.2",
     "winston": "3.3.3"
