@@ -51,8 +51,6 @@ describe("Feathers application tests", () => {
       } catch (error) {
         const { response } = error;
 
-        console.log(response);
-
         assert.strictEqual(response.status, 404);
         assert.strictEqual(response.data.code, 404);
         assert.strictEqual(response.data.message, "Page not found");
