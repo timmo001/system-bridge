@@ -2998,14 +2998,6 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-electron-debug@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/electron-debug/-/electron-debug-3.2.0.tgz#46a15b555c3b11872218c65ea01d058aa0814920"
-  integrity sha512-7xZh+LfUvJ52M9rn6N+tPuDw6oRAjxUj9SoxAZfJ0hVCXhZCsdkrSt7TgXOiWiEOBgEV8qwUIO/ScxllsPS7ow==
-  dependencies:
-    electron-is-dev "^1.1.0"
-    electron-localshortcut "^3.1.0"
-
 electron-devtools-installer@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/electron-devtools-installer/-/electron-devtools-installer-3.1.1.tgz#7b56c8c86475c5e4e10de6917d150c53c9ceb55e"
@@ -3070,11 +3062,6 @@ electron-installer-redhat@^3.2.0:
     word-wrap "^1.2.3"
     yargs "^16.0.2"
 
-electron-is-accelerator@^0.1.0:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/electron-is-accelerator/-/electron-is-accelerator-0.1.2.tgz#509e510c26a56b55e17f863a4b04e111846ab27b"
-  integrity sha1-UJ5RDCala1Xhf4Y6SwThEYRqsns=
-
 electron-is-dev@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-2.0.0.tgz#833487a069b8dad21425c67a19847d9064ab19bd"
@@ -3084,21 +3071,6 @@ electron-is-dev@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-0.3.0.tgz#14e6fda5c68e9e4ecbeff9ccf037cbd7c05c5afe"
   integrity sha1-FOb9pcaOnk7L7/nM8DfL18BcWv4=
-
-electron-is-dev@^1.1.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
-  integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
-
-electron-localshortcut@^3.1.0:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/electron-localshortcut/-/electron-localshortcut-3.2.1.tgz#cfc83a3eff5e28faf98ddcc87f80a2ce4f623cd3"
-  integrity sha512-DWvhKv36GsdXKnaFFhEiK8kZZA+24/yFLgtTwJJHc7AFgDjNRIBJZ/jq62Y/dWv9E4ypYwrVWN2bVrCYw1uv7Q==
-  dependencies:
-    debug "^4.0.1"
-    electron-is-accelerator "^0.1.0"
-    keyboardevent-from-electron-accelerator "^2.0.0"
-    keyboardevents-areequal "^0.2.1"
 
 electron-notarize@^1.0.0:
   version "1.0.0"
@@ -4966,16 +4938,6 @@ jws@^3.2.2:
   dependencies:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
-
-keyboardevent-from-electron-accelerator@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/keyboardevent-from-electron-accelerator/-/keyboardevent-from-electron-accelerator-2.0.0.tgz#ace21b1aa4e47148815d160057f9edb66567c50c"
-  integrity sha512-iQcmNA0M4ETMNi0kG/q0h/43wZk7rMeKYrXP7sqKIJbHkTU8Koowgzv+ieR/vWJbOwxx5nDC3UnudZ0aLSu4VA==
-
-keyboardevents-areequal@^0.2.1:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/keyboardevents-areequal/-/keyboardevents-areequal-0.2.2.tgz#88191ec738ce9f7591c25e9056de928b40277194"
-  integrity sha512-Nv+Kr33T0mEjxR500q+I6IWisOQ0lK1GGOncV0kWE6n4KFmpcu7RUX5/2B0EUtX51Cb0HjZ9VJsSY3u4cBa0kw==
 
 keyv@^3.0.0:
   version "3.1.0"
