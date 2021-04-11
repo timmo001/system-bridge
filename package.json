@@ -123,7 +123,6 @@
     "ignore": []
   },
   "devDependencies": {
-    "@babel/preset-env": "7.13.12",
     "@electron-forge/cli": "6.0.0-beta.54",
     "@electron-forge/maker-deb": "6.0.0-beta.54",
     "@electron-forge/maker-dmg": "6.0.0-beta.54",
