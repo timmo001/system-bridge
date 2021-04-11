@@ -12,7 +12,7 @@
     "test": "yarn compile && yarn mocha",
     "test:junit": "yarn compile && yarn mocha --reporter mocha-junit-reporter",
     "mocha": "ts-mocha \"test/**/*.ts\" --recursive --exit --timeout 10000",
-    "make": "yarn compile && yarn build:frontend && electron-forge make",
+    "make": "yarn compile && yarn build:frontend && cross-env ELECTRON_IS_DEV=false electron-forge make",
     "package": "yarn compile && yarn build:frontend && electron-forge package",
     "publish": "yarn compile && yarn build:frontend && electron-forge publish",
     "start": "concurrently -k \"yarn start:frontend\" \"wait-on tcp:3000 && yarn start:app\"",
