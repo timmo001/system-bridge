@@ -7,7 +7,7 @@
   "types": "lib/",
   "scripts": {
     "build:frontend": "cd frontend && yarn build",
-    "compile": "shx rm -rf dist/ && tsc",
+    "compile": "shx rm -rf dist/ && cross-env ELECTRON_IS_DEV=false tsc",
     "install:all": "yarn install && cd frontend && yarn install",
     "test": "yarn compile && yarn mocha",
     "test:junit": "yarn compile && yarn mocha --reporter mocha-junit-reporter",
