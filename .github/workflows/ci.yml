@@ -138,7 +138,7 @@ jobs:
       - name: 🧪 Run Tests
         run: yarn test:junit
       - name: ↗ Publish Tests
-        uses: EnricoMi/publish-unit-test-result-action@v1.10
+        uses: EnricoMi/publish-unit-test-result-action@v1.11
         with:
           files: test-results.xml
   build-app:
