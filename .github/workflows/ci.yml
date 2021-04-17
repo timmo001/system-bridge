@@ -142,6 +142,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1.11
         with:
           files: test-results.xml
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
