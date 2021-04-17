@@ -139,7 +139,7 @@ jobs:
         run: yarn test:junit
       - name: ↗ Publish Tests
         if: github.ref != 'refs/heads/master'
-        uses: EnricoMi/publish-unit-test-result-action@v1.11
+        uses: EnricoMi/publish-unit-test-result-action@v1.12
         with:
           files: test-results.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
