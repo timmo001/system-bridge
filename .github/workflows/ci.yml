@@ -113,6 +113,7 @@ jobs:
           strict: false
   test-app:
     name: 🧪 Test App
+    if: github.ref != "refs/heads/master"
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
