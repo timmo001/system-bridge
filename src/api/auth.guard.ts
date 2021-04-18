@@ -9,12 +9,7 @@ export class AuthGuard implements CanActivate {
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-
-    console.log(request);
-
     const settings = getSettings();
-    // if (!settings) return false;
-
-    return request !== settings.network.items.apiKey.value;
+    return request.headers["api-key"] === settings.network.items.apiKey.value;
   }
 }
