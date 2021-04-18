@@ -22,7 +22,9 @@ async function startServer(): Promise<void> {
       : 9170;
 
   // Setup Nest.js app
-  app = await NestFactory.create(AppModule);
+  app = await NestFactory.create(AppModule, {
+    logger: false,
+  });
 
   // Enable security
   app.use(
