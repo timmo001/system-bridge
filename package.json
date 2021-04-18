@@ -202,6 +202,7 @@
     "helmet": "4.4.1",
     "loudness": "0.4.1",
     "music-metadata": "7.8.3",
+    "nest-winston": "1.4.2",
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "reflect-metadata": "0.1.13",

@@ -22,9 +22,7 @@ async function startServer(): Promise<void> {
       : 9170;
 
   // Setup Nest.js app
-  app = await NestFactory.create(AppModule, {
-    logger: false,
-  });
+  app = await NestFactory.create(AppModule);
 
   // Enable security
   app.use(
@@ -36,8 +34,6 @@ async function startServer(): Promise<void> {
   app.enableCors();
   // Enable Global Auth Guard
   app.useGlobalGuards(new AuthGuard());
-  // Add logger
-  app.useLogger(logger);
 
   // Get server from app
   server = app.getHttpServer();
