@@ -27,6 +27,14 @@ export function getSettings(): Configuration {
   return settings;
 }
 
+export async function getSetting(key: string): Promise<any> {
+  return await electronSettings.get(key);
+}
+
+export async function setSetting(key: string, value: any): Promise<void> {
+  await electronSettings.set(key, value);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertArrayToObject(array: any[], key: string): any {
   return array.reduce(

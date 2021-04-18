@@ -3,7 +3,6 @@ import { Injectable } from "@nestjs/common";
 import { resolve } from "path";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import express from "express";
 import fs from "fs";
 import loudness from "loudness";
 import si from "systeminformation";
@@ -14,6 +13,7 @@ import { UpdateAudioDto } from "./dto/update-audio.dto";
 import { Audio } from "./entities/audio.entity";
 import { MediaCreateData } from "../../types/media";
 import { AudioUpdateId } from "./audio.controller";
+import { setSetting } from "../../common";
 import {
   closePlayerWindow,
   createPlayerWindow,
@@ -107,7 +107,7 @@ export class AudioService {
 
       if (createAudioDto.path) {
         logger.info(`URL: ${url}`);
-        // this.app.use(url, express.static(resolve(createAudioDto.path)));
+        setSetting("current-audio-path", resolve(createAudioDto.path));
 
         createPlayerWindow({ ...createAudioDto, type: "audio", url });
       }
