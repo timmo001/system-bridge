@@ -34,6 +34,8 @@ async function startServer(): Promise<void> {
   app.enableCors();
   // Enable Global Auth Guard
   app.useGlobalGuards(new AuthGuard());
+  // Add logger
+  app.useLogger(logger);
 
   // Get server from app
   server = app.getHttpServer();
