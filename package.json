@@ -24,7 +24,7 @@
     "start:app:dev": "nodemon --ext ts,js --watch src --exec \"yarn start:app\"",
     "start:app:prod": "yarn compile && cross-env electron-forge start",
     "start:frontend": "cd frontend && cross-env BROWSER=none yarn start",
-    "lint": "eslint . --config .eslintrc.json --ext .ts"
+    "eslint": "eslint . --config .eslintrc.json --ext .ts"
   },
   "keywords": [
     "system",

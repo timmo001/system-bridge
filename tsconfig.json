@@ -1,20 +1,30 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
     "baseUrl": "./",
+    "outDir": "./dist",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2018",
+    "paths": {
+      "*": ["node_modules/*"]
+    },
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
-    "module": "commonjs",
-    "outDir": "./dist",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "removeComments": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
-    "target": "es2017"
+    "strict": true
   },
   "include": ["src/**/*"]
 }
