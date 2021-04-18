@@ -9,7 +9,7 @@ import {
 } from "electron";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
-import debug from "electron-debug";
+// import debug from "electron-debug";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import electronSettings from "electron-settings";
 import execa from "execa";
@@ -31,8 +31,8 @@ const isDev = electronIsDev();
 
 handleSquirrelEvent();
 
-if (isDev)
-  debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
+// if (isDev)
+//   debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
 
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
