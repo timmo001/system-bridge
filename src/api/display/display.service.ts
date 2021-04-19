@@ -38,7 +38,9 @@ export class DisplayService {
         break;
       case "brightnessDown":
         if (typeof updateDisplayDto.value === "number")
-          await Brightness.set((currentBrightness - data.value) / 100);
+          await Brightness.set(
+            (currentBrightness - updateDisplayDto.value) / 100
+          );
         break;
       case "brightnessUp":
         if (typeof updateDisplayDto.value === "number")
