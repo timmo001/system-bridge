@@ -13,6 +13,7 @@ import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
+import { OpenModule } from "./open/open.module";
 import logger from "../logger";
 
 @Module({
@@ -30,6 +31,7 @@ import logger from "../logger";
     MemoryModule,
     NetworkModule,
     NotificationModule,
+    OpenModule,
   ],
   controllers: [],
   providers: [],
