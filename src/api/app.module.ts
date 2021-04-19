@@ -11,6 +11,7 @@ import { FilesystemModule } from "./filesystem/filesystem.module";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
+import { NetworkModule } from "./network/network.module";
 import logger from "../logger";
 
 @Module({
@@ -25,6 +26,7 @@ import logger from "../logger";
     FilesystemModule,
     GraphicsModule,
     MemoryModule,
+    NetworkModule,
     MediaModule,
   ],
   controllers: [],
