@@ -12,6 +12,7 @@ import { GraphicsModule } from "./graphics/graphics.module";
 import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
+import { NotificationModule } from "./notification/notification.module";
 import logger from "../logger";
 
 @Module({
@@ -25,9 +26,10 @@ import logger from "../logger";
     DisplayModule,
     FilesystemModule,
     GraphicsModule,
+    MediaModule,
     MemoryModule,
     NetworkModule,
-    MediaModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],
