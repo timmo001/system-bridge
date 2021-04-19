@@ -6,6 +6,7 @@ import { BatteryModule } from "./battery/battery.module";
 import { BluetoothModule } from "./bluetooth/bluetooth.module";
 import { CommandModule } from "./command/command.module";
 import { CpuModule } from "./cpu/cpu.module";
+import { DisplayModule } from "./display/display.module";
 import { MediaModule } from "./media/media.module";
 import logger from "../logger";
 
@@ -17,6 +18,7 @@ import logger from "../logger";
     BluetoothModule,
     CommandModule,
     CpuModule,
+    DisplayModule,
     MediaModule,
   ],
   controllers: [],
