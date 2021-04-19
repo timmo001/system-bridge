@@ -8,6 +8,7 @@ import { CommandModule } from "./command/command.module";
 import { CpuModule } from "./cpu/cpu.module";
 import { DisplayModule } from "./display/display.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
+import { GraphicsModule } from "./graphics/graphics.module";
 import { MediaModule } from "./media/media.module";
 import logger from "../logger";
 
@@ -21,6 +22,7 @@ import logger from "../logger";
     CpuModule,
     DisplayModule,
     FilesystemModule,
+    GraphicsModule,
     MediaModule,
   ],
   controllers: [],
