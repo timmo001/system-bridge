@@ -1,18 +1,11 @@
 import { app } from "electron";
 import { Injectable } from "@nestjs/common";
-import { resolve } from "path";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import fs from "fs";
 import loudness from "loudness";
 import si from "systeminformation";
 
-import { Audio } from "./entities/audio.entity";
-import { CreateAudioDto } from "./dto/create-audio.dto";
-import { DeleteAudioDto } from "./dto/delete-audio.dto";
-import { MediaCreateData } from "../../types/media";
-import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
-import { setSetting } from "../../common";
 import {
   closePlayerWindow,
   createPlayerWindow,
@@ -20,6 +13,11 @@ import {
   playpausePlayerWindow,
   playPlayerWindow,
 } from "../../player";
+import { Audio } from "./entities/audio.entity";
+import { CreateAudioDto } from "./dto/create-audio.dto";
+import { DeleteAudioDto } from "./dto/delete-audio.dto";
+import { setSetting } from "../../common";
+import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 import logger from "../../logger";
 
 @Injectable()
@@ -85,13 +83,13 @@ export class AudioService {
     return this.findAll();
   }
 
-  async create(createAudioDto: CreateAudioDto): Promise<MediaCreateData> {
-    const url = `/audio-${uuidv4()}`;
-
+  async create(createAudioDto: CreateAudioDto): Promise<CreateAudioDto> {
     (async () => {
       closePlayerWindow();
-      if (createAudioDto.url) {
-        createAudioDto.path = app.getPath("temp") + url;
+      if (createAudioDto.path) {
+        setSetting("current-media-path", createAudioDto.path);
+      } else if (createAudioDto.url) {
+        createAudioDto.path = app.getPath("temp") + `/audio-${uuidv4()}`;
         logger.info(`Downloading: ${createAudioDto.url}`);
         const response = await axios.get(createAudioDto.url, {
           responseType: "stream",
@@ -103,15 +101,14 @@ export class AudioService {
           writer.on("error", reject);
         });
       }
-
       if (createAudioDto.path) {
-        logger.info(`URL: ${url}`);
-        setSetting("current-audio-path", resolve(createAudioDto.path));
-
-        createPlayerWindow({ ...createAudioDto, type: "audio", url });
+        createPlayerWindow({
+          ...createAudioDto,
+          type: "audio",
+          url: `safe-file-protocol://${createAudioDto.path}`,
+        });
       }
     })();
-
-    return { ...createAudioDto, type: "audio", url };
+    return createAudioDto;
   }
 }

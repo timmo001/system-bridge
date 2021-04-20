@@ -49,9 +49,7 @@ function Player(): ReactElement {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
               setSource({
                 type: "audio",
-                source: String(query.path)
-                  ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-                  : String(query.url),
+                source: String(query.url),
                 album: data.album,
                 artist: data.artist,
                 cover: data.cover || logo,
@@ -70,9 +68,7 @@ function Player(): ReactElement {
         case "video":
           setSource({
             type: "video",
-            source: String(query.path)
-              ? `http://localhost:${settings?.network.items.port.value}${query.url}`
-              : String(query.url),
+            source: String(query.url),
             volumeInitial: volume > 0 ? volume : 60,
           });
           break;

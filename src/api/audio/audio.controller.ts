@@ -15,7 +15,6 @@ import { Audio } from "./entities/audio.entity";
 import { AudioService } from "./audio.service";
 import { CreateAudioDto } from "./dto/create-audio.dto";
 import { DeleteAudioDto } from "./dto/delete-audio.dto";
-import { MediaCreateData } from "../../types/media";
 import { UpdateAudioId, UpdateAudioDto } from "./dto/update-audio.dto";
 import logger from "../../logger";
 
@@ -44,7 +43,7 @@ export class AudioController {
   @Post()
   async create(
     @Body() createAudioDto: CreateAudioDto
-  ): Promise<MediaCreateData> {
+  ): Promise<CreateAudioDto> {
     if (!createAudioDto.path && !createAudioDto.url)
       throw new HttpException(
         {

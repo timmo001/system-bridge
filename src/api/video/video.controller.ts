@@ -12,7 +12,6 @@ import fs from "fs";
 
 import { CreateVideoDto } from "./dto/create-video.dto";
 import { DeleteVideoDto } from "./dto/delete-video.dto";
-import { MediaCreateData } from "../../types/media";
 import { UpdateVideoId } from "./dto/update-video.dto";
 import { VideoService } from "./video.service";
 import logger from "../../logger";
@@ -34,7 +33,7 @@ export class VideoController {
   @Post()
   async create(
     @Body() createVideoDto: CreateVideoDto
-  ): Promise<MediaCreateData> {
+  ): Promise<CreateVideoDto> {
     if (!createVideoDto.path && !createVideoDto.url)
       throw new HttpException(
         {

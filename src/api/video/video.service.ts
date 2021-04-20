@@ -1,11 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { resolve } from "path";
-import { v4 as uuidv4 } from "uuid";
 
-import { CreateVideoDto } from "./dto/create-video.dto";
-import { DeleteVideoDto } from "./dto/delete-video.dto";
-import { MediaCreateData } from "../../types/media";
-import { setSetting } from "../../common";
 import {
   closePlayerWindow,
   createPlayerWindow,
@@ -13,6 +7,9 @@ import {
   playpausePlayerWindow,
   playPlayerWindow,
 } from "../../player";
+import { CreateVideoDto } from "./dto/create-video.dto";
+import { DeleteVideoDto } from "./dto/delete-video.dto";
+import { setSetting } from "../../common";
 import { UpdateVideoId } from "./dto/update-video.dto";
 import logger from "../../logger";
 
@@ -40,16 +37,16 @@ export class VideoService {
     };
   }
 
-  async create(createVideoDto: CreateVideoDto): Promise<MediaCreateData> {
-    const url = `/video-${uuidv4()}`;
-
+  async create(createVideoDto: CreateVideoDto): Promise<CreateVideoDto> {
+    closePlayerWindow();
     if (createVideoDto.path) {
       logger.info(`Path: ${createVideoDto.path}`);
-
-      logger.info(`URL: ${url}`);
-      setSetting("current-video-path", resolve(createVideoDto.path));
-
-      createPlayerWindow({ ...createVideoDto, type: "video", url });
+      setSetting("current-media-path", createVideoDto.path);
+      createPlayerWindow({
+        ...createVideoDto,
+        type: "video",
+        url: `safe-file-protocol://${createVideoDto.path}`,
+      });
     } else if (createVideoDto.url) {
       createPlayerWindow({
         ...createVideoDto,
@@ -57,7 +54,6 @@ export class VideoService {
         url: createVideoDto.url,
       });
     }
-
-    return { ...createVideoDto, type: "video", url };
+    return createVideoDto;
   }
 }
