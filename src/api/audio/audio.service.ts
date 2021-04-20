@@ -7,12 +7,11 @@ import fs from "fs";
 import loudness from "loudness";
 import si from "systeminformation";
 
+import { Audio } from "./entities/audio.entity";
 import { CreateAudioDto } from "./dto/create-audio.dto";
 import { DeleteAudioDto } from "./dto/delete-audio.dto";
-import { UpdateAudioDto } from "./dto/update-audio.dto";
-import { Audio } from "./entities/audio.entity";
 import { MediaCreateData } from "../../types/media";
-import { AudioUpdateId } from "./audio.controller";
+import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 import { setSetting } from "../../common";
 import {
   closePlayerWindow,
@@ -49,7 +48,7 @@ export class AudioService {
   }
 
   async update(
-    id: AudioUpdateId,
+    id: UpdateAudioId,
     updateAudioDto: UpdateAudioDto
   ): Promise<Audio | DeleteAudioDto> {
     const currentVolume: number = await loudness.getVolume();

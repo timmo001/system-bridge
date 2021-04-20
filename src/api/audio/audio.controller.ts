@@ -11,23 +11,13 @@ import {
 } from "@nestjs/common";
 import fs from "fs";
 
+import { Audio } from "./entities/audio.entity";
 import { AudioService } from "./audio.service";
 import { CreateAudioDto } from "./dto/create-audio.dto";
 import { DeleteAudioDto } from "./dto/delete-audio.dto";
-import { UpdateAudioDto } from "./dto/update-audio.dto";
-import { Audio } from "./entities/audio.entity";
 import { MediaCreateData } from "../../types/media";
+import { UpdateAudioId, UpdateAudioDto } from "./dto/update-audio.dto";
 import logger from "../../logger";
-
-export type AudioUpdateId =
-  | "mute"
-  | "pause"
-  | "play"
-  | "playpause"
-  | "stop"
-  | "volume"
-  | "volumeDown"
-  | "volumeUp";
 
 @Controller("audio")
 export class AudioController {
@@ -45,7 +35,7 @@ export class AudioController {
 
   @Put(":id")
   async update(
-    @Param("id") id: AudioUpdateId,
+    @Param("id") id: UpdateAudioId,
     @Body() updateAudioDto: UpdateAudioDto
   ): Promise<Audio | DeleteAudioDto> {
     return await this.audioService.update(id, updateAudioDto);
