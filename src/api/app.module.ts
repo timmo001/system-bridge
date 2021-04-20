@@ -16,6 +16,7 @@ import { NotificationModule } from "./notification/notification.module";
 import { OpenModule } from "./open/open.module";
 import { OsModule } from "./os/os.module";
 import { ProcessesModule } from "./processes/processes.module";
+import { SystemModule } from "./system/system.module";
 import logger from "../logger";
 
 @Module({
@@ -36,6 +37,7 @@ import logger from "../logger";
     OpenModule,
     OsModule,
     ProcessesModule,
+    SystemModule,
   ],
   controllers: [],
   providers: [],
