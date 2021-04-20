@@ -1,3 +1,4 @@
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
 import { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
@@ -34,6 +35,15 @@ async function startServer(): Promise<void> {
   app.enableCors();
   // Enable Global Auth Guard
   app.useGlobalGuards(new AuthGuard());
+  // Setup Open API
+  const document = SwaggerModule.createDocument(
+    app,
+    new DocumentBuilder()
+      .setTitle("System Bridge")
+      .setDescription("A bridge for your systems")
+      .build()
+  );
+  SwaggerModule.setup("docs", app, document);
 
   // Get server from app
   server = app.getHttpServer();
