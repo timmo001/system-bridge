@@ -14,6 +14,7 @@ import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
 import { OpenModule } from "./open/open.module";
+import { OsModule } from "./os/os.module";
 import logger from "../logger";
 
 @Module({
@@ -32,6 +33,7 @@ import logger from "../logger";
     NetworkModule,
     NotificationModule,
     OpenModule,
+    OsModule,
   ],
   controllers: [],
   providers: [],
