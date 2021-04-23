@@ -28,26 +28,30 @@ export class DisplayService {
     id: UpdateDisplayId,
     updateDisplayDto: UpdateDisplayDto
   ): Promise<Display> {
-    const currentBrightness: number = (await Brightness.get()) * 100;
-    switch (id) {
-      default:
-        break;
-      case "brightness":
-        if (typeof updateDisplayDto.value === "number")
-          await Brightness.set(updateDisplayDto.value / 100);
-        break;
-      case "brightnessDown":
-        if (typeof updateDisplayDto.value === "number")
-          await Brightness.set(
-            (currentBrightness - updateDisplayDto.value) / 100
-          );
-        break;
-      case "brightnessUp":
-        if (typeof updateDisplayDto.value === "number")
-          await Brightness.set(
-            (currentBrightness + updateDisplayDto.value) / 100
-          );
-        break;
+    try {
+      const currentBrightness: number = (await Brightness.get()) * 100;
+      switch (id) {
+        default:
+          break;
+        case "brightness":
+          if (typeof updateDisplayDto.value === "number")
+            await Brightness.set(updateDisplayDto.value / 100);
+          break;
+        case "brightnessDown":
+          if (typeof updateDisplayDto.value === "number")
+            await Brightness.set(
+              (currentBrightness - updateDisplayDto.value) / 100
+            );
+          break;
+        case "brightnessUp":
+          if (typeof updateDisplayDto.value === "number")
+            await Brightness.set(
+              (currentBrightness + updateDisplayDto.value) / 100
+            );
+          break;
+      }
+    } catch (e) {
+      logger.warn(`Error updating brightness. ${e.message}`);
     }
     return await this.findAll();
   }
