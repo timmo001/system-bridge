@@ -205,7 +205,7 @@
     "execa": "5.0.0",
     "express": "4.17.1",
     "feathers-swagger": "1.2.1",
-    "helmet": "4.4.1",
+    "helmet": "4.5.0",
     "loudness": "0.4.1",
     "music-metadata": "7.8.3",
     "nest-winston": "1.4.2",
