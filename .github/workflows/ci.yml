@@ -137,8 +137,15 @@ jobs:
           yarn install
       - name: 🧪 Run Tests
         run: yarn test:junit
+      - name: ✏ Has Access to checks
+        id: checks
+        uses: scherermichael-oss/action-has-permission@1.0.5
+        with:
+          checks: write
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: ↗ Publish Tests
-        if: github.ref != 'refs/heads/master'
+        if: steps.checks.outputs.has-permission && github.ref != 'refs/heads/master'
         uses: EnricoMi/publish-unit-test-result-action@v1.12
         with:
           files: junit.xml
