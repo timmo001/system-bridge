@@ -4,20 +4,25 @@ import {
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
+  protocol,
   shell,
   Tray,
 } from "electron";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
-import debug from "electron-debug";
+// import debug from "electron-debug";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
-import electronSettings from "electron-settings";
 import execa from "execa";
 import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
 import updateApp from "update-electron-app";
 
-import { appIconPath, appSmallIconPath, getSettings } from "./common";
+import {
+  appIconPath,
+  appSmallIconPath,
+  getSettings,
+  setSetting,
+} from "./common";
 import { closePlayerWindow } from "./player";
 import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
@@ -31,8 +36,8 @@ const isDev = electronIsDev();
 
 handleSquirrelEvent();
 
-if (isDev)
-  debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
+// if (isDev)
+//   debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
 
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
@@ -159,6 +164,16 @@ async function setAppConfig(): Promise<void> {
 
 let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
+  protocol.registerFileProtocol("safe-file-protocol", (request, callback) => {
+    const url = request.url.replace("safe-file-protocol://", "");
+    try {
+      return callback(decodeURIComponent(url));
+    } catch (error) {
+      // Handle the error as needed
+      console.error(error);
+    }
+  });
+
   configurationWindow = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -328,7 +343,7 @@ ipcMain.on(
   "update-setting",
   async (event, args): Promise<void> => {
     logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
-    await electronSettings.set(args[0], args[1]);
+    await setSetting(args[0], args[1]);
     await setAppConfig();
     event.sender.send("updated-setting", args);
     ipcMain.emit("updated-setting", args);

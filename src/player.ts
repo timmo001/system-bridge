@@ -64,7 +64,11 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ ...data, id: "player", title: "Player" })}`;
+  }?${queryString.stringify({
+    ...data,
+    id: "player",
+    title: "Player",
+  })}`;
   logger.info(`Player URL: ${url}`);
 
   playerWindow.setVisibleOnAllWorkspaces(true);

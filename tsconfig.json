@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
+    "baseUrl": "./",
+    "outDir": "./dist",
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2018",
@@ -9,18 +9,22 @@
       "*": ["node_modules/*"]
     },
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
+    "incremental": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "removeComments": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
-    "jsx": "react-jsx"
+    "strict": true
   },
   "include": ["src/**/*"]
 }

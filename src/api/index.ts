@@ -1,29 +1,57 @@
-import { createServer, Server } from "http";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
+import { INestApplication } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { Server } from "http";
+import helmet from "helmet";
 import si, { Systeminformation } from "systeminformation";
 
-import { Configuration } from "../configuration";
-import app from "./app";
+import { AppModule } from "./app.module";
+import { AuthGuard } from "./auth.guard";
+import { getSettings } from "../common";
 import logger from "../logger";
 
-let server: Server | undefined;
-const startServer = async () => {
-  let settings: Configuration | undefined;
-  try {
-    settings = (await import("../common")).getSettings();
-  } catch (e) {
-    logger.error("Failed to get settings for API:", e);
-  }
+let app: INestApplication | undefined, server: Server | undefined;
 
+async function startServer(): Promise<void> {
+  const settings = getSettings();
   const networkSettings = settings?.network.items;
 
   const port: number =
     typeof networkSettings?.port?.value === "number"
       ? networkSettings?.port?.value
       : 9170;
-  server = createServer(app);
 
-  app.setup(server);
+  // Setup Nest.js app
+  app = await NestFactory.create(AppModule);
+
+  // Enable security
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
+  // Enable CORS
+  app.enableCors();
+  // Enable Global Auth Guard
+  app.useGlobalGuards(new AuthGuard());
+  // Setup Open API
+  const document = SwaggerModule.createDocument(
+    app,
+    new DocumentBuilder()
+      .setTitle("System Bridge")
+      .setDescription("A bridge for your systems")
+      .build()
+  );
+  SwaggerModule.setup("docs", app, document);
+
+  // Get server from app
+  server = app.getHttpServer();
+
+  if (!server) {
+    console.error("No server found!. Aborting");
+    return;
+  }
 
   // Set up RTC Broker
   const key = networkSettings?.apiKey.value;
@@ -93,19 +121,14 @@ const startServer = async () => {
     }
   });
   server.on("close", () => logger.info("Server closing."));
-  server.listen(port);
-};
+  app.listen(port);
+}
 
 async function stopServer(): Promise<void> {
-  return await new Promise<void>((resolve) => {
-    if (server)
-      server.close((err) => {
-        if (err) logger.error("Error closing server:", err);
-        logger.info("Server closed.");
-        server = undefined;
-        resolve();
-      });
-  });
+  if (app) await app.close();
+  logger.info("Server closed.");
+  app = undefined;
+  server = undefined;
 }
 
 export { server, startServer, stopServer };

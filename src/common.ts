@@ -27,6 +27,15 @@ export function getSettings(): Configuration {
   return settings;
 }
 
+export async function getSetting(key: string): Promise<unknown> {
+  return await electronSettings.get(key);
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
+export async function setSetting(key: string, value: any): Promise<void> {
+  await electronSettings.set(key, value);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertArrayToObject(array: any[], key: string): any {
   return array.reduce(
