@@ -6,9 +6,9 @@ declare global {
     api: {
       ipcRendererOn: (
         channel: string,
-        listener: (event: IpcRendererEvent, ...args: any[]) => void
+        listener: (event: IpcRendererEvent, ...args: unknown[]) => void
       ) => void;
-      ipcRendererSend: (channel: string, ...args: any[]) => void;
+      ipcRendererSend: (channel: string, ...args: unknown[]) => void;
     };
   }
 }
@@ -16,8 +16,8 @@ declare global {
 contextBridge.exposeInMainWorld("api", {
   ipcRendererOn: (
     channel: string,
-    listener: (event: IpcRendererEvent, ...args: any[]) => void
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void
   ) => ipcRenderer.on(channel, listener),
-  ipcRendererSend: (channel: string, ...args: any[]): void =>
+  ipcRendererSend: (channel: string, ...args: unknown[]): void =>
     ipcRenderer.send(channel, ...args),
 });
