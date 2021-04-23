@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BluetoothController } from './bluetooth.controller';
-import { BluetoothService } from './bluetooth.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { BluetoothController } from "./bluetooth.controller";
+import { BluetoothService } from "./bluetooth.service";
 
-describe('BluetoothController', () => {
+describe("BluetoothController", () => {
   let controller: BluetoothController;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('BluetoothController', () => {
     controller = module.get<BluetoothController>(BluetoothController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

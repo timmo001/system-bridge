@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CpuController } from './cpu.controller';
-import { CpuService } from './cpu.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { CpuController } from "./cpu.controller";
+import { CpuService } from "./cpu.service";
 
-describe('CpuController', () => {
+describe("CpuController", () => {
   let controller: CpuController;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('CpuController', () => {
     controller = module.get<CpuController>(CpuController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from "@nestjs/testing";
 
-import { SystemController } from './system.controller';
-import { SystemService } from './system.service';
+import { SystemController } from "./system.controller";
+import { SystemService } from "./system.service";
 
-describe('SystemController', () => {
+describe("SystemController", () => {
   let controller: SystemController;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('SystemController', () => {
     controller = module.get<SystemController>(SystemController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

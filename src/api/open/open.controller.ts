@@ -8,9 +8,7 @@ export class OpenController {
   constructor(private readonly openService: OpenService) {}
 
   @Post()
-  async create(
-    @Body() createOpenDto: CreateOpenDto
-  ): Promise<CreateOpenDto> {
+  async create(@Body() createOpenDto: CreateOpenDto): Promise<CreateOpenDto> {
     return await this.openService.create(createOpenDto);
   }
 }

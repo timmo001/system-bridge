@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from "@nestjs/testing";
 
-import { NetworkController } from './network.controller';
-import { NetworkService } from './network.service';
+import { NetworkController } from "./network.controller";
+import { NetworkService } from "./network.service";
 
-describe('NetworkController', () => {
+describe("NetworkController", () => {
   let controller: NetworkController;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('NetworkController', () => {
     controller = module.get<NetworkController>(NetworkController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BluetoothService } from './bluetooth.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { BluetoothService } from "./bluetooth.service";
 
-describe('BluetoothService', () => {
+describe("BluetoothService", () => {
   let service: BluetoothService;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('BluetoothService', () => {
     service = module.get<BluetoothService>(BluetoothService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

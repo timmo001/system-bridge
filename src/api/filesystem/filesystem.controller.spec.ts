@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from "@nestjs/testing";
 
-import { FilesystemController } from './filesystem.controller';
-import { FilesystemService } from './filesystem.service';
+import { FilesystemController } from "./filesystem.controller";
+import { FilesystemService } from "./filesystem.service";
 
-describe('FilesystemController', () => {
+describe("FilesystemController", () => {
   let controller: FilesystemController;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('FilesystemController', () => {
     controller = module.get<FilesystemController>(FilesystemController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

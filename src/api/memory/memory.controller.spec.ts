@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from "@nestjs/testing";
 
-import { MemoryController } from './memory.controller';
-import { MemoryService } from './memory.service';
+import { MemoryController } from "./memory.controller";
+import { MemoryService } from "./memory.service";
 
-describe('MemoryController', () => {
+describe("MemoryController", () => {
   let controller: MemoryController;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('MemoryController', () => {
     controller = module.get<MemoryController>(MemoryController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });
