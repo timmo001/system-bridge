@@ -7000,10 +7000,10 @@ multi-typeof@^1.0.0:
     fmix "^0.1.0"
     imul "^1.0.0"
 
-music-metadata@7.8.3:
-  version "7.8.3"
-  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.3.tgz"
-  integrity sha512-sF0oEmN88IJCuAR+1ZwyPqDvIrACddBJbWfRUQo3KZ6YN+V/EAex5AVWwlQxvY2XMcMJ+pPZEnALVnz9IXvU4A==
+music-metadata@7.8.4:
+  version "7.8.4"
+  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.4.tgz#6f2ab518881b4af384caf7e7cf17708a5cdf5cb4"
+  integrity sha512-bQbNWG36V1WL9+rHvK4gyZ5tGGZC4INPQ5n3ddyMpuA08ba095beH+qYS2KVk8VicXguDYK56nV9h2W8yAAPRQ==
   dependencies:
     content-type "^1.0.4"
     debug "^4.3.1"
