@@ -1,12 +1,13 @@
-import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WsResponse,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
 
+import { Event } from "./entities/event.entity";
 import { getSettings } from "../../common";
 import logger from "../../logger";
 
@@ -20,18 +21,17 @@ const port: number =
 
 @WebSocketGateway(port, { transports: ["websocket"] })
 export class EventsGateway {
-  @UseGuards()
   @SubscribeMessage("events")
   handleEvent(
-    @MessageBody() data: string,
+    @MessageBody() data: Event,
     @ConnectedSocket() client: Socket
-  ): string {
+  ): WsResponse<Event> {
     console.log(data);
     logger.info(
       `New event from ${client.id} (${
         client.conn.remoteAddress
       }): ${JSON.stringify(data)}`
     );
-    return data;
+    return { event: "events", data };
   }
 }

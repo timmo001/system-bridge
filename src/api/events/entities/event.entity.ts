@@ -1,1 +1,4 @@
-export class Event {}
+export interface Event {
+  type: string;
+  data: unknown;
+}
