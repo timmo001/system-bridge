@@ -59,6 +59,14 @@ const defaultConfiguration: Configuration = {
         icon: mdiProtocol,
         requiresServerRestart: true,
       },
+      wsPort: {
+        name: "WebSocket Port",
+        description: "The port the WebSocket runs on.",
+        defaultValue: 9172,
+        value: null,
+        icon: mdiProtocol,
+        requiresServerRestart: true,
+      },
       apiKey: {
         name: "API Key",
         description: "The API key to authenticate with the API.",
