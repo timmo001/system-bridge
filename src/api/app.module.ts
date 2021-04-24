@@ -7,7 +7,7 @@ import { BluetoothModule } from "./bluetooth/bluetooth.module";
 import { CommandModule } from "./command/command.module";
 import { CpuModule } from "./cpu/cpu.module";
 import { DisplayModule } from "./display/display.module";
-import { EventsModule } from './events/events.module';
+import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { MediaModule } from "./media/media.module";
