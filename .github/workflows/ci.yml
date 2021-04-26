@@ -139,7 +139,7 @@ jobs:
         run: yarn test:junit
       - name: ✏ Has Access to checks
         id: checks
-        uses: scherermichael-oss/action-has-permission@1.0.5
+        uses: scherermichael-oss/action-has-permission@1.0.6
         with:
           checks: write
         env:
