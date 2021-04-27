@@ -7001,10 +7001,10 @@ multi-typeof@^1.0.0:
     fmix "^0.1.0"
     imul "^1.0.0"
 
-music-metadata@7.8.4:
-  version "7.8.4"
-  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.4.tgz#6f2ab518881b4af384caf7e7cf17708a5cdf5cb4"
-  integrity sha512-bQbNWG36V1WL9+rHvK4gyZ5tGGZC4INPQ5n3ddyMpuA08ba095beH+qYS2KVk8VicXguDYK56nV9h2W8yAAPRQ==
+music-metadata@7.8.5:
+  version "7.8.5"
+  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.5.tgz#49fefc0a8abe30fe6c7f3fd8bd54b7a2a46016dd"
+  integrity sha512-0BZ9ah5vy73qxKiJYon+FnJN/zzWl9VM1ck8HSsEXyukXCzU3gg3vkw3A7+Aa5MzAUdUwczTd3yP4jS06a3t1w==
   dependencies:
     content-type "^1.0.4"
     debug "^4.3.1"

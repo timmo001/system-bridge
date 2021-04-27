@@ -207,7 +207,7 @@
     "feathers-swagger": "1.2.1",
     "helmet": "4.5.0",
     "loudness": "0.4.1",
-    "music-metadata": "7.8.4",
+    "music-metadata": "7.8.5",
     "nest-winston": "1.4.2",
     "peer": "0.6.1",
     "query-string": "7.0.0",
