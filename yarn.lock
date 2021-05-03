@@ -7021,10 +7021,10 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nest-winston@1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.4.2.tgz#6bb840d1a54a6a922a1178a27b84fe220c824e8a"
-  integrity sha512-6yad6Np7+XvvRFvwh0kWI/MfPmJV17MRBL9gkeyUB0ZmhDkZJcfqFmQawdaZ0dwmO8pXNeTw1VtLWUHQAZctWQ==
+nest-winston@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.5.0.tgz#2a1d8c5e7f7abc933f10cd80e05548d03b63684b"
+  integrity sha512-hjJOZrzLbHe5BsN00OIi9Y7lT3ZMT4HX/1SbA5oKS0SkbjvvwxavpUz3N9itL6Oznh0B7JVjUXZLLK8aGULL0w==
   dependencies:
     cli-color "^2.0.0"
     fast-safe-stringify "^2.0.7"
