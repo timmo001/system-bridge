@@ -15,7 +15,7 @@ import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
-import updateApp from "update-electron-app";
+import autoUpdater from "update-electron-app";
 
 import {
   appIconPath,
@@ -208,7 +208,7 @@ async function setupApp(): Promise<void> {
       logger.warning("Error adding dev tools:", error);
     }
   } else {
-    updateApp();
+    autoUpdater();
   }
 
   configurationWindow.on("close", (event) => {
