@@ -9256,10 +9256,10 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-systeminformation@5.6.16:
-  version "5.6.16"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.16.tgz#cbd244f24b10a4b352c1638d9c36f65006ccde8d"
-  integrity sha512-3sQ6SnHhXEWeciQ3ocgGjE3j/KquJmEcd6w36c9ETAQDZZUXqGj8Ogp0HTll4X4/k6uiHvyjfWeRhE7O0HN0vQ==
+systeminformation@5.6.17:
+  version "5.6.17"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.17.tgz#a2040b7a724b429ee13cab44487cb9eb92e837aa"
+  integrity sha512-l60ARpjFBYObdmACdsKPqTZymudpIB2/aGzXLHWFy+DDSOKxR+EfNZP9eRe8T/i0Zbok6LMSrAcHfKw6SCmKgg==
 
 table@^6.0.4:
   version "6.1.0"
