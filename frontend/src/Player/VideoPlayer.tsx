@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactPlayer from "react-player/lazy";
 
 import { usePlayer, VideoSource } from "./Utils";
@@ -26,7 +26,9 @@ function VideoPlayer() {
         width="100%"
         url={source}
         volume={volumeInitial}
-        handleSetPlaying={handleSetPlaying}
+        onPause={() => handleSetPlaying(false)}
+        onPlay={() => handleSetPlaying(true)}
+        onStart={() => handleSetPlaying(true)}
       />
     </>
   );
