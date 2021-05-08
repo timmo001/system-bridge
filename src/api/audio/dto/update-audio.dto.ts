@@ -1,12 +1,4 @@
-export type UpdateAudioId =
-  | "mute"
-  | "pause"
-  | "play"
-  | "playpause"
-  | "stop"
-  | "volume"
-  | "volumeDown"
-  | "volumeUp";
+export type UpdateAudioId = "mute" | "volume" | "volumeDown" | "volumeUp";
 
 export class UpdateAudioDto {
   value?: boolean | number;

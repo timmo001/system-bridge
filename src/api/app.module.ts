@@ -9,6 +9,7 @@ import { CpuModule } from "./cpu/cpu.module";
 import { DisplayModule } from "./display/display.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
 import { GraphicsModule } from "./graphics/graphics.module";
+import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
@@ -16,7 +17,6 @@ import { OpenModule } from "./open/open.module";
 import { OsModule } from "./os/os.module";
 import { ProcessesModule } from "./processes/processes.module";
 import { SystemModule } from "./system/system.module";
-import { VideoModule } from "./video/video.module";
 import logger from "../logger";
 
 @Module({
@@ -30,6 +30,7 @@ import logger from "../logger";
     DisplayModule,
     FilesystemModule,
     GraphicsModule,
+    MediaModule,
     MemoryModule,
     NetworkModule,
     NotificationModule,
@@ -37,7 +38,6 @@ import logger from "../logger";
     OsModule,
     ProcessesModule,
     SystemModule,
-    VideoModule,
   ],
   controllers: [],
   providers: [],
