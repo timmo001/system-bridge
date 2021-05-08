@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import loudness from "loudness";
 import si from "systeminformation";
 
-import { closePlayerWindow } from "../../player";
 import { Audio } from "./entities/audio.entity";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 import logger from "../../logger";

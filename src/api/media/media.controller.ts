@@ -15,7 +15,7 @@ import { Media } from "./entities/media.entity";
 import { MediaService } from "./media.service";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
-import { UpdateMediaId, UpdateMediaDto } from "./dto/update-media.dto";
+import { UpdateMediaId } from "./dto/update-media.dto";
 import logger from "../../logger";
 
 @Controller("media")
@@ -34,10 +34,9 @@ export class MediaController {
 
   @Put(":id")
   async update(
-    @Param("id") id: UpdateMediaId,
-    @Body() updateMediaDto: UpdateMediaDto
+    @Param("id") id: UpdateMediaId
   ): Promise<Media | DeleteMediaDto> {
-    return await this.mediaService.update(id, updateMediaDto);
+    return await this.mediaService.update(id);
   }
 
   @Post()
