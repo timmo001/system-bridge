@@ -34,8 +34,9 @@ function Player({ entered }: PlayerProps): ReactElement {
                   artist: data.artist,
                   cover: data.cover || logo,
                   title: data.title,
-                  volumeInitial: volume > 0 ? volume : 40,
+                  volumeInitial: (volume > 0 ? volume : 40) / 100,
                 },
+                playing: true,
               });
             });
             window.api.ipcRendererSend(
@@ -53,6 +54,7 @@ function Player({ entered }: PlayerProps): ReactElement {
               source: String(query.url),
               volumeInitial: volume > 0 ? volume : 60,
             },
+            playing: true,
           });
           break;
       }

@@ -16,8 +16,6 @@ function VideoPlayer() {
     [playerStatus, setPlayerStatus]
   );
 
-  const volume = useMemo(() => volumeInitial / 100, [volumeInitial]);
-
   return (
     <>
       <ReactPlayer
@@ -27,7 +25,7 @@ function VideoPlayer() {
         height="100%"
         width="100%"
         url={source}
-        volume={volume}
+        volume={volumeInitial}
         handleSetPlaying={handleSetPlaying}
       />
     </>

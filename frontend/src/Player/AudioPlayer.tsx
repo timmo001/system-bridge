@@ -1,10 +1,9 @@
 import React, {
   useState,
-  useEffect,
-  useRef,
   ChangeEvent,
   useMemo,
   useCallback,
+  useRef,
 } from "react";
 import {
   ButtonBase,
@@ -18,6 +17,7 @@ import {
 } from "@material-ui/core";
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 import moment from "moment";
+import ReactPlayer from "react-player/lazy";
 
 import { AudioSource, usePlayer } from "./Utils";
 
@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-let audioTimer: NodeJS.Timeout;
+// let audioTimer: NodeJS.Timeout;
 
 function AudioPlayer({ hovering }: AudioPlayerProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -69,59 +69,27 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
+  const [trackDuration, setTrackDuration] = useState<number>(1);
+  const [seeking, setSeeking] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(volumeInitial);
 
-  const audioRef = useRef(new Audio(source));
-
-  const { duration } = audioRef.current;
+  const audioRef = useRef<ReactPlayer>(null);
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
     [playerStatus, setPlayerStatus]
   );
 
-  const startTimer = useCallback(() => {
-    // Clear any timers already running
-    if (audioTimer) clearInterval(audioTimer);
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
+    isPlaying,
+    handleSetPlaying,
+  ]);
 
-    audioTimer = setInterval(() => {
-      if (audioRef.current.ended) {
-        handleSetPlaying(false);
-      } else {
-        setTrackProgress(audioRef.current.currentTime);
-      }
-    }, 1000);
-  }, [handleSetPlaying]);
-
-  useEffect(() => {
-    if (isPlaying) {
-      audioRef.current.play();
-      startTimer();
-    } else {
-      audioRef.current.pause();
+  function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
+    setSeeking(true);
+    if (typeof value === "number") {
+      setTrackProgress(value);
     }
-  }, [isPlaying, startTimer]);
-
-  useEffect(() => {
-    audioRef.current = new Audio(source);
-    setTrackProgress(audioRef.current.currentTime);
-    audioRef.current.volume = volumeInitial / 100;
-    handleSetPlaying(true);
-  }, [source, volumeInitial, handleSetPlaying]);
-
-  useEffect(() => {
-    // Pause and clean up on unmount
-    return () => {
-      audioRef.current.pause();
-      clearInterval(audioTimer);
-    };
-  }, []);
-
-  function handleScrub(value: number) {
-    // Clear any timers already running
-    clearInterval(audioTimer);
-    audioRef.current.currentTime = value;
-    setTrackProgress(audioRef.current.currentTime);
   }
 
   function handleScrubEnd() {
@@ -129,12 +97,8 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     if (!isPlaying) {
       handleSetPlaying(true);
     }
-    startTimer();
-  }
-
-  function handleSetVolume(value: number) {
-    audioRef.current.volume = value / 100;
-    setVolume(value);
+    setSeeking(false);
+    audioRef.current?.seekTo(trackProgress);
   }
 
   const formattedDuration = useMemo(() => {
@@ -148,113 +112,134 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   const classes = useStyles();
 
   return (
-    <Grid
-      className={classes.root}
-      container
-      direction="row"
-      alignItems="center"
-      justify="center"
-      wrap="nowrap"
-    >
-      <Grid className={classes.gridItem} item>
-        <ButtonBase
-          aria-label={isPlaying ? "Pause" : "Play"}
-          onClick={() => handleSetPlaying(!isPlaying)}
-        >
-          <img
-            className={classes.image}
-            src={cover}
-            alt={`${artist} - ${album}`}
-          />
-          <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
-            <div className={classes.overlay}>
-              {isPlaying ? (
-                <Pause className={classes.overlayInner} fontSize="large" />
-              ) : (
-                <PlayArrow className={classes.overlayInner} fontSize="large" />
-              )}
-            </div>
-          </Fade>
-        </ButtonBase>
-      </Grid>
-      <Grid item xs={8}>
-        <Grid
-          container
-          direction="column"
-          alignItems="flex-start"
-          justify="space-around"
-        >
-          <Grid item>
-            <Typography
-              color="textPrimary"
-              component="span"
-              variant="subtitle1"
-              noWrap
-            >
-              {artist} - {title}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography
-              color="textSecondary"
-              component="span"
-              variant="subtitle2"
-              noWrap
-            >
-              {album}
-            </Typography>
-          </Grid>
-
-          <Grid item container spacing={2}>
-            <Grid item xs={4} />
-            <Grid className={classes.center} item>
-              <VolumeUp />
-            </Grid>
-            <Grid className={classes.gridItem} item xs>
-              <Slider
-                min={0}
-                max={100}
-                step={5}
-                value={volume}
-                valueLabelDisplay="auto"
-                onChange={(
-                  _event: ChangeEvent<{}>,
-                  value: number | number[]
-                ) => {
-                  if (typeof value === "number") handleSetVolume(value);
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid container>
-            <Grid className={classes.gridItem} item />
-            <Grid className={classes.gridItem} item xs>
-              <Slider
-                min={0}
-                max={duration ? duration : 1}
-                step={1}
-                value={trackProgress}
-                valueLabelDisplay="off"
-                onChange={(
-                  _event: ChangeEvent<{}>,
-                  value: number | number[]
-                ) => {
-                  if (typeof value === "number") handleScrub(value);
-                }}
-                onMouseUp={handleScrubEnd}
-                onKeyUp={handleScrubEnd}
-              />
-            </Grid>
-            <Grid className={classes.gridItem} item>
-              <Typography component="span" variant="body2">
-                {formattedDuration}
+    <>
+      <ReactPlayer
+        ref={audioRef}
+        playing={isPlaying}
+        height="0px"
+        width="0px"
+        url={source}
+        volume={volume}
+        onDuration={(duration: number) => {
+          if (!seeking) setTrackDuration(duration);
+        }}
+        onPause={() => handleSetPlaying(false)}
+        onPlay={() => handleSetPlaying(true)}
+        onStart={() => handleSetPlaying(true)}
+        onProgress={({
+          playedSeconds,
+        }: {
+          played: number;
+          playedSeconds: number;
+          loaded: number;
+          loadedSeconds: number;
+        }) => setTrackProgress(playedSeconds)}
+      />
+      <Grid
+        className={classes.root}
+        container
+        direction="row"
+        alignItems="center"
+        justify="center"
+        wrap="nowrap"
+      >
+        <Grid className={classes.gridItem} item>
+          <ButtonBase
+            aria-label={isPlaying ? "Pause" : "Play"}
+            onClick={handleTogglePlaying}
+          >
+            <img
+              className={classes.image}
+              src={cover}
+              alt={`${artist} - ${album}`}
+            />
+            <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
+              <div className={classes.overlay}>
+                {isPlaying ? (
+                  <Pause className={classes.overlayInner} fontSize="large" />
+                ) : (
+                  <PlayArrow
+                    className={classes.overlayInner}
+                    fontSize="large"
+                  />
+                )}
+              </div>
+            </Fade>
+          </ButtonBase>
+        </Grid>
+        <Grid item xs={8}>
+          <Grid
+            container
+            direction="column"
+            alignItems="flex-start"
+            justify="space-around"
+          >
+            <Grid item>
+              <Typography
+                color="textPrimary"
+                component="span"
+                variant="subtitle1"
+                noWrap
+              >
+                {artist} - {title}
               </Typography>
+            </Grid>
+            <Grid item>
+              <Typography
+                color="textSecondary"
+                component="span"
+                variant="subtitle2"
+                noWrap
+              >
+                {album}
+              </Typography>
+            </Grid>
+
+            <Grid item container spacing={2}>
+              <Grid item xs={4} />
+              <Grid className={classes.center} item>
+                <VolumeUp />
+              </Grid>
+              <Grid className={classes.gridItem} item xs>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={volume}
+                  onChange={(
+                    _event: ChangeEvent<{}>,
+                    value: number | number[]
+                  ) => {
+                    if (typeof value === "number") setVolume(value);
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container>
+              <Grid className={classes.gridItem} item />
+              <Grid className={classes.gridItem} item xs>
+                <Slider
+                  min={0}
+                  max={trackDuration}
+                  step={1}
+                  value={trackProgress}
+                  valueLabelDisplay="off"
+                  onChange={handleScrub}
+                  onMouseUp={handleScrubEnd}
+                  onKeyUp={handleScrubEnd}
+                />
+              </Grid>
+              <Grid className={classes.gridItem} item>
+                <Typography component="span" variant="body2">
+                  {formattedDuration}
+                </Typography>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 }
 
