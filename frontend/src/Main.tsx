@@ -4,7 +4,7 @@ import { createStyles, Grid, makeStyles, Typography } from "@material-ui/core";
 import { parsedQuery, useSettings } from "./Utils";
 import Configuration from "./Configuration/Configuration";
 import WebRTC from "./WebRTC/WebRTC";
-import Player from "./Player/Player";
+import Player from "./Player/PlayerContainer";
 
 const useStyles = makeStyles(() =>
   createStyles({

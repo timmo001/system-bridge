@@ -2,6 +2,7 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
+  ipcMain,
   screen,
 } from "electron";
 import { join } from "path";
@@ -15,6 +16,29 @@ import logger from "./logger";
 const isDev = electronIsDev();
 
 let playerWindow: BrowserWindow | undefined;
+
+export interface Source {
+  type: "audio" | "video";
+  source: string;
+  volumeInitial: number;
+}
+
+export interface AudioSource extends Source {
+  type: "audio";
+  album: string;
+  artist: string;
+  cover: string;
+  title: string;
+}
+
+export interface VideoSource extends Source {
+  type: "video";
+}
+
+export interface PlayerStatus {
+  playing?: boolean;
+  source: AudioSource | VideoSource;
+}
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -60,6 +84,14 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     event.preventDefault()
   );
 
+  playerWindow.webContents.on("will-redirect", (event: Event) =>
+    event.preventDefault()
+  );
+
+  playerWindow.on("closed", () => {
+    ipcMain.emit("player-status", undefined);
+  });
+
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -77,13 +109,13 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   else playerWindow.show();
 
   // if (isDev) {
-  //   try {
-  //     await devTools(REACT_DEVELOPER_TOOLS);
-  //   } catch (error) {
-  //     logger.warning("Error adding dev tools:", error);
-  //   }
+  //   // try {
+  //   //   await devTools(REACT_DEVELOPER_TOOLS);
+  //   // } catch (error) {
+  //   //   logger.warning("Error adding dev tools:", error);
+  //   // }
   //   // Open the DevTools.
-  //   // playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  //   playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   // }
 }
 

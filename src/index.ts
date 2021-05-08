@@ -23,7 +23,7 @@ import {
   getSettings,
   setSetting,
 } from "./common";
-import { closePlayerWindow } from "./player";
+import { closePlayerWindow, PlayerStatus } from "./player";
 import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -405,3 +405,11 @@ ipcMain.on("get-audio-metadata", async (event, path: string) => {
     title: metadata.common.title || "",
   });
 });
+
+ipcMain.on(
+  "player-status",
+  async (_event, playerStatus: PlayerStatus): Promise<void> => {
+    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
+    await setSetting("player-status", playerStatus);
+  }
+);

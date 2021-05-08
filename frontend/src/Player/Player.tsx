@@ -1,44 +1,23 @@
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { ButtonBase, Fade } from "@material-ui/core";
-import { Close, Minimize } from "@material-ui/icons";
+import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 
 import { parsedQuery, useSettings } from "../Utils";
+import { usePlayer } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
-export interface Source {
-  type: "audio" | "video";
-  source: string;
-  volumeInitial: number;
+interface PlayerProps {
+  entered: boolean;
 }
 
-export interface AudioSource extends Source {
-  type: "audio";
-  album: string;
-  artist: string;
-  cover: string;
-  title: string;
-}
-
-export interface VideoSource extends Source {
-  type: "video";
-}
-
-function Player(): ReactElement {
-  const [entered, setEntered] = useState<boolean>(false);
+function Player({ entered }: PlayerProps): ReactElement {
   const [settings] = useSettings();
-  const [source, setSource] = useState<AudioSource | VideoSource>();
+  const [playerStatus, setPlayerStatus] = usePlayer();
 
   const query = useMemo(() => parsedQuery, []);
 
   useEffect(() => {
-    document.addEventListener("mouseenter", () => setEntered(true));
-    document.addEventListener("mouseleave", () => setEntered(false));
-  }, []);
-
-  useEffect(() => {
-    if (settings && !source) {
+    if (settings && !playerStatus) {
       console.log(query);
       const volume = Number(query.volume);
       switch (query.type) {
@@ -47,14 +26,17 @@ function Player(): ReactElement {
         case "audio":
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-              setSource({
-                type: "audio",
-                source: String(query.url),
-                album: data.album,
-                artist: data.artist,
-                cover: data.cover || logo,
-                title: data.title,
-                volumeInitial: volume > 0 ? volume : 40,
+              setPlayerStatus({
+                source: {
+                  type: "audio",
+                  source: String(query.url),
+                  album: data.album,
+                  artist: data.artist,
+                  cover: data.cover || logo,
+                  title: data.title,
+                  volumeInitial: (volume > 0 ? volume : 40) / 100,
+                },
+                playing: true,
               });
             });
             window.api.ipcRendererSend(
@@ -66,59 +48,55 @@ function Player(): ReactElement {
           }
           break;
         case "video":
-          setSource({
-            type: "video",
-            source: String(query.url),
-            volumeInitial: volume > 0 ? volume : 60,
+          setPlayerStatus({
+            source: {
+              type: "video",
+              source: String(query.url),
+              volumeInitial: (volume > 0 ? volume : 40) / 100,
+            },
+            playing: true,
           });
           break;
       }
     }
-  }, [settings, source, setSource, query]);
+  }, [settings, playerStatus, setPlayerStatus, query]);
+
+  const isPlaying = useMemo(() => playerStatus?.playing, [playerStatus]);
+
+  const handleSetPlaying = useCallback(
+    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
+    isPlaying,
+    handleSetPlaying,
+  ]);
+
+  useEffect(() => {
+    if (playerStatus) {
+      try {
+        window.api.ipcRendererSend("player-status", {
+          playing: playerStatus.playing,
+        });
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
+    }
+  }, [playerStatus]);
+
+  useEffect(() => {
+    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
+    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
+    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+  }, [handleSetPlaying, handleTogglePlaying]);
 
   return (
     <>
-      <div className="draggable-region" />
-      <Fade in={entered} timeout={{ enter: 200, exit: 400 }}>
-        <div
-          style={{
-            position: "absolute",
-            display: "flex",
-            top: 0,
-            right: 0,
-            zIndex: 10000,
-          }}
-        >
-          <ButtonBase
-            style={{ width: 36, height: 28 }}
-            onClick={() => {
-              try {
-                window.api.ipcRendererSend("window-minimize");
-              } catch (e) {
-                console.warn("Error calling window-minimize:", e);
-              }
-            }}
-          >
-            <Minimize fontSize="small" style={{ marginTop: -12 }} />
-          </ButtonBase>
-          <ButtonBase
-            style={{ width: 36, height: 28 }}
-            onClick={() => {
-              try {
-                window.api.ipcRendererSend("window-close");
-              } catch (e) {
-                console.warn("Error calling window-close:", e);
-              }
-            }}
-          >
-            <Close fontSize="small" />
-          </ButtonBase>
-        </div>
-      </Fade>
-      {source?.type === "audio" ? (
-        <AudioPlayer hovering={entered} source={source} />
-      ) : source?.type === "video" ? (
-        <VideoPlayer source={source} />
+      {playerStatus?.source.type === "audio" ? (
+        <AudioPlayer hovering={entered} />
+      ) : playerStatus?.source.type === "video" ? (
+        <VideoPlayer />
       ) : (
         ""
       )}
