@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
 import { usePlayer, VideoSource } from "./Utils";
@@ -15,6 +15,17 @@ function VideoPlayer() {
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
     [playerStatus, setPlayerStatus]
   );
+
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
+    isPlaying,
+    handleSetPlaying,
+  ]);
+
+  useEffect(() => {
+    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
+    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
+    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+  }, [handleSetPlaying, handleTogglePlaying]);
 
   return (
     <>

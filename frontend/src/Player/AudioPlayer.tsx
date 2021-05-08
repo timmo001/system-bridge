@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  useEffect,
 } from "react";
 import {
   ButtonBase,
@@ -84,6 +85,12 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     isPlaying,
     handleSetPlaying,
   ]);
+
+  useEffect(() => {
+    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
+    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
+    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+  }, [handleSetPlaying, handleTogglePlaying]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
     setSeeking(true);

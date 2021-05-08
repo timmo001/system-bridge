@@ -1,4 +1,7 @@
-export class CreateVideoDto {
+export type MediaType = "audio" | "video";
+
+export interface CreateMediaDto {
+  type: MediaType;
   backgroundColor?: string;
   hidden?: boolean;
   opacity?: number;
