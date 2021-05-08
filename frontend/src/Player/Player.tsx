@@ -74,10 +74,14 @@ function Player({ entered }: PlayerProps): ReactElement {
   ]);
 
   useEffect(() => {
-    try {
-      window.api.ipcRendererSend("player-status", playerStatus);
-    } catch (e) {
-      console.warn("Error calling window.api:", e);
+    if (playerStatus) {
+      try {
+        window.api.ipcRendererSend("player-status", {
+          playing: playerStatus.playing,
+        });
+      } catch (e) {
+        console.warn("Error calling window.api:", e);
+      }
     }
   }, [playerStatus]);
 
