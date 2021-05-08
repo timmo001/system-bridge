@@ -6,10 +6,13 @@ import {
   WsResponse,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
+import { UseGuards } from "@nestjs/common";
 
 import { Event } from "./entities/event.entity";
 import { getSettings } from "../../common";
 import logger from "../../logger";
+
+import { WsAuthGuard } from "../wsAuth.guard";
 
 const settings = getSettings();
 const networkSettings = settings?.network.items;
@@ -21,6 +24,7 @@ const port: number =
 
 @WebSocketGateway(port, { transports: ["websocket"] })
 export class EventsGateway {
+  @UseGuards(WsAuthGuard)
   @SubscribeMessage("events")
   handleEvent(
     @MessageBody() data: Event,

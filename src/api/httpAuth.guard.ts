@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { getSettings } from "../common";
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class HttpAuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
