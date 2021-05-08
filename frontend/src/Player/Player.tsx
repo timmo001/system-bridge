@@ -74,6 +74,14 @@ function Player({ entered }: PlayerProps): ReactElement {
   ]);
 
   useEffect(() => {
+    try {
+      window.api.ipcRendererSend("player-status", playerStatus);
+    } catch (e) {
+      console.warn("Error calling window.api:", e);
+    }
+  }, [playerStatus]);
+
+  useEffect(() => {
     window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
     window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
     window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
