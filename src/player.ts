@@ -8,7 +8,7 @@ import {
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath } from "./common";
+import { appIconPath, setSetting } from "./common";
 import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -16,6 +16,29 @@ import logger from "./logger";
 const isDev = electronIsDev();
 
 let playerWindow: BrowserWindow | undefined;
+
+export interface Source {
+  type: "audio" | "video";
+  source: string;
+  volumeInitial: number;
+}
+
+export interface AudioSource extends Source {
+  type: "audio";
+  album: string;
+  artist: string;
+  cover: string;
+  title: string;
+}
+
+export interface VideoSource extends Source {
+  type: "video";
+}
+
+export interface PlayerStatus {
+  playing?: boolean;
+  source: AudioSource | VideoSource;
+}
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -133,3 +156,11 @@ export function playpausePlayerWindow(): boolean {
   }
   return false;
 }
+
+ipcMain.on(
+  "player-status",
+  async (_event, playerStatus: PlayerStatus): Promise<void> => {
+    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
+    await setSetting("player-status", playerStatus);
+  }
+);
