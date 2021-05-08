@@ -47,26 +47,29 @@ export class MediaService {
   async create(createMediaDto: CreateMediaDto): Promise<CreateMediaDto> {
     (async () => {
       closePlayerWindow();
-      if (createMediaDto.path) {
-        setSetting("current-media-path", createMediaDto.path);
-      } else if (createMediaDto.url) {
-        createMediaDto.path = app.getPath("temp") + `/media-${uuidv4()}`;
-        logger.info(`Downloading: ${createMediaDto.url}`);
-        const response = await axios.get(createMediaDto.url, {
-          responseType: "stream",
-        });
-        const writer = fs.createWriteStream(createMediaDto.path);
-        response.data.pipe(writer);
-        await new Promise((resolve, reject) => {
-          writer.on("finish", resolve);
-          writer.on("error", reject);
-        });
-      }
+      if (createMediaDto.type === "audio")
+        if (createMediaDto.path) {
+          setSetting("current-media-path", createMediaDto.path);
+        } else if (createMediaDto.url) {
+          createMediaDto.path = app.getPath("temp") + `/media-${uuidv4()}`;
+          logger.info(`Downloading: ${createMediaDto.url}`);
+          const response = await axios.get(createMediaDto.url, {
+            responseType: "stream",
+          });
+          const writer = fs.createWriteStream(createMediaDto.path);
+          response.data.pipe(writer);
+          await new Promise((resolve, reject) => {
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+          });
+        }
       if (createMediaDto.path) {
         createPlayerWindow({
           ...createMediaDto,
           url: `safe-file-protocol://${createMediaDto.path}`,
         });
+      } else if (createMediaDto.url) {
+        createPlayerWindow(createMediaDto);
       }
     })();
     return createMediaDto;
