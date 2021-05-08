@@ -43,6 +43,15 @@ export class MediaController {
   async create(
     @Body() createMediaDto: CreateMediaDto
   ): Promise<CreateMediaDto> {
+    if (createMediaDto.type !== "audio" && createMediaDto.type !== "video")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a valid media type",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
     if (!createMediaDto.path && !createMediaDto.url)
       throw new HttpException(
         {
