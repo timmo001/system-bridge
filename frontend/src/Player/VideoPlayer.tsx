@@ -1,17 +1,15 @@
 import React, { useCallback, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
-import { useVideoPlayer, VideoSource } from "./Utils";
+import { usePlayer, VideoSource } from "./Utils";
 
 function VideoPlayer() {
-  const [playerStatus, setPlayerStatus] = useVideoPlayer();
+  const [playerStatus, setPlayerStatus] = usePlayer();
 
-  const videoSource = useMemo<VideoSource>(() => playerStatus!!.source, [
+  const { source, volumeInitial } = useMemo(() => playerStatus!!.source, [
     playerStatus,
-  ]);
+  ]) as VideoSource;
   const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
-
-  const { source, volumeInitial } = videoSource;
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),

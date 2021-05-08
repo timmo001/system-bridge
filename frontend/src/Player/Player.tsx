@@ -1,30 +1,20 @@
-import React, {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { ButtonBase, Fade } from "@material-ui/core";
-import { Close, Minimize } from "@material-ui/icons";
+import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 
 import { parsedQuery, useSettings } from "../Utils";
-import { PlayerProvider, usePlayer } from "./Utils";
+import { usePlayer } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
-function Player(): ReactElement {
-  const [entered, setEntered] = useState<boolean>(false);
+interface PlayerProps {
+  entered: boolean;
+}
+
+function Player({ entered }: PlayerProps): ReactElement {
   const [settings] = useSettings();
   const [playerStatus, setPlayerStatus] = usePlayer();
 
   const query = useMemo(() => parsedQuery, []);
-
-  useEffect(() => {
-    document.addEventListener("mouseenter", () => setEntered(true));
-    document.addEventListener("mouseleave", () => setEntered(false));
-  }, []);
 
   useEffect(() => {
     if (settings && !playerStatus) {
@@ -69,7 +59,7 @@ function Player(): ReactElement {
     }
   }, [settings, playerStatus, setPlayerStatus, query]);
 
-  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
+  const isPlaying = useMemo(() => playerStatus?.playing, [playerStatus]);
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
@@ -89,52 +79,13 @@ function Player(): ReactElement {
 
   return (
     <>
-      <div className="draggable-region" />
-      <Fade in={entered} timeout={{ enter: 200, exit: 400 }}>
-        <div
-          style={{
-            position: "absolute",
-            display: "flex",
-            top: 0,
-            right: 0,
-            zIndex: 10000,
-          }}
-        >
-          <ButtonBase
-            style={{ width: 36, height: 28 }}
-            onClick={() => {
-              try {
-                window.api.ipcRendererSend("window-minimize");
-              } catch (e) {
-                console.warn("Error calling window-minimize:", e);
-              }
-            }}
-          >
-            <Minimize fontSize="small" style={{ marginTop: -12 }} />
-          </ButtonBase>
-          <ButtonBase
-            style={{ width: 36, height: 28 }}
-            onClick={() => {
-              try {
-                window.api.ipcRendererSend("window-close");
-              } catch (e) {
-                console.warn("Error calling window-close:", e);
-              }
-            }}
-          >
-            <Close fontSize="small" />
-          </ButtonBase>
-        </div>
-      </Fade>
-      <PlayerProvider>
-        {playerStatus?.source.type === "audio" ? (
-          <AudioPlayer hovering={entered} />
-        ) : playerStatus?.source.type === "video" ? (
-          <VideoPlayer />
-        ) : (
-          <div />
-        )}
-      </PlayerProvider>
+      {playerStatus?.source.type === "audio" ? (
+        <AudioPlayer hovering={entered} />
+      ) : playerStatus?.source.type === "video" ? (
+        <VideoPlayer />
+      ) : (
+        ""
+      )}
     </>
   );
 }

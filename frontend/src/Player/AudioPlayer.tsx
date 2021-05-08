@@ -19,7 +19,7 @@ import {
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 import moment from "moment";
 
-import { AudioSource, useAudioPlayer } from "./Utils";
+import { AudioSource, usePlayer } from "./Utils";
 
 interface AudioPlayerProps {
   hovering: boolean;
@@ -60,14 +60,13 @@ const useStyles = makeStyles((theme: Theme) =>
 let audioTimer: NodeJS.Timeout;
 
 function AudioPlayer({ hovering }: AudioPlayerProps) {
-  const [playerStatus, setPlayerStatus] = useAudioPlayer();
+  const [playerStatus, setPlayerStatus] = usePlayer();
 
-  const audioSource = useMemo<AudioSource>(() => playerStatus!!.source, [
-    playerStatus,
-  ]);
+  const { title, artist, album, cover, source, volumeInitial } = useMemo(
+    () => playerStatus!!.source,
+    [playerStatus]
+  ) as AudioSource;
   const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
-
-  const { title, artist, album, cover, source, volumeInitial } = audioSource;
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [volume, setVolume] = useState<number>(volumeInitial);

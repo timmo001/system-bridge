@@ -23,35 +23,14 @@ export interface VideoSource extends Source {
   type: "video";
 }
 
-export interface AudioPlayerStatus {
+export interface PlayerStatus {
   playing?: boolean;
-  source: AudioSource;
+  source: AudioSource | VideoSource;
 }
 
-export interface VideoPlayerStatus {
-  playing?: boolean;
-  source: VideoSource;
-}
-
-const PlayerContext = createContext<
-  AudioPlayerStatus | VideoPlayerStatus | undefined
->(undefined);
+const PlayerContext = createContext<PlayerStatus | undefined>(undefined);
 const SetPlayerContext = createContext<null | React.Dispatch<
-  React.SetStateAction<AudioPlayerStatus | VideoPlayerStatus | undefined>
->>(null);
-
-const AudioPlayerContext = createContext<AudioPlayerStatus | undefined>(
-  undefined
-);
-const SetAudioPlayerContext = createContext<null | React.Dispatch<
-  React.SetStateAction<AudioPlayerStatus>
->>(null);
-
-const VideoPlayerContext = createContext<VideoPlayerStatus | undefined>(
-  undefined
-);
-const SetVideoPlayerContext = createContext<null | React.Dispatch<
-  React.SetStateAction<VideoPlayerStatus>
+  React.SetStateAction<PlayerStatus | undefined>
 >>(null);
 
 export const PlayerProvider = ({
@@ -59,9 +38,7 @@ export const PlayerProvider = ({
 }: {
   children: ReactElement;
 }): ReactElement => {
-  const [playerStatus, setPlayerStatus] = useState<
-    AudioPlayerStatus | VideoPlayerStatus
-  >();
+  const [playerStatus, setPlayerStatus] = useState<PlayerStatus>();
 
   return (
     <SetPlayerContext.Provider value={setPlayerStatus}>
@@ -73,33 +50,11 @@ export const PlayerProvider = ({
 };
 
 export const usePlayer = (): [
-  player: AudioPlayerStatus | VideoPlayerStatus | undefined,
-  setPlayer: React.Dispatch<
-    React.SetStateAction<AudioPlayerStatus | VideoPlayerStatus | undefined>
-  >
+  player: PlayerStatus | undefined,
+  setPlayer: React.Dispatch<React.SetStateAction<PlayerStatus | undefined>>
 ] => {
   const player = useContext(PlayerContext);
   const setPlayer = useContext(SetPlayerContext);
-  if (setPlayer === null) throw new Error(); // this will make setPlayer non-null
-  return [player, setPlayer];
-};
-
-export const useAudioPlayer = (): [
-  player: AudioPlayerStatus | undefined,
-  setPlayer: React.Dispatch<React.SetStateAction<AudioPlayerStatus>>
-] => {
-  const player = useContext(AudioPlayerContext);
-  const setPlayer = useContext(SetAudioPlayerContext);
-  if (setPlayer === null) throw new Error(); // this will make setPlayer non-null
-  return [player, setPlayer];
-};
-
-export const useVideoPlayer = (): [
-  player: VideoPlayerStatus | undefined,
-  setPlayer: React.Dispatch<React.SetStateAction<VideoPlayerStatus>>
-] => {
-  const player = useContext(VideoPlayerContext);
-  const setPlayer = useContext(SetVideoPlayerContext);
   if (setPlayer === null) throw new Error(); // this will make setPlayer non-null
   return [player, setPlayer];
 };
