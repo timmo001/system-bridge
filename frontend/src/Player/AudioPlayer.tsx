@@ -19,11 +19,10 @@ import {
 import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
 import moment from "moment";
 
-import { AudioSource } from "./Player";
+import { AudioSource, useAudioPlayer } from "./Utils";
 
 interface AudioPlayerProps {
   hovering: boolean;
-  source: AudioSource;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -60,33 +59,40 @@ const useStyles = makeStyles((theme: Theme) =>
 
 let audioTimer: NodeJS.Timeout;
 
-function AudioPlayer({ hovering, source }: AudioPlayerProps) {
-  const {
-    title,
-    artist,
-    album,
-    cover,
-    source: audioSrc,
-    volumeInitial,
-  } = source;
+function AudioPlayer({ hovering }: AudioPlayerProps) {
+  const [playerStatus, setPlayerStatus] = useAudioPlayer();
+
+  const audioSource = useMemo<AudioSource>(() => playerStatus!!.source, [
+    playerStatus,
+  ]);
+  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
+
+  const { title, artist, album, cover, source, volumeInitial } = audioSource;
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(volumeInitial);
 
-  const audioRef = useRef(new Audio(audioSrc));
+  const audioRef = useRef(new Audio(source));
 
   const { duration } = audioRef.current;
 
-  const handleTogglePlaying = useCallback(() => setIsPlaying(!isPlaying), [
-    isPlaying,
-  ]);
+  const handleSetPlaying = useCallback(
+    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
+    [playerStatus, setPlayerStatus]
+  );
 
-  useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => setIsPlaying(false));
-    window.api.ipcRendererOn("player-play", () => setIsPlaying(true));
-    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
-  }, [handleTogglePlaying]);
+  const startTimer = useCallback(() => {
+    // Clear any timers already running
+    if (audioTimer) clearInterval(audioTimer);
+
+    audioTimer = setInterval(() => {
+      if (audioRef.current.ended) {
+        handleSetPlaying(false);
+      } else {
+        setTrackProgress(audioRef.current.currentTime);
+      }
+    }, 1000);
+  }, [handleSetPlaying]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -95,14 +101,14 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, startTimer]);
 
   useEffect(() => {
-    audioRef.current = new Audio(audioSrc);
+    audioRef.current = new Audio(source);
     setTrackProgress(audioRef.current.currentTime);
     audioRef.current.volume = volumeInitial / 100;
-    setIsPlaying(true);
-  }, [audioSrc, volumeInitial]);
+    handleSetPlaying(true);
+  }, [source, volumeInitial, handleSetPlaying]);
 
   useEffect(() => {
     // Pause and clean up on unmount
@@ -111,19 +117,6 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
       clearInterval(audioTimer);
     };
   }, []);
-
-  function startTimer() {
-    // Clear any timers already running
-    if (audioTimer) clearInterval(audioTimer);
-
-    audioTimer = setInterval(() => {
-      if (audioRef.current.ended) {
-        setIsPlaying(false);
-      } else {
-        setTrackProgress(audioRef.current.currentTime);
-      }
-    }, 1000);
-  }
 
   function handleScrub(value: number) {
     // Clear any timers already running
@@ -135,7 +128,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
   function handleScrubEnd() {
     // If not already playing, start
     if (!isPlaying) {
-      setIsPlaying(true);
+      handleSetPlaying(true);
     }
     startTimer();
   }
@@ -167,7 +160,7 @@ function AudioPlayer({ hovering, source }: AudioPlayerProps) {
       <Grid className={classes.gridItem} item>
         <ButtonBase
           aria-label={isPlaying ? "Pause" : "Play"}
-          onClick={() => setIsPlaying(!isPlaying)}
+          onClick={() => handleSetPlaying(!isPlaying)}
         >
           <img
             className={classes.image}

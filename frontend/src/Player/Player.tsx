@@ -1,34 +1,23 @@
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ButtonBase, Fade } from "@material-ui/core";
 import { Close, Minimize } from "@material-ui/icons";
 
 import { parsedQuery, useSettings } from "../Utils";
+import { PlayerProvider, usePlayer } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
-export interface Source {
-  type: "audio" | "video";
-  source: string;
-  volumeInitial: number;
-}
-
-export interface AudioSource extends Source {
-  type: "audio";
-  album: string;
-  artist: string;
-  cover: string;
-  title: string;
-}
-
-export interface VideoSource extends Source {
-  type: "video";
-}
-
 function Player(): ReactElement {
   const [entered, setEntered] = useState<boolean>(false);
   const [settings] = useSettings();
-  const [source, setSource] = useState<AudioSource | VideoSource>();
+  const [playerStatus, setPlayerStatus] = usePlayer();
 
   const query = useMemo(() => parsedQuery, []);
 
@@ -38,7 +27,7 @@ function Player(): ReactElement {
   }, []);
 
   useEffect(() => {
-    if (settings && !source) {
+    if (settings && !playerStatus) {
       console.log(query);
       const volume = Number(query.volume);
       switch (query.type) {
@@ -47,14 +36,16 @@ function Player(): ReactElement {
         case "audio":
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-              setSource({
-                type: "audio",
-                source: String(query.url),
-                album: data.album,
-                artist: data.artist,
-                cover: data.cover || logo,
-                title: data.title,
-                volumeInitial: volume > 0 ? volume : 40,
+              setPlayerStatus({
+                source: {
+                  type: "audio",
+                  source: String(query.url),
+                  album: data.album,
+                  artist: data.artist,
+                  cover: data.cover || logo,
+                  title: data.title,
+                  volumeInitial: volume > 0 ? volume : 40,
+                },
               });
             });
             window.api.ipcRendererSend(
@@ -66,15 +57,35 @@ function Player(): ReactElement {
           }
           break;
         case "video":
-          setSource({
-            type: "video",
-            source: String(query.url),
-            volumeInitial: volume > 0 ? volume : 60,
+          setPlayerStatus({
+            source: {
+              type: "video",
+              source: String(query.url),
+              volumeInitial: volume > 0 ? volume : 60,
+            },
           });
           break;
       }
     }
-  }, [settings, source, setSource, query]);
+  }, [settings, playerStatus, setPlayerStatus, query]);
+
+  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
+
+  const handleSetPlaying = useCallback(
+    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
+    isPlaying,
+    handleSetPlaying,
+  ]);
+
+  useEffect(() => {
+    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
+    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
+    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+  }, [handleSetPlaying, handleTogglePlaying]);
 
   return (
     <>
@@ -115,13 +126,15 @@ function Player(): ReactElement {
           </ButtonBase>
         </div>
       </Fade>
-      {source?.type === "audio" ? (
-        <AudioPlayer hovering={entered} source={source} />
-      ) : source?.type === "video" ? (
-        <VideoPlayer source={source} />
-      ) : (
-        ""
-      )}
+      <PlayerProvider>
+        {playerStatus?.source.type === "audio" ? (
+          <AudioPlayer hovering={entered} />
+        ) : playerStatus?.source.type === "video" ? (
+          <VideoPlayer />
+        ) : (
+          <div />
+        )}
+      </PlayerProvider>
     </>
   );
 }

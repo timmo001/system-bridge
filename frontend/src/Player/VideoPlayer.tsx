@@ -1,26 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
-import { VideoSource } from "./Player";
+import { useVideoPlayer, VideoSource } from "./Utils";
 
-interface VideoPlayerProps {
-  source: VideoSource;
-}
+function VideoPlayer() {
+  const [playerStatus, setPlayerStatus] = useVideoPlayer();
 
-function VideoPlayer({ source }: VideoPlayerProps) {
-  const { source: videoSrc, volumeInitial } = source;
-
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-
-  const handleTogglePlaying = useCallback(() => setIsPlaying(!isPlaying), [
-    isPlaying,
+  const videoSource = useMemo<VideoSource>(() => playerStatus!!.source, [
+    playerStatus,
   ]);
+  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
 
-  useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => setIsPlaying(false));
-    window.api.ipcRendererOn("player-play", () => setIsPlaying(true));
-    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
-  }, [handleTogglePlaying]);
+  const { source, volumeInitial } = videoSource;
+
+  const handleSetPlaying = useCallback(
+    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
+    [playerStatus, setPlayerStatus]
+  );
 
   const volume = useMemo(() => volumeInitial / 100, [volumeInitial]);
 
@@ -32,8 +28,9 @@ function VideoPlayer({ source }: VideoPlayerProps) {
         playing={isPlaying}
         height="100%"
         width="100%"
-        url={videoSrc}
+        url={source}
         volume={volume}
+        handleSetPlaying={handleSetPlaying}
       />
     </>
   );
