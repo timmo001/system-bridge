@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
+import React, { ReactElement, useEffect, useMemo } from "react";
 
 import { parsedQuery, useSettings } from "../Utils";
 import { usePlayer } from "./Utils";
@@ -61,18 +61,6 @@ function Player({ entered }: PlayerProps): ReactElement {
     }
   }, [settings, playerStatus, setPlayerStatus, query]);
 
-  const isPlaying = useMemo(() => playerStatus?.playing, [playerStatus]);
-
-  const handleSetPlaying = useCallback(
-    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
-    [playerStatus, setPlayerStatus]
-  );
-
-  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
-    isPlaying,
-    handleSetPlaying,
-  ]);
-
   useEffect(() => {
     if (playerStatus) {
       try {
@@ -84,12 +72,6 @@ function Player({ entered }: PlayerProps): ReactElement {
       }
     }
   }, [playerStatus]);
-
-  useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
-    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
-    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
-  }, [handleSetPlaying, handleTogglePlaying]);
 
   return (
     <>

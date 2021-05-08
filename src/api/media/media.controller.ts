@@ -36,6 +36,15 @@ export class MediaController {
   async update(
     @Param("id") id: UpdateMediaId
   ): Promise<Media | DeleteMediaDto> {
+    if (id !== "pause" && id !== "play" && id !== "playpause" && id !== "stop")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a valid id",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
     return await this.mediaService.update(id);
   }
 
