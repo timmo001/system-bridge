@@ -1,5 +1,7 @@
+export type MediaType = "audio" | "video";
+
 export interface CreateMediaDto {
-  type: "audio" | "video";
+  type: MediaType;
   backgroundColor?: string;
   hidden?: boolean;
   opacity?: number;

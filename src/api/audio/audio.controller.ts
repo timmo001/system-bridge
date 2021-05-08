@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Put } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Put,
+} from "@nestjs/common";
 
 import { Audio } from "./entities/audio.entity";
 import { AudioService } from "./audio.service";
@@ -18,6 +26,20 @@ export class AudioController {
     @Param("id") id: UpdateAudioId,
     @Body() updateAudioDto: UpdateAudioDto
   ): Promise<Audio> {
+    if (
+      id !== "mute" &&
+      id !== "volume" &&
+      id !== "volumeDown" &&
+      id !== "volumeUp"
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a valid id",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
     return await this.audioService.update(id, updateAudioDto);
   }
 }
