@@ -8,7 +8,7 @@ import {
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath, setSetting } from "./common";
+import { appIconPath } from "./common";
 import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -156,11 +156,3 @@ export function playpausePlayerWindow(): boolean {
   }
   return false;
 }
-
-ipcMain.on(
-  "player-status",
-  async (_event, playerStatus: PlayerStatus): Promise<void> => {
-    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
-    await setSetting("player-status", playerStatus);
-  }
-);
