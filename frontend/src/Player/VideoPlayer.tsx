@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
 import { usePlayer, VideoSource } from "./Utils";
