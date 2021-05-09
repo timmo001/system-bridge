@@ -71,7 +71,8 @@ export class MediaController {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "ID volume, volumeDown and volumeUp require a valid numeric value",
+          error:
+            "ID volume, volumeDown and volumeUp require a valid numeric value",
         },
         HttpStatus.BAD_REQUEST
       );
