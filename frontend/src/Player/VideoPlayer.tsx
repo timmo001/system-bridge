@@ -23,11 +23,55 @@ function VideoPlayer() {
     handleSetPlaying,
   ]);
 
+  const handleSetMuted = useCallback(
+    (muted: boolean) => setPlayerStatus({ ...playerStatus!!, muted }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleToggleMuted = useCallback(() => handleSetMuted(!muted), [
+    muted,
+    handleSetMuted,
+  ]);
+
+  const handleSetVolume = useCallback(
+    (v: number, type?: "down" | "up") => {
+      setPlayerStatus({
+        ...playerStatus!!,
+        volume: type === "down" ? volume - v : type === "up" ? volume + v : v,
+      });
+      if (muted) handleSetMuted(false);
+    },
+    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
+  );
+
   useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
-    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
+    window.api.ipcRendererOn("player-mute-toggle", handleToggleMuted);
+    window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
+      handleSetMuted(v)
+    );
+    window.api.ipcRendererOn("player-pause", (_e: Event) =>
+      handleSetPlaying(false)
+    );
+    window.api.ipcRendererOn("player-play", (_e: Event) =>
+      handleSetPlaying(true)
+    );
     window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
-  }, [handleSetPlaying, handleTogglePlaying]);
+    window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
+      handleSetVolume(v)
+    );
+    window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
+      handleSetVolume(v, "down")
+    );
+    window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
+      handleSetVolume(v, "up")
+    );
+  }, [
+    handleSetMuted,
+    handleToggleMuted,
+    handleSetPlaying,
+    handleTogglePlaying,
+    handleSetVolume,
+  ]);
 
   return (
     <>

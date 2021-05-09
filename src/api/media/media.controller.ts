@@ -15,7 +15,7 @@ import { Media } from "./entities/media.entity";
 import { MediaService } from "./media.service";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
-import { UpdateMediaId } from "./dto/update-media.dto";
+import { UpdateMediaDto, UpdateMediaId } from "./dto/update-media.dto";
 import logger from "../../logger";
 
 @Controller("media")
@@ -34,18 +34,49 @@ export class MediaController {
 
   @Put(":id")
   async update(
-    @Param("id") id: UpdateMediaId
-  ): Promise<Media | DeleteMediaDto> {
-    if (id !== "pause" && id !== "play" && id !== "playpause" && id !== "stop")
+    @Param("id") id: UpdateMediaId,
+    @Body() updateMediaDto: UpdateMediaDto
+  ): Promise<DeleteMediaDto> {
+    if (
+      id !== "pause" &&
+      id !== "play" &&
+      id !== "playpause" &&
+      id !== "stop" &&
+      id !== "mute" &&
+      id !== "volume" &&
+      id !== "volumeDown" &&
+      id !== "volumeUp"
+    )
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a valid id",
+          error: "You must provide a valid ID",
         },
         HttpStatus.BAD_REQUEST
       );
 
-    return await this.mediaService.update(id);
+    if (id === "mute" && typeof updateMediaDto.value !== "boolean")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "ID mute requires a valid boolean value",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    if (
+      (id === "volume" || id === "volumeDown" || id === "volumeUp") &&
+      typeof updateMediaDto.value !== "number"
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "ID volume, volumeDown and volumeUp require a valid numeric value",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.mediaService.update(id, updateMediaDto);
   }
 
   @Post()

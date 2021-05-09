@@ -7,15 +7,17 @@ import fs from "fs";
 import {
   closePlayerWindow,
   createPlayerWindow,
+  mutePlayerWindow,
   pausePlayerWindow,
   playpausePlayerWindow,
   playPlayerWindow,
+  volumePlayerWindow,
 } from "../../player";
 import { Media } from "./entities/media.entity";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
 import { getSetting, setSetting } from "../../common";
-import { UpdateMediaId } from "./dto/update-media.dto";
+import { UpdateMediaDto, UpdateMediaId } from "./dto/update-media.dto";
 import logger from "../../logger";
 
 @Injectable()
@@ -28,10 +30,13 @@ export class MediaService {
     return (await getSetting("player-status")) as Media;
   }
 
-  async update(id: UpdateMediaId): Promise<Media | DeleteMediaDto> {
+  async update(
+    id: UpdateMediaId,
+    updateMediaDto: UpdateMediaDto
+  ): Promise<DeleteMediaDto> {
     switch (id) {
       default:
-        break;
+        return { successful: false };
       case "pause":
         return { successful: pausePlayerWindow() };
       case "play":
@@ -40,8 +45,26 @@ export class MediaService {
         return { successful: playpausePlayerWindow() };
       case "stop":
         return { successful: closePlayerWindow() };
+      case "mute":
+        return {
+          successful: mutePlayerWindow(updateMediaDto.value as boolean),
+        };
+      case "volume":
+        return {
+          successful: volumePlayerWindow(updateMediaDto.value as number),
+        };
+      case "volumeDown":
+        return {
+          successful: volumePlayerWindow(
+            updateMediaDto.value as number,
+            "down"
+          ),
+        };
+      case "volumeUp":
+        return {
+          successful: volumePlayerWindow(updateMediaDto.value as number, "up"),
+        };
     }
-    return this.findAll();
   }
 
   async create(createMediaDto: CreateMediaDto): Promise<CreateMediaDto> {

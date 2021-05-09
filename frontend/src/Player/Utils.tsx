@@ -24,10 +24,10 @@ export interface VideoSource extends Source {
 }
 
 export interface PlayerStatus {
-  muted?: boolean;
-  playing?: boolean;
+  muted: boolean;
+  playing: boolean;
   source: AudioSource | VideoSource;
-  volume?: number;
+  volume: number;
 }
 
 const PlayerContext = createContext<PlayerStatus | undefined>(undefined);
