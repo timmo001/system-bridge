@@ -182,9 +182,9 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       handleSetVolume(v, "up")
     );
     window.api.ipcRendererRemoveAllListeners("player-seek");
-    window.api.ipcRendererOn("player-seek", (_e: Event, v: number) => {
-      handleUpdatePlayerPosition(v);
-    });
+    window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
+      handleUpdatePlayerPosition(v)
+    );
   }, [
     handleToggleMuted,
     handleSetMuted,
