@@ -11,12 +11,13 @@ import {
   createStyles,
   Fade,
   Grid,
+  IconButton,
   makeStyles,
   Slider,
   Theme,
   Typography,
 } from "@material-ui/core";
-import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
+import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@material-ui/icons";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
@@ -63,16 +64,17 @@ const useStyles = makeStyles((theme: Theme) =>
 function AudioPlayer({ hovering }: AudioPlayerProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
 
-  const { title, artist, album, cover, source, volumeInitial } = useMemo(
+  const { title, artist, album, cover, source } = useMemo(
     () => playerStatus!!.source,
     [playerStatus]
   ) as AudioSource;
   const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
+  const muted = useMemo(() => playerStatus!!.muted, [playerStatus]);
+  const volume = useMemo(() => playerStatus!!.volume, [playerStatus]);
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [trackDuration, setTrackDuration] = useState<number>(1);
   const [seeking, setSeeking] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(volumeInitial);
 
   const audioRef = useRef<ReactPlayer>(null);
 
@@ -85,6 +87,16 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     isPlaying,
     handleSetPlaying,
   ]);
+
+  const handleSetVolume = useCallback(
+    (volume: number) => setPlayerStatus({ ...playerStatus!!, volume }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleToggleMuted = useCallback(
+    () => setPlayerStatus({ ...playerStatus!!, muted: !muted }),
+    [muted, playerStatus, setPlayerStatus]
+  );
 
   useEffect(() => {
     window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
@@ -126,6 +138,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
         height="0px"
         width="0px"
         url={source}
+        muted={muted}
         volume={volume}
         onDuration={(duration: number) => {
           if (!seeking) setTrackDuration(duration);
@@ -205,7 +218,9 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
             <Grid item container spacing={2}>
               <Grid item xs={4} />
               <Grid className={classes.center} item>
-                <VolumeUp />
+                <IconButton size="small" onClick={handleToggleMuted}>
+                  {muted ? <VolumeMute /> : <VolumeUp />}
+                </IconButton>
               </Grid>
               <Grid className={classes.gridItem} item xs>
                 <Slider
@@ -217,7 +232,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
                     _event: ChangeEvent<{}>,
                     value: number | number[]
                   ) => {
-                    if (typeof value === "number") setVolume(value);
+                    if (typeof value === "number") handleSetVolume(value);
                   }}
                 />
               </Grid>

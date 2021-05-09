@@ -27,6 +27,8 @@ function Player({ entered }: PlayerProps): ReactElement {
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
               setPlayerStatus({
+                muted: false,
+                playing: true,
                 source: {
                   type: "audio",
                   source: String(query.url),
@@ -36,7 +38,7 @@ function Player({ entered }: PlayerProps): ReactElement {
                   title: data.title,
                   volumeInitial: (volume > 0 ? volume : 40) / 100,
                 },
-                playing: true,
+                volume: (volume > 0 ? volume : 40) / 100,
               });
             });
             window.api.ipcRendererSend(
@@ -49,12 +51,14 @@ function Player({ entered }: PlayerProps): ReactElement {
           break;
         case "video":
           setPlayerStatus({
+            muted: false,
+            playing: true,
             source: {
               type: "video",
               source: String(query.url),
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },
-            playing: true,
+            volume: (volume > 0 ? volume : 40) / 100,
           });
           break;
       }
@@ -65,7 +69,9 @@ function Player({ entered }: PlayerProps): ReactElement {
     if (playerStatus) {
       try {
         window.api.ipcRendererSend("player-status", {
+          muted: playerStatus.muted,
           playing: playerStatus.playing,
+          volume: playerStatus.volume,
         });
       } catch (e) {
         console.warn("Error calling window.api:", e);

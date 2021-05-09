@@ -6,10 +6,12 @@ import { usePlayer, VideoSource } from "./Utils";
 function VideoPlayer() {
   const [playerStatus, setPlayerStatus] = usePlayer();
 
-  const { source, volumeInitial } = useMemo(() => playerStatus!!.source, [
+  const { source } = useMemo(() => playerStatus!!.source, [
     playerStatus,
   ]) as VideoSource;
   const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
+  const muted = useMemo(() => playerStatus!!.muted, [playerStatus]);
+  const volume = useMemo(() => playerStatus!!.volume, [playerStatus]);
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
@@ -36,7 +38,8 @@ function VideoPlayer() {
         height="100%"
         width="100%"
         url={source}
-        volume={volumeInitial}
+        muted={muted}
+        volume={volume}
         onPause={() => handleSetPlaying(false)}
         onPlay={() => handleSetPlaying(true)}
         onStart={() => handleSetPlaying(true)}

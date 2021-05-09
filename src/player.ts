@@ -18,7 +18,9 @@ const isDev = electronIsDev();
 let playerWindow: BrowserWindow | undefined;
 
 export interface PlayerStatus {
+  muted?: boolean;
   playing?: boolean;
+  volume?: number;
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
