@@ -127,12 +127,15 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   );
 
   const handleSetPosition = useCallback(
-    (position: number) =>
+    (p: number) => {
+      if (duration && p > duration) p = duration;
+      if (p < 0) p = 0;
       setPlayerStatus({
         ...playerStatus!!,
-        position,
-      }),
-    [playerStatus, setPlayerStatus]
+        position: p,
+      });
+    },
+    [playerStatus, duration, setPlayerStatus]
   );
 
   useEffect(() => {
@@ -165,6 +168,10 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       handleSetVolume(v, "down")
     );
     window.api.ipcRendererRemoveAllListeners("player-volume-up");
+    window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
+      handleSetVolume(v, "up")
+    );
+    window.api.ipcRendererRemoveAllListeners("player-seek");
     window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
       handleSetVolume(v, "up")
     );
