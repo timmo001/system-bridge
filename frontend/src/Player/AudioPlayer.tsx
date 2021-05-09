@@ -138,6 +138,16 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     [playerStatus, duration, setPlayerStatus]
   );
 
+  const handleUpdatePlayerPosition = useCallback(
+    (p: number) => {
+      // If not already playing, start
+      if (!playing) handleSetPlaying(true);
+      setSeeking(false);
+      audioRef.current?.seekTo(p);
+    },
+    [playing, handleSetPlaying]
+  );
+
   useEffect(() => {
     window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
     window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
@@ -172,15 +182,17 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       handleSetVolume(v, "up")
     );
     window.api.ipcRendererRemoveAllListeners("player-seek");
-    window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
-      handleSetVolume(v, "up")
-    );
+    window.api.ipcRendererOn("player-seek", (_e: Event, v: number) => {
+      handleUpdatePlayerPosition(v);
+    });
   }, [
     handleToggleMuted,
     handleSetMuted,
     handleSetPlaying,
     handleTogglePlaying,
     handleSetVolume,
+    handleSetPosition,
+    handleUpdatePlayerPosition,
   ]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
@@ -189,11 +201,12 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     }
   }
 
-  function handleScrubEnd() {
-    // If not already playing, start
-    if (!playing) handleSetPlaying(true);
-    setSeeking(false);
-    if (position) audioRef.current?.seekTo(position);
+  function handleScrubStart(): void {
+    setSeeking(true);
+  }
+
+  function handleScrubEnd(): void {
+    if (position) handleUpdatePlayerPosition(position);
   }
 
   const classes = useStyles();
@@ -315,6 +328,8 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
                   step={1}
                   value={position}
                   valueLabelDisplay="off"
+                  onMouseDown={handleScrubStart}
+                  onKeyDown={handleScrubStart}
                   onChange={handleScrub}
                   onMouseUp={handleScrubEnd}
                   onKeyUp={handleScrubEnd}

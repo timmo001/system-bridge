@@ -38,11 +38,12 @@ export class MediaController {
     @Body() updateMediaDto: UpdateMediaDto
   ): Promise<DeleteMediaDto> {
     if (
+      id !== "mute" &&
       id !== "pause" &&
       id !== "play" &&
       id !== "playpause" &&
+      id !== "seek" &&
       id !== "stop" &&
-      id !== "mute" &&
       id !== "volume" &&
       id !== "volumeDown" &&
       id !== "volumeUp"
@@ -65,14 +66,17 @@ export class MediaController {
       );
 
     if (
-      (id === "volume" || id === "volumeDown" || id === "volumeUp") &&
+      (id === "seek" ||
+        id === "volume" ||
+        id === "volumeDown" ||
+        id === "volumeUp") &&
       typeof updateMediaDto.value !== "number"
     )
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
           error:
-            "ID volume, volumeDown and volumeUp require a valid numeric value",
+            "ID seek, volume, volumeDown and volumeUp require a valid numeric value",
         },
         HttpStatus.BAD_REQUEST
       );

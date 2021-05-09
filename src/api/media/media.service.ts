@@ -11,6 +11,7 @@ import {
   pausePlayerWindow,
   playpausePlayerWindow,
   playPlayerWindow,
+  seekPlayerWindow,
   volumePlayerWindow,
 } from "../../player";
 import { Media } from "./entities/media.entity";
@@ -37,18 +38,20 @@ export class MediaService {
     switch (id) {
       default:
         return { successful: false };
+      case "mute":
+        return {
+          successful: mutePlayerWindow(updateMediaDto.value as boolean),
+        };
       case "pause":
         return { successful: pausePlayerWindow() };
       case "play":
         return { successful: playPlayerWindow() };
       case "playpause":
         return { successful: playpausePlayerWindow() };
+      case "seek":
+        return { successful: seekPlayerWindow(updateMediaDto.value as number) };
       case "stop":
         return { successful: closePlayerWindow() };
-      case "mute":
-        return {
-          successful: mutePlayerWindow(updateMediaDto.value as boolean),
-        };
       case "volume":
         return {
           successful: volumePlayerWindow(updateMediaDto.value as number),
