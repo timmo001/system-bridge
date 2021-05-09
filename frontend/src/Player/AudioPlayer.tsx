@@ -61,17 +61,22 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function AudioPlayer({ hovering }: AudioPlayerProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
-
-  const [trackProgress, setTrackProgress] = useState<number>(0);
-  const [trackDuration, setTrackDuration] = useState<number>(1);
   const [seeking, setSeeking] = useState<boolean>(false);
 
   const audioRef = useRef<ReactPlayer>(null);
 
-  const { playing, muted, volume } = useMemo<PlayerStatus>(
+  const { duration, playing, muted, position, volume } = useMemo<PlayerStatus>(
     () => playerStatus as PlayerStatus,
     [playerStatus]
   );
+
+  const formattedPosition = useMemo(() => {
+    const md = moment.duration(position, "seconds");
+    return `${md
+      .minutes()
+      .toString()
+      .padStart(2, "0")}:${md.seconds().toString().padStart(2, "0")}`;
+  }, [position]);
 
   const { title, artist, album, cover, source } = useMemo<AudioSource>(() => {
     const status = playerStatus as PlayerStatus;
@@ -110,6 +115,24 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       if (muted) handleSetMuted(false);
     },
     [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
+  );
+
+  const handleSetDuration = useCallback(
+    (duration: number) =>
+      setPlayerStatus({
+        ...playerStatus!!,
+        duration,
+      }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleSetPosition = useCallback(
+    (position: number) =>
+      setPlayerStatus({
+        ...playerStatus!!,
+        position,
+      }),
+    [playerStatus, setPlayerStatus]
   );
 
   useEffect(() => {
@@ -154,9 +177,8 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   ]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
-    setSeeking(true);
     if (typeof value === "number") {
-      setTrackProgress(value);
+      handleSetPosition(value);
     }
   }
 
@@ -164,16 +186,8 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     // If not already playing, start
     if (!playing) handleSetPlaying(true);
     setSeeking(false);
-    audioRef.current?.seekTo(trackProgress);
+    if (position) audioRef.current?.seekTo(position);
   }
-
-  const formattedDuration = useMemo(() => {
-    const md = moment.duration(trackProgress, "seconds");
-    return `${md
-      .minutes()
-      .toString()
-      .padStart(2, "0")}:${md.seconds().toString().padStart(2, "0")}`;
-  }, [trackProgress]);
 
   const classes = useStyles();
 
@@ -188,7 +202,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
         muted={muted}
         volume={volume}
         onDuration={(duration: number) => {
-          if (!seeking) setTrackDuration(duration);
+          if (!seeking) handleSetDuration(duration);
         }}
         onPause={() => handleSetPlaying(false)}
         onPlay={() => handleSetPlaying(true)}
@@ -200,7 +214,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
           playedSeconds: number;
           loaded: number;
           loadedSeconds: number;
-        }) => setTrackProgress(playedSeconds)}
+        }) => handleSetPosition(playedSeconds)}
       />
       <Grid
         className={classes.root}
@@ -290,9 +304,9 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
               <Grid className={classes.gridItem} item xs>
                 <Slider
                   min={0}
-                  max={trackDuration}
+                  max={duration}
                   step={1}
-                  value={trackProgress}
+                  value={position}
                   valueLabelDisplay="off"
                   onChange={handleScrub}
                   onMouseUp={handleScrubEnd}
@@ -301,7 +315,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
               </Grid>
               <Grid className={classes.gridItem} item>
                 <Typography component="span" variant="body2">
-                  {formattedDuration}
+                  {formattedPosition}
                 </Typography>
               </Grid>
             </Grid>
