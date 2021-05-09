@@ -73,15 +73,19 @@ function Player({ entered }: PlayerProps): ReactElement {
       if (previousPlayerStatus) {
         previous = cloneDeep(previousPlayerStatus) as PlayerStatus;
         previousStatus = {
+          duration: previous.duration,
           muted: previous.muted,
           playing: previous.playing,
+          position: previous.position,
           volume: previous.volume,
         };
       }
       const status = cloneDeep(playerStatus);
       const newStatus = {
+        duration: status.duration,
         muted: status.muted,
         playing: status.playing,
+        position: status.position,
         volume: status.volume,
       };
       if (!isEqual(newStatus, previousStatus)) {

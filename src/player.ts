@@ -18,8 +18,10 @@ const isDev = electronIsDev();
 let playerWindow: BrowserWindow | undefined;
 
 export interface PlayerStatus {
+  duration?: number;
   muted?: boolean;
   playing?: boolean;
+  position?: number;
   volume?: number;
 }
 
@@ -113,6 +115,15 @@ export function closePlayerWindow(): boolean {
   return false;
 }
 
+export function mutePlayerWindow(value: boolean): boolean {
+  if (playerWindow && !playerWindow.isDestroyed()) {
+    logger.debug(`player-mute: ${value}`);
+    playerWindow.webContents.send("player-mute", value);
+    return true;
+  }
+  return false;
+}
+
 export function pausePlayerWindow(): boolean {
   if (playerWindow && !playerWindow.isDestroyed()) {
     logger.debug("player-pause");
@@ -140,10 +151,10 @@ export function playpausePlayerWindow(): boolean {
   return false;
 }
 
-export function mutePlayerWindow(value: boolean): boolean {
+export function seekPlayerWindow(value: number): boolean {
   if (playerWindow && !playerWindow.isDestroyed()) {
-    logger.debug(`player-mute: ${value}`);
-    playerWindow.webContents.send("player-mute", value);
+    logger.debug("player-seek");
+    playerWindow.webContents.send("player-seek", value);
     return true;
   }
   return false;

@@ -24,8 +24,10 @@ export interface VideoSource extends Source {
 }
 
 export interface PlayerStatus {
+  duration?: number;
   muted: boolean;
   playing: boolean;
+  position?: number;
   source: AudioSource | VideoSource;
   volume: number;
 }

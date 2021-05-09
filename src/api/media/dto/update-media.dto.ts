@@ -1,9 +1,10 @@
 export type UpdateMediaId =
+  | "mute"
   | "pause"
   | "play"
   | "playpause"
+  | "seek"
   | "stop"
-  | "mute"
   | "volume"
   | "volumeDown"
   | "volumeUp";
