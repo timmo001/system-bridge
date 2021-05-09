@@ -11,10 +11,12 @@ import {
 } from "@nestjs/common";
 import fs from "fs";
 
-import { Media } from "./entities/media.entity";
-import { MediaService } from "./media.service";
+import { AudioSource, VideoSource } from "../../player";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
+import { FindMediaId } from "./dto/find-media.dto";
+import { Media } from "./entities/media.entity";
+import { MediaService } from "./media.service";
 import { UpdateMediaDto, UpdateMediaId } from "./dto/update-media.dto";
 import logger from "../../logger";
 
@@ -30,6 +32,22 @@ export class MediaController {
   @Get()
   async findAll(): Promise<Media> {
     return await this.mediaService.findAll();
+  }
+
+  @Get(":id")
+  async find(
+    @Param("id") id: FindMediaId
+  ): Promise<string | AudioSource | VideoSource | undefined> {
+    if (id !== "cover" && id !== "source")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a valid ID",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.mediaService.find(id);
   }
 
   @Put(":id")

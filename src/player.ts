@@ -17,11 +17,30 @@ const isDev = electronIsDev();
 
 let playerWindow: BrowserWindow | undefined;
 
+export interface Source {
+  type: "audio" | "video";
+  source?: string;
+  volumeInitial: number;
+}
+
+export interface AudioSource extends Source {
+  type: "audio";
+  album: string;
+  artist: string;
+  cover?: string;
+  title: string;
+}
+
+export interface VideoSource extends Source {
+  type: "video";
+}
+
 export interface PlayerStatus {
   duration?: number;
   muted?: boolean;
   playing?: boolean;
   position?: number;
+  source?: AudioSource | VideoSource;
   volume?: number;
 }
 
@@ -158,6 +177,23 @@ export function seekPlayerWindow(value: number): boolean {
     return true;
   }
   return false;
+}
+
+export async function getPlayerCover(): Promise<string | undefined> {
+  if (playerWindow && !playerWindow.isDestroyed()) {
+    return new Promise((resolve) => {
+      if (playerWindow && !playerWindow.isDestroyed()) {
+        playerWindow.webContents.send("player-get-cover");
+        logger.debug("player-get-cover");
+        ipcMain.removeAllListeners("player-cover");
+        ipcMain.on("player-cover", (_event, cover: string) => {
+          logger.debug("player-cover");
+          resolve(cover);
+        });
+      }
+    });
+  }
+  return undefined;
 }
 
 export function volumePlayerWindow(

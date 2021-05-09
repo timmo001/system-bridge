@@ -69,25 +69,22 @@ function Player({ entered }: PlayerProps): ReactElement {
 
   useEffect(() => {
     if (playerStatus) {
-      let previous, previousStatus;
+      let previousStatus;
       if (previousPlayerStatus) {
-        previous = cloneDeep(previousPlayerStatus) as PlayerStatus;
-        previousStatus = {
-          duration: previous.duration,
-          muted: previous.muted,
-          playing: previous.playing,
-          position: previous.position,
-          volume: previous.volume,
-        };
+        previousStatus = cloneDeep(previousPlayerStatus) as PlayerStatus;
+        previousStatus.source.source = previousStatus.source.source?.replace(
+          "safe-file-protocol://",
+          ""
+        );
+        if (previousStatus.source.type === "audio")
+          delete previousStatus.source.cover;
       }
-      const status = cloneDeep(playerStatus);
-      const newStatus = {
-        duration: status.duration,
-        muted: status.muted,
-        playing: status.playing,
-        position: status.position,
-        volume: status.volume,
-      };
+      let newStatus = cloneDeep(playerStatus);
+      newStatus.source.source = newStatus.source.source?.replace(
+        "safe-file-protocol://",
+        ""
+      );
+      if (newStatus.source.type === "audio") delete newStatus.source.cover;
       if (!isEqual(newStatus, previousStatus)) {
         console.log(
           "update\n\npreviousStatus:",
