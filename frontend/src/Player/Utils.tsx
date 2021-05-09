@@ -7,7 +7,7 @@ import React, {
 
 export interface Source {
   type: "audio" | "video";
-  source: string;
+  source?: string;
   volumeInitial: number;
 }
 
@@ -15,7 +15,7 @@ export interface AudioSource extends Source {
   type: "audio";
   album: string;
   artist: string;
-  cover: string;
+  cover?: string;
   title: string;
 }
 
