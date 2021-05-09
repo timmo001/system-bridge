@@ -90,6 +90,34 @@ function VideoPlayer() {
     [playing, handleSetPlaying]
   );
 
+  const handleSendCover = useCallback((event) => {
+    console.log("handleSendCover");
+    const player = ref.current?.getInternalPlayer() as any;
+
+    console.log(player);
+
+    let data = "";
+    if (player) {
+      try {
+        const scale = 480 / player.videoWidth;
+        let canvas = document.createElement("canvas") as HTMLCanvasElement;
+        canvas
+          .getContext("2d")
+          ?.drawImage(
+            player,
+            0,
+            0,
+            player.videoWidth * scale,
+            player.videoHeight * scale
+          );
+        data = canvas.toDataURL();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    event.sender.send("player-cover", data);
+  }, []);
+
   useEffect(() => {
     window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
     window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
@@ -127,6 +155,8 @@ function VideoPlayer() {
     window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
       handleUpdatePlayerPosition(v)
     );
+    window.api.ipcRendererRemoveAllListeners("player-get-cover");
+    window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
   }, [
     handleToggleMuted,
     handleSetMuted,
@@ -135,6 +165,7 @@ function VideoPlayer() {
     handleSetVolume,
     handleSetPosition,
     handleUpdatePlayerPosition,
+    handleSendCover,
   ]);
 
   return (
