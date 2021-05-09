@@ -18,8 +18,10 @@ const isDev = electronIsDev();
 let playerWindow: BrowserWindow | undefined;
 
 export interface PlayerStatus {
+  duration?: number;
   muted?: boolean;
   playing?: boolean;
+  position?: number;
   volume?: number;
 }
 
