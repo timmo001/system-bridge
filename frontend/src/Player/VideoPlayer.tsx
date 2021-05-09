@@ -1,12 +1,21 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactPlayer from "react-player/lazy";
 
 import { PlayerStatus, usePlayer, VideoSource } from "./Utils";
 
 function VideoPlayer() {
   const [playerStatus, setPlayerStatus] = usePlayer();
+  const [seeking, setSeeking] = useState<boolean>(false);
 
-  const { playing, muted, volume } = useMemo<PlayerStatus>(
+  const ref = useRef<ReactPlayer>(null);
+
+  const { duration, playing, muted, volume } = useMemo<PlayerStatus>(
     () => playerStatus as PlayerStatus,
     [playerStatus]
   );
@@ -50,6 +59,37 @@ function VideoPlayer() {
     [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
   );
 
+  const handleSetDuration = useCallback(
+    (duration: number) =>
+      setPlayerStatus({
+        ...playerStatus!!,
+        duration,
+      }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleSetPosition = useCallback(
+    (p: number) => {
+      if (duration && p > duration) p = duration;
+      if (p < 0) p = 0;
+      setPlayerStatus({
+        ...playerStatus!!,
+        position: p,
+      });
+    },
+    [playerStatus, duration, setPlayerStatus]
+  );
+
+  const handleUpdatePlayerPosition = useCallback(
+    (p: number) => {
+      // If not already playing, start
+      if (!playing) handleSetPlaying(true);
+      setSeeking(false);
+      ref.current?.seekTo(p);
+    },
+    [playing, handleSetPlaying]
+  );
+
   useEffect(() => {
     window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
     window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
@@ -83,12 +123,18 @@ function VideoPlayer() {
     window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
       handleSetVolume(v, "up")
     );
+    window.api.ipcRendererRemoveAllListeners("player-seek");
+    window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
+      handleUpdatePlayerPosition(v)
+    );
   }, [
     handleToggleMuted,
     handleSetMuted,
     handleSetPlaying,
     handleTogglePlaying,
     handleSetVolume,
+    handleSetPosition,
+    handleUpdatePlayerPosition,
   ]);
 
   return (
@@ -96,15 +142,27 @@ function VideoPlayer() {
       <ReactPlayer
         controls
         pip
+        ref={ref}
         playing={playing}
         height="100%"
         width="100%"
         url={source}
         muted={muted}
         volume={volume}
+        onDuration={(duration: number) => {
+          if (!seeking) handleSetDuration(duration);
+        }}
         onPause={() => handleSetPlaying(false)}
         onPlay={() => handleSetPlaying(true)}
         onStart={() => handleSetPlaying(true)}
+        onProgress={({
+          playedSeconds,
+        }: {
+          played: number;
+          playedSeconds: number;
+          loaded: number;
+          loadedSeconds: number;
+        }) => handleSetPosition(playedSeconds)}
       />
     </>
   );
