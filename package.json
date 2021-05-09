@@ -215,7 +215,6 @@
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "reflect-metadata": "0.1.13",
-    "resource": "^0.8.1",
     "rxjs": "6.6.7",
     "serve-favicon": "2.5.0",
     "swagger-ui-express": "4.1.6",
