@@ -38,9 +38,12 @@ function VideoPlayer() {
 
   const handleSetVolume = useCallback(
     (v: number, type?: "down" | "up") => {
+      let vol = type === "down" ? volume - v : type === "up" ? volume + v : v;
+      if (vol > 1) vol = 1;
+      if (vol < 0) vol = 0;
       setPlayerStatus({
         ...playerStatus!!,
-        volume: type === "down" ? volume - v : type === "up" ? volume + v : v,
+        volume: vol,
       });
       if (muted) handleSetMuted(false);
     },
