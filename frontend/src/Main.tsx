@@ -49,18 +49,20 @@ function Main(): ReactElement {
           ? `${query.title} - System Bridge`
           : "System Bridge";
 
-        window.console.log = (
-          msg: string,
-          args: string[] | readonly string[] | undefined
-        ) => sendLog("info", msg, args);
-        window.console.warn = (
-          msg: string,
-          args: string[] | readonly string[] | undefined
-        ) => sendLog("warn", msg, args);
-        window.console.error = (
-          msg: string,
-          args: string[] | readonly string[] | undefined
-        ) => sendLog("error", msg, args);
+        if (process.env.NODE_ENV !== "development") {
+          window.console.log = (
+            msg: string,
+            args: string[] | readonly string[] | undefined
+          ) => sendLog("info", msg, args);
+          window.console.warn = (
+            msg: string,
+            args: string[] | readonly string[] | undefined
+          ) => sendLog("warn", msg, args);
+          window.console.error = (
+            msg: string,
+            args: string[] | readonly string[] | undefined
+          ) => sendLog("error", msg, args);
+        }
 
         window.api.ipcRendererOn("set-settings", (_event, args) =>
           setSettings(args)

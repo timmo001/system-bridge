@@ -11,16 +11,17 @@ import {
   createStyles,
   Fade,
   Grid,
+  IconButton,
   makeStyles,
   Slider,
   Theme,
   Typography,
 } from "@material-ui/core";
-import { Pause, PlayArrow, VolumeUp } from "@material-ui/icons";
+import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@material-ui/icons";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
-import { AudioSource, usePlayer } from "./Utils";
+import { AudioSource, PlayerStatus, usePlayer } from "./Utils";
 
 interface AudioPlayerProps {
   hovering: boolean;
@@ -58,39 +59,99 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-// let audioTimer: NodeJS.Timeout;
-
 function AudioPlayer({ hovering }: AudioPlayerProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
-
-  const { title, artist, album, cover, source, volumeInitial } = useMemo(
-    () => playerStatus!!.source,
-    [playerStatus]
-  ) as AudioSource;
-  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
 
   const [trackProgress, setTrackProgress] = useState<number>(0);
   const [trackDuration, setTrackDuration] = useState<number>(1);
   const [seeking, setSeeking] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(volumeInitial);
 
   const audioRef = useRef<ReactPlayer>(null);
+
+  const { playing, muted, volume } = useMemo<PlayerStatus>(
+    () => playerStatus as PlayerStatus,
+    [playerStatus]
+  );
+
+  const { title, artist, album, cover, source } = useMemo<AudioSource>(() => {
+    const status = playerStatus as PlayerStatus;
+    return status.source as AudioSource;
+  }, [playerStatus]);
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
     [playerStatus, setPlayerStatus]
   );
 
-  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
-    isPlaying,
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!playing), [
+    playing,
     handleSetPlaying,
   ]);
 
+  const handleSetMuted = useCallback(
+    (muted: boolean) => setPlayerStatus({ ...playerStatus!!, muted }),
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleToggleMuted = useCallback(() => handleSetMuted(!muted), [
+    muted,
+    handleSetMuted,
+  ]);
+
+  const handleSetVolume = useCallback(
+    (v: number, type?: "down" | "up") => {
+      let vol = type === "down" ? volume - v : type === "up" ? volume + v : v;
+      if (vol > 1) vol = 1;
+      if (vol < 0) vol = 0;
+      setPlayerStatus({
+        ...playerStatus!!,
+        volume: vol,
+      });
+      if (muted) handleSetMuted(false);
+    },
+    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
+  );
+
   useEffect(() => {
-    window.api.ipcRendererOn("player-pause", () => handleSetPlaying(false));
-    window.api.ipcRendererOn("player-play", () => handleSetPlaying(true));
-    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
-  }, [handleSetPlaying, handleTogglePlaying]);
+    window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
+    window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
+      handleToggleMuted()
+    );
+    window.api.ipcRendererRemoveAllListeners("player-mute");
+    window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
+      handleSetMuted(v)
+    );
+    window.api.ipcRendererRemoveAllListeners("player-pause");
+    window.api.ipcRendererOn("player-pause", (_e: Event) =>
+      handleSetPlaying(false)
+    );
+    window.api.ipcRendererRemoveAllListeners("player-play");
+    window.api.ipcRendererOn("player-play", (_e: Event) =>
+      handleSetPlaying(true)
+    );
+    window.api.ipcRendererRemoveAllListeners("player-playpause");
+    window.api.ipcRendererOn("player-playpause", (_e: Event) =>
+      handleTogglePlaying()
+    );
+    window.api.ipcRendererRemoveAllListeners("player-volume");
+    window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
+      handleSetVolume(v)
+    );
+    window.api.ipcRendererRemoveAllListeners("player-volume-down");
+    window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
+      handleSetVolume(v, "down")
+    );
+    window.api.ipcRendererRemoveAllListeners("player-volume-up");
+    window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
+      handleSetVolume(v, "up")
+    );
+  }, [
+    handleToggleMuted,
+    handleSetMuted,
+    handleSetPlaying,
+    handleTogglePlaying,
+    handleSetVolume,
+  ]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
     setSeeking(true);
@@ -101,9 +162,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
 
   function handleScrubEnd() {
     // If not already playing, start
-    if (!isPlaying) {
-      handleSetPlaying(true);
-    }
+    if (!playing) handleSetPlaying(true);
     setSeeking(false);
     audioRef.current?.seekTo(trackProgress);
   }
@@ -122,10 +181,11 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     <>
       <ReactPlayer
         ref={audioRef}
-        playing={isPlaying}
+        playing={playing}
         height="0px"
         width="0px"
         url={source}
+        muted={muted}
         volume={volume}
         onDuration={(duration: number) => {
           if (!seeking) setTrackDuration(duration);
@@ -152,7 +212,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       >
         <Grid className={classes.gridItem} item>
           <ButtonBase
-            aria-label={isPlaying ? "Pause" : "Play"}
+            aria-label={playing ? "Pause" : "Play"}
             onClick={handleTogglePlaying}
           >
             <img
@@ -162,7 +222,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
             />
             <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
               <div className={classes.overlay}>
-                {isPlaying ? (
+                {playing ? (
                   <Pause className={classes.overlayInner} fontSize="large" />
                 ) : (
                   <PlayArrow
@@ -205,7 +265,9 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
             <Grid item container spacing={2}>
               <Grid item xs={4} />
               <Grid className={classes.center} item>
-                <VolumeUp />
+                <IconButton size="small" onClick={handleToggleMuted}>
+                  {muted ? <VolumeMute /> : <VolumeUp />}
+                </IconButton>
               </Grid>
               <Grid className={classes.gridItem} item xs>
                 <Slider
@@ -217,7 +279,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
                     _event: ChangeEvent<{}>,
                     value: number | number[]
                   ) => {
-                    if (typeof value === "number") setVolume(value);
+                    if (typeof value === "number") handleSetVolume(value);
                   }}
                 />
               </Grid>

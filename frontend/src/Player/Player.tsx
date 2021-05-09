@@ -1,7 +1,8 @@
 import React, { ReactElement, useEffect, useMemo } from "react";
+import { cloneDeep, isEqual } from "lodash";
 
-import { parsedQuery, useSettings } from "../Utils";
-import { usePlayer } from "./Utils";
+import { parsedQuery, usePrevious, useSettings } from "../Utils";
+import { PlayerStatus, usePlayer } from "./Utils";
 import AudioPlayer from "./AudioPlayer";
 import logo from "../resources/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
@@ -13,6 +14,7 @@ interface PlayerProps {
 function Player({ entered }: PlayerProps): ReactElement {
   const [settings] = useSettings();
   const [playerStatus, setPlayerStatus] = usePlayer();
+  const previousPlayerStatus = usePrevious(playerStatus);
 
   const query = useMemo(() => parsedQuery, []);
 
@@ -27,6 +29,8 @@ function Player({ entered }: PlayerProps): ReactElement {
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
               setPlayerStatus({
+                muted: false,
+                playing: true,
                 source: {
                   type: "audio",
                   source: String(query.url),
@@ -36,7 +40,7 @@ function Player({ entered }: PlayerProps): ReactElement {
                   title: data.title,
                   volumeInitial: (volume > 0 ? volume : 40) / 100,
                 },
-                playing: true,
+                volume: (volume > 0 ? volume : 40) / 100,
               });
             });
             window.api.ipcRendererSend(
@@ -49,12 +53,14 @@ function Player({ entered }: PlayerProps): ReactElement {
           break;
         case "video":
           setPlayerStatus({
+            muted: false,
+            playing: true,
             source: {
               type: "video",
               source: String(query.url),
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },
-            playing: true,
+            volume: (volume > 0 ? volume : 40) / 100,
           });
           break;
       }
@@ -63,21 +69,48 @@ function Player({ entered }: PlayerProps): ReactElement {
 
   useEffect(() => {
     if (playerStatus) {
-      try {
-        window.api.ipcRendererSend("player-status", {
-          playing: playerStatus.playing,
-        });
-      } catch (e) {
-        console.warn("Error calling window.api:", e);
+      let previous, previousStatus;
+      if (previousPlayerStatus) {
+        previous = cloneDeep(previousPlayerStatus) as PlayerStatus;
+        previousStatus = {
+          muted: previous.muted,
+          playing: previous.playing,
+          volume: previous.volume,
+        };
+      }
+      const status = cloneDeep(playerStatus);
+      const newStatus = {
+        muted: status.muted,
+        playing: status.playing,
+        volume: status.volume,
+      };
+      if (!isEqual(newStatus, previousStatus)) {
+        console.log(
+          "update\n\npreviousStatus:",
+          previousStatus,
+          "\nnewStatus:",
+          newStatus
+        );
+        try {
+          window.api.ipcRendererSend("player-status", newStatus);
+        } catch (e) {
+          console.warn("Error calling window.api:", e);
+        }
       }
     }
+  }, [playerStatus, previousPlayerStatus]);
+
+  const type = useMemo<string | undefined>(() => {
+    if (!playerStatus) return undefined;
+    const status = playerStatus as PlayerStatus;
+    return status.source.type;
   }, [playerStatus]);
 
   return (
     <>
-      {playerStatus?.source.type === "audio" ? (
+      {type === "audio" ? (
         <AudioPlayer hovering={entered} />
-      ) : playerStatus?.source.type === "video" ? (
+      ) : type === "video" ? (
         <VideoPlayer />
       ) : (
         ""
