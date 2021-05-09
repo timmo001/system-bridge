@@ -63,7 +63,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
 
-  const audioRef = useRef<ReactPlayer>(null);
+  const ref = useRef<ReactPlayer>(null);
 
   const { duration, playing, muted, position, volume } = useMemo<PlayerStatus>(
     () => playerStatus as PlayerStatus,
@@ -143,7 +143,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       // If not already playing, start
       if (!playing) handleSetPlaying(true);
       setSeeking(false);
-      audioRef.current?.seekTo(p);
+      ref.current?.seekTo(p);
     },
     [playing, handleSetPlaying]
   );
@@ -214,7 +214,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   return (
     <>
       <ReactPlayer
-        ref={audioRef}
+        ref={ref}
         playing={playing}
         height="0px"
         width="0px"
