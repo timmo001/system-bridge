@@ -179,6 +179,23 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
+export async function getPlayerCover(): Promise<string | undefined> {
+  if (playerWindow && !playerWindow.isDestroyed()) {
+    return new Promise((resolve) => {
+      if (playerWindow && !playerWindow.isDestroyed()) {
+        playerWindow.webContents.send("player-get-cover");
+        logger.debug("player-get-cover");
+        ipcMain.removeAllListeners("player-cover");
+        ipcMain.on("player-cover", (_event, cover: string) => {
+          logger.debug("player-cover");
+          resolve(cover);
+        });
+      }
+    });
+  }
+  return undefined;
+}
+
 export function volumePlayerWindow(
   value: number,
   type?: "down" | "up"

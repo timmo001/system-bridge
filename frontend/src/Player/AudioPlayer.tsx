@@ -148,6 +148,14 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     [playing, handleSetPlaying]
   );
 
+  const handleSendCover = useCallback(
+    (event) => {
+      console.log("handleSendCover");
+      event.sender.send("player-cover", cover);
+    },
+    [cover]
+  );
+
   useEffect(() => {
     window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
     window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
@@ -185,6 +193,8 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
       handleUpdatePlayerPosition(v)
     );
+    window.api.ipcRendererRemoveAllListeners("player-get-cover");
+    window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
   }, [
     handleToggleMuted,
     handleSetMuted,
@@ -193,6 +203,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     handleSetVolume,
     handleSetPosition,
     handleUpdatePlayerPosition,
+    handleSendCover,
   ]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {

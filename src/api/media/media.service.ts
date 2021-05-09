@@ -5,19 +5,23 @@ import axios from "axios";
 import fs from "fs";
 
 import {
+  AudioSource,
   closePlayerWindow,
   createPlayerWindow,
+  getPlayerCover,
   mutePlayerWindow,
   pausePlayerWindow,
   playpausePlayerWindow,
   playPlayerWindow,
   seekPlayerWindow,
+  VideoSource,
   volumePlayerWindow,
 } from "../../player";
-import { Media } from "./entities/media.entity";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
+import { FindMediaId } from "./dto/find-media.dto";
 import { getSetting, setSetting } from "../../common";
+import { Media } from "./entities/media.entity";
 import { UpdateMediaDto, UpdateMediaId } from "./dto/update-media.dto";
 import logger from "../../logger";
 
@@ -29,6 +33,14 @@ export class MediaService {
 
   async findAll(): Promise<Media> {
     return (await getSetting("player-status")) as Media;
+  }
+
+  async find(
+    id: FindMediaId
+  ): Promise<string | AudioSource | VideoSource | undefined> {
+    if (id === "cover") return getPlayerCover();
+    const media = (await getSetting("player-status")) as Media;
+    return media.source;
   }
 
   async update(
