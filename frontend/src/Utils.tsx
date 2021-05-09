@@ -2,10 +2,25 @@ import React, {
   createContext,
   ReactElement,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { Configuration } from "../../src/configuration";
 import queryString from "query-string";
+
+export function handleCopyToClipboard(value: string) {
+  navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+    if (result.state === "granted" || result.state === "prompt") {
+      navigator.clipboard.writeText(value);
+    }
+  });
+}
+
+export const parsedQuery = queryString.parse(window.location.search, {
+  parseBooleans: true,
+  parseNumbers: true,
+});
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<
@@ -38,15 +53,10 @@ export const useSettings = (): [
   return [settings, setSettings];
 };
 
-export function handleCopyToClipboard(value: string) {
-  navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
-    if (result.state === "granted" || result.state === "prompt") {
-      navigator.clipboard.writeText(value);
-    }
+export function usePrevious(value: any): unknown {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
   });
+  return ref.current;
 }
-
-export const parsedQuery = queryString.parse(window.location.search, {
-  parseBooleans: true,
-  parseNumbers: true,
-});

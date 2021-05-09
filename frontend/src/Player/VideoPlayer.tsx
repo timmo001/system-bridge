@@ -1,25 +1,28 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
-import { usePlayer, VideoSource } from "./Utils";
+import { PlayerStatus, usePlayer, VideoSource } from "./Utils";
 
 function VideoPlayer() {
   const [playerStatus, setPlayerStatus] = usePlayer();
 
-  const { source } = useMemo(() => playerStatus!!.source, [
-    playerStatus,
-  ]) as VideoSource;
-  const isPlaying = useMemo(() => playerStatus!!.playing, [playerStatus]);
-  const muted = useMemo(() => playerStatus!!.muted, [playerStatus]);
-  const volume = useMemo(() => playerStatus!!.volume, [playerStatus]);
+  const { playing, muted, volume } = useMemo<PlayerStatus>(
+    () => playerStatus as PlayerStatus,
+    [playerStatus]
+  );
+
+  const { source } = useMemo<VideoSource>(() => {
+    const status = playerStatus as PlayerStatus;
+    return status.source as VideoSource;
+  }, [playerStatus]);
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
     [playerStatus, setPlayerStatus]
   );
 
-  const handleTogglePlaying = useCallback(() => handleSetPlaying(!isPlaying), [
-    isPlaying,
+  const handleTogglePlaying = useCallback(() => handleSetPlaying(!playing), [
+    playing,
     handleSetPlaying,
   ]);
 
@@ -45,29 +48,41 @@ function VideoPlayer() {
   );
 
   useEffect(() => {
-    window.api.ipcRendererOn("player-mute-toggle", handleToggleMuted);
+    window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
+    window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
+      handleToggleMuted()
+    );
+    window.api.ipcRendererRemoveAllListeners("player-mute");
     window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
       handleSetMuted(v)
     );
+    window.api.ipcRendererRemoveAllListeners("player-pause");
     window.api.ipcRendererOn("player-pause", (_e: Event) =>
       handleSetPlaying(false)
     );
+    window.api.ipcRendererRemoveAllListeners("player-play");
     window.api.ipcRendererOn("player-play", (_e: Event) =>
       handleSetPlaying(true)
     );
-    window.api.ipcRendererOn("player-playpause", handleTogglePlaying);
+    window.api.ipcRendererRemoveAllListeners("player-playpause");
+    window.api.ipcRendererOn("player-playpause", (_e: Event) =>
+      handleTogglePlaying()
+    );
+    window.api.ipcRendererRemoveAllListeners("player-volume");
     window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
       handleSetVolume(v)
     );
+    window.api.ipcRendererRemoveAllListeners("player-volume-down");
     window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
       handleSetVolume(v, "down")
     );
+    window.api.ipcRendererRemoveAllListeners("player-volume-up");
     window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
       handleSetVolume(v, "up")
     );
   }, [
-    handleSetMuted,
     handleToggleMuted,
+    handleSetMuted,
     handleSetPlaying,
     handleTogglePlaying,
     handleSetVolume,
@@ -78,7 +93,7 @@ function VideoPlayer() {
       <ReactPlayer
         controls
         pip
-        playing={isPlaying}
+        playing={playing}
         height="100%"
         width="100%"
         url={source}

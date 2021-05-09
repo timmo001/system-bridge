@@ -1,6 +1,7 @@
 export declare global {
   interface Window {
     api: {
+      ipcRendererRemoveAllListeners: (channel: string) => void;
       ipcRendererOn: (
         channel: string,
         listener: (event: IpcRendererEvent, ...args: any[]) => void
