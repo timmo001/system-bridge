@@ -137,6 +137,9 @@ jobs:
           yarn install
       - name: 🧪 Run Tests
         run: yarn test:junit
+        env:
+          CI: true
+          NODE_ENV: test
       - name: ✏ Has Access to checks
         id: checks
         uses: scherermichael-oss/action-has-permission@1.0.6
