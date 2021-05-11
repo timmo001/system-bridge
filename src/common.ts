@@ -10,9 +10,16 @@ export function getSettings(): Configuration {
   Object.keys(defaultConfiguration).forEach((sectionKey: string) => {
     Object.keys(defaultConfiguration[sectionKey].items).forEach(
       (itemKey: string) => {
+        let settingValue;
+        try {
+          settingValue = electronSettings.getSync(
+            `${sectionKey}-items-${itemKey}-value`
+          );
+        } catch (e) {
+          console.log(e);
+        }
         settings[sectionKey].items[itemKey].value =
-          electronSettings?.getSync(`${sectionKey}-items-${itemKey}-value`) ||
-          settings[sectionKey].items[itemKey].defaultValue;
+          settingValue || settings[sectionKey].items[itemKey].defaultValue;
         if (
           itemKey === "apiKey" &&
           !settings[sectionKey].items[itemKey].value
