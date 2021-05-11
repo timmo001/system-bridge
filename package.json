@@ -196,6 +196,7 @@
     "@nestjs/mapped-types": "0.4.1",
     "@nestjs/platform-express": "7.6.15",
     "@nestjs/platform-socket.io": "7.6.15",
+    "@nestjs/platform-ws": "7.6.15",
     "@nestjs/swagger": "4.8.0",
     "@nestjs/websockets": "7.6.15",
     "axios": "0.21.1",

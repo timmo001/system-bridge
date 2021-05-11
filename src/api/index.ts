@@ -3,6 +3,7 @@ import { ExpressPeerServer } from "peer";
 import { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { Server } from "http";
+import { WsAdapter } from "@nestjs/platform-ws";
 import helmet from "helmet";
 import si, { Systeminformation } from "systeminformation";
 
@@ -24,6 +25,9 @@ async function startServer(): Promise<void> {
 
   // Setup Nest.js app
   app = await NestFactory.create(AppModule);
+
+  // WS adapter
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   // Enable security
   app.use(
