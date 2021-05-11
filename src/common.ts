@@ -11,12 +11,14 @@ export function getSettings(): Configuration {
     Object.keys(defaultConfiguration[sectionKey].items).forEach(
       (itemKey: string) => {
         let settingValue;
-        try {
-          settingValue = electronSettings.getSync(
-            `${sectionKey}-items-${itemKey}-value`
-          );
-        } catch (e) {
-          console.log(e);
+        if (process.env.NODE_ENV !== "test") {
+          try {
+            settingValue = electronSettings.getSync(
+              `${sectionKey}-items-${itemKey}-value`
+            );
+          } catch (e) {
+            console.log(e);
+          }
         }
         settings[sectionKey].items[itemKey].value =
           settingValue || settings[sectionKey].items[itemKey].defaultValue;
