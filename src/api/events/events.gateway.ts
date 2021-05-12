@@ -15,9 +15,9 @@ const settings = getSettings();
 const networkSettings = settings?.network.items;
 
 const port: number =
-  typeof networkSettings?.wsPort?.value === "number"
-    ? networkSettings?.wsPort?.value
-    : 9172;
+  typeof networkSettings?.port?.value === "number"
+    ? networkSettings?.port?.value
+    : 9170;
 
 @WebSocketGateway(port, { transports: ["websocket"] })
 export class EventsGateway {
