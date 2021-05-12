@@ -10,18 +10,19 @@ import {
 } from "electron";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
-// import debug from "electron-debug";
+import autoUpdater from "update-electron-app";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
 import si, { Systeminformation } from "systeminformation";
-import autoUpdater from "update-electron-app";
+import WebSocket from "ws";
 
 import {
   appIconPath,
   appSmallIconPath,
   getSettings,
   setSetting,
+  wsSendEvent,
 } from "./common";
 import { closePlayerWindow, PlayerStatus } from "./player";
 import { startServer, stopServer } from "./api";
@@ -162,7 +163,7 @@ async function setAppConfig(): Promise<void> {
   }
 }
 
-let configurationWindow: BrowserWindow, tray: Tray;
+let configurationWindow: BrowserWindow, tray: Tray, ws: WebSocket;
 async function setupApp(): Promise<void> {
   protocol.registerFileProtocol("safe-file-protocol", (request, callback) => {
     const url = request.url.replace("safe-file-protocol://", "");
@@ -260,28 +261,33 @@ app.on("activate", (): void => {
   }
 });
 
-app.whenReady().then((): void => {
-  tray = new Tray(appSmallIconPath);
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Settings", type: "normal", click: showConfigurationWindow },
-    { type: "separator" },
-    {
-      label: "Close Active Media Player",
-      type: "normal",
-      click: closePlayerWindow,
-    },
-    { type: "separator" },
-    ...helpMenu,
-    { type: "separator" },
-    { label: "Quit", type: "normal", click: quitApp },
-  ]);
-  tray.setToolTip("System Bridge");
-  tray.setContextMenu(contextMenu);
-  tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showConfigurationWindow);
+app.whenReady().then(
+  async (): Promise<void> => {
+    tray = new Tray(appSmallIconPath);
+    const contextMenu = Menu.buildFromTemplate([
+      { label: "Settings", type: "normal", click: showConfigurationWindow },
+      { type: "separator" },
+      {
+        label: "Close Active Media Player",
+        type: "normal",
+        click: closePlayerWindow,
+      },
+      { type: "separator" },
+      ...helpMenu,
+      { type: "separator" },
+      { label: "Quit", type: "normal", click: quitApp },
+    ]);
+    tray.setToolTip("System Bridge");
+    tray.setContextMenu(contextMenu);
+    tray.setIgnoreDoubleClickEvents(true);
+    tray.on("double-click", showConfigurationWindow);
 
-  startServer();
-});
+    startServer();
+    ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
+    // TODO: Remove
+    ws.on("message", (d) => console.log(d));
+  }
+);
 
 ipcMain.on(
   "get-app-information",
@@ -313,6 +319,7 @@ ipcMain.on(
     };
     logger.info(`App information: ${JSON.stringify(data)}`);
     event.sender.send("app-information", data);
+    ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
   }
 );
 
@@ -411,5 +418,10 @@ ipcMain.on(
   async (_event, playerStatus: PlayerStatus): Promise<void> => {
     logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
     await setSetting("player-status", playerStatus);
+    ws = await wsSendEvent(
+      { name: "player-status", data: playerStatus },
+      ws,
+      true
+    );
   }
 );
