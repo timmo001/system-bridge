@@ -105,7 +105,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
       - name: 🚀 Run YAMLLint
-        uses: ibiqlik/action-yamllint@v3
+        uses: ibiqlik/action-yamllint@v3.0.1
         with:
           file_or_dir: .
           config_file: .yamllint.yml
