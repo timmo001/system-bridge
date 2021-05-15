@@ -92,6 +92,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run Prettier
         uses: creyD/prettier_action@v3.3
         with:
