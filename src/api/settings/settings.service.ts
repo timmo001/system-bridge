@@ -19,8 +19,7 @@ export class SettingsService {
   }
 
   async find(section: string, key: string): Promise<Setting | undefined> {
-    const settings = await this.findAll();
-    return settings.find(
+    return (await this.findAll()).find(
       (s: Setting) => s.section === section && s.key === key
     );
   }
