@@ -307,20 +307,18 @@ app.on("activate", (): void => {
   }
 });
 
-app.whenReady().then(
-  async (): Promise<void> => {
-    tray = new Tray(appSmallIconPath);
-    tray.setToolTip("System Bridge");
-    tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
-    tray.setIgnoreDoubleClickEvents(true);
-    tray.on("double-click", showConfigurationWindow);
+app.whenReady().then(async (): Promise<void> => {
+  tray = new Tray(appSmallIconPath);
+  tray.setToolTip("System Bridge");
+  tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
+  tray.setIgnoreDoubleClickEvents(true);
+  tray.on("double-click", showConfigurationWindow);
 
-    startServer();
-    ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
-    ipcMain.emit("get-app-information");
-    ipcMain.emit("update-check");
-  }
-);
+  startServer();
+  ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
+  ipcMain.emit("get-app-information");
+  ipcMain.emit("update-check");
+});
 
 export async function getAppInformation(): Promise<
   ApplicationInfo | undefined
@@ -337,12 +335,11 @@ export async function getAppInformation(): Promise<
   const osInfo: Systeminformation.OsData = await si.osInfo();
   const uuidInfo: Systeminformation.UuidData = await si.uuid();
   const defaultInterface: string = await si.networkInterfaceDefault();
-  const networkInterface:
-    | Systeminformation.NetworkInterfacesData
-    | undefined = (await si.networkInterfaces()).find(
-    (ni: Systeminformation.NetworkInterfacesData) =>
-      ni.iface === defaultInterface
-  );
+  const networkInterface: Systeminformation.NetworkInterfacesData | undefined =
+    (await si.networkInterfaces()).find(
+      (ni: Systeminformation.NetworkInterfacesData) =>
+        ni.iface === defaultInterface
+    );
 
   if (networkInterface) {
     const data = {
@@ -390,95 +387,71 @@ export async function checkForUpdates(): Promise<
   return undefined;
 }
 
-ipcMain.on(
-  "get-app-information",
-  async (event): Promise<void> => {
-    const data = getAppInformation();
-    event?.sender?.send("app-information", data);
-    ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
-  }
-);
+ipcMain.on("get-app-information", async (event): Promise<void> => {
+  const data = getAppInformation();
+  event?.sender?.send("app-information", data);
+  ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
+});
 
-ipcMain.on(
-  "update-check",
-  async (event): Promise<void> => {
-    const update = await checkForUpdates();
-    if (update) {
-      event?.sender?.send("update-available", update);
-      ws = await wsSendEvent(
-        { name: "update-available", data: update },
-        ws,
-        true
-      );
-      contextMenuTemplate[
-        contextMenuTemplate.findIndex(
-          (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
-        )
-      ].label = `Version ${update.version.new} Avaliable!`;
-      tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
-      const notification = new Notification({
-        title: "System Bridge - Update Avaliable!",
-        body: `Version ${update.version.new} is available.`,
-      });
-      notification.on("click", () => shell.openExternal(update.url));
-      notification.show();
-    }
+ipcMain.on("update-check", async (event): Promise<void> => {
+  const update = await checkForUpdates();
+  if (update) {
+    event?.sender?.send("update-available", update);
+    ws = await wsSendEvent(
+      { name: "update-available", data: update },
+      ws,
+      true
+    );
+    contextMenuTemplate[
+      contextMenuTemplate.findIndex(
+        (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
+      )
+    ].label = `Version ${update.version.new} Avaliable!`;
+    tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
+    const notification = new Notification({
+      title: "System Bridge - Update Avaliable!",
+      body: `Version ${update.version.new} is available.`,
+    });
+    notification.on("click", () => shell.openExternal(update.url));
+    notification.show();
   }
-);
+});
 
-ipcMain.on(
-  "open-url",
-  async (event, arg): Promise<void> => {
-    shell.openExternal(arg);
-    event?.sender?.send("opened-url", arg);
-  }
-);
+ipcMain.on("open-url", async (event, arg): Promise<void> => {
+  shell.openExternal(arg);
+  event?.sender?.send("opened-url", arg);
+});
 
-ipcMain.on(
-  "open-settings",
-  async (event): Promise<void> => {
-    showConfigurationWindow();
-    event?.sender?.send("opened-settings");
-  }
-);
+ipcMain.on("open-settings", async (event): Promise<void> => {
+  showConfigurationWindow();
+  event?.sender?.send("opened-settings");
+});
 
-ipcMain.on(
-  "get-settings",
-  async (event): Promise<void> => {
-    event?.sender?.send("set-settings", getSettings());
-  }
-);
+ipcMain.on("get-settings", async (event): Promise<void> => {
+  event?.sender?.send("set-settings", getSettings());
+});
 
-ipcMain.on(
-  "update-setting",
-  async (event, args): Promise<void> => {
-    logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
-    await setSetting(args[0], args[1]);
-    await setAppConfig();
-    event?.sender?.send("updated-setting", args);
-    ipcMain.emit("updated-setting", args);
-  }
-);
+ipcMain.on("update-setting", async (event, args): Promise<void> => {
+  logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
+  await setSetting(args[0], args[1]);
+  await setAppConfig();
+  event?.sender?.send("updated-setting", args);
+  ipcMain.emit("updated-setting", args);
+});
 
-ipcMain.on(
-  "restart-app",
-  async (event): Promise<void> => {
-    event?.sender?.send("restarting-app");
-    ipcMain.emit("restarting-app");
-    logger.debug("restarting-app");
-    app.relaunch();
-  }
-);
+ipcMain.on("restart-app", async (event): Promise<void> => {
+  event?.sender?.send("restarting-app");
+  ipcMain.emit("restarting-app");
+  logger.debug("restarting-app");
+  app.relaunch();
+});
 
-ipcMain.on(
-  "restart-server",
-  async (event): Promise<void> => {
-    event?.sender?.send("restarting-server");
-    ipcMain.emit("restarting-server");
-    await stopServer();
-    setTimeout(() => startServer(), 2000);
-  }
-);
+ipcMain.on("restart-server", async (event): Promise<void> => {
+  event?.sender?.send("restarting-server");
+  ipcMain.emit("restarting-server");
+  await stopServer();
+  setTimeout(() => startServer(), 2000);
+});
 
 ipcMain.on("window-show", (event) => {
   const window = BrowserWindow.fromWebContents(event?.sender);
