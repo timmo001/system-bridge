@@ -6,7 +6,6 @@ import { CreateOpenDto } from "./dto/create-open.dto";
 @Injectable()
 export class OpenService {
   async create(createOpenDto: CreateOpenDto): Promise<CreateOpenDto> {
-    shell.beep();
     if (createOpenDto.path.includes("://"))
       shell.openExternal(createOpenDto.path);
     else shell.openPath(createOpenDto.path);
