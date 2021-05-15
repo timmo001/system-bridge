@@ -4,6 +4,7 @@ import { Configuration } from "../../configuration";
 import { getSettings, setSetting } from "../../common";
 import { Setting, Settings } from "./entities/settings.entity";
 import { UpdateSettingsDto } from "./dto/update-settings.dto";
+import { ipcMain } from "electron/main";
 
 @Injectable()
 export class SettingsService {
@@ -30,6 +31,9 @@ export class SettingsService {
     updateSettingsDto: UpdateSettingsDto
   ): Promise<Setting | undefined> {
     await setSetting(`${section}-items-${key}-value`, updateSettingsDto.value);
-    return await this.find(section, key);
+    const data = await this.find(section, key);
+    if (data?.requiresServerRestart)
+      setTimeout(() => ipcMain.emit("restart-server"), 1000);
+    return data;
   }
 }
