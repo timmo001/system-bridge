@@ -12,7 +12,7 @@ export class SettingsService {
       settings: Settings = [];
     Object.keys(s).forEach((section: string) => {
       Object.keys(s[section].items).forEach((key: string) => {
-        settings.push({ section, key, item: s[section].items[key] });
+        settings.push({ section, key, ...s[section].items[key] });
       });
     });
     return settings;

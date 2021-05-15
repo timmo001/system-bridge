@@ -1,9 +1,8 @@
 import { ConfigurationItem } from "../../../configuration";
 
-export interface Setting {
+export interface Setting extends ConfigurationItem {
   section: string;
   key: string;
-  item: ConfigurationItem;
 }
 
 export type Settings = Array<Setting>;
