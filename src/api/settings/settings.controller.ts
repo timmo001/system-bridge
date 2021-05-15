@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Put } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Put,
+} from "@nestjs/common";
 
 import { SettingsService } from "./settings.service";
 import { UpdateSettingsDto } from "./dto/update-settings.dto";
@@ -17,18 +25,17 @@ export class SettingsController {
   async find(
     @Param("section") section: string,
     @Param("key") key: string
-  ): Promise<Setting | undefined> {
-    // if (section)
-    //   if (key)
-    //     throw new HttpException(
-    //       {
-    //         status: HttpStatus.BAD_REQUEST,
-    //         error: "You must provide a valid ID",
-    //       },
-    //       HttpStatus.BAD_REQUEST
-    //     );
-
-    return await this.settingsService.find(section, key);
+  ): Promise<Setting> {
+    const data = await this.settingsService.find(section, key);
+    if (!data)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: `Could not find ${key} in ${section}`,
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    return data;
   }
 
   @Put(":section/:key")
@@ -36,16 +43,21 @@ export class SettingsController {
     @Param("section") section: string,
     @Param("key") key: string,
     @Body() updateSettingsDto: UpdateSettingsDto
-  ): Promise<Setting | undefined> {
-    // if (id)
-    //   throw new HttpException(
-    //     {
-    //       status: HttpStatus.BAD_REQUEST,
-    //       error: "You must provide a valid ID",
-    //     },
-    //     HttpStatus.BAD_REQUEST
-    //   );
-
-    return await this.settingsService.update(section, key, updateSettingsDto);
+  ): Promise<Setting> {
+    await this.find(section, key);
+    const data = await this.settingsService.update(
+      section,
+      key,
+      updateSettingsDto
+    );
+    if (!data)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: `Could not find ${key} in ${section}`,
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    return data;
   }
 }
