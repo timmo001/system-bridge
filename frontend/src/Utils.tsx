@@ -23,9 +23,10 @@ export const parsedQuery = queryString.parse(window.location.search, {
 });
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
-const SetSettingsContext = createContext<null | React.Dispatch<
-  React.SetStateAction<Configuration | undefined>
->>(null);
+const SetSettingsContext =
+  createContext<null | React.Dispatch<
+    React.SetStateAction<Configuration | undefined>
+  >>(null);
 
 export const SettingsProvider = ({
   children,

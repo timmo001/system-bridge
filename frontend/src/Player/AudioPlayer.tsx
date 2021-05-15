@@ -72,10 +72,10 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
 
   const formattedPosition = useMemo(() => {
     const md = moment.duration(position, "seconds");
-    return `${md
-      .minutes()
+    return `${md.minutes().toString().padStart(2, "0")}:${md
+      .seconds()
       .toString()
-      .padStart(2, "0")}:${md.seconds().toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
   }, [position]);
 
   const { title, artist, album, cover, source } = useMemo<AudioSource>(() => {
@@ -88,20 +88,20 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     [playerStatus, setPlayerStatus]
   );
 
-  const handleTogglePlaying = useCallback(() => handleSetPlaying(!playing), [
-    playing,
-    handleSetPlaying,
-  ]);
+  const handleTogglePlaying = useCallback(
+    () => handleSetPlaying(!playing),
+    [playing, handleSetPlaying]
+  );
 
   const handleSetMuted = useCallback(
     (muted: boolean) => setPlayerStatus({ ...playerStatus!!, muted }),
     [playerStatus, setPlayerStatus]
   );
 
-  const handleToggleMuted = useCallback(() => handleSetMuted(!muted), [
-    muted,
-    handleSetMuted,
-  ]);
+  const handleToggleMuted = useCallback(
+    () => handleSetMuted(!muted),
+    [muted, handleSetMuted]
+  );
 
   const handleSetVolume = useCallback(
     (v: number, type?: "down" | "up") => {

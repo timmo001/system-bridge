@@ -30,20 +30,20 @@ function VideoPlayer() {
     [playerStatus, setPlayerStatus]
   );
 
-  const handleTogglePlaying = useCallback(() => handleSetPlaying(!playing), [
-    playing,
-    handleSetPlaying,
-  ]);
+  const handleTogglePlaying = useCallback(
+    () => handleSetPlaying(!playing),
+    [playing, handleSetPlaying]
+  );
 
   const handleSetMuted = useCallback(
     (muted: boolean) => setPlayerStatus({ ...playerStatus!!, muted }),
     [playerStatus, setPlayerStatus]
   );
 
-  const handleToggleMuted = useCallback(() => handleSetMuted(!muted), [
-    muted,
-    handleSetMuted,
-  ]);
+  const handleToggleMuted = useCallback(
+    () => handleSetMuted(!muted),
+    [muted, handleSetMuted]
+  );
 
   const handleSetVolume = useCallback(
     (v: number, type?: "down" | "up") => {
