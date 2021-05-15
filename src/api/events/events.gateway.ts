@@ -25,12 +25,12 @@ export class EventsGateway {
   private authenticatedClients: Array<WebSocket> = [];
 
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage("authenticate")
+  @SubscribeMessage("register-listener")
   async handleAuthenticate(
     @ConnectedSocket() client: WebSocket
   ): Promise<WsResponse<boolean>> {
     this.authenticatedClients.push(client);
-    return { event: "authenticate", data: true };
+    return { event: "registered-listener", data: true };
   }
 
   @UseGuards(WsAuthGuard)
