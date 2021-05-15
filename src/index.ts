@@ -4,6 +4,7 @@ import {
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
+  Notification,
   protocol,
   shell,
   Tray,
@@ -14,6 +15,7 @@ import autoUpdater from "update-electron-app";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
+import semver from "semver";
 import si, { Systeminformation } from "systeminformation";
 import WebSocket from "ws";
 
@@ -28,6 +30,29 @@ import { closePlayerWindow, PlayerStatus } from "./player";
 import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
+import axios from "axios";
+
+export interface ApplicationInfo {
+  address: string;
+  fqdn: string;
+  host: string;
+  ip: string;
+  mac: string;
+  port: number;
+  updates?: ApplicationUpdate;
+  uuid: string;
+  version: string;
+  websocketAddress: string;
+  websocketPort: number;
+}
+
+export interface ApplicationUpdate {
+  available: boolean;
+  url: string;
+  version: { current: string; new: string };
+}
+
+export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
 logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
@@ -152,6 +177,29 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
   },
 ];
 
+const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
+  { label: "Settings", type: "normal", click: showConfigurationWindow },
+  { type: "separator" },
+  {
+    label: "Close Active Media Player",
+    type: "normal",
+    click: closePlayerWindow,
+  },
+  { type: "separator" },
+  {
+    id: "version-latest",
+    label: "Latest Version",
+    type: "normal",
+    click: () =>
+      shell.openExternal(
+        "https://github.com/timmo001/system-bridge/releases/latest"
+      ),
+  },
+  ...helpMenu,
+  { type: "separator" },
+  { label: "Quit", type: "normal", click: quitApp },
+];
+
 async function setAppConfig(): Promise<void> {
   const config = getSettings();
   if (!isDev) {
@@ -263,30 +311,20 @@ app.on("activate", (): void => {
 
 app.whenReady().then(async (): Promise<void> => {
   tray = new Tray(appSmallIconPath);
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Settings", type: "normal", click: showConfigurationWindow },
-    { type: "separator" },
-    {
-      label: "Close Active Media Player",
-      type: "normal",
-      click: closePlayerWindow,
-    },
-    { type: "separator" },
-    ...helpMenu,
-    { type: "separator" },
-    { label: "Quit", type: "normal", click: quitApp },
-  ]);
   tray.setToolTip("System Bridge");
-  tray.setContextMenu(contextMenu);
+  tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showConfigurationWindow);
 
   startServer();
   ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
   ipcMain.emit("get-app-information");
+  ipcMain.emit("update-check");
 });
 
-ipcMain.on("get-app-information", async (event): Promise<void> => {
+export async function getAppInformation(): Promise<
+  ApplicationInfo | undefined
+> {
   const settings = getSettings();
   const port: number =
     typeof settings?.network.items?.port?.value === "number"
@@ -305,21 +343,77 @@ ipcMain.on("get-app-information", async (event): Promise<void> => {
         ni.iface === defaultInterface
     );
 
-  const data = {
-    address: `http://${osInfo.fqdn}:${port}`,
-    fqdn: osInfo.fqdn,
-    host: osInfo.hostname,
-    ip: networkInterface?.ip4,
-    mac: networkInterface?.mac,
-    port,
-    uuid: uuidInfo.os,
-    version: app.getVersion(),
-    websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
-    websocketPort,
-  };
-  logger.info(`App information: ${JSON.stringify(data)}`);
+  if (networkInterface) {
+    const data: ApplicationInfo = {
+      address: `http://${osInfo.fqdn}:${port}`,
+      fqdn: osInfo.fqdn,
+      host: osInfo.hostname,
+      ip: networkInterface.ip4,
+      mac: networkInterface.mac,
+      port,
+      updates: await getUpdates(),
+      uuid: uuidInfo.os,
+      version: app.getVersion(),
+      websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
+      websocketPort,
+    };
+    logger.info(`Application info: ${JSON.stringify(data)}`);
+    return data;
+  }
+  return undefined;
+}
+
+export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
+  const response = await axios.get<{
+    html_url: string;
+    prerelease: boolean;
+    tag_name: string;
+  }>(`https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest`);
+  if (
+    response &&
+    response.status < 400 &&
+    response.data?.prerelease === false
+  ) {
+    const versionCurrent = semver.clean(app.getVersion()) as string;
+    const versionNew = semver.clean(response.data.tag_name) as string;
+    const available = semver.lt(versionCurrent, versionNew);
+    return {
+      available,
+      url: response.data.html_url,
+      version: { current: versionCurrent, new: versionNew },
+    };
+  }
+  return undefined;
+}
+
+ipcMain.on("get-app-information", async (event): Promise<void> => {
+  const data = await getAppInformation();
   event?.sender?.send("app-information", data);
   ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
+});
+
+ipcMain.on("update-check", async (event): Promise<void> => {
+  const update = await getUpdates();
+  if (update?.available) {
+    event?.sender?.send("update-available", update);
+    ws = await wsSendEvent(
+      { name: "update-available", data: update },
+      ws,
+      true
+    );
+    contextMenuTemplate[
+      contextMenuTemplate.findIndex(
+        (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
+      )
+    ].label = `Version ${update.version.new} Avaliable!`;
+    tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
+    const notification = new Notification({
+      title: "System Bridge - Update Avaliable!",
+      body: `Version ${update.version.new} is available.`,
+    });
+    notification.on("click", () => shell.openExternal(update.url));
+    notification.show();
+  }
 });
 
 ipcMain.on("open-url", async (event, arg): Promise<void> => {
