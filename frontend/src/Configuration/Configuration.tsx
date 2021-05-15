@@ -19,6 +19,26 @@ import { useSettings } from "../Utils";
 import logo from "../resources/system-bridge.svg";
 import Section from "./Section";
 
+export interface ApplicationInfo {
+  address: string;
+  fqdn: string;
+  host: string;
+  ip: string;
+  mac: string;
+  port: number;
+  updates?: ApplicationUpdate;
+  uuid: string;
+  version: string;
+  websocketAddress: string;
+  websocketPort: number;
+}
+
+export interface ApplicationUpdate {
+  available: boolean;
+  url: string;
+  version: { current: string; new: string };
+}
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     disabled: {
@@ -39,27 +59,19 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface AppInfo {
-  address: string;
-  fqdn: string;
-  host: string;
-  ip: string;
-  mac: string;
-  port: number;
-  version: string;
-}
-
 function Configuration(): ReactElement {
-  const [appInfo, setAppInfo] = useState<AppInfo>();
+  const [appInfo, setAppInfo] = useState<ApplicationInfo>();
   const [settings] = useSettings();
 
   useEffect(() => {
     if (!appInfo) {
       try {
-        window.api.ipcRendererOn("app-information", (_event, args) =>
-          setAppInfo(args)
+        window.api.ipcRendererOn(
+          "app-information",
+          (_event, info: ApplicationInfo) => setAppInfo(info)
         );
         window.api.ipcRendererSend("get-app-information");
+        console.log("get-app-information");
       } catch (e) {
         console.warn("Error calling window.api:", e);
       }
@@ -89,9 +101,32 @@ function Configuration(): ReactElement {
           xs
         >
           {appInfo?.version ? (
-            <Typography component="h3" variant="h5">
-              v{appInfo.version}
-            </Typography>
+            <>
+              <Typography component="h3" variant="h5">
+                {appInfo.version}
+              </Typography>
+              <Typography component="h4" variant="subtitle1">
+                {appInfo.updates?.available ? (
+                  <a
+                    href={window.location.href}
+                    onClick={() => {
+                      try {
+                        window.api.ipcRendererSend(
+                          "open-url",
+                          appInfo.updates?.url
+                        );
+                      } catch (e) {
+                        console.warn("Error calling window.api:", e);
+                      }
+                    }}
+                  >
+                    Version {appInfo.updates.version.new} avaliable!
+                  </a>
+                ) : (
+                  ""
+                )}
+              </Typography>
+            </>
           ) : (
             ""
           )}
