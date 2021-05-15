@@ -261,111 +261,135 @@ app.on("activate", (): void => {
   }
 });
 
-app.whenReady().then(async (): Promise<void> => {
-  tray = new Tray(appSmallIconPath);
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Settings", type: "normal", click: showConfigurationWindow },
-    { type: "separator" },
-    {
-      label: "Close Active Media Player",
-      type: "normal",
-      click: closePlayerWindow,
-    },
-    { type: "separator" },
-    ...helpMenu,
-    { type: "separator" },
-    { label: "Quit", type: "normal", click: quitApp },
-  ]);
-  tray.setToolTip("System Bridge");
-  tray.setContextMenu(contextMenu);
-  tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showConfigurationWindow);
+app.whenReady().then(
+  async (): Promise<void> => {
+    tray = new Tray(appSmallIconPath);
+    const contextMenu = Menu.buildFromTemplate([
+      { label: "Settings", type: "normal", click: showConfigurationWindow },
+      { type: "separator" },
+      {
+        label: "Close Active Media Player",
+        type: "normal",
+        click: closePlayerWindow,
+      },
+      { type: "separator" },
+      ...helpMenu,
+      { type: "separator" },
+      { label: "Quit", type: "normal", click: quitApp },
+    ]);
+    tray.setToolTip("System Bridge");
+    tray.setContextMenu(contextMenu);
+    tray.setIgnoreDoubleClickEvents(true);
+    tray.on("double-click", showConfigurationWindow);
 
-  startServer();
-  ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
-});
+    startServer();
+    ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
+  }
+);
 
-ipcMain.on("get-app-information", async (event): Promise<void> => {
-  const settings = getSettings();
-  const port: number =
-    typeof settings?.network.items?.port?.value === "number"
-      ? settings?.network.items?.port?.value
-      : 9170;
-  const osInfo: Systeminformation.OsData = await si.osInfo();
-  const uuidInfo: Systeminformation.UuidData = await si.uuid();
-  const defaultInterface: string = await si.networkInterfaceDefault();
-  const networkInterface: Systeminformation.NetworkInterfacesData | undefined =
-    (await si.networkInterfaces()).find(
+ipcMain.on(
+  "get-app-information",
+  async (event): Promise<void> => {
+    const settings = getSettings();
+    const port: number =
+      typeof settings?.network.items?.port?.value === "number"
+        ? settings?.network.items?.port?.value
+        : 9170;
+    const osInfo: Systeminformation.OsData = await si.osInfo();
+    const uuidInfo: Systeminformation.UuidData = await si.uuid();
+    const defaultInterface: string = await si.networkInterfaceDefault();
+    const networkInterface:
+      | Systeminformation.NetworkInterfacesData
+      | undefined = (await si.networkInterfaces()).find(
       (ni: Systeminformation.NetworkInterfacesData) =>
         ni.iface === defaultInterface
     );
 
-  const data = {
-    address: `http://${osInfo.fqdn}:${port}`,
-    fqdn: osInfo.fqdn,
-    host: osInfo.hostname,
-    ip: networkInterface?.ip4,
-    mac: networkInterface?.mac,
-    port,
-    uuid: uuidInfo.os,
-    version: app.getVersion(),
-  };
-  logger.info(`App information: ${JSON.stringify(data)}`);
-  event.sender.send("app-information", data);
-  ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
-});
+    const data = {
+      address: `http://${osInfo.fqdn}:${port}`,
+      fqdn: osInfo.fqdn,
+      host: osInfo.hostname,
+      ip: networkInterface?.ip4,
+      mac: networkInterface?.mac,
+      port,
+      uuid: uuidInfo.os,
+      version: app.getVersion(),
+    };
+    logger.info(`App information: ${JSON.stringify(data)}`);
+    event?.sender?.send("app-information", data);
+    ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
+  }
+);
 
-ipcMain.on("open-url", async (event, arg): Promise<void> => {
-  shell.openExternal(arg);
-  event?.sender?.send("opened-url", arg);
-});
+ipcMain.on(
+  "open-url",
+  async (event, arg): Promise<void> => {
+    shell.openExternal(arg);
+    event?.sender?.send("opened-url", arg);
+  }
+);
 
-ipcMain.on("open-settings", async (event): Promise<void> => {
-  showConfigurationWindow();
-  event?.sender?.send("opened-settings");
-});
+ipcMain.on(
+  "open-settings",
+  async (event): Promise<void> => {
+    showConfigurationWindow();
+    event?.sender?.send("opened-settings");
+  }
+);
 
-ipcMain.on("get-settings", async (event): Promise<void> => {
-  event.sender.send("set-settings", getSettings());
-});
+ipcMain.on(
+  "get-settings",
+  async (event): Promise<void> => {
+    event?.sender?.send("set-settings", getSettings());
+  }
+);
 
-ipcMain.on("update-setting", async (event, args): Promise<void> => {
-  logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
-  await setSetting(args[0], args[1]);
-  await setAppConfig();
-  event.sender.send("updated-setting", args);
-  ipcMain.emit("updated-setting", args);
-});
+ipcMain.on(
+  "update-setting",
+  async (event, args): Promise<void> => {
+    logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
+    await setSetting(args[0], args[1]);
+    await setAppConfig();
+    event?.sender?.send("updated-setting", args);
+    ipcMain.emit("updated-setting", args);
+  }
+);
 
-ipcMain.on("restart-app", async (event): Promise<void> => {
-  event.sender.send("restarting-app");
-  ipcMain.emit("restarting-app");
-  logger.debug("restarting-app");
-  app.relaunch();
-});
+ipcMain.on(
+  "restart-app",
+  async (event): Promise<void> => {
+    event?.sender?.send("restarting-app");
+    ipcMain.emit("restarting-app");
+    logger.debug("restarting-app");
+    app.relaunch();
+  }
+);
 
-ipcMain.on("restart-server", async (event): Promise<void> => {
-  event.sender.send("restarting-server");
-  ipcMain.emit("restarting-server");
-  await stopServer();
-  setTimeout(() => startServer(), 2000);
-});
+ipcMain.on(
+  "restart-server",
+  async (event): Promise<void> => {
+    event?.sender?.send("restarting-server");
+    ipcMain.emit("restarting-server");
+    await stopServer();
+    setTimeout(() => startServer(), 2000);
+  }
+);
 
 ipcMain.on("window-show", (event) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
+  const window = BrowserWindow.fromWebContents(event?.sender);
   window?.show();
 });
 
 ipcMain.on("window-hide", (event) => {
-  BrowserWindow.fromWebContents(event.sender)?.hide();
+  BrowserWindow.fromWebContents(event?.sender)?.hide();
 });
 
 ipcMain.on("window-minimize", (event) => {
-  BrowserWindow.fromWebContents(event.sender)?.minimize();
+  BrowserWindow.fromWebContents(event?.sender)?.minimize();
 });
 
 ipcMain.on("window-close", (event) => {
-  BrowserWindow.fromWebContents(event.sender)?.close();
+  BrowserWindow.fromWebContents(event?.sender)?.close();
 });
 
 ipcMain.on(
@@ -379,7 +403,7 @@ ipcMain.on("get-audio-metadata", async (event, path: string) => {
   const metadata: IAudioMetadata = await parseFile(path);
   const cover = selectCover(metadata.common.picture)?.data.toString("base64");
 
-  event.sender.send("audio-metadata", {
+  event?.sender?.send("audio-metadata", {
     album: metadata.common.album || "",
     artist: metadata.common.artist || metadata.common.albumartist || "",
     cover: cover && `data:image/png;base64, ${cover}`,
