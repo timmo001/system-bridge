@@ -108,14 +108,14 @@ async function startServer(): Promise<void> {
             name: `System Bridge - ${osInfo.fqdn}`,
             txtRecord: {
               address: `http://${osInfo.fqdn}:${port}`,
-              websocketAddress: `ws://${osInfo.fqdn}:${wsPort}`,
               fqdn: osInfo.fqdn,
               host: osInfo.hostname,
               ip: networkInterface.ip4,
               mac: networkInterface.mac,
               port,
-              websocketPort: wsPort,
               uuid: uuidInfo.os,
+              websocketAddress: `ws://${osInfo.fqdn}:${wsPort}`,
+              websocketPort: wsPort,
             },
           },
           (error, service) => {
