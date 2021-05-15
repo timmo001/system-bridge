@@ -296,6 +296,10 @@ ipcMain.on(
       typeof settings?.network.items?.port?.value === "number"
         ? settings?.network.items?.port?.value
         : 9170;
+    const websocketPort: number =
+      typeof settings?.network.items?.wsPort?.value === "number"
+        ? settings?.network.items?.wsPort?.value
+        : 9172;
     const osInfo: Systeminformation.OsData = await si.osInfo();
     const uuidInfo: Systeminformation.UuidData = await si.uuid();
     const defaultInterface: string = await si.networkInterfaceDefault();
@@ -315,6 +319,8 @@ ipcMain.on(
       port,
       uuid: uuidInfo.os,
       version: app.getVersion(),
+      websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
+      websocketPort,
     };
     logger.info(`App information: ${JSON.stringify(data)}`);
     event?.sender?.send("app-information", data);
