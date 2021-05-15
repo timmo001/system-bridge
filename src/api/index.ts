@@ -3,11 +3,12 @@ import { ExpressPeerServer } from "peer";
 import { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { Server } from "http";
+import { WsAdapter } from "@nestjs/platform-ws";
 import helmet from "helmet";
 import si, { Systeminformation } from "systeminformation";
 
 import { AppModule } from "./app.module";
-import { AuthGuard } from "./auth.guard";
+import { HttpAuthGuard } from "./httpAuth.guard";
 import { getSettings } from "../common";
 import logger from "../logger";
 
@@ -25,6 +26,9 @@ async function startServer(): Promise<void> {
   // Setup Nest.js app
   app = await NestFactory.create(AppModule);
 
+  // WS adapter
+  app.useWebSocketAdapter(new WsAdapter(app));
+
   // Enable security
   app.use(
     helmet({
@@ -34,7 +38,7 @@ async function startServer(): Promise<void> {
   // Enable CORS
   app.enableCors();
   // Enable Global Auth Guard
-  app.useGlobalGuards(new AuthGuard());
+  app.useGlobalGuards(new HttpAuthGuard());
   // Setup Open API
   const document = SwaggerModule.createDocument(
     app,

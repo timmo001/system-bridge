@@ -4,12 +4,12 @@ import { Observable } from "rxjs";
 import { getSettings } from "../common";
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class WsAuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const data = context.switchToWs().getData();
     const settings = getSettings();
-    return request.headers["api-key"] === settings.network.items.apiKey.value;
+    return data["api-key"] === settings.network.items.apiKey.value;
   }
 }
