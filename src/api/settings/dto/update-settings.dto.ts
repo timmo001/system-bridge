@@ -1,3 +1,5 @@
+import { SettingsValue } from "../../../configuration";
+
 export interface UpdateSettingsDto {
-  value?: boolean | number | string;
+  value?: SettingsValue;
 }
