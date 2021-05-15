@@ -1,10 +1,10 @@
+import { ipcMain } from "electron";
 import { Injectable } from "@nestjs/common";
 
 import { Configuration } from "../../configuration";
 import { getSettings, setSetting } from "../../common";
 import { Setting, Settings } from "./entities/settings.entity";
 import { UpdateSettingsDto } from "./dto/update-settings.dto";
-import { ipcMain } from "electron/main";
 
 @Injectable()
 export class SettingsService {
