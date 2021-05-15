@@ -220,7 +220,7 @@ async function setupApp(): Promise<void> {
   try {
     app.dock.hide();
   } catch (e) {
-    logger.warn(e);
+    if (e.message) logger.warn(e.message);
   }
 }
 
