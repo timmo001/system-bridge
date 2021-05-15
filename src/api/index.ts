@@ -1,3 +1,4 @@
+import { app as electronApp } from "electron";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
 import { INestApplication } from "@nestjs/common";
@@ -93,7 +94,7 @@ async function startServer(): Promise<void> {
       (ni: Systeminformation.NetworkInterfacesData) =>
         ni.iface === defaultInterface
     );
-    const wsPort: number =
+    const websocketPort: number =
       typeof networkSettings?.wsPort?.value === "number"
         ? networkSettings?.wsPort?.value
         : 9172;
@@ -114,8 +115,9 @@ async function startServer(): Promise<void> {
               mac: networkInterface.mac,
               port,
               uuid: uuidInfo.os,
-              websocketAddress: `ws://${osInfo.fqdn}:${wsPort}`,
-              websocketPort: wsPort,
+              version: electronApp.getVersion(),
+              websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
+              websocketPort,
             },
           },
           (error, service) => {
