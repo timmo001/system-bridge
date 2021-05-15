@@ -40,7 +40,7 @@ export class MediaService {
   ): Promise<string | AudioSource | VideoSource | undefined> {
     if (id === "cover") return getPlayerCover();
     const media = (await getSetting("player-status")) as Media;
-    return media.source;
+    return media?.source;
   }
 
   async update(
