@@ -284,6 +284,7 @@ app.whenReady().then(
 
     startServer();
     ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
+    ipcMain.emit("get-app-information");
   }
 );
 
