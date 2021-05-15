@@ -283,8 +283,6 @@ app.whenReady().then(async (): Promise<void> => {
 
   startServer();
   ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
-  // TODO: Remove
-  ws.on("message", (d) => console.log(d));
 });
 
 ipcMain.on("get-app-information", async (event): Promise<void> => {
