@@ -46,6 +46,7 @@ export interface ApplicationInfo {
 }
 
 export interface ApplicationUpdate {
+  available: boolean;
   url: string;
   version: { current: string; new: string };
 }
@@ -352,6 +353,7 @@ export async function getAppInformation(): Promise<
       ip: networkInterface.ip4,
       mac: networkInterface.mac,
       port,
+      updates: await getUpdates(),
       uuid: uuidInfo.os,
       version: app.getVersion(),
       websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
@@ -364,9 +366,7 @@ export async function getAppInformation(): Promise<
   return undefined;
 }
 
-export async function checkForUpdates(): Promise<
-  ApplicationUpdate | undefined
-> {
+export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   const response = await axios.get<{
     html_url: string;
     prerelease: boolean;
@@ -380,12 +380,11 @@ export async function checkForUpdates(): Promise<
     const versionCurrent = semver.clean(app.getVersion()) as string;
     const versionNew = semver.clean(response.data.tag_name) as string;
     const available = semver.lt(versionCurrent, versionNew);
-    const data = {
+    return {
+      available,
       url: response.data.html_url,
       version: { current: versionCurrent, new: versionNew },
     };
-    logger.info(`checkForUpdates: ${JSON.stringify(data)}`);
-    if (available) return data;
   }
   return undefined;
 }
@@ -402,8 +401,8 @@ ipcMain.on(
 ipcMain.on(
   "update-check",
   async (event): Promise<void> => {
-    const update = await checkForUpdates();
-    if (update) {
+    const update = await getUpdates();
+    if (update?.available) {
       event?.sender?.send("update-available", update);
       ws = await wsSendEvent(
         { name: "update-available", data: update },
