@@ -93,6 +93,11 @@ async function startServer(): Promise<void> {
       (ni: Systeminformation.NetworkInterfacesData) =>
         ni.iface === defaultInterface
     );
+    const wsPort: number =
+      typeof networkSettings?.wsPort?.value === "number"
+        ? networkSettings?.wsPort?.value
+        : 9172;
+
     if (networkInterface) {
       try {
         const MDNS = await import("mdns");
@@ -103,11 +108,13 @@ async function startServer(): Promise<void> {
             name: `System Bridge - ${osInfo.fqdn}`,
             txtRecord: {
               address: `http://${osInfo.fqdn}:${port}`,
+              websocketAddress: `ws://${osInfo.fqdn}:${wsPort}`,
               fqdn: osInfo.fqdn,
               host: osInfo.hostname,
               ip: networkInterface.ip4,
               mac: networkInterface.mac,
               port,
+              websocketPort: wsPort,
               uuid: uuidInfo.os,
             },
           },
