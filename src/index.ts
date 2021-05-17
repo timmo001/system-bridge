@@ -486,6 +486,12 @@ ipcMain.on("get-audio-metadata", async (event, path: string) => {
     cover: cover && `data:image/png;base64, ${cover}`,
     title: metadata.common.title || "",
   });
+
+  ws = await wsSendEvent(
+    { name: "player-cover-ready", data: undefined },
+    ws,
+    true
+  );
 });
 
 ipcMain.on(
@@ -501,14 +507,20 @@ ipcMain.on(
   }
 );
 
-ipcMain.on(
-  "player-cover-init",
-  async (_event, cover: string): Promise<void> => {
-    ws = await wsSendEvent({ name: "player-cover", data: cover }, ws, true);
-    ws = await wsSendEvent(
-      { name: "player-cover-ready", data: undefined },
-      ws,
-      true
-    );
-  }
-);
+ipcMain.on("player-cover-ready", async (): Promise<void> => {
+  logger.debug("ipcMain: player-cover-ready");
+  ws = await wsSendEvent(
+    { name: "player-cover-ready", data: undefined },
+    ws,
+    true
+  );
+});
+
+ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
+  logger.debug("ipcMain: player-thumbnail-ready");
+  ws = await wsSendEvent(
+    { name: "player-cover-ready", data: undefined },
+    ws,
+    true
+  );
+});

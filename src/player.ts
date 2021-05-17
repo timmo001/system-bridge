@@ -179,7 +179,9 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
-export async function getPlayerCover(): Promise<string | undefined> {
+export async function getPlayerCover(
+  sendUpdate?: boolean
+): Promise<string | undefined> {
   if (playerWindow && !playerWindow.isDestroyed()) {
     return new Promise((resolve) => {
       if (playerWindow && !playerWindow.isDestroyed()) {
@@ -187,17 +189,10 @@ export async function getPlayerCover(): Promise<string | undefined> {
         logger.debug("player-get-cover");
         ipcMain.removeAllListeners("player-cover");
         ipcMain.on("player-cover", async (_event, cover: string) => {
-          logger.debug("player-cover");
           resolve(cover);
-          const ws = await wsSendEvent(
-            { name: "player-cover", data: cover },
-            undefined,
-            true
-          );
-          await wsSendEvent(
-            { name: "player-cover-ready", data: undefined },
-            ws
-          );
+          logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
+          if (sendUpdate)
+            await wsSendEvent({ name: "player-cover-ready", data: undefined });
         });
       }
     });

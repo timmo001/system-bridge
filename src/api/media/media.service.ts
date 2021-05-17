@@ -36,9 +36,10 @@ export class MediaService {
   }
 
   async find(
-    id: FindMediaId
+    id: FindMediaId,
+    update?: boolean
   ): Promise<string | AudioSource | VideoSource | undefined> {
-    if (id === "cover") return getPlayerCover();
+    if (id === "cover") return getPlayerCover(update);
     const media = (await getSetting("player-status")) as Media;
     return media?.source;
   }

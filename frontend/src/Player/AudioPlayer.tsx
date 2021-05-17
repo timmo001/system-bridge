@@ -206,10 +206,6 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     handleSendCover,
   ]);
 
-  useEffect(() => {
-    if (cover) window.api.ipcRendererSend("player-cover-init", cover);
-  }, [cover]);
-
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
     if (typeof value === "number") {
       handleSetPosition(value);

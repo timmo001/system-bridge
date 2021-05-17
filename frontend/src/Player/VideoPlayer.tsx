@@ -92,7 +92,10 @@ function VideoPlayer() {
   );
 
   const handleUpdateThumbnail = useCallback(
-    (t: string) => setThumbnail(t),
+    (t: string) => {
+      setThumbnail(t);
+      window.api.ipcRendererSend("player-thumbnail-ready");
+    },
     [setThumbnail]
   );
 
@@ -124,9 +127,10 @@ function VideoPlayer() {
   const handleSendCover = useCallback(
     (event) => {
       console.log("handleSendCover");
-      event.sender.send("player-cover-init", getThumbnail);
+      getThumbnail();
+      event.sender.send("player-cover", thumbnail);
     },
-    [getThumbnail]
+    [thumbnail, getThumbnail]
   );
 
   useEffect(() => {
@@ -180,8 +184,7 @@ function VideoPlayer() {
   ]);
 
   useEffect(() => {
-    if (thumbnail) window.api.ipcRendererSend("player-cover", thumbnail);
-    else getThumbnail();
+    if (!thumbnail) getThumbnail();
   }, [thumbnail, getThumbnail]);
 
   return (

@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
 import fs from "fs";
 
@@ -36,7 +37,8 @@ export class MediaController {
 
   @Get(":id")
   async find(
-    @Param("id") id: FindMediaId
+    @Param("id") id: FindMediaId,
+    @Query("update") update?: boolean
   ): Promise<string | AudioSource | VideoSource | undefined> {
     if (id !== "cover" && id !== "source")
       throw new HttpException(
@@ -47,7 +49,7 @@ export class MediaController {
         HttpStatus.BAD_REQUEST
       );
 
-    return await this.mediaService.find(id);
+    return await this.mediaService.find(id, update);
   }
 
   @Put(":id")
