@@ -12,10 +12,11 @@ import { PlayerStatus, usePlayer, VideoSource } from "./Utils";
 function VideoPlayer() {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
+  const [thumbnail, setThumbnail] = useState<string>();
 
   const ref = useRef<ReactPlayer>(null);
 
-  const { duration, playing, muted, volume } = useMemo<PlayerStatus>(
+  const { duration, muted, playing, volume } = useMemo<PlayerStatus>(
     () => playerStatus as PlayerStatus,
     [playerStatus]
   );
@@ -90,12 +91,13 @@ function VideoPlayer() {
     [playing, handleSetPlaying]
   );
 
-  const handleSendCover = useCallback((event) => {
-    console.log("handleSendCover");
+  const handleUpdateThumbnail = useCallback(
+    (t: string) => setThumbnail(t),
+    [setThumbnail]
+  );
+
+  const getThumbnail = useCallback((): string => {
     const player = ref.current?.getInternalPlayer() as any;
-
-    console.log(player);
-
     let data = "";
     if (player) {
       try {
@@ -115,8 +117,17 @@ function VideoPlayer() {
         console.error(e);
       }
     }
-    event.sender.send("player-cover", data);
-  }, []);
+    handleUpdateThumbnail(data);
+    return data;
+  }, [handleUpdateThumbnail]);
+
+  const handleSendCover = useCallback(
+    (event) => {
+      console.log("handleSendCover");
+      event.sender.send("player-cover-init", getThumbnail);
+    },
+    [getThumbnail]
+  );
 
   useEffect(() => {
     window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
@@ -167,6 +178,11 @@ function VideoPlayer() {
     handleUpdatePlayerPosition,
     handleSendCover,
   ]);
+
+  useEffect(() => {
+    if (thumbnail) window.api.ipcRendererSend("player-cover", thumbnail);
+    else getThumbnail();
+  }, [thumbnail, getThumbnail]);
 
   return (
     <>

@@ -78,7 +78,7 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
       .padStart(2, "0")}`;
   }, [position]);
 
-  const { title, artist, album, cover, source } = useMemo<AudioSource>(() => {
+  const { artist, album, cover, source, title } = useMemo<AudioSource>(() => {
     const status = playerStatus as PlayerStatus;
     return status.source as AudioSource;
   }, [playerStatus]);
@@ -205,6 +205,10 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
     handleUpdatePlayerPosition,
     handleSendCover,
   ]);
+
+  useEffect(() => {
+    if (cover) window.api.ipcRendererSend("player-cover-init", cover);
+  }, [cover]);
 
   function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
     if (typeof value === "number") {

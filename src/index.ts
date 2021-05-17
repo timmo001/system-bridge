@@ -500,3 +500,14 @@ ipcMain.on(
     );
   }
 );
+
+ipcMain.on(
+  "player-cover-init",
+  async (_event, cover: string): Promise<void> => {
+    ws = await wsSendEvent(
+      { name: "player-cover", data: cover },
+      ws,
+      true
+    );
+  }
+);

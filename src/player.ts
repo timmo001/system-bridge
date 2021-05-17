@@ -8,7 +8,7 @@ import {
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath } from "./common";
+import { appIconPath, wsSendEvent } from "./common";
 import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -186,9 +186,10 @@ export async function getPlayerCover(): Promise<string | undefined> {
         playerWindow.webContents.send("player-get-cover");
         logger.debug("player-get-cover");
         ipcMain.removeAllListeners("player-cover");
-        ipcMain.on("player-cover", (_event, cover: string) => {
+        ipcMain.on("player-cover", async (_event, cover: string) => {
           logger.debug("player-cover");
           resolve(cover);
+          await wsSendEvent({ name: "player-cover", data: cover });
         });
       }
     });
