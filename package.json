@@ -218,7 +218,7 @@
     "semver": "7.3.5",
     "serve-favicon": "2.5.0",
     "swagger-ui-express": "4.1.6",
-    "systeminformation": "5.6.20",
+    "systeminformation": "5.6.21",
     "update-electron-app": "2.0.1",
     "uuid": "8.3.2",
     "winston": "3.3.3",
