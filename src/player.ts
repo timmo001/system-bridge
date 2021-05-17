@@ -189,7 +189,15 @@ export async function getPlayerCover(): Promise<string | undefined> {
         ipcMain.on("player-cover", async (_event, cover: string) => {
           logger.debug("player-cover");
           resolve(cover);
-          await wsSendEvent({ name: "player-cover", data: cover });
+          const ws = await wsSendEvent(
+            { name: "player-cover", data: cover },
+            undefined,
+            true
+          );
+          await wsSendEvent(
+            { name: "player-cover-ready", data: undefined },
+            ws
+          );
         });
       }
     });
