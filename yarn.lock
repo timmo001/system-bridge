@@ -557,16 +557,16 @@
   optionalDependencies:
     electron-installer-redhat "^3.2.0"
 
-"@electron-forge/maker-squirrel@6.0.0-beta.54":
-  version "6.0.0-beta.54"
-  resolved "https://registry.yarnpkg.com/@electron-forge/maker-squirrel/-/maker-squirrel-6.0.0-beta.54.tgz#4b58e42e8e75179309db91e84fcf681b7918d0a2"
-  integrity sha512-JJ+HmUe94zZ6mZnyv3IvNLQ5nwoj4dcQ4gzwps4P3fCEpuABMr74KOlza7fMXrrs8cwOrGfMFwsk80GTcLdWkg==
+"@electron-forge/maker-squirrel@6.0.0-beta.55":
+  version "6.0.0-beta.55"
+  resolved "https://registry.yarnpkg.com/@electron-forge/maker-squirrel/-/maker-squirrel-6.0.0-beta.55.tgz#f0540ea7c0bee9ad4d4dd1e4a4d7f7a22b17216a"
+  integrity sha512-2ugnVUA1His7nquOtqXjmEFcfVqBV2WWKlEYb4T71aw4Sq+Dzsu3EPmcIjR7dtU8mBrQxRt0EYcz/ZDtgZOPag==
   dependencies:
-    "@electron-forge/maker-base" "6.0.0-beta.54"
-    "@electron-forge/shared-types" "6.0.0-beta.54"
+    "@electron-forge/maker-base" "6.0.0-beta.55"
+    "@electron-forge/shared-types" "6.0.0-beta.55"
     fs-extra "^9.0.1"
   optionalDependencies:
-    electron-winstaller "^4.0.1"
+    electron-winstaller "^5.0.0"
 
 "@electron-forge/maker-zip@6.0.0-beta.55":
   version "6.0.0-beta.55"
@@ -3616,10 +3616,10 @@ electron-to-chromium@^1.3.723:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.727.tgz#857e310ca00f0b75da4e1db6ff0e073cc4a91ddf"
   integrity sha512-Mfz4FIB4FSvEwBpDfdipRIrwd6uo8gUDoRDF4QEYb4h4tSuI3ov594OrjU6on042UlFHouIJpClDODGkPcBSbg==
 
-electron-winstaller@^4.0.1:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/electron-winstaller/-/electron-winstaller-4.0.2.tgz#e3aa7e95db8232eeb337b28c11ad80b93dcafe6d"
-  integrity sha512-tYmzIyi+W0CXd9o/jmR0VT+vwJ+nOaE/dQz8f64IlbQ/J9d2lpwsmmOKxx6veAVKeYiJHYQHR1eYsLzznNzd5g==
+electron-winstaller@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/electron-winstaller/-/electron-winstaller-5.0.0.tgz#0db968f34d498b16c69566a40848f562e70e7bcc"
+  integrity sha512-V+jFda7aVAm0htCG8Q95buPUpmXZW9ujh1HdhSlWY6y4QnJnw4TfrmxTlQWV4p2ioF/71JMI/1YF+/qbSICogA==
   dependencies:
     asar "^2.0.1"
     debug "^4.1.1"
