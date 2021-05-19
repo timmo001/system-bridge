@@ -146,7 +146,7 @@
     "@electron-forge/publisher-github": "6.0.0-beta.55",
     "@nestjs/cli": "7.6.0",
     "@nestjs/schematics": "7.3.1",
-    "@nestjs/testing": "7.6.15",
+    "@nestjs/testing": "7.6.17",
     "@types/compression": "1.7.0",
     "@types/cors": "2.8.10",
     "@types/electron-devtools-installer": "2.2.0",
