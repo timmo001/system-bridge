@@ -191,7 +191,7 @@
     "@feathersjs/feathers": "4.5.11",
     "@mdi/js": "5.9.55",
     "@nestjs/common": "7.6.17",
-    "@nestjs/core": "7.6.15",
+    "@nestjs/core": "7.6.17",
     "@nestjs/mapped-types": "0.4.1",
     "@nestjs/platform-express": "7.6.15",
     "@nestjs/platform-ws": "7.6.17",
