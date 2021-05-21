@@ -9120,10 +9120,10 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-systeminformation@5.6.21:
-  version "5.6.21"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.21.tgz#02ec2272392fa2658d703431726cd25b0c493f29"
-  integrity sha512-9OaqZfyYBn37yTWof+bQqGbFyPjJua9a3+6w6iHHCPyYc0N59sscGaQn5lFosiP/CY4IgR+i5ZpDW/XJNbjV4Q==
+systeminformation@5.7.1:
+  version "5.7.1"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.7.1.tgz#f0ada6ca86c4b4fcd8930dcb41a985211e4ccf4d"
+  integrity sha512-kHzxI4x5/DkO6uMV0GUkxFBavGnmyCWsf30AArkpX22qyKLhFLQA+2CPyEVcuhh/471XIpzZJLhi3qPoa37W5g==
 
 table@^6.0.4:
   version "6.7.0"
