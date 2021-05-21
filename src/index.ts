@@ -26,7 +26,7 @@ import {
   setSetting,
   wsSendEvent,
 } from "./common";
-import { closePlayerWindow, PlayerStatus } from "./player";
+import { closePlayerWindow, PlayerStatus, savePlayerCover } from "./player";
 import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -478,14 +478,17 @@ ipcMain.on(
 
 ipcMain.on("get-audio-metadata", async (event, path: string) => {
   const metadata: IAudioMetadata = await parseFile(path);
-  const cover = selectCover(metadata.common.picture)?.data.toString("base64");
+  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
+  cover = cover && `data:image/png;base64, ${cover}`;
 
   event?.sender?.send("audio-metadata", {
     album: metadata.common.album || "",
     artist: metadata.common.artist || metadata.common.albumartist || "",
-    cover: cover && `data:image/png;base64, ${cover}`,
+    cover,
     title: metadata.common.title || "",
   });
+
+  await savePlayerCover(cover);
 
   ws = await wsSendEvent(
     { name: "player-cover-ready", data: undefined },
@@ -499,6 +502,7 @@ ipcMain.on(
   async (_event, playerStatus: PlayerStatus): Promise<void> => {
     logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
     await setSetting("player-status", playerStatus);
+    if (!playerStatus) await savePlayerCover();
     ws = await wsSendEvent(
       { name: "player-status", data: playerStatus },
       ws,

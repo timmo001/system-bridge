@@ -1,7 +1,9 @@
 import { app as electronApp } from "electron";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { existsSync, mkdirSync } from "fs";
 import { ExpressPeerServer } from "peer";
 import { INestApplication } from "@nestjs/common";
+import { join } from "path";
 import { NestFactory } from "@nestjs/core";
 import { Server } from "http";
 import { WsAdapter } from "@nestjs/platform-ws";
@@ -9,8 +11,10 @@ import helmet from "helmet";
 import si, { Systeminformation } from "systeminformation";
 
 import { AppModule } from "./app.module";
-import { HttpAuthGuard } from "./httpAuth.guard";
 import { getSettings } from "../common";
+import { HttpAuthGuard } from "./httpAuth.guard";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { savePlayerCover } from "../player";
 import logger from "../logger";
 
 let app: INestApplication | undefined, server: Server | undefined;
@@ -25,7 +29,7 @@ async function startServer(): Promise<void> {
       : 9170;
 
   // Setup Nest.js app
-  app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // WS adapter
   app.useWebSocketAdapter(new WsAdapter(app));
@@ -40,6 +44,14 @@ async function startServer(): Promise<void> {
   app.enableCors();
   // Enable Global Auth Guard
   app.useGlobalGuards(new HttpAuthGuard());
+
+  // Serve public directory
+  const publicDir = join(electronApp.getPath("userData"), "public");
+  if (!existsSync(publicDir)) mkdirSync(publicDir);
+  app.useStaticAssets(publicDir);
+  // Remove any existing cover
+  await savePlayerCover();
+
   // Setup Open API
   const document = SwaggerModule.createDocument(
     app,
