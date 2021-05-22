@@ -221,7 +221,7 @@ export async function savePlayerCover(cover?: string): Promise<void> {
         if (err) logger.error(err.message);
       });
     }
-  else
+  else if (existsSync(join(mediaDir, "cover.png")))
     unlink(join(mediaDir, "cover.png"), (err) => {
       if (err) logger.error(err.message);
     });
