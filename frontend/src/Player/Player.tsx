@@ -29,6 +29,7 @@ function Player({ entered }: PlayerProps): ReactElement {
           try {
             window.api.ipcRendererOn("audio-metadata", (_event, data) => {
               setPlayerStatus({
+                hasCover: data.cover ? true : false,
                 muted: false,
                 playing: true,
                 source: {
@@ -53,6 +54,7 @@ function Player({ entered }: PlayerProps): ReactElement {
           break;
         case "video":
           setPlayerStatus({
+            hasCover: true,
             muted: false,
             playing: true,
             source: {

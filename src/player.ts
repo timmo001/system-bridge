@@ -6,6 +6,7 @@ import {
   screen,
 } from "electron";
 import { join } from "path";
+import { copyFile, existsSync, mkdirSync, writeFile, unlink } from "fs";
 import queryString from "query-string";
 
 import { appIconPath, wsSendEvent } from "./common";
@@ -37,6 +38,7 @@ export interface VideoSource extends Source {
 
 export interface PlayerStatus {
   duration?: number;
+  hasCover?: boolean;
   muted?: boolean;
   playing?: boolean;
   position?: number;
@@ -198,6 +200,32 @@ export async function getPlayerCover(
     });
   }
   return undefined;
+}
+
+export async function savePlayerCover(cover?: string): Promise<void> {
+  const mediaDir = join(app.getPath("userData"), "public/media");
+  if (!existsSync(mediaDir)) mkdirSync(mediaDir);
+  if (cover)
+    if (cover.startsWith("data:image")) {
+      let base64Data = cover.replace(/^data:image\/png;base64,/, "");
+      base64Data += base64Data.replace("+", " ");
+      writeFile(
+        join(mediaDir, "cover.png"),
+        Buffer.from(base64Data, "base64").toString("binary"),
+        "binary",
+        (err) => {
+          if (err) logger.error(err.message);
+        }
+      );
+    } else {
+      copyFile(cover, join(mediaDir, "cover.png"), (err) => {
+        if (err) logger.error(err.message);
+      });
+    }
+  else if (existsSync(join(mediaDir, "cover.png")))
+    unlink(join(mediaDir, "cover.png"), (err) => {
+      if (err) logger.error(err.message);
+    });
 }
 
 export function volumePlayerWindow(

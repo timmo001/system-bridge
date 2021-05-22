@@ -2,13 +2,12 @@ import { app } from "electron";
 import { Injectable } from "@nestjs/common";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import fs from "fs";
+import { createWriteStream } from "fs";
 
 import {
   AudioSource,
   closePlayerWindow,
   createPlayerWindow,
-  getPlayerCover,
   mutePlayerWindow,
   pausePlayerWindow,
   playpausePlayerWindow,
@@ -19,7 +18,6 @@ import {
 } from "../../player";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { DeleteMediaDto } from "./dto/delete-media.dto";
-import { FindMediaId } from "./dto/find-media.dto";
 import { getSetting, setSetting } from "../../common";
 import { Media } from "./entities/media.entity";
 import { UpdateMediaDto, UpdateMediaId } from "./dto/update-media.dto";
@@ -35,11 +33,7 @@ export class MediaService {
     return (await getSetting("player-status")) as Media;
   }
 
-  async find(
-    id: FindMediaId,
-    update?: boolean
-  ): Promise<string | AudioSource | VideoSource | undefined> {
-    if (id === "cover") return getPlayerCover(update);
+  async find(): Promise<AudioSource | VideoSource | undefined> {
     const media = (await getSetting("player-status")) as Media;
     return media?.source;
   }
@@ -95,7 +89,7 @@ export class MediaService {
           const response = await axios.get(createMediaDto.url, {
             responseType: "stream",
           });
-          const writer = fs.createWriteStream(createMediaDto.path);
+          const writer = createWriteStream(createMediaDto.path);
           response.data.pipe(writer);
           await new Promise((resolve, reject) => {
             writer.on("finish", resolve);
