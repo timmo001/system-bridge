@@ -38,6 +38,7 @@ export interface VideoSource extends Source {
 
 export interface PlayerStatus {
   duration?: number;
+  hasCover?: boolean;
   muted?: boolean;
   playing?: boolean;
   position?: number;
