@@ -568,15 +568,15 @@
   optionalDependencies:
     electron-winstaller "^5.0.0"
 
-"@electron-forge/maker-zip@6.0.0-beta.55":
-  version "6.0.0-beta.55"
-  resolved "https://registry.yarnpkg.com/@electron-forge/maker-zip/-/maker-zip-6.0.0-beta.55.tgz#63301e736bf0b6618157c0e6882ef6b6e94a64e8"
-  integrity sha512-man3kGnsYldnKf2HI99JBOpU/AALsYzmt33kFxq1ptUnK8cWcJWB/HxWIzY1fEyLAkcFTVWt4wnN/L4PahzO/w==
+"@electron-forge/maker-zip@6.0.0-beta.57":
+  version "6.0.0-beta.57"
+  resolved "https://registry.yarnpkg.com/@electron-forge/maker-zip/-/maker-zip-6.0.0-beta.57.tgz#1162e5d6e3fe2802e46390633331b5ddf70830a7"
+  integrity sha512-5EcCN/tD6EBmA5oD/hQOTRENKq12vp6S8HgVXNib6CtVrnGVVLYukiqJ8NGC7S/0VMTO+NtZyHax21+xnuk6TA==
   dependencies:
-    "@electron-forge/maker-base" "6.0.0-beta.55"
-    "@electron-forge/shared-types" "6.0.0-beta.55"
-    cross-zip "^3.0.0"
-    fs-extra "^9.0.1"
+    "@electron-forge/maker-base" "6.0.0-beta.57"
+    "@electron-forge/shared-types" "6.0.0-beta.57"
+    cross-zip "^4.0.0"
+    fs-extra "^10.0.0"
 
 "@electron-forge/plugin-base@6.0.0-beta.55":
   version "6.0.0-beta.55"
@@ -3035,12 +3035,10 @@ cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-cross-zip@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/cross-zip/-/cross-zip-3.1.0.tgz#2b7d33f2a893bf83e232ccbabf4c6c706f6b313c"
-  integrity sha512-aX02l0SD3KE27pMl69gkxDdDM5D3u9Ic4Je+2b1B2fP0dWnlWWY6ns2Vk5DEgCXJRhL3GasSpicNQRNbDkq0+w==
-  dependencies:
-    rimraf "^3.0.0"
+cross-zip@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/cross-zip/-/cross-zip-4.0.0.tgz#c29bfb2c001659a6d480ae9596f3bee83b48a230"
+  integrity sha512-MEzGfZo0rqE10O/B+AEcCSJLZsrWuRUvmqJTqHNqBtALhaJc3E3ixLGLJNTRzEA2K34wbmOHC4fwYs9sVsdcCA==
 
 crypto-random-string@^2.0.0:
   version "2.0.0"
