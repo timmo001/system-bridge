@@ -150,7 +150,7 @@
     "@types/compression": "1.7.0",
     "@types/cors": "2.8.10",
     "@types/electron-devtools-installer": "2.2.0",
-    "@types/express": "4.17.11",
+    "@types/express": "4.17.12",
     "@types/helmet": "4.0.0",
     "@types/jest": "26.0.23",
     "@types/mdns": "0.0.33",
