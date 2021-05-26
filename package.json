@@ -137,7 +137,7 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "@electron-forge/cli": "6.0.0-beta.55",
+    "@electron-forge/cli": "6.0.0-beta.57",
     "@electron-forge/maker-deb": "6.0.0-beta.57",
     "@electron-forge/maker-dmg": "6.0.0-beta.55",
     "@electron-forge/maker-rpm": "6.0.0-beta.55",
