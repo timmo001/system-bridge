@@ -212,7 +212,7 @@
     "rxjs": "6.6.7",
     "semver": "7.3.5",
     "swagger-ui-express": "4.1.6",
-    "systeminformation": "5.7.2",
+    "systeminformation": "5.7.4",
     "update-electron-app": "2.0.1",
     "uuid": "8.3.2",
     "winston": "3.3.3",
