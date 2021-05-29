@@ -333,18 +333,22 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
             <Grid container>
               <Grid className={classes.gridItem} item />
               <Grid className={classes.gridItem} item xs>
-                <Slider
-                  min={0}
-                  max={duration}
-                  step={1}
-                  value={position}
-                  valueLabelDisplay="off"
-                  onMouseDown={handleScrubStart}
-                  onKeyDown={handleScrubStart}
-                  onChange={handleScrub}
-                  onMouseUp={handleScrubEnd}
-                  onKeyUp={handleScrubEnd}
-                />
+                {position ? (
+                  <Slider
+                    min={0}
+                    max={duration}
+                    step={1}
+                    value={position}
+                    valueLabelDisplay="off"
+                    onMouseDown={handleScrubStart}
+                    onKeyDown={handleScrubStart}
+                    onChange={handleScrub}
+                    onMouseUp={handleScrubEnd}
+                    onKeyUp={handleScrubEnd}
+                  />
+                ) : (
+                  ""
+                )}
               </Grid>
               <Grid className={classes.gridItem} item>
                 <Typography component="span" variant="body2">
