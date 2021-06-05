@@ -209,6 +209,7 @@
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "reflect-metadata": "0.1.13",
+    "robotjs": "0.6.0",
     "rxjs": "6.6.7",
     "semver": "7.3.5",
     "swagger-ui-express": "4.1.6",
