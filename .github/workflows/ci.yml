@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
         run: |
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
           yarn install
         env:
           CI: true
@@ -135,7 +135,7 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
         run: |
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
           yarn install
       - name: 🧪 Run Tests
         run: yarn test:junit
@@ -192,7 +192,7 @@ jobs:
         if: matrix.os.server == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
         env:
           CI: true
       - name: 🏗 Install linux wine dependencies

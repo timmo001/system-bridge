@@ -122,8 +122,11 @@
   "jest": {
     "moduleFileExtensions": [
       "js",
+      "jsx",
+      "ts",
+      "tsx",
       "json",
-      "ts"
+      "node"
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
