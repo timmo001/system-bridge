@@ -59,7 +59,7 @@ You will need the "Bonjour SDK for Windows" or a related SDK in your system.
 ###### Ubuntu/Debian/APT
 
 ```bash
-sudo apt install libavahi-compat-libdnssd-dev
+sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev
 ```
 
 ###### Fedora/DNF/RPM

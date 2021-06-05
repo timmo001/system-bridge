@@ -50,7 +50,7 @@ jobs:
         if: matrix.os.server == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install libavahi-compat-libdnssd-dev
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev
         env:
           CI: true
       - name: 🏗 Install linux wine dependencies
