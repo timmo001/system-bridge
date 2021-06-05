@@ -17,7 +17,9 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { savePlayerCover } from "../player";
 import logger from "../logger";
 
-let app: INestApplication | undefined, server: Server | undefined;
+let app: INestApplication | undefined,
+  server: Server | undefined,
+  rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
 
 async function startServer(): Promise<void> {
   const settings = getSettings();
@@ -87,7 +89,8 @@ async function startServer(): Promise<void> {
     logger.info(`RTC broker created on path ${broker.path()}`);
     (async () => {
       try {
-        (await import("../rtc")).createRTCWindow();
+        rtc = await import("../rtc");
+        rtc.createRTCWindow();
       } catch (e) {
         logger.warn("Couldn't create RTC window: ", e);
       }
@@ -150,8 +153,17 @@ async function startServer(): Promise<void> {
 }
 
 async function stopServer(): Promise<void> {
-  if (app) await app.close();
-  logger.info("Server closed.");
+  if (app) {
+    await app.close();
+    logger.info("App closed.");
+  }
+  if (server) {
+    server.close();
+    logger.info("Server closed.");
+  }
+  if (rtc) {
+    rtc.closeRTCWindow();
+  }
   app = undefined;
   server = undefined;
 }
