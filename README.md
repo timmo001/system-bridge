@@ -59,13 +59,23 @@ You will need the "Bonjour SDK for Windows" or a related SDK in your system.
 ###### Ubuntu/Debian/APT
 
 ```bash
-sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
+sudo apt install \
+    libavahi-compat-libdnssd-dev \
+    libpng++-dev \
+    libxext-dev \
+    libxss-dev \
+    libxtst-dev
 ```
 
 ###### Fedora/DNF/RPM
 
 ```bash
-sudo dnf install avahi-compat-libdns_sd-devel
+sudo dnf install \
+    avahi-compat-libdns_sd-devel
+    libpng-devel \
+    libxext-devel \
+    libxss-devel \
+    libxtst-devel
 ```
 
 ### Setup
