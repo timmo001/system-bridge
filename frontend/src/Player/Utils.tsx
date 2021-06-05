@@ -34,10 +34,9 @@ export interface PlayerStatus {
 }
 
 const PlayerContext = createContext<PlayerStatus | undefined>(undefined);
-const SetPlayerContext =
-  createContext<null | React.Dispatch<
-    React.SetStateAction<PlayerStatus | undefined>
-  >>(null);
+const SetPlayerContext = createContext<null | React.Dispatch<
+  React.SetStateAction<PlayerStatus | undefined>
+>>(null);
 
 export const PlayerProvider = ({
   children,
