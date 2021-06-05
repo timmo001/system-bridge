@@ -51,7 +51,6 @@ export async function createRTCWindow(): Promise<void> {
 
   rtcWindow.on("closed", () => {
     if (rtcWindow && !rtcWindow.isDestroyed()) rtcWindow.destroy();
-    createRTCWindow();
   });
 
   // if (isDev) {
@@ -63,4 +62,15 @@ export async function createRTCWindow(): Promise<void> {
   //   // Open the DevTools.
   //   // rtcWindow.webContents.openDevTools({ activate: true, mode: "detach" });
   // }
+}
+
+export function closeRTCWindow(): boolean {
+  if (rtcWindow) {
+    if (!rtcWindow.isDestroyed()) {
+      rtcWindow.close();
+    }
+    rtcWindow = undefined;
+    return true;
+  }
+  return false;
 }

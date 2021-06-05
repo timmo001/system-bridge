@@ -197,7 +197,7 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   },
   ...helpMenu,
   { type: "separator" },
-  { label: "Quit", type: "normal", click: quitApp },
+  { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
 
 async function setAppConfig(): Promise<void> {
@@ -244,7 +244,13 @@ async function setupApp(): Promise<void> {
   const menu = Menu.buildFromTemplate([
     {
       label: "File",
-      submenu: [{ label: "Quit Application", type: "normal", click: quitApp }],
+      submenu: [
+        {
+          label: "Quit Application",
+          type: "normal",
+          click: async () => await quitApp(),
+        },
+      ],
     },
     ...helpMenu,
   ]);
@@ -290,10 +296,13 @@ async function showConfigurationWindow(): Promise<void> {
   // }
 }
 
-function quitApp(): void {
-  tray?.destroy();
+async function quitApp(): Promise<void> {
   configurationWindow?.destroy();
-  app.quit();
+  closePlayerWindow();
+  await stopServer();
+  tray?.destroy();
+  app.exit(0);
+  process.exit(0);
 }
 
 // This method will be called when Electron has finished
@@ -443,6 +452,7 @@ ipcMain.on("restart-app", async (event): Promise<void> => {
   ipcMain.emit("restarting-app");
   logger.debug("restarting-app");
   app.relaunch();
+  await quitApp();
 });
 
 ipcMain.on("restart-server", async (event): Promise<void> => {
