@@ -105,15 +105,15 @@ async function handleSquirrelEvent(): Promise<void> {
     case "--squirrel-updated":
       // Install desktop and start menu shortcuts
       await spawnUpdate(["--createShortcut", exeName]);
-      app.quit();
+      quitApp();
       break;
     case "--squirrel-uninstall":
       // Remove desktop and start menu shortcuts
       await spawnUpdate(["--removeShortcut", exeName]);
-      app.quit();
+      quitApp();
       break;
     case "--squirrel-obsolete":
-      app.quit();
+      quitApp();
       break;
     case "--squirrel-firstrun":
       // Install desktop and start menu shortcuts
