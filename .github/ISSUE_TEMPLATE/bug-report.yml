@@ -1,0 +1,39 @@
+name: Report an issue/bug
+description: Report an issue/bug.
+body:
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Description
+      description: >-
+        Provide a clear and concise description of what the problem is.
+  - type: markdown
+    attributes:
+      value: |
+        ## Platform / OS
+  - type: dropdown
+    validations:
+      required: true
+    attributes:
+      label: What Platform / OS are you running?
+      options:
+        - Linux
+        - Mac OS
+        - Windows
+  - type: markdown
+    attributes:
+      value: |
+        # Additional Details
+  - type: textarea
+    attributes:
+      label: Anything in the logs or a references that might be useful?
+      description: For example, error message, or stack traces.
+      render: txt
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information for us, use the field below.
+        Please note, you can attach screenshots or screen recordings here, by
+        dragging and dropping files in the field below.
