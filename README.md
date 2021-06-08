@@ -31,6 +31,14 @@ You can download the latest version of the application [here](https://github.com
 The application will automatically update whenever a new version is released in
 this repository. You can also download the latest version manually from [here](https://github.com/timmo001/system-bridge/releases).
 
+## Support my work
+
+If you like my work, and would like to send me a tip/donation, please use the links below:
+
+[![Sponsor Timmo][sponsor-badge]][sponsor]
+
+[![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
+
 ## Developing
 
 ### Dependencies
@@ -116,3 +124,8 @@ yarn [package|make] --platform [darwin|linux|win32]
 1. Publish the release.
 
 The deploy workflow will then publish the release for each platform.
+
+[buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymeacoffee]: https://www.buymeacoffee.com/timmo
+[sponsor-badge]: https://raw.githubusercontent.com/timmo001/home-panel/master/documentation/resources/sponsor.png
+[sponsor]: https://github.com/sponsors/timmo001?o=esc
