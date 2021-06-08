@@ -33,7 +33,8 @@ this repository. You can also download the latest version manually from [here](h
 
 ## Support my work
 
-If you like my work, and would like to send me a tip/donation, please use the links below:
+If you like my work, and would like to send me a tip/donation, please use the
+links below:
 
 [![Sponsor Timmo][sponsor-badge]][sponsor]
 
