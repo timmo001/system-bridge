@@ -55,7 +55,13 @@ export interface ApplicationUpdate {
 export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
 logger.info(
+  "-------------------------------------------------------------------------------"
+);
+logger.info(
   `System Bridge ${app.getVersion()}: ${JSON.stringify(process.argv)}`
+);
+logger.info(
+  "-------------------------------------------------------------------------------"
 );
 
 const isDev = electronIsDev();
