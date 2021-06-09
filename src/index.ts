@@ -11,7 +11,6 @@ import {
 } from "electron";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
-import autoUpdater from "update-electron-app";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
@@ -268,8 +267,6 @@ async function setupApp(): Promise<void> {
     } catch (error) {
       logger.warning("Error adding dev tools:", error);
     }
-  } else {
-    autoUpdater();
   }
 
   configurationWindow.on("close", (event) => {
