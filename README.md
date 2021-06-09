@@ -60,9 +60,6 @@ The app will warn you if there are missing dependencies.
 
 You will need the "Bonjour SDK for Windows" or a related SDK in your system.
 
-> This is not used when building the app, as linux builds using the avahi
-> libdns_sd package with wine. See the GitHub workflows for details.
-
 ##### MDNS - Linux
 
 ###### Ubuntu/Debian/APT
