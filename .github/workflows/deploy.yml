@@ -20,7 +20,7 @@ jobs:
       matrix:
         os:
           - name: windows
-            server: ubuntu-latest
+            server: windows-latest
             platform: win32
           - name: linux
             server: ubuntu-latest
