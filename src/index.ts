@@ -15,7 +15,7 @@ import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
 
-import { appIconPath, appSmallIconPath, getSettings } from "./common";
+import { appIconPath, appSmallIconPath } from "./common";
 import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -196,14 +196,14 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
 ];
 
 async function setAppConfig(): Promise<void> {
-  const config = getSettings();
-  if (!isDev) {
-    const launchOnStartup = config.general?.items.launchOnStartup?.value;
-    app.setLoginItemSettings({
-      openAtLogin:
-        typeof launchOnStartup === "boolean" ? launchOnStartup : false,
-    });
-  }
+  // const config = getSettings();
+  // if (!isDev) {
+  //   const launchOnStartup = config.general?.items.launchOnStartup?.value;
+  //   app.setLoginItemSettings({
+  //     openAtLogin:
+  //       typeof launchOnStartup === "boolean" ? launchOnStartup : false,
+  //   });
+  // }
 }
 
 let configurationWindow: BrowserWindow, tray: Tray; //, ws: WebSocket;
