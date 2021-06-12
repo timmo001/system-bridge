@@ -9,7 +9,7 @@ import { join } from "path";
 import { copyFile, existsSync, mkdirSync, writeFile, unlink } from "fs";
 import queryString from "query-string";
 
-import { appIconPath, wsSendEvent } from "./common";
+import { appIconPath } from "./common";
 import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -181,9 +181,8 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
-export async function getPlayerCover(
-  sendUpdate?: boolean
-): Promise<string | undefined> {
+export async function getPlayerCover(): Promise<string | undefined> {
+  // sendUpdate?: boolean
   if (playerWindow && !playerWindow.isDestroyed()) {
     return new Promise((resolve) => {
       if (playerWindow && !playerWindow.isDestroyed()) {
@@ -193,8 +192,8 @@ export async function getPlayerCover(
         ipcMain.on("player-cover", async (_event, cover: string) => {
           resolve(cover);
           logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
-          if (sendUpdate)
-            await wsSendEvent({ name: "player-cover-ready", data: undefined });
+          // if (sendUpdate)
+          //   await wsSendEvent({ name: "player-cover-ready", data: undefined });
         });
       }
     });

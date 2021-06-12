@@ -2,10 +2,8 @@ import { app } from "electron";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import electronSettings from "electron-settings";
-import WebSocket from "ws";
 
 import defaultConfiguration, { Configuration } from "./configuration";
-import { Event } from "./api/events/entities/event.entity";
 
 export function getSettings(): Configuration {
   const settings: Configuration = defaultConfiguration;
@@ -65,40 +63,3 @@ export const appIconPath = app
 export const appSmallIconPath = app
   ? join(app.getAppPath(), "public/system-bridge-circle-32x32.png")
   : "";
-
-export async function wsConnect(settings?: Configuration): Promise<WebSocket> {
-  if (!settings) settings = getSettings();
-  const networkSettings = settings?.network.items;
-
-  const wsPort: number =
-    typeof networkSettings?.wsPort?.value === "number"
-      ? networkSettings?.wsPort?.value
-      : 9170;
-
-  const ws = new WebSocket(`ws://localhost:${wsPort}`);
-  await new Promise<void>((resolve) => ws.on("open", () => resolve()));
-  return ws;
-}
-
-export async function wsSendEvent(
-  event: Event,
-  ws?: WebSocket,
-  keepAlive?: boolean
-): Promise<WebSocket> {
-  const settings = getSettings();
-  if (!ws || ws.readyState !== ws.OPEN) {
-    ws = await wsConnect(settings);
-  }
-  const networkSettings = settings?.network.items;
-  ws?.send(
-    JSON.stringify({
-      event: "events",
-      data: {
-        "api-key": networkSettings?.apiKey?.value,
-        data: event,
-      },
-    })
-  );
-  if (ws && !keepAlive) ws.close();
-  return ws;
-}

@@ -15,18 +15,14 @@ import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
-import si, { Systeminformation } from "systeminformation";
-import WebSocket from "ws";
 
 import {
   appIconPath,
   appSmallIconPath,
   getSettings,
   setSetting,
-  wsSendEvent,
 } from "./common";
 import { closePlayerWindow, PlayerStatus, savePlayerCover } from "./player";
-import { startServer, stopServer } from "./api";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 import axios from "axios";
@@ -216,7 +212,7 @@ async function setAppConfig(): Promise<void> {
   }
 }
 
-let configurationWindow: BrowserWindow, tray: Tray, ws: WebSocket;
+let configurationWindow: BrowserWindow, tray: Tray; //, ws: WebSocket;
 async function setupApp(): Promise<void> {
   protocol.registerFileProtocol("safe-file-protocol", (request, callback) => {
     const url = request.url.replace("safe-file-protocol://", "");
@@ -302,7 +298,7 @@ async function showConfigurationWindow(): Promise<void> {
 async function quitApp(): Promise<void> {
   configurationWindow?.destroy();
   closePlayerWindow();
-  await stopServer();
+  // await stopServer();
   tray?.destroy();
   app.exit(0);
   process.exit(0);
@@ -328,52 +324,11 @@ app.whenReady().then(async (): Promise<void> => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showConfigurationWindow);
 
-  startServer();
-  ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
+  // startServer();
+  // ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
   ipcMain.emit("get-app-information");
   ipcMain.emit("update-check");
 });
-
-export async function getAppInformation(): Promise<
-  ApplicationInfo | undefined
-> {
-  const settings = getSettings();
-  const port: number =
-    typeof settings?.network.items?.port?.value === "number"
-      ? settings?.network.items?.port?.value
-      : 9170;
-  const websocketPort: number =
-    typeof settings?.network.items?.wsPort?.value === "number"
-      ? settings?.network.items?.wsPort?.value
-      : 9172;
-  const osInfo: Systeminformation.OsData = await si.osInfo();
-  const uuidInfo: Systeminformation.UuidData = await si.uuid();
-  const defaultInterface: string = await si.networkInterfaceDefault();
-  const networkInterface: Systeminformation.NetworkInterfacesData | undefined =
-    (await si.networkInterfaces()).find(
-      (ni: Systeminformation.NetworkInterfacesData) =>
-        ni.iface === defaultInterface
-    );
-
-  if (networkInterface) {
-    const data: ApplicationInfo = {
-      address: `http://${osInfo.fqdn}:${port}`,
-      fqdn: osInfo.fqdn,
-      host: osInfo.hostname,
-      ip: networkInterface.ip4,
-      mac: networkInterface.mac,
-      port,
-      updates: await getUpdates(),
-      uuid: uuidInfo.os,
-      version: app.getVersion(),
-      websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
-      websocketPort,
-    };
-    logger.info(`Application info: ${JSON.stringify(data)}`);
-    return data;
-  }
-  return undefined;
-}
 
 export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   const response = await axios.get<{
@@ -398,21 +353,15 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   return undefined;
 }
 
-ipcMain.on("get-app-information", async (event): Promise<void> => {
-  const data = await getAppInformation();
-  event?.sender?.send("app-information", data);
-  ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
-});
-
 ipcMain.on("update-check", async (event): Promise<void> => {
   const update = await getUpdates();
   if (update?.available) {
     event?.sender?.send("update-available", update);
-    ws = await wsSendEvent(
-      { name: "update-available", data: update },
-      ws,
-      true
-    );
+    // ws = await wsSendEvent(
+    //   { name: "update-available", data: update },
+    //   ws,
+    //   true
+    // );
     contextMenuTemplate[
       contextMenuTemplate.findIndex(
         (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
@@ -458,13 +407,6 @@ ipcMain.on("restart-app", async (event): Promise<void> => {
   await quitApp();
 });
 
-ipcMain.on("restart-server", async (event): Promise<void> => {
-  event?.sender?.send("restarting-server");
-  ipcMain.emit("restarting-server");
-  await stopServer();
-  setTimeout(() => startServer(), 2000);
-});
-
 ipcMain.on("window-show", (event) => {
   const window = BrowserWindow.fromWebContents(event?.sender);
   window?.show();
@@ -503,11 +445,11 @@ ipcMain.on("get-audio-metadata", async (event, path: string) => {
 
   await savePlayerCover(cover);
 
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
+  // ws = await wsSendEvent(
+  //   { name: "player-cover-ready", data: undefined },
+  //   ws,
+  //   true
+  // );
 });
 
 ipcMain.on(
@@ -516,28 +458,28 @@ ipcMain.on(
     logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
     await setSetting("player-status", playerStatus);
     if (!playerStatus) await savePlayerCover();
-    ws = await wsSendEvent(
-      { name: "player-status", data: playerStatus },
-      ws,
-      true
-    );
+    // ws = await wsSendEvent(
+    //   { name: "player-status", data: playerStatus },
+    //   ws,
+    //   true
+    // );
   }
 );
 
 ipcMain.on("player-cover-ready", async (): Promise<void> => {
   logger.debug("ipcMain: player-cover-ready");
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
+  // ws = await wsSendEvent(
+  //   { name: "player-cover-ready", data: undefined },
+  //   ws,
+  //   true
+  // );
 });
 
 ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
   logger.debug("ipcMain: player-thumbnail-ready");
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
+  // ws = await wsSendEvent(
+  //   { name: "player-cover-ready", data: undefined },
+  //   ws,
+  //   true
+  // );
 });
