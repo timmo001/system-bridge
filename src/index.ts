@@ -9,20 +9,14 @@ import {
   shell,
   Tray,
 } from "electron";
-import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 import { join, resolve, basename } from "path";
 import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
 
-import {
-  appIconPath,
-  appSmallIconPath,
-  getSettings,
-  setSetting,
-} from "./common";
-import { closePlayerWindow, PlayerStatus, savePlayerCover } from "./player";
+import { appIconPath, appSmallIconPath, getSettings } from "./common";
+import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 import axios from "axios";
@@ -387,18 +381,6 @@ ipcMain.on("open-settings", async (event): Promise<void> => {
   event?.sender?.send("opened-settings");
 });
 
-ipcMain.on("get-settings", async (event): Promise<void> => {
-  event?.sender?.send("set-settings", getSettings());
-});
-
-ipcMain.on("update-setting", async (event, args): Promise<void> => {
-  logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
-  await setSetting(args[0], args[1]);
-  await setAppConfig();
-  event?.sender?.send("updated-setting", args);
-  ipcMain.emit("updated-setting", args);
-});
-
 ipcMain.on("restart-app", async (event): Promise<void> => {
   event?.sender?.send("restarting-app");
   ipcMain.emit("restarting-app");
@@ -422,64 +404,4 @@ ipcMain.on("window-minimize", (event) => {
 
 ipcMain.on("window-close", (event) => {
   BrowserWindow.fromWebContents(event?.sender)?.close();
-});
-
-ipcMain.on(
-  "log",
-  (_event, { message, level }: { message: string; level: string }) => {
-    logger.log(level, message);
-  }
-);
-
-ipcMain.on("get-audio-metadata", async (event, path: string) => {
-  const metadata: IAudioMetadata = await parseFile(path);
-  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
-  cover = cover && `data:image/png;base64, ${cover}`;
-
-  event?.sender?.send("audio-metadata", {
-    album: metadata.common.album || "",
-    artist: metadata.common.artist || metadata.common.albumartist || "",
-    cover,
-    title: metadata.common.title || "",
-  });
-
-  await savePlayerCover(cover);
-
-  // ws = await wsSendEvent(
-  //   { name: "player-cover-ready", data: undefined },
-  //   ws,
-  //   true
-  // );
-});
-
-ipcMain.on(
-  "player-status",
-  async (_event, playerStatus: PlayerStatus): Promise<void> => {
-    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
-    await setSetting("player-status", playerStatus);
-    if (!playerStatus) await savePlayerCover();
-    // ws = await wsSendEvent(
-    //   { name: "player-status", data: playerStatus },
-    //   ws,
-    //   true
-    // );
-  }
-);
-
-ipcMain.on("player-cover-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-cover-ready");
-  // ws = await wsSendEvent(
-  //   { name: "player-cover-ready", data: undefined },
-  //   ws,
-  //   true
-  // );
-});
-
-ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-thumbnail-ready");
-  // ws = await wsSendEvent(
-  //   { name: "player-cover-ready", data: undefined },
-  //   ws,
-  //   true
-  // );
 });
