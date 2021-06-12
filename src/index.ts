@@ -15,7 +15,7 @@ import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
 
-import { appIconPath, appSmallIconPath } from "./common";
+import { appIconPath, appSmallIconPath, getSetting } from "./common";
 import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
@@ -276,7 +276,11 @@ async function showConfigurationWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "configuration", title: "Settings" })}`;
+  }?${queryString.stringify({
+    id: "configuration",
+    title: "Settings",
+    apiKey: await getSetting("network-apiKey"),
+  })}`;
   logger.info(`Configuration URL: ${url}`);
 
   configurationWindow.loadURL(url);

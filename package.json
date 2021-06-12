@@ -29,7 +29,8 @@
     "start:api:debug": "cd api && yarn start:debug",
     "start:api:prod": "cd api && yarn start:prod",
     "start:frontend": "cd frontend && cross-env BROWSER=none yarn start",
-    "eslint": "eslint ./src --config .eslintrc.json --ext .ts"
+    "eslint": "eslint ./src --config .eslintrc.json --ext .ts",
+    "rebuild-sqlite3": "electron-rebuild -f -w sqlite3"
   },
   "keywords": [
     "system",
@@ -160,6 +161,7 @@
     "concurrently": "6.2.0",
     "cross-env": "7.0.3",
     "electron": "13.1.2",
+    "electron-rebuild": "2.3.5",
     "eslint": "7.28.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-config-react-app": "6.0.0",
@@ -188,6 +190,8 @@
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "semver": "7.3.5",
+    "sqlite3": "5.0.2",
+    "typeorm": "0.2.34",
     "uuid": "8.3.2"
   }
 }
