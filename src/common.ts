@@ -1,14 +1,7 @@
 import { app } from "electron";
-import { ConnectionOptions, createConnection } from "typeorm";
+import { Connection, createConnection } from "typeorm";
 import { join } from "path";
 import { Setting } from "./types/settings.entity";
-
-const connectionOptions: ConnectionOptions = {
-  type: "sqlite",
-  database: "api/system-bridge_v1.db",
-  entities: [Setting],
-  logging: true,
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertArrayToObject(array: any[], key: string): any {
@@ -29,14 +22,34 @@ export const appSmallIconPath = app
   ? join(app.getAppPath(), "public/system-bridge-circle-32x32.png")
   : "";
 
-export async function getSettings(): Promise<Setting[]> {
-  const connection = await createConnection(connectionOptions);
+export async function getConnection(): Promise<Connection> {
+  return await createConnection({
+    type: "sqlite",
+    database: "api/system-bridge_v1.db",
+    entities: [Setting],
+    logging: true,
+    synchronize: true,
+  });
+}
+
+export async function getSettings(connection: Connection): Promise<Setting[]> {
   const settingsRepository = connection.getRepository(Setting);
   return settingsRepository.find();
 }
 
-export async function getSetting(key: string): Promise<Setting | undefined> {
-  const connection = await createConnection(connectionOptions);
+export async function getSetting(
+  connection: Connection,
+  key: string
+): Promise<Setting | undefined> {
   const settingsRepository = connection.getRepository(Setting);
   return settingsRepository.findOne(key);
+}
+
+export async function createSetting(
+  connection: Connection,
+  setting: Setting
+): Promise<Setting | undefined> {
+  const settingsRepository = connection.getRepository(Setting);
+  await settingsRepository.insert(setting);
+  return settingsRepository.findOne(setting.key);
 }

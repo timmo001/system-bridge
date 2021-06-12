@@ -10,16 +10,23 @@ import {
   Tray,
 } from "electron";
 import { join, resolve, basename } from "path";
-import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
+import { v4 as uuidv4 } from "uuid";
 import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
 
-import { appIconPath, appSmallIconPath, getSetting } from "./common";
+import {
+  appIconPath,
+  appSmallIconPath,
+  createSetting,
+  getConnection,
+  getSetting,
+} from "./common";
 import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 import axios from "axios";
+import { Connection } from "typeorm";
 
 export interface ApplicationInfo {
   address: string;
@@ -195,6 +202,11 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
 
+let connection: Connection;
+(async () => {
+  connection = await getConnection();
+})();
+
 async function setAppConfig(): Promise<void> {
   // const config = getSettings();
   // if (!isDev) {
@@ -220,7 +232,7 @@ async function setupApp(): Promise<void> {
 
   configurationWindow = new BrowserWindow({
     width: 1280,
-    height: 720,
+    height: 740,
     autoHideMenuBar: true,
     focusable: true,
     icon: appIconPath,
@@ -251,14 +263,6 @@ async function setupApp(): Promise<void> {
   ]);
   Menu.setApplicationMenu(menu);
 
-  if (isDev) {
-    try {
-      await devTools(REACT_DEVELOPER_TOOLS);
-    } catch (error) {
-      logger.warning("Error adding dev tools:", error);
-    }
-  }
-
   configurationWindow.on("close", (event) => {
     event.preventDefault();
     configurationWindow.hide();
@@ -272,6 +276,12 @@ async function setupApp(): Promise<void> {
 }
 
 async function showConfigurationWindow(): Promise<void> {
+  let apiKeySetting = await getSetting(connection, "network-apiKey");
+  if (!apiKeySetting)
+    apiKeySetting = await createSetting(connection, {
+      key: "network-apiKey",
+      value: uuidv4(),
+    });
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -279,7 +289,7 @@ async function showConfigurationWindow(): Promise<void> {
   }?${queryString.stringify({
     id: "configuration",
     title: "Settings",
-    apiKey: await getSetting("network-apiKey"),
+    apiKey: apiKeySetting?.value,
   })}`;
   logger.info(`Configuration URL: ${url}`);
 
