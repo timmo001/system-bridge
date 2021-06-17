@@ -189,7 +189,7 @@
   },
   "dependencies": {
     "@mdi/js": "5.9.55",
-    "@nestjs/common": "7.6.17",
+    "@nestjs/common": "7.6.18",
     "@nestjs/core": "7.6.17",
     "@nestjs/mapped-types": "0.4.1",
     "@nestjs/platform-express": "7.6.17",
