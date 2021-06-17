@@ -195,7 +195,7 @@
     "@nestjs/platform-express": "7.6.17",
     "@nestjs/platform-ws": "7.6.17",
     "@nestjs/swagger": "4.8.0",
-    "@nestjs/websockets": "7.6.17",
+    "@nestjs/websockets": "7.6.18",
     "axios": "0.21.1",
     "brightness": "3.0.0",
     "compression": "1.7.4",

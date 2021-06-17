@@ -995,10 +995,10 @@
     optional "0.1.4"
     tslib "2.2.0"
 
-"@nestjs/websockets@7.6.17":
-  version "7.6.17"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-7.6.17.tgz#0c5356481cd0280ef5da701bc86d790112bc85d8"
-  integrity sha512-xU+nqEQF8ky7gOFcWRMVLtYiIZDRSXFAb6E/TwLSKO8Fb4IvHpXHHtKD0xFcnZboLyv84kzoSfn+NwZw2x572Q==
+"@nestjs/websockets@7.6.18":
+  version "7.6.18"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-7.6.18.tgz#504426eb241ce528226a8d3ed308c6793cbe4d6c"
+  integrity sha512-QBp+zVAGMksNKa5HnfpZfXzO8FbDO+vGcGbxuXLPqEeH2/HsS1O09uPvi4uG02WtGWIJ+DewWdq/odsukl4lDg==
   dependencies:
     iterare "1.2.1"
     tslib "2.2.0"
