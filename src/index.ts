@@ -231,8 +231,8 @@ async function setupApp(): Promise<void> {
   });
 
   configurationWindow = new BrowserWindow({
-    width: 1280,
-    height: 740,
+    width: 1340,
+    height: 760,
     autoHideMenuBar: true,
     focusable: true,
     icon: appIconPath,
