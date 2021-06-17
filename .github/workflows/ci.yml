@@ -169,7 +169,9 @@ jobs:
         env:
           CI: true
       - name: 🚀 Make
-        run: yarn make --platform ${{ matrix.os.platform }}
+        run: |
+          yarn rebuild-sqlite3
+          yarn make --platform ${{ matrix.os.platform }}
         env:
           CI: true
           NODE_ENV: production
