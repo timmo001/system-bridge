@@ -29,8 +29,7 @@
     "start:api:debug": "cd api && yarn start:debug",
     "start:api:prod": "cd api && yarn start:prod",
     "start:frontend": "cd frontend && cross-env BROWSER=none yarn start",
-    "eslint": "eslint ./src --config .eslintrc.json --ext .ts",
-    "rebuild-sqlite3": "electron-rebuild -f -w sqlite3"
+    "eslint": "eslint ./src --config .eslintrc.json --ext .ts"
   },
   "keywords": [
     "system",
@@ -181,6 +180,7 @@
   },
   "dependencies": {
     "@mdi/js": "5.9.55",
+    "better-sqlite3": "7.4.1",
     "electron-debug": "3.2.0",
     "electron-devtools-installer": "3.2.0",
     "electron-settings": "4.0.2",
@@ -189,7 +189,6 @@
     "peer": "0.6.1",
     "query-string": "7.0.0",
     "semver": "7.3.5",
-    "sqlite3": "5.0.2",
     "typeorm": "0.2.34",
     "uuid": "8.3.2"
   }

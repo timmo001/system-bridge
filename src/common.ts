@@ -24,7 +24,7 @@ export const appSmallIconPath = app
 
 export async function getConnection(): Promise<Connection> {
   return await createConnection({
-    type: "sqlite",
+    type: "better-sqlite3",
     database: "api/system-bridge_v1.db",
     entities: [Setting],
     logging: true,
