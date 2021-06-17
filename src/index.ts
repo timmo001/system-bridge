@@ -9,8 +9,9 @@ import {
   shell,
   Tray,
 } from "electron";
+import { Connection } from "typeorm";
 import { join, resolve, basename } from "path";
-import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
@@ -18,15 +19,12 @@ import semver from "semver";
 import {
   appIconPath,
   appSmallIconPath,
-  createSetting,
   getConnection,
   getSetting,
 } from "./common";
 import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
-import axios from "axios";
-import { Connection } from "typeorm";
 
 export interface ApplicationInfo {
   address: string;
@@ -63,9 +61,6 @@ logger.info(
 const isDev = electronIsDev();
 
 handleSquirrelEvent();
-
-// if (isDev)
-//   debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
 
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
@@ -202,12 +197,14 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
 
-let connection: Connection;
+let connection: Connection, apiKey: string | undefined;
 (async () => {
   connection = await getConnection();
+  apiKey = (await getSetting(connection, "network-apiKey"))?.value;
 })();
 
 async function setAppConfig(): Promise<void> {
+  // TODO: Add support
   // const config = getSettings();
   // if (!isDev) {
   //   const launchOnStartup = config.general?.items.launchOnStartup?.value;
@@ -276,12 +273,6 @@ async function setupApp(): Promise<void> {
 }
 
 async function showConfigurationWindow(): Promise<void> {
-  let apiKeySetting = await getSetting(connection, "network-apiKey");
-  if (!apiKeySetting)
-    apiKeySetting = await createSetting(connection, {
-      key: "network-apiKey",
-      value: uuidv4(),
-    });
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -289,7 +280,7 @@ async function showConfigurationWindow(): Promise<void> {
   }?${queryString.stringify({
     id: "configuration",
     title: "Settings",
-    apiKey: apiKeySetting?.value,
+    apiKey,
   })}`;
   logger.info(`Configuration URL: ${url}`);
 
