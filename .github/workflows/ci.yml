@@ -151,7 +151,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: ↗ Publish Tests
         if: steps.checks.outputs.has-permission && github.ref != 'refs/heads/master'
-        uses: EnricoMi/publish-unit-test-result-action@v1.17
+        uses: EnricoMi/publish-unit-test-result-action@v1.18
         with:
           files: junit.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
