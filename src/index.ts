@@ -20,13 +20,13 @@ import {
   appIconPath,
   appSmallIconPath,
   getConnection,
-  getSetting,
   getSettingsObject,
 } from "./common";
 import { closePlayerWindow } from "./player";
+import { Event } from "./types/event.entity";
+import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
-import { WebSocketConnection } from "./websocket";
 
 export interface ApplicationInfo {
   address: string;
@@ -205,22 +205,34 @@ let connection: Connection,
 (async () => {
   connection = await getConnection();
   settings = await getSettingsObject(connection);
-  ws = new WebSocketConnection(
-    Number(settings["network-wsPort"]) || 9172,
-    settings["network-apiKey"],
-    () => ws.sendEvent({ name: "startup" })
-  );
+  await updateAppConfig();
+  try {
+    ws = new WebSocketConnection(
+      Number(settings["network-wsPort"]) || 9172,
+      settings["network-apiKey"],
+      () => ws.sendEvent({ name: "startup" })
+    );
+    ws.onEvent = async (event: Event) => {
+      logger.info(`Event: ${event.name}`);
+      if (event.name === "update-app-config") await updateAppConfig();
+      if (event.name === "restart-app") await restartApp();
+      if (event.name === "restart-server") await showConfigurationWindow();
+    };
+  } catch (e) {
+    logger.error(e);
+  }
 })();
 
-async function setAppConfig(): Promise<void> {
-  if (!isDev) {
-    const launchOnStartup = (
-      await getSetting(connection, "general-launchOnStartup")
-    )?.value;
-    app.setLoginItemSettings({
-      openAtLogin: launchOnStartup ? Boolean(launchOnStartup) : false,
-    });
-  }
+async function updateAppConfig(): Promise<void> {
+  settings = await getSettingsObject(connection);
+  const launchOnStartup =
+    settings["general-launchOnStartup"] === "true" || false;
+  logger.info(
+    `Update App Configuration - Launch on startup: ${launchOnStartup}`
+  );
+  app.setLoginItemSettings({
+    openAtLogin: isDev ? false : launchOnStartup,
+  });
 }
 
 let configurationWindow: BrowserWindow, tray: Tray;
@@ -230,8 +242,7 @@ async function setupApp(): Promise<void> {
     try {
       return callback(decodeURIComponent(url));
     } catch (error) {
-      // Handle the error as needed
-      console.error(error);
+      logger.error(error);
     }
   });
 
@@ -250,8 +261,6 @@ async function setupApp(): Promise<void> {
       // devTools: electronIsDev(),
     },
   });
-
-  setAppConfig();
 
   const menu = Menu.buildFromTemplate([
     {
@@ -289,6 +298,7 @@ async function showConfigurationWindow(): Promise<void> {
     id: "configuration",
     title: "Settings",
     apiKey: settings["network-apiKey"],
+    apiPort: settings["network-apiPort"] || 9170,
   })}`;
   logger.info(`Configuration URL: ${url}`);
 
@@ -358,6 +368,13 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   return undefined;
 }
 
+async function restartApp(): Promise<void> {
+  ipcMain.emit("restarting-app");
+  logger.debug("restarting-app");
+  app.relaunch();
+  await quitApp();
+}
+
 ipcMain.on("update-check", async (event): Promise<void> => {
   const update = await getUpdates();
   if (update?.available) {
@@ -390,10 +407,7 @@ ipcMain.on("open-settings", async (event): Promise<void> => {
 
 ipcMain.on("restart-app", async (event): Promise<void> => {
   event?.sender?.send("restarting-app");
-  ipcMain.emit("restarting-app");
-  logger.debug("restarting-app");
-  app.relaunch();
-  await quitApp();
+  await restartApp();
 });
 
 ipcMain.on("window-show", (event) => {

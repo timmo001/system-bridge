@@ -3,6 +3,7 @@ import WebSocket from "ws";
 import { Event } from "./types/event.entity";
 
 export class WebSocketConnection {
+  public onEvent?: (data: Event) => void;
   public port: number;
   public websocket: WebSocket | undefined;
 
@@ -23,7 +24,8 @@ export class WebSocketConnection {
     ws.on("message", (data: WebSocket.Data) => {
       if (typeof data === "string") {
         const json = JSON.parse(data);
-        if (json.event === "events" && json.data) this.onEvent(json.data);
+        if (json.event === "events" && json.data && this.onEvent)
+          this.onEvent(json.data);
       }
     });
     ws.send(
@@ -38,11 +40,12 @@ export class WebSocketConnection {
   }
 
   async close(): Promise<void> {
-    if (this.websocket && this.websocket.OPEN) this.websocket.close();
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
+      this.websocket.close();
   }
 
   sendEvent(event: Event): void {
-    if (this.websocket && this.websocket.OPEN)
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
       this.websocket.send(
         JSON.stringify({
           event: "events",
@@ -52,9 +55,5 @@ export class WebSocketConnection {
           },
         })
       );
-  }
-
-  onEvent(data: Event): void {
-    console.log("Event:", data);
   }
 }
