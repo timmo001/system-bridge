@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { Connection, createConnection } from "typeorm";
 import { join } from "path";
+
 import { Setting } from "./types/settings.entity";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,7 +28,7 @@ export async function getConnection(): Promise<Connection> {
     type: "better-sqlite3",
     database: "api/system-bridge_v1.db",
     entities: [Setting],
-    logging: true,
+    logging: false,
     synchronize: true,
   });
 }
@@ -35,6 +36,16 @@ export async function getConnection(): Promise<Connection> {
 export async function getSettings(connection: Connection): Promise<Setting[]> {
   const settingsRepository = connection.getRepository(Setting);
   return settingsRepository.find();
+}
+
+export async function getSettingsObject(
+  connection: Connection
+): Promise<{ [key: string]: string }> {
+  const settings: { [key: string]: string } = {};
+  (await getSettings(connection)).forEach(
+    ({ key, value }: Setting) => (settings[key] = value)
+  );
+  return settings;
 }
 
 export async function getSetting(

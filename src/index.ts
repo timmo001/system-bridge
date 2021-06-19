@@ -21,10 +21,12 @@ import {
   appSmallIconPath,
   getConnection,
   getSetting,
+  getSettingsObject,
 } from "./common";
 import { closePlayerWindow } from "./player";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
+import { WebSocketConnection } from "./websocket";
 
 export interface ApplicationInfo {
   address: string;
@@ -197,25 +199,31 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
 
-let connection: Connection, apiKey: string | undefined;
+let connection: Connection,
+  settings: { [key: string]: string },
+  ws: WebSocketConnection;
 (async () => {
   connection = await getConnection();
-  apiKey = (await getSetting(connection, "network-apiKey"))?.value;
+  settings = await getSettingsObject(connection);
+  ws = new WebSocketConnection(
+    Number(settings["network-wsPort"]) || 9172,
+    settings["network-apiKey"],
+    () => ws.sendEvent({ name: "startup", data: "started" })
+  );
 })();
 
 async function setAppConfig(): Promise<void> {
-  // TODO: Add support
-  // const config = getSettings();
-  // if (!isDev) {
-  //   const launchOnStartup = config.general?.items.launchOnStartup?.value;
-  //   app.setLoginItemSettings({
-  //     openAtLogin:
-  //       typeof launchOnStartup === "boolean" ? launchOnStartup : false,
-  //   });
-  // }
+  if (!isDev) {
+    const launchOnStartup = (
+      await getSetting(connection, "general-launchOnStartup")
+    )?.value;
+    app.setLoginItemSettings({
+      openAtLogin: launchOnStartup ? Boolean(launchOnStartup) : false,
+    });
+  }
 }
 
-let configurationWindow: BrowserWindow, tray: Tray; //, ws: WebSocket;
+let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
   protocol.registerFileProtocol("safe-file-protocol", (request, callback) => {
     const url = request.url.replace("safe-file-protocol://", "");
@@ -280,7 +288,7 @@ async function showConfigurationWindow(): Promise<void> {
   }?${queryString.stringify({
     id: "configuration",
     title: "Settings",
-    apiKey,
+    apiKey: settings["network-apiKey"],
   })}`;
   logger.info(`Configuration URL: ${url}`);
 
@@ -323,8 +331,6 @@ app.whenReady().then(async (): Promise<void> => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", showConfigurationWindow);
 
-  // startServer();
-  // ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
   ipcMain.emit("get-app-information");
   ipcMain.emit("update-check");
 });
@@ -356,11 +362,7 @@ ipcMain.on("update-check", async (event): Promise<void> => {
   const update = await getUpdates();
   if (update?.available) {
     event?.sender?.send("update-available", update);
-    // ws = await wsSendEvent(
-    //   { name: "update-available", data: update },
-    //   ws,
-    //   true
-    // );
+    if (ws) ws.sendEvent({ name: "update-available", data: update });
     contextMenuTemplate[
       contextMenuTemplate.findIndex(
         (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
