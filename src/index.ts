@@ -96,7 +96,6 @@ async function handleSquirrelEvent(): Promise<void> {
   }
 
   const squirrelEvent = process.argv[1];
-  logger.info(`squirrelEvent: ${squirrelEvent}`);
   switch (squirrelEvent) {
     default:
       break;
@@ -247,7 +246,7 @@ async function setupApp(): Promise<void> {
   });
 
   try {
-    app.dock.hide();
+    app.dock?.hide();
   } catch (e) {
     if (e.message) logger.warn(e.message);
   }
