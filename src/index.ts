@@ -1,7 +1,6 @@
 import {
   app,
   BrowserWindow,
-  ipcMain,
   Menu,
   MenuItemConstructorOptions,
   Notification,
@@ -25,9 +24,9 @@ import {
 import {
   closePlayerWindow,
   createPlayerWindow,
+  getAudioMetadata,
   mutePlayerWindow,
   pausePlayerWindow,
-  PlayerStatus,
   playpausePlayerWindow,
   playPlayerWindow,
   savePlayerCover,
@@ -38,7 +37,6 @@ import { Event } from "./types/event.entity";
 import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
-import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 
 export interface ApplicationInfo {
   address: string;
@@ -346,6 +344,16 @@ async function setupWsConnection(): Promise<void> {
         case "player-volumeUp":
           volumePlayerWindow(event.data.value as number, "up");
           break;
+        case "media-get-source":
+          setTimeout(
+            async () =>
+              ws.sendEvent({
+                name: "media-source",
+                data: await getAudioMetadata(event.data.path),
+              }),
+            4000
+          );
+          break;
         case "restart-server":
           console.log("restart-server:", event);
           await ws.close();
@@ -418,8 +426,9 @@ app.whenReady().then(async (): Promise<void> => {
   tray.setIgnoreDoubleClickEvents(true);
   tray.on("double-click", () => showConfigurationWindow());
 
-  ipcMain.emit("get-app-information");
-  ipcMain.emit("update-check");
+  // TODO: Implement
+  // ipcMain.emit("get-app-information");
+  updateCheck();
 });
 
 export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
@@ -445,17 +454,9 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   return undefined;
 }
 
-async function restartApp(): Promise<void> {
-  ipcMain.emit("restarting-app");
-  logger.debug("restarting-app");
-  app.relaunch();
-  await quitApp();
-}
-
-ipcMain.on("update-check", async (event): Promise<void> => {
+export async function updateCheck(): Promise<void> {
   const update = await getUpdates();
   if (update?.available) {
-    event?.sender?.send("update-available", update);
     if (ws) ws.sendEvent({ name: "update-available", data: update });
     contextMenuTemplate[
       contextMenuTemplate.findIndex(
@@ -470,72 +471,4 @@ ipcMain.on("update-check", async (event): Promise<void> => {
     notification.on("click", () => shell.openExternal(update.url));
     notification.show();
   }
-});
-
-ipcMain.on("open-url", async (event, arg): Promise<void> => {
-  shell.openExternal(arg);
-  event?.sender?.send("opened-url", arg);
-});
-
-ipcMain.on("open-settings", async (event): Promise<void> => {
-  showConfigurationWindow();
-  event?.sender?.send("opened-settings");
-});
-
-ipcMain.on("restart-app", async (event): Promise<void> => {
-  event?.sender?.send("restarting-app");
-  await restartApp();
-});
-
-ipcMain.on("window-show", (event) => {
-  const window = BrowserWindow.fromWebContents(event?.sender);
-  window?.show();
-});
-
-ipcMain.on("window-hide", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.hide();
-});
-
-ipcMain.on("window-minimize", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.minimize();
-});
-
-ipcMain.on("window-close", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.close();
-});
-
-ipcMain.on("get-audio-metadata", async (event, path: string) => {
-  const metadata: IAudioMetadata = await parseFile(path);
-  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
-  cover = cover && `data:image/png;base64, ${cover}`;
-
-  event?.sender?.send("audio-metadata", {
-    album: metadata.common.album || "",
-    artist: metadata.common.artist || metadata.common.albumartist || "",
-    cover,
-    title: metadata.common.title || "",
-  });
-  await savePlayerCover(cover);
-  ws.sendEvent({ name: "player-cover-ready" });
-});
-
-ipcMain.on(
-  "player-status",
-  async (_event, playerStatus: PlayerStatus): Promise<void> => {
-    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
-    // TODO: Implement
-    // await setSetting("player-status", playerStatus);
-    if (!playerStatus) await savePlayerCover();
-    ws.sendEvent({ name: "player-status", data: playerStatus });
-  }
-);
-
-ipcMain.on("player-cover-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-cover-ready");
-  ws.sendEvent({ name: "player-cover-ready" });
-});
-
-ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-thumbnail-ready");
-  ws.sendEvent({ name: "player-cover-ready" });
-});
+}

@@ -2,7 +2,6 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
-  ipcMain,
   screen,
 } from "electron";
 import { join } from "path";
@@ -11,9 +10,9 @@ import queryString from "query-string";
 
 import { appIconPath, getConnection, getSettingsObject } from "./common";
 import { MediaCreateData } from "./types/media";
-import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
+import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 
 const isDev = electronIsDev();
 
@@ -22,7 +21,7 @@ let playerWindow: BrowserWindow | undefined;
 export interface Source {
   type: "audio" | "video";
   source?: string;
-  volumeInitial: number;
+  volumeInitial?: number;
 }
 
 export interface AudioSource extends Source {
@@ -48,7 +47,6 @@ export interface PlayerStatus {
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
-  console.log("createPlayerWindow:", data);
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: data.type === "audio" ? 460 : 480,
@@ -96,9 +94,10 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     event.preventDefault()
   );
 
-  playerWindow.on("closed", () => {
-    ipcMain.emit("player-status", undefined);
-  });
+  // TODO: Implement
+  // playerWindow.on("closed", () => {
+  //   ipcMain.emit("player-status", undefined);
+  // });
 
   const connection = await getConnection("player");
   const settings = await getSettingsObject(connection);
@@ -190,40 +189,40 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
-export async function getPlayerCover(
-  sendUpdate?: boolean
-): Promise<string | undefined> {
-  if (playerWindow && !playerWindow.isDestroyed()) {
-    return new Promise((resolve) => {
-      if (playerWindow && !playerWindow.isDestroyed()) {
-        playerWindow.webContents.send("player-get-cover");
-        logger.debug("player-get-cover");
-        ipcMain.removeAllListeners("player-cover");
-        ipcMain.on("player-cover", async (_event, cover: string) => {
-          resolve(cover);
-          logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
-          // let ws: WebSocketConnection;
-          if (sendUpdate) {
-            const connection = await getConnection();
-            const settings = await getSettingsObject(connection);
-            await connection.close();
+// export async function getPlayerCover(
+//   // sendUpdate?: boolean
+// ): Promise<string | undefined> {
+//   if (playerWindow && !playerWindow.isDestroyed()) {
+//     return new Promise((resolve) => {
+//       if (playerWindow && !playerWindow.isDestroyed()) {
+//         playerWindow.webContents.send("player-get-cover");
+//         logger.debug("player-get-cover");
+//         // TODO: Implement
+//         // ipcMain.on("player-cover", async (_event, cover: string) => {
+//         //   resolve(cover);
+//         //   logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
+//         //   // let ws: WebSocketConnection;
+//         //   if (sendUpdate) {
+//         //     const connection = await getConnection();
+//         //     const settings = await getSettingsObject(connection);
+//         //     await connection.close();
 
-            const ws = new WebSocketConnection(
-              Number(settings["network-wsPort"]) || 9172,
-              settings["network-apiKey"],
-              false,
-              async () => {
-                ws.sendEvent({ name: "player-cover-ready" });
-                await ws.close();
-              }
-            );
-          }
-        });
-      }
-    });
-  }
-  return undefined;
-}
+//         //     const ws = new WebSocketConnection(
+//         //       Number(settings["network-wsPort"]) || 9172,
+//         //       settings["network-apiKey"],
+//         //       false,
+//         //       async () => {
+//         //         ws.sendEvent({ name: "player-cover-ready" });
+//         //         await ws.close();
+//         //       }
+//         //     );
+//         //   }
+//         // });
+//       }
+//     });
+//   }
+//   return undefined;
+// }
 
 export async function savePlayerCover(cover?: string): Promise<void> {
   const mediaDir = join(app.getPath("userData"), "public/media");
@@ -270,4 +269,19 @@ export function volumePlayerWindow(
     return true;
   }
   return false;
+}
+
+export async function getAudioMetadata(path: string): Promise<AudioSource> {
+  const metadata: IAudioMetadata = await parseFile(path);
+
+  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
+  cover = cover && `data:image/png;base64, ${cover}`;
+  await savePlayerCover(cover);
+
+  return {
+    type: "audio",
+    album: metadata.common.album || "",
+    artist: metadata.common.artist || metadata.common.albumartist || "",
+    title: metadata.common.title || "",
+  };
 }
