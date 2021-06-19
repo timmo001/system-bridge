@@ -177,7 +177,7 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
 ];
 
 const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
-  { label: "Settings", type: "normal", click: showConfigurationWindow },
+  { label: "Settings", type: "normal", click: () => showConfigurationWindow() },
   { type: "separator" },
   {
     label: "Close Active Media Player",
@@ -198,42 +198,6 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   { type: "separator" },
   { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
-
-let connection: Connection,
-  settings: { [key: string]: string },
-  ws: WebSocketConnection;
-(async () => {
-  connection = await getConnection();
-  settings = await getSettingsObject(connection);
-  await updateAppConfig();
-  try {
-    ws = new WebSocketConnection(
-      Number(settings["network-wsPort"]) || 9172,
-      settings["network-apiKey"],
-      () => ws.sendEvent({ name: "startup" })
-    );
-    ws.onEvent = async (event: Event) => {
-      logger.info(`Event: ${event.name}`);
-      if (event.name === "update-app-config") await updateAppConfig();
-      if (event.name === "restart-app") await restartApp();
-      if (event.name === "restart-server") await showConfigurationWindow();
-    };
-  } catch (e) {
-    logger.error(e);
-  }
-})();
-
-async function updateAppConfig(): Promise<void> {
-  settings = await getSettingsObject(connection);
-  const launchOnStartup =
-    settings["general-launchOnStartup"] === "true" || false;
-  logger.info(
-    `Update App Configuration - Launch on startup: ${launchOnStartup}`
-  );
-  app.setLoginItemSettings({
-    openAtLogin: isDev ? false : launchOnStartup,
-  });
-}
 
 let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
@@ -290,6 +254,7 @@ async function setupApp(): Promise<void> {
 }
 
 async function showConfigurationWindow(): Promise<void> {
+  settings = await getSettingsObject(connection);
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -321,6 +286,51 @@ async function quitApp(): Promise<void> {
   process.exit(0);
 }
 
+async function setupWsConnection(): Promise<void> {
+  try {
+    ws = new WebSocketConnection(
+      Number(settings["network-wsPort"]) || 9172,
+      settings["network-apiKey"],
+      () => ws.sendEvent({ name: "startup" })
+    );
+    ws.onEvent = async (event: Event) => {
+      logger.info(`Event: ${event.name}`);
+      if (event.name === "update-app-config") await updateAppConfig();
+      if (event.name === "restart-server") {
+        if (configurationWindow && !configurationWindow.isDestroyed())
+          await showConfigurationWindow();
+        settings = await getSettingsObject(connection);
+        await ws.close();
+        await setupWsConnection();
+      }
+    };
+  } catch (e) {
+    logger.error(e);
+  }
+}
+
+let connection: Connection,
+  settings: { [key: string]: string },
+  ws: WebSocketConnection;
+(async () => {
+  connection = await getConnection();
+  settings = await getSettingsObject(connection);
+  await updateAppConfig();
+  await setupWsConnection();
+})();
+
+async function updateAppConfig(): Promise<void> {
+  settings = await getSettingsObject(connection);
+  const launchOnStartup =
+    settings["general-launchOnStartup"] === "true" || false;
+  logger.info(
+    `Update App Configuration - Launch on startup: ${launchOnStartup}`
+  );
+  app.setLoginItemSettings({
+    openAtLogin: isDev ? false : launchOnStartup,
+  });
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -339,7 +349,7 @@ app.whenReady().then(async (): Promise<void> => {
   tray.setToolTip("System Bridge");
   tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
   tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showConfigurationWindow);
+  tray.on("double-click", () => showConfigurationWindow());
 
   ipcMain.emit("get-app-information");
   ipcMain.emit("update-check");
