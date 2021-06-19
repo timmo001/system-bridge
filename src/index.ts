@@ -253,7 +253,6 @@ async function setupApp(): Promise<void> {
 }
 
 async function showConfigurationWindow(): Promise<void> {
-  settings = await getSettingsObject(connection);
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -263,6 +262,7 @@ async function showConfigurationWindow(): Promise<void> {
     title: "Settings",
     apiKey: settings["network-apiKey"],
     apiPort: settings["network-apiPort"] || 9170,
+    wsPort: settings["network-wsPort"] || 9172,
   })}`;
   logger.info(`Configuration URL: ${url}`);
 
@@ -294,17 +294,28 @@ async function setupWsConnection(): Promise<void> {
     );
     ws.onEvent = async (event: Event) => {
       logger.info(`Event: ${event.name}`);
-      if (event.name === "update-app-config") await updateAppConfig();
-      if (event.name === "restart-server") {
-        if (configurationWindow && !configurationWindow.isDestroyed())
+      switch (event.name) {
+        default:
+          break;
+        case "restart-server":
+          console.log("restart-server:", event);
+          await ws.close();
+          setTimeout(async () => {
+            settings = await getSettingsObject(connection);
+            await setupWsConnection();
+          }, 8000);
+          break;
+        case "open-settings":
           await showConfigurationWindow();
-        settings = await getSettingsObject(connection);
-        await ws.close();
-        await setupWsConnection();
+          break;
+        case "update-app-config":
+          await updateAppConfig();
+          break;
       }
     };
   } catch (e) {
     logger.error(e);
+    setTimeout(async () => await setupWsConnection(), 4000);
   }
 }
 
