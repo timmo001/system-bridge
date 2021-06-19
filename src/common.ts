@@ -23,9 +23,10 @@ export const appSmallIconPath = app
   ? join(app.getAppPath(), "public/system-bridge-circle-32x32.png")
   : "";
 
-export async function getConnection(): Promise<Connection> {
+export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",
+    name,
     database: "api/system-bridge_v1.db",
     entities: [Setting],
     logging: false,

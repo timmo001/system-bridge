@@ -9,8 +9,9 @@ import { join } from "path";
 import { copyFile, existsSync, mkdirSync, writeFile, unlink } from "fs";
 import queryString from "query-string";
 
-import { appIconPath } from "./common";
+import { appIconPath, getConnection, getSettingsObject } from "./common";
 import { MediaCreateData } from "./types/media";
+import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
@@ -47,6 +48,7 @@ export interface PlayerStatus {
 }
 
 export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
+  console.log("createPlayerWindow:", data);
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowOpts: BrowserWindowConstructorOptions = {
     width: data.type === "audio" ? 460 : 480,
@@ -98,6 +100,10 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     ipcMain.emit("player-status", undefined);
   });
 
+  const connection = await getConnection("player");
+  const settings = await getSettingsObject(connection);
+  connection.close();
+
   const url = `${
     isDev
       ? "http://localhost:3000/"
@@ -106,6 +112,9 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     ...data,
     id: "player",
     title: "Player",
+    apiKey: settings["network-apiKey"],
+    apiPort: settings["network-apiPort"] || 9170,
+    wsPort: settings["network-wsPort"] || 9172,
   })}`;
   logger.info(`Player URL: ${url}`);
 
@@ -114,15 +123,15 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   if (data.hidden) playerWindow.hide();
   else playerWindow.show();
 
-  // if (isDev) {
-  //   // try {
-  //   //   await devTools(REACT_DEVELOPER_TOOLS);
-  //   // } catch (error) {
-  //   //   logger.warning("Error adding dev tools:", error);
-  //   // }
-  //   // Open the DevTools.
-  //   playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
-  // }
+  if (isDev) {
+    // try {
+    //   await devTools(REACT_DEVELOPER_TOOLS);
+    // } catch (error) {
+    //   logger.warning("Error adding dev tools:", error);
+    // }
+    // Open the DevTools.
+    playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  }
 }
 
 export function closePlayerWindow(): boolean {
@@ -181,8 +190,9 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
-export async function getPlayerCover(): Promise<string | undefined> {
-  // sendUpdate?: boolean
+export async function getPlayerCover(
+  sendUpdate?: boolean
+): Promise<string | undefined> {
   if (playerWindow && !playerWindow.isDestroyed()) {
     return new Promise((resolve) => {
       if (playerWindow && !playerWindow.isDestroyed()) {
@@ -192,9 +202,22 @@ export async function getPlayerCover(): Promise<string | undefined> {
         ipcMain.on("player-cover", async (_event, cover: string) => {
           resolve(cover);
           logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
-          // TODO: WS
-          // if (sendUpdate)
-          //   await wsSendEvent({ name: "player-cover-ready", data: undefined });
+          // let ws: WebSocketConnection;
+          if (sendUpdate) {
+            const connection = await getConnection();
+            const settings = await getSettingsObject(connection);
+            await connection.close();
+
+            const ws = new WebSocketConnection(
+              Number(settings["network-wsPort"]) || 9172,
+              settings["network-apiKey"],
+              false,
+              async () => {
+                ws.sendEvent({ name: "player-cover-ready" });
+                await ws.close();
+              }
+            );
+          }
         });
       }
     });

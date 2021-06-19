@@ -22,11 +22,23 @@ import {
   getConnection,
   getSettingsObject,
 } from "./common";
-import { closePlayerWindow } from "./player";
+import {
+  closePlayerWindow,
+  createPlayerWindow,
+  mutePlayerWindow,
+  pausePlayerWindow,
+  PlayerStatus,
+  playpausePlayerWindow,
+  playPlayerWindow,
+  savePlayerCover,
+  seekPlayerWindow,
+  volumePlayerWindow,
+} from "./player";
 import { Event } from "./types/event.entity";
 import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
+import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
 
 export interface ApplicationInfo {
   address: string;
@@ -290,12 +302,49 @@ async function setupWsConnection(): Promise<void> {
     ws = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
+      true,
       () => ws.sendEvent({ name: "startup" })
     );
     ws.onEvent = async (event: Event) => {
       logger.info(`Event: ${event.name}`);
       switch (event.name) {
         default:
+          break;
+        case "player-close":
+          closePlayerWindow();
+          break;
+        case "player-cover-clear":
+          await savePlayerCover();
+          break;
+        case "player-open":
+          await createPlayerWindow(event.data);
+          break;
+        case "player-mute":
+          mutePlayerWindow(event.data.value as boolean);
+          break;
+        case "player-pause":
+          pausePlayerWindow();
+          break;
+        case "player-play":
+          playPlayerWindow();
+          break;
+        case "player-playpause":
+          playpausePlayerWindow();
+          break;
+        case "player-seek":
+          seekPlayerWindow(event.data.value as number);
+          break;
+        case "player-stop":
+          closePlayerWindow();
+          break;
+        case "player-volume":
+          volumePlayerWindow(event.data.value as number);
+          break;
+        case "player-volumeDown":
+          volumePlayerWindow(event.data.value as number, "down");
+          break;
+        case "player-volumeUp":
+          volumePlayerWindow(event.data.value as number, "up");
           break;
         case "restart-server":
           console.log("restart-server:", event);
@@ -305,11 +354,19 @@ async function setupWsConnection(): Promise<void> {
             await setupWsConnection();
           }, 8000);
           break;
+        case "open-rtc":
+          try {
+            const rtc = await import("./rtc");
+            rtc.createRTCWindow();
+          } catch (e) {
+            logger.warn("Couldn't create RTC window: ", e);
+          }
+          break;
         case "open-settings":
           await showConfigurationWindow();
           break;
         case "update-app-config":
-          await updateAppConfig();
+          await updateAppConfig(true);
           break;
       }
     };
@@ -325,12 +382,12 @@ let connection: Connection,
 (async () => {
   connection = await getConnection();
   settings = await getSettingsObject(connection);
-  await updateAppConfig();
+  await updateAppConfig(false);
   await setupWsConnection();
 })();
 
-async function updateAppConfig(): Promise<void> {
-  settings = await getSettingsObject(connection);
+async function updateAppConfig(updateSettings: boolean): Promise<void> {
+  if (updateSettings) settings = await getSettingsObject(connection);
   const launchOnStartup =
     settings["general-launchOnStartup"] === "true" || false;
   logger.info(
@@ -445,4 +502,40 @@ ipcMain.on("window-minimize", (event) => {
 
 ipcMain.on("window-close", (event) => {
   BrowserWindow.fromWebContents(event?.sender)?.close();
+});
+
+ipcMain.on("get-audio-metadata", async (event, path: string) => {
+  const metadata: IAudioMetadata = await parseFile(path);
+  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
+  cover = cover && `data:image/png;base64, ${cover}`;
+
+  event?.sender?.send("audio-metadata", {
+    album: metadata.common.album || "",
+    artist: metadata.common.artist || metadata.common.albumartist || "",
+    cover,
+    title: metadata.common.title || "",
+  });
+  await savePlayerCover(cover);
+  ws.sendEvent({ name: "player-cover-ready" });
+});
+
+ipcMain.on(
+  "player-status",
+  async (_event, playerStatus: PlayerStatus): Promise<void> => {
+    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
+    // TODO: Implement
+    // await setSetting("player-status", playerStatus);
+    if (!playerStatus) await savePlayerCover();
+    ws.sendEvent({ name: "player-status", data: playerStatus });
+  }
+);
+
+ipcMain.on("player-cover-ready", async (): Promise<void> => {
+  logger.debug("ipcMain: player-cover-ready");
+  ws.sendEvent({ name: "player-cover-ready" });
+});
+
+ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
+  logger.debug("ipcMain: player-thumbnail-ready");
+  ws.sendEvent({ name: "player-cover-ready" });
 });

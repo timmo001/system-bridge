@@ -2,7 +2,7 @@ import { app, BrowserWindow, BrowserWindowConstructorOptions } from "electron";
 import { join } from "path";
 import queryString from "query-string";
 
-import { appIconPath } from "./common";
+import { appIconPath, getConnection, getSettingsObject } from "./common";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 
@@ -38,11 +38,21 @@ export async function createRTCWindow(): Promise<void> {
 
   rtcWindow = new BrowserWindow(windowOpts);
 
+  const connection = await getConnection("rtc");
+  const settings = await getSettingsObject(connection);
+  connection.close();
+
   const url = `${
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "webrtc", title: "Video Chat" })}`;
+  }?${queryString.stringify({
+    id: "webrtc",
+    title: "Video Chat",
+    apiKey: settings["network-apiKey"],
+    apiPort: settings["network-apiPort"] || 9170,
+    wsPort: settings["network-wsPort"] || 9172,
+  })}`;
   logger.info(`WebRTC URL: ${url}`);
 
   rtcWindow.setVisibleOnAllWorkspaces(true);
