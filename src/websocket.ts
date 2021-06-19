@@ -19,7 +19,6 @@ export class WebSocketConnection {
 
   private async connect(): Promise<WebSocket> {
     const ws = new WebSocket(`ws://localhost:${this.port}`);
-    console.log("ws:", ws);
     await new Promise<void>((resolve) => ws.on("open", () => resolve()));
     ws.on("message", (data: WebSocket.Data) => {
       if (typeof data === "string") {
@@ -43,8 +42,6 @@ export class WebSocketConnection {
   }
 
   sendEvent(event: Event): void {
-    console.log(this.websocket);
-    console.log(this.websocket?.OPEN);
     if (this.websocket && this.websocket.OPEN)
       this.websocket.send(
         JSON.stringify({

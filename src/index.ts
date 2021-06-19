@@ -208,7 +208,7 @@ let connection: Connection,
   ws = new WebSocketConnection(
     Number(settings["network-wsPort"]) || 9172,
     settings["network-apiKey"],
-    () => ws.sendEvent({ name: "startup", data: "started" })
+    () => ws.sendEvent({ name: "startup" })
   );
 })();
 
