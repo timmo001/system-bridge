@@ -13,6 +13,7 @@ import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
 import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
+import { WebSocketConnection } from "./websocket";
 
 const isDev = electronIsDev();
 
@@ -94,14 +95,18 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     event.preventDefault()
   );
 
-  // TODO: Implement
-  // playerWindow.on("closed", () => {
-  //   ipcMain.emit("player-status", undefined);
-  // });
-
   const connection = await getConnection("player");
   const settings = await getSettingsObject(connection);
   connection.close();
+
+  playerWindow.on("closed", () => {
+    const ws: WebSocketConnection = new WebSocketConnection(
+      Number(settings["network-wsPort"]) || 9172,
+      settings["network-apiKey"],
+      false,
+      () => ws.sendEvent({ name: "player-status" })
+    );
+  });
 
   const url = `${
     isDev
@@ -188,41 +193,6 @@ export function seekPlayerWindow(value: number): boolean {
   }
   return false;
 }
-
-// export async function getPlayerCover(
-//   // sendUpdate?: boolean
-// ): Promise<string | undefined> {
-//   if (playerWindow && !playerWindow.isDestroyed()) {
-//     return new Promise((resolve) => {
-//       if (playerWindow && !playerWindow.isDestroyed()) {
-//         playerWindow.webContents.send("player-get-cover");
-//         logger.debug("player-get-cover");
-//         // TODO: Implement
-//         // ipcMain.on("player-cover", async (_event, cover: string) => {
-//         //   resolve(cover);
-//         //   logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
-//         //   // let ws: WebSocketConnection;
-//         //   if (sendUpdate) {
-//         //     const connection = await getConnection();
-//         //     const settings = await getSettingsObject(connection);
-//         //     await connection.close();
-
-//         //     const ws = new WebSocketConnection(
-//         //       Number(settings["network-wsPort"]) || 9172,
-//         //       settings["network-apiKey"],
-//         //       false,
-//         //       async () => {
-//         //         ws.sendEvent({ name: "player-cover-ready" });
-//         //         await ws.close();
-//         //       }
-//         //     );
-//         //   }
-//         // });
-//       }
-//     });
-//   }
-//   return undefined;
-// }
 
 export async function savePlayerCover(cover?: string): Promise<void> {
   const mediaDir = join(app.getPath("userData"), "public/media");
