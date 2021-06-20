@@ -11,7 +11,7 @@ import {
 import { Connection } from "typeorm";
 import { join, resolve, basename } from "path";
 import axios from "axios";
-import execa from "execa";
+import execa, { ExecaReturnValue } from "execa";
 import queryString from "query-string";
 import semver from "semver";
 
@@ -131,6 +131,11 @@ async function handleSquirrelEvent(): Promise<void> {
 }
 
 if (!isDev) {
+  execa
+    .node("dist/main.js", [], { cwd: "api" })
+    .then((stdout: ExecaReturnValue<string>) => logger.info(stdout))
+    .catch((stderr: ExecaReturnValue<string>) => logger.error(stderr));
+
   process.on("unhandledRejection", (error: Error) =>
     logger.error("unhandledRejection:", error)
   );
@@ -220,8 +225,8 @@ async function setupApp(): Promise<void> {
   });
 
   configurationWindow = new BrowserWindow({
-    width: 1340,
-    height: 760,
+    width: 1400,
+    height: 860,
     autoHideMenuBar: true,
     focusable: true,
     icon: appIconPath,
@@ -360,7 +365,7 @@ async function setupWsConnection(): Promise<void> {
           setTimeout(async () => {
             settings = await getSettingsObject(connection);
             await setupWsConnection();
-          }, 8000);
+          }, 2000);
           break;
         case "open-rtc":
           try {

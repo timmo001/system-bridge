@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import waitOn from "wait-on";
 
 import { Event } from "./types/event.entity";
 
@@ -29,6 +30,7 @@ export class WebSocketConnection {
   }
 
   private async connect(register?: boolean): Promise<WebSocket> {
+    await waitOn({ resources: [`tcp:${this.port}`] });
     const ws = new WebSocket(`ws://localhost:${this.port}`);
     await new Promise<void>((resolve) => ws.on("open", () => resolve()));
     ws.on("message", (data: WebSocket.Data) => {

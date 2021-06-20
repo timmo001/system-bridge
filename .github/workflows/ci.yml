@@ -165,7 +165,7 @@ jobs:
           CI: true
       - name: 🏗 Install dependencies
         run: |
-          yarn install:all
+          yarn install:all:prod
         env:
           CI: true
       - name: 🚀 Make

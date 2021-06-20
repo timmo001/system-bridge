@@ -6,23 +6,22 @@
   "main": "dist/index.js",
   "types": "lib/",
   "scripts": {
-    "build:api": "cd api && yarn build",
+    "build:api": "cd api && yarn build:electron",
     "build:frontend": "cd frontend && yarn build",
     "compile": "shx rm -rf dist/ && tsc",
-    "install:all": "yarn install && cd api && yarn install && cd ../frontend && yarn install",
+    "install:all": "yarn install && cd api && yarn install --force && cd ../frontend && yarn install",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:junit": "jest --coverage --ci --reporters=default --reporters=jest-junit",
-    "make": "yarn compile && yarn make:api && yarn build:frontend && cross-env electron-forge make",
-    "make:api": "cd api && yarn make",
-    "package": "yarn compile && yarn make:api && yarn build:frontend && electron-forge package",
-    "publish": "yarn compile && yarn make:api && yarn build:frontend && electron-forge publish",
+    "make": "yarn compile && yarn build:api && yarn build:frontend && cross-env electron-forge make",
+    "package": "yarn compile && yarn build:api && yarn build:frontend && electron-forge package",
+    "publish": "yarn compile && yarn build:api && yarn build:frontend && electron-forge publish",
     "start": "concurrently -k \"yarn start:api\" \"yarn start:frontend\" \"wait-on tcp:3000 && yarn start:app\"",
     "start:dev": "concurrently -k \"yarn start:api:dev\" \"yarn start:frontend\" \"wait-on tcp:3000 && yarn start:app:dev\"",
-    "start:prod": "yarn build:frontend && concurrently -k \"yarn start:api:prod\" \"yarn start:app:prod\"",
+    "start:prod": "yarn build:api && yarn build:frontend && yarn start:app:prod",
     "start:app": "yarn compile && cross-env ELECTRON_IS_DEV=1 electron-forge start",
     "start:app:dev": "nodemon --ext ts,js --watch src --exec \"yarn start:app\"",
     "start:app:prod": "yarn compile && cross-env electron-forge start",
@@ -50,6 +49,13 @@
     "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
+  "build": {
+    "extraResources": [
+      "api/node_modules/**/*",
+      "api/dist/**/*",
+      "frontend/build/**/*"
+    ]
+  },
   "config": {
     "forge": {
       "packagerConfig": {
@@ -156,6 +162,7 @@
     "@types/electron-devtools-installer": "2.2.0",
     "@types/semver": "7.3.6",
     "@types/uuid": "8.3.0",
+    "@types/wait-on": "5.3.0",
     "@types/winston": "2.4.4",
     "@types/ws": "7.4.5",
     "@typescript-eslint/eslint-plugin": "4.28.0",
@@ -163,6 +170,7 @@
     "concurrently": "6.2.0",
     "cross-env": "7.0.3",
     "electron": "13.1.4",
+    "electron-builder": "22.11.7",
     "electron-rebuild": "2.3.5",
     "eslint": "7.29.0",
     "eslint-config-prettier": "8.3.0",
@@ -194,6 +202,7 @@
     "semver": "7.3.5",
     "typeorm": "0.2.34",
     "uuid": "8.3.2",
+    "winston": "3.3.3",
     "ws": "7.5.0"
   }
 }
