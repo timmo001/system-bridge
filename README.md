@@ -40,6 +40,12 @@ links below:
 
 [![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
 
+## Links
+
+- [Website](https://system-bridge.timmo.dev)
+- [API](https://github.com/timmo001/system-bridge-api)
+- [Frontend](https://github.com/timmo001/system-bridge-frontend)
+
 ## Developing
 
 ### Dependencies
