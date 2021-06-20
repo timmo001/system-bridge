@@ -22,7 +22,7 @@ jobs:
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: 15.x
+          node-version: 16.x
       - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -113,48 +113,6 @@ jobs:
           config_file: .yamllint.yml
           format: colored
           strict: false
-  test-app:
-    name: 🧪 Test App
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: 🏗 Set up Node.js
-        uses: actions/setup-node@v2.1.5
-        with:
-          node-version: 15.x
-      - name: ⤵️ Get yarn cache path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: ⤵️ Fetch Yarn cache
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-      - name: ⤵️ Install dependencies
-        run: |
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
-          yarn install
-      - name: 🧪 Run Tests
-        run: yarn test:junit
-        env:
-          CI: true
-          NODE_ENV: test
-      - name: ✏ Has Access to checks
-        id: checks
-        uses: scherermichael-oss/action-has-permission@1.0.6
-        with:
-          checks: write
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: ↗ Publish Tests
-        if: steps.checks.outputs.has-permission && github.ref != 'refs/heads/master'
-        uses: EnricoMi/publish-unit-test-result-action@v1.17
-        with:
-          files: junit.xml
-          github_token: ${{ secrets.GITHUB_TOKEN }}
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
@@ -174,10 +132,12 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          submodules: "true"
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: 15.x
+          node-version: 16.x
       - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -209,7 +169,8 @@ jobs:
         env:
           CI: true
       - name: 🚀 Make
-        run: yarn make --platform ${{ matrix.os.platform }}
+        run: |
+          yarn make --platform ${{ matrix.os.platform }}
         env:
           CI: true
           NODE_ENV: production

@@ -1,7 +1,6 @@
 import {
   app,
   BrowserWindow,
-  ipcMain,
   Menu,
   MenuItemConstructorOptions,
   Notification,
@@ -9,27 +8,35 @@ import {
   shell,
   Tray,
 } from "electron";
-import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
+import { Connection } from "typeorm";
 import { join, resolve, basename } from "path";
-import devTools, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
+import axios from "axios";
 import execa from "execa";
 import queryString from "query-string";
 import semver from "semver";
-import si, { Systeminformation } from "systeminformation";
-import WebSocket from "ws";
 
 import {
   appIconPath,
   appSmallIconPath,
-  getSettings,
-  setSetting,
-  wsSendEvent,
+  getConnection,
+  getSettingsObject,
 } from "./common";
-import { closePlayerWindow, PlayerStatus, savePlayerCover } from "./player";
-import { startServer, stopServer } from "./api";
+import {
+  closePlayerWindow,
+  createPlayerWindow,
+  getAudioMetadata,
+  mutePlayerWindow,
+  pausePlayerWindow,
+  playpausePlayerWindow,
+  playPlayerWindow,
+  savePlayerCover,
+  seekPlayerWindow,
+  volumePlayerWindow,
+} from "./player";
+import { Event } from "./types/event.entity";
+import { WebSocketConnection } from "./websocket";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
-import axios from "axios";
 
 export interface ApplicationInfo {
   address: string;
@@ -67,9 +74,6 @@ const isDev = electronIsDev();
 
 handleSquirrelEvent();
 
-// if (isDev)
-//   debug({ devToolsMode: "detach", isEnabled: true, showDevTools: false });
-
 async function handleSquirrelEvent(): Promise<void> {
   if (process.argv.length === 1) {
     return;
@@ -102,7 +106,6 @@ async function handleSquirrelEvent(): Promise<void> {
   }
 
   const squirrelEvent = process.argv[1];
-  logger.info(`squirrelEvent: ${squirrelEvent}`);
   switch (squirrelEvent) {
     default:
       break;
@@ -183,7 +186,7 @@ const helpMenu: Array<MenuItemConstructorOptions> = [
 ];
 
 const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
-  { label: "Settings", type: "normal", click: showConfigurationWindow },
+  { label: "Settings", type: "normal", click: () => showConfigurationWindow() },
   { type: "separator" },
   {
     label: "Close Active Media Player",
@@ -205,32 +208,20 @@ const contextMenuTemplate: Array<MenuItemConstructorOptions> = [
   { label: "Quit", type: "normal", click: async () => await quitApp() },
 ];
 
-async function setAppConfig(): Promise<void> {
-  const config = getSettings();
-  if (!isDev) {
-    const launchOnStartup = config.general?.items.launchOnStartup?.value;
-    app.setLoginItemSettings({
-      openAtLogin:
-        typeof launchOnStartup === "boolean" ? launchOnStartup : false,
-    });
-  }
-}
-
-let configurationWindow: BrowserWindow, tray: Tray, ws: WebSocket;
+let configurationWindow: BrowserWindow, tray: Tray;
 async function setupApp(): Promise<void> {
   protocol.registerFileProtocol("safe-file-protocol", (request, callback) => {
     const url = request.url.replace("safe-file-protocol://", "");
     try {
       return callback(decodeURIComponent(url));
     } catch (error) {
-      // Handle the error as needed
-      console.error(error);
+      logger.error(error);
     }
   });
 
   configurationWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: 1340,
+    height: 760,
     autoHideMenuBar: true,
     focusable: true,
     icon: appIconPath,
@@ -243,8 +234,6 @@ async function setupApp(): Promise<void> {
       // devTools: electronIsDev(),
     },
   });
-
-  setAppConfig();
 
   const menu = Menu.buildFromTemplate([
     {
@@ -261,21 +250,13 @@ async function setupApp(): Promise<void> {
   ]);
   Menu.setApplicationMenu(menu);
 
-  if (isDev) {
-    try {
-      await devTools(REACT_DEVELOPER_TOOLS);
-    } catch (error) {
-      logger.warning("Error adding dev tools:", error);
-    }
-  }
-
   configurationWindow.on("close", (event) => {
     event.preventDefault();
     configurationWindow.hide();
   });
 
   try {
-    app.dock.hide();
+    app.dock?.hide();
   } catch (e) {
     if (e.message) logger.warn(e.message);
   }
@@ -286,7 +267,13 @@ async function showConfigurationWindow(): Promise<void> {
     isDev
       ? "http://localhost:3000/"
       : `file://${join(app.getAppPath(), "frontend/build/index.html")}`
-  }?${queryString.stringify({ id: "configuration", title: "Settings" })}`;
+  }?${queryString.stringify({
+    id: "configuration",
+    title: "Settings",
+    apiKey: settings["network-apiKey"],
+    apiPort: settings["network-apiPort"] || 9170,
+    wsPort: settings["network-wsPort"] || 9172,
+  })}`;
   logger.info(`Configuration URL: ${url}`);
 
   configurationWindow.loadURL(url);
@@ -302,10 +289,121 @@ async function showConfigurationWindow(): Promise<void> {
 async function quitApp(): Promise<void> {
   configurationWindow?.destroy();
   closePlayerWindow();
-  await stopServer();
+  // await stopServer();
   tray?.destroy();
   app.exit(0);
   process.exit(0);
+}
+
+async function setupWsConnection(): Promise<void> {
+  try {
+    ws = new WebSocketConnection(
+      Number(settings["network-wsPort"]) || 9172,
+      settings["network-apiKey"],
+      true,
+      () => ws.sendEvent({ name: "startup" })
+    );
+    ws.onEvent = async (event: Event) => {
+      logger.info(`Event: ${event.name}`);
+      switch (event.name) {
+        default:
+          break;
+        case "player-close":
+          closePlayerWindow();
+          break;
+        case "player-cover-clear":
+          await savePlayerCover();
+          break;
+        case "player-open":
+          await createPlayerWindow(event.data);
+          break;
+        case "player-mute":
+          mutePlayerWindow(event.data.value as boolean);
+          break;
+        case "player-pause":
+          pausePlayerWindow();
+          break;
+        case "player-play":
+          playPlayerWindow();
+          break;
+        case "player-playpause":
+          playpausePlayerWindow();
+          break;
+        case "player-seek":
+          seekPlayerWindow(event.data.value as number);
+          break;
+        case "player-stop":
+          closePlayerWindow();
+          break;
+        case "player-volume":
+          volumePlayerWindow(event.data.value as number);
+          break;
+        case "player-volumeDown":
+          volumePlayerWindow(event.data.value as number, "down");
+          break;
+        case "player-volumeUp":
+          volumePlayerWindow(event.data.value as number, "up");
+          break;
+        case "media-get-source":
+          setTimeout(
+            async () =>
+              ws.sendEvent({
+                name: "media-source",
+                data: await getAudioMetadata(event.data.path),
+              }),
+            4000
+          );
+          break;
+        case "restart-server":
+          console.log("restart-server:", event);
+          await ws.close();
+          setTimeout(async () => {
+            settings = await getSettingsObject(connection);
+            await setupWsConnection();
+          }, 8000);
+          break;
+        case "open-rtc":
+          try {
+            const rtc = await import("./rtc");
+            rtc.createRTCWindow();
+          } catch (e) {
+            logger.warn("Couldn't create RTC window: ", e);
+          }
+          break;
+        case "open-settings":
+          await showConfigurationWindow();
+          break;
+        case "update-app-config":
+          await updateAppConfig(true);
+          break;
+      }
+    };
+  } catch (e) {
+    logger.error(e);
+    setTimeout(async () => await setupWsConnection(), 4000);
+  }
+}
+
+let connection: Connection,
+  settings: { [key: string]: string },
+  ws: WebSocketConnection;
+(async () => {
+  connection = await getConnection();
+  settings = await getSettingsObject(connection);
+  await updateAppConfig(false);
+  await setupWsConnection();
+})();
+
+async function updateAppConfig(updateSettings: boolean): Promise<void> {
+  if (updateSettings) settings = await getSettingsObject(connection);
+  const launchOnStartup =
+    settings["general-launchOnStartup"] === "true" || false;
+  logger.info(
+    `Update App Configuration - Launch on startup: ${launchOnStartup}`
+  );
+  app.setLoginItemSettings({
+    openAtLogin: isDev ? false : launchOnStartup,
+  });
 }
 
 // This method will be called when Electron has finished
@@ -326,54 +424,12 @@ app.whenReady().then(async (): Promise<void> => {
   tray.setToolTip("System Bridge");
   tray.setContextMenu(Menu.buildFromTemplate(contextMenuTemplate));
   tray.setIgnoreDoubleClickEvents(true);
-  tray.on("double-click", showConfigurationWindow);
+  tray.on("double-click", () => showConfigurationWindow());
 
-  startServer();
-  ws = await wsSendEvent({ name: "startup", data: "started" }, ws, true);
-  ipcMain.emit("get-app-information");
-  ipcMain.emit("update-check");
+  // TODO: Implement
+  // ipcMain.emit("get-app-information");
+  updateCheck();
 });
-
-export async function getAppInformation(): Promise<
-  ApplicationInfo | undefined
-> {
-  const settings = getSettings();
-  const port: number =
-    typeof settings?.network.items?.port?.value === "number"
-      ? settings?.network.items?.port?.value
-      : 9170;
-  const websocketPort: number =
-    typeof settings?.network.items?.wsPort?.value === "number"
-      ? settings?.network.items?.wsPort?.value
-      : 9172;
-  const osInfo: Systeminformation.OsData = await si.osInfo();
-  const uuidInfo: Systeminformation.UuidData = await si.uuid();
-  const defaultInterface: string = await si.networkInterfaceDefault();
-  const networkInterface: Systeminformation.NetworkInterfacesData | undefined =
-    (await si.networkInterfaces()).find(
-      (ni: Systeminformation.NetworkInterfacesData) =>
-        ni.iface === defaultInterface
-    );
-
-  if (networkInterface) {
-    const data: ApplicationInfo = {
-      address: `http://${osInfo.fqdn}:${port}`,
-      fqdn: osInfo.fqdn,
-      host: osInfo.hostname,
-      ip: networkInterface.ip4,
-      mac: networkInterface.mac,
-      port,
-      updates: await getUpdates(),
-      uuid: uuidInfo.os,
-      version: app.getVersion(),
-      websocketAddress: `ws://${osInfo.fqdn}:${websocketPort}`,
-      websocketPort,
-    };
-    logger.info(`Application info: ${JSON.stringify(data)}`);
-    return data;
-  }
-  return undefined;
-}
 
 export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   const response = await axios.get<{
@@ -398,21 +454,10 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   return undefined;
 }
 
-ipcMain.on("get-app-information", async (event): Promise<void> => {
-  const data = await getAppInformation();
-  event?.sender?.send("app-information", data);
-  ws = await wsSendEvent({ name: "app-information", data: data }, ws, true);
-});
-
-ipcMain.on("update-check", async (event): Promise<void> => {
+export async function updateCheck(): Promise<void> {
   const update = await getUpdates();
   if (update?.available) {
-    event?.sender?.send("update-available", update);
-    ws = await wsSendEvent(
-      { name: "update-available", data: update },
-      ws,
-      true
-    );
+    if (ws) ws.sendEvent({ name: "update-available", data: update });
     contextMenuTemplate[
       contextMenuTemplate.findIndex(
         (mi: MenuItemConstructorOptions) => mi.id === "version-latest"
@@ -426,118 +471,4 @@ ipcMain.on("update-check", async (event): Promise<void> => {
     notification.on("click", () => shell.openExternal(update.url));
     notification.show();
   }
-});
-
-ipcMain.on("open-url", async (event, arg): Promise<void> => {
-  shell.openExternal(arg);
-  event?.sender?.send("opened-url", arg);
-});
-
-ipcMain.on("open-settings", async (event): Promise<void> => {
-  showConfigurationWindow();
-  event?.sender?.send("opened-settings");
-});
-
-ipcMain.on("get-settings", async (event): Promise<void> => {
-  event?.sender?.send("set-settings", getSettings());
-});
-
-ipcMain.on("update-setting", async (event, args): Promise<void> => {
-  logger.debug(`update-setting: ${args[0]}, ${args[1]}`);
-  await setSetting(args[0], args[1]);
-  await setAppConfig();
-  event?.sender?.send("updated-setting", args);
-  ipcMain.emit("updated-setting", args);
-});
-
-ipcMain.on("restart-app", async (event): Promise<void> => {
-  event?.sender?.send("restarting-app");
-  ipcMain.emit("restarting-app");
-  logger.debug("restarting-app");
-  app.relaunch();
-  await quitApp();
-});
-
-ipcMain.on("restart-server", async (event): Promise<void> => {
-  event?.sender?.send("restarting-server");
-  ipcMain.emit("restarting-server");
-  await stopServer();
-  setTimeout(() => startServer(), 2000);
-});
-
-ipcMain.on("window-show", (event) => {
-  const window = BrowserWindow.fromWebContents(event?.sender);
-  window?.show();
-});
-
-ipcMain.on("window-hide", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.hide();
-});
-
-ipcMain.on("window-minimize", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.minimize();
-});
-
-ipcMain.on("window-close", (event) => {
-  BrowserWindow.fromWebContents(event?.sender)?.close();
-});
-
-ipcMain.on(
-  "log",
-  (_event, { message, level }: { message: string; level: string }) => {
-    logger.log(level, message);
-  }
-);
-
-ipcMain.on("get-audio-metadata", async (event, path: string) => {
-  const metadata: IAudioMetadata = await parseFile(path);
-  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
-  cover = cover && `data:image/png;base64, ${cover}`;
-
-  event?.sender?.send("audio-metadata", {
-    album: metadata.common.album || "",
-    artist: metadata.common.artist || metadata.common.albumartist || "",
-    cover,
-    title: metadata.common.title || "",
-  });
-
-  await savePlayerCover(cover);
-
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
-});
-
-ipcMain.on(
-  "player-status",
-  async (_event, playerStatus: PlayerStatus): Promise<void> => {
-    logger.debug(`player-status: ${JSON.stringify(playerStatus)}`);
-    await setSetting("player-status", playerStatus);
-    if (!playerStatus) await savePlayerCover();
-    ws = await wsSendEvent(
-      { name: "player-status", data: playerStatus },
-      ws,
-      true
-    );
-  }
-);
-
-ipcMain.on("player-cover-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-cover-ready");
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
-});
-
-ipcMain.on("player-thumbnail-ready", async (): Promise<void> => {
-  logger.debug("ipcMain: player-thumbnail-ready");
-  ws = await wsSendEvent(
-    { name: "player-cover-ready", data: undefined },
-    ws,
-    true
-  );
-});
+}

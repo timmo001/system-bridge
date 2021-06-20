@@ -2,17 +2,18 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
-  ipcMain,
   screen,
 } from "electron";
 import { join } from "path";
 import { copyFile, existsSync, mkdirSync, writeFile, unlink } from "fs";
 import queryString from "query-string";
 
-import { appIconPath, wsSendEvent } from "./common";
+import { appIconPath, getConnection, getSettingsObject } from "./common";
 import { MediaCreateData } from "./types/media";
 import electronIsDev from "./electronIsDev";
 import logger from "./logger";
+import { IAudioMetadata, parseFile, selectCover } from "music-metadata";
+import { WebSocketConnection } from "./websocket";
 
 const isDev = electronIsDev();
 
@@ -21,7 +22,7 @@ let playerWindow: BrowserWindow | undefined;
 export interface Source {
   type: "audio" | "video";
   source?: string;
-  volumeInitial: number;
+  volumeInitial?: number;
 }
 
 export interface AudioSource extends Source {
@@ -94,8 +95,17 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     event.preventDefault()
   );
 
+  const connection = await getConnection("player");
+  const settings = await getSettingsObject(connection);
+  connection.close();
+
   playerWindow.on("closed", () => {
-    ipcMain.emit("player-status", undefined);
+    const ws: WebSocketConnection = new WebSocketConnection(
+      Number(settings["network-wsPort"]) || 9172,
+      settings["network-apiKey"],
+      false,
+      () => ws.sendEvent({ name: "player-status" })
+    );
   });
 
   const url = `${
@@ -106,6 +116,9 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
     ...data,
     id: "player",
     title: "Player",
+    apiKey: settings["network-apiKey"],
+    apiPort: settings["network-apiPort"] || 9170,
+    wsPort: settings["network-wsPort"] || 9172,
   })}`;
   logger.info(`Player URL: ${url}`);
 
@@ -114,15 +127,15 @@ export async function createPlayerWindow(data: MediaCreateData): Promise<void> {
   if (data.hidden) playerWindow.hide();
   else playerWindow.show();
 
-  // if (isDev) {
-  //   // try {
-  //   //   await devTools(REACT_DEVELOPER_TOOLS);
-  //   // } catch (error) {
-  //   //   logger.warning("Error adding dev tools:", error);
-  //   // }
-  //   // Open the DevTools.
-  //   playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
-  // }
+  if (isDev) {
+    // try {
+    //   await devTools(REACT_DEVELOPER_TOOLS);
+    // } catch (error) {
+    //   logger.warning("Error adding dev tools:", error);
+    // }
+    // Open the DevTools.
+    playerWindow.webContents.openDevTools({ activate: true, mode: "detach" });
+  }
 }
 
 export function closePlayerWindow(): boolean {
@@ -181,27 +194,6 @@ export function seekPlayerWindow(value: number): boolean {
   return false;
 }
 
-export async function getPlayerCover(
-  sendUpdate?: boolean
-): Promise<string | undefined> {
-  if (playerWindow && !playerWindow.isDestroyed()) {
-    return new Promise((resolve) => {
-      if (playerWindow && !playerWindow.isDestroyed()) {
-        playerWindow.webContents.send("player-get-cover");
-        logger.debug("player-get-cover");
-        ipcMain.removeAllListeners("player-cover");
-        ipcMain.on("player-cover", async (_event, cover: string) => {
-          resolve(cover);
-          logger.debug(`player-cover: ${cover.substr(0, 30)}..`);
-          if (sendUpdate)
-            await wsSendEvent({ name: "player-cover-ready", data: undefined });
-        });
-      }
-    });
-  }
-  return undefined;
-}
-
 export async function savePlayerCover(cover?: string): Promise<void> {
   const mediaDir = join(app.getPath("userData"), "public/media");
   if (!existsSync(mediaDir)) mkdirSync(mediaDir);
@@ -247,4 +239,19 @@ export function volumePlayerWindow(
     return true;
   }
   return false;
+}
+
+export async function getAudioMetadata(path: string): Promise<AudioSource> {
+  const metadata: IAudioMetadata = await parseFile(path);
+
+  let cover = selectCover(metadata.common.picture)?.data.toString("base64");
+  cover = cover && `data:image/png;base64, ${cover}`;
+  await savePlayerCover(cover);
+
+  return {
+    type: "audio",
+    album: metadata.common.album || "",
+    artist: metadata.common.artist || metadata.common.albumartist || "",
+    title: metadata.common.title || "",
+  };
 }
