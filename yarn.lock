@@ -5649,10 +5649,10 @@ ms@^2.1.1:
     fmix "^0.1.0"
     imul "^1.0.0"
 
-music-metadata@7.8.6:
-  version "7.8.6"
-  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.6.tgz#e511f9c1756d5aef8378b76b46ab5bdab0fc4efd"
-  integrity sha512-YeYnhLNglD7XuONQWOaqOPuaPVK85lsTVJyQ5XQB27ooEyuXOGoB9/wt0xYAEOGc8+nXdoMeMReZdRLqkPJj+g==
+music-metadata@7.8.7:
+  version "7.8.7"
+  resolved "https://registry.yarnpkg.com/music-metadata/-/music-metadata-7.8.7.tgz#c689f174d8b886807f7caaed0e4e45d459b7a15e"
+  integrity sha512-sR0ik6xPPVk5Z+TedLuE51y142VsRVrAAdzv1Qtncgp6iWx/lBiwVHM/tTSPFzIuj+hQoXsNQ0NeogbS8ZCYPQ==
   dependencies:
     content-type "^1.0.4"
     debug "^4.3.1"
