@@ -121,7 +121,7 @@ jobs:
       matrix:
         os:
           - name: windows
-            server: windows-latest
+            server: self-hosted
             platform: win32
           - name: linux
             server: ubuntu-latest
