@@ -160,7 +160,7 @@
     "@typescript-eslint/parser": "4.28.0",
     "concurrently": "6.2.0",
     "cross-env": "7.0.3",
-    "electron": "13.1.2",
+    "electron": "13.1.4",
     "electron-rebuild": "2.3.5",
     "eslint": "7.29.0",
     "eslint-config-prettier": "8.3.0",
