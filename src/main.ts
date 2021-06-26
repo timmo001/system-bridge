@@ -16,7 +16,7 @@ import { Server } from "http";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import { getConnection, getSettingsObject } from "./common";
+import { appDataDirectory, getConnection, getSettingsObject } from "./common";
 import { Tray } from "./tray";
 import { WebSocketConnection } from "./websocket";
 import { WsAdapter } from "./ws-adapter";
@@ -62,15 +62,8 @@ export async function startServer(): Promise<void> {
   app.enableCors();
 
   // Serve public directory
-  const publicDir = join(
-    process.env.APP_PATH ||
-      process.env.APPDATA ||
-      (process.platform == "darwin"
-        ? process.env.HOME + "/Library/Preferences"
-        : process.env.HOME + "/.local/share"),
-    "System Bridge",
-    "public"
-  );
+  if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
+  const publicDir = join(appDataDirectory, "public");
   if (!existsSync(publicDir)) mkdirSync(publicDir);
   app.useStaticAssets(publicDir);
   // Remove any existing cover

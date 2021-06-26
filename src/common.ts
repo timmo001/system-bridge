@@ -1,7 +1,17 @@
+import { join } from "path";
 import { Connection, createConnection, Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 
 import { Setting } from "./settings/entities/setting.entity";
+
+export const appDataDirectory = join(
+  process.env.APP_PATH ||
+    process.env.APPDATA ||
+    (process.platform == "darwin"
+      ? process.env.HOME + "/Library/Preferences"
+      : process.env.HOME + "/.local/share"),
+  "system-bridge"
+);
 
 export async function getApiKey(
   settingsRepository: Repository<Setting>
@@ -32,7 +42,7 @@ export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",
     name,
-    database: "system-bridge_v1.db",
+    database: join(appDataDirectory, "system-bridge_v1.db"),
     entities: [Setting],
     logging: false,
     synchronize: true,

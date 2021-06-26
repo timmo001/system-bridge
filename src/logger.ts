@@ -1,5 +1,7 @@
-import { join } from "path";
 import { createLogger, format, transports } from "winston";
+import { join } from "path";
+
+import { appDataDirectory } from "./common";
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;
@@ -28,7 +30,10 @@ tps.push(
 );
 tps.push(
   new transports.File({
-    filename: join(process.env.LOG_PATH || "./", "system-bridge.log"),
+    filename: join(
+      process.env.LOG_PATH || appDataDirectory,
+      "system-bridge.log"
+    ),
     format: format.combine(format.errors({ stack: true }), logFormat),
     handleExceptions: true,
   })
