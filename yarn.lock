@@ -1635,7 +1635,7 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-brightness@3.0.0, brightness@^3.0.0:
+brightness@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/brightness/-/brightness-3.0.0.tgz#20acfdc0c385bc92c67ab6bd17f47704f08ca8a8"
   integrity sha1-IKz9wMOFvJLGera9F/R3BPCMqKg=
