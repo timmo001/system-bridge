@@ -30,7 +30,7 @@ const items = [
       const url = `${
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000/"
-          : `file://${join(__dirname, "../frontend/build/index.html")}`
+          : `http://localhost:9170/app`
       }?${queryString.stringify({
         id: "configuration",
         title: "Settings",

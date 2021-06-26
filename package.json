@@ -31,7 +31,7 @@
     "start": "concurrently -k \"yarn start:api\" \"yarn start:frontend\"",
     "start:dev": "concurrently -k \"yarn start:api:dev\" \"yarn start:frontend\"",
     "start:prod": "node dist/main",
-    "start:api": "cross-env NODE_ENV=development nest start",
+    "start:api": "nest start",
     "start:api:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:api:debug": "cross-env NODE_ENV=development nest start --debug --watch",
     "start:frontend": "cd frontend && cross-env BROWSER=none yarn start",
