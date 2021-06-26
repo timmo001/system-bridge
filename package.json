@@ -28,7 +28,8 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "install:all": "yarn install && cd frontend && yarn install",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "make": "yarn build && pkg .",
+    "make": "yarn package",
+    "package": "rimraf out && yarn build && pkg . && node scripts/post-package.js",
     "start": "concurrently -k \"yarn start:api\" \"yarn start:frontend\"",
     "start:dev": "concurrently -k \"yarn start:api:dev\" \"yarn start:frontend\"",
     "start:prod": "node dist/main",
@@ -128,13 +129,13 @@
     "testEnvironment": "node"
   },
   "pkg": {
-    "scripts": "dist/main.js",
     "assets": [
       "public/**/*"
     ],
+    "outputPath": "out",
+    "scripts": "dist/main.js",
     "targets": [
       "host"
-    ],
-    "outputPath": "out"
+    ]
   }
 }
