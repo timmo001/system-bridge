@@ -17,13 +17,16 @@ import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 import { getConnection, getSettingsObject } from "./common";
+import { Tray } from "./tray";
 import { WebSocketConnection } from "./websocket";
-import logger from "./logger";
 import { WsAdapter } from "./ws-adapter";
+import logger from "./logger";
 
 let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
+
+const tray = new Tray();
 
 export async function startServer(): Promise<void> {
   const version = process.env.APP_VERSION || "1.0.0";
@@ -184,3 +187,4 @@ export async function stopServer(): Promise<void> {
 
 config();
 startServer();
+tray.setupTray();
