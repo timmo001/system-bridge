@@ -1,6 +1,0 @@
-[submodule "api"]
-	path = api
-	url = https://github.com/timmo001/system-bridge-api
-[submodule "frontend"]
-	path = frontend
-	url = https://github.com/timmo001/system-bridge-frontend

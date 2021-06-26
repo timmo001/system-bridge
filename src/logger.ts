@@ -1,8 +1,5 @@
-import { app } from "electron";
 import { join } from "path";
 import { createLogger, format, transports } from "winston";
-
-import electronIsDev from "./electronIsDev";
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;
@@ -29,18 +26,17 @@ tps.push(
     handleExceptions: true,
   })
 );
-if (app)
-  tps.push(
-    new transports.File({
-      filename: join(app.getPath("userData"), "system-bridge.log"),
-      format: format.combine(format.errors({ stack: true }), logFormat),
-      handleExceptions: true,
-    })
-  );
+tps.push(
+  new transports.File({
+    filename: join(process.env.LOG_PATH || "./", "system-bridge.log"),
+    format: format.combine(format.errors({ stack: true }), logFormat),
+    handleExceptions: true,
+  })
+);
 
 // Configure the Winston logger.
 const logger = createLogger({
-  level: electronIsDev() ? "debug" : "info",
+  level: process.env.NODE_ENV === "production" ? "info" : "debug",
   format: format.combine(
     format.splat(),
     format.simple(),
