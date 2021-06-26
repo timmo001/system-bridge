@@ -74,7 +74,6 @@
     "systray2": "2.1.2",
     "typeorm": "0.2.34",
     "uuid": "8.3.2",
-    "win-audio": "2.0.2",
     "winston": "3.3.3",
     "ws": "7.5.0"
   },
@@ -110,7 +109,8 @@
     "typescript": "4.3.4"
   },
   "optionalDependencies": {
-    "mdns": "2.7.2"
+    "mdns": "2.7.2",
+    "win-audio": "2.0.2"
   },
   "jest": {
     "moduleFileExtensions": [
