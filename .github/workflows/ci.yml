@@ -132,8 +132,6 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
-        with:
-          submodules: "true"
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
