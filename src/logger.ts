@@ -1,7 +1,11 @@
 import { createLogger, format, transports } from "winston";
+import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
 import { appDataDirectory } from "./common";
+
+// Setup appDataDir
+if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;

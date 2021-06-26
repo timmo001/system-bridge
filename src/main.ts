@@ -61,9 +61,11 @@ export async function startServer(): Promise<void> {
   // Enable CORS
   app.enableCors();
 
-  // Serve public directory
+  // Setup appDataDir
   if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
-  const publicDir = join(appDataDirectory, "public");
+
+  // Serve public directory
+  const publicDir = join(__dirname, "../public");
   if (!existsSync(publicDir)) mkdirSync(publicDir);
   app.useStaticAssets(publicDir);
   // Remove any existing cover
