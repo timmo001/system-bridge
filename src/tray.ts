@@ -1,12 +1,12 @@
 import { join } from "path";
 import { platform } from "os";
+import { readFileSync } from "fs";
 import open from "open";
 import queryString from "query-string";
 import SysTray, { ClickEvent, MenuItem } from "systray2";
 
+import { appDataDirectory, getConnection, getSettingsObject } from "./common";
 import logger from "./logger";
-import { readFileSync } from "fs";
-import { getConnection, getSettingsObject } from "./common";
 
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
@@ -41,6 +41,22 @@ const items = [
 
       logger.info(`Open Configuration: ${url}`);
       open(url);
+    },
+  },
+  SysTray.separator,
+  {
+    title: "Open Logs",
+    tooltip: "Open Logs",
+    checked: false,
+    enabled: true,
+    click: async () => {
+      const path = join(
+        process.env.LOG_PATH || appDataDirectory,
+        "system-bridge.log"
+      );
+
+      logger.info(`Open Logs: ${path}`);
+      open(path);
     },
   },
 ];
