@@ -1635,7 +1635,7 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-brightness@3.0.0:
+brightness@3.0.0, brightness@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/brightness/-/brightness-3.0.0.tgz#20acfdc0c385bc92c67ab6bd17f47704f08ca8a8"
   integrity sha1-IKz9wMOFvJLGera9F/R3BPCMqKg=
@@ -5892,6 +5892,13 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
+system-control@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/system-control/-/system-control-0.1.1.tgz#bd36a791b7908abca6d06e881f2efc1edc9c1c68"
+  integrity sha512-1zlYAnAkxNVLoGTssGtjwK3iU59PzM5mKccvtmSNsYOOnIM8EIlgVsFvzqK2v48qdTPn8Cw9wuK7h0ozSWLYfQ==
+  dependencies:
+    brightness "^3.0.0"
+
 systeminformation@5.7.7:
   version "5.7.7"
   resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.7.7.tgz#f39d2ec4c72820aa97efd6f32021e455f20d1e61"
@@ -6498,6 +6505,11 @@ wide-align@^1.1.0:
   integrity sha512-QGkOQc8XL6Bt5PwnsExKBPuMKBxnGxWWW3fU55Xt4feHozMUhdUMaBCk290qpm/wG5u/RSKzwdAC4i51YigihA==
   dependencies:
     string-width "^1.0.2 || 2"
+
+win-audio@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/win-audio/-/win-audio-2.0.2.tgz#6c2f81f34b5786e7be67223da0261c13a6836e63"
+  integrity sha512-yrGFjfU7hOb4FeOwE+VKaqOdYPBDijnJGDMHsyURJoV1Ko8V6SvvjeAdnmucLrRsJLdVCrA8CkOTdrJTmhfa8g==
 
 windows-release@^4.0.0:
   version "4.0.0"

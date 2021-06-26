@@ -69,10 +69,12 @@
     "robotjs": "0.6.0",
     "rxjs": "7.1.0",
     "swagger-ui-express": "4.1.6",
+    "system-control": "0.1.1",
     "systeminformation": "5.7.7",
     "systray2": "2.1.2",
     "typeorm": "0.2.34",
     "uuid": "8.3.2",
+    "win-audio": "2.0.2",
     "winston": "3.3.3",
     "ws": "7.5.0"
   },
