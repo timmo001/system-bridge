@@ -114,12 +114,6 @@ yarn start
 yarn [package|make]
 ```
 
-or if developing for another platform:
-
-```bash
-yarn [package|make] --platform [darwin|linux|win32]
-```
-
 ## Publishing
 
 > Make sure the version in `package.json` matches the release before publishing.
