@@ -1,7 +1,7 @@
 {
-  "name": "system-bridge-api",
-  "version": "1.0.0",
-  "description": "System Bridge API",
+  "name": "system-bridge",
+  "version": "2.0.0",
+  "description": "System Bridge",
   "private": true,
   "author": {
     "name": "Timmo",
