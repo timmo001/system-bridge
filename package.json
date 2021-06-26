@@ -131,6 +131,7 @@
   },
   "pkg": {
     "assets": [
+      "node_modules/**/*",
       "public/**/*"
     ],
     "outputPath": "out",
