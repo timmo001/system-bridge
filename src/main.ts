@@ -143,7 +143,8 @@ export async function startServer(): Promise<void> {
               port: apiPort,
               uuid: uuidInfo.os,
               version,
-              websocketAddress: `ws://${siOsInfo.fqdn}:${apiPort}`,
+              websocketAddress: `ws://${siOsInfo.fqdn}:${wsPort}`,
+              wsPort: wsPort,
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
