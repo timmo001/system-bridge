@@ -23,6 +23,18 @@ const filePaths = [
     to: "notifier/snoretoast-x86.exe",
   },
   { from: "open/xdg-open", to: "xdg-open" },
+  {
+    from: "systray2/traybin/tray_darwin_release",
+    to: "traybin/tray_darwin_release",
+  },
+  {
+    from: "systray2/traybin/tray_linux_release",
+    to: "traybin/tray_linux_release",
+  },
+  {
+    from: "systray2/traybin/tray_windows_release.exe",
+    to: "traybin/tray_windows_release.exe",
+  },
 ];
 
 const nodeModulesDir = join(__dirname, "../node_modules");
