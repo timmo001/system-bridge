@@ -1,8 +1,31 @@
-import { app } from "electron";
-import { Connection, createConnection } from "typeorm";
 import { join } from "path";
+import { Connection, createConnection, Repository } from "typeorm";
+import { v4 as uuidv4 } from "uuid";
 
-import { Setting } from "./types/settings.entity";
+import { Setting } from "./settings/entities/setting.entity";
+
+export const appDataDirectory = join(
+  process.env.APP_PATH ||
+    process.env.APPDATA ||
+    (process.platform == "darwin"
+      ? process.env.HOME + "/Library/Preferences"
+      : process.env.HOME + "/.local/share"),
+  "system-bridge"
+);
+
+export async function getApiKey(
+  settingsRepository: Repository<Setting>
+): Promise<string> {
+  let setting = await settingsRepository.findOne("network-apiKey");
+  if (!setting) {
+    await settingsRepository.insert({
+      key: "network-apiKey",
+      value: uuidv4(),
+    });
+    setting = await settingsRepository.findOne("network-apiKey");
+  }
+  return setting.value as string;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertArrayToObject(array: any[], key: string): any {
@@ -15,19 +38,11 @@ export function convertArrayToObject(array: any[], key: string): any {
   );
 }
 
-export const appIconPath = app
-  ? join(app.getAppPath(), "public/system-bridge-circle.png")
-  : "";
-
-export const appSmallIconPath = app
-  ? join(app.getAppPath(), "public/system-bridge-circle-32x32.png")
-  : "";
-
 export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",
     name,
-    database: "api/system-bridge_v1.db",
+    database: join(appDataDirectory, "system-bridge_v1.db"),
     entities: [Setting],
     logging: false,
     synchronize: true,
