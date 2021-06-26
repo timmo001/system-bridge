@@ -20,6 +20,7 @@
     "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
+  "bin": "dist/main.js",
   "scripts": {
     "build": "yarn build:frontend && yarn build:api",
     "build:api": "rimraf dist && nest build",
@@ -127,9 +128,7 @@
     "testEnvironment": "node"
   },
   "pkg": {
-    "scripts": [
-      "dist/**/*"
-    ],
+    "scripts": "dist/main.js",
     "assets": [
       "public/**/*"
     ],

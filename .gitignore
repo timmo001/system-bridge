@@ -34,6 +34,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Additional
+out/
 public/app/*
 !public/app/.gitkeep
 .env

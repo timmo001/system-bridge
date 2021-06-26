@@ -168,7 +168,7 @@ jobs:
           CI: true
       - name: 🚀 Make
         run: |
-          yarn make --platform ${{ matrix.os.platform }}
+          yarn make
         env:
           CI: true
           NODE_ENV: production
