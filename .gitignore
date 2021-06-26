@@ -34,6 +34,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Additional
+public/app
 .env
 junit.xml
 *.db*
