@@ -14,7 +14,6 @@ import { FilesystemModule } from "./filesystem/filesystem.module";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { HttpAuthGuard } from "./httpAuth.guard";
 import { KeyboardModule } from "./keyboard/keyboard.module";
-import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
@@ -44,7 +43,6 @@ import logger from "./logger";
     FilesystemModule,
     GraphicsModule,
     KeyboardModule,
-    MediaModule,
     MemoryModule,
     NetworkModule,
     NotificationModule,
