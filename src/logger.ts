@@ -4,7 +4,7 @@ import { join } from "path";
 
 import { appDataDirectory } from "./common";
 
-// Setup appDataDir
+// Setup app data directory
 if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
 
 const logFormat = format.printf((info) => {

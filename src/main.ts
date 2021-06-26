@@ -61,20 +61,13 @@ export async function startServer(): Promise<void> {
   // Enable CORS
   app.enableCors();
 
-  // Setup appDataDir
+  // Setup app data directory
   if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
 
   // Serve public directory
   const publicDir = join(__dirname, "../public");
   if (!existsSync(publicDir)) mkdirSync(publicDir);
   app.useStaticAssets(publicDir);
-  // Remove any existing cover
-  const ws = new WebSocketConnection(
-    Number(settings["network-wsPort"]) || 9172,
-    settings["network-apiKey"],
-    false,
-    () => ws.sendEvent({ name: "player-cover-clear" })
-  );
 
   // Setup Open API
   const document = SwaggerModule.createDocument(
