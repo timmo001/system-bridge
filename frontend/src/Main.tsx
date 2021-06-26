@@ -8,7 +8,6 @@ import ConfigurationComponent, {
   Configuration,
   defaultConfiguration,
 } from "./Configuration/Configuration";
-import Player from "./Player/PlayerContainer";
 import WebRTC from "./WebRTC/WebRTC";
 
 const useStyles = makeStyles(() =>
@@ -93,8 +92,6 @@ function Main(): ReactElement {
     >
       {query.id === "configuration" ? (
         <ConfigurationComponent />
-      ) : query.id === "player" ? (
-        <Player />
       ) : query.id === "webrtc" ? (
         <WebRTC />
       ) : (
