@@ -31,7 +31,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           echo "${{ steps.release_drafter.outputs.tag_name }}"
-          npm version --allow-same-version ${{ steps.release_drafter.outputs.tag_name }}
+          npm version ${{ steps.release_drafter.outputs.tag_name }} \
+            --allow-same-version \
+            --no-git-tag-version
           cat package.json
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
