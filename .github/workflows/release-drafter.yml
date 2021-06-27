@@ -29,8 +29,9 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: ✏ Set Version File
         uses: reedyuk/npm-version@1.1.1
+        if: ${{ github.event_name == 'pull_request'
         with:
-          version: "${{ steps.release_drafter.outputs.tag_name }}"
+          version: ${{ steps.release_drafter.outputs.tag_name }}
       - name: 📜 Read package.json
         run: cat package.json
       - name: 🖊 Commit
@@ -40,4 +41,3 @@ jobs:
         with:
           commit_message: |
             Update version to ${{ steps.release_drafter.outputs.tag_name }}
-          push_options: ""

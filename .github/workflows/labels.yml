@@ -8,6 +8,7 @@ on:
       - master
     paths:
       - .github/labels.yml
+  workflow_dispatch:
 
 jobs:
   labels:
