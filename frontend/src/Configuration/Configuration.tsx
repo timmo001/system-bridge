@@ -260,7 +260,13 @@ function ConfigurationComponent(): ReactElement {
           )}
         </Grid>
         <Grid className={classes.headerItem} item>
-          <img src={logo} alt="System Bridge Logo" />
+          <a
+            href="https://system-bridge.timmo.dev"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img src={logo} alt="System Bridge Logo" />
+          </a>
         </Grid>
       </Grid>
       <Box className={classes.spacer} />
@@ -321,8 +327,26 @@ function ConfigurationComponent(): ReactElement {
       <Box className={classes.spacer} />
       <Grid container direction="row" justify="center">
         <Typography component="span" variant="body1">
+          Not sure what to do now? Check out the{" "}
+          <a
+            href="https://system-bridge.timmo.dev"
+            target="_blank"
+            rel="noreferrer"
+          >
+            website
+          </a>{" "}
+          for more information and documentation.
+        </Typography>
+      </Grid>
+      <Box className={classes.spacer} />
+      <Grid container direction="row" justify="center">
+        <Typography component="span" variant="body1">
           Found an issue? Report it{" "}
-          <a href="https://github.com/timmo001/system-bridge/issues/new/choose">
+          <a
+            href="https://github.com/timmo001/system-bridge/issues/new/choose"
+            target="_blank"
+            rel="noreferrer"
+          >
             here
           </a>
           .
@@ -331,7 +355,11 @@ function ConfigurationComponent(): ReactElement {
       <Grid container direction="row" justify="center">
         <Typography component="span" variant="body1">
           Thought of a feature that could be added? Suggest it{" "}
-          <a href="https://github.com/timmo001/system-bridge/issues/new/choose">
+          <a
+            href="https://github.com/timmo001/system-bridge/issues/new/choose"
+            target="_blank"
+            rel="noreferrer"
+          >
             here
           </a>
           .
@@ -341,7 +369,11 @@ function ConfigurationComponent(): ReactElement {
       <Grid container direction="row" justify="center">
         <Typography component="span" variant="body1">
           Participate in discussions and get help{" "}
-          <a href="https://github.com/timmo001/system-bridge/discussions">
+          <a
+            href="https://github.com/timmo001/system-bridge/discussions"
+            target="_blank"
+            rel="noreferrer"
+          >
             here
           </a>
           .
