@@ -272,7 +272,7 @@ function ConfigurationComponent(): ReactElement {
       <Box className={classes.spacer} />
       <Grid container direction="column" spacing={2} alignItems="stretch">
         <Grid container direction="row" item xs={12}>
-          <Grid item xs={4}>
+          <Grid item xs={4} className={classes.disabled}>
             <Typography component="h3" variant="h5">
               Server
             </Typography>
@@ -285,6 +285,7 @@ function ConfigurationComponent(): ReactElement {
                     <Icon title="Restart Server" size={1} path={mdiRestart} />
                   </ListItemIcon>
                   <ListItemText
+                    className={classes.disabled}
                     primary={`Restart Server${
                       restartRequired ? " (Restart Required)" : ""
                     }`}

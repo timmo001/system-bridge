@@ -27,7 +27,7 @@ function Section({
 
   return (
     <Grid container direction="row" item xs={12}>
-      <Grid item xs={4}>
+      <Grid item xs={4} style={{ userSelect: "none" }}>
         <Typography component="h3" variant="h5">
           {section?.name}
         </Typography>

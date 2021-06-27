@@ -35,6 +35,9 @@ const useStyles = makeStyles((theme: Theme) =>
     button: {
       margin: theme.spacing(-1, -0.5),
     },
+    disabled: {
+      userSelect: "none",
+    },
     secondaryAction: {
       width: 400,
       textAlign: "end",
@@ -147,7 +150,11 @@ function Item({
       <ListItemIcon>
         <Icon title={name} size={1} path={icon} />
       </ListItemIcon>
-      <ListItemText primary={name} secondary={description} />
+      <ListItemText
+        className={classes.disabled}
+        primary={name}
+        secondary={description}
+      />
       <ListItemSecondaryAction className={classes.secondaryAction}>
         {typeof value === "boolean" ? (
           <Switch
