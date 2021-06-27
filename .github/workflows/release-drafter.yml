@@ -18,7 +18,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 🚀 Get Draft Release
         id: get_release
-        uses: cardinalby/git-get-release-action@v1.1.1
+        uses: cardinalby/git-get-release-action@v1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 🚀 Set Version File
