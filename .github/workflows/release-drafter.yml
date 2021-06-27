@@ -6,6 +6,12 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
 
 jobs:
   update_release_draft:
@@ -22,16 +28,18 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: ✏ Set Version File
-        uses: reedyuk/npm-version@1.1.1
-        with:
-          version: "${{ steps.release_drafter.outputs.tag_name }}"
-      - name: 📜 Read package.json
-        run: cat package.json
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "${{ steps.release_drafter.outputs.tag_name }}"
+          npm version ${{ steps.release_drafter.outputs.tag_name }} \
+            --allow-same-version \
+            --no-git-tag-version
+          cat package.json
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commit_message: |
-            "Update version to ${{ steps.release_drafter.outputs.tag_name }}"
-          push_options: ""
+            Update version to ${{ steps.release_drafter.outputs.tag_name }}

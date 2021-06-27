@@ -7,10 +7,13 @@ on:
     types:
       - published
   workflow_run:
-    workflows: ["CI"]
-    branches: [master]
+    workflows:
+      - "CI"
+    branches:
+      - master
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   deploy-release:
