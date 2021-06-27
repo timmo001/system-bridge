@@ -18,8 +18,8 @@ interface ExtendedClickEvent extends ClickEvent {
 
 const items = [
   {
-    title: "Configuration",
-    tooltip: "Configuration",
+    title: "Settings",
+    tooltip: "Settings",
     checked: false,
     enabled: true,
     click: async () => {
@@ -45,19 +45,74 @@ const items = [
   },
   SysTray.separator,
   {
-    title: "Open Logs",
-    tooltip: "Open Logs",
+    title: "Latest Version",
+    tooltip: "Latest Version",
     checked: false,
     enabled: true,
     click: async () => {
-      const path = join(
-        process.env.LOG_PATH || appDataDirectory,
-        "system-bridge.log"
-      );
-
-      logger.info(`Open Logs: ${path}`);
-      open(path);
+      const url = "https://github.com/timmo001/system-bridge/releases/latest";
+      logger.info(`Open URL: ${url}`);
+      open(url);
     },
+  },
+  {
+    title: "Help",
+    tooltip: "Help",
+    checked: false,
+    enabled: true,
+    items: [
+      {
+        title: "Suggest a Feature",
+        tooltip: "Suggest a Feature",
+        checked: false,
+        enabled: true,
+        click: async () => {
+          const url =
+            "https://github.com/timmo001/system-bridge/issues/new/choose";
+          logger.info(`Open URL: ${url}`);
+          open(url);
+        },
+      },
+      {
+        title: "Report an issue",
+        tooltip: "Report an issue",
+        checked: false,
+        enabled: true,
+        click: async () => {
+          const url =
+            "https://github.com/timmo001/system-bridge/issues/new/choose";
+          logger.info(`Open URL: ${url}`);
+          open(url);
+        },
+      },
+      {
+        title: "Discussions",
+        tooltip: "Discussions",
+        checked: false,
+        enabled: true,
+        click: async () => {
+          const url = "https://github.com/timmo001/system-bridge/discussions";
+          logger.info(`Open URL: ${url}`);
+          open(url);
+        },
+      },
+      SysTray.separator,
+      {
+        title: "Open Logs",
+        tooltip: "Open Logs",
+        checked: false,
+        enabled: true,
+        click: async () => {
+          const path = join(
+            process.env.LOG_PATH || appDataDirectory,
+            "system-bridge.log"
+          );
+
+          logger.info(`Open Logs: ${path}`);
+          open(path);
+        },
+      },
+    ],
   },
 ];
 
