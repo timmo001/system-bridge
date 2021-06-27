@@ -28,14 +28,14 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: ✏ Set Version File
-        uses: reedyuk/npm-version@1.1.1
-        if: ${{ github.event_name == 'pull_request'
-        with:
-          version: ${{ steps.release_drafter.outputs.tag_name }}
-      - name: 📜 Read package.json
-        run: cat package.json
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "${{ steps.release_drafter.outputs.tag_name }}"
+          npm version --allow-same-version ${{ steps.release_drafter.outputs.tag_name }}
+          cat package.json
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
