@@ -26,11 +26,6 @@ You can find documentation for the API [here](https://system-bridge.timmo.dev/do
 
 You can download the latest version of the application [here](https://github.com/timmo001/system-bridge/releases).
 
-## Updates
-
-The application will automatically update whenever a new version is released in
-this repository. You can also download the latest version manually from [here](https://github.com/timmo001/system-bridge/releases).
-
 ## Support my work
 
 If you like my work, and would like to send me a tip/donation, please use the
