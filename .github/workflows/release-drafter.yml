@@ -22,3 +22,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "${{ steps.release_drafter.outputs.tag_name }}"
+          cat ${{ steps.release_drafter.outputs.tag_name }} > public/version.txt
+      - name: 🚀 Commit
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
+        with:
+          commit_message: |
+            "Update version file to ${{ steps.release_drafter.outputs.tag_name }}"
