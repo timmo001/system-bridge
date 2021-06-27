@@ -13,16 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🚀 Run Release Drafter
+        id: release_drafter
         uses: release-drafter/release-drafter@v5.15.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 🚀 Get Draft Release
-        id: get_release
-        uses: cardinalby/git-get-release-action@v1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 🚀 Set Version File
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ steps.get_release.outputs.tag_name }}"
+          echo "${{ steps.release_drafter.outputs.tag_name }}"
