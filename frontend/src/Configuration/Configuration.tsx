@@ -105,7 +105,7 @@ export const defaultConfiguration: Configuration = {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      padding: theme.spacing(1),
+      padding: theme.spacing(2),
     },
     center: {
       textAlign: "center",

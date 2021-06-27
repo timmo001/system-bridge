@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { audio } from "systeminformation";
-import { getMuted, getVolume, setMuted, setVolume } from "loudness";
+import { audio as scAudio } from "system-control";
 
 import { Audio } from "./entities/audio.entity";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
@@ -15,8 +15,8 @@ export class AudioService {
     };
     try {
       current = {
-        muted: await getMuted(),
-        volume: await getVolume(),
+        muted: await scAudio.muted(),
+        volume: await scAudio.volume(),
       };
     } catch (e) {
       logger.info(`Cannot get audio from loudness module: ${e.message}`);
@@ -31,27 +31,27 @@ export class AudioService {
     id: UpdateAudioId,
     updateAudioDto: UpdateAudioDto
   ): Promise<Audio> {
-    const currentVolume: number = await getVolume();
+    const currentVolume: number = await scAudio.volume();
     switch (id) {
       default:
         break;
       case "mute":
         if (typeof updateAudioDto.value === "boolean")
-          await setMuted(updateAudioDto.value);
+          await scAudio.muted(updateAudioDto.value);
         break;
       case "volume":
         if (typeof updateAudioDto.value === "number")
-          await setVolume(updateAudioDto.value);
+          await scAudio.volume(updateAudioDto.value);
         break;
       case "volumeDown":
         if (typeof updateAudioDto.value === "number")
-          await setVolume(currentVolume - updateAudioDto.value);
-        else await setVolume(currentVolume - 5);
+          await scAudio.volume(currentVolume - updateAudioDto.value);
+        else await scAudio.volume(currentVolume - 5);
         break;
       case "volumeUp":
         if (typeof updateAudioDto.value === "number")
-          await setVolume(currentVolume + updateAudioDto.value);
-        else await setVolume(currentVolume + 5);
+          await scAudio.volume(currentVolume + updateAudioDto.value);
+        else await scAudio.volume(currentVolume + 5);
         break;
     }
     return this.findAll();
