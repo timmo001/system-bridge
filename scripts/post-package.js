@@ -54,13 +54,8 @@ filePaths.forEach((path) => {
   }
 });
 
-require("create-nodew-exe")({
-  src: join(
-    outDir,
-    `system-bridge${process.platform === "win32" ? ".exe" : ""}`
-  ),
-  dst: join(
-    outDir,
-    `start-system-bridge${process.platform === "win32" ? ".exe" : ""}`
-  ),
-});
+if (process.platform === "win32")
+  require("create-nodew-exe")({
+    src: join(outDir, "system-bridge.exe"),
+    dst: join(outDir, "start-system-bridge.exe"),
+  });
