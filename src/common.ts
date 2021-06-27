@@ -1,8 +1,14 @@
-import { join } from "path";
 import { Connection, createConnection, Repository } from "typeorm";
+import { join } from "path";
+import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import semver from "semver";
 
+import { ApplicationUpdate } from "./information/entities/information.entity";
 import { Setting } from "./settings/entities/setting.entity";
+
+export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
 export const appDataDirectory = join(
   process.env.APP_PATH ||
@@ -79,4 +85,35 @@ export async function createSetting(
   const settingsRepository = connection.getRepository(Setting);
   await settingsRepository.insert(setting);
   return settingsRepository.findOne(setting.key);
+}
+
+export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
+  const response = await axios.get<{
+    html_url: string;
+    prerelease: boolean;
+    tag_name: string;
+  }>(`https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest`);
+  if (
+    response &&
+    response.status < 400 &&
+    response.data?.prerelease === false
+  ) {
+    const versionCurrent = getVersion();
+    const versionNew = semver.clean(response.data.tag_name);
+    const available = semver.lt(versionCurrent, versionNew);
+    return {
+      available,
+      url: response.data.html_url,
+      version: { current: versionCurrent, new: versionNew },
+    };
+  }
+  return undefined;
+}
+
+export function getVersion(): string {
+  return semver.clean(
+    readFileSync(join(__dirname, "../public/version.txt"), {
+      encoding: "utf8",
+    }).replace("\n", "")
+  );
 }

@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   Box,
@@ -32,6 +32,7 @@ import { useSettings } from "../Utils";
 import logo from "../resources/system-bridge.svg";
 import Section, { ConfigurationSection } from "./Section";
 import { WebSocketConnection } from "../Common/WebSocket";
+import axios, { AxiosResponse } from "axios";
 
 export interface ApplicationInfo {
   address: string;
@@ -133,28 +134,28 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function ConfigurationComponent(): ReactElement {
-  // const [appInfo, setAppInfo] = useState<ApplicationInfo>();
-  const [appInfo] = useState<ApplicationInfo>();
+  const [appInfo, setAppInfo] = useState<ApplicationInfo>();
   const [restartRequired, setRestartRequired] = useState<boolean>(false);
   const [settings] = useSettings();
 
   const query = useMemo(() => parsedQuery, []);
 
-  // TODO: Implement
-  // useEffect(() => {
-  //   if (!appInfo) {
-  //     axios
-  //       .get<ApplicationInfo>(
-  //         `http://${query.apiHost || "localhost"}:${query.apiPort || 9170}/info`,
-  //         {
-  //           headers: { "api-key": query.apiKey },
-  //         }
-  //       )
-  //       .then((response: AxiosResponse<ApplicationInfo>) => {
-  //         setAppInfo(response.data);
-  //       });
-  //   }
-  // }, [appInfo, setAppInfo, query]);
+  useEffect(() => {
+    if (!appInfo) {
+      axios
+        .get<ApplicationInfo>(
+          `http://${query.apiHost || "localhost"}:${
+            query.apiPort || 9170
+          }/information`,
+          {
+            headers: { "api-key": query.apiKey },
+          }
+        )
+        .then((response: AxiosResponse<ApplicationInfo>) => {
+          setAppInfo(response.data);
+        });
+    }
+  }, [appInfo, setAppInfo, query]);
 
   function handleServerRestartRequired(): void {
     setRestartRequired(true);
@@ -202,7 +203,11 @@ function ConfigurationComponent(): ReactElement {
               </Typography>
               <Typography component="h4" variant="subtitle1">
                 {appInfo.updates?.available ? (
-                  <a href={appInfo.updates?.url}>
+                  <a
+                    href={appInfo.updates?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     Version {appInfo.updates.version.new} avaliable!
                   </a>
                 ) : (

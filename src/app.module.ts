@@ -15,6 +15,7 @@ import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { HttpAuthGuard } from "./httpAuth.guard";
+import { InformationModule } from "./information/information.module";
 import { KeyboardModule } from "./keyboard/keyboard.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
@@ -44,6 +45,7 @@ import logger from "./logger";
     EventsModule,
     FilesystemModule,
     GraphicsModule,
+    InformationModule,
     KeyboardModule,
     MemoryModule,
     NetworkModule,
