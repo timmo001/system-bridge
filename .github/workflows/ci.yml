@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
@@ -52,6 +54,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run JSONLint
         run: |
           sudo apt install -y jsonlint
@@ -71,6 +75,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run mdl
         uses: actionshub/markdownlint@2.0.2
   lint-markdown-links:
@@ -79,6 +85,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run Markdown Links
         uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
         with:
@@ -111,6 +119,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run YAMLLint
         uses: ibiqlik/action-yamllint@v3.0.2
         with:
@@ -150,6 +160,8 @@ jobs:
           sudo apt install wine64 wine32
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
