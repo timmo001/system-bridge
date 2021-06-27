@@ -16,3 +16,15 @@ jobs:
         uses: release-drafter/release-drafter@v5.15.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🚀 Get Latest Release
+        id: latestrelease
+        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repository: ${{ github.repository }}
+      - name: 🚀 Set Version File
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ steps.latestrelease.outputs.release }}"
