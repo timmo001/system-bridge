@@ -39,5 +39,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commit_message: |
-            "Update version to ${{ steps.release_drafter.outputs.tag_name }}"
+            Update version to ${{ steps.release_drafter.outputs.tag_name }}
           push_options: ""
