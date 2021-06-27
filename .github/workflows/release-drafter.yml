@@ -18,13 +18,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 🚀 Set Version File
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "${{ steps.release_drafter.outputs.tag_name }}"
-          cat ${{ steps.release_drafter.outputs.tag_name }} > ./public/version.txt
+        uses: reedyuk/npm-version@1.1.1
+        with:
+          version: "${{ steps.release_drafter.outputs.tag_name }}"
       - name: 🚀 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_message: |
-            "Update version file to ${{ steps.release_drafter.outputs.tag_name }}"
+            "Update version to ${{ steps.release_drafter.outputs.tag_name }}"

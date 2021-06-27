@@ -111,9 +111,6 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
 }
 
 export function getVersion(): string {
-  return semver.clean(
-    readFileSync(join(__dirname, "../public/version.txt"), {
-      encoding: "utf8",
-    }).replace("\n", "")
-  );
+  const json = JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
+  return semver.clean(json.version);
 }
