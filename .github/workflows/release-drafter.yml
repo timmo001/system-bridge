@@ -23,6 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repository: ${{ github.repository }}
+          excludes: nothing
       - name: 🚀 Set Version File
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
