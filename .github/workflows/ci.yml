@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
@@ -37,6 +39,7 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+            ${{ runner.os }}-
       - name: ⤵️ Install dependencies
         run: |
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
@@ -51,6 +54,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run JSONLint
         run: |
           sudo apt install -y jsonlint
@@ -70,6 +75,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run mdl
         uses: actionshub/markdownlint@2.0.2
   lint-markdown-links:
@@ -78,6 +85,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run Markdown Links
         uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
         with:
@@ -110,6 +119,8 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run YAMLLint
         uses: ibiqlik/action-yamllint@v3.0.2
         with:
@@ -134,8 +145,23 @@ jobs:
             server: macos-latest
             platform: darwin
     steps:
+      - name: 🏗 Install linux dependencies
+        if: matrix.os.server == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
+        env:
+          CI: true
+      - name: 🏗 Install linux wine dependencies
+        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install wine64 wine32
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.1.5
         with:
@@ -150,31 +176,14 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: 🏗 Install linux dependencies
-        if: matrix.os.server == 'ubuntu-latest'
-        run: |
-          sudo apt update
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
-        env:
-          CI: true
-      - name: 🏗 Install linux wine dependencies
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt install wine64 wine32
-        env:
-          CI: true
+            ${{ runner.os }}-
       - name: 🏗 Install dependencies
         run: |
-          yarn install:all
-        env:
-          CI: true
+          yarn install:all:ci
       - name: 🚀 Make
         run: |
           yarn make
         env:
-          CI: true
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
       - name: ⬆ Upload Artifacts - Output
