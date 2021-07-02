@@ -152,14 +152,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
-        env:
-          CI: true
-      - name: 🏗 Install linux wine dependencies
-        if: matrix.os.server == 'ubuntu-latest' && matrix.os.platform == 'win32'
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt install wine64 wine32
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
@@ -183,12 +175,17 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           yarn install:all:ci
-      - name: 🚀 Make
+      - name: 🚀 Package
         run: |
-          yarn make
+          yarn package
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
+      - name: 🚀 Create windows installer
+        if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
+        uses: joncloud/makensis-action@v3.5
+        with:
+          script-file: "scripts/installer.nsi"
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:

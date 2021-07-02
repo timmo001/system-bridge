@@ -29,7 +29,6 @@
     "install:all": "yarn install && cd frontend && yarn install",
     "install:all:ci": "yarn install --pure-lockfile && cd frontend && yarn install --pure-lockfile",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "make": "yarn package",
     "package": "rimraf out && yarn build && pkg . && node scripts/post-package.js",
     "start": "concurrently -k \"yarn start:api\" \"yarn start:frontend\"",
     "start:dev": "concurrently -k \"yarn start:api:dev\" \"yarn start:frontend\"",
