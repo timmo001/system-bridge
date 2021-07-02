@@ -1,0 +1,25 @@
+---
+name: "system-bridge"
+arch: "amd64"
+platform: "linux"
+version: "v2.0.0"
+section: "default"
+priority: "extra"
+maintainer: "Aidan Timson <contact@timmo.xyz>"
+description: |
+  A bridge for your systems.
+vendor: "Timmo"
+homepage: "https://system-bridge.timmo.dev"
+license: "MIT"
+contents:
+  - src: ./out/system-bridge
+    dst: /usr/local/bin/system-bridge
+overrides:
+  rpm:
+    scripts:
+      preinstall: ./scripts/preinstall.sh
+      postremove: ./scripts/postremove.sh
+  deb:
+    scripts:
+      postinstall: ./scripts/postinstall.sh
+      preremove: ./scripts/preremove.sh
