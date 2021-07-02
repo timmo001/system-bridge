@@ -9,7 +9,7 @@
 
   ;Name and file
   Name "System Bridge"
-  OutFile "system-bridge-setup.exe"
+  OutFile "..\system-bridge-setup.exe"
   Unicode True
 
   ;Default installation folder

@@ -181,7 +181,7 @@ jobs:
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
-      - name: 🚀 Create windows installer
+      - name: 🚀 Create ${{ matrix.os.name }} installer
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: joncloud/makensis-action@v3.5
         with:
@@ -191,3 +191,9 @@ jobs:
         with:
           name: out-${{ matrix.os.name }}
           path: out
+      - name: ⬆ Upload Artifacts - Setup ${{ matrix.os.name }}
+        if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
+        uses: actions/upload-artifact@v2
+        with:
+          name: setup-${{ matrix.os.name }}
+          path: system-bridge-setup.exe
