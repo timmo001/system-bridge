@@ -30,7 +30,6 @@ jobs:
         with:
           node-version: 16.x
       - name: 🏗 Install linux dependencies
-        if: matrix.os.server == 'ubuntu-latest'
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
