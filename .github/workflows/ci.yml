@@ -29,20 +29,25 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: 16.x
+      - name: 🏗 Install linux dependencies
+        if: matrix.os.server == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
       - name: ⤵️ Get yarn cache path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: ⤵️ Fetch Yarn cache
         uses: actions/cache@v2.1.6
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-            ${{ runner.os }}-
       - name: ⤵️ Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
           yarn install
         env:
           CI: true
@@ -171,13 +176,14 @@ jobs:
         run: echo "::set-output name=dir::$(yarn cache dir)"
       - name: ⤵️ Fetch Yarn cache
         uses: actions/cache@v2.1.6
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-            ${{ runner.os }}-
       - name: 🏗 Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           yarn install:all:ci
       - name: 🚀 Make
