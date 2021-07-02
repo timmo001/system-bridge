@@ -36,7 +36,7 @@
     "@types/uuid": "8.3.0",
     "cross-env": "7.0.3",
     "jest-junit": "12.2.0",
-    "prettier": "2.3.1"
+    "prettier": "2.3.2"
   },
   "scripts": {
     "start": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts start",
