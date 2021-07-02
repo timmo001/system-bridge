@@ -3,6 +3,14 @@ const { join } = require("path");
 
 const filePaths = [
   {
+    from: "../package.json",
+    to: "package.json",
+  },
+  {
+    from: "../LICENSE",
+    to: "LICENSE",
+  },
+  {
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
     to: "notifier/notifu.exe",
   },
@@ -37,14 +45,6 @@ const filePaths = [
   {
     from: "../node_modules/systray2/traybin/tray_windows_release.exe",
     to: "traybin/tray_windows_release.exe",
-  },
-  {
-    from: "../package.json",
-    to: "package.json",
-  },
-  {
-    from: "../LICENSE",
-    to: "LICENSE",
   },
 ];
 
