@@ -3,37 +3,48 @@ const { join } = require("path");
 
 const filePaths = [
   {
-    from: "node-notifier/vendor/notifu/notifu.exe",
+    from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
     to: "notifier/notifu.exe",
   },
   {
-    from: "node-notifier/vendor/notifu/notifu64.exe",
+    from: "../node_modules/node-notifier/vendor/notifu/notifu64.exe",
     to: "notifier/notifu64.exe",
   },
   {
-    from: "node-notifier/vendor/terminal-notifier.app/Contents/MacOS/terminal-notifier",
+    from: "../node_modules/node-notifier/vendor/terminal-notifier.app/Contents/MacOS/terminal-notifier",
     to: "notifier/terminal-notifier",
   },
   {
-    from: "node-notifier/vendor/snoreToast/snoretoast-x64.exe",
+    from: "../node_modules/node-notifier/vendor/snoreToast/snoretoast-x64.exe",
     to: "notifier/snoretoast-x64.exe",
   },
   {
-    from: "node-notifier/vendor/snoreToast/snoretoast-x86.exe",
+    from: "../node_modules/node-notifier/vendor/snoreToast/snoretoast-x86.exe",
     to: "notifier/snoretoast-x86.exe",
   },
-  { from: "open/xdg-open", to: "xdg-open" },
   {
-    from: "systray2/traybin/tray_darwin_release",
+    from: "../node_modules/open/xdg-open",
+    to: "xdg-open",
+  },
+  {
+    from: "../node_modules/systray2/traybin/tray_darwin_release",
     to: "traybin/tray_darwin_release",
   },
   {
-    from: "systray2/traybin/tray_linux_release",
+    from: "../node_modules/systray2/traybin/tray_linux_release",
     to: "traybin/tray_linux_release",
   },
   {
-    from: "systray2/traybin/tray_windows_release.exe",
+    from: "../node_modules/systray2/traybin/tray_windows_release.exe",
     to: "traybin/tray_windows_release.exe",
+  },
+  {
+    from: "../package.json",
+    to: "package.json",
+  },
+  {
+    from: "../LICENSE",
+    to: "LICENSE",
   },
 ];
 
@@ -41,7 +52,7 @@ const nodeModulesDir = join(__dirname, "../node_modules");
 const outDir = join(__dirname, "../out");
 
 filePaths.forEach((path) => {
-  const sourceFile = join(nodeModulesDir, path.from);
+  const sourceFile = join(__dirname, path.from);
   if (existsSync(sourceFile)) {
     const targetDir = join(
       outDir,
