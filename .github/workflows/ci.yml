@@ -152,7 +152,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
-          curl -sfL https://install.goreleaser.com/github.com/goreleaser/nfpm.sh | sh
+          wget https://github.com/goreleaser/nfpm/releases/download/v2.5.1/nfpm_amd64.deb
+          sudo apt install ./nfpm_amd64.deb
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
