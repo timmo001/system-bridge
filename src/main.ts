@@ -16,7 +16,12 @@ import { Server } from "http";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import { appDataDirectory, getConnection, getSettingsObject } from "./common";
+import {
+  appDataDirectory,
+  getConnection,
+  getSettingsObject,
+  getVersion,
+} from "./common";
 import { Tray } from "./tray";
 import { WebSocketConnection } from "./websocket";
 import { WsAdapter } from "./ws-adapter";
@@ -29,12 +34,12 @@ let app: NestExpressApplication,
 const tray = new Tray();
 
 export async function startServer(): Promise<void> {
-  const version = process.env.APP_VERSION || "1.0.0";
+  const version = getVersion();
 
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
-  logger.info(`System Bridge API ${version}: ${JSON.stringify(process.argv)}`);
+  logger.info(`System Bridge ${version}: ${JSON.stringify(process.argv)}`);
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
