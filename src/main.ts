@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, unlink } from "fs";
 import { ExpressPeerServer } from "peer";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -14,6 +14,7 @@ import {
 } from "systeminformation";
 import { Server } from "http";
 import helmet from "helmet";
+import createDesktopShortcut from "create-desktop-shortcuts";
 
 import { AppModule } from "./app.module";
 import {
@@ -44,7 +45,37 @@ async function updateAppConfig(): Promise<void> {
   logger.info(
     `Main - Launch on startup: ${settings["general-launchOnStartup"]} - ${launchOnStartup}`
   );
-  if (launchOnStartup) {
+  if (process.platform === "win32") {
+    const startupDir = join(
+      process.env.APPDATA,
+      "Microsoft/Windows/Start Menu/Programs/Startup"
+    );
+    if (launchOnStartup) {
+      logger.info(
+        `Main - Adding link to startup directory: ${startupDir}${
+          process.env.NODE_ENV === "development" && " (Not adding as in dev)"
+        }`
+      );
+      if (process.env.NODE_ENV !== "development") {
+        const args = process.argv;
+        const path = args.shift();
+        createDesktopShortcut({
+          windows: {
+            filePath: path,
+            arguments: args.join(" "),
+            outputPath: startupDir,
+            name: "System Bridge",
+            comment: "A bridge for your systems",
+          },
+        });
+      }
+    } else {
+      const path = join(startupDir, "System Bridge.lnk");
+      if (existsSync(path))
+        unlink(path, () => {
+          logger.info(`Main - Removed link from startup directory: ${path}`);
+        });
+    }
   }
 }
 
