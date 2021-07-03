@@ -3,6 +3,7 @@ name: "system-bridge"
 arch: "amd64"
 platform: "linux"
 version: "v2.0.0"
+version_schema: semver
 section: "default"
 priority: "extra"
 maintainer: "Aidan Timson <contact@timmo.xyz>"
@@ -12,14 +13,11 @@ vendor: "Timmo"
 homepage: "https://system-bridge.timmo.dev"
 license: "MIT"
 contents:
-  - src: ./out/system-bridge
+  - src: ./out/*
+    dst: /usr/local/share/system-bridge
+  - src: /usr/local/share/system-bridge/system-bridge
     dst: /usr/local/bin/system-bridge
-overrides:
-  rpm:
-    scripts:
-      preinstall: ./scripts/preinstall.sh
-      postremove: ./scripts/postremove.sh
-  deb:
-    scripts:
-      postinstall: ./scripts/postinstall.sh
-      preremove: ./scripts/preremove.sh
+    type: symlink
+  - src: /usr/local/bin/system-bridge
+    dst: /usr/bin/system-bridge
+    type: symlink
