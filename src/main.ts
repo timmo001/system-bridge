@@ -13,7 +13,7 @@ import {
   uuid,
 } from "systeminformation";
 import { Server } from "http";
-import createDesktopShortcut from "create-desktop-shortcuts";
+import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
@@ -42,60 +42,20 @@ async function updateAppConfig(): Promise<void> {
 
   const launchOnStartup: boolean =
     settings["general-launchOnStartup"] === "true";
+
+  const autoLaunch = new AutoLaunch({
+    name: "System Bridge",
+    path: process.execPath,
+  });
+  if (launchOnStartup && process.env.NODE_ENV !== "development")
+    await autoLaunch.enable();
+  else await autoLaunch.disable();
+
   logger.info(
-    `Main - Launch on startup: ${settings["general-launchOnStartup"]} - ${launchOnStartup}`
+    `Main - Launch on startup: ${launchOnStartup} - ${
+      (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
+    } - ${process.execPath}`
   );
-  if (process.platform === "linux") {
-    if (launchOnStartup) {
-      logger.info(
-        `Main - Adding file to autostart directory ${
-          process.env.NODE_ENV === "development" && " (Not adding as in dev)"
-        }`
-      );
-      if (process.env.NODE_ENV !== "development")
-        copyFile(
-          "/usr/share/applications/system-bridge.desktop",
-          "/etc/xdg/autostart/system-bridge.desktop",
-          () => logger.info("Main - Copied desktop file to autostart directory")
-        );
-      if (existsSync("/etc/xdg/autostart/system-bridge.desktop"))
-        unlink("/etc/xdg/autostart/system-bridge.desktop", () =>
-          logger.info("Main - Removed file from autostart directory")
-        );
-    }
-  }
-  if (process.platform === "win32") {
-    const startupDir = join(
-      process.env.APPDATA,
-      "Microsoft/Windows/Start Menu/Programs/Startup"
-    );
-    if (launchOnStartup) {
-      logger.info(
-        `Main - Adding link to startup directory: ${startupDir}${
-          process.env.NODE_ENV === "development" && " (Not adding as in dev)"
-        }`
-      );
-      if (process.env.NODE_ENV !== "development") {
-        const args = process.argv;
-        const path = args.shift();
-        createDesktopShortcut({
-          windows: {
-            filePath: path,
-            arguments: args.join(" "),
-            outputPath: startupDir,
-            name: "System Bridge",
-            comment: "A bridge for your systems",
-          },
-        });
-      }
-    } else {
-      const path = join(startupDir, "System Bridge.lnk");
-      if (existsSync(path))
-        unlink(path, () =>
-          logger.info(`Main - Removed link from startup directory: ${path}`)
-        );
-    }
-  }
 }
 
 export async function startServer(): Promise<void> {
@@ -104,7 +64,11 @@ export async function startServer(): Promise<void> {
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
-  logger.info(`System Bridge ${version}: ${JSON.stringify(process.argv)}`);
+  logger.info(
+    `System Bridge ${version}: ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
+  );
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
