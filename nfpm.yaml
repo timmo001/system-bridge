@@ -20,3 +20,12 @@ contents:
   - src: /usr/local/bin/system-bridge
     dst: /usr/bin/system-bridge
     type: symlink
+depends:
+  - libavahi-compat-libdnssd-dev
+overrides:
+  deb:
+    depends:
+      - libavahi-compat-libdnssd-dev
+  rpm:
+    depends:
+      - avahi-compat-libdns_sd-devel
