@@ -183,6 +183,11 @@ jobs:
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-out
+          path: out
       - name: 🚀 Create windows setup file
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: joncloud/makensis-action@v3.5
@@ -200,11 +205,6 @@ jobs:
         if: matrix.os.platform == 'linux'
         run: |
           nfpm package --config nfpm.yaml --packager rpm
-      - name: ⬆ Upload Artifacts - Output
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os.name }}-out
-          path: out
       - name: ⬆ Upload Artifacts - Windows setup
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: actions/upload-artifact@v2
