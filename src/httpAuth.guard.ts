@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { async, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { Repository } from "typeorm";
 
 import { getApiKey } from "./common";
@@ -14,9 +14,9 @@ export class HttpAuthGuard implements CanActivate {
     @InjectRepository(Setting)
     private settingsRepository: Repository<Setting>
   ) {
-    (async () => {
+    setTimeout(async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
-    })();
+    }, 4000);
   }
 
   canActivate(

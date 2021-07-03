@@ -14,9 +14,9 @@ export class WsAuthGuard implements CanActivate {
     @InjectRepository(Setting)
     private settingsRepository: Repository<Setting>
   ) {
-    setTimeout(async () => {
+    (async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
-    }, 4000);
+    })();
   }
 
   canActivate(
