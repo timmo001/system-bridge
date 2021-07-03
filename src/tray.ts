@@ -160,7 +160,7 @@ export class Tray {
     });
 
     systray.onClick((action: ExtendedClickEvent) => {
-      if (action.item.click !== null) action.item.click();
+      if (action?.item?.click) action.item.click();
     });
   }
 }
