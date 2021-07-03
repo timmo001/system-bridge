@@ -1,7 +1,7 @@
 const { copyFileSync, existsSync, mkdirSync } = require("fs");
 const { join } = require("path");
 
-const filePaths = [
+let filePaths = [
   {
     from: "../package.json",
     to: "package.json",
@@ -48,8 +48,10 @@ const filePaths = [
   },
 ];
 
-const nodeModulesDir = join(__dirname, "../node_modules");
 const outDir = join(__dirname, "../out");
+
+if (process.platform !== "win32")
+  filePaths = filePaths.filter((path) => !path.from.includes(".exe"));
 
 filePaths.forEach((path) => {
   const sourceFile = join(__dirname, path.from);

@@ -41,3 +41,5 @@ public/app/*
 junit.xml
 *.db*
 *setup.exe
+*.deb
+*.rpm

@@ -181,19 +181,43 @@ jobs:
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
-      - name: 🚀 Create ${{ matrix.os.name }} installer
+      - name: 🚀 Create windows installer
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: joncloud/makensis-action@v3.5
         with:
           script-file: "scripts/installer.nsi"
+      - name: 🚀 Create linux deb file
+        if: matrix.os.platform == 'linux'
+        uses: skynet-core/nfpm@v1.5
+        with:
+          config: "nfpm.yaml"
+          packager: "deb"
+      - name: 🚀 Create linux rpm file
+        if: matrix.os.platform == 'linux'
+        uses: skynet-core/nfpm@v1.5
+        with:
+          config: "nfpm.yaml"
+          packager: "rpm"
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
           name: out-${{ matrix.os.name }}
           path: out
-      - name: ⬆ Upload Artifacts - Setup ${{ matrix.os.name }}
+      - name: ⬆ Upload Artifacts - Windows Setup
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: actions/upload-artifact@v2
         with:
           name: setup-${{ matrix.os.name }}
           path: system-bridge-setup.exe
+      - name: ⬆ Upload Artifacts - Linux deb
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-${{ matrix.os.name }}
+          path: "*.deb"
+      - name: ⬆ Upload Artifacts - Linux rpm
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: rpm-${{ matrix.os.name }}
+          path: "*.rpm"
