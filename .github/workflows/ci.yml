@@ -186,6 +186,10 @@ jobs:
         uses: joncloud/makensis-action@v3.5
         with:
           script-file: "scripts/installer.nsi"
+      - name: 🚀 Create linux apk file
+        if: matrix.os.platform == 'linux'
+        run: |
+          nfpm package --config nfpm.yaml --packager apk
       - name: 🚀 Create linux deb file
         if: matrix.os.platform == 'linux'
         run: |
@@ -199,21 +203,27 @@ jobs:
         with:
           name: out-${{ matrix.os.name }}
           path: out
-      - name: ⬆ Upload Artifacts - Windows Setup
+      - name: ⬆ Upload Artifacts - Windows setup
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: actions/upload-artifact@v2
         with:
-          name: setup-${{ matrix.os.name }}
-          path: system-bridge-setup.exe
+          name: ${{ matrix.os.name }}-setup
+          path: "*setup.exe"
+      - name: ⬆ Upload Artifacts - Linux apk
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-apk
+          path: "*.apk"
       - name: ⬆ Upload Artifacts - Linux deb
         if: matrix.os.platform == 'linux'
         uses: actions/upload-artifact@v2
         with:
-          name: deb-${{ matrix.os.name }}
+          name: ${{ matrix.os.name }}-deb
           path: "*.deb"
       - name: ⬆ Upload Artifacts - Linux rpm
         if: matrix.os.platform == 'linux'
         uses: actions/upload-artifact@v2
         with:
-          name: rpm-${{ matrix.os.name }}
+          name: ${{ matrix.os.name }}-rpm
           path: "*.rpm"
