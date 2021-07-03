@@ -3,10 +3,6 @@ const { join } = require("path");
 
 let filePaths = [
   {
-    from: "../package.json",
-    to: "package.json",
-  },
-  {
     from: "../LICENSE",
     to: "LICENSE",
   },
