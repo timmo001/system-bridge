@@ -181,23 +181,19 @@ jobs:
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
-      - name: 🚀 Create windows installer
+      - name: 🚀 Create windows setup file
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: joncloud/makensis-action@v3.5
         with:
           script-file: "scripts/installer.nsi"
       - name: 🚀 Create linux deb file
         if: matrix.os.platform == 'linux'
-        uses: skynet-core/nfpm@v1.5
-        with:
-          config: "nfpm.yaml"
-          packager: "deb"
+        run: |
+          nfpm package --config nfpm.yaml --packager deb
       - name: 🚀 Create linux rpm file
         if: matrix.os.platform == 'linux'
-        uses: skynet-core/nfpm@v1.5
-        with:
-          config: "nfpm.yaml"
-          packager: "rpm"
+        run: |
+          nfpm package --config nfpm.yaml --packager rpm
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
