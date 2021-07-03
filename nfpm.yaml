@@ -14,12 +14,8 @@ license: "MIT"
 contents:
   - src: ./out/*
     dst: /usr/local/share/system-bridge
-  - src: /usr/local/share/system-bridge/system-bridge
-    dst: /usr/local/bin/system-bridge
-    type: symlink
-  - src: /usr/local/bin/system-bridge
-    dst: /usr/bin/system-bridge
-    type: symlink
+  - src: ./scripts/system-bridge.desktop
+    dst: /usr/share/applications/system-bridge.desktop
 depends:
   - libavahi-compat-libdnssd-dev
 overrides:

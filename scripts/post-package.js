@@ -7,6 +7,10 @@ const filePaths = [
     to: "../out/LICENSE",
   },
   {
+    from: "../public/system-bridge-circle.png",
+    to: "../out/system-bridge-circle.png",
+  },
+  {
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
     to: "../out/notifier/notifu.exe",
     platform: "win32",

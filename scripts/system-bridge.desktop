@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=System Bridge
+Comment=A bridge for your systems.
+Categories=Utility
+Exec=/usr/local/share/system-bridge
+Icon=usr/local/share/system-bridge-circle.png
+Terminal=false
