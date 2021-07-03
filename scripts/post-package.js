@@ -62,7 +62,7 @@ filePaths
         path.to.substring(0, path.to.lastIndexOf("/"))
       );
       if (!existsSync(targetDir)) mkdirSync(targetDir);
-      const targetFile = join(outDir, path.to);
+      const targetFile = join(__dirname, path.to);
       console.log(`Copy ${sourceFile} to ${targetFile}`);
       copyFileSync(sourceFile, targetFile);
     }
@@ -70,6 +70,6 @@ filePaths
 
 if (process.platform === "win32")
   require("create-nodew-exe")({
-    src: join(outDir, "system-bridge.exe"),
-    dst: join(outDir, "start-system-bridge.exe"),
+    src: join(__dirname, "../out/system-bridge.exe"),
+    dst: join(__dirname, "../out/start-system-bridge.exe"),
   });
