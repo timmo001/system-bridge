@@ -13,10 +13,6 @@ on:
       - synchronize
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   update_release_draft:
     name: ✏️ Draft release
@@ -39,6 +35,11 @@ jobs:
             --allow-same-version \
             --no-git-tag-version
           cat package.json
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+          sudo add-apt-repository ppa:rmescandon/yq
+          sudo apt update
+          sudo apt install yq
+          yq eval '.version = "${{ steps.release_drafter.outputs.tag_name }}"' nfpm.yaml -i
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
         if: ${{ github.event_name == 'pull_request' }}

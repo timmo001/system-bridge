@@ -12,9 +12,9 @@ on:
       - synchronize
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.head_ref || github.ref }}
+#   cancel-in-progress: true
 
 jobs:
   lint-eslint:
@@ -152,6 +152,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
+          wget https://github.com/goreleaser/nfpm/releases/download/v2.5.1/nfpm_amd64.deb
+          sudo apt install ./nfpm_amd64.deb
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
@@ -181,19 +183,49 @@ jobs:
         env:
           NODE_ENV: production
           INLINE_RUNTIME_CHUNK: false
-      - name: 🚀 Create ${{ matrix.os.name }} installer
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-out
+          path: out
+      - name: 🚀 Create windows setup file
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: joncloud/makensis-action@v3.5
         with:
           script-file: "scripts/installer.nsi"
-      - name: ⬆ Upload Artifacts - Output
-        uses: actions/upload-artifact@v2
-        with:
-          name: out-${{ matrix.os.name }}
-          path: out
-      - name: ⬆ Upload Artifacts - Setup ${{ matrix.os.name }}
+      - name: ⬆ Upload Artifacts - Windows setup
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
         uses: actions/upload-artifact@v2
         with:
-          name: setup-${{ matrix.os.name }}
-          path: system-bridge-setup.exe
+          name: ${{ matrix.os.name }}-setup
+          path: "*setup.exe"
+      - name: 🚀 Create linux apk file
+        if: matrix.os.platform == 'linux'
+        run: |
+          nfpm package --config nfpm.yaml --packager apk
+      - name: ⬆ Upload Artifacts - Linux apk
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-apk
+          path: "*.apk"
+      - name: 🚀 Create linux deb file
+        if: matrix.os.platform == 'linux'
+        run: |
+          nfpm package --config nfpm.yaml --packager deb
+      - name: ⬆ Upload Artifacts - Linux deb
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-deb
+          path: "*.deb"
+      - name: 🚀 Create linux rpm file
+        if: matrix.os.platform == 'linux'
+        run: |
+          nfpm package --config nfpm.yaml --packager rpm
+      - name: ⬆ Upload Artifacts - Linux rpm
+        if: matrix.os.platform == 'linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-rpm
+          path: "*.rpm"
