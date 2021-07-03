@@ -13,10 +13,6 @@ on:
       - synchronize
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   update_release_draft:
     name: ✏️ Draft release
