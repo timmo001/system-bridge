@@ -201,7 +201,7 @@ jobs:
       - name: ⬆ Upload Artifacts - Output
         uses: actions/upload-artifact@v2
         with:
-          name: out-${{ matrix.os.name }}
+          name: ${{ matrix.os.name }}-out
           path: out
       - name: ⬆ Upload Artifacts - Windows setup
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
