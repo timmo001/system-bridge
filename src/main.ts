@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { existsSync, mkdirSync, unlink } from "fs";
+import { copyFile, existsSync, mkdirSync, unlink } from "fs";
 import { ExpressPeerServer } from "peer";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -13,8 +13,8 @@ import {
   uuid,
 } from "systeminformation";
 import { Server } from "http";
-import helmet from "helmet";
 import createDesktopShortcut from "create-desktop-shortcuts";
+import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 import {
@@ -45,6 +45,25 @@ async function updateAppConfig(): Promise<void> {
   logger.info(
     `Main - Launch on startup: ${settings["general-launchOnStartup"]} - ${launchOnStartup}`
   );
+  if (process.platform === "linux") {
+    if (launchOnStartup) {
+      logger.info(
+        `Main - Adding file to autostart directory ${
+          process.env.NODE_ENV === "development" && " (Not adding as in dev)"
+        }`
+      );
+      if (process.env.NODE_ENV !== "development")
+        copyFile(
+          "/usr/share/applications/system-bridge.desktop",
+          "/etc/xdg/autostart/system-bridge.desktop",
+          () => logger.info("Main - Copied desktop file to autostart directory")
+        );
+      if (existsSync("/etc/xdg/autostart/system-bridge.desktop"))
+        unlink("/etc/xdg/autostart/system-bridge.desktop", () =>
+          logger.info(`Main - Removed file from autostart directory: ${path}`)
+        );
+    }
+  }
   if (process.platform === "win32") {
     const startupDir = join(
       process.env.APPDATA,
@@ -72,9 +91,9 @@ async function updateAppConfig(): Promise<void> {
     } else {
       const path = join(startupDir, "System Bridge.lnk");
       if (existsSync(path))
-        unlink(path, () => {
-          logger.info(`Main - Removed link from startup directory: ${path}`);
-        });
+        unlink(path, () =>
+          logger.info(`Main - Removed link from startup directory: ${path}`)
+        );
     }
   }
 }
