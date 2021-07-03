@@ -39,7 +39,7 @@ jobs:
           sudo add-apt-repository ppa:rmescandon/yq
           sudo apt update
           sudo apt install yq
-          yq w nfpm.yaml version "${{ steps.release_drafter.outputs.tag_name }}"
+          yq eval '.version = "${{ steps.release_drafter.outputs.tag_name }}"' nfpm.yaml -i
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
         if: ${{ github.event_name == 'pull_request' }}
