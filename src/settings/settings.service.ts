@@ -34,6 +34,7 @@ export class SettingsService {
   async update(key: string, { value }: UpdateSettingDto): Promise<Setting> {
     await this.settingsRepository.update(key, { value });
     if (key === "general-launchOnStartup")
+      // eslint-disable-next-line no-var
       var ws = new WebSocketConnection(
         Number((await this.findOne("network-wsPort")).value) || 9172,
         (await this.findOne("network-apiKey")).value,

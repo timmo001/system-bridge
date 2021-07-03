@@ -22,6 +22,7 @@ import {
   getSettingsObject,
   getVersion,
 } from "./common";
+import { Event } from "./events/entities/event.entity";
 import { Tray } from "./tray";
 import { WebSocketConnection } from "./websocket";
 import { WsAdapter } from "./ws-adapter";
@@ -32,6 +33,20 @@ let app: NestExpressApplication,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
 
 const tray = new Tray();
+
+async function updateAppConfig(): Promise<void> {
+  const connection = await getConnection();
+  const settings = await getSettingsObject(connection);
+  await connection.close();
+
+  const launchOnStartup: boolean =
+    settings["general-launchOnStartup"] === "true";
+  logger.info(
+    `Main - Launch on startup: ${settings["general-launchOnStartup"]} - ${launchOnStartup}`
+  );
+  if (launchOnStartup) {
+  }
+}
 
 export async function startServer(): Promise<void> {
   const version = getVersion();
@@ -92,27 +107,6 @@ export async function startServer(): Promise<void> {
     return;
   }
 
-  // Set up RTC Broker
-  const apiKey = settings["network-apiKey"];
-  if (typeof apiKey === "string") {
-    const broker = ExpressPeerServer(server, {
-      allow_discovery: true,
-      key: apiKey,
-    });
-    broker.on("connection", (client) => {
-      logger.info(`Broker peer connected: ${client.getId()}`);
-    });
-    broker.on("disconnect", (client) => {
-      logger.info(`Broker peer disconnected: ${client.getId()}`);
-    });
-    app.use("/rtc", broker);
-    logger.info(`RTC broker created on path ${broker.path()}`);
-    const ws = new WebSocketConnection(wsPort, apiKey, false, () => {
-      ws.sendEvent({ name: "open-rtc" });
-      ws.close();
-    });
-  }
-
   server.on("error", (err: any) => logger.error("Server error:", err));
   server.on("listening", async () => {
     logger.info(`API started on port ${apiPort}`);
@@ -161,7 +155,35 @@ export async function startServer(): Promise<void> {
     }
   });
   server.on("close", () => logger.info("Server closing."));
+
   await app.listen(apiPort);
+
+  // Set up RTC Broker
+  const apiKey = settings["network-apiKey"];
+  if (typeof apiKey === "string") {
+    const broker = ExpressPeerServer(server, {
+      allow_discovery: true,
+      key: apiKey,
+    });
+    broker.on("connection", (client) => {
+      logger.info(`Broker peer connected: ${client.getId()}`);
+    });
+    broker.on("disconnect", (client) => {
+      logger.info(`Broker peer disconnected: ${client.getId()}`);
+    });
+    app.use("/rtc", broker);
+    logger.info(`RTC broker created on path ${broker.path()}`);
+    const ws = new WebSocketConnection(wsPort, apiKey, true, () =>
+      ws.sendEvent({ name: "open-rtc" })
+    );
+    ws.onEvent = async (event: Event) => {
+      logger.info(`Main - Event: ${event.name}`);
+      if (event.name === "update-app-config") {
+        await updateAppConfig();
+      }
+    };
+  }
+  await updateAppConfig();
 }
 
 export async function stopServer(): Promise<void> {
