@@ -60,7 +60,7 @@ async function updateAppConfig(): Promise<void> {
         );
       if (existsSync("/etc/xdg/autostart/system-bridge.desktop"))
         unlink("/etc/xdg/autostart/system-bridge.desktop", () =>
-          logger.info(`Main - Removed file from autostart directory: ${path}`)
+          logger.info("Main - Removed file from autostart directory")
         );
     }
   }
