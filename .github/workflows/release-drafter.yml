@@ -27,8 +27,6 @@ jobs:
         uses: actions/checkout@v2.3.4
         with:
           ref: ${{ github.head_ref }}
-      - name: 🏗 Set up yq
-        uses: chrisdickinson/setup-yq@v1.0.0
       - name: ✏ Set Version File
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -37,6 +35,10 @@ jobs:
             --allow-same-version \
             --no-git-tag-version
           cat package.json
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+          sudo add-apt-repository ppa:rmescandon/yq
+          sudo apt update
+          sudo apt install yq
           yq w nfpm.yaml version "${{ steps.release_drafter.outputs.tag_name }}"
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
