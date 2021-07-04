@@ -11,6 +11,10 @@ const filePaths = [
     to: "../out/system-bridge-circle.png",
   },
   {
+    from: "../public/system-bridge-circle.ico",
+    to: "../out/system-bridge-circle.ico",
+  },
+  {
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
     to: "../out/notifier/notifu.exe",
     platform: "win32",
