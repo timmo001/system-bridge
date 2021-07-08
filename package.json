@@ -84,7 +84,7 @@
     "@nestjs/testing": "7.6.18",
     "@types/express": "4.17.12",
     "@types/helmet": "4.0.0",
-    "@types/jest": "26.0.23",
+    "@types/jest": "26.0.24",
     "@types/mdns": "0.0.33",
     "@types/node": "16.0.0",
     "@types/node-notifier": "8.0.0",
