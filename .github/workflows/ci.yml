@@ -90,7 +90,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: 🚀 Run Markdown Links
-        uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
+        uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
         with:
           use-quiet-mode: no
           use-verbose-mode: no
