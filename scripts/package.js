@@ -87,7 +87,7 @@ async function package() {
   if (process.platform === "win32") {
     require("create-nodew-exe")({
       src: join(__dirname, "../out/system-bridge.exe"),
-      dst: join(__dirname, "../out/start-system-bridge.exe"),
+      dst: join(__dirname, "../out/system-bridge-start.exe"),
     });
   }
 
