@@ -48,7 +48,7 @@
     "@nestjs/core": "7.6.18",
     "@nestjs/platform-express": "7.6.18",
     "@nestjs/platform-ws": "7.6.18",
-    "@nestjs/swagger": "4.8.2",
+    "@nestjs/swagger": "5.0.0",
     "@nestjs/typeorm": "7.1.5",
     "@nestjs/websockets": "7.6.18",
     "auto-launch": "5.0.5",
