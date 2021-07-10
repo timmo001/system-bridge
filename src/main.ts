@@ -14,6 +14,7 @@ import {
 } from "systeminformation";
 import { Server } from "http";
 import AutoLaunch from "auto-launch";
+import execa from "execa";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
@@ -24,7 +25,6 @@ import {
   getVersion,
 } from "./common";
 import { Event } from "./events/entities/event.entity";
-import { Tray } from "./tray";
 import { WebSocketConnection } from "./websocket";
 import { WsAdapter } from "./ws-adapter";
 import logger from "./logger";
@@ -32,8 +32,6 @@ import logger from "./logger";
 let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
-
-const tray = new Tray();
 
 async function updateAppConfig(): Promise<void> {
   const connection = await getConnection();
@@ -215,6 +213,21 @@ export async function stopServer(): Promise<void> {
   rtc = undefined;
 }
 
+async function openTray(): Promise<void> {
+  try {
+    await execa(
+      join(
+        process.cwd(),
+        `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+      ),
+      [],
+      { windowsHide: true }
+    );
+  } catch (e) {
+    logger.error(e.message);
+  }
+}
+
 config();
 startServer();
-tray.setupTray();
+if (process.env.NODE_ENV !== "development") openTray();

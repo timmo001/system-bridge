@@ -6188,14 +6188,6 @@ systeminformation@5.7.7:
   resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.7.7.tgz#f39d2ec4c72820aa97efd6f32021e455f20d1e61"
   integrity sha512-aQ7MBeVI2MKPYOi3YJAoZ45JVlRkBA7IXoqGgtVBamvtE0I6JLOyJzD/VVc9pnMXDb3yqaMwssAjhwtJax4/Rw==
 
-systray2@2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/systray2/-/systray2-2.1.2.tgz#ef8aa177448e7c0704b55299495073fa31d55b07"
-  integrity sha512-7j3Wp5ZQdF2MDoZSra3mkIPOTOcMYFtXdIXyzhiiNvID+wfBIXj4z27510gX6f9TM9Efjy0vdEzQF9EEM8VH8Q==
-  dependencies:
-    debug "^4.3.1"
-    fs-extra "^9.1.0"
-
 table@^6.0.9:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/table/-/table-6.7.1.tgz#ee05592b7143831a8c94f3cee6aae4c1ccef33e2"

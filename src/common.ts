@@ -112,7 +112,9 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
 
 export function getVersion(): string {
   const json = JSON.parse(
-    readFileSync(join(__dirname, "../package.json"), { encoding: "utf8" })
+    readFileSync(join(process.cwd(), "package.json"), {
+      encoding: "utf8",
+    })
   );
   return semver.clean(json.version);
 }
