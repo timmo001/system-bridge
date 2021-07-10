@@ -102,10 +102,10 @@ or:
 yarn start
 ```
 
-### Package / Make
+### Package
 
 ```bash
-yarn [package|make]
+yarn package
 ```
 
 ## Publishing
