@@ -90,7 +90,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: 🚀 Run Markdown Links
-        uses: gaurav-nelson/github-action-markdown-link-check@1.0.12
+        uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
         with:
           use-quiet-mode: no
           use-verbose-mode: no
@@ -190,7 +190,7 @@ jobs:
           path: out
       - name: 🚀 Create windows setup file
         if: matrix.os.platform == 'win32' && matrix.os.server == 'self-hosted'
-        uses: joncloud/makensis-action@v3.5
+        uses: joncloud/makensis-action@v3.6
         with:
           script-file: "scripts/installer.nsi"
       - name: ⬆ Upload Artifacts - Windows setup
