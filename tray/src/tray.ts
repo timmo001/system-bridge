@@ -1,9 +1,9 @@
+import { ClickEvent, MenuItem } from "systray2";
 import { join } from "path";
 import { platform } from "os";
 import { readFileSync } from "fs";
 import open from "open";
 import queryString from "query-string";
-import { ClickEvent, MenuItem } from "systray2";
 
 import {
   appDataDirectory,
@@ -11,6 +11,7 @@ import {
   getSettingsObject,
   getUpdates,
 } from "../../src/common";
+import { WebSocketConnection } from "../../src/websocket";
 import logger from "../../src/logger";
 
 interface ExtendedMenuItem extends MenuItem {
@@ -23,7 +24,7 @@ interface ExtendedClickEvent extends ClickEvent {
 
 async function setupTray(): Promise<void> {
   logger.info("Tray - Setup");
-  // try {
+
   const update = await getUpdates();
   const versionText = update.available
     ? `Version ${update.version.new} avaliable!`
@@ -125,7 +126,6 @@ async function setupTray(): Promise<void> {
               process.env.LOG_PATH || appDataDirectory,
               "system-bridge.log"
             );
-
             logger.info(`Tray - Open Logs: ${path}`);
             open(path);
           },
@@ -157,9 +157,23 @@ async function setupTray(): Promise<void> {
           tooltip: "Exit",
           checked: false,
           enabled: true,
-          click: () => {
+          click: async () => {
             logger.info("Tray - Exit application");
-            process.exit(0);
+            const connection = await getConnection();
+            const settings = await getSettingsObject(connection);
+            await connection.close();
+
+            const ws = new WebSocketConnection(
+              settings["network-wsPort"]
+                ? Number(settings["network-wsPort"])
+                : 9172,
+              settings["network-apiKey"],
+              false,
+              () => {
+                ws.sendEvent({ name: "exit-application" });
+                systray.kill(true);
+              }
+            );
           },
         },
       ],
@@ -181,9 +195,6 @@ async function setupTray(): Promise<void> {
       if (action?.item?.click) action.item.click();
     });
   }
-  //   } catch (e) {
-  //     logger.error(`Tray - Caught Error: ${e.message}`);
-  //   }
 }
 
 setupTray();

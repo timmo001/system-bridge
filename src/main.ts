@@ -121,7 +121,7 @@ export async function startServer(): Promise<void> {
 
   server.on("error", (err: any) => logger.error("Server error:", err));
   server.on("listening", async () => {
-    logger.info(`API started on port ${apiPort}`);
+    logger.info(`Main - API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
     const uuidInfo: Systeminformation.UuidData = await uuid();
     const defaultInterface: string = await networkInterfaceDefault();
@@ -154,19 +154,19 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
-            if (error) logger.warn(error);
+            if (error) logger.warn("Main - MDNS error:", error);
             else
               logger.info(
-                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
+                `Main - Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
           }
         );
       } catch (e) {
-        logger.warn("MDNS error:", e);
+        logger.warn("Main - MDNS error:", e);
       }
     }
   });
-  server.on("close", () => logger.info("Server closing."));
+  server.on("close", () => logger.info("Main - Server closing."));
 
   await app.listen(apiPort);
 
@@ -178,20 +178,26 @@ export async function startServer(): Promise<void> {
       key: apiKey,
     });
     broker.on("connection", (client) => {
-      logger.info(`Broker peer connected: ${client.getId()}`);
+      logger.info(`Main - Broker peer connected: ${client.getId()}`);
     });
     broker.on("disconnect", (client) => {
-      logger.info(`Broker peer disconnected: ${client.getId()}`);
+      logger.info(`Main - Broker peer disconnected: ${client.getId()}`);
     });
     app.use("/rtc", broker);
-    logger.info(`RTC broker created on path ${broker.path()}`);
+    logger.info(`Main - RTC broker created on path ${broker.path()}`);
     const ws = new WebSocketConnection(wsPort, apiKey, true, () =>
       ws.sendEvent({ name: "open-rtc" })
     );
     ws.onEvent = async (event: Event) => {
       logger.info(`Main - Event: ${event.name}`);
-      if (event.name === "update-app-config") {
-        await updateAppConfig();
+      switch (event.name) {
+        case "exit-application":
+          await stopServer();
+          logger.info("Main - Exit application");
+          process.exit(0);
+        case "update-app-config":
+          await updateAppConfig();
+          break;
       }
     };
   }
@@ -201,11 +207,11 @@ export async function startServer(): Promise<void> {
 export async function stopServer(): Promise<void> {
   if (app) {
     await app.close();
-    logger.info("App closed.");
+    logger.info("Main - Nest Application closed.");
   }
   if (server) {
     server.close();
-    logger.info("Server closed.");
+    logger.info("Main - Server closed.");
   }
   if (rtc) rtc.closeRTCWindow();
   app = undefined;
@@ -215,6 +221,7 @@ export async function stopServer(): Promise<void> {
 
 async function openTray(): Promise<void> {
   try {
+    logger.info("Main - Open Tray");
     await execa(
       join(
         process.cwd(),
@@ -224,7 +231,7 @@ async function openTray(): Promise<void> {
       { windowsHide: true }
     );
   } catch (e) {
-    logger.error(e.message);
+    logger.error(`Main - Error Opening Tray: ${e.message}`);
   }
 }
 

@@ -23,9 +23,10 @@
     "start": "yarn build && node dist/tray/src/tray.js"
   },
   "dependencies": {
-    "query-string": "^7.0.1",
+    "query-string": "7.0.1",
     "rimraf": "3.0.2",
-    "systray2": "^2.1.2"
+    "systray2": "2.1.2",
+    "ws": "7.5.3"
   },
   "devDependencies": {
     "pkg": "5.3.0",
