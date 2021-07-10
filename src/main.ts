@@ -221,15 +221,12 @@ export async function stopServer(): Promise<void> {
 
 async function openTray(): Promise<void> {
   try {
-    logger.info("Main - Open Tray");
-    await execa(
-      join(
-        process.cwd(),
-        `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
-      ),
-      [],
-      { windowsHide: true }
+    const trayPath = join(
+      process.cwd(),
+      `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     );
+    logger.info(`Main - Open Tray: ${trayPath}`);
+    await execa(trayPath, [], { windowsHide: true });
   } catch (e) {
     logger.error(`Main - Error Opening Tray: ${e.message}`);
   }

@@ -59,7 +59,7 @@ async function setupTray(): Promise<void> {
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
 
-        logger.info(`Tray - Open Configuration: ${url}`);
+        logger.info(`Tray - Open Settings: ${url}`);
         open(url);
       },
     },
@@ -141,9 +141,8 @@ async function setupTray(): Promise<void> {
       icon: readFileSync(
         join(
           process.cwd(),
-          platform() === "win32"
-            ? "../public/system-bridge-circle.ico"
-            : "../public/system-bridge-circle.png"
+          process.env.NODE_ENV === "development" ? "../public/" : "./",
+          `system-bridge-circle.${platform() === "win32" ? "ico" : "png"}`
         ),
         { encoding: "base64" }
       ),

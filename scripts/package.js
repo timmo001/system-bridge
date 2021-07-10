@@ -68,10 +68,6 @@ const filePaths = [
 async function package() {
   await exec([
     join(__dirname, "../"),
-    "--script",
-    join(__dirname, "../dist/main.js"),
-    "--targets",
-    "host",
     "--output",
     join(
       __dirname,
@@ -81,10 +77,6 @@ async function package() {
 
   await exec([
     join(__dirname, "../tray"),
-    "--script",
-    join(__dirname, "../tray/dist/tray/src/tray.js"),
-    "--targets",
-    "host",
     "--output",
     join(
       __dirname,
