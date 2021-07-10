@@ -23,9 +23,12 @@
     "start": "yarn build && node dist/tray/src/tray.js"
   },
   "dependencies": {
+    "better-sqlite3": "7.4.1",
+    "open": "8.2.1",
     "query-string": "7.0.1",
     "rimraf": "3.0.2",
     "systray2": "2.1.2",
+    "typeorm": "0.2.34",
     "ws": "7.5.3"
   },
   "devDependencies": {
