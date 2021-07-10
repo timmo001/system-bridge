@@ -13,6 +13,8 @@ import {
   uuid,
 } from "systeminformation";
 import { Server } from "http";
+import AutoLaunch from "auto-launch";
+import execa from "execa";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
@@ -22,7 +24,7 @@ import {
   getSettingsObject,
   getVersion,
 } from "./common";
-import { Tray } from "./tray";
+import { Event } from "./events/entities/event.entity";
 import { WebSocketConnection } from "./websocket";
 import { WsAdapter } from "./ws-adapter";
 import logger from "./logger";
@@ -31,7 +33,28 @@ let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
 
-const tray = new Tray();
+async function updateAppConfig(): Promise<void> {
+  const connection = await getConnection();
+  const settings = await getSettingsObject(connection);
+  await connection.close();
+
+  const launchOnStartup: boolean =
+    settings["general-launchOnStartup"] === "true";
+
+  const autoLaunch = new AutoLaunch({
+    name: "System Bridge",
+    path: process.execPath,
+  });
+  if (launchOnStartup && process.env.NODE_ENV !== "development")
+    await autoLaunch.enable();
+  else await autoLaunch.disable();
+
+  logger.info(
+    `Main - Launch on startup: ${launchOnStartup} - ${
+      (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
+    } - ${process.execPath}`
+  );
+}
 
 export async function startServer(): Promise<void> {
   const version = getVersion();
@@ -39,7 +62,11 @@ export async function startServer(): Promise<void> {
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
-  logger.info(`System Bridge ${version}: ${JSON.stringify(process.argv)}`);
+  logger.info(
+    `System Bridge ${version}: ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
+  );
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
   );
@@ -92,30 +119,9 @@ export async function startServer(): Promise<void> {
     return;
   }
 
-  // Set up RTC Broker
-  const apiKey = settings["network-apiKey"];
-  if (typeof apiKey === "string") {
-    const broker = ExpressPeerServer(server, {
-      allow_discovery: true,
-      key: apiKey,
-    });
-    broker.on("connection", (client) => {
-      logger.info(`Broker peer connected: ${client.getId()}`);
-    });
-    broker.on("disconnect", (client) => {
-      logger.info(`Broker peer disconnected: ${client.getId()}`);
-    });
-    app.use("/rtc", broker);
-    logger.info(`RTC broker created on path ${broker.path()}`);
-    const ws = new WebSocketConnection(wsPort, apiKey, false, () => {
-      ws.sendEvent({ name: "open-rtc" });
-      ws.close();
-    });
-  }
-
   server.on("error", (err: any) => logger.error("Server error:", err));
   server.on("listening", async () => {
-    logger.info(`API started on port ${apiPort}`);
+    logger.info(`Main - API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
     const uuidInfo: Systeminformation.UuidData = await uuid();
     const defaultInterface: string = await networkInterfaceDefault();
@@ -148,30 +154,64 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
-            if (error) logger.warn(error);
+            if (error) logger.warn("Main - MDNS error:", error);
             else
               logger.info(
-                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
+                `Main - Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
           }
         );
       } catch (e) {
-        logger.warn("MDNS error:", e);
+        logger.warn("Main - MDNS error:", e);
       }
     }
   });
-  server.on("close", () => logger.info("Server closing."));
+  server.on("close", () => logger.info("Main - Server closing."));
+
   await app.listen(apiPort);
+
+  // Set up RTC Broker
+  const apiKey = settings["network-apiKey"];
+  if (typeof apiKey === "string") {
+    const broker = ExpressPeerServer(server, {
+      allow_discovery: true,
+      key: apiKey,
+    });
+    broker.on("connection", (client) => {
+      logger.info(`Main - Broker peer connected: ${client.getId()}`);
+    });
+    broker.on("disconnect", (client) => {
+      logger.info(`Main - Broker peer disconnected: ${client.getId()}`);
+    });
+    app.use("/rtc", broker);
+    logger.info(`Main - RTC broker created on path ${broker.path()}`);
+    const ws = new WebSocketConnection(wsPort, apiKey, true, () =>
+      ws.sendEvent({ name: "open-rtc" })
+    );
+    ws.onEvent = async (event: Event) => {
+      logger.info(`Main - Event: ${event.name}`);
+      switch (event.name) {
+        case "exit-application":
+          await stopServer();
+          logger.info("Main - Exit application");
+          process.exit(0);
+        case "update-app-config":
+          await updateAppConfig();
+          break;
+      }
+    };
+  }
+  await updateAppConfig();
 }
 
 export async function stopServer(): Promise<void> {
   if (app) {
     await app.close();
-    logger.info("App closed.");
+    logger.info("Main - Nest Application closed.");
   }
   if (server) {
     server.close();
-    logger.info("Server closed.");
+    logger.info("Main - Server closed.");
   }
   if (rtc) rtc.closeRTCWindow();
   app = undefined;
@@ -179,6 +219,19 @@ export async function stopServer(): Promise<void> {
   rtc = undefined;
 }
 
+async function openTray(): Promise<void> {
+  try {
+    const trayPath = join(
+      process.cwd(),
+      `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+    );
+    logger.info(`Main - Open Tray: ${trayPath}`);
+    await execa(trayPath, [], { windowsHide: true });
+  } catch (e) {
+    logger.error(`Main - Error Opening Tray: ${e.message}`);
+  }
+}
+
 config();
 startServer();
-tray.setupTray();
+if (process.env.NODE_ENV !== "development") openTray();
