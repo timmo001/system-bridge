@@ -70,14 +70,16 @@ Section "System Bridge"
   WriteRegStr HKCU "Software\System Bridge" "" $INSTDIR
 
   ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteUninstaller "$INSTDIR\uninstall.exe"
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\start-system-bridge.exe"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\Uninstall.exe"
+    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\start-system-bridge.exe" "" "$INSTDIR\system-bridge-circle.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\start-system-bridge.exe" "" "$INSTDIR\system-bridge-circle.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\uninstall.exe"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\start-system-bridge.exe" "" "$INSTDIR\system-bridge-circle.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -90,7 +92,7 @@ Section "Uninstall"
 
   ;ADD YOUR OWN FILES HERE...
 
-  Delete "$INSTDIR\Uninstall.exe"
+  Delete "$INSTDIR\uninstall.exe"
 
   RMDir /r "$INSTDIR"
 
@@ -98,6 +100,7 @@ Section "Uninstall"
 
   Delete "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk"
   Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk"
+  Delete "$DESKTOP\System Bridge.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
   DeleteRegKey /ifempty HKCU "Software\System Bridge"

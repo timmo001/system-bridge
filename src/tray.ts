@@ -52,7 +52,7 @@ export class Tray {
               wsPort: settings["network-wsPort"] || 9172,
             })}`;
 
-            logger.info(`Open Configuration: ${url}`);
+            logger.info(`Tray - Open Configuration: ${url}`);
             open(url);
           },
         },
@@ -65,7 +65,7 @@ export class Tray {
           click: async () => {
             const url =
               "https://github.com/timmo001/system-bridge/releases/latest";
-            logger.info(`Open URL: ${url}`);
+            logger.info(`Tray - Open URL: ${url}`);
             open(url);
           },
         },
@@ -83,7 +83,7 @@ export class Tray {
               click: async () => {
                 const url =
                   "https://github.com/timmo001/system-bridge/issues/new/choose";
-                logger.info(`Open URL: ${url}`);
+                logger.info(`Tray - Open URL: ${url}`);
                 open(url);
               },
             },
@@ -95,7 +95,7 @@ export class Tray {
               click: async () => {
                 const url =
                   "https://github.com/timmo001/system-bridge/issues/new/choose";
-                logger.info(`Open URL: ${url}`);
+                logger.info(`Tray - Open URL: ${url}`);
                 open(url);
               },
             },
@@ -107,7 +107,7 @@ export class Tray {
               click: async () => {
                 const url =
                   "https://github.com/timmo001/system-bridge/discussions";
-                logger.info(`Open URL: ${url}`);
+                logger.info(`Tray - Open URL: ${url}`);
                 open(url);
               },
             },
@@ -122,7 +122,7 @@ export class Tray {
                   "system-bridge.log"
                 );
 
-                logger.info(`Open Logs: ${path}`);
+                logger.info(`Tray - Open Logs: ${path}`);
                 open(path);
               },
             },
@@ -152,7 +152,7 @@ export class Tray {
               checked: false,
               enabled: true,
               click: () => {
-                logger.info("Exit application");
+                logger.info("Tray - Exit application");
                 process.exit(0);
               },
             },
@@ -160,11 +160,23 @@ export class Tray {
         },
       });
 
-      systray.onClick((action: ExtendedClickEvent) => {
-        if (action?.item?.click) action.item.click();
-      });
+      if (systray) {
+        await systray.ready();
+        logger.info("Tray - Started");
+
+        systray.onError((err: Error) =>
+          logger.error(`Tray - Error: ${err.message}`)
+        );
+        systray.onExit((code: number) => {
+          logger.info(`Tray - Exit: ${code}`);
+        });
+
+        systray.onClick((action: ExtendedClickEvent) => {
+          if (action?.item?.click) action.item.click();
+        });
+      }
     } catch (e) {
-      logger.error(e.message);
+      logger.error(`Tray - Caught Error: ${e.message}`);
     }
   }
 }
