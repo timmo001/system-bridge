@@ -2,17 +2,6 @@
 # yarn lockfile v1
 
 
-"@angular-devkit/core@11.2.4":
-  version "11.2.4"
-  resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-11.2.4.tgz#4404b86d8dbdb41a0e3f94cb08ff8604e0c49a2e"
-  integrity sha512-98mGDV4XtKWiQ/2D6yzvOHrnJovXchaAN9AjscAHd2an8Fkiq72d9m2wREpk+2J40NWTDB6J5iesTh3qbi8+CA==
-  dependencies:
-    ajv "6.12.6"
-    fast-json-stable-stringify "2.1.0"
-    magic-string "0.25.7"
-    rxjs "6.6.3"
-    source-map "0.7.3"
-
 "@angular-devkit/core@12.0.5":
   version "12.0.5"
   resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-12.0.5.tgz#3d02abd97684434f6e1ffee470b7a9c63987ae51"
@@ -48,15 +37,6 @@
     inquirer "8.1.1"
     minimist "1.2.5"
     symbol-observable "4.0.0"
-
-"@angular-devkit/schematics@11.2.4":
-  version "11.2.4"
-  resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-11.2.4.tgz#ba67ee835ceb210777f1feece86195f28c1b2e96"
-  integrity sha512-M9Ike1TYawOIHzenlZS1ufQbsS+Z11/doj5w/UrU0q2OEKc6U375t5qVGgKo3PLHHS8osb9aW9xYwBfVlKrryQ==
-  dependencies:
-    "@angular-devkit/core" "11.2.4"
-    ora "5.3.0"
-    rxjs "6.6.3"
 
 "@angular-devkit/schematics@12.0.5":
   version "12.0.5"
@@ -706,18 +686,7 @@
     tslib "2.2.0"
     ws "7.4.5"
 
-"@nestjs/schematics@7.3.1":
-  version "7.3.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/schematics/-/schematics-7.3.1.tgz#68b559d2e6a8a9ecf6c984f87eaa7d4e37a910be"
-  integrity sha512-eyBjJstAjecpdzRuBLiqnwomwXIAEV3+kPkpaphOieRUM6nBhjnXCCl3Qf8Dul2QUQK4NOVPd8FFxWtGP5XNlg==
-  dependencies:
-    "@angular-devkit/core" "11.2.4"
-    "@angular-devkit/schematics" "11.2.4"
-    fs-extra "9.1.0"
-    jsonc-parser "3.0.0"
-    pluralize "8.0.0"
-
-"@nestjs/schematics@^8.0.0":
+"@nestjs/schematics@8.0.0", "@nestjs/schematics@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@nestjs/schematics/-/schematics-8.0.0.tgz#3479a5e433a40f0fc42098ffe1b64ddcf21cea39"
   integrity sha512-TldaYlm40CDANGzAugcqkN9N2O4pAA67EMy7qREym8W2o57co7AiEsYUl1CD3zPhBfhVcFRWfnQHs06IbXxPFw==
@@ -1368,16 +1337,6 @@ ajv-keywords@^3.4.1, ajv-keywords@^3.5.2:
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.5.2.tgz#31f29da5ab6e00d1c2d329acf7b5929614d5014d"
   integrity sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==
 
-ajv@6.12.6, ajv@^6.10.0, ajv@^6.12.2, ajv@^6.12.4, ajv@^6.12.5:
-  version "6.12.6"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
-  integrity sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==
-  dependencies:
-    fast-deep-equal "^3.1.1"
-    fast-json-stable-stringify "^2.0.0"
-    json-schema-traverse "^0.4.1"
-    uri-js "^4.2.2"
-
 ajv@8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.2.0.tgz#c89d3380a784ce81b2085f48811c4c101df4c602"
@@ -1396,6 +1355,16 @@ ajv@8.6.0, ajv@^8.0.1:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
+    uri-js "^4.2.2"
+
+ajv@^6.10.0, ajv@^6.12.2, ajv@^6.12.4, ajv@^6.12.5:
+  version "6.12.6"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
+  integrity sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
 ajv@^8.0.0:
@@ -3069,7 +3038,7 @@ fs-extra@10.0.0:
     jsonfile "^6.0.1"
     universalify "^2.0.0"
 
-fs-extra@9.1.0, fs-extra@^9.0.0, fs-extra@^9.1.0:
+fs-extra@^9.0.0, fs-extra@^9.1.0:
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-9.1.0.tgz#5954460c764a8da2094ba3554bf839e6b9a7c86d"
   integrity sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ==
@@ -4325,7 +4294,7 @@ lodash@4.17.21, lodash@4.x, lodash@^4.14.0, lodash@^4.17.19, lodash@^4.17.21, lo
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
-log-symbols@^4.0.0, log-symbols@^4.1.0:
+log-symbols@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-4.1.0.tgz#3fbdbb95b4683ac9fc785111e792e558d4abd503"
   integrity sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==
@@ -4877,20 +4846,6 @@ optionator@^0.9.1:
     prelude-ls "^1.2.1"
     type-check "^0.4.0"
     word-wrap "^1.2.3"
-
-ora@5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/ora/-/ora-5.3.0.tgz#fb832899d3a1372fe71c8b2c534bbfe74961bb6f"
-  integrity sha512-zAKMgGXUim0Jyd6CXK9lraBnD3H5yPGBPPOkC23a2BG6hsm4Zu6OQSjQuEtV0BHDf4aKHcUFvJiGRrFuW3MG8g==
-  dependencies:
-    bl "^4.0.3"
-    chalk "^4.1.0"
-    cli-cursor "^3.1.0"
-    cli-spinners "^2.5.0"
-    is-interactive "^1.0.0"
-    log-symbols "^4.0.0"
-    strip-ansi "^6.0.0"
-    wcwidth "^1.0.1"
 
 ora@5.4.0:
   version "5.4.0"
@@ -5615,13 +5570,6 @@ run-parallel@^1.1.9:
   integrity sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==
   dependencies:
     queue-microtask "^1.2.2"
-
-rxjs@6.6.3:
-  version "6.6.3"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.3.tgz#8ca84635c4daa900c0d3967a6ee7ac60271ee552"
-  integrity sha512-trsQc+xYYXZ3urjOiJOuCOa5N3jAZ3eiSpQB5hIT8zGlL2QfnHLJ2r7GMkBGuIausdJN1OneaI6gQlsqNHHmZQ==
-  dependencies:
-    tslib "^1.9.0"
 
 rxjs@6.6.7, rxjs@^6.6.0, rxjs@^6.6.3, rxjs@^6.6.6:
   version "6.6.7"
