@@ -667,10 +667,10 @@
   resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-1.0.0.tgz#52a0441795f6da8144a35970d3ebc19281f31cfd"
   integrity sha512-26AW5jHadLXtvHs+M+Agd9KZ92dDlBrmD0rORlBlvn2KvsWs4JRaKl2mUsrW7YsdZeAu3Hc4ukqyYyDdyCmMWQ==
 
-"@nestjs/platform-express@8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-8.0.1.tgz#c5517fae4b1f4507122f75c098873aac864f96d1"
-  integrity sha512-HOqxVcOb70ixZe+oIBcrbKs/5FePFC1VIHlURQc6o4kAPOdSskuns689sNFkd+nW+CXQ1WxmOl2ODxpi0yGwVg==
+"@nestjs/platform-express@8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-8.0.2.tgz#9aa61fcdde2eb2c685f5d062c9b2ea81c591cba9"
+  integrity sha512-lDXDbxHp6yyJ2CBJ80+IkWJA51BxEPxIwzebVSeNVocAOzZg4TLe2oROmpHvawkjC0svWHjAWCCY2qi2Ojebsw==
   dependencies:
     body-parser "1.19.0"
     cors "2.8.5"
