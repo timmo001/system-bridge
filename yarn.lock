@@ -678,13 +678,13 @@
     multer "1.4.2"
     tslib "2.3.0"
 
-"@nestjs/platform-ws@8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.0.1.tgz#fbfb2873f44a0263d95ed8f3cdce1df08b75f282"
-  integrity sha512-OYiiGlc7DHobyL48WvOK6fhaT9vgz4zz58o9Vc7fleVYRiWDzH8d/Ijb3IwK0dq7r/mCXWJzvrPEE98/IYxD9Q==
+"@nestjs/platform-ws@8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.0.2.tgz#c989f6473a996ec869a03d6773ed4190cb89be81"
+  integrity sha512-4tZOO93y+fnDUaUwr2VPxw2ylzP6UQ5TxgMgw76VVXiXr3rj0aXyQ7hKR8xuaYfaucvNfp4dEhTvcun5DauQAg==
   dependencies:
     tslib "2.3.0"
-    ws "7.5.2"
+    ws "7.5.3"
 
 "@nestjs/schematics@8.0.0", "@nestjs/schematics@^8.0.0":
   version "8.0.0"
@@ -6864,11 +6864,6 @@ write-file-atomic@^3.0.0:
     is-typedarray "^1.0.0"
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
-
-ws@7.5.2:
-  version "7.5.2"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.2.tgz#09cc8fea3bec1bc5ed44ef51b42f945be36900f6"
-  integrity sha512-lkF7AWRicoB9mAgjeKbGqVUekLnSNO4VjKVnuPHpQeOxZOErX6BPXwJk70nFslRCEEA8EVW7ZjKwXaP9N+1sKQ==
 
 ws@7.5.3, ws@^7.2.3, ws@^7.4.5:
   version "7.5.3"
