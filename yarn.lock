@@ -639,10 +639,10 @@
     webpack "5.43.0"
     webpack-node-externals "3.0.0"
 
-"@nestjs/common@8.0.2":
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-8.0.2.tgz#4f8b82280073ae43a2f392557fe675ff6ba0656f"
-  integrity sha512-Onr29APFiOG/Ahox1ytIdNXGXBVn6ViOWErFVNRIz3ZB4guLeFlr9Cly8U3Dssrd6rxuQG22YGD8cRhBNyQHvQ==
+"@nestjs/common@8.0.3":
+  version "8.0.3"
+  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-8.0.3.tgz#e08418b2ad15bffefdbcc83db1755f6aa42aa8c6"
+  integrity sha512-i/prZ0essVlyg60ZDe3cvPhSDWStecobumqqU898vwt9YXloZ9p2Aw1dfd+zv7+SL2CuogZJpOoOswg/8VXKQw==
   dependencies:
     axios "0.21.1"
     iterare "1.2.1"
