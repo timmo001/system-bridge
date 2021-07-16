@@ -29,20 +29,11 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: 16.x
+          cache: yarn
       - name: 🏗 Install linux dependencies
         run: |
           sudo apt update
           sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
-      - name: ⤵️ Get yarn cache path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: ⤵️ Fetch Yarn cache
-        uses: actions/cache@v2.1.6
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
       - name: ⤵️ Install dependencies
         run: |
           yarn install
@@ -162,17 +153,7 @@ jobs:
         uses: actions/setup-node@v2.2.0
         with:
           node-version: 16.x
-      - name: ⤵️ Get yarn cache path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: ⤵️ Fetch Yarn cache
-        uses: actions/cache@v2.1.6
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          cache: yarn
       - name: 🏗 Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
