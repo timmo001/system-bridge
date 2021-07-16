@@ -35,8 +35,7 @@
     "@types/react-router-dom": "5.1.8",
     "@types/uuid": "8.3.1",
     "cross-env": "7.0.3",
-    "jest-junit": "12.2.0",
-    "prettier": "2.3.2"
+    "jest-junit": "12.2.0"
   },
   "scripts": {
     "start": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts start",
