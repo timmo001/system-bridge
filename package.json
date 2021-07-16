@@ -80,7 +80,7 @@
   "devDependencies": {
     "@nestjs/cli": "8.0.2",
     "@nestjs/schematics": "8.0.1",
-    "@nestjs/testing": "8.0.3",
+    "@nestjs/testing": "8.0.4",
     "@types/auto-launch": "5.0.2",
     "@types/express": "4.17.13",
     "@types/helmet": "4.0.0",
