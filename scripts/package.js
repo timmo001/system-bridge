@@ -68,8 +68,6 @@ const filePaths = [
 async function package() {
   await exec([
     join(__dirname, "../"),
-    "--compress",
-    "Brotli",
     "--output",
     join(
       __dirname,
@@ -81,8 +79,6 @@ async function package() {
 
   await exec([
     join(__dirname, "../tray"),
-    "--compress",
-    "Brotli",
     "--output",
     join(
       __dirname,
