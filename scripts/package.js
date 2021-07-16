@@ -1,4 +1,4 @@
-const { copyFileSync, existsSync, mkdirSync } = require("fs");
+const { copyFileSync, existsSync, mkdirSync, unlinkSync } = require("fs");
 const { exec } = require("pkg");
 const { join } = require("path");
 
@@ -71,7 +71,9 @@ async function package() {
     "--output",
     join(
       __dirname,
-      `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
+      `../out/system-bridge${
+        process.platform === "win32" ? "-console.exe" : ""
+      }`
     ),
   ]);
 
@@ -80,15 +82,24 @@ async function package() {
     "--output",
     join(
       __dirname,
-      `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+      `../out/system-bridge-tray${
+        process.platform === "win32" ? "-console.exe" : ""
+      }`
     ),
   ]);
 
   if (process.platform === "win32") {
-    require("create-nodew-exe")({
-      src: join(__dirname, "../out/system-bridge.exe"),
-      dst: join(__dirname, "../out/system-bridge-start.exe"),
+    const createNodewExe = require("create-nodew-exe");
+    createNodewExe({
+      src: join(__dirname, "../out/system-bridge-console.exe"),
+      dst: join(__dirname, "../out/system-bridge.exe"),
     });
+    createNodewExe({
+      src: join(__dirname, "../out/system-bridge-tray-console.exe"),
+      dst: join(__dirname, "../out/system-bridge-tray.exe"),
+    });
+    unlinkSync(join(__dirname, "../out/system-bridge-console.exe"));
+    unlinkSync(join(__dirname, "../out/system-bridge-tray-console.exe"));
   }
 
   filePaths
