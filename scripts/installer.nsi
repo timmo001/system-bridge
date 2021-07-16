@@ -60,7 +60,6 @@
 
 Section "System Bridge"
 
-  SetCompress off
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
