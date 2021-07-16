@@ -140,7 +140,14 @@ async function setupTray(): Promise<void> {
     menu: {
       icon: readFileSync(
         join(
-          process.cwd(),
+          process.env.NODE_ENV === "development"
+            ? process.cwd()
+            : process.execPath.substring(
+                0,
+                process.platform === "win32"
+                  ? process.execPath.lastIndexOf("\\")
+                  : process.execPath.lastIndexOf("/")
+              ),
           process.env.NODE_ENV === "development" ? "../public/" : "./",
           `system-bridge-circle.${platform() === "win32" ? "ico" : "png"}`
         ),

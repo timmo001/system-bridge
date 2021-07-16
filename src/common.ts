@@ -112,9 +112,22 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
 
 export function getVersion(): string {
   const json = JSON.parse(
-    readFileSync(join(process.cwd(), "package.json"), {
-      encoding: "utf8",
-    })
+    readFileSync(
+      join(
+        process.env.NODE_ENV === "development"
+          ? process.cwd()
+          : process.execPath.substring(
+              0,
+              process.platform === "win32"
+                ? process.execPath.lastIndexOf("\\")
+                : process.execPath.lastIndexOf("/")
+            ),
+        "package.json"
+      ),
+      {
+        encoding: "utf8",
+      }
+    )
   );
   return semver.clean(json.version);
 }

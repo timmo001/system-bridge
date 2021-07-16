@@ -221,14 +221,22 @@ export async function stopServer(): Promise<void> {
 
 async function openTray(): Promise<void> {
   try {
+    const workingDirectory = process.execPath.substring(
+      0,
+      process.platform === "win32"
+        ? process.execPath.lastIndexOf("\\")
+        : process.execPath.lastIndexOf("/")
+    );
     const trayPath = join(
-      process.cwd(),
+      workingDirectory,
       `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     );
     logger.info(`Main - Open Tray: ${trayPath}`);
-    await execa(trayPath, [], { windowsHide: true });
+    await execa(trayPath, [], { cwd: workingDirectory, windowsHide: true });
   } catch (e) {
     logger.error(`Main - Error Opening Tray: ${e.message}`);
+    logger.info("Main - Retrying in 10 seconds...");
+    setTimeout(() => openTray(), 10000);
   }
 }
 
