@@ -649,10 +649,10 @@
     tslib "2.3.0"
     uuid "8.3.2"
 
-"@nestjs/core@8.0.3":
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-8.0.3.tgz#6e16bd3c0e5b150c38b1f9cf1317a4ae5c9a9033"
-  integrity sha512-tTuJi3uRCf5lwcdFtd96l/H/CQsa4glJ7xkPqvLSV3p2QsLpv9CAuSRHRLaavLkreZpUzcLQqkQMnGDiKE4idA==
+"@nestjs/core@8.0.4":
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-8.0.4.tgz#fcef4fa0f62f8b205f6e741bf6cd2da01c94d98a"
+  integrity sha512-1clCaGtVZTE7/tEvVj1FLwgFTHIlaCvwfPSMgxhGalTrx+cM8MoqEGLWklqS5bS+YfQscI1+Gn3OLdWlRcGbRQ==
   dependencies:
     "@nuxtjs/opencollective" "0.3.2"
     fast-safe-stringify "2.0.8"
