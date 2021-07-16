@@ -179,6 +179,7 @@ jobs:
           yarn install:all:ci
       - name: 🚀 Package
         run: |
+          npx modclean
           yarn package
         env:
           NODE_ENV: production
