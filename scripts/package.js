@@ -1,7 +1,6 @@
-const { copyFileSync, existsSync, mkdirSync } = require("fs");
+const { copyFileSync, existsSync, mkdirSync, unlinkSync } = require("fs");
 const { exec } = require("pkg");
 const { join } = require("path");
-const { unlinkSync } = require("node:fs");
 
 const filePaths = [
   {
