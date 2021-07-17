@@ -217,10 +217,10 @@ jobs:
           brew install create-dmg
           create-dmg \
             --volname "System Bridge" \
-            --volicon public/system-bridge-circle.icns \
-            --icon public/system-bridge-circle.icns \
-            SystemBridge.dmg \
-            out
+            --volicon "public/system-bridge-circle.icns" \
+            --icon "public/system-bridge-circle.icns" \
+            "SystemBridge.dmg" \
+            "out/"
       - name: ⬆ Upload Artifacts - MacOS dmg
         if: matrix.os.platform == 'darwin'
         uses: actions/upload-artifact@v2
