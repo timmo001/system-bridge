@@ -16,23 +16,56 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-release:
-    name: 👷 Deploy to Release
-    runs-on: ${{ matrix.os.server }}
-    strategy:
-      matrix:
-        os:
-          - name: windows
-            server: windows-latest
-            platform: win32
-          - name: linux
-            server: ubuntu-latest
-            platform: linux
-          - name: macos
-            server: macos-latest
-            platform: darwin
+  deploy-output:
+    name: 👷 Deploy Output to Release Assets
+    runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      fail-fast: false
+      matrix:
+        artifact:
+          - windows-out
+          - linux-out
+          - macos-out
     steps:
-      - name: 🏗 TODO
+      - name: ⤵️ Download Artifact - ${{ matrix.artifact }}
+        uses: dawidd6/action-download-artifact@v2.14.0
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+          workflow: ci.yml
+          workflow_conclusion: success
+      - name: 🏗 Compress directories
         run: |
-          echo "TODO"
+          tar -czvf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}/*
+      - name: ⬆ Upload Artifacts to Release Assets
+        uses: fnkr/github-action-ghr@v1
+        env:
+          GHR_PATH: ${{ matrix.artifact }}.tar.gz
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy-packages:
+    name: 👷 Deploy Packages to Release Assets
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      fail-fast: false
+      matrix:
+        artifact:
+          - windows-setup
+          - linux-apk
+          - linux-deb
+          - linux-rpm
+          - macos-dmg
+    steps:
+      - name: ⤵️ Download Artifact - ${{ matrix.artifact }}
+        uses: dawidd6/action-download-artifact@v2.14.0
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+          workflow: ci.yml
+          workflow_conclusion: success
+      - name: ⬆ Upload to Release Assets
+        uses: fnkr/github-action-ghr@v1
+        env:
+          GHR_PATH: ${{ matrix.artifact }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
