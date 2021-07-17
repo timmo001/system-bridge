@@ -23,20 +23,28 @@ interface ExtendedClickEvent extends ClickEvent {
 }
 
 async function setupTray(): Promise<void> {
-  logger.info("Tray - Setup");
-
   const updates = await getUpdates(true);
+
+  logger.info(
+    "-----------------------------------------------------------------------------------------------------------------------"
+  );
+  logger.info(
+    `System Bridge - Tray ${updates.version.current}: ${JSON.stringify(
+      process.argv
+    )} - ${process.env.NODE_ENV}`
+  );
+  logger.info(
+    "-----------------------------------------------------------------------------------------------------------------------"
+  );
+
   const versionText = updates.available
     ? `Version ${updates.version.new} avaliable!`
     : `${updates.newer ? "Newer" : "Latest"} Version (${
         updates.version.current
       })`;
 
-  logger.info("Tray - Import");
   const st = await import("systray2");
-  logger.info("Tray - Import Default");
   const SysTray = st.default;
-  logger.info("Tray - Imported");
 
   const items = [
     {
