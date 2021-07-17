@@ -25,10 +25,12 @@ interface ExtendedClickEvent extends ClickEvent {
 async function setupTray(): Promise<void> {
   logger.info("Tray - Setup");
 
-  const update = await getUpdates();
-  const versionText = update.available
-    ? `Version ${update.version.new} avaliable!`
-    : `Latest Version (${update.version.current})`;
+  const updates = await getUpdates(true);
+  const versionText = updates.available
+    ? `Version ${updates.version.new} avaliable!`
+    : `${updates.newer ? "Newer" : "Latest"} Version (${
+        updates.version.current
+      })`;
 
   logger.info("Tray - Import");
   const st = await import("systray2");
@@ -154,7 +156,7 @@ async function setupTray(): Promise<void> {
         { encoding: "base64" }
       ),
       title: "System Bridge",
-      tooltip: "System Bridge",
+      tooltip: `System Bridge v${updates.version.current}`,
       items: [
         ...items,
         SysTray.separator,
