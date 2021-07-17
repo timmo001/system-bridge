@@ -87,7 +87,9 @@ export async function createSetting(
   return settingsRepository.findOne(setting.key);
 }
 
-export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
+export async function getUpdates(
+  tray = false
+): Promise<ApplicationUpdate | undefined> {
   const response = await axios.get<{
     html_url: string;
     prerelease: boolean;
@@ -98,11 +100,12 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
     response.status < 400 &&
     response.data?.prerelease === false
   ) {
-    const versionCurrent = getVersion();
     const versionNew = semver.clean(response.data.tag_name);
+    const versionCurrent = getVersion(tray);
     const available = semver.lt(versionCurrent, versionNew);
     return {
       available,
+      newer: semver.gt(versionCurrent, versionNew),
       url: response.data.html_url,
       version: { current: versionCurrent, new: versionNew },
     };
@@ -110,7 +113,7 @@ export async function getUpdates(): Promise<ApplicationUpdate | undefined> {
   return undefined;
 }
 
-export function getVersion(): string {
+export function getVersion(tray = false): string {
   const json = JSON.parse(
     readFileSync(
       join(
@@ -122,7 +125,7 @@ export function getVersion(): string {
                 ? process.execPath.lastIndexOf("\\")
                 : process.execPath.lastIndexOf("/")
             ),
-        "package.json"
+        tray ? "../package.json" : "package.json"
       ),
       {
         encoding: "utf8",
