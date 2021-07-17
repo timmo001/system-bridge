@@ -124,7 +124,7 @@ jobs:
   build-app:
     name: 🚀 Build Application
     runs-on: ${{ matrix.os.server }}
-    if: ${{ github.event_name == 'pull_request' && matrix.os.server != 'self-hosted' || github.event_name != 'pull_request' }}
+    if: ${{ ( github.event_name == 'pull_request' && matrix.os.server != 'self-hosted' ) || ( github.event_name != 'pull_request' ) }}
     strategy:
       fail-fast: false
       matrix:
