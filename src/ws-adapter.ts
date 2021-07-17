@@ -11,6 +11,8 @@ export class WsAdapter implements WebSocketAdapter {
     return new WebSocket.Server({ port: port || this.port, ...options });
   }
 
+  dispose(): any {}
+
   bindClientConnect(
     server: { on: (arg0: string, arg1: Function) => void },
     callback: Function
