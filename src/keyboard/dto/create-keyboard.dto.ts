@@ -1,4 +1,5 @@
 export interface CreateKeyboardDto {
-  key: string;
+  key?: string;
+  text?: string;
   modifiers?: string | Array<string>;
 }
