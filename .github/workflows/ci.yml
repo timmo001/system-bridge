@@ -211,3 +211,19 @@ jobs:
         with:
           name: ${{ matrix.os.name }}-rpm
           path: "*.rpm"
+      - name: 🚀 Create macos dmg file
+        if: matrix.os.platform == 'darwin'
+        run: |
+          brew install create-dmg
+          create-dmg \
+            --volname "System Bridge" \
+            --applications-shortcut \
+            --icon public/system-bridge-circle.icns \
+            SystemBridge.dmg \
+            out
+      - name: ⬆ Upload Artifacts - MacOS dmg
+        if: matrix.os.platform == 'darwin'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os.name }}-dmg
+          path: "*.dmg"
