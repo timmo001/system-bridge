@@ -160,7 +160,6 @@ jobs:
           yarn install:all:ci
       - name: 🚀 Package
         run: |
-          npx modclean --run --verbose
           yarn package
         env:
           NODE_ENV: production
