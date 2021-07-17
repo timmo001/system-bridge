@@ -9,7 +9,9 @@ export class KeyboardService {
     createKeyboardDto: CreateKeyboardDto
   ): Promise<CreateKeyboardDto> {
     try {
-      robot.keyTap(createKeyboardDto.key);
+      if (createKeyboardDto.modifiers?.length > 0)
+        robot.keyTap(createKeyboardDto.key, createKeyboardDto.modifiers);
+      else robot.keyTap(createKeyboardDto.key);
       return createKeyboardDto;
     } catch (e) {
       throw new HttpException(
