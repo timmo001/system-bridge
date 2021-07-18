@@ -150,6 +150,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: "",
         value: null,
         icon: mdiLock,
+        isPassword: true,
         requiresServerRestart: true,
       },
     },
