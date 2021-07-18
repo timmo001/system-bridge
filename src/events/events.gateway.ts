@@ -5,21 +5,21 @@ import {
   WebSocketGateway,
   WsResponse,
 } from "@nestjs/websockets";
-import { Inject, UseGuards } from "@nestjs/common";
-import { MqttService } from "nest-mqtt";
+import { Injectable, UseGuards } from "@nestjs/common";
 import { uuid } from "systeminformation";
+import mqtt from "mqtt";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
+import { getMqttOptions } from "../common";
 import { startServer, stopServer } from "../main";
 import { WsAuthGuard } from "../wsAuth.guard";
 import logger from "../logger";
 
+@Injectable()
 @WebSocketGateway()
 export class EventsGateway {
   private authenticatedClients: Array<WebSocket> = [];
-
-  constructor(@Inject(MqttService) private readonly mqttService: MqttService) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("register-listener")
@@ -54,10 +54,28 @@ export class EventsGateway {
             )
           );
       }, 200);
-    this.mqttService.publish(
-      `systembridge/${(await uuid()).os}/event/${data.name}`,
-      data.data
-    );
+    const { enabled, host, port, username, password } = await getMqttOptions();
+    if (enabled) {
+      const id = (await uuid()).os;
+      const mqttClient = mqtt.connect(`mqtt://${host}:${port}`, {
+        username,
+        password,
+        clientId: id,
+      });
+      const topic = `systembridge/event/${id}/${data.name}`;
+      logger.debug(`WebSocket - MQTT - Publishing to topic ${topic}`);
+      mqttClient.publish(
+        topic,
+        JSON.stringify(data.data),
+        { qos: 1, retain: true },
+        (error?: Error) => {
+          if (error)
+            logger.error(
+              `WebSocket - MQTT - Error publishing message: ${error.message}`
+            );
+        }
+      );
+    }
     return { event: "event-sent", data };
   }
 }

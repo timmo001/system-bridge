@@ -1,11 +1,10 @@
 import { APP_GUARD } from "@nestjs/core";
 import { join } from "path";
 import { Module } from "@nestjs/common";
-import { MqttModule } from "nest-mqtt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { WinstonModule } from "nest-winston";
 
-import { appDataDirectory, getMqttOptions } from "./common";
+import { appDataDirectory } from "./common";
 import { AudioModule } from "./audio/audio.module";
 import { BatteryModule } from "./battery/battery.module";
 import { BluetoothModule } from "./bluetooth/bluetooth.module";
@@ -37,9 +36,6 @@ import logger from "./logger";
       autoLoadEntities: true,
       logging: false,
       synchronize: true,
-    }),
-    MqttModule.forRootAsync({
-      useFactory: async () => await getMqttOptions(),
     }),
     AudioModule,
     BatteryModule,
