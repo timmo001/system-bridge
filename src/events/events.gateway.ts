@@ -5,7 +5,9 @@ import {
   WebSocketGateway,
   WsResponse,
 } from "@nestjs/websockets";
-import { UseGuards } from "@nestjs/common";
+import { Inject, UseGuards } from "@nestjs/common";
+import { MqttService } from "nest-mqtt";
+import { uuid } from "systeminformation";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
@@ -16,6 +18,8 @@ import logger from "../logger";
 @WebSocketGateway()
 export class EventsGateway {
   private authenticatedClients: Array<WebSocket> = [];
+
+  constructor(@Inject(MqttService) private readonly mqttService: MqttService) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("register-listener")
@@ -29,7 +33,9 @@ export class EventsGateway {
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("events")
-  handleEvent(@MessageBody() { data }: { data: Event }): WsResponse<Event> {
+  async handleEvent(
+    @MessageBody() { data }: { data: Event }
+  ): Promise<WsResponse<Event>> {
     logger.debug(`WebSocket - New event: ${data.name}`);
     this.authenticatedClients.forEach((ws: WebSocket) =>
       ws.send(JSON.stringify({ event: "events", data }))
@@ -48,6 +54,10 @@ export class EventsGateway {
             )
           );
       }, 200);
+    this.mqttService.publish(
+      `systembridge/${(await uuid()).os}/event/${data.name}`,
+      data.data
+    );
     return { event: "event-sent", data };
   }
 }

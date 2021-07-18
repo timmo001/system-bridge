@@ -44,7 +44,7 @@ export class InformationService {
         ip: networkInterface.ip4,
         mac: networkInterface.mac,
         updates: await getUpdates(),
-        uuid: uuidInfo.os,
+        uuid: uuidInfo,
         version: getVersion(),
         websocketAddress: `ws://${osSiInfo.fqdn}:${websocketPort}`,
         websocketPort,

@@ -13,7 +13,7 @@ export interface Information {
   ip: string;
   mac: string;
   updates?: ApplicationUpdate;
-  uuid: string;
+  uuid: any;
   version: string;
   websocketAddress: string;
   websocketPort: number;

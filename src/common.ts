@@ -1,5 +1,6 @@
 import { Connection, createConnection, Repository } from "typeorm";
 import { join } from "path";
+import { MqttModuleOptions } from "nest-mqtt";
 import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -133,4 +134,18 @@ export function getVersion(tray = false): string {
     )
   );
   return semver.clean(json.version);
+}
+
+export async function getMqttOptions(): Promise<MqttModuleOptions> {
+  const connection = await getConnection();
+  const settings = await getSettingsObject(connection);
+  await connection.close();
+
+  return {
+    hostname: settings["mqtt-host"] || "localhost",
+    port:
+      Number(settings["mqtt-port"]) > 0 ? Number(settings["mqtt-port"]) : 1883,
+    username: settings["mqtt-username"],
+    password: settings["mqtt-password"],
+  };
 }
