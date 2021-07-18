@@ -10,17 +10,19 @@ export class Events {
     this.websocket = new WebSocketConnection(wsPort, apiKey, true, () =>
       this.websocket.sendEvent({ name: "open-rtc" })
     );
-    this.websocket.onEvent = async (event: Event) => {
-      logger.info(`Main - Event: ${event.name}`);
-      switch (event.name) {
-        case "exit-application":
-          await stopServer();
-          logger.info("Main - Exit application");
-          process.exit(0);
-        case "update-app-config":
-          await updateAppConfig();
-          break;
-      }
-    };
+    this.websocket.onEvent = this.eventHandler;
+  }
+
+  async eventHandler(event: Event) {
+    logger.info(`Main - Event: ${event.name}`);
+    switch (event.name) {
+      case "exit-application":
+        await stopServer();
+        logger.info("Main - Exit application");
+        process.exit(0);
+      case "update-app-config":
+        await updateAppConfig();
+        break;
+    }
   }
 }
