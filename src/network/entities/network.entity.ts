@@ -10,4 +10,15 @@ export interface Network {
   stats: {
     [iface: string]: Systeminformation.NetworkStatsData;
   };
+  wifi: {
+    connections: {
+      [id: string]: Systeminformation.WifiConnectionData;
+    };
+    interfaces: {
+      [iface: string]: Systeminformation.WifiInterfaceData;
+    };
+    networks: {
+      [ssid: string]: Systeminformation.WifiNetworkData;
+    };
+  };
 }

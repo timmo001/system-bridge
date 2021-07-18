@@ -5,6 +5,9 @@ import {
   networkInterfaceDefault,
   networkInterfaces,
   networkStats,
+  wifiConnections,
+  wifiInterfaces,
+  wifiNetworks,
 } from "systeminformation";
 
 import { convertArrayToObject } from "../common";
@@ -19,6 +22,11 @@ export class NetworkService {
       interfaceDefault: await networkInterfaceDefault(),
       interfaces: convertArrayToObject(await networkInterfaces(), "iface"),
       stats: convertArrayToObject(await networkStats(), "iface"),
+      wifi: {
+        connections: convertArrayToObject(await wifiConnections(), "id"),
+        interfaces: convertArrayToObject(await wifiInterfaces(), "iface"),
+        networks: convertArrayToObject(await wifiNetworks(), "ssid"),
+      },
     };
   }
 }
