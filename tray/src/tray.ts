@@ -159,7 +159,13 @@ async function setupTray(): Promise<void> {
                   : process.execPath.lastIndexOf("/")
               ),
           process.env.NODE_ENV === "development" ? "../public/" : "./",
-          `system-bridge-circle.${platform() === "win32" ? "ico" : "png"}`
+          `system-bridge-circle.${
+            platform() === "win32"
+              ? "ico"
+              : platform() === "darwin"
+              ? "icns"
+              : "png"
+          }`
         ),
         { encoding: "base64" }
       ),
