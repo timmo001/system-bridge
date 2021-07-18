@@ -23,7 +23,7 @@ interface ExtendedClickEvent extends ClickEvent {
 }
 
 async function setupTray(): Promise<void> {
-  const updates = await getUpdates(true);
+  const updates = await getUpdates(process.env.NODE_ENV === "development");
 
   logger.info(
     "-----------------------------------------------------------------------------------------------------------------------"
