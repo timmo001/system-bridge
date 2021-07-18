@@ -20,11 +20,11 @@ export class Events {
   }
 
   private async eventHandler(event: Event) {
-    logger.info(`Main - Event: ${event.name}`);
+    logger.info(`Events - Event: ${event.name}`);
     switch (event.name) {
       case "exit-application":
         await stopServer();
-        logger.info("Main - Exit application");
+        logger.info("Events - Exit application");
         process.exit(0);
       case "update-app-config":
         await updateAppConfig();
