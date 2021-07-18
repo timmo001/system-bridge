@@ -30,7 +30,7 @@ export class EventsGateway {
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("events")
   handleEvent(@MessageBody() { data }: { data: Event }): WsResponse<Event> {
-    logger.info(`WebSocket - New event: ${data.name}`);
+    logger.debug(`WebSocket - New event: ${data.name}`);
     this.authenticatedClients.forEach((ws: WebSocket) =>
       ws.send(JSON.stringify({ event: "events", data }))
     );
