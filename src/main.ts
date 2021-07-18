@@ -24,8 +24,7 @@ import {
   getSettingsObject,
   getVersion,
 } from "./common";
-import { Event } from "./events/entities/event.entity";
-import { WebSocketConnection } from "./websocket";
+import { Events } from "./events";
 import { WsAdapter } from "./ws-adapter";
 import logger from "./logger";
 
@@ -33,7 +32,9 @@ let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
 
-async function updateAppConfig(): Promise<void> {
+const events: Events = new Events();
+
+export async function updateAppConfig(): Promise<void> {
   try {
     const connection = await getConnection();
     const settings = await getSettingsObject(connection);
@@ -177,6 +178,7 @@ export async function startServer(): Promise<void> {
   // Set up RTC Broker
   const apiKey = settings["network-apiKey"];
   if (typeof apiKey === "string") {
+    await updateAppConfig();
     const broker = ExpressPeerServer(server, {
       allow_discovery: true,
       key: apiKey,
@@ -189,23 +191,9 @@ export async function startServer(): Promise<void> {
     });
     app.use("/rtc", broker);
     logger.info(`Main - RTC broker created on path ${broker.path()}`);
-    const ws = new WebSocketConnection(wsPort, apiKey, true, () =>
-      ws.sendEvent({ name: "open-rtc" })
-    );
-    ws.onEvent = async (event: Event) => {
-      logger.info(`Main - Event: ${event.name}`);
-      switch (event.name) {
-        case "exit-application":
-          await stopServer();
-          logger.info("Main - Exit application");
-          process.exit(0);
-        case "update-app-config":
-          await updateAppConfig();
-          break;
-      }
-    };
+
+    events.setup(wsPort, apiKey);
   }
-  await updateAppConfig();
 }
 
 export async function stopServer(): Promise<void> {
