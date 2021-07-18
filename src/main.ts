@@ -34,26 +34,30 @@ let app: NestExpressApplication,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
 
 async function updateAppConfig(): Promise<void> {
-  const connection = await getConnection();
-  const settings = await getSettingsObject(connection);
-  await connection.close();
+  try {
+    const connection = await getConnection();
+    const settings = await getSettingsObject(connection);
+    await connection.close();
 
-  const launchOnStartup: boolean =
-    settings["general-launchOnStartup"] === "true";
+    const launchOnStartup: boolean =
+      settings["general-launchOnStartup"] === "true";
 
-  const autoLaunch = new AutoLaunch({
-    name: "System Bridge",
-    path: process.execPath,
-  });
-  if (launchOnStartup && process.env.NODE_ENV !== "development")
-    await autoLaunch.enable();
-  else await autoLaunch.disable();
+    const autoLaunch = new AutoLaunch({
+      name: "System Bridge",
+      path: process.execPath,
+    });
+    if (launchOnStartup && process.env.NODE_ENV !== "development")
+      await autoLaunch.enable();
+    else await autoLaunch.disable();
 
-  logger.info(
-    `Main - Launch on startup: ${launchOnStartup} - ${
-      (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
-    } - ${process.execPath}`
-  );
+    logger.info(
+      `Main - Launch on startup: ${launchOnStartup} - ${
+        (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
+      } - ${process.execPath}`
+    );
+  } catch (e) {
+    logger.error(e.message);
+  }
 }
 
 export async function startServer(): Promise<void> {
