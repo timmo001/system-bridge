@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: I have a question or need support
-    url: hhttps://github.com/timmo001/system-bridge/discussions
+    url: https://github.com/timmo001/system-bridge/discussions
     about: Please use the discussions area for getting help or asking questions.
+  - name: I have an issue with the documentation or would like to suggest content to be added
+    url: https://github.com/timmo001/system-bridge-site/issues
+    about: Please use the site issue tracker for documentation or website related issues.
+  - name: I have a an issue with the Home Assistant integration
+    url: https://github.com/home-assistant/core/issues
+    about: Please report any integration issues with Home Asssitant to the Core repository of Home Assistant.
