@@ -64,6 +64,7 @@ export interface ConfigurationItem {
   defaultValue: SettingsValue;
   value: SettingsValue;
   minimum?: number;
+  isPassword?: boolean;
   requiresServerRestart?: boolean;
 }
 
@@ -197,7 +198,7 @@ function Item({
           </FormControl>
         ) : typeof value === "string" ? (
           <TextField
-            type="text"
+            type={item?.isPassword ? "password" : "text"}
             defaultValue={value}
             onChange={handleChanged}
           />
