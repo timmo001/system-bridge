@@ -47,17 +47,6 @@ export class Events {
         await stopServer();
         logger.info("Events - Exit application");
         process.exit(0);
-      // case "observer-cpu-current-speed":
-      //   logger.info(
-      //     `Events - CPU current speed: ${JSON.stringify(event.data)}`
-      //   );
-      //   break;
-      // case "observer-fs-size":
-      //   logger.info(`Events - FS size: ${JSON.stringify(event.data)}`);
-      //   break;
-      // case "observer-usb":
-      //   logger.info(`Events - USB: ${JSON.stringify(event.data)}`);
-      //   break;
       case "update-app-config":
         logger.info("Events - Update app config");
         await updateAppConfig();
