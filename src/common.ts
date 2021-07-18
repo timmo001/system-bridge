@@ -9,7 +9,7 @@ import semver from "semver";
 
 import { ApplicationUpdate } from "./information/entities/information.entity";
 import { Setting } from "./settings/entities/setting.entity";
-import logger from "tray/dist/src/logger";
+import logger from "./logger";
 
 export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
