@@ -92,6 +92,17 @@ async function setupTray(): Promise<void> {
       enabled: true,
       items: [
         {
+          title: "Documentation / Website",
+          tooltip: "Documentation / Website",
+          checked: false,
+          enabled: true,
+          click: async () => {
+            const url = "https://system-bridge.timmo.dev";
+            logger.info(`Tray - Open URL: ${url}`);
+            open(url);
+          },
+        },
+        {
           title: "Suggest a Feature",
           tooltip: "Suggest a Feature",
           checked: false,
