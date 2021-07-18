@@ -21,8 +21,8 @@ import {
   TextField,
   Theme,
 } from "@material-ui/core";
+import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
 import Icon from "@mdi/react";
-import { mdiCached, mdiContentCopy } from "@mdi/js";
 
 import { Configuration } from "./Configuration";
 import { handleCopyToClipboard, parsedQuery, useSettings } from "../Utils";
@@ -64,6 +64,7 @@ export interface ConfigurationItem {
   defaultValue: SettingsValue;
   value: SettingsValue;
   minimum?: number;
+  isPassword?: boolean;
   requiresServerRestart?: boolean;
 }
 
@@ -82,6 +83,7 @@ function Item({
 
   const [originalItem, setOriginalItem] = useState<ConfigurationItem>();
   const [item, setItem] = useState<ConfigurationItem>();
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
 
   useEffect(() => {
     if (item === undefined) setItem(settings?.[sectionKey].items[itemKey]);
@@ -132,6 +134,16 @@ function Item({
   function handleGenerateApiKey() {
     handleSetSetting(uuidv4());
   }
+
+  function handleClickShowPassword() {
+    setShowPassword(!showPassword);
+  }
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
 
   const value = useMemo(() => {
     const value = item?.value === undefined ? item?.defaultValue : item.value;
@@ -189,6 +201,29 @@ function Item({
                       title="Copy to clipboard"
                       size={0.8}
                       path={mdiContentCopy}
+                    />
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+        ) : typeof value === "string" && item.isPassword ? (
+          <FormControl>
+            <Input
+              type={showPassword ? "text" : "password"}
+              defaultValue={value}
+              onChange={handleChanged}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="Toggle visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    <Icon
+                      title="Copy to clipboard"
+                      size={0.8}
+                      path={showPassword ? mdiEye : mdiEyeOff}
                     />
                   </IconButton>
                 </InputAdornment>

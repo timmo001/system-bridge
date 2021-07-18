@@ -5,14 +5,16 @@ import {
   WebSocketGateway,
   WsResponse,
 } from "@nestjs/websockets";
-import { UseGuards } from "@nestjs/common";
+import { Injectable, UseGuards } from "@nestjs/common";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
+import { mqttPublish } from "../common";
 import { startServer, stopServer } from "../main";
 import { WsAuthGuard } from "../wsAuth.guard";
 import logger from "../logger";
 
+@Injectable()
 @WebSocketGateway()
 export class EventsGateway {
   private authenticatedClients: Array<WebSocket> = [];
@@ -29,7 +31,9 @@ export class EventsGateway {
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("events")
-  handleEvent(@MessageBody() { data }: { data: Event }): WsResponse<Event> {
+  async handleEvent(
+    @MessageBody() { data }: { data: Event }
+  ): Promise<WsResponse<Event>> {
     logger.debug(`WebSocket - New event: ${data.name}`);
     this.authenticatedClients.forEach((ws: WebSocket) =>
       ws.send(JSON.stringify({ event: "events", data }))
@@ -48,6 +52,7 @@ export class EventsGateway {
             )
           );
       }, 200);
+    await mqttPublish(`event/${data.name}`, JSON.stringify(data.data));
     return { event: "event-sent", data };
   }
 }

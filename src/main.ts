@@ -205,12 +205,12 @@ export async function stopServer(): Promise<void> {
     server.close();
     logger.info("Main - Server closed.");
   }
-  if (rtc) rtc.closeRTCWindow();
   if (events) events.cleanup();
+  if (rtc) rtc.closeRTCWindow();
   app = undefined;
   server = undefined;
-  rtc = undefined;
   events = undefined;
+  rtc = undefined;
 }
 
 async function openTray(): Promise<void> {
