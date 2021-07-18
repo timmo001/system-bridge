@@ -7,13 +7,19 @@ export class Events {
   private websocket: WebSocketConnection;
 
   async setup(wsPort: number, apiKey: string): Promise<void> {
-    this.websocket = new WebSocketConnection(wsPort, apiKey, true, () =>
-      this.websocket.sendEvent({ name: "open-rtc" })
-    );
+    this.websocket = new WebSocketConnection(wsPort, apiKey, true, () => {
+      this.websocket.sendEvent({ name: "listening-for-events" });
+      this.websocket.sendEvent({ name: "open-rtc" });
+    });
     this.websocket.onEvent = this.eventHandler;
   }
 
-  async eventHandler(event: Event) {
+  cleanup(): void {
+    this.websocket.close();
+    this.websocket = undefined;
+  }
+
+  private async eventHandler(event: Event) {
     logger.info(`Main - Event: ${event.name}`);
     switch (event.name) {
       case "exit-application":

@@ -30,9 +30,8 @@ import logger from "./logger";
 
 let app: NestExpressApplication,
   server: Server | undefined,
-  rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean };
-
-const events: Events = new Events();
+  rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean },
+  events: Events = new Events();
 
 export async function updateAppConfig(): Promise<void> {
   try {
@@ -206,9 +205,11 @@ export async function stopServer(): Promise<void> {
     logger.info("Main - Server closed.");
   }
   if (rtc) rtc.closeRTCWindow();
+  if (events) events.cleanup();
   app = undefined;
   server = undefined;
   rtc = undefined;
+  events = undefined;
 }
 
 async function openTray(): Promise<void> {
