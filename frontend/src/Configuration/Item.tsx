@@ -63,6 +63,7 @@ export interface ConfigurationItem {
   icon: string;
   defaultValue: SettingsValue;
   value: SettingsValue;
+  minimum?: number;
   requiresServerRestart?: boolean;
 }
 
@@ -152,6 +153,7 @@ function Item({
       </ListItemIcon>
       <ListItemText
         className={classes.disabled}
+        style={{ maxWidth: "74%" }}
         primary={name}
         secondary={description}
       />
@@ -201,7 +203,9 @@ function Item({
           />
         ) : typeof value === "number" ? (
           <TextField
+            error={item.minimum ? value < item.minimum : false}
             type="number"
+            inputProps={{ minimum: item.minimum }}
             defaultValue={value}
             onChange={handleChanged}
           />
