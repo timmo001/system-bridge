@@ -120,7 +120,7 @@ export const defaultConfiguration: Configuration = {
         requiresServerRestart: true,
       },
       host: {
-        name: "MQTT Broker Host",
+        name: "Broker Host",
         description: "The host of your MQTT broker.",
         defaultValue: "localhost",
         value: null,
@@ -128,7 +128,7 @@ export const defaultConfiguration: Configuration = {
         requiresServerRestart: true,
       },
       port: {
-        name: "MQTT Broker Port",
+        name: "Broker Port",
         description: "The port of your MQTT broker.",
         defaultValue: 1883,
         value: null,
@@ -137,7 +137,7 @@ export const defaultConfiguration: Configuration = {
         requiresServerRestart: true,
       },
       username: {
-        name: "MQTT Broker Username",
+        name: "Broker Username",
         description: "The username of your MQTT broker.",
         defaultValue: "",
         value: null,
@@ -145,7 +145,7 @@ export const defaultConfiguration: Configuration = {
         requiresServerRestart: true,
       },
       password: {
-        name: "MQTT Broker Password",
+        name: "Broker Password",
         description: "The password of your MQTT broker.",
         defaultValue: "",
         value: null,
