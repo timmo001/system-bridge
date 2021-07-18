@@ -10,7 +10,7 @@ export class Observer {
     const timeout =
         Number(settings["observer-timeout"]) >= 5000
           ? Number(settings["observer-timeout"])
-          : 20000,
+          : 30000,
       callback = (data: { [key: string]: { [key: string]: any } }) => cb(data);
 
     callback({ status: { status: 1 } });

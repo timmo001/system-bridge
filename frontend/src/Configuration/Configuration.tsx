@@ -112,7 +112,7 @@ export const defaultConfiguration: Configuration = {
         name: "Observer Timeout (ms)",
         description:
           "The amount of time in milliseconds the observer will wait before checking for new data. The faster, the more updates, but also the more system utilization.",
-        defaultValue: 20000,
+        defaultValue: 30000,
         value: null,
         minimum: 5000,
         icon: mdiTimerOutline,
