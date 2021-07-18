@@ -24,6 +24,15 @@ body:
   - type: markdown
     attributes:
       value: |
+        ## Version
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: What version are you running?
+  - type: markdown
+    attributes:
+      value: |
         # Additional Details
   - type: textarea
     attributes:
