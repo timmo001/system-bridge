@@ -9,7 +9,6 @@ export class Events {
   async setup(wsPort: number, apiKey: string): Promise<void> {
     this.websocket = new WebSocketConnection(wsPort, apiKey, true, () => {
       this.websocket.sendEvent({ name: "listening-for-events" });
-      this.websocket.sendEvent({ name: "open-rtc" });
     });
     this.websocket.onEvent = this.eventHandler;
   }
