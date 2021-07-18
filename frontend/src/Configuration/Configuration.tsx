@@ -25,6 +25,7 @@ import {
   mdiProtocol,
   mdiRestart,
   mdiRocketLaunch,
+  mdiTimerOutline,
 } from "@mdi/js";
 
 import { handleCopyToClipboard, parsedQuery } from "../Utils";
@@ -81,6 +82,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: 9170,
         value: null,
         icon: mdiProtocol,
+        minimum: 1,
         requiresServerRestart: true,
       },
       wsPort: {
@@ -89,6 +91,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: 9172,
         value: null,
         icon: mdiProtocol,
+        minimum: 1,
         requiresServerRestart: true,
       },
       apiKey: {
@@ -97,6 +100,22 @@ export const defaultConfiguration: Configuration = {
         defaultValue: "",
         value: null,
         icon: mdiKey,
+        requiresServerRestart: true,
+      },
+    },
+  },
+  observer: {
+    name: "Observer",
+    description: "Observer specific settings.",
+    items: {
+      timeout: {
+        name: "Observer Timeout (ms)",
+        description:
+          "The amount of time in milliseconds the observer will wait before checking for new data. The faster, the more updates, but also the more system utilization.",
+        defaultValue: 20000,
+        value: null,
+        minimum: 5000,
+        icon: mdiTimerOutline,
         requiresServerRestart: true,
       },
     },

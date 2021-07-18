@@ -31,7 +31,7 @@ import logger from "./logger";
 let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean },
-  events: Events = new Events();
+  events: Events;
 
 export async function updateAppConfig(): Promise<void> {
   try {
@@ -191,7 +191,8 @@ export async function startServer(): Promise<void> {
     app.use("/rtc", broker);
     logger.info(`Main - RTC broker created on path ${broker.path()}`);
 
-    events.setup(wsPort, apiKey);
+    events = new Events();
+    events.setup(settings);
   }
 }
 
