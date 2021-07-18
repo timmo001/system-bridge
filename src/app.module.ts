@@ -26,6 +26,7 @@ import { ProcessesModule } from "./processes/processes.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SystemModule } from "./system/system.module";
 import logger from "./logger";
+import { UsbModule } from "./usb/usb.module";
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import logger from "./logger";
     ProcessesModule,
     SettingsModule,
     SystemModule,
+    UsbModule,
     WinstonModule.forRoot(logger),
   ],
   controllers: [],
