@@ -213,6 +213,11 @@ jobs:
       - name: 🚀 Create macos dmg file
         if: matrix.os.platform == 'darwin'
         run: |
+          plutil -lint ./scripts/Info.plist
+          cp ./scripts/Info.plist ./out
+          mkdir -p ./SystemBridge.app/Contents/{MacOS,Resources}
+          cp ./scripts/Info.plist ./ SystemBridge.app/Contents
+          cp -R out/* ./SystemBridge.app/Contents/Resources
           npx appdmg appdmg.json SystemBridge.dmg
       - name: ⬆ Upload Artifacts - MacOS dmg
         if: matrix.os.platform == 'darwin'
