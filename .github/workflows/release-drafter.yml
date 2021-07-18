@@ -35,6 +35,17 @@ jobs:
             --allow-same-version \
             --no-git-tag-version
           cat package.json
+          cd ./frontend
+          npm version ${{ steps.release_drafter.outputs.tag_name }} \
+            --allow-same-version \
+            --no-git-tag-version
+          cat package.json
+          cd ../tray
+          npm version ${{ steps.release_drafter.outputs.tag_name }} \
+            --allow-same-version \
+            --no-git-tag-version
+          cat package.json
+          cd ../
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
           sudo add-apt-repository ppa:rmescandon/yq
           sudo apt update
