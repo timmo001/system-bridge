@@ -150,6 +150,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
+        if: matrix.os.server != 'self-hosted'
         uses: actions/setup-node@v2.2.0
         with:
           node-version: 16.x
