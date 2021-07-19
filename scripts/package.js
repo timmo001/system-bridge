@@ -76,9 +76,7 @@ async function package() {
     "--output",
     join(
       __dirname,
-      `../out/system-bridge${
-        process.platform === "win32" ? "-console.exe" : ""
-      }`
+      `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
     ),
   ]);
 
@@ -87,25 +85,9 @@ async function package() {
     "--output",
     join(
       __dirname,
-      `../out/system-bridge-tray${
-        process.platform === "win32" ? "-console.exe" : ""
-      }`
+      `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     ),
   ]);
-
-  if (process.platform === "win32") {
-    const createNodewExe = require("create-nodew-exe");
-    createNodewExe({
-      src: join(__dirname, "../out/system-bridge-console.exe"),
-      dst: join(__dirname, "../out/system-bridge.exe"),
-    });
-    createNodewExe({
-      src: join(__dirname, "../out/system-bridge-tray-console.exe"),
-      dst: join(__dirname, "../out/system-bridge-tray.exe"),
-    });
-    unlinkSync(join(__dirname, "../out/system-bridge-console.exe"));
-    unlinkSync(join(__dirname, "../out/system-bridge-tray-console.exe"));
-  }
 
   filePaths
     .filter((path) =>

@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { existsSync, mkdirSync } from "fs";
 import { ExpressPeerServer } from "peer";
+import { hideConsole } from "node-hide-console-window";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
@@ -236,5 +237,6 @@ async function openTray(): Promise<void> {
 }
 
 config();
+hideConsole();
 startServer();
 if (process.env.NODE_ENV !== "development") openTray();
