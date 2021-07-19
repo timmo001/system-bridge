@@ -95,7 +95,6 @@
     "@typescript-eslint/eslint-plugin": "4.28.4",
     "@typescript-eslint/parser": "4.28.4",
     "concurrently": "6.2.0",
-    "create-nodew-exe": "1.0.8",
     "cross-env": "7.0.3",
     "eslint": "7.31.0",
     "eslint-config-prettier": "8.3.0",
@@ -114,6 +113,7 @@
   },
   "optionalDependencies": {
     "mdns": "2.7.2",
+    "node-hide-console-window": "2.1.0",
     "win-audio": "2.0.2"
   },
   "jest": {
