@@ -6,7 +6,7 @@ import open from "open";
 import queryString from "query-string";
 
 import {
-  appDataDirectory,
+  getAppDataDirectory,
   getConnection,
   getSettingsObject,
   getUpdates,
@@ -144,7 +144,7 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const path = join(
-              process.env.LOG_PATH || appDataDirectory,
+              process.env.LOG_PATH || getAppDataDirectory(),
               "system-bridge.log"
             );
             logger.info(`Tray - Open Logs: ${path}`);

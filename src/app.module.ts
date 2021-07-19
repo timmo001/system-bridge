@@ -4,7 +4,7 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { WinstonModule } from "nest-winston";
 
-import { appDataDirectory } from "./common";
+import { getAppDataDirectory } from "./common";
 import { AudioModule } from "./audio/audio.module";
 import { BatteryModule } from "./battery/battery.module";
 import { BluetoothModule } from "./bluetooth/bluetooth.module";
@@ -32,7 +32,7 @@ import logger from "./logger";
   imports: [
     TypeOrmModule.forRoot({
       type: "better-sqlite3",
-      database: join(appDataDirectory, "system-bridge_v1.db"),
+      database: join(getAppDataDirectory(), "system-bridge_v1.db"),
       autoLoadEntities: true,
       logging: false,
       synchronize: true,

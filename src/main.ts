@@ -19,7 +19,7 @@ import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 import {
-  appDataDirectory,
+  getAppDataDirectory,
   getConnection,
   getSettingsObject,
   getVersion,
@@ -98,7 +98,8 @@ export async function startServer(): Promise<void> {
   app.enableCors();
 
   // Setup app data directory
-  if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
+  const dir = getAppDataDirectory();
+  if (!existsSync(dir)) mkdirSync(dir);
 
   // Serve public directory
   const publicDir = join(__dirname, "../public");
