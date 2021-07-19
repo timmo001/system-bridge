@@ -90,3 +90,6 @@
 - name: "investigation"
   color: 0e8a16
   description: "An investigation is needed to determine what causes this."
+- name: "waiting-for-response"
+  color: ffee58
+  description: "This issue is waiting for a response."
