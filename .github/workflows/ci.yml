@@ -158,6 +158,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           yarn install:all:ci
+      - name: 🏗 Add console hide command for Windows
+        if: matrix.os.platform == 'win32'
+        run: |
+          Add-Content -Path .\src\main.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.ts)
       - name: 🚀 Package
         run: |
           yarn package
