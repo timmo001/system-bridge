@@ -61,7 +61,6 @@
     "loudness": "0.4.1",
     "mqtt": "4.2.8",
     "nest-winston": "1.5.0",
-    "node-hide-console-window": "2.1.0",
     "node-notifier": "10.0.0",
     "open": "8.2.1",
     "peer": "0.6.1",
@@ -114,6 +113,7 @@
   },
   "optionalDependencies": {
     "mdns": "2.7.2",
+    "node-hide-console-window": "2.1.0",
     "win-audio": "2.0.2"
   },
   "jest": {
