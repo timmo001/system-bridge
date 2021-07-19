@@ -214,10 +214,6 @@ export async function stopServer(): Promise<void> {
   rtc = undefined;
 }
 
-async function hideConsole(): Promise<void> {
-  (await import("node-hide-console-window")).hideConsole();
-}
-
 async function openTray(): Promise<void> {
   try {
     const workingDirectory = process.execPath.substring(
@@ -240,6 +236,5 @@ async function openTray(): Promise<void> {
 }
 
 config();
-if (process.platform === "win32") hideConsole();
 startServer();
 if (process.env.NODE_ENV !== "development") openTray();
