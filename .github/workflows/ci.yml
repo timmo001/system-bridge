@@ -161,7 +161,7 @@ jobs:
       - name: 🏗 Add console hide command for Windows
         if: matrix.os.platform == 'win32'
         run: |
-          Add-Content -Path .\src\main.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.ts)
+          Add-Content -Path .\src\main.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.js)
       - name: 🚀 Package
         run: |
           yarn package
