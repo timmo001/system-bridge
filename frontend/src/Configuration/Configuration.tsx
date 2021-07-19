@@ -117,7 +117,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: false,
         value: null,
         icon: mdiAccessPoint,
-        requiresServerRestart: true,
+        requiresServerRestart: false,
       },
       host: {
         name: "Broker Host",
@@ -125,7 +125,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: "localhost",
         value: null,
         icon: mdiAccessPoint,
-        requiresServerRestart: true,
+        requiresServerRestart: false,
       },
       port: {
         name: "Broker Port",
@@ -134,7 +134,7 @@ export const defaultConfiguration: Configuration = {
         value: null,
         icon: mdiProtocol,
         minimum: 1,
-        requiresServerRestart: true,
+        requiresServerRestart: false,
       },
       username: {
         name: "Broker Username",
@@ -142,7 +142,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: "",
         value: null,
         icon: mdiAccount,
-        requiresServerRestart: true,
+        requiresServerRestart: false,
       },
       password: {
         name: "Broker Password",
@@ -151,7 +151,7 @@ export const defaultConfiguration: Configuration = {
         value: null,
         icon: mdiLock,
         isPassword: true,
-        requiresServerRestart: true,
+        requiresServerRestart: false,
       },
     },
   },
