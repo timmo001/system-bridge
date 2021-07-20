@@ -289,7 +289,7 @@ function ConfigurationComponent(): ReactElement {
             ""
           )}
         </Grid>
-        <Grid className={clsx(classes.headerItem, classes.version)} item xs>
+        <Grid className={clsx(classes.headerItem, classes.version)} item xs={4}>
           {appInfo?.host ? (
             <Typography component="h5" variant="subtitle1">
               <span className={classes.disabled}>Host: </span>
@@ -317,6 +317,25 @@ function ConfigurationComponent(): ReactElement {
                 className={classes.smallButton}
                 aria-label="Copy to clipboard"
                 onClick={() => handleCopyToClipboard(appInfo.ip)}
+              >
+                <Icon
+                  title="Copy to clipboard"
+                  size={0.8}
+                  path={mdiContentCopy}
+                />
+              </IconButton>
+            </Typography>
+          ) : (
+            ""
+          )}
+          {appInfo?.uuid ? (
+            <Typography component="h5" variant="subtitle1">
+              <span className={classes.disabled}>UUID: </span>
+              {appInfo.uuid}
+              <IconButton
+                className={classes.smallButton}
+                aria-label="Copy to clipboard"
+                onClick={() => handleCopyToClipboard(appInfo.uuid)}
               >
                 <Icon
                   title="Copy to clipboard"
