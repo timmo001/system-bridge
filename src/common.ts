@@ -1,15 +1,12 @@
 import { Connection, createConnection, Repository } from "typeorm";
 import { join } from "path";
 import { readFileSync } from "fs";
-import { uuid } from "systeminformation";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import mqtt from "mqtt";
 import semver from "semver";
 
 import { ApplicationUpdate } from "./information/entities/information.entity";
 import { Setting } from "./settings/entities/setting.entity";
-import logger from "./logger";
 
 export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
@@ -138,51 +135,4 @@ export function getVersion(tray = false): string {
     )
   );
   return semver.clean(json.version);
-}
-
-export async function getMqttOptions(): Promise<{
-  enabled: boolean;
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-}> {
-  const connection = await getConnection();
-  const settings = await getSettingsObject(connection);
-  await connection.close();
-
-  return {
-    enabled: settings["mqtt-enabled"] === "true",
-    host: settings["mqtt-host"] || "localhost",
-    port:
-      Number(settings["mqtt-port"]) > 0 ? Number(settings["mqtt-port"]) : 1883,
-    username: settings["mqtt-username"],
-    password: settings["mqtt-password"],
-  };
-}
-
-export async function mqttPublish(
-  topicSuffix: string,
-  data: string
-): Promise<void> {
-  const { enabled, host, port, username, password } = await getMqttOptions();
-  if (enabled) {
-    const id = (await uuid()).os;
-    const mqttClient = mqtt.connect(`mqtt://${host}:${port}`, {
-      username,
-      password,
-      clientId: id,
-    });
-    const topic = `systembridge/${id}/${topicSuffix}`;
-    logger.debug(`MQTT - Publishing to topic ${topic}`);
-    mqttClient.publish(
-      topic,
-      data,
-      { qos: 1, retain: true },
-      (error?: Error) => {
-        if (error)
-          logger.error(`MQTT - Error publishing message: ${error.message}`);
-      }
-    );
-  }
 }
