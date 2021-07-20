@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: ✏ Set Version File
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         run: |
           echo "${{ steps.release_drafter.outputs.tag_name }}"
           npm version ${{ steps.release_drafter.outputs.tag_name }} \
@@ -53,7 +53,7 @@ jobs:
           yq eval '.version = "${{ steps.release_drafter.outputs.tag_name }}"' nfpm.yaml -i
       - name: 🖊 Commit
         uses: stefanzweifel/git-auto-commit-action@v4.11.0
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
