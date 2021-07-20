@@ -9,7 +9,7 @@ import { Injectable, UseGuards } from "@nestjs/common";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
-import { mqttPublish } from "../common";
+import { MQTT } from "../mqtt";
 import { startServer, stopServer } from "../main";
 import { WsAuthGuard } from "../wsAuth.guard";
 import logger from "../logger";
@@ -18,6 +18,12 @@ import logger from "../logger";
 @WebSocketGateway()
 export class EventsGateway {
   private authenticatedClients: Array<WebSocket> = [];
+  private mqtt: MQTT;
+
+  constructor() {
+    this.mqtt = new MQTT();
+    this.mqtt.setup();
+  }
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage("register-listener")
@@ -52,7 +58,7 @@ export class EventsGateway {
             )
           );
       }, 200);
-    await mqttPublish(`event/${data.name}`, JSON.stringify(data.data));
+    await this.mqtt.publish(`event/${data.name}`, JSON.stringify(data.data));
     return { event: "event-sent", data };
   }
 }
