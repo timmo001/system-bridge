@@ -1,18 +1,14 @@
 import React, { ReactElement } from "react";
-import {
-  createMuiTheme,
-  responsiveFontSizes,
-  ThemeProvider,
-} from "@material-ui/core/styles";
+import { responsiveFontSizes, ThemeProvider } from "@material-ui/core/styles";
 import { grey, deepPurple } from "@material-ui/core/colors";
-
+import { createTheme } from "@material-ui/core/styles";
 import "typeface-roboto";
 
 import { SettingsProvider } from "./Utils";
 import Main from "./Main";
 
 const theme = responsiveFontSizes(
-  createMuiTheme({
+  createTheme({
     palette: {
       type: "dark",
       primary: {

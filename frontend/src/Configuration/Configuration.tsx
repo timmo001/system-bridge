@@ -248,7 +248,7 @@ function ConfigurationComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Grid container alignItems="flex-start" justify="flex-start">
+      <Grid container alignItems="flex-start" justifyContent="flex-start">
         <Grid className={classes.disabled} item>
           <Typography component="h1" variant="h2">
             System Bridge
@@ -382,7 +382,7 @@ function ConfigurationComponent(): ReactElement {
           </Grid>
         </Grid>
         {!settings ? (
-          <Grid container direction="row" justify="center">
+          <Grid container direction="row" justifyContent="center">
             <CircularProgress />
           </Grid>
         ) : (
@@ -396,7 +396,7 @@ function ConfigurationComponent(): ReactElement {
         )}
       </Grid>
       <Box className={classes.spacer} />
-      <Grid container direction="row" justify="center">
+      <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Not sure what to do now? Check out the{" "}
           <a
@@ -410,7 +410,7 @@ function ConfigurationComponent(): ReactElement {
         </Typography>
       </Grid>
       <Box className={classes.spacer} />
-      <Grid container direction="row" justify="center">
+      <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Found an issue? Report it{" "}
           <a
@@ -423,7 +423,7 @@ function ConfigurationComponent(): ReactElement {
           .
         </Typography>
       </Grid>
-      <Grid container direction="row" justify="center">
+      <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Thought of a feature that could be added? Suggest it{" "}
           <a
@@ -437,7 +437,7 @@ function ConfigurationComponent(): ReactElement {
         </Typography>
       </Grid>
       <Box className={classes.spacer} />
-      <Grid container direction="row" justify="center">
+      <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Participate in discussions and get help{" "}
           <a

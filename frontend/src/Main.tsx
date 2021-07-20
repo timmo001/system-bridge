@@ -99,7 +99,7 @@ function Main(): ReactElement {
           className={classes.root}
           container
           alignItems="center"
-          justify="center"
+          justifyContent="center"
         >
           <Typography color="textPrimary" component="h2" variant="h4">
             Page not found
