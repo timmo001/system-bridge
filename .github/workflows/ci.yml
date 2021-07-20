@@ -148,6 +148,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
+          clean: ${{ matrix.os.server != 'self-hosted' }}
           ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         if: matrix.os.server != 'self-hosted'
