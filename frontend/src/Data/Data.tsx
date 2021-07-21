@@ -69,13 +69,7 @@ function DataComponent(): ReactElement {
       }
     );
     ws.onEvent = ({ name, data }: Event) => {
-      console.log(
-        "Event:",
-        { name, data },
-        name.includes("data-"),
-        name.includes("observer-"),
-        name.includes("data-") || name.includes("observer-")
-      );
+      console.log("Event:", { name, data });
       if (name.includes("data-") || name.includes("observer-")) {
         const key = dataItems.find((item: string) => name.includes(item));
         if (key) setData({ ...allData, [key]: data });
