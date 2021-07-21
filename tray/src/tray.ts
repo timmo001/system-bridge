@@ -63,13 +63,38 @@ async function setupTray(): Promise<void> {
             : `http://localhost:9170/app`
         }?${queryString.stringify({
           id: "configuration",
-          title: "Settings",
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
 
         logger.info(`Tray - Open Settings: ${url}`);
+        open(url);
+      },
+    },
+    SysTray.separator,
+    {
+      title: "Data",
+      tooltip: "Data",
+      checked: false,
+      enabled: true,
+      click: async () => {
+        const connection = await getConnection();
+        const settings = await getSettingsObject(connection);
+        await connection.close();
+
+        const url = `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000/"
+            : `http://localhost:9170/app`
+        }?${queryString.stringify({
+          id: "data",
+          apiKey: settings["network-apiKey"],
+          apiPort: settings["network-apiPort"] || 9170,
+          wsPort: settings["network-wsPort"] || 9172,
+        })}`;
+
+        logger.info(`Tray - Open Data: ${url}`);
         open(url);
       },
     },
