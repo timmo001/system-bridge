@@ -1,5 +1,4 @@
 import { ReactElement, useEffect, useMemo, useState } from "react";
-import clsx from "clsx";
 import {
   Box,
   createStyles,
@@ -11,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { mdiContentCopy } from "@mdi/js";
 import axios, { AxiosResponse } from "axios";
+import clsx from "clsx";
 import Icon from "@mdi/react";
 
 import { handleCopyToClipboard, parsedQuery } from "../Utils";
