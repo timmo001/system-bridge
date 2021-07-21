@@ -1,5 +1,6 @@
 import { observe } from "systeminformation";
 import axios, { AxiosResponse } from "axios";
+
 import { getConnection, getSettingsObject } from "./common";
 
 export class Observer {
