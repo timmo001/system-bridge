@@ -8,6 +8,7 @@ import ConfigurationComponent, {
   Configuration,
   defaultConfiguration,
 } from "./Configuration/Configuration";
+import Data from "./Data/Data";
 import WebRTC from "./WebRTC/WebRTC";
 
 const useStyles = makeStyles(() =>
@@ -27,10 +28,6 @@ function Main(): ReactElement {
   useEffect(() => {
     try {
       if (!settings) {
-        document.title = query.title
-          ? `${query.title} - System Bridge`
-          : "System Bridge";
-
         axios
           .get<Setting[]>(
             `http://${query.apiHost || "localhost"}:${
@@ -92,6 +89,8 @@ function Main(): ReactElement {
     >
       {query.id === "configuration" ? (
         <ConfigurationComponent />
+      ) : query.id === "data" ? (
+        <Data />
       ) : query.id === "webrtc" ? (
         <WebRTC />
       ) : (

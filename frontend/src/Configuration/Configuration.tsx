@@ -1,13 +1,10 @@
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import clsx from "clsx";
+import { ReactElement, useMemo, useState } from "react";
 import {
-  Box,
   Button,
   CircularProgress,
   Container,
   createStyles,
   Grid,
-  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -22,7 +19,6 @@ import Icon from "@mdi/react";
 import {
   mdiAccessPoint,
   mdiAccount,
-  mdiContentCopy,
   mdiKey,
   mdiLock,
   mdiProtocol,
@@ -31,32 +27,12 @@ import {
   mdiTimerOutline,
 } from "@mdi/js";
 
-import { handleCopyToClipboard, parsedQuery } from "../Utils";
+import { parsedQuery } from "../Utils";
 import { useSettings } from "../Utils";
-import logo from "../resources/system-bridge.svg";
-import Section, { ConfigurationSection } from "./Section";
 import { WebSocketConnection } from "../Common/WebSocket";
-import axios, { AxiosResponse } from "axios";
-
-export interface ApplicationInfo {
-  address: string;
-  fqdn: string;
-  host: string;
-  ip: string;
-  mac: string;
-  port: number;
-  updates?: ApplicationUpdate;
-  uuid: string;
-  version: string;
-  websocketAddress: string;
-  websocketPort: number;
-}
-
-export interface ApplicationUpdate {
-  available: boolean;
-  url: string;
-  version: { current: string; new: string };
-}
+import Footer from "../Common/Footer";
+import Header from "../Common/Header";
+import Section, { ConfigurationSection } from "./Section";
 
 export interface Configuration {
   [section: string]: ConfigurationSection;
@@ -204,28 +180,10 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function ConfigurationComponent(): ReactElement {
-  const [appInfo, setAppInfo] = useState<ApplicationInfo>();
   const [restartRequired, setRestartRequired] = useState<boolean>(false);
   const [settings] = useSettings();
 
   const query = useMemo(() => parsedQuery, []);
-
-  useEffect(() => {
-    if (!appInfo) {
-      axios
-        .get<ApplicationInfo>(
-          `http://${query.apiHost || "localhost"}:${
-            query.apiPort || 9170
-          }/information`,
-          {
-            headers: { "api-key": query.apiKey },
-          }
-        )
-        .then((response: AxiosResponse<ApplicationInfo>) => {
-          setAppInfo(response.data);
-        });
-    }
-  }, [appInfo, setAppInfo, query]);
 
   function handleServerRestartRequired(): void {
     setRestartRequired(true);
@@ -248,117 +206,7 @@ function ConfigurationComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Grid container alignItems="flex-start" justifyContent="flex-start">
-        <Grid className={classes.disabled} item>
-          <Typography component="h1" variant="h2">
-            System Bridge
-          </Typography>
-          <Typography component="h2" variant="h4">
-            Settings
-          </Typography>
-        </Grid>
-        <Grid
-          className={clsx(
-            classes.disabled,
-            classes.headerItem,
-            classes.version
-          )}
-          item
-          xs
-        >
-          {appInfo?.version ? (
-            <>
-              <Typography component="h3" variant="h5">
-                {appInfo.version}
-              </Typography>
-              <Typography component="h4" variant="subtitle1">
-                {appInfo.updates?.available ? (
-                  <a
-                    href={appInfo.updates?.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Version {appInfo.updates.version.new} avaliable!
-                  </a>
-                ) : (
-                  ""
-                )}
-              </Typography>
-            </>
-          ) : (
-            ""
-          )}
-        </Grid>
-        <Grid className={clsx(classes.headerItem, classes.version)} item xs={4}>
-          {appInfo?.host ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>Host: </span>
-              {appInfo.host}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.host)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-          {appInfo?.ip ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>IP: </span>
-              {appInfo.ip}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.ip)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-          {appInfo?.uuid ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>UUID: </span>
-              {appInfo.uuid}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.uuid)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-        </Grid>
-        <Grid className={classes.headerItem} item>
-          <a
-            href="https://system-bridge.timmo.dev"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img src={logo} alt="System Bridge Logo" />
-          </a>
-        </Grid>
-      </Grid>
-      <Box className={classes.spacer} />
+      <Header name="Settings" />
       <Grid container direction="column" spacing={2} alignItems="stretch">
         <Grid container direction="row" item xs={12}>
           <Grid item xs={4} className={classes.disabled}>
@@ -414,61 +262,7 @@ function ConfigurationComponent(): ReactElement {
           ))
         )}
       </Grid>
-      <Box className={classes.spacer} />
-      <Grid container direction="row" justifyContent="center">
-        <Typography component="span" variant="body1">
-          Not sure what to do now? Check out the{" "}
-          <a
-            href="https://system-bridge.timmo.dev"
-            target="_blank"
-            rel="noreferrer"
-          >
-            website
-          </a>{" "}
-          for more information and documentation.
-        </Typography>
-      </Grid>
-      <Box className={classes.spacer} />
-      <Grid container direction="row" justifyContent="center">
-        <Typography component="span" variant="body1">
-          Found an issue? Report it{" "}
-          <a
-            href="https://github.com/timmo001/system-bridge/issues/new/choose"
-            target="_blank"
-            rel="noreferrer"
-          >
-            here
-          </a>
-          .
-        </Typography>
-      </Grid>
-      <Grid container direction="row" justifyContent="center">
-        <Typography component="span" variant="body1">
-          Thought of a feature that could be added? Suggest it{" "}
-          <a
-            href="https://github.com/timmo001/system-bridge/issues/new/choose"
-            target="_blank"
-            rel="noreferrer"
-          >
-            here
-          </a>
-          .
-        </Typography>
-      </Grid>
-      <Box className={classes.spacer} />
-      <Grid container direction="row" justifyContent="center">
-        <Typography component="span" variant="body1">
-          Participate in discussions and get help{" "}
-          <a
-            href="https://github.com/timmo001/system-bridge/discussions"
-            target="_blank"
-            rel="noreferrer"
-          >
-            here
-          </a>
-          .
-        </Typography>
-      </Grid>
+      <Footer />
     </Container>
   );
 }
