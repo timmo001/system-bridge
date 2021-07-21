@@ -1,4 +1,6 @@
 import { observe } from "systeminformation";
+import axios, { AxiosResponse } from "axios";
+import { getConnection, getSettingsObject } from "./common";
 
 export class Observer {
   private observers: Array<number>;
@@ -11,26 +13,36 @@ export class Observer {
         Number(settings["observer-timeout"]) >= 5000
           ? Number(settings["observer-timeout"])
           : 30000,
-      callback = (data: { [key: string]: { [key: string]: any } }) => cb(data);
+      callback = async (name: string) => {
+        const connection = await getConnection();
+        const settings = await getSettingsObject(connection);
+        await connection.close();
 
-    callback({ status: { status: 1 } });
+        const response: AxiosResponse<any> = await axios.get<any>(
+          `http://localhost:${settings["network-apiPort"] || 9170}/${name}`,
+          { headers: { "api-key": settings["network-apiKey"] } }
+        );
+        if (response.status === 200) cb({ [name]: response.data });
+      };
+
+    cb({ status: { status: 1 } });
     this.observers = [
-      observe({ audio: "*" }, timeout, callback),
-      observe({ battery: "*" }, timeout, callback),
-      observe({ cpu: "*" }, timeout, callback),
-      observe({ cpuCurrentSpeed: "*" }, timeout, callback),
-      observe({ cpuTemperature: "*" }, timeout, callback),
-      observe({ currentLoad: "*" }, timeout, callback),
-      observe({ fsSize: "*" }, timeout, callback),
-      observe({ mem: "*" }, timeout, callback),
-      observe({ memLayout: "*" }, timeout, callback),
-      observe({ networkStats: "*" }, timeout, callback),
-      observe({ osInfo: "*" }, timeout, callback),
-      observe({ processes: "*" }, timeout, callback),
-      observe({ system: "*" }, timeout, callback),
-      observe({ users: "*" }, timeout, callback),
-      observe({ wifiConnections: "*" }, timeout, callback),
-      observe({ wifiNetworks: "*" }, timeout, callback),
+      observe({ audio: "*" }, timeout, () => callback("audio")),
+      observe({ battery: "*" }, timeout, () => callback("battery")),
+      observe({ cpu: "*" }, timeout, () => callback("cpu")),
+      observe({ cpuCurrentSpeed: "*" }, timeout, () => callback("cpu")),
+      observe({ cpuTemperature: "*" }, timeout, () => callback("cpu")),
+      observe({ currentLoad: "*" }, timeout, () => callback("processes")),
+      observe({ fsSize: "*" }, timeout, () => callback("filesystem")),
+      observe({ mem: "*" }, timeout, () => callback("memory")),
+      observe({ memLayout: "*" }, timeout, () => callback("memory")),
+      observe({ networkStats: "*" }, timeout, () => callback("network")),
+      observe({ osInfo: "*" }, timeout, () => callback("os")),
+      observe({ processes: "*" }, timeout, () => callback("processes")),
+      observe({ system: "*" }, timeout, () => callback("system")),
+      observe({ users: "*" }, timeout, () => callback("os")),
+      observe({ wifiConnections: "*" }, timeout, () => callback("network")),
+      observe({ wifiNetworks: "*" }, timeout, () => callback("network")),
     ];
   }
 
