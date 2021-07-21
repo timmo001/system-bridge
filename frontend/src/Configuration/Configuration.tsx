@@ -15,7 +15,6 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import Icon from "@mdi/react";
 import {
   mdiAccessPoint,
   mdiAccount,
@@ -26,6 +25,7 @@ import {
   mdiRocketLaunch,
   mdiTimerOutline,
 } from "@mdi/js";
+import Icon from "@mdi/react";
 
 import { parsedQuery } from "../Utils";
 import { useSettings } from "../Utils";
