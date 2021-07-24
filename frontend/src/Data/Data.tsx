@@ -25,6 +25,7 @@ const items = [
   "display",
   "filesystem",
   "graphics",
+  "information",
   "memory",
   "network",
   "os",
@@ -66,6 +67,7 @@ function DataComponent(): ReactElement {
   const [display, setDisplay] = useState<any>();
   const [filesystem, setFilesystem] = useState<any>();
   const [graphics, setGraphics] = useState<any>();
+  const [information, setInformation] = useState<any>();
   const [memory, setMemory] = useState<any>();
   const [network, setNetwork] = useState<any>();
   const [os, setOs] = useState<any>();
@@ -109,6 +111,9 @@ function DataComponent(): ReactElement {
             break;
           case "graphics":
             setGraphics(data);
+            break;
+          case "information":
+            setInformation(data);
             break;
           case "memory":
             setMemory(data);
@@ -179,12 +184,13 @@ function DataComponent(): ReactElement {
                 <Tab label="Display" {...a11yProps(4)} />
                 <Tab label="Filesystem" {...a11yProps(5)} />
                 <Tab label="Graphics" {...a11yProps(6)} />
-                <Tab label="Memory" {...a11yProps(7)} />
-                <Tab label="Network" {...a11yProps(8)} />
-                <Tab label="OS" {...a11yProps(9)} />
-                <Tab label="Processes" {...a11yProps(10)} />
-                <Tab label="System" {...a11yProps(11)} />
-                <Tab label="USB" {...a11yProps(12)} />
+                <Tab label="Information" {...a11yProps(7)} />
+                <Tab label="Memory" {...a11yProps(8)} />
+                <Tab label="Network" {...a11yProps(9)} />
+                <Tab label="OS" {...a11yProps(10)} />
+                <Tab label="Processes" {...a11yProps(11)} />
+                <Tab label="System" {...a11yProps(12)} />
+                <Tab label="USB" {...a11yProps(13)} />
               </Tabs>
             </Grid>
             <Grid item xs>
@@ -203,16 +209,18 @@ function DataComponent(): ReactElement {
               ) : tab === 6 ? (
                 <DataItems name="Graphics" data={graphics} />
               ) : tab === 7 ? (
-                <DataItems name="Memory" data={memory} />
+                <DataItems name="Information" data={information} />
               ) : tab === 8 ? (
-                <DataItems name="Network" data={network} />
+                <DataItems name="Memory" data={memory} />
               ) : tab === 9 ? (
-                <DataItems name="OS" data={os} />
+                <DataItems name="Network" data={network} />
               ) : tab === 10 ? (
-                <DataItems name="Processes" data={processes} />
+                <DataItems name="OS" data={os} />
               ) : tab === 11 ? (
-                <DataItems name="System" data={system} />
+                <DataItems name="Processes" data={processes} />
               ) : tab === 12 ? (
+                <DataItems name="System" data={system} />
+              ) : tab === 13 ? (
                 <DataItems name="USB" data={usb} />
               ) : (
                 ""
