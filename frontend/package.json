@@ -15,6 +15,7 @@
     "query-string": "7.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-json-view": "1.21.3",
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.3",
     "rect-scaler": "1.0.0",
