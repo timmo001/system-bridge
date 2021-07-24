@@ -38,18 +38,20 @@ async function setupTray(): Promise<void> {
   );
 
   const versionText = updates.available
-    ? `Version ${updates.version.new} avaliable!`
-    : `${updates.newer ? "Newer" : "Latest"} Version (${
-        updates.version.current
-      })`;
+    ? `Version ${updates.version.new} avaliable! (${updates.version.current} -> ${updates.version.new})`
+    : `${
+        updates.newer
+          ? `Version Newer (${updates.version.current} > ${updates.version.new})`
+          : `Latest Version (${updates.version.current})`
+      } `;
 
   const st = await import("systray2");
   const SysTray = st.default;
 
   const items = [
     {
-      title: "Settings",
-      tooltip: "Settings",
+      title: "Open Settings",
+      tooltip: "Open Settings",
       checked: false,
       enabled: true,
       click: async () => {
@@ -74,8 +76,8 @@ async function setupTray(): Promise<void> {
     },
     SysTray.separator,
     {
-      title: "Data",
-      tooltip: "Data",
+      title: "View Data",
+      tooltip: "View Data",
       checked: false,
       enabled: true,
       click: async () => {
