@@ -23,7 +23,7 @@ export class Events {
           (data: { [key: string]: { [key: string]: any } }) => {
             const key = Object.keys(data)[0];
             this.websocketConnection.sendEvent({
-              name: `observer-${key.replace(
+              name: `data-${key.replace(
                 /([A-Z])/g,
                 (x: string) => `-${x.toLowerCase()}`
               )}`,
