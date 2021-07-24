@@ -84,7 +84,7 @@ function DataComponent(): ReactElement {
   const query = useMemo(() => parsedQuery, []);
 
   const eventHandler = useCallback(({ name, data }: Event) => {
-    if (name.includes("data-") || name.includes("observer-")) {
+    if (name.includes("data-")) {
       const key = items.find((item: string) => name.includes(item));
       if (key) {
         console.log("Data update:", { key, data });

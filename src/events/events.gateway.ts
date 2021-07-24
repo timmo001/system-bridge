@@ -58,8 +58,11 @@ export class EventsGateway {
             )
           );
       }, 200);
-    if (data.name.includes("observer-"))
-      await this.mqtt.publish(`event/${data.name}`, JSON.stringify(data.data));
+    if (data.name.includes("data-"))
+      await this.mqtt.publish(
+        `data/${data.name.replace("data-", "")}`,
+        JSON.stringify(data.data)
+      );
     return { event: "event-sent", data };
   }
 }
