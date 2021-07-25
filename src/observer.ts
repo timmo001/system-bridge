@@ -1,7 +1,8 @@
-import { observe } from "systeminformation";
+import { observe as siObserve } from "systeminformation";
 import axios, { AxiosResponse } from "axios";
 
 import { getConnection, getSettingsObject } from "./common";
+import { getCurrent } from "./audio/data";
 
 export class Observer {
   private observers: Array<number>;
@@ -28,27 +29,102 @@ export class Observer {
 
     cb({ status: { status: 1 } });
     this.observers = [
-      observe({ audio: "*" }, timeout, () => callback("audio")),
-      observe({ battery: "*" }, timeout, () => callback("battery")),
-      observe({ cpu: "*" }, timeout, () => callback("cpu")),
-      observe({ cpuCurrentSpeed: "*" }, timeout, () => callback("cpu")),
-      observe({ cpuTemperature: "*" }, timeout, () => callback("cpu")),
-      observe({ currentLoad: "*" }, timeout, () => callback("processes")),
-      observe({ fsSize: "*" }, timeout, () => callback("filesystem")),
-      observe({ mem: "*" }, timeout, () => callback("memory")),
-      observe({ memLayout: "*" }, timeout, () => callback("memory")),
-      observe({ networkStats: "*" }, timeout, () => callback("network")),
-      observe({ osInfo: "*" }, timeout, () => callback("os")),
-      observe({ processes: "*" }, timeout, () => callback("processes")),
-      observe({ system: "*" }, timeout, () => callback("system")),
-      observe({ users: "*" }, timeout, () => callback("os")),
-      observe({ wifiConnections: "*" }, timeout, () => callback("network")),
-      observe({ wifiNetworks: "*" }, timeout, () => callback("network")),
+      this.observe({ type: "audioData" }, timeout, () => callback("audio")),
+      this.observe({ type: "systeminformation", key: "audio" }, timeout, () =>
+        callback("audio")
+      ),
+      this.observe({ type: "systeminformation", key: "battery" }, timeout, () =>
+        callback("battery")
+      ),
+      this.observe({ type: "systeminformation", key: "cpu" }, timeout, () =>
+        callback("cpu")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "cpuCurrentSpeed" },
+        timeout,
+        () => callback("cpu")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "cpuTemperature" },
+        timeout,
+        () => callback("cpu")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "currentLoad" },
+        timeout,
+        () => callback("processes")
+      ),
+      this.observe({ type: "systeminformation", key: "fsSize" }, timeout, () =>
+        callback("filesystem")
+      ),
+      this.observe({ type: "systeminformation", key: "mem" }, timeout, () =>
+        callback("memory")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "memLayout" },
+        timeout,
+        () => callback("memory")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "networkStats" },
+        timeout,
+        () => callback("network")
+      ),
+      this.observe({ type: "systeminformation", key: "osInfo" }, timeout, () =>
+        callback("os")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "processes" },
+        timeout,
+        () => callback("processes")
+      ),
+      this.observe({ type: "systeminformation", key: "system" }, timeout, () =>
+        callback("system")
+      ),
+      this.observe({ type: "systeminformation", key: "users" }, timeout, () =>
+        callback("os")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "wifiConnections" },
+        timeout,
+        () => callback("network")
+      ),
+      this.observe(
+        { type: "systeminformation", key: "wifiNetworks" },
+        timeout,
+        () => callback("network")
+      ),
     ];
   }
 
   cleanup(): void {
     this.observers.forEach((observer: number) => clearInterval(observer));
     this.observers = undefined;
+  }
+
+  observe(
+    config: { type: "systeminformation" | "audioData" | string; key?: string },
+    interval: number,
+    cb: (item: string) => void
+  ): number {
+    switch (config.type) {
+      case "audioData":
+        this.observeAudioData(interval, cb);
+      case "systeminformation":
+        if (config.key) return siObserve({ [config.key]: "*" }, interval, cb);
+      default:
+        return -1;
+    }
+  }
+
+  observeAudioData(interval: number, callback: (data: any) => void) {
+    let audioData: { muted?: boolean; volume?: number };
+    return setInterval(async () => {
+      const data = await getCurrent();
+      if (JSON.stringify(audioData) !== JSON.stringify(data)) {
+        audioData = Object.assign({}, data);
+        callback(data);
+      }
+    }, interval);
   }
 }

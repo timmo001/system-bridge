@@ -4,27 +4,18 @@ import { audio, Systeminformation } from "systeminformation";
 import { Audio } from "./entities/audio.entity";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 import logger from "../logger";
-import { muted, volume } from "./data";
+import { getCurrent, muted, volume } from "./data";
 
 @Injectable()
 export class AudioService {
   async findAll(): Promise<Audio> {
-    let current = {};
     let devices: Systeminformation.AudioData[] = [];
-    try {
-      current = {
-        muted: await muted(),
-        volume: await volume(),
-      };
-    } catch (e) {
-      logger.info(`Cannot get current audio: ${e.message}`);
-    }
     try {
       devices = await audio();
     } catch (e) {
       logger.info(`Cannot get audio devices: ${e.message}`);
     }
-    return { current, devices };
+    return { current: await getCurrent(), devices };
   }
 
   async update(

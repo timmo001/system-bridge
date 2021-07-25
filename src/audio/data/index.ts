@@ -1,3 +1,5 @@
+import logger from "../../logger";
+
 function getImpl(platform: string): any {
   switch (platform) {
     case "linux":
@@ -18,4 +20,19 @@ export async function muted(value?: boolean): Promise<boolean> {
 
 export async function volume(value?: number): Promise<number> {
   return value ? impl.setVolume(value) : impl.getVolume();
+}
+
+export async function getCurrent(): Promise<{
+  muted?: boolean;
+  volume?: number;
+}> {
+  try {
+    return {
+      muted: await muted(),
+      volume: await volume(),
+    };
+  } catch (e) {
+    logger.info(`Cannot get current audio: ${e.message}`);
+  }
+  return {};
 }
