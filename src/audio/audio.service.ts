@@ -9,27 +9,20 @@ import { muted, volume } from "./data";
 @Injectable()
 export class AudioService {
   async findAll(): Promise<Audio> {
-    let current = {
-      muted: false,
-      volume: -1,
-    };
-    let devices: Systeminformation.AudioData[];
+    let current = {};
+    let devices: Systeminformation.AudioData[] = [];
     try {
       current = {
         muted: await muted(),
         volume: await volume(),
       };
     } catch (e) {
-      logger.info(
-        `Cannot get current audio from audioData module: ${e.message}`
-      );
+      logger.info(`Cannot get current audio: ${e.message}`);
     }
     try {
       devices = await audio();
     } catch (e) {
-      logger.info(
-        `Cannot get audio devices from systeminformation module: ${e.message}`
-      );
+      logger.info(`Cannot get audio devices: ${e.message}`);
     }
     return { current, devices };
   }
