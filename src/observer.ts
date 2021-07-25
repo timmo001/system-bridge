@@ -126,7 +126,7 @@ export class Observer {
     return setInterval(async () => {
       const d = await func();
       if (JSON.stringify(data) !== JSON.stringify(d)) {
-        data = Object.assign({}, d);
+        data = d;
         callback(d);
       }
     }, interval);
