@@ -109,7 +109,7 @@ export class Observer {
   ): number {
     switch (config.type) {
       case "audioData":
-        this.observeAudioData(interval, cb);
+        this.customObserver(getCurrent, interval, cb);
       case "systeminformation":
         if (config.key) return siObserve({ [config.key]: "*" }, interval, cb);
       default:
@@ -117,13 +117,17 @@ export class Observer {
     }
   }
 
-  observeAudioData(interval: number, callback: (data: any) => void) {
-    let audioData: { muted?: boolean; volume?: number };
+  customObserver(
+    func: { (): Promise<{ muted?: boolean; volume?: number }>; (): any },
+    interval: number,
+    callback: (data: any) => void
+  ) {
+    let data: any;
     return setInterval(async () => {
-      const data = await getCurrent();
-      if (JSON.stringify(audioData) !== JSON.stringify(data)) {
-        audioData = Object.assign({}, data);
-        callback(data);
+      const d = await func();
+      if (JSON.stringify(data) !== JSON.stringify(d)) {
+        data = Object.assign({}, d);
+        callback(d);
       }
     }, interval);
   }
