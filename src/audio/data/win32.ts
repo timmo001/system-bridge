@@ -1,4 +1,5 @@
-import { speaker } from "win-audio";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { speaker } = require("win-audio");
 
 export async function getVolume(): Promise<number> {
   return await speaker.get();
