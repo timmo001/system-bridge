@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { audio } from "systeminformation";
+import { audio, Systeminformation } from "systeminformation";
 import { audio as scAudio } from "system-control";
 
 import { Audio } from "./entities/audio.entity";
@@ -13,7 +13,7 @@ export class AudioService {
       muted: false,
       volume: -1,
     };
-    let devices;
+    let devices: Systeminformation.AudioData[];
     try {
       current = {
         muted: await scAudio.muted(),
