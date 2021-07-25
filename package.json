@@ -71,7 +71,6 @@
     "rxjs": "7.2.0",
     "semver": "7.3.5",
     "swagger-ui-express": "4.1.6",
-    "system-control": "0.1.1",
     "systeminformation": "5.7.8",
     "typeorm": "0.2.34",
     "uuid": "8.3.2",

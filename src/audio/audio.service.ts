@@ -1,57 +1,57 @@
 import { Injectable } from "@nestjs/common";
-import { audio } from "systeminformation";
-import { audio as scAudio } from "system-control";
+import { audio, Systeminformation } from "systeminformation";
 
 import { Audio } from "./entities/audio.entity";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 import logger from "../logger";
+import { muted, volume } from "./data";
 
 @Injectable()
 export class AudioService {
   async findAll(): Promise<Audio> {
-    let current = {
-      muted: false,
-      volume: -1,
-    };
+    let current = {};
+    let devices: Systeminformation.AudioData[] = [];
     try {
       current = {
-        muted: await scAudio.muted(),
-        volume: await scAudio.volume(),
+        muted: await muted(),
+        volume: await volume(),
       };
     } catch (e) {
-      logger.info(`Cannot get audio from loudness module: ${e.message}`);
+      logger.info(`Cannot get current audio: ${e.message}`);
     }
-    return {
-      current,
-      devices: await audio(),
-    };
+    try {
+      devices = await audio();
+    } catch (e) {
+      logger.info(`Cannot get audio devices: ${e.message}`);
+    }
+    return { current, devices };
   }
 
   async update(
     id: UpdateAudioId,
     updateAudioDto: UpdateAudioDto
   ): Promise<Audio> {
-    const currentVolume: number = await scAudio.volume();
+    const currentVolume: number = await volume();
     switch (id) {
       default:
         break;
       case "mute":
         if (typeof updateAudioDto.value === "boolean")
-          await scAudio.muted(updateAudioDto.value);
+          await muted(updateAudioDto.value);
         break;
       case "volume":
         if (typeof updateAudioDto.value === "number")
-          await scAudio.volume(updateAudioDto.value);
+          await volume(updateAudioDto.value);
         break;
       case "volumeDown":
         if (typeof updateAudioDto.value === "number")
-          await scAudio.volume(currentVolume - updateAudioDto.value);
-        else await scAudio.volume(currentVolume - 5);
+          await volume(currentVolume - updateAudioDto.value);
+        else await volume(currentVolume - 5);
         break;
       case "volumeUp":
         if (typeof updateAudioDto.value === "number")
-          await scAudio.volume(currentVolume + updateAudioDto.value);
-        else await scAudio.volume(currentVolume + 5);
+          await volume(currentVolume + updateAudioDto.value);
+        else await volume(currentVolume + 5);
         break;
     }
     return this.findAll();
