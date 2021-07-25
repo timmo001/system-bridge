@@ -13,18 +13,25 @@ export class AudioService {
       muted: false,
       volume: -1,
     };
+    let devices;
     try {
       current = {
         muted: await scAudio.muted(),
         volume: await scAudio.volume(),
       };
     } catch (e) {
-      logger.info(`Cannot get audio from loudness module: ${e.message}`);
+      logger.info(
+        `Cannot get current audio from loudness module: ${e.message}`
+      );
     }
-    return {
-      current,
-      devices: await audio(),
-    };
+    try {
+      devices = await audio();
+    } catch (e) {
+      logger.info(
+        `Cannot get audio devices from systeminformation module: ${e.message}`
+      );
+    }
+    return { current, devices };
   }
 
   async update(
