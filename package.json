@@ -86,7 +86,7 @@
     "@types/helmet": "4.0.0",
     "@types/jest": "26.0.24",
     "@types/mdns": "0.0.34",
-    "@types/node": "16.4.1",
+    "@types/node": "16.4.3",
     "@types/node-notifier": "8.0.1",
     "@types/semver": "7.3.8",
     "@types/supertest": "2.0.11",
