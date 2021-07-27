@@ -93,3 +93,6 @@
 - name: "waiting-for-response"
   color: ffee58
   description: "This issue is waiting for a response."
+- name: "unable-to-reproduce"
+  color: ffee58
+  description: "This issue cannot be reproduced. It may be configuration or system related."
