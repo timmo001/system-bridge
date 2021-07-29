@@ -43,3 +43,5 @@ junit.xml
 *setup.exe
 *.deb
 *.rpm
+*.dmg
+*.app
