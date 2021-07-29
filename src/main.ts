@@ -238,3 +238,9 @@ async function openTray(): Promise<void> {
 config();
 startServer();
 if (process.env.NODE_ENV !== "development") openTray();
+
+setInterval(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const cpus = require("os").cpus();
+  console.log(cpus[0].speed);
+}, 2000);
