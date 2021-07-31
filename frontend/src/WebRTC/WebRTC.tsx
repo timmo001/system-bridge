@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useEffect } from "react";
+import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 import { createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
@@ -7,7 +7,7 @@ import { largestRect } from "rect-scaler";
 import { Icon } from "@mdi/react";
 import { mdiPhoneHangup } from "@mdi/js";
 
-import { useSettings } from "../Utils";
+import { parsedQuery, useSettings } from "../Utils";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -37,6 +37,8 @@ let peer: Peer | null,
 
 function WebRTC(): ReactElement {
   const [settings] = useSettings();
+
+  const query = useMemo(() => parsedQuery, []);
 
   const classes = useStyles();
 
@@ -107,9 +109,9 @@ function WebRTC(): ReactElement {
 
     const config = {
       host: "localhost",
-      key: String(settings?.network.items.apiKey.value),
+      key: String(query.apiKey),
       path: "/rtc",
-      port: Number(settings?.network.items.port.value),
+      port: Number(query.apiPort) || 9170,
     };
     peer = new Peer(`host-${uuidv4()}`, config);
 
@@ -172,7 +174,13 @@ function WebRTC(): ReactElement {
       if (peerConnectionInterval) clearInterval(peerConnectionInterval);
       peerConnectionInterval = setInterval(updateStreams, 1000);
     });
-  }, [classes.stream, debouncedRecalculateLayout, settings, updateStreams]);
+  }, [
+    classes.stream,
+    debouncedRecalculateLayout,
+    query.apiKey,
+    query.apiPort,
+    updateStreams,
+  ]);
 
   useEffect(() => {
     if (settings) handleConnect();
