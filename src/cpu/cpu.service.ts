@@ -59,7 +59,11 @@ export class CpuService {
         ) {
           const clocks: Array<number> = [];
           for (const sensor of hardwareSensors) {
-            if (sensor.type === "Clock" && typeof sensor.value === "number")
+            if (
+              sensor.type === "Clock" &&
+              !sensor.name.toLower().includes("Bus") &&
+              typeof sensor.value === "number"
+            )
               clocks.push(sensor.value);
           }
           if (clocks.length > 0) {
