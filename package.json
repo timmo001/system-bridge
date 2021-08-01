@@ -1,6 +1,6 @@
 {
   "name": "system-bridge",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -71,7 +71,7 @@
     "rxjs": "7.3.0",
     "semver": "7.3.5",
     "swagger-ui-express": "4.1.6",
-    "system-bridge-windows-sensors": "1.0.0",
+    "system-bridge-windows-sensors": "1.2.0",
     "systeminformation": "5.7.13",
     "typeorm": "0.2.35",
     "uuid": "8.3.2",
