@@ -1,4 +1,4 @@
-const { copyFileSync, existsSync, mkdirSync, unlinkSync } = require("fs");
+const { copyFileSync, existsSync, mkdirSync } = require("fs");
 const { exec } = require("pkg");
 const { join } = require("path");
 
@@ -66,6 +66,41 @@ const filePaths = [
   {
     from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
     to: "../out/traybin/tray_windows_release.exe",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/HidSharp.dll",
+    to: "../out/WindowsSensors/HidSharp.dll",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/HidSharp.pdb",
+    to: "../out/WindowsSensors/HidSharp.pdb",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/HidSharp.xml",
+    to: "../out/WindowsSensors/HidSharp.xml",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/LibreHardwareMonitorLib.dll",
+    to: "../out/WindowsSensors/LibreHardwareMonitorLib.dll",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/Newtonsoft.Json.dll",
+    to: "../out/WindowsSensors/Newtonsoft.Json.dll",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/Newtonsoft.Json.xml",
+    to: "../out/WindowsSensors/Newtonsoft.Json.xml",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/SystemBridgeWindowsSensors.exe",
+    to: "../out/WindowsSensors/SystemBridgeWindowsSensors.exe",
     platform: "win32",
   },
 ];

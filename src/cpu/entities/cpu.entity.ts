@@ -1,3 +1,4 @@
+import { Sensor } from "system-bridge-windows-sensors";
 import { Systeminformation } from "systeminformation";
 
 export interface CPU {
@@ -5,4 +6,5 @@ export interface CPU {
   cpu: Systeminformation.CpuData;
   currentSpeed: Systeminformation.CpuCurrentSpeedData;
   temperature: Systeminformation.CpuTemperatureData;
+  hardwareSensors?: Array<Sensor>;
 }
