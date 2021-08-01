@@ -5779,10 +5779,10 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-system-bridge-windows-sensors@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/system-bridge-windows-sensors/-/system-bridge-windows-sensors-0.1.4.tgz#719412915f626e64b1d525705227babd803e69f1"
-  integrity sha512-05acGU4mEHMrqZyQq8mLqvOF1l7lUAilXLuZjoSWvNhNByT5Y3VbdmXkFFh6pUfKO334GhQGC5Y6DglUhWC31A==
+system-bridge-windows-sensors@0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/system-bridge-windows-sensors/-/system-bridge-windows-sensors-0.1.9.tgz#1466442a0d045938fd78560bf5c24001b3e2ae09"
+  integrity sha512-y7pN0Y+nEdWhXFZIi/5irUUnECufDjiQAVvTznaUZU8xpmd1JP4roVDgRfwXWG4VaiZtlFPUMIpgaqOEsy7Z2A==
   dependencies:
     execa "5.1.1"
 
