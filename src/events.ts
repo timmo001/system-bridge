@@ -11,11 +11,13 @@ export class Events {
   private observer: Observer;
 
   async setup(settings: { [key: string]: string }): Promise<void> {
+    logger.debug(`Events - Setup: ${settings}`);
     this.websocketConnection = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
       true,
       () => {
+        logger.info("Events - Listening");
         this.websocketConnection.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer();
         this.observer.setup(
@@ -34,6 +36,7 @@ export class Events {
       }
     );
     this.websocketConnection.onEvent = async (event: Event) => {
+      logger.info(`Events - Received event: ${event.name}`);
       switch (event.name) {
         case "get-data":
           logger.info("Events - Get data");
