@@ -38,17 +38,20 @@ export class CpuService {
 
         if (!data.cpu.voltage)
           data.cpu.voltage = String(
-            hardwareSensors.find(
-              (sensor) =>
-                sensor.type === "Voltage" && sensor.name.startsWith("Core #")
-            ).value
+            Math.round(
+              hardwareSensors.find(
+                (sensor) =>
+                  sensor.type === "Voltage" && sensor.name.startsWith("Core #")
+              ).value * 100
+            ) / 100
           );
 
         if (!data.temperature.main)
-          data.temperature.main = Number(
-            hardwareSensors.find((sensor) => sensor.type === "Temperature")
-              .value
-          );
+          data.temperature.main =
+            Math.round(
+              hardwareSensors.find((sensor) => sensor.type === "Temperature")
+                .value * 100
+            ) / 100;
 
         if (
           !data.currentSpeed.avg ||
