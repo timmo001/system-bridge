@@ -26,8 +26,9 @@ export class CpuService {
           "system-bridge-windows-sensors"
         );
 
-        sensors = (await getHardwareByType("Cpu", !__filename.includes("node")))
-          .sensors;
+        sensors = (
+          await getHardwareByType("Cpu", !process.argv0.includes("node.exe"))
+        ).sensors;
       } catch (e) {
         logger.error(e.message);
       }
