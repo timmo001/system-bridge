@@ -6,5 +6,5 @@ export interface CPU {
   cpu: Systeminformation.CpuData;
   currentSpeed: Systeminformation.CpuCurrentSpeedData;
   temperature: Systeminformation.CpuTemperatureData;
-  sensors?: Array<Sensor>;
+  hardwareSensors?: Array<Sensor>;
 }

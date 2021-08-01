@@ -20,25 +20,25 @@ export class CpuService {
     };
 
     if (process.platform === "win32") {
-      let sensors = [];
+      let hardwareSensors = [];
       try {
         const { getHardwareByType } = await import(
           "system-bridge-windows-sensors"
         );
 
-        sensors = (
+        hardwareSensors = (
           await getHardwareByType("Cpu", !process.argv0.includes("node.exe"))
         ).sensors;
       } catch (e) {
         logger.error(e.message);
       }
 
-      if (sensors) {
-        data.sensors = sensors;
+      if (hardwareSensors) {
+        data.hardwareSensors = hardwareSensors;
 
         if (!data.cpu.voltage)
           data.cpu.voltage = String(
-            sensors.find(
+            hardwareSensors.find(
               (sensor) =>
                 sensor.type === "Voltage" && sensor.name.startsWith("Core #")
             ).value
@@ -46,7 +46,8 @@ export class CpuService {
 
         if (!data.temperature.main)
           data.temperature.main = Number(
-            sensors.find((sensor) => sensor.type === "Temperature").value
+            hardwareSensors.find((sensor) => sensor.type === "Temperature")
+              .value
           );
 
         if (
@@ -54,7 +55,7 @@ export class CpuService {
           data.currentSpeed.min === data.currentSpeed.max
         ) {
           const clocks: Array<number> = [];
-          for (const sensor of sensors) {
+          for (const sensor of hardwareSensors) {
             if (sensor.type === "Clock" && typeof sensor.value === "number")
               clocks.push(sensor.value);
           }
