@@ -36,7 +36,6 @@ export class Events {
       }
     );
     this.websocketConnection.onEvent = async (event: Event) => {
-      logger.info(`Events - Received event: ${event.name}`);
       switch (event.name) {
         case "get-data":
           logger.info("Events - Get data");
