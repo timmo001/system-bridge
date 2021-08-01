@@ -61,10 +61,14 @@ export class CpuService {
           }
           if (clocks.length > 0) {
             data.currentSpeed.avg =
-              clocks.reduce((a, b) => a + b, 0) / clocks.length;
-            data.currentSpeed.min = Math.min(...clocks);
-            data.currentSpeed.max = Math.max(...clocks);
-            data.currentSpeed.cores = clocks;
+              Math.round(
+                (clocks.reduce((a, b) => a + b, 0) / clocks.length) * 100
+              ) / 100;
+            data.currentSpeed.min = Math.round(Math.min(...clocks) * 100) / 100;
+            data.currentSpeed.max = Math.round(Math.max(...clocks) * 100) / 100;
+            data.currentSpeed.cores = clocks.map(
+              (c: number) => Math.round(c * 100) / 100
+            );
           }
         }
       }
