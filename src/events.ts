@@ -11,7 +11,7 @@ export class Events {
   private observer: Observer;
 
   async setup(settings: { [key: string]: string }): Promise<void> {
-    logger.debug(`Events - Setup: ${settings}`);
+    logger.debug("Events - Setup");
     this.websocketConnection = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
