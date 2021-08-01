@@ -1,6 +1,6 @@
 {
   "name": "system-bridge-frontend",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "private": true,
   "homepage": ".",
   "dependencies": {
