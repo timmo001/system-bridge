@@ -79,7 +79,7 @@
     "ws": "7.5.3"
   },
   "devDependencies": {
-    "@nestjs/cli": "8.1.0",
+    "@nestjs/cli": "8.1.1",
     "@nestjs/schematics": "8.0.2",
     "@nestjs/testing": "8.0.5",
     "@types/auto-launch": "5.0.2",
