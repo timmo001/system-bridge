@@ -30,7 +30,7 @@ export class CpuService {
           "Cpu",
           !process.argv0.includes("node.exe"),
           true,
-          false,
+          true,
           { cpu: true }
         )) as Array<Hardware>;
 
