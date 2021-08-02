@@ -135,8 +135,8 @@ export const defaultConfiguration: Configuration = {
     name: "Observer",
     description: "Observer specific settings.",
     items: {
-      timeout: {
-        name: "Observer Timeout (ms)",
+      interval: {
+        name: "Observer Interval (ms)",
         description:
           "The amount of time in milliseconds the observer will wait before checking for new data. The faster, the more updates, but also the more system utilization.",
         defaultValue: 30000,
