@@ -5,7 +5,6 @@ import { CpuService } from "./api/cpu/cpu.service";
 import { DisplayService } from "./api/display/display.service";
 import { FilesystemService } from "./api/filesystem/filesystem.service";
 import { GraphicsService } from "./api/graphics/graphics.service";
-import { InformationService } from "./api/information/information.service";
 import { MemoryService } from "./api/memory/memory.service";
 import { NetworkService } from "./api/network/network.service";
 import { ProcessesService } from "./api/processes/processes.service";
@@ -34,7 +33,6 @@ export class Observer {
     const displayService = new DisplayService();
     const filesystemService = new FilesystemService();
     const graphicsService = new GraphicsService();
-    const informationService = new InformationService();
     const memoryService = new MemoryService();
     const networkService = new NetworkService();
     const processesService = new ProcessesService();
@@ -71,12 +69,6 @@ export class Observer {
       this.customObserver(
         "graphics",
         graphicsService.findAll,
-        interval,
-        callback
-      ),
-      this.customObserver(
-        "information",
-        informationService.findAll,
         interval,
         callback
       ),
