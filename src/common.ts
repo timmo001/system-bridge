@@ -7,6 +7,7 @@ import semver from "semver";
 
 import { ApplicationUpdate } from "./api/information/entities/information.entity";
 import { Setting } from "./api/settings/entities/setting.entity";
+import logger from "./logger";
 
 export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
@@ -92,25 +93,31 @@ export async function createSetting(
 export async function getUpdates(
   tray = false
 ): Promise<ApplicationUpdate | undefined> {
-  const response = await axios.get<{
-    html_url: string;
-    prerelease: boolean;
-    tag_name: string;
-  }>(`https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest`);
-  if (
-    response &&
-    response.status < 400 &&
-    response.data?.prerelease === false
-  ) {
-    const versionNew = semver.clean(response.data.tag_name);
-    const versionCurrent = getVersion(tray);
-    const available = semver.lt(versionCurrent, versionNew);
-    return {
-      available,
-      newer: semver.gt(versionCurrent, versionNew),
-      url: response.data.html_url,
-      version: { current: versionCurrent, new: versionNew },
-    };
+  try {
+    const response = await axios.get<{
+      html_url: string;
+      prerelease: boolean;
+      tag_name: string;
+    }>(`https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest`);
+    if (
+      response &&
+      response.status < 400 &&
+      response.data?.prerelease === false
+    ) {
+      const versionNew = semver.clean(response.data.tag_name);
+      const versionCurrent = getVersion(tray);
+      const available = semver.lt(versionCurrent, versionNew);
+      return {
+        available,
+        newer: semver.gt(versionCurrent, versionNew),
+        url: response.data.html_url,
+        version: { current: versionCurrent, new: versionNew },
+      };
+    }
+  } catch (e) {
+    logger.error(
+      `Error getting updates. ${e.message} - GitHub may be rate limiting your requests which will resolve itself later`
+    );
   }
   return undefined;
 }

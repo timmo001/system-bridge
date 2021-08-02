@@ -29,7 +29,7 @@ async function setupTray(): Promise<void> {
     "-----------------------------------------------------------------------------------------------------------------------"
   );
   logger.info(
-    `System Bridge - Tray ${updates.version.current}: ${JSON.stringify(
+    `System Bridge - Tray ${updates?.version.current}: ${JSON.stringify(
       process.argv
     )} - ${process.env.NODE_ENV}`
   );
@@ -37,13 +37,15 @@ async function setupTray(): Promise<void> {
     "-----------------------------------------------------------------------------------------------------------------------"
   );
 
-  const versionText = updates.available
-    ? `Version ${updates.version.new} avaliable! (${updates.version.current} -> ${updates.version.new})`
-    : `${
-        updates.newer
-          ? `Version Newer (${updates.version.current} > ${updates.version.new})`
-          : `Latest Version (${updates.version.current})`
-      } `;
+  const versionText = updates
+    ? updates.available
+      ? `Version ${updates.version.new} avaliable! (${updates.version.current} -> ${updates.version.new})`
+      : `${
+          updates.newer
+            ? `Version Newer (${updates.version.current} > ${updates.version.new})`
+            : `Latest Version (${updates.version.current})`
+        }`
+    : "Latest Version";
 
   const st = await import("systray2");
   const SysTray = st.default;
@@ -208,7 +210,7 @@ async function setupTray(): Promise<void> {
         { encoding: "base64" }
       ),
       title: "System Bridge",
-      tooltip: `System Bridge v${updates.version.current}`,
+      tooltip: `System Bridge ${updates ? `v${updates.version.current}` : ""}`,
       items: [
         ...items,
         SysTray.separator,
