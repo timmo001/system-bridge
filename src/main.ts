@@ -227,9 +227,12 @@ async function openTray(): Promise<void> {
       `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     );
     logger.info(`Main - Open Tray: ${trayPath}`);
-    await execa(trayPath, [], { cwd: workingDirectory, windowsHide: true });
+    await execa(trayPath, [], {
+      cwd: workingDirectory,
+      windowsHide: true,
+    }).catch((e) => logger.error(`Main - Error inside tray: ${e.message}`));
   } catch (e) {
-    logger.error(`Main - Error Opening Tray: ${e.message}`);
+    logger.error(`Main - Error opening tray: ${e.message}`);
     logger.info("Main - Retrying in 10 seconds...");
     setTimeout(() => openTray(), 10000);
   }
