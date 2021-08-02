@@ -26,7 +26,7 @@ export class CpuService {
           "system-bridge-windows-sensors"
         );
 
-        const hardware: Hardware = (await getHardwareByType(
+        const hardware = (await getHardwareByType(
           "Cpu",
           !process.argv0.includes("node.exe"),
           true,

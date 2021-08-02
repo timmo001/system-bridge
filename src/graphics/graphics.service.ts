@@ -18,16 +18,18 @@ export class GraphicsService {
           "system-bridge-windows-sensors"
         );
 
-        const hardware: Hardware = (await getHardwareByType(
+        const hardware = (await getHardwareByType(
           "Gpu",
           !process.argv0.includes("node.exe"),
           false,
-          false,
+          true,
           { gpu: true }
-        )) as Hardware;
+        )) as Array<Hardware>;
 
-        if (hardware.sensors) {
-          data.hardwareSensors = hardware.sensors;
+        if (hardware && hardware.length > 0) {
+          data.hardwareSensors = [];
+          for (const hw of hardware)
+            data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
         }
       } catch (e) {
         logger.error(e.message);
