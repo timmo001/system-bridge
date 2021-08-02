@@ -48,7 +48,7 @@ tps.push(
 
 // Configure the Winston logger.
 const logger = createLogger({
-  level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  level: process.env.NODE_ENV === "development" ? "debug" : "info",
   format: format.combine(
     format.splat(),
     format.simple(),
