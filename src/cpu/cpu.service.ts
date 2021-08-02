@@ -32,16 +32,18 @@ export class CpuService {
           true,
           false,
           { cpu: true }
-        )) as Hardware;
+        )) as Array<Hardware>;
 
-        if (hardware.sensors) {
-          data.hardwareSensors = hardware.sensors;
+        if (hardware && hardware.length > 0) {
+          data.hardwareSensors = [];
+          for (const hw of hardware)
+            data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
 
           if (!data.cpu.voltage)
             data.cpu.voltage = String(
               Math.round(
                 Number(
-                  hardware.sensors.find(
+                  hardware[0].sensors.find(
                     (sensor: Sensor) =>
                       sensor.type === "Voltage" &&
                       sensor.name.startsWith("Core #")
@@ -54,7 +56,7 @@ export class CpuService {
             data.temperature.main =
               Math.round(
                 Number(
-                  hardware.sensors.find(
+                  hardware[0].sensors.find(
                     (sensor: Sensor) => sensor.type === "Temperature"
                   ).value
                 ) * 100
@@ -65,7 +67,7 @@ export class CpuService {
             data.currentSpeed.min === data.currentSpeed.max
           ) {
             const clocks: Array<number> = [];
-            for (const sensor of hardware.sensors) {
+            for (const sensor of hardware[0].sensors) {
               if (
                 sensor.type === "Clock" &&
                 !sensor.name.includes("Bus") &&
