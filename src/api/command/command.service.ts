@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import execa, { ExecaReturnValue } from "execa";
 
 import { CreateCommandDto } from "./dto/create-command.dto";
-import logger from "../logger";
+import logger from "../../logger";
 
 @Injectable()
 export class CommandService {

@@ -10,7 +10,7 @@ import {
   wifiNetworks,
 } from "systeminformation";
 
-import { convertArrayToObject } from "../common";
+import { convertArrayToObject } from "../../common";
 import { Network } from "./entities/network.entity";
 
 @Injectable()

@@ -1,16 +1,16 @@
-import { AudioService } from "./audio/audio.service";
-import { BatteryService } from "./battery/battery.service";
-import { BluetoothService } from "./bluetooth/bluetooth.service";
-import { CpuService } from "./cpu/cpu.service";
-import { DisplayService } from "./display/display.service";
-import { FilesystemService } from "./filesystem/filesystem.service";
-import { GraphicsService } from "./graphics/graphics.service";
-import { InformationService } from "./information/information.service";
-import { MemoryService } from "./memory/memory.service";
-import { NetworkService } from "./network/network.service";
-import { ProcessesService } from "./processes/processes.service";
-import { SystemService } from "./system/system.service";
-import { UsbService } from "./usb/usb.service";
+import { AudioService } from "./api/audio/audio.service";
+import { BatteryService } from "./api/battery/battery.service";
+import { BluetoothService } from "./api/bluetooth/bluetooth.service";
+import { CpuService } from "./api/cpu/cpu.service";
+import { DisplayService } from "./api/display/display.service";
+import { FilesystemService } from "./api/filesystem/filesystem.service";
+import { GraphicsService } from "./api/graphics/graphics.service";
+import { InformationService } from "./api/information/information.service";
+import { MemoryService } from "./api/memory/memory.service";
+import { NetworkService } from "./api/network/network.service";
+import { ProcessesService } from "./api/processes/processes.service";
+import { SystemService } from "./api/system/system.service";
+import { UsbService } from "./api/usb/usb.service";
 
 export class Observer {
   private observers: Array<NodeJS.Timer>;

@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 
 import { Graphics } from "./entities/graphics.entity";
 import { graphics } from "systeminformation";
-import logger from "../logger";
+import logger from "../../logger";
 
 @Injectable()
 export class GraphicsService {

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import notifier from "node-notifier";
 
 import { CreateNotificationDto } from "./dto/create-notification.dto";
-import logger from "../logger";
+import logger from "../../logger";
 
 @Injectable()
 export class NotificationService {

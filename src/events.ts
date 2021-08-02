@@ -1,4 +1,4 @@
-import { Event } from "./events/entities/event.entity";
+import { Event } from "./api/events/entities/event.entity";
 import { getConnection, getSettingsObject } from "./common";
 import { Observer } from "./observer";
 import { stopServer, updateAppConfig } from "./main";

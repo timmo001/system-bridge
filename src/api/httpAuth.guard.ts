@@ -9,7 +9,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Observable } from "rxjs";
 import { Repository } from "typeorm";
 
-import { getApiKey } from "./common";
+import { getApiKey } from "../common";
 import { Setting } from "./settings/entities/setting.entity";
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
 
-import { convertArrayToObject } from "../common";
+import { convertArrayToObject } from "../../common";
 import { Filesystem } from "./entities/filesystem.entity";
 
 @Injectable()
