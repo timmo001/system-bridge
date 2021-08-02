@@ -71,7 +71,7 @@ export class CpuService {
                 !sensor.name.includes("Bus") &&
                 typeof sensor.value === "number"
               )
-                clocks.push(sensor.value);
+                clocks.push(sensor.value / 1000);
             }
             if (clocks.length > 0) {
               data.currentSpeed.avg =
