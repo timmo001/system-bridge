@@ -1,133 +1,120 @@
-import { observe as siObserve } from "systeminformation";
-import axios, { AxiosResponse } from "axios";
-
-import { getConnection, getSettingsObject } from "./common";
-import { getCurrent } from "./audio/data";
+import { AudioService } from "./audio/audio.service";
+import { BatteryService } from "./battery/battery.service";
+import { BluetoothService } from "./bluetooth/bluetooth.service";
+import { CpuService } from "./cpu/cpu.service";
+import { DisplayService } from "./display/display.service";
+import { FilesystemService } from "./filesystem/filesystem.service";
+import { GraphicsService } from "./graphics/graphics.service";
+import { InformationService } from "./information/information.service";
+import { MemoryService } from "./memory/memory.service";
+import { NetworkService } from "./network/network.service";
+import { ProcessesService } from "./processes/processes.service";
+import { SystemService } from "./system/system.service";
+import { UsbService } from "./usb/usb.service";
 
 export class Observer {
-  private observers: Array<number>;
+  private observers: Array<NodeJS.Timer>;
 
   async setup(
     settings: { [key: string]: string },
     cb: (data: { [key: string]: { [key: string]: any } }) => void
   ): Promise<void> {
-    const timeout =
-        Number(settings["observer-timeout"]) >= 5000
-          ? Number(settings["observer-timeout"])
+    const interval =
+        Number(settings["observer-interval"]) >= 5000
+          ? Number(settings["observer-interval"])
           : 30000,
-      callback = async (name: string) => {
-        const connection = await getConnection();
-        const settings = await getSettingsObject(connection);
-        await connection.close();
-
-        const response: AxiosResponse<any> = await axios.get<any>(
-          `http://localhost:${settings["network-apiPort"] || 9170}/${name}`,
-          { headers: { "api-key": settings["network-apiKey"] } }
-        );
-        if (response.status === 200) cb({ [name]: response.data });
-      };
+      callback = (name: string, data: any) => cb({ [name]: data });
 
     cb({ status: { status: 1 } });
+
+    const audioService = new AudioService();
+    const batteryService = new BatteryService();
+    const bluetoothService = new BluetoothService();
+    const cpuService = new CpuService();
+    const displayService = new DisplayService();
+    const filesystemService = new FilesystemService();
+    const graphicsService = new GraphicsService();
+    const informationService = new InformationService();
+    const memoryService = new MemoryService();
+    const networkService = new NetworkService();
+    const processesService = new ProcessesService();
+    const systemService = new SystemService();
+    const usbService = new UsbService();
+
     this.observers = [
-      this.observe({ type: "audioData" }, timeout, () => callback("audio")),
-      this.observe({ type: "systeminformation", key: "audio" }, timeout, () =>
-        callback("audio")
+      this.customObserver("audio", audioService.findAll, interval, callback),
+      this.customObserver(
+        "battery",
+        batteryService.findAll,
+        interval,
+        callback
       ),
-      this.observe({ type: "systeminformation", key: "battery" }, timeout, () =>
-        callback("battery")
+      this.customObserver(
+        "bluetooth",
+        bluetoothService.findAll,
+        interval,
+        callback
       ),
-      this.observe({ type: "systeminformation", key: "cpu" }, timeout, () =>
-        callback("cpu")
+      this.customObserver("cpu", cpuService.findAll, interval, callback),
+      this.customObserver(
+        "display",
+        displayService.findAll,
+        interval,
+        callback
       ),
-      this.observe(
-        { type: "systeminformation", key: "cpuCurrentSpeed" },
-        timeout,
-        () => callback("cpu")
+      this.customObserver(
+        "filesystem",
+        filesystemService.findAll,
+        interval,
+        callback
       ),
-      this.observe(
-        { type: "systeminformation", key: "cpuTemperature" },
-        timeout,
-        () => callback("cpu")
+      this.customObserver(
+        "graphics",
+        graphicsService.findAll,
+        interval,
+        callback
       ),
-      this.observe(
-        { type: "systeminformation", key: "currentLoad" },
-        timeout,
-        () => callback("processes")
+      this.customObserver(
+        "information",
+        informationService.findAll,
+        interval,
+        callback
       ),
-      this.observe({ type: "systeminformation", key: "fsSize" }, timeout, () =>
-        callback("filesystem")
+      this.customObserver("memory", memoryService.findAll, interval, callback),
+      this.customObserver(
+        "network",
+        networkService.findAll,
+        interval,
+        callback
       ),
-      this.observe({ type: "systeminformation", key: "mem" }, timeout, () =>
-        callback("memory")
+      this.customObserver(
+        "processes",
+        processesService.findAll,
+        interval,
+        callback
       ),
-      this.observe(
-        { type: "systeminformation", key: "memLayout" },
-        timeout,
-        () => callback("memory")
-      ),
-      this.observe(
-        { type: "systeminformation", key: "networkStats" },
-        timeout,
-        () => callback("network")
-      ),
-      this.observe({ type: "systeminformation", key: "osInfo" }, timeout, () =>
-        callback("os")
-      ),
-      this.observe(
-        { type: "systeminformation", key: "processes" },
-        timeout,
-        () => callback("processes")
-      ),
-      this.observe({ type: "systeminformation", key: "system" }, timeout, () =>
-        callback("system")
-      ),
-      this.observe({ type: "systeminformation", key: "users" }, timeout, () =>
-        callback("os")
-      ),
-      this.observe(
-        { type: "systeminformation", key: "wifiConnections" },
-        timeout,
-        () => callback("network")
-      ),
-      this.observe(
-        { type: "systeminformation", key: "wifiNetworks" },
-        timeout,
-        () => callback("network")
-      ),
+      this.customObserver("system", systemService.findAll, interval, callback),
+      this.customObserver("usb", usbService.findAll, interval, callback),
     ];
   }
 
   cleanup(): void {
-    this.observers.forEach((observer: number) => clearInterval(observer));
+    this.observers.forEach((observer: NodeJS.Timer) => clearInterval(observer));
     this.observers = undefined;
   }
 
-  observe(
-    config: { type: "systeminformation" | "audioData" | string; key?: string },
-    interval: number,
-    cb: (item: string) => void
-  ): number {
-    switch (config.type) {
-      case "audioData":
-        this.customObserver(getCurrent, interval, cb);
-      case "systeminformation":
-        if (config.key) return siObserve({ [config.key]: "*" }, interval, cb);
-      default:
-        return -1;
-    }
-  }
-
   customObserver(
-    func: { (): Promise<{ muted?: boolean; volume?: number }>; (): any },
+    name: string,
+    func: () => Promise<any>,
     interval: number,
-    callback: (data: any) => void
-  ) {
+    callback: (name: string, data: any) => void
+  ): NodeJS.Timer {
     let data: any;
     return setInterval(async () => {
       const d = await func();
       if (JSON.stringify(data) !== JSON.stringify(d)) {
         data = d;
-        callback(d);
+        callback(name, d);
       }
     }, interval);
   }
