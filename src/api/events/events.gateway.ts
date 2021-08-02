@@ -9,10 +9,10 @@ import { Injectable, UseGuards } from "@nestjs/common";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
-import { MQTT } from "../mqtt";
-import { startServer, stopServer } from "../main";
+import { MQTT } from "../../mqtt";
+import { startServer, stopServer } from "../../main";
 import { WsAuthGuard } from "../wsAuth.guard";
-import logger from "../logger";
+import logger from "../../logger";
 
 @Injectable()
 @WebSocketGateway()

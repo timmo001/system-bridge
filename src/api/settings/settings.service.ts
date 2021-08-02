@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { CreateSettingDto } from "./dto/create-setting.dto";
 import { Setting } from "./entities/setting.entity";
 import { UpdateSettingDto } from "./dto/update-setting.dto";
-import { WebSocketConnection } from "../websocket";
+import { WebSocketConnection } from "../../websocket";
 
 @Injectable()
 export class SettingsService {

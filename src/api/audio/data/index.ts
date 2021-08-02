@@ -1,4 +1,4 @@
-import logger from "../../logger";
+import logger from "../../../logger";
 
 function getImpl(platform: string): any {
   switch (platform) {

@@ -13,7 +13,7 @@ import {
   getSettingsObject,
   getUpdates,
   getVersion,
-} from "../common";
+} from "../../common";
 
 @Injectable()
 export class InformationService {

@@ -2,7 +2,7 @@ import { bluetoothDevices, osInfo } from "systeminformation";
 import { Injectable } from "@nestjs/common";
 import fs from "fs";
 
-import logger from "../logger";
+import logger from "../../logger";
 
 @Injectable()
 export class BluetoothService {

@@ -3,7 +3,7 @@ import { audio, Systeminformation } from "systeminformation";
 
 import { Audio } from "./entities/audio.entity";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
-import logger from "../logger";
+import logger from "../../logger";
 import { getCurrent, muted, volume } from "./data";
 
 @Injectable()

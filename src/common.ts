@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import semver from "semver";
 
-import { ApplicationUpdate } from "./information/entities/information.entity";
-import { Setting } from "./settings/entities/setting.entity";
+import { ApplicationUpdate } from "./api/information/entities/information.entity";
+import { Setting } from "./api/settings/entities/setting.entity";
 
 export const GITHUB_REPOSITORY = "timmo001/system-bridge";
 

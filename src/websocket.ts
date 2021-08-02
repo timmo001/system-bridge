@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 
-import { Event } from "./events/entities/event.entity";
+import { Event } from "./api/events/entities/event.entity";
 
 export class WebSocketConnection {
   public onEvent?: (data: Event) => void;

@@ -17,7 +17,7 @@ import AutoLaunch from "auto-launch";
 import execa from "execa";
 import helmet from "helmet";
 
-import { AppModule } from "./app.module";
+import { AppModule } from "./api/app.module";
 import {
   getAppDataDirectory,
   getConnection,
@@ -25,7 +25,7 @@ import {
   getVersion,
 } from "./common";
 import { Events } from "./events";
-import { WsAdapter } from "./ws-adapter";
+import { WsAdapter } from "./api/ws-adapter";
 import logger from "./logger";
 
 let app: NestExpressApplication,
