@@ -1,5 +1,10 @@
 import { ReactElement } from "react";
-import { CardContent, Typography } from "@material-ui/core";
+import {
+  CardContent,
+  CircularProgress,
+  Grid,
+  Typography,
+} from "@material-ui/core";
 import ReactJson from "react-json-view";
 
 function DataItemsComponent({
@@ -14,17 +19,23 @@ function DataItemsComponent({
       <Typography gutterBottom variant="h4" component="h3">
         {name}
       </Typography>
-      <ReactJson
-        src={data}
-        displayDataTypes={false}
-        displayObjectSize
-        enableClipboard
-        iconStyle="triangle"
-        name={null}
-        collapseStringsAfterLength={140}
-        style={{ background: "initial", maxWidth: "100%" }}
-        theme="google"
-      />
+      {data ? (
+        <ReactJson
+          src={data}
+          displayDataTypes={false}
+          displayObjectSize
+          enableClipboard
+          iconStyle="triangle"
+          name={null}
+          collapseStringsAfterLength={140}
+          style={{ background: "initial", maxWidth: "100%" }}
+          theme="google"
+        />
+      ) : (
+        <Grid container direction="row" justifyContent="center">
+          <CircularProgress />
+        </Grid>
+      )}
     </CardContent>
   );
 }
