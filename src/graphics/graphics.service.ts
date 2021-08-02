@@ -22,10 +22,9 @@ export class GraphicsService {
           "Gpu",
           !process.argv0.includes("node.exe"),
           false,
-          false
+          false,
+          { gpu: true }
         )) as Hardware;
-
-        console.log("hardware:", typeof hardware, hardware);
 
         if (hardware.sensors) {
           data.hardwareSensors = hardware.sensors;

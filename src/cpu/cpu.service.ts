@@ -30,7 +30,8 @@ export class CpuService {
           "Cpu",
           !process.argv0.includes("node.exe"),
           true,
-          false
+          false,
+          { cpu: true }
         )) as Hardware;
 
         if (hardware.sensors) {
