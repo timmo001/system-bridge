@@ -56,7 +56,7 @@ export class Events {
                   headers: { "api-key": settings["network-apiKey"] },
                 })
                 .then((response: AxiosResponse<any>) => {
-                  logger.info(`Response status: ${response.status}`);
+                  logger.debug(`Response status: ${response.status}`);
                   if (response.status === 200 && this.websocketConnection)
                     this.websocketConnection.sendEvent({
                       name: `data-${name}`,
