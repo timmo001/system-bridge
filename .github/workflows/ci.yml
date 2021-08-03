@@ -26,7 +26,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
-        uses: actions/setup-node@v2.3.0
+        uses: actions/setup-node@v2.3.1
         with:
           node-version: 16.x
           cache: yarn
@@ -152,7 +152,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         if: matrix.os.server != 'self-hosted'
-        uses: actions/setup-node@v2.3.0
+        uses: actions/setup-node@v2.3.1
         with:
           node-version: 16.x
           cache: yarn
