@@ -17,6 +17,7 @@ import { GraphicsModule } from "./graphics/graphics.module";
 import { HttpAuthGuard } from "./httpAuth.guard";
 import { InformationModule } from "./information/information.module";
 import { KeyboardModule } from "./keyboard/keyboard.module";
+import { LogsModule } from "./logs/logs.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
@@ -48,6 +49,7 @@ import logger from "../logger";
     GraphicsModule,
     InformationModule,
     KeyboardModule,
+    LogsModule,
     MemoryModule,
     NetworkModule,
     NotificationModule,
