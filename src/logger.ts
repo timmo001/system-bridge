@@ -3,7 +3,7 @@ import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
 // Setup app data directory
-const appDataDir = join(
+export const appDataDir = join(
   process.env.APP_PATH ||
     process.env.APPDATA ||
     (process.platform == "darwin"
@@ -12,6 +12,11 @@ const appDataDir = join(
   "system-bridge"
 );
 if (!existsSync(appDataDir)) mkdirSync(appDataDir);
+
+export const logsPath = join(
+  process.env.LOG_PATH || appDataDir,
+  "system-bridge.log"
+);
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;
@@ -40,7 +45,7 @@ tps.push(
 );
 tps.push(
   new transports.File({
-    filename: join(process.env.LOG_PATH || appDataDir, "system-bridge.log"),
+    filename: logsPath,
     format: format.combine(format.errors({ stack: true }), logFormat),
     handleExceptions: true,
   })
