@@ -7,7 +7,10 @@ import { logsPath } from "../../logger";
 export class LogsService {
   async findAll(): Promise<Array<string>> {
     const data = readFileSync(logsPath, "utf8");
-    const lines = data.split("\r\n");
-    return lines;
+    if (data) {
+      const lines = data.split(/\r\n|\r|\n/g);
+      return lines;
+    }
+    return [];
   }
 }
