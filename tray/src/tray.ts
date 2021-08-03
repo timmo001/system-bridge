@@ -172,11 +172,36 @@ async function setupTray(): Promise<void> {
           checked: false,
           enabled: true,
           click: async () => {
+            const connection = await getConnection();
+            const settings = await getSettingsObject(connection);
+            await connection.close();
+
+            const url = `${
+              process.env.NODE_ENV === "development"
+                ? "http://localhost:3000/"
+                : `http://localhost:9170/app`
+            }?${queryString.stringify({
+              id: "logs",
+              apiKey: settings["network-apiKey"],
+              apiPort: settings["network-apiPort"] || 9170,
+              wsPort: settings["network-wsPort"] || 9172,
+            })}`;
+
+            logger.info(`Tray - Open Logs: ${url}`);
+            open(url);
+          },
+        },
+        {
+          title: "Open Log File",
+          tooltip: "Open Log File",
+          checked: false,
+          enabled: true,
+          click: async () => {
             const path = join(
               process.env.LOG_PATH || getAppDataDirectory(),
               "system-bridge.log"
             );
-            logger.info(`Tray - Open Logs: ${path}`);
+            logger.info(`Tray - Open Log File: ${path}`);
             open(path);
           },
         },
