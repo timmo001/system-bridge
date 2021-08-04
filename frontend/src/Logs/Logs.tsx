@@ -1,10 +1,17 @@
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   CircularProgress,
   Container,
   createStyles,
-  Fab,
   Grid,
+  IconButton,
   makeStyles,
   Theme,
   Typography,
@@ -33,36 +40,38 @@ const useStyles = makeStyles((theme: Theme) =>
       textAlign: "end",
     },
     logsContainer: {
-      height: 600,
-      minHeight: 600,
-      maxHeight: 600,
+      height: 540,
+      minHeight: 540,
+      maxHeight: 540,
       maxWidth: "100%",
       overflowY: "auto",
-    },
-    refresh: {
-      position: "fixed",
-      right: theme.spacing(2),
-      bottom: theme.spacing(2),
     },
   })
 );
 
-function DataComponent(): ReactElement {
+function LogsComponent(): ReactElement {
   const [logs, setLogs] = useState<string>();
   const [settings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
+
+  const refBottom = useRef<any>(null);
 
   const query = useMemo(() => parsedQuery, []);
 
   const handleSetup = useCallback(async () => {
     console.log("Setup Logs");
-    const response = await axios.get<string>(
+    const response = await axios.get<Array<string>>(
       `http://${query.apiHost || "localhost"}:${query.apiPort || 9170}/logs`,
       {
         headers: { "api-key": query.apiKey },
       }
     );
-    if (response && response.status < 400) setLogs(response.data);
+    if (response && response.status < 400) {
+      const data: string = response.data.slice(-251).join("\n");
+      setLogs(data);
+      if (refBottom.current)
+        refBottom.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [query.apiHost, query.apiPort, query.apiKey]);
 
   useEffect(() => {
@@ -76,30 +85,29 @@ function DataComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Header name="Data" />
-      <Grid container direction="column" spacing={2} alignItems="stretch">
-        {!settings ? (
-          <Grid container direction="row" justifyContent="center">
-            <CircularProgress />
+      <Header name="Logs" />
+      {!settings ? (
+        <Grid container direction="row" justifyContent="center">
+          <CircularProgress />
+        </Grid>
+      ) : (
+        <>
+          <Grid item container direction="row" justifyContent="flex-end">
+            <IconButton aria-label="Refresh Logs" onClick={() => handleSetup()}>
+              <Icon title="Refresh Logs" size={1} path={mdiRefresh} />
+            </IconButton>
           </Grid>
-        ) : (
           <Grid className={classes.logsContainer} item>
             <Typography component="pre" variant="body2" color="textSecondary">
               {logs}
+              <div ref={refBottom} />
             </Typography>
           </Grid>
-        )}
-      </Grid>
-      <Fab
-        className={classes.refresh}
-        aria-label="Refresh Logs"
-        onClick={() => handleSetup()}
-      >
-        <Icon title="Refresh Logs" size={1} path={mdiRefresh} />
-      </Fab>
+        </>
+      )}
       <Footer />
     </Container>
   );
 }
 
-export default DataComponent;
+export default LogsComponent;
