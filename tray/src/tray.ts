@@ -167,8 +167,8 @@ async function setupTray(): Promise<void> {
           },
         },
         {
-          title: "Open Logs",
-          tooltip: "Open Logs",
+          title: "View Logs",
+          tooltip: "View Logs",
           checked: false,
           enabled: true,
           click: async () => {
