@@ -7,7 +7,7 @@ export class LogsController {
   constructor(private readonly logsService: LogsService) {}
 
   @Get()
-  async findAll(): Promise<string> {
+  async findAll(): Promise<Array<string>> {
     return await this.logsService.findAll();
   }
 }

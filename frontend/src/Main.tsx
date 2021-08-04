@@ -9,6 +9,7 @@ import ConfigurationComponent, {
   defaultConfiguration,
 } from "./Configuration/Configuration";
 import Data from "./Data/Data";
+import Logs from "./Logs/Logs";
 import WebRTC from "./WebRTC/WebRTC";
 
 const useStyles = makeStyles(() =>
@@ -91,6 +92,8 @@ function Main(): ReactElement {
         <ConfigurationComponent />
       ) : query.id === "data" ? (
         <Data />
+      ) : query.id === "logs" ? (
+        <Logs />
       ) : query.id === "webrtc" ? (
         <WebRTC />
       ) : (
