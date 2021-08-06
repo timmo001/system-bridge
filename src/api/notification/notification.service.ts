@@ -12,7 +12,11 @@ export class NotificationService {
     notifier.notify(
       createNotificationDto,
       (err: any, response: any, metadata: any) =>
-        logger.info({ err, response, metadata })
+        err
+          ? logger.warning(
+              `Error: ${JSON.stringify({ err, response, metadata })}`
+            )
+          : logger.info(`${JSON.stringify({ response, metadata })}`)
     );
     return createNotificationDto;
   }

@@ -17,7 +17,7 @@ export class BluetoothService {
         );
       return await bluetoothDevices();
     } catch (e) {
-      logger.warn(e);
+      logger.warning(e);
     }
     return {};
   }

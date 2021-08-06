@@ -12,7 +12,7 @@ export class CommandService {
         createCommandDto.command,
         createCommandDto.arguments
       );
-      logger.info(JSON.stringify({ stdout, stderr }));
+      logger.debug(JSON.stringify({ stdout, stderr }));
       return {
         ...createCommandDto,
         success: stderr ? false : true,
@@ -22,7 +22,7 @@ export class CommandService {
     }
     execa(createCommandDto.command, createCommandDto.arguments)
       .then((stdout: ExecaReturnValue<string>) => logger.info(stdout))
-      .catch((stderr: ExecaReturnValue<string>) => logger.warn(stderr));
+      .catch((stderr: ExecaReturnValue<string>) => logger.warning(stderr));
     return createCommandDto;
   }
 }

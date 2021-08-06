@@ -47,7 +47,7 @@ export class Events {
 
           if (Array.isArray(event.data) && event.data.length > 0)
             event.data.forEach(async (name: string) => {
-              logger.info(`Name: ${name}`);
+              logger.debug(`Events - Get data: ${name}`);
               const url = `http://localhost:${
                 settings["network-apiPort"] || 9170
               }/${name}`;
