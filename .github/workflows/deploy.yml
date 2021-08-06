@@ -29,7 +29,7 @@ jobs:
           - macos-out
     steps:
       - name: ⤵️ Download Artifact - ${{ matrix.artifact }}
-        uses: dawidd6/action-download-artifact@v2.14.0
+        uses: dawidd6/action-download-artifact@v2.14.1
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
@@ -58,7 +58,7 @@ jobs:
           - macos-dmg
     steps:
       - name: ⤵️ Download Artifact - ${{ matrix.artifact }}
-        uses: dawidd6/action-download-artifact@v2.14.0
+        uses: dawidd6/action-download-artifact@v2.14.1
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
