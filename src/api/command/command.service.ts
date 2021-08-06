@@ -22,7 +22,7 @@ export class CommandService {
     }
     execa(createCommandDto.command, createCommandDto.arguments)
       .then((stdout: ExecaReturnValue<string>) => logger.info(stdout))
-      .catch((stderr: ExecaReturnValue<string>) => logger.warning(stderr));
+      .catch((stderr: ExecaReturnValue<string>) => logger.warn(stderr));
     return createCommandDto;
   }
 }

@@ -13,7 +13,7 @@ export class AudioService {
     try {
       devices = await audio();
     } catch (e) {
-      logger.warning(`Cannot get audio devices: ${e.message}`);
+      logger.warn(`Cannot get audio devices: ${e.message}`);
     }
     return { current: await getCurrent(), devices };
   }

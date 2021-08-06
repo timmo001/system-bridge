@@ -13,7 +13,7 @@ export class NotificationService {
       createNotificationDto,
       (err: any, response: any, metadata: any) =>
         err
-          ? logger.warning(
+          ? logger.warn(
               `Error: ${JSON.stringify({ err, response, metadata })}`
             )
           : logger.info(`${JSON.stringify({ response, metadata })}`)

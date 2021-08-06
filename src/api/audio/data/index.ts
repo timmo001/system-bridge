@@ -32,7 +32,7 @@ export async function getCurrent(): Promise<{
       volume: await volume(),
     };
   } catch (e) {
-    logger.warning(`Cannot get current audio: ${e.message}`);
+    logger.warn(`Cannot get current audio: ${e.message}`);
   }
   return {};
 }
