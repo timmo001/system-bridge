@@ -55,11 +55,13 @@ export class Events {
               });
             });
           break;
-        case "observer-stop":
-          if (this.observer) this.observer.stop();
-          break;
         case "observer-start":
+          logger.info("Events - Start Observer");
           if (this.observer) this.observer.start();
+          break;
+        case "observer-stop":
+          logger.info("Events - Stop Observer");
+          if (this.observer) this.observer.stop();
           break;
         case "update-app-config":
           logger.info("Events - Update app config");

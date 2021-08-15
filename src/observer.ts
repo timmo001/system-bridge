@@ -34,14 +34,13 @@ export class Observer {
       "usb",
     ];
 
-    items.forEach(async (name: string) =>
+    for (const name of items)
       this.scheduler.addSimpleIntervalJob(
         new SimpleIntervalJob(
           { milliseconds: this.interval },
           await this.createObserver(name)
         )
-      )
-    );
+      );
   }
 
   stop(): void {
