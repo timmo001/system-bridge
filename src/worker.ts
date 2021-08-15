@@ -13,6 +13,7 @@ import { NetworkService } from "./api/network/network.service";
 import { ProcessesService } from "./api/processes/processes.service";
 import { SystemService } from "./api/system/system.service";
 import { UsbService } from "./api/usb/usb.service";
+import logger from "./logger";
 
 function getService() {
   switch (workerData.name) {
@@ -44,6 +45,8 @@ function getService() {
       return new UsbService();
   }
 }
+
+logger.debug(`Worker - Run: ${workerData.name}`);
 
 const service = getService();
 

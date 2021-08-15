@@ -141,7 +141,7 @@ export const defaultConfiguration: Configuration = {
           "The amount of time in milliseconds the observer will wait before checking for new data. The faster, the more updates, but also the more system utilization.",
         defaultValue: 30000,
         value: null,
-        minimum: 5000,
+        minimum: 20000,
         icon: mdiTimerOutline,
         requiresServerRestart: true,
       },
