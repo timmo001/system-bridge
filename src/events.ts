@@ -1,9 +1,8 @@
 import { Event } from "./api/events/entities/event.entity";
-import { getConnection, getSettingsObject } from "./common";
 import { Observer } from "./observer";
+import { runService } from "./common";
 import { stopServer, updateAppConfig } from "./main";
 import { WebSocketConnection } from "./websocket";
-import axios, { AxiosResponse } from "axios";
 import logger from "./logger";
 
 export class Events {
@@ -23,13 +22,6 @@ export class Events {
         this.observer.setup(
           settings,
           (data: { [key: string]: { [key: string]: any } }) => {
-            logger.debug(
-              `Events - Observer - Received data: ${JSON.stringify(
-                data
-              ).substring(0, 40)}${
-                JSON.stringify(data).length > 40 ? "..." : ""
-              }`
-            );
             const key = Object.keys(data)[0];
             this.websocketConnection.sendEvent({
               name: `data-${key.replace(
@@ -48,33 +40,16 @@ export class Events {
           logger.info("Events - Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
 
-          const connection = await getConnection();
-          const settings = await getSettingsObject(connection);
-          await connection.close();
-
           if (Array.isArray(event.data) && event.data.length > 0)
             event.data.forEach(async (name: string) => {
               logger.debug(`Events - Get data: ${name}`);
-              const url = `http://localhost:${
-                settings["network-apiPort"] || 9170
-              }/${name}`;
-              axios
-                .get<any>(url, {
-                  headers: { "api-key": settings["network-apiKey"] },
-                })
-                .then((response: AxiosResponse<any>) => {
-                  logger.debug(`Response status: ${response.status}`);
-                  if (response.status === 200 && this.websocketConnection)
-                    this.websocketConnection.sendEvent({
-                      name: `data-${name}`,
-                      data: response.data,
-                    });
-                })
-                .catch((error: Error) => {
-                  logger.error(
-                    `Error getting data from ${url}: ${error.message}`
-                  );
-                });
+              this.websocketConnection.sendEvent({
+                name: `data-${name.replace(
+                  /([A-Z])/g,
+                  (x: string) => `-${x.toLowerCase()}`
+                )}`,
+                data: await runService({ name }),
+              });
             });
           break;
         case "exit-application":

@@ -2,6 +2,7 @@ import { Connection, createConnection, Repository } from "typeorm";
 import { join } from "path";
 import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { Worker } from "worker_threads";
 import axios from "axios";
 import semver from "semver";
 
@@ -142,4 +143,16 @@ export function getVersion(tray = false): string {
     )
   );
   return semver.clean(json.version);
+}
+
+export function runService(workerData: { name: string }): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    const worker = new Worker(require.resolve("./worker.js"), { workerData });
+    worker.on("message", resolve);
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
+    });
+  });
 }

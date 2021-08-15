@@ -1,4 +1,4 @@
-import { Worker } from "worker_threads";
+import { runService } from "./common";
 
 export class Observer {
   private observers: Array<NodeJS.Timer>;
@@ -36,18 +36,6 @@ export class Observer {
     this.observers = undefined;
   }
 
-  runService(workerData: { name: string }): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-      const worker = new Worker(require.resolve("./worker.js"), { workerData });
-      worker.on("message", resolve);
-      worker.on("error", reject);
-      worker.on("exit", (code) => {
-        if (code !== 0)
-          reject(new Error(`Worker stopped with exit code ${code}`));
-      });
-    });
-  }
-
   observer(
     name: string,
     interval: number,
@@ -55,7 +43,7 @@ export class Observer {
   ): NodeJS.Timer {
     let data: any;
     return setInterval(async () => {
-      const d = await this.runService({ name });
+      const d = await runService({ name });
       if (JSON.stringify(data) !== JSON.stringify(d)) {
         data = d;
         callback(name, d);
