@@ -32,7 +32,10 @@ export class Observer {
   }
 
   cleanup(): void {
-    this.observers.forEach((observer: NodeJS.Timer) => clearInterval(observer));
+    if (this.observers && this.observers.length > 0)
+      this.observers.forEach((observer: NodeJS.Timer) =>
+        clearInterval(observer)
+      );
     this.observers = undefined;
   }
 
