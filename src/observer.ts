@@ -10,7 +10,7 @@ export class Observer {
     const interval =
         Number(settings["observer-interval"]) >= 20000
           ? Number(settings["observer-interval"])
-          : 30000,
+          : 60000,
       callback = (name: string, data: any) => cb({ [name]: data });
 
     cb({ status: { status: 1 } });
