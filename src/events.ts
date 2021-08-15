@@ -17,13 +17,13 @@ export class Events {
       true,
       () => {
         logger.info("Events - Listening");
-        this.websocketConnection.sendEvent({ name: "listening-for-events" });
+        this.websocketConnection?.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer();
         this.observer.setup(
           settings,
           (data: { [key: string]: { [key: string]: any } }) => {
             const key = Object.keys(data)[0];
-            this.websocketConnection.sendEvent({
+            this.websocketConnection?.sendEvent({
               name: `data-${key.replace(
                 /([A-Z])/g,
                 (x: string) => `-${x.toLowerCase()}`
