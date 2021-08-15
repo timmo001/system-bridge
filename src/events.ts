@@ -23,6 +23,13 @@ export class Events {
         this.observer.setup(
           settings,
           (data: { [key: string]: { [key: string]: any } }) => {
+            logger.debug(
+              `Events - Observer - Received data: ${JSON.stringify(
+                data
+              ).substring(0, 40)}${
+                JSON.stringify(data).length > 40 ? "..." : ""
+              }`
+            );
             const key = Object.keys(data)[0];
             this.websocketConnection.sendEvent({
               name: `data-${key.replace(
