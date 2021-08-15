@@ -50,15 +50,7 @@ logger.debug(`Worker - Run: ${workerData.name}`);
 
 const service = getService();
 
-let data: string;
-
 (async () => {
-  const d = await service.findAll();
-
-  const ds = JSON.stringify(d);
-  if (data !== ds) {
-    data = ds;
-    parentPort.postMessage(d);
-    parentPort.postMessage("done");
-  }
+  parentPort.postMessage(await service.findAll());
+  parentPort.postMessage("done");
 })();
