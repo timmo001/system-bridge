@@ -1,4 +1,3 @@
-import { getIdleTime } from "desktop-idle";
 import { Injectable } from "@nestjs/common";
 import { osInfo, users } from "systeminformation";
 
@@ -10,6 +9,7 @@ export class OsService {
   async findAll(): Promise<Os> {
     let idleTime = -1;
     try {
+      const { getIdleTime } = await import("desktop-idle");
       idleTime = getIdleTime();
     } catch (e) {
       logger.error(`OsService - Error ${e.message}`);
