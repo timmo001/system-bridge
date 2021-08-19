@@ -1,56 +1,64 @@
 import { parentPort, workerData } from "worker_threads";
 
-import { AudioService } from "./api/audio/audio.service";
-import { BatteryService } from "./api/battery/battery.service";
-import { BluetoothService } from "./api/bluetooth/bluetooth.service";
-import { CpuService } from "./api/cpu/cpu.service";
-import { DisplayService } from "./api/display/display.service";
-import { FilesystemService } from "./api/filesystem/filesystem.service";
-import { GraphicsService } from "./api/graphics/graphics.service";
-import { InformationService } from "./api/information/information.service";
-import { MemoryService } from "./api/memory/memory.service";
-import { NetworkService } from "./api/network/network.service";
-import { ProcessesService } from "./api/processes/processes.service";
-import { SystemService } from "./api/system/system.service";
-import { UsbService } from "./api/usb/usb.service";
 import logger from "./logger";
 
-function getService() {
+async function getService(): Promise<any> {
   switch (workerData.name) {
     default:
-      return new InformationService();
+      return undefined;
     case "audio":
-      return new AudioService();
+      return new (await import("./api/audio/audio.service")).AudioService();
     case "battery":
-      return new BatteryService();
+      return new (
+        await import("./api/battery/battery.service")
+      ).BatteryService();
     case "bluetooth":
-      return new BluetoothService();
+      return new (
+        await import("./api/bluetooth/bluetooth.service")
+      ).BluetoothService();
     case "cpu":
-      return new CpuService();
+      return new (await import("./api/cpu/cpu.service")).CpuService();
     case "display":
-      return new DisplayService();
+      return new (
+        await import("./api/display/display.service")
+      ).DisplayService();
     case "filesystem":
-      return new FilesystemService();
+      return new (
+        await import("./api/filesystem/filesystem.service")
+      ).FilesystemService();
     case "graphics":
-      return new GraphicsService();
+      return new (
+        await import("./api/graphics/graphics.service")
+      ).GraphicsService();
+    case "information":
+      return new (
+        await import("./api/information/information.service")
+      ).InformationService();
+    case "logs":
+      return new (await import("./api/logs/logs.service")).LogsService();
     case "memory":
-      return new MemoryService();
+      return new (await import("./api/memory/memory.service")).MemoryService();
     case "network":
-      return new NetworkService();
+      return new (
+        await import("./api/network/network.service")
+      ).NetworkService();
+    case "os":
+      return new (await import("./api/os/os.service")).OsService();
     case "processes":
-      return new ProcessesService();
+      return new (
+        await import("./api/processes/processes.service")
+      ).ProcessesService();
     case "system":
-      return new SystemService();
+      return new (await import("./api/system/system.service")).SystemService();
     case "usb":
-      return new UsbService();
+      return new (await import("./api/usb/usb.service")).UsbService();
   }
 }
 
 logger.debug(`Worker - Run: ${workerData.name}`);
 
-const service = getService();
-
 (async () => {
+  const service = await getService();
   parentPort.postMessage(await service.findAll());
   parentPort.postMessage("done");
 })();
