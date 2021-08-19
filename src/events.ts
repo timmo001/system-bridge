@@ -46,13 +46,19 @@ export class Events {
           if (Array.isArray(event.data) && event.data.length > 0)
             event.data.forEach(async (name: string) => {
               logger.debug(`Events - Get data: ${name}`);
-              this.websocketConnection.sendEvent({
-                name: `data-${name.replace(
-                  /([A-Z])/g,
-                  (x: string) => `-${x.toLowerCase()}`
-                )}`,
-                data: await runService({ name }),
-              });
+              try {
+                this.websocketConnection.sendEvent({
+                  name: `data-${name.replace(
+                    /([A-Z])/g,
+                    (x: string) => `-${x.toLowerCase()}`
+                  )}`,
+                  data: await runService({ name }),
+                });
+              } catch (e) {
+                logger.error(
+                  `Events - Service error for ${name}: ${e.message}`
+                );
+              }
             });
           break;
         case "observer-start":

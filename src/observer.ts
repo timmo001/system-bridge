@@ -1,6 +1,7 @@
 import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { runService } from "./common";
+import logger from "./logger";
 
 export class Observer {
   private interval: number;
@@ -50,13 +51,22 @@ export class Observer {
   }
 
   async createObserver(name: string): Promise<AsyncTask> {
-    let data = await runService({ name });
+    let data: any;
+    try {
+      data = await runService({ name });
+    } catch (e) {
+      logger.error(`Observer - Service error: ${e.message}`);
+    }
     this.callback({ [name]: data });
     return new AsyncTask(name, async () => {
-      const d = await runService({ name });
-      if (JSON.stringify(data) !== JSON.stringify(d)) {
-        data = d;
-        this.callback({ [name]: d });
+      try {
+        const d = await runService({ name });
+        if (JSON.stringify(data) !== JSON.stringify(d)) {
+          data = d;
+          this.callback({ [name]: d });
+        }
+      } catch (e) {
+        logger.error(`Observer - Service error for ${name}: ${e.message}`);
       }
     });
   }
