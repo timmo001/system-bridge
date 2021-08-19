@@ -115,7 +115,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: 🚀 Run YAMLLint
-        uses: ibiqlik/action-yamllint@v3.0.3
+        uses: ibiqlik/action-yamllint@v3.0.4
         with:
           file_or_dir: .
           config_file: .yamllint.yml
