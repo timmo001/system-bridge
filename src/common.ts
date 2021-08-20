@@ -124,25 +124,30 @@ export async function getUpdates(
 }
 
 export function getVersion(tray = false): string {
-  const json = JSON.parse(
-    readFileSync(
-      join(
-        process.env.NODE_ENV === "development"
-          ? process.cwd()
-          : process.execPath.substring(
-              0,
-              process.platform === "win32"
-                ? process.execPath.lastIndexOf("\\")
-                : process.execPath.lastIndexOf("/")
-            ),
-        tray ? "../package.json" : "package.json"
-      ),
-      {
-        encoding: "utf8",
-      }
-    )
-  );
-  return semver.clean(json.version);
+  try {
+    const json = JSON.parse(
+      readFileSync(
+        join(
+          process.env.NODE_ENV === "development"
+            ? process.cwd()
+            : process.execPath.substring(
+                0,
+                process.platform === "win32"
+                  ? process.execPath.lastIndexOf("\\")
+                  : process.execPath.lastIndexOf("/")
+              ),
+          tray ? "../package.json" : "package.json"
+        ),
+        {
+          encoding: "utf8",
+        }
+      )
+    );
+    return semver.clean(json.version);
+  } catch (e) {
+    logger.error(`Common - getVersion Error: ${e.message}`);
+    return "0.0.0";
+  }
 }
 
 export function runService(workerData: { name: string }): Promise<any> {

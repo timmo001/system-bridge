@@ -211,29 +211,36 @@ async function setupTray(): Promise<void> {
 
   logger.info("Tray - Create Tray");
 
+  let icon = "";
+  try {
+    icon = readFileSync(
+      join(
+        process.env.NODE_ENV === "development"
+          ? process.cwd()
+          : process.execPath.substring(
+              0,
+              process.platform === "win32"
+                ? process.execPath.lastIndexOf("\\")
+                : process.execPath.lastIndexOf("/")
+            ),
+        process.env.NODE_ENV === "development" ? "../public/" : "./",
+        `system-bridge-circle.${
+          platform() === "win32"
+            ? "ico"
+            : platform() === "darwin"
+            ? "icns"
+            : "png"
+        }`
+      ),
+      { encoding: "base64" }
+    );
+  } catch (e) {
+    logger.error(`Tray - Error getting icon: ${e.message}`);
+  }
+
   const systray = new SysTray({
     menu: {
-      icon: readFileSync(
-        join(
-          process.env.NODE_ENV === "development"
-            ? process.cwd()
-            : process.execPath.substring(
-                0,
-                process.platform === "win32"
-                  ? process.execPath.lastIndexOf("\\")
-                  : process.execPath.lastIndexOf("/")
-              ),
-          process.env.NODE_ENV === "development" ? "../public/" : "./",
-          `system-bridge-circle.${
-            platform() === "win32"
-              ? "ico"
-              : platform() === "darwin"
-              ? "icns"
-              : "png"
-          }`
-        ),
-        { encoding: "base64" }
-      ),
+      icon,
       title: "System Bridge",
       tooltip: `System Bridge ${updates ? `v${updates.version.current}` : ""}`,
       items: [
