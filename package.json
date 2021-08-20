@@ -30,7 +30,7 @@
     "package": "rimraf out && yarn build && node scripts/package.js",
     "start": "concurrently -k \"yarn start:app\" \"yarn start:tray\" \"yarn start:frontend\"",
     "start:dev": "concurrently -k \"yarn start:app:dev\" \"yarn start:tray\" \"yarn start:frontend\"",
-    "start:prod": "node dist/main",
+    "start:prebuilt": "cross-env SB_TRAY=false NODE_ENV=development node dist/main",
     "start:app": "cross-env NODE_ENV=development nest start",
     "start:app:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:app:debug": "cross-env NODE_ENV=development nest start --debug --watch",
