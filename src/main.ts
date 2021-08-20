@@ -248,4 +248,5 @@ async function openTray(): Promise<void> {
 
 config();
 startServer();
-if (process.env.NODE_ENV !== "development") openTray();
+if (process.env.NODE_ENV !== "development" && process.env.SB_TRAY !== "false")
+  openTray();
