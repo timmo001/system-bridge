@@ -1,7 +1,6 @@
-import { Connection, createConnection, Repository } from "typeorm";
+import { Connection, createConnection } from "typeorm";
 import { join } from "path";
 import { readFileSync } from "fs";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import semver from "semver";
 
@@ -9,24 +8,27 @@ import { ApplicationUpdate } from "./entities/applicationUpdate.entity";
 import { Setting } from "./entities/setting.entity";
 import logger from "./logger";
 
-export const GITHUB_REPOSITORY = "timmo001/system-bridge";
+const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
-export function getAppDataDirectory() {
-  return join(
-    process.env.APP_PATH ||
-      process.env.APPDATA ||
-      (process.platform == "darwin"
-        ? process.env.HOME + "/Library/Preferences"
-        : process.env.HOME + "/.local/share"),
-    "system-bridge"
-  );
-}
+export const appDataDirectory = join(
+  process.env.APP_PATH ||
+    process.env.APPDATA ||
+    (process.platform == "darwin"
+      ? process.env.HOME + "/Library/Preferences"
+      : process.env.HOME + "/.local/share"),
+  "system-bridge"
+);
+
+export const logsPath = join(
+  process.env.LOG_PATH || appDataDirectory,
+  "system-bridge.log"
+);
 
 export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",
     name,
-    database: join(getAppDataDirectory(), "system-bridge_v1.db"),
+    database: join(appDataDirectory, "system-bridge_v1.db"),
     entities: [Setting],
     logging: false,
     synchronize: true,

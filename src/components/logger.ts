@@ -1,22 +1,17 @@
 import { createLogger, format, transports } from "winston";
-import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
-// Setup app data directory
-export const appDataDir = join(
-  process.env.APP_PATH ||
-    process.env.APPDATA ||
-    (process.platform == "darwin"
-      ? process.env.HOME + "/Library/Preferences"
-      : process.env.HOME + "/.local/share"),
-  "system-bridge"
-);
-if (!existsSync(appDataDir)) mkdirSync(appDataDir);
-
-export const logsPath = join(
-  process.env.LOG_PATH || appDataDir,
-  "system-bridge.log"
-);
+const logsPath =
+  process.env.LOG_PATH ||
+  join(
+    process.env.APP_PATH ||
+      process.env.APPDATA ||
+      (process.platform == "darwin"
+        ? process.env.HOME + "/Library/Preferences"
+        : process.env.HOME + "/.local/share"),
+    "system-bridge",
+    "system-bridge.log"
+  );
 
 const logFormat = format.printf((info) => {
   const { timestamp, level, stack } = info;

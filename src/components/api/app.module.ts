@@ -12,7 +12,7 @@ import { CpuModule } from "./cpu/cpu.module";
 import { DisplayModule } from "./display/display.module";
 import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
-import { getAppDataDirectory } from "../common";
+import { appDataDirectory } from "../common";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { HttpAuthGuard } from "./httpAuth.guard";
 import { InformationModule } from "./information/information.module";
@@ -33,7 +33,7 @@ import logger from "../logger";
   imports: [
     TypeOrmModule.forRoot({
       type: "better-sqlite3",
-      database: join(getAppDataDirectory(), "system-bridge_v1.db"),
+      database: join(appDataDirectory, "system-bridge_v1.db"),
       autoLoadEntities: true,
       logging: false,
       synchronize: true,

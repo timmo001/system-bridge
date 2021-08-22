@@ -10,18 +10,21 @@ import { ApplicationUpdate } from "./api/information/entities/information.entity
 import { Setting } from "./api/settings/entities/setting.entity";
 import logger from "./logger";
 
-export const GITHUB_REPOSITORY = "timmo001/system-bridge";
+const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
-export function getAppDataDirectory() {
-  return join(
-    process.env.APP_PATH ||
-      process.env.APPDATA ||
-      (process.platform == "darwin"
-        ? process.env.HOME + "/Library/Preferences"
-        : process.env.HOME + "/.local/share"),
-    "system-bridge"
-  );
-}
+export const appDataDirectory = join(
+  process.env.APP_PATH ||
+    process.env.APPDATA ||
+    (process.platform == "darwin"
+      ? process.env.HOME + "/Library/Preferences"
+      : process.env.HOME + "/.local/share"),
+  "system-bridge"
+);
+
+export const logsPath = join(
+  process.env.LOG_PATH || appDataDirectory,
+  "system-bridge.log"
+);
 
 export async function getApiKey(
   settingsRepository: Repository<Setting>
@@ -52,7 +55,7 @@ export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",
     name,
-    database: join(getAppDataDirectory(), "system-bridge_v1.db"),
+    database: join(appDataDirectory, "system-bridge_v1.db"),
     entities: [Setting],
     logging: false,
     synchronize: true,
