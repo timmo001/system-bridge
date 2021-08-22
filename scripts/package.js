@@ -113,6 +113,8 @@ async function package() {
       __dirname,
       `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
     ),
+    "--options",
+    "--max_old_space_size=4096",
   ]);
 
   await exec([
@@ -122,6 +124,8 @@ async function package() {
       __dirname,
       `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     ),
+    "--options",
+    "--max_old_space_size=4096",
   ]);
 
   filePaths
