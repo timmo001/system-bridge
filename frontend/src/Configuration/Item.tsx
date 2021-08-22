@@ -25,7 +25,10 @@ import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
 import axios from "axios";
 import Icon from "@mdi/react";
 
-import { Configuration, ConfigurationItem } from "../entities/configuration.entity";
+import {
+  Configuration,
+  ConfigurationItem,
+} from "../entities/configuration.entity";
 import { handleCopyToClipboard, parsedQuery, useSettings } from "../Utils";
 import { SectionProps } from "./Section";
 import { Setting } from "../entities/settings.entity";
