@@ -27,15 +27,9 @@ async function setupTray(): Promise<void> {
   const updates = await getUpdates(process.env.NODE_ENV === "development");
 
   logger.info(
-    "-----------------------------------------------------------------------------------------------------------------------"
-  );
-  logger.info(
-    `System Bridge - Tray ${updates?.version.current}: ${JSON.stringify(
-      process.argv
-    )} - ${process.env.NODE_ENV}`
-  );
-  logger.info(
-    "-----------------------------------------------------------------------------------------------------------------------"
+    `${updates?.version.current}: ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
   );
 
   const versionText = updates
