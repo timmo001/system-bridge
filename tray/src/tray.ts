@@ -6,13 +6,13 @@ import open from "open";
 import queryString from "query-string";
 
 import {
-  getAppDataDirectory,
+  appDataDirectory,
   getConnection,
   getSettingsObject,
   getUpdates,
-} from "../../src/common";
-import { WebSocketConnection } from "../../src/websocket";
-import logger from "../../src/logger";
+} from "./components/common";
+import { WebSocketConnection } from "./components/websocket";
+import logger from "./components/logger";
 
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
@@ -198,7 +198,7 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const path = join(
-              process.env.LOG_PATH || getAppDataDirectory(),
+              process.env.LOG_PATH || appDataDirectory,
               "system-bridge.log"
             );
             logger.info(`Tray - Open Log File: ${path}`);
@@ -262,7 +262,6 @@ async function setupTray(): Promise<void> {
                 ? Number(settings["network-wsPort"])
                 : 9172,
               settings["network-apiKey"],
-              false,
               () => {
                 ws.sendEvent({ name: "exit-application" });
                 systray.kill(true);

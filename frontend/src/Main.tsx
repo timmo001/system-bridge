@@ -2,15 +2,14 @@ import React, { ReactElement, useEffect, useMemo } from "react";
 import { createStyles, Grid, makeStyles, Typography } from "@material-ui/core";
 import axios, { AxiosResponse } from "axios";
 
+import { Configuration } from "./entities/configuration.entity";
+import { defaultConfiguration } from "./defaultConfiguration";
 import { parsedQuery, useSettings } from "./Utils";
-import { Setting } from "./types/settings";
-import ConfigurationComponent, {
-  Configuration,
-  defaultConfiguration,
-} from "./Configuration/Configuration";
-import Data from "./Data/Data";
+import { Setting } from "./entities/settings.entity";
+import ConfigurationComponent from "./Configuration/Configuration";
 import Logs from "./Logs/Logs";
 import WebRTC from "./WebRTC/WebRTC";
+import Data from "./Data/Data";
 
 const useStyles = makeStyles(() =>
   createStyles({

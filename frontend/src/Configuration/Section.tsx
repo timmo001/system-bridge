@@ -1,17 +1,10 @@
 import React, { ReactElement } from "react";
 import { Grid, List, Paper, Typography } from "@material-ui/core";
 
+import { ConfigurationSection } from "../entities/configuration.entity";
 import { useSettings } from "../Utils";
-import Item, { ConfigurationItem } from "./Item";
+import Item from "./Item";
 
-export interface ConfigurationSection {
-  name: string;
-  description?: string;
-  icon?: string;
-  items: {
-    [item: string]: ConfigurationItem;
-  };
-}
 export interface SectionProps {
   handleServerRestartRequired: () => void;
   sectionKey: string;

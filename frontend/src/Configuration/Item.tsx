@@ -22,13 +22,16 @@ import {
   Theme,
 } from "@material-ui/core";
 import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
+import axios from "axios";
 import Icon from "@mdi/react";
 
-import { Configuration } from "./Configuration";
+import {
+  Configuration,
+  ConfigurationItem,
+} from "../entities/configuration.entity";
 import { handleCopyToClipboard, parsedQuery, useSettings } from "../Utils";
 import { SectionProps } from "./Section";
-import axios from "axios";
-import { Setting } from "../types/settings";
+import { Setting } from "../entities/settings.entity";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -44,29 +47,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
   })
 );
-
-export type SettingsValue =
-  | null
-  | boolean
-  | string
-  | number
-  | SettingsObject
-  | SettingsValue[];
-
-export type SettingsObject = {
-  [key: string]: SettingsValue;
-};
-
-export interface ConfigurationItem {
-  name: string;
-  description?: string;
-  icon: string;
-  defaultValue: SettingsValue;
-  value: SettingsValue;
-  minimum?: number;
-  isPassword?: boolean;
-  requiresServerRestart?: boolean;
-}
 
 interface ItemProps extends SectionProps {
   itemKey: string;
