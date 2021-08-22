@@ -4,10 +4,12 @@ import { existsSync, mkdirSync } from "fs";
 import { appDataDirectory, getVersion } from "./components/common";
 import { openTray } from "./components/tray";
 import { startServer } from "./components/api";
-import logger from "./components/logger";
+import { Logger } from "./components/logger";
 
 // Get process environment variables
 config();
+
+const { logger } = new Logger();
 
 // Setup app data directory
 if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);

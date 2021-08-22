@@ -23,8 +23,10 @@ import {
   getVersion,
 } from "../common";
 import { Events } from "../events";
+import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
-import logger from "../logger";
+
+const { logger } = new Logger("API");
 
 let app: NestExpressApplication,
   server: Server | undefined,
@@ -49,7 +51,7 @@ export async function updateAppConfig(): Promise<void> {
     else await autoLaunch.disable();
 
     logger.info(
-      `Main - Launch on startup: ${launchOnStartup} - ${
+      `Launch on startup: ${launchOnStartup} - ${
         (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
       } - ${process.execPath}`
     );
@@ -110,7 +112,7 @@ export async function startServer(): Promise<void> {
 
   server.on("error", (err: any) => logger.error("Server error:", err));
   server.on("listening", async () => {
-    logger.info(`Main - API started on port ${apiPort}`);
+    logger.info(`API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
     const uuidInfo: Systeminformation.UuidData = await uuid();
     const defaultInterface: string = await networkInterfaceDefault();
@@ -144,19 +146,19 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
-            if (error) logger.warn("Main - MDNS error:", error);
+            if (error) logger.warn("MDNS error:", error);
             else
               logger.info(
-                `Main - Sent mdns advertisement on port ${service.fullname}:${service.port}`
+                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
           }
         );
       } catch (e) {
-        logger.warn("Main - MDNS error:", e);
+        logger.warn("MDNS error:", e);
       }
     }
   });
-  server.on("close", () => logger.info("Main - Server closing."));
+  server.on("close", () => logger.info("Server closing."));
 
   await app.listen(apiPort);
 
@@ -169,13 +171,13 @@ export async function startServer(): Promise<void> {
       key: apiKey,
     });
     broker.on("connection", (client) => {
-      logger.info(`Main - Broker peer connected: ${client.getId()}`);
+      logger.info(`Broker peer connected: ${client.getId()}`);
     });
     broker.on("disconnect", (client) => {
-      logger.info(`Main - Broker peer disconnected: ${client.getId()}`);
+      logger.info(`Broker peer disconnected: ${client.getId()}`);
     });
     app.use("/rtc", broker);
-    logger.info(`Main - RTC broker created on path ${broker.path()}`);
+    logger.info(`RTC broker created on path ${broker.path()}`);
 
     events = new Events();
     events.setup(settings);
@@ -185,11 +187,11 @@ export async function startServer(): Promise<void> {
 export async function stopServer(): Promise<void> {
   if (app) {
     await app.close();
-    logger.info("Main - Nest Application closed.");
+    logger.info("Nest Application closed.");
   }
   if (server) {
     server.close();
-    logger.info("Main - Server closed.");
+    logger.info("Server closed.");
   }
   if (events) events.cleanup();
   if (rtc) rtc.closeRTCWindow();

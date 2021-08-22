@@ -1,19 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import { readFileSync } from "fs";
 
-import logger, { logsPath } from "../../logger";
+import { Logger, LOG_PATH } from "../../logger";
+
+const { logger } = new Logger("LogsService");
 
 @Injectable()
 export class LogsService {
   async findAll(): Promise<Array<string>> {
     try {
-      const data = readFileSync(logsPath, "utf8");
+      const data = readFileSync(LOG_PATH, "utf8");
       if (data) {
         const lines = data.split(/\r\n|\r|\n/g);
         return lines;
       }
     } catch (e) {
-      logger.error(`LogsService - Error reading logs: ${e.message}`);
+      logger.error(`Error reading logs: ${e.message}`);
     }
     return [];
   }

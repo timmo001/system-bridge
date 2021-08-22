@@ -3,7 +3,9 @@ import { Injectable } from "@nestjs/common";
 
 import { Graphics } from "./entities/graphics.entity";
 import { graphics } from "systeminformation";
-import logger from "../../logger";
+import { Logger } from "../../logger";
+
+const { logger } = new Logger("GraphicsService");
 
 @Injectable()
 export class GraphicsService {
@@ -32,7 +34,7 @@ export class GraphicsService {
             data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
         }
       } catch (e) {
-        logger.error(e.message);
+        logger.error(`Error: %{e.message}`);
       }
     }
     return data;

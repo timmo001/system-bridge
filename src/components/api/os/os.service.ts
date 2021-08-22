@@ -2,7 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { osInfo, users } from "systeminformation";
 
 import { Os } from "./entities/os.entity";
-import logger from "../../logger";
+import { Logger } from "../../logger";
+
+const { logger } = new Logger("OsService");
 
 @Injectable()
 export class OsService {
@@ -12,7 +14,7 @@ export class OsService {
       const { getIdleTime } = await import("desktop-idle");
       idleTime = getIdleTime();
     } catch (e) {
-      logger.error(`OsService - Error ${e.message}`);
+      logger.error(`Error ${e.message}`);
     }
     return {
       ...(await osInfo()),

@@ -2,7 +2,9 @@ import { bluetoothDevices, osInfo } from "systeminformation";
 import { Injectable } from "@nestjs/common";
 import fs from "fs";
 
-import logger from "../../logger";
+import { Logger } from "../../logger";
+
+const { logger } = new Logger("BluetoothService");
 
 @Injectable()
 export class BluetoothService {
@@ -17,7 +19,7 @@ export class BluetoothService {
         );
       return await bluetoothDevices();
     } catch (e) {
-      logger.warn(e);
+      logger.warn(`Error: ${e.message}`);
     }
     return {};
   }

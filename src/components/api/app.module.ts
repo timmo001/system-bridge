@@ -27,7 +27,9 @@ import { ProcessesModule } from "./processes/processes.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SystemModule } from "./system/system.module";
 import { UsbModule } from "./usb/usb.module";
-import logger from "../logger";
+import { Logger } from "../logger";
+
+const { logger } = new Logger("AppService");
 
 @Module({
   imports: [

@@ -1,7 +1,9 @@
 import { join } from "path";
 import execa from "execa";
 
-import logger from "./logger";
+import { Logger } from "./logger";
+
+const { logger } = new Logger("Tray");
 
 export async function openTray(): Promise<void> {
   try {
@@ -15,22 +17,20 @@ export async function openTray(): Promise<void> {
       workingDirectory,
       `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
     );
-    logger.info(`Main - Open Tray: ${trayPath}`);
+    logger.info(`Open Tray: ${trayPath}`);
     const trayProcess = execa(trayPath, [], {
       cwd: workingDirectory,
       windowsHide: true,
     });
-    trayProcess.catch((e) =>
-      logger.error(`Main - Error inside tray: ${e.message}`)
-    );
+    trayProcess.catch((e) => logger.error(`Error inside tray: ${e.message}`));
     trayProcess.on("close", (code: string) => {
-      logger.error(`Main - Tray closed with code: ${code}`);
-      logger.info("Main - Tray reopening in 10 seconds...");
+      logger.error(`Tray closed with code: ${code}`);
+      logger.info("Tray reopening in 10 seconds...");
       setTimeout(() => openTray(), 10000);
     });
   } catch (e) {
-    logger.error(`Main - Error opening tray: ${e.message}`);
-    logger.info("Main - Retrying in 10 seconds...");
+    logger.error(`Error opening tray: ${e.message}`);
+    logger.info("Retrying in 10 seconds...");
     setTimeout(() => openTray(), 10000);
   }
 }

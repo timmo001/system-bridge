@@ -1,22 +1,24 @@
 import { Event } from "./api/events/entities/event.entity";
+import { Logger } from "./logger";
 import { Observer } from "./observer";
 import { runService } from "./common";
 import { stopServer, updateAppConfig } from "./api";
 import { WebSocketConnection } from "./websocket";
-import logger from "./logger";
+
+const { logger } = new Logger("Events");
 
 export class Events {
   private websocketConnection: WebSocketConnection;
   private observer: Observer;
 
   async setup(settings: { [key: string]: string }): Promise<void> {
-    logger.debug("Events - Setup");
+    logger.debug("Setup");
     this.websocketConnection = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
       true,
       () => {
-        logger.info("Events - Listening");
+        logger.info("Listening");
         this.websocketConnection?.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer(settings);
         this.observer.callback = (data: {
@@ -38,14 +40,14 @@ export class Events {
       switch (event.name) {
         case "exit-application":
           await stopServer();
-          logger.info("Events - Exit application");
+          logger.info("Exit application");
           process.exit(0);
         case "get-data":
-          logger.info("Events - Get data");
+          logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
             event.data.forEach(async (name: string) => {
-              logger.debug(`Events - Get data: ${name}`);
+              logger.debug(`Get data: ${name}`);
               try {
                 this.websocketConnection.sendEvent({
                   name: `data-${name.replace(
@@ -56,21 +58,21 @@ export class Events {
                 });
               } catch (e) {
                 logger.error(
-                  `Events - Service error for ${name}: ${e.message}`
+                  `Service error for ${name}: ${e.message}`
                 );
               }
             });
           break;
         case "observer-start":
-          logger.info("Events - Start Observer");
+          logger.info("Start Observer");
           if (this.observer) this.observer.start();
           break;
         case "observer-stop":
-          logger.info("Events - Stop Observer");
+          logger.info("Stop Observer");
           if (this.observer) this.observer.stop();
           break;
         case "update-app-config":
-          logger.info("Events - Update app config");
+          logger.info("Update app config");
           await updateAppConfig();
           break;
       }
