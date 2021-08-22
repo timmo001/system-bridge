@@ -13,28 +13,9 @@ import axios, { AxiosResponse } from "axios";
 import clsx from "clsx";
 import Icon from "@mdi/react";
 
+import { ApplicationInfo } from "../entities/application.entity";
 import { handleCopyToClipboard, parsedQuery } from "../Utils";
 import logo from "../resources/system-bridge.svg";
-
-export interface ApplicationInfo {
-  address: string;
-  fqdn: string;
-  host: string;
-  ip: string;
-  mac: string;
-  port: number;
-  updates?: ApplicationUpdate;
-  uuid: string;
-  version: string;
-  websocketAddress: string;
-  websocketPort: number;
-}
-
-export interface ApplicationUpdate {
-  available: boolean;
-  url: string;
-  version: { current: string; new: string };
-}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
