@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { osInfo, users } from "systeminformation";
 
 import { Os } from "./entities/os.entity";
-import logger from "src/logger";
+import logger from "../../logger";
 
 @Injectable()
 export class OsService {
