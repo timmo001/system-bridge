@@ -46,14 +46,12 @@ export class Logger {
           format.colorize(),
           logFormat
         ),
-        handleExceptions: true,
       })
     );
     tps.push(
       new transports.File({
         filename: LOG_PATH,
         format: format.combine(format.errors({ stack: true }), logFormat),
-        handleExceptions: true,
       })
     );
 
