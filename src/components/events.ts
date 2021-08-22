@@ -57,9 +57,7 @@ export class Events {
                   data: await runService({ name }),
                 });
               } catch (e) {
-                logger.error(
-                  `Service error for ${name}: ${e.message}`
-                );
+                logger.error(`Service error for ${name}: ${e.message}`);
               }
             });
           break;
