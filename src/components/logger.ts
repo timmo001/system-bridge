@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from "winston";
 import { join } from "path";
 
-const logsPath =
+export const logsPath =
   process.env.LOG_PATH ||
   join(
     process.env.APP_PATH ||

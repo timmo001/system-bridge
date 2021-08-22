@@ -21,11 +21,6 @@ export const appDataDirectory = join(
   "system-bridge"
 );
 
-export const logsPath = join(
-  process.env.LOG_PATH || appDataDirectory,
-  "system-bridge.log"
-);
-
 export async function getApiKey(
   settingsRepository: Repository<Setting>
 ): Promise<string> {
