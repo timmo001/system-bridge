@@ -1,7 +1,7 @@
 import { Event } from "./api/events/entities/event.entity";
 import { Observer } from "./observer";
 import { runService } from "./common";
-import { stopServer, updateAppConfig } from "./main";
+import { stopServer, updateAppConfig } from "./api";
 import { WebSocketConnection } from "./websocket";
 import logger from "./logger";
 

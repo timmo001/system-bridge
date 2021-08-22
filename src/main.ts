@@ -1,7 +1,8 @@
 import { config } from "dotenv";
 
 import { getVersion } from "./components/common";
-import { openTray, startServer } from "./components/main";
+import { openTray } from "./components/tray";
+import { startServer } from "./components/api";
 import logger from "./components/logger";
 
 config();

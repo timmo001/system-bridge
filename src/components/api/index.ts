@@ -13,19 +13,18 @@ import {
 } from "systeminformation";
 import { Server } from "http";
 import AutoLaunch from "auto-launch";
-import execa from "execa";
 import helmet from "helmet";
 
-import { AppModule } from "./api/app.module";
+import { AppModule } from "./app.module";
 import {
   getAppDataDirectory,
   getConnection,
   getSettingsObject,
   getVersion,
-} from "./common";
-import { Events } from "./events";
-import { WsAdapter } from "./api/ws-adapter";
-import logger from "./logger";
+} from "../common";
+import { Events } from "../events";
+import { WsAdapter } from "./ws-adapter";
+import logger from "../logger";
 
 let app: NestExpressApplication,
   server: Server | undefined,
@@ -198,36 +197,4 @@ export async function stopServer(): Promise<void> {
   server = undefined;
   events = undefined;
   rtc = undefined;
-}
-
-export async function openTray(): Promise<void> {
-  try {
-    const workingDirectory = process.execPath.substring(
-      0,
-      process.platform === "win32"
-        ? process.execPath.lastIndexOf("\\")
-        : process.execPath.lastIndexOf("/")
-    );
-    const trayPath = join(
-      workingDirectory,
-      `./system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
-    );
-    logger.info(`Main - Open Tray: ${trayPath}`);
-    const trayProcess = execa(trayPath, [], {
-      cwd: workingDirectory,
-      windowsHide: true,
-    });
-    trayProcess.catch((e) =>
-      logger.error(`Main - Error inside tray: ${e.message}`)
-    );
-    trayProcess.on("close", (code: string) => {
-      logger.error(`Main - Tray closed with code: ${code}`);
-      logger.info("Main - Tray reopening in 10 seconds...");
-      setTimeout(() => openTray(), 10000);
-    });
-  } catch (e) {
-    logger.error(`Main - Error opening tray: ${e.message}`);
-    logger.info("Main - Retrying in 10 seconds...");
-    setTimeout(() => openTray(), 10000);
-  }
 }
