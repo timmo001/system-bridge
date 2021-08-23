@@ -85,7 +85,6 @@ export async function startServer(): Promise<void> {
 
   // Serve public directory
   const publicDir = join(__dirname, "../../public");
-  if (!existsSync(publicDir)) mkdirSync(publicDir);
   app.useStaticAssets(publicDir);
 
   // Setup Open API
