@@ -8,7 +8,9 @@ import {
 import { Hardware, Sensor } from "system-bridge-windows-sensors";
 
 import { CPU } from "./entities/cpu.entity";
-import logger from "../../logger";
+import { Logger } from "../../logger";
+
+const { logger } = new Logger("CpuService");
 
 @Injectable()
 export class CpuService {
@@ -91,7 +93,7 @@ export class CpuService {
           }
         }
       } catch (e) {
-        logger.error(e.message);
+        logger.error(`Error: ${e.message}`);
       }
     }
     return data;

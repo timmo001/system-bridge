@@ -6,7 +6,9 @@ import semver from "semver";
 
 import { ApplicationUpdate } from "./entities/applicationUpdate.entity";
 import { Setting } from "./entities/setting.entity";
-import logger from "./logger";
+import { Logger } from "./logger";
+
+const { logger } = new Logger("TrayCommon");
 
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
@@ -104,7 +106,7 @@ export function getVersion(tray = false): string {
     );
     return semver.clean(json.version);
   } catch (e) {
-    logger.error(`Common - getVersion Error: ${e.message}`);
+    logger.error(`getVersion Error: ${e.message}`);
     return "0.0.0";
   }
 }

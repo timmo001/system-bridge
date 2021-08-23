@@ -2,9 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { audio, Systeminformation } from "systeminformation";
 
 import { Audio } from "./entities/audio.entity";
-import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
-import logger from "../../logger";
 import { getCurrent, muted, volume } from "./data";
+import { Logger } from "../../logger";
+import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
+
+const { logger } = new Logger("AudioService");
 
 @Injectable()
 export class AudioService {

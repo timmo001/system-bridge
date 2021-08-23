@@ -1,9 +1,10 @@
 import { uuid } from "systeminformation";
 import mqtt from "mqtt";
 
-import logger from "./logger";
 import { getConnection, getSettingsObject } from "./common";
+import { Logger } from "./logger";
 
+const { logger } = new Logger("MQTT");
 export class MQTT {
   private mqttClient: mqtt.MqttClient;
 
@@ -15,7 +16,7 @@ export class MQTT {
     await connection.close();
 
     if (settings["mqtt-enabled"] === "true") {
-      logger.info("MQTT - Setup");
+      logger.info("Setup");
       this.clientId = (await uuid()).os;
       this.mqttClient = mqtt.connect(
         `mqtt://${settings["mqtt-host"] || "localhost"}:${
@@ -36,14 +37,13 @@ export class MQTT {
   async publish(topicSuffix: string, data: string): Promise<void> {
     if (this.mqttClient) {
       const topic = `systembridge/${this.clientId}/${topicSuffix}`;
-      logger.debug(`MQTT - Publishing to topic ${topic}`);
+      logger.debug(`Publishing to topic ${topic}`);
       this.mqttClient.publish(
         topic,
         data,
         { qos: 0, retain: true },
         (error?: Error) => {
-          if (error)
-            logger.error(`MQTT - Error publishing message: ${error.message}`);
+          if (error) logger.error(`Error publishing message: ${error.message}`);
         }
       );
     }

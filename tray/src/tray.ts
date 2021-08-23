@@ -11,9 +11,10 @@ import {
   getSettingsObject,
   getUpdates,
 } from "./components/common";
+import { Logger } from "./components/logger";
 import { WebSocketConnection } from "./components/websocket";
-import logger from "./components/logger";
 
+const { logger } = new Logger("Tray");
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
 }
@@ -26,15 +27,9 @@ async function setupTray(): Promise<void> {
   const updates = await getUpdates(process.env.NODE_ENV === "development");
 
   logger.info(
-    "-----------------------------------------------------------------------------------------------------------------------"
-  );
-  logger.info(
-    `System Bridge - Tray ${updates?.version.current}: ${JSON.stringify(
-      process.argv
-    )} - ${process.env.NODE_ENV}`
-  );
-  logger.info(
-    "-----------------------------------------------------------------------------------------------------------------------"
+    `${updates?.version.current}: ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
   );
 
   const versionText = updates
@@ -72,7 +67,7 @@ async function setupTray(): Promise<void> {
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
 
-        logger.info(`Tray - Open Settings: ${url}`);
+        logger.info(`Open Settings: ${url}`);
         open(url);
       },
     },
@@ -98,7 +93,7 @@ async function setupTray(): Promise<void> {
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
 
-        logger.info(`Tray - Open Data: ${url}`);
+        logger.info(`Open Data: ${url}`);
         open(url);
       },
     },
@@ -110,7 +105,7 @@ async function setupTray(): Promise<void> {
       enabled: true,
       click: async () => {
         const url = "https://github.com/timmo001/system-bridge/releases/latest";
-        logger.info(`Tray - Open URL: ${url}`);
+        logger.info(`Open URL: ${url}`);
         open(url);
       },
     },
@@ -127,7 +122,7 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const url = "https://system-bridge.timmo.dev";
-            logger.info(`Tray - Open URL: ${url}`);
+            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -139,7 +134,7 @@ async function setupTray(): Promise<void> {
           click: async () => {
             const url =
               "https://github.com/timmo001/system-bridge/issues/new/choose";
-            logger.info(`Tray - Open URL: ${url}`);
+            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -151,7 +146,7 @@ async function setupTray(): Promise<void> {
           click: async () => {
             const url =
               "https://github.com/timmo001/system-bridge/issues/new/choose";
-            logger.info(`Tray - Open URL: ${url}`);
+            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -162,7 +157,7 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const url = "https://github.com/timmo001/system-bridge/discussions";
-            logger.info(`Tray - Open URL: ${url}`);
+            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -187,7 +182,7 @@ async function setupTray(): Promise<void> {
               wsPort: settings["network-wsPort"] || 9172,
             })}`;
 
-            logger.info(`Tray - Open Logs: ${url}`);
+            logger.info(`Open Logs: ${url}`);
             open(url);
           },
         },
@@ -201,7 +196,7 @@ async function setupTray(): Promise<void> {
               process.env.LOG_PATH || appDataDirectory,
               "system-bridge.log"
             );
-            logger.info(`Tray - Open Log File: ${path}`);
+            logger.info(`Open Log File: ${path}`);
             open(path);
           },
         },
@@ -209,7 +204,7 @@ async function setupTray(): Promise<void> {
     },
   ];
 
-  logger.info("Tray - Create Tray");
+  logger.info("Create Tray");
 
   let icon = "";
   try {
@@ -235,7 +230,7 @@ async function setupTray(): Promise<void> {
       { encoding: "base64" }
     );
   } catch (e) {
-    logger.error(`Tray - Error getting icon: ${e.message}`);
+    logger.error(`Error getting icon: ${e.message}`);
   }
 
   const systray = new SysTray({
@@ -252,7 +247,7 @@ async function setupTray(): Promise<void> {
           checked: false,
           enabled: true,
           click: async () => {
-            logger.info("Tray - Exit application");
+            logger.info("Exit application");
             const connection = await getConnection();
             const settings = await getSettingsObject(connection);
             await connection.close();
@@ -275,13 +270,11 @@ async function setupTray(): Promise<void> {
 
   if (systray) {
     await systray.ready();
-    logger.info("Tray - Started");
+    logger.info("Started");
 
-    systray.onError((err: Error) =>
-      logger.error(`Tray - Error: ${err.message}`)
-    );
+    systray.onError((err: Error) => logger.error(`Error: ${err.message}`));
     systray.onExit((code: number) => {
-      logger.info(`Tray - Exit: ${code}`);
+      logger.info(`Exit: ${code}`);
     });
 
     systray.onClick((action: ExtendedClickEvent) => {

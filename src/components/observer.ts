@@ -1,8 +1,9 @@
 import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
+import { Logger } from "./logger";
 import { runService } from "./common";
-import logger from "./logger";
 
+const { logger } = new Logger("Observer");
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;
@@ -55,7 +56,7 @@ export class Observer {
     try {
       data = await runService({ name });
     } catch (e) {
-      logger.error(`Observer - Service error: ${e.message}`);
+      logger.error(`Service error: ${e.message}`);
     }
     this.callback({ [name]: data });
     return new AsyncTask(name, async () => {
@@ -66,7 +67,7 @@ export class Observer {
           this.callback({ [name]: d });
         }
       } catch (e) {
-        logger.error(`Observer - Service error for ${name}: ${e.message}`);
+        logger.error(`Service error for ${name}: ${e.message}`);
       }
     });
   }

@@ -9,10 +9,12 @@ import { Injectable, UseGuards } from "@nestjs/common";
 import WebSocket from "ws";
 
 import { Event } from "./entities/event.entity";
+import { Logger } from "../../logger";
 import { MQTT } from "../../mqtt";
 import { startServer, stopServer } from "..";
 import { WsAuthGuard } from "../wsAuth.guard";
-import logger from "../../logger";
+
+const { logger } = new Logger("EventsGateway");
 
 @Injectable()
 @WebSocketGateway()
@@ -30,7 +32,7 @@ export class EventsGateway {
   async handleRegisterListener(
     @ConnectedSocket() client: WebSocket
   ): Promise<WsResponse<boolean>> {
-    logger.info("WebSocket - New client registered");
+    logger.info("New client registered");
     this.authenticatedClients.push(client);
     return { event: "registered-listener", data: true };
   }
@@ -40,7 +42,7 @@ export class EventsGateway {
   async handleEvent(
     @MessageBody() { data }: { data: Event }
   ): Promise<WsResponse<Event>> {
-    logger.debug(`WebSocket - New event: ${data.name}`);
+    logger.debug(`New event: ${data.name}`);
     this.authenticatedClients.forEach((ws: WebSocket) =>
       ws.send(JSON.stringify({ event: "events", data }))
     );
