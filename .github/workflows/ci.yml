@@ -160,6 +160,11 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           yarn install:all:ci
+      - name: 🏗 Remove windows only dependencies
+        if: matrix.os.platform != 'win32'
+        run: |
+          yarn remove node-hide-console-window win-audio
+          yarn install:all:ci
       - name: 🏗 Add console hide command for Windows
         if: matrix.os.platform == 'win32'
         run: |
