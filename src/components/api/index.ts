@@ -84,7 +84,8 @@ export async function startServer(): Promise<void> {
   app.enableCors();
 
   // Serve public directory
-  const publicDir = join(__dirname, "../../public");
+  const publicDir = join(__dirname, "../../../public");
+  logger.info(`Serving public directory: ${publicDir}`);
   app.useStaticAssets(publicDir);
 
   // Setup Open API
