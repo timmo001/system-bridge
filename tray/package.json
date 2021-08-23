@@ -17,7 +17,7 @@
     "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
-  "bin": "dist/tray/src/tray.js",
+  "bin": "dist/tray.js",
   "scripts": {
     "build": "rimraf dist && tsc",
     "start": "yarn build && node dist/tray.js"
