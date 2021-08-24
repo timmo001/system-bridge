@@ -1,9 +1,5 @@
 import { parentPort, workerData } from "worker_threads";
 
-import { Logger } from "./logger";
-
-const { logger } = new Logger("Worker");
-
 async function getService(): Promise<any> {
   switch (workerData.name) {
     default:
@@ -56,8 +52,6 @@ async function getService(): Promise<any> {
       return new (await import("./api/usb/usb.service")).UsbService();
   }
 }
-
-logger.debug(`Run: ${workerData.name}`);
 
 (async () => {
   const service = await getService();
