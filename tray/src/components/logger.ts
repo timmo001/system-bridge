@@ -1,7 +1,9 @@
 import {
   createLogger,
   format,
+  LeveledLogMethod,
   Logger as WinstonLogger,
+  transport,
   transports,
 } from "winston";
 import { join } from "path";
@@ -19,27 +21,41 @@ export const LOG_PATH =
   );
 
 export class Logger {
-  private logger: WinstonLogger;
-  private name: string;
+  public logger: WinstonLogger;
 
   constructor(name?: string) {
-    this.name = name;
+    const logFormat = format.printf((info) => {
+      const { timestamp, level, stack } = info;
+      let { message } = info;
+      // print the stack if we have it, message otherwise.
+      message = stack || message;
+      try {
+        if (typeof message === "object") message = JSON.stringify(message);
+      } catch (e) {
+        console.log(e);
+      }
+      return name
+        ? `${timestamp} ${level}: ${message}`
+        : `${timestamp} ${level}: ${message}`;
+    });
 
-    if (!this.logger) {
-      const logFormat = format.printf((info) => {
-        const { timestamp, level, stack } = info;
-        let { message } = info;
-        // print the stack if we have it, message otherwise.
-        message = stack || message;
-        try {
-          if (typeof message === "object") message = JSON.stringify(message);
-        } catch (e) {
-          console.log(e);
-        }
-        return `${timestamp} ${level}: ${message}`;
-      });
+    const tps = [
+      new transports.Console({
+        format: format.combine(
+          format.splat(),
+          format.simple(),
+          format.colorize(),
+          logFormat
+        ),
+      }),
+      new transports.File({
+        filename: LOG_PATH,
+        format: format.combine(format.errors({ stack: true }), logFormat),
+      }),
+    ];
 
-      // Configure the Winston logger.
+    // Configure the Winston logger.
+    if (!this.logger)
       this.logger = createLogger({
         level: process.env.NODE_ENV === "development" ? "debug" : "info",
         format: format.combine(
@@ -47,41 +63,8 @@ export class Logger {
           format.simple(),
           format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
         ),
-        transports: [
-          new transports.Console({
-            format: format.combine(
-              format.splat(),
-              format.simple(),
-              format.colorize(),
-              logFormat
-            ),
-          }),
-          new transports.File({
-            filename: LOG_PATH,
-            format: format.combine(format.errors({ stack: true }), logFormat),
-          }),
-        ],
+        transports: tps,
       });
-    }
-  }
-
-  log(level: string, message: string) {
-    this.logger.log(level, this.name ? `${this.name} - ${message}` : message);
-  }
-
-  public debug(message: string) {
-    this.log("debug", message);
-  }
-
-  public info(message: string) {
-    this.log("info", message);
-  }
-
-  public warn(message: string) {
-    this.log("warn", message);
-  }
-
-  public error(message: string) {
-    this.log("error", message);
+    else this.logger.transports = tps;
   }
 }
