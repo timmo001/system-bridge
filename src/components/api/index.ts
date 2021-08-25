@@ -171,6 +171,10 @@ export async function startServer(): Promise<void> {
 
     events = new Events();
     events.setup(settings);
+
+    if (process.env.CLI_ONLY === "true") {
+      console.log("Your api-key is:", apiKey);
+    }
   }
 }
 
