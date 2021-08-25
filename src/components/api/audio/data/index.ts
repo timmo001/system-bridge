@@ -1,7 +1,3 @@
-import { Logger } from "../../../logger";
-
-const { logger } = new Logger("AudioData");
-
 function getImpl(platform: string): any {
   switch (platform) {
     case "linux":
@@ -34,7 +30,6 @@ export async function getCurrent(): Promise<{
       volume: await volume(),
     };
   } catch (e) {
-    logger.warn(`Cannot get current audio: ${e.message}`);
+    throw new Error(`Cannot get current audio: ${e.message}`);
   }
-  return {};
 }

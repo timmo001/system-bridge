@@ -11,13 +11,13 @@ const { logger } = new Logger("AudioService");
 @Injectable()
 export class AudioService {
   async findAll(): Promise<Audio> {
-    let devices: Systeminformation.AudioData[] = [];
+    let data = {};
     try {
-      devices = await audio();
+      data = { current: await getCurrent(), devices: await audio() };
     } catch (e) {
       logger.warn(`Cannot get audio devices: ${e.message}`);
     }
-    return { current: await getCurrent(), devices };
+    return data;
   }
 
   async update(
