@@ -85,28 +85,28 @@ export async function getUpdates(
 }
 
 export function getVersion(tray = false): string {
-  try {
-    const json = JSON.parse(
-      readFileSync(
-        join(
-          process.env.NODE_ENV === "development"
-            ? process.cwd()
-            : process.execPath.substring(
-                0,
-                process.platform === "win32"
-                  ? process.execPath.lastIndexOf("\\")
-                  : process.execPath.lastIndexOf("/")
-              ),
-          tray ? "../package.json" : "package.json"
-        ),
-        {
-          encoding: "utf8",
-        }
-      )
-    );
-    return semver.clean(json.version);
-  } catch (e) {
-    logger.error(`getVersion Error: ${e.message}`);
-    return "0.0.0";
-  }
+  // try {
+  //   const json = JSON.parse(
+  //     readFileSync(
+  //       join(
+  //         process.env.NODE_ENV === "development"
+  //           ? process.cwd()
+  //           : process.execPath.substring(
+  //               0,
+  //               process.platform === "win32"
+  //                 ? process.execPath.lastIndexOf("\\")
+  //                 : process.execPath.lastIndexOf("/")
+  //             ),
+  //         tray ? "../package.json" : "package.json"
+  //       ),
+  //       {
+  //         encoding: "utf8",
+  //       }
+  //     )
+  //   );
+  //   return semver.clean(json.version);
+  // } catch (e) {
+  //   logger.error(`getVersion Error: ${e.message}`);
+  return "0.0.0";
+  // }
 }

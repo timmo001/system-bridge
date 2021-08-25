@@ -48,12 +48,12 @@ export class Logger {
         ),
       })
     );
-    tps.push(
-      new transports.File({
-        filename: LOG_PATH,
-        format: format.combine(format.errors({ stack: true }), logFormat),
-      })
-    );
+    // tps.push(
+    //   new transports.File({
+    //     filename: LOG_PATH,
+    //     format: format.combine(format.errors({ stack: true }), logFormat),
+    //   })
+    // );
 
     // Configure the Winston logger.
     this.logger = createLogger({

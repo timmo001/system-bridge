@@ -1,5 +1,4 @@
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { existsSync, mkdirSync } from "fs";
 import { ExpressPeerServer } from "peer";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -16,12 +15,7 @@ import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import {
-  appDataDirectory,
-  getConnection,
-  getSettingsObject,
-  getVersion,
-} from "../common";
+import { getConnection, getSettingsObject, getVersion } from "../common";
 import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
