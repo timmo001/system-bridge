@@ -1,9 +1,7 @@
 import {
   createLogger,
   format,
-  LeveledLogMethod,
   Logger as WinstonLogger,
-  transport,
   transports,
 } from "winston";
 import { join } from "path";

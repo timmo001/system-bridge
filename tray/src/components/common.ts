@@ -1,12 +1,12 @@
 import { Connection, createConnection } from "typeorm";
 import { join } from "path";
+import { Logger } from "winston";
 import { readFileSync } from "fs";
 import axios from "axios";
 import semver from "semver";
 
 import { ApplicationUpdate } from "./entities/applicationUpdate.entity";
 import { Setting } from "./entities/setting.entity";
-import { Logger } from "./logger";
 
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
