@@ -154,12 +154,13 @@ export async function startServer(): Promise<void> {
 
   // Set up RTC Broker
   const apiKey = settings["network-apiKey"];
+
+  if (process.env.CLI_ONLY === "true") {
+    logger.info("Your api-key is:", apiKey);
+  }
+
   if (typeof apiKey === "string") {
     await updateAppConfig();
-
-    if (process.env.CLI_ONLY === "true") {
-      logger.info("Your api-key is:", apiKey);
-    }
 
     const broker = ExpressPeerServer(server, {
       allow_discovery: true,
