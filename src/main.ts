@@ -15,7 +15,7 @@ const { logger } = new Logger();
 if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);
 
 // Get version
-const version = getVersion();
+const version = getVersion(logger);
 
 // Startup log
 logger.info(
@@ -29,6 +29,7 @@ logger.info(
 logger.info(
   "-----------------------------------------------------------------------------------------------------------------------"
 );
+logger.close();
 
 // Start server
 startServer();

@@ -1,14 +1,12 @@
 import { Connection, createConnection } from "typeorm";
 import { join } from "path";
+import { Logger } from "winston";
 import { readFileSync } from "fs";
 import axios from "axios";
 import semver from "semver";
 
 import { ApplicationUpdate } from "./entities/applicationUpdate.entity";
 import { Setting } from "./entities/setting.entity";
-import { Logger } from "./logger";
-
-const { logger } = new Logger("TrayCommon");
 
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
@@ -53,6 +51,7 @@ export async function getSettingsObject(
 }
 
 export async function getUpdates(
+  logger: Logger,
   tray = false
 ): Promise<ApplicationUpdate | undefined> {
   try {
@@ -67,7 +66,7 @@ export async function getUpdates(
       response.data?.prerelease === false
     ) {
       const versionNew = semver.clean(response.data.tag_name);
-      const versionCurrent = getVersion(tray);
+      const versionCurrent = getVersion(logger, tray);
       const available = semver.lt(versionCurrent, versionNew);
       return {
         available,
@@ -84,7 +83,7 @@ export async function getUpdates(
   return undefined;
 }
 
-export function getVersion(tray = false): string {
+export function getVersion(logger: Logger, tray = false): string {
   try {
     const json = JSON.parse(
       readFileSync(

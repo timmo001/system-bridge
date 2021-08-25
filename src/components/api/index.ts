@@ -1,5 +1,4 @@
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { existsSync, mkdirSync } from "fs";
 import { ExpressPeerServer } from "peer";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -16,12 +15,7 @@ import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import {
-  appDataDirectory,
-  getConnection,
-  getSettingsObject,
-  getVersion,
-} from "../common";
+import { getConnection, getSettingsObject, getVersion } from "../common";
 import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
@@ -106,7 +100,7 @@ export async function startServer(): Promise<void> {
     return;
   }
 
-  server.on("error", (err: any) => logger.error("Server error:", err));
+  server.on("error", (error: any) => logger.error(`Server error: ${error}`));
   server.on("listening", async () => {
     logger.info(`API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
@@ -121,7 +115,7 @@ export async function startServer(): Promise<void> {
 
     if (networkInterface) {
       try {
-        const version = getVersion();
+        const version = getVersion(logger);
         const MDNS = await import("mdns");
         MDNS.createAdvertisement(
           MDNS.udp("system-bridge"),
@@ -142,15 +136,15 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
-            if (error) logger.warn("MDNS error:", error);
+            if (error) logger.warn(`MDNS error: ${error}`);
             else
               logger.info(
                 `Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
           }
         );
-      } catch (e) {
-        logger.warn("MDNS error:", e);
+      } catch (error) {
+        logger.warn(`MDNS error caught: ${error.message}`);
       }
     }
   });

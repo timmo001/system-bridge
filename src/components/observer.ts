@@ -59,7 +59,7 @@ export class Observer {
       logger.error(`Service error: ${e.message}`);
     }
     this.callback({ [name]: data });
-    return new AsyncTask(name, async () => {
+    const task = new AsyncTask(name, async () => {
       try {
         const d = await runService({ name });
         if (JSON.stringify(data) !== JSON.stringify(d)) {
@@ -70,5 +70,7 @@ export class Observer {
         logger.error(`Service error for ${name}: ${e.message}`);
       }
     });
+    logger.close();
+    return task;
   }
 }

@@ -1,4 +1,4 @@
-import { bluetoothDevices, osInfo } from "systeminformation";
+import { bluetoothDevices, osInfo, Systeminformation } from "systeminformation";
 import { Injectable } from "@nestjs/common";
 import fs from "fs";
 
@@ -8,9 +8,7 @@ const { logger } = new Logger("BluetoothService");
 
 @Injectable()
 export class BluetoothService {
-  // BUSTED: async findAll(): Promise<Systeminformation.BluetoothDeviceData> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async findAll(): Promise<any> {
+  async findAll(): Promise<Array<Systeminformation.BluetoothDeviceData>> {
     try {
       if ((await osInfo()).platform === "linux")
         fs.accessSync(
@@ -21,6 +19,6 @@ export class BluetoothService {
     } catch (e) {
       logger.warn(`Error: ${e.message}`);
     }
-    return {};
+    return [];
   }
 }
