@@ -156,6 +156,11 @@ export async function startServer(): Promise<void> {
   const apiKey = settings["network-apiKey"];
   if (typeof apiKey === "string") {
     await updateAppConfig();
+
+    if (process.env.CLI_ONLY === "true") {
+      console.log("Your api-key is:", apiKey);
+    }
+
     const broker = ExpressPeerServer(server, {
       allow_discovery: true,
       key: apiKey,
@@ -171,10 +176,6 @@ export async function startServer(): Promise<void> {
 
     events = new Events();
     events.setup(settings);
-
-    if (process.env.CLI_ONLY === "true") {
-      console.log("Your api-key is:", apiKey);
-    }
   }
 }
 
