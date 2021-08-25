@@ -27,9 +27,6 @@ import { ProcessesModule } from "./processes/processes.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SystemModule } from "./system/system.module";
 import { UsbModule } from "./usb/usb.module";
-import { Logger } from "../logger";
-
-const { logger } = new Logger("AppService");
 
 @Module({
   imports: [
@@ -61,7 +58,6 @@ const { logger } = new Logger("AppService");
     SettingsModule,
     SystemModule,
     UsbModule,
-    WinstonModule.forRoot(logger),
   ],
   controllers: [],
   providers: [

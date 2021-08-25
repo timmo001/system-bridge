@@ -115,7 +115,7 @@ export async function startServer(): Promise<void> {
 
     if (networkInterface) {
       try {
-        const version = getVersion();
+        const version = getVersion(logger);
         const MDNS = await import("mdns");
         MDNS.createAdvertisement(
           MDNS.udp("system-bridge"),

@@ -14,6 +14,9 @@ import {
   getUpdates,
   getVersion,
 } from "../../common";
+import { Logger } from "../../logger";
+
+const { logger } = new Logger("InformationService");
 
 @Injectable()
 export class InformationService {
@@ -43,9 +46,9 @@ export class InformationService {
         host: osSiInfo.hostname,
         ip: networkInterface.ip4,
         mac: networkInterface.mac,
-        updates: await getUpdates(),
+        updates: await getUpdates(logger),
         uuid: uuidInfo.os,
-        version: getVersion(),
+        version: getVersion(logger),
         websocketAddress: `ws://${osSiInfo.fqdn}:${websocketPort}`,
         websocketPort,
       };

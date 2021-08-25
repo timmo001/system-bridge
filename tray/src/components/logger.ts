@@ -2,11 +2,12 @@ import {
   createLogger,
   format,
   Logger as WinstonLogger,
+  transport,
   transports,
 } from "winston";
 import { join } from "path";
 
-const LOG_PATH =
+export const LOG_PATH =
   process.env.LOG_PATH ||
   join(
     process.env.APP_PATH ||
@@ -20,6 +21,7 @@ const LOG_PATH =
 
 export class Logger {
   public logger: WinstonLogger;
+  private transports: Array<transport>;
 
   constructor(name?: string) {
     const logFormat = format.printf((info) => {
@@ -37,8 +39,7 @@ export class Logger {
         : `${timestamp} ${level}: ${message}`;
     });
 
-    const tps = [];
-    tps.push(
+    const tps = [
       new transports.Console({
         format: format.combine(
           format.splat(),
@@ -46,24 +47,24 @@ export class Logger {
           format.colorize(),
           logFormat
         ),
-      })
-    );
-    // tps.push(
-    //   new transports.File({
-    //     filename: LOG_PATH,
-    //     format: format.combine(format.errors({ stack: true }), logFormat),
-    //   })
-    // );
+      }),
+      new transports.File({
+        filename: LOG_PATH,
+        format: format.combine(format.errors({ stack: true }), logFormat),
+      }),
+    ];
 
     // Configure the Winston logger.
-    this.logger = createLogger({
-      level: process.env.NODE_ENV === "development" ? "debug" : "info",
-      format: format.combine(
-        format.splat(),
-        format.simple(),
-        format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
-      ),
-      transports: tps,
-    });
+    if (!this.logger)
+      this.logger = createLogger({
+        level: process.env.NODE_ENV === "development" ? "debug" : "info",
+        format: format.combine(
+          format.splat(),
+          format.simple(),
+          format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
+        ),
+        transports: tps,
+      });
+    else this.logger.transports = tps;
   }
 }

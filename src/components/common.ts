@@ -1,16 +1,14 @@
 import { Connection, createConnection, Repository } from "typeorm";
 import { join } from "path";
-// import { readFileSync } from "fs";
+import { Logger } from "winston";
+import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { Worker } from "worker_threads";
 import axios from "axios";
 import semver from "semver";
 
 import { ApplicationUpdate } from "./api/information/entities/information.entity";
-import { Logger } from "./logger";
 import { Setting } from "./api/settings/entities/setting.entity";
-
-const { logger } = new Logger("Common");
 
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
@@ -92,6 +90,7 @@ export async function createSetting(
 }
 
 export async function getUpdates(
+  logger: Logger,
   tray = false
 ): Promise<ApplicationUpdate | undefined> {
   try {
@@ -123,31 +122,31 @@ export async function getUpdates(
   return undefined;
 }
 
-export function getVersion(tray = false): string {
-  // try {
-  //   const json = JSON.parse(
-  //     readFileSync(
-  //       join(
-  //         process.env.NODE_ENV === "development"
-  //           ? process.cwd()
-  //           : process.execPath.substring(
-  //               0,
-  //               process.platform === "win32"
-  //                 ? process.execPath.lastIndexOf("\\")
-  //                 : process.execPath.lastIndexOf("/")
-  //             ),
-  //         tray ? "../package.json" : "package.json"
-  //       ),
-  //       {
-  //         encoding: "utf8",
-  //       }
-  //     )
-  //   );
-  //   return semver.clean(json.version);
-  // } catch (e) {
-  // logger.error(`getVersion Error: ${e.message}`);
-  return "0.0.0";
-  // }
+export function getVersion(logger: Logger, tray = false): string {
+  try {
+    const json = JSON.parse(
+      readFileSync(
+        join(
+          process.env.NODE_ENV === "development"
+            ? process.cwd()
+            : process.execPath.substring(
+                0,
+                process.platform === "win32"
+                  ? process.execPath.lastIndexOf("\\")
+                  : process.execPath.lastIndexOf("/")
+              ),
+          tray ? "../package.json" : "package.json"
+        ),
+        {
+          encoding: "utf8",
+        }
+      )
+    );
+    return semver.clean(json.version);
+  } catch (e) {
+    logger.error(`getVersion Error: ${e.message}`);
+    return "0.0.0";
+  }
 }
 
 export function runService(workerData: { name: string }): Promise<any> {
