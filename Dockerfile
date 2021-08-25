@@ -20,6 +20,7 @@ RUN \
     \
     && apk add --no-cache --virtual .build-dependencies \
         g++=10.3.1_git20210424-r2	\
+        gcc=10.3.1_git20210424-r2	\
         make=4.3-r0	\
         nodejs-current=16.6.0-r0 \
         npm=7.17.0-r0 \
@@ -27,10 +28,19 @@ RUN \
         yarn=1.22.10-r0 \
     \
     && apk add --no-cache --virtual .runtime-dependencies \
-        avahi-compat-libdns_sd=0.8-r5 \
+        avahi-dev=0.8-r5 \
+        avahi-compat-libdns_sd=0.8-r5
+
+# hadolint ignore=DL3003,DL3018
+RUN \
+    set -o pipefail \
     \
     && cd /tmp/app \
-    && yarn remove node-hide-console-window win-audio \
+    && yarn remove \
+        desktop-idle \
+        node-hide-console-window \
+        robotjs \
+        win-audio \
     && yarn install:all:ci
 
 # hadolint ignore=DL3003,DL3018
@@ -38,7 +48,7 @@ RUN \
     set -o pipefail \
     \
     && cd /tmp/app \
-    && yarn package \
+    && CLI_ONLY=true SB_TRAY=false yarn package \
     && cp out/system-bridge /bin \
     \
     && mkdir -p /root/.local/share/system-bridge \
