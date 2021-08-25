@@ -4,7 +4,7 @@ import execa, { ExecaReturnValue } from "execa";
 import { CreateCommandDto } from "./dto/create-command.dto";
 import { Logger } from "../../logger";
 
-const logger = new Logger("CommandService");
+const { logger } = new Logger("CommandService");
 
 @Injectable()
 export class CommandService {

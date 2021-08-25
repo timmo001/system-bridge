@@ -20,7 +20,7 @@ import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
 
-const logger = new Logger("API");
+const { logger } = new Logger("API");
 
 let app: NestExpressApplication,
   server: Server | undefined,

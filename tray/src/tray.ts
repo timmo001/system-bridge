@@ -14,7 +14,7 @@ import {
 import { Logger } from "./components/logger";
 import { WebSocketConnection } from "./components/websocket";
 
-const logger = new Logger("Tray");
+const { logger } = new Logger("Tray");
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
 }

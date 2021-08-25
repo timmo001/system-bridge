@@ -1,6 +1,6 @@
 import { Logger } from "../../../logger";
 
-const logger = new Logger("AudioData");
+const { logger } = new Logger("AudioData");
 
 function getImpl(platform: string): any {
   switch (platform) {

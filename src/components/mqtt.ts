@@ -4,7 +4,7 @@ import mqtt from "mqtt";
 import { getConnection, getSettingsObject } from "./common";
 import { Logger } from "./logger";
 
-const logger = new Logger("MQTT");
+const { logger } = new Logger("MQTT");
 export class MQTT {
   private mqttClient: mqtt.MqttClient;
 

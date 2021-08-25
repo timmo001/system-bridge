@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 
 import { Logger, LOG_PATH } from "../../logger";
 
-const logger = new Logger("LogsService");
+const { logger } = new Logger("LogsService");
 
 @Injectable()
 export class LogsService {

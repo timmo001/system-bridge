@@ -6,7 +6,7 @@ import { getCurrent, muted, volume } from "./data";
 import { Logger } from "../../logger";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
 
-const logger = new Logger("AudioService");
+const { logger } = new Logger("AudioService");
 
 @Injectable()
 export class AudioService {

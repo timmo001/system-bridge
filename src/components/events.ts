@@ -5,7 +5,7 @@ import { runService } from "./common";
 import { stopServer, updateAppConfig } from "./api";
 import { WebSocketConnection } from "./websocket";
 
-const logger = new Logger("Events");
+const { logger } = new Logger("Events");
 
 export class Events {
   private websocketConnection: WebSocketConnection;

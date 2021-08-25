@@ -5,7 +5,7 @@ import { Graphics } from "./entities/graphics.entity";
 import { graphics } from "systeminformation";
 import { Logger } from "../../logger";
 
-const logger = new Logger("GraphicsService");
+const { logger } = new Logger("GraphicsService");
 
 @Injectable()
 export class GraphicsService {
