@@ -49,7 +49,7 @@ RUN \
     \
     && cd /tmp/app \
     && CLI_ONLY=true SB_TRAY=false yarn package \
-    && cp out/system-bridge /bin \
+    && cp out/* /usr/local/share \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \

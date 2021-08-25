@@ -28,45 +28,54 @@ const filePaths = [
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
     to: "../out/notifier/notifu.exe",
     platform: "win32",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/notifu/notifu64.exe",
     to: "../out/notifier/notifu64.exe",
     platform: "win32",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/terminal-notifier.app/Contents/MacOS/terminal-notifier",
     to: "../out/notifier/terminal-notifier",
     platform: "darwin",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/snoreToast/snoretoast-x64.exe",
     to: "../out/notifier/snoretoast-x64.exe",
     platform: "win32",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/snoreToast/snoretoast-x86.exe",
     to: "../out/notifier/snoretoast-x86.exe",
     platform: "win32",
+    cli: false,
   },
   {
     from: "../node_modules/open/xdg-open",
     to: "../out/xdg-open",
+    cli: false,
   },
   {
     from: "../tray/node_modules/systray2/traybin/tray_darwin_release",
     to: "../out/traybin/tray_darwin_release",
     platform: "darwin",
+    cli: false,
   },
   {
     from: "../tray/node_modules/systray2/traybin/tray_linux_release",
     to: "../out/traybin/tray_linux_release",
     platform: "linux",
+    cli: false,
   },
   {
     from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
     to: "../out/traybin/tray_windows_release.exe",
     platform: "win32",
+    cli: false,
   },
   {
     from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/HidSharp.dll",
@@ -130,7 +139,11 @@ async function package() {
 
   filePaths
     .filter((path) =>
-      path.platform ? path.platform === process.platform : true
+      process.env.CLI_ONLY && path.cli === false
+        ? false
+        : path.platform
+        ? path.platform === process.platform
+        : true
     )
     .forEach((path) => {
       const sourceFile = join(__dirname, path.from);
