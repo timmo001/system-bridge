@@ -158,7 +158,7 @@ export async function startServer(): Promise<void> {
     await updateAppConfig();
 
     if (process.env.CLI_ONLY === "true") {
-      console.log("Your api-key is:", apiKey);
+      logger.info("Your api-key is:", apiKey);
     }
 
     const broker = ExpressPeerServer(server, {
