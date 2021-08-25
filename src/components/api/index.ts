@@ -20,7 +20,7 @@ import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
 
-const { logger } = new Logger("API");
+const logger = new Logger("API");
 
 let app: NestExpressApplication,
   server: Server | undefined,
@@ -100,7 +100,7 @@ export async function startServer(): Promise<void> {
     return;
   }
 
-  server.on("error", (err: any) => logger.error("Server error:", err));
+  server.on("error", (error: any) => logger.error(`Server error: ${error}`));
   server.on("listening", async () => {
     logger.info(`API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
@@ -136,15 +136,15 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
-            if (error) logger.warn("MDNS error:", error);
+            if (error) logger.warn(`MDNS error: ${error}`);
             else
               logger.info(
                 `Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
           }
         );
-      } catch (e) {
-        logger.warn("MDNS error:", e);
+      } catch (error) {
+        logger.warn(`MDNS error caught: ${error.message}`);
       }
     }
   });

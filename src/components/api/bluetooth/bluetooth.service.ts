@@ -4,7 +4,7 @@ import fs from "fs";
 
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("BluetoothService");
+const logger = new Logger("BluetoothService");
 
 @Injectable()
 export class BluetoothService {

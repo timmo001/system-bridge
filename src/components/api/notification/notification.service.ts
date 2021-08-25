@@ -4,7 +4,7 @@ import notifier from "node-notifier";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("NotificationService");
+const logger = new Logger("NotificationService");
 
 @Injectable()
 export class NotificationService {

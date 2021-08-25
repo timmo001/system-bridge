@@ -6,7 +6,7 @@ import semver from "semver";
 
 import { ApplicationUpdate } from "./entities/applicationUpdate.entity";
 import { Setting } from "./entities/setting.entity";
-import { Logger } from "winston";
+import { Logger } from "./logger";
 
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 

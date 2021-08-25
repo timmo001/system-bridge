@@ -3,7 +3,7 @@ import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 import { Logger } from "./logger";
 import { runService } from "./common";
 
-const { logger } = new Logger("Observer");
+const logger = new Logger("Observer");
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;

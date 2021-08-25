@@ -9,7 +9,7 @@ import { Logger } from "./components/logger";
 // Get process environment variables
 config();
 
-const { logger } = new Logger();
+const logger = new Logger();
 
 // Setup app data directory
 if (!existsSync(appDataDirectory)) mkdirSync(appDataDirectory);

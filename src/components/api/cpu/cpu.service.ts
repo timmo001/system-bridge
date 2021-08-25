@@ -10,7 +10,7 @@ import { Hardware, Sensor } from "system-bridge-windows-sensors";
 import { CPU } from "./entities/cpu.entity";
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("CpuService");
+const logger = new Logger("CpuService");
 
 @Injectable()
 export class CpuService {

@@ -3,7 +3,7 @@ import execa from "execa";
 
 import { Logger } from "./logger";
 
-const { logger } = new Logger("Tray");
+const logger = new Logger("Tray");
 
 export async function openTray(): Promise<void> {
   try {

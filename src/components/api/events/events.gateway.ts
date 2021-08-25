@@ -14,7 +14,7 @@ import { MQTT } from "../../mqtt";
 import { startServer, stopServer } from "..";
 import { WsAuthGuard } from "../wsAuth.guard";
 
-const { logger } = new Logger("EventsGateway");
+const logger = new Logger("EventsGateway");
 
 @Injectable()
 @WebSocketGateway()

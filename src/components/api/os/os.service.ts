@@ -4,7 +4,7 @@ import { osInfo, users } from "systeminformation";
 import { Os } from "./entities/os.entity";
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("OsService");
+const logger = new Logger("OsService");
 
 @Injectable()
 export class OsService {

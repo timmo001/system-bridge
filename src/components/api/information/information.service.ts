@@ -16,7 +16,7 @@ import {
 } from "../../common";
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("InformationService");
+const logger = new Logger("InformationService");
 
 @Injectable()
 export class InformationService {
