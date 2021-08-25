@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import robot from "robotjs";
 
 import { CreateKeyboardDto } from "./dto/create-keyboard.dto";
 
@@ -9,6 +8,7 @@ export class KeyboardService {
     createKeyboardDto: CreateKeyboardDto
   ): Promise<CreateKeyboardDto> {
     try {
+      const robotjs = await import("robotjs");
       if (createKeyboardDto.key && createKeyboardDto.text)
         throw new HttpException(
           {
@@ -20,9 +20,10 @@ export class KeyboardService {
         );
       else if (createKeyboardDto.key)
         if (createKeyboardDto.modifiers?.length > 0)
-          robot.keyTap(createKeyboardDto.key, createKeyboardDto.modifiers);
-        else robot.keyTap(createKeyboardDto.key);
-      else if (createKeyboardDto.text) robot.typeString(createKeyboardDto.text);
+          robotjs.keyTap(createKeyboardDto.key, createKeyboardDto.modifiers);
+        else robotjs.keyTap(createKeyboardDto.key);
+      else if (createKeyboardDto.text)
+        robotjs.typeString(createKeyboardDto.text);
       else
         throw new HttpException(
           {
