@@ -8,7 +8,8 @@ export class KeyboardService {
     createKeyboardDto: CreateKeyboardDto
   ): Promise<CreateKeyboardDto> {
     try {
-      const robotjs = await import("robotjs");
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const robotjs = require("robotjs");
       if (createKeyboardDto.key && createKeyboardDto.text)
         throw new HttpException(
           {
