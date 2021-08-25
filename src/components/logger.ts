@@ -4,19 +4,19 @@ import {
   Logger as WinstonLogger,
   transports,
 } from "winston";
-import { join } from "path";
+// import { join } from "path";
 
-export const LOG_PATH =
-  process.env.LOG_PATH ||
-  join(
-    process.env.APP_PATH ||
-      process.env.APPDATA ||
-      (process.platform == "darwin"
-        ? process.env.HOME + "/Library/Preferences"
-        : process.env.HOME + "/.local/share"),
-    "system-bridge",
-    "system-bridge.log"
-  );
+// export const LOG_PATH =
+//   process.env.LOG_PATH ||
+//   join(
+//     process.env.APP_PATH ||
+//       process.env.APPDATA ||
+//       (process.platform == "darwin"
+//         ? process.env.HOME + "/Library/Preferences"
+//         : process.env.HOME + "/.local/share"),
+//     "system-bridge",
+//     "system-bridge.log"
+//   );
 
 export class Logger {
   public logger: WinstonLogger;

@@ -1,6 +1,6 @@
 import { Connection, createConnection } from "typeorm";
 import { join } from "path";
-import { readFileSync } from "fs";
+// import { readFileSync } from "fs";
 import axios from "axios";
 import semver from "semver";
 

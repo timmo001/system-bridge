@@ -1,8 +1,8 @@
-import { bluetoothDevices, osInfo } from "systeminformation";
+// import { bluetoothDevices, osInfo } from "systeminformation";
 import { Injectable } from "@nestjs/common";
 // import fs from "fs";
 
-import { Logger } from "../../logger";
+// import { Logger } from "../../logger";
 
 // const { logger } = new Logger("BluetoothService");
 
