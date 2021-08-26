@@ -36,11 +36,6 @@ RUN \
     set -o pipefail \
     \
     && cd /tmp/app \
-    && yarn remove \
-        desktop-idle \
-        node-hide-console-window \
-        robotjs \
-        win-audio \
     && yarn install:all:ci
 
 # hadolint ignore=DL3003,DL3018
