@@ -33,7 +33,7 @@ export class Logger {
         console.log(e);
       }
       return name
-        ? `${timestamp} ${level}: ${message}`
+        ? `${timestamp} ${level}: ${name} - ${message}`
         : `${timestamp} ${level}: ${message}`;
     });
 

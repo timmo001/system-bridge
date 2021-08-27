@@ -1,0 +1,10 @@
+#!/bin/bash
+# ==============================================================================
+# Starts app
+# ==============================================================================
+cd /usr/local/share/system-bridge || exit
+
+export CLI_ONLY=true
+export SB_TRAY=false
+
+exec /usr/local/share/system-bridge/system-bridge

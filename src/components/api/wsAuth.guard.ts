@@ -34,6 +34,7 @@ export class WsAuthGuard implements CanActivate {
         HttpStatus.SERVICE_UNAVAILABLE
       );
     const data = context.switchToWs().getData();
+
     return data["api-key"] === this.apiKey;
   }
 }

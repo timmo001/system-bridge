@@ -156,6 +156,7 @@ export async function startServer(): Promise<void> {
   const apiKey = settings["network-apiKey"];
   if (typeof apiKey === "string") {
     await updateAppConfig();
+
     const broker = ExpressPeerServer(server, {
       allow_discovery: true,
       key: apiKey,
