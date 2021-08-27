@@ -12,9 +12,9 @@ on:
       - synchronize
   workflow_dispatch:
 
-# concurrency:
-#   group: ${{ github.head_ref || github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-eslint:
