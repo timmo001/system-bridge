@@ -3,7 +3,6 @@ services:
   system-bridge:
     container_name: system-bridge
     build: .
-    network_mode: host
     # image: system-bridge:test
     # image: ghcr.io/timmo001/system-bridge/amd64:edge
     restart: unless-stopped
