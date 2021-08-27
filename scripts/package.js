@@ -126,16 +126,17 @@ async function package() {
     "--max_old_space_size=4096",
   ]);
 
-  await exec([
-    join(__dirname, "../tray"),
-    "--output",
-    join(
-      __dirname,
-      `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
-    ),
-    "--options",
-    "--max_old_space_size=4096",
-  ]);
+  if (APP_ONLY !== "true")
+    await exec([
+      join(__dirname, "../tray"),
+      "--output",
+      join(
+        __dirname,
+        `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+      ),
+      "--options",
+      "--max_old_space_size=4096",
+    ]);
 
   filePaths
     .filter((path) =>

@@ -39,6 +39,13 @@ export class HttpAuthGuard implements CanActivate {
       );
 
     const request = context.switchToHttp().getRequest();
+
+    logger.info(
+      `${request.headers["api-key"]} === ${this.apiKey}: ${
+        request.headers["api-key"] === this.apiKey
+      }`
+    );
+
     return request.headers["api-key"] === this.apiKey;
   }
 }

@@ -10,7 +10,10 @@ import { Observable } from "rxjs";
 import { Repository } from "typeorm";
 
 import { getApiKey } from "../common";
+import { Logger } from "../logger";
 import { Setting } from "./settings/entities/setting.entity";
+
+const { logger } = new Logger("WsAuthGuard");
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
@@ -22,6 +25,8 @@ export class WsAuthGuard implements CanActivate {
   ) {
     (async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
+      if (process.env.CLI_ONLY === "true")
+        logger.info("Your api-key is:", this.apiKey);
     })();
   }
 

@@ -36,7 +36,9 @@ RUN \
     set -o pipefail \
     \
     && cd /tmp/app \
-    && yarn install:all:ci
+    && yarn install --pure-lockfile \
+    && cd frontend \
+    && yarn install --pure-lockfile
 
 # hadolint ignore=DL3003,DL3018
 RUN \
