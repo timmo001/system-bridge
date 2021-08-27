@@ -18,6 +18,5 @@ services:
         source: system-bridge-data
         target: /root/.local/share/system-bridge
 
-
 volumes:
   system-bridge-data: {}
