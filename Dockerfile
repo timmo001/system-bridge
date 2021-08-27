@@ -6,7 +6,7 @@ FROM ${BUILD_FROM}
 COPY rootfs /
 
 # Copy apk
-COPY *.apk /tmp/app
+COPY *.apk /tmp
 
 # Set shell
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
@@ -18,7 +18,7 @@ ARG BUILD_ARCH=amd64
 RUN \
     set -o pipefail \
     \
-    && cd /tmp/app \
+    && cd /tmp \
     && apk add --no-cache --virtual --allow-untrusted \
         *.apk \
     \
