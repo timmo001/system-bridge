@@ -41,7 +41,7 @@ RUN \
     && yarn install --pure-lockfile \
     \
     && cd /tmp/app \
-    && CLI_ONLY=true SB_TRAY=false yarn package \
+    && yarn package:app \
     && mkdir -p /usr/local/share/system-bridge \
     && cp out/* /usr/local/share/system-bridge \
     \
