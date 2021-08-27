@@ -38,11 +38,7 @@ RUN \
     && cd /tmp/app \
     && yarn install --pure-lockfile \
     && cd frontend \
-    && yarn install --pure-lockfile
-
-# hadolint ignore=DL3003,DL3018
-RUN \
-    set -o pipefail \
+    && yarn install --pure-lockfile \
     \
     && cd /tmp/app \
     && CLI_ONLY=true SB_TRAY=false yarn package \
@@ -51,6 +47,7 @@ RUN \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \
+    && yarn cache clean \
     && apk del --purge .build-dependencies \
     && rm -fr /tmp/*
 

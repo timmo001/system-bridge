@@ -1,10 +1,10 @@
-#!/usr/bin/with-contenv bash
+#!/bin/bash
 # ==============================================================================
 # Starts app
 # ==============================================================================
-cd /usr/local/share/system-bridge || exit 1
+cd /usr/local/share/system-bridge || exit
 
 export CLI_ONLY=true
 export SB_TRAY=false
 
-exec ./system-bridge
+exec /usr/local/share/system-bridge/system-bridge
