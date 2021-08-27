@@ -13,8 +13,6 @@ import queryString from "query-string";
 import { getApiKey } from "../common";
 import { Logger } from "../logger";
 import { Setting } from "./settings/entities/setting.entity";
-
-const { logger } = new Logger("HttpAuthGuard");
 @Injectable()
 export class HttpAuthGuard implements CanActivate {
   private apiKey: string;
@@ -26,6 +24,7 @@ export class HttpAuthGuard implements CanActivate {
     setTimeout(async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
       if (process.env.CLI_ONLY === "true") {
+        const { logger } = new Logger();
         logger.info(`Your api-key is: ${this.apiKey}`);
         logger.info(
           `You can access settings for the app via: ${
