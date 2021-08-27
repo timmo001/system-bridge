@@ -36,7 +36,7 @@ export class HttpAuthGuard implements CanActivate {
             apiKey: this.apiKey,
             apiPort: 9170,
             wsPort: 9172,
-          })}}`
+          })}`
         );
         logger.info(
           `You can view data for the app via: ${
@@ -48,7 +48,7 @@ export class HttpAuthGuard implements CanActivate {
             apiKey: this.apiKey,
             apiPort: 9170,
             wsPort: 9172,
-          })}}`
+          })}`
         );
       }
     }, 4000);
