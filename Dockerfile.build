@@ -5,8 +5,8 @@ FROM ${BUILD_FROM}
 # Copy root filesystem
 COPY rootfs /
 
-# Copy apk
-COPY system-bridge.apk /tmp/app
+# Copy application
+COPY . /tmp/app
 
 # Set shell
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
@@ -18,12 +18,33 @@ ARG BUILD_ARCH=amd64
 RUN \
     set -o pipefail \
     \
-    && cd /tmp/app \
+    && apk add --no-cache --virtual .build-dependencies \
+        g++=10.3.1_git20210424-r2	\
+        gcc=10.3.1_git20210424-r2	\
+        make=4.3-r0	\
+        nodejs-current=16.6.0-r0 \
+        npm=7.17.0-r0 \
+        python3-dev=3.9.5-r1 \
+        yarn=1.22.10-r0 \
+    \
     && apk add --no-cache --virtual .runtime-dependencies \
-        ./system-bridge.apk \
+        avahi-dev=0.8-r5 \
+        avahi-compat-libdns_sd=0.8-r5 \
+    \
+    && cd /tmp/app \
+    && yarn install --pure-lockfile \
+    && cd frontend \
+    && yarn install --pure-lockfile \
+    \
+    && cd /tmp/app \
+    && yarn package:app \
+    && mkdir -p /usr/local/share/system-bridge \
+    && cp -r out/* /usr/local/share/system-bridge \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \
+    && yarn cache clean \
+    && apk del --purge .build-dependencies \
     && rm -fr /tmp/*
 
 # Build arguments
