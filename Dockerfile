@@ -29,11 +29,7 @@ RUN \
     \
     && apk add --no-cache --virtual .runtime-dependencies \
         avahi-dev=0.8-r5 \
-        avahi-compat-libdns_sd=0.8-r5
-
-# hadolint ignore=DL3003,DL3018
-RUN \
-    set -o pipefail \
+        avahi-compat-libdns_sd=0.8-r5 \
     \
     && cd /tmp/app \
     && yarn install --pure-lockfile \
@@ -43,7 +39,7 @@ RUN \
     && cd /tmp/app \
     && yarn package:app \
     && mkdir -p /usr/local/share/system-bridge \
-    && cp out/* /usr/local/share/system-bridge \
+    && cp -r out/* /usr/local/share/system-bridge \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \
