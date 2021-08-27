@@ -25,8 +25,6 @@ export class WsAuthGuard implements CanActivate {
   ) {
     (async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
-      if (process.env.CLI_ONLY === "true")
-        logger.info("Your api-key is:", this.apiKey);
     })();
   }
 
@@ -39,6 +37,10 @@ export class WsAuthGuard implements CanActivate {
         HttpStatus.SERVICE_UNAVAILABLE
       );
     const data = context.switchToWs().getData();
+
+    if (process.env.CLI_ONLY === "true")
+      logger.info("Your api-key is:", this.apiKey);
+
     return data["api-key"] === this.apiKey;
   }
 }

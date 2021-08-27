@@ -15,12 +15,7 @@ import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import {
-  getApiKey,
-  getConnection,
-  getSettingsObject,
-  getVersion,
-} from "../common";
+import { getConnection, getSettingsObject, getVersion } from "../common";
 import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
@@ -66,8 +61,6 @@ export async function startServer(): Promise<void> {
 
   const apiPort = Number(settings["network-apiPort"]) || 9170;
   const wsPort = Number(settings["network-wsPort"]) || 9172;
-
-  const apiKey = await getApiKey(this.settingsRepository);
 
   // Setup Nest.js app
   app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -160,6 +153,7 @@ export async function startServer(): Promise<void> {
   await app.listen(apiPort);
 
   // Set up RTC Broker
+  const apiKey = settings["network-apiKey"];
   if (typeof apiKey === "string") {
     await updateAppConfig();
 

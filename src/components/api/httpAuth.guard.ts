@@ -24,8 +24,6 @@ export class HttpAuthGuard implements CanActivate {
   ) {
     setTimeout(async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
-      if (process.env.CLI_ONLY === "true")
-        logger.info("Your api-key is:", this.apiKey);
     }, 4000);
   }
 
@@ -40,11 +38,8 @@ export class HttpAuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
-    logger.info(
-      `${request.headers["api-key"]} === ${this.apiKey}: ${
-        request.headers["api-key"] === this.apiKey
-      }`
-    );
+    if (process.env.CLI_ONLY === "true")
+      logger.info("Your api-key is:", this.apiKey);
 
     return request.headers["api-key"] === this.apiKey;
   }
