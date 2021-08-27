@@ -6,7 +6,7 @@ FROM ${BUILD_FROM}
 COPY rootfs /
 
 # Copy apk
-COPY system-bridge.apk /tmp/app
+COPY *.apk /tmp/app
 
 # Set shell
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
@@ -19,8 +19,8 @@ RUN \
     set -o pipefail \
     \
     && cd /tmp/app \
-    && apk add --no-cache --virtual .runtime-dependencies \
-        ./system-bridge.apk \
+    && apk add --no-cache --virtual --allow-untrusted \
+        *.apk \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \
