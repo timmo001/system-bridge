@@ -16,10 +16,14 @@ ARG BUILD_ARCH=amd64
 # Install system
 # hadolint ignore=DL3003,DL3018
 RUN \
-    set -o pipefail \
+    apk add --allow-untrusted /tmp/*.apk \
     \
-    && cd /tmp \
-    && apk add --allow-untrusted *.apk \
+    && rm -f /usr/local/share/system-bridge/*.ico \
+    && rm -f /usr/local/share/system-bridge/*.png \
+    && rm -f /usr/local/share/system-bridge/system-bridge-tray \
+    && rm -f /usr/local/share/system-bridge/xdg-open \
+    && rm -f /usr/share/applications/system-bridge.desktop \
+    && rm -fr /usr/local/share/system-bridge/traybin \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \
