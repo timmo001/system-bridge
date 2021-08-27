@@ -126,7 +126,7 @@ async function package() {
     "--max_old_space_size=4096",
   ]);
 
-  if (APP_ONLY !== "true")
+  if (process.env.APP_ONLY !== "true")
     await exec([
       join(__dirname, "../tray"),
       "--output",
