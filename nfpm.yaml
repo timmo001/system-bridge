@@ -19,6 +19,9 @@ contents:
 depends:
   - libavahi-compat-libdnssd-dev
 overrides:
+  apk:
+    depends:
+      - avahi-compat-libdns_sd-dev
   deb:
     depends:
       - libavahi-compat-libdnssd-dev
