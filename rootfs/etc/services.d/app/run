@@ -2,7 +2,7 @@
 # ==============================================================================
 # Starts app
 # ==============================================================================
-cd /usr/local/share/system-bridge || exit
+cd /usr/local/share/system-bridge || exit 1
 
 export CLI_ONLY=true
 export SB_TRAY=false
