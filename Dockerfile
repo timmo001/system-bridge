@@ -19,8 +19,7 @@ RUN \
     set -o pipefail \
     \
     && cd /tmp \
-    && apk add --no-cache --virtual --allow-untrusted \
-        *.apk \
+    && apk add --allow-untrusted *.apk \
     \
     && mkdir -p /root/.local/share/system-bridge \
     \

@@ -21,7 +21,7 @@ depends:
 overrides:
   apk:
     depends:
-      - avahi-compat-libdns_sd-dev
+      - avahi-compat-libdns_sd
   deb:
     depends:
       - libavahi-compat-libdnssd-dev

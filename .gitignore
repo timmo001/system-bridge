@@ -40,6 +40,7 @@ public/app/*
 junit.xml
 *.db*
 *setup.exe
+*.apk
 *.deb
 *.rpm
 *.dmg
