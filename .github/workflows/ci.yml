@@ -209,7 +209,7 @@ jobs:
           path: "*.rpm"
   build-app-macos:
     name: 🚀 Build Application - MacOS
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
