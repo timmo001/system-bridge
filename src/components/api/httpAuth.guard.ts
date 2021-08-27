@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Observable } from "rxjs";
 import { Repository } from "typeorm";
+import queryString from "query-string";
 
 import { getApiKey } from "../common";
 import { Logger } from "../logger";
@@ -24,6 +25,33 @@ export class HttpAuthGuard implements CanActivate {
   ) {
     setTimeout(async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
+      if (process.env.CLI_ONLY === "true") {
+        logger.info(`Your api-key is: ${this.apiKey}`);
+        logger.info(
+          `You can access settings for the app via: ${
+            process.env.NODE_ENV === "development"
+              ? "http://localhost:3000/"
+              : `http://localhost:9170/app`
+          }?${queryString.stringify({
+            id: "configuration",
+            apiKey: this.apiKey,
+            apiPort: 9170,
+            wsPort: 9172,
+          })}}`
+        );
+        logger.info(
+          `You can view data for the app via: ${
+            process.env.NODE_ENV === "development"
+              ? "http://localhost:3000/"
+              : `http://localhost:9170/app`
+          }?${queryString.stringify({
+            id: "data",
+            apiKey: this.apiKey,
+            apiPort: 9170,
+            wsPort: 9172,
+          })}}`
+        );
+      }
     }, 4000);
   }
 
@@ -37,9 +65,6 @@ export class HttpAuthGuard implements CanActivate {
       );
 
     const request = context.switchToHttp().getRequest();
-
-    if (process.env.CLI_ONLY === "true")
-      logger.info("Your api-key is:", this.apiKey);
 
     return request.headers["api-key"] === this.apiKey;
   }
