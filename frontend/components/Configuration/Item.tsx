@@ -28,10 +28,10 @@ import Icon from "@mdi/react";
 import {
   Configuration,
   ConfigurationItem,
-} from "../entities/configuration.entity";
+} from "../../assets/entities/configuration.entity";
 import { handleCopyToClipboard, parsedQuery, useSettings } from "../Utils";
 import { SectionProps } from "./Section";
-import { Setting } from "../entities/settings.entity";
+import { Setting } from "../../assets/entities/settings.entity";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

@@ -10,7 +10,7 @@ import {
   Theme,
 } from "@material-ui/core";
 
-import { Event } from "../entities/event.entity";
+import { Event } from "../../assets/entities/event.entity";
 import { parsedQuery, useSettings } from "../Utils";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";

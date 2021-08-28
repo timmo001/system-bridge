@@ -13,7 +13,7 @@ import axios, { AxiosResponse } from "axios";
 import clsx from "clsx";
 import Icon from "@mdi/react";
 
-import { ApplicationInfo } from "../entities/application.entity";
+import { ApplicationInfo } from "../../assets/entities/application.entity";
 import { handleCopyToClipboard, parsedQuery } from "../Utils";
 import logo from "../resources/system-bridge.svg";
 

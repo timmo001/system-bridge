@@ -8,7 +8,7 @@ import {
   mdiTimerOutline,
 } from "@mdi/js";
 
-import { Configuration } from "./entities/configuration.entity";
+import { Configuration } from "../assets/entities/configuration.entity";
 
 export const defaultConfiguration: Configuration = {
   general: {

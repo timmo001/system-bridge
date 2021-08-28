@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import queryString from "query-string";
 
-import { Configuration } from "./entities/configuration.entity";
+import { Configuration } from "../assets/entities/configuration.entity";
 
 export function handleCopyToClipboard(value: string) {
   navigator.permissions.query({ name: "clipboard-write" }).then((result) => {

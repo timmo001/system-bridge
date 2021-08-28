@@ -1,4 +1,4 @@
-import { Event } from "../entities/event.entity";
+import { Event } from "../../assets/entities/event.entity";
 
 export class WebSocketConnection {
   public onEvent?: (data: Event) => void;

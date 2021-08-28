@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import { Grid, List, Paper, Typography } from "@material-ui/core";
 
-import { ConfigurationSection } from "../entities/configuration.entity";
+import { ConfigurationSection } from "../../assets/entities/configuration.entity";
 import { useSettings } from "../Utils";
 import Item from "./Item";
 
