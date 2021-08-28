@@ -16,9 +16,15 @@ contents:
     dst: /usr/local/share/system-bridge
   - src: ./scripts/system-bridge.desktop
     dst: /usr/share/applications/system-bridge.desktop
+  - src: /usr/local/share/system-bridge/system-bridge
+    dst: /usr/bin/system-bridge
+    type: symlink
 depends:
   - libavahi-compat-libdnssd-dev
 overrides:
+  apk:
+    depends:
+      - avahi-compat-libdns_sd
   deb:
     depends:
       - libavahi-compat-libdnssd-dev

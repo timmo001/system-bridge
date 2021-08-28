@@ -1,0 +1,22 @@
+---
+services:
+  system-bridge:
+    container_name: system-bridge
+    # build: .
+    # image: system-bridge:test
+    image: ghcr.io/timmo001/system-bridge/amd64:edge
+    restart: unless-stopped
+    ports:
+      - target: 9170
+        published: 9170
+        protocol: tcp
+      - target: 9172
+        published: 9172
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: system-bridge-data
+        target: /root/.local/share/system-bridge
+
+volumes:
+  system-bridge-data: {}

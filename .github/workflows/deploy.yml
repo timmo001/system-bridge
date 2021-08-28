@@ -59,6 +59,12 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
+      - name: ⤵️ Download Artifact - deb
+        uses: dawidd6/action-download-artifact@v2.14.1
+        with:
+          name: linux-deb
+          workflow: ci.yml
+          workflow_conclusion: success
       - name: 🏗 Set up build cache
         id: cache
         uses: actions/cache@v2.1.6
