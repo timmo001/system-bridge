@@ -2,7 +2,6 @@ import React, { ReactElement } from "react";
 import ReactMarkdown from "react-markdown";
 
 import Code from "./MarkdownRenderers/Code";
-import Image from "./MarkdownRenderers/Image";
 import Link from "./MarkdownRenderers/Link";
 
 interface MarkdownProps {
@@ -17,7 +16,6 @@ function Markdown(props: MarkdownProps): ReactElement {
       components={{
         a: Link,
         code: Code,
-        img: Image,
       }}
     >
       {props.source}
