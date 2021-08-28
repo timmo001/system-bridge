@@ -1,5 +1,5 @@
 import { createTheme, responsiveFontSizes } from "@material-ui/core/styles";
-import { teal, indigo } from "@material-ui/core/colors";
+import { deepPurple, grey } from "@material-ui/core/colors";
 
 let theme = createTheme({
   palette: {

@@ -21,7 +21,7 @@ import axios, { AxiosResponse } from "axios";
 import Icon from "@mdi/react";
 
 import { ApplicationInfo } from "assets/entities/application.entity";
-import { handleCopyToClipboard } from "../Utils";
+import { handleCopyToClipboard } from "components/Common/Utils";
 // import logo from "../../public/system-bridge.svg";
 import useStyles from "assets/jss/components/header";
 

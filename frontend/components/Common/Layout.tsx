@@ -3,9 +3,9 @@ import Head from "next/head";
 import { ClassNameMap } from "@material-ui/styles";
 import Container from "@material-ui/core/Container";
 
-import Footer from "./Common/Footer";
-import Header from "./Common/Header";
-import HeaderLinks from "./HeaderLinks";
+import Footer from "components/Common/Footer";
+import Header from "components/Common/Header";
+import HeaderLinks from "components/Common/HeaderLinks";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
