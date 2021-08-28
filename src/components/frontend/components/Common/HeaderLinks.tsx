@@ -12,7 +12,7 @@ import {
 } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import useStyles from "assets/jss/components/headerLinks";
+import useStyles from "../../assets/jss/components/headerLinks";
 
 function HeaderLinks(): ReactElement {
   const query = useRouter().query;

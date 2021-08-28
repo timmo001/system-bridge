@@ -1,4 +1,4 @@
 {
-  "exclude": ["node_modules", "test", "dist", "tray", "**/*spec.ts"],
+  "exclude": [".next", "node_modules", "test", "dist", "tray", "**/*spec.ts"],
   "extends": "./tsconfig.json"
 }

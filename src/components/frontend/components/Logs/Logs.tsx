@@ -14,7 +14,7 @@ import { Icon } from "@mdi/react";
 import { mdiRefresh } from "@mdi/js";
 import axios from "axios";
 
-import { useSettings } from "components/Common/Utils";
+import { useSettings } from "../Common/Utils";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

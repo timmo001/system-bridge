@@ -3,9 +3,9 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/dist/client/router";
 import { Container } from "@material-ui/core";
 
-import { getSettings, useSettings } from "../components/Common/Utils";
-import Layout from "../components/Common/Layout";
-import useStyles from "../assets/jss/components/layout";
+import { getSettings, useSettings } from "../../components/Common/Utils";
+import Layout from "../../components/Common/Layout";
+import useStyles from "../../assets/jss/components/layout";
 
 function Home(): ReactElement {
   const [settings, setSettings] = useSettings();

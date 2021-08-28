@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { useRouter } from "next/dist/client/router";
-import Link from "next/link";
+// import { useRouter } from "next/dist/client/router";
+// import Link from "next/link";
 import clsx from "clsx";
 import {
   AppBar,
@@ -16,14 +16,14 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
-import { mdiContentCopy } from "@mdi/js";
-import axios, { AxiosResponse } from "axios";
-import Icon from "@mdi/react";
+// import { mdiContentCopy } from "@mdi/js";
+// import axios, { AxiosResponse } from "axios";
+// import Icon from "@mdi/react";
 
-import { ApplicationInfo } from "assets/entities/application.entity";
-import { handleCopyToClipboard } from "components/Common/Utils";
-import logo from "assets/media/system-bridge.svg";
-import useStyles from "assets/jss/components/header";
+// import { ApplicationInfo } from "../../assets/entities/application.entity";
+// import { handleCopyToClipboard } from "../Common/Utils";
+import logo from "../../assets/media/system-bridge.svg";
+import useStyles from "../../assets/jss/components/header";
 
 type ColorExpanded = PropTypes.Color | "transparent";
 

@@ -12,10 +12,10 @@ import {
 } from "@material-ui/core";
 
 import { Event } from "../../assets/entities/event.entity";
-import { useSettings } from "components/Common/Utils";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import DataItems from "components/Data/DataItems";
-import Footer from "components/Common/Footer";
+import { useSettings } from "../Common/Utils";
+import { WebSocketConnection } from "../Common/WebSocket";
+import DataItems from "../Data/DataItems";
+import Footer from "../Common/Footer";
 
 const items = [
   "audio",
