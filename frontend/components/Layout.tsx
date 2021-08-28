@@ -26,9 +26,7 @@ function Layout(props: LayoutProps): ReactElement {
     <>
       <Head>
         <title>
-          {props.title
-            ? `${props.title} - System Bridge`
-            : `System Bridge`}
+          {props.title ? `${props.title} - System Bridge` : `System Bridge`}
         </title>
         <link rel="canonical" href={props.url} />
         <meta
