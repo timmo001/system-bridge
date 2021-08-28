@@ -1,14 +1,11 @@
 import React, { ReactElement } from "react";
 import Head from "next/head";
 import { ClassNameMap } from "@material-ui/styles";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import Container from "@material-ui/core/Container";
-import Typography from "@material-ui/core/Typography";
 
+import Footer from "./Common/Footer";
 import Header from "./Header";
 import HeaderLinks from "./HeaderLinks";
-import Markdown from "./Markdown";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
@@ -61,13 +58,7 @@ function Layout(props: LayoutProps): ReactElement {
       />
       {props.children}
       <Container className={classes.footer} component="footer" maxWidth="xl">
-        <Card>
-          <CardContent>
-            <Typography component="div">
-              <Markdown source="Copyright © Owner" />
-            </Typography>
-          </CardContent>
-        </Card>
+        <Footer />
       </Container>
     </>
   );
