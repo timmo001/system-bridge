@@ -4,12 +4,15 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 
-import { KeyboardService } from "./keyboard.service";
 import { CreateKeyboardDto } from "./dto/create-keyboard.dto";
+import { HttpAuthGuard } from "../httpAuth.guard";
+import { KeyboardService } from "./keyboard.service";
 
 @Controller("keyboard")
+@UseGuards(HttpAuthGuard)
 export class KeyboardController {
   constructor(private readonly keyboardService: KeyboardService) {}
 

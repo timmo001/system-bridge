@@ -5,12 +5,15 @@ import {
   HttpStatus,
   Param,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 
+import { HttpAuthGuard } from "../httpAuth.guard";
 import { Process, Processes } from "./entities/processes.entity";
 import { ProcessesService } from "./processes.service";
 
 @Controller("processes")
+@UseGuards(HttpAuthGuard)
 export class ProcessesController {
   constructor(private readonly processesService: ProcessesService) {}
 

@@ -8,7 +8,7 @@ import Layout from "../../components/Common/Layout";
 import Settings from "../../components/Settings/Settings";
 import useStyles from "../../assets/jss/components/layout";
 
-function Home(): ReactElement {
+function PageSettings(): ReactElement {
   const [settings, setSettings] = useSettings();
 
   const query = useRouter().query;
@@ -46,4 +46,4 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 };
 
-export default Home;
+export default PageSettings;

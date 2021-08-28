@@ -4,12 +4,15 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 
-import { OpenService } from "./open.service";
 import { CreateOpenDto } from "./dto/create-open.dto";
+import { HttpAuthGuard } from "../httpAuth.guard";
+import { OpenService } from "./open.service";
 
 @Controller("open")
+@UseGuards(HttpAuthGuard)
 export class OpenController {
   constructor(private readonly openService: OpenService) {}
 

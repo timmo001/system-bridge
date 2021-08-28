@@ -22,7 +22,7 @@ import { Menu } from "@material-ui/icons";
 
 // import { ApplicationInfo } from "../../assets/entities/application.entity";
 // import { handleCopyToClipboard } from "../Common/Utils";
-import logo from "../../assets/media/system-bridge.svg";
+// import logo from "../../assets/media/system-bridge.svg";
 import useStyles from "../../assets/jss/components/header";
 
 type ColorExpanded = PropTypes.Color | "transparent";
@@ -119,7 +119,7 @@ function Header(props: HeaderProps): ReactElement {
           <Toolbar className={classes.container}>
             <Grid className={classes.headerItem} item>
               <Button href="https://system-bridge.timmo.dev" target="_blank">
-                <img src={logo} alt="System Bridge Logo" />
+                {/* <img src={logo} alt="System Bridge Logo" /> */}
                 <Typography
                   className={classes.title}
                   component="div"

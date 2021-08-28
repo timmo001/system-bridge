@@ -7,7 +7,7 @@ import { getSettings, useSettings } from "../../components/Common/Utils";
 import Layout from "../../components/Common/Layout";
 import useStyles from "../../assets/jss/components/layout";
 
-function Home(): ReactElement {
+function PageHome(): ReactElement {
   const [settings, setSettings] = useSettings();
 
   const query = useRouter().query;
@@ -45,4 +45,4 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 };
 
-export default Home;
+export default PageHome;

@@ -1,4 +1,3 @@
-import { APP_GUARD } from "@nestjs/core";
 import { join } from "path";
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -14,7 +13,6 @@ import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
 import { FrontendModule } from "./frontend/frontend.module";
 import { GraphicsModule } from "./graphics/graphics.module";
-import { HttpAuthGuard } from "./httpAuth.guard";
 import { InformationModule } from "./information/information.module";
 import { KeyboardModule } from "./keyboard/keyboard.module";
 import { LogsModule } from "./logs/logs.module";
@@ -61,11 +59,6 @@ import { UsbModule } from "./usb/usb.module";
     UsbModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: HttpAuthGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}

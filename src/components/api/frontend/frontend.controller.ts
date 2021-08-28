@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 import { FrontendService } from "./frontend.service";
 
-@Controller("app")
+@Controller("/")
 export class FrontendController {
   constructor(private readonly frontendService: FrontendService) {}
 
@@ -17,17 +17,17 @@ export class FrontendController {
     await this.frontendService.handler(req, res);
   }
 
-  @Get("data")
+  @Get("app/data")
   public async showData(@Req() req: Request, @Res() res: Response) {
     await this.frontendService.handler(req, res);
   }
 
-  @Get("logs")
+  @Get("app/logs")
   public async showLogs(@Req() req: Request, @Res() res: Response) {
     await this.frontendService.handler(req, res);
   }
 
-  @Get("settings")
+  @Get("app/settings")
   public async showSettings(@Req() req: Request, @Res() res: Response) {
     await this.frontendService.handler(req, res);
   }

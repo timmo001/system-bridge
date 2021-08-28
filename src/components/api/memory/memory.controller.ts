@@ -1,9 +1,11 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, UseGuards } from "@nestjs/common";
 
+import { HttpAuthGuard } from "../httpAuth.guard";
 import { Memory } from "./entities/memory.entity";
 import { MemoryService } from "./memory.service";
 
 @Controller("memory")
+@UseGuards(HttpAuthGuard)
 export class MemoryController {
   constructor(private readonly memoryService: MemoryService) {}
 

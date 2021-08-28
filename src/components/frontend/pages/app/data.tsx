@@ -8,7 +8,7 @@ import Data from "../../components/Data/Data";
 import Layout from "../../components/Common/Layout";
 import useStyles from "../../assets/jss/components/layout";
 
-function Home(): ReactElement {
+function PageData(): ReactElement {
   const [settings, setSettings] = useSettings();
 
   const query = useRouter().query;
@@ -28,7 +28,7 @@ function Home(): ReactElement {
   return (
     <Layout
       classes={classes}
-      title="Home"
+      title="Data"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
     >
@@ -46,4 +46,4 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 };
 
-export default Home;
+export default PageData;

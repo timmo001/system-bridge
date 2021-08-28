@@ -1,4 +1,14 @@
 {
-  "exclude": [".next", "node_modules", "test", "dist", "tray", "**/*spec.ts"],
+  "exclude": [
+    ".next",
+    "**/*spec.ts",
+    "dist",
+    "next-env.d.ts",
+    "node_modules",
+    "public",
+    "src/components/frontend",
+    "test",
+    "tray"
+  ],
   "extends": "./tsconfig.json"
 }

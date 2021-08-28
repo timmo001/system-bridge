@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
-import { FrontendService } from "./frontend.service";
+
 import { FrontendController } from "./frontend.controller";
+import { FrontendService } from "./frontend.service";
 
 @Module({
   controllers: [FrontendController],

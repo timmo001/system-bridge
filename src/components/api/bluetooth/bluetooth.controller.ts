@@ -1,8 +1,10 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, UseGuards } from "@nestjs/common";
 
 import { BluetoothService } from "./bluetooth.service";
+import { HttpAuthGuard } from "../httpAuth.guard";
 
 @Controller("bluetooth")
+@UseGuards(HttpAuthGuard)
 export class BluetoothController {
   constructor(private readonly bluetoothService: BluetoothService) {}
 
