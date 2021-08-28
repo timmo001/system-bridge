@@ -2,15 +2,26 @@
   "name": "system-bridge-frontend",
   "version": "2.6.0",
   "private": true,
-  "homepage": ".",
+  "scripts": {
+    "build": "next build",
+    "eslint": "eslint --ext .ts --ext .tsx --color ./",
+    "start:dev": "next dev",
+    "start": "next start"
+  },
   "dependencies": {
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
+    "@material-ui/lab": "4.0.0-alpha.60",
+    "@material-ui/styles": "4.11.4",
     "@mdi/js": "5.9.55",
     "@mdi/react": "1.5.0",
+    "@types/uuid": "^8.3.1",
     "axios": "0.21.1",
+    "clsx": "1.1.1",
+    "fontsource-roboto": "4.0.0",
     "lodash": "4.17.21",
     "moment": "2.29.1",
+    "next": "11.1.0",
     "peerjs": "1.3.2",
     "query-string": "7.0.1",
     "react": "17.0.2",
@@ -19,48 +30,19 @@
     "react-router-dom": "5.2.1",
     "react-scripts": "4.0.3",
     "rect-scaler": "1.0.0",
-    "typeface-roboto": "1.1.13",
-    "typescript": "4.3.5",
-    "uuid": "8.3.2",
-    "web-vitals": "2.1.0"
+    "uuid": "8.3.2"
   },
+  "license": "MIT",
   "devDependencies": {
-    "@testing-library/jest-dom": "5.14.1",
-    "@testing-library/react": "12.0.0",
-    "@testing-library/user-event": "13.2.1",
-    "@types/jest": "27.0.1",
-    "@types/lodash": "^4.14.172",
     "@types/node": "16.7.10",
     "@types/react": "17.0.19",
-    "@types/react-dom": "17.0.9",
-    "@types/react-router-dom": "5.1.8",
-    "@types/uuid": "8.3.1",
-    "cross-env": "7.0.3",
-    "jest-junit": "12.2.0"
-  },
-  "scripts": {
-    "start": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts start",
-    "build": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts build",
-    "test": "react-scripts test",
-    "test:junit": "react-scripts test --coverage --ci --reporters=default --reporters=jest-junit",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "@types/react-syntax-highlighter": "13.5.2",
+    "@typescript-eslint/eslint-plugin": "4.29.3",
+    "@typescript-eslint/parser": "4.29.3",
+    "eslint": "7.32.0",
+    "eslint-import-resolver-typescript": "2.4.0",
+    "eslint-plugin-import": "2.24.2",
+    "prettier": "2.3.2",
+    "typescript": "4.4.2"
   }
 }
