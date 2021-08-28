@@ -18,7 +18,8 @@ function Markdown(props: MarkdownProps): ReactElement {
         a: Link,
         code: Code,
         img: Image,
-      }}>
+      }}
+    >
       {props.source}
     </ReactMarkdown>
   );

@@ -17,7 +17,8 @@ function Link({
           ? "_self"
           : "_blank"
       }
-      rel="noreferrer">
+      rel="noreferrer"
+    >
       {children}
     </a>
   );
