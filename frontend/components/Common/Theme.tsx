@@ -4,8 +4,16 @@ import { teal, indigo } from "@material-ui/core/colors";
 let theme = createTheme({
   palette: {
     type: "dark",
-    primary: teal,
-    secondary: indigo,
+    primary: {
+      dark: deepPurple[800],
+      main: deepPurple[700],
+      light: deepPurple[600],
+    },
+    secondary: deepPurple,
+    background: {
+      default: "#121212",
+      paper: grey[900],
+    },
     contrastThreshold: 3,
     tonalOffset: 0.2,
   },

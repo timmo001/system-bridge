@@ -3,8 +3,9 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/dist/client/router";
 import { Container } from "@material-ui/core";
 
-import { getSettings, useSettings } from "components/Common/Utils";
-import Layout from "components/Common/Layout";
+import { getSettings, useSettings } from "components/Utils";
+import Configuration from "components/Configuration/Configuration";
+import Layout from "components/Layout";
 import useStyles from "assets/jss/components/layout";
 
 function Home(): ReactElement {
@@ -27,12 +28,12 @@ function Home(): ReactElement {
   return (
     <Layout
       classes={classes}
-      title="Home"
+      title="Settings"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
     >
       <Container className={classes.main} component="article" maxWidth="xl">
-        <></>
+        <Configuration />
       </Container>
     </Layout>
   );

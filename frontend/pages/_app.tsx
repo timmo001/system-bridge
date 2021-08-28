@@ -3,9 +3,11 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
 
+import { SettingsProvider } from "components/Common/Utils";
+import theme from "../components/Common/Theme";
+
 import "assets/css/style.css";
 import "fontsource-roboto";
-import theme from "../components/Theme";
 
 function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
@@ -29,8 +31,12 @@ function App({ Component, pageProps }: AppProps): ReactElement {
         />
       </Head>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Component {...pageProps} />
+        <SettingsProvider>
+          <>
+            <CssBaseline />
+            <Component {...pageProps} />
+          </>
+        </SettingsProvider>
       </ThemeProvider>
     </>
   );
