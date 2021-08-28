@@ -9,7 +9,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <meta name="author" content="Aidan Timson" />
+          <meta name="author" content="Aidan Timson <contact@timmo.xyz>" />
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link

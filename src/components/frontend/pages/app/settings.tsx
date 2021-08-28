@@ -28,7 +28,7 @@ function PageSettings(): ReactElement {
   return (
     <Layout
       classes={classes}
-      title="Home"
+      title="Settings"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
     >
