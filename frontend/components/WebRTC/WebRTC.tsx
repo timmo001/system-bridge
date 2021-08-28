@@ -1,4 +1,5 @@
-import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
+import React, { ReactElement, useCallback, useEffect } from "react";
+import { useRouter } from "next/dist/client/router";
 import { createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
@@ -7,7 +8,7 @@ import { largestRect } from "rect-scaler";
 import { Icon } from "@mdi/react";
 import { mdiPhoneHangup } from "@mdi/js";
 
-import { parsedQuery, useSettings } from "../Utils";
+import { useSettings } from "components/Common/Utils";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,7 +39,7 @@ let peer: Peer | null,
 function WebRTC(): ReactElement {
   const [settings] = useSettings();
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   const classes = useStyles();
 

@@ -14,11 +14,13 @@ import { defaultConfiguration } from "assets/data/defaultSettings";
 import { Setting } from "assets/entities/settings.entity";
 
 export function handleCopyToClipboard(value: string) {
-  navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
-    if (result.state === "granted" || result.state === "prompt") {
-      navigator.clipboard.writeText(value);
-    }
-  });
+  navigator.permissions
+    .query({ name: "clipboard-write" as PermissionName })
+    .then((result) => {
+      if (result.state === "granted" || result.state === "prompt") {
+        navigator.clipboard.writeText(value);
+      }
+    });
 }
 
 const SettingsContext = createContext<ConfigurationEntity | undefined>(
