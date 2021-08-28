@@ -6,7 +6,7 @@ import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import { SettingsProvider } from "../components/Common/Utils";
 import theme from "../components/Common/Theme";
 
-import "assets/css/style.css";
+import "../assets/css/style.css";
 import "@fontsource/roboto";
 
 function App({ Component, pageProps }: AppProps): ReactElement {
