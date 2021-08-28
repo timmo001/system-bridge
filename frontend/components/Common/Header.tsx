@@ -22,6 +22,7 @@ import Icon from "@mdi/react";
 
 import { ApplicationInfo } from "assets/entities/application.entity";
 import { handleCopyToClipboard } from "../Utils";
+// import logo from "../../public/system-bridge.svg";
 import useStyles from "assets/jss/components/header";
 
 type ColorExpanded = PropTypes.Color | "transparent";
@@ -60,6 +61,9 @@ function Header(props: HeaderProps): ReactElement {
         )
         .then((response: AxiosResponse<ApplicationInfo>) => {
           setAppInfo(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
         });
     }
   }, [appInfo, setAppInfo, query]);
@@ -113,17 +117,55 @@ function Header(props: HeaderProps): ReactElement {
       >
         <Container maxWidth="xl">
           <Toolbar className={classes.container}>
-            <Link href="/">
-              <Button>
-                <Typography
-                  className={classes.title}
-                  component="div"
-                  variant="h4"
-                >
-                  {brand}
-                </Typography>
-              </Button>
-            </Link>
+            <Grid
+              className={classes.headerItem}
+              item
+              // alignContent="center"
+              // justifyContent="center"
+            >
+              <Link href="/">
+                <Button>
+                  {/* <img src={logo} alt="System Bridge Logo" /> */}
+                  <Typography
+                    className={classes.title}
+                    component="div"
+                    variant="h4"
+                  >
+                    {brand}
+                  </Typography>
+                </Button>
+              </Link>
+              {appInfo?.version ? (
+                <>
+                  <Typography
+                    className={clsx(classes.disabled, classes.version)}
+                    component="span"
+                    variant="h5"
+                  >
+                    {appInfo.version}
+                  </Typography>
+                  <Typography
+                    className={clsx(classes.disabled, classes.version)}
+                    component="span"
+                    variant="subtitle1"
+                  >
+                    {appInfo.updates?.available ? (
+                      <a
+                        href={appInfo.updates?.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Version {appInfo.updates.version.new} avaliable!
+                      </a>
+                    ) : (
+                      ""
+                    )}
+                  </Typography>
+                </>
+              ) : (
+                ""
+              )}
+            </Grid>
             <Hidden smDown implementation="css">
               {rightLinks}
             </Hidden>
@@ -152,108 +194,72 @@ function Header(props: HeaderProps): ReactElement {
           </Hidden>
         </Container>
       </AppBar>
-      <Grid container alignItems="flex-start" justifyContent="flex-start">
-        <Grid
-          className={clsx(
-            classes.disabled,
-            classes.headerItem,
-            classes.version
-          )}
-          item
-          xs
-        >
-          {appInfo?.version ? (
-            <>
-              <Typography component="h3" variant="h5">
-                {appInfo.version}
+      <Box className={classes.spacer} />
+      <Box className={classes.spacer} />
+      <Container maxWidth="xl" style={{ zIndex: 1000 }}>
+        <Grid container alignItems="flex-start" justifyContent="space-around">
+          <Grid className={classes.headerItem} item></Grid>
+          <Grid className={classes.headerItem} item>
+            {appInfo?.host ? (
+              <Typography component="h5" variant="subtitle1">
+                <span className={classes.disabled}>Host: </span>
+                {appInfo.host}
+                <IconButton
+                  className={classes.smallButton}
+                  aria-label="Copy to clipboard"
+                  onClick={() => handleCopyToClipboard(appInfo.host)}
+                >
+                  <Icon
+                    title="Copy to clipboard"
+                    size={0.8}
+                    path={mdiContentCopy}
+                  />
+                </IconButton>
               </Typography>
-              <Typography component="h4" variant="subtitle1">
-                {appInfo.updates?.available ? (
-                  <a
-                    href={appInfo.updates?.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Version {appInfo.updates.version.new} avaliable!
-                  </a>
-                ) : (
-                  ""
-                )}
+            ) : (
+              ""
+            )}
+            {appInfo?.ip ? (
+              <Typography component="h5" variant="subtitle1">
+                <span className={classes.disabled}>IP: </span>
+                {appInfo.ip}
+                <IconButton
+                  className={classes.smallButton}
+                  aria-label="Copy to clipboard"
+                  onClick={() => handleCopyToClipboard(appInfo.ip)}
+                >
+                  <Icon
+                    title="Copy to clipboard"
+                    size={0.8}
+                    path={mdiContentCopy}
+                  />
+                </IconButton>
               </Typography>
-            </>
-          ) : (
-            ""
-          )}
+            ) : (
+              ""
+            )}
+            {appInfo?.uuid ? (
+              <Typography component="h5" variant="subtitle1">
+                <span className={classes.disabled}>UUID: </span>
+                {appInfo.uuid}
+                <IconButton
+                  className={classes.smallButton}
+                  aria-label="Copy to clipboard"
+                  onClick={() => handleCopyToClipboard(appInfo.uuid)}
+                >
+                  <Icon
+                    title="Copy to clipboard"
+                    size={0.8}
+                    path={mdiContentCopy}
+                  />
+                </IconButton>
+              </Typography>
+            ) : (
+              ""
+            )}
+          </Grid>
         </Grid>
-        <Grid className={clsx(classes.headerItem, classes.version)} item xs={4}>
-          {appInfo?.host ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>Host: </span>
-              {appInfo.host}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.host)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-          {appInfo?.ip ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>IP: </span>
-              {appInfo.ip}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.ip)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-          {appInfo?.uuid ? (
-            <Typography component="h5" variant="subtitle1">
-              <span className={classes.disabled}>UUID: </span>
-              {appInfo.uuid}
-              <IconButton
-                className={classes.smallButton}
-                aria-label="Copy to clipboard"
-                onClick={() => handleCopyToClipboard(appInfo.uuid)}
-              >
-                <Icon
-                  title="Copy to clipboard"
-                  size={0.8}
-                  path={mdiContentCopy}
-                />
-              </IconButton>
-            </Typography>
-          ) : (
-            ""
-          )}
-        </Grid>
-        {/* <Grid className={classes.headerItem} item>
-          <a
-            href="https://system-bridge.timmo.dev"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img src={logo} alt="System Bridge Logo" />
-          </a>
-        </Grid> */}
-      </Grid>
+      </Container>
       <Box className={classes.spacer} />
     </>
   );
