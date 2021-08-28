@@ -33,8 +33,6 @@ RUN \
     \
     && cd /tmp/app \
     && yarn install --pure-lockfile \
-    && cd frontend \
-    && yarn install --pure-lockfile \
     \
     && cd /tmp/app \
     && yarn package:app \

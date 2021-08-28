@@ -42,12 +42,7 @@ jobs:
             --allow-same-version \
             --no-git-tag-version
           cat package.json
-          cd ./frontend
-          npm version ${{ steps.release_drafter.outputs.tag_name }} \
-            --allow-same-version \
-            --no-git-tag-version
-          cat package.json
-          cd ../tray
+          cd ./tray
           npm version ${{ steps.release_drafter.outputs.tag_name }} \
             --allow-same-version \
             --no-git-tag-version

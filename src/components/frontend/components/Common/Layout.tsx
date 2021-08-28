@@ -32,7 +32,7 @@ function Layout(props: LayoutProps): ReactElement {
             props.description
               ? `${props.description}`
               : props.title
-              ? `${props.title} - Frontend`
+              ? `${props.title} - System Bridge`
               : `System Bridge`
           }
         />
