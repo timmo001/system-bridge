@@ -1,14 +1,10 @@
 import React, { ReactElement } from "react";
 import Link from "next/link";
 import clsx from "clsx";
+import { Button, List, ListItem, Tooltip } from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import Tooltip from "@material-ui/core/Tooltip";
-// eslint-disable-next-line import/no-named-as-default
-import Icon from "@mdi/react";
 import { mdiInformation } from "@mdi/js";
+import Icon from "@mdi/react";
 
 import useStyles from "assets/jss/components/headerLinks";
 
@@ -31,7 +27,8 @@ function HeaderLinks(): ReactElement {
             variant="text"
             className={classes.navLink}
             href="https://github.com/timmo001/system-bridge"
-            target="_blank">
+            target="_blank"
+          >
             <Icon
               path={mdiInformation}
               color={theme.palette.text.primary}

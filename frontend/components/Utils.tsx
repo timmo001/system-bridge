@@ -6,7 +6,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import queryString from "query-string";
 
 import { Configuration } from "../assets/entities/configuration.entity";
 
@@ -17,11 +16,6 @@ export function handleCopyToClipboard(value: string) {
     }
   });
 }
-
-export const parsedQuery = queryString.parse(window.location.search, {
-  parseBooleans: true,
-  parseNumbers: true,
-});
 
 const SettingsContext = createContext<Configuration | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<

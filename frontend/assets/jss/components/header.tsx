@@ -86,6 +86,21 @@ const headerStyle = makeStyles((theme: Theme) => ({
     paddingLeft: "0",
     ...transition,
   },
+  disabled: {
+    userSelect: "none",
+  },
+  headerItem: {
+    margin: theme.spacing(1, 1, 0),
+  },
+  smallButton: {
+    margin: theme.spacing(-1, -0.5),
+  },
+  spacer: {
+    height: theme.spacing(6),
+  },
+  version: {
+    margin: theme.spacing(3, 2, 0),
+  },
 }));
 
 export default headerStyle;

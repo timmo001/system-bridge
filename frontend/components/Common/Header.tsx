@@ -1,50 +1,54 @@
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/router";
+import Link from "next/link";
+import clsx from "clsx";
 import {
+  AppBar,
   Box,
-  createStyles,
+  Button,
+  Container,
+  Drawer,
   Grid,
+  Hidden,
   IconButton,
-  makeStyles,
-  Theme,
+  PropTypes,
+  Toolbar,
   Typography,
 } from "@material-ui/core";
+import { Menu } from "@material-ui/icons";
 import { mdiContentCopy } from "@mdi/js";
 import axios, { AxiosResponse } from "axios";
-import clsx from "clsx";
 import Icon from "@mdi/react";
 
-import { ApplicationInfo } from "../../assets/entities/application.entity";
-import { handleCopyToClipboard, parsedQuery } from "../Utils";
-import logo from "../resources/system-bridge.svg";
+import { ApplicationInfo } from "assets/entities/application.entity";
+import { handleCopyToClipboard } from "../Utils";
+import useStyles from "assets/jss/components/header";
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    disabled: {
-      userSelect: "none",
-    },
-    headerItem: {
-      margin: theme.spacing(1, 1, 0),
-    },
-    smallButton: {
-      margin: theme.spacing(-1, -0.5),
-    },
-    spacer: {
-      height: theme.spacing(6),
-    },
-    version: {
-      margin: theme.spacing(3, 2, 0),
-    },
-  })
-);
+type ColorExpanded = PropTypes.Color | "transparent";
 
-function Header({ name }: { name: string }): ReactElement {
+interface ChangeColorOnScroll {
+  color: ColorExpanded;
+  height: string | number;
+}
+
+interface HeaderProps {
+  absolute?: string;
+  brand?: string;
+  changeColorOnScroll?: ChangeColorOnScroll;
+  color?: ColorExpanded;
+  fixed?: boolean;
+  rightLinks?: ReactElement;
+}
+
+function Header(props: HeaderProps): ReactElement {
+  const classes = useStyles();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [appInfo, setAppInfo] = useState<ApplicationInfo>();
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   useEffect(() => {
     if (!appInfo) {
-      document.title = `${name} - System Bridge`;
       axios
         .get<ApplicationInfo>(
           `http://${query.apiHost || "localhost"}:${
@@ -58,21 +62,97 @@ function Header({ name }: { name: string }): ReactElement {
           setAppInfo(response.data);
         });
     }
-  }, [appInfo, name, setAppInfo, query]);
+  }, [appInfo, setAppInfo, query]);
 
-  const classes = useStyles();
+  useEffect(() => {
+    if (props.changeColorOnScroll) {
+      window.addEventListener("scroll", headerColorChange);
+    }
+    return function cleanup() {
+      if (props.changeColorOnScroll) {
+        window.removeEventListener("scroll", headerColorChange);
+      }
+    };
+  }, []);
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const headerColorChange = () => {
+    const { color, changeColorOnScroll } = props;
+    const windowsScrollTop = window.pageYOffset;
+    if (windowsScrollTop > changeColorOnScroll.height) {
+      document.body
+        .getElementsByTagName("header")[0]
+        .classList.remove(classes[color]);
+      document.body
+        .getElementsByTagName("header")[0]
+        .classList.add(classes[changeColorOnScroll.color]);
+    } else {
+      document.body
+        .getElementsByTagName("header")[0]
+        .classList.add(classes[color]);
+      document.body
+        .getElementsByTagName("header")[0]
+        .classList.remove(classes[changeColorOnScroll.color]);
+    }
+  };
+
+  const { color, rightLinks, brand, fixed, absolute } = props;
   return (
     <>
+      <AppBar
+        className={clsx({
+          [classes.appBar]: true,
+          [classes[color]]: color,
+          [classes.absolute]: absolute,
+          [classes.fixed]: fixed,
+        })}
+        color={color}
+      >
+        <Container maxWidth="xl">
+          <Toolbar className={classes.container}>
+            <Link href="/">
+              <Button>
+                <Typography
+                  className={classes.title}
+                  component="div"
+                  variant="h4"
+                >
+                  {brand}
+                </Typography>
+              </Button>
+            </Link>
+            <Hidden smDown implementation="css">
+              {rightLinks}
+            </Hidden>
+            <Hidden mdUp>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerToggle}
+              >
+                <Menu />
+              </IconButton>
+            </Hidden>
+          </Toolbar>
+          <Hidden mdUp implementation="css">
+            <Drawer
+              variant="temporary"
+              anchor={"right"}
+              open={mobileOpen}
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              onClose={handleDrawerToggle}
+            >
+              <div className={classes.appResponsive}>{rightLinks}</div>
+            </Drawer>
+          </Hidden>
+        </Container>
+      </AppBar>
       <Grid container alignItems="flex-start" justifyContent="flex-start">
-        <Grid className={classes.disabled} item>
-          <Typography component="h1" variant="h2">
-            System Bridge
-          </Typography>
-          <Typography component="h2" variant="h4">
-            {name}
-          </Typography>
-        </Grid>
         <Grid
           className={clsx(
             classes.disabled,
@@ -164,7 +244,7 @@ function Header({ name }: { name: string }): ReactElement {
             ""
           )}
         </Grid>
-        <Grid className={classes.headerItem} item>
+        {/* <Grid className={classes.headerItem} item>
           <a
             href="https://system-bridge.timmo.dev"
             target="_blank"
@@ -172,7 +252,7 @@ function Header({ name }: { name: string }): ReactElement {
           >
             <img src={logo} alt="System Bridge Logo" />
           </a>
-        </Grid>
+        </Grid> */}
       </Grid>
       <Box className={classes.spacer} />
     </>

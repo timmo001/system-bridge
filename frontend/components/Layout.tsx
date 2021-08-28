@@ -4,7 +4,7 @@ import { ClassNameMap } from "@material-ui/styles";
 import Container from "@material-ui/core/Container";
 
 import Footer from "./Common/Footer";
-import Header from "./Header";
+import Header from "./Common/Header";
 import HeaderLinks from "./HeaderLinks";
 
 interface LayoutProps {
