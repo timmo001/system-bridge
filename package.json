@@ -20,7 +20,7 @@
   "bin": "dist/main.js",
   "scripts": {
     "build": "yarn build:app && yarn build:tray",
-    "build:app": "rimraf dist && nest build",
+    "build:app": "rimraf dist && nest build && cd src/components/frontend && next build",
     "build:tray": "cd tray && yarn build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "install:all": "yarn install && cd ../tray && yarn install",
@@ -163,6 +163,7 @@
   },
   "pkg": {
     "assets": [
+      ".next/**/*",
       "node_modules/**/*",
       "public/**/*"
     ],
