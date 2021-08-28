@@ -22,7 +22,7 @@ import Icon from "@mdi/react";
 
 import { ApplicationInfo } from "assets/entities/application.entity";
 import { handleCopyToClipboard } from "components/Common/Utils";
-// import logo from "../../public/system-bridge.svg";
+import logo from "assets/media/system-bridge.svg";
 import useStyles from "assets/jss/components/header";
 
 type ColorExpanded = PropTypes.Color | "transparent";
@@ -44,29 +44,29 @@ interface HeaderProps {
 function Header(props: HeaderProps): ReactElement {
   const classes = useStyles();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [appInfo, setAppInfo] = useState<ApplicationInfo>();
+  // const [appInfo, setAppInfo] = useState<ApplicationInfo>();
 
-  const query = useRouter().query;
+  // const query = useRouter().query;
 
-  useEffect(() => {
-    if (!appInfo) {
-      // axios
-      //   .get<ApplicationInfo>(
-      //     `http://${query.apiHost || "localhost"}:${
-      //       query.apiPort || 9170
-      //     }/information`,
-      //     {
-      //       headers: { "api-key": query.apiKey },
-      //     }
-      //   )
-      //   .then((response: AxiosResponse<ApplicationInfo>) => {
-      //     setAppInfo(response.data);
-      //   })
-      //   .catch((error) => {
-      //     console.error(error);
-      //   });
-    }
-  }, [appInfo, setAppInfo, query]);
+  // useEffect(() => {
+  //   if (!appInfo) {
+  //     axios
+  //       .get<ApplicationInfo>(
+  //         `http://${query.apiHost || "localhost"}:${
+  //           query.apiPort || 9170
+  //         }/information`,
+  //         {
+  //           headers: { "api-key": query.apiKey },
+  //         }
+  //       )
+  //       .then((response: AxiosResponse<ApplicationInfo>) => {
+  //         setAppInfo(response.data);
+  //       })
+  //       .catch((error) => {
+  //         console.error(error);
+  //       });
+  //   }
+  // }, [appInfo, setAppInfo, query]);
 
   useEffect(() => {
     if (props.changeColorOnScroll) {
@@ -117,25 +117,18 @@ function Header(props: HeaderProps): ReactElement {
       >
         <Container maxWidth="xl">
           <Toolbar className={classes.container}>
-            <Grid
-              className={classes.headerItem}
-              item
-              // alignContent="center"
-              // justifyContent="center"
-            >
-              <Link href="/">
-                <Button>
-                  {/* <img src={logo} alt="System Bridge Logo" /> */}
-                  <Typography
-                    className={classes.title}
-                    component="div"
-                    variant="h4"
-                  >
-                    {brand}
-                  </Typography>
-                </Button>
-              </Link>
-              {appInfo?.version ? (
+            <Grid className={classes.headerItem} item>
+              <Button href="https://system-bridge.timmo.dev" target="_blank">
+                <img src={logo} alt="System Bridge Logo" />
+                <Typography
+                  className={classes.title}
+                  component="div"
+                  variant="h4"
+                >
+                  {brand}
+                </Typography>
+              </Button>
+              {/* {appInfo?.version ? (
                 <>
                   <Typography
                     className={clsx(classes.disabled, classes.version)}
@@ -164,7 +157,7 @@ function Header(props: HeaderProps): ReactElement {
                 </>
               ) : (
                 ""
-              )}
+              )} */}
             </Grid>
             <Hidden smDown implementation="css">
               {rightLinks}
@@ -196,7 +189,7 @@ function Header(props: HeaderProps): ReactElement {
       </AppBar>
       <Box className={classes.spacer} />
       <Box className={classes.spacer} />
-      <Container maxWidth="xl" style={{ zIndex: 1000 }}>
+      {/* <Container maxWidth="xl" style={{ zIndex: 1000 }}>
         <Grid container alignItems="flex-start" justifyContent="space-around">
           <Grid className={classes.headerItem} item></Grid>
           <Grid className={classes.headerItem} item>
@@ -259,7 +252,7 @@ function Header(props: HeaderProps): ReactElement {
             )}
           </Grid>
         </Grid>
-      </Container>
+      </Container> */}
       <Box className={classes.spacer} />
     </>
   );
