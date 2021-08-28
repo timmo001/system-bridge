@@ -11,8 +11,8 @@ let theme = createTheme({
     },
     secondary: deepPurple,
     background: {
-      default: "#121212",
-      paper: grey[900],
+      default: grey[900],
+      paper: "#292929",
     },
     contrastThreshold: 3,
     tonalOffset: 0.2,
