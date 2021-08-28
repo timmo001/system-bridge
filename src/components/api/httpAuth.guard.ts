@@ -13,6 +13,7 @@ import queryString from "query-string";
 import { getApiKey } from "../common";
 import { Logger } from "../logger";
 import { Setting } from "./settings/entities/setting.entity";
+import { loggers } from "winston";
 @Injectable()
 export class HttpAuthGuard implements CanActivate {
   private apiKey: string;
@@ -63,6 +64,8 @@ export class HttpAuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
-    return request.headers["api-key"] === this.apiKey;
+    const apiKey = request.headers["api-key"] || request.query["apiKey"];
+
+    return apiKey === this.apiKey;
   }
 }

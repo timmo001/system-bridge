@@ -8,7 +8,7 @@ import { largestRect } from "rect-scaler";
 import { Icon } from "@mdi/react";
 import { mdiPhoneHangup } from "@mdi/js";
 
-import { useSettings } from "components/Common/Utils";
+import { useSettings } from "../Common/Utils";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

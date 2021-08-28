@@ -32,6 +32,9 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# NextJS
+.next
+
 # Additional
 out/
 public/app/*

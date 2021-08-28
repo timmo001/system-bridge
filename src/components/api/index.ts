@@ -1,6 +1,6 @@
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
-import { join } from "path";
+// import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
 import {
@@ -78,9 +78,9 @@ export async function startServer(): Promise<void> {
   app.enableCors();
 
   // Serve public directory
-  const publicDir = join(__dirname, "../../../public");
-  logger.info(`Serving public directory: ${publicDir}`);
-  app.useStaticAssets(publicDir);
+  // const publicDir = join(__dirname, "../../../public");
+  // logger.info(`Serving public directory: ${publicDir}`);
+  // app.useStaticAssets(publicDir);
 
   // Setup Open API
   const document = SwaggerModule.createDocument(

@@ -3,10 +3,10 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/dist/client/router";
 import { Container } from "@material-ui/core";
 
-import { getSettings, useSettings } from "components/Common/Utils";
-import Layout from "components/Common/Layout";
-import Settings from "components/Settings/Settings";
-import useStyles from "assets/jss/components/layout";
+import { getSettings, useSettings } from "../components/Common/Utils";
+import Logs from "../components/Logs/Logs";
+import Layout from "../components/Common/Layout";
+import useStyles from "../assets/jss/components/layout";
 
 function Home(): ReactElement {
   const [settings, setSettings] = useSettings();
@@ -33,7 +33,7 @@ function Home(): ReactElement {
       description="Frontend for System Bridge"
     >
       <Container className={classes.main} component="article" maxWidth="xl">
-        <Settings />
+        <Logs />
       </Container>
     </Layout>
   );

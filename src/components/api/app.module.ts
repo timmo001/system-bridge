@@ -2,8 +2,8 @@ import { APP_GUARD } from "@nestjs/core";
 import { join } from "path";
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { WinstonModule } from "nest-winston";
 
+import { appDataDirectory } from "../common";
 import { AudioModule } from "./audio/audio.module";
 import { BatteryModule } from "./battery/battery.module";
 import { BluetoothModule } from "./bluetooth/bluetooth.module";
@@ -12,7 +12,7 @@ import { CpuModule } from "./cpu/cpu.module";
 import { DisplayModule } from "./display/display.module";
 import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
-import { appDataDirectory } from "../common";
+import { FrontendModule } from "./frontend/frontend.module";
 import { GraphicsModule } from "./graphics/graphics.module";
 import { HttpAuthGuard } from "./httpAuth.guard";
 import { InformationModule } from "./information/information.module";
@@ -45,6 +45,7 @@ import { UsbModule } from "./usb/usb.module";
     DisplayModule,
     EventsModule,
     FilesystemModule,
+    FrontendModule,
     GraphicsModule,
     InformationModule,
     KeyboardModule,

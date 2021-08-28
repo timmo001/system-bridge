@@ -19,9 +19,9 @@ import {
 import { mdiRestart } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import { useSettings } from "components/Common/Utils";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import Section from "components/Settings/Section";
+import { useSettings } from "../Common/Utils";
+import { WebSocketConnection } from "../Common/WebSocket";
+import Section from "../Settings/Section";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
