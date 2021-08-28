@@ -27,8 +27,8 @@ function Layout(props: LayoutProps): ReactElement {
       <Head>
         <title>
           {props.title
-            ? `${props.title} - Material Frontend Template`
-            : `Material Frontend Template`}
+            ? `${props.title} - System Bridge`
+            : `System Bridge`}
         </title>
         <link rel="canonical" href={props.url} />
         <meta
@@ -38,7 +38,7 @@ function Layout(props: LayoutProps): ReactElement {
               ? `${props.description}`
               : props.title
               ? `${props.title} - Frontend`
-              : `Material Frontend Template`
+              : `System Bridge`
           }
         />
         <meta
@@ -46,13 +46,13 @@ function Layout(props: LayoutProps): ReactElement {
           content={
             props.keywords
               ? `${props.keywords}`
-              : `material, frontend, template, material-ui, nextjs, reactjs, react, developer`
+              : `system-bridge, system, bridge, typescript`
           }
         />
       </Head>
       <Header
         {...props}
-        brand="Frontend"
+        brand="System Bridge"
         changeColorOnScroll={{
           height: 200,
           color: "primary",

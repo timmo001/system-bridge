@@ -16,8 +16,8 @@ function Home(): ReactElement {
     <Layout
       classes={classes}
       title="Home"
-      url="https://material-frontend-template.timmo.dev"
-      description="A Frontend Template written using Material UI Next.js/React in TypeScript.">
+      url="https://system-bridge.timmo.dev"
+      description="Frontend for System Bridge">
       <Container className={classes.main} component="article" maxWidth="xl">
         <Card>
           <CardContent>
