@@ -1,11 +1,15 @@
 import { ReactElement } from "react";
+import dynamic from "next/dynamic";
 import {
   CardContent,
   CircularProgress,
   Grid,
   Typography,
 } from "@material-ui/core";
-import ReactJson from "react-json-view";
+
+const BrowserReactJsonView = dynamic(() => import("react-json-view"), {
+  ssr: false,
+});
 
 function DataItemsComponent({
   name,
@@ -20,7 +24,7 @@ function DataItemsComponent({
         {name}
       </Typography>
       {data ? (
-        <ReactJson
+        <BrowserReactJsonView
           src={data}
           displayDataTypes={false}
           displayObjectSize
