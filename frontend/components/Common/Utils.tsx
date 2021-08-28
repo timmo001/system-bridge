@@ -10,7 +10,7 @@ import { ParsedUrlQuery } from "querystring";
 import axios from "axios";
 
 import { Configuration as ConfigurationEntity } from "assets/entities/configuration.entity";
-import { defaultConfiguration } from "components/Configuration/defaultConfiguration";
+import { defaultConfiguration } from "assets/data/defaultSettings";
 import { Setting } from "assets/entities/settings.entity";
 
 export function handleCopyToClipboard(value: string) {

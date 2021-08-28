@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { useRouter } from "next/dist/client/router";
 import { v4 as uuidv4 } from "uuid";
 import {
   createStyles,
@@ -28,10 +29,10 @@ import Icon from "@mdi/react";
 import {
   Configuration,
   ConfigurationItem,
-} from "../../assets/entities/configuration.entity";
-import { handleCopyToClipboard, parsedQuery, useSettings } from "../Utils";
-import { SectionProps } from "./Section";
-import { Setting } from "../../assets/entities/settings.entity";
+} from "assets/entities/configuration.entity";
+import { handleCopyToClipboard, useSettings } from "components/Common/Utils";
+import { SectionProps } from "components/Settings/Section";
+import { Setting } from "assets/entities/settings.entity";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -59,7 +60,7 @@ function Item({
 }: ItemProps): ReactElement {
   const [settings, setSettings] = useSettings();
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   const [originalItem, setOriginalItem] = useState<ConfigurationItem>();
   const [item, setItem] = useState<ConfigurationItem>();

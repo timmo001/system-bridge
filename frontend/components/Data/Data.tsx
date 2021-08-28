@@ -1,4 +1,5 @@
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
   Container,
@@ -11,11 +12,10 @@ import {
 } from "@material-ui/core";
 
 import { Event } from "../../assets/entities/event.entity";
-import { parsedQuery, useSettings } from "../Utils";
-import { WebSocketConnection } from "../Common/WebSocket";
-import DataItems from "./DataItems";
-import Footer from "../Common/Footer";
-import Header from "../Common/Header";
+import { useSettings } from "components/Common/Utils";
+import { WebSocketConnection } from "components/Common/WebSocket";
+import DataItems from "components/Data/DataItems";
+import Footer from "components/Common/Footer";
 
 const items = [
   "audio",
@@ -79,11 +79,14 @@ function DataComponent(): ReactElement {
   const [settings] = useSettings();
   const [tab, setTab] = useState<number>(0);
 
-  const handleChangeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleChangeTab = (
+    _event: React.ChangeEvent<any>,
+    newValue: number
+  ) => {
     setTab(newValue);
   };
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   const eventHandler = useCallback(({ name, data }: Event) => {
     if (name.includes("data-")) {
@@ -162,7 +165,6 @@ function DataComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Header name="Data" />
       <Grid container direction="column" spacing={2} alignItems="stretch">
         {!settings ? (
           <Grid container direction="row" justifyContent="center">

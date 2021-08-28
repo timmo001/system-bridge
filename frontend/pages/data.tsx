@@ -4,8 +4,8 @@ import { useRouter } from "next/dist/client/router";
 import { Container } from "@material-ui/core";
 
 import { getSettings, useSettings } from "components/Common/Utils";
+import Data from "components/Data/Data";
 import Layout from "components/Common/Layout";
-import Settings from "components/Settings/Settings";
 import useStyles from "assets/jss/components/layout";
 
 function Home(): ReactElement {
@@ -33,7 +33,7 @@ function Home(): ReactElement {
       description="Frontend for System Bridge"
     >
       <Container className={classes.main} component="article" maxWidth="xl">
-        <Settings />
+        <Data />
       </Container>
     </Layout>
   );

@@ -1,11 +1,5 @@
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
   Container,
@@ -20,9 +14,7 @@ import { Icon } from "@mdi/react";
 import { mdiRefresh } from "@mdi/js";
 import axios from "axios";
 
-import { parsedQuery, useSettings } from "../Utils";
-import Footer from "../Common/Footer";
-import Header from "../Common/Header";
+import { useSettings } from "components/Common/Utils";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -56,7 +48,7 @@ function LogsComponent(): ReactElement {
 
   const refBottom = useRef<any>(null);
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   const handleSetup = useCallback(async () => {
     console.log("Setup Logs");
@@ -85,7 +77,6 @@ function LogsComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Header name="Logs" />
       {!settings ? (
         <Grid container direction="row" justifyContent="center">
           <CircularProgress />
@@ -105,7 +96,6 @@ function LogsComponent(): ReactElement {
           </Grid>
         </>
       )}
-      <Footer />
     </Container>
   );
 }

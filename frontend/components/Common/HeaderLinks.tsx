@@ -1,28 +1,110 @@
 import React, { ReactElement } from "react";
 import Link from "next/link";
 import clsx from "clsx";
+import { useRouter } from "next/dist/client/router";
 import { Button, List, ListItem, Tooltip } from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
-import { mdiInformation } from "@mdi/js";
+import {
+  mdiFileDocumentMultiple,
+  mdiForumOutline,
+  mdiGithub,
+  mdiNotebookEditOutline,
+} from "@mdi/js";
 import Icon from "@mdi/react";
 
 import useStyles from "assets/jss/components/headerLinks";
 
 function HeaderLinks(): ReactElement {
+  const query = useRouter().query;
+
   const classes = useStyles();
   const theme = useTheme();
   return (
     <List className={classes.list}>
       <ListItem className={classes.listItem}>
-        <Link href="/about">
+        <Link href={{ pathname: "/data", query }}>
           <Button variant="text" className={classes.navLink}>
-            <span className={classes.listItemText}>About</span>
+            <span className={classes.listItemText}>Data</span>
+          </Button>
+        </Link>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Link href={{ pathname: "/settings", query }}>
+          <Button variant="text" className={classes.navLink}>
+            <span className={classes.listItemText}>Settings</span>
+          </Button>
+        </Link>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Link href={{ pathname: "/logs", query }}>
+          <Button variant="text" className={classes.navLink}>
+            <span className={classes.listItemText}>Logs</span>
           </Button>
         </Link>
       </ListItem>
       <ListItem className={clsx(classes.listItem, classes.divider)} />
       <ListItem className={classes.listItem}>
-        <Tooltip title="GitHub" classes={{ tooltip: classes.tooltip }}>
+        <Tooltip
+          title="Suggest a Feature / Report a Bug"
+          classes={{ tooltip: classes.tooltip }}
+        >
+          <Button
+            variant="text"
+            className={classes.navLink}
+            href="https://github.com/timmo001/system-bridge/issues"
+            target="_blank"
+          >
+            <Icon
+              color={theme.palette.text.primary}
+              path={mdiFileDocumentMultiple}
+              size={1}
+            />
+          </Button>
+        </Tooltip>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Tooltip
+          title="Discussions/Help"
+          classes={{ tooltip: classes.tooltip }}
+        >
+          <Button
+            variant="text"
+            className={classes.navLink}
+            href="https://github.com/timmo001/system-bridge/discussions"
+            target="_blank"
+          >
+            <Icon
+              color={theme.palette.text.primary}
+              path={mdiForumOutline}
+              size={1}
+            />
+          </Button>
+        </Tooltip>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Tooltip
+          title="Contribute to the Website/Documentation"
+          classes={{ tooltip: classes.tooltip }}
+        >
+          <Button
+            variant="text"
+            className={classes.navLink}
+            href="https://github.com/timmo001/system-bridge-site"
+            target="_blank"
+          >
+            <Icon
+              color={theme.palette.text.primary}
+              path={mdiNotebookEditOutline}
+              size={1}
+            />
+          </Button>
+        </Tooltip>
+      </ListItem>
+      <ListItem className={classes.listItem}>
+        <Tooltip
+          title="Contribute to the Application"
+          classes={{ tooltip: classes.tooltip }}
+        >
           <Button
             variant="text"
             className={classes.navLink}
@@ -30,13 +112,13 @@ function HeaderLinks(): ReactElement {
             target="_blank"
           >
             <Icon
-              path={mdiInformation}
               color={theme.palette.text.primary}
+              path={mdiGithub}
               size={1}
             />
           </Button>
         </Tooltip>
-      </ListItem>
+      </ListItem>{" "}
     </List>
   );
 }

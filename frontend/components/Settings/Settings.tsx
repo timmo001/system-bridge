@@ -1,4 +1,5 @@
-import { ReactElement, useMemo, useState } from "react";
+import { ReactElement, useState } from "react";
+import { useRouter } from "next/dist/client/router";
 import {
   Button,
   CircularProgress,
@@ -18,12 +19,9 @@ import {
 import { mdiRestart } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import { parsedQuery } from "../Utils";
-import { useSettings } from "../Utils";
-import { WebSocketConnection } from "../Common/WebSocket";
-import Footer from "../Common/Footer";
-import Header from "../Common/Header";
-import Section from "./Section";
+import { useSettings } from "components/Common/Utils";
+import { WebSocketConnection } from "components/Common/WebSocket";
+import Section from "components/Settings/Section";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -55,11 +53,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function ConfigurationComponent(): ReactElement {
+function Settings(): ReactElement {
   const [restartRequired, setRestartRequired] = useState<boolean>(false);
   const [settings] = useSettings();
 
-  const query = useMemo(() => parsedQuery, []);
+  const query = useRouter().query;
 
   function handleServerRestartRequired(): void {
     setRestartRequired(true);
@@ -82,7 +80,6 @@ function ConfigurationComponent(): ReactElement {
 
   return (
     <Container className={classes.root} maxWidth="lg">
-      <Header name="Settings" />
       <Grid container direction="column" spacing={2} alignItems="stretch">
         <Grid container direction="row" item xs={12}>
           <Grid item xs={4} className={classes.disabled}>
@@ -138,9 +135,8 @@ function ConfigurationComponent(): ReactElement {
           ))
         )}
       </Grid>
-      <Footer />
     </Container>
   );
 }
 
-export default ConfigurationComponent;
+export default Settings;
