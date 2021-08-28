@@ -61,10 +61,9 @@ async function setupTray(): Promise<void> {
 
         const url = `${
           process.env.NODE_ENV === "development"
-            ? "http://localhost:3000/"
-            : `http://localhost:9170/app`
+            ? "http://localhost:3000/settings"
+            : `http://localhost:9170/app/settings`
         }?${queryString.stringify({
-          id: "configuration",
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
@@ -87,10 +86,9 @@ async function setupTray(): Promise<void> {
 
         const url = `${
           process.env.NODE_ENV === "development"
-            ? "http://localhost:3000/"
-            : `http://localhost:9170/app`
+            ? "http://localhost:3000/data"
+            : `http://localhost:9170/app/data`
         }?${queryString.stringify({
-          id: "data",
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
@@ -176,10 +174,9 @@ async function setupTray(): Promise<void> {
 
             const url = `${
               process.env.NODE_ENV === "development"
-                ? "http://localhost:3000/"
-                : `http://localhost:9170/app`
+                ? "http://localhost:3000/logs"
+                : `http://localhost:9170/app/logs`
             }?${queryString.stringify({
-              id: "logs",
               apiKey: settings["network-apiKey"],
               apiPort: settings["network-apiPort"] || 9170,
               wsPort: settings["network-wsPort"] || 9172,

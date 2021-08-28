@@ -75,6 +75,7 @@ function Footer(): ReactElement {
           </a>
           .
         </Typography>
+        <Box className={classes.spacer} />
       </Grid>
     </>
   );

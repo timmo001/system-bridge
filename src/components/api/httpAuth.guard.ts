@@ -29,10 +29,9 @@ export class HttpAuthGuard implements CanActivate {
         logger.info(
           `You can access settings for the app via: ${
             process.env.NODE_ENV === "development"
-              ? "http://localhost:3000/"
-              : `http://localhost:9170/app`
+              ? "http://localhost:3000/settings"
+              : `http://localhost:9170/app/settings`
           }?${queryString.stringify({
-            id: "configuration",
             apiKey: this.apiKey,
             apiPort: 9170,
             wsPort: 9172,
@@ -41,10 +40,9 @@ export class HttpAuthGuard implements CanActivate {
         logger.info(
           `You can view data for the app via: ${
             process.env.NODE_ENV === "development"
-              ? "http://localhost:3000/"
-              : `http://localhost:9170/app`
+              ? "http://localhost:3000/data"
+              : `http://localhost:9170/app/data`
           }?${queryString.stringify({
-            id: "data",
             apiKey: this.apiKey,
             apiPort: 9170,
             wsPort: 9172,

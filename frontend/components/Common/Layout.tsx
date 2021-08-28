@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import Head from "next/head";
+import { Container } from "@material-ui/core";
 import { ClassNameMap } from "@material-ui/styles";
-import Container from "@material-ui/core/Container";
 
 import Footer from "components/Common/Footer";
 import Header from "components/Common/Header";
