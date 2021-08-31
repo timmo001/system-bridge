@@ -20,7 +20,7 @@
     "react-scripts": "4.0.3",
     "rect-scaler": "1.0.0",
     "typeface-roboto": "1.1.13",
-    "typescript": "4.3.5",
+    "typescript": "4.4.2",
     "uuid": "8.3.2",
     "web-vitals": "2.1.0"
   },
