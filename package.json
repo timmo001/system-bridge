@@ -64,7 +64,7 @@
     "helmet": "4.6.0",
     "loudness": "0.4.1",
     "mqtt": "4.2.8",
-    "nest-winston": "1.5.0",
+    "nest-winston": "1.6.0",
     "node-notifier": "10.0.0",
     "open": "8.2.1",
     "peer": "0.6.1",

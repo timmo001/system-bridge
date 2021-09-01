@@ -2800,7 +2800,7 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fast-safe-stringify@2.0.8, fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
+fast-safe-stringify@2.0.8, fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7, fast-safe-stringify@^2.0.8:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.8.tgz#dc2af48c46cf712b683e849b2bbd446b32de936f"
   integrity sha512-lXatBjf3WPjmWD6DpIZxkeSsCOwqI0maYMpgDlx8g4U2qi4lbjA9oH/HD2a87G+KfsUmo5WbJFmqBZlPxtptag==
@@ -4498,13 +4498,13 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nest-winston@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.5.0.tgz#2a1d8c5e7f7abc933f10cd80e05548d03b63684b"
-  integrity sha512-hjJOZrzLbHe5BsN00OIi9Y7lT3ZMT4HX/1SbA5oKS0SkbjvvwxavpUz3N9itL6Oznh0B7JVjUXZLLK8aGULL0w==
+nest-winston@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.6.0.tgz#6eb42afa204102ff7d471a8fd093da0dc13d24f4"
+  integrity sha512-hH6G/wYqW6IslYPJdtmbws7A3UhI/YwLd2aClY4m1OHgI7i7Ikg4ZJVXHAjr7UWXR8Vd4ZFg+YIihw1GIxzbWw==
   dependencies:
     cli-color "^2.0.0"
-    fast-safe-stringify "^2.0.7"
+    fast-safe-stringify "^2.0.8"
 
 next-tick@1, next-tick@^1.1.0:
   version "1.1.0"
