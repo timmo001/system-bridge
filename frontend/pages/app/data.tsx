@@ -16,7 +16,8 @@ function PageData(): ReactElement {
   useEffect(() => {
     try {
       (async () => {
-        if (!settings) setSettings(await getSettings(query));
+        if (!settings && query && query.apiKey)
+          setSettings(await getSettings(query));
       })();
     } catch (e) {
       console.warn("Error getting settings:", e);

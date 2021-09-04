@@ -69,6 +69,7 @@ export function usePrevious(value: any): unknown {
 export async function getSettings(
   query: ParsedUrlQuery
 ): Promise<ConfigurationEntity | undefined> {
+  if (!query || !query.apiKey) return defaultConfiguration;
   const response = await axios.get<Setting[]>(
     `http://${query.apiHost || "localhost"}:${query.apiPort || 9170}/settings`,
     {
