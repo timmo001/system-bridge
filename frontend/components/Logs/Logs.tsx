@@ -67,7 +67,7 @@ function LogsComponent(): ReactElement {
   }, [query.apiHost, query.apiPort, query.apiKey]);
 
   useEffect(() => {
-    if (!setup) {
+    if (!setup && query && query.apiKey) {
       setSetup(true);
       handleSetup();
     }
