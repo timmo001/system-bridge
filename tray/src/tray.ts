@@ -59,13 +59,13 @@ async function setupTray(): Promise<void> {
         const settings = await getSettingsObject(connection);
         await connection.close();
 
-        const url = `http://localhost:9170/app/settings?${queryString.stringify(
-          {
-            apiKey: settings["network-apiKey"],
-            apiPort: settings["network-apiPort"] || 9170,
-            wsPort: settings["network-wsPort"] || 9172,
-          }
-        )}`;
+        const url = `http://localhost:${
+          process.env.node_env === "development" ? 3000 : 9170
+        }/app/settings?${queryString.stringify({
+          apiKey: settings["network-apiKey"],
+          apiPort: settings["network-apiPort"] || 9170,
+          wsPort: settings["network-wsPort"] || 9172,
+        })}`;
 
         logger.info(`Open Settings: ${url}`);
         open(url);
@@ -82,7 +82,9 @@ async function setupTray(): Promise<void> {
         const settings = await getSettingsObject(connection);
         await connection.close();
 
-        const url = `http://localhost:9170/app/data?${queryString.stringify({
+        const url = `http://localhost:${
+          process.env.node_env === "development" ? 3000 : 9170
+        }/app/data?${queryString.stringify({
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
@@ -166,13 +168,13 @@ async function setupTray(): Promise<void> {
             const settings = await getSettingsObject(connection);
             await connection.close();
 
-            const url = `http://localhost:9170/app/logs?${queryString.stringify(
-              {
-                apiKey: settings["network-apiKey"],
-                apiPort: settings["network-apiPort"] || 9170,
-                wsPort: settings["network-wsPort"] || 9172,
-              }
-            )}`;
+            const url = `http://localhost:${
+              process.env.node_env === "development" ? 3000 : 9170
+            }/app/logs?${queryString.stringify({
+              apiKey: settings["network-apiKey"],
+              apiPort: settings["network-apiPort"] || 9170,
+              wsPort: settings["network-wsPort"] || 9172,
+            })}`;
 
             logger.info(`Open Logs: ${url}`);
             open(url);
