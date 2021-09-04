@@ -19,7 +19,7 @@
   "license": "MIT",
   "bin": "dist/main.js",
   "scripts": {
-    "build": "yarn build:app && yarn build:frontend && yarn build:tray",
+    "build": "yarn build:frontend && yarn build:app && yarn build:tray",
     "build:app": "rimraf dist && nest build",
     "build:frontend": "cd frontend && yarn build",
     "build:tray": "cd tray && yarn build",
