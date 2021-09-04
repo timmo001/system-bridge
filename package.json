@@ -154,7 +154,6 @@
   "pkg": {
     "assets": [
       "frontend/**/*",
-      "frontend/.next/**/*",
       "node_modules/**/*",
       "public/**/*"
     ],

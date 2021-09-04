@@ -1,7 +1,22 @@
 {
   "name": "system-bridge-frontend",
   "version": "2.6.0",
+  "description": "A bridge for your systems",
   "private": true,
+  "author": {
+    "name": "Aidan Timson <Timmo>",
+    "email": "contact@timmo.xyz",
+    "url": "https://system-bridge.timmo.dev"
+  },
+  "keywords": [
+    "system",
+    "bridge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timmo001/system-bridge"
+  },
+  "license": "MIT",
   "scripts": {
     "build": "next build",
     "eslint": "eslint --ext .ts --ext .tsx --color ./",
@@ -27,7 +42,6 @@
     "rect-scaler": "1.0.0",
     "uuid": "8.3.2"
   },
-  "license": "MIT",
   "devDependencies": {
     "@types/react": "17.0.19",
     "@types/react-dom": "17.0.9",

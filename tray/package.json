@@ -40,7 +40,7 @@
     "assets": [
       "node_modules/**/*"
     ],
-    "scripts": "dist/tray/src/tray.js",
+    "scripts": "dist/tray.js",
     "targets": [
       "host"
     ]
