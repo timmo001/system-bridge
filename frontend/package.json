@@ -1,10 +1,6 @@
 {
   "name": "system-bridge-frontend",
-<<<<<<< HEAD
   "version": "2.6.0",
-=======
-  "version": "1.0.0",
->>>>>>> ec30169 (Move back to own directory)
   "private": true,
   "scripts": {
     "build": "next build",
