@@ -30,7 +30,7 @@
     "rimraf": "3.0.2",
     "systray2": "2.1.2",
     "typeorm": "0.2.37",
-    "ws": "7.5.3"
+    "ws": "7.5.4"
   },
   "devDependencies": {
     "pkg": "5.3.1",

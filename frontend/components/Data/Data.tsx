@@ -155,7 +155,7 @@ function DataComponent(): ReactElement {
   );
 
   useEffect(() => {
-    if (!setup) {
+    if (!setup && query && query.apiKey) {
       setSetup(true);
       handleSetup(Number(query.wsPort) || 9172, String(query.apiKey));
     }
