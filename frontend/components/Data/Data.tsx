@@ -15,7 +15,6 @@ import { Event } from "../../assets/entities/event.entity";
 import { useSettings } from "../Common/Utils";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";
-import Footer from "../Common/Footer";
 
 const items = [
   "audio",
@@ -231,7 +230,6 @@ function DataComponent(): ReactElement {
           </Grid>
         )}
       </Grid>
-      <Footer />
     </Container>
   );
 }
