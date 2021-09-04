@@ -20,7 +20,8 @@
   "bin": "dist/tray.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "yarn build && node dist/tray.js"
+    "start": "yarn build && node dist/tray.js",
+    "start:prod": "node dist/tray.js"
   },
   "dependencies": {
     "better-sqlite3": "7.4.1",

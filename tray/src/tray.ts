@@ -202,7 +202,8 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        process.env.NODE_ENV === "development"
+        process.env.NODE_ENV === "development" ||
+          process.env.SB_USE_CWD === "true"
           ? process.cwd()
           : process.execPath.substring(
               0,
@@ -210,7 +211,10 @@ async function setupTray(): Promise<void> {
                 ? process.execPath.lastIndexOf("\\")
                 : process.execPath.lastIndexOf("/")
             ),
-        process.env.NODE_ENV === "development" ? "../public/" : "./",
+        process.env.NODE_ENV === "development" ||
+          process.env.SB_USE_CWD === "true"
+          ? "../public/"
+          : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"
