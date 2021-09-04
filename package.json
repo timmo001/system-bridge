@@ -153,12 +153,16 @@
   },
   "pkg": {
     "assets": [
+      "frontend/**/*",
       "frontend/.next/**/*",
       "node_modules/**/*",
       "public/**/*"
     ],
     "outputPath": "out",
-    "scripts": "dist/main.js",
+    "scripts": [
+      "dist/main.js",
+      "frontend/.next/**/*.js"
+    ],
     "targets": [
       "host"
     ]
