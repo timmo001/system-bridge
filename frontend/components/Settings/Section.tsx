@@ -3,7 +3,7 @@ import { Grid, List, Paper, Typography } from "@material-ui/core";
 
 import { ConfigurationSection } from "../../assets/entities/configuration.entity";
 import { useSettings } from "../Common/Utils";
-import Item from "../Settings/Item";
+import Item from "./Item";
 
 export interface SectionProps {
   handleServerRestartRequired: () => void;

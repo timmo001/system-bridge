@@ -1,12 +1,11 @@
 {
   "exclude": [
-    ".next",
     "**/*spec.ts",
     "dist",
+    "frontend",
     "next-env.d.ts",
     "node_modules",
     "public",
-    "src/components/frontend",
     "test",
     "tray"
   ],

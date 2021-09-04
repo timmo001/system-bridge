@@ -11,7 +11,7 @@ export class FrontendService implements OnModuleInit {
     try {
       this.server = createServer({
         dev: process.env.NODE_ENV === "development",
-        dir: "./src/components/frontend",
+        dir: "./frontend",
       });
       await this.server.prepare();
     } catch (error) {
