@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { NextServer } from "next/dist/server/next";
 import { Request, Response } from "express";
-import createServer from "next";
+import next from "next";
 
 @Injectable()
 export class FrontendService implements OnModuleInit {
@@ -9,8 +9,8 @@ export class FrontendService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     try {
-      this.server = createServer({
-        dev: process.env.NODE_ENV === "development",
+      this.server = next({
+        dev: false,
         dir: "./frontend",
       });
       await this.server.prepare();
