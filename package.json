@@ -153,7 +153,8 @@
   },
   "pkg": {
     "assets": [
-      "frontend/**/*",
+      "frontend/.next/**/*",
+      "frontend/node_modules/**/*",
       "node_modules/**/*",
       "public/**/*"
     ],
