@@ -29,6 +29,10 @@ export async function getInformation(
       headers: { "api-key": query.apiKey },
     }
   );
+  if (response.status > 204 || !Array.isArray(response.data)) {
+    console.error(response);
+    return undefined;
+  }
   return response.data;
 }
 
@@ -42,6 +46,10 @@ export async function getSettings(
       headers: { "api-key": query.apiKey },
     }
   );
+  if (response.status > 204 || !Array.isArray(response.data)) {
+    console.error(response);
+    return defaultConfiguration;
+  }
   const s: ConfigurationEntity = defaultConfiguration;
   Object.keys(s).forEach((sectionKey: string) => {
     Object.keys(s[sectionKey].items).forEach((itemKey: string) => {
