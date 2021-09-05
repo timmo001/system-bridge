@@ -138,14 +138,17 @@ export async function startServer(): Promise<void> {
             },
           },
           (error: any, service: { fullname: any; port: any }) => {
+            const { logger } = new Logger("API");
             if (error) logger.warn(`MDNS error: ${error}`);
             else
               logger.info(
                 `Sent mdns advertisement on port ${service.fullname}:${service.port}`
               );
+            logger.close();
           }
         );
       } catch (error) {
+        const { logger } = new Logger("API");
         logger.warn(`MDNS error caught: ${error.message}`);
       }
     }
