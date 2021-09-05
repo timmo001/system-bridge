@@ -8,14 +8,17 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 
 import { CreateSettingDto } from "./dto/create-setting.dto";
+import { HttpAuthGuard } from "../httpAuth.guard";
 import { Setting } from "./entities/setting.entity";
 import { SettingsService } from "./settings.service";
 import { UpdateSettingDto } from "./dto/update-setting.dto";
 
 @Controller("settings")
+@UseGuards(HttpAuthGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 

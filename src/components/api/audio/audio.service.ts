@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { audio, Systeminformation } from "systeminformation";
+import { audio } from "systeminformation";
 
 import { Audio } from "./entities/audio.entity";
 import { getCurrent, muted, volume } from "./data";

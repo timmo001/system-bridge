@@ -4,12 +4,15 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 
 import { CommandService } from "./command.service";
 import { CreateCommandDto } from "./dto/create-command.dto";
+import { HttpAuthGuard } from "../httpAuth.guard";
 
 @Controller("command")
+@UseGuards(HttpAuthGuard)
 export class CommandController {
   constructor(private readonly commandService: CommandService) {}
 

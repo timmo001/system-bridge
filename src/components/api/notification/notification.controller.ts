@@ -1,9 +1,11 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 
-import { NotificationService } from "./notification.service";
 import { CreateNotificationDto } from "./dto/create-notification.dto";
+import { HttpAuthGuard } from "../httpAuth.guard";
+import { NotificationService } from "./notification.service";
 
 @Controller("notification")
+@UseGuards(HttpAuthGuard)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 

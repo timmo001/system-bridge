@@ -13,6 +13,7 @@ import queryString from "query-string";
 import { getApiKey } from "../common";
 import { Logger } from "../logger";
 import { Setting } from "./settings/entities/setting.entity";
+
 @Injectable()
 export class HttpAuthGuard implements CanActivate {
   private apiKey: string;
@@ -27,28 +28,22 @@ export class HttpAuthGuard implements CanActivate {
         const { logger } = new Logger();
         logger.info(`Your api-key is: ${this.apiKey}`);
         logger.info(
-          `You can access settings for the app via: ${
-            process.env.NODE_ENV === "development"
-              ? "http://localhost:3000/"
-              : `http://localhost:9170/app`
-          }?${queryString.stringify({
-            id: "configuration",
-            apiKey: this.apiKey,
-            apiPort: 9170,
-            wsPort: 9172,
-          })}`
+          `You can access settings for the app via: http://localhost:9170/app/settings?${queryString.stringify(
+            {
+              apiKey: this.apiKey,
+              apiPort: 9170,
+              wsPort: 9172,
+            }
+          )}`
         );
         logger.info(
-          `You can view data for the app via: ${
-            process.env.NODE_ENV === "development"
-              ? "http://localhost:3000/"
-              : `http://localhost:9170/app`
-          }?${queryString.stringify({
-            id: "data",
-            apiKey: this.apiKey,
-            apiPort: 9170,
-            wsPort: 9172,
-          })}`
+          `You can view data for the app via: http://localhost:9170/app/data?${queryString.stringify(
+            {
+              apiKey: this.apiKey,
+              apiPort: 9170,
+              wsPort: 9172,
+            }
+          )}`
         );
       }
     }, 4000);
@@ -65,6 +60,8 @@ export class HttpAuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
-    return request.headers["api-key"] === this.apiKey;
+    const apiKey = request.headers["api-key"] || request.query["apiKey"];
+
+    return apiKey === this.apiKey;
   }
 }

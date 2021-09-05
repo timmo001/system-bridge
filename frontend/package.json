@@ -1,66 +1,54 @@
 {
   "name": "system-bridge-frontend",
   "version": "2.6.0",
+  "description": "A bridge for your systems",
   "private": true,
-  "homepage": ".",
+  "author": {
+    "name": "Aidan Timson <Timmo>",
+    "email": "contact@timmo.xyz",
+    "url": "https://system-bridge.timmo.dev"
+  },
+  "keywords": [
+    "system",
+    "bridge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timmo001/system-bridge"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "next build",
+    "eslint": "eslint --ext .ts --ext .tsx --color ./",
+    "start": "next start",
+    "start:dev": "next dev"
+  },
   "dependencies": {
+    "@fontsource/roboto": "4.5.0",
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
+    "@material-ui/lab": "4.0.0-alpha.60",
+    "@material-ui/styles": "4.11.4",
     "@mdi/js": "5.9.55",
     "@mdi/react": "1.5.0",
-    "axios": "0.21.1",
+    "axios": "0.21.2",
+    "clsx": "1.1.1",
     "lodash": "4.17.21",
-    "moment": "2.29.1",
     "peerjs": "1.3.2",
-    "query-string": "7.0.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
     "react-json-view": "1.21.3",
-    "react-router-dom": "5.2.1",
-    "react-scripts": "4.0.3",
     "rect-scaler": "1.0.0",
-    "typeface-roboto": "1.1.13",
-    "typescript": "4.3.5",
-    "uuid": "8.3.2",
-    "web-vitals": "2.1.0"
+    "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "5.14.1",
-    "@testing-library/react": "12.0.0",
-    "@testing-library/user-event": "13.2.1",
-    "@types/jest": "27.0.1",
-    "@types/lodash": "^4.14.172",
-    "@types/node": "16.7.10",
     "@types/react": "17.0.19",
     "@types/react-dom": "17.0.9",
-    "@types/react-router-dom": "5.1.8",
-    "@types/uuid": "8.3.1",
-    "cross-env": "7.0.3",
-    "jest-junit": "12.2.0"
+    "eslint-import-resolver-typescript": "2.4.0",
+    "eslint-plugin-import": "2.24.2",
+    "typescript": "4.4.2"
   },
-  "scripts": {
-    "start": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts start",
-    "build": "cross-env SKIP_PREFLIGHT_CHECK=true CI=false react-scripts build",
-    "test": "react-scripts test",
-    "test:junit": "react-scripts test --coverage --ci --reporters=default --reporters=jest-junit",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "peerDependencies": {
+    "next": "11.1.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   }
 }

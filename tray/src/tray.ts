@@ -59,12 +59,9 @@ async function setupTray(): Promise<void> {
         const settings = await getSettingsObject(connection);
         await connection.close();
 
-        const url = `${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000/"
-            : `http://localhost:9170/app`
-        }?${queryString.stringify({
-          id: "configuration",
+        const url = `http://localhost:${
+          process.env.node_env === "development" ? 3000 : 9170
+        }/app/settings?${queryString.stringify({
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
@@ -85,12 +82,9 @@ async function setupTray(): Promise<void> {
         const settings = await getSettingsObject(connection);
         await connection.close();
 
-        const url = `${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000/"
-            : `http://localhost:9170/app`
-        }?${queryString.stringify({
-          id: "data",
+        const url = `http://localhost:${
+          process.env.node_env === "development" ? 3000 : 9170
+        }/app/data?${queryString.stringify({
           apiKey: settings["network-apiKey"],
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
@@ -174,12 +168,9 @@ async function setupTray(): Promise<void> {
             const settings = await getSettingsObject(connection);
             await connection.close();
 
-            const url = `${
-              process.env.NODE_ENV === "development"
-                ? "http://localhost:3000/"
-                : `http://localhost:9170/app`
-            }?${queryString.stringify({
-              id: "logs",
+            const url = `http://localhost:${
+              process.env.node_env === "development" ? 3000 : 9170
+            }/app/logs?${queryString.stringify({
               apiKey: settings["network-apiKey"],
               apiPort: settings["network-apiPort"] || 9170,
               wsPort: settings["network-wsPort"] || 9172,
@@ -213,7 +204,8 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        process.env.NODE_ENV === "development"
+        process.env.NODE_ENV === "development" ||
+          process.env.SB_USE_CWD === "true"
           ? process.cwd()
           : process.execPath.substring(
               0,
@@ -221,7 +213,10 @@ async function setupTray(): Promise<void> {
                 ? process.execPath.lastIndexOf("\\")
                 : process.execPath.lastIndexOf("/")
             ),
-        process.env.NODE_ENV === "development" ? "../public/" : "./",
+        process.env.NODE_ENV === "development" ||
+          process.env.SB_USE_CWD === "true"
+          ? "../public/"
+          : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"

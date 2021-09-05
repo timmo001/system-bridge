@@ -6,13 +6,16 @@ import {
   HttpStatus,
   Param,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 
 import { Audio } from "./entities/audio.entity";
 import { AudioService } from "./audio.service";
+import { HttpAuthGuard } from "../httpAuth.guard";
 import { UpdateAudioId, UpdateAudioDto } from "./dto/update-audio.dto";
 
 @Controller("audio")
+@UseGuards(HttpAuthGuard)
 export class AudioController {
   constructor(private readonly audioService: AudioService) {}
 
