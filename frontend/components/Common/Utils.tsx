@@ -1,16 +1,10 @@
-import React, {
-  createContext,
-  ReactElement,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
 import { ParsedUrlQuery } from "querystring";
+import { useEffect, useRef } from "react";
 import axios from "axios";
 
 import { Configuration as ConfigurationEntity } from "../../assets/entities/configuration.entity";
 import { defaultConfiguration } from "../../assets/data/defaultSettings";
+import { Information as InformationEntity } from "../../assets/entities/information.entity";
 import { Setting } from "../../assets/entities/settings.entity";
 
 export function handleCopyToClipboard(value: string) {
@@ -23,47 +17,19 @@ export function handleCopyToClipboard(value: string) {
     });
 }
 
-const SettingsContext = createContext<ConfigurationEntity | undefined>(
-  undefined
-);
-const SetSettingsContext = createContext<null | React.Dispatch<
-  React.SetStateAction<ConfigurationEntity | undefined>
->>(null);
-
-export const SettingsProvider = ({
-  children,
-}: {
-  children: ReactElement;
-}): ReactElement => {
-  const [config, setConfig] = useState<ConfigurationEntity>();
-
-  return (
-    <SetSettingsContext.Provider value={setConfig}>
-      <SettingsContext.Provider value={config}>
-        {children}
-      </SettingsContext.Provider>
-    </SetSettingsContext.Provider>
+export async function getInformation(
+  query: ParsedUrlQuery
+): Promise<InformationEntity | undefined> {
+  if (!query || !query.apiKey) return undefined;
+  const response = await axios.get<InformationEntity>(
+    `http://${query.apiHost || "localhost"}:${
+      query.apiPort || 9170
+    }/information`,
+    {
+      headers: { "api-key": query.apiKey },
+    }
   );
-};
-
-export const useSettings = (): [
-  settings: ConfigurationEntity | undefined,
-  setSettings: React.Dispatch<
-    React.SetStateAction<ConfigurationEntity | undefined>
-  >
-] => {
-  const settings = useContext(SettingsContext);
-  const setSettings = useContext(SetSettingsContext);
-  if (setSettings === null) throw new Error(); // this will make setSettings non-null
-  return [settings, setSettings];
-};
-
-export function usePrevious(value: any): unknown {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
+  return response.data;
 }
 
 export async function getSettings(
@@ -107,4 +73,12 @@ export async function getSettings(
     });
   });
   return s;
+}
+
+export function usePrevious(value: any): unknown {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }

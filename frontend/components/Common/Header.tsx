@@ -44,29 +44,6 @@ interface HeaderProps {
 function Header(props: HeaderProps): ReactElement {
   const classes = useStyles();
   const [mobileOpen, setMobileOpen] = useState(false);
-  // const [appInfo, setAppInfo] = useState<ApplicationInfo>();
-
-  // const query = useRouter().query;
-
-  // useEffect(() => {
-  //   if (!appInfo) {
-  //     axios
-  //       .get<ApplicationInfo>(
-  //         `http://${query.apiHost || "localhost"}:${
-  //           query.apiPort || 9170
-  //         }/information`,
-  //         {
-  //           headers: { "api-key": query.apiKey },
-  //         }
-  //       )
-  //       .then((response: AxiosResponse<ApplicationInfo>) => {
-  //         setAppInfo(response.data);
-  //       })
-  //       .catch((error) => {
-  //         console.error(error);
-  //       });
-  //   }
-  // }, [appInfo, setAppInfo, query]);
 
   useEffect(() => {
     if (props.changeColorOnScroll) {

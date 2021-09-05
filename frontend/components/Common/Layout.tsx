@@ -1,8 +1,12 @@
-import React, { ReactElement } from "react";
-import Head from "next/head";
-import { Container } from "@material-ui/core";
+import React, { ReactElement, useEffect } from "react";
 import { ClassNameMap } from "@material-ui/styles";
+import { Container } from "@material-ui/core";
+import { useRouter } from "next/dist/client/router";
+import Head from "next/head";
 
+import { getInformation, getSettings } from "./Utils";
+import { useInformation } from "../Contexts/Information";
+import { useSettings } from "../Contexts/Settings";
 import Footer from "./Footer";
 import Header from "./Header";
 import HeaderLinks from "./HeaderLinks";
@@ -17,6 +21,33 @@ interface LayoutProps {
 }
 
 function Layout(props: LayoutProps): ReactElement {
+  const [information, setInformation] = useInformation();
+  const [settings, setSettings] = useSettings();
+
+  const query = useRouter().query;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!information && query && query.apiKey)
+          setInformation(await getInformation(query));
+      } catch (e) {
+        console.warn("Error getting information:", e);
+      }
+    })();
+  }, [settings, setSettings, query]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!settings && query && query.apiKey)
+          setSettings(await getSettings(query));
+      } catch (e) {
+        console.warn("Error getting settings:", e);
+      }
+    })();
+  }, [settings, setSettings, query]);
+
   const classes = props.classes;
 
   return (

@@ -20,6 +20,7 @@ export const defaultConfiguration: Configuration = {
         defaultValue: false,
         value: null,
         icon: mdiRocketLaunch,
+        containerDisabled: true,
       },
     },
   },
@@ -35,6 +36,7 @@ export const defaultConfiguration: Configuration = {
         icon: mdiProtocol,
         minimum: 1,
         requiresServerRestart: true,
+        containerDisabled: true,
       },
       wsPort: {
         name: "WebSocket Port",
@@ -44,6 +46,7 @@ export const defaultConfiguration: Configuration = {
         icon: mdiProtocol,
         minimum: 1,
         requiresServerRestart: true,
+        containerDisabled: true,
       },
       apiKey: {
         name: "API Key",

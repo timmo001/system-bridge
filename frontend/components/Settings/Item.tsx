@@ -30,9 +30,11 @@ import {
   Configuration,
   ConfigurationItem,
 } from "../../assets/entities/configuration.entity";
-import { handleCopyToClipboard, useSettings } from "../Common/Utils";
+import { handleCopyToClipboard } from "../Common/Utils";
 import { SectionProps } from "./Section";
 import { Setting } from "../../assets/entities/settings.entity";
+import { useInformation } from "components/Contexts/Information";
+import { useSettings } from "../Contexts/Settings";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -58,6 +60,7 @@ function Item({
   itemKey,
   handleServerRestartRequired,
 }: ItemProps): ReactElement {
+  const [information] = useInformation();
   const [settings, setSettings] = useSettings();
 
   const query = useRouter().query;
@@ -137,7 +140,8 @@ function Item({
   const classes = useStyles();
 
   if (!item) return <></>;
-  const { name, description, icon }: ConfigurationItem = item;
+  const { name, description, icon, containerDisabled }: ConfigurationItem =
+    item;
 
   return (
     <ListItem>
@@ -154,6 +158,7 @@ function Item({
         {typeof value === "boolean" ? (
           <Switch
             edge="end"
+            disabled={information.container && containerDisabled}
             defaultChecked={value}
             onChange={handleCheckedChanged}
           />
@@ -215,12 +220,14 @@ function Item({
           <TextField
             type="text"
             defaultValue={value}
+            disabled={information.container && containerDisabled}
             onChange={handleChanged}
           />
         ) : typeof value === "number" ? (
           <TextField
             error={item.minimum ? value < item.minimum : false}
             type="number"
+            disabled={information.container && containerDisabled}
             inputProps={{ minimum: item.minimum }}
             defaultValue={value}
             onChange={handleChanged}

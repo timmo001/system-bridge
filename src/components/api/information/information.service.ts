@@ -42,6 +42,8 @@ export class InformationService {
       const data: Information = {
         address: `http://${osSiInfo.fqdn}:${apiPort}`,
         apiPort,
+        cli: process.env.SB_CLI === "true",
+        container: process.env.SB_CONTAINER === "true",
         fqdn: osSiInfo.fqdn,
         host: osSiInfo.hostname,
         ip: networkInterface.ip4,
