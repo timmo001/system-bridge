@@ -53,7 +53,9 @@ function LogsComponent(): ReactElement {
   const handleSetup = useCallback(async () => {
     console.log("Setup Logs");
     const response = await axios.get<Array<string>>(
-      `http://${query.apiHost || "localhost"}:${query.apiPort || 9170}/logs`,
+      `http://${query.apiHost || window.location.hostname}:${
+        query.apiPort || 9170
+      }/logs`,
       {
         headers: { "api-key": query.apiKey },
       }

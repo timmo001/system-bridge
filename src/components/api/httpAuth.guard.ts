@@ -11,6 +11,7 @@ import { Repository } from "typeorm";
 import queryString from "query-string";
 
 import { getApiKey } from "../common";
+import { InformationService } from "./information/information.service";
 import { Logger } from "../logger";
 import { Setting } from "./settings/entities/setting.entity";
 
@@ -26,22 +27,18 @@ export class HttpAuthGuard implements CanActivate {
       this.apiKey = await getApiKey(this.settingsRepository);
       if (process.env.SB_CLI === "true") {
         const { logger } = new Logger();
+
+        const { address, host, apiPort, websocketPort } =
+          await new InformationService().findAll();
+
         logger.info(`Your api-key is: ${this.apiKey}`);
         logger.info(
-          `You can access settings for the app via: http://localhost:9170/app/settings?${queryString.stringify(
+          `You can access settings for the app via: ${address}/app/settings?${queryString.stringify(
             {
+              apiHost: host,
               apiKey: this.apiKey,
-              apiPort: 9170,
-              wsPort: 9172,
-            }
-          )}`
-        );
-        logger.info(
-          `You can view data for the app via: http://localhost:9170/app/data?${queryString.stringify(
-            {
-              apiKey: this.apiKey,
-              apiPort: 9170,
-              wsPort: 9172,
+              apiPort: apiPort,
+              wsPort: websocketPort,
             }
           )}`
         );

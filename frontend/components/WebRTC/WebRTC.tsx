@@ -109,7 +109,7 @@ function WebRTC(): ReactElement {
     window.addEventListener("resize", debouncedRecalculateLayout);
 
     const config = {
-      host: "localhost",
+      host: window.location.hostname,
       key: String(query.apiKey),
       path: "/rtc",
       port: Number(query.apiPort) || 9170,

@@ -22,7 +22,7 @@ export async function getInformation(
 ): Promise<InformationEntity | undefined> {
   if (!query || !query.apiKey) return undefined;
   const response = await axios.get<InformationEntity>(
-    `http://${query.apiHost || "localhost"}:${
+    `http://${query.apiHost || window.location.hostname}:${
       query.apiPort || 9170
     }/information`,
     {
@@ -41,7 +41,9 @@ export async function getSettings(
 ): Promise<ConfigurationEntity | undefined> {
   if (!query || !query.apiKey) return defaultConfiguration;
   const response = await axios.get<Setting[]>(
-    `http://${query.apiHost || "localhost"}:${query.apiPort || 9170}/settings`,
+    `http://${query.apiHost || window.location.hostname}:${
+      query.apiPort || 9170
+    }/settings`,
     {
       headers: { "api-key": query.apiKey },
     }
@@ -67,7 +69,7 @@ export async function getSettings(
           : value;
       if (!settingValue)
         axios.post<Setting>(
-          `http://${query.apiHost || "localhost"}:${
+          `http://${query.apiHost || window.location.hostname}:${
             query.apiPort || 9170
           }/settings`,
           {

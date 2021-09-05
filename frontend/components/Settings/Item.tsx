@@ -88,7 +88,7 @@ function Item({
         newSettings[sectionKey].items[itemKey].value = value;
         setSettings(newSettings);
         axios.put<Setting>(
-          `http://${query.apiHost || "localhost"}:${
+          `http://${query.apiHost || window.location.hostname}:${
             query.apiPort || 9170
           }/settings/${sectionKey}-${itemKey}`,
           {
