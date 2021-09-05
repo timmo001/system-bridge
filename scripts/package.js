@@ -140,7 +140,7 @@ async function package() {
 
   filePaths
     .filter((path) =>
-      process.env.CLI_ONLY && path.cli === false
+      process.env.SB_CLI && path.cli === false
         ? false
         : path.platform
         ? path.platform === process.platform

@@ -18,7 +18,7 @@ export class OpenController {
 
   @Post()
   async create(@Body() createOpenDto: CreateOpenDto): Promise<CreateOpenDto> {
-    if (process.env.CLI_ONLY === "true")
+    if (process.env.SB_CLI === "true")
       throw new HttpException(
         {
           status: HttpStatus.NOT_IMPLEMENTED,

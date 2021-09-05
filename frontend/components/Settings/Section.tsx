@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 import { Grid, List, Paper, Typography } from "@material-ui/core";
 
 import { ConfigurationSection } from "../../assets/entities/configuration.entity";
-import { useSettings } from "../Common/Utils";
+import { useSettings } from "../Contexts/Settings";
 import Item from "./Item";
 
 export interface SectionProps {

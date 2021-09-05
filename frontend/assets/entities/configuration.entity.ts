@@ -22,4 +22,5 @@ export interface ConfigurationItem {
   minimum?: number;
   isPassword?: boolean;
   requiresServerRestart?: boolean;
+  containerDisabled?: boolean;
 }

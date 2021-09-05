@@ -4,7 +4,8 @@
 # ==============================================================================
 cd /usr/local/share/system-bridge || exit 1
 
-export CLI_ONLY=true
+export SB_CLI=true
+export SB_CONTAINER=true
 export SB_TRAY=false
 
 exec system-bridge

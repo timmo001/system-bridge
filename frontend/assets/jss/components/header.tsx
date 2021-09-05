@@ -89,9 +89,6 @@ const headerStyle = makeStyles((theme: Theme) => ({
   disabled: {
     userSelect: "none",
   },
-  headerItem: {
-    margin: theme.spacing(1, 1, 0),
-  },
   smallButton: {
     margin: theme.spacing(-1, -0.5),
   },
@@ -100,6 +97,7 @@ const headerStyle = makeStyles((theme: Theme) => ({
   },
   version: {
     margin: theme.spacing(3, 2, 0),
+    verticalAlign: "middle",
   },
 }));
 

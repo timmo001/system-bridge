@@ -1,29 +1,12 @@
-import React, { ReactElement, useEffect } from "react";
-import { GetStaticProps } from "next";
-import { useRouter } from "next/dist/client/router";
+import React, { ReactElement } from "react";
 import { Container } from "@material-ui/core";
+import { GetStaticProps } from "next";
 
-import { getSettings, useSettings } from "../../components/Common/Utils";
-import Logs from "../../components/Logs/Logs";
 import Layout from "../../components/Common/Layout";
+import Logs from "../../components/Logs/Logs";
 import useStyles from "../../assets/jss/components/layout";
 
 function PageLogs(): ReactElement {
-  const [settings, setSettings] = useSettings();
-
-  const query = useRouter().query;
-
-  useEffect(() => {
-    try {
-      (async () => {
-        if (!settings && query && query.apiKey)
-          setSettings(await getSettings(query));
-      })();
-    } catch (e) {
-      console.warn("Error getting settings:", e);
-    }
-  }, [settings, setSettings, query]);
-
   const classes = useStyles();
 
   return (

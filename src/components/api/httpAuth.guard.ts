@@ -24,7 +24,7 @@ export class HttpAuthGuard implements CanActivate {
   ) {
     setTimeout(async () => {
       this.apiKey = await getApiKey(this.settingsRepository);
-      if (process.env.CLI_ONLY === "true") {
+      if (process.env.SB_CLI === "true") {
         const { logger } = new Logger();
         logger.info(`Your api-key is: ${this.apiKey}`);
         logger.info(

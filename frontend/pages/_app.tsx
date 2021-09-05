@@ -1,9 +1,10 @@
 import React, { ReactElement, useEffect } from "react";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import Head from "next/head";
 
-import { SettingsProvider } from "../components/Common/Utils";
+import { InformationProvider } from "components/Contexts/Information";
+import { SettingsProvider } from "../components/Contexts/Settings";
 import theme from "../components/Common/Theme";
 
 import "../assets/css/style.css";
@@ -31,12 +32,16 @@ function App({ Component, pageProps }: AppProps): ReactElement {
         />
       </Head>
       <ThemeProvider theme={theme}>
-        <SettingsProvider>
+        <InformationProvider>
           <>
-            <CssBaseline />
-            <Component {...pageProps} />
+            <SettingsProvider>
+              <>
+                <CssBaseline />
+                <Component {...pageProps} />
+              </>
+            </SettingsProvider>
           </>
-        </SettingsProvider>
+        </InformationProvider>
       </ThemeProvider>
     </>
   );

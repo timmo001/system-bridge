@@ -19,7 +19,7 @@ import {
 import { mdiRestart } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import { useSettings } from "../Common/Utils";
+import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import Section from "./Section";
 
