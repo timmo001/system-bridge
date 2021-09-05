@@ -21,7 +21,6 @@ function Footer(): ReactElement {
 
   return (
     <>
-      <Box className={classes.spacer} />
       <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Not sure what to do now? Check out the{" "}
