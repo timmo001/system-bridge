@@ -66,8 +66,6 @@ async function setupTray(): Promise<void> {
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
-
-        logger.info(`Open Settings: ${url}`);
         open(url);
       },
     },
@@ -89,8 +87,6 @@ async function setupTray(): Promise<void> {
           apiPort: settings["network-apiPort"] || 9170,
           wsPort: settings["network-wsPort"] || 9172,
         })}`;
-
-        logger.info(`Open Data: ${url}`);
         open(url);
       },
     },
@@ -102,7 +98,6 @@ async function setupTray(): Promise<void> {
       enabled: true,
       click: async () => {
         const url = "https://github.com/timmo001/system-bridge/releases/latest";
-        logger.info(`Open URL: ${url}`);
         open(url);
       },
     },
@@ -119,7 +114,6 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const url = "https://system-bridge.timmo.dev";
-            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -131,7 +125,6 @@ async function setupTray(): Promise<void> {
           click: async () => {
             const url =
               "https://github.com/timmo001/system-bridge/issues/new/choose";
-            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -143,7 +136,6 @@ async function setupTray(): Promise<void> {
           click: async () => {
             const url =
               "https://github.com/timmo001/system-bridge/issues/new/choose";
-            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -154,7 +146,6 @@ async function setupTray(): Promise<void> {
           enabled: true,
           click: async () => {
             const url = "https://github.com/timmo001/system-bridge/discussions";
-            logger.info(`Open URL: ${url}`);
             open(url);
           },
         },
@@ -175,8 +166,6 @@ async function setupTray(): Promise<void> {
               apiPort: settings["network-apiPort"] || 9170,
               wsPort: settings["network-wsPort"] || 9172,
             })}`;
-
-            logger.info(`Open Logs: ${url}`);
             open(url);
           },
         },
@@ -190,7 +179,6 @@ async function setupTray(): Promise<void> {
               process.env.LOG_PATH || appDataDirectory,
               "system-bridge.log"
             );
-            logger.info(`Open Log File: ${path}`);
             open(path);
           },
         },
@@ -271,14 +259,13 @@ async function setupTray(): Promise<void> {
     logger.info("Started");
 
     systray.onError((err: Error) => logger.error(`Error: ${err.message}`));
-    systray.onExit((code: number) => {
-      logger.info(`Exit: ${code}`);
-    });
 
     systray.onClick((action: ExtendedClickEvent) => {
       if (action?.item?.click) action.item.click();
     });
   }
+
+  logger.close();
 }
 
 setupTray();

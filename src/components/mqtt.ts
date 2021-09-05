@@ -3,8 +3,6 @@ import mqtt from "mqtt";
 
 import { getConnection, getSettingsObject } from "./common";
 import { Logger } from "./logger";
-
-const { logger } = new Logger("MQTT");
 export class MQTT {
   private mqttClient: mqtt.MqttClient;
 
@@ -16,6 +14,8 @@ export class MQTT {
     await connection.close();
 
     if (settings["mqtt-enabled"] === "true") {
+      const { logger } = new Logger("MQTT");
+
       logger.info("Setup");
       this.clientId = (await uuid()).os;
       this.mqttClient = mqtt.connect(
@@ -31,11 +31,14 @@ export class MQTT {
           reconnectPeriod: 10000,
         }
       );
+      logger.close();
     }
   }
 
   async publish(topicSuffix: string, data: string): Promise<void> {
     if (this.mqttClient) {
+      const { logger } = new Logger("MQTT");
+
       const topic = `systembridge/${this.clientId}/${topicSuffix}`;
       logger.debug(`Publishing to topic ${topic}`);
       this.mqttClient.publish(
@@ -43,9 +46,14 @@ export class MQTT {
         data,
         { qos: 0, retain: true },
         (error?: Error) => {
-          if (error) logger.error(`Error publishing message: ${error.message}`);
+          if (error) {
+            const { logger } = new Logger("MQTT");
+            logger.error(`Error publishing message: ${error.message}`);
+            logger.close();
+          }
         }
       );
+      logger.close();
     }
   }
 }

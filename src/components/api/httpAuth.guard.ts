@@ -45,6 +45,7 @@ export class HttpAuthGuard implements CanActivate {
             }
           )}`
         );
+        logger.close();
       }
     }, 4000);
   }

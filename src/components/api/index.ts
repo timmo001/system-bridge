@@ -20,14 +20,13 @@ import { Events } from "../events";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
 
-const { logger } = new Logger("API");
-
 let app: NestExpressApplication,
   server: Server | undefined,
   rtc: { createRTCWindow: () => void; closeRTCWindow: () => boolean },
   events: Events;
 
 export async function updateAppConfig(): Promise<void> {
+  const { logger } = new Logger("API");
   try {
     const connection = await getConnection();
     const settings = await getSettingsObject(connection);
@@ -52,9 +51,12 @@ export async function updateAppConfig(): Promise<void> {
   } catch (e) {
     logger.error(e.message);
   }
+  logger.close();
 }
 
 export async function startServer(): Promise<void> {
+  const { logger } = new Logger("API");
+
   const connection = await getConnection();
   const settings = await getSettingsObject(connection);
   await connection.close();
@@ -173,9 +175,11 @@ export async function startServer(): Promise<void> {
     events = new Events();
     events.setup(settings);
   }
+  logger.close();
 }
 
 export async function stopServer(): Promise<void> {
+  const { logger } = new Logger("API");
   if (app) {
     await app.close();
     logger.info("Nest Application closed.");
@@ -184,6 +188,7 @@ export async function stopServer(): Promise<void> {
     server.close();
     logger.info("Server closed.");
   }
+  logger.close();
   if (events) events.cleanup();
   if (rtc) rtc.closeRTCWindow();
   app = undefined;

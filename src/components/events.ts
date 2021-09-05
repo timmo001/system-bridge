@@ -5,18 +5,20 @@ import { runService } from "./common";
 import { stopServer, updateAppConfig } from "./api";
 import { WebSocketConnection } from "./websocket";
 
-const { logger } = new Logger("Events");
-
 export class Events {
   private websocketConnection: WebSocketConnection;
   private observer: Observer;
 
   async setup(settings: { [key: string]: string }): Promise<void> {
+    const { logger } = new Logger("Events");
+
     this.websocketConnection = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
       true,
       () => {
+        const { logger } = new Logger("Events");
+
         logger.info("Listening");
         this.websocketConnection?.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer(settings);
@@ -33,20 +35,25 @@ export class Events {
           });
         };
         this.observer.start();
+
+        logger.close();
       }
     );
     this.websocketConnection.onEvent = async (event: Event) => {
+      const { logger } = new Logger("Events");
+
       switch (event.name) {
         case "exit-application":
           await stopServer();
           logger.info("Exit application");
+          logger.close();
           process.exit(0);
         case "get-data":
           logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
-            event.data.forEach(async (name: string) => {
-              logger.debug(`Get data: ${name}`);
+            for (const name of event.data) {
+              logger.info(`Get data: ${name}`);
               try {
                 this.websocketConnection.sendEvent({
                   name: `data-${name.replace(
@@ -58,7 +65,7 @@ export class Events {
               } catch (e) {
                 logger.error(`Service error for ${name}: ${e.message}`);
               }
-            });
+            }
           break;
         case "observer-start":
           logger.info("Start Observer");
@@ -74,6 +81,7 @@ export class Events {
           break;
       }
     };
+    logger.close();
   }
 
   cleanup(): void {

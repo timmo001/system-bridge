@@ -3,9 +3,9 @@ import execa from "execa";
 
 import { Logger } from "./logger";
 
-const { logger } = new Logger("Tray");
-
 export async function openTray(): Promise<void> {
+  const { logger } = new Logger("Tray");
+
   try {
     const workingDirectory = process.execPath.substring(
       0,
@@ -22,10 +22,16 @@ export async function openTray(): Promise<void> {
       cwd: workingDirectory,
       windowsHide: true,
     });
-    trayProcess.catch((e) => logger.error(`Error inside tray: ${e.message}`));
+    trayProcess.catch((e) => {
+      const { logger } = new Logger("Tray");
+      logger.error(`Error inside tray: ${e.message}`);
+      logger.close();
+    });
     trayProcess.on("close", (code: string) => {
+      const { logger } = new Logger("Tray");
       logger.error(`Tray closed with code: ${code}`);
       logger.info("Tray reopening in 10 seconds...");
+      logger.close();
       setTimeout(() => openTray(), 10000);
     });
   } catch (e) {
@@ -33,4 +39,5 @@ export async function openTray(): Promise<void> {
     logger.info("Retrying in 10 seconds...");
     setTimeout(() => openTray(), 10000);
   }
+  logger.close();
 }
