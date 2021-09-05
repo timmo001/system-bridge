@@ -29,7 +29,7 @@ export async function getInformation(
       headers: { "api-key": query.apiKey },
     }
   );
-  if (response.status > 204 || !Array.isArray(response.data)) {
+  if (response.status > 204 || !response.data) {
     console.error(response);
     return undefined;
   }
@@ -48,7 +48,11 @@ export async function getSettings(
       headers: { "api-key": query.apiKey },
     }
   );
-  if (response.status > 204 || !Array.isArray(response.data)) {
+  if (
+    response.status > 204 ||
+    !response.data ||
+    !Array.isArray(response.data)
+  ) {
     console.error(response);
     return defaultConfiguration;
   }
