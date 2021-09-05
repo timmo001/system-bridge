@@ -10,8 +10,6 @@ export class Events {
   private observer: Observer;
 
   async setup(settings: { [key: string]: string }): Promise<void> {
-    const { logger } = new Logger("Events");
-
     this.websocketConnection = new WebSocketConnection(
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
@@ -81,7 +79,6 @@ export class Events {
           break;
       }
     };
-    logger.close();
   }
 
   cleanup(): void {
