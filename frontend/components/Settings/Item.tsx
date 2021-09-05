@@ -158,7 +158,7 @@ function Item({
         {typeof value === "boolean" ? (
           <Switch
             edge="end"
-            disabled={information.container && containerDisabled}
+            disabled={information?.container && containerDisabled}
             defaultChecked={value}
             onChange={handleCheckedChanged}
           />
@@ -220,14 +220,14 @@ function Item({
           <TextField
             type="text"
             defaultValue={value}
-            disabled={information.container && containerDisabled}
+            disabled={information?.container && containerDisabled}
             onChange={handleChanged}
           />
         ) : typeof value === "number" ? (
           <TextField
             error={item.minimum ? value < item.minimum : false}
             type="number"
-            disabled={information.container && containerDisabled}
+            disabled={information?.container && containerDisabled}
             inputProps={{ minimum: item.minimum }}
             defaultValue={value}
             onChange={handleChanged}

@@ -1,6 +1,4 @@
 import React, { ReactElement, useEffect, useState } from "react";
-// import { useRouter } from "next/dist/client/router";
-// import Link from "next/link";
 import clsx from "clsx";
 import {
   AppBar,
@@ -17,12 +15,10 @@ import {
 } from "@material-ui/core";
 import { Menu } from "@material-ui/icons";
 // import { mdiContentCopy } from "@mdi/js";
-// import axios, { AxiosResponse } from "axios";
 // import Icon from "@mdi/react";
 
-// import { ApplicationInfo } from "../../assets/entities/application.entity";
 // import { handleCopyToClipboard } from "../Common/Utils";
-// import logo from "../../assets/media/system-bridge.svg";
+import { useInformation } from "../Contexts/Information";
 import useStyles from "../../assets/jss/components/header";
 
 type ColorExpanded = PropTypes.Color | "transparent";
@@ -42,7 +38,7 @@ interface HeaderProps {
 }
 
 function Header(props: HeaderProps): ReactElement {
-  const classes = useStyles();
+  const [information] = useInformation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -55,6 +51,8 @@ function Header(props: HeaderProps): ReactElement {
       }
     };
   }, []);
+
+  const classes = useStyles();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -94,7 +92,7 @@ function Header(props: HeaderProps): ReactElement {
       >
         <Container maxWidth="xl">
           <Toolbar className={classes.container}>
-            <Grid className={classes.headerItem} item>
+            <Grid item>
               <Button href="https://system-bridge.timmo.dev" target="_blank">
                 {/* <img src={logo} alt="System Bridge Logo" /> */}
                 <Typography
@@ -105,27 +103,27 @@ function Header(props: HeaderProps): ReactElement {
                   {brand}
                 </Typography>
               </Button>
-              {/* {appInfo?.version ? (
+              {information ? (
                 <>
                   <Typography
                     className={clsx(classes.disabled, classes.version)}
                     component="span"
                     variant="h5"
                   >
-                    {appInfo.version}
+                    {information.version}
                   </Typography>
                   <Typography
                     className={clsx(classes.disabled, classes.version)}
                     component="span"
                     variant="subtitle1"
                   >
-                    {appInfo.updates?.available ? (
+                    {information.updates?.available ? (
                       <a
-                        href={appInfo.updates?.url}
+                        href={information.updates?.url}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        Version {appInfo.updates.version.new} avaliable!
+                        Version {information.updates.version.new} avaliable!
                       </a>
                     ) : (
                       ""
@@ -134,7 +132,7 @@ function Header(props: HeaderProps): ReactElement {
                 </>
               ) : (
                 ""
-              )} */}
+              )}
             </Grid>
             <Hidden smDown implementation="css">
               {rightLinks}
@@ -170,14 +168,14 @@ function Header(props: HeaderProps): ReactElement {
         <Grid container alignItems="flex-start" justifyContent="space-around">
           <Grid className={classes.headerItem} item></Grid>
           <Grid className={classes.headerItem} item>
-            {appInfo?.host ? (
+            {information?.host ? (
               <Typography component="h5" variant="subtitle1">
                 <span className={classes.disabled}>Host: </span>
-                {appInfo.host}
+                {information.host}
                 <IconButton
                   className={classes.smallButton}
                   aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(appInfo.host)}
+                  onClick={() => handleCopyToClipboard(information.host)}
                 >
                   <Icon
                     title="Copy to clipboard"
@@ -189,14 +187,14 @@ function Header(props: HeaderProps): ReactElement {
             ) : (
               ""
             )}
-            {appInfo?.ip ? (
+            {information?.ip ? (
               <Typography component="h5" variant="subtitle1">
                 <span className={classes.disabled}>IP: </span>
-                {appInfo.ip}
+                {information.ip}
                 <IconButton
                   className={classes.smallButton}
                   aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(appInfo.ip)}
+                  onClick={() => handleCopyToClipboard(information.ip)}
                 >
                   <Icon
                     title="Copy to clipboard"
@@ -208,14 +206,14 @@ function Header(props: HeaderProps): ReactElement {
             ) : (
               ""
             )}
-            {appInfo?.uuid ? (
+            {information?.uuid ? (
               <Typography component="h5" variant="subtitle1">
                 <span className={classes.disabled}>UUID: </span>
-                {appInfo.uuid}
+                {information.uuid}
                 <IconButton
                   className={classes.smallButton}
                   aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(appInfo.uuid)}
+                  onClick={() => handleCopyToClipboard(information.uuid)}
                 >
                   <Icon
                     title="Copy to clipboard"

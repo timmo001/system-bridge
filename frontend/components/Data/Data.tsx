@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 
 import { Event } from "../../assets/entities/event.entity";
-import { useSettings } from "../Common/Utils";
+import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";
 
