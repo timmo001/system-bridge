@@ -29,7 +29,7 @@
     "@material-ui/icons": "4.11.2",
     "@material-ui/lab": "4.0.0-alpha.60",
     "@material-ui/styles": "4.11.4",
-    "@mdi/js": "5.9.55",
+    "@mdi/js": "6.1.95",
     "@mdi/react": "1.5.0",
     "axios": "0.21.2",
     "clsx": "1.1.1",
