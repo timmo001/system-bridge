@@ -88,7 +88,7 @@
     "typeorm": "0.2.37",
     "uuid": "8.3.2",
     "winston": "3.3.3",
-    "ws": "7.5.4"
+    "ws": "7.5.5"
   },
   "devDependencies": {
     "@nestjs/cli": "8.1.1",
