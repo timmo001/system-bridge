@@ -59,7 +59,7 @@ jobs:
           sudo apt install yq
           yq eval '.version = "${{ steps.release_drafter.outputs.tag_name }}"' nfpm.yaml -i
       - name: 🖊 Commit
-        uses: stefanzweifel/git-auto-commit-action@v4.11.0
+        uses: stefanzweifel/git-auto-commit-action@v4.12.0
         if: ${{ github.event_name == 'pull_request_target' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
