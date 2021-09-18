@@ -55,8 +55,10 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       return null;
     case "api":
       subprocess = execa.node(PATH_API, [], DEFAULT_OPTIONS);
+      break;
     case "tray":
       subprocess = execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
+      break;
   }
 
   subprocess.stdout.pipe(process.stdout);
