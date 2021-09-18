@@ -135,7 +135,7 @@ jobs:
           yarn install:all:ci
       - name: 🏗 Add console hide command
         run: |
-          Add-Content -Path .\src\main.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.js)
+          Add-Content -Path .\src\index.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.js)
       - name: 🚀 Package
         run: |
           yarn package
