@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { existsSync, mkdirSync } from "fs";
+import { join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
 
 import { appDataDirectory, getVersion } from "./components/common";
@@ -19,7 +20,7 @@ const DEFAULT_ENV = {
 
 const DEFAULT_OPTIONS: NodeOptions = {
   cleanup: true,
-  cwd: process.cwd(),
+  cwd: join(__dirname, ".."),
   env: DEFAULT_ENV,
   execPath: __dirname,
 };
