@@ -159,6 +159,8 @@
     "outputPath": "out",
     "scripts": [
       "dist/index.js",
+      "dist/components/api/index.js",
+      "dist/components/tray/index.js",
       "frontend/.next/**/*.js"
     ],
     "targets": [
