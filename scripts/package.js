@@ -72,7 +72,7 @@ const filePaths = [
     cli: false,
   },
   {
-    from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
+    from: "../node_modules/systray2/traybin/tray_windows_release.exe",
     to: "../out/traybin/tray_windows_release.exe",
     platform: "win32",
     cli: false,
