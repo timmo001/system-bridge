@@ -17,7 +17,7 @@
     "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
-  "bin": "dist/main.js",
+  "bin": "dist/index.js",
   "scripts": {
     "autoclean:all": "yarn autoclean --force && cd frontend && yarn autoclean --force && yarn autoclean --force",
     "build": "yarn build:frontend && yarn build:app",
@@ -159,7 +159,7 @@
     ],
     "outputPath": "out",
     "scripts": [
-      "dist/main.js",
+      "dist/index.js",
       "frontend/.next/**/*.js"
     ],
     "targets": [
