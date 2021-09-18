@@ -44,7 +44,7 @@ logger.info(
 );
 logger.close();
 
-let processes: Process = {};
+const processes: Process = {};
 
 function setupSubprocess(name: string): ExecaChildProcess | null {
   const { logger } = new Logger("Process Manager");
@@ -67,15 +67,15 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
 
   subprocess.on("exit", (code: number | null) => {
     const { logger } = new Logger("Process Manager");
-    logger.info(`${name}: Exited with code: ${code}`);
     if (code !== 0) {
-      logger.info(`${name}: Restarting in 5 seconds`);
+      logger.error(`${name}: Exited with code: ${code}`);
+      logger.info(`${name}: Restarting in 10 seconds..`);
       logger.close();
       setTimeout(() => {
         // Recreate process
         processes[name] = setupSubprocess(name);
-      }, 5000);
-    }
+      }, 10000);
+    } else logger.info(`${name}: Exited with code: ${code}`);
   });
 
   return subprocess;
