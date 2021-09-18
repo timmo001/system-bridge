@@ -59,7 +59,9 @@ export async function startServer(): Promise<void> {
   const version = getVersion(logger);
 
   logger.info(
-    `${version}: ${JSON.stringify(process.argv)} - ${process.env.NODE_ENV}`
+    `${version}: ${process.cwd()} - ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
   );
   logger.close();
 
@@ -211,3 +213,5 @@ export async function stopServer(): Promise<void> {
   events = undefined;
   rtc = undefined;
 }
+
+if (!app) startServer();
