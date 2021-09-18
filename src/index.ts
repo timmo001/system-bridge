@@ -9,8 +9,8 @@ interface Process {
   [name: string]: ExecaChildProcess;
 }
 
-const PATH_API = "dist/components/api/index.js";
-const PATH_TRAY = "dist/components/tray.js";
+const PATH_API = "dist/components/api";
+const PATH_TRAY = "dist/components/tray";
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,

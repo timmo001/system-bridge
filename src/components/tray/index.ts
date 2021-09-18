@@ -10,9 +10,9 @@ import {
   getConnection,
   getSettingsObject,
   getUpdates,
-} from "./common";
-import { Logger } from "./logger";
-import { WebSocketConnection } from "./websocket";
+} from "../common";
+import { Logger } from "../logger";
+import { WebSocketConnection } from "../websocket";
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
 }
