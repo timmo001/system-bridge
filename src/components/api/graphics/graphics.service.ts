@@ -34,7 +34,7 @@ export class GraphicsService {
             data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
         }
       } catch (e) {
-        logger.error(`Error: %{e.message}`);
+        logger.error(`Error: ${e.message}`);
       }
     }
     return data;
