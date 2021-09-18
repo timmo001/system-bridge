@@ -1,6 +1,5 @@
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
-// import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
 import {
@@ -57,6 +56,13 @@ export async function updateAppConfig(): Promise<void> {
 export async function startServer(): Promise<void> {
   const { logger } = new Logger("API");
 
+  const version = getVersion(logger);
+
+  logger.info(
+    `${version}: ${JSON.stringify(process.argv)} - ${process.env.NODE_ENV}`
+  );
+  logger.close();
+
   const connection = await getConnection();
   const settings = await getSettingsObject(connection);
   await connection.close();
@@ -79,11 +85,6 @@ export async function startServer(): Promise<void> {
   // Enable CORS
   app.enableCors();
 
-  // Serve public directory
-  // const publicDir = join(__dirname, "../../../public");
-  // logger.info(`Serving public directory: ${publicDir}`);
-  // app.useStaticAssets(publicDir);
-
   // Setup Open API
   const document = SwaggerModule.createDocument(
     app,
@@ -104,6 +105,7 @@ export async function startServer(): Promise<void> {
 
   server.on("error", (error: any) => logger.error(`Server error: ${error}`));
   server.on("listening", async () => {
+    const { logger } = new Logger("API");
     logger.info(`API started on port ${apiPort}`);
     const siOsInfo: Systeminformation.OsData = await osInfo();
     const uuidInfo: Systeminformation.UuidData = await uuid();
@@ -117,7 +119,6 @@ export async function startServer(): Promise<void> {
 
     if (networkInterface) {
       try {
-        const version = getVersion(logger);
         const MDNS = await import("mdns");
         MDNS.createAdvertisement(
           MDNS.udp("system-bridge"),
@@ -150,16 +151,23 @@ export async function startServer(): Promise<void> {
       } catch (error) {
         const { logger } = new Logger("API");
         logger.warn(`MDNS error caught: ${error.message}`);
+        logger.close();
       }
     }
   });
-  server.on("close", () => logger.info("Server closing."));
+  server.on("close", () => {
+    const { logger } = new Logger("API");
+    logger.info("Server closing.");
+    logger.close();
+  });
 
   await app.listen(apiPort);
 
   // Set up RTC Broker
   const apiKey = settings["network-apiKey"];
   if (typeof apiKey === "string") {
+    const { logger } = new Logger("API");
+
     await updateAppConfig();
 
     const broker = ExpressPeerServer(server, {
@@ -167,10 +175,14 @@ export async function startServer(): Promise<void> {
       key: apiKey,
     });
     broker.on("connection", (client) => {
+      const { logger } = new Logger("API");
       logger.info(`Broker peer connected: ${client.getId()}`);
+      logger.close();
     });
     broker.on("disconnect", (client) => {
+      const { logger } = new Logger("API");
       logger.info(`Broker peer disconnected: ${client.getId()}`);
+      logger.close();
     });
     app.use("/rtc", broker);
     logger.info(`RTC broker created on path ${broker.path()}`);

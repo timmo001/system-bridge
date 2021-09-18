@@ -19,15 +19,9 @@ const version = getVersion(logger);
 
 // Startup log
 logger.info(
-  "-----------------------------------------------------------------------------------------------------------------------"
-);
-logger.info(
   `System Bridge ${version}: ${JSON.stringify(process.argv)} - ${
     process.env.NODE_ENV
   }`
-);
-logger.info(
-  "-----------------------------------------------------------------------------------------------------------------------"
 );
 logger.close();
 
