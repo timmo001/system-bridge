@@ -242,7 +242,7 @@ jobs:
           plutil -lint ./scripts/Info.plist
           mkdir -p SystemBridge.app/Contents/{MacOS,Resources}
           cp scripts/Info.plist SystemBridge.app/Contents
-          cp out/{system-bridge,system-bridge-tray,xdg-open,traybin/tray_darwin_release} SystemBridge.app/Contents/MacOS
+          cp out/{system-bridge,xdg-open,traybin/tray_darwin_release} SystemBridge.app/Contents/MacOS
           cp -R out/system-bridge-circle.* SystemBridge.app/Contents/Resources
           npx appdmg appdmg.json SystemBridge.dmg
       - name: ⬆ Upload Artifacts - dmg
