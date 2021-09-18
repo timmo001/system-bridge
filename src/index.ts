@@ -91,7 +91,5 @@ process.on("beforeExit", () => killAllProcesses());
 process.on("SIGKILL", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
 
-processes = {
-  api: setupSubprocess("api"),
-  tray: setupSubprocess("tray"),
-};
+processes.api = setupSubprocess("api");
+if (process.env.SB_TRAY !== "false") processes.tray = setupSubprocess("tray");
