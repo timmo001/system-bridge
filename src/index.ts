@@ -66,7 +66,7 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
     const { logger } = new Logger("Process Manager");
     logger.info(`${name}: Exited with code: ${code}`);
     if (code !== 0) {
-      logger.info(`${name}: Restarting in 5 seconds: `);
+      logger.info(`${name}: Restarting in 5 seconds`);
       logger.close();
       setTimeout(() => {
         // Recreate process
