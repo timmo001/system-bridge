@@ -56,10 +56,8 @@ export async function updateAppConfig(): Promise<void> {
 export async function startServer(): Promise<void> {
   const { logger } = new Logger("API");
 
-  const version = getVersion(logger);
-
   logger.info(
-    `${version}: ${process.cwd()} - ${JSON.stringify(process.argv)} - ${
+    `${process.cwd()} - ${JSON.stringify(process.argv)} - ${
       process.env.NODE_ENV
     }`
   );
@@ -121,6 +119,7 @@ export async function startServer(): Promise<void> {
 
     if (networkInterface) {
       try {
+        const version = getVersion(logger);
         const MDNS = await import("mdns");
         MDNS.createAdvertisement(
           MDNS.udp("system-bridge"),

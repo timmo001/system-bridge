@@ -24,14 +24,13 @@ interface ExtendedClickEvent extends ClickEvent {
 async function setupTray(): Promise<void> {
   const { logger } = new Logger("Tray");
 
-  const updates = await getUpdates(logger);
-
   logger.info(
-    `${updates?.version.current}: ${process.cwd()} - ${JSON.stringify(
-      process.argv
-    )} - ${process.env.NODE_ENV}`
+    `${process.cwd()} - ${JSON.stringify(process.argv)} - ${
+      process.env.NODE_ENV
+    }`
   );
 
+  const updates = await getUpdates(logger);
   const versionText = updates
     ? updates.available
       ? `Version ${updates.version.new} avaliable! (${updates.version.current} -> ${updates.version.new})`
