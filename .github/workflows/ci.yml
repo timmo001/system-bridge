@@ -136,9 +136,6 @@ jobs:
       - name: 🏗 Add console hide command
         run: |
           Add-Content -Path .\src\main.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.js)
-      - name: 🧹 Auto Clean
-        run: |
-          yarn autoclean:all
       - name: 🚀 Package
         run: |
           yarn package
