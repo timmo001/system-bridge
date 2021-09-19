@@ -5,6 +5,7 @@ tests
 powered-test
 
 # asset directories
+documentation
 docs
 doc
 website
@@ -43,3 +44,7 @@ wercker.yml
 
 # misc
 *.md
+*LICENSE*
+README*
+.DS_Store*
+.github

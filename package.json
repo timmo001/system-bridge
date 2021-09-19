@@ -19,7 +19,7 @@
   "license": "MIT",
   "bin": "dist/index.js",
   "scripts": {
-    "autoclean:all": "yarn autoclean --force && cd frontend && yarn autoclean --force && yarn autoclean --force",
+    "autoclean:all": "yarn autoclean --force && cd frontend && yarn autoclean --force",
     "build": "yarn build:frontend && yarn build:app",
     "build:app": "rimraf dist && nest build",
     "build:frontend": "cd frontend && yarn build",
