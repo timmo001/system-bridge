@@ -60,7 +60,7 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       break;
     case "tray":
       subprocess =
-        process.env.SB_PACKAGED === "true"
+        process.env.SB_PACKAGED !== "false"
           ? execa(PATH_TRAY_EXE, [], DEFAULT_OPTIONS)
           : execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
       break;
