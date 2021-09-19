@@ -20,8 +20,8 @@
   "bin": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "yarn build && node dist/tray.js",
-    "start:prod": "node dist/tray.js"
+    "start": "yarn build && node dist",
+    "start:prod": "node dist"
   },
   "dependencies": {
     "better-sqlite3": "7.4.3",
@@ -37,9 +37,7 @@
     "typescript": "4.4.2"
   },
   "pkg": {
-    "assets": [
-      "node_modules/**/*"
-    ],
+    "assets": [],
     "scripts": "dist/index.js",
     "targets": [
       "host"

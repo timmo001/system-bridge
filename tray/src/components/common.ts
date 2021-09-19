@@ -51,8 +51,7 @@ export async function getSettingsObject(
 }
 
 export async function getUpdates(
-  logger: Logger,
-  tray = false
+  logger: Logger
 ): Promise<ApplicationUpdate | undefined> {
   try {
     const response = await axios.get<{
@@ -66,7 +65,7 @@ export async function getUpdates(
       response.data?.prerelease === false
     ) {
       const versionNew = semver.clean(response.data.tag_name);
-      const versionCurrent = getVersion(logger, tray);
+      const versionCurrent = getVersion(logger);
       const available = semver.lt(versionCurrent, versionNew);
       return {
         available,
@@ -83,13 +82,12 @@ export async function getUpdates(
   return undefined;
 }
 
-export function getVersion(logger: Logger, tray = false): string {
+export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
       readFileSync(
         join(
-          process.env.NODE_ENV === "development" ||
-            process.env.SB_USE_CWD === "true"
+          process.env.SB_USE_CWD === "true"
             ? process.cwd()
             : process.execPath.substring(
                 0,
@@ -97,7 +95,7 @@ export function getVersion(logger: Logger, tray = false): string {
                   ? process.execPath.lastIndexOf("\\")
                   : process.execPath.lastIndexOf("/")
               ),
-          tray ? "../package.json" : "package.json"
+          "package.json"
         ),
         {
           encoding: "utf8",

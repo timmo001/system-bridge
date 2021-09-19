@@ -212,3 +212,5 @@ export async function stopServer(): Promise<void> {
   events = undefined;
   rtc = undefined;
 }
+
+if (!app) startServer();

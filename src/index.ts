@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { existsSync, mkdirSync, readdirSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
 
@@ -11,7 +11,7 @@ interface Process {
 }
 
 const PATH_API = "dist/components/api";
-const PATH_TRAY = "tray/dist/tray";
+const PATH_TRAY = "tray/dist";
 const PATH_TRAY_EXE = "system-bridge-tray.exe";
 
 const DEFAULT_ENV = {
