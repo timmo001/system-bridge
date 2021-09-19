@@ -29,9 +29,7 @@ const DEFAULT_OPTIONS: NodeOptions = {
 
 const DEFAULT_PACKAGED_OPTIONS: NodeOptions = {
   cleanup: true,
-  cwd: process.cwd(),
   env: DEFAULT_ENV,
-  execPath: process.cwd(),
 };
 
 // Get process environment variables
