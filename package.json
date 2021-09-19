@@ -160,7 +160,6 @@
     "outputPath": "out",
     "scripts": [
       "dist/index.js",
-      "dist/main.js",
       "dist/components/api/index.js",
       "frontend/.next/**/*.js"
     ],
