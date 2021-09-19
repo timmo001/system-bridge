@@ -1,11 +1,6 @@
 import { parentPort, workerData } from "worker_threads";
 
-import { Logger } from "./logger";
-
 async function getService(): Promise<any> {
-  const { logger } = new Logger("Worker");
-  logger.info(`Run: ${workerData.name}`);
-  logger.close();
   switch (workerData.name) {
     default:
       return undefined;
