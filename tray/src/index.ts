@@ -189,15 +189,8 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        process.env.SB_USE_CWD === "true"
-          ? process.cwd()
-          : process.execPath.substring(
-              0,
-              process.platform === "win32"
-                ? process.execPath.lastIndexOf("\\")
-                : process.execPath.lastIndexOf("/")
-            ),
-        process.env.SB_PACKAGED !== "false" ? "public" : "./",
+        process.cwd(),
+        process.env.SB_PACKAGED === "false" ? "public" : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"
