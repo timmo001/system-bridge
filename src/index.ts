@@ -10,7 +10,7 @@ interface Process {
   [name: string]: ExecaChildProcess;
 }
 
-const PATH_API = "dist/main";
+const PATH_API = "dist/components/api";
 const PATH_TRAY = "tray/dist/tray";
 const PATH_TRAY_EXE = "system-bridge-tray.exe";
 
