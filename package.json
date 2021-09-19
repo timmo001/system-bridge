@@ -155,7 +155,6 @@
     "assets": [
       "frontend/.next/**/*",
       "frontend/node_modules/**/*",
-      "node_modules/systray2/traybin/*",
       "public/**/*"
     ],
     "outputPath": "out",
