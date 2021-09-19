@@ -19,6 +19,13 @@ A bridge for your systems.
  [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) -
  Interact with your Bridges using Home Assistant.
 
+## Android Companion App
+
+You can find the Android companion app on the
+[Play Store](https://play.google.com/store/apps/details?id=dev.timmo.systembridge).
+The source for this app can be found on
+[GitHub](https://github.com/timmo001/system-bridge-android-companion).
+
 ### API Endpoints
 
 You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api).
