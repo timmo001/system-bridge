@@ -232,6 +232,7 @@ async function setupTray(): Promise<void> {
               () => {
                 ws.sendEvent({ name: "exit-application" });
                 systray.kill(true);
+                process.exit(0);
               }
             );
           },
