@@ -155,6 +155,7 @@
     "assets": [
       "frontend/.next/**/*",
       "frontend/node_modules/**/*",
+      "node_modules/**/*",
       "public/**/*"
     ],
     "outputPath": "out",

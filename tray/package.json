@@ -37,7 +37,9 @@
     "typescript": "4.4.2"
   },
   "pkg": {
-    "assets": [],
+    "assets": [
+      "node_modules/**/*"
+    ],
     "scripts": "dist/index.js",
     "targets": [
       "host"
