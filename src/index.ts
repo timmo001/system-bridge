@@ -95,7 +95,7 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       logger.info("Closing..");
       logger.close();
       setTimeout(() => {
-        process.kill(0);
+        process.exit(0);
       }, 2000);
     }
   });
