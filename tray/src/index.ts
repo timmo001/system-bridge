@@ -24,10 +24,7 @@ interface ExtendedClickEvent extends ClickEvent {
 }
 
 async function setupTray(): Promise<void> {
-  const updates = await getUpdates(
-    logger,
-    process.env.NODE_ENV === "development"
-  );
+  const updates = await getUpdates(logger);
 
   logger.info(
     `${updates?.version.current}: ${JSON.stringify(process.argv)} - ${
@@ -192,19 +189,8 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        process.env.NODE_ENV === "development" ||
-          process.env.SB_USE_CWD === "true"
-          ? process.cwd()
-          : process.execPath.substring(
-              0,
-              process.platform === "win32"
-                ? process.execPath.lastIndexOf("\\")
-                : process.execPath.lastIndexOf("/")
-            ),
-        process.env.NODE_ENV === "development" ||
-          process.env.SB_USE_CWD === "true"
-          ? "../public/"
-          : "./",
+        process.cwd(),
+        process.env.SB_PACKAGED === "false" ? "public" : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"

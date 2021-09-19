@@ -30,7 +30,7 @@ export class CpuService {
 
         const hardware = (await getHardwareByType(
           "Cpu",
-          !process.argv0.includes("node.exe"),
+          process.env.SB_PACKAGED !== "false",
           true,
           true,
           { cpu: true }

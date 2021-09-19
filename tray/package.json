@@ -17,11 +17,11 @@
     "url": "https://github.com/timmo001/system-bridge"
   },
   "license": "MIT",
-  "bin": "dist/tray.js",
+  "bin": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "yarn build && node dist/tray.js",
-    "start:prod": "node dist/tray.js"
+    "start": "yarn build && node dist",
+    "start:prod": "node dist"
   },
   "dependencies": {
     "better-sqlite3": "7.4.3",
@@ -37,10 +37,8 @@
     "typescript": "4.4.2"
   },
   "pkg": {
-    "assets": [
-      "node_modules/**/*"
-    ],
-    "scripts": "dist/tray.js",
+    "assets": [],
+    "scripts": "dist/index.js",
     "targets": [
       "host"
     ]

@@ -22,7 +22,7 @@ export class GraphicsService {
 
         const hardware = (await getHardwareByType(
           "Gpu",
-          !process.argv0.includes("node.exe"),
+          process.env.SB_PACKAGED !== "false",
           false,
           true,
           { gpu: true }
@@ -34,7 +34,7 @@ export class GraphicsService {
             data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
         }
       } catch (e) {
-        logger.error(`Error: %{e.message}`);
+        logger.error(`Error: ${e.message}`);
       }
     }
     return data;
