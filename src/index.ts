@@ -87,7 +87,21 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         // Recreate process
         processes[name] = setupSubprocess(name);
       }, 10000);
-    } else logger.info(`${name}: Exited with code: ${code}`);
+    } else {
+      logger.info(`${name}: Exited with code: ${code}`);
+      if (name === "api") {
+        logger.info(`Mopping up processes..`);
+        killAllProcesses();
+        logger.info(`Closing..`);
+        logger.close();
+        process.kill(0);
+      }
+      logger.close();
+      setTimeout(() => {
+        // Recreate process
+        processes[name] = setupSubprocess(name);
+      }, 10000);
+    }
   });
 
   return subprocess;
