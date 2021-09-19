@@ -10,8 +10,9 @@ interface Process {
   [name: string]: ExecaChildProcess;
 }
 
-const PATH_API = "dist/components/api";
-const PATH_TRAY = "dist/components/tray";
+const PATH_API = "dist/main";
+const PATH_TRAY = "tray/dist/tray";
+const PATH_TRAY_EXE = "system-bridge-tray.exe"
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
@@ -58,7 +59,10 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       subprocess = execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "tray":
-      subprocess = execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
+      subprocess =
+        process.env.SB_PACKAGED === "true"
+          ? execa(PATH_TRAY_EXE, [], DEFAULT_OPTIONS)
+          : execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
       break;
   }
 
@@ -173,4 +177,4 @@ function logDirs(): void {
 logDirs();
 
 processes.api = setupSubprocess("api");
-// if (process.env.SB_TRAY !== "false") processes.tray = setupSubprocess("tray");
+if (process.env.SB_TRAY !== "false") processes.tray = setupSubprocess("tray");

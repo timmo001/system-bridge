@@ -1,4 +1,4 @@
-import SysTray, { ClickEvent, MenuItem } from "systray2";
+import { ClickEvent, MenuItem } from "systray2";
 import { join } from "path";
 import { platform } from "os";
 import { readFileSync } from "fs";
@@ -10,9 +10,11 @@ import {
   getConnection,
   getSettingsObject,
   getUpdates,
-} from "../common";
-import { Logger } from "../logger";
-import { WebSocketConnection } from "../websocket";
+} from "./components/common";
+import { Logger } from "./components/logger";
+import { WebSocketConnection } from "./components/websocket";
+
+const { logger } = new Logger("Tray");
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
 }
@@ -21,16 +23,18 @@ interface ExtendedClickEvent extends ClickEvent {
   item: ExtendedMenuItem;
 }
 
-export async function setupTray(): Promise<void> {
-  const { logger } = new Logger("Tray");
+async function setupTray(): Promise<void> {
+  const updates = await getUpdates(
+    logger,
+    process.env.NODE_ENV === "development"
+  );
 
   logger.info(
-    `${process.cwd()} - ${JSON.stringify(process.argv)} - ${
+    `${updates?.version.current}: ${JSON.stringify(process.argv)} - ${
       process.env.NODE_ENV
     }`
   );
 
-  const updates = await getUpdates(logger);
   const versionText = updates
     ? updates.available
       ? `Version ${updates.version.new} avaliable! (${updates.version.current} -> ${updates.version.new})`
@@ -40,6 +44,9 @@ export async function setupTray(): Promise<void> {
             : `Latest Version (${updates.version.current})`
         }`
     : "Latest Version";
+
+  const st = await import("systray2");
+  const SysTray = st.default;
 
   const items = [
     {
@@ -194,7 +201,10 @@ export async function setupTray(): Promise<void> {
                 ? process.execPath.lastIndexOf("\\")
                 : process.execPath.lastIndexOf("/")
             ),
-        "public",
+        process.env.NODE_ENV === "development" ||
+          process.env.SB_USE_CWD === "true"
+          ? "../public/"
+          : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"
@@ -223,9 +233,7 @@ export async function setupTray(): Promise<void> {
           checked: false,
           enabled: true,
           click: async () => {
-            const { logger } = new Logger("Tray");
             logger.info("Exit application");
-            logger.close();
             const connection = await getConnection();
             const settings = await getSettingsObject(connection);
             await connection.close();
@@ -235,7 +243,6 @@ export async function setupTray(): Promise<void> {
                 ? Number(settings["network-wsPort"])
                 : 9172,
               settings["network-apiKey"],
-              false,
               () => {
                 ws.sendEvent({ name: "exit-application" });
                 systray.kill(true);
@@ -249,8 +256,6 @@ export async function setupTray(): Promise<void> {
 
   if (systray) {
     await systray.ready();
-
-    const { logger } = new Logger("Tray");
     logger.info("Started");
 
     systray.onError((err: Error) => logger.error(`Error: ${err.message}`));
@@ -262,3 +267,5 @@ export async function setupTray(): Promise<void> {
 
   logger.close();
 }
+
+setupTray();

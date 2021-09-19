@@ -153,12 +153,13 @@
     "assets": [
       "frontend/.next/**/*",
       "frontend/node_modules/**/*",
-      "node_modules/**/*",
+      "node_modules/systray2/traybin/*",
       "public/**/*"
     ],
     "outputPath": "out",
     "scripts": [
       "dist/index.js",
+      "dist/main.js",
       "dist/components/api/index.js",
       "dist/components/tray/index.js",
       "frontend/.next/**/*.js"
