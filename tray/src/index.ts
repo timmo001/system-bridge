@@ -197,7 +197,7 @@ async function setupTray(): Promise<void> {
                 ? process.execPath.lastIndexOf("\\")
                 : process.execPath.lastIndexOf("/")
             ),
-        "public",
+        process.env.SB_PACKAGED !== "false" ? "public" : "./",
         `system-bridge-circle.${
           platform() === "win32"
             ? "ico"

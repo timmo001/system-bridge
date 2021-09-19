@@ -16,6 +16,7 @@ const PATH_TRAY_EXE = "system-bridge-tray.exe";
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
+  SB_PACKAGED: process.env.SB_PACKAGED,
   SB_USE_CWD: "true",
 };
 
