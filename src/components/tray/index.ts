@@ -1,4 +1,4 @@
-import { ClickEvent, MenuItem } from "systray2";
+import SysTray, { ClickEvent, MenuItem } from "systray2";
 import { join } from "path";
 import { platform } from "os";
 import { readFileSync } from "fs";
@@ -40,9 +40,6 @@ async function setupTray(): Promise<void> {
             : `Latest Version (${updates.version.current})`
         }`
     : "Latest Version";
-
-  const st = await import("systray2");
-  const SysTray = st.default;
 
   const items = [
     {
