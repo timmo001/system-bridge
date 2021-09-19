@@ -90,11 +90,13 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
     } else {
       logger.info(`${name}: Exited with code: ${code}`);
       delete processes[name];
-      logger.info(`Mopping up processes..`);
+      logger.info("Mopping up processes..");
       killAllProcesses();
-      logger.info(`Closing..`);
+      logger.info("Closing..");
       logger.close();
-      process.kill(0);
+      setTimeout(() => {
+        process.kill(0);
+      }, 2000);
     }
   });
 
