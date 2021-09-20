@@ -98,7 +98,7 @@
     "@types/helmet": "4.0.0",
     "@types/jest": "27.0.1",
     "@types/mdns": "0.0.34",
-    "@types/node": "16.9.2",
+    "@types/node": "16.9.4",
     "@types/node-notifier": "8.0.1",
     "@types/react": "17.0.21",
     "@types/react-dom": "17.0.9",
