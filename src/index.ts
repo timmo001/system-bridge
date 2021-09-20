@@ -27,9 +27,11 @@ const DEFAULT_OPTIONS: NodeOptions = {
   execPath: __dirname,
 };
 
-const DEFAULT_PACKAGED_OPTIONS: NodeOptions = {
+const DEFAULT_EXE_OPTIONS: NodeOptions = {
   cleanup: true,
+  cwd: process.cwd(),
   env: DEFAULT_ENV,
+  execPath: process.cwd(),
 };
 
 // Get process environment variables
@@ -62,18 +64,12 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
     default:
       return null;
     case "api":
-      subprocess = execa.node(
-        PATH_API,
-        [],
-        process.env.SB_PACKAGED !== "false"
-          ? DEFAULT_PACKAGED_OPTIONS
-          : DEFAULT_OPTIONS
-      );
+      subprocess = execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "tray":
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_TRAY_EXE, [], DEFAULT_PACKAGED_OPTIONS)
+          ? execa(PATH_TRAY_EXE, [], DEFAULT_EXE_OPTIONS)
           : execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
       break;
   }
