@@ -5,11 +5,11 @@ import { Graphics } from "./entities/graphics.entity";
 import { graphics } from "systeminformation";
 import { Logger } from "../../logger";
 
-const { logger } = new Logger("GraphicsService");
-
 @Injectable()
 export class GraphicsService {
   async findAll(): Promise<Graphics> {
+    const { logger } = new Logger("GraphicsService");
+
     const data: Graphics = {
       ...(await graphics()),
     };
@@ -36,6 +36,7 @@ export class GraphicsService {
       } catch (e) {
         logger.error(`Error: ${e.message}`);
       }
+      logger.close();
     }
     return data;
   }

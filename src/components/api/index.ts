@@ -59,7 +59,9 @@ export async function startServer(): Promise<void> {
   logger.info(
     `${process.cwd()} - ${JSON.stringify(process.argv)} - ${
       process.env.NODE_ENV
-    }`
+    } - ${process.env.SB_PACKAGED} - ${process.env.SB_USE_CWD} - ${
+      process.env.SB_CLI
+    } - ${process.env.SB_TRAY}`
   );
   logger.close();
 

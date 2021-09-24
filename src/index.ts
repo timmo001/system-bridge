@@ -49,7 +49,9 @@ const version = getVersion(logger);
 logger.info(
   `System Bridge ${version}: ${process.cwd()} - ${JSON.stringify(
     process.argv
-  )} - ${process.env.NODE_ENV}`
+  )} - ${process.env.NODE_ENV} - ${process.env.SB_PACKAGED} - ${
+    process.env.SB_USE_CWD
+  } - ${process.env.SB_CLI} - ${process.env.SB_TRAY}`
 );
 logger.close();
 
