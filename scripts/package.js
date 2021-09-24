@@ -108,6 +108,21 @@ const filePaths = [
     platform: "win32",
   },
   {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/NvAPIWrapper.dll",
+    to: "../out/WindowsSensors/NvAPIWrapper.dll",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/NvAPIWrapper.xml",
+    to: "../out/WindowsSensors/NvAPIWrapper.xml",
+    platform: "win32",
+  },
+  {
+    from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/Newtonsoft.Json.xml",
+    to: "../out/WindowsSensors/Newtonsoft.Json.xml",
+    platform: "win32",
+  },
+  {
     from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/SystemBridgeWindowsSensors.exe",
     to: "../out/WindowsSensors/SystemBridgeWindowsSensors.exe",
     platform: "win32",
