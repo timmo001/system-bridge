@@ -93,7 +93,11 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         processes[name] = setupSubprocess(name);
       }, 10000);
     } else {
-      logger.info(`${name}: Exited with code: ${code} - ${processes}`);
+      logger.info(
+        `${name}: Exited with code: ${code} - ${JSON.stringify(
+          subprocess.spawnargs
+        )}`
+      );
       delete processes[name];
       logger.info("Mopping up processes..");
       killAllProcesses();
