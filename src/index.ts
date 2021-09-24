@@ -56,9 +56,6 @@ logger.close();
 const processes: Process = {};
 
 function setupSubprocess(name: string): ExecaChildProcess | null {
-  const { logger } = new Logger("Process Manager");
-  logger.info(`Starting ${name}`);
-  logger.close();
   let subprocess: ExecaChildProcess;
   switch (name) {
     default:
@@ -77,6 +74,10 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
   subprocess.stdout.pipe(process.stdout);
   subprocess.stderr.pipe(process.stderr);
 
+  const { logger } = new Logger("Process Manager");
+  logger.info(`Starting ${name} - ${subprocess.spawnargs}`);
+  logger.close();
+
   subprocess.on("error", (error: Error) => {
     logger.error(`${name} error: ${error.message}`);
   });
@@ -92,7 +93,7 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         processes[name] = setupSubprocess(name);
       }, 10000);
     } else {
-      logger.info(`${name}: Exited with code: ${code}`);
+      logger.info(`${name}: Exited with code: ${code} - ${processes}`);
       delete processes[name];
       logger.info("Mopping up processes..");
       killAllProcesses();
