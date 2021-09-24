@@ -124,7 +124,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), {
+      readFileSync(join(process.env.SB_CWD || process.cwd(), "package.json"), {
         encoding: "utf8",
       })
     );

@@ -20,12 +20,13 @@ const PATH_TRAY_EXE = join(process.cwd(), "system-bridge-tray.exe");
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
   SB_PACKAGED: process.env.SB_PACKAGED,
+  SB_CWD: process.cwd(),
 };
 
 const DEFAULT_OPTIONS: NodeOptions = {
   cleanup: true,
+  cwd: join(__dirname, ".."),
   env: DEFAULT_ENV,
-  execPath: __dirname,
 };
 
 const DEFAULT_EXE_OPTIONS: NodeOptions = {

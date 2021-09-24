@@ -33,6 +33,7 @@ async function setupTray(): Promise<void> {
       JSON.stringify(process.argv),
       process.env.NODE_ENV,
       process.env.SB_CLI,
+      process.env.SB_CWD,
       process.env.SB_PACKAGED,
       process.env.SB_TRAY,
     ].join(" - ")}`

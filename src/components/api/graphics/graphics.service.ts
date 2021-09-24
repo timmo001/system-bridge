@@ -22,7 +22,9 @@ export class GraphicsService {
 
         const hardware = (await getHardwareByType(
           "Gpu",
-          process.env.SB_PACKAGED === "false" ? undefined : process.cwd(),
+          process.env.SB_PACKAGED === "false"
+            ? undefined
+            : process.env.SB_CWD || process.cwd(),
           false,
           true,
           { gpu: true }
