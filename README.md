@@ -26,7 +26,7 @@ You can find the Android companion app on the
 The source for this app can be found on
 [GitHub](https://github.com/timmo001/system-bridge-android-companion).
 
-### API Endpoints
+## API Endpoints
 
 You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api).
 
