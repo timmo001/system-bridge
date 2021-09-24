@@ -47,11 +47,15 @@ const version = getVersion(logger);
 
 // Startup log
 logger.info(
-  `System Bridge ${version}: ${process.cwd()} - ${JSON.stringify(
-    process.argv
-  )} - ${process.env.NODE_ENV} - ${process.env.SB_PACKAGED} - ${
-    process.env.SB_USE_CWD
-  } - ${process.env.SB_CLI} - ${process.env.SB_TRAY}`
+  `System Bridge ${version}: ${[
+    process.cwd(),
+    JSON.stringify(process.argv),
+    process.env.NODE_ENV,
+    process.env.SB_CLI,
+    process.env.SB_PACKAGED,
+    process.env.SB_TRAY,
+    process.env.SB_USE_CWD,
+  ].join(" - ")}`
 );
 logger.close();
 

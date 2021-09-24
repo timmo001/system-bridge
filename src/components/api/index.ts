@@ -57,11 +57,15 @@ export async function startServer(): Promise<void> {
   const { logger } = new Logger("API");
 
   logger.info(
-    `${process.cwd()} - ${JSON.stringify(process.argv)} - ${
-      process.env.NODE_ENV
-    } - ${process.env.SB_PACKAGED} - ${process.env.SB_USE_CWD} - ${
-      process.env.SB_CLI
-    } - ${process.env.SB_TRAY}`
+    [
+      process.cwd(),
+      JSON.stringify(process.argv),
+      process.env.NODE_ENV,
+      process.env.SB_CLI,
+      process.env.SB_PACKAGED,
+      process.env.SB_TRAY,
+      process.env.SB_USE_CWD,
+    ].join(" - ")
   );
   logger.close();
 
