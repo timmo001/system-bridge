@@ -17,19 +17,16 @@ const PATH_TRAY_EXE = join(process.cwd(), "system-bridge-tray.exe");
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
   SB_PACKAGED: process.env.SB_PACKAGED,
-  SB_USE_CWD: "true",
 };
 
 const DEFAULT_OPTIONS: NodeOptions = {
   cleanup: true,
-  cwd: join(__dirname, ".."),
   env: DEFAULT_ENV,
   execPath: __dirname,
 };
 
 const DEFAULT_EXE_OPTIONS: NodeOptions = {
   cleanup: true,
-  cwd: process.cwd(),
   env: DEFAULT_ENV,
   execPath: process.cwd(),
 };
@@ -48,13 +45,13 @@ const version = getVersion(logger);
 // Startup log
 logger.info(
   `System Bridge ${version}: ${[
+    process.execPath,
     process.cwd(),
     JSON.stringify(process.argv),
     process.env.NODE_ENV,
     process.env.SB_CLI,
     process.env.SB_PACKAGED,
     process.env.SB_TRAY,
-    process.env.SB_USE_CWD,
   ].join(" - ")}`
 );
 logger.close();

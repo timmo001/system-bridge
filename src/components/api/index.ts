@@ -58,13 +58,13 @@ export async function startServer(): Promise<void> {
 
   logger.info(
     [
+      process.execPath,
       process.cwd(),
       JSON.stringify(process.argv),
       process.env.NODE_ENV,
       process.env.SB_CLI,
       process.env.SB_PACKAGED,
       process.env.SB_TRAY,
-      process.env.SB_USE_CWD,
     ].join(" - ")
   );
   logger.close();

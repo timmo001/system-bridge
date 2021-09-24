@@ -126,8 +126,7 @@ export function getVersion(logger: Logger): string {
     const json = JSON.parse(
       readFileSync(
         join(
-          process.env.NODE_ENV === "development" ||
-            process.env.SB_USE_CWD === "true"
+          process.env.SB_PACKAGED !== "false"
             ? process.cwd()
             : process.execPath.substring(
                 0,
