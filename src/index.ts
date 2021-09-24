@@ -75,7 +75,7 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
   subprocess.stderr.pipe(process.stderr);
 
   const { logger } = new Logger("Process Manager");
-  logger.info(`Starting ${name} - ${subprocess.spawnargs}`);
+  logger.info(`Starting ${name} - ${JSON.stringify(subprocess.spawnargs)}`);
   logger.close();
 
   subprocess.on("error", (error: Error) => {
