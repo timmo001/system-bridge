@@ -25,6 +25,7 @@ const DEFAULT_ENV = {
 const DEFAULT_OPTIONS: NodeOptions = {
   cleanup: true,
   env: DEFAULT_ENV,
+  execPath: __dirname,
 };
 
 const DEFAULT_EXE_OPTIONS: NodeOptions = {
