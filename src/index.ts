@@ -10,6 +10,9 @@ interface Process {
   [name: string]: ExecaChildProcess;
 }
 
+// Get process environment variables
+config();
+
 const PATH_API = "dist/components/api/index.js";
 const PATH_TRAY = "tray/dist/index.js";
 const PATH_TRAY_EXE = join(process.cwd(), "system-bridge-tray.exe");
@@ -28,9 +31,6 @@ const DEFAULT_EXE_OPTIONS: NodeOptions = {
   cleanup: true,
   env: DEFAULT_ENV,
 };
-
-// Get process environment variables
-config();
 
 const { logger } = new Logger();
 
