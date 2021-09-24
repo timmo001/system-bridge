@@ -12,7 +12,7 @@ interface Process {
 
 const PATH_API = "dist/components/api/index.js";
 const PATH_TRAY = "tray/dist/index.js";
-const PATH_TRAY_EXE = "system-bridge-tray.exe";
+const PATH_TRAY_EXE = join(process.cwd(), "system-bridge-tray.exe");
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
