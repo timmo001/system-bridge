@@ -27,9 +27,15 @@ async function setupTray(): Promise<void> {
   const updates = await getUpdates(logger);
 
   logger.info(
-    `${updates?.version.current}: ${JSON.stringify(process.argv)} - ${
-      process.env.NODE_ENV
-    }`
+    `${updates?.version.current}: ${[
+      process.execPath,
+      process.cwd(),
+      JSON.stringify(process.argv),
+      process.env.NODE_ENV,
+      process.env.SB_CLI,
+      process.env.SB_PACKAGED,
+      process.env.SB_TRAY,
+    ].join(" - ")}`
   );
 
   const versionText = updates
