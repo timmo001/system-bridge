@@ -58,13 +58,14 @@ export async function startServer(): Promise<void> {
 
   logger.info(
     [
+      process.execPath,
       process.cwd(),
       JSON.stringify(process.argv),
       process.env.NODE_ENV,
       process.env.SB_CLI,
+      process.env.SB_CWD,
       process.env.SB_PACKAGED,
       process.env.SB_TRAY,
-      process.env.SB_USE_CWD,
     ].join(" - ")
   );
   logger.close();
@@ -77,7 +78,9 @@ export async function startServer(): Promise<void> {
   const wsPort = Number(settings["network-wsPort"]) || 9172;
 
   // Setup Nest.js app
-  app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: false,
+  });
 
   // WS adapter
   app.useWebSocketAdapter(new WsAdapter(app, wsPort));
