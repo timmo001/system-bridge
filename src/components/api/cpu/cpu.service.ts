@@ -30,7 +30,7 @@ export class CpuService {
 
         const hardware = (await getHardwareByType(
           "Cpu",
-          process.env.SB_PACKAGED !== "false",
+          process.env.SB_PACKAGED === "false" ? undefined : process.cwd(),
           true,
           true,
           { cpu: true }
