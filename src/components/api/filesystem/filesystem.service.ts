@@ -33,9 +33,6 @@ export class FilesystemService {
   };
 
   buildPath(path: string): string | null {
-    console.log(this.baseDirectories);
-    console.log(Object.keys(this.baseDirectories));
-
     const index = Object.keys(this.baseDirectories).findIndex(
       (baseDirectory: string) =>
         path.includes("/")
@@ -43,18 +40,7 @@ export class FilesystemService {
           : baseDirectory === path
     );
 
-    console.log(index);
-
     if (!index) return null;
-
-    console.log(Object.values(this.baseDirectories)[index]);
-
-    console.log(
-      join(
-        Object.values(this.baseDirectories)[index],
-        path.replace(Object.keys(this.baseDirectories)[index], "")
-      )
-    );
 
     return join(
       Object.values(this.baseDirectories)[index],
