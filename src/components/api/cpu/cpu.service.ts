@@ -1,3 +1,4 @@
+import { dirname } from "path";
 import { Injectable } from "@nestjs/common";
 import {
   cpu,
@@ -32,7 +33,7 @@ export class CpuService {
           "Cpu",
           process.env.SB_PACKAGED === "false"
             ? undefined
-            : process.env.SB_CWD || process.cwd(),
+            : dirname(process.execPath),
           true,
           true,
           { cpu: true }

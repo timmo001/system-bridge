@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
 
 import { appDataDirectory, getVersion } from "./components/common";
@@ -15,12 +15,11 @@ config();
 
 const PATH_API = "dist/components/api/index.js";
 const PATH_TRAY = "tray/dist/index.js";
-const PATH_TRAY_EXE = join(process.cwd(), "system-bridge-tray.exe");
+const PATH_TRAY_EXE = join(dirname(process.execPath), "system-bridge-tray.exe");
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
   SB_PACKAGED: process.env.SB_PACKAGED,
-  SB_CWD: process.cwd(),
 };
 
 const DEFAULT_OPTIONS: NodeOptions = {
@@ -45,6 +44,7 @@ const version = getVersion(logger);
 // Startup log
 logger.info(
   `System Bridge ${version}: ${[
+    dirname(process.execPath),
     process.execPath,
     process.cwd(),
     JSON.stringify(process.argv),

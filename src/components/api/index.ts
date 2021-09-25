@@ -1,3 +1,4 @@
+import { dirname } from "path";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -59,12 +60,12 @@ export async function startServer(): Promise<void> {
 
   logger.info(
     [
+      dirname(process.execPath),
       process.execPath,
       process.cwd(),
       JSON.stringify(process.argv),
       process.env.NODE_ENV,
       process.env.SB_CLI,
-      process.env.SB_CWD,
       process.env.SB_PACKAGED,
       process.env.SB_TRAY,
     ].join(" - ")

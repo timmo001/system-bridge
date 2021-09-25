@@ -1,5 +1,5 @@
 import { Connection, createConnection, Repository } from "typeorm";
-import { join } from "path";
+import { dirname, join } from "path";
 import { Logger } from "winston";
 import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
@@ -124,7 +124,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(process.env.SB_CWD || process.cwd(), "package.json"), {
+      readFileSync(join(dirname(process.execPath), "package.json"), {
         encoding: "utf8",
       })
     );

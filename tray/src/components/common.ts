@@ -1,5 +1,5 @@
 import { Connection, createConnection } from "typeorm";
-import { join } from "path";
+import { dirname, join } from "path";
 import { Logger } from "winston";
 import { readFileSync } from "fs";
 import axios from "axios";
@@ -85,7 +85,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), {
+      readFileSync(join(dirname(process.execPath), "package.json"), {
         encoding: "utf8",
       })
     );
