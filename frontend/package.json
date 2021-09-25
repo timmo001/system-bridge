@@ -1,6 +1,6 @@
 {
   "name": "system-bridge-frontend",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "A bridge for your systems",
   "private": true,
   "author": {

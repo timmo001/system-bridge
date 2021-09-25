@@ -1,23 +1,27 @@
 import {
   Body,
   Controller,
-  createParamDecorator,
   Get,
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
-  Request,
+  Res,
+  StreamableFile,
   UseGuards,
 } from "@nestjs/common";
+import { Request, Response } from "express";
 import rawbody from "raw-body";
 
 import {
   Filesystem,
+  FilesystemItem,
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
 import { FilesystemService } from "./filesystem.service";
 import { HttpAuthGuard } from "../httpAuth.guard";
+import { createReadStream } from "fs";
 
 @Controller("filesystem")
 @UseGuards(HttpAuthGuard)
@@ -29,16 +33,131 @@ export class FilesystemController {
     return await this.filesystemService.findAll();
   }
 
-  @Post("file")
-  async createFile(
-    @Req() request,
-    @Body() body: any
-  ): Promise<FilesystemUploadResponse> {
-    if (!request.headers["path"])
+  @Get("files")
+  async listFiles(@Query("path") path: string): Promise<Array<FilesystemItem>> {
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a path header",
+          error: "You must provide a path",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    path = this.filesystemService.buildPath(path);
+
+    if (
+      !path ||
+      typeof path !== "string" ||
+      !this.filesystemService.checkPathExists(path) ||
+      !(await this.filesystemService.checkPathIsDirectory(path))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.filesystemService.listFiles(path);
+  }
+
+  @Get("files/file")
+  async getFileInfo(
+    @Query("path") path: string
+  ): Promise<FilesystemItem | null> {
+    if (!path || typeof path !== "string")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    path = this.filesystemService.buildPath(path);
+
+    if (
+      !path ||
+      typeof path !== "string" ||
+      !this.filesystemService.checkPathExists(path) ||
+      (await this.filesystemService.checkPathIsDirectory(path))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.filesystemService.getFileInfo(path);
+  }
+
+  @Get("files/file/data")
+  async getFileData(
+    @Query("path") path: string,
+    @Res({ passthrough: true }) response: Response
+  ): Promise<StreamableFile> {
+    if (!path || typeof path !== "string")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    path = this.filesystemService.buildPath(path);
+
+    if (
+      !path ||
+      typeof path !== "string" ||
+      !this.filesystemService.checkPathExists(path) ||
+      (await this.filesystemService.checkPathIsDirectory(path))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    const info = await this.filesystemService.getFileInfo(path);
+
+    response.set({
+      "Content-Type": info.mimeType,
+      "Content-Disposition": `attachment; filename="${info.name}"`,
+    });
+
+    const file = createReadStream(path);
+    return new StreamableFile(file);
+  }
+
+  @Post("files/file")
+  async createFile(
+    @Req() request: Request,
+    @Query("path") path: string,
+    @Body() body: any
+  ): Promise<FilesystemUploadResponse> {
+    if (!path || typeof path !== "string")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    path = this.filesystemService.buildPath(path);
+
+    if (!path || typeof path !== "string")
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
         },
         HttpStatus.BAD_REQUEST
       );
@@ -62,10 +181,7 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
-    const result = await this.filesystemService.createFile(
-      request.headers["path"],
-      data
-    );
+    const result = await this.filesystemService.createFile(path, data);
 
     if (!result.success)
       throw new HttpException(
