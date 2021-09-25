@@ -39,16 +39,14 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
+    const path = this.filesystemService.buildPath(
+      request.headers["path"] as string
+    );
+
     if (
-      !this.filesystemService.checkPathIsValid(
-        request.headers["path"] as string
-      ) ||
-      !this.filesystemService.checkPathExists(
-        request.headers["path"] as string
-      ) ||
-      !(await this.filesystemService.checkPathIsDirectory(
-        request.headers["path"] as string
-      ))
+      !path ||
+      !this.filesystemService.checkPathExists(path) ||
+      !(await this.filesystemService.checkPathIsDirectory(path))
     )
       throw new HttpException(
         {
@@ -58,9 +56,7 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
-    return await this.filesystemService.listFiles(
-      request.headers["path"] as string
-    );
+    return await this.filesystemService.listFiles(path);
   }
 
   @Post("files/file")
@@ -77,11 +73,11 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
-    if (
-      !this.filesystemService.checkPathIsValid(
-        request.headers["path"] as string
-      )
-    )
+    const path = this.filesystemService.buildPath(
+      request.headers["path"] as string
+    );
+
+    if (!path)
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -109,10 +105,7 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
-    const result = await this.filesystemService.createFile(
-      request.headers["path"] as string,
-      data
-    );
+    const result = await this.filesystemService.createFile(path, data);
 
     if (!result.success)
       throw new HttpException(

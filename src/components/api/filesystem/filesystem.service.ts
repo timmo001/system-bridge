@@ -1,8 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
-import { homedir } from "os";
 import { join } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
+import { existsSync } from "fs";
+import {
+  getDesktopFolder,
+  getDocumentsFolder,
+  getDownloadsFolder,
+  getHomeFolder,
+  getMusicFolder,
+  getPicturesFolder,
+  getVideosFolder,
+} from "platform-folders";
 
 import { convertArrayToObject } from "../../common";
 import {
@@ -10,10 +19,57 @@ import {
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
 import { Logger } from "../../logger";
-import { existsSync } from "fs";
 
 @Injectable()
 export class FilesystemService {
+  baseDirectories = {
+    desktop: getDesktopFolder(),
+    documents: getDocumentsFolder(),
+    downloads: getDownloadsFolder(),
+    home: getHomeFolder(),
+    music: getMusicFolder(),
+    pictures: getPicturesFolder(),
+    videos: getVideosFolder(),
+  };
+
+  buildPath(path: string): string | null {
+    console.log(this.baseDirectories);
+    console.log(Object.keys(this.baseDirectories));
+
+    const index = Object.keys(this.baseDirectories).findIndex(
+      (baseDirectory: string) =>
+        path.includes("/")
+          ? baseDirectory === path.split("/")[0]
+          : baseDirectory === path
+    );
+
+    console.log(index);
+
+    if (!index) return null;
+
+    console.log(Object.values(this.baseDirectories)[index]);
+
+    console.log(
+      join(
+        Object.values(this.baseDirectories)[index],
+        path.replace(Object.keys(this.baseDirectories)[index], "")
+      )
+    );
+
+    return join(
+      Object.values(this.baseDirectories)[index],
+      path.replace(Object.keys(this.baseDirectories)[index], "")
+    );
+  }
+
+  checkPathExists(path: string): boolean {
+    return existsSync(path);
+  }
+
+  async checkPathIsDirectory(path: string): Promise<boolean> {
+    return (await stat(path)).isDirectory();
+  }
+
   async findAll(): Promise<Filesystem> {
     return {
       blockDevices: convertArrayToObject(await blockDevices(), "name"),
@@ -23,23 +79,7 @@ export class FilesystemService {
     };
   }
 
-  checkPathExists(relativePathFromHome: string): boolean {
-    const path = join(homedir(), relativePathFromHome);
-    return existsSync(path);
-  }
-
-  async checkPathIsDirectory(relativePathFromHome: string): Promise<boolean> {
-    const path = join(homedir(), relativePathFromHome);
-    return (await stat(path)).isDirectory();
-  }
-
-  checkPathIsValid(relativePathFromHome: string): boolean {
-    const path = join(homedir(), relativePathFromHome);
-    return path.startsWith(homedir());
-  }
-
-  async listFiles(relativePathFromHome: string): Promise<string[]> {
-    const path = join(homedir(), relativePathFromHome);
+  async listFiles(path: string): Promise<string[]> {
     const { logger } = new Logger("FilesystemService");
     logger.info(`Listing files in ${path}`);
     logger.close();
@@ -48,11 +88,9 @@ export class FilesystemService {
   }
 
   async createFile(
-    relativePathFromHome: string,
+    path: string,
     fileData: string | Buffer
   ): Promise<FilesystemUploadResponse> {
-    const path = join(homedir(), relativePathFromHome);
-
     const { logger } = new Logger("FilesystemService");
     logger.info(`Uploading file to ${path}`);
     try {
