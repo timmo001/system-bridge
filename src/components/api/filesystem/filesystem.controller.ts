@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   StreamableFile,
@@ -33,19 +34,17 @@ export class FilesystemController {
   }
 
   @Get("files")
-  async listFiles(@Req() request: Request): Promise<Array<FilesystemItem>> {
-    if (!request.headers["path"])
+  async listFiles(@Query("path") path: string): Promise<Array<FilesystemItem>> {
+    if (!path)
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a path header",
+          error: "You must provide a path",
         },
         HttpStatus.BAD_REQUEST
       );
 
-    const path = this.filesystemService.buildPath(
-      request.headers["path"] as string
-    );
+    path = this.filesystemService.buildPath(path);
 
     if (
       !path ||
@@ -64,19 +63,19 @@ export class FilesystemController {
   }
 
   @Get("files/file")
-  async getFileInfo(@Req() request: Request): Promise<FilesystemItem | null> {
-    if (!request.headers["path"])
+  async getFileInfo(
+    @Query("path") path: string
+  ): Promise<FilesystemItem | null> {
+    if (!path)
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a path header",
+          error: "You must provide a path",
         },
         HttpStatus.BAD_REQUEST
       );
 
-    const path = this.filesystemService.buildPath(
-      request.headers["path"] as string
-    );
+    path = this.filesystemService.buildPath(path);
 
     if (
       !path ||
@@ -96,21 +95,19 @@ export class FilesystemController {
 
   @Get("files/file/data")
   async getFileData(
-    @Req() request: Request,
+    @Query("path") path: string,
     @Res({ passthrough: true }) response: Response
   ): Promise<StreamableFile> {
-    if (!request.headers["path"])
+    if (!path)
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a path header",
+          error: "You must provide a path",
         },
         HttpStatus.BAD_REQUEST
       );
 
-    const path = this.filesystemService.buildPath(
-      request.headers["path"] as string
-    );
+    path = this.filesystemService.buildPath(path);
 
     if (
       !path ||
@@ -140,20 +137,19 @@ export class FilesystemController {
   @Post("files/file")
   async createFile(
     @Req() request: Request,
+    @Query("path") path: string,
     @Body() body: any
   ): Promise<FilesystemUploadResponse> {
-    if (!request.headers["path"])
+    if (!path)
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: "You must provide a path header",
+          error: "You must provide a path",
         },
         HttpStatus.BAD_REQUEST
       );
 
-    const path = this.filesystemService.buildPath(
-      request.headers["path"] as string
-    );
+    path = this.filesystemService.buildPath(path);
 
     if (!path)
       throw new HttpException(
