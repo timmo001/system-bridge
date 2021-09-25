@@ -21,9 +21,11 @@ export class FilesystemService {
   }
 
   async createFile(
-    path: string,
+    relativePathFromHome: string,
     fileData: string | Buffer
   ): Promise<FilesystemUploadResponse> {
+    const path = join(homedir(), relativePathFromHome);
+
     const { logger } = new Logger("FilesystemService");
     logger.info(`Uploading file to ${path}`);
     try {
