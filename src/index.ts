@@ -30,6 +30,7 @@ const DEFAULT_OPTIONS: NodeOptions = {
 
 const DEFAULT_EXE_OPTIONS: NodeOptions = {
   cleanup: true,
+  cwd: dirname(process.execPath),
   env: DEFAULT_ENV,
 };
 
