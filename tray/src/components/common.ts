@@ -1,5 +1,5 @@
 import { Connection, createConnection } from "typeorm";
-import { join } from "path";
+import { dirname, join } from "path";
 import { Logger } from "winston";
 import { readFileSync } from "fs";
 import axios from "axios";
@@ -23,6 +23,11 @@ export const logsPath = join(
   process.env.LOG_PATH || appDataDirectory,
   "system-bridge.log"
 );
+
+export const workingDirectory =
+  process.env.SB_PACKAGED === "false"
+    ? process.cwd()
+    : dirname(process.execPath);
 
 export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
@@ -85,7 +90,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), {
+      readFileSync(join(workingDirectory, "package.json"), {
         encoding: "utf8",
       })
     );

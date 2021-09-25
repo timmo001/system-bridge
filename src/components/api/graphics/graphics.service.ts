@@ -1,3 +1,4 @@
+import { dirname } from "path";
 import { Hardware } from "system-bridge-windows-sensors";
 import { Injectable } from "@nestjs/common";
 
@@ -24,7 +25,7 @@ export class GraphicsService {
           "Gpu",
           process.env.SB_PACKAGED === "false"
             ? undefined
-            : process.env.SB_CWD || process.cwd(),
+            : dirname(process.execPath),
           false,
           true,
           { gpu: true }

@@ -1,5 +1,5 @@
 import { ClickEvent, MenuItem } from "systray2";
-import { join } from "path";
+import { dirname, join } from "path";
 import { platform } from "os";
 import { readFileSync } from "fs";
 import open from "open";
@@ -10,6 +10,7 @@ import {
   getConnection,
   getSettingsObject,
   getUpdates,
+  workingDirectory,
 } from "./components/common";
 import { Logger } from "./components/logger";
 import { WebSocketConnection } from "./components/websocket";
@@ -28,12 +29,12 @@ async function setupTray(): Promise<void> {
 
   logger.info(
     `${updates?.version.current}: ${[
+      dirname(process.execPath),
       process.execPath,
       process.cwd(),
       JSON.stringify(process.argv),
       process.env.NODE_ENV,
       process.env.SB_CLI,
-      process.env.SB_CWD,
       process.env.SB_PACKAGED,
       process.env.SB_TRAY,
     ].join(" - ")}`
@@ -196,7 +197,7 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        process.cwd(),
+        workingDirectory,
         process.env.SB_PACKAGED === "false" ? "public" : "./",
         `system-bridge-circle.${
           platform() === "win32"

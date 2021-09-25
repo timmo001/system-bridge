@@ -1,5 +1,5 @@
 import { Connection, createConnection, Repository } from "typeorm";
-import { join } from "path";
+import { dirname, join } from "path";
 import { Logger } from "winston";
 import { readFileSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
@@ -20,6 +20,11 @@ export const appDataDirectory = join(
       : process.env.HOME + "/.local/share"),
   "system-bridge"
 );
+
+export const workingDirectory =
+  process.env.SB_PACKAGED === "false"
+    ? process.cwd()
+    : dirname(process.execPath);
 
 export async function getApiKey(
   settingsRepository: Repository<Setting>
@@ -124,7 +129,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(process.env.SB_CWD || process.cwd(), "package.json"), {
+      readFileSync(join(workingDirectory, "package.json"), {
         encoding: "utf8",
       })
     );
