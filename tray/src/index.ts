@@ -10,6 +10,7 @@ import {
   getConnection,
   getSettingsObject,
   getUpdates,
+  workingDirectory,
 } from "./components/common";
 import { Logger } from "./components/logger";
 import { WebSocketConnection } from "./components/websocket";
@@ -196,7 +197,7 @@ async function setupTray(): Promise<void> {
   try {
     icon = readFileSync(
       join(
-        dirname(process.execPath),
+        workingDirectory,
         process.env.SB_PACKAGED === "false" ? "public" : "./",
         `system-bridge-circle.${
           platform() === "win32"

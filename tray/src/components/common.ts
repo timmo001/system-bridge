@@ -24,6 +24,11 @@ export const logsPath = join(
   "system-bridge.log"
 );
 
+export const workingDirectory =
+  process.env.SB_PACKAGED === "false"
+    ? process.cwd()
+    : dirname(process.execPath);
+
 export async function getConnection(name = "common"): Promise<Connection> {
   return await createConnection({
     type: "better-sqlite3",

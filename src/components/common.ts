@@ -21,6 +21,11 @@ export const appDataDirectory = join(
   "system-bridge"
 );
 
+export const workingDirectory =
+  process.env.SB_PACKAGED === "false"
+    ? process.cwd()
+    : dirname(process.execPath);
+
 export async function getApiKey(
   settingsRepository: Repository<Setting>
 ): Promise<string> {
@@ -124,7 +129,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(dirname(process.execPath), "package.json"), {
+      readFileSync(join(workingDirectory, "package.json"), {
         encoding: "utf8",
       })
     );
