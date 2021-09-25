@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
 import { join } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
-import { existsSync } from "fs";
+import { Dirent, existsSync } from "fs";
 import {
   getDesktopFolder,
   getDocumentsFolder,
@@ -16,6 +16,7 @@ import {
 import { convertArrayToObject } from "../../common";
 import {
   Filesystem,
+  FilesystemItem,
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
 import { Logger } from "../../logger";
@@ -65,12 +66,27 @@ export class FilesystemService {
     };
   }
 
-  async listFiles(path: string): Promise<string[]> {
+  async listFiles(path: string): Promise<Array<FilesystemItem>> {
     const { logger } = new Logger("FilesystemService");
     logger.info(`Listing files in ${path}`);
     logger.close();
 
-    return await readdir(path);
+    const files: Array<FilesystemItem> = [];
+
+    for (const item of await readdir(path, { withFileTypes: true })) {
+      files.push({
+        name: item.name,
+        extension: item.name.split(".").pop(),
+        isDirectory: item.isDirectory(),
+        isFile: item.isFile(),
+        isLink: item.isSymbolicLink(),
+        size: item.isDirectory()
+          ? null
+          : (await stat(join(path, item.name))).size,
+      });
+    }
+
+    return files;
   }
 
   async createFile(

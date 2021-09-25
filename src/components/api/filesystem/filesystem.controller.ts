@@ -8,11 +8,13 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import { Dirent } from "fs";
 import { Request } from "express";
 import rawbody from "raw-body";
 
 import {
   Filesystem,
+  FilesystemItem,
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
 import { FilesystemService } from "./filesystem.service";
@@ -29,7 +31,7 @@ export class FilesystemController {
   }
 
   @Get("files")
-  async listFiles(@Req() request: Request): Promise<string[]> {
+  async listFiles(@Req() request: Request): Promise<Array<FilesystemItem>> {
     if (!request.headers["path"])
       throw new HttpException(
         {

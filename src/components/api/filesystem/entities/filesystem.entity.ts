@@ -7,6 +7,15 @@ export interface Filesystem {
   fsSize: { [mount: string]: Systeminformation.FsSizeData };
 }
 
+export interface FilesystemItem {
+  name: string;
+  extension?: string;
+  isDirectory?: boolean;
+  isFile?: boolean;
+  isLink?: boolean;
+  size?: number;
+}
+
 export interface FilesystemUploadResponse {
   success: boolean;
   message: string;
