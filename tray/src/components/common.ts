@@ -90,7 +90,7 @@ export async function getUpdates(
 export function getVersion(logger: Logger): string {
   try {
     const json = JSON.parse(
-      readFileSync(join(dirname(process.execPath), "package.json"), {
+      readFileSync(join(workingDirectory, "package.json"), {
         encoding: "utf8",
       })
     );
