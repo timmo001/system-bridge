@@ -28,11 +28,14 @@ export class FilesystemService {
     logger.info(`Uploading file to ${path}`);
     try {
       await writeFile(path, fileData, { encoding: "utf8" });
+      logger.close();
       return {
         success: true,
         message: "File uploaded successfully",
       };
     } catch (err) {
+      logger.warn(`Error uploading file to ${path} - ${err.message}`);
+      logger.close();
       return {
         success: false,
         message: err.message,
