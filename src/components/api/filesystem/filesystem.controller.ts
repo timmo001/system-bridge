@@ -6,10 +6,11 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
+  StreamableFile,
   UseGuards,
 } from "@nestjs/common";
-import { Dirent } from "fs";
-import { Request } from "express";
+import { Request, Response } from "express";
 import rawbody from "raw-body";
 
 import {
@@ -19,6 +20,7 @@ import {
 } from "./entities/filesystem.entity";
 import { FilesystemService } from "./filesystem.service";
 import { HttpAuthGuard } from "../httpAuth.guard";
+import { createReadStream } from "fs";
 
 @Controller("filesystem")
 @UseGuards(HttpAuthGuard)
@@ -61,7 +63,7 @@ export class FilesystemController {
     return await this.filesystemService.listFiles(path);
   }
 
-  @Get("files/file/info")
+  @Get("files/file")
   async getFileInfo(@Req() request: Request): Promise<FilesystemItem | null> {
     if (!request.headers["path"])
       throw new HttpException(
@@ -75,10 +77,6 @@ export class FilesystemController {
     const path = this.filesystemService.buildPath(
       request.headers["path"] as string
     );
-
-    console.log(path);
-    console.log(this.filesystemService.checkPathExists(path));
-    console.log(await this.filesystemService.checkPathIsDirectory(path));
 
     if (
       !path ||
@@ -94,6 +92,49 @@ export class FilesystemController {
       );
 
     return await this.filesystemService.getFileInfo(path);
+  }
+
+  @Get("files/file/data")
+  async getFileData(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response
+  ): Promise<StreamableFile> {
+    if (!request.headers["path"])
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path header",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    const path = this.filesystemService.buildPath(
+      request.headers["path"] as string
+    );
+
+    if (
+      !path ||
+      !this.filesystemService.checkPathExists(path) ||
+      (await this.filesystemService.checkPathIsDirectory(path))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    const data = await this.filesystemService.getFileData(path);
+
+    const file = createReadStream(path);
+    response.set({
+      "Content-Type": data.mimeType,
+      "Content-Disposition": `attachment; filename="${data.name}"`,
+    });
+    return new StreamableFile(file);
+
+    // return new StreamableFile(data.readStream);
   }
 
   @Post("files/file")

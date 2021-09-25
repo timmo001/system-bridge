@@ -1,3 +1,4 @@
+import { ReadStream } from "fs";
 import { Systeminformation } from "systeminformation";
 
 export interface Filesystem {
@@ -16,7 +17,14 @@ export interface FilesystemItem {
   isLink?: boolean;
   lastAccessed?: Date;
   lastModified?: Date;
+  mimeType?: string;
   size?: number;
+}
+
+export interface FilesystemData {
+  name: string;
+  mimeType: string;
+  readStream: any;
 }
 
 export interface FilesystemUploadResponse {

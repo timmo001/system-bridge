@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
 import { join, sep } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
-import { existsSync } from "fs";
+import { createReadStream, existsSync } from "fs";
 import {
   getDesktopFolder,
   getDocumentsFolder,
@@ -12,10 +12,12 @@ import {
   getPicturesFolder,
   getVideosFolder,
 } from "platform-folders";
+import { lookup as mimeLookup } from "mime-types";
 
 import { convertArrayToObject } from "../../common";
 import {
   Filesystem,
+  FilesystemData,
   FilesystemItem,
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
@@ -80,6 +82,8 @@ export class FilesystemService {
         ? null
         : await stat(join(path, item.name));
 
+      const mimeType = item.isFile() ? mimeLookup(join(path, item.name)) : null;
+
       files.push({
         name: item.name,
         created: stats?.birthtime,
@@ -89,6 +93,7 @@ export class FilesystemService {
         isLink: item.isSymbolicLink(),
         lastAccessed: stats?.atime,
         lastModified: stats?.mtime,
+        mimeType: mimeType ? mimeType : null,
         size: stats?.size,
       });
     }
@@ -101,17 +106,30 @@ export class FilesystemService {
     logger.info(`Getting file info: ${path}`);
     logger.close();
 
-    console.log(path);
-    console.log(path.split(sep));
-    console.log(path.split(sep)[0]);
-    console.log(path.split(sep).slice(0, -1));
-    console.log(path.split(sep).slice(0, -1).join(sep));
-
     const dirInfo = path.split(sep).slice(0, -1).join(sep);
 
     return (await this.listFiles(dirInfo)).find((file: FilesystemItem) =>
       path.endsWith(file.name)
     );
+  }
+
+  async getFileData(path: string): Promise<FilesystemData> {
+    const { logger } = new Logger("FilesystemService");
+    logger.info(`Getting file data: ${path}`);
+
+    try {
+      const fileInfo = await this.getFileInfo(path);
+      const data = {
+        name: fileInfo.name,
+        mimeType: fileInfo.mimeType,
+        readStream: createReadStream(path, { encoding: "utf8" }),
+      };
+      return data;
+    } catch (err) {
+      logger.warn(`Error getting file data: ${path} - ${err.message}`);
+      logger.close();
+      return null;
+    }
   }
 
   async createFile(
