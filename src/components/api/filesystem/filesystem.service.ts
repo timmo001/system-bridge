@@ -74,15 +74,20 @@ export class FilesystemService {
     const files: Array<FilesystemItem> = [];
 
     for (const item of await readdir(path, { withFileTypes: true })) {
+      const stats = item.isDirectory()
+        ? null
+        : await stat(join(path, item.name));
+
       files.push({
         name: item.name,
+        created: stats?.birthtime,
         extension: item.name.split(".").pop(),
         isDirectory: item.isDirectory(),
         isFile: item.isFile(),
         isLink: item.isSymbolicLink(),
-        size: item.isDirectory()
-          ? null
-          : (await stat(join(path, item.name))).size,
+        lastAccessed: stats?.atime,
+        lastModified: stats?.mtime,
+        size: stats?.size,
       });
     }
 

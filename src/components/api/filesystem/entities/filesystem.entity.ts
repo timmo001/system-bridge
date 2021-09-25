@@ -9,10 +9,13 @@ export interface Filesystem {
 
 export interface FilesystemItem {
   name: string;
+  created?: Date;
   extension?: string;
   isDirectory?: boolean;
   isFile?: boolean;
   isLink?: boolean;
+  lastAccessed?: Date;
+  lastModified?: Date;
   size?: number;
 }
 
