@@ -39,6 +39,25 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
+    if (
+      !this.filesystemService.checkPathIsValid(
+        request.headers["path"] as string
+      ) ||
+      !this.filesystemService.checkPathExists(
+        request.headers["path"] as string
+      ) ||
+      !(await this.filesystemService.checkPathIsDirectory(
+        request.headers["path"] as string
+      ))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
     return await this.filesystemService.listFiles(
       request.headers["path"] as string
     );
@@ -54,6 +73,19 @@ export class FilesystemController {
         {
           status: HttpStatus.BAD_REQUEST,
           error: "You must provide a path header",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    if (
+      !this.filesystemService.checkPathIsValid(
+        request.headers["path"] as string
+      )
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
         },
         HttpStatus.BAD_REQUEST
       );

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
 import { homedir } from "os";
 import { join } from "path";
-import { readdir, writeFile } from "fs/promises";
+import { readdir, stat, writeFile } from "fs/promises";
 
 import { convertArrayToObject } from "../../common";
 import {
@@ -10,6 +10,7 @@ import {
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
 import { Logger } from "../../logger";
+import { existsSync } from "fs";
 
 @Injectable()
 export class FilesystemService {
@@ -20,6 +21,21 @@ export class FilesystemService {
       disksIO: await disksIO(),
       fsSize: convertArrayToObject(await fsSize(), "mount"),
     };
+  }
+
+  checkPathExists(relativePathFromHome: string): boolean {
+    const path = join(homedir(), relativePathFromHome);
+    return existsSync(path);
+  }
+
+  async checkPathIsDirectory(relativePathFromHome: string): Promise<boolean> {
+    const path = join(homedir(), relativePathFromHome);
+    return (await stat(path)).isDirectory();
+  }
+
+  checkPathIsValid(relativePathFromHome: string): boolean {
+    const path = join(homedir(), relativePathFromHome);
+    return path.startsWith(homedir());
   }
 
   async listFiles(relativePathFromHome: string): Promise<string[]> {
