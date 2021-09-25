@@ -6,3 +6,8 @@ export interface Filesystem {
   disksIO: Systeminformation.DisksIoData;
   fsSize: { [mount: string]: Systeminformation.FsSizeData };
 }
+
+export interface FilesystemUploadResponse {
+  success: boolean;
+  message: string;
+}
