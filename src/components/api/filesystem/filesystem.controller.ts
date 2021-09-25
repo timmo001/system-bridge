@@ -98,7 +98,7 @@ export class FilesystemController {
     @Query("path") path: string,
     @Res({ passthrough: true }) response: Response
   ): Promise<StreamableFile> {
-    if (!path)
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,

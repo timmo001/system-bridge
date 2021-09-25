@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
 import { join, sep } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
-import { createReadStream, existsSync } from "fs";
+import { existsSync } from "fs";
 import {
   getDesktopFolder,
   getDocumentsFolder,
@@ -17,7 +17,6 @@ import { lookup as mimeLookup } from "mime-types";
 import { convertArrayToObject } from "../../common";
 import {
   Filesystem,
-  FilesystemData,
   FilesystemItem,
   FilesystemUploadResponse,
 } from "./entities/filesystem.entity";
