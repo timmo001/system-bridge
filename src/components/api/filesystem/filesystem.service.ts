@@ -34,7 +34,7 @@ export class FilesystemService {
     videos: getVideosFolder(),
   };
 
-  buildPath(path: string): string | null {
+  buildPath(path: string): string | undefined {
     const index = Object.keys(this.baseDirectories).findIndex(
       (baseDirectory: string) =>
         path.includes("/")
@@ -44,7 +44,7 @@ export class FilesystemService {
           : baseDirectory === path
     );
 
-    if (!index) return null;
+    if (index < 0) return undefined;
 
     return join(
       Object.values(this.baseDirectories)[index],
@@ -78,10 +78,12 @@ export class FilesystemService {
 
     for (const item of await readdir(path, { withFileTypes: true })) {
       const stats = item.isDirectory()
-        ? null
+        ? undefined
         : await stat(join(path, item.name));
 
-      const mimeType = item.isFile() ? mimeLookup(join(path, item.name)) : null;
+      const mimeType = item.isFile()
+        ? mimeLookup(join(path, item.name))
+        : undefined;
 
       files.push({
         name: item.name,
@@ -92,7 +94,7 @@ export class FilesystemService {
         isLink: item.isSymbolicLink(),
         lastAccessed: stats?.atime,
         lastModified: stats?.mtime,
-        mimeType: mimeType ? mimeType : null,
+        mimeType: mimeType ? mimeType : undefined,
         size: stats?.size,
       });
     }
@@ -100,7 +102,7 @@ export class FilesystemService {
     return files;
   }
 
-  async getFileInfo(path: string): Promise<FilesystemItem | null> {
+  async getFileInfo(path: string): Promise<FilesystemItem | undefined> {
     const { logger } = new Logger("FilesystemService");
     logger.info(`Getting file info: ${path}`);
     logger.close();
