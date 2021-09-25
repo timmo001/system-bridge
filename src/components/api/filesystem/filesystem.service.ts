@@ -113,25 +113,6 @@ export class FilesystemService {
     );
   }
 
-  async getFileData(path: string): Promise<FilesystemData> {
-    const { logger } = new Logger("FilesystemService");
-    logger.info(`Getting file data: ${path}`);
-
-    try {
-      const fileInfo = await this.getFileInfo(path);
-      const data = {
-        name: fileInfo.name,
-        mimeType: fileInfo.mimeType,
-        readStream: createReadStream(path, { encoding: "utf8" }),
-      };
-      return data;
-    } catch (err) {
-      logger.warn(`Error getting file data: ${path} - ${err.message}`);
-      logger.close();
-      return null;
-    }
-  }
-
   async createFile(
     path: string,
     fileData: string | Buffer

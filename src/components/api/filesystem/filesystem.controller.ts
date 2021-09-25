@@ -122,16 +122,15 @@ export class FilesystemController {
         HttpStatus.BAD_REQUEST
       );
 
-    const data = await this.filesystemService.getFileData(path);
+    const info = await this.filesystemService.getFileInfo(path);
+
+    response.set({
+      "Content-Type": info.mimeType,
+      "Content-Disposition": `attachment; filename="${info.name}"`,
+    });
 
     const file = createReadStream(path);
-    response.set({
-      "Content-Type": data.mimeType,
-      "Content-Disposition": `attachment; filename="${data.name}"`,
-    });
     return new StreamableFile(file);
-
-    // return new StreamableFile(data.readStream);
   }
 
   @Post("files/file")
