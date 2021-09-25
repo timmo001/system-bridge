@@ -61,6 +61,41 @@ export class FilesystemController {
     return await this.filesystemService.listFiles(path);
   }
 
+  @Get("files/file/info")
+  async getFileInfo(@Req() request: Request): Promise<FilesystemItem | null> {
+    if (!request.headers["path"])
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path header",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    const path = this.filesystemService.buildPath(
+      request.headers["path"] as string
+    );
+
+    console.log(path);
+    console.log(this.filesystemService.checkPathExists(path));
+    console.log(await this.filesystemService.checkPathIsDirectory(path));
+
+    if (
+      !path ||
+      !this.filesystemService.checkPathExists(path) ||
+      (await this.filesystemService.checkPathIsDirectory(path))
+    )
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Path is not valid",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.filesystemService.getFileInfo(path);
+  }
+
   @Post("files/file")
   async createFile(
     @Req() request: Request,

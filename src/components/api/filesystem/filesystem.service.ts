@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
-import { join } from "path";
+import { join, sep } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
-import { Dirent, existsSync } from "fs";
+import { existsSync } from "fs";
 import {
   getDesktopFolder,
   getDocumentsFolder,
@@ -38,6 +38,8 @@ export class FilesystemService {
       (baseDirectory: string) =>
         path.includes("/")
           ? baseDirectory === path.split("/")[0]
+          : path.includes("\\")
+          ? baseDirectory === path.split("\\")[0]
           : baseDirectory === path
     );
 
@@ -92,6 +94,24 @@ export class FilesystemService {
     }
 
     return files;
+  }
+
+  async getFileInfo(path: string): Promise<FilesystemItem | null> {
+    const { logger } = new Logger("FilesystemService");
+    logger.info(`Getting file info: ${path}`);
+    logger.close();
+
+    console.log(path);
+    console.log(path.split(sep));
+    console.log(path.split(sep)[0]);
+    console.log(path.split(sep).slice(0, -1));
+    console.log(path.split(sep).slice(0, -1).join(sep));
+
+    const dirInfo = path.split(sep).slice(0, -1).join(sep);
+
+    return (await this.listFiles(dirInfo)).find((file: FilesystemItem) =>
+      path.endsWith(file.name)
+    );
   }
 
   async createFile(
