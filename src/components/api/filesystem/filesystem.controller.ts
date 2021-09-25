@@ -1,15 +1,14 @@
 import {
   Body,
   Controller,
-  createParamDecorator,
   Get,
   HttpException,
   HttpStatus,
   Post,
   Req,
-  Request,
   UseGuards,
 } from "@nestjs/common";
+import { Request } from "express";
 import rawbody from "raw-body";
 
 import {
@@ -29,9 +28,25 @@ export class FilesystemController {
     return await this.filesystemService.findAll();
   }
 
-  @Post("file")
+  @Get("files")
+  async listFiles(@Req() request: Request): Promise<string[]> {
+    if (!request.headers["path"])
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "You must provide a path header",
+        },
+        HttpStatus.BAD_REQUEST
+      );
+
+    return await this.filesystemService.listFiles(
+      request.headers["path"] as string
+    );
+  }
+
+  @Post("files/file")
   async createFile(
-    @Req() request,
+    @Req() request: Request,
     @Body() body: any
   ): Promise<FilesystemUploadResponse> {
     if (!request.headers["path"])
@@ -63,7 +78,7 @@ export class FilesystemController {
       );
 
     const result = await this.filesystemService.createFile(
-      request.headers["path"],
+      request.headers["path"] as string,
       data
     );
 

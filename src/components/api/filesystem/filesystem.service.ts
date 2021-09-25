@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
-import { writeFile } from "fs/promises";
+import { homedir } from "os";
+import { join } from "path";
+import { readdir, writeFile } from "fs/promises";
 
 import { convertArrayToObject } from "../../common";
 import {
@@ -18,6 +20,15 @@ export class FilesystemService {
       disksIO: await disksIO(),
       fsSize: convertArrayToObject(await fsSize(), "mount"),
     };
+  }
+
+  async listFiles(relativePathFromHome: string): Promise<string[]> {
+    const path = join(homedir(), relativePathFromHome);
+    const { logger } = new Logger("FilesystemService");
+    logger.info(`Listing files in ${path}`);
+    logger.close();
+
+    return await readdir(path);
   }
 
   async createFile(
