@@ -141,7 +141,7 @@ jobs:
         run: |
           tar -czvf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}/*
       - name: ⬆ Upload Artifacts to Release Assets
-        uses: fnkr/github-action-ghr@v1
+        uses: fnkr/github-action-ghr@v1.3
         env:
           GHR_PATH: ${{ matrix.artifact }}.tar.gz
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -167,7 +167,7 @@ jobs:
           workflow: ci.yml
           workflow_conclusion: success
       - name: ⬆ Upload to Release Assets
-        uses: fnkr/github-action-ghr@v1
+        uses: fnkr/github-action-ghr@v1.3
         env:
           GHR_PATH: ${{ matrix.artifact }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
