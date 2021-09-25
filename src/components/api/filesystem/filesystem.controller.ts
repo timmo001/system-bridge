@@ -35,7 +35,7 @@ export class FilesystemController {
 
   @Get("files")
   async listFiles(@Query("path") path: string): Promise<Array<FilesystemItem>> {
-    if (!path)
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -48,6 +48,7 @@ export class FilesystemController {
 
     if (
       !path ||
+      typeof path !== "string" ||
       !this.filesystemService.checkPathExists(path) ||
       !(await this.filesystemService.checkPathIsDirectory(path))
     )
@@ -66,7 +67,7 @@ export class FilesystemController {
   async getFileInfo(
     @Query("path") path: string
   ): Promise<FilesystemItem | null> {
-    if (!path)
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -79,6 +80,7 @@ export class FilesystemController {
 
     if (
       !path ||
+      typeof path !== "string" ||
       !this.filesystemService.checkPathExists(path) ||
       (await this.filesystemService.checkPathIsDirectory(path))
     )
@@ -111,6 +113,7 @@ export class FilesystemController {
 
     if (
       !path ||
+      typeof path !== "string" ||
       !this.filesystemService.checkPathExists(path) ||
       (await this.filesystemService.checkPathIsDirectory(path))
     )
@@ -139,7 +142,7 @@ export class FilesystemController {
     @Query("path") path: string,
     @Body() body: any
   ): Promise<FilesystemUploadResponse> {
-    if (!path)
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -150,7 +153,7 @@ export class FilesystemController {
 
     path = this.filesystemService.buildPath(path);
 
-    if (!path)
+    if (!path || typeof path !== "string")
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,

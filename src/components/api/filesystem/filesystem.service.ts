@@ -88,7 +88,9 @@ export class FilesystemService {
       files.push({
         name: item.name,
         created: stats?.birthtime,
-        extension: item.name.split(".").pop(),
+        extension: item.name.includes(".")
+          ? item.name.split(".").pop()
+          : undefined,
         isDirectory: item.isDirectory(),
         isFile: item.isFile(),
         isLink: item.isSymbolicLink(),
