@@ -145,6 +145,7 @@ jobs:
         env:
           GHR_PATH: ${{ matrix.artifact }}.tar.gz
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHR_REPLACE: true
   deploy-packages:
     name: 👷 Deploy Packages to Release Assets
     runs-on: ubuntu-latest
@@ -171,3 +172,4 @@ jobs:
         env:
           GHR_PATH: ${{ matrix.artifact }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHR_REPLACE: true
