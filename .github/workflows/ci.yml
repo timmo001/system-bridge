@@ -132,8 +132,7 @@ jobs:
       - name: 📦 Get package version
         id: get-package-version
         run: |
-          apt-get update
-          apt-get install jq
+          chocolatey install jq
           ::set-output name=PACKAGE_VERSION::$(cat package.json | jq -r '.version')
       - name: 🏗 Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
