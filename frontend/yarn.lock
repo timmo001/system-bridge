@@ -14,10 +14,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
   integrity sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==
 
-"@fontsource/roboto@4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-4.5.0.tgz#d6f925668ba6af46707f1040c43aff498ba204bb"
-  integrity sha512-ja4XYw/9kNRFM5Ndk9vwzHWsdBMXczyBazFkTXJQ74QQBnT0BbSsHn0pF60AU0Iznig1Wt9x3rADfG8LANvMpw==
+"@fontsource/roboto@4.5.1":
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-4.5.1.tgz#63f7b783f755d8f6727eb60198627e7e1be3ac20"
+  integrity sha512-3mhfL+eNPG/woMNqwD/OHaW5qMpeGEBsDwzmhFmjB1yUV+M+M9P0NhP/AyHvnGz3DrqkvZ7CPzNMa+UkVLeELg==
 
 "@material-ui/core@4.12.3":
   version "4.12.3"
