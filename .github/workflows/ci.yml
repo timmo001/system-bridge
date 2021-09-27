@@ -132,7 +132,7 @@ jobs:
       - name: 📦 Get package version
         id: get-package-version
         run: |
-          ::set-output name=PACKAGE_VERSION::$(cat package.json | jq -r '.version')
+          cat package.json | jq -r '.version' >> $SB_VERSION
       - name: 🏗 Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
