@@ -132,7 +132,6 @@ jobs:
       - name: 📦 Get package version
         id: get-package-version
         run: |
-          chocolatey install jq
           ::set-output name=PACKAGE_VERSION::$(cat package.json | jq -r '.version')
       - name: 🏗 Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
