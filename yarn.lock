@@ -687,10 +687,10 @@
     webpack "5.45.1"
     webpack-node-externals "3.0.0"
 
-"@nestjs/common@8.0.7":
-  version "8.0.7"
-  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-8.0.7.tgz#b77d904d22c6d7dd7424b306c5ff4946f183cbcb"
-  integrity sha512-p9dF6rFE8SYIUphzTCtQ2FoE1NVsAnX5jOPsmRvP0DlleKSfE/SizzkM6YmVUM98yyOvlGuHGV1X0NoSP3azCg==
+"@nestjs/common@8.0.8":
+  version "8.0.8"
+  resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-8.0.8.tgz#76512446c5a6d46f8b8b08304844d6c9826d7013"
+  integrity sha512-dodw4GEcdPaLw/1QKMuqy31WtFyl8bqrxkkEL3y6rDVdk5Mm6xdCoBibKigZXjwzC7vL7BN6kK2Tlnak7v7kHw==
   dependencies:
     axios "0.21.4"
     iterare "1.2.1"
