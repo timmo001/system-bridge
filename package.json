@@ -1,6 +1,6 @@
 {
   "name": "system-bridge",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -86,7 +86,7 @@
     "system-bridge-windows-sensors": "1.2.5",
     "systeminformation": "5.9.4",
     "toad-scheduler": "1.5.0",
-    "typeorm": "0.2.37",
+    "typeorm": "0.2.38",
     "uuid": "8.3.2",
     "winston": "3.3.3",
     "ws": "7.5.5"
