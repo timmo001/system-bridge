@@ -68,7 +68,7 @@
     "execa": "5.1.1",
     "helmet": "4.6.0",
     "loudness": "0.4.1",
-    "mime-types": "2.1.32",
+    "mime-types": "2.1.33",
     "mqtt": "4.2.8",
     "next": "11.1.2",
     "node-notifier": "10.0.0",
