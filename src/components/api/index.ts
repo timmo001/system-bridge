@@ -15,8 +15,9 @@ import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
-import { getConnection, getSettingsObject, getVersion } from "../common";
 import { Events } from "../events";
+import { getConnection, getSettingsObject, getVersion } from "../common";
+import { HttpExceptionFilter } from "./http-exception.filter";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
 
@@ -26,7 +27,6 @@ let app: NestExpressApplication,
   events: Events;
 
 export async function updateAppConfig(): Promise<void> {
-  const { logger } = new Logger("API");
   try {
     const connection = await getConnection();
     const settings = await getSettingsObject(connection);
@@ -43,21 +43,23 @@ export async function updateAppConfig(): Promise<void> {
       if (launchOnStartup) await autoLaunch.enable();
       else await autoLaunch.disable();
 
+      const { logger } = new Logger("API");
       logger.info(
         `Launch on startup: ${launchOnStartup} - ${
           (await autoLaunch.isEnabled()) ? "enabled" : "disabled"
         } - ${process.execPath}`
       );
+      logger.close();
     }
   } catch (e) {
+    const { logger } = new Logger("API");
     logger.error(e.message);
+    logger.close();
   }
-  logger.close();
 }
 
 export async function startServer(): Promise<void> {
   const { logger } = new Logger("API");
-
   logger.info(
     [
       dirname(process.execPath),
@@ -83,6 +85,8 @@ export async function startServer(): Promise<void> {
   app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: false,
   });
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // WS adapter
   app.useWebSocketAdapter(new WsAdapter(app, wsPort));
@@ -110,11 +114,17 @@ export async function startServer(): Promise<void> {
   server = app.getHttpServer();
 
   if (!server) {
-    console.error("No server found!. Aborting");
+    const { logger } = new Logger("API");
+    logger.error("No server found! Aborting");
+    logger.close();
     return;
   }
 
-  server.on("error", (error: any) => logger.error(`Server error: ${error}`));
+  server.on("error", (error: any) => {
+    const { logger } = new Logger("API");
+    logger.error(`Server error: ${error}`);
+    logger.close();
+  });
   server.on("listening", async () => {
     const { logger } = new Logger("API");
     logger.info(`API started on port ${apiPort}`);
@@ -223,5 +233,11 @@ export async function stopServer(): Promise<void> {
   events = undefined;
   rtc = undefined;
 }
+
+process.on("uncaughtException", (error: any) => {
+  const { logger } = new Logger("API");
+  logger.error(`Uncaught Exception: ${error}`);
+  logger.close();
+});
 
 if (!app) startServer();

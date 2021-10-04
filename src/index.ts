@@ -122,6 +122,11 @@ function killAllProcesses(): void {
   }
 }
 
+process.on("uncaughtException", (error: any) => {
+  const { logger } = new Logger("Process Manager");
+  logger.error(`Uncaught Exception: ${error}`);
+  logger.close();
+});
 process.on("beforeExit", () => killAllProcesses());
 process.on("SIGKILL", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
