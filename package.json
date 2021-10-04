@@ -162,6 +162,7 @@
     ],
     "outputPath": "out",
     "scripts": [
+      "dist/**/**.js",
       "dist/index.js",
       "dist/components/api/index.js",
       "dist/components/api/audio/data/win32.js",
