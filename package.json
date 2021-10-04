@@ -118,7 +118,7 @@
     "eslint-plugin-import": "2.24.2",
     "eslint-plugin-prettier": "4.0.0",
     "jest": "27.2.4",
-    "jest-junit": "12.3.0",
+    "jest-junit": "13.0.0",
     "pkg": "5.3.3",
     "prettier": "2.4.1",
     "shx": "0.3.3",
