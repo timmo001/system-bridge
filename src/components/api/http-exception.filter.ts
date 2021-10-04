@@ -12,20 +12,26 @@ import { Logger } from "../logger";
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
+    let exceptionResponse = exception.getResponse();
+
+    if (typeof exceptionResponse !== "object") {
+      exceptionResponse = {};
+    }
+
+    exceptionResponse = {
+      ...exceptionResponse,
+      body: request.body,
+      message: exception.message,
+      path: request.url,
+    };
 
     const { logger } = new Logger("API Execption");
-    logger.error(
-      `HTTP Exception: ${status} - ${request.url} - ${request.body}`
-    );
+    logger.warn(`HTTP Exception: ${JSON.stringify(exceptionResponse)}`);
     logger.close();
 
-    response.status(status).json({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+    response.status(status).json(exceptionResponse);
   }
 }
