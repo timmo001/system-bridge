@@ -83,7 +83,9 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
   logger.close();
 
   subprocess.on("error", (error: Error) => {
+    const { logger } = new Logger("Process Manager");
     logger.error(`${name} error: ${error.message}`);
+    logger.close();
   });
 
   subprocess.on("exit", (code: number | null) => {
