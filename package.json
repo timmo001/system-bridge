@@ -164,6 +164,8 @@
     "scripts": [
       "dist/index.js",
       "dist/components/api/index.js",
+      "dist/components/api/audio/data/win32.js",
+      "dist/components/api/audio/data/unix.js",
       "frontend/.next/**/*.js"
     ],
     "targets": [
