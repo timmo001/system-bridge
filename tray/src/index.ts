@@ -15,7 +15,6 @@ import {
 import { Logger } from "./components/logger";
 import { WebSocketConnection } from "./components/websocket";
 
-const { logger } = new Logger("Tray");
 interface ExtendedMenuItem extends MenuItem {
   click: () => void;
 }
@@ -25,6 +24,7 @@ interface ExtendedClickEvent extends ClickEvent {
 }
 
 async function setupTray(): Promise<void> {
+  const { logger } = new Logger("Tray");
   const updates = await getUpdates(logger);
 
   logger.info(
@@ -227,7 +227,9 @@ async function setupTray(): Promise<void> {
           checked: false,
           enabled: true,
           click: async () => {
+            const { logger } = new Logger("Tray");
             logger.info("Exit application");
+            logger.close();
             const connection = await getConnection();
             const settings = await getSettingsObject(connection);
             await connection.close();
@@ -262,5 +264,11 @@ async function setupTray(): Promise<void> {
 
   logger.close();
 }
+
+process.on("uncaughtException", (error: any) => {
+  const { logger } = new Logger("Tray");
+  logger.error(`Uncaught Exception: ${error}`);
+  logger.close();
+});
 
 setupTray();
