@@ -132,8 +132,7 @@
   "optionalDependencies": {
     "mdns": "2.7.2",
     "node-hide-console-window": "2.1.0",
-    "robotjs": "0.6.0",
-    "win-audio": "2.0.2"
+    "robotjs": "0.6.0"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -165,8 +164,6 @@
       "dist/**/**.js",
       "dist/index.js",
       "dist/components/api/index.js",
-      "dist/components/api/audio/data/win32.js",
-      "dist/components/api/audio/data/unix.js",
       "frontend/.next/**/*.js"
     ],
     "targets": [
