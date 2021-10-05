@@ -7844,6 +7844,11 @@ wide-align@^1.1.0:
   dependencies:
     string-width "^1.0.2 || 2"
 
+win-audio@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/win-audio/-/win-audio-2.0.2.tgz#6c2f81f34b5786e7be67223da0261c13a6836e63"
+  integrity sha512-yrGFjfU7hOb4FeOwE+VKaqOdYPBDijnJGDMHsyURJoV1Ko8V6SvvjeAdnmucLrRsJLdVCrA8CkOTdrJTmhfa8g==
+
 windows-release@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/windows-release/-/windows-release-4.0.0.tgz#4725ec70217d1bf6e02c7772413b29cdde9ec377"
