@@ -57,7 +57,7 @@ function LogsComponent(): ReactElement {
         query.apiPort || 9170
       }/logs`,
       {
-        headers: { "api-key": query.apiKey },
+        headers: { "api-key": query.apiKey as string },
       }
     );
     if (response && response.status < 400) {
