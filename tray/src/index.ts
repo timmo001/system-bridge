@@ -271,4 +271,6 @@ process.on("uncaughtException", (error: any) => {
   logger.close();
 });
 
-setupTray();
+(async () => {
+  setupTray();
+})();

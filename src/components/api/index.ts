@@ -240,4 +240,6 @@ process.on("uncaughtException", (error: any) => {
   logger.close();
 });
 
-if (!app) startServer();
+(async () => {
+  if (!app) startServer();
+})();
