@@ -77,25 +77,25 @@ function Item({
     if (originalItem === undefined && item) setOriginalItem(item);
   }, [originalItem, item]);
 
-  function handleSetSetting(value: string | number | boolean) {
-    if (typeof value !== "boolean" && !Number.isNaN(Number(value)))
-      value = Number(value);
-    console.log("handleSetSetting:", { sectionKey, itemKey, value });
+  function handleSetSetting(valueIn: string | number | boolean) {
+    if (typeof valueIn !== "boolean" && !Number.isNaN(Number(valueIn)))
+      valueIn = Number(valueIn);
+    console.log("handleSetSetting:", { sectionKey, itemKey, value: valueIn });
     if (item) {
-      setItem({ ...item, value });
+      setItem({ ...item, value: valueIn });
       if (settings) {
         const newSettings: Configuration = settings;
-        newSettings[sectionKey].items[itemKey].value = value;
+        newSettings[sectionKey].items[itemKey].value = valueIn;
         setSettings(newSettings);
         axios.put<Setting>(
           `http://${query.apiHost || window.location.hostname}:${
             query.apiPort || 9170
           }/settings/${sectionKey}-${itemKey}`,
           {
-            value: String(value),
+            value: String(valueIn),
           },
           {
-            headers: { "api-key": query.apiKey },
+            headers: { "api-key": query.apiKey as string },
           }
         );
         if (newSettings[sectionKey].items[itemKey].requiresServerRestart)

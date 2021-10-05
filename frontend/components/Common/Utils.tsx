@@ -26,7 +26,7 @@ export async function getInformation(
       query.apiPort || 9170
     }/information`,
     {
-      headers: { "api-key": query.apiKey },
+      headers: { "api-key": query.apiKey as string },
     }
   );
   if (response.status > 204 || !response.data) {
@@ -45,7 +45,7 @@ export async function getSettings(
       query.apiPort || 9170
     }/settings`,
     {
-      headers: { "api-key": query.apiKey },
+      headers: { "api-key": query.apiKey as string },
     }
   );
   if (
@@ -81,7 +81,7 @@ export async function getSettings(
             value: String(s[sectionKey].items[itemKey].defaultValue),
           },
           {
-            headers: { "api-key": query.apiKey },
+            headers: { "api-key": query.apiKey as string },
           }
         );
     });

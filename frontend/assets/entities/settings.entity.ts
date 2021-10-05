@@ -8,7 +8,7 @@ export interface UpdateSetting {
 }
 
 export interface Setting {
-  key: string;
+  key?: string;
   value: string;
 }
 
