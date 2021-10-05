@@ -736,10 +736,10 @@
     multer "1.4.3"
     tslib "2.3.1"
 
-"@nestjs/platform-ws@8.0.9":
-  version "8.0.9"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.0.9.tgz#0e6ac5ceb9e0114119188e2ce2720db0a24e4552"
-  integrity sha512-LWP9kBMHxxQd6OUlizTxercJK3wKP6VoS0g3usClQJUz7sjiWLmncRf8KTHXICGumQYaTi+GtiZeLKVwIei52g==
+"@nestjs/platform-ws@8.0.10":
+  version "8.0.10"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.0.10.tgz#1a0b68bbcf290d1daa64939fc6191a141fbfca05"
+  integrity sha512-ZAG15owmv/A2yICKpTeuscTGZq6TrReBlu3+7rTnRcAOd2MklIVkwh4jiwrMUidOY2x6wTiuCnmIOiNuJFhnCg==
   dependencies:
     tslib "2.3.1"
     ws "7.5.5"
