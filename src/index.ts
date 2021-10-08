@@ -130,7 +130,6 @@ process.on("uncaughtException", (error: any) => {
   logger.close();
 });
 process.on("beforeExit", () => killAllProcesses());
-process.on("SIGKILL", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
 
 processes.api = setupSubprocess("api");
