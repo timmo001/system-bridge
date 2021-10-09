@@ -15,6 +15,7 @@ config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
 const PATH_TRAY = join(__dirname, "../tray/dist/index.js");
+const PATH_EXE = join(dirname(process.execPath), "system-bridge.exe");
 const PATH_TRAY_EXE = join(dirname(process.execPath), "system-bridge-tray.exe");
 
 const DEFAULT_ENV = {
@@ -68,7 +69,10 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       return null;
     case "api":
       logger.info(`PATH_API: ${PATH_API}`);
-      subprocess = execa.node(PATH_API, [], DEFAULT_OPTIONS);
+      subprocess =
+        process.env.SB_PACKAGED !== "false"
+          ? execa(PATH_EXE, [PATH_API], DEFAULT_EXE_OPTIONS)
+          : execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "tray":
       logger.info(
