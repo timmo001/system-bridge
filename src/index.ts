@@ -13,8 +13,8 @@ interface Process {
 // Get process environment variables
 config();
 
-const PATH_API = "dist/components/api/index.js";
-const PATH_TRAY = "tray/dist/index.js";
+const PATH_API = join(__dirname, "components/api/index.js");
+const PATH_TRAY = join(__dirname, "../tray/dist/index.js");
 const PATH_TRAY_EXE = join(dirname(process.execPath), "system-bridge-tray.exe");
 
 const DEFAULT_ENV = {
@@ -61,13 +61,21 @@ const processes: Process = {};
 
 function setupSubprocess(name: string): ExecaChildProcess | null {
   let subprocess: ExecaChildProcess;
+  const { logger } = new Logger("Process Manager");
+
   switch (name) {
     default:
       return null;
     case "api":
+      logger.info(`PATH_API: ${PATH_API}`);
       subprocess = execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "tray":
+      logger.info(
+        `PATH_TRAY${process.env.SB_PACKAGED !== "false" ? "_EXE" : ""}: ${
+          process.env.SB_PACKAGED !== "false" ? PATH_TRAY_EXE : PATH_TRAY
+        }`
+      );
       subprocess =
         process.env.SB_PACKAGED !== "false"
           ? execa(PATH_TRAY_EXE, [], DEFAULT_EXE_OPTIONS)
@@ -78,7 +86,6 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
   subprocess.stdout.pipe(process.stdout);
   subprocess.stderr.pipe(process.stderr);
 
-  const { logger } = new Logger("Process Manager");
   logger.info(`Starting ${name} - ${JSON.stringify(subprocess.spawnargs)}`);
   logger.close();
 
