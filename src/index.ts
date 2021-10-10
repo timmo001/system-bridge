@@ -15,8 +15,14 @@ config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
 const PATH_TRAY = join(__dirname, "../tray/dist/index.js");
-const PATH_EXE = join(dirname(process.execPath), "system-bridge.exe");
-const PATH_TRAY_EXE = join(dirname(process.execPath), "system-bridge-tray.exe");
+const PATH_EXE = join(
+  dirname(process.execPath),
+  `system-bridge${process.platform === "win32" ? ".exe" : ""}`
+);
+const PATH_TRAY_EXE = join(
+  dirname(process.execPath),
+  `system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+);
 
 const DEFAULT_ENV = {
   NODE_ENV: process.env.NODE_ENV,
