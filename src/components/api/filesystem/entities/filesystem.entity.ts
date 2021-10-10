@@ -1,4 +1,3 @@
-import { ReadStream } from "fs";
 import { Systeminformation } from "systeminformation";
 
 export interface Filesystem {
