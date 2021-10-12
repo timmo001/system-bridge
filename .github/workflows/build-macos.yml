@@ -24,7 +24,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: build-macos-${{ github.head_ref || github.ref }}
+          ref: build-macos-${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.4.1
         with:
