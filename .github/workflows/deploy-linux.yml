@@ -7,7 +7,7 @@ on:
       - published
   workflow_run:
     workflows:
-      - "CI"
+      - "Build Linux"
     branches:
       - master
     types:
