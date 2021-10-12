@@ -1,0 +1,137 @@
+name: Build Linux
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-app-linux:
+    name: 🚀 Build Application - Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libavahi-compat-libdnssd-dev libxtst-dev libpng++-dev libxext-dev libxss-dev
+          wget https://github.com/goreleaser/nfpm/releases/download/v2.6.0/nfpm_amd64.deb
+          sudo apt install ./nfpm_amd64.deb
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: 16.x
+          cache: yarn
+      - name: 🏗 Install dependencies
+        run: |
+          yarn install:all:ci
+      - name: 🧹 Auto Clean
+        run: |
+          yarn autoclean:all
+      - name: 🚀 Package
+        run: |
+          yarn package
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-out
+          path: out
+      - name: 🚀 Create apk file
+        run: |
+          nfpm package --config nfpm.yaml --packager apk
+      - name: ⬆ Upload Artifacts - apk
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-apk
+          path: "*.apk"
+      - name: 🚀 Create deb file
+        run: |
+          nfpm package --config nfpm.yaml --packager deb
+      - name: ⬆ Upload Artifacts - deb
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-deb
+          path: "*.deb"
+      - name: 🚀 Create rpm file
+        run: |
+          nfpm package --config nfpm.yaml --packager rpm
+      - name: ⬆ Upload Artifacts - rpm
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-rpm
+          path: "*.rpm"
+  build-container:
+    name: 🚀 Build Container - ${{ matrix.architecture }}
+    runs-on: ubuntu-latest
+    needs:
+      - build-app-linux
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+          - amd64
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: ⤵️ Download Artifact - deb
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: linux-deb
+      - name: 🏗 Set up build cache
+        id: cache
+        uses: actions/cache@v2.1.6
+        with:
+          path: /tmp/.docker-cache
+          key: docker-${{ github.ref }}-${{ matrix.architecture }}-${{ github.sha }}
+          restore-keys: |
+            docker-${{ github.ref }}-${{ matrix.architecture }}
+      - name: 🏗 Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
+      - name: 🏗 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: ℹ️ Compose build flags
+        id: flags
+        run: |
+          echo "::set-output name=date::$(date +"%Y-%m-%dT%H:%M:%SZ")"
+          from=$(jq --raw-output ".build_from.${{ matrix.architecture }}" "build.json")
+          echo "::set-output name=from::${from}"
+          if [[ "${{ matrix.architecture}}" = "amd64" ]]; then
+            echo "::set-output name=platform::linux/amd64"
+          else
+            echo "::error ::Could not determine platform for architecture ${{ matrix.architecture }}"
+            exit 1
+          fi
+      - name: 🚀 Build
+        uses: docker/build-push-action@v2.7.0
+        with:
+          push: false
+          context: .
+          file: Dockerfile
+          cache-from: |
+            type=local,src=/tmp/.docker-cache
+            ghcr.io/timmo001/system-bridge/${{ matrix.architecture }}:edge
+          cache-to: type=local,mode=max,dest=/tmp/.docker-cache
+          platforms: ${{ steps.flags.outputs.platform }}
+          build-args: |
+            BUILD_ARCH=${{ matrix.architecture }}
+            BUILD_DATE=${{ steps.flags.outputs.date }}
+            BUILD_FROM=${{ steps.flags.outputs.from }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_REPOSITORY=${{ github.repository }}
+            BUILD_VERSION=edge
