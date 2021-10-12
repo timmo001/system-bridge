@@ -1,0 +1,59 @@
+name: Build MacOS
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-app-macos:
+    name: 🚀 Build Application - MacOS
+    runs-on: macos-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: 🏗 Set up Node.js
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: 16.x
+          cache: yarn
+      - name: 🏗 Install dependencies
+        run: |
+          yarn install:all:ci
+      - name: 🧹 Auto Clean
+        run: |
+          yarn autoclean:all
+      - name: 🚀 Package
+        run: |
+          yarn package
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-out
+          path: out
+      - name: 🚀 Create dmg file
+        run: |
+          plutil -lint ./scripts/Info.plist
+          mkdir -p SystemBridge.app/Contents/{MacOS,Resources}
+          cp scripts/Info.plist SystemBridge.app/Contents
+          cp out/{system-bridge,system-bridge-tray,xdg-open,traybin/tray_darwin_release} SystemBridge.app/Contents/MacOS
+          cp -R out/system-bridge-circle.* SystemBridge.app/Contents/Resources
+          npx appdmg appdmg.json SystemBridge.dmg
+      - name: ⬆ Upload Artifacts - dmg
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-dmg
+          path: "*.dmg"

@@ -1,0 +1,51 @@
+name: Build Windows
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-app-windows:
+    name: 🚀 Build Application - Windows
+    runs-on: self-hosted
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: 🏗 Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          yarn install:all:ci
+      - name: 🏗 Add console hide command
+        run: |
+          Add-Content -Path .\src\index.ts -Value $(Get-Content -Path .\scripts\windowsConsoleHide.js)
+      - name: 🚀 Package
+        run: |
+          yarn package
+      - name: ⬆ Upload Artifacts - Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-out
+          path: out
+      - name: 🚀 Create setup file
+        uses: joncloud/makensis-action@v3.6
+        with:
+          script-file: "scripts/installer.nsi"
+      - name: ⬆ Upload Artifacts - Setup
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-setup
+          path: "*setup.exe"
