@@ -24,7 +24,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: build-windows-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🏗 Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |

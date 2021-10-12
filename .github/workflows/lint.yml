@@ -24,7 +24,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🏗 Set up Node.js
         uses: actions/setup-node@v2.4.1
         with:
@@ -48,7 +48,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run JSONLint
         run: |
           sudo apt install -y jsonlint
@@ -69,7 +69,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run mdl
         uses: actionshub/markdownlint@2.0.2
   lint-markdown-links:
@@ -79,7 +79,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run Markdown Links
         uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
         with:
@@ -99,7 +99,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run Prettier
         uses: creyD/prettier_action@v4.0
         with:
@@ -113,7 +113,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2.3.4
         with:
-          ref: lint-${{ github.head_ref }}
+          ref: ${{ github.head_ref }}
       - name: 🚀 Run YAMLLint
         uses: ibiqlik/action-yamllint@v3.1
         with:
