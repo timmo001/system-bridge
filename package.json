@@ -62,7 +62,7 @@
     "@nestjs/typeorm": "8.0.2",
     "@nestjs/websockets": "8.0.11",
     "auto-launch": "5.0.5",
-    "axios": "0.22.0",
+    "axios": "0.23.0",
     "better-sqlite3": "7.4.3",
     "dotenv": "10.0.0",
     "execa": "5.1.1",
