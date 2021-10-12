@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy MacOS
 
 # yamllint disable-line rule:truthy
 on:
