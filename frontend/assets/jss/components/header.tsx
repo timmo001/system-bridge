@@ -44,6 +44,7 @@ const headerStyle = makeStyles((theme: Theme) => ({
     lineHeight: "30px",
     borderRadius: 3,
     textTransform: "none",
+    marginTop: -2,
     userSelect: "none",
     color: theme.palette.primary.contrastText,
     padding: "8px 16px",
