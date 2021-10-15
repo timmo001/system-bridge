@@ -10,6 +10,7 @@ const headerStyle = makeStyles((theme: Theme) => ({
     padding: "0.625rem 0",
     marginBottom: 20,
     width: "100%",
+    maxHeight: 88,
     boxShadow:
       "0 4px 18px 0px rgba(0, 0, 0, 0.12), 0 7px 10px -5px rgba(0, 0, 0, 0.15)",
     transition: "all 150ms ease 0s",
