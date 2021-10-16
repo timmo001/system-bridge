@@ -27,7 +27,7 @@ RUN \
     && rm -f /usr/share/applications/system-bridge.desktop \
     && rm -fr /usr/local/share/system-bridge/traybin \
     \
-    && mkdir -p /root/.local/share/system-bridge \
+    && mkdir -p /data/system-bridge \
     \
     && rm -fr \
         /tmp/* \

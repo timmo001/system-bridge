@@ -41,7 +41,7 @@ RUN \
     && mkdir -p /usr/local/share/system-bridge \
     && cp -r out/* /usr/local/share/system-bridge \
     \
-    && mkdir -p /root/.local/share/system-bridge \
+    && mkdir -p /data/system-bridge \
     \
     && yarn cache clean \
     && apk del --purge .build-dependencies \
