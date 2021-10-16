@@ -11,7 +11,7 @@ import { Setting } from "./entities/setting.entity";
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
 export const appDataDirectory = join(
-  process.env.APP_PATH ||
+  process.env.SB_APPDATA ||
     process.env.APPDATA ||
     (process.platform == "darwin"
       ? process.env.HOME + "/Library/Preferences"

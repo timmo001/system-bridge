@@ -9,7 +9,7 @@ import { join } from "path";
 export const LOG_PATH =
   process.env.LOG_PATH ||
   join(
-    process.env.APP_PATH ||
+    process.env.SB_APPDATA ||
       process.env.APPDATA ||
       (process.platform == "darwin"
         ? process.env.HOME + "/Library/Preferences"
