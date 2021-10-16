@@ -35,6 +35,7 @@
     "start": "yarn build:tray && concurrently -k \"yarn start:app\" \"yarn start:frontend\"",
     "start:dev": "yarn build:tray && concurrently -k \"yarn start:app:dev\" \"yarn start:frontend:dev\"",
     "start:prod": "cross-env SB_PACKAGED=false node dist/",
+    "start:prod:cli": "cross-env SB_PACKAGED=false SB_CLI=true SB_CONTAINER=true SB_TRAY=false node dist/",
     "start:app": "cross-env NODE_ENV=development SB_PACKAGED=false nest start",
     "start:app:cli": "cross-env NODE_ENV=development SB_CLI=true SB_PACKAGED=false SB_TRAY=false nest start",
     "start:app:cli:dev": "cross-env NODE_ENV=development SB_CLI=true SB_PACKAGED=false SB_TRAY=false nest start --watch",
