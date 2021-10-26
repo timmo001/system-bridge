@@ -1,6 +1,6 @@
 {
   "name": "system-bridge",
-  "version": "2.7.7",
+  "version": "2.7.8",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -56,7 +56,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@nestjs/common": "8.1.1",
+    "@nestjs/common": "8.1.2",
     "@nestjs/core": "8.1.1",
     "@nestjs/platform-express": "8.1.1",
     "@nestjs/platform-ws": "8.1.1",
