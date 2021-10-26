@@ -40,7 +40,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@types/react": "17.0.31",
+    "@types/react": "17.0.32",
     "@types/react-dom": "17.0.10",
     "eslint-import-resolver-typescript": "2.5.0",
     "eslint-plugin-import": "2.25.2",
