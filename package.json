@@ -87,7 +87,7 @@
     "swagger-ui-express": "4.1.6",
     "system-bridge-windows-sensors": "1.2.5",
     "systeminformation": "5.9.8",
-    "toad-scheduler": "1.5.0",
+    "toad-scheduler": "1.6.0",
     "typeorm": "0.2.38",
     "uuid": "8.3.2",
     "winston": "3.3.3",
