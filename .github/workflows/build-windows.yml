@@ -22,7 +22,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.5
+        uses: actions/checkout@v2.4.0
         with:
           ref: ${{ github.head_ref }}
       - name: 🏗 Install dependencies
