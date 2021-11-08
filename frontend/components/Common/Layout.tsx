@@ -24,7 +24,20 @@ function Layout(props: LayoutProps): ReactElement {
   const [information, setInformation] = useInformation();
   const [settings, setSettings] = useSettings();
 
-  const query = useRouter().query;
+  const router = useRouter();
+  const query = router.query;
+
+  useEffect(() => {
+    console.log(query, query.apiKey);
+    if (query && Object.keys(query).length > 0)
+      if (!query.apiKey) {
+        const response: string = window.prompt("Please enter your API key", "");
+        if (response)
+          router.replace(
+            `${router.pathname}?apiKey=${response}&apiPort=${query.apiPort}&wsPort=${query.wsPort}`
+          );
+      }
+  }, [query]);
 
   useEffect(() => {
     (async () => {
