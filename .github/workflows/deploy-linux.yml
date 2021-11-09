@@ -62,7 +62,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2.15.0
         with:
           name: linux-deb
-          workflow: ci.yml
+          workflow: build-linux.yml
           workflow_conclusion: success
       - name: 🏗 Set up build cache
         id: cache
@@ -127,7 +127,7 @@ jobs:
         with:
           name: linux-out
           path: linux-out
-          workflow: ci.yml
+          workflow: build-linux.yml
           workflow_conclusion: success
       - name: 🏗 Compress directories
         run: |
@@ -155,7 +155,7 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
-          workflow: ci.yml
+          workflow: build-linux.yml
           workflow_conclusion: success
       - name: ⬆ Upload to Release Assets
         uses: fnkr/github-action-ghr@v1.3

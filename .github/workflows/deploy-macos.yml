@@ -25,7 +25,7 @@ jobs:
         with:
           name: macos-out
           path: macos-out
-          workflow: ci.yml
+          workflow: build-macos.yml
           workflow_conclusion: success
       - name: 🏗 Compress directories
         run: |
@@ -46,7 +46,7 @@ jobs:
         with:
           name: macos-dmg
           path: macos-dmg
-          workflow: ci.yml
+          workflow: build-macos.yml
           workflow_conclusion: success
       - name: ⬆ Upload to Release Assets
         uses: fnkr/github-action-ghr@v1.3
