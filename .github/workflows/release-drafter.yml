@@ -15,6 +15,6 @@ on:
 
 jobs:
   workflows:
-    uses: timmo001/workflows/.github/workflows/release-drafter.yml@master
+    uses: timmo001/workflows/.github/workflows/release-drafter-node-executable.yml@master
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
