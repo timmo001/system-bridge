@@ -15,42 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-output:
-    name: 👷 Deploy Output to Release Assets
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: ⤵️ Download Artifact - macos-out
-        uses: dawidd6/action-download-artifact@v2.15.0
-        with:
-          name: macos-out
-          path: macos-out
-          workflow: build-macos.yml
-          workflow_conclusion: success
-      - name: 🏗 Compress directories
-        run: |
-          tar -czvf macos-out.tar.gz macos-out/*
-      - name: ⬆ Upload Artifacts to Release Assets
-        uses: fnkr/github-action-ghr@v1.3
-        env:
-          GHR_PATH: macos-out.tar.gz
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_REPLACE: true
-  deploy-packages:
-    name: 👷 Deploy Packages to Release Assets
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: ⤵️ Download Artifact - macos-dmg
-        uses: dawidd6/action-download-artifact@v2.15.0
-        with:
-          name: macos-dmg
-          path: macos-dmg
-          workflow: build-macos.yml
-          workflow_conclusion: success
-      - name: ⬆ Upload to Release Assets
-        uses: fnkr/github-action-ghr@v1.3
-        env:
-          GHR_PATH: macos-dmg
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_REPLACE: true
+  deploy-macos:
+    uses: timmo001/workflows/.github/workflows/deploy-node-executable-macos.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

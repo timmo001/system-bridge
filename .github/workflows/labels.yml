@@ -8,16 +8,12 @@ on:
       - master
     paths:
       - .github/labels.yml
+  schedule:
+    - cron: "34 5 * * *"
   workflow_dispatch:
 
 jobs:
   labels:
-    name: ♻️ Sync labels
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.4.0
-      - name: 🚀 Run Label Syncer
-        uses: micnncim/action-label-syncer@v1.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: timmo001/workflows/.github/workflows/labels.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

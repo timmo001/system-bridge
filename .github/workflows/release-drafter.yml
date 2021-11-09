@@ -14,54 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update_release_draft:
-    name: ✏️ Draft release
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🏗 Show event name
-        run: |
-          echo ${{ github.event }}
-          echo ${{ github.event_name }}
-          echo ${{ github.event_path }}
-          echo ${{ github.base_ref }}
-          echo ${{ github.actor }}
-      - name: 🚀 Run Release Drafter
-        id: release_drafter
-        uses: release-drafter/release-drafter@v5.15.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.4.0
-        with:
-          ref: ${{ github.head_ref }}
-      - name: ✏ Set Version File
-        if: ${{ github.event_name == 'pull_request_target' }}
-        run: |
-          echo "${{ steps.release_drafter.outputs.tag_name }}"
-          npm version ${{ steps.release_drafter.outputs.tag_name }} \
-            --allow-same-version \
-            --no-git-tag-version
-          cat package.json
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
-          sudo add-apt-repository ppa:rmescandon/yq
-          sudo apt update
-          sudo apt install yq
-          yq eval '.version = "${{ steps.release_drafter.outputs.tag_name }}"' nfpm.yaml -i
-          cd ./frontend
-          npm version ${{ steps.release_drafter.outputs.tag_name }} \
-            --allow-same-version \
-            --no-git-tag-version
-          cat package.json
-          cd ../tray
-          npm version ${{ steps.release_drafter.outputs.tag_name }} \
-            --allow-same-version \
-            --no-git-tag-version
-          cat package.json
-      - name: 🖊 Commit
-        uses: stefanzweifel/git-auto-commit-action@v4.12.0
-        if: ${{ github.event_name == 'pull_request_target' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          commit_message: |
-            Update version to ${{ steps.release_drafter.outputs.tag_name }}
+  release-drafter:
+    uses: timmo001/workflows/.github/workflows/release-drafter-node-executable.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

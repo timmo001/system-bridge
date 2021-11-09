@@ -15,42 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-output:
-    name: 👷 Deploy Output to Release Assets
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: ⤵️ Download Artifact - windows-out
-        uses: dawidd6/action-download-artifact@v2.15.0
-        with:
-          name: windows-out
-          path: windows-out
-          workflow: build-windows.yml
-          workflow_conclusion: success
-      - name: 🏗 Compress directories
-        run: |
-          tar -czvf windows-out.tar.gz windows-out/*
-      - name: ⬆ Upload Artifacts to Release Assets
-        uses: fnkr/github-action-ghr@v1.3
-        env:
-          GHR_PATH: windows-out.tar.gz
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_REPLACE: true
-  deploy-packages:
-    name: 👷 Deploy Packages to Release Assets
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: ⤵️ Download Artifact - windows-setup
-        uses: dawidd6/action-download-artifact@v2.15.0
-        with:
-          name: windows-setup
-          path: windows-setup
-          workflow: build-windows.yml
-          workflow_conclusion: success
-      - name: ⬆ Upload to Release Assets
-        uses: fnkr/github-action-ghr@v1.3
-        env:
-          GHR_PATH: windows-setup
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_REPLACE: true
+  deploy-windows:
+    uses: timmo001/workflows/.github/workflows/deploy-node-executable-windows.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,13 +9,6 @@ on:
 
 jobs:
   lock:
-    name: 🔒 Lock closed issues and PRs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dessant/lock-threads@v3
-        with:
-          github-token: ${{ github.token }}
-          issue-lock-inactive-days: "30"
-          issue-lock-reason: ""
-          pr-lock-inactive-days: "1"
-          pr-lock-reason: ""
+    uses: timmo001/workflows/.github/workflows/lock.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
