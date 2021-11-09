@@ -17,46 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-app-macos:
-    name: 🚀 Build Application - MacOS
-    runs-on: macos-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.4.0
-        with:
-          ref: ${{ github.head_ref }}
-      - name: 🏗 Set up Node.js
-        uses: actions/setup-node@v2.4.1
-        with:
-          node-version: 16.x
-          cache: yarn
-      - name: 🏗 Install dependencies
-        run: |
-          yarn install:all:ci
-      - name: 🧹 Auto Clean
-        run: |
-          yarn autoclean:all
-      - name: 🚀 Package
-        run: |
-          yarn package
-      - name: ⬆ Upload Artifacts - Output
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-out
-          path: out
-      - name: 🚀 Create dmg file
-        run: |
-          plutil -lint ./scripts/Info.plist
-          mkdir -p SystemBridge.app/Contents/{MacOS,Resources,MacOS/traybin}
-          cp scripts/Info.plist SystemBridge.app/Contents
-          cp out/{system-bridge,system-bridge-tray,xdg-open} SystemBridge.app/Contents/MacOS
-          cp out/traybin/tray_darwin_release SystemBridge.app/Contents/MacOS/traybin
-          cp out/system-bridge-circle.icns SystemBridge.app/Contents/Resources
-          cp -R out/system-bridge-circle.* SystemBridge.app/Contents/MacOS
-          cp out/package.json SystemBridge.app/Contents/MacOS
-          npx appdmg appdmg.json SystemBridge.dmg
-      - name: ⬆ Upload Artifacts - dmg
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-dmg
-          path: "*.dmg"
+  workflows:
+    uses: timmo001/workflows/.github/workflows/build-node-executable-macos.yml@master
+    secrets:
+      APP_NAME: SystemBridge
+      APP_FILE: system-bridge
+      ICON_NAME: system-bridge-circle
