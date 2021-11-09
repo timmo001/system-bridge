@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  workflows:
+  build-macos:
     uses: timmo001/workflows/.github/workflows/build-node-executable-macos.yml@master
     secrets:
       APP_NAME: SystemBridge

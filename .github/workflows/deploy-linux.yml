@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  workflows:
+  deploy-linux:
     uses: timmo001/workflows/.github/workflows/deploy-node-executable-linux.yml@master
     secrets:
       CONTAINER_SLUG: system-bridge

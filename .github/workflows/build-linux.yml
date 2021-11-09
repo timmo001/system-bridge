@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  workflows:
+  build-linux:
     uses: timmo001/workflows/.github/workflows/build-node-executable-linux.yml@master
     secrets:
       CONTAINER_SLUG: system-bridge

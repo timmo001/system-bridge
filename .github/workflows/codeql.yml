@@ -17,5 +17,5 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  workflows:
+  codeql-analyze:
     uses: timmo001/workflows/.github/workflows/codeql-javascript.yml@master

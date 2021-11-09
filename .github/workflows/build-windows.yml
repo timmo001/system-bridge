@@ -17,5 +17,5 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  workflows:
+  build-windows:
     uses: timmo001/workflows/.github/workflows/build-node-executable-windows.yml@master

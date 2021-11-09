@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  workflows:
+  deploy-macos:
     uses: timmo001/workflows/.github/workflows/deploy-node-executable-macos.yml@master
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
