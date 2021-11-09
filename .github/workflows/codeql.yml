@@ -19,5 +19,3 @@ concurrency:
 jobs:
   workflows:
     uses: timmo001/workflows/.github/workflows/codeql-javascript.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
