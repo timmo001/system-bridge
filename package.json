@@ -88,7 +88,7 @@
     "system-bridge-windows-sensors": "1.2.5",
     "systeminformation": "5.9.9",
     "toad-scheduler": "1.6.0",
-    "typeorm": "0.2.39",
+    "typeorm": "0.2.40",
     "uuid": "8.3.2",
     "winston": "3.3.3",
     "ws": "7.5.5"
