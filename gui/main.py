@@ -1,5 +1,6 @@
 import logging
 import sys
+from webbrowser import open_new_tab
 from argparse import ArgumentParser, Namespace
 from typing import Callable
 from PySide6.QtCore import Qt, QUrl
@@ -12,20 +13,30 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 
 PATH_DATA = "/app/data"
+PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
+
+URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
+URL_DOCS = "https://system-bridge.timmo.dev"
+URL_ISSUES = "https://github.com/timmo001/system-bridge/issues/new/choose"
 
 
 class Base:
+    """Base class"""
+
     def __init__(
         self,
         args: Namespace,
         logger: logging.Logger,
     ):
+        """Initialize the base class"""
         self.args = args
         self.logger = logger
 
 
 class SystemTrayIcon(QSystemTrayIcon):
+    """System Tray Icon"""
+
     def __init__(
         self,
         icon: QIcon,
@@ -33,11 +44,12 @@ class SystemTrayIcon(QSystemTrayIcon):
         exit: Callable[[], None],
         show_window: Callable[[str], None],
     ):
+        """Initialize the system tray icon"""
         QSystemTrayIcon.__init__(self, icon, parent)
         menu = QMenu()
         self.show_window = show_window
 
-        action_settings: QAction = menu.addAction("Settings")
+        action_settings: QAction = menu.addAction("Open Settings")
         action_settings.triggered.connect(self.showSettings)
 
         menu.addSeparator()
@@ -47,15 +59,56 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         menu.addSeparator()
 
+        menu_help = menu.addMenu("Help")
+
+        action_docs = menu_help.addAction("Documentation / Website")
+        action_docs.triggered.connect(self.openDocs)
+
+        action_feature = menu_help.addAction("Suggest a Feature")
+        action_feature.triggered.connect(self.openFeatureRequest)
+
+        action_issue = menu_help.addAction("Report an issue")
+        action_issue.triggered.connect(self.openIssues)
+
+        action_discussions = menu_help.addAction("Discussions")
+        action_discussions.triggered.connect(self.openDiscussions)
+
+        action_logs = menu_help.addAction("View Logs")
+        action_logs.triggered.connect(self.showLogs)
+
+        menu.addSeparator()
+
         menu.addAction("Exit", exit)
 
         self.setContextMenu(menu)
 
     def showData(self):
+        """Show api data"""
         self.show_window(PATH_DATA)
 
+    def showLogs(self):
+        """Show logs"""
+        self.show_window(PATH_LOGS)
+
     def showSettings(self):
+        """Show settings"""
         self.show_window(PATH_SETTINGS)
+
+    def openDocs(self):
+        """Open documentation"""
+        open_new_tab(URL_DOCS)
+
+    def openFeatureRequest(self):
+        """Open feature request"""
+        open_new_tab(URL_ISSUES)
+
+    def openIssues(self):
+        """Open issues"""
+        open_new_tab(URL_ISSUES)
+
+    def openDiscussions(self):
+        """Open discussions"""
+        open_new_tab(URL_DISCUSSIONS)
 
 
 class MainWindow(Base, QWidget):
@@ -64,6 +117,7 @@ class MainWindow(Base, QWidget):
         args: Namespace,
         logger: logging.Logger,
     ) -> None:
+        """Initialize the main window"""
         Base.__init__(self, args, logger)
         QWidget.__init__(self)
         self.layout = QVBoxLayout(self)
@@ -74,6 +128,7 @@ class MainWindow(Base, QWidget):
         self.layout.addWidget(self.browser)
 
     def closeEvent(self, evnt: QCloseEvent):
+        """Close the window instead of closing the app"""
         evnt.ignore()
         self.hide()
 
@@ -90,12 +145,15 @@ class MainWindow(Base, QWidget):
 
 
 class Main(Base):
+    """Main class"""
+
     def __init__(
         self,
         args: Namespace,
         logger: logging.Logger,
         app: QApplication,
     ) -> None:
+        """Initialize the main class"""
         super().__init__(args, logger)
         self.app = app
         self.icon = QIcon("public/system-bridge-circle.png")
@@ -114,6 +172,7 @@ class Main(Base):
         self.systemTrayIcon.show()
 
     def showWindow(self, path: str):
+        """Show the window"""
         self.logger.info(f"Showing window: {path}")
         self.main_window.setup(path)
         self.main_window.show()
