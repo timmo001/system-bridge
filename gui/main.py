@@ -1,26 +1,19 @@
 import sys
-import random
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 
 class MyWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
-
-        self.button = QtWidgets.QPushButton("Click me!")
-        self.text = QtWidgets.QLabel("Hello World", alignment=QtCore.Qt.AlignCenter)
+        self.browser = QWebEngineView(self)
+        self.browser.load(QtCore.QUrl("https://timmo.dev"))
 
         self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.button.clicked.connect(self.magic)
-
-    @QtCore.Slot()
-    def magic(self):
-        self.text.setText(random.choice(self.hello))
+        self.layout.addWidget(self.browser)
 
 
 if __name__ == "__main__":
