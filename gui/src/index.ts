@@ -24,7 +24,7 @@ interface ExtendedClickEvent extends ClickEvent {
 }
 
 async function setup(): Promise<void> {
-  const { logger } = new Logger("Tray");
+  const { logger } = new Logger("GUI");
   const updates = await getUpdates(logger);
 
   logger.info(
