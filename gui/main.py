@@ -1,13 +1,13 @@
 import logging
 import sys
-from webbrowser import open_new_tab
 from argparse import ArgumentParser, Namespace
-from typing import Callable
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QVBoxLayout, QWidget
+from typing import Callable
 from urllib.parse import urlencode
+from webbrowser import open_new_tab
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
