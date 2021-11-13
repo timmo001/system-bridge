@@ -71,4 +71,6 @@ Thumbs.db
 *.dll
 *.exe
 
+build/
+dist/
 venv/
