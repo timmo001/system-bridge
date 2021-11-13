@@ -73,6 +73,10 @@ class MainWindow(Base, QWidget):
 
         self.layout.addWidget(self.browser)
 
+    def closeEvent(self, evnt: QCloseEvent):
+        evnt.ignore()
+        self.hide()
+
     def setup(self, path) -> None:
         self.browser.load(
             QUrl(
@@ -83,10 +87,6 @@ class MainWindow(Base, QWidget):
                 })}"""
             )
         )
-
-    def closeEvent(self, evnt: QCloseEvent):
-        evnt.ignore()
-        self.hide()
 
 
 class Main(Base):
