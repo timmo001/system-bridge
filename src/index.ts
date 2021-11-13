@@ -14,14 +14,14 @@ interface Process {
 config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
-const PATH_TRAY = join(__dirname, "../tray/dist/index.js");
+const PATH_GUI = join(__dirname, "../gui/dist/index.js");
 const PATH_EXE = join(
   dirname(process.execPath),
   `system-bridge${process.platform === "win32" ? ".exe" : ""}`
 );
-const PATH_TRAY_EXE = join(
+const PATH_GUI_EXE = join(
   dirname(process.execPath),
-  `system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+  `system-bridge-gui${process.platform === "win32" ? ".exe" : ""}`
 );
 
 const DEFAULT_ENV = {
@@ -59,7 +59,7 @@ logger.info(
     process.env.NODE_ENV,
     process.env.SB_CLI,
     process.env.SB_PACKAGED,
-    process.env.SB_TRAY,
+    process.env.SB_GUI,
   ].join(" - ")}`
 );
 logger.close();
@@ -80,16 +80,16 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
           ? execa(PATH_EXE, [PATH_API], DEFAULT_EXE_OPTIONS)
           : execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
-    case "tray":
+    case "gui":
       logger.info(
-        `PATH_TRAY${process.env.SB_PACKAGED !== "false" ? "_EXE" : ""}: ${
-          process.env.SB_PACKAGED !== "false" ? PATH_TRAY_EXE : PATH_TRAY
+        `PATH_GUI${process.env.SB_PACKAGED !== "false" ? "_EXE" : ""}: ${
+          process.env.SB_PACKAGED !== "false" ? PATH_GUI_EXE : PATH_GUI
         }`
       );
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_TRAY_EXE, [], DEFAULT_EXE_OPTIONS)
-          : execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
+          ? execa(PATH_GUI_EXE, [], DEFAULT_EXE_OPTIONS)
+          : execa.node(PATH_GUI, [], DEFAULT_OPTIONS);
       break;
   }
 
@@ -150,4 +150,4 @@ process.on("beforeExit", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
 
 processes.api = setupSubprocess("api");
-if (process.env.SB_TRAY !== "false") processes.tray = setupSubprocess("tray");
+if (process.env.SB_GUI !== "false") processes.gui = setupSubprocess("gui");

@@ -60,19 +60,19 @@ const filePaths = [
     cli: false,
   },
   {
-    from: "../tray/node_modules/systray2/traybin/tray_darwin_release",
+    from: "../gui/node_modules/systray2/traybin/tray_darwin_release",
     to: "../out/traybin/tray_darwin_release",
     platform: "darwin",
     cli: false,
   },
   {
-    from: "../tray/node_modules/systray2/traybin/tray_linux_release",
+    from: "../gui/node_modules/systray2/traybin/tray_linux_release",
     to: "../out/traybin/tray_linux_release",
     platform: "linux",
     cli: false,
   },
   {
-    from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
+    from: "../gui/node_modules/systray2/traybin/tray_windows_release.exe",
     to: "../out/traybin/tray_windows_release.exe",
     platform: "win32",
     cli: false,
@@ -143,11 +143,11 @@ async function package() {
 
   if (process.env.APP_ONLY !== "true")
     await exec([
-      join(__dirname, "../tray"),
+      join(__dirname, "../gui"),
       "--output",
       join(
         __dirname,
-        `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+        `../out/system-bridge-gui${process.platform === "win32" ? ".exe" : ""}`
       ),
       "--options",
       "--max_old_space_size=4096",

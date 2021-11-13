@@ -23,7 +23,7 @@ interface ExtendedClickEvent extends ClickEvent {
   item: ExtendedMenuItem;
 }
 
-async function setupTray(): Promise<void> {
+async function setup(): Promise<void> {
   const { logger } = new Logger("Tray");
   const updates = await getUpdates(logger);
 
@@ -191,7 +191,7 @@ async function setupTray(): Promise<void> {
     },
   ];
 
-  logger.info("Create Tray");
+  logger.info("Create GUI");
 
   let icon = "";
   try {
@@ -227,7 +227,7 @@ async function setupTray(): Promise<void> {
           checked: false,
           enabled: true,
           click: async () => {
-            const { logger } = new Logger("Tray");
+            const { logger } = new Logger("GUI");
             logger.info("Exit application");
             logger.close();
             const connection = await getConnection();
@@ -266,11 +266,11 @@ async function setupTray(): Promise<void> {
 }
 
 process.on("uncaughtException", (error: any) => {
-  const { logger } = new Logger("Tray");
+  const { logger } = new Logger("GUI");
   logger.error(`Uncaught Exception: ${error}`);
   logger.close();
 });
 
 (async () => {
-  setupTray();
+  await setup();
 })();

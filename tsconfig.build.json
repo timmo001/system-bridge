@@ -7,7 +7,7 @@
     "node_modules",
     "public",
     "test",
-    "tray"
+    "gui"
   ],
   "extends": "./tsconfig.json"
 }
