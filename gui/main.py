@@ -59,7 +59,7 @@ if __name__ == "__main__":
     widget = MainWindow(args)
     widget.setWindowTitle("System Bridge")
     widget.setWindowIcon(QIcon("public/system-bridge-circle.png"))
-    widget.resize(1280, 720)
+    widget.resize(1920, 1080)
     widget.show()
 
     sys.exit(app.exec())
