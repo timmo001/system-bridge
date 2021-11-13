@@ -48,3 +48,4 @@ junit.xml
 *.rpm
 *.dmg
 *.app
+.vscode/
