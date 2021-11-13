@@ -14,7 +14,7 @@ interface Process {
 config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
-const PATH_GUI = join(__dirname, "../gui/dist/index.js");
+const PATH_GUI = join(__dirname, "../gui/dist/REPLACEME");
 const PATH_EXE = join(
   dirname(process.execPath),
   `system-bridge${process.platform === "win32" ? ".exe" : ""}`
