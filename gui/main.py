@@ -1,10 +1,13 @@
+import asyncio
 import logging
 import sys
+from aiohttp.client import ClientSession
 from argparse import ArgumentParser, Namespace
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import QUrl
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QVBoxLayout, QWidget
+from systembridge import Bridge, BridgeClient
 from typing import Callable
 from urllib.parse import urlencode
 from webbrowser import open_new_tab
@@ -80,7 +83,8 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         menu.addSeparator()
 
-        menu.addAction("Exit", exit)
+        action_exit = menu.addAction("Exit")
+        action_exit.triggered.connect(exit)
 
         self.setContextMenu(menu)
 
@@ -135,6 +139,7 @@ class MainWindow(Base, QWidget):
         self.hide()
 
     def setup(self, path) -> None:
+        """Setup the main window"""
         self.browser.load(
             QUrl(
                 f"""http://{self.args.hostname}:{self.args.port}{path}?{urlencode({
@@ -159,6 +164,7 @@ class Main(Base):
         super().__init__(args, logger)
         self.app = app
         self.icon = QIcon("public/system-bridge-circle.png")
+        asyncio.run(self.setupBridge())
 
         self.main_window = MainWindow(self.args, self.logger)
         self.main_window.setWindowTitle("System Bridge")
@@ -167,14 +173,37 @@ class Main(Base):
 
         self.systemTrayIcon = SystemTrayIcon(
             self.icon,
-            app,
-            app.quit,
+            self.app,
+            self.exitApplication,
             self.showWindow,
         )
         self.systemTrayIcon.show()
 
+    def exitApplication(self) -> None:
+        """Exit the application"""
+        self.logger.info("Exiting application..")
+        asyncio.run(self.exitBackend())
+        self.app.quit()
+
+    async def exitBackend(self) -> None:
+        """Exit the backend"""
+        await self.bridge.async_connect_websocket(
+            self.args.hostname,
+            self.args.websocket_port,
+        )
+        await self.bridge.async_send_event("exit-application", {})
+
+    async def setupBridge(self) -> None:
+        """Setup the bridge"""
+        async with ClientSession() as session:
+            self.bridge = Bridge(
+                session,
+                f"http://{self.args.hostname}:{self.args.port}",
+                self.args.api_key,
+            )
+
     def showWindow(self, path: str):
-        """Show the window"""
+        """Show the main window"""
         self.logger.info(f"Showing window: {path}")
         self.main_window.setup(path)
         self.main_window.show()
