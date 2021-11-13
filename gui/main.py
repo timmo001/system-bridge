@@ -1,25 +1,29 @@
 import sys
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtCore import QUrl
+from PySide6.QtGui import QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.browser = QWebEngineView(self)
-        self.browser.load(QtCore.QUrl("https://timmo.dev"))
+        self.browser = QWebEngineView()
+        self.browser.load(QUrl("https://timmo.dev"))
 
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.browser)
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
+    app = QApplication([])
 
     widget = MyWidget()
+    widget.setWindowTitle("System Bridge")
+    widget.setWindowIcon(QIcon("public/system-bridge-circle.png"))
     widget.resize(800, 600)
     widget.show()
 
