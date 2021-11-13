@@ -73,6 +73,8 @@ class SystemTrayIcon(QSystemTrayIcon):
         action_discussions = menu_help.addAction("Discussions")
         action_discussions.triggered.connect(self.openDiscussions)
 
+        menu_help.addSeparator()
+
         action_logs = menu_help.addAction("View Logs")
         action_logs.triggered.connect(self.showLogs)
 
@@ -180,12 +182,39 @@ class Main(Base):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-ah", "--host", dest="hostname", help="API Hostname")
-    parser.add_argument("-ak", "--api-key", dest="api_key", help="API key")
-    parser.add_argument("-ap", "--api-port", dest="port", help="API Port")
-    parser.add_argument("-ll", "--log-level", dest="log_level", help="Log level")
     parser.add_argument(
-        "-wp", "--websocket-port", dest="websocket_port", help="WebSocket Port"
+        "-ah",
+        "--host",
+        dest="hostname",
+        help="API Hostname",
+        default="localhost",
+    )
+    parser.add_argument(
+        "-ak",
+        "--api-key",
+        dest="api_key",
+        help="API key",
+    )
+    parser.add_argument(
+        "-ap",
+        "--api-port",
+        dest="port",
+        help="API Port",
+        default=9170,
+    )
+    parser.add_argument(
+        "-ll",
+        "--log-level",
+        dest="log_level",
+        help="Log level",
+        default="INFO",
+    )
+    parser.add_argument(
+        "-wp",
+        "--websocket-port",
+        dest="websocket_port",
+        help="WebSocket Port",
+        default=9172,
     )
 
     args = parser.parse_args()
