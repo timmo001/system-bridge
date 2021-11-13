@@ -191,7 +191,7 @@ async function setup(): Promise<void> {
     },
   ];
 
-  logger.info("Create GUI");
+  logger.info("Create Tray");
 
   let icon = "";
   try {
@@ -253,7 +253,7 @@ async function setup(): Promise<void> {
 
   if (systray) {
     await systray.ready();
-    logger.info("Started");
+    logger.info("Tray Started");
 
     systray.onError((err: Error) => logger.error(`Error: ${err.message}`));
 
