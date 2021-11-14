@@ -29,10 +29,11 @@ if path is None:
 
 print(path)
 
-with io.open(path, encoding="utf-8") as f:
-    package = json.load(f)
+if path is not None:
+    with io.open(path, encoding="utf-8") as f:
+        package = json.load(f)
 
-version = package["version"]
+    version = package["version"]
 
 print(version)
 
