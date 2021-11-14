@@ -36,15 +36,15 @@ version = package["version"]
 
 print(version)
 
-# setup(
-#     name="systembridgegui",
-#     version=version,
-#     description="System Bridge GUI",
-#     keywords="system bridge gui",
-#     author="Aidan Timson (Timmo)",
-#     author_email="contact@timmo.xyz",
-#     license="MIT",
-#     url="https://github.com/timmo001/system-bridge",
-#     packages=find_packages(exclude=["tests", "generator"]),
-#     install_requires=requirements,
-# )
+setup(
+    name="systembridgegui",
+    version=version,
+    description="System Bridge GUI",
+    keywords="system bridge gui",
+    author="Aidan Timson (Timmo)",
+    author_email="contact@timmo.xyz",
+    license="MIT",
+    url="https://github.com/timmo001/system-bridge",
+    packages=find_packages(exclude=["tests", "generator"]),
+    install_requires=requirements,
+)
