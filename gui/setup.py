@@ -29,6 +29,8 @@ if path is None:
 
 print(path)
 
+version = None
+
 if path is not None:
     with io.open(path, encoding="utf-8") as f:
         package = json.load(f)
