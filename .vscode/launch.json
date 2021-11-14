@@ -24,7 +24,7 @@
         "debug"
       ],
       "request": "launch",
-      "program": "gui/main.py",
+      "program": "gui/__init__.py",
       "console": "integratedTerminal"
     }
   ]

@@ -20,7 +20,7 @@ hiddenimports += tmp_ret[2]
 block_cipher = None
 
 a = Analysis(
-    ["main.py"],
+    ["__init__.py"],
     pathex=[],
     binaries=binaries,
     datas=datas,
