@@ -87,6 +87,7 @@
     "toad-scheduler": "1.6.0",
     "typeorm": "0.2.40",
     "uuid": "8.3.2",
+    "wait-on": "6.0.0",
     "winston": "3.3.3",
     "ws": "7.5.5"
   },

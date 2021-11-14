@@ -2,8 +2,14 @@ import { config } from "dotenv";
 import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
+import waitOn from "wait-on";
 
-import { appDataDirectory, getVersion } from "./components/common";
+import {
+  appDataDirectory,
+  getConnection,
+  getSettingsObject,
+  getVersion,
+} from "./components/common";
 import { Logger } from "./components/logger";
 
 interface Process {
@@ -47,6 +53,8 @@ const DEFAULT_OPTIONS_PACKAGED: NodeOptions = {
   cwd: dirname(process.execPath),
   env: DEFAULT_ENV,
 };
+
+let settings: { [key: string]: string };
 
 const { logger } = new Logger();
 
@@ -97,11 +105,12 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         "--host",
         "localhost",
         "--api-key",
-        process.env.SB_API_KEY, // TODO: Get API key from config
+        settings["network-apiKey"],
         "--api-port",
-        "9170",
+        settings["network-apiPort"] || "9170",
         "--websocket-port",
         "9172",
+        settings["network-wsPort"] || "9172",
         "--log-level",
         process.env.NODE_ENV === "development" ? "debug" : "info",
       ];
@@ -169,4 +178,20 @@ process.on("beforeExit", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
 
 processes.api = setupSubprocess("api");
-if (process.env.SB_GUI !== "false") processes.gui = setupSubprocess("gui");
+if (process.env.SB_GUI !== "false") {
+  (async () => {
+    const connection = await getConnection();
+    settings = await getSettingsObject(connection);
+    await connection.close();
+
+    const apiPort = Number(settings["network-apiPort"]) || 9170;
+    const apiKey = settings["network-apiKey"];
+    await waitOn({
+      delay: 2000,
+      interval: 500,
+      resources: [`http://localhost:${apiPort}/system`],
+      headers: { "api-key": apiKey },
+    });
+    processes.gui = setupSubprocess("gui");
+  })();
+}
