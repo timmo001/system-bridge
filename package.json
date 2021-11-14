@@ -22,7 +22,7 @@
     "build": "yarn build:frontend && yarn build:app && yarn build:gui",
     "build:app": "rimraf dist && nest build",
     "build:frontend": "cd frontend && yarn build",
-    "build:gui": "cd gui && python3 -m pip install -r requirements.txt && pyinstaller --noconfirm system-bridge-gui.spec",
+    "build:gui": "cd gui && python3 -m pip install . && pyinstaller --noconfirm system-bridge-gui.spec",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "install:all": "yarn install && cd frontend && yarn install",
     "install:all:ci": "yarn install --pure-lockfile && cd frontend && yarn install --pure-lockfile",
