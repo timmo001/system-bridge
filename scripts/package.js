@@ -66,24 +66,6 @@ const filePaths = [
     cli: false,
   },
   {
-    from: "../tray/node_modules/systray2/traybin/tray_darwin_release",
-    to: "../out/traybin/tray_darwin_release",
-    platform: "darwin",
-    cli: false,
-  },
-  {
-    from: "../tray/node_modules/systray2/traybin/tray_linux_release",
-    to: "../out/traybin/tray_linux_release",
-    platform: "linux",
-    cli: false,
-  },
-  {
-    from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
-    to: "../out/traybin/tray_windows_release.exe",
-    platform: "win32",
-    cli: false,
-  },
-  {
     from: "../node_modules/system-bridge-windows-sensors/dist/WindowsSensors/HidSharp.dll",
     to: "../out/WindowsSensors/HidSharp.dll",
     platform: "win32",
@@ -136,36 +118,45 @@ const filePaths = [
 ];
 
 async function package() {
-  await exec([
-    join(__dirname, "../"),
-    "--output",
-    join(
-      __dirname,
-      `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
-    ),
-    "--options",
-    "--max_old_space_size=4096",
-  ]);
+  // await exec([
+  //   join(__dirname, "../"),
+  //   "--output",
+  //   join(
+  //     __dirname,
+  //     `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
+  //   ),
+  //   "--options",
+  //   "--max_old_space_size=4096",
+  // ]);
 
   filePaths
-    .filter((path) =>
-      process.env.SB_CLI && path.cli === false
-        ? false
-        : path.platform
-        ? path.platform === process.platform
-        : true
-    )
+    .filter((path) => {
+      const shouldCopy =
+        process.env.SB_CLI && path.cli === false
+          ? false
+          : path.platform
+          ? path.platform === process.platform
+          : true;
+
+      console.log(`${path.from} -> ${path.to}`, shouldCopy ? "✅" : "❌");
+
+      return shouldCopy;
+    })
     .forEach((path) => {
       const sourceFile = join(__dirname, path.from);
-      if (existsSync(sourceFile)) {
+      const targetFile = join(__dirname, path.to);
+      const sourceExists = existsSync(sourceFile);
+      console.log(
+        `Copy ${sourceFile} -> ${targetFile}`,
+        sourceExists ? "✅" : "❌"
+      );
+      if (sourceExists) {
         const targetDir = join(
           __dirname,
           path.to.substring(0, path.to.lastIndexOf("/"))
         );
         if (!existsSync(targetDir)) mkdirSync(targetDir);
-        const targetFile = join(__dirname, path.to);
-        console.log(`Copy ${sourceFile} to ${targetFile}`);
-        copySync(sourceFile, targetFile);
+        copySync(sourceFile, targetFile, {});
       }
     });
 }
