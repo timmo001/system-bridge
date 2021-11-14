@@ -184,7 +184,7 @@ class MainWindow(Base, QWidget):
     def setup(self, path) -> None:
         """Setup the main window"""
         url = QUrl(
-            f"""http://{self.args.hostname}:{self.args.port}{path}?{urlencode({
+            f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
                     "apiKey": self.args.api_key,
                     "apiPort": self.args.port,
                     "wsPort": self.args.websocket_port,
@@ -279,6 +279,13 @@ if __name__ == "__main__":
         "--api-port",
         dest="port",
         help="API Port",
+        default=9170,
+    )
+    parser.add_argument(
+        "-fp",
+        "--frontend-port",
+        dest="frontend_port",
+        help="Frontend Port",
         default=9170,
     )
     parser.add_argument(

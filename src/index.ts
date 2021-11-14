@@ -108,10 +108,14 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         settings["network-apiKey"],
         "--api-port",
         settings["network-apiPort"] || "9170",
-        "--websocket-port",
-        settings["network-wsPort"] || "9172",
+        "--frontend-port",
+        process.env.NODE_ENV === "development"
+          ? "3000"
+          : settings["network-apiPort"] || "9170",
         "--log-level",
         process.env.NODE_ENV === "development" ? "debug" : "info",
+        "--websocket-port",
+        settings["network-wsPort"] || "9172",
       ];
       subprocess =
         process.env.SB_PACKAGED !== "false"
@@ -123,7 +127,14 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
   subprocess.stdout.pipe(process.stdout);
   subprocess.stderr.pipe(process.stderr);
 
-  logger.info(`Starting ${name} - ${JSON.stringify(subprocess.spawnargs)}`);
+  logger.info(
+    `Starting ${name} - ${JSON.stringify(
+      subprocess.spawnargs.map(
+        (value: string, index: number, array: Array<string>) =>
+          array[index - 1] === "--api-key" ? "***" : value
+      )
+    )}`
+  );
   logger.close();
 
   subprocess.on("error", (error: Error) => {
@@ -186,8 +197,8 @@ if (process.env.SB_GUI !== "false") {
     const apiPort = Number(settings["network-apiPort"]) || 9170;
     const apiKey = settings["network-apiKey"];
     await waitOn({
-      delay: 2000,
-      interval: 500,
+      delay: 4000,
+      interval: 1000,
       resources: [`http://localhost:${apiPort}/system`],
       headers: { "api-key": apiKey },
     });
