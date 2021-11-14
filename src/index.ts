@@ -109,7 +109,6 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
         "--api-port",
         settings["network-apiPort"] || "9170",
         "--websocket-port",
-        "9172",
         settings["network-wsPort"] || "9172",
         "--log-level",
         process.env.NODE_ENV === "development" ? "debug" : "info",
