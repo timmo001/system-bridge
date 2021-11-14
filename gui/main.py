@@ -74,6 +74,7 @@ class SystemTrayIcon(Base, QSystemTrayIcon):
             information is not None
             and information is not {}
             and information.updates is not None
+            and information.updates is not {}
         ):
             if (
                 information.updates.available is not None
