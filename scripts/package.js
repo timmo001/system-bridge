@@ -1,6 +1,8 @@
-const { copyFileSync, existsSync, mkdirSync } = require("fs");
+const { copySync, existsSync, mkdirSync } = require("fs-extra");
 const { exec } = require("pkg");
 const { join } = require("path");
+
+console.log("Package..", [process.env.SB_CLI]);
 
 const filePaths = [
   {
@@ -23,6 +25,11 @@ const filePaths = [
     from: "../public/system-bridge-circle.icns",
     to: "../out/system-bridge-circle.icns",
     platform: "darwin",
+  },
+  {
+    from: "../gui/dist/system-bridge-gui",
+    to: "../out/system-bridge-gui",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
@@ -141,9 +148,11 @@ async function package() {
         if (!existsSync(targetDir)) mkdirSync(targetDir);
         const targetFile = join(__dirname, path.to);
         console.log(`Copy ${sourceFile} to ${targetFile}`);
-        copyFileSync(sourceFile, targetFile);
+        copySync(sourceFile, targetFile);
       }
     });
 }
 
-package();
+(async () => {
+  package();
+})();

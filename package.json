@@ -116,6 +116,7 @@
     "eslint-import-resolver-typescript": "2.5.0",
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-prettier": "4.0.0",
+    "fs-extra": "10.0.0",
     "jest": "27.3.1",
     "jest-junit": "13.0.0",
     "pkg": "5.4.1",
