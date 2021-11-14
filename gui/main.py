@@ -12,6 +12,8 @@ from typing import Callable
 from urllib.parse import urlencode
 from webbrowser import open_new_tab
 
+from systembridge.objects.information import Information
+
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 
@@ -22,6 +24,7 @@ PATH_SETTINGS = "/app/settings"
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
 URL_DOCS = "https://system-bridge.timmo.dev"
 URL_ISSUES = "https://github.com/timmo001/system-bridge/issues/new/choose"
+URL_LATEST_RELEASE = "https://github.com/timmo001/system-bridge/releases/latest"
 
 
 class Base:
@@ -44,6 +47,7 @@ class SystemTrayIcon(QSystemTrayIcon):
         self,
         icon: QIcon,
         parent: QWidget,
+        information: Information,
         exit: Callable[[], None],
         show_window: Callable[[str], None],
     ):
@@ -62,28 +66,52 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         menu.addSeparator()
 
+        latest_version_text = "Latest Version"
+        if information.updates is not None:
+            if information.updates.available == True:
+                latest_version_text = f"""Version {
+                        information.updates.version.new
+                    } avaliable! ({
+                        information.updates.version.current
+                    } -> {
+                        information.updates.version.new
+                    })"""
+            elif information.updates.newer == True:
+                latest_version_text = f"""Version Newer ({
+                        information.updates.version.current
+                    } > {
+                        information.updates.version.new
+                    })"""
+            else:
+                latest_version_text = f"""Latest Version ({
+                        information.updates.version.current
+                    })"""
+
+        action_latest_release: QAction = menu.addAction(latest_version_text)
+        action_latest_release.triggered.connect(self.openLatestReleases)
+
         menu_help = menu.addMenu("Help")
 
-        action_docs = menu_help.addAction("Documentation / Website")
+        action_docs: QAction = menu_help.addAction("Documentation / Website")
         action_docs.triggered.connect(self.openDocs)
 
-        action_feature = menu_help.addAction("Suggest a Feature")
+        action_feature: QAction = menu_help.addAction("Suggest a Feature")
         action_feature.triggered.connect(self.openFeatureRequest)
 
-        action_issue = menu_help.addAction("Report an issue")
+        action_issue: QAction = menu_help.addAction("Report an issue")
         action_issue.triggered.connect(self.openIssues)
 
-        action_discussions = menu_help.addAction("Discussions")
+        action_discussions: QAction = menu_help.addAction("Discussions")
         action_discussions.triggered.connect(self.openDiscussions)
 
         menu_help.addSeparator()
 
-        action_logs = menu_help.addAction("View Logs")
+        action_logs: QAction = menu_help.addAction("View Logs")
         action_logs.triggered.connect(self.showLogs)
 
         menu.addSeparator()
 
-        action_exit = menu.addAction("Exit")
+        action_exit: QAction = menu.addAction("Exit")
         action_exit.triggered.connect(exit)
 
         self.setContextMenu(menu)
@@ -91,6 +119,10 @@ class SystemTrayIcon(QSystemTrayIcon):
     def showData(self):
         """Show api data"""
         self.show_window(PATH_DATA)
+
+    def openLatestReleases(self):
+        """Open latest release"""
+        open_new_tab(URL_LATEST_RELEASE)
 
     def showLogs(self):
         """Show logs"""
@@ -174,6 +206,7 @@ class Main(Base):
         self.systemTrayIcon = SystemTrayIcon(
             self.icon,
             self.app,
+            self.information,
             self.exitApplication,
             self.showWindow,
         )
@@ -201,6 +234,7 @@ class Main(Base):
                 f"http://{self.args.hostname}:{self.args.port}",
                 self.args.api_key,
             )
+            self.information = await self.bridge.async_get_information()
 
     def showWindow(self, path: str):
         """Show the main window"""
