@@ -243,7 +243,7 @@ class Main(Base):
         """Setup the bridge"""
         async with ClientSession() as session:
             self.bridge = Bridge(
-                session,
+                BridgeClient(session),
                 f"http://{self.args.hostname}:{self.args.port}",
                 self.args.api_key,
             )
