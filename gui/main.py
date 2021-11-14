@@ -176,9 +176,9 @@ class MainWindow(Base, QWidget):
 
         self.layout.addWidget(self.browser)
 
-    def closeEvent(self, evnt: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent):
         """Close the window instead of closing the app"""
-        evnt.ignore()
+        event.ignore()
         self.hide()
 
     def setup(self, path) -> None:
