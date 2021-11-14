@@ -1,17 +1,17 @@
 import asyncio
 import logging
 import sys
-from aiohttp.client import ClientSession
 from argparse import ArgumentParser, Namespace
+from typing import Callable
+from urllib.parse import urlencode
+from webbrowser import open_new_tab
+
+from aiohttp.client import ClientSession
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QVBoxLayout, QWidget
 from systembridge import Bridge, BridgeClient
-from typing import Callable
-from urllib.parse import urlencode
-from webbrowser import open_new_tab
-
 from systembridge.objects.information import Information
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
