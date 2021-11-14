@@ -72,9 +72,9 @@ class SystemTrayIcon(Base, QSystemTrayIcon):
         latest_version_text = "Latest Version"
         if (
             information is not None
-            and information is not {}
+            and information.attributes is not None
             and information.updates is not None
-            and information.updates is not {}
+            and information.updates.attributes is not None
         ):
             if (
                 information.updates.available is not None
