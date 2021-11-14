@@ -24,7 +24,6 @@ const filePaths = [
   {
     from: "../public/system-bridge-circle.icns",
     to: "../out/system-bridge-circle.icns",
-    platform: "darwin",
   },
   {
     from: "../gui/dist/system-bridge-gui",
@@ -64,6 +63,24 @@ const filePaths = [
   {
     from: "../node_modules/open/xdg-open",
     to: "../out/xdg-open",
+    cli: false,
+  },
+  {
+    from: "../tray/node_modules/systray2/traybin/tray_darwin_release",
+    to: "../out/traybin/tray_darwin_release",
+    platform: "darwin",
+    cli: false,
+  },
+  {
+    from: "../tray/node_modules/systray2/traybin/tray_linux_release",
+    to: "../out/traybin/tray_linux_release",
+    platform: "linux",
+    cli: false,
+  },
+  {
+    from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
+    to: "../out/traybin/tray_windows_release.exe",
+    platform: "win32",
     cli: false,
   },
   {
