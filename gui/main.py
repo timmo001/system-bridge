@@ -183,15 +183,15 @@ class MainWindow(Base, QWidget):
 
     def setup(self, path) -> None:
         """Setup the main window"""
-        self.browser.load(
-            QUrl(
-                f"""http://{self.args.hostname}:{self.args.port}{path}?{urlencode({
+        url = QUrl(
+            f"""http://{self.args.hostname}:{self.args.port}{path}?{urlencode({
                     "apiKey": self.args.api_key,
                     "apiPort": self.args.port,
                     "wsPort": self.args.websocket_port,
                 })}"""
-            )
         )
+        self.logger.debug(f"Opening url: {url}")
+        self.browser.load(url)
 
 
 class Main(Base):
