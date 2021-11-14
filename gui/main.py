@@ -211,7 +211,7 @@ class Main(Base):
         self.main_window = MainWindow(self.args, self.logger)
         self.main_window.setWindowTitle("System Bridge")
         self.main_window.setWindowIcon(self.icon)
-        self.main_window.resize(1920, 1080)
+        self.main_window.resize(1280, 720)
 
         self.systemTrayIcon = SystemTrayIcon(
             self.args,
@@ -248,11 +248,14 @@ class Main(Base):
             )
             self.information = await self.bridge.async_get_information()
 
-    def showWindow(self, path: str):
+    def showWindow(self, path: str, maximized: bool = True) -> None:
         """Show the main window"""
         self.logger.info(f"Showing window: {path}")
         self.main_window.setup(path)
-        self.main_window.show()
+        if maximized == True:
+            self.main_window.showMaximized()
+        else:
+            self.main_window.show()
 
 
 if __name__ == "__main__":
