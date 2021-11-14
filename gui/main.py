@@ -40,11 +40,13 @@ class Base:
         self.logger = logger
 
 
-class SystemTrayIcon(QSystemTrayIcon):
+class SystemTrayIcon(Base, QSystemTrayIcon):
     """System Tray Icon"""
 
     def __init__(
         self,
+        args: Namespace,
+        logger: logging.Logger,
         icon: QIcon,
         parent: QWidget,
         information: Information,
@@ -52,6 +54,7 @@ class SystemTrayIcon(QSystemTrayIcon):
         show_window: Callable[[str], None],
     ):
         """Initialize the system tray icon"""
+        Base.__init__(self, args, logger)
         QSystemTrayIcon.__init__(self, icon, parent)
         menu = QMenu()
         self.show_window = show_window
@@ -67,8 +70,15 @@ class SystemTrayIcon(QSystemTrayIcon):
         menu.addSeparator()
 
         latest_version_text = "Latest Version"
-        if information.updates is not None:
-            if information.updates.available == True:
+        if (
+            information is not None
+            and information is not {}
+            and information.updates is not None
+        ):
+            if (
+                information.updates.available is not None
+                and information.updates.available == True
+            ):
                 latest_version_text = f"""Version {
                         information.updates.version.new
                     } avaliable! ({
@@ -204,6 +214,8 @@ class Main(Base):
         self.main_window.resize(1920, 1080)
 
         self.systemTrayIcon = SystemTrayIcon(
+            self.args,
+            self.logger,
             self.icon,
             self.app,
             self.information,
