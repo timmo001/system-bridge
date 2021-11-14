@@ -95,6 +95,7 @@ disable = [
     "consider-using-f-string",
     "consider-using-namedtuple-or-dataclass",
     "consider-using-assignment-expr",
+    "no-name-in-module",
 ]
 enable = [
     #"useless-suppression",  # temporarily every now and then to clean them up

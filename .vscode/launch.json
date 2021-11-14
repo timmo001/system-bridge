@@ -2,13 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Node.js: yarn start",
-      "command": "yarn start",
-      "request": "launch",
-      "type": "node-terminal",
-      "console": "integratedTerminal"
-    },
-    {
       "name": "Python: Main",
       "type": "python",
       "args": [
@@ -18,10 +11,12 @@
         "${env:SB_API_KEY}",
         "--api-port",
         "9170",
-        "--websocket-port",
-        "9172",
+        "--frontend-port",
+        "3000",
         "--log-level",
-        "debug"
+        "debug",
+        "--websocket-port",
+        "9172"
       ],
       "request": "launch",
       "program": "gui/__init__.py",
