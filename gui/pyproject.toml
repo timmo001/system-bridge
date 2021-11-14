@@ -27,7 +27,6 @@ init-hook='from pylint.config.find_default_config_files import find_default_conf
 load-plugins = [
     "pylint.extensions.code_style",
     "pylint.extensions.typing",
-    "pylint_strict_informational",
 ]
 persistent = false
 extension-pkg-allow-list = [
