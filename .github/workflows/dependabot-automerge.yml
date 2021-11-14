@@ -1,0 +1,13 @@
+name: Dependabot - Auto-merge
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request_target:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  dependabot-automerge:
+    uses: timmo001/workflows/.github/workflows/dependabot-automerge.yml@master
