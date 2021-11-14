@@ -88,24 +88,6 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
           : execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "gui":
-      logger.info(`__dirname: ${join(__dirname)}`);
-      logger.info(`__dirname, ..: ${join(__dirname, "..")}`);
-      logger.info(`__dirname, ../gui: ${join(__dirname, "../gui")}`);
-      logger.info(`__dirname, ../gui/dist: ${join(__dirname, "../gui/dist")}`);
-      logger.info(
-        `__dirname, ../gui/dist/system-bridge-gui: ${join(
-          __dirname,
-          "../gui/dist/system-bridge-gui"
-        )}`
-      );
-      logger.info(
-        `PATH_GUI: ${join(
-          __dirname,
-          `../gui/dist/system-bridge-gui/system-bridge-gui${
-            process.platform === "win32" ? ".exe" : ""
-          }`
-        )}`
-      );
       logger.info(
         `PATH_GUI${process.env.SB_PACKAGED !== "false" ? "_PACKAGED" : ""}: ${
           process.env.SB_PACKAGED !== "false" ? PATH_GUI_PACKAGED : PATH_GUI
