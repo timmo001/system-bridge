@@ -17,6 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint-black:
+    uses: timmo001/workflows/.github/workflows/lint-black.yml@master
   lint-eslint:
     uses: timmo001/workflows/.github/workflows/lint-eslint.yml@master
   lint-jsonlint:
