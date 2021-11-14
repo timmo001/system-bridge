@@ -20,7 +20,7 @@ jobs:
   lint-black:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     secrets:
-      CODE_PATH: gui
+      CODE_PATH: ./gui
   lint-eslint:
     uses: timmo001/workflows/.github/workflows/lint-eslint.yml@master
   lint-jsonlint:
@@ -36,6 +36,6 @@ jobs:
   lint-pylint:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
-      CODE_PATH: gui
+      CODE_PATH: ./gui
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
