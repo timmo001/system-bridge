@@ -78,7 +78,7 @@ class SystemTrayIcon(Base, QSystemTrayIcon):
         ):
             if (
                 information.updates.available is not None
-                and information.updates.available == True
+                and information.updates.available
             ):
                 latest_version_text = f"""Version {
                         information.updates.version.new
@@ -87,7 +87,7 @@ class SystemTrayIcon(Base, QSystemTrayIcon):
                     } -> {
                         information.updates.version.new
                     })"""
-            elif information.updates.newer == True:
+            elif information.updates.newer:
                 latest_version_text = f"""Version Newer ({
                         information.updates.version.current
                     } > {
@@ -253,7 +253,7 @@ class Main(Base):
         """Show the main window"""
         self.logger.info(f"Showing window: {path}")
         self.main_window.setup(path)
-        if maximized == True:
+        if maximized:
             self.main_window.showMaximized()
         else:
             self.main_window.show()
