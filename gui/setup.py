@@ -7,7 +7,8 @@ from setuptools import find_packages, setup
 
 
 def find(name, path):
-    for root, _, files in os.walk(path):
+    for root, dir, files in os.walk(path):
+        print(f"{root} : {dir} : {files}")
         if name in files:
             return os.path.join(root, name)
 
