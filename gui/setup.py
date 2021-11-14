@@ -5,19 +5,33 @@ import json
 
 from setuptools import find_packages, setup
 
-print(os.listdir("./"))
+
+def find(name, path):
+    for root, _, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)
+
+
+print(find("package.json", "./"))
+print(find("package.json", "../"))
 
 # Get packages from requirements.txt
 with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
-print(os.listdir("../"))
-
 # Get version from package.json
-with io.open("../package.json", encoding="utf-8") as f:
+path = find("package.json", "./")
+if path is None:
+    path = find("package.json", "../")
+
+print(path)
+
+with io.open(path, encoding="utf-8") as f:
     package = json.load(f)
 
 version = package["version"]
+
+print(version)
 
 setup(
     name="systembridgegui",
