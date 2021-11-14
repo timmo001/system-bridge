@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Node.js: yarn start",
+      "command": "yarn start",
+      "request": "launch",
+      "type": "node-terminal",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Python: Main",
       "type": "python",
       "args": [
