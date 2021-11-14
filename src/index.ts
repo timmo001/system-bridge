@@ -14,14 +14,21 @@ interface Process {
 config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
-const PATH_GUI = join(__dirname, "../gui/dist/REPLACEME");
-const PATH_EXE = join(
+const PATH_API_PACKAGED = join(
   dirname(process.execPath),
   `system-bridge${process.platform === "win32" ? ".exe" : ""}`
 );
-const PATH_GUI_EXE = join(
+const PATH_GUI = join(
+  __dirname,
+  `../gui/dist/system-bridge-gui/system-bridge-gui${
+    process.platform === "win32" ? ".exe" : ""
+  }`
+);
+const PATH_GUI_PACKAGED = join(
   dirname(process.execPath),
-  `system-bridge-gui${process.platform === "win32" ? ".exe" : ""}`
+  `./system-bridge-gui/system-bridge-gui${
+    process.platform === "win32" ? ".exe" : ""
+  }`
 );
 
 const DEFAULT_ENV = {
@@ -35,7 +42,7 @@ const DEFAULT_OPTIONS: NodeOptions = {
   env: DEFAULT_ENV,
 };
 
-const DEFAULT_EXE_OPTIONS: NodeOptions = {
+const DEFAULT_OPTIONS_PACKAGED: NodeOptions = {
   cleanup: true,
   cwd: dirname(process.execPath),
   env: DEFAULT_ENV,
@@ -77,19 +84,49 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       logger.info(`PATH_API: ${PATH_API}`);
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_EXE, [PATH_API], DEFAULT_EXE_OPTIONS)
+          ? execa(PATH_API_PACKAGED, [PATH_API], DEFAULT_OPTIONS_PACKAGED)
           : execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
     case "gui":
+      logger.info(`__dirname: ${join(__dirname)}`);
+      logger.info(`__dirname, ..: ${join(__dirname, "..")}`);
+      logger.info(`__dirname, ../gui: ${join(__dirname, "../gui")}`);
+      logger.info(`__dirname, ../gui/dist: ${join(__dirname, "../gui/dist")}`);
       logger.info(
-        `PATH_GUI${process.env.SB_PACKAGED !== "false" ? "_EXE" : ""}: ${
-          process.env.SB_PACKAGED !== "false" ? PATH_GUI_EXE : PATH_GUI
+        `__dirname, ../gui/dist/system-bridge-gui: ${join(
+          __dirname,
+          "../gui/dist/system-bridge-gui"
+        )}`
+      );
+      logger.info(
+        `PATH_GUI: ${join(
+          __dirname,
+          `../gui/dist/system-bridge-gui/system-bridge-gui${
+            process.platform === "win32" ? ".exe" : ""
+          }`
+        )}`
+      );
+      logger.info(
+        `PATH_GUI${process.env.SB_PACKAGED !== "false" ? "_PACKAGED" : ""}: ${
+          process.env.SB_PACKAGED !== "false" ? PATH_GUI_PACKAGED : PATH_GUI
         }`
       );
+      const guiArgs = [
+        "--host",
+        "localhost",
+        "--api-key",
+        process.env.SB_API_KEY, // TODO: Get API key from config
+        "--api-port",
+        "9170",
+        "--websocket-port",
+        "9172",
+        "--log-level",
+        process.env.NODE_ENV === "development" ? "debug" : "info",
+      ];
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_GUI_EXE, [], DEFAULT_EXE_OPTIONS)
-          : execa.node(PATH_GUI, [], DEFAULT_OPTIONS);
+          ? execa(PATH_GUI_PACKAGED, guiArgs, DEFAULT_OPTIONS_PACKAGED)
+          : execa(PATH_GUI, guiArgs, DEFAULT_OPTIONS);
       break;
   }
 
