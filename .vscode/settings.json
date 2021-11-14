@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "gui\\venv\\Scripts\\python.exe",
-    "python.formatting.provider": "black"
+  "python.pythonPath": "gui\\venv\\Scripts\\python.exe",
+  "python.formatting.provider": "black"
 }
