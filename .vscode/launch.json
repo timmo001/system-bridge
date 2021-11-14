@@ -4,6 +4,10 @@
     {
       "name": "Python: Main",
       "type": "python",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "preLaunchTask": "Python: pip install",
+      "program": "gui/main.py",
       "args": [
         "--host",
         "localhost",
@@ -17,10 +21,7 @@
         "debug",
         "--websocket-port",
         "9172"
-      ],
-      "request": "launch",
-      "program": "gui/__init__.py",
-      "console": "integratedTerminal"
+      ]
     }
   ]
 }
