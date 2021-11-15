@@ -8,7 +8,7 @@
     "public",
     "test",
     "gui",
-    "out/*"
+    "out"
   ],
   "extends": "./tsconfig.json"
 }
