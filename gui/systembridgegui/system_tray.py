@@ -1,11 +1,15 @@
 """System Bridge GUI: System Tray"""
 from argparse import Namespace
 from collections.abc import Callable
+from typing import List
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 from systembridge.objects.information import Information
+from zeroconf._services.info import ServiceInfo
+
+from .zeroconf_browser import ZeroconfBrowser
 
 from .base import Base
 
@@ -46,6 +50,15 @@ class SystemTray(Base, QSystemTrayIcon):
 
         action_data: QAction = menu.addAction("View Data")
         action_data.triggered.connect(self.show_data)
+
+        menu.addSeparator()
+
+        self.menu_sendto = menu.addMenu("Send to..")
+
+        ZeroconfBrowser(
+            self.args,
+            lambda services: self.update_sendto_menu(services),
+        )
 
         menu.addSeparator()
 
@@ -132,6 +145,10 @@ class SystemTray(Base, QSystemTrayIcon):
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
+    def send_to(self, service: ServiceInfo) -> None:
+        """Send to device"""
+        self.logger.info("Send to %s", service.name)
+
     def show_data(self) -> None:
         """Show api data"""
         self.callback_show_window(PATH_DATA)
@@ -143,3 +160,18 @@ class SystemTray(Base, QSystemTrayIcon):
     def show_settings(self) -> None:
         """Show settings"""
         self.callback_show_window(PATH_SETTINGS)
+
+    def update_sendto_menu(self, services: List[ServiceInfo]):
+        """Update sendto menu"""
+        self.menu_sendto.clear()
+
+        for service in services:
+            host = service.properties.get(b"host")
+            ip = service.properties.get(b"ip")
+
+            action_device = self.menu_sendto.addAction(
+                f"{host.decode('utf-8')} ({ip.decode('utf-8')})"
+                if host is not None
+                else service.name
+            )
+            action_device.triggered.connect(lambda s=service: self.send_to(s))
