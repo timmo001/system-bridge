@@ -19,6 +19,7 @@ from systembridge.exceptions import BridgeException
 from .base import Base
 from .system_tray import SystemTray
 from .window.main import MainWindow
+from .window.player import PlayerWindow
 
 
 class Main(Base):
@@ -73,6 +74,9 @@ class Main(Base):
             self.callback_show_window,
         )
         self.system_tray_icon.show()
+
+        self.player_window = PlayerWindow(self.args, self.icon)
+        self.player_window.show()
 
         sys.exit(self.application.exec())
 
