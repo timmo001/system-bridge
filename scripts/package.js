@@ -18,6 +18,10 @@ const filePaths = [
     to: "../out/system-bridge-circle.png",
   },
   {
+    from: "../public/system-bridge-circle.png",
+    to: "../out/public/system-bridge-circle.png",
+  },
+  {
     from: "../public/system-bridge-circle.ico",
     to: "../out/system-bridge-circle.ico",
   },
