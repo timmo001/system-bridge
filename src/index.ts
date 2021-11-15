@@ -2,8 +2,14 @@ import { config } from "dotenv";
 import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
+import waitOn from "wait-on";
 
-import { appDataDirectory, getVersion } from "./components/common";
+import {
+  appDataDirectory,
+  getConnection,
+  getSettingsObject,
+  getVersion,
+} from "./components/common";
 import { Logger } from "./components/logger";
 
 interface Process {
@@ -14,14 +20,21 @@ interface Process {
 config();
 
 const PATH_API = join(__dirname, "components/api/index.js");
-const PATH_TRAY = join(__dirname, "../tray/dist/index.js");
-const PATH_EXE = join(
+const PATH_API_PACKAGED = join(
   dirname(process.execPath),
   `system-bridge${process.platform === "win32" ? ".exe" : ""}`
 );
-const PATH_TRAY_EXE = join(
+const PATH_GUI = join(
+  __dirname,
+  `../gui/dist/system-bridge-gui/system-bridge-gui${
+    process.platform === "win32" ? ".exe" : ""
+  }`
+);
+const PATH_GUI_PACKAGED = join(
   dirname(process.execPath),
-  `system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
+  `./system-bridge-gui/system-bridge-gui${
+    process.platform === "win32" ? ".exe" : ""
+  }`
 );
 
 const DEFAULT_ENV = {
@@ -35,11 +48,13 @@ const DEFAULT_OPTIONS: NodeOptions = {
   env: DEFAULT_ENV,
 };
 
-const DEFAULT_EXE_OPTIONS: NodeOptions = {
+const DEFAULT_OPTIONS_PACKAGED: NodeOptions = {
   cleanup: true,
   cwd: dirname(process.execPath),
   env: DEFAULT_ENV,
 };
+
+let settings: { [key: string]: string };
 
 const { logger } = new Logger();
 
@@ -59,7 +74,7 @@ logger.info(
     process.env.NODE_ENV,
     process.env.SB_CLI,
     process.env.SB_PACKAGED,
-    process.env.SB_TRAY,
+    process.env.SB_GUI,
   ].join(" - ")}`
 );
 logger.close();
@@ -77,26 +92,49 @@ function setupSubprocess(name: string): ExecaChildProcess | null {
       logger.info(`PATH_API: ${PATH_API}`);
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_EXE, [PATH_API], DEFAULT_EXE_OPTIONS)
+          ? execa(PATH_API_PACKAGED, [PATH_API], DEFAULT_OPTIONS_PACKAGED)
           : execa.node(PATH_API, [], DEFAULT_OPTIONS);
       break;
-    case "tray":
+    case "gui":
       logger.info(
-        `PATH_TRAY${process.env.SB_PACKAGED !== "false" ? "_EXE" : ""}: ${
-          process.env.SB_PACKAGED !== "false" ? PATH_TRAY_EXE : PATH_TRAY
+        `PATH_GUI${process.env.SB_PACKAGED !== "false" ? "_PACKAGED" : ""}: ${
+          process.env.SB_PACKAGED !== "false" ? PATH_GUI_PACKAGED : PATH_GUI
         }`
       );
+      const guiArgs = [
+        "--host",
+        "localhost",
+        "--api-key",
+        settings["network-apiKey"],
+        "--api-port",
+        settings["network-apiPort"] || "9170",
+        "--frontend-port",
+        process.env.NODE_ENV === "development"
+          ? "3000"
+          : settings["network-apiPort"] || "9170",
+        "--log-level",
+        process.env.NODE_ENV === "development" ? "debug" : "info",
+        "--websocket-port",
+        settings["network-wsPort"] || "9172",
+      ];
       subprocess =
         process.env.SB_PACKAGED !== "false"
-          ? execa(PATH_TRAY_EXE, [], DEFAULT_EXE_OPTIONS)
-          : execa.node(PATH_TRAY, [], DEFAULT_OPTIONS);
+          ? execa(PATH_GUI_PACKAGED, guiArgs, DEFAULT_OPTIONS_PACKAGED)
+          : execa(PATH_GUI, guiArgs, DEFAULT_OPTIONS);
       break;
   }
 
   subprocess.stdout.pipe(process.stdout);
   subprocess.stderr.pipe(process.stderr);
 
-  logger.info(`Starting ${name} - ${JSON.stringify(subprocess.spawnargs)}`);
+  logger.info(
+    `Starting ${name} - ${JSON.stringify(
+      subprocess.spawnargs.map(
+        (value: string, index: number, array: Array<string>) =>
+          array[index - 1] === "--api-key" ? "***" : value
+      )
+    )}`
+  );
   logger.close();
 
   subprocess.on("error", (error: Error) => {
@@ -150,4 +188,20 @@ process.on("beforeExit", () => killAllProcesses());
 process.on("SIGTERM", () => killAllProcesses());
 
 processes.api = setupSubprocess("api");
-if (process.env.SB_TRAY !== "false") processes.tray = setupSubprocess("tray");
+if (process.env.SB_GUI !== "false") {
+  (async () => {
+    const connection = await getConnection();
+    settings = await getSettingsObject(connection);
+    await connection.close();
+
+    const apiPort = Number(settings["network-apiPort"]) || 9170;
+    const apiKey = settings["network-apiKey"];
+    await waitOn({
+      delay: 4000,
+      interval: 1000,
+      resources: [`http://localhost:${apiPort}/system`],
+      headers: { "api-key": apiKey },
+    });
+    processes.gui = setupSubprocess("gui");
+  })();
+}

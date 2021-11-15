@@ -69,7 +69,7 @@ export async function startServer(): Promise<void> {
       process.env.NODE_ENV,
       process.env.SB_CLI,
       process.env.SB_PACKAGED,
-      process.env.SB_TRAY,
+      process.env.SB_GUI,
     ].join(" - ")
   );
   logger.close();

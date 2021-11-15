@@ -22,10 +22,8 @@ RUN \
     \
     && rm -f /usr/local/share/system-bridge/*.ico \
     && rm -f /usr/local/share/system-bridge/*.png \
-    && rm -f /usr/local/share/system-bridge/system-bridge-tray \
     && rm -f /usr/local/share/system-bridge/xdg-open \
     && rm -f /usr/share/applications/system-bridge.desktop \
-    && rm -fr /usr/local/share/system-bridge/traybin \
     \
     && mkdir -p /data/system-bridge \
     \

@@ -7,6 +7,6 @@ cd /usr/local/share/system-bridge || exit 1
 export SB_APPDATA=/data/system-bridge
 export SB_CLI=true
 export SB_CONTAINER=true
-export SB_TRAY=false
+export SB_GUI=false
 
 exec system-bridge

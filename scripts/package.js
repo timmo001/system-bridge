@@ -1,6 +1,8 @@
-const { copyFileSync, existsSync, mkdirSync } = require("fs");
+const { copySync, existsSync, mkdirSync } = require("fs-extra");
 const { exec } = require("pkg");
 const { join } = require("path");
+
+console.log("Package..", [process.env.SB_CLI]);
 
 const filePaths = [
   {
@@ -16,13 +18,21 @@ const filePaths = [
     to: "../out/system-bridge-circle.png",
   },
   {
+    from: "../public/system-bridge-circle.png",
+    to: "../out/public/system-bridge-circle.png",
+  },
+  {
     from: "../public/system-bridge-circle.ico",
     to: "../out/system-bridge-circle.ico",
   },
   {
     from: "../public/system-bridge-circle.icns",
     to: "../out/system-bridge-circle.icns",
-    platform: "darwin",
+  },
+  {
+    from: "../gui/dist/system-bridge-gui",
+    to: "../out/system-bridge-gui",
+    cli: false,
   },
   {
     from: "../node_modules/node-notifier/vendor/notifu/notifu.exe",
@@ -57,24 +67,6 @@ const filePaths = [
   {
     from: "../node_modules/open/xdg-open",
     to: "../out/xdg-open",
-    cli: false,
-  },
-  {
-    from: "../tray/node_modules/systray2/traybin/tray_darwin_release",
-    to: "../out/traybin/tray_darwin_release",
-    platform: "darwin",
-    cli: false,
-  },
-  {
-    from: "../tray/node_modules/systray2/traybin/tray_linux_release",
-    to: "../out/traybin/tray_linux_release",
-    platform: "linux",
-    cli: false,
-  },
-  {
-    from: "../tray/node_modules/systray2/traybin/tray_windows_release.exe",
-    to: "../out/traybin/tray_windows_release.exe",
-    platform: "win32",
     cli: false,
   },
   {
@@ -141,39 +133,38 @@ async function package() {
     "--max_old_space_size=4096",
   ]);
 
-  if (process.env.APP_ONLY !== "true")
-    await exec([
-      join(__dirname, "../tray"),
-      "--output",
-      join(
-        __dirname,
-        `../out/system-bridge-tray${process.platform === "win32" ? ".exe" : ""}`
-      ),
-      "--options",
-      "--max_old_space_size=4096",
-    ]);
-
   filePaths
-    .filter((path) =>
-      process.env.SB_CLI && path.cli === false
-        ? false
-        : path.platform
-        ? path.platform === process.platform
-        : true
-    )
+    .filter((path) => {
+      const shouldCopy =
+        process.env.SB_CLI && path.cli === false
+          ? false
+          : path.platform
+          ? path.platform === process.platform
+          : true;
+
+      console.log(`${path.from} -> ${path.to}`, shouldCopy ? "✅" : "❌");
+
+      return shouldCopy;
+    })
     .forEach((path) => {
       const sourceFile = join(__dirname, path.from);
-      if (existsSync(sourceFile)) {
+      const targetFile = join(__dirname, path.to);
+      const sourceExists = existsSync(sourceFile);
+      console.log(
+        `Copy ${sourceFile} -> ${targetFile}`,
+        sourceExists ? "✅" : "❌"
+      );
+      if (sourceExists) {
         const targetDir = join(
           __dirname,
           path.to.substring(0, path.to.lastIndexOf("/"))
         );
         if (!existsSync(targetDir)) mkdirSync(targetDir);
-        const targetFile = join(__dirname, path.to);
-        console.log(`Copy ${sourceFile} to ${targetFile}`);
-        copyFileSync(sourceFile, targetFile);
+        copySync(sourceFile, targetFile, {});
       }
     });
 }
 
-package();
+(async () => {
+  package();
+})();
