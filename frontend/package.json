@@ -1,6 +1,6 @@
 {
   "name": "system-bridge-frontend",
-  "version": "2.7.9",
+  "version": "2.8.0",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -29,7 +29,7 @@
     "@material-ui/icons": "4.11.2",
     "@material-ui/lab": "4.0.0-alpha.60",
     "@material-ui/styles": "4.11.4",
-    "@mdi/js": "6.4.95",
+    "@mdi/js": "6.5.95",
     "@mdi/react": "1.5.0",
     "axios": "0.24.0",
     "clsx": "1.1.1",
