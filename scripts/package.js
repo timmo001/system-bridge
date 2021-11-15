@@ -118,16 +118,16 @@ const filePaths = [
 ];
 
 async function package() {
-  // await exec([
-  //   join(__dirname, "../"),
-  //   "--output",
-  //   join(
-  //     __dirname,
-  //     `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
-  //   ),
-  //   "--options",
-  //   "--max_old_space_size=4096",
-  // ]);
+  await exec([
+    join(__dirname, "../"),
+    "--output",
+    join(
+      __dirname,
+      `../out/system-bridge${process.platform === "win32" ? ".exe" : ""}`
+    ),
+    "--options",
+    "--max_old_space_size=4096",
+  ]);
 
   filePaths
     .filter((path) => {
