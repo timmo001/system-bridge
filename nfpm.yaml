@@ -1,7 +1,7 @@
 name: "system-bridge"
 arch: "amd64"
 platform: "linux"
-version: "v2.7.9"
+version: "v2.8.0"
 version_schema: semver
 section: "default"
 priority: "extra"
