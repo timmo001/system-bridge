@@ -728,10 +728,10 @@
     multer "1.4.3"
     tslib "2.3.1"
 
-"@nestjs/platform-ws@8.2.0":
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.2.0.tgz#1aacb018dd2a5d5117e2360da33678fe0be8d94a"
-  integrity sha512-xvhd76I4VbuV/Ua6NfnzykOrPTejNUFIpRXCVUgSaata5QyfQwiuhgon0D5uCcylpR48vaNFtyoT21op5doz4g==
+"@nestjs/platform-ws@8.2.1":
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-ws/-/platform-ws-8.2.1.tgz#419cbbb73aaf2e036318f94d0c2000c50c6be570"
+  integrity sha512-W1H9XZBOWBLWbojyWamTqA3rSBBO/K884FUBGsaUZuK6xCj5QPc61DLFU7sY0PVY+LdYif1i1AAJm9B8cc9jbg==
   dependencies:
     tslib "2.3.1"
     ws "7.5.5"
