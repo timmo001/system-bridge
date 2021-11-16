@@ -75,7 +75,11 @@ class Main(Base):
         )
         self.system_tray_icon.show()
 
-        self.player_window = PlayerWindow(self.args, self.icon)
+        self.player_window = PlayerWindow(
+            self.args,
+            self.icon,
+            True,
+        )
         self.player_window.show()
 
         sys.exit(self.application.exec())
