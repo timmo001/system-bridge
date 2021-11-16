@@ -2,8 +2,8 @@
 from argparse import Namespace
 from urllib.parse import urlencode
 
-from PySide6.QtCore import QPoint, QUrl
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import QDataStream, QDeadlineTimer, QPoint, QUrl
+from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
@@ -32,10 +32,22 @@ class PlayerWindow(Base, QWidget):
 
         self.setWindowTitle("System Bridge - Player")
         self.setWindowIcon(icon)
-        self.move(QPoint(0, 0))
 
         # self.resize(460, 130) # Audio
         self.resize(480, 270)  # Video
+
+        # screen = QScreen()
+        # widget = self.geometry()
+
+        # self.logger.debug(screen)
+        # self.logger.debug(screen.width())
+        # self.logger.debug(screen.height())
+        # self.logger.debug(screen.bottomRight())
+        # self.logger.debug(widget)
+        # self.logger.debug(widget.width())
+        # self.logger.debug(widget.height())
+
+        # self.move(screen.bottomRight())
 
         url = QUrl(
             f"""http://{self.args.hostname}:{self.args.frontend_port}/app/player?{urlencode({
