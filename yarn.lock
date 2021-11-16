@@ -756,10 +756,10 @@
     lodash "4.17.21"
     path-to-regexp "3.2.0"
 
-"@nestjs/testing@8.2.0":
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-8.2.0.tgz#2e8259e9af6b76cb7469f67fdf6a423a27afb0e3"
-  integrity sha512-8AIZMuPMZ0zIzuR5iOTZ38zH1CjBhhmwQD/thNhIAANWNYKPEpoqNFzol14hiWWsRUpsV9amgljtTf3hzX6KnA==
+"@nestjs/testing@8.2.1":
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-8.2.1.tgz#405a56ddcfd6eee13a03952f3ef0806867f834f6"
+  integrity sha512-nUxsFVwUdagSQSWhnyqZVOeq32Lzzy1bOcJ0Ot0E12pcg8hZenKTQAwLcjbpFIVKKxYgl9P340csSjPN80uI8A==
   dependencies:
     optional "0.1.4"
     tslib "2.3.1"
