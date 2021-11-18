@@ -9,9 +9,10 @@ from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 from systembridge.objects.information import Information
 from zeroconf._services.info import ServiceInfo
 
+from .base import Base
+from .util import get_or_create_event_loop
 from .zeroconf_browser import ZeroconfBrowser
 
-from .base import Base
 
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
@@ -54,6 +55,8 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         self.menu_sendto = menu.addMenu("Send to..")
+
+        get_or_create_event_loop()
 
         ZeroconfBrowser(
             self.args,
@@ -147,7 +150,7 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def send_to(self, service: ServiceInfo) -> None:
         """Send to device"""
-        self.logger.info("Send to %s", service.name)
+        self.logger.info("Send to %s", service)
 
     def show_data(self) -> None:
         """Show api data"""

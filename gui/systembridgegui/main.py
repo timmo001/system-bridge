@@ -23,8 +23,8 @@ class Main(Base):
         super().__init__(args)
 
         self.application = application
-
         self.icon = QIcon("public/system-bridge-circle.png")
+
         asyncio.run(self.setup_bridge())
 
         self.main_window = MainWindow(self.args)

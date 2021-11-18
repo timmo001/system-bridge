@@ -1,9 +1,8 @@
 """System Bridge GUI: Zeroconf"""
 from argparse import Namespace
 from typing import Callable, List
-from zeroconf import ServiceBrowser, Zeroconf
-from zeroconf._services import ServiceListener
-from zeroconf._services.info import ServiceInfo
+from zeroconf import Zeroconf, ServiceStateChange
+from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo
 
 from .base import Base
 
@@ -11,67 +10,52 @@ from .base import Base
 class ZeroconfBrowser(Base):
     """Zeroconf Browser"""
 
+    services: List[AsyncServiceInfo] = []
+
     def __init__(
         self,
         args: Namespace,
-        services_updated: Callable[[List[ServiceInfo]], None],
+        services_updated: Callable[[List[AsyncServiceInfo]], None],
     ) -> None:
         """Initialize Zeroconf Browser"""
         super().__init__(args)
 
-        ServiceBrowser(
-            Zeroconf(),
-            "_system-bridge._udp.local.",
-            ZeroconfListener(args, services_updated),
-        )
-
-
-class ZeroconfListener(Base, ServiceListener):
-    """Zeroconf Service Listener"""
-
-    services: List[ServiceInfo] = []
-
-    def __init__(
-        self,
-        args: Namespace,
-        services_updated: Callable[[List[ServiceInfo]], None],
-    ) -> None:
-        """Initialize Zeroconf Listener"""
-        super().__init__(args)
-
         self.services_updated = services_updated
 
-    def add_service(
-        self,
-        zeroconf: Zeroconf,
-        type: str,
-        name: str,
-    ) -> None:
-        """Add service to list"""
-        self.services.append(zeroconf.get_service_info(type, name))
-        self.services_updated(self.services)
+        AsyncServiceBrowser(
+            Zeroconf(),
+            "_system-bridge._udp.local.",
+            [self.service_updated],
+        )
 
-    def remove_service(
+    def service_updated(
         self,
         zeroconf: Zeroconf,
         type: str,
         name: str,
+        state_change: ServiceStateChange,
     ) -> None:
-        """Remove service from list"""
-        for service in self.services:
-            if service.name == name:
-                self.services.remove(service)
-                self.services_updated(self.services)
+        """Service state changed."""
+        print(f"Service {name} state changed: {state_change}")
+        self.logger.debug(
+            "Service Updated: type=%s name=%s state_change=%s",
+            type,
+            name,
+            state_change,
+        )
 
-    def update_service(
-        self,
-        zeroconf: Zeroconf,
-        type: str,
-        name: str,
-    ) -> None:
-        """Update service in list"""
-        for service in self.services:
-            if service.name == name:
-                self.services.remove(service)
-                self.services.append(zeroconf.get_service_info(type, name))
-                self.services_updated(self.services)
+        # service_info = zeroconf.get_service_info(type, name)
+
+        # if state_change == ServiceStateChange.Added:
+        #     self.services.append(service_info)
+        # elif state_change == ServiceStateChange.Updated:
+        #     for service in self.services:
+        #         if service.name == name:
+        #             self.services.remove(service)
+        #             self.services.append(service_info)
+        # elif state_change == ServiceStateChange.Removed:
+        #     for service in self.services:
+        #         if service.name == name:
+        #             self.services.remove(service)
+
+        # self.services_updated(self.services)
