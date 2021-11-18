@@ -794,10 +794,10 @@
   dependencies:
     uuid "8.3.2"
 
-"@nestjs/websockets@8.2.1":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.2.1.tgz#55b6ab3c0acb3583667a59dfbebcd12199d1e165"
-  integrity sha512-kRaQeRunta0sk5I2aaSLZOGlKAo2ekw5pLRcfz3//jMxWQfJCR5nX5m0uAGEP+CHlxeo+zAk1n41Mk5e0BcRkQ==
+"@nestjs/websockets@8.2.2":
+  version "8.2.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.2.2.tgz#0154f1339d5851446f9685fede3c20466cc6d00b"
+  integrity sha512-bbmKETPF61HYQ3o1oI1XUnVnbXpAIsaAx6VuHrPQL4sVjfKR8LkaJOZDLUzM1tN0HTxEiHWIdcXAQNtbUCdh5g==
   dependencies:
     iterare "1.2.1"
     object-hash "2.2.0"
@@ -7073,10 +7073,10 @@ system-bridge-windows-sensors@1.2.5:
   dependencies:
     execa "5.1.1"
 
-systeminformation@5.9.13:
-  version "5.9.13"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.9.13.tgz#90aef7cc534027870d2d10fec63580a7a916aff9"
-  integrity sha512-AGL34jWboB7bjmNYIcJ5hbYEVYXQuLPbIq7bJg3rJJNHYZvZkQC9hH15KpH9CPg9ZxCsTqAfUNyGMv1jmv78Tw==
+systeminformation@5.9.14:
+  version "5.9.14"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.9.14.tgz#20fd41ddb0a258b5958476769269b8dbe5f42f0d"
+  integrity sha512-s9/ikrNXM60LC+rYuTKzFFJHaXs9emwh4gLVfQwYzv1QejI1WW9XkgLJfnDbHbV70C5zmBIypCsuc1BNICuTfQ==
 
 table@^6.0.9:
   version "6.7.1"
