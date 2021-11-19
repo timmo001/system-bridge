@@ -55,6 +55,7 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         self.menu_sendto = menu.addMenu("Send to..")
+        self.menu_sendto.setEnabled(False)
 
         get_or_create_event_loop()
 
@@ -167,6 +168,11 @@ class SystemTray(Base, QSystemTrayIcon):
     def update_sendto_menu(self, services: List[ServiceInfo]):
         """Update sendto menu"""
         self.menu_sendto.clear()
+
+        if services is not None and len(services) > 0:
+            self.menu_sendto.setEnabled(True)
+        else:
+            self.menu_sendto.setEnabled(False)
 
         for service in services:
             host = service.properties.get(b"host")

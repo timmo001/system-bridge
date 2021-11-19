@@ -1,8 +1,8 @@
 """System Bridge GUI: Zeroconf"""
 from argparse import Namespace
 from typing import Callable, List
-from zeroconf import Zeroconf, ServiceStateChange
-from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo
+from zeroconf import ServiceInfo, ServiceStateChange
+from zeroconf.asyncio import AsyncServiceBrowser, Zeroconf
 
 from .base import Base
 
@@ -10,12 +10,12 @@ from .base import Base
 class ZeroconfBrowser(Base):
     """Zeroconf Browser"""
 
-    services: List[AsyncServiceInfo] = []
+    services: List[ServiceInfo] = []
 
     def __init__(
         self,
         args: Namespace,
-        services_updated: Callable[[List[AsyncServiceInfo]], None],
+        services_updated: Callable[[List[ServiceInfo]], None],
     ) -> None:
         """Initialize Zeroconf Browser"""
         super().__init__(args)
@@ -31,7 +31,7 @@ class ZeroconfBrowser(Base):
     def service_updated(
         self,
         zeroconf: Zeroconf,
-        type: str,
+        service_type: str,
         name: str,
         state_change: ServiceStateChange,
     ) -> None:
@@ -39,23 +39,22 @@ class ZeroconfBrowser(Base):
         print(f"Service {name} state changed: {state_change}")
         self.logger.debug(
             "Service Updated: type=%s name=%s state_change=%s",
-            type,
+            service_type,
             name,
             state_change,
         )
 
-        # service_info = zeroconf.get_service_info(type, name)
+        if (
+            state_change == ServiceStateChange.Added
+            or state_change == ServiceStateChange.Updated
+        ):
+            for service in self.services:
+                if service.name == name:
+                    self.services.remove(service)
+            self.services.append(zeroconf.get_service_info(service_type, name))
+        elif state_change == ServiceStateChange.Removed:
+            for service in self.services:
+                if service.name == name:
+                    self.services.remove(service)
 
-        # if state_change == ServiceStateChange.Added:
-        #     self.services.append(service_info)
-        # elif state_change == ServiceStateChange.Updated:
-        #     for service in self.services:
-        #         if service.name == name:
-        #             self.services.remove(service)
-        #             self.services.append(service_info)
-        # elif state_change == ServiceStateChange.Removed:
-        #     for service in self.services:
-        #         if service.name == name:
-        #             self.services.remove(service)
-
-        # self.services_updated(self.services)
+        self.services_updated(self.services)
