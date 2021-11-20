@@ -7,7 +7,7 @@ from PySide6.QtGui import QCloseEvent
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
-from .base import Base
+from ..base import Base
 
 
 class MainWindow(Base, QWidget):
@@ -29,13 +29,13 @@ class MainWindow(Base, QWidget):
         self.layout.addWidget(self.browser)
 
     # pylint: disable=invalid-name
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """Close the window instead of closing the app"""
         event.ignore()
         self.hide()
 
     def setup(self, path) -> None:
-        """Setup the main window"""
+        """Setup the window"""
         url = QUrl(
             f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
                     "apiKey": self.args.api_key,

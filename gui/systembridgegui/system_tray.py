@@ -1,22 +1,19 @@
 """System Bridge GUI: System Tray"""
 from argparse import Namespace
 from collections.abc import Callable
-from typing import List
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 from systembridge.objects.information import Information
-from zeroconf._services.info import ServiceInfo
 
 from .base import Base
-from .util import get_or_create_event_loop
-from .zeroconf_browser import ZeroconfBrowser
 
 
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
+PATH_SEND_TO = "SEND_TO"
 
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
 URL_DOCS = "https://system-bridge.timmo.dev"
@@ -54,15 +51,8 @@ class SystemTray(Base, QSystemTrayIcon):
 
         menu.addSeparator()
 
-        self.menu_sendto = menu.addMenu("Send to..")
-        self.menu_sendto.setEnabled(False)
-
-        get_or_create_event_loop()
-
-        ZeroconfBrowser(
-            self.args,
-            lambda services: self.update_sendto_menu(services),
-        )
+        action_sendto = menu.addAction("Send to..")
+        action_sendto.triggered.connect(self.show_send_to)
 
         menu.addSeparator()
 
@@ -149,10 +139,6 @@ class SystemTray(Base, QSystemTrayIcon):
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
-    def send_to(self, service: ServiceInfo) -> None:
-        """Send to device"""
-        self.logger.info("Send to %s", service)
-
     def show_data(self) -> None:
         """Show api data"""
         self.callback_show_window(PATH_DATA)
@@ -161,26 +147,10 @@ class SystemTray(Base, QSystemTrayIcon):
         """Show logs"""
         self.callback_show_window(PATH_LOGS)
 
+    def show_send_to(self) -> None:
+        """Show send to window"""
+        self.callback_show_window(PATH_SEND_TO)
+
     def show_settings(self) -> None:
         """Show settings"""
         self.callback_show_window(PATH_SETTINGS)
-
-    def update_sendto_menu(self, services: List[ServiceInfo]):
-        """Update sendto menu"""
-        self.menu_sendto.clear()
-
-        if services is not None and len(services) > 0:
-            self.menu_sendto.setEnabled(True)
-        else:
-            self.menu_sendto.setEnabled(False)
-
-        for service in services:
-            host = service.properties.get(b"host")
-            ip = service.properties.get(b"ip")
-
-            action_device = self.menu_sendto.addAction(
-                f"{host.decode('utf-8')} ({ip.decode('utf-8')})"
-                if host is not None
-                else service.name
-            )
-            action_device.triggered.connect(lambda s=service: self.send_to(s))

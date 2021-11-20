@@ -15,7 +15,8 @@ from systembridge.exceptions import BridgeException
 
 from .base import Base
 from .system_tray import SystemTray
-from .window_main import MainWindow
+from .window.main import MainWindow
+from .window.send_to import SendToWindow
 
 
 class Main(Base):
@@ -39,6 +40,11 @@ class Main(Base):
         self.main_window.setWindowIcon(self.icon)
         self.main_window.resize(1280, 720)
 
+        self.send_to_window = SendToWindow(
+            self.args,
+            self.icon,
+        )
+
         self.system_tray_icon = SystemTray(
             self.args,
             self.icon,
@@ -58,15 +64,15 @@ class Main(Base):
     def callback_show_window(
         self,
         path: str,
-        maximized: bool = True,
     ) -> None:
         """Show the main window"""
         self.logger.info("Showing window: %s", path)
-        self.main_window.setup(path)
-        if maximized:
-            self.main_window.showMaximized()
+        if path == "SEND_TO":
+            self.send_to_window.setup()
+            self.send_to_window.show()
         else:
-            self.main_window.show()
+            self.main_window.setup(path)
+            self.main_window.showMaximized()
 
     async def exit_backend(self) -> None:
         """Exit the backend"""
@@ -96,6 +102,6 @@ class Main(Base):
             OSError,
         ) as exception:
             self.logger.error(exception)
-            self.logger.info("Retrying in 10 seconds..")
-            await asyncio.sleep(10)
+            self.logger.info("Retrying in 5 seconds..")
+            await asyncio.sleep(5)
             await self.setup_bridge()
