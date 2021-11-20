@@ -19,7 +19,7 @@ from ..zeroconf_browser import ZeroconfBrowser
 
 
 class SendToWindow(Base, QWidget):
-    """Send to Window"""
+    """Send to window"""
 
     def __init__(
         self,
@@ -121,23 +121,17 @@ class SendToWindow(Base, QWidget):
         self.text_api_key.setText("")
 
     def send(self) -> None:
-        """Send the selected service"""
-        index = self.combo_box.currentIndex()
-        if index < 0:
-            return
+        """Send to bridge"""
+        host = self.text_host.toPlainText()
+        port = int(self.text_port.toPlainText())
+        api_key = self.text_api_key.toPlainText()
 
-        if index == self.combo_box.count() - 1:
-            self.logger.info("Manual send")
-        else:
-            service = self.services[index]
-            host = service.properties.get(b"host")
-            ip = service.properties.get(b"ip")
-
-            self.logger.info(
-                "Sending to: %s (%s)",
-                host.decode("utf-8") if host is not None else service.name,
-                ip.decode("utf-8") if ip is not None else "",
-            )
+        self.logger.info(
+            "Sending to %s:%s with API Key %s",
+            host,
+            port,
+            api_key,
+        )
 
         self.hide()
 
