@@ -36,7 +36,7 @@ function BridgesComponent(): ReactElement {
   const query = useRouter().query;
 
   const handleSetup = useCallback(async () => {
-    console.log("Setup Logs");
+    console.log("Setup Bridges");
     const response = await axios.get<Array<Bridge>>(
       `http://${query.apiHost || window.location.hostname}:${
         query.apiPort || 9170
