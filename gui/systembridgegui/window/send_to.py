@@ -3,7 +3,7 @@ from argparse import Namespace
 from typing import List
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCloseEvent, QIcon
-from PySide6.QtWidgets import QComboBox, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QPushButton, QVBoxLayout, QWidget
 from zeroconf.asyncio import AsyncServiceInfo
 
 from ..base import Base
@@ -29,7 +29,7 @@ class SendToWindow(Base, QWidget):
 
         self.setWindowTitle("System Bridge - Send To")
         self.setWindowIcon(icon)
-        self.resize(340, 420)
+        self.resize(320, 380)
 
         label = QLabel("Send To:")
         font = label.font()
@@ -38,12 +38,16 @@ class SendToWindow(Base, QWidget):
         label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
         self.combo_box = QComboBox()
-        self.combo_box.currentIndexChanged.connect(
-            lambda index: self.logger.info("Index changed: %s", index)
-        )
+        # self.combo_box.currentIndexChanged.connect(
+        #     lambda index: self.logger.info("Index changed: %s", index)
+        # )
+
+        button = QPushButton("Send")
+        button.clicked.connect(self.send)
 
         self.layout.addWidget(label, 1, Qt.AlignTop | Qt.AlignVCenter)
         self.layout.addWidget(self.combo_box, 1, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.layout.addWidget(button, 1, Qt.AlignBottom | Qt.AlignVCenter)
 
         get_or_create_event_loop()
 
@@ -51,6 +55,12 @@ class SendToWindow(Base, QWidget):
             self.args,
             self.services_update,
         )
+
+    # pylint: disable=invalid-name
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """Close the window instead of closing the app"""
+        event.ignore()
+        self.hide()
 
     def setup(self) -> None:
         """Setup the window"""
@@ -65,10 +75,24 @@ class SendToWindow(Base, QWidget):
                 else service.name
             )
 
-    # pylint: disable=invalid-name
-    def closeEvent(self, event: QCloseEvent) -> None:
-        """Close the window instead of closing the app"""
-        event.ignore()
+        self.combo_box.setCurrentIndex(0)
+
+    def send(self) -> None:
+        """Send the selected service"""
+        index = self.combo_box.currentIndex()
+        if index < 0:
+            return
+
+        service = self.services[index]
+        host = service.properties.get(b"host")
+        ip = service.properties.get(b"ip")
+
+        self.logger.info(
+            "Sending to: %s (%s)",
+            host.decode("utf-8") if host is not None else service.name,
+            ip.decode("utf-8") if ip is not None else "",
+        )
+
         self.hide()
 
     def services_update(self, services: List[AsyncServiceInfo]) -> None:
