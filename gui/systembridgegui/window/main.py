@@ -1,4 +1,4 @@
-"""System Bridge GUI: Main Window"""
+"""System Bridge GUI: Main window"""
 from argparse import Namespace
 from urllib.parse import urlencode
 

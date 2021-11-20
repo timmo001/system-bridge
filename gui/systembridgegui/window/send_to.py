@@ -1,4 +1,4 @@
-"""System Bridge GUI: Main Window"""
+"""System Bridge GUI: Send to window"""
 from argparse import Namespace
 from typing import List
 from PySide6.QtCore import Qt
