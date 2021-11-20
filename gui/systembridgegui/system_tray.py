@@ -11,10 +11,11 @@ from systembridge.objects.information import Information
 from .base import Base
 
 
+PATH_BRIDGES_SEND_TO = "/app/bridges/sendto"
+PATH_BRIDGES_SETUP = "/app/bridges/setup"
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
-PATH_SEND_TO = "/app/bridges/sendto"
 
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
 URL_DOCS = "https://system-bridge.timmo.dev"
@@ -45,6 +46,9 @@ class SystemTray(Base, QSystemTrayIcon):
         action_settings: QAction = menu.addAction("Open Settings")
         action_settings.triggered.connect(self.show_settings)
 
+        action_bridges_setup = menu.addAction("Setup Bridges")
+        action_bridges_setup.triggered.connect(self.show_bridges_setup)
+
         menu.addSeparator()
 
         action_data: QAction = menu.addAction("View Data")
@@ -52,8 +56,8 @@ class SystemTray(Base, QSystemTrayIcon):
 
         menu.addSeparator()
 
-        action_sendto = menu.addAction("Send to..")
-        action_sendto.triggered.connect(self.show_send_to)
+        action_bridges_sendto = menu.addAction("Send to Bridge..")
+        action_bridges_sendto.triggered.connect(self.show_bridges_send_to)
 
         menu.addSeparator()
 
@@ -140,6 +144,14 @@ class SystemTray(Base, QSystemTrayIcon):
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
+    def show_bridges_send_to(self) -> None:
+        """Show bridges send to window"""
+        self.callback_show_window(PATH_BRIDGES_SEND_TO, False, 420, 480)
+
+    def show_bridges_setup(self) -> None:
+        """Show bridges setup window"""
+        self.callback_show_window(PATH_BRIDGES_SETUP, False, 420, 480)
+
     def show_data(self) -> None:
         """Show api data"""
         self.callback_show_window(PATH_DATA, True)
@@ -147,10 +159,6 @@ class SystemTray(Base, QSystemTrayIcon):
     def show_logs(self) -> None:
         """Show logs"""
         self.callback_show_window(PATH_LOGS, True)
-
-    def show_send_to(self) -> None:
-        """Show send to window"""
-        self.callback_show_window(PATH_SEND_TO, False, 420, 480)
 
     def show_settings(self) -> None:
         """Show settings"""
