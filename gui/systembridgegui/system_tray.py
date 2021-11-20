@@ -154,12 +154,12 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def show_data(self) -> None:
         """Show api data"""
-        self.callback_show_window(PATH_DATA, True)
+        self.callback_show_window(PATH_DATA, False)
 
     def show_logs(self) -> None:
         """Show logs"""
-        self.callback_show_window(PATH_LOGS, True)
+        self.callback_show_window(PATH_LOGS, False)
 
     def show_settings(self) -> None:
         """Show settings"""
-        self.callback_show_window(PATH_SETTINGS, True)
+        self.callback_show_window(PATH_SETTINGS, False)
