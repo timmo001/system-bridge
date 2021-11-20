@@ -20,6 +20,7 @@ import { getConnection, getSettingsObject, getVersion } from "../common";
 import { HttpExceptionFilter } from "./http-exception.filter";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
+import { MDNSAdversisement } from "../mdns/advertisement";
 
 let app: NestExpressApplication,
   server: Server | undefined,
@@ -128,54 +129,9 @@ export async function startServer(): Promise<void> {
   server.on("listening", async () => {
     const { logger } = new Logger("API");
     logger.info(`API started on port ${apiPort}`);
-    const siOsInfo: Systeminformation.OsData = await osInfo();
-    const uuidInfo: Systeminformation.UuidData = await uuid();
-    const defaultInterface: string = await networkInterfaceDefault();
-    const networkInterface:
-      | Systeminformation.NetworkInterfacesData
-      | undefined = (await networkInterfaces()).find(
-      (ni: Systeminformation.NetworkInterfacesData) =>
-        ni.iface === defaultInterface
-    );
 
-    if (networkInterface) {
-      try {
-        const version = getVersion(logger);
-        const MDNS = await import("mdns");
-        MDNS.createAdvertisement(
-          MDNS.udp("system-bridge"),
-          apiPort,
-          {
-            name: `System Bridge - ${siOsInfo.fqdn}`,
-            txtRecord: {
-              address: `http://${siOsInfo.fqdn}:${apiPort}`,
-              fqdn: siOsInfo.fqdn,
-              host: siOsInfo.hostname,
-              ip: networkInterface.ip4,
-              mac: networkInterface.mac,
-              port: apiPort,
-              uuid: uuidInfo.os,
-              version,
-              websocketAddress: `ws://${siOsInfo.fqdn}:${wsPort}`,
-              wsPort: wsPort,
-            },
-          },
-          (error: any, service: { fullname: any; port: any }) => {
-            const { logger } = new Logger("API");
-            if (error) logger.warn(`MDNS error: ${error}`);
-            else
-              logger.info(
-                `Sent mdns advertisement on port ${service.fullname}:${service.port}`
-              );
-            logger.close();
-          }
-        );
-      } catch (error) {
-        const { logger } = new Logger("API");
-        logger.warn(`MDNS error caught: ${error.message}`);
-        logger.close();
-      }
-    }
+    const mdnsAdvertisement = new MDNSAdversisement();
+    await mdnsAdvertisement.createAdvertisement(apiPort, wsPort);
   });
   server.on("close", () => {
     const { logger } = new Logger("API");
