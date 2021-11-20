@@ -1,10 +1,17 @@
 """System Bridge GUI: Main class"""
 from argparse import Namespace
 import asyncio
+import async_timeout
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 from aiohttp.client import ClientSession
 from systembridge import Bridge, BridgeClient
+from aiohttp.client_exceptions import (
+    ClientConnectionError,
+    ClientConnectorError,
+    ClientResponseError,
+)
+from systembridge.exceptions import BridgeException
 
 from .base import Base
 from .system_tray import SystemTray
@@ -71,10 +78,24 @@ class Main(Base):
 
     async def setup_bridge(self) -> None:
         """Setup the bridge"""
-        async with ClientSession() as session:
-            self.bridge = Bridge(
-                BridgeClient(session),
-                f"http://{self.args.hostname}:{self.args.port}",
-                self.args.api_key,
-            )
-            self.information = await self.bridge.async_get_information()
+        try:
+            async with async_timeout.timeout(30):
+                async with ClientSession() as session:
+                    self.bridge = Bridge(
+                        BridgeClient(session),
+                        f"http://{self.args.hostname}:{self.args.port}",
+                        self.args.api_key,
+                    )
+                    self.information = await self.bridge.async_get_information()
+        except (
+            asyncio.TimeoutError,
+            BridgeException,
+            ClientConnectionError,
+            ClientConnectorError,
+            ClientResponseError,
+            OSError,
+        ) as exception:
+            self.logger.error(exception)
+            self.logger.info("Retrying in 10 seconds..")
+            await asyncio.sleep(10)
+            await self.setup_bridge()
