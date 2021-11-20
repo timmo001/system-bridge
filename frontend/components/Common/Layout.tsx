@@ -16,6 +16,8 @@ interface LayoutProps {
   classes: ClassNameMap;
   description?: string;
   keywords?: string;
+  noFooter?: boolean;
+  noHeader?: boolean;
   title?: string;
   url?: string;
 }
@@ -89,21 +91,25 @@ function Layout(props: LayoutProps): ReactElement {
           }
         />
       </Head>
-      <Header
-        {...props}
-        brand="System Bridge"
-        changeColorOnScroll={{
-          height: 200,
-          color: "primary",
-        }}
-        color="transparent"
-        fixed
-        rightLinks={<HeaderLinks />}
-      />
+      {!props.noHeader && (
+        <Header
+          {...props}
+          brand="System Bridge"
+          changeColorOnScroll={{
+            height: 200,
+            color: "primary",
+          }}
+          color="transparent"
+          fixed
+          rightLinks={<HeaderLinks />}
+        />
+      )}
       {props.children}
-      <Container className={classes.footer} component="footer" maxWidth="xl">
-        <Footer />
-      </Container>
+      {!props.noFooter && (
+        <Container className={classes.footer} component="footer" maxWidth="xl">
+          <Footer />
+        </Container>
+      )}
     </>
   );
 }
