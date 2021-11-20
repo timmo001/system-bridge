@@ -106,17 +106,17 @@ class SendToWindow(Base, QWidget):
         if index == self.combo_box.count() - 1:
             self.text_host.setEnabled(True)
             self.text_port.setEnabled(True)
-            self.text_api_key.setEnabled(True)
             self.text_host.setText("")
             self.text_port.setText("")
         else:
             service = self.services[index]
+            host = service.properties.get(b"host").decode("utf-8")
+            port = service.properties.get(b"port").decode("utf-8")
 
             self.text_host.setEnabled(False)
             self.text_port.setEnabled(False)
-            self.text_api_key.setEnabled(False)
-            self.text_host.setText(service.properties.get(b"host"))
-            self.text_port.setText(service.properties.get(b"port"))
+            self.text_host.setText(host)
+            self.text_port.setText(port)
 
         self.text_api_key.setText("")
 
@@ -127,7 +127,7 @@ class SendToWindow(Base, QWidget):
         api_key = self.text_api_key.toPlainText()
 
         self.logger.info(
-            "Sending to %s:%s with API Key %s",
+            "Sending to %s:%s with API Key: %s",
             host,
             port,
             api_key,
