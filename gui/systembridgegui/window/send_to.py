@@ -75,6 +75,8 @@ class SendToWindow(Base, QWidget):
                 else service.name
             )
 
+        self.combo_box.addItem("Manual")
+
         self.combo_box.setCurrentIndex(0)
 
     def send(self) -> None:
@@ -83,15 +85,18 @@ class SendToWindow(Base, QWidget):
         if index < 0:
             return
 
-        service = self.services[index]
-        host = service.properties.get(b"host")
-        ip = service.properties.get(b"ip")
+        if index == self.combo_box.count() - 1:
+            self.logger.info("Manual send")
+        else:
+            service = self.services[index]
+            host = service.properties.get(b"host")
+            ip = service.properties.get(b"ip")
 
-        self.logger.info(
-            "Sending to: %s (%s)",
-            host.decode("utf-8") if host is not None else service.name,
-            ip.decode("utf-8") if ip is not None else "",
-        )
+            self.logger.info(
+                "Sending to: %s (%s)",
+                host.decode("utf-8") if host is not None else service.name,
+                ip.decode("utf-8") if ip is not None else "",
+            )
 
         self.hide()
 
