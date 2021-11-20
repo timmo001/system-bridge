@@ -14,6 +14,6 @@ export class Bridge {
   @Column({ type: "int" })
   port = 9170;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   apiKey = "";
 }
