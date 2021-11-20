@@ -1,10 +1,9 @@
 import React, { ReactElement } from "react";
-import { Container } from "@material-ui/core";
 import { GetStaticProps } from "next";
 
-import Bridges from "../../components/Bridges/Bridges";
-import Layout from "../../components/Common/Layout";
-import useStyles from "../../assets/jss/components/layout";
+import Layout from "../../../components/Common/Layout";
+import Setup from "../../../components/Bridges/Setup";
+import useStyles from "../../../assets/jss/components/layout";
 
 function PageBridges(): ReactElement {
   const classes = useStyles();
@@ -18,7 +17,7 @@ function PageBridges(): ReactElement {
       noHeader
       noFooter
     >
-      <Bridges />
+      <Setup />
     </Layout>
   );
 }

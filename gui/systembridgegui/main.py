@@ -16,7 +16,6 @@ from systembridge.exceptions import BridgeException
 from .base import Base
 from .system_tray import SystemTray
 from .window.main import MainWindow
-from .window.send_to import SendToWindow
 
 
 class Main(Base):
@@ -40,11 +39,6 @@ class Main(Base):
         self.main_window.setWindowIcon(self.icon)
         self.main_window.resize(1280, 720)
 
-        self.send_to_window = SendToWindow(
-            self.args,
-            self.icon,
-        )
-
         self.system_tray_icon = SystemTray(
             self.args,
             self.icon,
@@ -64,15 +58,19 @@ class Main(Base):
     def callback_show_window(
         self,
         path: str,
+        maximized: bool,
+        width: int = 1280,
+        height: int = 720,
     ) -> None:
         """Show the main window"""
         self.logger.info("Showing window: %s", path)
-        if path == "SEND_TO":
-            self.send_to_window.setup()
-            self.send_to_window.show()
-        else:
-            self.main_window.setup(path)
+
+        self.main_window.resize(width, height)
+        self.main_window.setup(path)
+        if maximized:
             self.main_window.showMaximized()
+        else:
+            self.main_window.show()
 
     async def exit_backend(self) -> None:
         """Exit the backend"""

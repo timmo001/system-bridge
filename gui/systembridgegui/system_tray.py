@@ -1,6 +1,7 @@
 """System Bridge GUI: System Tray"""
 from argparse import Namespace
 from collections.abc import Callable
+from typing import Optional
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QIcon
@@ -13,7 +14,7 @@ from .base import Base
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
-PATH_SEND_TO = "SEND_TO"
+PATH_SEND_TO = "/app/bridges/sendto"
 
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
 URL_DOCS = "https://system-bridge.timmo.dev"
@@ -31,7 +32,7 @@ class SystemTray(Base, QSystemTrayIcon):
         parent: QWidget,
         information: Information,
         callback_exit_application: Callable[[], None],
-        callback_show_window: Callable[[str], None],
+        callback_show_window: Callable[[str, bool, Optional[int], Optional[int]], None],
     ) -> None:
         """Initialize the system tray icon"""
         Base.__init__(self, args)
@@ -141,16 +142,16 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def show_data(self) -> None:
         """Show api data"""
-        self.callback_show_window(PATH_DATA)
+        self.callback_show_window(PATH_DATA, True)
 
     def show_logs(self) -> None:
         """Show logs"""
-        self.callback_show_window(PATH_LOGS)
+        self.callback_show_window(PATH_LOGS, True)
 
     def show_send_to(self) -> None:
         """Show send to window"""
-        self.callback_show_window(PATH_SEND_TO)
+        self.callback_show_window(PATH_SEND_TO, False, 420, 480)
 
     def show_settings(self) -> None:
         """Show settings"""
-        self.callback_show_window(PATH_SETTINGS)
+        self.callback_show_window(PATH_SETTINGS, True)
