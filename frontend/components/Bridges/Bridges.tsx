@@ -86,7 +86,11 @@ function BridgesComponent(): ReactElement {
 
           <List>
             {bridges.map((bridge: Bridge) => (
-              <ListItem button onClick={() => handleItemClick(bridge)}>
+              <ListItem
+                key={bridge.key}
+                button
+                onClick={() => handleItemClick(bridge)}
+              >
                 <ListItemText
                   primary={`${bridge.name} ${
                     !bridge.apiKey && "(Not Configured)"
