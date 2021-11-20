@@ -30,7 +30,6 @@ function Layout(props: LayoutProps): ReactElement {
   const query = router.query;
 
   useEffect(() => {
-    console.log(query, query.apiKey);
     if (query && Object.keys(query).length > 0)
       if (!query.apiKey) {
         const response: string = window.prompt("Please enter your API key", "");
