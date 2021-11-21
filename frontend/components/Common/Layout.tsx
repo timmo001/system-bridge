@@ -90,7 +90,9 @@ function Layout(props: LayoutProps): ReactElement {
           }
         />
       </Head>
-      {!props.noHeader && (
+      {props.noHeader ? (
+        ""
+      ) : (
         <Header
           {...props}
           brand="System Bridge"
@@ -104,7 +106,9 @@ function Layout(props: LayoutProps): ReactElement {
         />
       )}
       {props.children}
-      {!props.noFooter && (
+      {props.noFooter ? (
+        ""
+      ) : (
         <Container className={classes.footer} component="footer" maxWidth="xl">
           <Footer />
         </Container>
