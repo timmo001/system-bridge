@@ -146,7 +146,7 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def show_bridges_send_to(self) -> None:
         """Show bridges send to window"""
-        self.callback_show_window(PATH_BRIDGES_SEND_TO, False)
+        self.callback_show_window(PATH_BRIDGES_SEND_TO, False, 620, 420)
 
     def show_bridges_setup(self) -> None:
         """Show bridges setup window"""

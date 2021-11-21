@@ -26,7 +26,7 @@ import { useSettings } from "../Contexts/Settings";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     title: {
-      margin: theme.spacing(2, 1.5, 1),
+      margin: theme.spacing(2, 1.5, 6),
     },
     subtitle: {
       margin: theme.spacing(1, 2, 2),
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "calc(100% - 32px)",
     },
     button: {
-      margin: theme.spacing(4, 2.5, 1.5),
+      margin: theme.spacing(6, 2.5, 2),
       width: "calc(100% - 32px)",
     },
   })
