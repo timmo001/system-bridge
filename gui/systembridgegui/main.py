@@ -80,6 +80,7 @@ class Main(Base):
             self.application,
             self.icon,
             True,
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         )
         self.player_window.show()
 

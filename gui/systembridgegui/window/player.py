@@ -19,10 +19,13 @@ class PlayerWindow(Base, QWidget):
         application: QApplication,
         icon: QIcon,
         video: bool,
+        url: str,
     ) -> None:
         """Initialize the window"""
         Base.__init__(self, args)
-        QWidget.__init__(self, WindowFlags=Qt.FramelessWindowHint)
+        QWidget.__init__(
+            self, WindowFlags=Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        )
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -47,10 +50,11 @@ class PlayerWindow(Base, QWidget):
         )
 
         url = QUrl(
-            f"""http://{self.args.hostname}:{self.args.frontend_port}/app/player?{urlencode({
+            f"""http://{self.args.hostname}:{self.args.frontend_port}/app/player/{"video" if video else "audio"}?{urlencode({
                     "apiKey": self.args.api_key,
                     "apiPort": self.args.port,
                     "wsPort": self.args.websocket_port,
+                    "url": url,
                 })}"""
         )
         self.logger.debug("Opening url: %s", url)
