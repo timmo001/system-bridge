@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(2, 0),
     },
     title: {
-      margin: theme.spacing(0.5, 1.5),
+      margin: theme.spacing(2, 1.5, 6),
     },
   })
 );

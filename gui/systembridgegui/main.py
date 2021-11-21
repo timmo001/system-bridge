@@ -103,6 +103,7 @@ class Main(Base):
             self.main_window.showMaximized()
         else:
             self.main_window.showNormal()
+        self.main_window.setFocus()
 
     async def exit_backend(self) -> None:
         """Exit the backend"""
