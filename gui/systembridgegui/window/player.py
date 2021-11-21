@@ -35,8 +35,10 @@ class PlayerWindow(Base, QWidget):
         self.setWindowIcon(icon)
         self.setWindowFlags(Qt.CustomizeWindowHint)
 
-        # self.resize(460, 130) # Audio
-        self.resize(480, 270)  # Video
+        if video:
+            self.resize(480, 270)
+        else:
+            self.resize(460, 130)
 
         screen_geometry = application.primaryScreen().availableSize()
 
