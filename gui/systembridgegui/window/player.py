@@ -2,8 +2,8 @@
 from argparse import Namespace
 from urllib.parse import urlencode
 
-from PySide6.QtCore import QPoint, QUrl
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import QUrl
+from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 
@@ -33,6 +33,7 @@ class PlayerWindow(Base, QWidget):
 
         self.setWindowTitle("System Bridge - Player")
         self.setWindowIcon(icon)
+        self.setWindowFlags(Qt.CustomizeWindowHint)
 
         # self.resize(460, 130) # Audio
         self.resize(480, 270)  # Video
@@ -41,7 +42,7 @@ class PlayerWindow(Base, QWidget):
 
         self.move(
             screen_geometry.width() - self.width() - 8,
-            screen_geometry.height() - self.height() - 34,
+            screen_geometry.height() - self.height() - 8,
         )
 
         url = QUrl(
