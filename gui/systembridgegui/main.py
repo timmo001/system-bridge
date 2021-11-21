@@ -3,16 +3,17 @@ from argparse import Namespace
 import asyncio
 import os
 import sys
-import async_timeout
+
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 from aiohttp.client import ClientSession
-from systembridge import Bridge, BridgeClient
 from aiohttp.client_exceptions import (
     ClientConnectionError,
     ClientConnectorError,
     ClientResponseError,
 )
+import async_timeout
+from systembridge import Bridge, BridgeClient
 from systembridge.exceptions import BridgeException
 
 from .base import Base

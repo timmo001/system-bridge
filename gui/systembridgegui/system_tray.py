@@ -10,7 +10,6 @@ from systembridge.objects.information import Information
 
 from .base import Base
 
-
 PATH_BRIDGES_SEND_TO = "/app/bridges/sendto"
 PATH_BRIDGES_SETUP = "/app/bridges/setup"
 PATH_DATA = "/app/data"

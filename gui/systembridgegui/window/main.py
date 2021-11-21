@@ -5,11 +5,7 @@ from urllib.parse import urlencode
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import (
-    QFrame,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFrame, QVBoxLayout
 
 from ..base import Base
 
