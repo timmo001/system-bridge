@@ -12,7 +12,7 @@ export class FrontendController {
     await this.frontendService.handler(req, res);
   }
 
-  @Get("favicon.ico")
+  @Get("favicon.*")
   public async favicon(@Req() req: Request, @Res() res: Response) {
     await this.frontendService.handler(req, res);
   }
