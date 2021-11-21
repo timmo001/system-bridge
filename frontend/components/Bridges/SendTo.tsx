@@ -25,36 +25,35 @@ import { useSettings } from "../Contexts/Settings";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      padding: theme.spacing(2, 0),
-    },
     title: {
-      margin: theme.spacing(0.5, 1.5, 1),
+      margin: theme.spacing(2, 1.5, 1),
     },
     subtitle: {
-      margin: theme.spacing(0.5, 2.5, 2),
+      margin: theme.spacing(1, 2, 2),
     },
-    autocomplete: {
-      margin: theme.spacing(0.5, 2.5, 2),
-      width: "100%",
+    input: {
+      margin: theme.spacing(2, 2.5),
+      width: "calc(100% - 32px)",
     },
     button: {
       margin: theme.spacing(4, 2.5, 1.5),
-      width: "100%",
+      width: "calc(100% - 32px)",
     },
   })
 );
 
 function BridgesSendToComponent(): ReactElement {
+  const query = useRouter().query;
+
   const [bridges, setBridges] = useState<Array<Bridge>>();
   const [bridgeSelected, setBridgeSelected] = useState<Bridge>();
   const [settings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
-
-  const query = useRouter().query;
+  const [url, setUrl] = useState<string>("");
 
   const handleSetup = useCallback(async () => {
     console.log("Setup SendTo");
+    setUrl(query.url as string);
     const response = await axios.get<Array<Bridge>>(
       `http://${query.apiHost || window.location.hostname}:${
         query.apiPort || 9170
@@ -64,6 +63,10 @@ function BridgesSendToComponent(): ReactElement {
     if (response && response.status < 400)
       setBridges(response.data.filter((bridge: Bridge) => bridge.apiKey));
   }, [query.apiHost, query.apiPort, query.apiKey]);
+
+  function handleUrlChanged(event: ChangeEvent<HTMLInputElement>): void {
+    setUrl(event.target.value);
+  }
 
   async function handleSendTo(): Promise<void> {
     if (bridgeSelected) {
@@ -93,7 +96,7 @@ function BridgesSendToComponent(): ReactElement {
 
   return (
     <>
-      <Container className={classes.root} maxWidth="lg">
+      <Container maxWidth="lg">
         {!settings && !bridges ? (
           <Grid container direction="row" justifyContent="center">
             <CircularProgress />
@@ -104,16 +107,8 @@ function BridgesSendToComponent(): ReactElement {
               Send to Bridge..
             </Typography>
 
-            <Typography
-              className={classes.subtitle}
-              component="h3"
-              variant="subtitle1"
-            >
-              {query.url}
-            </Typography>
-
             <Autocomplete
-              className={classes.autocomplete}
+              className={classes.input}
               id="bridge"
               options={bridges}
               value={bridgeSelected}
@@ -126,10 +121,21 @@ function BridgesSendToComponent(): ReactElement {
               }
             />
 
+            <TextField
+              className={classes.input}
+              fullWidth
+              id="url"
+              label="URL"
+              onChange={handleUrlChanged}
+              type="url"
+              value={url}
+              variant="outlined"
+            />
+
             <Button
               className={classes.button}
               color="primary"
-              disabled={!bridgeSelected || !query.url}
+              disabled={!bridgeSelected || !url}
               variant="contained"
               onClick={handleSendTo}
             >

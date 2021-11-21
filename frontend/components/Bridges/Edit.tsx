@@ -1,11 +1,14 @@
 import React, { ChangeEvent, ReactElement, useState } from "react";
 import {
   Button,
+  createStyles,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  makeStyles,
   TextField,
+  Theme,
   Typography,
   useMediaQuery,
   useTheme,
@@ -25,6 +28,13 @@ interface BridgeEditProps {
   handleClose: () => void;
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    input: {
+      margin: theme.spacing(1, 0),
+    },
+  })
+);
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
   const [bridge, setBridge] = useState<Bridge>(props.bridge);
   const [testingMessage, setTestingMessage] = useState<TestingMessage>({
@@ -91,6 +101,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
     return false;
   }
 
+  const classes = useStyles();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -104,41 +115,48 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       <DialogTitle id="form-dialog-title">Edit {bridge.name}</DialogTitle>
       <DialogContent>
         <TextField
+          className={classes.input}
           autoFocus
           fullWidth
           id="name"
           label="Name"
-          margin="dense"
           onChange={handleTextChanged("name")}
           type="text"
           value={bridge.name || ""}
+          variant="outlined"
         />
+
         <TextField
+          className={classes.input}
           fullWidth
           id="host"
           label="Host"
-          margin="dense"
           onChange={handleTextChanged("host")}
           type="text"
           value={bridge.host || ""}
+          variant="outlined"
         />
+
         <TextField
+          className={classes.input}
           fullWidth
           id="port"
           label="Port"
-          margin="dense"
           onChange={handleTextChanged("port")}
           type="number"
           value={bridge.port || 9170}
+          variant="outlined"
         />
+
         <TextField
+          className={classes.input}
           fullWidth
           id="apiKey"
           label="API Key"
-          margin="dense"
           onChange={handleTextChanged("apiKey")}
           type="text"
           value={bridge.apiKey || ""}
+          variant="outlined"
         />
       </DialogContent>
       <DialogActions>
