@@ -11,3 +11,5 @@ permissions:
 jobs:
   dependabot-automerge:
     uses: timmo001/workflows/.github/workflows/dependabot-automerge.yml@master
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
