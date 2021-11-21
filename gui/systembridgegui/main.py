@@ -32,9 +32,24 @@ class Main(Base):
 
         self.application = QApplication([])
         self.icon = QIcon("public/system-bridge-circle.png")
+        self.application.setStyleSheet("""
+            QWidget {
+                color: #FFFFFF;
+                background-color: #212121;
+            }
 
-        with open(f"{os.path.dirname(__file__)}/style.qss", "r") as style_file:
-            self.application.setStyleSheet(style_file.read())
+            QMenu {
+                background-color: #292929;
+            }
+
+            QMenu::item {
+                background-color: transparent;
+            }
+
+            QMenu::item:selected {
+                background-color: #757575;
+            }
+        """)
 
         asyncio.run(self.setup_bridge())
 
