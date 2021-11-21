@@ -1,25 +1,29 @@
-"""System Bridge GUI: Main Window"""
+"""System Bridge GUI: Main window"""
 from argparse import Namespace
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QUrl
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QVBoxLayout
 
-from .base import Base
+from ..base import Base
 
 
-class MainWindow(Base, QWidget):
+class MainWindow(Base, QFrame):
     """Main Window"""
 
     def __init__(
         self,
         args: Namespace,
+        icon: QIcon,
     ) -> None:
-        """Initialize the main window"""
+        """Initialize the window"""
         Base.__init__(self, args)
-        QWidget.__init__(self)
+        QFrame.__init__(self)
+
+        self.setWindowTitle("System Bridge")
+        self.setWindowIcon(icon)
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -29,13 +33,13 @@ class MainWindow(Base, QWidget):
         self.layout.addWidget(self.browser)
 
     # pylint: disable=invalid-name
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """Close the window instead of closing the app"""
         event.ignore()
         self.hide()
 
     def setup(self, path) -> None:
-        """Setup the main window"""
+        """Setup the window"""
         url = QUrl(
             f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
                     "apiKey": self.args.api_key,

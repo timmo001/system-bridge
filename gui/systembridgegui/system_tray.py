@@ -1,6 +1,7 @@
 """System Bridge GUI: System Tray"""
 from argparse import Namespace
 from collections.abc import Callable
+from typing import Optional
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QIcon
@@ -9,6 +10,8 @@ from systembridge.objects.information import Information
 
 from .base import Base
 
+PATH_BRIDGES_SEND_TO = "/app/bridges/sendto"
+PATH_BRIDGES_SETUP = "/app/bridges/setup"
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
@@ -29,9 +32,9 @@ class SystemTray(Base, QSystemTrayIcon):
         parent: QWidget,
         information: Information,
         callback_exit_application: Callable[[], None],
-        callback_show_window: Callable[[str], None],
+        callback_show_window: Callable[[str, bool, Optional[int], Optional[int]], None],
     ) -> None:
-        """Initialize the system tray icon"""
+        """Initialize the system tray"""
         Base.__init__(self, args)
         QSystemTrayIcon.__init__(self, icon, parent)
 
@@ -42,10 +45,18 @@ class SystemTray(Base, QSystemTrayIcon):
         action_settings: QAction = menu.addAction("Open Settings")
         action_settings.triggered.connect(self.show_settings)
 
+        action_bridges_setup = menu.addAction("Setup Bridges")
+        action_bridges_setup.triggered.connect(self.show_bridges_setup)
+
         menu.addSeparator()
 
         action_data: QAction = menu.addAction("View Data")
         action_data.triggered.connect(self.show_data)
+
+        menu.addSeparator()
+
+        action_bridges_sendto = menu.addAction("Send to Bridge..")
+        action_bridges_sendto.triggered.connect(self.show_bridges_send_to)
 
         menu.addSeparator()
 
@@ -132,14 +143,22 @@ class SystemTray(Base, QSystemTrayIcon):
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
+    def show_bridges_send_to(self) -> None:
+        """Show bridges send to window"""
+        self.callback_show_window(PATH_BRIDGES_SEND_TO, False, 620, 420)
+
+    def show_bridges_setup(self) -> None:
+        """Show bridges setup window"""
+        self.callback_show_window(PATH_BRIDGES_SETUP, False)
+
     def show_data(self) -> None:
         """Show api data"""
-        self.callback_show_window(PATH_DATA)
+        self.callback_show_window(PATH_DATA, False)
 
     def show_logs(self) -> None:
         """Show logs"""
-        self.callback_show_window(PATH_LOGS)
+        self.callback_show_window(PATH_LOGS, True)
 
     def show_settings(self) -> None:
         """Show settings"""
-        self.callback_show_window(PATH_SETTINGS)
+        self.callback_show_window(PATH_SETTINGS, False)

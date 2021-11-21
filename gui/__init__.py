@@ -1,9 +1,6 @@
 """System Bridge GUI"""
 from argparse import ArgumentParser
 import logging
-import sys
-
-from PySide6.QtWidgets import QApplication
 
 from systembridgegui.main import Main
 
@@ -56,8 +53,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    application = QApplication([])
-
     logging.basicConfig(
         format=FORMAT,
         datefmt=DATE_FORMAT,
@@ -65,6 +60,4 @@ if __name__ == "__main__":
     )
     logger = logging.getLogger(__name__)
 
-    Main(args, application)
-
-    sys.exit(application.exec())
+    Main(args)

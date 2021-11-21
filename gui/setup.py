@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import io
-import os
 import json
+import os
 
 from setuptools import find_packages, setup
 
