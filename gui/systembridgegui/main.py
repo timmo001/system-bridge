@@ -91,11 +91,11 @@ class Main(Base):
         """Show the main window"""
         self.logger.info("Showing window: %s", path)
 
-        self.main_window.resize(width, height)
         self.main_window.setup(path)
         self.main_window.showMaximized()
         if not maximized:
             self.main_window.showNormal()
+        self.main_window.resize(width, height)
 
     async def exit_backend(self) -> None:
         """Exit the backend"""
