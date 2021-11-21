@@ -1,6 +1,8 @@
 """System Bridge GUI: Main class"""
 from argparse import Namespace
 import asyncio
+import os
+import sys
 import async_timeout
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
@@ -24,19 +26,22 @@ class Main(Base):
     def __init__(
         self,
         args: Namespace,
-        application: QApplication,
     ) -> None:
         """Initialize the main class"""
         super().__init__(args)
 
-        self.application = application
+        self.application = QApplication([])
         self.icon = QIcon("public/system-bridge-circle.png")
+
+        with open(f"{os.path.dirname(__file__)}/style.qss", "r") as style_file:
+            self.application.setStyleSheet(style_file.read())
 
         asyncio.run(self.setup_bridge())
 
-        self.main_window = MainWindow(self.args)
-        self.main_window.setWindowTitle("System Bridge")
-        self.main_window.setWindowIcon(self.icon)
+        self.main_window = MainWindow(
+            self.args,
+            self.icon,
+        )
 
         self.system_tray_icon = SystemTray(
             self.args,
@@ -47,6 +52,8 @@ class Main(Base):
             self.callback_show_window,
         )
         self.system_tray_icon.show()
+
+        sys.exit(self.application.exec())
 
     def callback_exit_application(self) -> None:
         """Exit the application"""

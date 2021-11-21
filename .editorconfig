@@ -19,7 +19,7 @@ indent_size = 2
 [*.html]
 indent_style = space
 
-[*.{py,html,md}]
+[*.{py,qss,html,md}]
 indent_size = 4
 
 [*.md]

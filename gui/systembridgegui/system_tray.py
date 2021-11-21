@@ -35,7 +35,7 @@ class SystemTray(Base, QSystemTrayIcon):
         callback_exit_application: Callable[[], None],
         callback_show_window: Callable[[str, bool, Optional[int], Optional[int]], None],
     ) -> None:
-        """Initialize the system tray icon"""
+        """Initialize the system tray"""
         Base.__init__(self, args)
         QSystemTrayIcon.__init__(self, icon, parent)
 

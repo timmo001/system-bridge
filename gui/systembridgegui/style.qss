@@ -1,0 +1,16 @@
+QWidget {
+    color: #FFFFFF;
+    background-color: #212121;
+}
+
+QMenu {
+    background-color: #292929;
+}
+
+QMenu::item {
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background-color: #757575;
+}

@@ -3,23 +3,31 @@ from argparse import Namespace
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QUrl
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFrame,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ..base import Base
 
 
-class MainWindow(Base, QWidget):
+class MainWindow(Base, QFrame):
     """Main Window"""
 
     def __init__(
         self,
         args: Namespace,
+        icon: QIcon,
     ) -> None:
-        """Initialize the main window"""
+        """Initialize the window"""
         Base.__init__(self, args)
-        QWidget.__init__(self)
+        QFrame.__init__(self)
+
+        self.setWindowTitle("System Bridge")
+        self.setWindowIcon(icon)
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
