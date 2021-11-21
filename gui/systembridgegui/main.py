@@ -77,6 +77,7 @@ class Main(Base):
 
         self.player_window = PlayerWindow(
             self.args,
+            self.application,
             self.icon,
             True,
         )
