@@ -42,7 +42,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-json-view": "1.21.3",
-    "rect-scaler": "1.1.0",
+    "react-player": "2.9.0",
+    "rect-scaler": "1.0.0",
     "uuid": "8.3.2"
   },
   "devDependencies": {
