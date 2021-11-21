@@ -17,18 +17,8 @@ export class FrontendController {
     await this.frontendService.handler(req, res);
   }
 
-  @Get("app/data")
+  @Get("app/*")
   public async showData(@Req() req: Request, @Res() res: Response) {
-    await this.frontendService.handler(req, res);
-  }
-
-  @Get("app/logs")
-  public async showLogs(@Req() req: Request, @Res() res: Response) {
-    await this.frontendService.handler(req, res);
-  }
-
-  @Get("app/settings")
-  public async showSettings(@Req() req: Request, @Res() res: Response) {
     await this.frontendService.handler(req, res);
   }
 }
