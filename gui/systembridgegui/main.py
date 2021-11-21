@@ -60,6 +60,8 @@ class Main(Base):
             self.args,
             self.icon,
         )
+        self.main_window.show()
+        self.main_window.hide()
 
         self.system_tray_icon = SystemTray(
             self.args,
@@ -91,10 +93,9 @@ class Main(Base):
 
         self.main_window.resize(width, height)
         self.main_window.setup(path)
-        if maximized:
-            self.main_window.showMaximized()
-        else:
-            self.main_window.show()
+        self.main_window.showMaximized()
+        if not maximized:
+            self.main_window.showNormal()
 
     async def exit_backend(self) -> None:
         """Exit the backend"""

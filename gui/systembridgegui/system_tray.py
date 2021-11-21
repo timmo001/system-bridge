@@ -157,7 +157,7 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def show_logs(self) -> None:
         """Show logs"""
-        self.callback_show_window(PATH_LOGS, False)
+        self.callback_show_window(PATH_LOGS, True)
 
     def show_settings(self) -> None:
         """Show settings"""
