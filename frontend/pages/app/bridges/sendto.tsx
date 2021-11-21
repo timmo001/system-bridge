@@ -11,7 +11,7 @@ function PageBridges(): ReactElement {
   return (
     <Layout
       classes={classes}
-      title="Bridges"
+      title="Send to Bridge"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
       noHeader
