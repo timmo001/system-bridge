@@ -72,18 +72,10 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
       let previousStatus;
       if (previousPlayerStatus) {
         previousStatus = cloneDeep(previousPlayerStatus) as PlayerStatus;
-        previousStatus.source.source = previousStatus.source.source?.replace(
-          "safe-file-protocol://",
-          ""
-        );
         if (previousStatus.source.type === "audio")
           delete previousStatus.source.cover;
       }
       let newStatus = cloneDeep(playerStatus);
-      newStatus.source.source = newStatus.source.source?.replace(
-        "safe-file-protocol://",
-        ""
-      );
       if (newStatus.source.type === "audio") delete newStatus.source.cover;
       if (!isEqual(newStatus, previousStatus)) {
         console.log(
