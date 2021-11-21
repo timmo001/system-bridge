@@ -73,7 +73,7 @@ function BridgesSendToComponent(): ReactElement {
       try {
         const response = await axios.post<{ path: string }>(
           `http://${bridgeSelected.host}:${bridgeSelected.port}/open`,
-          { path: query.url },
+          { path: url },
           { headers: { "api-key": bridgeSelected.apiKey } }
         );
         if (response && response.status < 400) {
