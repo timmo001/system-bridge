@@ -22,7 +22,7 @@ class PlayerWindow(Base, QWidget):
     ) -> None:
         """Initialize the window"""
         Base.__init__(self, args)
-        QWidget.__init__(self)
+        QWidget.__init__(self, WindowFlags=Qt.FramelessWindowHint)
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -33,7 +33,6 @@ class PlayerWindow(Base, QWidget):
 
         self.setWindowTitle("System Bridge - Player")
         self.setWindowIcon(icon)
-        self.setWindowFlags(Qt.CustomizeWindowHint)
 
         if video:
             self.resize(480, 270)
