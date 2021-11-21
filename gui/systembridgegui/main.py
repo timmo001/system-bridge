@@ -92,6 +92,7 @@ class Main(Base):
         """Show the main window"""
         self.logger.info("Showing window: %s", path)
 
+        self.main_window.hide()
         self.main_window.setup(path)
         self.main_window.resize(width, height)
         screen_geometry = self.application.primaryScreen().availableSize()
@@ -103,7 +104,6 @@ class Main(Base):
             self.main_window.showMaximized()
         else:
             self.main_window.showNormal()
-        self.main_window.setFocus()
 
     async def exit_backend(self) -> None:
         """Exit the backend"""

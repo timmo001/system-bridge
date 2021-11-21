@@ -20,9 +20,6 @@ import BridgeEdit from "./Edit";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      padding: theme.spacing(2, 0),
-    },
     title: {
       margin: theme.spacing(2, 1.5, 6),
     },
@@ -73,7 +70,7 @@ function BridgesSetupComponent(): ReactElement {
 
   return (
     <>
-      <Container className={classes.root} maxWidth="lg">
+      <Container maxWidth="lg">
         {!settings && !bridges ? (
           <Grid container direction="row" justifyContent="center">
             <CircularProgress />
