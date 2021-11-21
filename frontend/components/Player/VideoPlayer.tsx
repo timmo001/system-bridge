@@ -197,6 +197,7 @@ function VideoPlayerComponent(): ReactElement {
         playing={playing}
         height="100%"
         width="100%"
+        style={{ margin: 0, overflow: "hidden" }}
         url={source}
         muted={muted}
         volume={volume}
