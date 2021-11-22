@@ -18,13 +18,18 @@ import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 
+export interface EditBridge {
+  edit: boolean;
+  bridge: Partial<Bridge>;
+}
+
 interface TestingMessage {
   text: string;
   error: boolean;
 }
 
 interface BridgeEditProps {
-  bridge: Bridge;
+  bridgeEdit: EditBridge;
   handleClose: () => void;
 }
 
@@ -36,7 +41,9 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
-  const [bridge, setBridge] = useState<Bridge>(props.bridge);
+  const [bridge, setBridge] = useState<Partial<Bridge>>(
+    props.bridgeEdit.bridge
+  );
   const [testingMessage, setTestingMessage] = useState<TestingMessage>({
     text: "",
     error: false,
@@ -56,15 +63,16 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
   async function handleSave() {
     if (await handleTestBridge()) {
-      const response = await axios.put<Bridge>(
-        `http://${query.apiHost || window.location.hostname}:${
-          query.apiPort || 9170
-        }/bridges/${bridge.key}`,
-        bridge,
-        {
-          headers: { "api-key": query.apiKey as string },
-        }
-      );
+      const url = `http://${query.apiHost || window.location.hostname}:${
+        query.apiPort || 9170
+      }/bridges`;
+      const response = props.bridgeEdit.edit
+        ? await axios.put<Partial<Bridge>>(`${url}/${bridge.key}`, bridge, {
+            headers: { "api-key": query.apiKey as string },
+          })
+        : await axios.post<Partial<Bridge>>(url, bridge, {
+            headers: { "api-key": query.apiKey as string },
+          });
       if (response && response.status < 400) props.handleClose();
       else setTestingMessage({ text: "Failed to save bridge", error: true });
     }
@@ -112,7 +120,9 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       maxWidth="md"
       open
     >
-      <DialogTitle id="form-dialog-title">Edit {bridge.name}</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        {props.bridgeEdit.edit ? "Edit" : ""} {bridge.name}
+      </DialogTitle>
       <DialogContent>
         <TextField
           className={classes.input}
