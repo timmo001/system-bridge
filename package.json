@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@nestjs/common": "8.2.2",
-    "@nestjs/core": "8.2.2",
+    "@nestjs/core": "8.2.3",
     "@nestjs/platform-express": "8.2.2",
     "@nestjs/platform-ws": "8.2.2",
     "@nestjs/swagger": "5.1.5",
