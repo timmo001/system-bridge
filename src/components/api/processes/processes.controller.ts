@@ -38,7 +38,7 @@ export class ProcessesController {
     @Param("name") name: string,
     @Query("exact") exact = false
   ): Promise<Process[]> {
-    const data = await this.processesService.find(name, exact);
+    const data = await this.processesService.findProcess(name, exact);
     if (!data || data.length === 0)
       throw new HttpException(
         {

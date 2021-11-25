@@ -22,11 +22,11 @@ export class Observer {
     this.scheduler = new ToadScheduler();
   }
 
-  async startJob(data: WorkerData): void {
+  async startJob(workerData: WorkerData): void {
     this.scheduler.addSimpleIntervalJob(
       new SimpleIntervalJob(
         { milliseconds: this.interval },
-        await this.createObserver(data)
+        await this.createObserver(workerData)
       )
     );
   }
@@ -37,26 +37,26 @@ export class Observer {
     this.callback({ status: { status: 0 } });
   }
 
-  async createObserver(name: string): Promise<AsyncTask> {
+  async createObserver(workerData: WorkerData): Promise<AsyncTask> {
     const { logger } = new Logger("Observer");
 
     let data: any;
     try {
-      data = await runService({ name });
+      data = await runService(workerData);
     } catch (e) {
       logger.error(`Service error: ${e.message}`);
     }
     this.callback({ [name]: data });
-    const task = new AsyncTask(name, async () => {
+    const task = new AsyncTask(workerData.service, async () => {
       try {
-        const d = await runService({ name });
+        const d = await runService(workerData);
         if (JSON.stringify(data) !== JSON.stringify(d)) {
           data = d;
-          this.callback({ [name]: d });
+          this.callback({ [workerData.service]: d });
         }
       } catch (e) {
         const { logger } = new Logger("Observer");
-        logger.error(`Service error for ${name}: ${e.message}`);
+        logger.error(`Service error for ${workerData.service}: ${e.message}`);
         logger.close();
       }
     });
