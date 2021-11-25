@@ -1,5 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { currentLoad, processes } from "systeminformation";
+import {
+  currentLoad,
+  CurrentLoadData,
+  processes,
+  ProcessesData,
+} from "systeminformation";
 
 import { Process, Processes } from "./entities/processes.entity";
 
@@ -9,8 +14,19 @@ export class ProcessesService {
     return { ...(await processes()), load: await currentLoad() };
   }
 
-  async find(name: string, exact: boolean): Promise<Process[] | undefined> {
-    const data = await this.findAll();
+  async findCurrentLoad(): Promise<CurrentLoadData> {
+    return await currentLoad();
+  }
+
+  async findProcesses(): Promise<ProcessesData> {
+    return await processes();
+  }
+
+  async findProcess(
+    name: string,
+    exact: boolean
+  ): Promise<Process[] | undefined> {
+    const data = await this.findProcesses();
     return data.list.filter((process: Process) =>
       exact
         ? process.name.toLowerCase() === name.toLowerCase()
