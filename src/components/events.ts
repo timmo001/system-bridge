@@ -63,7 +63,7 @@ export class Events {
                   )}`,
                   data: await runService(data),
                 });
-                if (data.observe) this.observer.startJob(data);
+                if (data.observe) await this.observer.startJob(data);
               } catch (e) {
                 logger.error(
                   `Service error for ${JSON.stringify(data)}: ${e.message}`

@@ -22,7 +22,7 @@ export class Observer {
     this.scheduler = new ToadScheduler();
   }
 
-  startJob(item: WorkerData): void {
+  async startJob(data: WorkerData): void {
     this.scheduler.addSimpleIntervalJob(
       new SimpleIntervalJob(
         { milliseconds: this.interval },
