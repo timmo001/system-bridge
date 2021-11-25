@@ -23,20 +23,20 @@ export interface WorkerData {
 }
 
 const items: Array<WorkerData> = [
-  { name: "audio", method: "findAll", observe: false },
-  { name: "battery", method: "findAll", observe: false },
-  { name: "bluetooth", method: "findAll", observe: false },
-  { name: "cpu", method: "findAll", observe: false },
-  { name: "display", method: "findAll", observe: false },
-  { name: "filesystem", method: "findAll", observe: false },
-  { name: "graphics", method: "findAll", observe: false },
-  { name: "information", method: "findAll", observe: false },
-  { name: "memory", method: "findAll", observe: false },
-  { name: "network", method: "findAll", observe: false },
-  { name: "os", method: "findAll", observe: false },
-  { name: "processes", method: "findAll", observe: false },
-  { name: "system", method: "findAll", observe: false },
-  { name: "usb", method: "findAll", observe: false },
+  { service: "audio", method: "findAll", observe: false },
+  { service: "battery", method: "findAll", observe: false },
+  { service: "bluetooth", method: "findAll", observe: false },
+  { service: "cpu", method: "findAll", observe: false },
+  { service: "display", method: "findAll", observe: false },
+  { service: "filesystem", method: "findAll", observe: false },
+  { service: "graphics", method: "findAll", observe: false },
+  { service: "information", method: "findAll", observe: false },
+  { service: "memory", method: "findAll", observe: false },
+  { service: "network", method: "findAll", observe: false },
+  { service: "os", method: "findAll", observe: false },
+  { service: "processes", method: "findAll", observe: false },
+  { service: "system", method: "findAll", observe: false },
+  { service: "usb", method: "findAll", observe: false },
 ];
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -95,7 +95,7 @@ function DataComponent(): ReactElement {
 
   const eventHandler = useCallback(({ name, data }: Event) => {
     if (name.includes("data-")) {
-      const key = items.find((item: WorkerData) => name.includes(item.name));
+      const key = items.find((item: WorkerData) => name.includes(item.service));
       if (key) {
         console.log("Data update:", { key, data });
         switch (key) {

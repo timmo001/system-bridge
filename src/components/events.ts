@@ -53,11 +53,11 @@ export class Events {
               logger.info(`Get data: ${JSON.stringify(data)}`);
               // Legacy support
               if (typeof data === "string") {
-                data = { name: data, method: "findAll", observe: true };
+                data = { service: data, method: "findAll", observe: true };
               }
               try {
                 this.websocketConnection.sendEvent({
-                  name: `data-${data.name.replace(
+                  name: `data-${data.service.replace(
                     /([A-Z])/g,
                     (x: string) => `-${x.toLowerCase()}`
                   )}`,
