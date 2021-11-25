@@ -117,7 +117,10 @@ function BridgesSetupComponent(): ReactElement {
         )}
       </Container>
       {bridgeEdit ? (
-        <BridgeEdit bridgeEdit={bridgeEdit} handleClose={handleBridgeEditClosed} />
+        <BridgeEdit
+          bridgeEdit={bridgeEdit}
+          handleClose={handleBridgeEditClosed}
+        />
       ) : (
         ""
       )}
