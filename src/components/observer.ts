@@ -2,6 +2,12 @@ import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { Logger } from "./logger";
 import { runService } from "./common";
+
+export interface WorkerData {
+  service: string;
+  method: "findAll" | string;
+}
+
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;
@@ -16,31 +22,13 @@ export class Observer {
     this.scheduler = new ToadScheduler();
   }
 
-  async start(): Promise<void> {
-    this.callback({ status: { status: 1 } });
-
-    const items = [
-      "audio",
-      "battery",
-      "bluetooth",
-      "cpu",
-      "display",
-      "filesystem",
-      "graphics",
-      "memory",
-      "network",
-      "processes",
-      "system",
-      "usb",
-    ];
-
-    for (const name of items)
-      this.scheduler.addSimpleIntervalJob(
-        new SimpleIntervalJob(
-          { milliseconds: this.interval },
-          await this.createObserver(name)
-        )
-      );
+  startJob(item: WorkerData): void {
+    this.scheduler.addSimpleIntervalJob(
+      new SimpleIntervalJob(
+        { milliseconds: this.interval },
+        await this.createObserver(data)
+      )
+    );
   }
 
   stop(): void {

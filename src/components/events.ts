@@ -32,7 +32,6 @@ export class Events {
             data: data[key],
           });
         };
-        this.observer.start();
 
         logger.close();
       }
@@ -50,24 +49,23 @@ export class Events {
           logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
-            for (const name of event.data) {
-              logger.info(`Get data: ${name}`);
+            for (const data of event.data) {
+              logger.info(`Get data: ${JSON.stringify(data)}`);
               try {
                 this.websocketConnection.sendEvent({
-                  name: `data-${name.replace(
+                  name: `data-${data.name.replace(
                     /([A-Z])/g,
                     (x: string) => `-${x.toLowerCase()}`
                   )}`,
-                  data: await runService({ name }),
+                  data: await runService(data),
                 });
+                if (data.observe) this.observer.startJob(data);
               } catch (e) {
-                logger.error(`Service error for ${name}: ${e.message}`);
+                logger.error(
+                  `Service error for ${JSON.stringify(data)}: ${e.message}`
+                );
               }
             }
-          break;
-        case "observer-start":
-          logger.info("Start Observer");
-          if (this.observer) this.observer.start();
           break;
         case "observer-stop":
           logger.info("Stop Observer");
