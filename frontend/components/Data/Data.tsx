@@ -16,7 +16,7 @@ import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";
 
-export interface WebsocketData {
+export interface WorkerData {
   service: string;
   method: "findAll" | string;
   observe: boolean;
