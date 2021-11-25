@@ -51,6 +51,10 @@ export class Events {
           if (Array.isArray(event.data) && event.data.length > 0)
             for (const data of event.data) {
               logger.info(`Get data: ${JSON.stringify(data)}`);
+              // Legacy support
+              if (typeof data === "string") {
+                data = { name: data, method: "findAll", observe: true };
+              }
               try {
                 this.websocketConnection.sendEvent({
                   name: `data-${data.name.replace(
