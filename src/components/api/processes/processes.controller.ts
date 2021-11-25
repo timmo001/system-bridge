@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import { CurrentLoadData, ProcessesData } from "systeminformation";
 
 import { HttpAuthGuard } from "../httpAuth.guard";
 import { Process, Processes } from "./entities/processes.entity";
@@ -22,7 +23,17 @@ export class ProcessesController {
     return await this.processesService.findAll();
   }
 
-  @Get(":name")
+  @Get("load")
+  async findCurrentLoad(): Promise<CurrentLoadData> {
+    return await this.processesService.findCurrentLoad();
+  }
+
+  @Get("processes")
+  async findProcesses(): Promise<ProcessesData> {
+    return await this.processesService.findProcesses();
+  }
+
+  @Get("processes/:name")
   async find(
     @Param("name") name: string,
     @Query("exact") exact = false
