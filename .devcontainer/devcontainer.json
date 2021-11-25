@@ -1,0 +1,15 @@
+{
+  "name": "System Bridge Dev",
+  "context": "..",
+  "dockerFile": "../Dockerfile.dev",
+  "containerEnv": { "DEVCONTAINER": "1" },
+  "appPort": 9170,
+  "runArgs": ["-e", "GIT_EDITOR=code --wait"],
+  "extensions": [],
+  "settings": {
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black"
+  }
+}
