@@ -22,7 +22,10 @@ export class ProcessesService {
     return await processes();
   }
 
-  async findProcess(name: string, exact: boolean): Promise<Process[] | undefined> {
+  async findProcess(
+    name: string,
+    exact: boolean
+  ): Promise<Process[] | undefined> {
     const data = await this.findProcesses();
     return data.list.filter((process: Process) =>
       exact
