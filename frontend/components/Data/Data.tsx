@@ -95,7 +95,9 @@ function DataComponent(): ReactElement {
 
   const eventHandler = useCallback(({ name, data }: Event) => {
     if (name.includes("data-")) {
-      const item = items.find((item: WorkerData) => name.includes(item.service));
+      const item = items.find((item: WorkerData) =>
+        name.includes(item.service)
+      );
       if (item.service) {
         console.log("Data update:", data);
         switch (item.service) {
