@@ -49,7 +49,7 @@ export class Events {
           logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
-            for (const data of event.data) {
+            for (let data of event.data) {
               logger.info(`Get data: ${JSON.stringify(data)}`);
               // Legacy support
               if (typeof data === "string") {

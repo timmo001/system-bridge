@@ -10,6 +10,11 @@ import semver from "semver";
 import { ApplicationUpdate } from "./api/information/entities/information.entity";
 import { Setting } from "./api/settings/entities/setting.entity";
 
+export interface WorkerData {
+  service: string;
+  method: "findAll" | string;
+}
+
 const GITHUB_REPOSITORY = "timmo001/system-bridge";
 
 export const appDataDirectory = join(
@@ -140,9 +145,9 @@ export function getVersion(logger: Logger): string {
   }
 }
 
-export function runService(workerData: { name: string }): Promise<any> {
+export function runService(workerData: WorkerData): Promise<any> {
   return new Promise<any>((resolve, reject) => {
-    const worker = new Worker(require.resolve("./worker.js"), { workerData });
+    const worker = new Worker(require.resolve("./worker.js"), workerData);
     worker.on("message", resolve);
     worker.on("error", reject);
     worker.on("exit", (code) => {
