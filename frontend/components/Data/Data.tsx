@@ -95,10 +95,10 @@ function DataComponent(): ReactElement {
 
   const eventHandler = useCallback(({ name, data }: Event) => {
     if (name.includes("data-")) {
-      const key = items.find((item: WorkerData) => name.includes(item.service));
-      if (key) {
-        console.log("Data update:", { key, data });
-        switch (key) {
+      const item = items.find((item: WorkerData) => name.includes(item.service));
+      if (item.service) {
+        console.log("Data update:", data);
+        switch (item.service) {
           case "audio":
             setAudio(data);
             break;
