@@ -1,7 +1,6 @@
 """System Bridge GUI: Main class"""
 from argparse import Namespace
 import asyncio
-import os
 import sys
 
 from PySide6.QtGui import QIcon
@@ -14,7 +13,8 @@ from aiohttp.client_exceptions import (
 )
 import async_timeout
 from systembridge import Bridge, BridgeClient
-from systembridge.exceptions import BridgeException
+from systembridge.exceptions import BridgeConnectionClosedException, BridgeException
+from systembridge.objects.events import Event
 
 from .base import Base
 from .system_tray import SystemTray
@@ -75,14 +75,14 @@ class Main(Base):
         )
         self.system_tray_icon.show()
 
-        self.player_window = PlayerWindow(
-            self.args,
-            self.application,
-            self.icon,
-            True,
-            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        )
-        self.player_window.showNormal()
+        # self.player_window = PlayerWindow(
+        #     self.args,
+        #     self.application,
+        #     self.icon,
+        #     True,
+        #     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        # )
+        # self.player_window.showNormal()
 
         sys.exit(self.application.exec())
 
@@ -146,3 +146,32 @@ class Main(Base):
             self.logger.info("Retrying in 5 seconds..")
             await asyncio.sleep(5)
             await self.setup_bridge()
+
+        try:
+            await self.bridge.async_connect_websocket(
+                self.args.hostname,
+                self.args.websocket_port,
+            )
+            asyncio.ensure_future(self.bridge.listen_for_events(self.handle_bridge_event))
+        except BridgeConnectionClosedException as exception:
+            self.logger.info(
+                "Websocket Connection Closed for %s (%s). Will retry: %s",
+                self.title,
+                self.host,
+                exception,
+            )
+            await asyncio.sleep(10)
+            await self.setup_bridge()
+        except BridgeException as exception:
+            self.logger.warning(
+                "Exception occurred for %s (%s). Will retry: %s",
+                self.title,
+                self.host,
+                exception,
+            )
+            await asyncio.sleep(10)
+            await self.setup_bridge()
+
+    async def handle_bridge_event(self, event: Event):
+        """Handle an event"""
+        self.logger.info("Event: %s", event.name)
