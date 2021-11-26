@@ -46,8 +46,6 @@ export class Observer {
   }
 
   async createObserver(workerData: WorkerData): Promise<AsyncTask> {
-    const { logger } = new Logger("Observer");
-
     let data: any;
     const task = new AsyncTask(workerData.service, async () => {
       try {
@@ -62,7 +60,6 @@ export class Observer {
         logger.close();
       }
     });
-    logger.close();
     return task;
   }
 }
