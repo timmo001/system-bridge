@@ -1,6 +1,6 @@
 import { Event } from "./api/events/entities/event.entity";
 import { Logger } from "./logger";
-import { Observer } from "./observer";
+import { Observer, ObserverData } from "./observer";
 import { runService } from "./common";
 import { stopServer, updateAppConfig } from "./api";
 import { WebSocketConnection } from "./websocket";
@@ -20,16 +20,17 @@ export class Events {
         logger.info("Listening");
         this.websocketConnection?.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer(settings);
-        this.observer.callback = (data: {
-          [key: string]: { [key: string]: any };
-        }) => {
-          const key = Object.keys(data)[0];
+        this.observer.callback = (observerData: ObserverData) => {
           this.websocketConnection?.sendEvent({
-            name: `data-${key.replace(
-              /([A-Z])/g,
-              (x: string) => `-${x.toLowerCase()}`
-            )}`,
-            data: data[key],
+            name: `data-${observerData.service}${
+              observerData.method !== undefined &&
+              observerData.method !== "findAll"
+                ? `-${observerData.method}`
+                : ""
+            }`,
+            service: observerData.service,
+            method: observerData.method,
+            data: observerData.data,
           });
         };
 
@@ -49,24 +50,32 @@ export class Events {
           logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
-            for (let data of event.data) {
-              logger.info(`Get data: ${JSON.stringify(data)}`);
+            for (let eventData of event.data) {
+              logger.info(`Get data: ${JSON.stringify(eventData)}`);
               // Legacy support
-              if (typeof data === "string") {
-                data = { service: data, method: "findAll", observe: true };
+              if (typeof eventData === "string") {
+                eventData = {
+                  service: eventData,
+                  method: "findAll",
+                  observe: true,
+                };
               }
               try {
                 this.websocketConnection.sendEvent({
-                  name: `data-${data.service.replace(
-                    /([A-Z])/g,
-                    (x: string) => `-${x.toLowerCase()}`
-                  )}`,
-                  data: await runService(data),
+                  name: `data-${eventData.service}${
+                    eventData.method !== undefined &&
+                    eventData.method !== "findAll"
+                      ? `-${eventData.method}`
+                      : ""
+                  }`,
+                  service: eventData.service,
+                  method: eventData.method,
+                  data: await runService(eventData),
                 });
-                if (data.observe) await this.observer.startJob(data);
+                if (eventData.observe) await this.observer.startJob(eventData);
               } catch (e) {
                 logger.error(
-                  `Service error for ${JSON.stringify(data)}: ${e.message}`
+                  `Service error for ${JSON.stringify(eventData)}: ${e.message}`
                 );
               }
             }

@@ -3,12 +3,16 @@ import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 import { Logger } from "./logger";
 import { runService, WorkerData } from "./common";
 
+export interface ObserverData extends WorkerData {
+  data: any;
+}
+
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;
   private jobs: Array<WorkerData> = [];
 
-  public callback: (data: { [name: string]: any }) => void;
+  public callback: (data: ObserverData) => void;
 
   constructor(settings: { [key: string]: string }) {
     this.interval =
@@ -38,7 +42,7 @@ export class Observer {
   stop(): void {
     if (this.scheduler) this.scheduler.stop();
     this.scheduler = undefined;
-    this.callback({ status: { status: 0 } });
+    this.callback({ service: "status", method: "", data: 0 });
   }
 
   async createObserver(workerData: WorkerData): Promise<AsyncTask> {
@@ -50,13 +54,13 @@ export class Observer {
     } catch (e) {
       logger.error(`Service error: ${e.message}`);
     }
-    this.callback({ [workerData.service]: data });
+    this.callback({ ...workerData, data });
     const task = new AsyncTask(workerData.service, async () => {
       try {
         const d = await runService(workerData);
         if (JSON.stringify(data) !== JSON.stringify(d)) {
           data = d;
-          this.callback({ [workerData.service]: d });
+          this.callback({ ...workerData, data: d });
         }
       } catch (e) {
         const { logger } = new Logger("Observer");
