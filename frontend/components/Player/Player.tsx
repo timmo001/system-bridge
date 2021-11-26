@@ -5,8 +5,8 @@ import { cloneDeep, isEqual } from "lodash";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
 import { useSettings } from "../Contexts/Settings";
-// import AudioPlayer from "./AudioPlayer";
-// import logo from "../resources/system-bridge.svg";
+import AudioPlayer from "./AudioPlayer";
+import logo from "assets/media/system-bridge.svg";
 import VideoPlayer from "./VideoPlayer";
 
 interface PlayerProps {
@@ -30,20 +30,20 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           break;
         case "audio":
           // window.api.ipcRendererOn("audio-metadata", (_event, data) => {
-          //   setPlayerStatus({
-          //     muted: false,
-          //     playing: true,
-          //     source: {
-          //       type: "audio",
-          //       source: String(query.url),
-          //       album: data.album,
-          //       artist: data.artist,
-          //       cover: data.cover || logo,
-          //       title: data.title,
-          //       volumeInitial: (volume > 0 ? volume : 40) / 100,
-          //     },
-          //     volume: (volume > 0 ? volume : 40) / 100,
-          //   });
+          setPlayerStatus({
+            muted: false,
+            playing: true,
+            source: {
+              type: "audio",
+              source: String(query.url),
+              album: "Album",
+              artist: "Aritst",
+              cover: logo,
+              title: "Title",
+              volumeInitial: (volume > 0 ? volume : 40) / 100,
+            },
+            volume: (volume > 0 ? volume : 40) / 100,
+          });
           // });
           console.log(
             "OLD ipcRendererSend:",
@@ -102,8 +102,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
   return (
     <>
       {type === "audio" ? (
-        // <AudioPlayer hovering={entered} />
-        <div>Audio Player</div>
+        <AudioPlayer />
       ) : type === "video" ? (
         <VideoPlayer />
       ) : (
