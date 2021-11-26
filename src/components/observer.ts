@@ -46,15 +46,7 @@ export class Observer {
   }
 
   async createObserver(workerData: WorkerData): Promise<AsyncTask> {
-    const { logger } = new Logger("Observer");
-
     let data: any;
-    try {
-      data = await runService(workerData);
-    } catch (e) {
-      logger.error(`Service error: ${e.message}`);
-    }
-    this.callback({ ...workerData, data });
     const task = new AsyncTask(workerData.service, async () => {
       try {
         const d = await runService(workerData);
@@ -68,7 +60,6 @@ export class Observer {
         logger.close();
       }
     });
-    logger.close();
     return task;
   }
 }
