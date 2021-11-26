@@ -42,7 +42,7 @@ export class EventsGateway {
   async handleEvent(
     @MessageBody() { data }: { data: Event }
   ): Promise<WsResponse<Event>> {
-    logger.debug(
+    logger.info(
       `New event: ${data.name}${
         data.service
           ? ` - ${data.service}${data.method ? ` - ${data.method}` : ""}`
