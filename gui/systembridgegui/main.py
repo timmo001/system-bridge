@@ -65,6 +65,8 @@ class Main(Base):
         self.main_window.showNormal()
         self.main_window.hide()
 
+        self.player_window = None
+
         self.system_tray_icon = SystemTray(
             self.args,
             self.icon,
@@ -75,14 +77,7 @@ class Main(Base):
         )
         self.system_tray_icon.show()
 
-        # self.player_window = PlayerWindow(
-        #     self.args,
-        #     self.application,
-        #     self.icon,
-        #     True,
-        #     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        # )
-        # self.player_window.showNormal()
+        asyncio.run(self.setup_bridge_websocket())
 
         sys.exit(self.application.exec())
 
@@ -147,14 +142,14 @@ class Main(Base):
             await asyncio.sleep(5)
             await self.setup_bridge()
 
+    async def setup_bridge_websocket(self) -> None:
+        """Setup bridge websocket"""
         try:
             await self.bridge.async_connect_websocket(
                 self.args.hostname,
                 self.args.websocket_port,
             )
-            asyncio.ensure_future(
-                self.bridge.listen_for_events(self.handle_bridge_event)
-            )
+            await self.bridge.listen_for_events(self.handle_bridge_event)
         except BridgeConnectionClosedException as exception:
             self.logger.info(
                 "Websocket Connection Closed for %s (%s). Will retry: %s",
@@ -174,6 +169,20 @@ class Main(Base):
             await asyncio.sleep(10)
             await self.setup_bridge()
 
-    async def handle_bridge_event(self, event: Event):
+    async def handle_bridge_event(self, event: Event) -> None:
         """Handle an event"""
-        self.logger.info("Event: %s", event.name)
+        self.logger.info("Event: %s", event.__dict__)
+        if event.name == "gui-player-close" and self.player_window is not None:
+            self.player_window.hide()
+        elif event.name == "gui-player-create":
+            video = event.data["type"] == "video"
+            params = event.data
+            del params["type"]
+            self.player_window = PlayerWindow(
+                self.args,
+                self.application,
+                self.icon,
+                video,
+                params,
+            )
+            self.player_window.showNormal()

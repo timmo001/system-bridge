@@ -19,7 +19,7 @@ class PlayerWindow(Base, QWidget):
         application: QApplication,
         icon: QIcon,
         video: bool,
-        url: str,
+        params: dict,
     ) -> None:
         """Initialize the window"""
         Base.__init__(self, args)
@@ -54,7 +54,7 @@ class PlayerWindow(Base, QWidget):
                     "apiKey": self.args.api_key,
                     "apiPort": self.args.port,
                     "wsPort": self.args.websocket_port,
-                    "url": url,
+                    **params
                 })}"""
         )
         self.logger.debug("Opening url: %s", url)
