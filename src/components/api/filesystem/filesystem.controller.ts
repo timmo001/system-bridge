@@ -22,6 +22,7 @@ import {
 import { FilesystemService } from "./filesystem.service";
 import { HttpAuthGuard } from "../httpAuth.guard";
 import { createReadStream } from "fs";
+import { Systeminformation } from "systeminformation";
 
 @Controller("filesystem")
 @UseGuards(HttpAuthGuard)
@@ -31,6 +32,32 @@ export class FilesystemController {
   @Get()
   async findAll(): Promise<Filesystem> {
     return await this.filesystemService.findAll();
+  }
+
+  @Get("blockDevices")
+  async findBlockDevices(): Promise<{
+    [name: string]: Systeminformation.BlockDevicesData;
+  }> {
+    return await this.filesystemService.findBlockDevices();
+  }
+
+  @Get("layout")
+  async findDisksLayout(): Promise<{
+    [device: string]: Systeminformation.DiskLayoutData;
+  }> {
+    return await this.filesystemService.findDisksLayout();
+  }
+
+  @Get("io")
+  async findDisksIO(): Promise<Systeminformation.DisksIoData> {
+    return await this.filesystemService.findDisksIO();
+  }
+
+  @Get("size")
+  async findSizes(): Promise<{
+    [mount: string]: Systeminformation.FsSizeData;
+  }> {
+    return await this.filesystemService.findSizes();
   }
 
   @Get("files")

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { audio } from "systeminformation";
+import { audio, Systeminformation } from "systeminformation";
 
-import { Audio } from "./entities/audio.entity";
+import { Audio, AudioCurrent } from "./entities/audio.entity";
 import { getCurrent, muted, volume } from "./data";
 import { Logger } from "../../logger";
 import { UpdateAudioDto, UpdateAudioId } from "./dto/update-audio.dto";
@@ -11,13 +11,28 @@ const { logger } = new Logger("AudioService");
 @Injectable()
 export class AudioService {
   async findAll(): Promise<Audio> {
-    let data = {};
+    return {
+      current: await this.findCurrent(),
+      devices: await this.findDevices(),
+    };
+  }
+
+  async findCurrent(): Promise<AudioCurrent | null> {
     try {
-      data = { current: await getCurrent(), devices: await audio() };
+      return await getCurrent();
+    } catch (e) {
+      logger.warn(`Cannot get current audio: ${e.message}`);
+    }
+    return null;
+  }
+
+  async findDevices(): Promise<Array<Systeminformation.AudioData> | null> {
+    try {
+      return await audio();
     } catch (e) {
       logger.warn(`Cannot get audio devices: ${e.message}`);
     }
-    return data;
+    return null;
   }
 
   async update(

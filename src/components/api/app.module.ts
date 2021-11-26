@@ -9,7 +9,6 @@ import { BluetoothModule } from "./bluetooth/bluetooth.module";
 import { BridgesModule } from "./bridges/bridges.module";
 import { CommandModule } from "./command/command.module";
 import { CpuModule } from "./cpu/cpu.module";
-import { DisplayModule } from "./display/display.module";
 import { EventsModule } from "./events/events.module";
 import { FilesystemModule } from "./filesystem/filesystem.module";
 import { FrontendModule } from "./frontend/frontend.module";
@@ -42,7 +41,6 @@ import { UsbModule } from "./usb/usb.module";
     BridgesModule,
     CommandModule,
     CpuModule,
-    DisplayModule,
     EventsModule,
     FilesystemModule,
     FrontendModule,

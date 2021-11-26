@@ -1,5 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { blockDevices, diskLayout, disksIO, fsSize } from "systeminformation";
+import {
+  blockDevices,
+  diskLayout,
+  disksIO,
+  fsSize,
+  Systeminformation,
+} from "systeminformation";
 import { join, sep } from "path";
 import { readdir, stat, writeFile } from "fs/promises";
 import { existsSync } from "fs";
@@ -34,6 +40,37 @@ export class FilesystemService {
     videos: getVideosFolder(),
   };
 
+  async findAll(): Promise<Filesystem> {
+    return {
+      blockDevices: await this.findBlockDevices(),
+      diskLayout: await this.findDisksLayout(),
+      disksIO: await this.findDisksIO(),
+      fsSize: await this.findSizes(),
+    };
+  }
+
+  async findBlockDevices(): Promise<{
+    [name: string]: Systeminformation.BlockDevicesData;
+  }> {
+    return convertArrayToObject(await blockDevices(), "name");
+  }
+
+  async findDisksLayout(): Promise<{
+    [device: string]: Systeminformation.DiskLayoutData;
+  }> {
+    return convertArrayToObject(await diskLayout(), "device");
+  }
+
+  async findDisksIO(): Promise<Systeminformation.DisksIoData> {
+    return await disksIO();
+  }
+
+  async findSizes(): Promise<{
+    [mount: string]: Systeminformation.FsSizeData;
+  }> {
+    return convertArrayToObject(await fsSize(), "mount");
+  }
+
   buildPath(path: string): string | undefined {
     const index = Object.keys(this.baseDirectories).findIndex(
       (baseDirectory: string) =>
@@ -58,15 +95,6 @@ export class FilesystemService {
 
   async checkPathIsDirectory(path: string): Promise<boolean> {
     return (await stat(path)).isDirectory();
-  }
-
-  async findAll(): Promise<Filesystem> {
-    return {
-      blockDevices: convertArrayToObject(await blockDevices(), "name"),
-      diskLayout: convertArrayToObject(await diskLayout(), "device"),
-      disksIO: await disksIO(),
-      fsSize: convertArrayToObject(await fsSize(), "mount"),
-    };
   }
 
   async listFiles(path: string): Promise<Array<FilesystemItem>> {

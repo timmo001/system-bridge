@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { osInfo, users } from "systeminformation";
+import { osInfo, Systeminformation, users } from "systeminformation";
 
 import { Os } from "./entities/os.entity";
 
@@ -7,8 +7,16 @@ import { Os } from "./entities/os.entity";
 export class OsService {
   async findAll(): Promise<Os> {
     return {
-      ...(await osInfo()),
-      users: await users(),
+      ...(await this.findOsInfo()),
+      users: await this.findUsers(),
     };
+  }
+
+  async findOsInfo(): Promise<Systeminformation.OsData> {
+    return await osInfo();
+  }
+
+  async findUsers(): Promise<Array<Systeminformation.UserData>> {
+    return await users();
   }
 }

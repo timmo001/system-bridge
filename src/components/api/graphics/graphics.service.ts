@@ -1,20 +1,27 @@
 import { dirname } from "path";
-import { Hardware } from "system-bridge-windows-sensors";
+import { graphics, Systeminformation } from "systeminformation";
+import { Hardware, Sensor } from "system-bridge-windows-sensors";
 import { Injectable } from "@nestjs/common";
 
 import { Graphics } from "./entities/graphics.entity";
-import { graphics } from "systeminformation";
 import { Logger } from "../../logger";
 
 @Injectable()
 export class GraphicsService {
   async findAll(): Promise<Graphics> {
-    const { logger } = new Logger("GraphicsService");
-
     const data: Graphics = {
-      ...(await graphics()),
+      ...(await this.findGraphics()),
+      ...(await this.findHardwareSensors()),
     };
 
+    return data;
+  }
+
+  async findGraphics(): Promise<Systeminformation.GraphicsData> {
+    return await graphics();
+  }
+
+  async findHardwareSensors(): Promise<Array<Sensor> | null> {
     if (process.platform === "win32") {
       try {
         const { getHardwareByType } = await import(
@@ -32,15 +39,16 @@ export class GraphicsService {
         )) as Array<Hardware>;
 
         if (hardware && hardware.length > 0) {
-          data.hardwareSensors = [];
+          let hardwareSensors = [];
           for (const hw of hardware)
-            data.hardwareSensors = [...data.hardwareSensors, ...hw.sensors];
+            hardwareSensors = [...hardwareSensors, ...hw.sensors];
         }
       } catch (e) {
+        const { logger } = new Logger("GraphicsService");
         logger.error(`Error: ${e.message}`);
+        logger.close();
       }
-      logger.close();
     }
-    return data;
+    return null;
   }
 }

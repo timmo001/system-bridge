@@ -8,8 +8,9 @@ import {
   Put,
   UseGuards,
 } from "@nestjs/common";
+import { Systeminformation } from "systeminformation";
 
-import { Audio } from "./entities/audio.entity";
+import { Audio, AudioCurrent } from "./entities/audio.entity";
 import { AudioService } from "./audio.service";
 import { HttpAuthGuard } from "../httpAuth.guard";
 import { UpdateAudioId, UpdateAudioDto } from "./dto/update-audio.dto";
@@ -22,6 +23,16 @@ export class AudioController {
   @Get()
   async findAll(): Promise<Audio> {
     return await this.audioService.findAll();
+  }
+
+  @Get("current")
+  async findCurrent(): Promise<AudioCurrent | null> {
+    return await this.audioService.findCurrent();
+  }
+
+  @Get("devices")
+  async getDevices(): Promise<Array<Systeminformation.AudioData> | null> {
+    return await this.audioService.findDevices();
   }
 
   @Put(":id")

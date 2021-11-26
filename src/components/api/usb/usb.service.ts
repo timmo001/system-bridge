@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { usb } from "systeminformation";
+import { Systeminformation, usb } from "systeminformation";
 
 import { Usb } from "./entities/usb.entity";
 
@@ -7,7 +7,11 @@ import { Usb } from "./entities/usb.entity";
 export class UsbService {
   async findAll(): Promise<Usb> {
     return {
-      devices: await usb(),
+      devices: await this.findUsbDevices(),
     };
+  }
+
+  async findUsbDevices(): Promise<Array<Systeminformation.UsbData>> {
+    return await usb();
   }
 }

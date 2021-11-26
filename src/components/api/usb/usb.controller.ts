@@ -1,4 +1,5 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
+import { Systeminformation } from "systeminformation";
 
 import { HttpAuthGuard } from "../httpAuth.guard";
 import { Usb } from "./entities/usb.entity";
@@ -12,5 +13,10 @@ export class UsbController {
   @Get()
   async findAll(): Promise<Usb> {
     return await this.usbService.findAll();
+  }
+
+  @Get("devices")
+  async findUsbDevices(): Promise<Array<Systeminformation.UsbData>> {
+    return await this.usbService.findUsbDevices();
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { mem, memLayout } from "systeminformation";
+import { mem, memLayout, Systeminformation } from "systeminformation";
 
 import { Memory } from "./entities/memory.entity";
 
@@ -7,8 +7,16 @@ import { Memory } from "./entities/memory.entity";
 export class MemoryService {
   async findAll(): Promise<Memory> {
     return {
-      ...(await mem()),
-      layout: await memLayout(),
+      ...(await this.findMemory()),
+      layout: await this.findMemoryLayout(),
     };
+  }
+
+  async findMemory(): Promise<Systeminformation.MemData> {
+    return await mem();
+  }
+
+  async findMemoryLayout(): Promise<Array<Systeminformation.MemLayoutData>> {
+    return await memLayout();
   }
 }
