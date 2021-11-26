@@ -22,22 +22,28 @@ export interface WorkerData {
   observe: boolean;
 }
 
-const items: Array<WorkerData> = [
-  { service: "audio", method: "findAll", observe: false },
-  { service: "battery", method: "findAll", observe: false },
-  { service: "bluetooth", method: "findAll", observe: false },
-  { service: "cpu", method: "findAll", observe: false },
-  { service: "display", method: "findAll", observe: false },
-  { service: "filesystem", method: "findAll", observe: false },
-  { service: "graphics", method: "findAll", observe: false },
-  { service: "information", method: "findAll", observe: false },
-  { service: "memory", method: "findAll", observe: false },
-  { service: "network", method: "findAll", observe: false },
-  { service: "os", method: "findAll", observe: false },
-  { service: "processes", method: "findAll", observe: false },
-  { service: "system", method: "findAll", observe: false },
-  { service: "usb", method: "findAll", observe: false },
+const services = [
+  "audio",
+  "battery",
+  "bluetooth",
+  "cpu",
+  "display",
+  "filesystem",
+  "graphics",
+  "information",
+  "memory",
+  "network",
+  "os",
+  "processes",
+  "system",
+  "usb",
 ];
+
+const items: Array<WorkerData> = services.map((service: string) => ({
+  service: service,
+  method: "findAll",
+  observe: false,
+}));
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -93,59 +99,60 @@ function DataComponent(): ReactElement {
 
   const query = useRouter().query;
 
-  const eventHandler = useCallback(({ name, data }: Event) => {
-    if (name.includes("data-")) {
-      const item = items.find((item: WorkerData) =>
-        name.includes(item.service)
-      );
-      if (item.service) {
-        console.log("Data update:", data);
-        switch (item.service) {
-          case "audio":
-            setAudio(data);
-            break;
-          case "battery":
-            setBattery(data);
-            break;
-          case "bluetooth":
-            setBluetooth(data);
-            break;
-          case "cpu":
-            setCpu(data);
-            break;
-          case "display":
-            setDisplay(data);
-            break;
-          case "filesystem":
-            setFilesystem(data);
-            break;
-          case "graphics":
-            setGraphics(data);
-            break;
-          case "information":
-            setInformation(data);
-            break;
-          case "memory":
-            setMemory(data);
-            break;
-          case "network":
-            setNetwork(data);
-            break;
-          case "os":
-            setOs(data);
-            break;
-          case "processes":
-            setProcesses(data);
-            break;
-          case "system":
-            setSystem(data);
-            break;
-          case "usb":
-            setUsb(data);
-            break;
-          default:
-            break;
-        }
+  const eventHandler = useCallback(({ name, service, method, data }: Event) => {
+    if (
+      name.includes("data-") &&
+      service &&
+      services.findIndex((s: string) => s === service) > -1 &&
+      method === "findAll" &&
+      data
+    ) {
+      console.log("Data update:", name, service, data);
+      switch (service) {
+        case "audio":
+          setAudio(data);
+          break;
+        case "battery":
+          setBattery(data);
+          break;
+        case "bluetooth":
+          setBluetooth(data);
+          break;
+        case "cpu":
+          setCpu(data);
+          break;
+        case "display":
+          setDisplay(data);
+          break;
+        case "filesystem":
+          setFilesystem(data);
+          break;
+        case "graphics":
+          setGraphics(data);
+          break;
+        case "information":
+          setInformation(data);
+          break;
+        case "memory":
+          setMemory(data);
+          break;
+        case "network":
+          setNetwork(data);
+          break;
+        case "os":
+          setOs(data);
+          break;
+        case "processes":
+          setProcesses(data);
+          break;
+        case "system":
+          setSystem(data);
+          break;
+        case "usb":
+          setUsb(data);
+          break;
+        default:
+          break;
       }
     }
   }, []);
