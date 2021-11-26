@@ -17,6 +17,7 @@ import { GraphicsModule } from "./graphics/graphics.module";
 import { InformationModule } from "./information/information.module";
 import { KeyboardModule } from "./keyboard/keyboard.module";
 import { LogsModule } from "./logs/logs.module";
+import { MediaModule } from "./media/media.module";
 import { MemoryModule } from "./memory/memory.module";
 import { NetworkModule } from "./network/network.module";
 import { NotificationModule } from "./notification/notification.module";
@@ -50,6 +51,7 @@ import { UsbModule } from "./usb/usb.module";
     InformationModule,
     KeyboardModule,
     LogsModule,
+    MediaModule,
     MemoryModule,
     NetworkModule,
     NotificationModule,
