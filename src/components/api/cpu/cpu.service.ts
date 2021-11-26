@@ -99,24 +99,29 @@ export class CpuService {
     return await cpuTemperature();
   }
 
-  async findHardwareSensors(): Promise<Array<Sensor>> {
-    const { getHardwareByType } = await import("system-bridge-windows-sensors");
+  async findHardwareSensors(): Promise<Array<Sensor> | null> {
+    if (process.platform === "win32") {
+      const { getHardwareByType } = await import(
+        "system-bridge-windows-sensors"
+      );
 
-    const hardware = (await getHardwareByType(
-      "Cpu",
-      process.env.SB_PACKAGED === "false"
-        ? undefined
-        : dirname(process.execPath),
-      true,
-      true,
-      { cpu: true }
-    )) as Array<Hardware>;
+      const hardware = (await getHardwareByType(
+        "Cpu",
+        process.env.SB_PACKAGED === "false"
+          ? undefined
+          : dirname(process.execPath),
+        true,
+        true,
+        { cpu: true }
+      )) as Array<Hardware>;
 
-    let hardwareSensors = [];
-    if (hardware && hardware.length > 0) {
-      for (const hw of hardware)
-        hardwareSensors = [...hardwareSensors, ...hw.sensors];
+      let hardwareSensors = [];
+      if (hardware && hardware.length > 0) {
+        for (const hw of hardware)
+          hardwareSensors = [...hardwareSensors, ...hw.sensors];
+      }
+      return hardwareSensors;
     }
-    return hardwareSensors;
+    return null;
   }
 }
