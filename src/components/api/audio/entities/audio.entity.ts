@@ -1,6 +1,11 @@
 import { Systeminformation } from "systeminformation";
 
+export class AudioCurrent {
+  muted?: boolean;
+  volume?: number;
+}
+
 export class Audio {
-  current?: { muted?: boolean; volume?: number };
-  devices?: Systeminformation.AudioData[];
+  current?: AudioCurrent;
+  devices?: Array<Systeminformation.AudioData>;
 }
