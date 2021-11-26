@@ -16,21 +16,27 @@ import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";
 
-const items = [
-  "audio",
-  "battery",
-  "bluetooth",
-  "cpu",
-  "display",
-  "filesystem",
-  "graphics",
-  "information",
-  "memory",
-  "network",
-  "os",
-  "processes",
-  "system",
-  "usb",
+export interface WorkerData {
+  service: string;
+  method: "findAll" | string;
+  observe: boolean;
+}
+
+const items: Array<WorkerData> = [
+  { service: "audio", method: "findAll", observe: false },
+  { service: "battery", method: "findAll", observe: false },
+  { service: "bluetooth", method: "findAll", observe: false },
+  { service: "cpu", method: "findAll", observe: false },
+  { service: "display", method: "findAll", observe: false },
+  { service: "filesystem", method: "findAll", observe: false },
+  { service: "graphics", method: "findAll", observe: false },
+  { service: "information", method: "findAll", observe: false },
+  { service: "memory", method: "findAll", observe: false },
+  { service: "network", method: "findAll", observe: false },
+  { service: "os", method: "findAll", observe: false },
+  { service: "processes", method: "findAll", observe: false },
+  { service: "system", method: "findAll", observe: false },
+  { service: "usb", method: "findAll", observe: false },
 ];
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -89,10 +95,12 @@ function DataComponent(): ReactElement {
 
   const eventHandler = useCallback(({ name, data }: Event) => {
     if (name.includes("data-")) {
-      const key = items.find((item: string) => name.includes(item));
-      if (key) {
-        console.log("Data update:", { key, data });
-        switch (key) {
+      const item = items.find((item: WorkerData) =>
+        name.includes(item.service)
+      );
+      if (item.service) {
+        console.log("Data update:", data);
+        switch (item.service) {
           case "audio":
             setAudio(data);
             break;

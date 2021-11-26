@@ -1,12 +1,18 @@
 import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { Logger } from "./logger";
-import { runService } from "./common";
+import { runService, WorkerData } from "./common";
+
+export interface ObserverData extends WorkerData {
+  data: any;
+}
+
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;
+  private jobs: Array<WorkerData> = [];
 
-  public callback: (data: { [name: string]: any }) => void;
+  public callback: (data: ObserverData) => void;
 
   constructor(settings: { [key: string]: string }) {
     this.interval =
@@ -16,59 +22,49 @@ export class Observer {
     this.scheduler = new ToadScheduler();
   }
 
-  async start(): Promise<void> {
-    this.callback({ status: { status: 1 } });
-
-    const items = [
-      "audio",
-      "battery",
-      "bluetooth",
-      "cpu",
-      "display",
-      "filesystem",
-      "graphics",
-      "memory",
-      "network",
-      "processes",
-      "system",
-      "usb",
-    ];
-
-    for (const name of items)
+  async startJob(workerData: WorkerData): Promise<void> {
+    if (
+      this.jobs.findIndex(
+        (job: WorkerData) =>
+          job.service === workerData.service && job.method === workerData.method
+      ) === -1
+    ) {
+      this.jobs.push(workerData);
       this.scheduler.addSimpleIntervalJob(
         new SimpleIntervalJob(
           { milliseconds: this.interval },
-          await this.createObserver(name)
+          await this.createObserver(workerData)
         )
       );
+    }
   }
 
   stop(): void {
     if (this.scheduler) this.scheduler.stop();
     this.scheduler = undefined;
-    this.callback({ status: { status: 0 } });
+    this.callback({ service: "status", method: "", data: 0 });
   }
 
-  async createObserver(name: string): Promise<AsyncTask> {
+  async createObserver(workerData: WorkerData): Promise<AsyncTask> {
     const { logger } = new Logger("Observer");
 
     let data: any;
     try {
-      data = await runService({ name });
+      data = await runService(workerData);
     } catch (e) {
       logger.error(`Service error: ${e.message}`);
     }
-    this.callback({ [name]: data });
-    const task = new AsyncTask(name, async () => {
+    this.callback({ ...workerData, data });
+    const task = new AsyncTask(workerData.service, async () => {
       try {
-        const d = await runService({ name });
+        const d = await runService(workerData);
         if (JSON.stringify(data) !== JSON.stringify(d)) {
           data = d;
-          this.callback({ [name]: d });
+          this.callback({ ...workerData, data: d });
         }
       } catch (e) {
         const { logger } = new Logger("Observer");
-        logger.error(`Service error for ${name}: ${e.message}`);
+        logger.error(`Service error for ${workerData.service}: ${e.message}`);
         logger.close();
       }
     });

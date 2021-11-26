@@ -42,7 +42,13 @@ export class EventsGateway {
   async handleEvent(
     @MessageBody() { data }: { data: Event }
   ): Promise<WsResponse<Event>> {
-    logger.debug(`New event: ${data.name}`);
+    logger.debug(
+      `New event: ${data.name}${
+        data.service
+          ? ` - ${data.service}${data.method ? ` - ${data.method}` : ""}`
+          : ""
+      }`
+    );
     this.authenticatedClients.forEach((ws: WebSocket) =>
       ws.send(JSON.stringify({ event: "events", data }))
     );

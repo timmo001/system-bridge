@@ -1,10 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-  currentLoad,
-  CurrentLoadData,
-  processes,
-  ProcessesData,
-} from "systeminformation";
+import { currentLoad, processes, Systeminformation } from "systeminformation";
 
 import { Process, Processes } from "./entities/processes.entity";
 
@@ -14,11 +9,11 @@ export class ProcessesService {
     return { ...(await processes()), load: await currentLoad() };
   }
 
-  async findCurrentLoad(): Promise<CurrentLoadData> {
+  async findCurrentLoad(): Promise<Systeminformation.CurrentLoadData> {
     return await currentLoad();
   }
 
-  async findProcesses(): Promise<ProcessesData> {
+  async findProcesses(): Promise<Systeminformation.ProcessesData> {
     return await processes();
   }
 

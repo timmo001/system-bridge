@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { CurrentLoadData, ProcessesData } from "systeminformation";
+import { Systeminformation } from "systeminformation";
 
 import { HttpAuthGuard } from "../httpAuth.guard";
 import { Process, Processes } from "./entities/processes.entity";
@@ -24,12 +24,12 @@ export class ProcessesController {
   }
 
   @Get("load")
-  async findCurrentLoad(): Promise<CurrentLoadData> {
+  async findCurrentLoad(): Promise<Systeminformation.CurrentLoadData> {
     return await this.processesService.findCurrentLoad();
   }
 
   @Get("processes")
-  async findProcesses(): Promise<ProcessesData> {
+  async findProcesses(): Promise<Systeminformation.ProcessesData> {
     return await this.processesService.findProcesses();
   }
 
@@ -38,7 +38,7 @@ export class ProcessesController {
     @Param("name") name: string,
     @Query("exact") exact = false
   ): Promise<Process[]> {
-    const data = await this.processesService.find(name, exact);
+    const data = await this.processesService.findProcess(name, exact);
     if (!data || data.length === 0)
       throw new HttpException(
         {
