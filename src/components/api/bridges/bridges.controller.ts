@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { HttpAuthGuard } from "../httpAuth.guard";
-import { BridgesService } from "./bridges.service";
 import { Bridge } from "./entities/bridges.entity";
+import { BridgesService } from "./bridges.service";
+import { HttpAuthGuard } from "../httpAuth.guard";
 
 @Controller("bridges")
 @UseGuards(HttpAuthGuard)

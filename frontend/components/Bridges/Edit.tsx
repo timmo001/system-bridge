@@ -13,10 +13,17 @@ import {
   useMediaQuery,
   useTheme,
 } from "@material-ui/core";
+import { red } from "@material-ui/core/colors";
 import { useRouter } from "next/dist/client/router";
 import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
+import { Information } from "assets/entities/information.entity";
+
+export interface EditBridge {
+  edit: boolean;
+  bridge: Partial<Bridge>;
+}
 
 interface TestingMessage {
   text: string;
@@ -24,19 +31,30 @@ interface TestingMessage {
 }
 
 interface BridgeEditProps {
-  bridge: Bridge;
+  bridgeEdit: EditBridge;
   handleClose: () => void;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    delete: {
+      marginLeft: 2,
+      backgroundColor: red[600],
+    },
     input: {
       margin: theme.spacing(1, 0),
+    },
+    testingMessage: {
+      margin: theme.spacing(0, 1),
+      flex: 1,
+      textAlign: "right",
     },
   })
 );
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
-  const [bridge, setBridge] = useState<Bridge>(props.bridge);
+  const [bridge, setBridge] = useState<Partial<Bridge>>(
+    props.bridgeEdit.bridge
+  );
   const [testingMessage, setTestingMessage] = useState<TestingMessage>({
     text: "",
     error: false,
@@ -49,31 +67,48 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       setBridge({ ...bridge, [name]: event.target.value });
     };
 
-  function handleClose() {
+  function handleClose(): void {
     setTestingMessage({ text: "", error: false });
     props.handleClose();
   }
 
+  async function handleDelete(): Promise<void> {
+    const response = await axios.delete(
+      `http://${query.apiHost || window.location.hostname}:${
+        query.apiPort || 9170
+      }/bridges/${bridge.key}`,
+      { headers: { "api-key": query.apiKey as string } }
+    );
+    if (response && response.status < 400) props.handleClose();
+    else setTestingMessage({ text: "Failed to delete bridge", error: true });
+  }
+
   async function handleSave() {
-    if (await handleTestBridge()) {
-      const response = await axios.put<Bridge>(
-        `http://${query.apiHost || window.location.hostname}:${
-          query.apiPort || 9170
-        }/bridges/${bridge.key}`,
-        bridge,
-        {
-          headers: { "api-key": query.apiKey as string },
-        }
-      );
+    const information = await handleTestBridge();
+    if (information && information.uuid) {
+      const bridgeData = {
+        ...bridge,
+        key: information.uuid,
+      };
+      const url = `http://${query.apiHost || window.location.hostname}:${
+        query.apiPort || 9170
+      }/bridges`;
+      const response = props.bridgeEdit.edit
+        ? await axios.put<Partial<Bridge>>(`${url}/${bridge.key}`, bridgeData, {
+            headers: { "api-key": query.apiKey as string },
+          })
+        : await axios.post<Partial<Bridge>>(url, bridgeData, {
+            headers: { "api-key": query.apiKey as string },
+          });
       if (response && response.status < 400) props.handleClose();
       else setTestingMessage({ text: "Failed to save bridge", error: true });
     }
   }
 
-  async function handleTestBridge(): Promise<boolean> {
+  async function handleTestBridge(): Promise<Information | null> {
     setTestingMessage({ text: "Testing bridge..", error: false });
     try {
-      const response = await axios.get<Array<Bridge>>(
+      const response = await axios.get<Information>(
         `http://${bridge.host}:${bridge.port}/information`,
         {
           headers: { "api-key": bridge.apiKey },
@@ -85,7 +120,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           text: "Successfully connected to bridge.",
           error: false,
         });
-        return true;
+        return response.data;
       }
       setTestingMessage({
         text: `Error testing bridge: ${response.status} - ${response.data}`,
@@ -98,7 +133,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         error: true,
       });
     }
-    return false;
+    return null;
   }
 
   const classes = useStyles();
@@ -112,7 +147,9 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       maxWidth="md"
       open
     >
-      <DialogTitle id="form-dialog-title">Edit {bridge.name}</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        {props.bridgeEdit.edit ? "Edit" : ""} {bridge.name}
+      </DialogTitle>
       <DialogContent>
         <TextField
           className={classes.input}
@@ -160,9 +197,17 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         />
       </DialogContent>
       <DialogActions>
+        <Button
+          className={classes.delete}
+          onClick={handleDelete}
+          color="inherit"
+          variant="contained"
+        >
+          Delete
+        </Button>
         <Typography
+          className={classes.testingMessage}
           color={testingMessage.error ? "error" : "textPrimary"}
-          style={{ marginRight: theme.spacing(1) }}
           variant="subtitle2"
         >
           {testingMessage.text}

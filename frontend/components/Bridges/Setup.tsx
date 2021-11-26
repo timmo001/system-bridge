@@ -16,7 +16,11 @@ import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { useSettings } from "../Contexts/Settings";
-import BridgeEdit from "./Edit";
+import BridgeEdit, { EditBridge } from "./Edit";
+
+const DEFAULT_BRIDGE: Partial<Bridge> = {
+  port: 9170,
+};
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -27,8 +31,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function BridgesSetupComponent(): ReactElement {
-  const [bridgeEdit, setBridgeEdit] = useState<Bridge>();
-  const [bridges, setBridges] = useState<Array<Bridge>>();
+  const [bridgeEdit, setBridgeEdit] = useState<EditBridge>();
+  const [bridges, setBridges] = useState<Array<Partial<Bridge>>>();
   const [settings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
 
@@ -56,8 +60,8 @@ function BridgesSetupComponent(): ReactElement {
     }
   }, [setup, handleSetup, query.apiKey, query.wsPort]);
 
-  function handleItemClick(bridge: Bridge): void {
-    setBridgeEdit(bridge);
+  function handleItemClick(bridge: Partial<Bridge>, edit: boolean): void {
+    setBridgeEdit({ bridge: bridge, edit: edit });
   }
 
   async function handleBridgeEditClosed(): Promise<void> {
@@ -86,7 +90,7 @@ function BridgesSetupComponent(): ReactElement {
                 <ListItem
                   key={bridge.key}
                   button
-                  onClick={() => handleItemClick(bridge)}
+                  onClick={() => handleItemClick(bridge, true)}
                 >
                   <ListItemText
                     primary={`${bridge.name} ${
@@ -98,11 +102,25 @@ function BridgesSetupComponent(): ReactElement {
                 </ListItem>
               ))}
             </List>
+
+            <ListItem
+              button
+              onClick={() => handleItemClick(DEFAULT_BRIDGE, false)}
+            >
+              <ListItemText
+                primary="Add Bridge"
+                secondary="Add a new bridge"
+                color="primary"
+              />
+            </ListItem>
           </>
         )}
       </Container>
       {bridgeEdit ? (
-        <BridgeEdit bridge={bridgeEdit} handleClose={handleBridgeEditClosed} />
+        <BridgeEdit
+          bridgeEdit={bridgeEdit}
+          handleClose={handleBridgeEditClosed}
+        />
       ) : (
         ""
       )}
