@@ -58,6 +58,7 @@ if __name__ == "__main__":
         datefmt=DATE_FORMAT,
         level=args.log_level.upper(),
     )
+    logging.getLogger("websockets").setLevel(logging.INFO)
     logger = logging.getLogger(__name__)
 
     Main(args)
