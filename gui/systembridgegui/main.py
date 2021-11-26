@@ -152,7 +152,9 @@ class Main(Base):
                 self.args.hostname,
                 self.args.websocket_port,
             )
-            asyncio.ensure_future(self.bridge.listen_for_events(self.handle_bridge_event))
+            asyncio.ensure_future(
+                self.bridge.listen_for_events(self.handle_bridge_event)
+            )
         except BridgeConnectionClosedException as exception:
             self.logger.info(
                 "Websocket Connection Closed for %s (%s). Will retry: %s",
