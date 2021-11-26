@@ -90,7 +90,6 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         ...bridge,
         key: information.uuid,
       };
-      console.log(bridgeData);
       const url = `http://${query.apiHost || window.location.hostname}:${
         query.apiPort || 9170
       }/bridges`;
