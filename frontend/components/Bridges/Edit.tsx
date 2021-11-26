@@ -88,9 +88,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
     if (information && information.uuid) {
       const bridgeData = {
         ...bridge,
-        key: `${information.uuid}-${bridge.name
-          .replace(" ", "-")
-          .toLowerCase()}`,
+        key: information.uuid,
       };
       console.log(bridgeData);
       const url = `http://${query.apiHost || window.location.hostname}:${
