@@ -1,7 +1,7 @@
 import { Systeminformation } from "systeminformation";
 
 export interface Network {
-  connections: Systeminformation.NetworkConnectionsData[];
+  connections: Array<Systeminformation.NetworkConnectionsData>;
   gatewayDefault: string;
   interfaceDefault: string;
   interfaces: {
