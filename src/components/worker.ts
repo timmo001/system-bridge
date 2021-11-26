@@ -1,7 +1,7 @@
 import { parentPort, workerData } from "worker_threads";
 
 async function getService(): Promise<any> {
-  switch (workerData.name) {
+  switch (workerData.service) {
     default:
       return undefined;
     case "audio":
@@ -55,6 +55,6 @@ async function getService(): Promise<any> {
 
 (async () => {
   const service = await getService();
-  parentPort.postMessage(await service.findAll());
+  parentPort.postMessage(await service[workerData.method]());
   parentPort.postMessage("done");
 })();
