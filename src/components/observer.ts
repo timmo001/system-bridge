@@ -6,6 +6,7 @@ import { runService, WorkerData } from "./common";
 export class Observer {
   private interval: number;
   private scheduler: ToadScheduler;
+  private jobs: Array<WorkerData> = [];
 
   public callback: (data: { [name: string]: any }) => void;
 
@@ -18,12 +19,20 @@ export class Observer {
   }
 
   async startJob(workerData: WorkerData): Promise<void> {
-    this.scheduler.addSimpleIntervalJob(
-      new SimpleIntervalJob(
-        { milliseconds: this.interval },
-        await this.createObserver(workerData)
-      )
-    );
+    if (
+      this.jobs.findIndex(
+        (job: WorkerData) =>
+          job.service === workerData.service && job.method === workerData.method
+      ) === -1
+    ) {
+      this.jobs.push(workerData);
+      this.scheduler.addSimpleIntervalJob(
+        new SimpleIntervalJob(
+          { milliseconds: this.interval },
+          await this.createObserver(workerData)
+        )
+      );
+    }
   }
 
   stop(): void {
