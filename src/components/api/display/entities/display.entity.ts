@@ -1,3 +1,5 @@
+import { Systeminformation } from "systeminformation";
+
 export interface Display {
-  displays: unknown[];
+  displays: Array<Systeminformation.GraphicsDisplayData>;
 }
