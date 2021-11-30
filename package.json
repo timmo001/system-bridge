@@ -120,7 +120,7 @@
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-prettier": "4.0.0",
     "fs-extra": "10.0.0",
-    "jest": "27.4.0",
+    "jest": "27.4.1",
     "jest-junit": "13.0.0",
     "pkg": "5.5.1",
     "prettier": "2.5.0",
