@@ -32,13 +32,13 @@ export class Observer {
       this.jobs.push(workerData);
 
       const { logger } = new Logger("Observer");
-      logger.info(`Start job ${workerData.service} - ${workerData.method}`);
+      logger.info(`Create job ${workerData.service} - ${workerData.method}`);
       logger.close();
 
       this.scheduler.addSimpleIntervalJob(
         new SimpleIntervalJob(
           { milliseconds: this.interval },
-          await this.createObserver(workerData)
+          await this.createObserverTask(workerData)
         )
       );
     }
@@ -50,9 +50,9 @@ export class Observer {
     this.callback({ service: "status", method: "", data: 0 });
   }
 
-  async createObserver(workerData: WorkerData): Promise<AsyncTask> {
+  async createObserverTask(workerData: WorkerData): Promise<AsyncTask> {
     let data: any;
-    const task = new AsyncTask(workerData.service, async () => {
+    return new AsyncTask(workerData.service, async () => {
       try {
         const d = await runService(workerData);
         if (JSON.stringify(data) !== JSON.stringify(d)) {
@@ -65,6 +65,5 @@ export class Observer {
         logger.close();
       }
     });
-    return task;
   }
 }
