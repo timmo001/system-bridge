@@ -3,20 +3,13 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ExpressPeerServer } from "peer";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
-import {
-  networkInterfaceDefault,
-  networkInterfaces,
-  osInfo,
-  Systeminformation,
-  uuid,
-} from "systeminformation";
 import { Server } from "http";
 import AutoLaunch from "auto-launch";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 import { Events } from "../events";
-import { getConnection, getSettingsObject, getVersion } from "../common";
+import { getConnection, getSettingsObject } from "../common";
 import { HttpExceptionFilter } from "./http-exception.filter";
 import { Logger } from "../logger";
 import { WsAdapter } from "./ws-adapter";
