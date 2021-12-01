@@ -2,7 +2,6 @@ import { config } from "dotenv";
 import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
-import waitOn from "wait-on";
 
 import {
   appDataDirectory,
@@ -194,15 +193,6 @@ if (process.env.SB_GUI !== "false") {
     settings = await getSettingsObject(connection);
     await connection.close();
 
-    const apiPort = Number(settings["network-apiPort"]) || 9170;
-    const apiKey = settings["network-apiKey"];
-    await waitOn({
-      delay: 6000,
-      interval: 500,
-      resources: [`http://localhost:${apiPort}/system`],
-      headers: { "api-key": apiKey },
-      validateStatus: (status: number) => status === 200,
-    });
     processes.gui = setupSubprocess("gui");
   })();
 }
