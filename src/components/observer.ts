@@ -30,6 +30,11 @@ export class Observer {
       ) === -1
     ) {
       this.jobs.push(workerData);
+
+      const { logger } = new Logger("Observer");
+      logger.info(`Start job ${workerData.service} - ${workerData.method}`);
+      logger.close();
+
       this.scheduler.addSimpleIntervalJob(
         new SimpleIntervalJob(
           { milliseconds: this.interval },
