@@ -197,10 +197,11 @@ if (process.env.SB_GUI !== "false") {
     const apiPort = Number(settings["network-apiPort"]) || 9170;
     const apiKey = settings["network-apiKey"];
     await waitOn({
-      delay: 4000,
-      interval: 1000,
+      delay: 6000,
+      interval: 500,
       resources: [`http://localhost:${apiPort}/system`],
       headers: { "api-key": apiKey },
+      validateStatus: (status: number) => status === 200,
     });
     processes.gui = setupSubprocess("gui");
   })();
