@@ -12,8 +12,8 @@ import { Events } from "../events";
 import { getConnection, getSettingsObject } from "../common";
 import { HttpExceptionFilter } from "./http-exception.filter";
 import { Logger } from "../logger";
-import { RequestInterceptor } from "./request.interceptor";
 import { MDNSAdversisement } from "../mdns/advertisement";
+import { RequestInterceptor } from "./request.interceptor";
 import { WsAdapter } from "./ws-adapter";
 
 let app: NestExpressApplication,

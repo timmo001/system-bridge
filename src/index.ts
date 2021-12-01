@@ -1,6 +1,6 @@
 import { config } from "dotenv";
-import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
+import { existsSync, mkdirSync } from "fs";
 import execa, { ExecaChildProcess, NodeOptions } from "execa";
 
 import {
