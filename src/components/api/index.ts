@@ -12,8 +12,9 @@ import { Events } from "../events";
 import { getConnection, getSettingsObject } from "../common";
 import { HttpExceptionFilter } from "./http-exception.filter";
 import { Logger } from "../logger";
-import { WsAdapter } from "./ws-adapter";
+import { RequestInterceptor } from "./request.interceptor";
 import { MDNSAdversisement } from "../mdns/advertisement";
+import { WsAdapter } from "./ws-adapter";
 
 let app: NestExpressApplication,
   server: Server | undefined,
@@ -81,6 +82,7 @@ export async function startServer(): Promise<void> {
   });
 
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new RequestInterceptor());
 
   // WS adapter
   app.useWebSocketAdapter(new WsAdapter(app, wsPort));
