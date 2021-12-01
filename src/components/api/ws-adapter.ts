@@ -11,11 +11,13 @@ export class WsAdapter implements WebSocketAdapter {
     return new WebSocket.Server({ port: port || this.port, ...options });
   }
 
-  dispose(): any {}
+  dispose(): any {
+    // Do nothing
+  }
 
   bindClientConnect(
-    server: { on: (arg0: string, arg1: Function) => void },
-    callback: Function
+    server: { on: (arg0: string, arg1: any) => void },
+    callback: any
   ) {
     server.on("connection", callback);
   }
@@ -34,7 +36,7 @@ export class WsAdapter implements WebSocketAdapter {
   }
 
   bindMessageHandler(
-    buffer,
+    buffer: any,
     handlers: MessageMappingProperties[],
     process: (data: any) => Observable<any>
   ): Observable<any> {
