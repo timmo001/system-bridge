@@ -83,7 +83,7 @@
     "rimraf": "3.0.2",
     "rxjs": "7.4.0",
     "semver": "7.3.5",
-    "swagger-ui-express": "4.1.6",
+    "swagger-ui-express": "4.2.0",
     "system-bridge-windows-sensors": "1.2.5",
     "systeminformation": "5.9.15",
     "toad-scheduler": "1.6.0",
