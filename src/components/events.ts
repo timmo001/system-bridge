@@ -50,8 +50,7 @@ export class Events {
           logger.info("Get data");
           this.websocketConnection.sendEvent({ name: "getting-data" });
           if (Array.isArray(event.data) && event.data.length > 0)
-            for (let eventData of event.data) {
-              logger.info(`Get data: ${JSON.stringify(eventData)}`);
+            event.data.forEach(async (eventData: any): Promise<void> => {
               // Legacy support
               if (typeof eventData === "string") {
                 eventData = {
@@ -60,6 +59,7 @@ export class Events {
                   observe: true,
                 };
               }
+              logger.info(`Get data: ${JSON.stringify(eventData)}`);
               try {
                 this.websocketConnection.sendEvent({
                   name: `data-${eventData.service}${
@@ -78,7 +78,7 @@ export class Events {
                   `Service error for ${JSON.stringify(eventData)}: ${e.message}`
                 );
               }
-            }
+            });
           break;
         case "observer-stop":
           logger.info("Stop Observer");
