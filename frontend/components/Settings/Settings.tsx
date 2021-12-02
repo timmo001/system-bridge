@@ -3,7 +3,6 @@ import { useRouter } from "next/dist/client/router";
 import {
   Button,
   CircularProgress,
-  Container,
   Grid,
   List,
   ListItem,
@@ -79,8 +78,14 @@ function Settings(): ReactElement {
   const classes = useStyles();
 
   return (
-    <Container className={classes.root} maxWidth="lg">
-      <Grid container direction="column" spacing={2} alignItems="stretch">
+    <>
+      <Grid
+        container
+        className={classes.root}
+        direction="column"
+        spacing={2}
+        alignItems="stretch"
+      >
         <Grid container direction="row" item xs={12}>
           <Grid item xs={4} className={classes.disabled}>
             <Typography component="h3" variant="h5">
@@ -135,7 +140,7 @@ function Settings(): ReactElement {
           ))
         )}
       </Grid>
-    </Container>
+    </>
   );
 }
 

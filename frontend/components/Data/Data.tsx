@@ -1,13 +1,6 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/dist/client/router";
-import {
-  CircularProgress,
-  Container,
-  Grid,
-  Tab,
-  Tabs,
-  Theme,
-} from "@mui/material";
+import { CircularProgress, Grid, Tab, Tabs, Theme } from "@mui/material";
 
 import createStyles from "@mui/styles/createStyles";
 import makeStyles from "@mui/styles/makeStyles";
@@ -179,8 +172,14 @@ function DataComponent(): ReactElement {
   const classes = useStyles();
 
   return (
-    <Container className={classes.root} maxWidth="lg">
-      <Grid container direction="column" spacing={2} alignItems="stretch">
+    <>
+      <Grid
+        container
+        className={classes.root}
+        direction="column"
+        spacing={2}
+        alignItems="stretch"
+      >
         {!settings ? (
           <Grid container direction="row" justifyContent="center">
             <CircularProgress />
@@ -246,7 +245,7 @@ function DataComponent(): ReactElement {
           </Grid>
         )}
       </Grid>
-    </Container>
+    </>
   );
 }
 

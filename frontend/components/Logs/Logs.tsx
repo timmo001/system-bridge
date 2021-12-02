@@ -2,7 +2,6 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
-  Container,
   Grid,
   IconButton,
   Theme,
@@ -78,14 +77,20 @@ function LogsComponent(): ReactElement {
   const classes = useStyles();
 
   return (
-    <Container className={classes.root} maxWidth="lg">
+    <>
       {!settings ? (
         <Grid container direction="row" justifyContent="center">
           <CircularProgress />
         </Grid>
       ) : (
         <>
-          <Grid item container direction="row" justifyContent="flex-end">
+          <Grid
+            item
+            container
+            className={classes.root}
+            direction="row"
+            justifyContent="flex-end"
+          >
             <IconButton
               aria-label="Refresh Logs"
               onClick={() => handleSetup()}
@@ -102,7 +107,7 @@ function LogsComponent(): ReactElement {
           </Grid>
         </>
       )}
-    </Container>
+    </>
   );
 }
 

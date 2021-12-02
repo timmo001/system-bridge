@@ -87,7 +87,7 @@ function Header(props: HeaderProps): ReactElement {
         })}
         color={color}
       >
-        <Container maxWidth="xl">
+        <Container className={classes.containerBase} maxWidth="xl">
           <Toolbar className={classes.container}>
             <Grid item>
               <Button href="https://system-bridge.timmo.dev" target="_blank">
