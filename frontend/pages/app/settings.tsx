@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { GetStaticProps } from "next";
-import { Container } from "@material-ui/core";
+import { Container } from "@mui/material";
 
 import Layout from "../../components/Common/Layout";
 import Settings from "../../components/Settings/Settings";

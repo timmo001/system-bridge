@@ -8,7 +8,6 @@ import React, {
 import { useRouter } from "next/dist/client/router";
 import { v4 as uuidv4 } from "uuid";
 import {
-  createStyles,
   FormControl,
   IconButton,
   Input,
@@ -17,14 +16,15 @@ import {
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
   Switch,
   TextField,
   Theme,
-} from "@material-ui/core";
+} from "@mui/material";
 import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
 import axios from "axios";
+import createStyles from "@mui/styles/createStyles";
 import Icon from "@mdi/react";
+import makeStyles from "@mui/styles/makeStyles";
 
 import {
   Configuration,
@@ -175,6 +175,7 @@ function Item({
                     aria-label="Generate Api Key"
                     onClick={handleGenerateApiKey}
                     edge="end"
+                    size="large"
                   >
                     <Icon title="Generate API Key" size={1} path={mdiCached} />
                   </IconButton>
@@ -182,6 +183,7 @@ function Item({
                     className={classes.button}
                     aria-label="Copy to clipboard"
                     onClick={() => handleCopyToClipboard(value)}
+                    size="large"
                   >
                     <Icon
                       title="Copy to clipboard"
@@ -205,6 +207,7 @@ function Item({
                     aria-label="Toggle visibility"
                     onClick={handleClickShowPassword}
                     onMouseDown={handleMouseDownPassword}
+                    size="large"
                   >
                     <Icon
                       title="Copy to clipboard"

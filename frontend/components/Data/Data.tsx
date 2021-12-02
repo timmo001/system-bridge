@@ -3,13 +3,14 @@ import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
   Container,
-  createStyles,
   Grid,
-  makeStyles,
   Tab,
   Tabs,
   Theme,
-} from "@material-ui/core";
+} from "@mui/material";
+
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { Event } from "../../assets/entities/event.entity";
 import { useSettings } from "../Contexts/Settings";

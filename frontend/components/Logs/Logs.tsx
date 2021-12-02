@@ -3,16 +3,16 @@ import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
   Container,
-  createStyles,
   Grid,
   IconButton,
-  makeStyles,
   Theme,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { Icon } from "@mdi/react";
 import { mdiRefresh } from "@mdi/js";
 import axios from "axios";
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { useSettings } from "../Contexts/Settings";
 
@@ -86,7 +86,11 @@ function LogsComponent(): ReactElement {
       ) : (
         <>
           <Grid item container direction="row" justifyContent="flex-end">
-            <IconButton aria-label="Refresh Logs" onClick={() => handleSetup()}>
+            <IconButton
+              aria-label="Refresh Logs"
+              onClick={() => handleSetup()}
+              size="large"
+            >
               <Icon title="Refresh Logs" size={1} path={mdiRefresh} />
             </IconButton>
           </Grid>

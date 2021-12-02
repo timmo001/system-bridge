@@ -4,20 +4,20 @@ import {
   Button,
   CircularProgress,
   Container,
-  createStyles,
   Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
   Paper,
   Theme,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { mdiRestart } from "@mdi/js";
+import createStyles from "@mui/styles/createStyles";
 import Icon from "@mdi/react";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";

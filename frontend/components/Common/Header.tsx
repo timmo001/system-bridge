@@ -12,12 +12,9 @@ import {
   PropTypes,
   Toolbar,
   Typography,
-} from "@material-ui/core";
-import { Menu } from "@material-ui/icons";
-// import { mdiContentCopy } from "@mdi/js";
-// import Icon from "@mdi/react";
+} from "@mui/material";
+import { Menu } from "@mui/icons-material";
 
-// import { handleCopyToClipboard } from "../Common/Utils";
 import { useInformation } from "../Contexts/Information";
 import useStyles from "../../assets/jss/components/header";
 
@@ -134,7 +131,7 @@ function Header(props: HeaderProps): ReactElement {
                 ""
               )}
             </Grid>
-            <Hidden smDown implementation="css">
+            <Hidden lgDown implementation="css">
               {rightLinks}
             </Hidden>
             <Hidden mdUp>
@@ -142,6 +139,7 @@ function Header(props: HeaderProps): ReactElement {
                 color="inherit"
                 aria-label="open drawer"
                 onClick={handleDrawerToggle}
+                size="large"
               >
                 <Menu />
               </IconButton>
@@ -164,70 +162,6 @@ function Header(props: HeaderProps): ReactElement {
       </AppBar>
       <Box className={classes.spacer} />
       <Box className={classes.spacer} />
-      {/* <Container maxWidth="xl" style={{ zIndex: 1000 }}>
-        <Grid container alignItems="flex-start" justifyContent="space-around">
-          <Grid className={classes.headerItem} item></Grid>
-          <Grid className={classes.headerItem} item>
-            {information?.host ? (
-              <Typography component="h5" variant="subtitle1">
-                <span className={classes.disabled}>Host: </span>
-                {information.host}
-                <IconButton
-                  className={classes.smallButton}
-                  aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(information.host)}
-                >
-                  <Icon
-                    title="Copy to clipboard"
-                    size={0.8}
-                    path={mdiContentCopy}
-                  />
-                </IconButton>
-              </Typography>
-            ) : (
-              ""
-            )}
-            {information?.ip ? (
-              <Typography component="h5" variant="subtitle1">
-                <span className={classes.disabled}>IP: </span>
-                {information.ip}
-                <IconButton
-                  className={classes.smallButton}
-                  aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(information.ip)}
-                >
-                  <Icon
-                    title="Copy to clipboard"
-                    size={0.8}
-                    path={mdiContentCopy}
-                  />
-                </IconButton>
-              </Typography>
-            ) : (
-              ""
-            )}
-            {information?.uuid ? (
-              <Typography component="h5" variant="subtitle1">
-                <span className={classes.disabled}>UUID: </span>
-                {information.uuid}
-                <IconButton
-                  className={classes.smallButton}
-                  aria-label="Copy to clipboard"
-                  onClick={() => handleCopyToClipboard(information.uuid)}
-                >
-                  <Icon
-                    title="Copy to clipboard"
-                    size={0.8}
-                    path={mdiContentCopy}
-                  />
-                </IconButton>
-              </Typography>
-            ) : (
-              ""
-            )}
-          </Grid>
-        </Grid>
-      </Container> */}
       <Box className={classes.spacer} />
     </>
   );
