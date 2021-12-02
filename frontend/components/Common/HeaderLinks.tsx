@@ -2,8 +2,8 @@ import React, { ReactElement } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useRouter } from "next/dist/client/router";
-import { Button, List, ListItem, Tooltip } from "@material-ui/core";
-import { useTheme } from "@material-ui/core/styles";
+import { Button, List, ListItem, Tooltip } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   mdiFileDocumentMultiple,
   mdiForumOutline,

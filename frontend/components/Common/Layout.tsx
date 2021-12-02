@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from "react";
-import { ClassNameMap } from "@material-ui/styles";
-import { Container } from "@material-ui/core";
+import { ClassNameMap } from "@mui/styles";
+import { Container } from "@mui/material";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 

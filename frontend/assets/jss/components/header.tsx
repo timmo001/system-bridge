@@ -1,4 +1,5 @@
-import { makeStyles, Theme } from "@material-ui/core/styles";
+import { Theme } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { boxShadow, defaultFont, drawerWidth, transition } from "../shared";
 
@@ -28,8 +29,13 @@ const headerStyle = makeStyles((theme: Theme) => ({
     position: "fixed",
     zIndex: 1100,
   },
+  containerBase: {
+    padding: 0,
+  },
   container: {
     minHeight: 50,
+    maxHeight: 50,
+    padding: 0,
     flex: 1,
     alignItems: "center",
     justifyContent: "space-between",

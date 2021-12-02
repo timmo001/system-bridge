@@ -1,12 +1,14 @@
 import React, { ReactElement, useCallback, useEffect } from "react";
 import { useRouter } from "next/dist/client/router";
-import { createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
-import { v4 as uuidv4 } from "uuid";
-import Peer from "peerjs";
-import debounce from "lodash/debounce";
-import { largestRect } from "rect-scaler";
+import { Fab, Theme } from "@mui/material";
 import { Icon } from "@mdi/react";
+import { largestRect } from "rect-scaler";
 import { mdiPhoneHangup } from "@mdi/js";
+import { v4 as uuidv4 } from "uuid";
+import createStyles from "@mui/styles/createStyles";
+import debounce from "lodash/debounce";
+import makeStyles from "@mui/styles/makeStyles";
+import Peer from "peerjs";
 
 import { useSettings } from "../Contexts/Settings";
 

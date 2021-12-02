@@ -1,6 +1,11 @@
 import React, { ReactElement, useEffect } from "react";
 import { AppProps } from "next/app";
-import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import {
+  CssBaseline,
+  ThemeProvider,
+  Theme,
+  StyledEngineProvider,
+} from "@mui/material";
 import Head from "next/head";
 
 import { InformationProvider } from "components/Contexts/Information";
@@ -9,6 +14,11 @@ import theme from "../components/Common/Theme";
 
 import "../assets/css/style.css";
 import "@fontsource/roboto";
+
+declare module "@mui/styles/defaultTheme" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme {}
+}
 
 function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
@@ -31,18 +41,20 @@ function App({ Component, pageProps }: AppProps): ReactElement {
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      <ThemeProvider theme={theme}>
-        <InformationProvider>
-          <>
-            <SettingsProvider>
-              <>
-                <CssBaseline />
-                <Component {...pageProps} />
-              </>
-            </SettingsProvider>
-          </>
-        </InformationProvider>
-      </ThemeProvider>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <InformationProvider>
+            <>
+              <SettingsProvider>
+                <>
+                  <CssBaseline />
+                  <Component {...pageProps} />
+                </>
+              </SettingsProvider>
+            </>
+          </InformationProvider>
+        </ThemeProvider>
+      </StyledEngineProvider>
     </>
   );
 }

@@ -7,18 +7,19 @@ import React, {
 } from "react";
 import { useRouter } from "next/dist/client/router";
 import {
+  Autocomplete,
   Button,
+  AutocompleteRenderInputParams,
   CircularProgress,
   Container,
-  createStyles,
   Grid,
-  makeStyles,
   TextField,
   Theme,
   Typography,
-} from "@material-ui/core";
-import { Autocomplete, AutocompleteRenderInputParams } from "@material-ui/lab";
+} from "@mui/material";
 import axios from "axios";
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { useSettings } from "../Contexts/Settings";

@@ -1,11 +1,6 @@
 import { ReactElement } from "react";
 import dynamic from "next/dynamic";
-import {
-  CardContent,
-  CircularProgress,
-  Grid,
-  Typography,
-} from "@material-ui/core";
+import { CardContent, CircularProgress, Grid, Typography } from "@mui/material";
 
 const BrowserReactJsonView = dynamic(() => import("react-json-view"), {
   ssr: false,

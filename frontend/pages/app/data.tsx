@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { Container } from "@material-ui/core";
+import { Container } from "@mui/material";
 import { GetStaticProps } from "next";
 
 import Data from "../../components/Data/Data";

@@ -3,21 +3,20 @@ import { useRouter } from "next/dist/client/router";
 import {
   Button,
   CircularProgress,
-  Container,
-  createStyles,
   Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
   Paper,
   Theme,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { mdiRestart } from "@mdi/js";
+import createStyles from "@mui/styles/createStyles";
 import Icon from "@mdi/react";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
@@ -79,8 +78,14 @@ function Settings(): ReactElement {
   const classes = useStyles();
 
   return (
-    <Container className={classes.root} maxWidth="lg">
-      <Grid container direction="column" spacing={2} alignItems="stretch">
+    <>
+      <Grid
+        container
+        className={classes.root}
+        direction="column"
+        spacing={2}
+        alignItems="stretch"
+      >
         <Grid container direction="row" item xs={12}>
           <Grid item xs={4} className={classes.disabled}>
             <Typography component="h3" variant="h5">
@@ -135,7 +140,7 @@ function Settings(): ReactElement {
           ))
         )}
       </Grid>
-    </Container>
+    </>
   );
 }
 

@@ -1,21 +1,21 @@
 import React, { ChangeEvent, ReactElement, useState } from "react";
 import {
   Button,
-  createStyles,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  makeStyles,
   TextField,
   Theme,
   Typography,
   useMediaQuery,
   useTheme,
-} from "@material-ui/core";
-import { red } from "@material-ui/core/colors";
+} from "@mui/material";
+import { red } from "@mui/material/colors";
 import { useRouter } from "next/dist/client/router";
 import axios from "axios";
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { Information } from "assets/entities/information.entity";
@@ -138,7 +138,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
   const classes = useStyles();
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
   return (
     <Dialog
@@ -212,12 +212,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         >
           {testingMessage.text}
         </Typography>
-        <Button
-          autoFocus
-          onClick={handleClose}
-          color="default"
-          variant="contained"
-        >
+        <Button autoFocus onClick={handleClose} variant="contained">
           Cancel
         </Button>
         <Button onClick={handleSave} color="primary" variant="contained">

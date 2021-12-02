@@ -1,6 +1,6 @@
 {
   "name": "system-bridge-frontend",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -24,13 +24,15 @@
     "start:dev": "next dev"
   },
   "dependencies": {
+    "@emotion/react": "11.7.0",
+    "@emotion/styled": "11.6.0",
     "@fontsource/roboto": "4.5.1",
-    "@material-ui/core": "4.12.3",
-    "@material-ui/icons": "4.11.2",
-    "@material-ui/lab": "4.0.0-alpha.60",
-    "@material-ui/styles": "4.11.4",
     "@mdi/js": "6.5.95",
     "@mdi/react": "1.5.0",
+    "@mui/icons-material": "5.2.0",
+    "@mui/lab": "5.0.0-alpha.58",
+    "@mui/material": "5.2.2",
+    "@mui/styles": "5.2.2",
     "axios": "0.24.0",
     "clsx": "1.1.1",
     "lodash": "4.17.21",

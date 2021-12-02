@@ -1,4 +1,5 @@
-import { makeStyles, Theme } from "@material-ui/core/styles";
+import { Theme } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
 
 import tooltipsStyle from "../tooltips";
 
@@ -20,7 +21,7 @@ const headerLinksStyle = makeStyles((theme: Theme) => ({
     width: "auto",
     margin: "0",
     padding: "0",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       width: "100%",
       "&:after": {
         width: "calc(100% - 30px)",
@@ -51,7 +52,7 @@ const headerLinksStyle = makeStyles((theme: Theme) => ({
       color: "inherit",
       background: "rgba(200, 200, 200, 0.2)",
     },
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("md")]: {
       width: "calc(100% - 30px)",
       marginLeft: 15,
       marginBottom: 8,

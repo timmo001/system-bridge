@@ -3,15 +3,15 @@ import { useRouter } from "next/dist/client/router";
 import {
   CircularProgress,
   Container,
-  createStyles,
   Grid,
   List,
   ListItem,
   ListItemText,
-  makeStyles,
   Theme,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";

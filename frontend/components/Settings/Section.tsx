@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { Grid, List, Paper, Typography } from "@material-ui/core";
+import { Grid, List, Paper, Typography } from "@mui/material";
 
 import { ConfigurationSection } from "../../assets/entities/configuration.entity";
 import { useSettings } from "../Contexts/Settings";

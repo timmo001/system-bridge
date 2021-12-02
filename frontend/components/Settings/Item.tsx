@@ -8,23 +8,23 @@ import React, {
 import { useRouter } from "next/dist/client/router";
 import { v4 as uuidv4 } from "uuid";
 import {
-  createStyles,
   FormControl,
   IconButton,
-  Input,
   InputAdornment,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
+  OutlinedInput,
   Switch,
   TextField,
   Theme,
-} from "@material-ui/core";
+} from "@mui/material";
 import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
 import axios from "axios";
+import createStyles from "@mui/styles/createStyles";
 import Icon from "@mdi/react";
+import makeStyles from "@mui/styles/makeStyles";
 
 import {
   Configuration,
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme: Theme) =>
       userSelect: "none",
     },
     secondaryAction: {
-      width: 400,
+      width: 420,
       textAlign: "end",
     },
   })
@@ -150,7 +150,7 @@ function Item({
       </ListItemIcon>
       <ListItemText
         className={classes.disabled}
-        style={{ maxWidth: "74%" }}
+        style={{ maxWidth: "64%" }}
         primary={name}
         secondary={description}
       />
@@ -163,8 +163,8 @@ function Item({
             onChange={handleCheckedChanged}
           />
         ) : typeof value === "string" && itemKey === "apiKey" ? (
-          <FormControl fullWidth>
-            <Input
+          <FormControl fullWidth variant="outlined">
+            <OutlinedInput
               type="text"
               disabled
               value={value}
@@ -175,6 +175,7 @@ function Item({
                     aria-label="Generate Api Key"
                     onClick={handleGenerateApiKey}
                     edge="end"
+                    size="large"
                   >
                     <Icon title="Generate API Key" size={1} path={mdiCached} />
                   </IconButton>
@@ -182,6 +183,7 @@ function Item({
                     className={classes.button}
                     aria-label="Copy to clipboard"
                     onClick={() => handleCopyToClipboard(value)}
+                    size="large"
                   >
                     <Icon
                       title="Copy to clipboard"
@@ -194,8 +196,8 @@ function Item({
             />
           </FormControl>
         ) : typeof value === "string" && item.isPassword ? (
-          <FormControl>
-            <Input
+          <FormControl variant="outlined">
+            <OutlinedInput
               type={showPassword ? "text" : "password"}
               defaultValue={value}
               onChange={handleChanged}
@@ -205,6 +207,7 @@ function Item({
                     aria-label="Toggle visibility"
                     onClick={handleClickShowPassword}
                     onMouseDown={handleMouseDownPassword}
+                    size="large"
                   >
                     <Icon
                       title="Copy to clipboard"
@@ -222,6 +225,7 @@ function Item({
             defaultValue={value}
             disabled={information?.container && containerDisabled}
             onChange={handleChanged}
+            variant="outlined"
           />
         ) : typeof value === "number" ? (
           <TextField
@@ -231,6 +235,7 @@ function Item({
             inputProps={{ minimum: item.minimum }}
             defaultValue={value}
             onChange={handleChanged}
+            variant="outlined"
           />
         ) : (
           ""
