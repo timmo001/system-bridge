@@ -10,12 +10,12 @@ import { v4 as uuidv4 } from "uuid";
 import {
   FormControl,
   IconButton,
-  Input,
   InputAdornment,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
+  OutlinedInput,
   Switch,
   TextField,
   Theme,
@@ -163,8 +163,8 @@ function Item({
             onChange={handleCheckedChanged}
           />
         ) : typeof value === "string" && itemKey === "apiKey" ? (
-          <FormControl fullWidth>
-            <Input
+          <FormControl fullWidth variant="outlined">
+            <OutlinedInput
               type="text"
               disabled
               value={value}
@@ -196,8 +196,8 @@ function Item({
             />
           </FormControl>
         ) : typeof value === "string" && item.isPassword ? (
-          <FormControl>
-            <Input
+          <FormControl variant="outlined">
+            <OutlinedInput
               type={showPassword ? "text" : "password"}
               defaultValue={value}
               onChange={handleChanged}
@@ -225,6 +225,7 @@ function Item({
             defaultValue={value}
             disabled={information?.container && containerDisabled}
             onChange={handleChanged}
+            variant="outlined"
           />
         ) : typeof value === "number" ? (
           <TextField
@@ -234,6 +235,7 @@ function Item({
             inputProps={{ minimum: item.minimum }}
             defaultValue={value}
             onChange={handleChanged}
+            variant="outlined"
           />
         ) : (
           ""
