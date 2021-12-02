@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme: Theme) =>
       userSelect: "none",
     },
     secondaryAction: {
-      width: 400,
+      width: 420,
       textAlign: "end",
     },
   })
@@ -150,7 +150,7 @@ function Item({
       </ListItemIcon>
       <ListItemText
         className={classes.disabled}
-        style={{ maxWidth: "74%" }}
+        style={{ maxWidth: "64%" }}
         primary={name}
         secondary={description}
       />
