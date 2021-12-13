@@ -11,12 +11,12 @@ import {
   Fade,
   Grid,
   IconButton,
-  makeStyles,
   Slider,
   Theme,
   Typography,
-} from "@material-ui/core";
-import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@material-ui/icons";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@mui/icons-material";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
