@@ -24,7 +24,7 @@
     "start:dev": "next dev"
   },
   "dependencies": {
-    "@emotion/react": "11.7.0",
+    "@emotion/react": "11.7.1",
     "@emotion/styled": "11.6.0",
     "@fontsource/roboto": "4.5.1",
     "@mdi/js": "6.5.95",
