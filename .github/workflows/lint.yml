@@ -31,8 +31,6 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-markdownlint.yml@master
   lint-prettier:
     uses: timmo001/workflows/.github/workflows/lint-prettier.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   lint-pylint:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
