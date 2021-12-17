@@ -83,7 +83,7 @@
     "rimraf": "3.0.2",
     "rxjs": "7.4.0",
     "semver": "7.3.5",
-    "swagger-ui-express": "4.2.0",
+    "swagger-ui-express": "4.3.0",
     "system-bridge-windows-sensors": "1.2.5",
     "systeminformation": "5.9.17",
     "toad-scheduler": "1.6.0",
@@ -93,7 +93,7 @@
     "ws": "7.5.6"
   },
   "devDependencies": {
-    "@nestjs/cli": "8.1.5",
+    "@nestjs/cli": "8.1.6",
     "@nestjs/schematics": "8.0.5",
     "@nestjs/testing": "8.2.3",
     "@types/auto-launch": "5.0.2",
@@ -111,7 +111,7 @@
     "@types/uuid": "8.3.3",
     "@typescript-eslint/eslint-plugin": "4.33.0",
     "@typescript-eslint/parser": "4.33.0",
-    "concurrently": "6.4.0",
+    "concurrently": "6.5.0",
     "cross-env": "7.0.3",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
