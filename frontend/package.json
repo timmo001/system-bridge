@@ -32,7 +32,7 @@
     "@mui/icons-material": "5.2.4",
     "@mui/lab": "5.0.0-alpha.58",
     "@mui/material": "5.2.2",
-    "@mui/styles": "5.2.2",
+    "@mui/styles": "5.2.3",
     "axios": "0.24.0",
     "clsx": "1.1.1",
     "lodash": "4.17.21",
