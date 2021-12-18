@@ -171,7 +171,6 @@ class Main(Base):
 
     async def handle_bridge_event(self, event: Event) -> None:
         """Handle an event"""
-        self.logger.info("Event: %s", event.__dict__)
         if event.name == "gui-player-close" and self.player_window is not None:
             self.player_window.hide()
         elif event.name == "gui-player-create":
