@@ -24,7 +24,8 @@ class PlayerWindow(Base, QWidget):
         """Initialize the window"""
         Base.__init__(self, args)
         QWidget.__init__(
-            self, WindowFlags=Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+            self,
+            WindowFlags=Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint,
         )
 
         self.layout = QVBoxLayout(self)
