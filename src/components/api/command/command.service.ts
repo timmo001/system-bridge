@@ -25,6 +25,10 @@ export class CommandService {
     execa(createCommandDto.command, createCommandDto.arguments)
       .then((stdout: ExecaReturnValue<string>) => logger.info(`${stdout}`))
       .catch((stderr: ExecaReturnValue<string>) => logger.warn(`${stderr}`));
-    return createCommandDto;
+    return {
+      ...createCommandDto,
+      success: true,
+      message: "Command executed",
+    };
   }
 }
