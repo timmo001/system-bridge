@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function BridgesSendToComponent(): ReactElement {
+function BridgesOpenOnComponent(): ReactElement {
   const query = useRouter().query;
 
   const [bridges, setBridges] = useState<Array<Bridge>>();
@@ -53,7 +53,6 @@ function BridgesSendToComponent(): ReactElement {
   const [url, setUrl] = useState<string>("");
 
   const handleSetup = useCallback(async () => {
-    console.log("Setup SendTo");
     setUrl(query.url as string);
     const response = await axios.get<Array<Bridge>>(
       `http://${query.apiHost || window.location.hostname}:${
@@ -69,7 +68,7 @@ function BridgesSendToComponent(): ReactElement {
     setUrl(event.target.value);
   }
 
-  async function handleSendTo(): Promise<void> {
+  async function handleOpenOn(): Promise<void> {
     if (bridgeSelected) {
       try {
         const response = await axios.post<{ path: string }>(
@@ -105,7 +104,7 @@ function BridgesSendToComponent(): ReactElement {
         ) : (
           <>
             <Typography className={classes.title} component="h2" variant="h3">
-              Send to Bridge..
+              Open URL On..
             </Typography>
 
             <Autocomplete
@@ -138,7 +137,7 @@ function BridgesSendToComponent(): ReactElement {
               color="primary"
               disabled={!bridgeSelected || !url}
               variant="contained"
-              onClick={handleSendTo}
+              onClick={handleOpenOn}
             >
               Send
             </Button>
@@ -149,4 +148,4 @@ function BridgesSendToComponent(): ReactElement {
   );
 }
 
-export default BridgesSendToComponent;
+export default BridgesOpenOnComponent;
