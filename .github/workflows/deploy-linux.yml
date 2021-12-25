@@ -19,4 +19,3 @@ jobs:
     uses: timmo001/workflows/.github/workflows/deploy-node-executable-linux.yml@master
     secrets:
       CONTAINER_SLUG: system-bridge
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

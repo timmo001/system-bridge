@@ -10,5 +10,3 @@ on:
 jobs:
   stale:
     uses: timmo001/workflows/.github/workflows/stale.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

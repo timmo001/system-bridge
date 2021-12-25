@@ -10,5 +10,3 @@ on:
 jobs:
   lock:
     uses: timmo001/workflows/.github/workflows/lock.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

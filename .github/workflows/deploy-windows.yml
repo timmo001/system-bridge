@@ -17,5 +17,3 @@ on:
 jobs:
   deploy-windows:
     uses: timmo001/workflows/.github/workflows/deploy-node-executable-windows.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

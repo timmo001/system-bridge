@@ -15,5 +15,3 @@ on:
 jobs:
   labels:
     uses: timmo001/workflows/.github/workflows/labels.yml@master
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
