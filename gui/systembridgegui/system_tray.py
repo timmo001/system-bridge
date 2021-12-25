@@ -144,7 +144,7 @@ class SystemTray(Base, QSystemTrayIcon):
         open_new_tab(URL_DISCUSSIONS)
 
     def show_bridges_send_to(self) -> None:
-        """Show bridges open in window"""
+        """Show bridges open url on window"""
         self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
 
     def show_bridges_setup(self) -> None:
