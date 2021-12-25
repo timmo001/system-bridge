@@ -10,7 +10,7 @@ from systembridge.objects.information import Information
 
 from .base import Base
 
-PATH_BRIDGES_SEND_TO = "/app/bridges/sendto"
+PATH_BRIDGES_OPEN_ON = "/app/bridges/openon"
 PATH_BRIDGES_SETUP = "/app/bridges/setup"
 PATH_DATA = "/app/data"
 PATH_LOGS = "/app/logs"
@@ -55,7 +55,7 @@ class SystemTray(Base, QSystemTrayIcon):
 
         menu.addSeparator()
 
-        action_bridges_sendto = menu.addAction("Send to Bridge..")
+        action_bridges_sendto = menu.addAction("Open URL On..")
         action_bridges_sendto.triggered.connect(self.show_bridges_send_to)
 
         menu.addSeparator()
@@ -144,8 +144,8 @@ class SystemTray(Base, QSystemTrayIcon):
         open_new_tab(URL_DISCUSSIONS)
 
     def show_bridges_send_to(self) -> None:
-        """Show bridges send to window"""
-        self.callback_show_window(PATH_BRIDGES_SEND_TO, False, 620, 420)
+        """Show bridges open in window"""
+        self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
 
     def show_bridges_setup(self) -> None:
         """Show bridges setup window"""

@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import { GetStaticProps } from "next";
 
-import SendTo from "../../../components/Bridges/SendTo";
+import OpenOn from "../../../components/Bridges/OpenOn";
 import Layout from "../../../components/Common/Layout";
 import useStyles from "../../../assets/jss/components/layout";
 
@@ -11,13 +11,13 @@ function PageBridges(): ReactElement {
   return (
     <Layout
       classes={classes}
-      title="Send to Bridge"
+      title="Open URL On"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
       noHeader
       noFooter
     >
-      <SendTo />
+      <OpenOn />
     </Layout>
   );
 }
