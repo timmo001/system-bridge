@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import {
   ButtonBase,
-  createStyles,
   Fade,
   Grid,
   IconButton,
@@ -15,8 +14,9 @@ import {
   Theme,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@mui/icons-material";
+import createStyles from "@mui/styles/createStyles";
+import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
@@ -205,7 +205,7 @@ function AudioComponent({ hovering }: AudioProps) {
   //   handleSendCover,
   // ]);
 
-  function handleScrub(_event: ChangeEvent<{}>, value: number | number[]) {
+  function handleScrub(_event: Event, value: number | number[]) {
     if (typeof value === "number") {
       handleSetPosition(value);
     }
@@ -251,7 +251,7 @@ function AudioComponent({ hovering }: AudioProps) {
         container
         direction="row"
         alignItems="center"
-        justify="center"
+        justifyItems="center"
         wrap="nowrap"
       >
         <Grid className={classes.gridItem} item>
@@ -283,7 +283,7 @@ function AudioComponent({ hovering }: AudioProps) {
             container
             direction="column"
             alignItems="flex-start"
-            justify="space-around"
+            justifyItems="space-around"
           >
             <Grid item>
               <Typography
@@ -319,10 +319,7 @@ function AudioComponent({ hovering }: AudioProps) {
                   max={1}
                   step={0.05}
                   value={volume}
-                  onChange={(
-                    _event: ChangeEvent<{}>,
-                    value: number | number[]
-                  ) => {
+                  onChange={(_event: Event, value: number | number[]) => {
                     if (typeof value === "number") handleSetVolume(value);
                   }}
                 />
