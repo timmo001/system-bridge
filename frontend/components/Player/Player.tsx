@@ -5,9 +5,9 @@ import { cloneDeep, isEqual } from "lodash";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
 import { useSettings } from "../Contexts/Settings";
-import AudioPlayer from "./AudioPlayer";
+import AudioComponent from "./Audio";
 import logo from "assets/media/system-bridge.svg";
-import VideoPlayer from "./VideoPlayer";
+import VideoComponent from "./Video";
 
 interface PlayerProps {
   playerType: "audio" | "video";
@@ -102,9 +102,9 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
   return (
     <>
       {type === "audio" ? (
-        <AudioPlayer />
+        <AudioComponent />
       ) : type === "video" ? (
-        <VideoPlayer />
+        <VideoComponent />
       ) : (
         ""
       )}

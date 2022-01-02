@@ -22,7 +22,7 @@ import ReactPlayer from "react-player/lazy";
 
 import { AudioSource, PlayerStatus, usePlayer } from "./Utils";
 
-interface AudioPlayerProps {
+interface AudioProps {
   hovering?: boolean;
 }
 
@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function AudioPlayer({ hovering }: AudioPlayerProps) {
+function AudioComponent({ hovering }: AudioProps) {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
 
@@ -358,4 +358,4 @@ function AudioPlayer({ hovering }: AudioPlayerProps) {
   );
 }
 
-export default AudioPlayer;
+export default AudioComponent;
