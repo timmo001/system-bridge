@@ -10,7 +10,7 @@ import ReactPlayer from "react-player/lazy";
 
 import { PlayerStatus, usePlayer, VideoSource } from "./Utils";
 
-function VideoPlayerComponent(): ReactElement {
+function VideoComponent(): ReactElement {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
   const [thumbnail, setThumbnail] = useState<string>();
@@ -220,4 +220,4 @@ function VideoPlayerComponent(): ReactElement {
   );
 }
 
-export default VideoPlayerComponent;
+export default VideoComponent;
