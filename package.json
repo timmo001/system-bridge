@@ -67,7 +67,7 @@
     "better-sqlite3": "7.4.6",
     "dotenv": "10.0.0",
     "execa": "5.1.1",
-    "helmet": "4.6.0",
+    "helmet": "5.0.1",
     "loudness": "0.4.1",
     "mime-types": "2.1.34",
     "mqtt": "4.3.2",
