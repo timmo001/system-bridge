@@ -206,19 +206,6 @@
   resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.5.0.tgz#461d2064ba12d509723bffc95e2f7169a6ac884a"
   integrity sha512-NztRgUxSYD+ImaKN94Tg66VVVqXj4SmlDGzZoz48H9riJ+Awha56sfXH2fegw819NWo7KI3oeS1Es0lNQqwr0w==
 
-"@mui/base@5.0.0-alpha.62":
-  version "5.0.0-alpha.62"
-  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.62.tgz#d86ff07f33d7b49ebb545f29e184750c0270c3f8"
-  integrity sha512-ItmdSZwHKQbLbAsS3sWguR7OHqYqh2cYWahoVmHb13Kc6bMdmVUTY4x57IlDSU712B0yuA0Q/gPTq7xADKnFow==
-  dependencies:
-    "@babel/runtime" "^7.16.3"
-    "@emotion/is-prop-valid" "^1.1.1"
-    "@mui/utils" "^5.2.3"
-    "@popperjs/core" "^2.4.4"
-    clsx "^1.1.1"
-    prop-types "^15.7.2"
-    react-is "^17.0.2"
-
 "@mui/base@5.0.0-alpha.63":
   version "5.0.0-alpha.63"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.63.tgz#8646b9b91dae128a474feadac74748c532ffef2c"
@@ -239,17 +226,17 @@
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-"@mui/lab@5.0.0-alpha.62":
-  version "5.0.0-alpha.62"
-  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.62.tgz#972f03b63f53e3d87a606f31a16b9b015d0b3146"
-  integrity sha512-oUxGhoaTvNFiXjV6xe3pGu+wvQsDC9R8Q6Os8xL4TUwihdaU/pIBRuUiANtJOZJPgJ1JyUpTwZZDTvOiCQFwZA==
+"@mui/lab@5.0.0-alpha.63":
+  version "5.0.0-alpha.63"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.63.tgz#9024ed77e6a598ddfbc94d3831df115886900e1a"
+  integrity sha512-BFexWjiiXZ2aWfSq+4j1cua7XmCt7BIDC27MgFWoKY6O0Fe3zeUz/6WH0M5+4VKT+yn3DC3vzWGAWKmNDa3TUQ==
   dependencies:
     "@babel/runtime" "^7.16.3"
     "@date-io/date-fns" "^2.11.0"
     "@date-io/dayjs" "^2.11.0"
     "@date-io/luxon" "^2.11.1"
     "@date-io/moment" "^2.11.0"
-    "@mui/base" "5.0.0-alpha.62"
+    "@mui/base" "5.0.0-alpha.63"
     "@mui/system" "^5.2.6"
     "@mui/utils" "^5.2.3"
     clsx "^1.1.1"
