@@ -4684,6 +4684,11 @@ jest@27.4.5:
     import-local "^3.0.2"
     jest-cli "^27.4.5"
 
+js-sdsl@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/js-sdsl/-/js-sdsl-2.1.2.tgz#5f3234baeef891a8845e400e73f1bd3ce4a268e8"
+  integrity sha512-1KKQoHwdf5I4y3iXyOoYTWFBsot96s9DTOKOrujfb8+6k8zOTsIVQe6WDvNDhYMQ6WmUhdcjAkW5/StK6MZNPQ==
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -5143,10 +5148,10 @@ mqtt-packet@^6.8.0:
     debug "^4.1.1"
     process-nextick-args "^2.0.1"
 
-mqtt@4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-4.3.2.tgz#d31bde834a8d5ef59adfcbeb28eb4b6b5d56002c"
-  integrity sha512-cSmPOvTL9diVV7nZVHobwFR//fLZw8c1Yw04z49sLwJx45ooiiqcg2soFLYdjI4iXlkw49lP6BZ2ZRv9kGpOyw==
+mqtt@4.3.3:
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-4.3.3.tgz#14379aaedb29d3bea7ee99c457b31fb39c0ef7a2"
+  integrity sha512-5wOr2mDchGd+PKZMrbxisP5JS42K6IHI5sueYr6yQnDL/F6vF0Qq6JDcGN3yWcngoJTTK7oYZrx1tlMxkH3mWQ==
   dependencies:
     collections "^5.1.13"
     commist "^1.0.0"
@@ -5157,7 +5162,7 @@ mqtt@4.3.2:
     inherits "^2.0.3"
     minimist "^1.2.5"
     mqtt-packet "^6.8.0"
-    number-allocator "^1.0.8"
+    number-allocator "^1.0.9"
     pump "^3.0.0"
     readable-stream "^3.6.0"
     reinterval "^1.1.0"
@@ -5453,13 +5458,13 @@ npmlog@^4.0.1:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-number-allocator@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/number-allocator/-/number-allocator-1.0.8.tgz#b7493de1cac628472aba48666c000f70a5d37280"
-  integrity sha512-5lhaurSl3Kvn6j47S2ELzyv5X7b+UvvcZONUjL5/bFGNiOU7GkG/HUmtqef9ayEzS2i6BtsqB0FTTyu+8QrRrg==
+number-allocator@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/number-allocator/-/number-allocator-1.0.9.tgz#6f8fc46c3e6c90f6175ac7daf3b8f74ff786ba03"
+  integrity sha512-sIIF0dZKMs3roPUD7rLreH8H3x47QKV9dHZ+PeSnH24gL0CxKxz/823woGZC0hLBSb2Ar/rOOeHiNbnPBum/Mw==
   dependencies:
-    collections "^5.1.13"
     debug "^4.3.1"
+    js-sdsl "^2.1.2"
 
 number-is-nan@^1.0.0:
   version "1.0.1"
