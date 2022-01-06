@@ -108,7 +108,7 @@
     "@types/react-dom": "17.0.11",
     "@types/semver": "7.3.9",
     "@types/supertest": "2.0.11",
-    "@types/uuid": "8.3.3",
+    "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "4.33.0",
     "@typescript-eslint/parser": "4.33.0",
     "concurrently": "7.0.0",
