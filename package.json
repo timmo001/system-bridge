@@ -70,7 +70,7 @@
     "helmet": "5.0.1",
     "loudness": "0.4.1",
     "mime-types": "2.1.34",
-    "mqtt": "4.3.3",
+    "mqtt": "4.3.4",
     "next": "11.1.3",
     "node-notifier": "10.0.0",
     "open": "8.4.0",
