@@ -85,7 +85,7 @@
     "semver": "7.3.5",
     "swagger-ui-express": "4.3.0",
     "system-bridge-windows-sensors": "1.2.5",
-    "systeminformation": "5.9.17",
+    "systeminformation": "5.10.0",
     "toad-scheduler": "1.6.0",
     "typeorm": "0.2.41",
     "uuid": "8.3.2",
