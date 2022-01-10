@@ -1,7 +1,6 @@
 """System Bridge GUI: Main class"""
 from argparse import Namespace
 import asyncio
-import os
 import sys
 
 from PySide6.QtGui import QIcon
