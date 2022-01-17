@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import Optional
 from webbrowser import open_new_tab
 
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 from systembridge.objects.information import Information
 
@@ -39,6 +39,8 @@ class SystemTray(Base, QSystemTrayIcon):
         QSystemTrayIcon.__init__(self, icon, parent)
 
         self.callback_show_window = callback_show_window
+
+        self.activated.connect(self.on_activated)
 
         menu = QMenu()
 
@@ -117,6 +119,11 @@ class SystemTray(Base, QSystemTrayIcon):
         action_exit.triggered.connect(callback_exit_application)
 
         self.setContextMenu(menu)
+
+    def on_activated(self, reason: int) -> None:
+        """Handle the activated signal"""
+        if reason == QSystemTrayIcon.Trigger:
+            self.contextMenu().popup(QCursor.pos())
 
     @staticmethod
     def open_latest_releases() -> None:
