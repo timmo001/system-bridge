@@ -65,7 +65,7 @@
     "auto-launch": "5.0.5",
     "axios": "0.24.0",
     "better-sqlite3": "7.4.6",
-    "dotenv": "11.0.0",
+    "dotenv": "14.2.0",
     "execa": "5.1.1",
     "helmet": "5.0.1",
     "loudness": "0.4.1",
