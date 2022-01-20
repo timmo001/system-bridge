@@ -942,10 +942,10 @@
   dependencies:
     uuid "8.3.2"
 
-"@nestjs/websockets@8.2.5":
-  version "8.2.5"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.2.5.tgz#113ea89102bb5a69574f42a0182458c40b181b04"
-  integrity sha512-K+W0uMqJ5EwvGBS4CYDkE0RpU0ggmww6opntjQ8IAOtwLH7em+oYYDqHm9Umi1UWsLPd4FWPDP5noytZG8RWKQ==
+"@nestjs/websockets@8.2.6":
+  version "8.2.6"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.2.6.tgz#dde908b0094f8eeeb89cffd67f298b6cd4a58dc7"
+  integrity sha512-GUdPd5X+ojNeaYE+/4c4105tb8skvQt3KyR7CCzrhMziHsRakDLQ/8LO932fh8ADrkRxr7jfAbt3UTq5FggQ2w==
   dependencies:
     iterare "1.2.1"
     object-hash "2.2.0"
