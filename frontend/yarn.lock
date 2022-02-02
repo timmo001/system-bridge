@@ -219,6 +219,19 @@
     prop-types "^15.7.2"
     react-is "^17.0.2"
 
+"@mui/base@5.0.0-alpha.67":
+  version "5.0.0-alpha.67"
+  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.67.tgz#da2423b96204f71cf37bcfcf3054667f38361eb8"
+  integrity sha512-yK2++NivZUitAVpheMc5QVuwrVCphrTw85L6qjKcvnSpB8wmVYne58CY2vzMCNEuHkuHG2jccq9/JlRZFGAanw==
+  dependencies:
+    "@babel/runtime" "^7.16.7"
+    "@emotion/is-prop-valid" "^1.1.1"
+    "@mui/utils" "^5.3.0"
+    "@popperjs/core" "^2.4.4"
+    clsx "^1.1.1"
+    prop-types "^15.7.2"
+    react-is "^17.0.2"
+
 "@mui/icons-material@5.3.1":
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.3.1.tgz#e0e0aecce5a86971dbaa46441d931a9c749a1c53"
@@ -226,18 +239,18 @@
   dependencies:
     "@babel/runtime" "^7.16.7"
 
-"@mui/lab@5.0.0-alpha.66":
-  version "5.0.0-alpha.66"
-  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.66.tgz#ca50eaf3e6b5b1e264cecd5f31b5b8b7581dc919"
-  integrity sha512-C/WB5vo+arkdbx3r1gRRKh4BcZJ763+ePcPHYj3pShDA1vG0jecp1RWO8MJ07SnsdfDHiKWtlUDJh+DpieR0Og==
+"@mui/lab@5.0.0-alpha.67":
+  version "5.0.0-alpha.67"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.67.tgz#2b906cabf15351429c9967199e093cc510506826"
+  integrity sha512-pL6O2teso3tpAv38FXiFNWGcXjakgO66/Os5p2KX4QbkPKvzzeSxNU7hI02Ye8BIEYqTR5Oaz8njcdQgcNI7Cg==
   dependencies:
     "@babel/runtime" "^7.16.7"
     "@date-io/date-fns" "^2.11.0"
     "@date-io/dayjs" "^2.11.0"
     "@date-io/luxon" "^2.11.1"
     "@date-io/moment" "^2.11.0"
-    "@mui/base" "5.0.0-alpha.66"
-    "@mui/system" "^5.3.0"
+    "@mui/base" "5.0.0-alpha.67"
+    "@mui/system" "^5.4.0"
     "@mui/utils" "^5.3.0"
     clsx "^1.1.1"
     prop-types "^15.7.2"
@@ -304,10 +317,10 @@
     jss-plugin-vendor-prefixer "^10.8.2"
     prop-types "^15.7.2"
 
-"@mui/system@^5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.3.0.tgz#cd2c5fd7631f2c90f0072c866015bb24e319b66e"
-  integrity sha512-mblz3EObrhhIMPwSEe2Az7MbMaXOFgrvItPOzZwcY5O9qERB7Rr8KQgbU8VouWLUqyV2i8BaFpLrkKPA6eX2Aw==
+"@mui/system@^5.3.0", "@mui/system@^5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.4.0.tgz#ff79c4922b8cea8c6e05946587fa9a3b938ab729"
+  integrity sha512-LX7g5gK5yCwiueSUVG73uVNc0yeHjsWUIFLrnPjP3m+J7O38RkPqyao5nZahhaSL1PGNbR9+zfkxljXthO9QqA==
   dependencies:
     "@babel/runtime" "^7.16.7"
     "@mui/private-theming" "^5.3.0"
