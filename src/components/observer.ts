@@ -2,7 +2,6 @@ import { AsyncTask, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { Logger } from "./logger";
 import { runService, WorkerData } from "./common";
-import { loggers } from "winston";
 
 export interface ObserverData extends WorkerData {
   data: any;
