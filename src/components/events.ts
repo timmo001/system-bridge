@@ -14,7 +14,7 @@ export class Events {
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
       true,
-      () => {
+      async () => {
         const { logger } = new Logger("Events");
 
         logger.info("Listening");
@@ -33,6 +33,7 @@ export class Events {
             data: observerData.data,
           });
         };
+        await this.observer.start();
 
         logger.close();
       }
@@ -72,7 +73,7 @@ export class Events {
                   method: eventData.method,
                   data: await runService(eventData),
                 });
-                if (eventData.observe) await this.observer.startJob(eventData);
+                if (eventData.observe) await this.observer.addJob(eventData);
               } catch (e) {
                 logger.error(
                   `Service error for ${JSON.stringify(eventData)}: ${e.message}`
