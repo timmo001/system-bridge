@@ -4928,10 +4928,10 @@ node-fetch@^2.6.1, node-fetch@^2.6.6:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-hide-console-window@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/node-hide-console-window/-/node-hide-console-window-2.1.0.tgz#52563c3a92e6636b405b46d37e676537111b7a2b"
-  integrity sha512-Ao6Pe4CObt5wfLFy/xZzI4TUXNSIWP5Hfel1XJXB64tJ6OQ6xh26q01NfgRNanAwYispibRTeWWDr9/HGloDxA==
+node-hide-console-window@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/node-hide-console-window/-/node-hide-console-window-2.1.1.tgz#e6c20e6ec4d09745e6f275681a2c02bbebbe4421"
+  integrity sha512-6knDFNCPJhgbXF10xJWVJb4COe6pvr4pI6wX4B3g9owErZD7oltrqiZS6wtoAH81dZUZFe6ys+kZDpcsH9nfqw==
 
 node-int64@^0.4.0:
   version "0.4.0"
