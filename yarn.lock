@@ -906,10 +906,10 @@
   dependencies:
     uuid "8.3.2"
 
-"@nestjs/websockets@8.2.6":
-  version "8.2.6"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.2.6.tgz#dde908b0094f8eeeb89cffd67f298b6cd4a58dc7"
-  integrity sha512-GUdPd5X+ojNeaYE+/4c4105tb8skvQt3KyR7CCzrhMziHsRakDLQ/8LO932fh8ADrkRxr7jfAbt3UTq5FggQ2w==
+"@nestjs/websockets@8.3.0":
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.3.0.tgz#a9cd389565c5e7d55e096edbd57cf32fbf8b65e4"
+  integrity sha512-zblnqd71y8t2DXpvTzTTSxaHhDRxkui/Yvri120rJ9Z45s8mEI5RFPLyiRczTO+tyKRbKItB0l6+m9Q29XAcwA==
   dependencies:
     iterare "1.2.1"
     object-hash "2.2.0"
