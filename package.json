@@ -71,7 +71,7 @@
     "loudness": "0.4.1",
     "mime-types": "2.1.34",
     "mqtt": "4.3.5",
-    "next": "12.0.10",
+    "next": "12.1.0",
     "node-notifier": "10.0.1",
     "open": "8.4.0",
     "peer": "0.6.1",
