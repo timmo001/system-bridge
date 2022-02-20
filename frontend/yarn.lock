@@ -1296,10 +1296,10 @@ react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-rect-scaler@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/rect-scaler/-/rect-scaler-1.0.0.tgz#90a51c1f16efa4deff80be0d968b1a05eb18a163"
-  integrity sha512-8gg6ztlhe0zbV6ChrpGUpmoFeTpBI0GH0uRIN0HwOIr/R5Z+1CVm3nZlPUxlbgbd9gh9CsUm6pZ27IIYGNTMyg==
+rect-scaler@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/rect-scaler/-/rect-scaler-1.1.0.tgz#05bfe20e27f8e181d4b88273c2ad70c2c8093e2f"
+  integrity sha512-zqvIrh6x5ZdBGvtb7K0Zor6uFdEOmZr19lgcxb9Fp4IyfWl+GV+i5SVXirbg/vFzboBB3EB9fTBHr/vTonPBdQ==
 
 regenerator-runtime@^0.13.4:
   version "0.13.9"
