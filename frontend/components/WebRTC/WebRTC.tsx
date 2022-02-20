@@ -57,7 +57,8 @@ function WebRTC(): ReactElement {
       screenWidth,
       screenHeight,
       videoCount || 2,
-      16 / 9
+      16,
+      9
     );
 
     streamContainer.style.setProperty("--width", width + "px");
