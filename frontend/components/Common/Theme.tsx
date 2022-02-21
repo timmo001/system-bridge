@@ -1,7 +1,4 @@
-import {
-  createTheme,
-  responsiveFontSizes,
-} from "@mui/material/styles";
+import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 import { deepPurple, grey } from "@mui/material/colors";
 
 let theme = createTheme({
