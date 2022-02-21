@@ -245,14 +245,14 @@
     react-transition-group "^4.4.2"
     rifm "^0.12.1"
 
-"@mui/material@5.4.2":
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.4.2.tgz#04ea6632d7ca600a2ae528f6f140ef0af9c01434"
-  integrity sha512-jmeLWEO6AA6g7HErhI3MXVGaMZtqDZjDwcHCg24WY954wO38Xn0zJ53VfpFc44ZTJLV9Ejd7ci9fLlG/HmJCeg==
+"@mui/material@5.4.3":
+  version "5.4.3"
+  resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.4.3.tgz#cc0af7192a856796bd82955c5317722916d02bc1"
+  integrity sha512-E2K402xjz3U09mTgrVYj+vUACeOppV41uEcu9GSkm7QSg4Nzy48WkdaiGL7TRCyH0T8HsonFSMJvCpwyQbD6iw==
   dependencies:
     "@babel/runtime" "^7.17.0"
     "@mui/base" "5.0.0-alpha.69"
-    "@mui/system" "^5.4.2"
+    "@mui/system" "^5.4.3"
     "@mui/types" "^7.1.2"
     "@mui/utils" "^5.4.2"
     "@types/react-transition-group" "^4.4.4"
@@ -304,10 +304,10 @@
     jss-plugin-vendor-prefixer "^10.8.2"
     prop-types "^15.7.2"
 
-"@mui/system@^5.4.2":
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.4.2.tgz#8166e406ba4628950bd79cec8159de25d5aef162"
-  integrity sha512-QegBVu6fxUNov1X9bWc1MZUTeV3A5g9PIpli7d0kzkGfq6JzrJWuPlhSPZ+6hlWmWky+bbAXhU65Qz8atWxDGw==
+"@mui/system@^5.4.2", "@mui/system@^5.4.3":
+  version "5.4.3"
+  resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.4.3.tgz#3bc2547183b8d09b04df1c835cfeb1259f7ec3fd"
+  integrity sha512-Xz5AVe9JMufJVozMzUv93IRtnLNZnw/Q8k+Mg7Q4oRuwdir0TcYkMVUqAHetVKb3rAouIVCu/cQv0jB8gVeVsQ==
   dependencies:
     "@babel/runtime" "^7.17.0"
     "@mui/private-theming" "^5.4.2"
