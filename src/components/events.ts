@@ -14,12 +14,13 @@ export class Events {
       Number(settings["network-wsPort"]) || 9172,
       settings["network-apiKey"],
       true,
-      () => {
+      async () => {
         const { logger } = new Logger("Events");
 
         logger.info("Listening");
         this.websocketConnection?.sendEvent({ name: "listening-for-events" });
         this.observer = new Observer(settings);
+        await this.observer.setupJobs();
         this.observer.callback = (observerData: ObserverData) => {
           this.websocketConnection?.sendEvent({
             name: `data-${observerData.service}${
@@ -72,7 +73,7 @@ export class Events {
                   method: eventData.method,
                   data: await runService(eventData),
                 });
-                if (eventData.observe) await this.observer.startJob(eventData);
+                if (eventData.observe) this.observer.addJob(eventData);
               } catch (e) {
                 logger.error(
                   `Service error for ${JSON.stringify(eventData)}: ${e.message}`

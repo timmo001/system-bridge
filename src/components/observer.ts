@@ -22,25 +22,30 @@ export class Observer {
     this.scheduler = new ToadScheduler();
   }
 
-  async startJob(workerData: WorkerData): Promise<void> {
+  async setupJobs(): Promise<void> {
+    this.scheduler.addSimpleIntervalJob(
+      new SimpleIntervalJob(
+        {
+          milliseconds: this.interval,
+          runImmediately: false,
+        },
+        this.createMainTask()
+      )
+    );
+  }
+
+  addJob(workerData: WorkerData): void {
     if (
       this.jobs.findIndex(
         (job: WorkerData) =>
           job.service === workerData.service && job.method === workerData.method
       ) === -1
     ) {
-      this.jobs.push(workerData);
-
       const { logger } = new Logger("Observer");
-      logger.info(`Create job ${workerData.service} - ${workerData.method}`);
+      logger.info(`Add job ${workerData.service} - ${workerData.method}`);
       logger.close();
 
-      this.scheduler.addSimpleIntervalJob(
-        new SimpleIntervalJob(
-          { milliseconds: this.interval },
-          await this.createObserverTask(workerData)
-        )
-      );
+      this.jobs.push(workerData);
     }
   }
 
@@ -50,20 +55,34 @@ export class Observer {
     this.callback({ service: "status", method: "", data: 0 });
   }
 
-  async createObserverTask(workerData: WorkerData): Promise<AsyncTask> {
-    let data: any;
-    return new AsyncTask(workerData.service, async () => {
-      try {
-        const d = await runService(workerData);
-        if (JSON.stringify(data) !== JSON.stringify(d)) {
-          data = d;
-          this.callback({ ...workerData, data: d });
-        }
-      } catch (e) {
-        const { logger } = new Logger("Observer");
-        logger.error(`Service error for ${workerData.service}: ${e.message}`);
-        logger.close();
+  createMainTask(): AsyncTask {
+    return new AsyncTask("main", async () => {
+      const { logger } = new Logger("Observer");
+      logger.info(
+        `Run Jobs: ${this.jobs
+          .map((job: WorkerData) => `${job.service} - ${job.method}`)
+          .join(", ")}`
+      );
+      for (const workerData of this.jobs) {
+        await this.createObserverTask(workerData);
       }
+      logger.info("Done");
+      logger.close();
     });
+  }
+
+  async createObserverTask(workerData: WorkerData): Promise<void> {
+    let data: any;
+    try {
+      const d = await runService(workerData);
+      if (JSON.stringify(data) !== JSON.stringify(d)) {
+        data = d;
+        this.callback({ ...workerData, data: d });
+      }
+    } catch (e) {
+      const { logger } = new Logger("Observer");
+      logger.error(`Service error for ${workerData.service}: ${e.message}`);
+      logger.close();
+    }
   }
 }
