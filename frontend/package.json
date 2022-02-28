@@ -1,6 +1,6 @@
 {
   "name": "system-bridge-frontend",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "A bridge for your systems",
   "private": true,
   "author": {
@@ -29,7 +29,7 @@
     "@fontsource/roboto": "4.5.3",
     "@mdi/js": "6.5.95",
     "@mdi/react": "1.5.0",
-    "@mui/icons-material": "5.4.2",
+    "@mui/icons-material": "5.4.4",
     "@mui/lab": "5.0.0-alpha.70",
     "@mui/material": "5.4.3",
     "@mui/styles": "5.4.2",
