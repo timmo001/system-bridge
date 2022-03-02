@@ -6012,10 +6012,10 @@ system-bridge-windows-sensors@1.2.5:
   dependencies:
     execa "5.1.1"
 
-systeminformation@5.11.5:
-  version "5.11.5"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.11.5.tgz#0262c1e892ef6925330f11d401cee8df47eea805"
-  integrity sha512-AtJreEPwOAnMstMRtVbQwq8V+dOgOJa8fqzjXjrb46JnVIqrRHRP6+L8VU4WvDbPgdRHA7Nr0l6jH42dmGoACQ==
+systeminformation@5.11.6:
+  version "5.11.6"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.11.6.tgz#8624cbb2e95e6fa98a4ebb0d10759427c0e88144"
+  integrity sha512-7KBXgdnIDxABQ93w+GrPSrK/pup73+fM09VGka4A/+FhgzdlRY0JNGGDFmV8BHnFuzP9zwlI3n64yDbp7emasQ==
 
 table@^6.0.9:
   version "6.8.0"
