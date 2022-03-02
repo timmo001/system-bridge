@@ -58,7 +58,7 @@
     "@nestjs/common": "8.3.1",
     "@nestjs/core": "8.3.1",
     "@nestjs/platform-express": "8.3.1",
-    "@nestjs/platform-ws": "8.3.1",
+    "@nestjs/platform-ws": "8.4.0",
     "@nestjs/swagger": "5.2.0",
     "@nestjs/typeorm": "8.0.3",
     "@nestjs/websockets": "8.3.1",
