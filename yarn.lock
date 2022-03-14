@@ -716,10 +716,10 @@
   dependencies:
     uuid "8.3.2"
 
-"@nestjs/websockets@8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.4.0.tgz#3508e58e2ac44b5f155cff6614128d404a9c4abe"
-  integrity sha512-Sni9B9j4PeVnXKZHBys4pfCpHjc3Y6AMeM6uMsYnSZXyC9/YR4MsL3tKy251BixfVQ5S0U9UegSkj3PSaOC7Tw==
+"@nestjs/websockets@8.4.1":
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-8.4.1.tgz#d6f6e110c43ac02873cdfcfd5e177fd26ce11cd9"
+  integrity sha512-6ozRqLZR87iyKHmiFf4JoslWTy4bSAE+mI19OrRyfYbhpXkNLxe/G/vtJ8bXFJWgPFKY7HjfiFFevZ71nvt3IA==
   dependencies:
     iterare "1.2.1"
     object-hash "3.0.0"
