@@ -58,7 +58,7 @@ export async function getSettings(
   }
   const s: ConfigurationEntity = defaultConfiguration;
   Object.keys(s).forEach((sectionKey: string) => {
-    Object.keys(s[sectionKey].items).forEach((itemKey: string) => {
+    Object.keys(s[sectionKey].items).forEach(async (itemKey: string) => {
       const settingValue = response.data.find(({ key }: Setting) => {
         const keys = key.split("-");
         return keys[0] === sectionKey && keys[1] === itemKey;
@@ -72,18 +72,21 @@ export async function getSettings(
           ? Number(value)
           : value;
       if (!settingValue)
-        axios.post<Setting>(
-          `http://${query.apiHost || window.location.hostname}:${
+        try {
+          const url = `http://${query.apiHost || window.location.hostname}:${
             query.apiPort || 9170
-          }/settings`,
-          {
+          }/settings`;
+          const data = {
             key: `${sectionKey}-${itemKey}`,
             value: String(s[sectionKey].items[itemKey].defaultValue),
-          },
-          {
+          };
+          console.log("Create setting:", { url, data });
+          await axios.post<Setting>(url, data, {
             headers: { "api-key": query.apiKey as string },
-          }
-        );
+          });
+        } catch (e) {
+          console.error(e);
+        }
     });
   });
   return s;

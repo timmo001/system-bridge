@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { red } from "@mui/material/colors";
 import { useRouter } from "next/dist/client/router";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import createStyles from "@mui/styles/createStyles";
 import makeStyles from "@mui/styles/makeStyles";
 
@@ -93,13 +93,23 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       const url = `http://${query.apiHost || window.location.hostname}:${
         query.apiPort || 9170
       }/bridges`;
-      const response = props.bridgeEdit.edit
-        ? await axios.put<Partial<Bridge>>(`${url}/${bridge.key}`, bridgeData, {
-            headers: { "api-key": query.apiKey as string },
-          })
-        : await axios.post<Partial<Bridge>>(url, bridgeData, {
-            headers: { "api-key": query.apiKey as string },
-          });
+      console.log("Save:", { url, bridgeData });
+      let response: AxiosResponse<Partial<Bridge>, any>;
+      try {
+        response = props.bridgeEdit.edit
+          ? await axios.put<Partial<Bridge>>(
+              `${url}/${bridge.key}`,
+              bridgeData,
+              {
+                headers: { "api-key": query.apiKey as string },
+              }
+            )
+          : await axios.post<Partial<Bridge>>(url, bridgeData, {
+              headers: { "api-key": query.apiKey as string },
+            });
+      } catch (e) {
+        console.error(e);
+      }
       if (response && response.status < 400) props.handleClose();
       else setTestingMessage({ text: "Failed to save bridge", error: true });
     }
