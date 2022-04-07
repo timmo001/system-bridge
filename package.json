@@ -64,7 +64,7 @@
     "@nestjs/websockets": "8.4.3",
     "auto-launch": "5.0.5",
     "axios": "0.26.1",
-    "better-sqlite3": "7.5.0",
+    "better-sqlite3": "7.5.1",
     "dotenv": "16.0.0",
     "execa": "5.1.1",
     "helmet": "5.0.2",
