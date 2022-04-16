@@ -5113,10 +5113,10 @@ pkg@5.6.0:
     stream-meter "^1.0.4"
     tslib "2.3.1"
 
-platform-folders@0.5.4:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/platform-folders/-/platform-folders-0.5.4.tgz#517673a9ce0ad2a7a8863878fdaea85e1b1a42c0"
-  integrity sha512-xF0qK+YP+h4y8ZqWIWhaHEzgVNZO+N1PKApz9qNif1xtw/MIKEiHZ5qyx9WiSCPgicj831xGlUq7xyUyHdXXZQ==
+platform-folders@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/platform-folders/-/platform-folders-0.6.0.tgz#9841351716a70d79d5f84f7e0c096bd426b4c259"
+  integrity sha512-CzaJGN1cbL6kwkge7zM7VbXr/L0Qjkg2Z4IzcprziHHSw8y73oORfB9pMLwjAIhb8JcWUemmWvTXAXvc5hnVlg==
   dependencies:
     bindings "^1.5.0"
 
