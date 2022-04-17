@@ -77,7 +77,7 @@ class Main(Base):
 
     def callback_exit_application(self) -> None:
         """Exit the application"""
-        self.logger.info("Exiting application..")
+        self._logger.info("Exiting application..")
         asyncio.run(self.exit_backend())
         self.application.quit()
 
@@ -89,7 +89,7 @@ class Main(Base):
         height: int = 720,
     ) -> None:
         """Show the main window"""
-        self.logger.info("Showing window: %s", path)
+        self._logger.info("Showing window: %s", path)
 
         self.main_window.hide()
         self.main_window.setup(path)
@@ -131,7 +131,7 @@ class Main(Base):
             ClientResponseError,
             OSError,
         ) as exception:
-            self.logger.error(exception)
-            self.logger.info("Retrying in 5 seconds..")
+            self._logger.error(exception)
+            self._logger.info("Retrying in 5 seconds..")
             await asyncio.sleep(5)
             await self.setup_bridge()

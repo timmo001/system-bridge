@@ -47,5 +47,5 @@ class MainWindow(Base, QFrame):
                     "wsPort": self.args.websocket_port,
                 })}"""
         )
-        self.logger.debug("Opening url: %s", url)
+        self._logger.debug("Opening url: %s", url)
         self.browser.load(url)

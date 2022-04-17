@@ -173,3 +173,4 @@ junit.xml
 *.dmg
 *.app
 .qt*
+test.json
