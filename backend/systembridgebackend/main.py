@@ -78,7 +78,7 @@ class Main(Base):
             self._database.write("cpu", f"usage_{count}", v)
             count += 1
 
-        self._logger.info(self._database.read_table("cpu"))
+        self._logger.info(self._database.read_table("cpu").to_json(orient="records"))
 
     def _call_all_public_functions(self, x) -> None:
         """Call all functions"""
