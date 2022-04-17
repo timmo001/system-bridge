@@ -4,7 +4,7 @@
 
 ## Related Issues
 
-> ([Github link][autolink-references] to related issues or pull requests)
+> (GitHub link to related issues or pull requests)
 
 ## Checklist
 
@@ -15,5 +15,3 @@
 <!-- All other checks are handled by the CI server as preflight checks.
      Make sure to fix any errors found.
      Your PR will not be merged if fixable errors are not resolved -->
-
-[autolink-references]: https://help.github.com/articles/autolinked-references-and-urls/
