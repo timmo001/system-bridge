@@ -4,6 +4,7 @@ import asyncio
 from systembridgebackend import Base
 from systembridgebackend.database import Database
 from systembridgebackend.modules.cpu.update import CPUUpdate
+from systembridgebackend.modules.memory.update import MemoryUpdate
 from systembridgebackend.server import Server
 
 
@@ -30,5 +31,10 @@ class Main(Base):
         if not self._database.connected:
             self._database.connect()
 
-        self._loop.create_task(CPUUpdate(self._database).update_all_data())
-        # self._logger.info(self._database.read_table("cpu").to_json(orient="records"))
+        classes = [
+            CPUUpdate(self._database),
+            MemoryUpdate(self._database),
+        ]
+
+        for cls in classes:
+            self._loop.run_until_complete(cls.update_all_data())
