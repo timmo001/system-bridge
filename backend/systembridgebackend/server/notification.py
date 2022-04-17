@@ -17,8 +17,13 @@ async def handler_notification(
     notification.notify(
         title=request.json["title"] if "title" in request.json else "",
         message=request.json["message"],
-        app_icon="./resources/system-bridge-circle.ico",
-        timeout=10,
+        app_name=request.json["app_name"]
+        if "app_name" in request.json
+        else "System Bridge",
+        app_icon=request.json["icon"]
+        if "icon" in request.json
+        else "./resources/system-bridge-circle.ico",
+        timeout=request.json["timeout"] if "timeout" in request.json else 10,
     )
 
     return json(
