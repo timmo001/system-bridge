@@ -18,18 +18,24 @@ class SensorsUpdate(ModuleUpdateBase):
 
     async def update_battery(self) -> None:
         """Update Battery Sensors"""
-        for key, value in self._sensors.battery()._asdict().items():
-            self._database.write("sensors", f"battery_{key}", value)
+        data = self._sensors.battery()
+        if data:
+            for key, value in data._asdict().items():
+                self._database.write("sensors", f"battery_{key}", value)
 
     async def update_fans(self) -> None:
         """Update Fan Sensors"""
-        for key, value in self._sensors.fans()._asdict().items():
-            self._database.write("sensors", f"fans_{key}", value)
+        data = self._sensors.fans()
+        if data:
+            for key, value in data._asdict().items():
+                self._database.write("sensors", f"fans_{key}", value)
 
     async def update_temperatures(self) -> None:
         """Update Temperature Sensors"""
-        for key, value in self._sensors.temperatures()._asdict().items():
-            self._database.write("sensors", f"temperatures_{key}", value)
+        data = self._sensors.temperatures()
+        if data:
+            for key, value in data._asdict().items():
+                self._database.write("sensors", f"temperatures_{key}", value)
 
     async def update_all_data(self) -> None:
         """Update data"""

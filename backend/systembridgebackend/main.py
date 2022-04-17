@@ -7,6 +7,7 @@ from systembridgebackend.modules.cpu.update import CPUUpdate
 from systembridgebackend.modules.disk.update import DiskUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
 from systembridgebackend.modules.network.update import NetworkUpdate
+from systembridgebackend.modules.sensors.update import SensorsUpdate
 from systembridgebackend.modules.system.update import SystemUpdate
 from systembridgebackend.server import Server
 
@@ -39,6 +40,7 @@ class Main(Base):
             DiskUpdate(self._database),
             MemoryUpdate(self._database),
             NetworkUpdate(self._database),
+            SensorsUpdate(self._database),
             SystemUpdate(self._database),
         ]
 
