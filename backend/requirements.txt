@@ -1,2 +1,3 @@
+psutil==5.9.0
 pyinstaller==4.10
 systembridge==2.3.1
