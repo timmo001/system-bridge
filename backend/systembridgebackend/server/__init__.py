@@ -5,6 +5,7 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 
 from systembridgebackend import Base
+from systembridgebackend.server.open import handler_open
 
 
 class ServerBase(Base):
@@ -30,13 +31,13 @@ class Server(ServerBase):
         super().__init__(database)
         self._server = Sanic("SystemBridge")
 
-        async def handler_all(
+        async def handler_data_all(
             request: Request,
             table: str,
         ) -> HTTPResponse:
             return json(self._database.table_data_to_ordered_dict(table))
 
-        async def handler_key(
+        async def handler_data_by_key(
             request: Request,
             table: str,
             key: str,
@@ -51,10 +52,13 @@ class Server(ServerBase):
                 }
             )
 
-        self._server.add_route(handler_all, "/api/data/<table:str>", methods=["GET"])
         self._server.add_route(
-            handler_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
+            handler_data_all, "/api/data/<table:str>", methods=["GET"]
         )
+        self._server.add_route(
+            handler_data_by_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
+        )
+        self._server.add_route(handler_open, "/api/open", methods=["POST"])
 
         # self._server.static("/", "./frontend/dist/")
         # self._server.add_websocket_route(websocket, "/api/websocket")
