@@ -2,19 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "start:dev",
-      "problemMatcher": [],
-      "label": "Node.js: start:dev"
-    },
-    {
-      "type": "npm",
-      "script": "build",
-      "group": "build",
-      "problemMatcher": [],
-      "label": "Node.js: build"
-    },
-    {
       "type": "shell",
       "label": "Python: pip install",
       "command": "pip install .",
