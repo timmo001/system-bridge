@@ -29,9 +29,7 @@ class Server(ServerBase):
         super().__init__(database)
         self._server = Sanic("SystemBridge")
 
-        cpu = CPU(self._database)
-
-        self._server.add_route(cpu.all, "/api/cpu", methods=["GET"])
+        CPU(self._database, self._server)
 
         # self._server.static("/", "./frontend/dist/")
         # self._server.add_websocket_route(websocket, "/api/websocket")
