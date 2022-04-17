@@ -6,6 +6,7 @@ from systembridgebackend.database import Database
 from systembridgebackend.modules.cpu.update import CPUUpdate
 from systembridgebackend.modules.disk.update import DiskUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
+from systembridgebackend.modules.network.update import NetworkUpdate
 from systembridgebackend.server import Server
 
 
@@ -34,8 +35,9 @@ class Main(Base):
 
         classes = [
             CPUUpdate(self._database),
-            MemoryUpdate(self._database),
             DiskUpdate(self._database),
+            MemoryUpdate(self._database),
+            NetworkUpdate(self._database),
         ]
 
         for cls in classes:
