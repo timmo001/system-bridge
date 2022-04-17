@@ -1,4 +1,4 @@
-"""System Bridge: Main class"""
+"""System Bridge: Update CPU"""
 from sqlite3 import Connection
 
 from systembridgebackend.modules import ModuleUpdateBase

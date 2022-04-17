@@ -1,4 +1,4 @@
-"""System Bridge: Main class"""
+"""System Bridge: Update Network"""
 from sqlite3 import Connection
 
 from systembridgebackend.modules import ModuleUpdateBase
