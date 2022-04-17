@@ -7,7 +7,7 @@
       "request": "launch",
       "console": "integratedTerminal",
       "preLaunchTask": "Python: pip install",
-      "program": "gui/__init__.py",
+      "program": "backend/__init__.py",
       "args": [
         "--host",
         "localhost",
