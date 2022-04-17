@@ -1,4 +1,5 @@
 """System Bridge: Database"""
+from collections import OrderedDict
 from pandas import DataFrame, read_sql_query
 from sqlite3 import Connection, connect
 from time import time
@@ -106,3 +107,24 @@ class Database(Base):
                 "            ", ""
             ),
         )
+
+    def table_data_to_ordered_dict(
+        self,
+        table_name: str,
+    ) -> OrderedDict:
+        """Convert table to OrderedDict"""
+        data_dict = self.read_table(table_name).to_dict(orient="records")
+        data = {"last_updated": {}}
+        for v in data_dict:
+            data = {
+                **data,
+                v["key"]: v["value"],
+                "last_updated": {
+                    **data["last_updated"],
+                    v["key"]: v["timestamp"],
+                },
+            }
+        output = OrderedDict(data)
+        output.move_to_end("last_updated", last=True)
+
+        return output

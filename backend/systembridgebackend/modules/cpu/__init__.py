@@ -13,7 +13,7 @@ from systembridgebackend import Base
 
 
 class CPU(Base):
-    """CPU: Get CPU usage"""
+    """CPU"""
 
     def count(self) -> int:
         """CPU count"""

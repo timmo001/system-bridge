@@ -1,4 +1,5 @@
 pandas==1.4.2
 psutil==5.9.0
 pyinstaller==4.10
-systembridge==2.3.1
+sanic==22.3.1
+sanic-ext==22.3.0
