@@ -3,7 +3,7 @@ from pandas import DataFrame, read_sql_query
 from sqlite3 import Connection, connect
 from time import time
 
-from systembridgebackend.base import Base
+from systembridgebackend import Base
 from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
 
 

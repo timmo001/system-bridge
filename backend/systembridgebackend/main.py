@@ -1,7 +1,7 @@
 """System Bridge: Main class"""
 import asyncio
 
-from systembridgebackend.base import Base
+from systembridgebackend import Base
 from systembridgebackend.database import Database
 from systembridgebackend.modules.cpu.update import CPUUpdate
 

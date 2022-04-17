@@ -9,7 +9,7 @@ from psutil import (
 )
 from psutil._common import scpufreq, scpustats, pcputimes
 
-from systembridgebackend.base import Base
+from systembridgebackend import Base
 
 
 class CPU(Base):
