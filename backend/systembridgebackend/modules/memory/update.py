@@ -16,17 +16,17 @@ class MemoryUpdate(ModuleUpdateBase):
         super().__init__(database, "memory")
         self._memory = Memory()
 
-    async def update_swap_memory(self) -> None:
+    async def update_swap(self) -> None:
         """Update Swap Memory"""
-        for key, value in self._memory.swap_memory()._asdict().items():
+        for key, value in self._memory.swap()._asdict().items():
             self._database.write("memory", f"swap_{key}", value)
 
-    async def update_virtual_memory(self) -> None:
+    async def update_virtual(self) -> None:
         """Update Virtual Memory"""
-        for key, value in self._memory.virtual_memory()._asdict().items():
+        for key, value in self._memory.virtual()._asdict().items():
             self._database.write("memory", f"virtual_{key}", value)
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_swap_memory()
-        await self.update_virtual_memory()
+        await self.update_swap()
+        await self.update_virtual()

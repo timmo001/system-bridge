@@ -12,10 +12,10 @@ from systembridgebackend import Base
 class Memory(Base):
     """Memory"""
 
-    def swap_memory(self) -> sswap:
+    def swap(self) -> sswap:
         """Swap memory"""
         return swap_memory()
 
-    def virtual_memory(self) -> namedtuple:  # svmem:
+    def virtual(self) -> namedtuple:  # svmem:
         """Virtual memory"""
         return virtual_memory()
