@@ -1,3 +1,4 @@
+import os
 from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
@@ -22,7 +23,9 @@ async def handler_notification(
         else "System Bridge",
         app_icon=request.json["icon"]
         if "icon" in request.json
-        else "./resources/system-bridge-circle.ico",
+        else "./resources/system-bridge-circle.ico"
+        if os.name == "nt"
+        else "./resources/system-bridge-circle.png",
         timeout=request.json["timeout"] if "timeout" in request.json else 10,
     )
 
