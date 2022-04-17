@@ -4,7 +4,7 @@
 
 A bridge for your systems.
 
-![Logo](./public/system-bridge-rect.png)
+![Logo](./resources/system-bridge-rect.png)
 
 ## Features
 
@@ -49,71 +49,7 @@ links below:
 
 ## Developing
 
-### Dependencies
-
-To make changes to the application, you will need:
-
-- Node.js
-- Yarn
-
-### Optional Dependencies
-
-#### MDNS
-
-You will only need this if you want to be able to discover the app over mdns.
-The app will warn you if there are missing dependencies.
-
-##### MDNS - Windows
-
-You will need the "Bonjour SDK for Windows" or a related SDK in your system.
-
-##### MDNS - Linux
-
-###### Ubuntu/Debian/APT
-
-```bash
-sudo apt install \
-    libavahi-compat-libdnssd-dev \
-    libpng++-dev \
-    libxext-dev \
-    libxss-dev \
-    libxtst-dev
-```
-
-###### Fedora/DNF/RPM
-
-```bash
-sudo dnf install \
-    avahi-compat-libdns_sd-devel
-    libpng-devel \
-    libxext-devel \
-    libxss-devel \
-    libxtst-devel
-```
-
-### Setup
-
-```bash
-yarn install:all
-```
-
-### Running
-
-```bash
-yarn start:dev
-```
-
-or:
-
-```bash
-yarn start
-```
-
-### Package
-
-```bash
-yarn package
-```
+TBD
 
 ## Publishing
 
