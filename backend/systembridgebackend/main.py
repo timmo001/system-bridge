@@ -45,28 +45,26 @@ class Main(Base):
 
         cpu = CPU()
         self._database.write("cpu", "count", cpu.count())
-        for key, value in self._named_tuple_to_json(cpu.freq()).items():
+        for key, value in cpu.freq()._asdict().items():
             self._database.write("cpu", f"frequency_{key}", value)
         count = 0
-        for d in [self._named_tuple_to_json(freq) for freq in cpu.freq_per_cpu()]:
+        for d in [freq._asdict() for freq in cpu.freq_per_cpu()]:
             for key, value in d.items():
                 self._database.write("cpu", f"frequency_{count}_{key}", value)
             count += 1
-        for key, value in self._named_tuple_to_json(cpu.stats()).items():
+        for key, value in cpu.stats()._asdict().items():
             self._database.write("cpu", f"stats_{key}", value)
-        for key, value in self._named_tuple_to_json(cpu.times()).items():
+        for key, value in cpu.times()._asdict().items():
             self._database.write("cpu", f"times_{key}", value)
-        for key, value in self._named_tuple_to_json(cpu.times_percent()).items():
+        for key, value in cpu.times_percent()._asdict().items():
             self._database.write("cpu", f"times_percent_{key}", value)
         count = 0
-        for d in [self._named_tuple_to_json(freq) for freq in cpu.times_per_cpu()]:
+        for d in [freq._asdict() for freq in cpu.times_per_cpu()]:
             for key, value in d.items():
                 self._database.write("cpu", f"times_per_cpu_{count}_{key}", value)
             count += 1
         count = 0
-        for d in [
-            self._named_tuple_to_json(freq) for freq in cpu.times_per_cpu_percent()
-        ]:
+        for d in [freq._asdict() for freq in cpu.times_per_cpu_percent()]:
             for key, value in d.items():
                 self._database.write(
                     "cpu", f"times_per_cpu_percent_{count}_{key}", value
@@ -79,18 +77,3 @@ class Main(Base):
             count += 1
 
         self._logger.info(self._database.read_table("cpu").to_json(orient="records"))
-
-    def _call_all_public_functions(self, x) -> None:
-        """Call all functions"""
-        public_method_names = [
-            method
-            for method in dir(x)
-            if callable(getattr(x, method))
-            if not method.startswith("_")
-        ]  # 'private' methods start from _
-        for method in public_method_names:
-            self._logger.info("%s: %s", method, getattr(x, method)())
-
-    def _named_tuple_to_json(self, x) -> dict:
-        """Convert named tuple to JSON"""
-        return x._asdict()
