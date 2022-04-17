@@ -12,10 +12,10 @@ with io.open("../version.txt", encoding="utf-8") as f:
     version = f.read().splitlines()[0]
 
 setup(
-    name="systembridgebackend",
+    name="systembridgegui",
     version=version,
-    description="System Bridge Backend",
-    keywords="system bridge backend",
+    description="System Bridge GUI",
+    keywords="system bridge gui",
     author="Aidan Timson (Timmo)",
     author_email="contact@timmo.xyz",
     license="MIT",
