@@ -1,4 +1,4 @@
-"""System Bridge GUI: Base class"""
+"""System Bridge: Base class"""
 from argparse import Namespace
 import logging
 

@@ -1,4 +1,4 @@
-"""System Bridge GUI"""
+"""System Bridge"""
 from argparse import ArgumentParser
 import logging
 

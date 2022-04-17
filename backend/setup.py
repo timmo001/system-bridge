@@ -42,8 +42,8 @@ print(version)
 setup(
     name="systembridgegui",
     version=version,
-    description="System Bridge GUI",
-    keywords="system bridge gui",
+    description="System Bridge",
+    keywords="system bridge",
     author="Aidan Timson (Timmo)",
     author_email="contact@timmo.xyz",
     license="MIT",

@@ -6,7 +6,7 @@
       "label": "Python: pip install",
       "command": "pip install .",
       "options": {
-        "cwd": "gui"
+        "cwd": "backend"
       }
     }
   ]

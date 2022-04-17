@@ -8,20 +8,7 @@
       "console": "integratedTerminal",
       "preLaunchTask": "Python: pip install",
       "program": "backend/__init__.py",
-      "args": [
-        "--host",
-        "localhost",
-        "--api-key",
-        "${env:SB_API_KEY}",
-        "--api-port",
-        "9170",
-        "--frontend-port",
-        "3000",
-        "--log-level",
-        "debug",
-        "--websocket-port",
-        "9172"
-      ]
+      "args": []
     }
   ]
 }

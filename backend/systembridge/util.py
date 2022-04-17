@@ -1,4 +1,4 @@
-"""System Bridge GUI: Util"""
+"""System Bridge: Util"""
 import asyncio
 
 

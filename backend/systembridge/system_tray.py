@@ -1,4 +1,4 @@
-"""System Bridge GUI: System Tray"""
+"""System Bridge: System Tray"""
 from argparse import Namespace
 from collections.abc import Callable
 from typing import Optional

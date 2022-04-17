@@ -1,4 +1,4 @@
-"""System Bridge GUI: Main class"""
+"""System Bridge: Main class"""
 from argparse import Namespace
 import asyncio
 import sys
