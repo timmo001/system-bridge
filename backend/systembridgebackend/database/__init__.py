@@ -23,11 +23,18 @@ class Database(Base):
     def _execute(
         self,
         sql: str,
-        params: list = None,
     ) -> None:
         """Execute SQL"""
-        if params is None:
-            params = []
+        self._logger.debug(f"Executing SQL: {sql}")
+        self._connection.execute(sql)
+        self._connection.commit()
+
+    def _execute_with_params(
+        self,
+        sql: str,
+        params: list[any],
+    ) -> None:
+        """Execute SQL"""
         self._logger.debug(f"Executing SQL: {sql}\n{params}")
         self._connection.execute(sql, params)
         self._connection.commit()
