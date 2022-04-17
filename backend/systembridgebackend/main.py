@@ -3,6 +3,7 @@ import asyncio
 
 from systembridgebackend import Base
 from systembridgebackend.database import Database
+from systembridgebackend.modules.battery.update import BatteryUpdate
 from systembridgebackend.modules.cpu.update import CPUUpdate
 from systembridgebackend.modules.disk.update import DiskUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
@@ -36,6 +37,7 @@ class Main(Base):
             self._database.connect()
 
         classes = [
+            BatteryUpdate(self._database),
             CPUUpdate(self._database),
             DiskUpdate(self._database),
             MemoryUpdate(self._database),
