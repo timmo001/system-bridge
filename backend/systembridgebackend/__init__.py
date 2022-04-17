@@ -1,6 +1,7 @@
 """System Bridge"""
 import logging
 
+
 class Base:
     """Base"""
 

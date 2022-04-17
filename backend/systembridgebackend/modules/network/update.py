@@ -20,14 +20,14 @@ class NetworkUpdate(ModuleUpdateBase):
         """Update stats"""
         for key, value in self._network.stats().items():
             for subkey, subvalue in value._asdict().items():
-                self._database.write("network", f"stat_{key.replace(' ', '')}_{subkey}", subvalue)
+                self._database.write(
+                    "network", f"stat_{key.replace(' ', '')}_{subkey}", subvalue
+                )
 
     async def update_io_counters(self) -> None:
         """Update IO counters"""
         for key, value in self._network.io_counters()._asdict().items():
-            self._database.write(
-                "network", f"io_counters_{key}", value
-            )
+            self._database.write("network", f"io_counters_{key}", value)
 
     async def update_all_data(self) -> None:
         """Update data"""
