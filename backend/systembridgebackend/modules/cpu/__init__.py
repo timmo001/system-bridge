@@ -15,10 +15,6 @@ from systembridgebackend.base import Base
 class CPU(Base):
     """CPU: Get CPU usage"""
 
-    def __init__(self) -> None:
-        """Initialize"""
-        super().__init__()
-
     def count(self) -> int:
         """CPU count"""
         return cpu_count()
