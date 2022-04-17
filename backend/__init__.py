@@ -2,7 +2,7 @@
 from argparse import ArgumentParser
 import logging
 
-from systembridgegui.main import Main
+from systembridgebackend.main import Main
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
