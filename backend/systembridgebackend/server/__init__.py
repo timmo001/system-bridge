@@ -51,9 +51,9 @@ class Server(ServerBase):
                 }
             )
 
-        self._server.add_route(handler_all, "/api/<table:str>", methods=["GET"])
+        self._server.add_route(handler_all, "/api/data/<table:str>", methods=["GET"])
         self._server.add_route(
-            handler_key, "/api/<table:str>/<key:str>", methods=["GET"]
+            handler_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
         )
 
         # self._server.static("/", "./frontend/dist/")
