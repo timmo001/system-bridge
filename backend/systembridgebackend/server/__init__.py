@@ -60,7 +60,9 @@ class Server(ServerBase):
             handler_data_by_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
         )
         self._server.add_route(handler_open, "/api/open", methods=["POST"])
-        self._server.add_route(handler_notification, "/api/notification", methods=["POST"])
+        self._server.add_route(
+            handler_notification, "/api/notification", methods=["POST"]
+        )
 
         # self._server.static("/", "./frontend/dist/")
         # self._server.add_websocket_route(websocket, "/api/websocket")
