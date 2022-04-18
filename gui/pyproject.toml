@@ -65,11 +65,6 @@ good-names = [
 # inconsistent-return-statements - doesn't handle raise
 # too-many-ancestors - it's too strict.
 # wrong-import-order - isort guards this
-# consider-using-f-string - str.format sometimes more readable
-# ---
-# Enable once current issues are fixed:
-# consider-using-namedtuple-or-dataclass (Pylint CodeStyle extension)
-# consider-using-assignment-expr (Pylint CodeStyle extension)
 disable = [
     "format",
     "abstract-class-little-used",
@@ -92,10 +87,6 @@ disable = [
     "too-many-boolean-expressions",
     "unused-argument",
     "wrong-import-order",
-    "consider-using-f-string",
-    "consider-using-namedtuple-or-dataclass",
-    "consider-using-assignment-expr",
-    "no-name-in-module",
 ]
 enable = [
     #"useless-suppression",  # temporarily every now and then to clean them up
