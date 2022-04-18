@@ -7,7 +7,8 @@
       "request": "launch",
       "console": "integratedTerminal",
       "preLaunchTask": "Python: pip install",
-      "program": "backend/__init__.py",
+      "program": "__init__.py",
+      "cwd": "${workspaceFolder}/backend",
       "args": []
     }
   ]
