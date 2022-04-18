@@ -1,7 +1,7 @@
 """System Bridge: Update Battery"""
 from sqlite3 import Connection
 
-from systembridgebackend.modules import ModuleUpdateBase
+from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.battery import Battery
 
 

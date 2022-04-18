@@ -1,7 +1,7 @@
 """System Bridge: Update Memory"""
 from sqlite3 import Connection
 
-from systembridgebackend.modules import ModuleUpdateBase
+from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.memory import Memory
 
 
