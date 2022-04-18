@@ -1,11 +1,14 @@
 """System Bridge: Server"""
+from datetime import timedelta
 from os import walk
 from sqlite3 import Connection
 from sanic import Sanic
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+from sanic_scheduler import SanicScheduler, task
 
 from systembridgebackend import Base
+from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
@@ -41,9 +44,16 @@ class Server(ServerBase):
             keys=["abc123"],
         )
 
+        scheduler = SanicScheduler(self._server, utc=True)
+        update = Update(self._database)
+
         for _, dirs, _ in walk("./backend/systembridgebackend/modules"):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
+
+        @task(timedelta(seconds=30))
+        async def update_data(_) -> None:
+            await update.update_data()
 
         @auth.key_required
         async def handler_data_all(
@@ -77,6 +87,7 @@ class Server(ServerBase):
         async def handler_generic(request: Request, function) -> HTTPResponse:
             return await function(request)
 
+        self._logger.info(scheduler.task_info())
         self._server.add_route(
             handler_data_all,
             "/api/data/<table:str>",
@@ -103,9 +114,10 @@ class Server(ServerBase):
 
     def start(self) -> None:
         """Start Server"""
+        self._logger.info("Starting server")
         self._server.run(
             host="0.0.0.0",
             port=9170,
-            auto_reload=True,
-            debug=False,
+            debug=True,
+            motd=False,
         )

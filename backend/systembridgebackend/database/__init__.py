@@ -26,6 +26,8 @@ class Database(Base):
         sql: str,
     ) -> None:
         """Execute SQL"""
+        if not self.connected:
+            self.connect()
         self._logger.debug(f"Executing SQL: {sql}")
         self._connection.execute(sql)
         self._connection.commit()
@@ -71,6 +73,8 @@ class Database(Base):
         query: str,
     ) -> DataFrame:
         """Read SQL"""
+        if not self.connected:
+            self.connect()
         self._logger.debug(f"Reading SQL: {query}")
         return read_sql_query(query, self._connection)
 

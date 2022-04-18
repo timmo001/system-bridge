@@ -3,4 +3,5 @@ plyer==2.0.0
 psutil==5.9.0
 pyinstaller==4.10
 sanic-ext==22.3.0
+sanic-scheduler==1.0.7
 sanic==22.3.1
