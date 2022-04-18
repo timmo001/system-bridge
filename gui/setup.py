@@ -17,8 +17,10 @@ with io.open("requirements.txt", encoding="utf-8") as f:
 
 # Get version from version.txt
 path = find("version.txt", "../")
+print(path)
 if not path:
     path = find("version.txt", "./")
+print(path)
 with io.open(path, encoding="utf-8") as f:
     version = f.read().splitlines()[0]
 
