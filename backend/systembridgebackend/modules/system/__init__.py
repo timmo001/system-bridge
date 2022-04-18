@@ -1,10 +1,7 @@
 """System Bridge: System"""
 import os
-from psutil import (
-    boot_time,
-    getloadavg,
-    users,
-)
+
+from psutil import boot_time, getloadavg, users
 from psutil._common import suser
 
 from systembridgebackend import Base

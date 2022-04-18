@@ -1,7 +1,8 @@
 from os import startfile
+from webbrowser import open_new_tab
+
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
-from webbrowser import open_new_tab
 
 
 async def handler_open(

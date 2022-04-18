@@ -1,9 +1,7 @@
 """System Bridge: Memory"""
 from collections import namedtuple
-from psutil import (
-    swap_memory,
-    virtual_memory,
-)
+
+from psutil import swap_memory, virtual_memory
 from psutil._common import sswap
 
 from systembridgebackend import Base

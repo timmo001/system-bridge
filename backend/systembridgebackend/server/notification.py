@@ -1,4 +1,5 @@
 import os
+
 from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json

@@ -1,5 +1,4 @@
 import asyncio
-
 from sqlite3 import Connection
 
 from systembridgebackend import Base

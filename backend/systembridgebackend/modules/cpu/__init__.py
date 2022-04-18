@@ -4,10 +4,10 @@ from psutil import (
     cpu_freq,
     cpu_percent,
     cpu_stats,
-    cpu_times_percent,
     cpu_times,
+    cpu_times_percent,
 )
-from psutil._common import scpufreq, scpustats, pcputimes
+from psutil._common import pcputimes, scpufreq, scpustats
 
 from systembridgebackend import Base
 
