@@ -26,6 +26,10 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     secrets:
       CODE_PATH: gui
+  lint-eslint-frontend:
+    uses: timmo001/workflows/.github/workflows/lint-eslint.yml@master
+    secrets:
+      CODE_PATH: frontend
   lint-jsonlint:
     uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@master
   lint-markdown-links:
