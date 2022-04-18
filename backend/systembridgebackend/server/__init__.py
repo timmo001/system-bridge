@@ -6,6 +6,7 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 
 from systembridgebackend import Base
+from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 
@@ -33,10 +34,17 @@ class Server(ServerBase):
         super().__init__(database)
         self._server = Sanic("SystemBridge")
 
+        auth = ApiKeyAuthentication(
+            app=self._server,
+            header="api-key",
+            keys=["abc123"],
+        )
+
         for _, dirs, _ in walk("./backend/systembridgebackend/modules"):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 
+        @auth.key_required
         async def handler_data_all(
             request: Request,
             table: str,
@@ -45,6 +53,7 @@ class Server(ServerBase):
                 return json({"message": f"Data module {table} not found"}, status=404)
             return json(self._database.table_data_to_ordered_dict(table))
 
+        @auth.key_required
         async def handler_data_by_key(
             request: Request,
             table: str,
