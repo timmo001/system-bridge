@@ -16,7 +16,10 @@ with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 # Get version from version.txt
-with io.open(find("version.txt", "../"), encoding="utf-8") as f:
+path = find("version.txt", "../")
+if not path:
+    path = find("version.txt", "./")
+with io.open(path, encoding="utf-8") as f:
     version = f.read().splitlines()[0]
 
 setup(
