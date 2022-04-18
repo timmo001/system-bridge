@@ -2,8 +2,8 @@
 from collections import OrderedDict
 from sqlite3 import Connection, connect
 from time import time
-
 from pandas import DataFrame, read_sql_query
+
 from systembridgebackend import Base
 from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
 
