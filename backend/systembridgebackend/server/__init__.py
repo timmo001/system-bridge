@@ -11,6 +11,7 @@ from sanic_scheduler import SanicScheduler, task
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.base import ServerBase
+from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 
@@ -89,6 +90,11 @@ class Server(ServerBase):  # pylint: disable=too-few-public-methods
             handler_data_by_key,
             "/api/data/<table:str>/<key:str>",
             methods=["GET"],
+        )
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_keyboard),
+            "/api/keyboard",
+            methods=["POST"],
         )
         self._server.add_route(
             lambda r: handler_generic(r, handler_notification),
