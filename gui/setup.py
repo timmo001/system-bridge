@@ -6,7 +6,10 @@ from setuptools import find_packages, setup
 
 
 def find(name, path):
+    """Find a file in a directory."""
     for root, _, files in os.walk(path):
+        print(root)
+        print(files)
         if name in files:
             return os.path.join(root, name)
 
