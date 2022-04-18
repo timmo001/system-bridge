@@ -18,10 +18,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-black:
+  lint-black-backend:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     secrets:
       CODE_PATH: backend
+  lint-black-gui:
+    uses: timmo001/workflows/.github/workflows/lint-black.yml@master
+    secrets:
+      CODE_PATH: gui
   lint-jsonlint:
     uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@master
   lint-markdown-links:
@@ -30,9 +34,13 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-markdownlint.yml@master
   lint-prettier:
     uses: timmo001/workflows/.github/workflows/lint-prettier.yml@master
-  lint-pylint:
+  lint-pylint-backend:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
       CODE_PATH: backend
+  lint-pylint-gui:
+    uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
+    secrets:
+      CODE_PATH: gui
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
