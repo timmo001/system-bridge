@@ -1,6 +1,5 @@
 """System Bridge: Battery"""
 from plyer import battery
-
 from systembridgebackend import Base
 
 

@@ -2,7 +2,6 @@
 from functools import wraps
 
 from sanic import Sanic, exceptions
-
 from systembridgebackend import Base
 
 

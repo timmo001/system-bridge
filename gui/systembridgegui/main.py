@@ -1,17 +1,17 @@
 """System Bridge: Main class"""
-from argparse import Namespace
 import asyncio
 import sys
+from argparse import Namespace
 
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication
+import async_timeout
 from aiohttp.client import ClientSession
 from aiohttp.client_exceptions import (
     ClientConnectionError,
     ClientConnectorError,
     ClientResponseError,
 )
-import async_timeout
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
 from systembridge import Bridge, BridgeClient
 from systembridge.exceptions import BridgeException
 

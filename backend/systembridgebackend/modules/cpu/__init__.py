@@ -8,7 +8,6 @@ from psutil import (
     cpu_times_percent,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-
 from systembridgebackend import Base
 
 

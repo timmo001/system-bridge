@@ -1,6 +1,5 @@
 """System Bridge: Sensors"""
 import psutil
-
 from systembridgebackend import Base
 
 

@@ -1,6 +1,6 @@
 """System Bridge: Base class"""
-from argparse import Namespace
 import logging
+from argparse import Namespace
 
 
 class Base:
