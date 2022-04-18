@@ -1,4 +1,4 @@
-"""System Bridge: Module"""
+"""System Bridge: Module Base"""
 from sqlite3 import Connection
 
 from systembridgebackend import Base

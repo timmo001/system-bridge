@@ -28,7 +28,7 @@ class Database(Base):
         """Execute SQL"""
         if not self.connected:
             self.connect()
-        self._logger.debug(f"Executing SQL: {sql}")
+        self._logger.debug("Executing SQL: %s", sql)
         self._connection.execute(sql)
         self._connection.commit()
 
@@ -38,14 +38,16 @@ class Database(Base):
         params: list[any],
     ) -> None:
         """Execute SQL"""
-        self._logger.debug(f"Executing SQL: {sql}\n{params}")
+        self._logger.debug("Executing SQL: %s\n%s", sql, params)
         self._connection.execute(sql, params)
         self._connection.commit()
 
     def connect(self) -> None:
+        """Connect to database"""
         self._connection = connect("systembridge.db")
 
     def close(self) -> None:
+        """Close connection"""
         self._connection.close()
         self._connection = None
 
@@ -75,7 +77,7 @@ class Database(Base):
         """Read SQL"""
         if not self.connected:
             self.connect()
-        self._logger.debug(f"Reading SQL: {query}")
+        self._logger.debug("Reading SQL: %s", query)
         return read_sql_query(query, self._connection)
 
     def create_table(
@@ -84,9 +86,9 @@ class Database(Base):
         columns: list[str, str],
     ) -> None:
         """Create table"""
-        sql = "CREATE TABLE IF NOT EXISTS {} (".format(table_name)
+        sql = f"CREATE TABLE IF NOT EXISTS {table_name} ("
         for column in columns:
-            sql += "{} {},".format(column[0], column[1])
+            sql += f"{column[0]} {column[1]},"
         sql = sql[:-1] + ")"
         self._execute(sql)
 
@@ -103,7 +105,8 @@ class Database(Base):
         self._execute(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
              VALUES ("{key}", "{value}", {timestamp})
-             ON CONFLICT({COLUMN_KEY}) DO UPDATE SET {COLUMN_VALUE} = "{value}", {COLUMN_TIMESTAMP} = {timestamp}
+             ON CONFLICT({COLUMN_KEY}) DO
+             UPDATE SET {COLUMN_VALUE} = "{value}", {COLUMN_TIMESTAMP} = {timestamp}
              WHERE {COLUMN_KEY} = "{key}"
             """.replace(
                 "\n", ""
@@ -119,13 +122,13 @@ class Database(Base):
         """Convert table to OrderedDict"""
         data_dict = self.read_table(table_name).to_dict(orient="records")
         data = {"last_updated": {}}
-        for v in data_dict:
+        for item in data_dict:
             data = {
                 **data,
-                v["key"]: v["value"],
+                item["key"]: item["value"],
                 "last_updated": {
                     **data["last_updated"],
-                    v["key"]: v["timestamp"],
+                    item["key"]: item["timestamp"],
                 },
             }
         output = OrderedDict(data)

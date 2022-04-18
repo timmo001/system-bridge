@@ -1,18 +1,16 @@
-#!/usr/bin/env python
+"""Setup"""
 import io
 import os
-from unittest.mock import patch
 
 from setuptools import find_packages, setup
 
 
-def find(name, path):
+def find(name: str, path: str) -> str:
     """Find a file in a directory."""
     for root, _, files in os.walk(path):
-        print(root)
-        print(files)
         if name in files:
             return os.path.join(root, name)
+    return None
 
 
 # Get packages from requirements.txt
@@ -20,12 +18,12 @@ with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 # Get version from version.txt
-path = find("version.txt", "../")
-print(path)
-if not path:
-    path = find("version.txt", "./")
-print(path)
-with io.open(path, encoding="utf-8") as f:
+version_path = find("version.txt", "../")
+print("Path:", version_path)
+if not version_path:
+    version_path = find("version.txt", "./")
+print("Path:", version_path)
+with io.open(version_path, encoding="utf-8") as f:
     version = f.read().splitlines()[0]
 
 setup(

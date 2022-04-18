@@ -4,7 +4,7 @@ from systembridgebackend.database import Database
 from systembridgebackend.server import Server
 
 
-class Main(Base):
+class Main(Base):  # pylint: disable=too-few-public-methods
     """Main"""
 
     def __init__(self) -> None:

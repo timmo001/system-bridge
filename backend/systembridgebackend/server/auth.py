@@ -13,16 +13,16 @@ class ApiKeyAuthentication(Base):
         app=None,
         arg="key",
         header=None,
-        form=None,
         keys=None,
-        error="Authentication required",
     ):
         """Initialize"""
+        super().__init__()
         self.api_keys = keys
         self.header = header
         self.arg = arg
-        self.form = form
-        self.error = error
+        self.form = None
+        self.error = "Authentication required"
+        self.token = None
 
         if app is not None:
             self.init_app(app)
@@ -33,7 +33,7 @@ class ApiKeyAuthentication(Base):
 
     async def open_session(self, request):
         """Open session"""
-        pass
+        pass  # pylint: disable=unnecessary-pass
 
     async def _is_api_key(self, request):
         """Check key is valid api key"""
@@ -67,10 +67,9 @@ class ApiKeyAuthentication(Base):
         @wraps(handler)
         async def wrapper(request, *args, **kwargs):
             if not await self._is_api_key(request):
-                if hasattr(self.error, "__call__"):
-                    return await self.error(request)
-                else:
-                    raise exceptions.Unauthorized(self.error)
+                # if hasattr(self.error, "__call__"):
+                #     return await self.error(request)
+                raise exceptions.Unauthorized(self.error)
             return await handler(request, *args, **kwargs)
 
         return wrapper

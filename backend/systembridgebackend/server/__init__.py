@@ -7,26 +7,15 @@ from sanic import Sanic
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
-from systembridgebackend import Base
+
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
+from systembridgebackend.server.base import ServerBase
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 
 
-class ServerBase(Base):
-    """Server"""
-
-    def __init__(
-        self,
-        database: Connection,
-    ) -> None:
-        """Initialize"""
-        super().__init__()
-        self._database = database
-
-
-class Server(ServerBase):
+class Server(ServerBase):  # pylint: disable=too-few-public-methods
     """Server"""
 
     def __init__(
@@ -57,7 +46,7 @@ class Server(ServerBase):
 
         @auth.key_required
         async def handler_data_all(
-            request: Request,
+            _: Request,
             table: str,
         ) -> HTTPResponse:
             if table not in implemented_modules:
@@ -66,7 +55,7 @@ class Server(ServerBase):
 
         @auth.key_required
         async def handler_data_by_key(
-            request: Request,
+            _: Request,
             table: str,
             key: str,
         ) -> HTTPResponse:
@@ -84,7 +73,10 @@ class Server(ServerBase):
             )
 
         @auth.key_required
-        async def handler_generic(request: Request, function) -> HTTPResponse:
+        async def handler_generic(
+            request: Request,
+            function: callable,
+        ) -> HTTPResponse:
             return await function(request)
 
         self._logger.info(scheduler.task_info())

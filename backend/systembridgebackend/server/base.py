@@ -4,8 +4,9 @@ from sqlite3 import Connection
 from systembridgebackend import Base
 
 
-class ServerBase(Base):
-    """Server"""
+# pylint: disable=duplicate-code
+class ServerBase(Base):  # pylint: disable=too-few-public-methods
+    """Server Base"""
 
     def __init__(
         self,
