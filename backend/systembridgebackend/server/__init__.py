@@ -1,4 +1,5 @@
 """System Bridge: Server"""
+from os import walk
 from sqlite3 import Connection
 from sanic import Sanic
 from sanic.request import Request
@@ -32,10 +33,16 @@ class Server(ServerBase):
         super().__init__(database)
         self._server = Sanic("SystemBridge")
 
+        for _, dirs, _ in walk("./backend/systembridgebackend/modules"):
+            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+            break
+
         async def handler_data_all(
             request: Request,
             table: str,
         ) -> HTTPResponse:
+            if table not in implemented_modules:
+                return json({"message": f"Data module {table} not found"}, status=404)
             return json(self._database.table_data_to_ordered_dict(table))
 
         async def handler_data_by_key(
@@ -43,6 +50,9 @@ class Server(ServerBase):
             table: str,
             key: str,
         ) -> HTTPResponse:
+            if table not in implemented_modules:
+                return json({"message": f"Data module {table} not found"}, status=404)
+
             data = self._database.read_table_by_key(table, key).to_dict(
                 orient="records"
             )[0]
@@ -59,10 +69,10 @@ class Server(ServerBase):
         self._server.add_route(
             handler_data_by_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
         )
-        self._server.add_route(handler_open, "/api/open", methods=["POST"])
         self._server.add_route(
             handler_notification, "/api/notification", methods=["POST"]
         )
+        self._server.add_route(handler_open, "/api/open", methods=["POST"])
 
         # self._server.static("/", "./frontend/dist/")
         # self._server.add_websocket_route(websocket, "/api/websocket")
