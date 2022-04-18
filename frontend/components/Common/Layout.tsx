@@ -32,13 +32,13 @@ function Layout(props: LayoutProps): ReactElement {
   useEffect(() => {
     if (query && Object.keys(query).length > 0)
       if (!query.apiKey) {
-        const response: string = window.prompt("Please enter your API key", "");
+        const response = window.prompt("Please enter your API key", "");
         if (response)
           router.replace(
             `${router.pathname}?apiKey=${response}&apiPort=${query.apiPort}&wsPort=${query.wsPort}`
           );
       }
-  }, [query]);
+  }, [router, query]);
 
   useEffect(() => {
     (async () => {
@@ -49,7 +49,7 @@ function Layout(props: LayoutProps): ReactElement {
         console.warn("Error getting information:", e);
       }
     })();
-  }, [settings, setSettings, query]);
+  }, [information, setInformation, settings, setSettings, query]);
 
   useEffect(() => {
     (async () => {

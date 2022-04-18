@@ -58,7 +58,7 @@ function BridgesSetupComponent(): ReactElement {
       setSetup(true);
       handleSetup();
     }
-  }, [setup, handleSetup, query.apiKey, query.wsPort]);
+  }, [setup, handleSetup, query]);
 
   function handleItemClick(bridge: Partial<Bridge>, edit: boolean): void {
     setBridgeEdit({ bridge: bridge, edit: edit });

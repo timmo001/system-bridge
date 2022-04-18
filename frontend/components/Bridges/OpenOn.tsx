@@ -62,7 +62,7 @@ function BridgesOpenOnComponent(): ReactElement {
     );
     if (response && response.status < 400)
       setBridges(response.data.filter((bridge: Bridge) => bridge.apiKey));
-  }, [query.apiHost, query.apiPort, query.apiKey]);
+  }, [query.apiHost, query.apiPort, query.apiKey, query.url]);
 
   function handleUrlChanged(event: ChangeEvent<HTMLInputElement>): void {
     setUrl(event.target.value);
@@ -90,7 +90,7 @@ function BridgesOpenOnComponent(): ReactElement {
       setSetup(true);
       handleSetup();
     }
-  }, [setup, handleSetup, query.apiKey, query.wsPort]);
+  }, [setup, handleSetup, query]);
 
   const classes = useStyles();
 

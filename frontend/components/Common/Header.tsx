@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useCallback, useEffect, useState } from "react";
 import clsx from "clsx";
 import {
   AppBar,
@@ -38,25 +38,11 @@ function Header(props: HeaderProps): ReactElement {
   const [information] = useInformation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    if (props.changeColorOnScroll) {
-      window.addEventListener("scroll", headerColorChange);
-    }
-    return function cleanup() {
-      if (props.changeColorOnScroll) {
-        window.removeEventListener("scroll", headerColorChange);
-      }
-    };
-  }, []);
-
   const classes = useStyles();
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const headerColorChange = () => {
+  const headerColorChange = useCallback(() => {
     const { color, changeColorOnScroll } = props;
+    if (!color || !changeColorOnScroll) return;
     const windowsScrollTop = window.pageYOffset;
     if (windowsScrollTop > changeColorOnScroll.height) {
       document.body
@@ -73,6 +59,21 @@ function Header(props: HeaderProps): ReactElement {
         .getElementsByTagName("header")[0]
         .classList.remove(classes[changeColorOnScroll.color]);
     }
+  }, [classes, props]);
+
+  useEffect(() => {
+    if (props.changeColorOnScroll) {
+      window.addEventListener("scroll", headerColorChange);
+    }
+    return function cleanup() {
+      if (props.changeColorOnScroll) {
+        window.removeEventListener("scroll", headerColorChange);
+      }
+    };
+  }, [headerColorChange, props.changeColorOnScroll]);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
   };
 
   const { color, rightLinks, brand, fixed, absolute } = props;

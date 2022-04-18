@@ -22,21 +22,21 @@ function HeaderLinks(): ReactElement {
   return (
     <List className={classes.list}>
       <ListItem className={classes.listItem}>
-        <Link href={{ pathname: "/app/data", query }}>
+        <Link href={{ pathname: "/app/data", query }} passHref>
           <Button variant="text" className={classes.navLink}>
             <span className={classes.listItemText}>Data</span>
           </Button>
         </Link>
       </ListItem>
       <ListItem className={classes.listItem}>
-        <Link href={{ pathname: "/app/settings", query }}>
+        <Link href={{ pathname: "/app/settings", query }} passHref>
           <Button variant="text" className={classes.navLink}>
             <span className={classes.listItemText}>Settings</span>
           </Button>
         </Link>
       </ListItem>
       <ListItem className={classes.listItem}>
-        <Link href={{ pathname: "/app/logs", query }}>
+        <Link href={{ pathname: "/app/logs", query }} passHref>
           <Button variant="text" className={classes.navLink}>
             <span className={classes.listItemText}>Logs</span>
           </Button>

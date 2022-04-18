@@ -20,6 +20,7 @@
   "scripts": {
     "build": "next build",
     "eslint": "eslint --ext .ts --ext .tsx --color ./",
+    "lint": "next lint",
     "start": "next start",
     "start:dev": "next dev"
   },
@@ -36,22 +37,20 @@
     "axios": "0.26.1",
     "clsx": "1.1.1",
     "lodash": "4.17.21",
+    "next": "12.1.5",
     "peerjs": "1.3.2",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
     "react-json-view": "1.21.3",
     "rect-scaler": "1.1.0",
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@types/react": "18.0.1",
+    "@types/node": "17.0.24",
     "@types/react-dom": "18.0.2",
+    "@types/react": "18.0.5",
     "eslint": "8.13.0",
-    "eslint-import-resolver-typescript": "2.7.1",
-    "eslint-plugin-import": "2.26.0",
+    "eslint-config-next": "12.1.5",
     "typescript": "4.6.3"
-  },
-  "peerDependencies": {
-    "next": "12.0.10",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
   }
 }

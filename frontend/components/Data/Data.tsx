@@ -167,7 +167,7 @@ function DataComponent(): ReactElement {
       setSetup(true);
       handleSetup(Number(query.wsPort) || 9172, String(query.apiKey));
     }
-  }, [setup, handleSetup, query.apiKey, query.wsPort]);
+  }, [setup, handleSetup, query]);
 
   const classes = useStyles();
 

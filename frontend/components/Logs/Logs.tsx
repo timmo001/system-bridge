@@ -72,7 +72,7 @@ function LogsComponent(): ReactElement {
       setSetup(true);
       handleSetup();
     }
-  }, [setup, handleSetup, query.apiKey, query.wsPort]);
+  }, [setup, handleSetup, query]);
 
   const classes = useStyles();
 
