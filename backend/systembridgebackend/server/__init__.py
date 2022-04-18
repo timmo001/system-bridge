@@ -72,16 +72,30 @@ class Server(ServerBase):
                 }
             )
 
+        @auth.key_required
+        async def handler_generic(request: Request, function) -> HTTPResponse:
+            return await function(request)
+
         self._server.add_route(
-            handler_data_all, "/api/data/<table:str>", methods=["GET"]
+            handler_data_all,
+            "/api/data/<table:str>",
+            methods=["GET"],
         )
         self._server.add_route(
-            handler_data_by_key, "/api/data/<table:str>/<key:str>", methods=["GET"]
+            handler_data_by_key,
+            "/api/data/<table:str>/<key:str>",
+            methods=["GET"],
         )
         self._server.add_route(
-            handler_notification, "/api/notification", methods=["POST"]
+            lambda r: handler_generic(r, handler_notification),
+            "/api/notification",
+            methods=["POST"],
         )
-        self._server.add_route(handler_open, "/api/open", methods=["POST"])
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_open),
+            "/api/open",
+            methods=["POST"],
+        )
 
         # self._server.static("/", "./frontend/dist/")
         # self._server.add_websocket_route(websocket, "/api/websocket")

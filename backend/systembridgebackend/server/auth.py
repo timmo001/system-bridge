@@ -15,7 +15,7 @@ class ApiKeyAuthentication(Base):
         header=None,
         form=None,
         keys=None,
-        error="Auth required.",
+        error="Authentication required",
     ):
         """Initialize"""
         self.api_keys = keys
