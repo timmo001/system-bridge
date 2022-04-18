@@ -37,6 +37,7 @@ class Server(ServerBase):
         auth = ApiKeyAuthentication(
             app=self._server,
             header="api-key",
+            # TODO: Add api key from config
             keys=["abc123"],
         )
 
