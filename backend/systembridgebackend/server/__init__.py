@@ -13,6 +13,7 @@ from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.base import ServerBase
 from systembridgebackend.server.keyboard import handler_keyboard
+from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 
@@ -37,6 +38,9 @@ class Server(ServerBase):  # pylint: disable=too-few-public-methods
 
         scheduler = SanicScheduler(self._server, utc=True)
         update = Update(self._database)
+
+        mdns_advertisement = MDNSAdvertisement()
+        mdns_advertisement.advertise_server()
 
         for _, dirs, _ in walk("systembridgebackend/modules"):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
