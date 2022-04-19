@@ -1,16 +1,15 @@
 """System Bridge: Server Base"""
-from sqlite3 import Connection
 
 from systembridgebackend import Base
+from systembridgebackend.database import Database
 
 
-# pylint: disable=duplicate-code
 class ServerBase(Base):  # pylint: disable=too-few-public-methods
     """Server Base"""
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__()

@@ -1,10 +1,11 @@
 """System Bridge: Main"""
+import asyncio
 from systembridgebackend import Base
 from systembridgebackend.database import Database
 from systembridgebackend.server import Server
 
 
-class Main(Base):  # pylint: disable=too-few-public-methods
+class Main(Base):
     """Main"""
 
     def __init__(self) -> None:
@@ -19,6 +20,9 @@ class Main(Base):  # pylint: disable=too-few-public-methods
 
         self._database = Database()
         self._server = Server(self._database)
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
         # Start the server
         self._server.start()

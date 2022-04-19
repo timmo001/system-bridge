@@ -21,7 +21,7 @@ class Database(Base):
         """Check if connected"""
         return self._connection is not None
 
-    def _execute(
+    def execute_sql(
         self,
         sql: str,
     ) -> None:
@@ -32,7 +32,7 @@ class Database(Base):
         self._connection.execute(sql)
         self._connection.commit()
 
-    def _execute_with_params(
+    def execute_sql_with_params(
         self,
         sql: str,
         params: list[any],
@@ -44,7 +44,7 @@ class Database(Base):
 
     def connect(self) -> None:
         """Connect to database"""
-        self._connection = connect("systembridge.db")
+        self._connection = connect("systembridge.db", check_same_thread=False)
 
     def close(self) -> None:
         """Close connection"""
@@ -90,19 +90,19 @@ class Database(Base):
         for column in columns:
             sql += f"{column[0]} {column[1]},"
         sql = sql[:-1] + ")"
-        self._execute(sql)
+        self.execute_sql(sql)
 
     def write(
         self,
         table_name: str,
         key: str,
         value: str,
-        timestamp: int = None,
+        timestamp: float = None,
     ) -> None:
         """Write to table"""
         if timestamp is None:
-            timestamp = int(time())
-        self._execute(
+            timestamp = time()
+        self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
              VALUES ("{key}", "{value}", {timestamp})
              ON CONFLICT({COLUMN_KEY}) DO

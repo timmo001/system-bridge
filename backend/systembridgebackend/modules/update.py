@@ -1,9 +1,10 @@
 """System Bridge: Modules Update"""
 import asyncio
-from sqlite3 import Connection
 
 from systembridgebackend import Base
+from systembridgebackend.database import Database
 from systembridgebackend.modules.battery.update import BatteryUpdate
+from systembridgebackend.modules.bridge.update import BridgeUpdate
 from systembridgebackend.modules.cpu.update import CPUUpdate
 from systembridgebackend.modules.disk.update import DiskUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
@@ -17,11 +18,12 @@ class Update(Base):
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__()
         self._database = database  # pylint: disable=duplicate-code
+
         self._classes = [
             BatteryUpdate(self._database),
             CPUUpdate(self._database),
@@ -31,6 +33,7 @@ class Update(Base):
             SensorsUpdate(self._database),
             SystemUpdate(self._database),
         ]
+        BridgeUpdate(self._database)
 
     async def update_data(self) -> None:
         """Update Data"""

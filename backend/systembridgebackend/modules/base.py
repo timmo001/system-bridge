@@ -1,8 +1,7 @@
 """System Bridge: Module Base"""
-from sqlite3 import Connection
-
 from systembridgebackend import Base
 from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgebackend.database import Database
 
 
 class ModuleUpdateBase(Base):
@@ -10,7 +9,7 @@ class ModuleUpdateBase(Base):
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
         table: str,
     ):
         super().__init__()
@@ -21,7 +20,7 @@ class ModuleUpdateBase(Base):
             [
                 (COLUMN_KEY, "TEXT PRIMARY KEY"),
                 (COLUMN_VALUE, "TEXT"),
-                (COLUMN_TIMESTAMP, "INTEGER"),
+                (COLUMN_TIMESTAMP, "DOUBLE"),
             ],
         )
 

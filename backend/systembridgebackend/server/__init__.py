@@ -8,6 +8,7 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 
+from systembridgebackend.database import Database
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.base import ServerBase
@@ -21,7 +22,7 @@ class Server(ServerBase):  # pylint: disable=too-few-public-methods
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__(database)
@@ -37,7 +38,7 @@ class Server(ServerBase):  # pylint: disable=too-few-public-methods
         scheduler = SanicScheduler(self._server, utc=True)
         update = Update(self._database)
 
-        for _, dirs, _ in walk("./backend/systembridgebackend/modules"):
+        for _, dirs, _ in walk("systembridgebackend/modules"):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 

@@ -1,6 +1,5 @@
 """System Bridge: Update Sensors"""
-from sqlite3 import Connection
-
+from systembridgebackend.database import Database
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.sensors import Sensors
 
@@ -10,7 +9,7 @@ class SensorsUpdate(ModuleUpdateBase):
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__(database, "sensors")

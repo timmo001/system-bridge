@@ -10,7 +10,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         format=FORMAT,
         datefmt=DATE_FORMAT,
-        level="INFO",
+        level="DEBUG",
     )
     logger = logging.getLogger(__name__)
 

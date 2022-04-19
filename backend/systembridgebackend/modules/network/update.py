@@ -1,6 +1,5 @@
 """System Bridge: Update Network"""
-from sqlite3 import Connection
-
+from systembridgebackend.database import Database
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.network import Network
 
@@ -10,7 +9,7 @@ class NetworkUpdate(ModuleUpdateBase):
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__(database, "network")

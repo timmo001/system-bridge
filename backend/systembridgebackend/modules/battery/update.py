@@ -1,7 +1,6 @@
 """System Bridge: Update Battery"""
-from sqlite3 import Connection
-
 from systembridgebackend.modules.base import ModuleUpdateBase
+from systembridgebackend.database import Database
 from systembridgebackend.modules.battery import Battery
 
 
@@ -10,7 +9,7 @@ class BatteryUpdate(ModuleUpdateBase):
 
     def __init__(
         self,
-        database: Connection,
+        database: Database,
     ) -> None:
         """Initialize"""
         super().__init__(database, "battery")
