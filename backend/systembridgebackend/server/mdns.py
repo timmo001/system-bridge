@@ -8,12 +8,21 @@ from plyer import uniqueid
 from zeroconf import ServiceInfo, Zeroconf, InterfaceChoice
 
 from systembridgebackend import Base
+from systembridgebackend.settings import Settings, SETTING_PORT_API
 
 ZEROCONF_TYPE = "_system-bridge._tcp.local."
 
 
 class MDNSAdvertisement(Base):
     """MDNS/Zeroconf Advertisement"""
+
+    def __init__(
+        self,
+        settings: Settings,
+    ) -> None:
+        """Initialize"""
+        super().__init__()
+        self._settings = settings
 
     def advertise_server(self) -> None:
         """Advertise server"""
@@ -25,8 +34,8 @@ class MDNSAdvertisement(Base):
         hostname = socket.gethostname()
         ip4 = s.getsockname()[0]
         mac = ":".join(re.findall("..", "%012x" % uuid.getnode()))
-        port_api = 9170
-        port_websocket = 9172
+        port_api = int(self._settings.get(SETTING_PORT_API))
+        port_websocket = int(port_api)  # 9172
         id = uniqueid.id
 
         # Get version from version.txt

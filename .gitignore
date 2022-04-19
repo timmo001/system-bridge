@@ -174,3 +174,4 @@ junit.xml
 *.app
 .qt*
 test.json
+*.key

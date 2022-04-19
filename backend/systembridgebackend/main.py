@@ -1,8 +1,10 @@
 """System Bridge: Main"""
 import asyncio
+
 from systembridgebackend import Base
 from systembridgebackend.database import Database
 from systembridgebackend.server import Server
+from systembridgebackend.settings import Settings
 
 
 class Main(Base):
@@ -19,7 +21,8 @@ class Main(Base):
         self._logger.info("Setup")
 
         self._database = Database()
-        self._server = Server(self._database)
+        self._settings = Settings(self._database)
+        self._server = Server(self._database, self._settings)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

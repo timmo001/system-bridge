@@ -1,45 +1,47 @@
 """System Bridge: Server"""
 from datetime import timedelta
 from os import walk
-from sqlite3 import Connection
 
 from sanic import Sanic
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 
+from systembridgebackend import Base
 from systembridgebackend.database import Database
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
-from systembridgebackend.server.base import ServerBase
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
+from systembridgebackend.settings import Settings, SECRET_API_KEY, SETTING_PORT_API
 
 
-class Server(ServerBase):  # pylint: disable=too-few-public-methods
+class Server(Base):
     """Server"""
 
     def __init__(
         self,
         database: Database,
+        settings: Settings,
     ) -> None:
         """Initialize"""
-        super().__init__(database)
+        super().__init__()
+        self._database = database
+        self._settings = settings
         self._server = Sanic("SystemBridge")
 
         auth = ApiKeyAuthentication(
             app=self._server,
             header="api-key",
-            # TODO: Add api key from config
-            keys=["abc123"],
+            keys=[self._settings.get_secret(SECRET_API_KEY)],
         )
 
         scheduler = SanicScheduler(self._server, utc=True)
         update = Update(self._database)
 
-        mdns_advertisement = MDNSAdvertisement()
+        mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
         for _, dirs, _ in walk("systembridgebackend/modules"):
@@ -120,7 +122,7 @@ class Server(ServerBase):  # pylint: disable=too-few-public-methods
         self._logger.info("Starting server")
         self._server.run(
             host="0.0.0.0",
-            port=9170,
+            port=self._settings.get(SETTING_PORT_API),
             debug=True,
             motd=False,
         )

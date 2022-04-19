@@ -51,6 +51,14 @@ class Database(Base):
         self._connection.close()
         self._connection = None
 
+    def check_table_for_key(
+        self,
+        table_name: str,
+        key: str,
+    ) -> bool:
+        """Check if key exists in table"""
+        return self.read_table_by_key(table_name, key).empty
+
     def read_table(
         self,
         table_name: str,
