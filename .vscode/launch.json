@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Module",
+      "name": "Backend",
       "type": "python",
       "request": "launch",
       "module": "systembridgebackend",
@@ -11,7 +11,7 @@
       "args": []
     },
     {
-      "name": "Python: Module",
+      "name": "CLI",
       "type": "python",
       "request": "launch",
       "module": "systembridgecli",
@@ -20,7 +20,7 @@
       "args": ["--help"]
     },
     {
-      "name": "Python: Module",
+      "name": "GUI",
       "type": "python",
       "request": "launch",
       "module": "systembridgegui",
