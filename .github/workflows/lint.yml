@@ -46,13 +46,16 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
       CODE_PATH: backend
+      MODULE_NAME: systembridgebackend
   lint-pylint-cli:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
       CODE_PATH: cli
+      MODULE_NAME: systembridgecli
   lint-pylint-gui:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
       CODE_PATH: gui
+      MODULE_NAME: systembridgedgui
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
