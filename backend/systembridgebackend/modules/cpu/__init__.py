@@ -22,7 +22,7 @@ class CPU(Base):
         """CPU frequency"""
         return cpu_freq()
 
-    def freq_per_cpu(self) -> list[scpufreq]:
+    def freq_per_cpu(self) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
         """CPU frequency per CPU"""
         return cpu_freq(percpu=True)
 
@@ -38,11 +38,15 @@ class CPU(Base):
         """CPU times percent"""
         return cpu_times_percent(interval=1, percpu=False)
 
-    def times_per_cpu(self) -> list[pcputimes]:
+    def times_per_cpu(
+        self,
+    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
         """CPU times per CPU"""
         return cpu_times(percpu=True)
 
-    def times_per_cpu_percent(self) -> list[pcputimes]:
+    def times_per_cpu_percent(
+        self,
+    ) -> list[pcputimes]:  # pylint: disable=unsubscriptable-object
         """CPU times per CPU percent"""
         return cpu_times_percent(interval=1, percpu=True)
 
@@ -50,6 +54,6 @@ class CPU(Base):
         """CPU usage"""
         return cpu_percent(interval=1, percpu=False)
 
-    def usage_per_cpu(self) -> list[float]:
+    def usage_per_cpu(self) -> list[float]:  # pylint: disable=unsubscriptable-object
         """CPU usage per CPU"""
         return cpu_percent(interval=1, percpu=True)

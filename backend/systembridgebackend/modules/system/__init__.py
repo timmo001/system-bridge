@@ -13,10 +13,12 @@ class System(Base):
         """Get boot time"""
         return boot_time()
 
-    def load_average(self) -> tuple[float, float, float]:
+    def load_average(
+        self,
+    ) -> tuple[float, float, float]:  # pylint: disable=unsubscriptable-object
         """Get load average"""
         return getloadavg()
 
-    def users(self) -> list[suser]:
+    def users(self) -> list[suser]:  # pylint: disable=unsubscriptable-object
         """Get users"""
         return users()

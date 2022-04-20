@@ -18,18 +18,12 @@ FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 class Main(Base):
     """Main"""
 
-    def __init__(
-        self,
-        database: Database,
-        settings: Settings,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize"""
         super().__init__()
         self._logger.info("System Bridge: Startup")
 
-        self._database = database
-        self._settings = settings
-        self._server = Server(self._database, self._settings)
+        self._server = Server(database, settings)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
