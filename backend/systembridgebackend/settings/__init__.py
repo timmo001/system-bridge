@@ -53,7 +53,7 @@ class Settings(Base):
             AppDirs("systembridge", "timmo001").user_data_dir, "secret.key"
         )
         if exists(secret_key_path):
-            with io.open("", encoding="utf-8") as f:
+            with io.open(secret_key_path, encoding="utf-8") as f:
                 self._encryption_key = f.read().splitlines()[0]
         if not self._encryption_key:
             self._encryption_key = Fernet.generate_key()
