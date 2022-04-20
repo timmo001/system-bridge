@@ -17,6 +17,7 @@ TABLE_SETTINGS = "settings"
 
 SECRET_API_KEY = "api_key"
 
+SETTING_LOG_LEVEL = "log_level"
 SETTING_PORT_API = "port_api"
 # SETTING_PORT_WEBSOCKET = "port_websocket"
 
@@ -68,6 +69,8 @@ class Settings(Base):
             self.set_secret(SECRET_API_KEY, str(uuid4()))
 
         # Default Settings
+        if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_LOG_LEVEL):
+            self.set(SETTING_LOG_LEVEL, "INFO")
         if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_PORT_API):
             self.set(SETTING_PORT_API, 9170)
         # if self._database.check_table_for_key(SETTINGS_TABLE, SETTING_PORT_WEBSOCKET):
