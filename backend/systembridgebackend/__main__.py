@@ -3,6 +3,7 @@ import asyncio
 import logging
 import os
 from appdirs import AppDirs
+from colorlog import ColoredFormatter
 
 from systembridgebackend import Base
 from systembridgebackend.database import Database
@@ -46,13 +47,40 @@ if __name__ == "__main__":
     database = Database()
     settings = Settings(database)
 
+    # Set up logging
+    log_level = settings.get(SETTING_LOG_LEVEL)
+
     logging.basicConfig(
         datefmt=DATE_FORMAT,
         format=FORMAT,
-        handlers=[
-            logging.FileHandler(os.path.join(user_data_dir, "system-bridge.log")),
-        ],
-        level=settings.get(SETTING_LOG_LEVEL),
+        level=log_level,
     )
+
+    logging.getLogger().handlers[0].setFormatter(
+        ColoredFormatter(
+            f"%(log_color)s{FORMAT}%(reset)s",
+            datefmt=DATE_FORMAT,
+            reset=True,
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red",
+            },
+        )
+    )
+
+    file_handler = logging.handlers.RotatingFileHandler(
+        os.path.join(user_data_dir, "system-bridge.log"),
+        backupCount=1,
+    )
+    file_handler.doRollover()
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(logging.Formatter(FORMAT, datefmt=DATE_FORMAT))
+
+    logger = logging.getLogger("")
+    logger.addHandler(file_handler)
+    logger.setLevel(log_level)
 
     Main(database, settings)
