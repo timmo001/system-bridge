@@ -1,8 +1,10 @@
 """System Bridge: Database"""
+import os
+from appdirs import AppDirs
 from collections import OrderedDict
+from pandas import DataFrame, read_sql_query
 from sqlite3 import Connection, connect
 from time import time
-from pandas import DataFrame, read_sql_query
 
 from systembridgebackend import Base
 from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
@@ -44,7 +46,12 @@ class Database(Base):
 
     def connect(self) -> None:
         """Connect to database"""
-        self._connection = connect("systembridge.db", check_same_thread=False)
+        self._connection = connect(
+            os.path.join(
+                AppDirs("systembridge", "timmo001").user_data_dir, "systembridge.db"
+            ),
+            check_same_thread=False,
+        )
 
     def close(self) -> None:
         """Close connection"""
