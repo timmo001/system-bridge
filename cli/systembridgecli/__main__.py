@@ -1,6 +1,6 @@
 """System Bridge CLI: Main"""
 import typer
-import tabulate
+from tabulate import tabulate
 
 from systembridgecli.database import Database
 from systembridgecli.settings import (
@@ -12,7 +12,6 @@ from systembridgecli.settings import (
 
 app = typer.Typer()
 database = Database()
-database.connect()
 settings = Settings(database)
 
 
@@ -29,7 +28,7 @@ def api_port() -> None:
 @app.command(name="settings", short_help="Get all Settings")
 def settings_all():
     data = database.read_table(TABLE_SETTINGS)
-    table_data = tabulate(data, headers="keys")
+    table_data = tabulate(data, headers="keys", tablefmt="psql")
     typer.secho(table_data, fg=typer.colors.CYAN)
 
 
