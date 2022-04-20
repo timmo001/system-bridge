@@ -56,6 +56,6 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     secrets:
       CODE_PATH: gui
-      MODULE_NAME: systembridgedgui
+      MODULE_NAME: systembridgegui
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
