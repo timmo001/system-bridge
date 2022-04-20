@@ -13,6 +13,12 @@ from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
+from systembridgebackend.server.media import (
+    handler_media_files,
+    handler_media_file,
+    handler_media_file_data,
+    handler_media_file_write,
+)
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 from systembridgebackend.settings import Settings, SECRET_API_KEY, SETTING_PORT_API
@@ -34,6 +40,7 @@ class Server(Base):
 
         auth = ApiKeyAuthentication(
             app=self._server,
+            arg="apiKey",
             header="api-key",
             keys=[self._settings.get_secret(SECRET_API_KEY)],
         )
@@ -48,13 +55,13 @@ class Server(Base):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 
-        @task(timedelta(seconds=30))
-        async def update_frequent_data(_) -> None:
-            await update.update_frequent_data()
-
         @task(timedelta(minutes=2))
         async def update_data(_) -> None:
             await update.update_data()
+
+        @task(timedelta(seconds=30))
+        async def update_frequent_data(_) -> None:
+            await update.update_frequent_data()
 
         @auth.key_required
         async def handler_data_all(
@@ -105,6 +112,26 @@ class Server(Base):
         self._server.add_route(
             lambda r: handler_generic(r, handler_keyboard),
             "/api/keyboard",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_media_files),
+            "/api/media/files",
+            methods=["GET"],
+        )
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_media_file),
+            "/api/media/file",
+            methods=["GET"],
+        )
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_media_file_data),
+            "/api/media/file/data",
+            methods=["GET"],
+        )
+        self._server.add_route(
+            lambda r: handler_generic(r, handler_media_file_write),
+            "/api/media/file/write",
             methods=["POST"],
         )
         self._server.add_route(
