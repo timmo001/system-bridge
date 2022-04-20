@@ -17,16 +17,19 @@ settings = Settings(database)
 
 @app.command(name="api-key", short_help="Get API Key")
 def api_key() -> None:
+    """Get API Key"""
     secret(SECRET_API_KEY)
 
 
 @app.command(name="api-port", short_help="Get API Port")
 def api_port() -> None:
+    """Get API Port"""
     setting(SETTING_PORT_API)
 
 
 @app.command(name="settings", short_help="Get all Settings")
 def settings_all():
+    """Get all Settings"""
     data = database.read_table(TABLE_SETTINGS)
     table_data = tabulate(data, headers="keys", tablefmt="psql")
     typer.secho(table_data, fg=typer.colors.CYAN)
@@ -38,6 +41,7 @@ def setting(
     set: bool = False,
     value: str = None,
 ) -> None:
+    """Get or Set Setting"""
     if set:
         settings.set(key, value)
     result = settings.get(key)
@@ -53,6 +57,7 @@ def secret(
     set: bool = False,
     value: str = None,
 ) -> None:
+    """Get or Set Secret"""
     if set:
         if value:
             settings.set_secret(key, value)
