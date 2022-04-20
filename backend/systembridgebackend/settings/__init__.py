@@ -1,6 +1,8 @@
 """Settings"""
 import io
+import os
 
+from appdirs import AppDirs
 from cryptography.fernet import Fernet
 from uuid import uuid4
 from os.path import exists
@@ -47,12 +49,15 @@ class Settings(Base):
 
         # Generate default encryption key
         self._encryption_key = None
-        if exists("secret.key"):
-            with io.open("secret.key", encoding="utf-8") as f:
+        secret_key_path = os.path.join(
+            AppDirs("systembridge", "timmo001").user_data_dir, "secret.key"
+        )
+        if exists(secret_key_path):
+            with io.open("", encoding="utf-8") as f:
                 self._encryption_key = f.read().splitlines()[0]
         if not self._encryption_key:
             self._encryption_key = Fernet.generate_key()
-            with io.open("secret.key", "w", encoding="utf-8") as f:
+            with io.open(secret_key_path, "w", encoding="utf-8") as f:
                 f.write(self._encryption_key.decode())
 
         # Default Secrets
