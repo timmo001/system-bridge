@@ -107,11 +107,11 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           : await axios.post<Partial<Bridge>>(url, bridgeData, {
               headers: { "api-key": query.apiKey as string },
             });
+        if (response && response.status < 400) props.handleClose();
+        else setTestingMessage({ text: "Failed to save bridge", error: true });
       } catch (e) {
         console.error(e);
       }
-      if (response && response.status < 400) props.handleClose();
-      else setTestingMessage({ text: "Failed to save bridge", error: true });
     }
   }
 
