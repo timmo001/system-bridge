@@ -24,7 +24,7 @@ class Main(Base):
     ) -> None:
         """Initialize"""
         super().__init__()
-        self._logger.info("System Bridge")
+        self._logger.info("System Bridge: Startup")
 
         self._database = database
         self._settings = settings
