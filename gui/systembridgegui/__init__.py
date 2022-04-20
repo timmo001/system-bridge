@@ -1,1 +1,1 @@
-"""System Bridge: Init"""
+"""System Bridge GUI"""

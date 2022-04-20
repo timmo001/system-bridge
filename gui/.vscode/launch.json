@@ -5,9 +5,8 @@
       "name": "Python: Module",
       "type": "python",
       "request": "launch",
-      "module": "systembridgebackend",
+      "module": "systembridgegui",
       "preLaunchTask": "Python: pip install",
-      "cwd": "${workspaceFolder}/backend",
       "args": []
     }
   ]

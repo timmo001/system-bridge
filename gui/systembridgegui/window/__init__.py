@@ -1,1 +1,1 @@
-"""System Bridge: Window"""
+"""System Bridge GUI: Window"""

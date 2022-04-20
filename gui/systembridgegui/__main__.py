@@ -1,7 +1,8 @@
-"""System Bridge: Main class"""
+"""System Bridge GUI: Main"""
 import asyncio
+import logging
 import sys
-from argparse import Namespace
+from argparse import ArgumentParser, Namespace
 
 import async_timeout
 from aiohttp.client import ClientSession
@@ -18,6 +19,11 @@ from systembridge.exceptions import BridgeException
 from .base import Base
 from .system_tray import SystemTray
 from .window.main import MainWindow
+
+from systembridgegui.main import Main
+
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 
 
 class Main(Base):
@@ -135,3 +141,59 @@ class Main(Base):
             self._logger.info("Retrying in 5 seconds..")
             await asyncio.sleep(5)
             await self.setup_bridge()
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-ah",
+        "--host",
+        dest="hostname",
+        help="API Hostname",
+        default="localhost",
+    )
+    parser.add_argument(
+        "-ak",
+        "--api-key",
+        dest="api_key",
+        help="API key",
+    )
+    parser.add_argument(
+        "-ap",
+        "--api-port",
+        dest="port",
+        help="API Port",
+        default=9170,
+    )
+    parser.add_argument(
+        "-fp",
+        "--frontend-port",
+        dest="frontend_port",
+        help="Frontend Port",
+        default=9170,
+    )
+    parser.add_argument(
+        "-ll",
+        "--log-level",
+        dest="log_level",
+        help="Log level",
+        default="INFO",
+    )
+    parser.add_argument(
+        "-wp",
+        "--websocket-port",
+        dest="websocket_port",
+        help="WebSocket Port",
+        default=9172,
+    )
+
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        format=FORMAT,
+        datefmt=DATE_FORMAT,
+        level=args.log_level.upper(),
+    )
+    logger = logging.getLogger(__name__)
+
+    Main(args)

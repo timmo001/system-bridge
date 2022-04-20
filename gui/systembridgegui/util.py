@@ -1,8 +1,9 @@
-"""System Bridge: Util"""
+"""System Bridge GUI: Util"""
 import asyncio
 
 
 def get_or_create_event_loop() -> asyncio.AbstractEventLoop:
+    """Get or Create Event Loop"""
     try:
         return asyncio.get_event_loop()
     except RuntimeError as ex:
