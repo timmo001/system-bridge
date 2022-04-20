@@ -1,4 +1,5 @@
 """Settings"""
+from __future__ import annotations
 import io
 import os
 
@@ -77,23 +78,28 @@ class Settings(Base):
     def get(
         self,
         key: str,
-    ) -> str:
+    ) -> str | None:
         """Get setting"""
-        return self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
+        record = self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
             orient="records"
-        )[0]["value"]
+        )
+        if record and len(record) > 0:
+            return record[0]["value"]
+        return None
 
     def get_secret(
         self,
         key: str,
-    ) -> str:
+    ) -> str | None:
         """Get secret"""
         record = self._database.read_table_by_key(TABLE_SECRETS, key).to_dict(
             orient="records"
         )
-        secret = record[0]["value"]
-        fernet = Fernet(self._encryption_key)
-        return fernet.decrypt(secret.encode()).decode()
+        if record and len(record) > 0:
+            secret = record[0]["value"]
+            fernet = Fernet(self._encryption_key)
+            return fernet.decrypt(secret.encode()).decode()
+        return None
 
     def set(
         self,
