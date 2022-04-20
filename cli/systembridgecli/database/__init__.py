@@ -6,7 +6,7 @@ from pandas import DataFrame, read_sql_query
 from sqlite3 import Connection, connect
 from time import time
 
-from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgecli.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
 
 
 class Database:

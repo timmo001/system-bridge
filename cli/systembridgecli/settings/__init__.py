@@ -7,8 +7,7 @@ from appdirs import AppDirs
 from cryptography.fernet import Fernet
 from os.path import exists
 
-from systembridgebackend import Base
-from systembridgebackend.database import Database
+from systembridgecli.database import Database
 
 TABLE_SECRETS = "secrets"
 TABLE_SETTINGS = "settings"
@@ -19,14 +18,14 @@ SETTING_PORT_API = "port_api"
 # SETTING_PORT_WEBSOCKET = "port_websocket"
 
 
-class Settings(Base):
+class Settings:
+    """Settings"""
+
     def __init__(
         self,
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__()
-
         self._database = database
 
         # Generate default encryption key
@@ -35,8 +34,8 @@ class Settings(Base):
             AppDirs("systembridge", "timmo001").user_data_dir, "secret.key"
         )
         if exists(secret_key_path):
-            with io.open(secret_key_path, encoding="utf-8") as f:
-                self._encryption_key = f.read().splitlines()[0]
+            with io.open(secret_key_path, encoding="utf-8") as file:
+                self._encryption_key = file.read().splitlines()[0]
 
     def get_all(self) -> dict:
         """Get settings"""

@@ -38,14 +38,13 @@ def settings_all():
 @app.command(name="setting", short_help="Get or Set Setting")
 def setting(
     key: str,
-    set: bool = False,
+    set_value: bool = False,
     value: str = None,
 ) -> None:
     """Get or Set Setting"""
-    if set:
+    if set_value:
         settings.set(key, value)
-    result = settings.get(key)
-    if result:
+    if result := settings.get(key):
         typer.secho(result, fg=typer.colors.CYAN)
     else:
         typer.secho(f"Could not find {key}", err=True, fg=typer.colors.RED)
@@ -54,18 +53,17 @@ def setting(
 @app.command(name="secret", short_help="Get or Set Secret")
 def secret(
     key: str,
-    set: bool = False,
+    set_value: bool = False,
     value: str = None,
 ) -> None:
     """Get or Set Secret"""
-    if set:
+    if set_value:
         if value:
             settings.set_secret(key, value)
         else:
             typer.secho("Missing value to set", err=True, fg=typer.colors.RED)
             return
-    result = settings.get_secret(key)
-    if result:
+    if result := settings.get_secret(key):
         typer.secho(result, fg=typer.colors.MAGENTA)
     else:
         typer.secho(f"Could not find {key}", err=True, fg=typer.colors.RED)
