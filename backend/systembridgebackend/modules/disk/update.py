@@ -39,10 +39,12 @@ class DiskUpdate(ModuleUpdateBase):
     async def update_usage(self) -> None:
         """Update usage"""
         for partition in self._disk.partitions():
-            for key, value in self._disk.usage(partition.mountpoint)._asdict().items():
-                self._database.write(
-                    "disk", f"usage_{partition.mountpoint}_{key}", value
-                )
+            data = self._disk.usage(partition.mountpoint)
+            if data:
+                for key, value in data._asdict().items():
+                    self._database.write(
+                        "disk", f"usage_{partition.mountpoint}_{key}", value
+                    )
 
     async def update_all_data(self) -> None:
         """Update data"""

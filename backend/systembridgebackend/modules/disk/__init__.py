@@ -1,4 +1,5 @@
 """System Bridge: Disk"""
+from __future__ import annotations
 from collections import namedtuple
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
@@ -21,6 +22,10 @@ class Disk(Base):
         """Disk partitions"""
         return disk_partitions(all=True)
 
-    def usage(self, path: str) -> namedtuple:
+    def usage(self, path: str) -> namedtuple | None:
         """Disk usage"""
-        return disk_usage(path)
+        try:
+            return disk_usage(path)
+        except PermissionError as e:
+            self._logger.error("PermissionError: %s", e)
+            return None
