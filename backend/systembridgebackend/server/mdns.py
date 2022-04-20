@@ -27,20 +27,21 @@ class MDNSAdvertisement(Base):
     def advertise_server(self) -> None:
         """Advertise server"""
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.connect(("8.8.8.8", 80))
 
         fqdn = socket.getfqdn()
         hostname = socket.gethostname()
-        ip4 = s.getsockname()[0]
+        ip4 = sock.getsockname()[0]
+        # pylint: disable=consider-using-f-string
         mac = ":".join(re.findall("..", "%012x" % uuid.getnode()))
         port_api = int(self._settings.get(SETTING_PORT_API))
         port_websocket = int(port_api)  # 9172
-        id = uniqueid.id
+        system_id = uniqueid.id
 
         # Get version from version.txt
-        with io.open("version.txt", encoding="utf-8") as f:
-            version = f.read().splitlines()[0]
+        with io.open("version.txt", encoding="utf-8") as file:
+            version = file.read().splitlines()[0]
 
         zeroconf = Zeroconf(
             interfaces=InterfaceChoice.All,
@@ -49,8 +50,8 @@ class MDNSAdvertisement(Base):
 
         info = ServiceInfo(
             ZEROCONF_TYPE,
-            name=f"{id}.{ZEROCONF_TYPE}",
-            server=f"{id}.local.",
+            name=f"{system_id}.{ZEROCONF_TYPE}",
+            server=f"{system_id}.local.",
             parsed_addresses=[ip4],
             port=port_api,
             properties={
@@ -60,7 +61,7 @@ class MDNSAdvertisement(Base):
                 "ip": ip4,
                 "mac": mac,
                 "port": port_api,
-                "uuid": id,
+                "uuid": system_id,
                 "version": version,
                 "websocketAddress": f"ws://{fqdn}:{port_websocket}",
                 "wsPort": port_websocket,

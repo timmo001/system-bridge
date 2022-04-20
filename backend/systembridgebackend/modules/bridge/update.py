@@ -73,10 +73,7 @@ class BridgeUpdate(Base):
             "Service %s %s: %s - %s", name, state_change, service_type, service_info
         )
         if service_info and service_info.properties:
-            if (
-                state_change == ServiceStateChange.Added
-                or state_change == ServiceStateChange.Updated
-            ):
+            if state_change in (ServiceStateChange.Added, ServiceStateChange.Updated):
                 self.write_bridge(name, service_info.properties)
             elif state_change == ServiceStateChange.Removed:
                 self.deactivate_bridge(name, service_info.properties)

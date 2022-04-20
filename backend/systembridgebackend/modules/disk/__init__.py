@@ -26,6 +26,6 @@ class Disk(Base):
         """Disk usage"""
         try:
             return disk_usage(path)
-        except PermissionError as e:
-            self._logger.error("PermissionError: %s", e)
+        except PermissionError as error:
+            self._logger.error("PermissionError: %s", error)
             return None

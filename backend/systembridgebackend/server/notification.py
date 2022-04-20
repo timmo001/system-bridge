@@ -1,3 +1,4 @@
+"""System Bridge: Server Handler - Notification"""
 import os
 
 from plyer import notification
@@ -8,6 +9,7 @@ from sanic.response import HTTPResponse, json
 async def handler_notification(
     request: Request,
 ) -> HTTPResponse:
+    """Send a notification."""
     if "message" not in request.json:
         return json(
             {

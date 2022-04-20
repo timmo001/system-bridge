@@ -30,10 +30,6 @@ class CPU(Base):
         """CPU stats"""
         return cpu_stats()
 
-    def freq_per_cpu(self) -> list[scpufreq]:
-        """CPU frequency per CPU"""
-        return cpu_freq(percpu=True)
-
     def times(self) -> pcputimes:
         """CPU times"""
         return cpu_times(percpu=False)

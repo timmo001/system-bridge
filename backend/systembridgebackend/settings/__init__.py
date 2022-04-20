@@ -1,4 +1,4 @@
-"""Settings"""
+"""System Bridge: Settings"""
 from __future__ import annotations
 import io
 import os
@@ -22,6 +22,8 @@ SETTING_PORT_API = "port_api"
 
 
 class Settings(Base):
+    """Settings"""
+
     def __init__(
         self,
         database: Database,
@@ -54,12 +56,12 @@ class Settings(Base):
             AppDirs("systembridge", "timmo001").user_data_dir, "secret.key"
         )
         if exists(secret_key_path):
-            with io.open(secret_key_path, encoding="utf-8") as f:
-                self._encryption_key = f.read().splitlines()[0]
+            with io.open(secret_key_path, encoding="utf-8") as file:
+                self._encryption_key = file.read().splitlines()[0]
         if not self._encryption_key:
             self._encryption_key = Fernet.generate_key()
-            with io.open(secret_key_path, "w", encoding="utf-8") as f:
-                f.write(self._encryption_key.decode())
+            with io.open(secret_key_path, "w", encoding="utf-8") as file:
+                file.write(self._encryption_key.decode())
 
         # Default Secrets
         if self._database.check_table_for_key(TABLE_SECRETS, SECRET_API_KEY):

@@ -1,3 +1,4 @@
+"""System Bridge: Server Handler - Open"""
 from os import startfile
 from webbrowser import open_new_tab
 
@@ -8,6 +9,7 @@ from sanic.response import HTTPResponse, json
 async def handler_open(
     request: Request,
 ) -> HTTPResponse:
+    """Open a file or a URL in the default browser."""
     if "path" in request.json:
         startfile(request.json["path"])
         return json(

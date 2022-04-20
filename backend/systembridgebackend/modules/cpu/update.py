@@ -27,8 +27,8 @@ class CPUUpdate(ModuleUpdateBase):
     async def update_frequency_per_cpu(self) -> None:
         """Update CPU frequency per CPU"""
         count = 0
-        for d in [freq._asdict() for freq in self._cpu.freq_per_cpu()]:
-            for key, value in d.items():
+        for data in [freq._asdict() for freq in self._cpu.freq_per_cpu()]:
+            for key, value in data.items():
                 self._database.write("cpu", f"frequency_{count}_{key}", value)
             count += 1
 
@@ -50,16 +50,16 @@ class CPUUpdate(ModuleUpdateBase):
     async def update_times_per_cpu(self) -> None:
         """Update times per CPU"""
         count = 0
-        for d in [freq._asdict() for freq in self._cpu.times_per_cpu()]:
-            for key, value in d.items():
+        for data in [freq._asdict() for freq in self._cpu.times_per_cpu()]:
+            for key, value in data.items():
                 self._database.write("cpu", f"times_per_cpu_{count}_{key}", value)
             count += 1
 
     async def update_times_per_cpu_percent(self) -> None:
         """Update times per CPU percent"""
         count = 0
-        for d in [freq._asdict() for freq in self._cpu.times_per_cpu_percent()]:
-            for key, value in d.items():
+        for data in [freq._asdict() for freq in self._cpu.times_per_cpu_percent()]:
+            for key, value in data.items():
                 self._database.write(
                     "cpu", f"times_per_cpu_percent_{count}_{key}", value
                 )
@@ -67,13 +67,13 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def update_usage(self) -> None:
         """Update usage"""
-        self._database.write("cpu", f"usage", self._cpu.usage())
+        self._database.write("cpu", "usage", self._cpu.usage())
 
     async def update_usage_per_cpu(self) -> None:
         """Update usage per CPU"""
         count = 0
-        for v in self._cpu.usage_per_cpu():
-            self._database.write("cpu", f"usage_{count}", v)
+        for value in self._cpu.usage_per_cpu():
+            self._database.write("cpu", f"usage_{count}", value)
             count += 1
 
     async def update_all_data(self) -> None:
