@@ -29,7 +29,8 @@ def api_port() -> None:
 @app.command(name="settings", short_help="Get all Settings")
 def settings_all():
     data = database.read_table(TABLE_SETTINGS)
-    typer.secho(tabulate(data), fg=typer.colors.CYAN)
+    table_data = tabulate(data, headers="keys")
+    typer.secho(table_data, fg=typer.colors.CYAN)
 
 
 @app.command(name="setting", short_help="Get or Set Setting")
