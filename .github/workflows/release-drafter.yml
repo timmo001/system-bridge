@@ -15,4 +15,4 @@ on:
 
 jobs:
   release-drafter:
-    uses: timmo001/workflows/.github/workflows/release-drafter-python-monorepo.yml@master
+    uses: timmo001/workflows/.github/workflows/release-drafter.yml@master
