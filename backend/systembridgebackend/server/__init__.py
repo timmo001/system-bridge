@@ -49,6 +49,10 @@ class Server(Base):
             break
 
         @task(timedelta(seconds=30))
+        async def update_frequent_data(_) -> None:
+            await update.update_frequent_data()
+
+        @task(timedelta(minutes=2))
         async def update_data(_) -> None:
             await update.update_data()
 

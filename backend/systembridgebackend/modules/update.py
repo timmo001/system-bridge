@@ -26,12 +26,14 @@ class Update(Base):
 
         self._classes = [
             BatteryUpdate(self._database),
-            CPUUpdate(self._database),
             DiskUpdate(self._database),
+            SystemUpdate(self._database),
+        ]
+        self._classes_frequent = [
+            CPUUpdate(self._database),
             MemoryUpdate(self._database),
             NetworkUpdate(self._database),
             SensorsUpdate(self._database),
-            SystemUpdate(self._database),
         ]
         BridgeUpdate(self._database)
 
@@ -45,3 +47,14 @@ class Update(Base):
         asyncio.gather(*tasks)
 
         self._logger.info("Finished updating data")
+
+    async def update_frequent_data(self) -> None:
+        """Update Data"""
+        self._logger.info("Update frequent data")
+        if not self._database.connected:
+            self._database.connect()
+
+        tasks = [cls.update_all_data() for cls in self._classes_frequent]
+        asyncio.gather(*tasks)
+
+        self._logger.info("Finished updating frequent data")
