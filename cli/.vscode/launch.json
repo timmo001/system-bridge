@@ -7,9 +7,7 @@
       "request": "launch",
       "module": "systembridgecli",
       "preLaunchTask": "Python: pip install",
-      "args": [
-        "--help"
-      ]
+      "args": ["--help"]
     }
   ]
 }
