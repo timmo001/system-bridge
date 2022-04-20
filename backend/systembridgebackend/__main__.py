@@ -77,4 +77,4 @@ if __name__ == "__main__":
     logger.addHandler(file_handler)
     logger.setLevel(log_level)
 
-    Main(database, settings)
+    Main()

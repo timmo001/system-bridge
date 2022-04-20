@@ -1,5 +1,7 @@
 """System Bridge: Server Handler - Open"""
 import os
+import subprocess
+import sys
 from webbrowser import open_new_tab
 
 from sanic.request import Request
@@ -11,7 +13,12 @@ async def handler_open(
 ) -> HTTPResponse:
     """Open a file or a URL in the default browser."""
     if "path" in request.json:
-        os.startfile(request.json["path"])
+        if sys.platform == "win32":
+            os.startfile(request.json["path"])
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, request.json["path"]])
+
         return json(
             {
                 "message": f"Opening path: {request.json['path']}",
