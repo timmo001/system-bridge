@@ -3,10 +3,26 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "Python: pip install",
+      "label": "Backend: pip install",
       "command": "pip install .",
       "options": {
         "cwd": "backend"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "CLI: pip install",
+      "command": "pip install .",
+      "options": {
+        "cwd": "cli"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "GUI: pip install",
+      "command": "pip install .",
+      "options": {
+        "cwd": "gui"
       }
     }
   ]

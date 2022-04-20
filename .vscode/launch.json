@@ -6,8 +6,26 @@
       "type": "python",
       "request": "launch",
       "module": "systembridgebackend",
-      "preLaunchTask": "Python: pip install",
+      "preLaunchTask": "Backend: pip install",
       "cwd": "${workspaceFolder}/backend",
+      "args": []
+    },
+    {
+      "name": "Python: Module",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgecli",
+      "preLaunchTask": "CLI: pip install",
+      "cwd": "${workspaceFolder}/cli",
+      "args": ["--help"]
+    },
+    {
+      "name": "Python: Module",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgegui",
+      "preLaunchTask": "GUI: pip install",
+      "cwd": "${workspaceFolder}/gui",
       "args": []
     }
   ]
