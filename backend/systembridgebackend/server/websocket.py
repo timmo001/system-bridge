@@ -31,13 +31,13 @@ class WebSocket(Base):
         if "api-key" not in data:
             self._self._logger.warn("No api-key provided")
             await self._websocket.send(
-                dumps({"error": True, "message": "No api-key provided"})
+                dumps({"type": "ERROR", "message": "No api-key provided"})
             )
             return False
         if data["api-key"] != self._settings.get_secret(SECRET_API_KEY):
             self._logger.warn("Invalid api-key")
             await self._websocket.send(
-                dumps({"error": True, "message": "Invalid api-key"})
+                dumps({"type": "ERROR", "message": "Invalid api-key"})
             )
             return False
         return True
@@ -54,7 +54,7 @@ class WebSocket(Base):
         await self._websocket.send(
             dumps(
                 {
-                    "error": False,
+                    "type": "DATA_UPDATE",
                     "message": "Data changed",
                     "module": module,
                     "data": data,
@@ -65,104 +65,126 @@ class WebSocket(Base):
     async def handler(self) -> None:
         """Handler"""
         id = str(uuid4())
-        # Loop until the connection is closed
-        while True:
-            try:
-                data = loads(await self._websocket.recv())
-            except JSONDecodeError as e:
-                self._logger.error("Invalid JSON: %s", e)
-                await self._websocket.send(
-                    dumps({"error": True, "message": "Invalid JSON"})
-                )
-                continue
-
-            self._logger.info("Received data: %s", data)
-            if data["event"] == "register-data-listener":
-                if not await self._check_api_key(data):
-                    continue
-                if "modules" not in data:
-                    self._logger.warn("No modules provided")
+        try:
+            # Loop until the connection is closed
+            while True:
+                try:
+                    data = loads(await self._websocket.recv())
+                except JSONDecodeError as e:
+                    self._logger.error("Invalid JSON: %s", e)
                     await self._websocket.send(
-                        dumps({"error": True, "message": "No modules provided"})
+                        dumps({"type": "ERROR", "message": "Invalid JSON"})
                     )
                     continue
 
-                self._logger.info(
-                    "Registering data listener: %s - %s", id, data["modules"]
-                )
+                self._logger.info("Received data: %s", data)
+                if data["event"] == "register-data-listener":
+                    if not await self._check_api_key(data):
+                        continue
+                    if "modules" not in data:
+                        self._logger.warn("No modules provided")
+                        await self._websocket.send(
+                            dumps({"type": "ERROR", "message": "No modules provided"})
+                        )
+                        continue
 
-                if await self._listeners.add_listener(
-                    id,
-                    self._data_changed,
-                    data["modules"],
-                ):
+                    self._logger.info(
+                        "Registering data listener: %s - %s", id, data["modules"]
+                    )
+
+                    if await self._listeners.add_listener(
+                        id,
+                        self._data_changed,
+                        data["modules"],
+                    ):
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    "type": "ERROR",
+                                    "message": "Listener already registered with this connection",
+                                }
+                            )
+                        )
+                        continue
+
                     await self._websocket.send(
                         dumps(
                             {
-                                "error": True,
-                                "message": "Listener already registered with this connection",
+                                "type": "DATA_LISTENER_REGISTERED",
+                                "message": "Data listener registered",
+                                "id": id,
+                                "modules": data["modules"],
                             }
                         )
                     )
-                    continue
+                elif data["event"] == "unregister-data-listener":
+                    if not await self._check_api_key(data):
+                        continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
-                            "error": False,
-                            "message": "Data listener registered",
-                            "id": id,
-                            "modules": data["modules"],
-                        }
-                    )
-                )
-            elif data["event"] == "unregister-data-listener":
-                if not await self._check_api_key(data):
-                    continue
+                    self._logger.info("Unregistering data listener %s", id)
 
-                self._logger.info("Unregistering data listener %s", id)
+                    if not await self._listeners.remove_listener(id):
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    "type": "ERROR",
+                                    "message": "Listener not registered with this connection",
+                                }
+                            )
+                        )
+                        continue
 
-                if not await self._listeners.remove_listener(id):
                     await self._websocket.send(
                         dumps(
                             {
-                                "error": True,
-                                "message": "Listener not registered with this connection",
+                                "type": "DATA_LISTENER_UNREGISTERED",
+                                "message": "Data listener unregistered",
+                                "id": id,
                             }
                         )
                     )
-                    continue
+                elif data["event"] == "get-data":
+                    if not await self._check_api_key(data):
+                        continue
+                    if "modules" not in data:
+                        self._logger.warn("No modules provided")
+                        await self._websocket.send(
+                            dumps({"type": "ERROR", "message": "No modules provided"})
+                        )
+                        continue
+                    self._logger.info("Getting data: %s", data["modules"])
 
-                await self._websocket.send(
-                    dumps(
-                        {
-                            "error": False,
-                            "message": "Data listener unregistered",
-                            "id": id,
-                        }
-                    )
-                )
-            elif data["event"] == "get-data":
-                if not await self._check_api_key(data):
-                    continue
-                if "modules" not in data:
-                    self._logger.warn("No modules provided")
                     await self._websocket.send(
-                        dumps({"error": True, "message": "No modules provided"})
+                        dumps(
+                            {
+                                "type": "DATA_GET",
+                                "message": "Getting data",
+                                "modules": data["modules"],
+                            }
+                        )
                     )
-                    continue
-                self._logger.info("Getting data: %s", data["modules"])
-                await self._websocket.send(
-                    dumps(
-                        {
-                            "error": False,
-                            "message": "Getting data",
-                            "modules": data["modules"],
-                        }
+
+                    for module in data["modules"]:
+                        data = self._database.table_data_to_ordered_dict(module)
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    "type": "DATA_UPDATE",
+                                    "message": "Data received",
+                                    "module": module,
+                                    "data": data,
+                                }
+                            )
+                        )
+
+                else:
+                    self._logger.warn("Unknown event: %s", data["event"])
+                    await self._websocket.send(
+                        dumps({"type": "ERROR", "message": "Unknown event"})
                     )
-                )
-            else:
-                self._logger.warn("Unknown event: %s", data["event"])
-                await self._websocket.send(
-                    dumps({"error": True, "message": "Unknown event"})
-                )
+        except ConnectionError as e:
+            self._logger.info("Connection closed: %s", e)
+        finally:
+            self._logger.info("Unregistering data listener %s", id)
+            await self._listeners.remove_listener(id)
+            await self._websocket.close()
