@@ -15,12 +15,6 @@ class SensorsUpdate(ModuleUpdateBase):
         super().__init__(database, "sensors")
         self._sensors = Sensors()
 
-    async def update_battery(self) -> None:
-        """Update Battery Sensors"""
-        if data := self._sensors.battery():
-            for key, value in data._asdict().items():
-                self._database.write("sensors", f"battery_{key}", value)
-
     async def update_fans(self) -> None:
         """Update Fan Sensors"""
         if data := self._sensors.fans():
@@ -35,6 +29,5 @@ class SensorsUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_battery()
         await self.update_fans()
         await self.update_temperatures()
