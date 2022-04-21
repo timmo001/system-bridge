@@ -88,17 +88,7 @@ function Layout(props: LayoutProps): ReactElement {
         />
       </Head>
       {!props.noHeader && (
-        <Header
-          {...props}
-          brand="System Bridge"
-          changeColorOnScroll={{
-            height: 200,
-            color: "primary",
-          }}
-          color="transparent"
-          fixed
-          rightLinks={<HeaderLinks />}
-        />
+        <Header brand="System Bridge" rightLinks={<HeaderLinks />} />
       )}
       {props.children}
       {!props.noFooter && (

@@ -24,9 +24,8 @@ function App({ Component, pageProps }: AppProps): ReactElement {
     document.documentElement.lang = "en-GB";
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector("#jss-server-side");
-    if (jssStyles) {
+    if (jssStyles?.parentElement)
       jssStyles.parentElement.removeChild(jssStyles);
-    }
   }, []);
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />;

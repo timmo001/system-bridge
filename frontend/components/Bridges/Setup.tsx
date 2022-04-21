@@ -22,7 +22,7 @@ const DEFAULT_BRIDGE: Partial<Bridge> = {
 
 function BridgesSetupComponent(): ReactElement {
   const [bridgeEdit, setBridgeEdit] = useState<EditBridge>();
-  const [bridges, setBridges] = useState<Array<Partial<Bridge>>>();
+  const [bridges, setBridges] = useState<Array<Bridge>>();
   const [settings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
 
@@ -87,25 +87,27 @@ function BridgesSetupComponent(): ReactElement {
             >
               Bridges
             </Typography>
-
-            <List>
-              {bridges.map((bridge: Bridge) => (
-                <ListItem
-                  key={bridge.key}
-                  button
-                  onClick={() => handleItemClick(bridge, true)}
-                >
-                  <ListItemText
-                    primary={`${bridge.name} ${
-                      bridge.apiKey ? "" : "(Not Configured)"
-                    }`}
-                    secondary={`${bridge.host}:${bridge.port}`}
-                    color={bridge.apiKey ? "primary" : "error"}
-                  />
-                </ListItem>
-              ))}
-            </List>
-
+            {bridges ? (
+              <List>
+                {bridges.map((bridge: Bridge) => (
+                  <ListItem
+                    key={bridge.key}
+                    button
+                    onClick={() => handleItemClick(bridge, true)}
+                  >
+                    <ListItemText
+                      primary={`${bridge.name} ${
+                        bridge.apiKey ? "" : "(Not Configured)"
+                      }`}
+                      secondary={`${bridge.host}:${bridge.port}`}
+                      color={bridge.apiKey ? "primary" : "error"}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              ""
+            )}
             <ListItem
               button
               onClick={() => handleItemClick(DEFAULT_BRIDGE, false)}

@@ -18,6 +18,7 @@ import {
   OutlinedInput,
   Switch,
   TextField,
+  useTheme,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
 import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
@@ -37,10 +38,7 @@ interface ItemProps extends SectionProps {
   itemKey: string;
 }
 
-function Item({
-  sectionKey,
-  itemKey,
-}: ItemProps): ReactElement {
+function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
   const [information] = useInformation();
   const [settings, setSettings] = useSettings();
 
@@ -117,6 +115,8 @@ function Item({
     if (typeof item?.defaultValue === "string") return String(value);
     return value;
   }, [item?.value, item?.defaultValue]);
+
+  const theme = useTheme();
 
   if (!item) return <></>;
   const { name, description, icon, containerDisabled }: ConfigurationItem =
