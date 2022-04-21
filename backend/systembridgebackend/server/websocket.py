@@ -102,6 +102,8 @@ class WebSocket(Base):
                                 {
                                     "type": "ERROR",
                                     "message": "Listener already registered with this connection",
+                                    "id": id,
+                                    "modules": data["modules"],
                                 }
                             )
                         )
@@ -180,7 +182,13 @@ class WebSocket(Base):
                 else:
                     self._logger.warn("Unknown event: %s", data["event"])
                     await self._websocket.send(
-                        dumps({"type": "ERROR", "message": "Unknown event"})
+                        dumps(
+                            {
+                                "type": "ERROR",
+                                "message": "Unknown event",
+                                "event": data["event"],
+                            }
+                        )
                     )
         except ConnectionError as e:
             self._logger.info("Connection closed: %s", e)
