@@ -24,6 +24,17 @@
       "options": {
         "cwd": "gui"
       }
+    },
+    {
+      "type": "npm",
+      "script": "Frontend: install",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "install",
+      "detail": "install dependencies from package",
+      "options": {
+        "cwd": "frontend"
+      }
     }
   ]
 }

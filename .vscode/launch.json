@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+
     {
       "name": "Backend",
       "type": "python",
@@ -27,6 +28,15 @@
       "preLaunchTask": "GUI: pip install",
       "cwd": "${workspaceFolder}/gui",
       "args": []
+    },
+    {
+      "name": "Frontend",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "preLaunchTask": "Frontend: install",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeArgs": ["start:dev"]
     }
   ]
 }
