@@ -2,10 +2,8 @@ import React, {
   cloneElement,
   ReactElement,
   useCallback,
-  useEffect,
   useState,
 } from "react";
-import clsx from "clsx";
 import {
   AppBar,
   Box,
@@ -15,7 +13,6 @@ import {
   Grid,
   Hidden,
   IconButton,
-  PropTypes,
   Toolbar,
   Typography,
   useScrollTrigger,
@@ -60,7 +57,7 @@ function Header({ rightLinks, brand }: HeaderProps): ReactElement {
     <>
       <ElevationScroll>
         <>
-          <AppBar>
+          <AppBar color="transparent" elevation={0}>
             <Container maxWidth="xl" sx={{ padding: 0 }}>
               <Toolbar
                 sx={{
