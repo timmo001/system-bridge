@@ -1,6 +1,7 @@
 """System Bridge: Update Battery"""
-from systembridgebackend.modules.base import ModuleUpdateBase
+from systembridgebackend.common import camel_to_snake
 from systembridgebackend.database import Database
+from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.battery import Battery
 
 
@@ -19,12 +20,15 @@ class BatteryUpdate(ModuleUpdateBase):
         """Update Battery Sensors"""
         if data := self._battery.sensors():
             for key, value in data._asdict().items():
+                # From status
+                if key == "percent":
+                    continue
                 self._database.write("battery", f"sensors_{key}", value)
 
     async def update_status(self) -> None:
         """Update Battery Status"""
         for key, value in self._battery.status().items():
-            self._database.write("battery", key, value)
+            self._database.write("battery", camel_to_snake(key), value)
 
     async def update_all_data(self) -> None:
         """Update data"""

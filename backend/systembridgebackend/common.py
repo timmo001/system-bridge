@@ -1,9 +1,15 @@
 """System Bridge: Common"""
 from __future__ import annotations
+import re
 
 COLUMN_KEY = "key"
 COLUMN_VALUE = "value"
 COLUMN_TIMESTAMP = "timestamp"
+
+
+def camel_to_snake(name):
+    name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
 def convert_string_to_correct_type(
