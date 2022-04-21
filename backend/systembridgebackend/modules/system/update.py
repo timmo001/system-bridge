@@ -1,4 +1,6 @@
 """System Bridge: Update System"""
+from itertools import chain
+
 from systembridgebackend.database import Database
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.system import System
@@ -21,7 +23,10 @@ class SystemUpdate(ModuleUpdateBase):
 
     async def update_load_average(self) -> None:
         """Update load average"""
-        self._database.write("system", "load_average", self._system.load_average())
+        avg = self._system.load_average()
+        temp = list(chain(*avg))
+        result = sum(temp) / len(avg)
+        self._database.write("system", "load_average", result)
 
     async def update_users(self) -> None:
         """Update users"""
