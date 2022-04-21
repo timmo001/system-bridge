@@ -21,6 +21,7 @@ from systembridgebackend.server.media import (
 )
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
+from systembridgebackend.server.websocket import WebSocket
 from systembridgebackend.settings import Settings, SECRET_API_KEY, SETTING_PORT_API
 
 
@@ -105,17 +106,12 @@ class Server(Base):
 
         async def handler_websocket(
             _: Request,
-            websocket,
+            ws,
         ) -> None:
-            """WebSocket"""
-            while True:
-                data = "hello!"
-                self._logger.info("Sending: %s", data)
-                await websocket.send(data)
-                data = await websocket.recv()
-                self._logger.info("Received: %s", data)
+            """WebSocket handler"""
+            websocket = WebSocket(self._database, self._settings, ws)
+            await websocket.handler()
 
-        self._logger.info(scheduler.task_info())
         self._server.add_route(
             handler_data_all,
             "/api/data/<table:str>",
@@ -171,6 +167,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=self._settings.get(SETTING_PORT_API),
-            debug=True,
+            debug=False,
+            auto_reload=True,
             motd=False,
         )
