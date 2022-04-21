@@ -7,7 +7,12 @@ from sqlite3 import Connection, connect
 from time import time
 
 from systembridgebackend import Base
-from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgebackend.common import (
+    convert_string_to_correct_type,
+    COLUMN_KEY,
+    COLUMN_TIMESTAMP,
+    COLUMN_VALUE,
+)
 
 
 class Database(Base):
@@ -140,7 +145,7 @@ class Database(Base):
         for item in data_dict:
             data = {
                 **data,
-                item["key"]: item["value"],
+                item["key"]: convert_string_to_correct_type(item["value"]),
                 "last_updated": {
                     **data["last_updated"],
                     item["key"]: item["timestamp"],
