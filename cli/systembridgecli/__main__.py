@@ -15,13 +15,13 @@ database = Database()
 settings = Settings(database)
 
 
-@app.command(name="api-key", short_help="Get API Key")
+@app.command(name="api-key", short_help="Get api key")
 def api_key() -> None:
     """Get API Key"""
     secret(SECRET_API_KEY)
 
 
-@app.command(name="api-port", short_help="Get API Port")
+@app.command(name="api-port", short_help="Get api port")
 def api_port() -> None:
     """Get API Port"""
     setting(SETTING_PORT_API)
@@ -56,7 +56,7 @@ def settings_all():
     typer.secho(table_data, fg=typer.colors.CYAN)
 
 
-@app.command(name="setting", short_help="Get or Set Setting")
+@app.command(name="setting", short_help="Get or set setting")
 def setting(
     key: str,
     set_value: bool = False,
@@ -71,7 +71,7 @@ def setting(
         typer.secho(f"Could not find {key}", err=True, fg=typer.colors.RED)
 
 
-@app.command(name="secret", short_help="Get or Set Secret")
+@app.command(name="secret", short_help="Get or set secret")
 def secret(
     key: str,
     set_value: bool = False,
