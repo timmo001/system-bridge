@@ -20,6 +20,7 @@ class WebSocket(Base):
         websocket,
     ) -> None:
         """Initialize"""
+        super().__init__()
         self._database = database
         self._settings = settings
         self._listeners = listeners
@@ -32,13 +33,13 @@ class WebSocket(Base):
     ) -> bool:
         """Check API key"""
         if "api-key" not in data:
-            self._self._logger.warn("No api-key provided")
+            self._self._logger.warning("No api-key provided")
             await self._websocket.send(
                 dumps({"type": "ERROR", "message": "No api-key provided"})
             )
             return False
         if data["api-key"] != self._settings.get_secret(SECRET_API_KEY):
-            self._logger.warn("Invalid api-key")
+            self._logger.warning("Invalid api-key")
             await self._websocket.send(
                 dumps({"type": "ERROR", "message": "Invalid api-key"})
             )
@@ -67,14 +68,14 @@ class WebSocket(Base):
 
     async def handler(self) -> None:
         """Handler"""
-        id = str(uuid4())
+        listener_id = str(uuid4())
         try:
             # Loop until the connection is closed
             while True:
                 try:
                     data = loads(await self._websocket.recv())
-                except JSONDecodeError as e:
-                    self._logger.error("Invalid JSON: %s", e)
+                except JSONDecodeError as error:
+                    self._logger.error("Invalid JSON: %s", error)
                     await self._websocket.send(
                         dumps({"type": "ERROR", "message": "Invalid JSON"})
                     )
@@ -85,18 +86,20 @@ class WebSocket(Base):
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:
-                        self._logger.warn("No modules provided")
+                        self._logger.warning("No modules provided")
                         await self._websocket.send(
                             dumps({"type": "ERROR", "message": "No modules provided"})
                         )
                         continue
 
                     self._logger.info(
-                        "Registering data listener: %s - %s", id, data["modules"]
+                        "Registering data listener: %s - %s",
+                        listener_id,
+                        data["modules"],
                     )
 
                     if await self._listeners.add_listener(
-                        id,
+                        listener_id,
                         self._data_changed,
                         data["modules"],
                     ):
@@ -105,7 +108,7 @@ class WebSocket(Base):
                                 {
                                     "type": "ERROR",
                                     "message": "Listener already registered with this connection",
-                                    "id": id,
+                                    "id": listener_id,
                                     "modules": data["modules"],
                                 }
                             )
@@ -117,7 +120,7 @@ class WebSocket(Base):
                             {
                                 "type": "DATA_LISTENER_REGISTERED",
                                 "message": "Data listener registered",
-                                "id": id,
+                                "id": listener_id,
                                 "modules": data["modules"],
                             }
                         )
@@ -126,9 +129,9 @@ class WebSocket(Base):
                     if not await self._check_api_key(data):
                         continue
 
-                    self._logger.info("Unregistering data listener %s", id)
+                    self._logger.info("Unregistering data listener %s", listener_id)
 
-                    if not await self._listeners.remove_listener(id):
+                    if not await self._listeners.remove_listener(listener_id):
                         await self._websocket.send(
                             dumps(
                                 {
@@ -144,7 +147,7 @@ class WebSocket(Base):
                             {
                                 "type": "DATA_LISTENER_UNREGISTERED",
                                 "message": "Data listener unregistered",
-                                "id": id,
+                                "id": listener_id,
                             }
                         )
                     )
@@ -152,7 +155,7 @@ class WebSocket(Base):
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:
-                        self._logger.warn("No modules provided")
+                        self._logger.warning("No modules provided")
                         await self._websocket.send(
                             dumps({"type": "ERROR", "message": "No modules provided"})
                         )
@@ -183,7 +186,7 @@ class WebSocket(Base):
                         )
 
                 else:
-                    self._logger.warn("Unknown event: %s", data["event"])
+                    self._logger.warning("Unknown event: %s", data["event"])
                     await self._websocket.send(
                         dumps(
                             {
@@ -196,6 +199,6 @@ class WebSocket(Base):
         except ConnectionError as e:
             self._logger.info("Connection closed: %s", e)
         finally:
-            self._logger.info("Unregistering data listener %s", id)
-            await self._listeners.remove_listener(id)
+            self._logger.info("Unregistering data listener %s", listener_id)
+            await self._listeners.remove_listener(listener_id)
             await self._websocket.close()

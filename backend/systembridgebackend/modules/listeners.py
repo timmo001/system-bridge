@@ -82,7 +82,7 @@ class Listeners(Base):
         """Refresh data by module"""
         self._logger.info("Refresh data by module: %s", module)
         if module not in self._implemented_modules:
-            self._logger.warn("Module to refresh not implemented: %s", module)
+            self._logger.warning("Module to refresh not implemented: %s", module)
             return
 
         new_data = self._database.table_data_to_ordered_dict(module)
