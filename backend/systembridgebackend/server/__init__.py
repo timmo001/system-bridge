@@ -61,14 +61,12 @@ class Server(Base):
         @task(timedelta(minutes=2))
         async def update_data(_) -> None:
             """Update data"""
-            await self._update.update_data()
-            await self._listeners.refresh_data()
+            await self._update.update_data(self._data_updated)
 
         @task(timedelta(seconds=30))
         async def update_frequent_data(_) -> None:
             """Update frequent data"""
-            await self._update.update_frequent_data()
-            await self._listeners.refresh_data()
+            await self._update.update_frequent_data(self._data_updated)
 
         @auth.key_required
         async def handler_data_all(
@@ -171,6 +169,13 @@ class Server(Base):
         self._server.static("/", "../frontend/out")
         self._server.add_websocket_route(handler_websocket, "/api/websocket")
 
+    async def _data_updated(
+        self,
+        module: str,
+    ) -> None:
+        """Data updated"""
+        await self._listeners.refresh_data_by_module(module)
+
     def start(self) -> None:
         """Start Server"""
         self._logger.info("Starting server")
@@ -181,3 +186,8 @@ class Server(Base):
             auto_reload=True,
             motd=False,
         )
+
+    def stop(self) -> None:
+        """Stop Server"""
+        self._logger.info("Stopping server")
+        self._server.stop()
