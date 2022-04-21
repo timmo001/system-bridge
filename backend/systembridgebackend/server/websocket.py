@@ -111,6 +111,7 @@ class WebSocket(Base):
                         {
                             "error": False,
                             "message": "Data listener registered",
+                            "id": id,
                             "modules": data["modules"],
                         }
                     )
@@ -118,19 +119,26 @@ class WebSocket(Base):
             elif data["event"] == "unregister-data-listener":
                 if not await self._check_api_key(data):
                     continue
-                if "modules" not in data:
-                    self._logger.warn("No modules provided")
+
+                self._logger.info("Unregistering data listener %s", id)
+
+                if not await self._listeners.remove_listener(id):
                     await self._websocket.send(
-                        dumps({"error": True, "message": "No modules provided"})
+                        dumps(
+                            {
+                                "error": True,
+                                "message": "Listener not registered with this connection",
+                            }
+                        )
                     )
                     continue
-                self._logger.info("Unregistering data listener %s", data["modules"])
+
                 await self._websocket.send(
                     dumps(
                         {
                             "error": False,
                             "message": "Data listener unregistered",
-                            "modules": data["modules"],
+                            "id": id,
                         }
                     )
                 )

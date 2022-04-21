@@ -91,3 +91,17 @@ class Listeners(Base):
                         "Sending '%s' data to listener: %s", module, listener.id
                     )
                     await listener.data_changed_callback(module, new_data)
+
+    async def remove_listener(
+        self,
+        id: str,
+    ) -> bool:
+        """Remove listener"""
+        for listener in self._registered_listeners:
+            if listener.id == id:
+                self._registered_listeners.remove(listener)
+                self._logger.info("Removed listener: %s", id)
+                return True
+
+        self._logger.warning("Listener not found: %s", id)
+        return False
