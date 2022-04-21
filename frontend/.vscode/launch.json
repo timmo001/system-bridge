@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Start Frontend",
+      "runtimeExecutable": "yarn",
+      "preLaunchTask": "install",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["start:dev"]
+    }
+  ]
+}
