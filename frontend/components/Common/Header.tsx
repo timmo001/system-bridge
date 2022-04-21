@@ -13,7 +13,8 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Menu } from "@mui/icons-material";
+import { Icon } from "@mdi/react";
+import { mdiMenu } from "@mdi/js";
 
 import { useInformation } from "../Contexts/Information";
 import useStyles from "../../assets/jss/components/header";
@@ -142,7 +143,7 @@ function Header(props: HeaderProps): ReactElement {
                 onClick={handleDrawerToggle}
                 size="large"
               >
-                <Menu />
+                <Icon path={mdiMenu} size={1} />
               </IconButton>
             </Hidden>
           </Toolbar>
