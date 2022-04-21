@@ -7,11 +7,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Theme,
   Typography,
 } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
@@ -21,14 +18,6 @@ import BridgeEdit, { EditBridge } from "./Edit";
 const DEFAULT_BRIDGE: Partial<Bridge> = {
   port: 9170,
 };
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    title: {
-      margin: theme.spacing(2, 1.5, 6),
-    },
-  })
-);
 
 function BridgesSetupComponent(): ReactElement {
   const [bridgeEdit, setBridgeEdit] = useState<EditBridge>();
@@ -72,8 +61,6 @@ function BridgesSetupComponent(): ReactElement {
     setBridgeEdit(undefined);
   }
 
-  const classes = useStyles();
-
   return (
     <>
       <Container maxWidth="lg">
@@ -83,7 +70,13 @@ function BridgesSetupComponent(): ReactElement {
           </Grid>
         ) : (
           <>
-            <Typography className={classes.title} component="h2" variant="h3">
+            <Typography
+              component="h2"
+              variant="h3"
+              sx={{
+                margin: theme.spacing(2, 1.5, 6),
+              }}
+            >
               Bridges
             </Typography>
 

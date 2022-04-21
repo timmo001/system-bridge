@@ -62,6 +62,7 @@ export async function getSettings(
   Object.keys(s).forEach((sectionKey: string) => {
     Object.keys(s[sectionKey].items).forEach(async (itemKey: string) => {
       const settingValue = response.data.find(({ key }: Setting) => {
+        if (!key) return;
         const keys = key.split("-");
         return keys[0] === sectionKey && keys[1] === itemKey;
       })?.value;

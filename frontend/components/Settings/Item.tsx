@@ -18,13 +18,10 @@ import {
   OutlinedInput,
   Switch,
   TextField,
-  Theme,
 } from "@mui/material";
+import { Icon } from "@mdi/react";
 import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
 import axios from "axios";
-import createStyles from "@mui/styles/createStyles";
-import Icon from "@mdi/react";
-import makeStyles from "@mui/styles/makeStyles";
 
 import {
   Configuration,
@@ -35,21 +32,6 @@ import { SectionProps } from "./Section";
 import { Setting } from "../../assets/entities/settings.entity";
 import { useInformation } from "components/Contexts/Information";
 import { useSettings } from "../Contexts/Settings";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    button: {
-      margin: theme.spacing(-1, -0.5),
-    },
-    disabled: {
-      userSelect: "none",
-    },
-    secondaryAction: {
-      width: 420,
-      textAlign: "end",
-    },
-  })
-);
 
 interface ItemProps extends SectionProps {
   itemKey: string;
@@ -139,8 +121,6 @@ function Item({
     return value;
   }, [item?.value, item?.defaultValue]);
 
-  const classes = useStyles();
-
   if (!item) return <></>;
   const { name, description, icon, containerDisabled }: ConfigurationItem =
     item;
@@ -148,15 +128,15 @@ function Item({
   return (
     <ListItem>
       <ListItemIcon>
-        <Icon title={name} size={1} path={icon} />
+        <Icon id="icon" title={name} size={1} path={icon} />
       </ListItemIcon>
       <ListItemText
-        className={classes.disabled}
         style={{ maxWidth: "64%" }}
         primary={name}
         secondary={description}
+        sx={{ userSelect: "none" }}
       />
-      <ListItemSecondaryAction className={classes.secondaryAction}>
+      <ListItemSecondaryAction sx={{ width: 420, textAlign: "end" }}>
         {typeof value === "boolean" ? (
           <Switch
             edge="end"
@@ -173,21 +153,27 @@ function Item({
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
-                    className={classes.button}
                     aria-label="Generate Api Key"
                     onClick={handleGenerateApiKey}
                     edge="end"
                     size="large"
+                    sx={{ margin: theme.spacing(-1, -0.5) }}
                   >
-                    <Icon title="Generate API Key" size={1} path={mdiCached} />
+                    <Icon
+                      id="generate-api-key"
+                      title="Generate API Key"
+                      size={1}
+                      path={mdiCached}
+                    />
                   </IconButton>
                   <IconButton
-                    className={classes.button}
                     aria-label="Copy to clipboard"
                     onClick={() => handleCopyToClipboard(value)}
                     size="large"
+                    sx={{ margin: theme.spacing(-1, -0.5) }}
                   >
                     <Icon
+                      id="copy-to-clipboard"
                       title="Copy to clipboard"
                       size={0.8}
                       path={mdiContentCopy}
@@ -212,6 +198,7 @@ function Item({
                     size="large"
                   >
                     <Icon
+                      id="copy-to-clipboard"
                       title="Copy to clipboard"
                       size={0.8}
                       path={showPassword ? mdiEye : mdiEyeOff}

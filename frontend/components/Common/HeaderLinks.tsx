@@ -2,7 +2,14 @@ import React, { ReactElement } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useRouter } from "next/dist/client/router";
-import { Button, List, ListItem, Tooltip } from "@mui/material";
+import {
+  Button,
+  List,
+  Grid,
+  Tooltip,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   mdiFileDocumentMultiple,
@@ -12,107 +19,112 @@ import {
 } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import useStyles from "../../assets/jss/components/headerLinks";
-
 function HeaderLinks(): ReactElement {
   const query = useRouter().query;
 
-  const classes = useStyles();
   const theme = useTheme();
   return (
-    <List className={classes.list}>
-      <ListItem className={classes.listItem}>
+    <Grid container alignContent="center" spacing={2}>
+      <Grid item>
         <Link href={{ pathname: "/app/data", query }} passHref>
-          <Button variant="text" className={classes.navLink}>
-            <span className={classes.listItemText}>Data</span>
+          <Button color="inherit" variant="text">
+            <Typography component="span">Data</Typography>
           </Button>
         </Link>
-      </ListItem>
-      <ListItem className={classes.listItem}>
+      </Grid>
+      <Grid item>
         <Link href={{ pathname: "/app/settings", query }} passHref>
-          <Button variant="text" className={classes.navLink}>
-            <span className={classes.listItemText}>Settings</span>
+          <Button color="inherit" variant="text">
+            <Typography component="span">Settings</Typography>
           </Button>
         </Link>
-      </ListItem>
-      <ListItem className={clsx(classes.listItem, classes.divider)} />
-      <ListItem className={classes.listItem}>
+      </Grid>
+      <Grid item sx={{ padding: theme.spacing(1) }} />
+      <Grid item>
         <Tooltip
           title="Suggest a Feature / Report a Bug"
-          classes={{ tooltip: classes.tooltip }}
+          // classes={{ tooltip: classes.tooltip }}
         >
-          <Button
-            variant="text"
-            className={classes.navLink}
+          <a
             href="https://github.com/timmo001/system-bridge/issues"
             target="_blank"
+            rel="noreferrer"
           >
-            <Icon
-              color={theme.palette.text.primary}
-              path={mdiFileDocumentMultiple}
-              size={1}
-            />
-          </Button>
+            <IconButton>
+              <Icon
+                id="issues"
+                color={theme.palette.text.primary}
+                path={mdiFileDocumentMultiple}
+                size={1}
+              />
+            </IconButton>
+          </a>
         </Tooltip>
-      </ListItem>
-      <ListItem className={classes.listItem}>
+      </Grid>
+      <Grid item>
         <Tooltip
           title="Discussions/Help"
-          classes={{ tooltip: classes.tooltip }}
+          // classes={{ tooltip: classes.tooltip }}
         >
-          <Button
-            variant="text"
-            className={classes.navLink}
+          <a
             href="https://github.com/timmo001/system-bridge/discussions"
             target="_blank"
+            rel="noreferrer"
           >
-            <Icon
-              color={theme.palette.text.primary}
-              path={mdiForumOutline}
-              size={1}
-            />
-          </Button>
+            <IconButton>
+              <Icon
+                id="discussions"
+                color={theme.palette.text.primary}
+                path={mdiForumOutline}
+                size={1}
+              />
+            </IconButton>
+          </a>
         </Tooltip>
-      </ListItem>
-      <ListItem className={classes.listItem}>
+      </Grid>
+      <Grid item>
         <Tooltip
           title="Contribute to the Website/Documentation"
-          classes={{ tooltip: classes.tooltip }}
+          // classes={{ tooltip: classes.tooltip }}
         >
-          <Button
-            variant="text"
-            className={classes.navLink}
+          <a
             href="https://github.com/timmo001/system-bridge-site"
             target="_blank"
+            rel="noreferrer"
           >
-            <Icon
-              color={theme.palette.text.primary}
-              path={mdiNotebookEditOutline}
-              size={1}
-            />
-          </Button>
+            <IconButton>
+              <Icon
+                id="website"
+                color={theme.palette.text.primary}
+                path={mdiNotebookEditOutline}
+                size={1}
+              />
+            </IconButton>
+          </a>
         </Tooltip>
-      </ListItem>
-      <ListItem className={classes.listItem}>
+      </Grid>
+      <Grid item>
         <Tooltip
           title="Contribute to the Application"
-          classes={{ tooltip: classes.tooltip }}
+          // classes={{ tooltip: classes.tooltip }}
         >
-          <Button
-            variant="text"
-            className={classes.navLink}
+          <a
             href="https://github.com/timmo001/system-bridge"
             target="_blank"
+            rel="noreferrer"
           >
-            <Icon
-              color={theme.palette.text.primary}
-              path={mdiGithub}
-              size={1}
-            />
-          </Button>
+            <IconButton>
+              <Icon
+                id="github"
+                color={theme.palette.text.primary}
+                path={mdiGithub}
+                size={1}
+              />
+            </IconButton>
+          </a>
         </Tooltip>
-      </ListItem>{" "}
-    </List>
+      </Grid>
+    </Grid>
   );
 }
 

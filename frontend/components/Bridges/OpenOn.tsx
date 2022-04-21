@@ -14,34 +14,12 @@ import {
   Container,
   Grid,
   TextField,
-  Theme,
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { useSettings } from "../Contexts/Settings";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    title: {
-      margin: theme.spacing(2, 1.5, 6),
-    },
-    subtitle: {
-      margin: theme.spacing(1, 2, 2),
-    },
-    input: {
-      margin: theme.spacing(2, 2.5),
-      width: "calc(100% - 32px)",
-    },
-    button: {
-      margin: theme.spacing(6, 2.5, 2),
-      width: "calc(100% - 32px)",
-    },
-  })
-);
 
 function BridgesOpenOnComponent(): ReactElement {
   const query = useRouter().query;
@@ -94,8 +72,6 @@ function BridgesOpenOnComponent(): ReactElement {
     }
   }, [setup, handleSetup, query]);
 
-  const classes = useStyles();
-
   return (
     <>
       <Container maxWidth="lg">
@@ -105,12 +81,15 @@ function BridgesOpenOnComponent(): ReactElement {
           </Grid>
         ) : (
           <>
-            <Typography className={classes.title} component="h2" variant="h3">
+            <Typography
+              component="h2"
+              variant="h3"
+              sx={{ margin: theme.spacing(2, 1.5, 6) }}
+            >
               Open URL On..
             </Typography>
 
             <Autocomplete
-              className={classes.input}
               id="bridge"
               options={bridges}
               value={bridgeSelected}
@@ -121,10 +100,13 @@ function BridgesOpenOnComponent(): ReactElement {
               onChange={(_event: ChangeEvent, value: Bridge) =>
                 setBridgeSelected(value)
               }
+              sx={{
+                margin: theme.spacing(2, 2.5),
+                width: "calc(100% - 32px)",
+              }}
             />
 
             <TextField
-              className={classes.input}
               fullWidth
               id="url"
               label="URL"
@@ -132,14 +114,21 @@ function BridgesOpenOnComponent(): ReactElement {
               type="url"
               value={url}
               variant="outlined"
+              sx={{
+                margin: theme.spacing(2, 2.5),
+                width: "calc(100% - 32px)",
+              }}
             />
 
             <Button
-              className={classes.button}
               color="primary"
               disabled={!bridgeSelected || !url}
               variant="contained"
               onClick={handleOpenOn}
+              sx={{
+                margin: theme.spacing(6, 2.5, 2),
+                width: "calc(100% - 32px)",
+              }}
             >
               Send
             </Button>

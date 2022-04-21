@@ -6,16 +6,12 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Theme,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
 import { useRouter } from "next/dist/client/router";
 import axios, { AxiosResponse } from "axios";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { Information } from "assets/entities/information.entity";
@@ -35,22 +31,6 @@ interface BridgeEditProps {
   handleClose: () => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    delete: {
-      marginLeft: 2,
-      backgroundColor: red[600],
-    },
-    input: {
-      margin: theme.spacing(1, 0),
-    },
-    testingMessage: {
-      margin: theme.spacing(0, 1),
-      flex: 1,
-      textAlign: "right",
-    },
-  })
-);
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
   const [bridge, setBridge] = useState<Partial<Bridge>>(
     props.bridgeEdit.bridge
@@ -140,7 +120,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         text: `Error testing bridge: ${response.status} - ${response.data}`,
         error: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error:", e);
       setTestingMessage({
         text: `Error testing bridge: ${e.message}`,
@@ -150,7 +130,6 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
     return null;
   }
 
-  const classes = useStyles();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
@@ -166,7 +145,6 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       </DialogTitle>
       <DialogContent>
         <TextField
-          className={classes.input}
           autoFocus
           fullWidth
           id="name"
@@ -175,10 +153,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.name || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="host"
           label="Host"
@@ -186,10 +164,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.host || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="port"
           label="Port"
@@ -197,10 +175,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="number"
           value={bridge.port || 9170}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="apiKey"
           label="API Key"
@@ -208,21 +186,26 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.apiKey || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
       </DialogContent>
       <DialogActions>
         <Button
-          className={classes.delete}
           onClick={handleDelete}
           color="inherit"
           variant="contained"
+          sx={{ margin: theme.spacing(1, 0) }}
         >
           Delete
         </Button>
         <Typography
-          className={classes.testingMessage}
           color={testingMessage.error ? "error" : "textPrimary"}
           variant="subtitle2"
+          sx={{
+            margin: theme.spacing(0, 1),
+            flex: 1,
+            textAlign: "right",
+          }}
         >
           {testingMessage.text}
         </Typography>

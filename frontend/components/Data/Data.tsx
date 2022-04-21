@@ -1,9 +1,6 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/dist/client/router";
-import { CircularProgress, Grid, Tab, Tabs, Theme } from "@mui/material";
-
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
+import { CircularProgress, Grid, Tab, Tabs, useTheme } from "@mui/material";
 
 import { Event } from "../../assets/entities/event.entity";
 import { useSettings } from "../Contexts/Settings";
@@ -38,24 +35,6 @@ const items: Array<WorkerData> = services.map((service: string) => ({
   method: "findAll",
   observe: false,
 }));
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      padding: theme.spacing(2),
-    },
-    center: {
-      textAlign: "center",
-    },
-    disabled: {
-      userSelect: "none",
-    },
-    secondaryAction: {
-      width: 400,
-      textAlign: "end",
-    },
-  })
-);
 
 function a11yProps(index: any) {
   return {
@@ -169,22 +148,18 @@ function DataComponent(): ReactElement {
     }
   }, [setup, handleSetup, query]);
 
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <>
       <Grid
         container
-        className={classes.root}
         direction="column"
         spacing={2}
         alignItems="stretch"
+        sx={{ padding: theme.spacing(2) }}
       >
-        {!settings ? (
-          <Grid container direction="row" justifyContent="center">
-            <CircularProgress />
-          </Grid>
-        ) : (
+        {settings ? (
           <Grid container direction="row" item xs>
             <Grid item>
               <Tabs
@@ -242,6 +217,15 @@ function DataComponent(): ReactElement {
                 ""
               )}
             </Grid>
+          </Grid>
+        ) : (
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(8, 0, 14) }}
+          >
+            <CircularProgress />
           </Grid>
         )}
       </Grid>

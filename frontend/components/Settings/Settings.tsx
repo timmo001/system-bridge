@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useCallback, useState } from "react";
 import { useRouter } from "next/dist/client/router";
 import {
   Button,
@@ -10,47 +10,15 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Paper,
-  Theme,
   Typography,
+  useTheme,
 } from "@mui/material";
+import { Icon } from "@mdi/react";
 import { mdiRestart } from "@mdi/js";
-import createStyles from "@mui/styles/createStyles";
-import Icon from "@mdi/react";
-import makeStyles from "@mui/styles/makeStyles";
 
 import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import Section from "./Section";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      padding: theme.spacing(2),
-    },
-    center: {
-      textAlign: "center",
-    },
-    disabled: {
-      userSelect: "none",
-    },
-    secondaryAction: {
-      width: 400,
-      textAlign: "end",
-    },
-    smallButton: {
-      margin: theme.spacing(-1, -0.5),
-    },
-    spacer: {
-      height: theme.spacing(6),
-    },
-    headerItem: {
-      margin: theme.spacing(1, 1, 0),
-    },
-    version: {
-      margin: theme.spacing(3, 2, 0),
-    },
-  })
-);
 
 function Settings(): ReactElement {
   const [restartRequired, setRestartRequired] = useState<boolean>(false);
@@ -58,11 +26,11 @@ function Settings(): ReactElement {
 
   const query = useRouter().query;
 
-  function handleServerRestartRequired(): void {
+  const handleServerRestartRequired = useCallback(() => {
     setRestartRequired(true);
-  }
+  }, []);
 
-  function handleRestartServer(): void {
+  const handleRestartServer = useCallback(() => {
     const ws = new WebSocketConnection(
       Number(query.wsPort) || 9172,
       String(query.apiKey),
@@ -73,21 +41,29 @@ function Settings(): ReactElement {
         if (typeof window !== "undefined") window.close();
       }
     );
-  }
+  }, [query]);
 
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <>
       <Grid
         container
-        className={classes.root}
         direction="column"
         spacing={2}
         alignItems="stretch"
+        sx={{
+          padding: theme.spacing(2),
+        }}
       >
         <Grid container direction="row" item xs={12}>
-          <Grid item xs={4} className={classes.disabled}>
+          <Grid
+            item
+            xs={4}
+            sx={{
+              userSelect: "none",
+            }}
+          >
             <Typography component="h3" variant="h5">
               Server
             </Typography>
@@ -97,16 +73,25 @@ function Settings(): ReactElement {
               <List>
                 <ListItem>
                   <ListItemIcon>
-                    <Icon title="Restart Server" size={1} path={mdiRestart} />
+                    <Icon
+                      id="restart-server"
+                      title="Restart Server"
+                      size={1}
+                      path={mdiRestart}
+                    />
                   </ListItemIcon>
                   <ListItemText
-                    className={classes.disabled}
                     primary={`Restart Server${
                       restartRequired ? " (Restart Required)" : ""
                     }`}
                     secondary="Restart the server. This is required when changing any network settings."
+                    sx={{
+                      userSelect: "none",
+                    }}
                   />
-                  <ListItemSecondaryAction className={classes.secondaryAction}>
+                  <ListItemSecondaryAction
+                    sx={{ width: 400, textAlign: "end" }}
+                  >
                     <Button
                       aria-label="Restart Server"
                       color="primary"
@@ -114,6 +99,7 @@ function Settings(): ReactElement {
                       onClick={handleRestartServer}
                     >
                       <Icon
+                        id="restart-server"
                         title="Restart Server"
                         size={0.8}
                         path={mdiRestart}
@@ -127,7 +113,12 @@ function Settings(): ReactElement {
           </Grid>
         </Grid>
         {!settings ? (
-          <Grid container direction="row" justifyContent="center">
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(10, 0, 8) }}
+          >
             <CircularProgress />
           </Grid>
         ) : (

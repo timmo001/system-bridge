@@ -1,4 +1,10 @@
-import React, { ReactElement, useCallback, useEffect, useState } from "react";
+import React, {
+  cloneElement,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import clsx from "clsx";
 import {
   AppBar,
@@ -12,160 +18,142 @@ import {
   PropTypes,
   Toolbar,
   Typography,
+  useScrollTrigger,
+  useTheme,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
 import { mdiMenu } from "@mdi/js";
 
 import { useInformation } from "../Contexts/Information";
-import useStyles from "../../assets/jss/components/header";
-
-type ColorExpanded = PropTypes.Color | "transparent";
-
-interface ChangeColorOnScroll {
-  color: ColorExpanded;
-  height: string | number;
-}
 
 interface HeaderProps {
-  absolute?: string;
   brand?: string;
-  changeColorOnScroll?: ChangeColorOnScroll;
-  color?: ColorExpanded;
-  fixed?: boolean;
   rightLinks?: ReactElement;
 }
 
-function Header(props: HeaderProps): ReactElement {
+interface ElevationScrollProps {
+  children: ReactElement;
+}
+
+function ElevationScroll({ children }: ElevationScrollProps) {
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 24,
+  });
+
+  return cloneElement(children, {
+    elevation: trigger ? 4 : 0,
+  });
+}
+
+function Header({ rightLinks, brand }: HeaderProps): ReactElement {
   const [information] = useInformation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const classes = useStyles();
-
-  const headerColorChange = useCallback(() => {
-    const { color, changeColorOnScroll } = props;
-    if (!color || !changeColorOnScroll) return;
-    const windowsScrollTop =
-      typeof window !== "undefined" ? window.pageYOffset : 10;
-    if (windowsScrollTop > changeColorOnScroll.height) {
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.remove(classes[color]);
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.add(classes[changeColorOnScroll.color]);
-    } else {
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.add(classes[color]);
-      document.body
-        .getElementsByTagName("header")[0]
-        .classList.remove(classes[changeColorOnScroll.color]);
-    }
-  }, [classes, props]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && props.changeColorOnScroll) {
-      window.addEventListener("scroll", headerColorChange);
-    }
-    return function cleanup() {
-      if (typeof window !== "undefined" && props.changeColorOnScroll) {
-        window.removeEventListener("scroll", headerColorChange);
-      }
-    };
-  }, [headerColorChange, props.changeColorOnScroll]);
-
-  const handleDrawerToggle = () => {
+  const handleDrawerToggle = useCallback(() => {
     setMobileOpen(!mobileOpen);
-  };
+  }, [mobileOpen]);
 
-  const { color, rightLinks, brand, fixed, absolute } = props;
+  const theme = useTheme();
+
   return (
     <>
-      <AppBar
-        className={clsx({
-          [classes.appBar]: true,
-          [classes[color]]: color,
-          [classes.absolute]: absolute,
-          [classes.fixed]: fixed,
-        })}
-        color={color}
-      >
-        <Container className={classes.containerBase} maxWidth="xl">
-          <Toolbar className={classes.container}>
-            <Grid item>
-              <Button href="https://system-bridge.timmo.dev" target="_blank">
-                {/* <img src={logo} alt="System Bridge Logo" /> */}
-                <Typography
-                  className={classes.title}
-                  component="div"
-                  variant="h4"
-                >
-                  {brand}
-                </Typography>
-              </Button>
-              {information ? (
-                <>
-                  <Typography
-                    className={clsx(classes.disabled, classes.version)}
-                    component="span"
-                    variant="h5"
-                  >
-                    {information.version}
-                  </Typography>
-                  <Typography
-                    className={clsx(classes.disabled, classes.version)}
-                    component="span"
-                    variant="subtitle1"
-                  >
-                    {information.updates?.available ? (
-                      <a
-                        href={information.updates?.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Version {information.updates.version.new} avaliable!
-                      </a>
-                    ) : (
-                      ""
-                    )}
-                  </Typography>
-                </>
-              ) : (
-                ""
-              )}
-            </Grid>
-            <Hidden lgDown implementation="css">
-              {rightLinks}
-            </Hidden>
-            <Hidden mdUp>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerToggle}
-                size="large"
+      <ElevationScroll>
+        <>
+          <AppBar>
+            <Container maxWidth="xl" sx={{ padding: 0 }}>
+              <Toolbar
+                sx={{
+                  minHeight: 50,
+                  maxHeight: 50,
+                  padding: 0,
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  display: "flex",
+                  flexWrap: "nowrap",
+                }}
               >
-                <Icon path={mdiMenu} size={1} />
-              </IconButton>
-            </Hidden>
-          </Toolbar>
-          <Hidden mdUp implementation="css">
-            <Drawer
-              variant="temporary"
-              anchor={"right"}
-              open={mobileOpen}
-              classes={{
-                paper: classes.drawerPaper,
-              }}
-              onClose={handleDrawerToggle}
-            >
-              <div className={classes.appResponsive}>{rightLinks}</div>
-            </Drawer>
-          </Hidden>
-        </Container>
-      </AppBar>
-      <Box className={classes.spacer} />
-      <Box className={classes.spacer} />
-      <Box className={classes.spacer} />
+                <Grid item>
+                  <Button
+                    href="https://system-bridge.timmo.dev"
+                    target="_blank"
+                  >
+                    <Typography
+                      component="div"
+                      variant="h4"
+                      sx={{
+                        textTransform: "none",
+                        userSelect: "none",
+                        color: theme.palette.primary.contrastText,
+                      }}
+                    >
+                      {brand}
+                    </Typography>
+                  </Button>
+                  {information ? (
+                    <>
+                      <Typography
+                        // className={clsx(classes.disabled, classes.version)}
+                        component="span"
+                        variant="h5"
+                      >
+                        {information.version}
+                      </Typography>
+                      <Typography
+                        // className={clsx(classes.disabled, classes.version)}
+                        component="span"
+                        variant="subtitle1"
+                      >
+                        {information.updates?.available ? (
+                          <a
+                            href={information.updates?.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Version {information.updates.version.new} avaliable!
+                          </a>
+                        ) : (
+                          ""
+                        )}
+                      </Typography>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </Grid>
+                <Hidden lgDown implementation="css">
+                  {rightLinks}
+                </Hidden>
+                <Hidden mdUp>
+                  <IconButton
+                    color="inherit"
+                    aria-label="open drawer"
+                    onClick={handleDrawerToggle}
+                    size="large"
+                  >
+                    <Icon id="menu" path={mdiMenu} size={1} />
+                  </IconButton>
+                </Hidden>
+              </Toolbar>
+              <Hidden mdUp implementation="css">
+                <Drawer
+                  variant="temporary"
+                  anchor={"right"}
+                  open={mobileOpen}
+                  // classes={{
+                  //   paper: classes.drawerPaper,
+                  // }}
+                  onClose={handleDrawerToggle}
+                >
+                  <Box sx={{ margin: "20px 10px" }}>{rightLinks}</Box>
+                </Drawer>
+              </Hidden>
+            </Container>
+          </AppBar>
+          <Box sx={{ height: theme.spacing(18) }} />
+        </>
+      </ElevationScroll>
     </>
   );
 }

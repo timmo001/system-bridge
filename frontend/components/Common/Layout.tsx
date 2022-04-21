@@ -13,7 +13,6 @@ import HeaderLinks from "./HeaderLinks";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
-  classes: ClassNameMap;
   description?: string;
   keywords?: string;
   noFooter?: boolean;
@@ -62,8 +61,6 @@ function Layout(props: LayoutProps): ReactElement {
     })();
   }, [settings, setSettings, query]);
 
-  const classes = props.classes;
-
   return (
     <>
       <Head>
@@ -105,7 +102,7 @@ function Layout(props: LayoutProps): ReactElement {
       )}
       {props.children}
       {!props.noFooter && (
-        <Container className={classes.footer} component="footer" maxWidth="xl">
+        <Container component="footer" maxWidth="xl">
           <Footer />
         </Container>
       )}
