@@ -69,7 +69,10 @@ if __name__ == "__main__":
         os.path.join(user_data_dir, "system-bridge.log"),
         backupCount=1,
     )
-    file_handler.doRollover()
+    try:
+        file_handler.doRollover()
+    except PermissionError:
+        pass
     file_handler.setLevel(log_level)
     file_handler.setFormatter(logging.Formatter(FORMAT, datefmt=DATE_FORMAT))
 
