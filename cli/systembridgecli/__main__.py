@@ -53,8 +53,9 @@ def data_value(
 @app.command(name="settings", short_help="Get all settings")
 def settings_all():
     """Get all Settings"""
-    data = database.read_table(TABLE_SETTINGS)
-    table_data = tabulate(data, headers="keys", tablefmt="psql")
+    table_data = tabulate(
+        database.read_table(TABLE_SETTINGS), headers="keys", tablefmt="psql"
+    )
     typer.secho(table_data, fg=typer.colors.CYAN)
 
 
