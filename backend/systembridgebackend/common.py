@@ -11,11 +11,12 @@ def convert_string_to_correct_type(
 ) -> str | int | float | bool | None:
     """Convert string to correct data type"""
     try:
-        if value.lower() == "none":
+        value_lower = value.lower()
+        if value_lower in ("none", "null"):
             return None
-        if value.lower() == "true":
+        if value_lower == "true":
             return True
-        if value.lower() == "false":
+        if value_lower == "false":
             return False
         if value.isalpha():
             return value
