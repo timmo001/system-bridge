@@ -57,10 +57,12 @@ class Server(Base):
 
         @task(timedelta(minutes=2))
         async def update_data(_) -> None:
+            """Update data"""
             await update.update_data()
 
         @task(timedelta(seconds=30))
         async def update_frequent_data(_) -> None:
+            """Update frequent data"""
             await update.update_frequent_data()
 
         @auth.key_required
@@ -68,6 +70,7 @@ class Server(Base):
             _: Request,
             table: str,
         ) -> HTTPResponse:
+            """Data handler all"""
             if table not in implemented_modules:
                 return json({"message": f"Data module {table} not found"}, status=404)
             return json(self._database.table_data_to_ordered_dict(table))
@@ -78,6 +81,7 @@ class Server(Base):
             table: str,
             key: str,
         ) -> HTTPResponse:
+            """Data handler by key"""
             if table not in implemented_modules:
                 return json({"message": f"Data module {table} not found"}, status=404)
 
@@ -96,7 +100,20 @@ class Server(Base):
             request: Request,
             function: callable,
         ) -> HTTPResponse:
+            """Generic handler"""
             return await function(request)
+
+        async def handler_websocket(
+            _: Request,
+            websocket,
+        ) -> None:
+            """WebSocket"""
+            while True:
+                data = "hello!"
+                self._logger.info("Sending: %s", data)
+                await websocket.send(data)
+                data = await websocket.recv()
+                self._logger.info("Received: %s", data)
 
         self._logger.info(scheduler.task_info())
         self._server.add_route(
@@ -146,7 +163,7 @@ class Server(Base):
         )
 
         self._server.static("/", "../frontend/out")
-        # self._server.add_websocket_route(websocket, "/api/websocket")
+        self._server.add_websocket_route(handler_websocket, "/api/websocket")
 
     def start(self) -> None:
         """Start Server"""
