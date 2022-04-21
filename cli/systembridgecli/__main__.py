@@ -31,10 +31,10 @@ def api_port() -> None:
 def data(module: str, key=None) -> None:
     """Get data"""
     if key:
-        data = database.read_table_by_key(module, key)
+        output = database.read_table_by_key(module, key)
     else:
-        data = database.read_table(module)
-    table_data = tabulate(data, headers="keys", tablefmt="psql")
+        output = database.read_table(module)
+    table_data = tabulate(output, headers="keys", tablefmt="psql")
     typer.secho(table_data, fg=typer.colors.GREEN)
 
 
@@ -44,8 +44,10 @@ def data_value(
     key: str,
 ) -> None:
     """Get data value"""
-    data = database.read_table_by_key(module, key).to_dict(orient="records")[0]["value"]
-    typer.secho(data, fg=typer.colors.GREEN)
+    output = database.read_table_by_key(module, key).to_dict(orient="records")[0][
+        "value"
+    ]
+    typer.secho(output, fg=typer.colors.GREEN)
 
 
 @app.command(name="settings", short_help="Get all settings")
