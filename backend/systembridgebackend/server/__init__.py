@@ -145,7 +145,7 @@ class Server(Base):
             methods=["POST"],
         )
 
-        # self._server.static("/", "./frontend/dist/")
+        self._server.static("/", "../frontend/out")
         # self._server.add_websocket_route(websocket, "/api/websocket")
 
     def start(self) -> None:
