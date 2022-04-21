@@ -1,7 +1,9 @@
-from json import dumps, loads
+from json import JSONDecodeError, dumps, loads
+from uuid import uuid4
 
 from systembridgebackend import Base
 from systembridgebackend.database import Database
+from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.settings import Settings, SECRET_API_KEY
 
 
@@ -10,11 +12,15 @@ class WebSocket(Base):
         self,
         database: Database,
         settings: Settings,
+        listeners: Listeners,
+        implemented_modules: list[str],
         websocket,
     ) -> None:
         super().__init__()
         self._database = database
         self._settings = settings
+        self._listeners = listeners
+        self._implemented_modules = implemented_modules
         self._websocket = websocket
 
     async def _check_api_key(
@@ -36,11 +42,40 @@ class WebSocket(Base):
             return False
         return True
 
+    async def _data_changed(
+        self,
+        module: str,
+        data: dict,
+    ) -> None:
+        """Data changed"""
+        if module not in self._implemented_modules:
+            self._logger.info("Data module %s not in registered modules", module)
+            return
+        await self._websocket.send(
+            dumps(
+                {
+                    "error": False,
+                    "message": "Data changed",
+                    "module": module,
+                    "data": data,
+                }
+            )
+        )
+
     async def handler(self) -> None:
         """Handler"""
+        id = str(uuid4())
         # Loop until the connection is closed
         while True:
-            data = loads(await self._websocket.recv())
+            try:
+                data = loads(await self._websocket.recv())
+            except JSONDecodeError as e:
+                self._logger.error("Invalid JSON: %s", e)
+                await self._websocket.send(
+                    dumps({"error": True, "message": "Invalid JSON"})
+                )
+                continue
+
             self._logger.info("Received data: %s", data)
             if data["event"] == "register-data-listener":
                 if not await self._check_api_key(data):
@@ -51,7 +86,26 @@ class WebSocket(Base):
                         dumps({"error": True, "message": "No modules provided"})
                     )
                     continue
-                self._logger.info("Registering data listener: %s", data["modules"])
+
+                self._logger.info(
+                    "Registering data listener: %s - %s", id, data["modules"]
+                )
+
+                if await self._listeners.add_listener(
+                    id,
+                    self._data_changed,
+                    data["modules"],
+                ):
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                "error": True,
+                                "message": "Listener already registered with this connection",
+                            }
+                        )
+                    )
+                    continue
+
                 await self._websocket.send(
                     dumps(
                         {

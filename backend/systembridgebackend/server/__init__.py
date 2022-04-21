@@ -9,16 +9,17 @@ from sanic_scheduler import SanicScheduler, task
 
 from systembridgebackend import Base
 from systembridgebackend.database import Database
+from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
-from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.media import (
     handler_media_files,
     handler_media_file,
     handler_media_file_data,
     handler_media_file_write,
 )
+from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 from systembridgebackend.server.websocket import WebSocket
@@ -39,6 +40,14 @@ class Server(Base):
         self._settings = settings
         self._server = Sanic("SystemBridge")
 
+        for _, dirs, _ in walk("systembridgebackend/modules"):
+            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+            break
+
+        self._scheduler = SanicScheduler(self._server, utc=True)
+        self._listeners = Listeners(self._database, implemented_modules)
+        self._update = Update(self._database)
+
         auth = ApiKeyAuthentication(
             app=self._server,
             arg="apiKey",
@@ -46,25 +55,20 @@ class Server(Base):
             keys=[self._settings.get_secret(SECRET_API_KEY)],
         )
 
-        scheduler = SanicScheduler(self._server, utc=True)
-        update = Update(self._database)
-
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
-
-        for _, dirs, _ in walk("systembridgebackend/modules"):
-            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-            break
 
         @task(timedelta(minutes=2))
         async def update_data(_) -> None:
             """Update data"""
-            await update.update_data()
+            await self._update.update_data()
+            await self._listeners.refresh_data()
 
         @task(timedelta(seconds=30))
         async def update_frequent_data(_) -> None:
             """Update frequent data"""
-            await update.update_frequent_data()
+            await self._update.update_frequent_data()
+            await self._listeners.refresh_data()
 
         @auth.key_required
         async def handler_data_all(
@@ -109,7 +113,13 @@ class Server(Base):
             ws,
         ) -> None:
             """WebSocket handler"""
-            websocket = WebSocket(self._database, self._settings, ws)
+            websocket = WebSocket(
+                self._database,
+                self._settings,
+                self._listeners,
+                implemented_modules,
+                ws,
+            )
             await websocket.handler()
 
         self._server.add_route(
