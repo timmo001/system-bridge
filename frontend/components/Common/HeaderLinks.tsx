@@ -35,13 +35,6 @@ function HeaderLinks(): ReactElement {
           </Button>
         </Link>
       </ListItem>
-      <ListItem className={classes.listItem}>
-        <Link href={{ pathname: "/app/logs", query }} passHref>
-          <Button variant="text" className={classes.navLink}>
-            <span className={classes.listItemText}>Logs</span>
-          </Button>
-        </Link>
-      </ListItem>
       <ListItem className={clsx(classes.listItem, classes.divider)} />
       <ListItem className={classes.listItem}>
         <Tooltip
