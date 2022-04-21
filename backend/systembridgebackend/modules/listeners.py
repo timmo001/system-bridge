@@ -6,11 +6,13 @@ from systembridgebackend.database import Database
 
 
 class Listener:
+    """Listener"""
+
     def __init__(
         self,
         id: str,
         data_changed_callback: callable,
-        modules: list[str],
+        modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
         self.id = id
@@ -24,7 +26,7 @@ class Listeners(Base):
     def __init__(
         self,
         database: Database,
-        implemented_modules: list[str],
+        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -35,18 +37,20 @@ class Listeners(Base):
 
     async def add_listener(
         self,
-        id: str,
+        listener_id: str,
         data_changed_callback: callable,
-        modules: list[str],
+        modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> bool:
         """Add modules to listener"""
         for listner in self._registered_listeners:
-            if listner.id == id:
-                self._logger.warning("Listener already registered: %s", id)
+            if listner.id == listener_id:
+                self._logger.warning("Listener already registered: %s", listener_id)
                 return True
 
-        self._registered_listeners.append(Listener(id, data_changed_callback, modules))
-        self._logger.info("Added listener: %s", id)
+        self._registered_listeners.append(
+            Listener(listener_id, data_changed_callback, modules)
+        )
+        self._logger.info("Added listener: %s", listener_id)
 
         await self.refresh_data()
         return False
@@ -95,14 +99,14 @@ class Listeners(Base):
 
     async def remove_listener(
         self,
-        id: str,
+        listener_id: str,
     ) -> bool:
         """Remove listener"""
         for listener in self._registered_listeners:
-            if listener.id == id:
+            if listener.id == listener_id:
                 self._registered_listeners.remove(listener)
-                self._logger.info("Removed listener: %s", id)
+                self._logger.info("Removed listener: %s", listener_id)
                 return True
 
-        self._logger.warning("Listener not found: %s", id)
+        self._logger.warning("Listener not found: %s", listener_id)
         return False

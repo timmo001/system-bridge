@@ -8,7 +8,6 @@ from systembridgebackend import Base
 class Sensors(Base):
     """Sensors"""
 
-
     def fans(self) -> dict | None:
         """Get fans"""
         if not hasattr(psutil, "sensors_fans"):

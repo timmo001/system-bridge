@@ -41,8 +41,7 @@ async def handler_media_files(
     request: Request,
 ) -> HTTPResponse:
     """Handler for media files"""
-    query_base = request.args.get(QUERY_BASE)
-    if not query_base:
+    if not (query_base := request.args.get(QUERY_BASE)):
         return json(
             {"message": "No base specified"},
             status=400,
@@ -79,14 +78,12 @@ async def handler_media_file(
     request: Request,
 ) -> HTTPResponse:
     """Handler for media file requests"""
-    query_base = request.args.get(QUERY_BASE)
-    if not query_base:
+    if not (query_base := request.args.get(QUERY_BASE)):
         return json(
             {"message": "No base specified"},
             status=400,
         )
-    query_path = request.args.get(QUERY_PATH)
-    if not query_path:
+    if not (query_path := request.args.get(QUERY_PATH)):
         return json(
             {"message": "No path specified"},
             status=400,
@@ -110,8 +107,7 @@ async def handler_media_file_data(
     request: Request,
 ) -> HTTPResponse:
     """Handler for media file requests"""
-    query_base = request.args.get(QUERY_BASE)
-    if not query_base:
+    if not (query_base := request.args.get(QUERY_BASE)):
         return json(
             {"message": "No base specified"},
             status=400,
@@ -141,14 +137,12 @@ async def handler_media_file_write(
     request: Request,
 ) -> HTTPResponse:
     """Handler for media file write requests"""
-    query_base = request.args.get(QUERY_BASE)
-    if not query_base:
+    if not (query_base := request.args.get(QUERY_BASE)):
         return json(
             {"message": "No base specified"},
             status=400,
         )
-    query_path = request.args.get(QUERY_PATH)
-    if not query_path:
+    if not (query_path := request.args.get(QUERY_PATH)):
         return json(
             {"message": "No path specified"},
             status=400,

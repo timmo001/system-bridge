@@ -39,10 +39,7 @@ class ApiKeyAuthentication(Base):
 
     async def _is_api_key(self, request):
         """Check key is valid api key"""
-        # if self.header:
-        token = request.headers.get(self.header, None)
-        if not token:
-            # else:
+        if not (token := request.headers.get(self.header, None)):
             token = request.args.get(self.arg, None)
 
         self.token = token

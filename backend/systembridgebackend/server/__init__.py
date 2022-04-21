@@ -108,7 +108,7 @@ class Server(Base):
 
         async def handler_websocket(
             _: Request,
-            ws,
+            socket,
         ) -> None:
             """WebSocket handler"""
             websocket = WebSocket(
@@ -116,7 +116,7 @@ class Server(Base):
                 self._settings,
                 self._listeners,
                 implemented_modules,
-                ws,
+                socket,
             )
             await websocket.handler()
 

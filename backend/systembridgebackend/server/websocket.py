@@ -1,3 +1,4 @@
+"""System Bridge: WebSocket"""
 from json import JSONDecodeError, dumps, loads
 from uuid import uuid4
 
@@ -8,15 +9,17 @@ from systembridgebackend.settings import Settings, SECRET_API_KEY
 
 
 class WebSocket(Base):
+    """WebSocket"""
+
     def __init__(
         self,
         database: Database,
         settings: Settings,
         listeners: Listeners,
-        implemented_modules: list[str],
+        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket,
     ) -> None:
-        super().__init__()
+        """Initialize"""
         self._database = database
         self._settings = settings
         self._listeners = listeners
