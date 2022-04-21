@@ -93,18 +93,10 @@ function Header({ rightLinks, brand }: HeaderProps): ReactElement {
                   </Button>
                   {information ? (
                     <>
-                      <Typography
-                        // className={clsx(classes.disabled, classes.version)}
-                        component="span"
-                        variant="h5"
-                      >
+                      <Typography component="span" variant="h5">
                         {information.version}
                       </Typography>
-                      <Typography
-                        // className={clsx(classes.disabled, classes.version)}
-                        component="span"
-                        variant="subtitle1"
-                      >
+                      <Typography component="span" variant="subtitle1">
                         {information.updates?.available ? (
                           <a
                             href={information.updates?.url}
@@ -141,9 +133,6 @@ function Header({ rightLinks, brand }: HeaderProps): ReactElement {
                   variant="temporary"
                   anchor={"right"}
                   open={mobileOpen}
-                  // classes={{
-                  //   paper: classes.drawerPaper,
-                  // }}
                   onClose={handleDrawerToggle}
                 >
                   <Box sx={{ margin: "20px 10px" }}>{rightLinks}</Box>

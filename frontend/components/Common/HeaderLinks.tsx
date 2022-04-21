@@ -41,10 +41,7 @@ function HeaderLinks(): ReactElement {
       </Grid>
       <Grid item sx={{ padding: theme.spacing(1) }} />
       <Grid item>
-        <Tooltip
-          title="Suggest a Feature / Report a Bug"
-          // classes={{ tooltip: classes.tooltip }}
-        >
+        <Tooltip title="Suggest a Feature / Report a Bug">
           <a
             href="https://github.com/timmo001/system-bridge/issues"
             target="_blank"
@@ -62,10 +59,7 @@ function HeaderLinks(): ReactElement {
         </Tooltip>
       </Grid>
       <Grid item>
-        <Tooltip
-          title="Discussions/Help"
-          // classes={{ tooltip: classes.tooltip }}
-        >
+        <Tooltip title="Discussions/Help">
           <a
             href="https://github.com/timmo001/system-bridge/discussions"
             target="_blank"
@@ -83,10 +77,7 @@ function HeaderLinks(): ReactElement {
         </Tooltip>
       </Grid>
       <Grid item>
-        <Tooltip
-          title="Contribute to the Website/Documentation"
-          // classes={{ tooltip: classes.tooltip }}
-        >
+        <Tooltip title="Contribute to the Website/Documentation">
           <a
             href="https://github.com/timmo001/system-bridge-site"
             target="_blank"
@@ -104,10 +95,7 @@ function HeaderLinks(): ReactElement {
         </Tooltip>
       </Grid>
       <Grid item>
-        <Tooltip
-          title="Contribute to the Application"
-          // classes={{ tooltip: classes.tooltip }}
-        >
+        <Tooltip title="Contribute to the Application">
           <a
             href="https://github.com/timmo001/system-bridge"
             target="_blank"
