@@ -32,6 +32,12 @@ class CPUUpdate(ModuleUpdateBase):
                 self._database.write("cpu", f"frequency_{count}_{key}", value)
             count += 1
 
+    async def update_load_average(self) -> None:
+        """Update load average"""
+        avg_tuple = self._cpu.load_average()
+        result = sum([avg_tuple[0], avg_tuple[1], avg_tuple[2]]) / 3
+        self._database.write("cpu", "load_average", result)
+
     async def update_stats(self) -> None:
         """Update stats"""
         for key, value in self._cpu.stats()._asdict().items():
@@ -81,6 +87,7 @@ class CPUUpdate(ModuleUpdateBase):
         await self.update_count()
         await self.update_frequency()
         await self.update_frequency_per_cpu()
+        await self.update_load_average()
         await self.update_stats()
         await self.update_times()
         await self.update_times_percent()

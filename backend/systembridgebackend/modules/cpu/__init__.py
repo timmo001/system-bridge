@@ -6,6 +6,7 @@ from psutil import (
     cpu_stats,
     cpu_times,
     cpu_times_percent,
+    getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
 from systembridgebackend import Base
@@ -25,6 +26,12 @@ class CPU(Base):
     def freq_per_cpu(self) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
         """CPU frequency per CPU"""
         return cpu_freq(percpu=True)
+
+    def load_average(
+        self,
+    ) -> tuple[float, float, float]:  # pylint: disable=unsubscriptable-object
+        """Get load average"""
+        return getloadavg()
 
     def stats(self) -> scpustats:
         """CPU stats"""
