@@ -19,6 +19,7 @@
   "license": "MIT",
   "scripts": {
     "build": "next build",
+    "export": "next export",
     "eslint": "eslint --ext .ts --ext .tsx --color ./",
     "lint": "next lint",
     "start": "next start",
