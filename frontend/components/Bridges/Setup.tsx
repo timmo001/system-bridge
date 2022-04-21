@@ -8,6 +8,7 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  useTheme,
 } from "@mui/material";
 import axios from "axios";
 
@@ -61,11 +62,18 @@ function BridgesSetupComponent(): ReactElement {
     setBridgeEdit(undefined);
   }
 
+  const theme = useTheme();
+
   return (
     <>
       <Container maxWidth="lg">
         {!settings && !bridges ? (
-          <Grid container direction="row" justifyContent="center">
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(10, 0, 8) }}
+          >
             <CircularProgress />
           </Grid>
         ) : (

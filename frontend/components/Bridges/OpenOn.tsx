@@ -15,6 +15,7 @@ import {
   Grid,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import axios from "axios";
 
@@ -49,7 +50,7 @@ function BridgesOpenOnComponent(): ReactElement {
   }
 
   async function handleOpenOn(): Promise<void> {
-    if (bridgeSelected) {
+    if (bridgeSelected?.apiKey) {
       try {
         const response = await axios.post<{ path: string }>(
           `http://${bridgeSelected.host}:${bridgeSelected.port}/open`,
@@ -72,11 +73,18 @@ function BridgesOpenOnComponent(): ReactElement {
     }
   }, [setup, handleSetup, query]);
 
+  const theme = useTheme();
+
   return (
     <>
       <Container maxWidth="lg">
         {!settings && !bridges ? (
-          <Grid container direction="row" justifyContent="center">
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(10, 0, 8) }}
+          >
             <CircularProgress />
           </Grid>
         ) : (
@@ -89,23 +97,26 @@ function BridgesOpenOnComponent(): ReactElement {
               Open URL On..
             </Typography>
 
-            <Autocomplete
-              id="bridge"
-              options={bridges}
-              value={bridgeSelected}
-              getOptionLabel={(option: Bridge) => option.name}
-              renderInput={(params: AutocompleteRenderInputParams) => (
-                <TextField {...params} label="Bridge" variant="outlined" />
-              )}
-              onChange={(_event: ChangeEvent, value: Bridge) =>
-                setBridgeSelected(value)
-              }
-              sx={{
-                margin: theme.spacing(2, 2.5),
-                width: "calc(100% - 32px)",
-              }}
-            />
-
+            {bridges ? (
+              <Autocomplete
+                id="bridge"
+                options={bridges}
+                value={bridgeSelected}
+                getOptionLabel={(option: Bridge) => option.name}
+                renderInput={(params: AutocompleteRenderInputParams) => (
+                  <TextField {...params} label="Bridge" variant="outlined" />
+                )}
+                onChange={(_event, value: Bridge | null) => {
+                  if (value) setBridgeSelected(value);
+                }}
+                sx={{
+                  margin: theme.spacing(2, 2.5),
+                  width: "calc(100% - 32px)",
+                }}
+              />
+            ) : (
+              ""
+            )}
             <TextField
               fullWidth
               id="url"

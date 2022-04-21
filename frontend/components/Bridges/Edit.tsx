@@ -101,32 +101,33 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
   async function handleTestBridge(): Promise<Information | null> {
     setTestingMessage({ text: "Testing bridge..", error: false });
-    try {
-      const response = await axios.get<Information>(
-        `http://${bridge.host}:${bridge.port}/information`,
-        {
-          headers: { "api-key": bridge.apiKey },
+    if (bridge?.apiKey)
+      try {
+        const response = await axios.get<Information>(
+          `http://${bridge.host}:${bridge.port}/information`,
+          {
+            headers: { "api-key": bridge.apiKey },
+          }
+        );
+        if (response && response.status < 400) {
+          console.log("Information:", response.data);
+          setTestingMessage({
+            text: "Successfully connected to bridge.",
+            error: false,
+          });
+          return response.data;
         }
-      );
-      if (response && response.status < 400) {
-        console.log("Information:", response.data);
         setTestingMessage({
-          text: "Successfully connected to bridge.",
-          error: false,
+          text: `Error testing bridge: ${response.status} - ${response.data}`,
+          error: true,
         });
-        return response.data;
+      } catch (e: any) {
+        console.error("Error:", e);
+        setTestingMessage({
+          text: `Error testing bridge: ${e.message}`,
+          error: true,
+        });
       }
-      setTestingMessage({
-        text: `Error testing bridge: ${response.status} - ${response.data}`,
-        error: true,
-      });
-    } catch (e: any) {
-      console.error("Error:", e);
-      setTestingMessage({
-        text: `Error testing bridge: ${e.message}`,
-        error: true,
-      });
-    }
     return null;
   }
 
