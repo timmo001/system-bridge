@@ -27,6 +27,27 @@ def api_port() -> None:
     setting(SETTING_PORT_API)
 
 
+@app.command(name="data", short_help="Get data")
+def data(module: str, key=None) -> None:
+    """Get data"""
+    if key:
+        data = database.read_table_by_key(module, key)
+    else:
+        data = database.read_table(module)
+    table_data = tabulate(data, headers="keys", tablefmt="psql")
+    typer.secho(table_data, fg=typer.colors.GREEN)
+
+
+@app.command(name="data-value", short_help="Get data value")
+def data_value(
+    module: str,
+    key: str,
+) -> None:
+    """Get data value"""
+    data = database.read_table_by_key(module, key).to_dict(orient="records")[0]["value"]
+    typer.secho(data, fg=typer.colors.GREEN)
+
+
 @app.command(name="settings", short_help="Get all Settings")
 def settings_all():
     """Get all Settings"""
