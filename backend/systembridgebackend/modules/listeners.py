@@ -53,7 +53,6 @@ class Listeners(Base):
 
     async def refresh_data(self) -> None:
         """Refresh data"""
-        self._logger.info("Refresh data")
         if not self._database.connected:
             self._database.connect()
 
@@ -64,11 +63,13 @@ class Listeners(Base):
                 if module not in modules:
                     modules.append(module)
 
+        self._logger.info("Refresh data: %s", modules)
+
         # Refresh data for each module
         tasks = [self.refresh_data_by_module(module) for module in modules]
         await asyncio.gather(*tasks)
 
-        self._logger.info("Finished refreshing data")
+        self._logger.info("Finished refreshing data: %s", modules)
 
     async def refresh_data_by_module(
         self,
