@@ -33,7 +33,7 @@ class WebSocket(Base):
     ) -> bool:
         """Check API key"""
         if "api-key" not in data:
-            self._self._logger.warning("No api-key provided")
+            self._logger.warning("No api-key provided")
             await self._websocket.send(
                 dumps({"type": "ERROR", "message": "No api-key provided"})
             )
@@ -196,8 +196,8 @@ class WebSocket(Base):
                             }
                         )
                     )
-        except ConnectionError as e:
-            self._logger.info("Connection closed: %s", e)
+        except ConnectionError as error:
+            self._logger.info("Connection closed: %s", error)
         finally:
             self._logger.info("Unregistering data listener %s", listener_id)
             await self._listeners.remove_listener(listener_id)

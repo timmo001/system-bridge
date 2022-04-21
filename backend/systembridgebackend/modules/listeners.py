@@ -10,12 +10,12 @@ class Listener:
 
     def __init__(
         self,
-        id: str,
+        listener_id: str,
         data_changed_callback: callable,
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
-        self.id = id
+        self.id = listener_id
         self.data_changed_callback = data_changed_callback
         self.modules = modules
 
@@ -33,6 +33,7 @@ class Listeners(Base):
         self._database = database
         self._implemented_modules = implemented_modules
         self._data = {module: {} for module in self._implemented_modules}
+        # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
 
     async def add_listener(
