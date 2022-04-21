@@ -38,16 +38,6 @@ export const defaultConfiguration: Configuration = {
         requiresServerRestart: true,
         containerDisabled: true,
       },
-      wsPort: {
-        name: "WebSocket Port",
-        description: "The port the WebSocket server runs on.",
-        defaultValue: 9172,
-        value: null,
-        icon: mdiProtocol,
-        minimum: 1,
-        requiresServerRestart: true,
-        containerDisabled: true,
-      },
       apiKey: {
         name: "API Key",
         description: "The API key to authenticate with the API.",

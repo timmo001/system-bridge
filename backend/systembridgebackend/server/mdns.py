@@ -36,7 +36,7 @@ class MDNSAdvertisement(Base):
         # pylint: disable=consider-using-f-string
         mac = ":".join(re.findall("..", "%012x" % uuid.getnode()))
         port_api = int(self._settings.get(SETTING_PORT_API))
-        port_websocket = int(port_api)  # 9172
+        port_websocket = int(port_api)
         system_id = uniqueid.id
 
         # Get version from version.txt

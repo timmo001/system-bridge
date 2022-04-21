@@ -27,7 +27,7 @@ export class WebSocketConnection {
   }
 
   private async connect(register?: boolean): Promise<WebSocket> {
-    const ws = new WebSocket(`ws://localhost:${this.port}`);
+    const ws = new WebSocket(`ws://localhost:${this.port}/api/websocket`);
     await new Promise<void>((resolve) => {
       ws.onopen = () => resolve();
     });

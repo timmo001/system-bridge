@@ -184,7 +184,7 @@ if __name__ == "__main__":
         "--websocket-port",
         dest="websocket_port",
         help="WebSocket Port",
-        default=9172,
+        default=9170,
     )
 
     args = parser.parse_args()

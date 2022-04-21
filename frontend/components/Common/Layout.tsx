@@ -29,14 +29,25 @@ function Layout(props: LayoutProps): ReactElement {
   const query = router.query;
 
   useEffect(() => {
-    if (query && Object.keys(query).length > 0)
-      if (!query.apiKey && typeof window !== "undefined") {
-        const response = window.prompt("Please enter your API key", "");
-        if (response)
-          router.replace(
-            `${router.pathname}?apiKey=${response}&apiPort=${query.apiPort}&wsPort=${query.wsPort}`
-          );
-      }
+    if (
+      query &&
+      Object.keys(query).length > 0 &&
+      typeof window !== "undefined"
+    ) {
+      let newApiKey: string | null = null,
+        newApiPort: string | null = null;
+      if (!query?.apiKey)
+        newApiKey = window.prompt("Please enter your API key", "");
+      if (!query?.apiPort)
+        newApiPort = window.prompt(
+          "Please enter your API port (default: 9170)",
+          (query.apiPort as string) || "9170"
+        );
+      if (newApiKey && newApiPort)
+        router.replace(
+          `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`
+        );
+    }
   }, [router, query]);
 
   useEffect(() => {
