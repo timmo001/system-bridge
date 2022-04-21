@@ -41,9 +41,11 @@ function BridgesSetupComponent(): ReactElement {
   const handleSetup = useCallback(async () => {
     console.log("Setup Bridges");
     const response = await axios.get<Array<Bridge>>(
-      `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges`,
+      `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges`,
       {
         headers: { "api-key": query.apiKey as string },
       }

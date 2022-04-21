@@ -74,9 +74,11 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
   async function handleDelete(): Promise<void> {
     const response = await axios.delete(
-      `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges/${bridge.key}`,
+      `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges/${bridge.key}`,
       { headers: { "api-key": query.apiKey as string } }
     );
     if (response && response.status < 400) props.handleClose();
@@ -90,9 +92,11 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         ...bridge,
         key: information.uuid,
       };
-      const url = `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges`;
+      const url = `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges`;
       console.log("Save:", { url, bridgeData });
       let response: AxiosResponse<Partial<Bridge>, any>;
       try {

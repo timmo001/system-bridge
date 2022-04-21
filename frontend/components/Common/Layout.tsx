@@ -31,7 +31,7 @@ function Layout(props: LayoutProps): ReactElement {
 
   useEffect(() => {
     if (query && Object.keys(query).length > 0)
-      if (!query.apiKey) {
+      if (!query.apiKey && typeof window !== "undefined") {
         const response = window.prompt("Please enter your API key", "");
         if (response)
           router.replace(

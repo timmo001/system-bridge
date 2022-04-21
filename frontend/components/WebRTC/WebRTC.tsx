@@ -91,11 +91,11 @@ function WebRTC(): ReactElement {
           console.log("No more peers. Closing stream");
           if (peerConnectionInterval) clearInterval(peerConnectionInterval);
           peerConnectionInterval = null;
-          try {
-            // window.api.ipcRendererSend("window-hide");
-          } catch (e) {
-            console.warn("Error calling window.api:", e);
-          }
+          // try {
+          //   // typeof window !== "undefined"window.api.ipcRendererSend("window-hide");
+          // } catch (e) {
+          //   console.warn("Error calling window.api:", e);
+          // }
           if (mediaStream)
             mediaStream.getTracks().forEach((track) => track.stop());
           mediaStream = null;
@@ -109,10 +109,12 @@ function WebRTC(): ReactElement {
   }, [debouncedRecalculateLayout]);
 
   const handleConnect = useCallback(async () => {
-    window.addEventListener("resize", debouncedRecalculateLayout);
+    if (typeof window !== "undefined")
+      window.addEventListener("resize", debouncedRecalculateLayout);
 
     const config = {
-      host: window.location.hostname,
+      host:
+        typeof window !== "undefined" ? window.location.hostname : "localhost",
       key: String(query.apiKey),
       path: "/rtc",
       port: Number(query.apiPort) || 9170,
@@ -126,11 +128,11 @@ function WebRTC(): ReactElement {
       console.log(`New connection from: ${dataConnection.peer}`);
     });
     peer.on("call", async (mediaConnection: Peer.MediaConnection) => {
-      try {
-        // window.api.ipcRendererSend("window-show");
-      } catch (e) {
-        console.warn("Error calling window.api:", e);
-      }
+      // try {
+      //   // typeof window !== "undefined" window.api.ipcRendererSend("window-show");
+      // } catch (e) {
+      //   console.warn("Error calling window.api:", e);
+      // }
       try {
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: true,

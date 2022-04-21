@@ -70,7 +70,7 @@ function Settings(): ReactElement {
       async () => {
         ws.sendEvent({ name: "restart-server", data: { openSettings: true } });
         await ws.close();
-        window.close();
+        if (typeof window !== "undefined") window.close();
       }
     );
   }

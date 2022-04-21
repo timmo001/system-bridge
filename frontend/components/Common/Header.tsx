@@ -44,7 +44,8 @@ function Header(props: HeaderProps): ReactElement {
   const headerColorChange = useCallback(() => {
     const { color, changeColorOnScroll } = props;
     if (!color || !changeColorOnScroll) return;
-    const windowsScrollTop = window.pageYOffset;
+    const windowsScrollTop =
+      typeof window !== "undefined" ? window.pageYOffset : 10;
     if (windowsScrollTop > changeColorOnScroll.height) {
       document.body
         .getElementsByTagName("header")[0]
@@ -63,11 +64,11 @@ function Header(props: HeaderProps): ReactElement {
   }, [classes, props]);
 
   useEffect(() => {
-    if (props.changeColorOnScroll) {
+    if (typeof window !== "undefined" && props.changeColorOnScroll) {
       window.addEventListener("scroll", headerColorChange);
     }
     return function cleanup() {
-      if (props.changeColorOnScroll) {
+      if (typeof window !== "undefined" && props.changeColorOnScroll) {
         window.removeEventListener("scroll", headerColorChange);
       }
     };

@@ -88,9 +88,11 @@ function Item({
         newSettings[sectionKey].items[itemKey].value = valueIn;
         setSettings(newSettings);
         axios.put<Setting>(
-          `http://${query.apiHost || window.location.hostname}:${
-            query.apiPort || 9170
-          }/settings/${sectionKey}-${itemKey}`,
+          `http://${
+            query.apiHost || typeof window !== "undefined"
+              ? window.location.hostname
+              : "localhost"
+          }:${query.apiPort || 9170}/settings/${sectionKey}-${itemKey}`,
           {
             value: String(valueIn),
           },

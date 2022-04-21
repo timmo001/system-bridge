@@ -22,9 +22,11 @@ export async function getInformation(
 ): Promise<InformationEntity | undefined> {
   if (!query || !query.apiKey) return undefined;
   const response = await axios.get<InformationEntity>(
-    `http://${query.apiHost || window.location.hostname}:${
-      query.apiPort || 9170
-    }/information`,
+    `http://${
+      query.apiHost || typeof window !== "undefined"
+        ? window.location.hostname
+        : "localhost"
+    }:${query.apiPort || 9170}/information`,
     {
       headers: { "api-key": query.apiKey as string },
     }
@@ -73,9 +75,11 @@ export async function getSettings(
           : value;
       if (!settingValue)
         try {
-          const url = `http://${query.apiHost || window.location.hostname}:${
-            query.apiPort || 9170
-          }/settings`;
+          const url = `http://${
+            query.apiHost || typeof window !== "undefined"
+              ? window.location.hostname
+              : "localhost"
+          }:${query.apiPort || 9170}/settings`;
           const data = {
             key: `${sectionKey}-${itemKey}`,
             value: String(s[sectionKey].items[itemKey].defaultValue),
