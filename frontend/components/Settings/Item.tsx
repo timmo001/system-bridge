@@ -40,7 +40,6 @@ interface ItemProps extends SectionProps {
 function Item({
   sectionKey,
   itemKey,
-  handleServerRestartRequired,
 }: ItemProps): ReactElement {
   const [information] = useInformation();
   const [settings, setSettings] = useSettings();
@@ -82,8 +81,6 @@ function Item({
             headers: { "api-key": query.apiKey as string },
           }
         );
-        if (newSettings[sectionKey].items[itemKey].requiresServerRestart)
-          handleServerRestartRequired();
       }
     }
   }

@@ -6,14 +6,10 @@ import { useSettings } from "../Contexts/Settings";
 import Item from "./Item";
 
 export interface SectionProps {
-  handleServerRestartRequired: () => void;
   sectionKey: string;
 }
 
-function Section({
-  sectionKey,
-  handleServerRestartRequired,
-}: SectionProps): ReactElement {
+function Section({ sectionKey }: SectionProps): ReactElement {
   const [settings] = useSettings();
 
   const section: ConfigurationSection | undefined = settings?.[sectionKey];
@@ -35,7 +31,6 @@ function Section({
                     key={`${sectionKey}-${itemKey}`}
                     sectionKey={sectionKey}
                     itemKey={itemKey}
-                    handleServerRestartRequired={handleServerRestartRequired}
                   />
                 ))
               : ""}
