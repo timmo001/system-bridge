@@ -48,7 +48,7 @@ def data_value(
     typer.secho(data, fg=typer.colors.GREEN)
 
 
-@app.command(name="settings", short_help="Get all Settings")
+@app.command(name="settings", short_help="Get all settings")
 def settings_all():
     """Get all Settings"""
     data = database.read_table(TABLE_SETTINGS)
