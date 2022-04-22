@@ -128,53 +128,59 @@ class SystemTray(Base, QSystemTrayIcon):
         if reason == QSystemTrayIcon.Trigger:
             self.contextMenu().popup(QCursor.pos())
 
-    @staticmethod
-    def _open_latest_releases() -> None:
+    def _open_latest_releases(self) -> None:
         """Open latest release"""
+        self._logger.info("Open: %s", URL_LATEST_RELEASE)
         open_new_tab(URL_LATEST_RELEASE)
 
-    @staticmethod
-    def _open_docs() -> None:
+    def _open_docs(self) -> None:
         """Open documentation"""
+        self._logger.info("Open: %s", URL_DOCS)
         open_new_tab(URL_DOCS)
 
-    @staticmethod
-    def _open_feature_request() -> None:
+    def _open_feature_request(self) -> None:
         """Open feature request"""
+        self._logger.info("Open: %s", URL_ISSUES)
         open_new_tab(URL_ISSUES)
 
-    @staticmethod
-    def _open_issues() -> None:
+    def _open_issues(self) -> None:
         """Open issues"""
+        self._logger.info("Open: %s", URL_ISSUES)
         open_new_tab(URL_ISSUES)
 
-    @staticmethod
-    def _open_discussions() -> None:
+    def _open_discussions(self) -> None:
         """Open discussions"""
+        self._logger.info("Open: %s", URL_DISCUSSIONS)
         open_new_tab(URL_DISCUSSIONS)
 
-    @staticmethod
-    def _open_log() -> None:
+    def _open_log(self) -> None:
         """Open log"""
-        open_new_tab(os.path.join(get_user_data_directory(), "system-bridge.log"))
+        log_path = os.path.join(get_user_data_directory(), "system-bridge.log")
+        self._logger.info("Open: %s", log_path)
+        open_new_tab(log_path)
 
-    @staticmethod
-    def _open_gui_log() -> None:
+    def _open_gui_log(self) -> None:
         """Open GUI log"""
-        open_new_tab(os.path.join(get_user_data_directory(), "system-bridge-gui.log"))
+        log_path = os.path.join(get_user_data_directory(), "system-bridge-gui.log")
+        self._logger.info("Open: %s", log_path)
+        open_new_tab(log_path)
 
     def _show_bridges_send_to(self) -> None:
         """Show bridges open url on window"""
+        self._logger.info("Show: %s", PATH_BRIDGES_OPEN_ON)
         self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
 
     def _show_bridges_setup(self) -> None:
         """Show bridges setup window"""
+        self._logger.info("Show: %s", PATH_BRIDGES_SETUP)
         self.callback_show_window(PATH_BRIDGES_SETUP, False)
 
     def _show_data(self) -> None:
         """Show api data"""
+        self._logger.info("Show: %s", PATH_DATA)
         self.callback_show_window(PATH_DATA, False)
 
     def _show_settings(self) -> None:
         """Show settings"""
+        self._logger.info("Show: %s", PATH_SETTINGS)
         self.callback_show_window(PATH_SETTINGS, False)
