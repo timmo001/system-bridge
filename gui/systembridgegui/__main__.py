@@ -65,9 +65,7 @@ class Main(Base):
 
     def _callback_exit_application(self) -> None:
         """Exit the application"""
-        self._logger.info("Exiting application..")
-        asyncio.run(self._exit_backend())
-        self._application.quit()
+        asyncio.run(self._exit_application())
 
     def _callback_show_window(
         self,
@@ -92,14 +90,16 @@ class Main(Base):
         else:
             self._main_window.showNormal()
 
-    async def _exit_backend(self) -> None:
+    async def _exit_application(self) -> None:
         """Exit the backend"""
-        self._logger.info("Exiting backend..")
+        self._logger.info("Exit Backend..")
         # await self.bridge.async_connect_websocket(
         #     self.args.hostname,
         #     self.args.websocket_port,
         # )
         # await self.bridge.async_send_event("exit-application", {})
+        self._logger.info("Exit GUI..")
+        self._application.quit()
 
     async def _setup_bridge(self) -> None:
         """Setup bridge connection"""

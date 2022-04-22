@@ -3,6 +3,21 @@ from json import JSONDecodeError, dumps, loads
 from uuid import uuid4
 
 from systembridgeshared.base import Base
+from systembridgeshared.const import (
+    TYPE_DATA_GET,
+    TYPE_DATA_LISTENER_REGISTERED,
+    TYPE_DATA_LISTENER_UNREGISTERED,
+    TYPE_DATA_UPDATE,
+    TYPE_ERROR,
+    TYPE_GET_DATA,
+    TYPE_GET_SETTING,
+    TYPE_GET_SETTINGS,
+    TYPE_SETTING_RESULT,
+    TYPE_SETTING_UPDATED,
+    TYPE_SETTINGS_RESULT,
+    TYPE_UNREGISTER_DATA_LISTENER,
+    TYPE_UPDATE_SETTING,
+)
 from systembridgeshared.database import Database
 from systembridgebackend.modules.listeners import Listeners
 from systembridgeshared.settings import Settings, SECRET_API_KEY
@@ -35,13 +50,13 @@ class WebSocket(Base):
         if "api-key" not in data:
             self._logger.warning("No api-key provided")
             await self._websocket.send(
-                dumps({"type": "ERROR", "message": "No api-key provided"})
+                dumps({"type": TYPE_ERROR, "message": "No api-key provided"})
             )
             return False
         if data["api-key"] != self._settings.get_secret(SECRET_API_KEY):
             self._logger.warning("Invalid api-key")
             await self._websocket.send(
-                dumps({"type": "ERROR", "message": "Invalid api-key"})
+                dumps({"type": TYPE_ERROR, "message": "Invalid api-key"})
             )
             return False
         return True
@@ -58,7 +73,7 @@ class WebSocket(Base):
         await self._websocket.send(
             dumps(
                 {
-                    "type": "DATA_UPDATE",
+                    "type": TYPE_DATA_UPDATE,
                     "message": "Data changed",
                     "module": module,
                     "data": data,
@@ -77,18 +92,20 @@ class WebSocket(Base):
                 except JSONDecodeError as error:
                     self._logger.error("Invalid JSON: %s", error)
                     await self._websocket.send(
-                        dumps({"type": "ERROR", "message": "Invalid JSON"})
+                        dumps({"type": TYPE_ERROR, "message": "Invalid JSON"})
                     )
                     continue
 
                 self._logger.info("Received data: %s", data)
-                if data["event"] == "register-data-listener":
+                if data["event"] == "REGISTER_DATA_LISTENER":
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
-                            dumps({"type": "ERROR", "message": "No modules provided"})
+                            dumps(
+                                {"type": TYPE_ERROR, "message": "No modules provided"}
+                            )
                         )
                         continue
 
@@ -106,7 +123,7 @@ class WebSocket(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": "ERROR",
+                                    "type": TYPE_ERROR,
                                     "message": "Listener already registered with this connection",
                                     "id": listener_id,
                                     "modules": data["modules"],
@@ -118,14 +135,14 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "DATA_LISTENER_REGISTERED",
+                                "type": TYPE_DATA_LISTENER_REGISTERED,
                                 "message": "Data listener registered",
                                 "id": listener_id,
                                 "modules": data["modules"],
                             }
                         )
                     )
-                elif data["event"] == "unregister-data-listener":
+                elif data["event"] == TYPE_UNREGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
 
@@ -135,7 +152,7 @@ class WebSocket(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": "ERROR",
+                                    "type": TYPE_ERROR,
                                     "message": "Listener not registered with this connection",
                                 }
                             )
@@ -145,19 +162,21 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "DATA_LISTENER_UNREGISTERED",
+                                "type": TYPE_DATA_LISTENER_UNREGISTERED,
                                 "message": "Data listener unregistered",
                                 "id": listener_id,
                             }
                         )
                     )
-                elif data["event"] == "get-data":
+                elif data["event"] == TYPE_GET_DATA:
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
-                            dumps({"type": "ERROR", "message": "No modules provided"})
+                            dumps(
+                                {"type": TYPE_ERROR, "message": "No modules provided"}
+                            )
                         )
                         continue
                     self._logger.info("Getting data: %s", data["modules"])
@@ -165,7 +184,7 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "DATA_GET",
+                                "type": TYPE_DATA_GET,
                                 "message": "Getting data",
                                 "modules": data["modules"],
                             }
@@ -177,14 +196,14 @@ class WebSocket(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": "DATA_UPDATE",
+                                    "type": TYPE_DATA_UPDATE,
                                     "message": "Data received",
                                     "module": module,
                                     "data": data,
                                 }
                             )
                         )
-                elif data["event"] == "get-settings":
+                elif data["event"] == TYPE_GET_SETTINGS:
                     if not await self._check_api_key(data):
                         continue
                     self._logger.info("Getting settings")
@@ -192,20 +211,22 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "SETTINGS_RESULT",
+                                "type": TYPE_SETTINGS_RESULT,
                                 "message": "Got settings",
                                 "data": self._settings.get_all(),
                             }
                         )
                     )
 
-                elif data["event"] == "get-setting":
+                elif data["event"] == TYPE_GET_SETTING:
                     if not await self._check_api_key(data):
                         continue
                     if "setting" not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
-                            dumps({"type": "ERROR", "message": "No setting provided"})
+                            dumps(
+                                {"type": TYPE_ERROR, "message": "No setting provided"}
+                            )
                         )
                         continue
                     self._logger.info("Getting setting: %s", data["setting"])
@@ -213,26 +234,28 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "SETTING_RESULT",
+                                "type": TYPE_SETTING_RESULT,
                                 "message": "Got setting",
                                 "setting": data["setting"],
                                 "data": self._settings.get(data["setting"]),
                             }
                         )
                     )
-                elif data["event"] == "update-setting":
+                elif data["event"] == TYPE_UPDATE_SETTING:
                     if not await self._check_api_key(data):
                         continue
                     if "setting" not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
-                            dumps({"type": "ERROR", "message": "No setting provided"})
+                            dumps(
+                                {"type": TYPE_ERROR, "message": "No setting provided"}
+                            )
                         )
                         continue
                     if "value" not in data:
                         self._logger.warning("No value provided")
                         await self._websocket.send(
-                            dumps({"type": "ERROR", "message": "No value provided"})
+                            dumps({"type": TYPE_ERROR, "message": "No value provided"})
                         )
                         continue
                     self._logger.info(
@@ -244,8 +267,8 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "SETTING_SET",
-                                "message": "Setting set",
+                                "type": TYPE_SETTING_UPDATED,
+                                "message": "Setting updated",
                                 "setting": data["setting"],
                                 "value": data["value"],
                             }
@@ -256,7 +279,7 @@ class WebSocket(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": "ERROR",
+                                "type": TYPE_ERROR,
                                 "message": "Unknown event",
                                 "event": data["event"],
                             }

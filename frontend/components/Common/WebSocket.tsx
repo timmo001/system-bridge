@@ -46,7 +46,7 @@ export class WebSocketConnection {
     console.log("Get data:", modules);
     this.websocket.send(
       JSON.stringify({
-        event: "get-data",
+        event: "GET_DATA",
         "api-key": this.apiKey,
         modules: modules,
       })
@@ -58,7 +58,7 @@ export class WebSocketConnection {
     console.log("Get settings");
     this.websocket.send(
       JSON.stringify({
-        event: "get-settings",
+        event: "GET_SETTINGS",
         "api-key": this.apiKey,
       })
     );
@@ -69,7 +69,7 @@ export class WebSocketConnection {
     console.log("Register data listener:", modules);
     this.websocket.send(
       JSON.stringify({
-        event: "register-data-listener",
+        event: "REGISTER_DATA_LISTENER",
         "api-key": this.apiKey,
         modules: modules,
       })
@@ -94,7 +94,7 @@ export class WebSocketConnection {
     console.log("Update setting:", { key, value });
     this.websocket.send(
       JSON.stringify({
-        event: "update-setting",
+        event: "UPDATE_SETTING",
         "api-key": this.apiKey,
         setting: key,
         value: value,
