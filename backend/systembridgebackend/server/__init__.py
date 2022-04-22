@@ -178,11 +178,12 @@ class Server(Base):
 
     def start(self) -> None:
         """Start Server"""
-        self._logger.info("Starting server")
+        port = self._settings.get(SETTING_PORT_API)
+        self._logger.info("Starting server on port: %s", port)
         self._server.run(
             host="0.0.0.0",
-            port=self._settings.get(SETTING_PORT_API),
-            debug=False,
+            port=port,
+            debug=True,
             auto_reload=True,
             motd=False,
         )
