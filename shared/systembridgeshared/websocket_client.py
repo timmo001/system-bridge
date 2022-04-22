@@ -34,11 +34,13 @@ class WebSocketClient(Base):
         return self._websocket is not None and not self._websocket.closed
 
     async def close(self) -> None:
+        """Close connection"""
         if self._websocket is not None:
             await self._websocket.close()
             self._websocket = None
 
     async def connect(self) -> None:
+        """Connect to server"""
         try:
             self._websocket = await websockets.connect(
                 f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
@@ -50,6 +52,7 @@ class WebSocketClient(Base):
         self,
         modules: list[str],
     ) -> None:
+        """Get data from server"""
         try:
             await self._websocket.send(
                 json.dumps(
@@ -65,10 +68,11 @@ class WebSocketClient(Base):
         except (InvalidMessage, InvalidHandshake) as error:
             raise Exception from error
 
-    async def get_data(
+    async def register_data_listener(
         self,
         modules: list[str],
     ) -> None:
+        """Register data listener"""
         try:
             await self._websocket.send(
                 json.dumps(
@@ -85,6 +89,7 @@ class WebSocketClient(Base):
             raise Exception from error
 
     async def listen_for_messages(self, callback: callable) -> None:
+        """Listen for messages"""
         while True:
             await asyncio.sleep(0)
             try:
