@@ -12,6 +12,7 @@ from systembridgeshared.const import (
     TYPE_GET_DATA,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
+    TYPE_REGISTER_DATA_LISTENER,
     TYPE_SETTING_RESULT,
     TYPE_SETTING_UPDATED,
     TYPE_SETTINGS_RESULT,
@@ -21,6 +22,7 @@ from systembridgeshared.const import (
 from systembridgeshared.database import Database
 from systembridgebackend.modules.listeners import Listeners
 from systembridgeshared.settings import Settings, SECRET_API_KEY
+
 
 
 class WebSocket(Base):
@@ -97,7 +99,7 @@ class WebSocket(Base):
                     continue
 
                 self._logger.info("Received data: %s", data)
-                if data["event"] == "REGISTER_DATA_LISTENER":
+                if data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:

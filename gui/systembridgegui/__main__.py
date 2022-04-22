@@ -1,6 +1,5 @@
 """System Bridge GUI: Main"""
 import asyncio
-import os
 import sys
 
 from PySide6.QtGui import QIcon
@@ -11,9 +10,10 @@ from systembridgegui.window.main import MainWindow
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
+from systembridgeshared.exceptions import ConnectionClosedException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
-
+from systembridgeshared.websocket_client import WebSocketClient
 
 class Main(Base):
     """Main"""
@@ -46,8 +46,6 @@ class Main(Base):
             """
         )
 
-        asyncio.run(self._setup_bridge())
-
         self._main_window = MainWindow(self._icon)
         self._main_window.resize(1280, 720)
         self._main_window.showNormal()
@@ -77,6 +75,10 @@ class Main(Base):
         """Show the main window"""
         self._logger.info("Showing window: %s", path)
 
+        self._database = database
+        self._settings = settings
+        self._websocket_client = WebSocketClient(self._settings)
+
         self._main_window.hide()
         self._main_window.setup(path)
         self._main_window.resize(width, height)
@@ -100,32 +102,6 @@ class Main(Base):
         # await self.bridge.async_send_event("exit-application", {})
         self._logger.info("Exit GUI..")
         self._application.quit()
-
-    async def _setup_bridge(self) -> None:
-        """Setup bridge connection"""
-        self._logger.info("Setup bridge connection..")
-        # try:
-        #     async with async_timeout.timeout(30):
-        #         async with ClientSession() as session:
-        #             self.bridge = Bridge(
-        #                 BridgeClient(session),
-        #                 f"http://{self.args.hostname}:{self.args.port}",
-        #                 self.args.api_key,
-        #             )
-        #             self.information = await self.bridge.async_get_information()
-        # except (
-        #     asyncio.TimeoutError,
-        #     BridgeException,
-        #     ClientConnectionError,
-        #     ClientConnectorError,
-        #     ClientResponseError,
-        #     OSError,
-        # ) as exception:
-        #     self._logger.error(exception)
-        #     self._logger.info("Retrying in 5 seconds..")
-        #     await asyncio.sleep(5)
-        #     await self.setup_bridge()
-
 
 if __name__ == "__main__":
     asyncio.set_event_loop(asyncio.new_event_loop())
