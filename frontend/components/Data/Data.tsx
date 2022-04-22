@@ -6,6 +6,7 @@ import { Event } from "../../assets/entities/event.entity";
 import { useSettings } from "../Contexts/Settings";
 import { WebSocketConnection } from "../Common/WebSocket";
 import DataItems from "./DataItems";
+import { TabPanel } from "@mui/lab";
 
 export interface WorkerData {
   service: string;
@@ -13,13 +14,27 @@ export interface WorkerData {
   observe: boolean;
 }
 
-const modules = ["cpu", "memory"];
+const modules = [
+  "battery",
+  "bridge",
+  "cpu",
+  "disk",
+  "memory",
+  "network",
+  "sensors",
+  "system",
+];
 
-const items: Array<WorkerData> = modules.map((service: string) => ({
-  service: service,
-  method: "findAll",
-  observe: false,
-}));
+const moduleMap: { [key: string]: string } = {
+  battery: "Battery",
+  bridge: "Bridge",
+  cpu: "CPU",
+  disk: "Disk",
+  memory: "Memory",
+  network: "Network",
+  sensors: "Sensors",
+  system: "System",
+};
 
 function a11yProps(index: any) {
   return {
@@ -28,7 +43,12 @@ function a11yProps(index: any) {
   };
 }
 
+interface DataMap {
+  [key: string]: { [key: string]: any };
+}
+
 function DataComponent(): ReactElement {
+  const [data, setData] = useState<DataMap>({});
   const [settings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
   const [tab, setTab] = useState<number>(0);
@@ -42,22 +62,20 @@ function DataComponent(): ReactElement {
     setTab(newValue);
   };
 
-  const eventHandler = useCallback((event: Event) => {
-    console.log("Event:", event);
-    // if (
-    //   name.includes("data-") &&
-    //   service &&
-    //   services.findIndex((s: string) => s === service) > -1 &&
-    //   method === "findAll" &&
-    //   data
-    // ) {
-    //   console.log("Data update:", name, service, data);
-    //   switch (service) {
-    //     default:
-    //       break;
-    //   }
-    // }
-  }, []);
+  const eventHandler = useCallback(
+    (event: Event) => {
+      console.log("Event:", event);
+      if (
+        event.type === "DATA_UPDATE" &&
+        event.module &&
+        modules.includes(event.module)
+      ) {
+        console.log("Data update:", moduleMap[event.module], event.data);
+        setData({ ...data, [event.module]: event.data });
+      }
+    },
+    [data]
+  );
 
   const handleSetup = useCallback(
     (port: number, apiKey: string) => {
@@ -89,33 +107,48 @@ function DataComponent(): ReactElement {
         alignItems="stretch"
         sx={{ padding: theme.spacing(2) }}
       >
-        {settings ? (
-          <Grid container direction="row" item xs>
-            <Grid item>
-              <Tabs
-                orientation="vertical"
-                variant="scrollable"
-                value={tab}
-                onChange={handleChangeTab}
-              >
-                <Tab label="CPU" {...a11yProps(0)} />
-                <Tab label="Memory" {...a11yProps(0)} />
-              </Tabs>
-            </Grid>
-            <Grid item xs>
-              {/* <DataItems */}
-            </Grid>
+        <Grid container direction="row" item xs>
+          <Grid item>
+            <Tabs
+              orientation="vertical"
+              variant="scrollable"
+              value={tab}
+              onChange={handleChangeTab}
+            >
+              {modules.map((module: string, index: number) => (
+                <Tab
+                  key={index}
+                  label={moduleMap[module]}
+                  {...a11yProps(index)}
+                />
+              ))}
+            </Tabs>
           </Grid>
-        ) : (
-          <Grid
-            container
-            direction="row"
-            justifyContent="center"
-            sx={{ margin: theme.spacing(8, 0, 14) }}
-          >
-            <CircularProgress />
+          <Grid item xs>
+            {modules.map((module: string, index: number) => (
+              <>
+                {tab === index ? (
+                  <>
+                    {data[module] ? (
+                      <DataItems data={data[module]} name={moduleMap[module]} />
+                    ) : (
+                      <Grid
+                        container
+                        direction="row"
+                        justifyContent="center"
+                        sx={{ margin: theme.spacing(8, 0, 14) }}
+                      >
+                        <CircularProgress />
+                      </Grid>
+                    )}
+                  </>
+                ) : (
+                  ""
+                )}
+              </>
+            ))}
           </Grid>
-        )}
+        </Grid>
       </Grid>
     </>
   );
