@@ -190,7 +190,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=port,
-            debug=True,  # if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
+            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
             auto_reload=True,
             motd=False,
         )
