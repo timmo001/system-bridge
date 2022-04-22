@@ -21,6 +21,7 @@ class Main(Base):
     def __init__(self) -> None:
         """Initialize"""
         super().__init__()
+        self._logger.info("System Bridge GUI: Startup")
 
         self._application = QApplication([])
         self._icon = QIcon("../resources/system-bridge-circle.png")
