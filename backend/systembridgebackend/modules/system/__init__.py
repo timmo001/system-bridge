@@ -1,7 +1,7 @@
 """System Bridge: System"""
 from psutil import boot_time, users
 from psutil._common import suser
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class System(Base):

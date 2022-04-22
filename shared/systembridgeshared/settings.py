@@ -8,17 +8,18 @@ from cryptography.fernet import Fernet
 from uuid import uuid4
 from os.path import exists
 
-from systembridgebackend import Base
-from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
-from systembridgebackend.database import Database
-
-TABLE_SECRETS = "secrets"
-TABLE_SETTINGS = "settings"
-
-SECRET_API_KEY = "api_key"
-
-SETTING_LOG_LEVEL = "log_level"
-SETTING_PORT_API = "port_api"
+from systembridgeshared.base import Base
+from systembridgeshared.const import (
+    COLUMN_KEY,
+    COLUMN_TIMESTAMP,
+    COLUMN_VALUE,
+    SECRET_API_KEY,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+    TABLE_SECRETS,
+    TABLE_SETTINGS,
+)
+from systembridgeshared.database import Database
 
 
 class Settings(Base):

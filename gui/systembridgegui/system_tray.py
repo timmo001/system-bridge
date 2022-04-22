@@ -6,7 +6,7 @@ from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
-from systembridge.objects.information import Information
+from systembridgeshared.objects.information import Information
 
 from .base import Base
 

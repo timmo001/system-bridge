@@ -2,10 +2,10 @@
 from json import JSONDecodeError, dumps, loads
 from uuid import uuid4
 
-from systembridgebackend import Base
-from systembridgebackend.database import Database
+from systembridgeshared.base import Base
+from systembridgeshared.database import Database
 from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.settings import Settings, SECRET_API_KEY
+from systembridgeshared.settings import Settings, SECRET_API_KEY
 
 
 class WebSocket(Base):

@@ -14,13 +14,12 @@ from aiohttp.client_exceptions import (
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 from systembridge import Bridge, BridgeClient
-from systembridge.exceptions import BridgeException
+from systembridgeshared.exceptions import BridgeException
 
-from .base import Base
-from .system_tray import SystemTray
-from .window.main import MainWindow
-
+from systembridgegui.base import Base
 from systembridgegui.main import Main
+from systembridgegui.system_tray import SystemTray
+from systembridgegui.window.main import MainWindow
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
@@ -187,13 +186,50 @@ if __name__ == "__main__":
         default=9170,
     )
 
+    user_data_dir = AppDirs("systembridge", "timmo001").user_data_dir
+
+    # Create User Data Directories
+    os.makedirs(user_data_dir, exist_ok=True)
+
     args = parser.parse_args()
 
+    # Set up logging
+    log_level = settings.get(SETTING_LOG_LEVEL)
+
     logging.basicConfig(
-        format=FORMAT,
         datefmt=DATE_FORMAT,
-        level=args.log_level.upper(),
+        format=FORMAT,
+        level=log_level,
     )
-    logger = logging.getLogger(__name__)
+
+    logging.getLogger().handlers[0].setFormatter(
+        ColoredFormatter(
+            f"%(log_color)s{FORMAT}%(reset)s",
+            datefmt=DATE_FORMAT,
+            reset=True,
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red",
+            },
+        )
+    )
+
+    file_handler = logging.handlers.RotatingFileHandler(
+        os.path.join(user_data_dir, "system-bridge.log"),
+        backupCount=1,
+    )
+    try:
+        file_handler.doRollover()
+    except PermissionError:
+        pass
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(logging.Formatter(FORMAT, datefmt=DATE_FORMAT))
+
+    logger = logging.getLogger("")
+    logger.addHandler(file_handler)
+    logger.setLevel(log_level)
 
     Main(args)

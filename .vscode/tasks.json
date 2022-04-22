@@ -3,8 +3,17 @@
   "tasks": [
     {
       "type": "shell",
+      "label": "Shared: pip install",
+      "command": "pip install .",
+      "options": {
+        "cwd": "shared"
+      }
+    },
+    {
+      "type": "shell",
       "label": "Backend: pip install",
       "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
       "options": {
         "cwd": "backend"
       }
@@ -13,6 +22,7 @@
       "type": "shell",
       "label": "CLI: pip install",
       "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
       "options": {
         "cwd": "cli"
       }
@@ -21,6 +31,7 @@
       "type": "shell",
       "label": "GUI: pip install",
       "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
       "options": {
         "cwd": "gui"
       }

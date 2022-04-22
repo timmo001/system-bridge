@@ -3,7 +3,7 @@ from __future__ import annotations
 import psutil
 from plyer import battery
 
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class Battery(Base):

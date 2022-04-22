@@ -9,7 +9,7 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class CPU(Base):

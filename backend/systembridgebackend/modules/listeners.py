@@ -1,8 +1,8 @@
 """System Bridge: Module Listeners"""
 
 import asyncio
-from systembridgebackend import Base
-from systembridgebackend.database import Database
+from systembridgeshared.base import Base
+from systembridgeshared.database import Database
 
 
 class Listener:

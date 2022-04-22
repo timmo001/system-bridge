@@ -2,7 +2,7 @@
 from __future__ import annotations
 import psutil
 
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class Sensors(Base):

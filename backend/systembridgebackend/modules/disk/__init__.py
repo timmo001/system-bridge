@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class Disk(Base):

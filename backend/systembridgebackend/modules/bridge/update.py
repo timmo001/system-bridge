@@ -2,10 +2,10 @@
 import time
 from zeroconf import Zeroconf, ServiceStateChange
 
-from systembridgebackend import Base
-from systembridgebackend.common import COLUMN_TIMESTAMP
-from systembridgebackend.database import Database
 from systembridgebackend.modules.bridge import Bridge
+from systembridgeshared.base import Base
+from systembridgeshared.const import COLUMN_TIMESTAMP
+from systembridgeshared.database import Database
 
 COLUMN_NAME = "name"
 COLUMN_ADDRESS = "address"

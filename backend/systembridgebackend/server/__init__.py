@@ -7,8 +7,6 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 
-from systembridgebackend import Base
-from systembridgebackend.database import Database
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
@@ -23,12 +21,10 @@ from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 from systembridgebackend.server.websocket import WebSocket
-from systembridgebackend.settings import (
-    Settings,
-    SECRET_API_KEY,
-    SETTING_PORT_API,
-    SETTING_LOG_LEVEL,
-)
+from systembridgeshared.base import Base
+from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, SETTING_LOG_LEVEL
+from systembridgeshared.database import Database
+from systembridgeshared.settings import Settings
 
 
 class Server(Base):

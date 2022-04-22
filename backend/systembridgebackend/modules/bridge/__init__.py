@@ -1,7 +1,7 @@
 """System Bridge: Bridge"""
 from zeroconf import Zeroconf, ServiceBrowser, InterfaceChoice
 
-from systembridgebackend import Base
+from systembridgeshared.base import Base
 
 
 class Bridge(Base):

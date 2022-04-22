@@ -1,5 +1,5 @@
 """System Bridge: Update Memory"""
-from systembridgebackend.database import Database
+from systembridgeshared.database import Database
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.memory import Memory
 

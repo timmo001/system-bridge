@@ -1,8 +1,4 @@
-appdirs==1.4.4
-colorlog==6.6.0
-cryptography==36.0.2
 keyboard==0.13.5
-pandas==1.4.2
 plyer==2.0.0
 psutil==5.9.0
 pyinstaller==4.10

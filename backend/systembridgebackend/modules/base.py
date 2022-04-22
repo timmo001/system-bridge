@@ -1,7 +1,7 @@
 """System Bridge: Module Base"""
-from systembridgebackend import Base
-from systembridgebackend.common import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
-from systembridgebackend.database import Database
+from systembridgeshared.base import Base
+from systembridgeshared.const import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgeshared.database import Database
 
 
 class ModuleUpdateBase(Base):

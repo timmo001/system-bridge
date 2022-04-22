@@ -1,18 +1,16 @@
-"""System Bridge: Database"""
+"""System Bridge Shared: Database"""
 import os
-from appdirs import AppDirs
 from collections import OrderedDict
 from pandas import DataFrame, read_sql_query
 from sqlite3 import Connection, connect
 from time import time
 
-from systembridgebackend import Base
-from systembridgebackend.common import (
+from systembridgeshared.base import Base
+from systembridgeshared.common import (
     convert_string_to_correct_type,
-    COLUMN_KEY,
-    COLUMN_TIMESTAMP,
-    COLUMN_VALUE,
+    get_user_data_directory,
 )
+from systembridgeshared.const import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
 
 
 class Database(Base):
@@ -52,9 +50,7 @@ class Database(Base):
     def connect(self) -> None:
         """Connect to database"""
         self._connection = connect(
-            os.path.join(
-                AppDirs("systembridge", "timmo001").user_data_dir, "systembridge.db"
-            ),
+            os.path.join(get_user_data_directory(), "systembridge.db"),
             check_same_thread=False,
         )
 
