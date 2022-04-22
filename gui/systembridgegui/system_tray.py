@@ -10,10 +10,10 @@ from systembridgeshared.base import Base
 from systembridgeshared.common import get_user_data_directory
 
 
-PATH_BRIDGES_OPEN_ON = "/app/bridges/openon"
-PATH_BRIDGES_SETUP = "/app/bridges/setup"
-PATH_DATA = "/app/data"
-PATH_SETTINGS = "/app/settings"
+PATH_BRIDGES_OPEN_ON = "/app/bridges/openon.html"
+PATH_BRIDGES_SETUP = "/app/bridges/setup.html"
+PATH_DATA = "/app/data.html"
+PATH_SETTINGS = "/app/settings.html"
 
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
 URL_DOCS = "https://system-bridge.timmo.dev"

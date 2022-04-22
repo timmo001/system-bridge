@@ -57,5 +57,5 @@ class MainWindow(Base, QFrame):
                     "apiPort": api_port,
                 })}"""
         )
-        self._logger.info("Opening url: %s", url)
+        self._logger.info("Open URL: %s", url)
         self._browser.load(url)

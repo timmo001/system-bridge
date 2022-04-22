@@ -1,6 +1,7 @@
 """System Bridge: Server"""
 from datetime import timedelta
 from os import walk
+import os
 
 from sanic import Sanic
 from sanic.request import Request
@@ -167,7 +168,12 @@ class Server(Base):
             methods=["POST"],
         )
 
-        self._server.static("/", "../frontend/out")
+        self._server.static(
+            "/",
+            "../frontend/out",
+            strict_slashes=False,
+            content_type="text/html",
+        )
         self._server.add_websocket_route(handler_websocket, "/api/websocket")
 
     async def _data_updated(
@@ -184,7 +190,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=port,
-            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
+            debug=True,  # if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
             auto_reload=True,
             motd=False,
         )
