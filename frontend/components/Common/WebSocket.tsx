@@ -53,6 +53,17 @@ export class WebSocketConnection {
     );
   }
 
+  getSettings(): void {
+    if (!this.websocket) return;
+    console.log("Get settings");
+    this.websocket.send(
+      JSON.stringify({
+        event: "get-settings",
+        "api-key": this.apiKey,
+      })
+    );
+  }
+
   registerDataListener(modules: Array<string>): void {
     if (!this.websocket) return;
     console.log("Register data listener:", modules);
@@ -85,7 +96,8 @@ export class WebSocketConnection {
       JSON.stringify({
         event: "update-setting",
         "api-key": this.apiKey,
-        data: { key: key, value: value },
+        setting: key,
+        value: value,
       })
     );
   }

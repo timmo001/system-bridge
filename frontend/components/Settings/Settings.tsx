@@ -7,9 +7,7 @@ import { useSettings } from "components/Contexts/Settings";
 import { WebSocketConnection } from "components/Common/WebSocket";
 import Item from "components/Settings/Item";
 import Section from "components/Settings/Section";
-import { SettingsValue } from "assets/entities/settings.entity";
-
-const modules = ["settings"];
+import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
 
 let ws: WebSocketConnection;
 
@@ -22,10 +20,14 @@ function Settings(): ReactElement {
   const eventHandler = useCallback(
     (event: Event) => {
       console.log("Event:", event);
-      if (event.type === "DATA_UPDATE" && event.module === "settings") {
-        delete event.data["last_updated"];
-        console.log("Data update:", event.module, event.data);
-        setSettings(event.data);
+      if (event.type === "SETTINGS_RESULT") {
+        console.log("Settings result:", event.data);
+        let newSettings: SettingsObject = {};
+        event.data.forEach((s: { key: string; value: SettingsValue }) => {
+          newSettings[s.key] = s.value;
+        });
+        console.log("Settings:", newSettings);
+        setSettings(newSettings);
       }
     },
     [setSettings]
@@ -35,8 +37,7 @@ function Settings(): ReactElement {
     (port: number, apiKey: string) => {
       console.log("Setup WebSocketConnection");
       ws = new WebSocketConnection(port, apiKey, async () => {
-        ws.getData(modules);
-        ws.registerDataListener(modules);
+        ws.getSettings();
       });
       ws.onEvent = eventHandler;
     },

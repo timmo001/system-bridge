@@ -184,7 +184,73 @@ class WebSocket(Base):
                                 }
                             )
                         )
+                elif data["event"] == "get-settings":
+                    if not await self._check_api_key(data):
+                        continue
+                    self._logger.info("Getting settings")
 
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                "type": "SETTINGS_RESULT",
+                                "message": "Got settings",
+                                "data": self._settings.get_all(),
+                            }
+                        )
+                    )
+
+                elif data["event"] == "get-setting":
+                    if not await self._check_api_key(data):
+                        continue
+                    if "setting" not in data:
+                        self._logger.warning("No setting provided")
+                        await self._websocket.send(
+                            dumps({"type": "ERROR", "message": "No setting provided"})
+                        )
+                        continue
+                    self._logger.info("Getting setting: %s", data["setting"])
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                "type": "SETTING_RESULT",
+                                "message": "Got setting",
+                                "setting": data["setting"],
+                                "data": self._settings.get(data["setting"]),
+                            }
+                        )
+                    )
+                elif data["event"] == "update-setting":
+                    if not await self._check_api_key(data):
+                        continue
+                    if "setting" not in data:
+                        self._logger.warning("No setting provided")
+                        await self._websocket.send(
+                            dumps({"type": "ERROR", "message": "No setting provided"})
+                        )
+                        continue
+                    if "value" not in data:
+                        self._logger.warning("No value provided")
+                        await self._websocket.send(
+                            dumps({"type": "ERROR", "message": "No value provided"})
+                        )
+                        continue
+                    self._logger.info(
+                        "Setting setting %s to: %s", data["setting"], data["value"]
+                    )
+
+                    self._settings.set(data["setting"], data["value"])
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                "type": "SETTING_SET",
+                                "message": "Setting set",
+                                "setting": data["setting"],
+                                "value": data["value"],
+                            }
+                        )
+                    )
                 else:
                     self._logger.warning("Unknown event: %s", data["event"])
                     await self._websocket.send(
