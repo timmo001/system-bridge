@@ -50,7 +50,10 @@ class Main(Base):
             """
         )
 
-        self._main_window = MainWindow(self._icon)
+        self._main_window = MainWindow(
+            self._settings,
+            self._icon,
+        )
         # self._main_window.resize(1280, 720)
         # self._main_window.showNormal()
         # self._main_window.hide()

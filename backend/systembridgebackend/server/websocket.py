@@ -24,7 +24,6 @@ from systembridgebackend.modules.listeners import Listeners
 from systembridgeshared.settings import Settings, SECRET_API_KEY
 
 
-
 class WebSocket(Base):
     """WebSocket"""
 

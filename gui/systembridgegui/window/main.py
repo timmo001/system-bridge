@@ -7,6 +7,8 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 
 from systembridgeshared.base import Base
+from systembridgeshared.const import SETTING_PORT_API, SECRET_API_KEY
+from systembridgeshared.settings import Settings
 
 
 class MainWindow(Base, QFrame):
@@ -14,11 +16,14 @@ class MainWindow(Base, QFrame):
 
     def __init__(
         self,
+        settings: Settings,
         icon: QIcon,
     ) -> None:
         """Initialize the window"""
         Base.__init__(self)
         QFrame.__init__(self)
+
+        self._settings = settings
 
         self.setWindowTitle("System Bridge")
         self.setWindowIcon(icon)
@@ -44,11 +49,13 @@ class MainWindow(Base, QFrame):
         path: str,
     ) -> None:
         """Setup the window"""
-        # url = QUrl(
-        #     f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
-        #             "apiKey": self.args.api_key,
-        #             "apiPort": self.args.port,
-        #         })}"""
-        # )
-        # self._logger.debug("Opening url: %s", url)
-        # self._browser.load(url)
+        api_port = self._settings.get(SETTING_PORT_API)
+        api_key = self._settings.get_secret(SECRET_API_KEY)
+        url = QUrl(
+            f"""http://localhost:{api_port}{path}?{urlencode({
+                    "apiKey": api_key,
+                    "apiPort": api_port,
+                })}"""
+        )
+        self._logger.info("Opening url: %s", url)
+        self._browser.load(url)
