@@ -11,7 +11,7 @@ from systembridgeshared.common import get_user_data_directory
 def setup_logger(
     log_level: str,
     name: str,
-) -> None:
+) -> logging.Logger:
     """Set up logging"""
 
     logging.basicConfig(
@@ -49,3 +49,5 @@ def setup_logger(
     logger = logging.getLogger("")
     logger.addHandler(file_handler)
     logger.setLevel(log_level)
+
+    return logger
