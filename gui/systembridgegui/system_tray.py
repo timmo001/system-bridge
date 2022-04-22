@@ -1,17 +1,18 @@
 """System Bridge GUI: System Tray"""
 from __future__ import annotations
+import os
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 
 from systembridgeshared.base import Base
+from systembridgeshared.common import get_user_data_directory
 
 
 PATH_BRIDGES_OPEN_ON = "/app/bridges/openon"
 PATH_BRIDGES_SETUP = "/app/bridges/setup"
 PATH_DATA = "/app/data"
-PATH_LOGS = "/app/logs"
 PATH_SETTINGS = "/app/settings"
 
 URL_DISCUSSIONS = "https://github.com/timmo001/system-bridge/discussions"
@@ -106,8 +107,11 @@ class SystemTray(Base, QSystemTrayIcon):
 
         menu_help.addSeparator()
 
-        action_logs: QAction = menu_help.addAction("View Logs")
-        action_logs.triggered.connect(self._show_logs)
+        action_log: QAction = menu_help.addAction("Open Log File")
+        action_log.triggered.connect(self._open_log)
+
+        action_log_gui: QAction = menu_help.addAction("Open GUI Log File")
+        action_log_gui.triggered.connect(self._open_gui_log)
 
         menu.addSeparator()
 
@@ -149,6 +153,16 @@ class SystemTray(Base, QSystemTrayIcon):
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
+    @staticmethod
+    def _open_log() -> None:
+        """Open log"""
+        open_new_tab(os.path.join(get_user_data_directory(), "system-bridge.log"))
+
+    @staticmethod
+    def _open_gui_log() -> None:
+        """Open GUI log"""
+        open_new_tab(os.path.join(get_user_data_directory(), "system-bridge-gui.log"))
+
     def _show_bridges_send_to(self) -> None:
         """Show bridges open url on window"""
         self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
@@ -160,10 +174,6 @@ class SystemTray(Base, QSystemTrayIcon):
     def _show_data(self) -> None:
         """Show api data"""
         self.callback_show_window(PATH_DATA, False)
-
-    def _show_logs(self) -> None:
-        """Show logs"""
-        self.callback_show_window(PATH_LOGS, False)
 
     def _show_settings(self) -> None:
         """Show settings"""
