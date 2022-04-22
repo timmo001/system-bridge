@@ -1,6 +1,7 @@
-import React, { ChangeEvent, ReactElement, useState } from "react";
+import React, { ChangeEvent, ReactElement, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
+  Box,
   FormControl,
   IconButton,
   InputAdornment,
@@ -17,6 +18,7 @@ import { Icon } from "@mdi/react";
 import {
   mdiCached,
   mdiContentCopy,
+  mdiContentSaveOutline,
   mdiEye,
   mdiEyeOff,
   mdiTextBoxOutline,
@@ -54,7 +56,7 @@ interface ItemProps {
   handleChanged: (key: string, value: SettingsValue) => void;
 }
 
-function Item({ keyIn, valueIn }: ItemProps): ReactElement {
+function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [value, setValue] = useState<SettingsValue>(valueIn);
 
@@ -62,7 +64,7 @@ function Item({ keyIn, valueIn }: ItemProps): ReactElement {
     setValue(valueIn);
   }
 
-  function handleChanged(event: ChangeEvent<HTMLInputElement>) {
+  function handleInputChanged(event: ChangeEvent<HTMLInputElement>) {
     handleSetSetting(event.target.value);
   }
 
@@ -86,6 +88,8 @@ function Item({ keyIn, valueIn }: ItemProps): ReactElement {
   ) => {
     event.preventDefault();
   };
+
+  const valueChanged = useMemo(() => valueIn !== value, [valueIn, value]);
 
   const {
     name,
@@ -161,7 +165,7 @@ function Item({ keyIn, valueIn }: ItemProps): ReactElement {
             <OutlinedInput
               type={showPassword ? "text" : "password"}
               defaultValue={value}
-              onChange={handleChanged}
+              onChange={handleInputChanged}
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
@@ -186,7 +190,7 @@ function Item({ keyIn, valueIn }: ItemProps): ReactElement {
             type="text"
             defaultValue={value}
             disabled={containerDisabled}
-            onChange={handleChanged}
+            onChange={handleInputChanged}
             variant="outlined"
           />
         ) : typeof value === "number" ? (
@@ -196,12 +200,27 @@ function Item({ keyIn, valueIn }: ItemProps): ReactElement {
             disabled={containerDisabled}
             inputProps={{ minimum: minimum }}
             defaultValue={value}
-            onChange={handleChanged}
+            onChange={handleInputChanged}
             variant="outlined"
           />
         ) : (
           ""
         )}
+        <IconButton
+          disabled={valueChanged === false}
+          onClick={() => {
+            handleChanged(keyIn, value);
+          }}
+          sx={{ margin: theme.spacing(1) }}
+        >
+          <Icon
+            id="save"
+            title="Save"
+            size={1}
+            path={mdiContentSaveOutline}
+            style={{ opacity: valueChanged ? 1 : 0.25 }}
+          />
+        </IconButton>
       </ListItemSecondaryAction>
     </ListItem>
   );

@@ -45,7 +45,6 @@ function Settings(): ReactElement {
 
   const handleChanged = useCallback(
     (key: string, value: SettingsValue) => {
-      console.log("Handle changed:", key, value);
       ws.updateSetting(key, value);
       setSettings({ ...settings, [key]: value });
     },
