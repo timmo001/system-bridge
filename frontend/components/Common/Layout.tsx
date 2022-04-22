@@ -1,11 +1,8 @@
 import React, { ReactElement, useEffect } from "react";
-import { ClassNameMap } from "@mui/styles";
 import { Container } from "@mui/material";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 
-import { getInformation, getSettings } from "./Utils";
-import { useInformation } from "../Contexts/Information";
 import { useSettings } from "../Contexts/Settings";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -22,7 +19,6 @@ interface LayoutProps {
 }
 
 function Layout(props: LayoutProps): ReactElement {
-  const [information, setInformation] = useInformation();
   const [settings, setSettings] = useSettings();
 
   const router = useRouter();
@@ -51,25 +47,7 @@ function Layout(props: LayoutProps): ReactElement {
   }, [router, query]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (!information && query && query.apiKey)
-          setInformation(await getInformation(query));
-      } catch (e) {
-        console.warn("Error getting information:", e);
-      }
-    })();
-  }, [information, setInformation, settings, setSettings, query]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!settings && query && query.apiKey)
-          setSettings(await getSettings(query));
-      } catch (e) {
-        console.warn("Error getting settings:", e);
-      }
-    })();
+    console.log("TODO: Get Settings from WebSocket");
   }, [settings, setSettings, query]);
 
   return (
