@@ -36,25 +36,25 @@ class SystemTray(Base, QSystemTrayIcon):
 
         self.callback_show_window = callback_show_window
 
-        self.activated.connect(self.on_activated)
+        self.activated.connect(self._on_activated)
 
         menu = QMenu()
 
         action_settings: QAction = menu.addAction("Open Settings")
-        action_settings.triggered.connect(self.show_settings)
+        action_settings.triggered.connect(self._show_settings)
 
         action_bridges_setup = menu.addAction("Setup Bridges")
-        action_bridges_setup.triggered.connect(self.show_bridges_setup)
+        action_bridges_setup.triggered.connect(self._show_bridges_setup)
 
         menu.addSeparator()
 
         action_data: QAction = menu.addAction("View Data")
-        action_data.triggered.connect(self.show_data)
+        action_data.triggered.connect(self._show_data)
 
         menu.addSeparator()
 
         action_bridges_sendto = menu.addAction("Open URL On..")
-        action_bridges_sendto.triggered.connect(self.show_bridges_send_to)
+        action_bridges_sendto.triggered.connect(self._show_bridges_send_to)
 
         menu.addSeparator()
 
@@ -88,26 +88,26 @@ class SystemTray(Base, QSystemTrayIcon):
         #             })"""
 
         action_latest_release: QAction = menu.addAction(latest_version_text)
-        action_latest_release.triggered.connect(self.open_latest_releases)
+        action_latest_release.triggered.connect(self._open_latest_releases)
 
         menu_help = menu.addMenu("Help")
 
         action_docs: QAction = menu_help.addAction("Documentation / Website")
-        action_docs.triggered.connect(self.open_docs)
+        action_docs.triggered.connect(self._open_docs)
 
         action_feature: QAction = menu_help.addAction("Suggest a Feature")
-        action_feature.triggered.connect(self.open_feature_request)
+        action_feature.triggered.connect(self._open_feature_request)
 
         action_issue: QAction = menu_help.addAction("Report an issue")
-        action_issue.triggered.connect(self.open_issues)
+        action_issue.triggered.connect(self._open_issues)
 
         action_discussions: QAction = menu_help.addAction("Discussions")
-        action_discussions.triggered.connect(self.open_discussions)
+        action_discussions.triggered.connect(self._open_discussions)
 
         menu_help.addSeparator()
 
         action_logs: QAction = menu_help.addAction("View Logs")
-        action_logs.triggered.connect(self.show_logs)
+        action_logs.triggered.connect(self._show_logs)
 
         menu.addSeparator()
 
@@ -116,7 +116,7 @@ class SystemTray(Base, QSystemTrayIcon):
 
         self.setContextMenu(menu)
 
-    def on_activated(
+    def _on_activated(
         self,
         reason: int,
     ) -> None:
@@ -125,46 +125,46 @@ class SystemTray(Base, QSystemTrayIcon):
             self.contextMenu().popup(QCursor.pos())
 
     @staticmethod
-    def open_latest_releases() -> None:
+    def _open_latest_releases() -> None:
         """Open latest release"""
         open_new_tab(URL_LATEST_RELEASE)
 
     @staticmethod
-    def open_docs() -> None:
+    def _open_docs() -> None:
         """Open documentation"""
         open_new_tab(URL_DOCS)
 
     @staticmethod
-    def open_feature_request() -> None:
+    def _open_feature_request() -> None:
         """Open feature request"""
         open_new_tab(URL_ISSUES)
 
     @staticmethod
-    def open_issues() -> None:
+    def _open_issues() -> None:
         """Open issues"""
         open_new_tab(URL_ISSUES)
 
     @staticmethod
-    def open_discussions() -> None:
+    def _open_discussions() -> None:
         """Open discussions"""
         open_new_tab(URL_DISCUSSIONS)
 
-    def show_bridges_send_to(self) -> None:
+    def _show_bridges_send_to(self) -> None:
         """Show bridges open url on window"""
         self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
 
-    def show_bridges_setup(self) -> None:
+    def _show_bridges_setup(self) -> None:
         """Show bridges setup window"""
         self.callback_show_window(PATH_BRIDGES_SETUP, False)
 
-    def show_data(self) -> None:
+    def _show_data(self) -> None:
         """Show api data"""
         self.callback_show_window(PATH_DATA, False)
 
-    def show_logs(self) -> None:
+    def _show_logs(self) -> None:
         """Show logs"""
         self.callback_show_window(PATH_LOGS, False)
 
-    def show_settings(self) -> None:
+    def _show_settings(self) -> None:
         """Show settings"""
         self.callback_show_window(PATH_SETTINGS, False)
