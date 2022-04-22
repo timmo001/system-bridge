@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import {
   Button,
   List,

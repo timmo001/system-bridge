@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from "react";
 import { Container } from "@mui/material";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import Head from "next/head";
 
 import { useSettings } from "../Contexts/Settings";

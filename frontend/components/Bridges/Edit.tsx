@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";

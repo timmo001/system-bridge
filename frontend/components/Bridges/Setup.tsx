@@ -1,5 +1,5 @@
 import React, { ReactElement, useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import {
   CircularProgress,
   Container,
