@@ -143,7 +143,6 @@ class Database(Base):
         data_dict = self.read_table(table_name).to_dict(orient="records")
         data = {"last_updated": {}}
         for item in data_dict:
-            self._logger.info("Item: %s", item)
             data = {
                 **data,
                 item[COLUMN_KEY]: convert_string_to_correct_type(item[COLUMN_VALUE]),
