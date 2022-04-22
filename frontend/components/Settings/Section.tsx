@@ -1,40 +1,24 @@
 import React, { ReactElement } from "react";
 import { Grid, List, Paper, Typography } from "@mui/material";
 
-import { ConfigurationSection } from "../../assets/entities/configuration.entity";
-import { useSettings } from "../Contexts/Settings";
-import Item from "./Item";
-
 export interface SectionProps {
-  sectionKey: string;
+  name: string;
+  description: string;
+  children: ReactElement;
 }
 
-function Section({ sectionKey }: SectionProps): ReactElement {
-  const [settings] = useSettings();
-
-  const section: ConfigurationSection | undefined = settings?.[sectionKey];
-
+function Section({ name, description, children }: SectionProps): ReactElement {
   return (
     <Grid container direction="row" item xs={12}>
       <Grid item xs={4} style={{ userSelect: "none" }}>
         <Typography component="h3" variant="h5">
-          {section?.name}
+          {name}
         </Typography>
-        <Typography variant="subtitle1">{section?.description}</Typography>
+        <Typography variant="subtitle1">{description}</Typography>
       </Grid>
       <Grid item xs={8}>
         <Paper>
-          <List>
-            {section
-              ? Object.keys(section.items).map((itemKey: string) => (
-                  <Item
-                    key={`${sectionKey}-${itemKey}`}
-                    sectionKey={sectionKey}
-                    itemKey={itemKey}
-                  />
-                ))
-              : ""}
-          </List>
+          <List>{children}</List>
         </Paper>
       </Grid>
     </Grid>

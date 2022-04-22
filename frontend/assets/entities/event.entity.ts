@@ -1,6 +1,8 @@
 export interface Event {
-  name: string;
-  service?: string;
-  method?: "findAll" | string;
+  type: string;
+  message: string;
+  id?: string;
+  modules?: Array<string>;
+  module?: string;
   data?: any;
 }

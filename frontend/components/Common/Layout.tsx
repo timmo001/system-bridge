@@ -46,10 +46,6 @@ function Layout(props: LayoutProps): ReactElement {
     }
   }, [router, query]);
 
-  useEffect(() => {
-    console.log("TODO: Get Settings from WebSocket");
-  }, [settings, setSettings, query]);
-
   return (
     <>
       <Head>

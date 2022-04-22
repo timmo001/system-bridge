@@ -21,8 +21,6 @@ import {
 import { Icon } from "@mdi/react";
 import { mdiMenu } from "@mdi/js";
 
-import { useInformation } from "../Contexts/Information";
-
 interface HeaderProps {
   brand?: string;
   rightLinks?: ReactElement;
@@ -44,7 +42,6 @@ function ElevationScroll({ children }: ElevationScrollProps) {
 }
 
 function Header({ rightLinks, brand }: HeaderProps): ReactElement {
-  const [information] = useInformation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = useCallback(() => {
@@ -88,28 +85,6 @@ function Header({ rightLinks, brand }: HeaderProps): ReactElement {
                       {brand}
                     </Typography>
                   </Button>
-                  {information ? (
-                    <>
-                      <Typography component="span" variant="h5">
-                        {information.version}
-                      </Typography>
-                      <Typography component="span" variant="subtitle1">
-                        {information.updates?.available ? (
-                          <a
-                            href={information.updates?.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Version {information.updates.version.new} avaliable!
-                          </a>
-                        ) : (
-                          ""
-                        )}
-                      </Typography>
-                    </>
-                  ) : (
-                    ""
-                  )}
                 </Grid>
                 <Hidden lgDown implementation="css">
                   {rightLinks}

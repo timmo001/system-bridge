@@ -1,22 +1,18 @@
+import { SettingsValue } from "assets/entities/settings.entity";
 import { Event } from "../../assets/entities/event.entity";
 
 export class WebSocketConnection {
-  public onEvent?: (data: Event) => void;
+  public onEvent?: (event: Event) => void;
   public port: number;
   public websocket: WebSocket | undefined;
 
   private apiKey: string;
 
-  constructor(
-    port: number,
-    apiKey: string,
-    register?: boolean,
-    connected?: () => void
-  ) {
+  constructor(port: number, apiKey: string, connected?: () => void) {
     this.port = port;
     this.apiKey = apiKey;
     (async () => {
-      this.websocket = await this.connect(register);
+      this.websocket = await this.connect();
       if (
         connected &&
         this.websocket &&
@@ -26,7 +22,12 @@ export class WebSocketConnection {
     })();
   }
 
-  private async connect(register?: boolean): Promise<WebSocket> {
+  close(): void {
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
+      this.websocket.close();
+  }
+
+  private async connect(): Promise<WebSocket> {
     const ws = new WebSocket(`ws://localhost:${this.port}/api/websocket`);
     await new Promise<void>((resolve) => {
       ws.onopen = () => resolve();
@@ -34,25 +35,34 @@ export class WebSocketConnection {
     ws.onmessage = (event) => {
       if (typeof event.data === "string") {
         const json = JSON.parse(event.data);
-        if (json.event === "events" && json.data && this.onEvent)
-          this.onEvent(json.data);
+        if (json && this.onEvent) this.onEvent(json);
       }
     };
-    if (register)
-      ws.send(
-        JSON.stringify({
-          event: "register-listener",
-          data: {
-            "api-key": this.apiKey,
-          },
-        })
-      );
     return ws;
   }
 
-  async close(): Promise<void> {
-    if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
-      this.websocket.close();
+  getData(modules: Array<string>): void {
+    if (!this.websocket) return;
+    console.log("Get data:", modules);
+    this.websocket.send(
+      JSON.stringify({
+        event: "get-data",
+        "api-key": this.apiKey,
+        modules: modules,
+      })
+    );
+  }
+
+  registerDataListener(modules: Array<string>): void {
+    if (!this.websocket) return;
+    console.log("Register data listener:", modules);
+    this.websocket.send(
+      JSON.stringify({
+        event: "register-data-listener",
+        "api-key": this.apiKey,
+        modules: modules,
+      })
+    );
   }
 
   sendEvent(event: Event): void {
@@ -66,5 +76,17 @@ export class WebSocketConnection {
           },
         })
       );
+  }
+
+  updateSetting(key: string, value: SettingsValue): void {
+    if (!this.websocket) return;
+    console.log("Update setting:", { key, value });
+    this.websocket.send(
+      JSON.stringify({
+        event: "update-setting",
+        "api-key": this.apiKey,
+        data: { key: key, value: value },
+      })
+    );
   }
 }

@@ -5,13 +5,11 @@ import React, {
   useState,
 } from "react";
 
-import { Configuration as ConfigurationEntity } from "../../assets/entities/configuration.entity";
+import { SettingsObject } from "assets/entities/settings.entity";
 
-const SettingsContext = createContext<ConfigurationEntity | undefined>(
-  undefined
-);
+const SettingsContext = createContext<SettingsObject | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<
-  React.SetStateAction<ConfigurationEntity | undefined>
+  React.SetStateAction<SettingsObject | undefined>
 >>(null);
 
 export const SettingsProvider = ({
@@ -19,7 +17,7 @@ export const SettingsProvider = ({
 }: {
   children: ReactElement;
 }): ReactElement => {
-  const [config, setConfig] = useState<ConfigurationEntity>();
+  const [config, setConfig] = useState<SettingsObject>();
 
   return (
     <SetSettingsContext.Provider value={setConfig}>
@@ -31,10 +29,8 @@ export const SettingsProvider = ({
 };
 
 export const useSettings = (): [
-  settings: ConfigurationEntity | undefined,
-  setSettings: React.Dispatch<
-    React.SetStateAction<ConfigurationEntity | undefined>
-  >
+  settings: SettingsObject | undefined,
+  setSettings: React.Dispatch<React.SetStateAction<SettingsObject | undefined>>
 ] => {
   const settings = useContext(SettingsContext);
   const setSettings = useContext(SetSettingsContext);

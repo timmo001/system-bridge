@@ -13,9 +13,9 @@ export interface WorkerData {
   observe: boolean;
 }
 
-const services = ["cpu", "memory"];
+const modules = ["cpu", "memory"];
 
-const items: Array<WorkerData> = services.map((service: string) => ({
+const items: Array<WorkerData> = modules.map((service: string) => ({
   service: service,
   method: "findAll",
   observe: false,
@@ -29,9 +29,11 @@ function a11yProps(index: any) {
 }
 
 function DataComponent(): ReactElement {
-  const [setup, setSetup] = useState<boolean>(false);
   const [settings] = useSettings();
+  const [setup, setSetup] = useState<boolean>(false);
   const [tab, setTab] = useState<number>(0);
+
+  const query = useRouter().query;
 
   const handleChangeTab = (
     _event: React.ChangeEvent<any>,
@@ -40,29 +42,29 @@ function DataComponent(): ReactElement {
     setTab(newValue);
   };
 
-  const query = useRouter().query;
-
-  const eventHandler = useCallback(({ name, service, method, data }: Event) => {
-    if (
-      name.includes("data-") &&
-      service &&
-      services.findIndex((s: string) => s === service) > -1 &&
-      method === "findAll" &&
-      data
-    ) {
-      console.log("Data update:", name, service, data);
-      switch (service) {
-        default:
-          break;
-      }
-    }
+  const eventHandler = useCallback((event: Event) => {
+    console.log("Event:", event);
+    // if (
+    //   name.includes("data-") &&
+    //   service &&
+    //   services.findIndex((s: string) => s === service) > -1 &&
+    //   method === "findAll" &&
+    //   data
+    // ) {
+    //   console.log("Data update:", name, service, data);
+    //   switch (service) {
+    //     default:
+    //       break;
+    //   }
+    // }
   }, []);
 
   const handleSetup = useCallback(
     (port: number, apiKey: string) => {
       console.log("Setup WebSocketConnection");
-      const ws = new WebSocketConnection(port, apiKey, true, async () => {
-        ws.sendEvent({ name: "get-data", data: items });
+      const ws = new WebSocketConnection(port, apiKey, async () => {
+        ws.getData(modules);
+        ws.registerDataListener(modules);
       });
       ws.onEvent = eventHandler;
     },
@@ -100,7 +102,9 @@ function DataComponent(): ReactElement {
                 <Tab label="Memory" {...a11yProps(0)} />
               </Tabs>
             </Grid>
-            <Grid item xs></Grid>
+            <Grid item xs>
+              {/* <DataItems */}
+            </Grid>
           </Grid>
         ) : (
           <Grid

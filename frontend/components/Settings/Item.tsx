@@ -1,11 +1,4 @@
-import React, {
-  ChangeEvent,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { useRouter } from "next/dist/client/router";
+import React, { ChangeEvent, ReactElement, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   FormControl,
@@ -21,66 +14,52 @@ import {
   useTheme,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
-import { mdiCached, mdiContentCopy, mdiEye, mdiEyeOff } from "@mdi/js";
-import axios from "axios";
-
 import {
-  Configuration,
-  ConfigurationItem,
-} from "../../assets/entities/configuration.entity";
-import { handleCopyToClipboard } from "../Common/Utils";
-import { SectionProps } from "./Section";
-import { Setting } from "../../assets/entities/settings.entity";
-import { useInformation } from "components/Contexts/Information";
-import { useSettings } from "../Contexts/Settings";
+  mdiCached,
+  mdiContentCopy,
+  mdiEye,
+  mdiEyeOff,
+  mdiTextBoxOutline,
+  mdiWebBox,
+} from "@mdi/js";
 
-interface ItemProps extends SectionProps {
-  itemKey: string;
+import { handleCopyToClipboard } from "components/Common/Utils";
+import { SettingsValue } from "assets/entities/settings.entity";
+
+interface SettingDescription {
+  name: string;
+  description: string;
+  icon: string;
+  containerDisabled?: boolean;
+  isPassword?: boolean;
+  minimum?: number;
 }
 
-function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
-  const [information] = useInformation();
-  const [settings, setSettings] = useSettings();
+const settingsMap: { [key: string]: SettingDescription } = {
+  log_level: {
+    name: "Log Level",
+    description: "Log level for the application",
+    icon: mdiTextBoxOutline,
+  },
+  port_api: {
+    name: "API Port",
+    description: "Port for the API and WebSocket",
+    icon: mdiWebBox,
+  },
+};
 
-  const query = useRouter().query;
+interface ItemProps {
+  keyIn: string;
+  valueIn: SettingsValue;
+  handleChanged: (key: string, value: SettingsValue) => void;
+}
 
-  const [originalItem, setOriginalItem] = useState<ConfigurationItem>();
-  const [item, setItem] = useState<ConfigurationItem>();
-  const [showPassword, setShowPassword] = React.useState<boolean>(false);
+function Item({ keyIn, valueIn }: ItemProps): ReactElement {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [value, setValue] = useState<SettingsValue>(valueIn);
 
-  useEffect(() => {
-    if (item === undefined) setItem(settings?.[sectionKey].items[itemKey]);
-  }, [item, itemKey, sectionKey, settings]);
-
-  useEffect(() => {
-    if (originalItem === undefined && item) setOriginalItem(item);
-  }, [originalItem, item]);
-
-  function handleSetSetting(valueIn: string | number | boolean) {
-    if (typeof valueIn !== "boolean" && !Number.isNaN(Number(valueIn)))
-      valueIn = Number(valueIn);
-    console.log("handleSetSetting:", { sectionKey, itemKey, value: valueIn });
-    if (item) {
-      setItem({ ...item, value: valueIn });
-      if (settings) {
-        const newSettings: Configuration = settings;
-        newSettings[sectionKey].items[itemKey].value = valueIn;
-        setSettings(newSettings);
-        axios.put<Setting>(
-          `http://${
-            query.apiHost || typeof window !== "undefined"
-              ? window.location.hostname
-              : "localhost"
-          }:${query.apiPort || 9170}/settings/${sectionKey}-${itemKey}`,
-          {
-            value: String(valueIn),
-          },
-          {
-            headers: { "api-key": query.apiKey as string },
-          }
-        );
-      }
-    }
+  function handleSetSetting(valueIn: SettingsValue): void {
+    setValue(valueIn);
   }
 
   function handleChanged(event: ChangeEvent<HTMLInputElement>) {
@@ -108,19 +87,16 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
     event.preventDefault();
   };
 
-  const value = useMemo(() => {
-    const value = item?.value === undefined ? item?.defaultValue : item.value;
-    if (typeof item?.defaultValue === "boolean") return Boolean(value);
-    if (typeof item?.defaultValue === "number") return Number(value);
-    if (typeof item?.defaultValue === "string") return String(value);
-    return value;
-  }, [item?.value, item?.defaultValue]);
+  const {
+    name,
+    description,
+    icon,
+    containerDisabled,
+    isPassword,
+    minimum,
+  }: SettingDescription = settingsMap[keyIn];
 
   const theme = useTheme();
-
-  if (!item) return <></>;
-  const { name, description, icon, containerDisabled }: ConfigurationItem =
-    item;
 
   return (
     <ListItem>
@@ -137,11 +113,11 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
         {typeof value === "boolean" ? (
           <Switch
             edge="end"
-            disabled={information?.container && containerDisabled}
+            disabled={containerDisabled}
             defaultChecked={value}
             onChange={handleCheckedChanged}
           />
-        ) : typeof value === "string" && itemKey === "apiKey" ? (
+        ) : typeof value === "string" && keyIn === "api_key" ? (
           <FormControl fullWidth variant="outlined">
             <OutlinedInput
               type="text"
@@ -180,7 +156,7 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
               }
             />
           </FormControl>
-        ) : typeof value === "string" && item.isPassword ? (
+        ) : typeof value === "string" && isPassword ? (
           <FormControl variant="outlined">
             <OutlinedInput
               type={showPassword ? "text" : "password"}
@@ -209,16 +185,16 @@ function Item({ sectionKey, itemKey }: ItemProps): ReactElement {
           <TextField
             type="text"
             defaultValue={value}
-            disabled={information?.container && containerDisabled}
+            disabled={containerDisabled}
             onChange={handleChanged}
             variant="outlined"
           />
         ) : typeof value === "number" ? (
           <TextField
-            error={item.minimum ? value < item.minimum : false}
+            error={minimum ? value < minimum : false}
             type="number"
-            disabled={information?.container && containerDisabled}
-            inputProps={{ minimum: item.minimum }}
+            disabled={containerDisabled}
+            inputProps={{ minimum: minimum }}
             defaultValue={value}
             onChange={handleChanged}
             variant="outlined"
