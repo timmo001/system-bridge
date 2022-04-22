@@ -1,5 +1,4 @@
 """System Bridge GUI: Main window"""
-from argparse import Namespace
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QUrl
@@ -7,7 +6,7 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 
-from ..base import Base
+from systembridgeshared.base import Base
 
 
 class MainWindow(Base, QFrame):
@@ -15,11 +14,10 @@ class MainWindow(Base, QFrame):
 
     def __init__(
         self,
-        args: Namespace,
         icon: QIcon,
     ) -> None:
         """Initialize the window"""
-        Base.__init__(self, args)
+        Base.__init__(self)
         QFrame.__init__(self)
 
         self.setWindowTitle("System Bridge")
@@ -28,24 +26,29 @@ class MainWindow(Base, QFrame):
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.browser = QWebEngineView()
+        self._browser = QWebEngineView()
 
-        self.layout.addWidget(self.browser)
+        self.layout.addWidget(self._browser)
 
     # pylint: disable=invalid-name
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(
+        self,
+        event: QCloseEvent,
+    ) -> None:
         """Close the window instead of closing the app"""
         event.ignore()
         self.hide()
 
-    def setup(self, path) -> None:
+    def setup(
+        self,
+        path: str,
+    ) -> None:
         """Setup the window"""
-        url = QUrl(
-            f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
-                    "apiKey": self.args.api_key,
-                    "apiPort": self.args.port,
-                    "wsPort": self.args.websocket_port,
-                })}"""
-        )
-        self._logger.debug("Opening url: %s", url)
-        self.browser.load(url)
+        # url = QUrl(
+        #     f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
+        #             "apiKey": self.args.api_key,
+        #             "apiPort": self.args.port,
+        #         })}"""
+        # )
+        # self._logger.debug("Opening url: %s", url)
+        # self._browser.load(url)

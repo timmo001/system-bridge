@@ -2,6 +2,7 @@
 import logging
 import os
 from colorlog import ColoredFormatter
+from logging.handlers import RotatingFileHandler
 
 from systembridgeshared.const import DATE_FORMAT, FORMAT
 from systembridgeshared.common import get_user_data_directory
@@ -34,7 +35,7 @@ def setup_logger(
         )
     )
 
-    file_handler = logging.handlers.RotatingFileHandler(
+    file_handler = RotatingFileHandler(
         os.path.join(get_user_data_directory(), f"{name}.log"),
         backupCount=1,
     )

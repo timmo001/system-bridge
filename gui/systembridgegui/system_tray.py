@@ -1,14 +1,12 @@
 """System Bridge GUI: System Tray"""
-from argparse import Namespace
-from collections.abc import Callable
-from typing import Optional
+from __future__ import annotations
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
-from systembridgeshared.objects.information import Information
 
-from .base import Base
+from systembridgeshared.base import Base
+
 
 PATH_BRIDGES_OPEN_ON = "/app/bridges/openon"
 PATH_BRIDGES_SETUP = "/app/bridges/setup"
@@ -27,15 +25,13 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def __init__(
         self,
-        args: Namespace,
         icon: QIcon,
         parent: QWidget,
-        information: Information,
-        callback_exit_application: Callable,
-        callback_show_window: Callable[[str, bool, Optional[int], Optional[int]], None],
+        callback_exit_application: callable,
+        callback_show_window: callable[[str, bool, int | None, int | None], None],
     ) -> None:
         """Initialize the system tray"""
-        Base.__init__(self, args)
+        Base.__init__(self)
         QSystemTrayIcon.__init__(self, icon, parent)
 
         self.callback_show_window = callback_show_window
@@ -63,33 +59,33 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         latest_version_text = "Latest Version"
-        if (
-            information is not None
-            and information.attributes is not None
-            and information.updates is not None
-            and information.updates.attributes is not None
-        ):
-            if (
-                information.updates.available is not None
-                and information.updates.available
-            ):
-                latest_version_text = f"""Version {
-                        information.updates.version.new
-                    } avaliable! ({
-                        information.updates.version.current
-                    } -> {
-                        information.updates.version.new
-                    })"""
-            elif information.updates.newer:
-                latest_version_text = f"""Version Newer ({
-                        information.updates.version.current
-                    } > {
-                        information.updates.version.new
-                    })"""
-            else:
-                latest_version_text = f"""Latest Version ({
-                        information.updates.version.current
-                    })"""
+        # if (
+        #     information is not None
+        #     and information.attributes is not None
+        #     and information.updates is not None
+        #     and information.updates.attributes is not None
+        # ):
+        #     if (
+        #         information.updates.available is not None
+        #         and information.updates.available
+        #     ):
+        #         latest_version_text = f"""Version {
+        #                 information.updates.version.new
+        #             } avaliable! ({
+        #                 information.updates.version.current
+        #             } -> {
+        #                 information.updates.version.new
+        #             })"""
+        #     elif information.updates.newer:
+        #         latest_version_text = f"""Version Newer ({
+        #                 information.updates.version.current
+        #             } > {
+        #                 information.updates.version.new
+        #             })"""
+        #     else:
+        #         latest_version_text = f"""Latest Version ({
+        #                 information.updates.version.current
+        #             })"""
 
         action_latest_release: QAction = menu.addAction(latest_version_text)
         action_latest_release.triggered.connect(self.open_latest_releases)
@@ -120,7 +116,10 @@ class SystemTray(Base, QSystemTrayIcon):
 
         self.setContextMenu(menu)
 
-    def on_activated(self, reason: int) -> None:
+    def on_activated(
+        self,
+        reason: int,
+    ) -> None:
         """Handle the activated signal"""
         if reason == QSystemTrayIcon.Trigger:
             self.contextMenu().popup(QCursor.pos())
