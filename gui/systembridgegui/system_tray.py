@@ -35,6 +35,8 @@ class SystemTray(Base, QSystemTrayIcon):
         Base.__init__(self)
         QSystemTrayIcon.__init__(self, icon, parent)
 
+        self._logger.info("Setup system tray")
+
         self.callback_show_window = callback_show_window
 
         self.activated.connect(self._on_activated)

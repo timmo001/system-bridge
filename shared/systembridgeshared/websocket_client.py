@@ -20,7 +20,7 @@ from systembridgeshared.settings import Settings
 class WebSocketClient(Base):
     """WebSocket Client"""
 
-    async def __init__(
+    def __init__(
         self,
         settings: Settings,
     ) -> None:

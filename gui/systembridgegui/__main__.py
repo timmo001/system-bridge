@@ -10,10 +10,10 @@ from systembridgegui.window.main import MainWindow
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
-from systembridgeshared.exceptions import ConnectionClosedException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
+
 
 class Main(Base):
     """Main"""
@@ -22,6 +22,10 @@ class Main(Base):
         """Initialize"""
         super().__init__()
         self._logger.info("System Bridge GUI: Startup")
+
+        self._database = database
+        self._settings = settings
+        self._websocket_client = WebSocketClient(self._settings)
 
         self._application = QApplication([])
         self._icon = QIcon("../resources/system-bridge-circle.png")
@@ -47,9 +51,9 @@ class Main(Base):
         )
 
         self._main_window = MainWindow(self._icon)
-        self._main_window.resize(1280, 720)
-        self._main_window.showNormal()
-        self._main_window.hide()
+        # self._main_window.resize(1280, 720)
+        # self._main_window.showNormal()
+        # self._main_window.hide()
 
         self._system_tray_icon = SystemTray(
             self._icon,
@@ -75,10 +79,6 @@ class Main(Base):
         """Show the main window"""
         self._logger.info("Showing window: %s", path)
 
-        self._database = database
-        self._settings = settings
-        self._websocket_client = WebSocketClient(self._settings)
-
         self._main_window.hide()
         self._main_window.setup(path)
         self._main_window.resize(width, height)
@@ -102,6 +102,7 @@ class Main(Base):
         # await self.bridge.async_send_event("exit-application", {})
         self._logger.info("Exit GUI..")
         self._application.quit()
+
 
 if __name__ == "__main__":
     asyncio.set_event_loop(asyncio.new_event_loop())
