@@ -23,7 +23,12 @@ from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 from systembridgebackend.server.websocket import WebSocket
-from systembridgebackend.settings import Settings, SECRET_API_KEY, SETTING_PORT_API
+from systembridgebackend.settings import (
+    Settings,
+    SECRET_API_KEY,
+    SETTING_PORT_API,
+    SETTING_LOG_LEVEL,
+)
 
 
 class Server(Base):
@@ -183,7 +188,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=port,
-            debug=True,
+            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
             auto_reload=True,
             motd=False,
         )
