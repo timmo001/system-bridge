@@ -1,5 +1,6 @@
 """System Bridge: Main"""
 import asyncio
+import logging
 
 from systembridgebackend.server import Server
 from systembridgeshared.base import Base
@@ -32,5 +33,6 @@ if __name__ == "__main__":
     log_level = settings.get(SETTING_LOG_LEVEL)
 
     setup_logger(log_level, "system-bridge")
+    logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
     Main()
