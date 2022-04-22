@@ -1,7 +1,6 @@
 import React, { ChangeEvent, ReactElement, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
-  Box,
   FormControl,
   IconButton,
   InputAdornment,
@@ -21,8 +20,8 @@ import {
   mdiContentSaveOutline,
   mdiEye,
   mdiEyeOff,
+  mdiProtocol,
   mdiTextBoxOutline,
-  mdiWebBox,
 } from "@mdi/js";
 
 import { handleCopyToClipboard } from "components/Common/Utils";
@@ -46,7 +45,7 @@ const settingsMap: { [key: string]: SettingDescription } = {
   port_api: {
     name: "API Port",
     description: "Port for the API and WebSocket",
-    icon: mdiWebBox,
+    icon: mdiProtocol,
   },
 };
 

@@ -3,7 +3,6 @@ import { AppProps } from "next/app";
 import {
   CssBaseline,
   ThemeProvider,
-  Theme,
   StyledEngineProvider,
 } from "@mui/material";
 import Head from "next/head";
@@ -14,10 +13,6 @@ import { SettingsProvider } from "../components/Contexts/Settings";
 import theme from "../components/Common/Theme";
 
 import "../assets/css/style.css";
-
-declare module "@mui/styles/defaultTheme" {
-  interface DefaultTheme extends Theme {}
-}
 
 function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
