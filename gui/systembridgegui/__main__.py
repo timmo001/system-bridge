@@ -12,7 +12,9 @@ from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
+
 from systembridgegui.system_tray import SystemTray
+from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
 
 
@@ -56,12 +58,12 @@ class Main(Base):
             asyncio.run(self._websocket_client.connect())
         except ConnectionErrorException as error:
             self._logger.error("Could not connect to WebSocket: %s", error)
-            error_message = QMessageBox()
+            error_message = TimedMessageBox(
+                10,
+                "Could not connect to System Bridge Backend! Exiting in",
+            )
             error_message.setIcon(QMessageBox.Critical)
             error_message.setWindowTitle("Error")
-            error_message.setText(
-                "Could not connect to System Bridge Backend! Exiting now."
-            )
             error_message.exec()
             # Exit cleanly
             self._callback_exit_application(True)

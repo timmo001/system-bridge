@@ -14,7 +14,7 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
-from systembridgebackend.gui import start_gui
+from systembridgebackend.gui import GUIAttemptsExceededException, start_gui
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
@@ -68,9 +68,15 @@ class Server(Base):
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
-        # @task(start=timedelta(seconds=5))
-        # async def _after_startup(_) -> None:
-        #     """After startup"""
+        @task(start=timedelta(seconds=5))
+        async def _after_startup(_) -> None:
+            """After startup"""
+            if "--no-gui" not in sys.argv:
+                try:
+                    await start_gui(self._logger, self._settings)
+                except GUIAttemptsExceededException:
+                    self._logger.error("GUI could not be started. Exiting application")
+                    await self._exit_application()
 
         @task(timedelta(minutes=2))
         async def _update_data(_) -> None:
@@ -205,15 +211,13 @@ class Server(Base):
         self._logger.info("Exiting application")
         self.stop_server()
 
-    def _server_started(
+    async def _server_started(
         self,
         _listener: ListenerType[Sanic],
         _type: str,
     ) -> None:
         """Server started"""
         self._logger.info("Server started")
-        if "--no-gui" not in sys.argv:
-            asyncio.create_task(start_gui(self._logger))
 
     def start_server(self) -> None:
         """Start Server"""

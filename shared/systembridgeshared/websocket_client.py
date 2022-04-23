@@ -42,25 +42,29 @@ class WebSocketClient(Base):
 
     async def close(self) -> None:
         """Close connection"""
+        self._logger.info("Closing WebSocket connection")
         if self._websocket is not None:
             await self._websocket.close()
             self._websocket = None
 
     async def connect(self) -> None:
         """Connect to server"""
+        url = f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
+        self._logger.info("Connecting to WebSocket: %s", url)
         try:
-            self._websocket = await connect(
-                f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
-            )
+            self._websocket = await connect(url)
         except (
             asyncio.exceptions.TimeoutError,
             ConnectionRefusedError,
             InvalidHandshake,
         ) as error:
+            self._logger.error("Failed to connect to WebSocket: %s", error)
             raise ConnectionErrorException from error
+        self._logger.info("Connected to WebSocket")
 
     async def exit_backend(self) -> None:
         """Exit backend"""
+        self._logger.info("Exiting backend")
         try:
             await self._websocket.send(
                 json.dumps(
@@ -82,6 +86,7 @@ class WebSocketClient(Base):
         modules: list[str],
     ) -> None:
         """Get data from server"""
+        self._logger.info("Getting data from server: %s", modules)
         try:
             await self._websocket.send(
                 json.dumps(
@@ -104,6 +109,7 @@ class WebSocketClient(Base):
         modules: list[str],
     ) -> None:
         """Register data listener"""
+        self._logger.info("Registering data listener: %s", modules)
         try:
             await self._websocket.send(
                 json.dumps(
@@ -123,6 +129,7 @@ class WebSocketClient(Base):
 
     async def listen_for_messages(self, callback: callable) -> None:
         """Listen for messages"""
+        self._logger.info("Listen for messages")
         while True:
             await asyncio.sleep(0)
             try:
