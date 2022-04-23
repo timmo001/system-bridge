@@ -58,7 +58,11 @@ class WebSocketClient(Base):
             ConnectionRefusedError,
             InvalidHandshake,
         ) as error:
-            self._logger.error("Failed to connect to WebSocket: %s", error)
+            self._logger.error(
+                "Failed to connect to WebSocket: %s - %s",
+                error.__class__.__name__,
+                error,
+            )
             raise ConnectionErrorException from error
         self._logger.info("Connected to WebSocket")
 

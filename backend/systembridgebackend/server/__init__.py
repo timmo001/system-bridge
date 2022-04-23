@@ -14,7 +14,7 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
-from systembridgebackend.gui import GUIAttemptsExceededException, start_gui
+from systembridgebackend.gui import GUIAttemptsExceededException, start_gui_threaded
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
@@ -73,7 +73,7 @@ class Server(Base):
             """After startup"""
             if "--no-gui" not in sys.argv:
                 try:
-                    await start_gui(self._logger, self._settings)
+                    await start_gui_threaded(self._logger, self._settings)
                 except GUIAttemptsExceededException:
                     self._logger.error("GUI could not be started. Exiting application")
                     await self._exit_application()

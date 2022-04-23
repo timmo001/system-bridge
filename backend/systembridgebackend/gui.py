@@ -4,6 +4,7 @@ from logging import Logger
 import os
 import subprocess
 import sys
+from threading import Thread
 
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
@@ -34,8 +35,8 @@ async def start_gui(
         await start_gui(logger, settings, attempt + 1)
         return
 
-    logger.info("Starting GUI")
     logger.info("Executable: %s", sys.executable)
+    logger.info("Starting GUI")
     with subprocess.Popen(
         [
             sys.executable,
@@ -57,3 +58,20 @@ async def start_gui(
             await start_gui(logger, settings, attempt + 1)
             return
         logger.info("GUI exited with code: %s", exit_code)
+
+
+def start_gui_sync(
+    logger: Logger,
+    settings: Settings,
+) -> None:
+    """Start the GUI in a synchronous thread"""
+    asyncio.run(start_gui(logger, settings))
+
+
+async def start_gui_threaded(
+    logger: Logger,
+    settings: Settings,
+) -> None:
+    """Start the GUI in a thread"""
+    thread = Thread(target=start_gui_sync, args=(logger, settings))
+    thread.start()
