@@ -1,7 +1,7 @@
 """System Bridge: Server"""
 import asyncio
 from datetime import timedelta
-from os import walk
+import os
 import sys
 
 from sanic import Sanic
@@ -50,9 +50,13 @@ class Server(Base):
         self._server = Sanic("SystemBridge")
         self._server.after_server_start(self._server_started)
 
-        for _, dirs, _ in walk("systembridgebackend/modules"):
+        path = os.path.join(os.path.dirname(__file__), "../", "modules")
+        self._logger.info("Loading modules from: %s", path)
+        for _, dirs, _ in os.walk(path):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
+
+        self._logger.info("Implemented modules: %s", implemented_modules)
 
         SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)

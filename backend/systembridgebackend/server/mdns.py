@@ -1,5 +1,6 @@
 """MDNS/Zeroconf Advertisement"""
 import io
+import os
 import re
 import socket
 import uuid
@@ -38,9 +39,13 @@ class MDNSAdvertisement(Base):
         port_websocket = int(port_api)
         system_id = uniqueid.id
 
-        # Get version from version.txt
-        with io.open("version.txt", encoding="utf-8") as file:
-            version = file.read().splitlines()[0]
+        # # Get version from version.txt
+        # with io.open(
+        #     os.path.join(os.path.dirname(__file__), f"../", "version.txt"),
+        #     encoding="utf-8",
+        # ) as file:
+        #     version = file.read().splitlines()[0]
+        version = "3.0.0"
 
         zeroconf = Zeroconf(
             interfaces=InterfaceChoice.All,

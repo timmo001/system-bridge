@@ -22,4 +22,6 @@ setup(
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),
     install_requires=requirements,
+    package_data={"": ["icon.png"]},
+    include_package_data=True,
 )

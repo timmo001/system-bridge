@@ -1,5 +1,6 @@
 """System Bridge GUI: Main"""
 import asyncio
+import os
 import sys
 
 from PySide6.QtGui import QIcon
@@ -23,7 +24,17 @@ class Main(Base):
 
     def __init__(self) -> None:
         """Initialize"""
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+        database = Database()
+        settings = Settings(database)
+
+        log_level = settings.get(SETTING_LOG_LEVEL)
+
+        setup_logger(log_level, "system-bridge-gui")
+
         super().__init__()
+
         self._logger.info("System Bridge GUI: Startup")
 
         self._database = database
@@ -31,7 +42,11 @@ class Main(Base):
         self._websocket_client = WebSocketClient(self._settings)
 
         self._application = QApplication([])
-        self._icon = QIcon("../resources/system-bridge-circle.png")
+
+        icon_path = os.path.join(os.path.dirname(__file__), "icon.png")
+        self._logger.info("Icon path: %s", icon_path)
+        self._icon = QIcon(icon_path)
+
         self._application.setStyleSheet(
             """
             QWidget {
@@ -129,13 +144,4 @@ class Main(Base):
 
 
 if __name__ == "__main__":
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
-    database = Database()
-    settings = Settings(database)
-
-    log_level = settings.get(SETTING_LOG_LEVEL)
-
-    setup_logger(log_level, "system-bridge-gui")
-
     Main()
