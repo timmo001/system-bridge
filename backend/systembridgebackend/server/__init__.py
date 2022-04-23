@@ -68,11 +68,9 @@ class Server(Base):
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
-        @task()
-        async def _after_startup(_) -> None:
-            """After startup"""
-            if "--no-gui" not in sys.argv:
-                asyncio.create_task(start_gui(self._logger))
+        # @task(start=timedelta(seconds=5))
+        # async def _after_startup(_) -> None:
+        #     """After startup"""
 
         @task(timedelta(minutes=2))
         async def _update_data(_) -> None:
@@ -214,6 +212,8 @@ class Server(Base):
     ) -> None:
         """Server started"""
         self._logger.info("Server started")
+        if "--no-gui" not in sys.argv:
+            asyncio.create_task(start_gui(self._logger))
 
     def start_server(self) -> None:
         """Start Server"""

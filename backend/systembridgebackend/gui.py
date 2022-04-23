@@ -9,25 +9,24 @@ async def start_gui(logger: Logger) -> None:
     """Start the GUI"""
     logger.info("Starting GUI")
     logger.info("Executable: %s", sys.executable)
-    try:
-        if "python" in sys.executable.lower():
-            with subprocess.Popen(
-                [
-                    sys.executable,
-                    "-m",
-                    "systembridgegui",
-                ]
-            ):
-                logger.info("GUI started")
+    with subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "systembridgegui",
+        ]
+        if "python" in sys.executable.lower()
+        else [
+            os.path.join(
+                os.path.dirname(sys.executable),
+                f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
+            )
+        ]
+    ) as process:
+        logger.info("GUI started with PID: %s", process.pid)
+        exit_code = process.wait()
+        if exit_code != 0:
+            logger.error("GUI exited with code: %s", exit_code)
+            await start_gui(logger)
         else:
-            with subprocess.Popen(
-                [
-                    os.path.join(
-                        os.path.dirname(sys.executable),
-                        f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
-                    )
-                ]
-            ):
-                logger.info("GUI started")
-    except Exception as exception:  # pylint: disable=broad-except
-        logger.exception("Failed to start GUI: %s", exception)
+            logger.info("GUI exited with code: %s", exit_code)

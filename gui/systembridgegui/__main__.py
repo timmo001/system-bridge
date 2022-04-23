@@ -65,7 +65,7 @@ class Main(Base):
             error_message.exec()
             # Exit cleanly
             self._callback_exit_application(True)
-            sys.exit(0)
+            sys.exit(1)
 
         self._main_window = MainWindow(
             self._settings,
