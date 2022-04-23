@@ -52,8 +52,7 @@ async def start_gui(
         ]
     ) as process:
         logger.info("GUI started with PID: %s", process.pid)
-        exit_code = process.wait()
-        if exit_code != 0:
+        if (exit_code := process.wait()) != 0:
             logger.error("GUI exited with code: %s", exit_code)
             await start_gui(logger, settings, attempt + 1)
             return

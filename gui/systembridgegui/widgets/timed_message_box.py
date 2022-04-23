@@ -1,7 +1,12 @@
+"""System Bridge GUI: Timed Message Box"""
 from PySide6 import QtCore, QtWidgets
+# pylint: disable=c-extension-no-member
+from PySide6.QtGui import QCloseEvent
 
 
 class TimedMessageBox(QtWidgets.QMessageBox):
+    """Timed Message Box"""
+
     def __init__(
         self,
         timeout=10,
@@ -9,7 +14,7 @@ class TimedMessageBox(QtWidgets.QMessageBox):
         parent=None,
     ):
         """Initialize"""
-        super(TimedMessageBox, self).__init__(parent)
+        super().__init__(parent)
         self.time_to_wait = timeout
         self.message = message
         self.setText(
@@ -29,9 +34,10 @@ class TimedMessageBox(QtWidgets.QMessageBox):
         if self.time_to_wait < 0:
             self.close()
 
+    # pylint: disable=invalid-name
     def closeEvent(
         self,
-        event,
+        event: QCloseEvent,
     ):
         """Close event"""
         self.timer.stop()
