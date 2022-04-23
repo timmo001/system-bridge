@@ -23,14 +23,13 @@ URL_LATEST_RELEASE = "https://github.com/timmo001/system-bridge/releases/latest"
 class SystemTray(Base, QSystemTrayIcon):
     """System Tray"""
 
+    # pylint: disable=unsubscriptable-object
     def __init__(
         self,
         icon: QIcon,
         parent: QWidget,
         callback_exit_application: callable,
-        callback_show_window: callable[
-            [str, bool, int | None, int | None], None
-        ],  # pylint: disable=unsubscriptable-object
+        callback_show_window: callable[[str, bool, int | None, int | None], None],
     ) -> None:
         """Initialize the system tray"""
         Base.__init__(self)
