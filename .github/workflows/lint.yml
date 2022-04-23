@@ -30,6 +30,10 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     with:
       code-path: gui
+  lint-black-shared:
+    uses: timmo001/workflows/.github/workflows/lint-black.yml@master
+    with:
+      code-path: shared
   lint-eslint-frontend:
     uses: timmo001/workflows/.github/workflows/lint-eslint.yml@master
     with:
@@ -63,5 +67,10 @@ jobs:
       module-name: systembridgegui
       pre-install-command: |
         cd ../shared && pip install .
+  lint-pylint-shared:
+    uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
+    with:
+      code-path: shared
+      module-name: systembridgeshared
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
