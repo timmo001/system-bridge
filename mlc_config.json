@@ -13,5 +13,5 @@
       "pattern": "^https://microbadger.com"
     }
   ],
-  "retryOn429": true
+  "retryOn429": false
 }

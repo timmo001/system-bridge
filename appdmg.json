@@ -1,6 +1,6 @@
 {
   "title": "System Bridge",
-  "icon": "public/system-bridge-circle.icns",
+  "icon": "resources/system-bridge-circle.icns",
   "contents": [
     { "x": 448, "y": 344, "type": "link", "path": "/Applications" },
     { "x": 192, "y": 344, "type": "file", "path": "SystemBridge.app" }

@@ -1,33 +1,22 @@
 name: "system-bridge"
 arch: "amd64"
 platform: "linux"
-version: "v2.8.5"
+version: "3.0.0"
 version_schema: semver
 section: "default"
 priority: "extra"
 maintainer: "Aidan Timson <contact@timmo.xyz>"
-description: |
-  A bridge for your systems.
+description: "A bridge for your systems"
 vendor: "Timmo"
 homepage: "https://system-bridge.timmo.dev"
 license: "MIT"
 contents:
-  - src: ./out/*
+  - src: ./dist/*
     dst: /usr/local/share/system-bridge
   - src: ./scripts/system-bridge.desktop
     dst: /usr/share/applications/system-bridge.desktop
   - src: /usr/local/share/system-bridge/system-bridge
     dst: /usr/bin/system-bridge
     type: symlink
-depends:
-  - libavahi-compat-libdnssd-dev
-overrides:
-  apk:
-    depends:
-      - avahi-compat-libdns_sd
-  deb:
-    depends:
-      - libavahi-compat-libdnssd-dev
-  rpm:
-    depends:
-      - avahi-compat-libdns_sd-devel
+depends: []
+overrides: []
