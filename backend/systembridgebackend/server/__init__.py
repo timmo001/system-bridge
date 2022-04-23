@@ -1,7 +1,11 @@
 """System Bridge: Server"""
+import asyncio
 from datetime import timedelta
 from os import walk
 import os
+import sys
+import time
+from typing import final
 
 from sanic import Sanic
 from sanic.request import Request
@@ -21,11 +25,15 @@ from systembridgebackend.server.media import (
 from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
-from systembridgebackend.server.websocket import WebSocket
+from systembridgebackend.server.websocket import WebSocketHandler
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
+
+
+class ApplicationExitException(BaseException):
+    """Forces application to close."""
 
 
 class Server(Base):
@@ -46,7 +54,7 @@ class Server(Base):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 
-        self._scheduler = SanicScheduler(self._server, utc=True)
+        # self._scheduler = SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
         self._update = Update(self._database)
 
@@ -60,15 +68,15 @@ class Server(Base):
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
-        @task(timedelta(minutes=2))
-        async def update_data(_) -> None:
-            """Update data"""
-            await self._update.update_data(self._data_updated)
+        # @task(timedelta(minutes=2))
+        # async def update_data(_) -> None:
+        #     """Update data"""
+        #     await self._update.update_data(self._data_updated)
 
-        @task(timedelta(seconds=30))
-        async def update_frequent_data(_) -> None:
-            """Update frequent data"""
-            await self._update.update_frequent_data(self._data_updated)
+        # @task(timedelta(seconds=30))
+        # async def update_frequent_data(_) -> None:
+        #     """Update frequent data"""
+        #     await self._update.update_frequent_data(self._data_updated)
 
         @auth.key_required
         async def handler_data_all(
@@ -113,12 +121,13 @@ class Server(Base):
             socket,
         ) -> None:
             """WebSocket handler"""
-            websocket = WebSocket(
+            websocket = WebSocketHandler(
                 self._database,
                 self._settings,
                 self._listeners,
                 implemented_modules,
                 socket,
+                self._exit_application,
             )
             await websocket.handler()
 
@@ -183,19 +192,55 @@ class Server(Base):
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
 
-    def start(self) -> None:
+    def _exit_application(self) -> None:
+        """Exit application"""
+        self._logger.info("Exiting application")
+        self.stop_server()
+        loop = asyncio.get_event_loop()
+        self._logger.info("Cancel any pending tasks")
+        for task in asyncio.all_tasks():
+            task.cancel()
+        self._logger.info("Stop the event loop")
+        loop.stop()
+        while True:
+            if not loop.is_running():
+                self._logger.info("Close the event loop")
+                loop.close()
+                break
+            self._logger.info("Wait for the event loop to stop")
+            time.sleep(1)
+        # self._logger.info("Close the event loop")
+        # loop.close()
+        self._logger.info("Event loop closed")
+        # time.sleep(5)
+        # raise ApplicationExitException()
+        # self._logger.info("Exit application")
+        # exit(0)
+        # sys.exit(0)
+
+
+    def start_server(self) -> None:
         """Start Server"""
         port = self._settings.get(SETTING_PORT_API)
         self._logger.info("Starting server on port: %s", port)
-        self._server.run(
-            host="0.0.0.0",
-            port=port,
-            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
-            auto_reload=True,
-            motd=False,
-        )
+        try:
+            self._server.run(
+                host="0.0.0.0",
+                port=port,
+                debug=True
+                if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG"
+                else False,
+                auto_reload=True,
+                motd=False,
+            )
+        except ApplicationExitException:
+            self._logger.info("Close application")
+        except KeyboardInterrupt:
+            pass
+        except RuntimeError as error:
+            self._logger.error("Error: %s", error)
 
-    def stop(self) -> None:
+    def stop_server(self) -> None:
         """Stop Server"""
         self._logger.info("Stopping server")
         self._server.stop()

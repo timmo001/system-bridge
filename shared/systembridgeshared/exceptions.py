@@ -12,5 +12,6 @@ class ConnectionClosedException(BaseException):
 class ConnectionErrorException(BaseException):
     """Raise this when error connecting."""
 
+
 class BadMessageException(BaseException):
     """Raise this when a bad message is sent."""

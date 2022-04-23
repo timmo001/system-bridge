@@ -1,4 +1,4 @@
-"""System Bridge: WebSocket"""
+"""System Bridge: WebSocket handler"""
 from json import JSONDecodeError, dumps, loads
 from uuid import uuid4
 
@@ -9,6 +9,7 @@ from systembridgeshared.const import (
     TYPE_DATA_LISTENER_UNREGISTERED,
     TYPE_DATA_UPDATE,
     TYPE_ERROR,
+    TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
@@ -24,8 +25,8 @@ from systembridgebackend.modules.listeners import Listeners
 from systembridgeshared.settings import Settings, SECRET_API_KEY
 
 
-class WebSocket(Base):
-    """WebSocket"""
+class WebSocketHandler(Base):
+    """WebSocket handler"""
 
     def __init__(
         self,
@@ -34,6 +35,7 @@ class WebSocket(Base):
         listeners: Listeners,
         implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket,
+        callback_exit_application: callable,
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -42,6 +44,7 @@ class WebSocket(Base):
         self._listeners = listeners
         self._implemented_modules = implemented_modules
         self._websocket = websocket
+        self._callback_exit_application = callback_exit_application
 
     async def _check_api_key(
         self,
@@ -97,8 +100,13 @@ class WebSocket(Base):
                     )
                     continue
 
-                self._logger.info("Received data: %s", data)
-                if data["event"] == TYPE_REGISTER_DATA_LISTENER:
+                self._logger.info("Received: %s", data["event"])
+                if data["event"] == TYPE_EXIT_APPLICATION:
+                    if not await self._check_api_key(data):
+                        continue
+                    self._callback_exit_application()
+                    break
+                elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
                     if "modules" not in data:

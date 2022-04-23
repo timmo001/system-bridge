@@ -21,11 +21,10 @@ class Main(Base):
         self._server = Server(database, settings)
 
         # Start the server
-        self._server.start()
+        self._server.start_server()
 
 
 if __name__ == "__main__":
-    asyncio.set_event_loop(asyncio.new_event_loop())
 
     database = Database()
     settings = Settings(database)

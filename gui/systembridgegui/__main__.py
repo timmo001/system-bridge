@@ -119,11 +119,9 @@ class Main(Base):
         """Exit the backend"""
         if not gui_only:
             self._logger.info("Exit Backend..")
-            # await self.bridge.async_connect_websocket(
-            #     self.args.hostname,
-            #     self.args.websocket_port,
-            # )
-            # await self.bridge.async_send_event("exit-application", {})
+            if not self._websocket_client.connected:
+                await self._websocket_client.connect()
+            await self._websocket_client.exit_backend()
         self._logger.info("Exit GUI..")
         self._application.quit()
 

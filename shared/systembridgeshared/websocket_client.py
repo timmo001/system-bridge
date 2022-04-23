@@ -2,6 +2,7 @@
 from __future__ import annotations
 import asyncio
 import json
+from sqlite3 import connect
 import websockets
 
 from websockets import ConnectionClosed, InvalidHandshake, InvalidMessage
@@ -10,6 +11,7 @@ from systembridgeshared.base import Base
 from systembridgeshared.const import (
     SECRET_API_KEY,
     SETTING_PORT_API,
+    TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
     TYPE_REGISTER_DATA_LISTENER,
 )
@@ -51,6 +53,24 @@ class WebSocketClient(Base):
             )
         except (ConnectionRefusedError, InvalidHandshake) as error:
             raise ConnectionErrorException from error
+
+    async def exit_backend(self) -> None:
+        """Exit backend"""
+        try:
+            await self._websocket.send(
+                json.dumps(
+                    {
+                        "event": TYPE_EXIT_APPLICATION,
+                        "api-key": self._settings.get_secret(SECRET_API_KEY),
+                    }
+                )
+            )
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
 
     async def get_data(
         self,
