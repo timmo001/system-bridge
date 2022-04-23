@@ -3,10 +3,9 @@ from __future__ import annotations
 
 import asyncio
 import json
-from sqlite3 import connect
 
-import websockets
-from websockets import ConnectionClosed, InvalidHandshake, InvalidMessage
+from websockets.client import connect
+from websockets.exceptions import ConnectionClosed, InvalidHandshake, InvalidMessage
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
@@ -32,6 +31,7 @@ class WebSocketClient(Base):
         settings: Settings,
     ) -> None:
         """Initialize"""
+        super().__init__()
         self._settings = settings
         self._websocket = None
 
@@ -49,7 +49,7 @@ class WebSocketClient(Base):
     async def connect(self) -> None:
         """Connect to server"""
         try:
-            self._websocket = await websockets.connect(
+            self._websocket = await connect(
                 f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
             )
         except (
