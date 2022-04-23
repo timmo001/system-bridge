@@ -109,7 +109,6 @@ class WebSocketHandler(Base):
                         continue
                     self._callback_exit_application()
                     self._logger.info("Exit application called")
-                    break
                 elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
@@ -308,4 +307,5 @@ class WebSocketHandler(Base):
         self,
         active: bool,
     ) -> None:
+        """Set active"""
         self._active = active

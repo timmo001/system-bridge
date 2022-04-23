@@ -222,7 +222,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=port,
-            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
+            debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )
 
@@ -231,8 +231,8 @@ class Server(Base):
         self._logger.info("Stopping server")
         loop = self._server.loop
         self._logger.info("Cancel any pending tasks")
-        for task in asyncio.all_tasks():
-            task.cancel()
+        for pending_task in asyncio.all_tasks():
+            pending_task.cancel()
         self._logger.info("Stop the event loop")
         loop.stop()
         # self._server.enable_websocket(False)
