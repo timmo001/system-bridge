@@ -5,6 +5,7 @@
       "type": "shell",
       "label": "Shared: pip install",
       "command": "pip install .",
+      "dependsOn": [],
       "options": {
         "cwd": "shared"
       }
@@ -13,7 +14,7 @@
       "type": "shell",
       "label": "Backend: pip install",
       "command": "pip install .",
-      "dependsOn": ["Shared: pip install"],
+      "dependsOn": ["Shared: pip install", "GUI: pip install (no shared)"],
       "options": {
         "cwd": "backend"
       }
@@ -37,12 +38,22 @@
       }
     },
     {
+      "type": "shell",
+      "label": "GUI: pip install (no shared)",
+      "command": "pip install .",
+      "dependsOn": [],
+      "options": {
+        "cwd": "gui"
+      }
+    },
+    {
       "type": "npm",
       "script": "Frontend: install",
       "group": "build",
       "problemMatcher": [],
       "label": "install",
       "detail": "install dependencies from package",
+      "dependsOn": [],
       "options": {
         "cwd": "frontend"
       }

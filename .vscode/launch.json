@@ -11,6 +11,15 @@
       "args": []
     },
     {
+      "name": "Backend (No GUI)",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgebackend",
+      "preLaunchTask": "Backend: pip install",
+      "cwd": "${workspaceFolder}/backend",
+      "args": ["--no-gui"]
+    },
+    {
       "name": "CLI",
       "type": "python",
       "request": "launch",
