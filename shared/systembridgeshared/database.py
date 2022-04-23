@@ -1,9 +1,10 @@
 """System Bridge Shared: Database"""
-import os
 from collections import OrderedDict
-from pandas import DataFrame, read_sql_query
+import os
 from sqlite3 import Connection, connect
 from time import time
+
+from pandas import DataFrame, read_sql_query
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import (

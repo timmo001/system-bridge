@@ -1,8 +1,9 @@
 """System Bridge: Update Battery"""
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.battery import Battery
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
+
+from systembridgebackend.modules.base import ModuleUpdateBase
+from systembridgebackend.modules.battery import Battery
 
 
 class BatteryUpdate(ModuleUpdateBase):

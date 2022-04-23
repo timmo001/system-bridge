@@ -1,6 +1,7 @@
 """System Bridge: Module Listeners"""
 
 import asyncio
+
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 

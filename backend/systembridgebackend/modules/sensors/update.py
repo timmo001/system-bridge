@@ -1,5 +1,6 @@
 """System Bridge: Update Sensors"""
 from systembridgeshared.database import Database
+
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.sensors import Sensors
 

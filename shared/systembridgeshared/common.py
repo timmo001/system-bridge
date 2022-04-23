@@ -1,7 +1,9 @@
 """System Bridge Shared: Common"""
 from __future__ import annotations
+
 import os
 import re
+
 from appdirs import AppDirs
 
 

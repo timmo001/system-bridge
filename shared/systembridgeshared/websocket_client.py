@@ -1,10 +1,11 @@
 """System Bridge Shared: WebSocket Client"""
 from __future__ import annotations
+
 import asyncio
 import json
 from sqlite3 import connect
-import websockets
 
+import websockets
 from websockets import ConnectionClosed, InvalidHandshake, InvalidMessage
 
 from systembridgeshared.base import Base
@@ -16,9 +17,9 @@ from systembridgeshared.const import (
     TYPE_REGISTER_DATA_LISTENER,
 )
 from systembridgeshared.exceptions import (
+    BadMessageException,
     ConnectionClosedException,
     ConnectionErrorException,
-    BadMessageException,
 )
 from systembridgeshared.settings import Settings
 

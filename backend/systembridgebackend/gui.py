@@ -1,8 +1,8 @@
 """System Bridge: GUI"""
+from logging import Logger
+import os
 import subprocess
 import sys
-import os
-from logging import Logger
 
 
 async def start_gui(logger: Logger) -> None:

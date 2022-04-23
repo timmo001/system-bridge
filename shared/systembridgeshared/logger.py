@@ -1,11 +1,12 @@
 """System Bridge Shared: Logger"""
 import logging
-import os
-from colorlog import ColoredFormatter
 from logging.handlers import RotatingFileHandler
+import os
 
-from systembridgeshared.const import DATE_FORMAT, FORMAT
+from colorlog import ColoredFormatter
+
 from systembridgeshared.common import get_user_data_directory
+from systembridgeshared.const import DATE_FORMAT, FORMAT
 
 
 def setup_logger(

@@ -1,7 +1,7 @@
 """System Bridge: Sensors"""
 from __future__ import annotations
-import psutil
 
+import psutil
 from systembridgeshared.base import Base
 
 

@@ -4,7 +4,7 @@ import os
 
 from plyer import storagepath
 from sanic.request import Request
-from sanic.response import HTTPResponse, json, file
+from sanic.response import HTTPResponse, file, json
 
 QUERY_BASE = "base"
 QUERY_PATH = "path"

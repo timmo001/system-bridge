@@ -5,10 +5,9 @@ import socket
 import uuid
 
 from plyer import uniqueid
-from zeroconf import ServiceInfo, Zeroconf, InterfaceChoice
-
 from systembridgeshared.base import Base
-from systembridgeshared.settings import Settings, SETTING_PORT_API
+from systembridgeshared.settings import SETTING_PORT_API, Settings
+from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
 ZEROCONF_TYPE = "_system-bridge._tcp.local."
 

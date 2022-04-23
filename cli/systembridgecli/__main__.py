@@ -1,11 +1,9 @@
 """System Bridge CLI: Main"""
-import typer
-from tabulate import tabulate
-
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
-
+from tabulate import tabulate
+import typer
 
 app = typer.Typer()
 database = Database()

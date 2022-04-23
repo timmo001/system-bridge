@@ -1,5 +1,6 @@
 """System Bridge: Disk"""
 from __future__ import annotations
+
 from collections import namedtuple
 
 from psutil import disk_io_counters, disk_partitions, disk_usage

@@ -1,12 +1,13 @@
 """System Bridge: Main"""
 import logging
 
-from systembridgebackend.server import Server
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
+
+from systembridgebackend.server import Server
 
 
 class Main(Base):

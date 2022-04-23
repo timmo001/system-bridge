@@ -1,12 +1,13 @@
 """System Bridge: Settings"""
 from __future__ import annotations
+
 import io
 import os
+from os.path import exists
+from uuid import uuid4
 
 from appdirs import AppDirs
 from cryptography.fernet import Fernet
-from uuid import uuid4
-from os.path import exists
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (

@@ -21,8 +21,9 @@ from systembridgeshared.const import (
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.settings import SECRET_API_KEY, Settings
+
 from systembridgebackend.modules.listeners import Listeners
-from systembridgeshared.settings import Settings, SECRET_API_KEY
 
 
 class WebSocketHandler(Base):

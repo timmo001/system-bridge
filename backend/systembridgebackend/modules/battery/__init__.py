@@ -1,8 +1,8 @@
 """System Bridge: Battery"""
 from __future__ import annotations
-import psutil
-from plyer import battery
 
+from plyer import battery
+import psutil
 from systembridgeshared.base import Base
 
 

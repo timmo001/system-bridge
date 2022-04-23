@@ -3,6 +3,7 @@ import asyncio
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+
 from systembridgebackend.modules.battery.update import BatteryUpdate
 from systembridgebackend.modules.bridge.update import BridgeUpdate
 from systembridgebackend.modules.cpu.update import CPUUpdate

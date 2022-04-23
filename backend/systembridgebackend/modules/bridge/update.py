@@ -1,11 +1,12 @@
 """System Bridge: Update Bridge"""
 import time
-from zeroconf import Zeroconf, ServiceStateChange
 
-from systembridgebackend.modules.bridge import Bridge
 from systembridgeshared.base import Base
 from systembridgeshared.const import COLUMN_TIMESTAMP
 from systembridgeshared.database import Database
+from zeroconf import ServiceStateChange, Zeroconf
+
+from systembridgebackend.modules.bridge import Bridge
 
 COLUMN_NAME = "name"
 COLUMN_ADDRESS = "address"

@@ -1,5 +1,6 @@
 """System Bridge: Update Disk"""
 from systembridgeshared.database import Database
+
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.disk import Disk
 

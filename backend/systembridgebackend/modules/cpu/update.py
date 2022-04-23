@@ -1,5 +1,6 @@
 """System Bridge: Update CPU"""
 from systembridgeshared.database import Database
+
 from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.cpu import CPU
 

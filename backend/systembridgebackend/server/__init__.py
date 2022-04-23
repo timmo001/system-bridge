@@ -5,30 +5,30 @@ from os import walk
 import sys
 
 from sanic import Sanic
-from sanic_scheduler import SanicScheduler, task
 from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+from sanic_scheduler import SanicScheduler, task
+from systembridgeshared.base import Base
+from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_PORT_API
+from systembridgeshared.database import Database
+from systembridgeshared.settings import Settings
 
 from systembridgebackend.gui import start_gui
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
+from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.media import (
-    handler_media_files,
     handler_media_file,
     handler_media_file_data,
     handler_media_file_write,
+    handler_media_files,
 )
-from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
 from systembridgebackend.server.websocket import WebSocketHandler
-from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, SETTING_LOG_LEVEL
-from systembridgeshared.database import Database
-from systembridgeshared.settings import Settings
 
 
 class ApplicationExitException(BaseException):
