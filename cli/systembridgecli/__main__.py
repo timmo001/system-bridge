@@ -1,5 +1,6 @@
 """System Bridge CLI: Main"""
 import os
+import sys
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.database import Database
@@ -111,17 +112,23 @@ def path_logs_gui() -> None:
 @app.command(name="open-logs-backend", short_help="Open backend logs")
 def open_logs_backend() -> None:
     """Open backend logs"""
-    os.startfile(
-        os.path.join(get_user_data_directory(), "system-bridge.log"),
-    )
+    path = os.path.join(get_user_data_directory(), "system-bridge.log")
+    if sys.platform == "win32":
+        os.startfile(path)
+    else:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, path])
 
 
 @app.command(name="open-logs-gui", short_help="Open GUI logs")
 def open_logs_gui() -> None:
     """Open gui logs"""
-    os.startfile(
-        os.path.join(get_user_data_directory(), "system-bridge-gui.log"),
-    )
+    path = os.path.join(get_user_data_directory(), "system-bridge-gui.log")
+    if sys.platform == "win32":
+        os.startfile(path)
+    else:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, path])
 
 
 if __name__ == "__main__":
