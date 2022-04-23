@@ -56,8 +56,8 @@ class Main(Base):
         # Connect to WebSocket
         try:
             asyncio.run(self._websocket_client.connect())
-        except ConnectionErrorException as error:
-            self._logger.error("Could not connect to WebSocket: %s", error)
+        except ConnectionErrorException:
+            self._logger.error("Could not connect to WebSocket")
             error_message = TimedMessageBox(
                 10,
                 "Could not connect to System Bridge Backend! Exiting in",
