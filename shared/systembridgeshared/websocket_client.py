@@ -13,7 +13,11 @@ from systembridgeshared.const import (
     TYPE_GET_DATA,
     TYPE_REGISTER_DATA_LISTENER,
 )
-from systembridgeshared.exceptions import ConnectionClosedException
+from systembridgeshared.exceptions import (
+    ConnectionClosedException,
+    ConnectionErrorException,
+    BadMessageException,
+)
 from systembridgeshared.settings import Settings
 
 
@@ -45,8 +49,8 @@ class WebSocketClient(Base):
             self._websocket = await websockets.connect(
                 f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
             )
-        except InvalidHandshake as error:
-            raise Exception from error
+        except (ConnectionRefusedError, InvalidHandshake) as error:
+            raise ConnectionErrorException from error
 
     async def get_data(
         self,
@@ -65,8 +69,10 @@ class WebSocketClient(Base):
             )
         except ConnectionClosed as error:
             raise ConnectionClosedException from error
-        except (InvalidMessage, InvalidHandshake) as error:
-            raise Exception from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
 
     async def register_data_listener(
         self,
@@ -85,8 +91,10 @@ class WebSocketClient(Base):
             )
         except ConnectionClosed as error:
             raise ConnectionClosedException from error
-        except (InvalidMessage, InvalidHandshake) as error:
-            raise Exception from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
 
     async def listen_for_messages(self, callback: callable) -> None:
         """Listen for messages"""

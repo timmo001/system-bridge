@@ -3,13 +3,14 @@ import asyncio
 import sys
 
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 
 from systembridgegui.system_tray import SystemTray
 from systembridgegui.window.main import MainWindow
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
+from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
@@ -50,13 +51,26 @@ class Main(Base):
             """
         )
 
+        # Connect to WebSocket
+        try:
+            asyncio.run(self._websocket_client.connect())
+        except ConnectionErrorException as error:
+            self._logger.error("Could not connect to WebSocket: %s", error)
+            error_message = QMessageBox()
+            error_message.setIcon(QMessageBox.Critical)
+            error_message.setWindowTitle("Error")
+            error_message.setText(
+                "Could not connect to System Bridge Backend! Exiting now."
+            )
+            error_message.exec()
+            # Exit cleanly
+            self._callback_exit_application(True)
+            sys.exit(0)
+
         self._main_window = MainWindow(
             self._settings,
             self._icon,
         )
-        # self._main_window.resize(1280, 720)
-        # self._main_window.showNormal()
-        # self._main_window.hide()
 
         self._system_tray_icon = SystemTray(
             self._icon,
@@ -68,9 +82,12 @@ class Main(Base):
 
         sys.exit(self._application.exec())
 
-    def _callback_exit_application(self) -> None:
+    def _callback_exit_application(
+        self,
+        gui_only: bool,
+    ) -> None:
         """Exit the application"""
-        asyncio.run(self._exit_application())
+        asyncio.run(self._exit_application(gui_only))
 
     def _callback_show_window(
         self,
@@ -95,14 +112,18 @@ class Main(Base):
         else:
             self._main_window.showNormal()
 
-    async def _exit_application(self) -> None:
+    async def _exit_application(
+        self,
+        gui_only: bool,
+    ) -> None:
         """Exit the backend"""
-        self._logger.info("Exit Backend..")
-        # await self.bridge.async_connect_websocket(
-        #     self.args.hostname,
-        #     self.args.websocket_port,
-        # )
-        # await self.bridge.async_send_event("exit-application", {})
+        if not gui_only:
+            self._logger.info("Exit Backend..")
+            # await self.bridge.async_connect_websocket(
+            #     self.args.hostname,
+            #     self.args.websocket_port,
+            # )
+            # await self.bridge.async_send_event("exit-application", {})
         self._logger.info("Exit GUI..")
         self._application.quit()
 

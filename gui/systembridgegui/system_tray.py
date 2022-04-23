@@ -118,7 +118,7 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         action_exit: QAction = menu.addAction("Exit")
-        action_exit.triggered.connect(callback_exit_application)
+        action_exit.triggered.connect(lambda: callback_exit_application(False))
 
         self.setContextMenu(menu)
 
