@@ -3,5 +3,4 @@ appdirs==1.4.4
 colorlog==6.6.0
 cryptography==36.0.2
 pandas==1.4.2
-pyinstaller==5.0
 websockets==10.3

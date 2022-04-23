@@ -20,17 +20,17 @@ concurrency:
 jobs:
   build-backend:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    secrets:
-      CODE_PATH: backend
+    with:
+      code-path: backend
   build-cli:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    secrets:
-      CODE_PATH: cli
+    with:
+      code-path: cli
   build-gui:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    secrets:
-      CODE_PATH: gui
+    with:
+      code-path: gui
   build-frontend:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
-    secrets:
-      CODE_PATH: frontend
+    with:
+      code-path: frontend
