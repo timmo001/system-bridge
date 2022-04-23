@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "install",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "install",
+      "detail": "install dependencies from package"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "build",
+      "detail": "next build"
+    },
+    {
+      "type": "npm",
+      "script": "eslint",
+      "problemMatcher": [],
+      "label": "eslint",
+      "detail": "eslint --ext .ts --ext .tsx --color ./"
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "problemMatcher": [],
+      "label": "start",
+      "detail": "next start"
+    },
+    {
+      "type": "npm",
+      "script": "start:dev",
+      "problemMatcher": [],
+      "label": "start:dev",
+      "detail": "next dev"
+    }
+  ]
+}

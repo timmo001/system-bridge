@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import {
   Autocomplete,
   Button,
@@ -14,34 +14,13 @@ import {
   Container,
   Grid,
   TextField,
-  Theme,
   Typography,
+  useTheme,
 } from "@mui/material";
 import axios from "axios";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { useSettings } from "../Contexts/Settings";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    title: {
-      margin: theme.spacing(2, 1.5, 6),
-    },
-    subtitle: {
-      margin: theme.spacing(1, 2, 2),
-    },
-    input: {
-      margin: theme.spacing(2, 2.5),
-      width: "calc(100% - 32px)",
-    },
-    button: {
-      margin: theme.spacing(6, 2.5, 2),
-      width: "calc(100% - 32px)",
-    },
-  })
-);
 
 function BridgesOpenOnComponent(): ReactElement {
   const query = useRouter().query;
@@ -55,21 +34,23 @@ function BridgesOpenOnComponent(): ReactElement {
   const handleSetup = useCallback(async () => {
     setUrl(query.url as string);
     const response = await axios.get<Array<Bridge>>(
-      `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges`,
+      `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges`,
       { headers: { "api-key": query.apiKey as string } }
     );
     if (response && response.status < 400)
       setBridges(response.data.filter((bridge: Bridge) => bridge.apiKey));
-  }, [query.apiHost, query.apiPort, query.apiKey]);
+  }, [query.apiHost, query.apiPort, query.apiKey, query.url]);
 
   function handleUrlChanged(event: ChangeEvent<HTMLInputElement>): void {
     setUrl(event.target.value);
   }
 
   async function handleOpenOn(): Promise<void> {
-    if (bridgeSelected) {
+    if (bridgeSelected?.apiKey) {
       try {
         const response = await axios.post<{ path: string }>(
           `http://${bridgeSelected.host}:${bridgeSelected.port}/open`,
@@ -90,39 +71,53 @@ function BridgesOpenOnComponent(): ReactElement {
       setSetup(true);
       handleSetup();
     }
-  }, [setup, handleSetup, query.apiKey, query.wsPort]);
+  }, [setup, handleSetup, query]);
 
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <>
       <Container maxWidth="lg">
         {!settings && !bridges ? (
-          <Grid container direction="row" justifyContent="center">
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(10, 0, 8) }}
+          >
             <CircularProgress />
           </Grid>
         ) : (
           <>
-            <Typography className={classes.title} component="h2" variant="h3">
+            <Typography
+              component="h2"
+              variant="h3"
+              sx={{ margin: theme.spacing(2, 1.5, 6) }}
+            >
               Open URL On..
             </Typography>
 
-            <Autocomplete
-              className={classes.input}
-              id="bridge"
-              options={bridges}
-              value={bridgeSelected}
-              getOptionLabel={(option: Bridge) => option.name}
-              renderInput={(params: AutocompleteRenderInputParams) => (
-                <TextField {...params} label="Bridge" variant="outlined" />
-              )}
-              onChange={(_event: ChangeEvent, value: Bridge) =>
-                setBridgeSelected(value)
-              }
-            />
-
+            {bridges ? (
+              <Autocomplete
+                id="bridge"
+                options={bridges}
+                value={bridgeSelected}
+                getOptionLabel={(option: Bridge) => option.name}
+                renderInput={(params: AutocompleteRenderInputParams) => (
+                  <TextField {...params} label="Bridge" variant="outlined" />
+                )}
+                onChange={(_event, value: Bridge | null) => {
+                  if (value) setBridgeSelected(value);
+                }}
+                sx={{
+                  margin: theme.spacing(2, 2.5),
+                  width: "calc(100% - 32px)",
+                }}
+              />
+            ) : (
+              ""
+            )}
             <TextField
-              className={classes.input}
               fullWidth
               id="url"
               label="URL"
@@ -130,14 +125,21 @@ function BridgesOpenOnComponent(): ReactElement {
               type="url"
               value={url}
               variant="outlined"
+              sx={{
+                margin: theme.spacing(2, 2.5),
+                width: "calc(100% - 32px)",
+              }}
             />
 
             <Button
-              className={classes.button}
               color="primary"
               disabled={!bridgeSelected || !url}
               variant="contained"
               onClick={handleOpenOn}
+              sx={{
+                margin: theme.spacing(6, 2.5, 2),
+                width: "calc(100% - 32px)",
+              }}
             >
               Send
             </Button>

@@ -6,16 +6,12 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Theme,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
 import { Information } from "assets/entities/information.entity";
@@ -35,22 +31,6 @@ interface BridgeEditProps {
   handleClose: () => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    delete: {
-      marginLeft: 2,
-      backgroundColor: red[600],
-    },
-    input: {
-      margin: theme.spacing(1, 0),
-    },
-    testingMessage: {
-      margin: theme.spacing(0, 1),
-      flex: 1,
-      textAlign: "right",
-    },
-  })
-);
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
   const [bridge, setBridge] = useState<Partial<Bridge>>(
     props.bridgeEdit.bridge
@@ -74,9 +54,11 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
   async function handleDelete(): Promise<void> {
     const response = await axios.delete(
-      `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges/${bridge.key}`,
+      `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges/${bridge.key}`,
       { headers: { "api-key": query.apiKey as string } }
     );
     if (response && response.status < 400) props.handleClose();
@@ -90,9 +72,11 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         ...bridge,
         key: information.uuid,
       };
-      const url = `http://${query.apiHost || window.location.hostname}:${
-        query.apiPort || 9170
-      }/bridges`;
+      const url = `http://${
+        query.apiHost || typeof window !== "undefined"
+          ? window.location.hostname
+          : "localhost"
+      }:${query.apiPort || 9170}/bridges`;
       console.log("Save:", { url, bridgeData });
       let response: AxiosResponse<Partial<Bridge>, any>;
       try {
@@ -107,46 +91,46 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           : await axios.post<Partial<Bridge>>(url, bridgeData, {
               headers: { "api-key": query.apiKey as string },
             });
+        if (response && response.status < 400) props.handleClose();
+        else setTestingMessage({ text: "Failed to save bridge", error: true });
       } catch (e) {
         console.error(e);
       }
-      if (response && response.status < 400) props.handleClose();
-      else setTestingMessage({ text: "Failed to save bridge", error: true });
     }
   }
 
   async function handleTestBridge(): Promise<Information | null> {
     setTestingMessage({ text: "Testing bridge..", error: false });
-    try {
-      const response = await axios.get<Information>(
-        `http://${bridge.host}:${bridge.port}/information`,
-        {
-          headers: { "api-key": bridge.apiKey },
+    if (bridge?.apiKey)
+      try {
+        const response = await axios.get<Information>(
+          `http://${bridge.host}:${bridge.port}/information`,
+          {
+            headers: { "api-key": bridge.apiKey },
+          }
+        );
+        if (response && response.status < 400) {
+          console.log("Information:", response.data);
+          setTestingMessage({
+            text: "Successfully connected to bridge.",
+            error: false,
+          });
+          return response.data;
         }
-      );
-      if (response && response.status < 400) {
-        console.log("Information:", response.data);
         setTestingMessage({
-          text: "Successfully connected to bridge.",
-          error: false,
+          text: `Error testing bridge: ${response.status} - ${response.data}`,
+          error: true,
         });
-        return response.data;
+      } catch (e: any) {
+        console.error("Error:", e);
+        setTestingMessage({
+          text: `Error testing bridge: ${e.message}`,
+          error: true,
+        });
       }
-      setTestingMessage({
-        text: `Error testing bridge: ${response.status} - ${response.data}`,
-        error: true,
-      });
-    } catch (e) {
-      console.error("Error:", e);
-      setTestingMessage({
-        text: `Error testing bridge: ${e.message}`,
-        error: true,
-      });
-    }
     return null;
   }
 
-  const classes = useStyles();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
@@ -162,7 +146,6 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
       </DialogTitle>
       <DialogContent>
         <TextField
-          className={classes.input}
           autoFocus
           fullWidth
           id="name"
@@ -171,10 +154,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.name || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="host"
           label="Host"
@@ -182,10 +165,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.host || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="port"
           label="Port"
@@ -193,10 +176,10 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="number"
           value={bridge.port || 9170}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
 
         <TextField
-          className={classes.input}
           fullWidth
           id="apiKey"
           label="API Key"
@@ -204,21 +187,26 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           type="text"
           value={bridge.apiKey || ""}
           variant="outlined"
+          sx={{ margin: theme.spacing(1, 0) }}
         />
       </DialogContent>
       <DialogActions>
         <Button
-          className={classes.delete}
           onClick={handleDelete}
           color="inherit"
           variant="contained"
+          sx={{ margin: theme.spacing(1, 0) }}
         >
           Delete
         </Button>
         <Typography
-          className={classes.testingMessage}
           color={testingMessage.error ? "error" : "textPrimary"}
           variant="subtitle2"
+          sx={{
+            margin: theme.spacing(0, 1),
+            flex: 1,
+            textAlign: "right",
+          }}
         >
           {testingMessage.text}
         </Typography>

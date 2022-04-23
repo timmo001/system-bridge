@@ -1,0 +1,6 @@
+aiohttp==3.8.1
+appdirs==1.4.4
+cryptography==36.0.2
+pandas==1.4.2
+pyinstaller==4.10
+websockets==10.3

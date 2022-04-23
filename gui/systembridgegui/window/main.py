@@ -1,13 +1,13 @@
 """System Bridge GUI: Main window"""
-from argparse import Namespace
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QFrame, QVBoxLayout
-
-from ..base import Base
+from systembridgeshared.base import Base
+from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.settings import Settings
 
 
 class MainWindow(Base, QFrame):
@@ -15,12 +15,14 @@ class MainWindow(Base, QFrame):
 
     def __init__(
         self,
-        args: Namespace,
+        settings: Settings,
         icon: QIcon,
     ) -> None:
         """Initialize the window"""
-        Base.__init__(self, args)
+        Base.__init__(self)
         QFrame.__init__(self)
+
+        self._settings = settings
 
         self.setWindowTitle("System Bridge")
         self.setWindowIcon(icon)
@@ -28,24 +30,31 @@ class MainWindow(Base, QFrame):
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.browser = QWebEngineView()
+        self._browser = QWebEngineView()
 
-        self.layout.addWidget(self.browser)
+        self.layout.addWidget(self._browser)
 
     # pylint: disable=invalid-name
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(
+        self,
+        event: QCloseEvent,
+    ) -> None:
         """Close the window instead of closing the app"""
         event.ignore()
         self.hide()
 
-    def setup(self, path) -> None:
+    def setup(
+        self,
+        path: str,
+    ) -> None:
         """Setup the window"""
+        api_port = self._settings.get(SETTING_PORT_API)
+        api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
-            f"""http://{self.args.hostname}:{self.args.frontend_port}{path}?{urlencode({
-                    "apiKey": self.args.api_key,
-                    "apiPort": self.args.port,
-                    "wsPort": self.args.websocket_port,
+            f"""http://localhost:{api_port}{path}?{urlencode({
+                    "apiKey": api_key,
+                    "apiPort": api_port,
                 })}"""
         )
-        self.logger.debug("Opening url: %s", url)
-        self.browser.load(url)
+        self._logger.info("Open URL: %s", url)
+        self._browser.load(url)

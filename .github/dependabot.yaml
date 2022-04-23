@@ -5,18 +5,23 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: "pip"
+    directory: "/backend"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/frontend"
+  - package-ecosystem: "pip"
+    directory: "/cli"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
     directory: "/gui"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/frontend"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"

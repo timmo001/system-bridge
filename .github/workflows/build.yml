@@ -1,0 +1,36 @@
+---
+name: Build
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: lint-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-backend:
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    secrets:
+      CODE_PATH: backend
+  build-cli:
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    secrets:
+      CODE_PATH: cli
+  build-gui:
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    secrets:
+      CODE_PATH: gui
+  build-frontend:
+    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
+    secrets:
+      CODE_PATH: frontend

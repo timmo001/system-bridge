@@ -9,9 +9,3 @@ You are welcome to edit, fork and create pull requests as you like.
   issues the bots find.
 - I, and any other users I approve will be able to merge your changes so
   be patient.
-
-## Docs
-
-Feel free to improve documentation as you like by making a pull request in
- `/docs`. Once merged into the master branch, my ci server will update the
- docs in the `gh-pages` branch.

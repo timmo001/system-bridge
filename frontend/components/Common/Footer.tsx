@@ -1,18 +1,8 @@
 import { ReactElement } from "react";
-import { Box, Grid, Theme, Typography } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    spacer: {
-      height: theme.spacing(6),
-    },
-  })
-);
+import { Box, Grid, Typography, useTheme } from "@mui/material";
 
 function Footer(): ReactElement {
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <>
@@ -29,7 +19,7 @@ function Footer(): ReactElement {
           for more information and documentation.
         </Typography>
       </Grid>
-      <Box className={classes.spacer} />
+      <Box sx={{ height: theme.spacing(6) }} />
       <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Found an issue? Report it{" "}
@@ -56,7 +46,7 @@ function Footer(): ReactElement {
           .
         </Typography>
       </Grid>
-      <Box className={classes.spacer} />
+      <Box sx={{ height: theme.spacing(6) }} />
       <Grid container direction="row" justifyContent="center">
         <Typography component="span" variant="body1">
           Participate in discussions and get help{" "}
@@ -69,7 +59,7 @@ function Footer(): ReactElement {
           </a>
           .
         </Typography>
-        <Box className={classes.spacer} />
+        <Box sx={{ height: theme.spacing(6) }} />
       </Grid>
     </>
   );

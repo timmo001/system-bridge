@@ -2,24 +2,49 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "start:dev",
-      "problemMatcher": [],
-      "label": "Node.js: start:dev"
-    },
-    {
-      "type": "npm",
-      "script": "build",
-      "group": "build",
-      "problemMatcher": [],
-      "label": "Node.js: build"
+      "type": "shell",
+      "label": "Shared: pip install",
+      "command": "pip install .",
+      "options": {
+        "cwd": "shared"
+      }
     },
     {
       "type": "shell",
-      "label": "Python: pip install",
+      "label": "Backend: pip install",
       "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
+      "options": {
+        "cwd": "backend"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "CLI: pip install",
+      "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
+      "options": {
+        "cwd": "cli"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "GUI: pip install",
+      "command": "pip install .",
+      "dependsOn": ["Shared: pip install"],
       "options": {
         "cwd": "gui"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "Frontend: install",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "install",
+      "detail": "install dependencies from package",
+      "options": {
+        "cwd": "frontend"
       }
     }
   ]

@@ -1,143 +1,100 @@
-import { ReactElement, useState } from "react";
-import { useRouter } from "next/dist/client/router";
-import {
-  Button,
-  CircularProgress,
-  Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  Paper,
-  Theme,
-  Typography,
-} from "@mui/material";
-import { mdiRestart } from "@mdi/js";
-import createStyles from "@mui/styles/createStyles";
-import Icon from "@mdi/react";
-import makeStyles from "@mui/styles/makeStyles";
+import { ReactElement, useCallback, useEffect, useState } from "react";
+import { CircularProgress, Grid, useTheme } from "@mui/material";
+import { useRouter } from "next/router";
 
-import { useSettings } from "../Contexts/Settings";
-import { WebSocketConnection } from "../Common/WebSocket";
-import Section from "./Section";
+import { Event } from "assets/entities/event.entity";
+import { useSettings } from "components/Contexts/Settings";
+import { WebSocketConnection } from "components/Common/WebSocket";
+import Item from "components/Settings/Item";
+import Section from "components/Settings/Section";
+import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      padding: theme.spacing(2),
-    },
-    center: {
-      textAlign: "center",
-    },
-    disabled: {
-      userSelect: "none",
-    },
-    secondaryAction: {
-      width: 400,
-      textAlign: "end",
-    },
-    smallButton: {
-      margin: theme.spacing(-1, -0.5),
-    },
-    spacer: {
-      height: theme.spacing(6),
-    },
-    headerItem: {
-      margin: theme.spacing(1, 1, 0),
-    },
-    version: {
-      margin: theme.spacing(3, 2, 0),
-    },
-  })
-);
+let ws: WebSocketConnection;
 
 function Settings(): ReactElement {
-  const [restartRequired, setRestartRequired] = useState<boolean>(false);
-  const [settings] = useSettings();
+  const [settings, setSettings] = useSettings();
+  const [setup, setSetup] = useState<boolean>(false);
 
   const query = useRouter().query;
 
-  function handleServerRestartRequired(): void {
-    setRestartRequired(true);
-  }
-
-  function handleRestartServer(): void {
-    const ws = new WebSocketConnection(
-      Number(query.wsPort) || 9172,
-      String(query.apiKey),
-      false,
-      async () => {
-        ws.sendEvent({ name: "restart-server", data: { openSettings: true } });
-        await ws.close();
-        window.close();
+  const eventHandler = useCallback(
+    (event: Event) => {
+      console.log("Event:", event);
+      if (event.type === "SETTINGS_RESULT") {
+        console.log("Settings result:", event.data);
+        let newSettings: SettingsObject = {};
+        event.data.forEach((s: { key: string; value: SettingsValue }) => {
+          newSettings[s.key] = s.value;
+        });
+        console.log("Settings:", newSettings);
+        setSettings(newSettings);
       }
-    );
-  }
+    },
+    [setSettings]
+  );
 
-  const classes = useStyles();
+  const handleSetup = useCallback(
+    (port: number, apiKey: string) => {
+      console.log("Setup WebSocketConnection");
+      ws = new WebSocketConnection(port, apiKey, async () => {
+        ws.getSettings();
+      });
+      ws.onEvent = eventHandler;
+    },
+    [eventHandler]
+  );
+
+  const handleChanged = useCallback(
+    (key: string, value: SettingsValue) => {
+      ws.updateSetting(key, value);
+      setSettings({ ...settings, [key]: value });
+    },
+    [settings, setSettings]
+  );
+
+  useEffect(() => {
+    if (!setup && query && query.apiKey) {
+      setSetup(true);
+      handleSetup(Number(query.apiPort) || 9170, String(query.apiKey));
+    }
+  }, [setup, handleSetup, query]);
+
+  const theme = useTheme();
 
   return (
     <>
       <Grid
         container
-        className={classes.root}
         direction="column"
         spacing={2}
         alignItems="stretch"
+        sx={{
+          marginBottom: theme.spacing(8),
+          padding: theme.spacing(2),
+        }}
       >
-        <Grid container direction="row" item xs={12}>
-          <Grid item xs={4} className={classes.disabled}>
-            <Typography component="h3" variant="h5">
-              Server
-            </Typography>
-          </Grid>
-          <Grid item xs={8}>
-            <Paper>
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <Icon title="Restart Server" size={1} path={mdiRestart} />
-                  </ListItemIcon>
-                  <ListItemText
-                    className={classes.disabled}
-                    primary={`Restart Server${
-                      restartRequired ? " (Restart Required)" : ""
-                    }`}
-                    secondary="Restart the server. This is required when changing any network settings."
-                  />
-                  <ListItemSecondaryAction className={classes.secondaryAction}>
-                    <Button
-                      aria-label="Restart Server"
-                      color="primary"
-                      variant="contained"
-                      onClick={handleRestartServer}
-                    >
-                      <Icon
-                        title="Restart Server"
-                        size={0.8}
-                        path={mdiRestart}
-                      />
-                      Restart Server
-                    </Button>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
-        {!settings ? (
-          <Grid container direction="row" justifyContent="center">
+        {settings ? (
+          <Section name="General" description="General settings">
+            <>
+              {Object.keys(settings).map((key: string, index: number) => (
+                <Item
+                  key={index}
+                  keyIn={key}
+                  valueIn={settings[key]}
+                  handleChanged={handleChanged}
+                />
+              ))}
+            </>
+          </Section>
+        ) : (
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            sx={{ margin: theme.spacing(2, 0, 10) }}
+          >
             <CircularProgress />
           </Grid>
-        ) : (
-          Object.keys(settings).map((sectionKey: string) => (
-            <Section
-              key={sectionKey}
-              sectionKey={sectionKey}
-              handleServerRestartRequired={handleServerRestartRequired}
-            />
-          ))
         )}
       </Grid>
     </>

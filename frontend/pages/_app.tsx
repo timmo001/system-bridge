@@ -3,31 +3,24 @@ import { AppProps } from "next/app";
 import {
   CssBaseline,
   ThemeProvider,
-  Theme,
   StyledEngineProvider,
 } from "@mui/material";
 import Head from "next/head";
 
-import { InformationProvider } from "components/Contexts/Information";
+import "@fontsource/roboto";
+
 import { SettingsProvider } from "../components/Contexts/Settings";
 import theme from "../components/Common/Theme";
 
 import "../assets/css/style.css";
-import "@fontsource/roboto";
-
-declare module "@mui/styles/defaultTheme" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {}
-}
 
 function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
     document.documentElement.lang = "en-GB";
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector("#jss-server-side");
-    if (jssStyles) {
+    if (jssStyles?.parentElement)
       jssStyles.parentElement.removeChild(jssStyles);
-    }
   }, []);
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />;
@@ -43,16 +36,12 @@ function App({ Component, pageProps }: AppProps): ReactElement {
       </Head>
       <StyledEngineProvider injectFirst>
         <ThemeProvider theme={theme}>
-          <InformationProvider>
+          <SettingsProvider>
             <>
-              <SettingsProvider>
-                <>
-                  <CssBaseline />
-                  <Component {...pageProps} />
-                </>
-              </SettingsProvider>
+              <CssBaseline />
+              <Component {...pageProps} />
             </>
-          </InformationProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </StyledEngineProvider>
     </>

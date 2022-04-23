@@ -1,11 +1,8 @@
 import React, { ReactElement, useEffect } from "react";
-import { ClassNameMap } from "@mui/styles";
 import { Container } from "@mui/material";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import Head from "next/head";
 
-import { getInformation, getSettings } from "./Utils";
-import { useInformation } from "../Contexts/Information";
 import { useSettings } from "../Contexts/Settings";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -13,7 +10,6 @@ import HeaderLinks from "./HeaderLinks";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
-  classes: ClassNameMap;
   description?: string;
   keywords?: string;
   noFooter?: boolean;
@@ -23,46 +19,32 @@ interface LayoutProps {
 }
 
 function Layout(props: LayoutProps): ReactElement {
-  const [information, setInformation] = useInformation();
   const [settings, setSettings] = useSettings();
 
   const router = useRouter();
   const query = router.query;
 
   useEffect(() => {
-    if (query && Object.keys(query).length > 0)
-      if (!query.apiKey) {
-        const response: string = window.prompt("Please enter your API key", "");
-        if (response)
-          router.replace(
-            `${router.pathname}?apiKey=${response}&apiPort=${query.apiPort}&wsPort=${query.wsPort}`
-          );
-      }
-  }, [query]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!information && query && query.apiKey)
-          setInformation(await getInformation(query));
-      } catch (e) {
-        console.warn("Error getting information:", e);
-      }
-    })();
-  }, [settings, setSettings, query]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!settings && query && query.apiKey)
-          setSettings(await getSettings(query));
-      } catch (e) {
-        console.warn("Error getting settings:", e);
-      }
-    })();
-  }, [settings, setSettings, query]);
-
-  const classes = props.classes;
+    if (
+      query &&
+      Object.keys(query).length > 0 &&
+      typeof window !== "undefined"
+    ) {
+      let newApiKey: string | null = null,
+        newApiPort: string | null = null;
+      if (!query?.apiKey)
+        newApiKey = window.prompt("Please enter your API key", "");
+      if (!query?.apiPort)
+        newApiPort = window.prompt(
+          "Please enter your API port (default: 9170)",
+          (query.apiPort as string) || "9170"
+        );
+      if (newApiKey && newApiPort)
+        router.replace(
+          `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`
+        );
+    }
+  }, [router, query]);
 
   return (
     <>
@@ -91,21 +73,11 @@ function Layout(props: LayoutProps): ReactElement {
         />
       </Head>
       {!props.noHeader && (
-        <Header
-          {...props}
-          brand="System Bridge"
-          changeColorOnScroll={{
-            height: 200,
-            color: "primary",
-          }}
-          color="transparent"
-          fixed
-          rightLinks={<HeaderLinks />}
-        />
+        <Header brand="System Bridge" rightLinks={<HeaderLinks />} />
       )}
       {props.children}
       {!props.noFooter && (
-        <Container className={classes.footer} component="footer" maxWidth="xl">
+        <Container component="footer" maxWidth="xl">
           <Footer />
         </Container>
       )}

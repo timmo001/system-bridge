@@ -2,26 +2,40 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Main",
+      "name": "Backend",
       "type": "python",
       "request": "launch",
-      "console": "integratedTerminal",
-      "preLaunchTask": "Python: pip install",
-      "program": "gui/__init__.py",
-      "args": [
-        "--host",
-        "localhost",
-        "--api-key",
-        "${env:SB_API_KEY}",
-        "--api-port",
-        "9170",
-        "--frontend-port",
-        "3000",
-        "--log-level",
-        "debug",
-        "--websocket-port",
-        "9172"
-      ]
+      "module": "systembridgebackend",
+      "preLaunchTask": "Backend: pip install",
+      "cwd": "${workspaceFolder}/backend",
+      "args": []
+    },
+    {
+      "name": "CLI",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgecli",
+      "preLaunchTask": "CLI: pip install",
+      "cwd": "${workspaceFolder}/cli",
+      "args": ["--help"]
+    },
+    {
+      "name": "GUI",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgegui",
+      "preLaunchTask": "GUI: pip install",
+      "cwd": "${workspaceFolder}/gui",
+      "args": []
+    },
+    {
+      "name": "Frontend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "preLaunchTask": "Frontend: install",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeArgs": ["start:dev"]
     }
   ]
 }
