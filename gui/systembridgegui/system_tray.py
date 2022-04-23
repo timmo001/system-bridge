@@ -28,7 +28,9 @@ class SystemTray(Base, QSystemTrayIcon):
         icon: QIcon,
         parent: QWidget,
         callback_exit_application: callable,
-        callback_show_window: callable[[str, bool, int | None, int | None], None],
+        callback_show_window: callable[
+            [str, bool, int | None, int | None], None
+        ],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize the system tray"""
         Base.__init__(self)
