@@ -1,8 +1,10 @@
 """System Bridge CLI: Main"""
 import os
+import subprocess
 import sys
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
+
 from systembridgeshared.common import get_user_data_directory
+from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 from tabulate import tabulate
