@@ -1,5 +1,7 @@
 """System Bridge CLI: Main"""
+import os
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
+from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 from tabulate import tabulate
@@ -86,6 +88,40 @@ def secret(
         typer.secho(result, fg=typer.colors.MAGENTA)
     else:
         typer.secho(f"Could not find {key}", err=True, fg=typer.colors.RED)
+
+
+@app.command(name="path-logs-backend", short_help="Backend logs path")
+def path_logs_backend() -> None:
+    """Open backend logs path"""
+    typer.secho(
+        os.path.join(get_user_data_directory(), "system-bridge.log"),
+        fg=typer.colors.YELLOW,
+    )
+
+
+@app.command(name="path-logs-gui", short_help="GUI logs path")
+def path_logs_gui() -> None:
+    """Open gui logs path"""
+    typer.secho(
+        os.path.join(get_user_data_directory(), "system-bridge-gui.log"),
+        fg=typer.colors.YELLOW,
+    )
+
+
+@app.command(name="open-logs-backend", short_help="Open backend logs")
+def open_logs_backend() -> None:
+    """Open backend logs"""
+    os.startfile(
+        os.path.join(get_user_data_directory(), "system-bridge.log"),
+    )
+
+
+@app.command(name="open-logs-gui", short_help="Open GUI logs")
+def open_logs_gui() -> None:
+    """Open gui logs"""
+    os.startfile(
+        os.path.join(get_user_data_directory(), "system-bridge-gui.log"),
+    )
 
 
 if __name__ == "__main__":
