@@ -20,19 +20,19 @@ concurrency:
 jobs:
   lint-black-backend:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
-    inputs:
+    with:
       code-path: backend
   lint-black-cli:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
-    inputs:
+    with:
       code-path: cli
   lint-black-gui:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
-    inputs:
+    with:
       code-path: gui
   lint-eslint-frontend:
     uses: timmo001/workflows/.github/workflows/lint-eslint.yml@master
-    inputs:
+    with:
       code-path: frontend
   lint-jsonlint:
     uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@master
@@ -44,21 +44,21 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-prettier.yml@master
   lint-pylint-backend:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
-    inputs:
+    with:
       code-path: backend
       module-name: systembridgebackend
       pre-install-command: |
         cd ../shared && pip install .
   lint-pylint-cli:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
-    inputs:
+    with:
       code-path: cli
       module-name: systembridgecli
       pre-install-command: |
         cd ../shared && pip install .
   lint-pylint-gui:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
-    inputs:
+    with:
       code-path: gui
       module-name: systembridgegui
       pre-install-command: |
