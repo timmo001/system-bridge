@@ -1,5 +1,4 @@
 """System Bridge: Main"""
-import asyncio
 import logging
 
 from systembridgebackend.server import Server

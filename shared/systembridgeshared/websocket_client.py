@@ -51,7 +51,11 @@ class WebSocketClient(Base):
             self._websocket = await websockets.connect(
                 f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
             )
-        except (ConnectionRefusedError, InvalidHandshake) as error:
+        except (
+            asyncio.exceptions.TimeoutError,
+            ConnectionRefusedError,
+            InvalidHandshake,
+        ) as error:
             raise ConnectionErrorException from error
 
     async def exit_backend(self) -> None:

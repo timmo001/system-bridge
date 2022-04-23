@@ -2,16 +2,15 @@
 import asyncio
 from datetime import timedelta
 from os import walk
-import os
 import sys
-import time
-from typing import final
 
 from sanic import Sanic
+from sanic_scheduler import SanicScheduler, task
+from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
-from sanic_scheduler import SanicScheduler, task
 
+from systembridgebackend.gui import start_gui
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
@@ -49,12 +48,13 @@ class Server(Base):
         self._database = database
         self._settings = settings
         self._server = Sanic("SystemBridge")
+        self._server.after_server_start(self._server_started)
 
         for _, dirs, _ in walk("systembridgebackend/modules"):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 
-        # self._scheduler = SanicScheduler(self._server, utc=True)
+        SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
         self._update = Update(self._database)
 
@@ -68,18 +68,24 @@ class Server(Base):
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
-        # @task(timedelta(minutes=2))
-        # async def update_data(_) -> None:
-        #     """Update data"""
-        #     await self._update.update_data(self._data_updated)
+        @task()
+        async def _after_startup(_) -> None:
+            """After startup"""
+            if "--no-gui" not in sys.argv:
+                asyncio.create_task(start_gui(self._logger))
 
-        # @task(timedelta(seconds=30))
-        # async def update_frequent_data(_) -> None:
-        #     """Update frequent data"""
-        #     await self._update.update_frequent_data(self._data_updated)
+        @task(timedelta(minutes=2))
+        async def _update_data(_) -> None:
+            """Update data"""
+            await self._update.update_data(self._data_updated)
+
+        @task(timedelta(seconds=30))
+        async def _update_frequent_data(_) -> None:
+            """Update frequent data"""
+            await self._update.update_frequent_data(self._data_updated)
 
         @auth.key_required
-        async def handler_data_all(
+        async def _handler_data_all(
             _: Request,
             table: str,
         ) -> HTTPResponse:
@@ -89,7 +95,7 @@ class Server(Base):
             return json(self._database.table_data_to_ordered_dict(table))
 
         @auth.key_required
-        async def handler_data_by_key(
+        async def _handler_data_by_key(
             _: Request,
             table: str,
             key: str,
@@ -109,14 +115,14 @@ class Server(Base):
             )
 
         @auth.key_required
-        async def handler_generic(
+        async def _handler_generic(
             request: Request,
             function: callable,
         ) -> HTTPResponse:
             """Generic handler"""
             return await function(request)
 
-        async def handler_websocket(
+        async def _handler_websocket(
             _: Request,
             socket,
         ) -> None:
@@ -127,52 +133,52 @@ class Server(Base):
                 self._listeners,
                 implemented_modules,
                 socket,
-                self._exit_application,
+                self._callback_exit_application,
             )
             await websocket.handler()
 
         self._server.add_route(
-            handler_data_all,
+            _handler_data_all,
             "/api/data/<table:str>",
             methods=["GET"],
         )
         self._server.add_route(
-            handler_data_by_key,
+            _handler_data_by_key,
             "/api/data/<table:str>/<key:str>",
             methods=["GET"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_keyboard),
+            lambda r: _handler_generic(r, handler_keyboard),
             "/api/keyboard",
             methods=["POST"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_media_files),
+            lambda r: _handler_generic(r, handler_media_files),
             "/api/media/files",
             methods=["GET"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_media_file),
+            lambda r: _handler_generic(r, handler_media_file),
             "/api/media/file",
             methods=["GET"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_media_file_data),
+            lambda r: _handler_generic(r, handler_media_file_data),
             "/api/media/file/data",
             methods=["GET"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_media_file_write),
+            lambda r: _handler_generic(r, handler_media_file_write),
             "/api/media/file/write",
             methods=["POST"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_notification),
+            lambda r: _handler_generic(r, handler_notification),
             "/api/notification",
             methods=["POST"],
         )
         self._server.add_route(
-            lambda r: handler_generic(r, handler_open),
+            lambda r: _handler_generic(r, handler_open),
             "/api/open",
             methods=["POST"],
         )
@@ -183,7 +189,11 @@ class Server(Base):
             strict_slashes=False,
             content_type="text/html",
         )
-        self._server.add_websocket_route(handler_websocket, "/api/websocket")
+        self._server.add_websocket_route(_handler_websocket, "/api/websocket")
+
+    def _callback_exit_application(self) -> None:
+        """Callback to exit application"""
+        asyncio.create_task(self._exit_application())
 
     async def _data_updated(
         self,
@@ -192,55 +202,39 @@ class Server(Base):
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
 
-    def _exit_application(self) -> None:
+    async def _exit_application(self) -> None:
         """Exit application"""
         self._logger.info("Exiting application")
         self.stop_server()
-        loop = asyncio.get_event_loop()
-        self._logger.info("Cancel any pending tasks")
-        for task in asyncio.all_tasks():
-            task.cancel()
-        self._logger.info("Stop the event loop")
-        loop.stop()
-        while True:
-            if not loop.is_running():
-                self._logger.info("Close the event loop")
-                loop.close()
-                break
-            self._logger.info("Wait for the event loop to stop")
-            time.sleep(1)
-        # self._logger.info("Close the event loop")
-        # loop.close()
-        self._logger.info("Event loop closed")
-        # time.sleep(5)
-        # raise ApplicationExitException()
-        # self._logger.info("Exit application")
-        # exit(0)
-        # sys.exit(0)
 
+    def _server_started(
+        self,
+        _listener: ListenerType[Sanic],
+        _type: str,
+    ) -> None:
+        """Server started"""
+        self._logger.info("Server started")
 
     def start_server(self) -> None:
         """Start Server"""
         port = self._settings.get(SETTING_PORT_API)
         self._logger.info("Starting server on port: %s", port)
-        try:
-            self._server.run(
-                host="0.0.0.0",
-                port=port,
-                debug=True
-                if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG"
-                else False,
-                auto_reload=True,
-                motd=False,
-            )
-        except ApplicationExitException:
-            self._logger.info("Close application")
-        except KeyboardInterrupt:
-            pass
-        except RuntimeError as error:
-            self._logger.error("Error: %s", error)
+        self._server.run(
+            host="0.0.0.0",
+            port=port,
+            debug=True if self._settings.get(SETTING_LOG_LEVEL) == "DEBUG" else False,
+            motd=False,
+        )
 
     def stop_server(self) -> None:
         """Stop Server"""
         self._logger.info("Stopping server")
+        loop = self._server.loop
+        self._logger.info("Cancel any pending tasks")
+        for task in asyncio.all_tasks():
+            task.cancel()
+        self._logger.info("Stop the event loop")
+        loop.stop()
+        # self._server.enable_websocket(False)
+        self._listeners.remove_all_listeners()
         self._server.stop()

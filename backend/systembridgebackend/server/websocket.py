@@ -45,6 +45,7 @@ class WebSocketHandler(Base):
         self._implemented_modules = implemented_modules
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
+        self._active = True
 
     async def _check_api_key(
         self,
@@ -90,7 +91,7 @@ class WebSocketHandler(Base):
         listener_id = str(uuid4())
         try:
             # Loop until the connection is closed
-            while True:
+            while self._active:
                 try:
                     data = loads(await self._websocket.recv())
                 except JSONDecodeError as error:
@@ -101,10 +102,12 @@ class WebSocketHandler(Base):
                     continue
 
                 self._logger.info("Received: %s", data["event"])
+
                 if data["event"] == TYPE_EXIT_APPLICATION:
                     if not await self._check_api_key(data):
                         continue
                     self._callback_exit_application()
+                    self._logger.info("Exit application called")
                     break
                 elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
@@ -157,7 +160,7 @@ class WebSocketHandler(Base):
 
                     self._logger.info("Unregistering data listener %s", listener_id)
 
-                    if not await self._listeners.remove_listener(listener_id):
+                    if not self._listeners.remove_listener(listener_id):
                         await self._websocket.send(
                             dumps(
                                 {
@@ -298,5 +301,10 @@ class WebSocketHandler(Base):
             self._logger.info("Connection closed: %s", error)
         finally:
             self._logger.info("Unregistering data listener %s", listener_id)
-            await self._listeners.remove_listener(listener_id)
-            await self._websocket.close()
+            self._listeners.remove_listener(listener_id)
+
+    def set_active(
+        self,
+        active: bool,
+    ) -> None:
+        self._active = active
