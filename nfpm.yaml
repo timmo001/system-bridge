@@ -20,5 +20,3 @@ contents:
   - src: /usr/local/share/systembridge/systembridge
     dst: /usr/bin/systembridge
     type: symlink
-depends: []
-overrides: []
