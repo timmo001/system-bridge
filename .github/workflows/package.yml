@@ -40,6 +40,9 @@ jobs:
         --windowed \
       entry-point-file: systembridge.py
       pre-package-command: |
-        cd ./shared && pip install . \
+        apt-get update && \
+          && apt-get install -y \
+            libegl-dev \
+          && cd ./shared && pip install . \
           && cd ../gui && pip install . \
           && cd ../backend && pip install .
