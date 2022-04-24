@@ -42,7 +42,7 @@ jobs:
       pre-package-command: |
         sudo apt update
         sudo apt install -y \
-          libegl-dev \
+          libegl-dev
         cd ./shared
         pip install .
         cd ../gui
