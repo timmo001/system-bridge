@@ -29,7 +29,6 @@ jobs:
         --hidden-import=keyboard \
         --hidden-import=pandas \
         --hidden-import=plyer \
-        --hidden-import=plyer \
         --hidden-import=psutil \
         --hidden-import=PySide6 \
         --hidden-import=sanic \
