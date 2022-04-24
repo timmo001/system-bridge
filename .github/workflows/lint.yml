@@ -26,6 +26,10 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     with:
       code-path: cli
+  lint-black-connector:
+    uses: timmo001/workflows/.github/workflows/lint-black.yml@master
+    with:
+      code-path: connector
   lint-black-gui:
     uses: timmo001/workflows/.github/workflows/lint-black.yml@master
     with:
@@ -60,6 +64,11 @@ jobs:
       module-name: systembridgecli
       pre-install-command: |
         cd ../shared && pip install .
+  lint-pylint-connector:
+    uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
+    with:
+      code-path: connector
+      module-name: systembridgeconnector
   lint-pylint-gui:
     uses: timmo001/workflows/.github/workflows/lint-pylint.yml@master
     with:
