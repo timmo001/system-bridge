@@ -1,6 +1,4 @@
 """MDNS/Zeroconf Advertisement"""
-import io
-import os
 import re
 import socket
 import uuid
