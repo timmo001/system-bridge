@@ -68,6 +68,9 @@ jobs:
         --windowed \
       entry-point-file: systembridge.py
       pre-package-command: |
-        (cd .\shared) -and (pip install .) \
-          -and (cd ..\gui) -and (pip install .) \
-          -and (cd ..\backend) -and (pip install .)
+        cd .\shared
+        pip install .
+        cd ..\gui
+        pip install .
+        cd ..\backend
+        pip install .
