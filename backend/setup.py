@@ -1,5 +1,6 @@
 """Setup"""
 import io
+import os
 
 from setuptools import find_packages, setup
 
@@ -8,7 +9,9 @@ with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 # Get version from version.txt
-with io.open("version.txt", encoding="utf-8") as f:
+with io.open(
+    os.path.join(os.path.dirname(__file__), "../version.txt"), encoding="utf-8"
+) as f:
     version = f.read().splitlines()[0]
 
 setup(
