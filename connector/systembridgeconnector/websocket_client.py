@@ -145,3 +145,12 @@ class WebSocketClient(Base):
                 await callback(json.loads(message))
             except ConnectionClosed as error:
                 raise ConnectionClosedException from error
+
+    async def listen_for_message(self) -> dict:
+        """Listen for message"""
+        self._logger.info("Listen for message")
+        try:
+            message = await self._websocket.recv()
+            return json.loads(message)
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
