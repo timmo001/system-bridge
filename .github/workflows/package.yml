@@ -53,22 +53,22 @@ jobs:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
-        --hidden-import=aiohttp \
-        --hidden-import=appdirs \
-        --hidden-import=colorlog \
-        --hidden-import=cryptography \
-        --hidden-import=keyboard \
-        --hidden-import=pandas \
-        --hidden-import=plyer \
-        --hidden-import=psutil \
-        --hidden-import=PySide6 \
-        --hidden-import=sanic \
-        --hidden-import=sanic-ext \
-        --hidden-import=sanic-scheduler \
-        --hidden-import=websockets \
-        --hidden-import=zeroconf \
-        --onefile \
-        --windowed \
+        --hidden-import=aiohttp `
+        --hidden-import=appdirs `
+        --hidden-import=colorlog `
+        --hidden-import=cryptography `
+        --hidden-import=keyboard `
+        --hidden-import=pandas `
+        --hidden-import=plyer `
+        --hidden-import=psutil `
+        --hidden-import=PySide6 `
+        --hidden-import=sanic `
+        --hidden-import=sanic-ext `
+        --hidden-import=sanic-scheduler `
+        --hidden-import=websockets `
+        --hidden-import=zeroconf `
+        --onefile `
+        --windowed `
       entry-point-file: systembridge.py
       pre-package-command: |
         cd .\shared
