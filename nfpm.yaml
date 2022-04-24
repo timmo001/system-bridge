@@ -1,4 +1,4 @@
-name: "system-bridge"
+name: "systembridge"
 arch: "amd64"
 platform: "linux"
 version: "3.0.0"
@@ -12,11 +12,13 @@ homepage: "https://system-bridge.timmo.dev"
 license: "MIT"
 contents:
   - src: ./dist/*
-    dst: /usr/local/share/system-bridge
-  - src: ./scripts/system-bridge.desktop
-    dst: /usr/share/applications/system-bridge.desktop
-  - src: /usr/local/share/system-bridge/system-bridge
-    dst: /usr/bin/system-bridge
+    dst: /usr/local/share/systembridge
+  - src: ./resources/system-bridge-circle.png
+    dst: /usr/local/share/systembridge/icon.png
+  - src: ./systembridge.desktop
+    dst: /usr/share/applications/systembridge.desktop
+  - src: /usr/local/share/systembridge/systembridge
+    dst: /usr/bin/systembridge
     type: symlink
 depends: []
 overrides: []
