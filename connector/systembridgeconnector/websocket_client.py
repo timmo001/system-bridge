@@ -1,4 +1,4 @@
-"""System Bridge Shared: WebSocket Client"""
+"""System Bridge Connector: WebSocket Client"""
 from __future__ import annotations
 
 import asyncio
