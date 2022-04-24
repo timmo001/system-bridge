@@ -1,9 +1,5 @@
 """System Bridge Connector: Constants"""
 
-# Logging
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
-
 # Settings
 SETTING_LOG_LEVEL = "log_level"
 SETTING_PORT_API = "port_api"
