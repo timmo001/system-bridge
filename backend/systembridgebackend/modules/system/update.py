@@ -28,7 +28,12 @@ class SystemUpdate(ModuleUpdateBase):
                     "system", f"user_{user.name.replace(' ','_').lower()}_{key}", value
                 )
 
+    async def update_uuid(self) -> None:
+        """Update UUID"""
+        self._database.write("system", "uuid", self._system.uuid())
+
     async def update_all_data(self) -> None:
         """Update data"""
         await self.update_boot_time()
         await self.update_users()
+        await self.update_uuid()
