@@ -9,7 +9,7 @@
 
   ;Name and file
   Name "System Bridge"
-  OutFile "..\systembridge-setup.exe"
+  OutFile "systembridge-setup.exe"
   Unicode True
 
   ;Default installation folder
@@ -34,7 +34,7 @@
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "..\LICENSE"
+  !insertmacro MUI_PAGE_LICENSE "LICENSE"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
 
@@ -63,7 +63,7 @@ Section "System Bridge"
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
-  File /nonfatal /a /r "..\dist\" $INSTDIR
+  File /nonfatal /a /r "dist\" $INSTDIR
 
   ;Store installation folder
   WriteRegStr HKCU "Software\System Bridge" "" $INSTDIR
