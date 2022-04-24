@@ -70,6 +70,7 @@ jobs:
         --hidden-import=zeroconf `
         --onefile `
         --windowed `
+      create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
         cd .\shared
