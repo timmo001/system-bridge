@@ -70,7 +70,7 @@ jobs:
         --hidden-import=zeroconf `
         --onefile `
         --windowed `
-      create-setup: true
+      create-setup: ${{ github.actor == 'dependabot[bot]' false || true }}
       entry-point-file: systembridge.py
       pre-package-command: |
         cd .\shared
