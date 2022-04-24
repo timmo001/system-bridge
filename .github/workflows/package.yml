@@ -1,0 +1,45 @@
+---
+name: Package
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --hidden-import=aiohttp \
+        --hidden-import=appdirs \
+        --hidden-import=colorlog \
+        --hidden-import=cryptography \
+        --hidden-import=keyboard \
+        --hidden-import=pandas \
+        --hidden-import=plyer \
+        --hidden-import=psutil \
+        --hidden-import=PySide6 \
+        --hidden-import=sanic \
+        --hidden-import=sanic-ext \
+        --hidden-import=sanic-scheduler \
+        --hidden-import=websockets \
+        --hidden-import=zeroconf \
+        --onefile \
+        --windowed
+      entry-point-file: systembridge.py
+      pre-package-command: |
+        cd ./shared && pip install . \
+          && cd ../gui && pip install . \
+          && cd ../backend && pip install .
