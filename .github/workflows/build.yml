@@ -18,20 +18,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
+  build-backend-linux:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: backend
-  build-cli:
+  build-backend-windows:
+    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
+    with:
+      code-path: backend
+  build-cli-linux:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    with:
+      code-path: cli
+  build-cli-windows:
+    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
     with:
       code-path: cli
   build-connector:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: connector
-  build-gui:
+  build-gui-linux:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    with:
+      code-path: gui
+  build-gui-windows:
+    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
     with:
       code-path: gui
   build-frontend:
