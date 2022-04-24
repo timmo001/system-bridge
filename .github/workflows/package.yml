@@ -37,7 +37,7 @@ jobs:
         --hidden-import=websockets \
         --hidden-import=zeroconf \
         --onefile \
-        --windowed
+        --windowed \
       entry-point-file: systembridge.py
       pre-package-command: |
         cd ./shared && pip install . \
