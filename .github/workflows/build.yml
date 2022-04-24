@@ -26,6 +26,10 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: cli
+  build-connector:
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    with:
+      code-path: connector
   build-gui:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
