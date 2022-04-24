@@ -13,10 +13,10 @@
   Unicode True
 
   ;Default installation folder
-  InstallDir "$LOCALAPPDATA\System Bridge"
+  InstallDir "$LOCALAPPDATA\systembridge"
 
   ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\System Bridge" ""
+  InstallDirRegKey HKCU "Software\systembridge" ""
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel user
@@ -40,7 +40,7 @@
 
   ;Start Menu Folder Page Configuration
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
-  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\System Bridge"
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\systembridge"
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
   !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
@@ -63,10 +63,11 @@ Section "System Bridge"
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
+  File /nonfatal /a /r "resources\" $INSTDIR
   File /nonfatal /a /r "dist\" $INSTDIR
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\System Bridge" "" $INSTDIR
+  WriteRegStr HKCU "Software\systembridge" "" $INSTDIR
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -102,6 +103,6 @@ Section "Uninstall"
   Delete "$DESKTOP\System Bridge.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
-  DeleteRegKey /ifempty HKCU "Software\System Bridge"
+  DeleteRegKey /ifempty HKCU "Software\systembridge"
 
 SectionEnd
