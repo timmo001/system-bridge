@@ -42,6 +42,7 @@ jobs:
       pre-package-command: |
         sudo apt update
         sudo apt install -y \
+          build-essential \
           libegl-dev
         cd ./shared
         pip install .
