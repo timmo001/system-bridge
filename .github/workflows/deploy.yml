@@ -3,9 +3,6 @@ name: Deploy
 
 # yamllint disable-line rule:truthy
 on:
-  push:
-    branches:
-      - master
   release:
     types:
       - published
