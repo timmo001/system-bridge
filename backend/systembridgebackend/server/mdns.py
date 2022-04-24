@@ -1,5 +1,6 @@
 """MDNS/Zeroconf Advertisement"""
 import io
+import os
 import re
 import socket
 import uuid
@@ -39,7 +40,10 @@ class MDNSAdvertisement(Base):
         system_id = uniqueid.id
 
         # Get version from version.txt
-        with io.open("version.txt", encoding="utf-8") as file:
+        with io.open(
+            os.path.join(os.path.dirname(__file__), "../../../version.txt"),
+            encoding="utf-8",
+        ) as file:
             version = file.read().splitlines()[0]
 
         zeroconf = Zeroconf(
