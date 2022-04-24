@@ -11,6 +11,7 @@ from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
+    TYPE_OPEN,
     TYPE_REGISTER_DATA_LISTENER,
 )
 from systembridgeconnector.exceptions import (
@@ -122,6 +123,52 @@ class WebSocketClient(Base):
                         "event": TYPE_REGISTER_DATA_LISTENER,
                         "api-key": self._api_key,
                         "modules": modules,
+                    }
+                )
+            )
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
+
+    async def open_path(
+        self,
+        path: str,
+    ) -> None:
+        """Register data listener"""
+        self._logger.info("Opening path: %s", path)
+        try:
+            await self._websocket.send(
+                json.dumps(
+                    {
+                        "event": TYPE_OPEN,
+                        "api-key": self._api_key,
+                        "url": path,
+                    }
+                )
+            )
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
+
+    async def open_url(
+        self,
+        url: str,
+    ) -> None:
+        """Register data listener"""
+        self._logger.info("Opening URL: %s", url)
+        try:
+            await self._websocket.send(
+                json.dumps(
+                    {
+                        "event": TYPE_OPEN,
+                        "api-key": self._api_key,
+                        "url": url,
                     }
                 )
             )

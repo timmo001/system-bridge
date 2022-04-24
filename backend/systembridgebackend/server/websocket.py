@@ -13,6 +13,8 @@ from systembridgeshared.const import (
     TYPE_GET_DATA,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
+    TYPE_OPEN,
+    TYPE_OPENED,
     TYPE_REGISTER_DATA_LISTENER,
     TYPE_SETTING_RESULT,
     TYPE_SETTING_UPDATED,
@@ -24,6 +26,7 @@ from systembridgeshared.database import Database
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 
 from systembridgebackend.modules.listeners import Listeners
+from systembridgebackend.server.open import open_path, open_url
 
 
 class WebSocketHandler(Base):
@@ -109,6 +112,42 @@ class WebSocketHandler(Base):
                         continue
                     self._callback_exit_application()
                     self._logger.info("Exit application called")
+                elif data["event"] == TYPE_OPEN:
+                    if not await self._check_api_key(data):
+                        continue
+                    if "path" in data:
+                        open_path(data["path"])
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    "type": TYPE_OPENED,
+                                    "message": "Path opened",
+                                    "id": listener_id,
+                                    "path": data["path"],
+                                }
+                            )
+                        )
+                        continue
+                    elif "url" in data:
+                        open_url(data["url"])
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    "type": TYPE_OPENED,
+                                    "message": "URL opened",
+                                    "id": listener_id,
+                                    "url": data["url"],
+                                }
+                            )
+                        )
+                        continue
+
+                    self._logger.warning("No path or url provided")
+                    await self._websocket.send(
+                        dumps(
+                            {"type": TYPE_ERROR, "message": "No path or url provided"}
+                        )
+                    )
                 elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
