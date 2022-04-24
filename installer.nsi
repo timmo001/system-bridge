@@ -76,10 +76,10 @@ Section "System Bridge"
 
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\systembridge-circle.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\systembridge-circle.ico"
+    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\icon.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\icon.ico"
     CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\uninstall.exe"
-    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\systembridge-circle.ico"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\icon.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
