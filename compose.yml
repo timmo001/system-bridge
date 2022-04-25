@@ -10,9 +10,6 @@ services:
       - target: 9170
         published: 9170
         protocol: tcp
-      - target: 9172
-        published: 9172
-        protocol: tcp
     volumes:
       - type: volume
         source: system-bridge-data
