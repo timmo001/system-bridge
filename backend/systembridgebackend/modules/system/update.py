@@ -40,6 +40,12 @@ class SystemUpdate(ModuleUpdateBase):
         """Update platform"""
         self._database.write("system", "platform", self._system.platform())
 
+    async def update_platform_version(self) -> None:
+        """Update platform version"""
+        self._database.write(
+            "system", "platform_version", self._system.platform_version()
+        )
+
     async def update_uptime(self) -> None:
         """Update uptime"""
         self._database.write("system", "uptime", self._system.uptime())
@@ -68,6 +74,7 @@ class SystemUpdate(ModuleUpdateBase):
         await self.update_ip_address_4()
         await self.update_mac_address()
         await self.update_platform()
+        await self.update_platform_version()
         await self.update_uptime()
         await self.update_users()
         await self.update_uuid()

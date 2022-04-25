@@ -1,6 +1,7 @@
 """System Bridge: System"""
 import io
 import os
+import platform
 import re
 import socket
 import uuid
@@ -38,7 +39,11 @@ class System(Base):
 
     def platform(self) -> str:
         """Get platform"""
-        return os.name
+        return platform.system()
+
+    def platform_version(self) -> str:
+        """Get platform version"""
+        return platform.version()
 
     def uptime(self) -> float:
         """Get uptime"""
