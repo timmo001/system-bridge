@@ -5,9 +5,16 @@ import platform
 import re
 import socket
 import uuid
+from aiogithubapi import (
+    GitHubAPI,
+    GitHubConnectionException,
+    GitHubException,
+    GitHubRatelimitException,
+)
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
+
 from systembridgeshared.base import Base
 
 
@@ -65,3 +72,34 @@ class System(Base):
             encoding="utf-8",
         ) as file:
             return file.read().splitlines()[0]
+
+    async def version_latest(self) -> dict:
+        """Get latest version from GitHub"""
+        self._logger.info("Getting latest version from GitHub")
+        with io.open(
+            os.path.join(os.path.dirname(__file__), "github_version.graphql"),
+            encoding="utf-8",
+        ) as file:
+            query = file.read()
+        self._logger.info("Query: %s", query)
+        try:
+            async with GitHubAPI() as github:
+                self._logger.info("GitHubAPI")
+                response = await github.graphql(
+                    query,
+                    variables={
+                        "owner": "timmo001",
+                        "repo": "system-bridge",
+                    },
+                )
+            self._logger.info("GitHub response: %s", response)
+            return response.data["data"]["repository"]["release"]
+        except (
+            GitHubConnectionException,
+            GitHubRatelimitException,
+        ) as error:
+            self._logger.error("Error getting data from GitHub: %s", error)
+        except GitHubException as error:
+            self._logger.exception(
+                "Unexpected error getting data from GitHub: %s", error
+            )
