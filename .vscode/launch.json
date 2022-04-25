@@ -8,6 +8,7 @@
       "module": "systembridgebackend",
       "preLaunchTask": "Backend: pip install",
       "cwd": "${workspaceFolder}/backend",
+      "justMyCode": false,
       "args": []
     },
     {
@@ -17,6 +18,7 @@
       "module": "systembridgebackend",
       "preLaunchTask": "Backend: pip install",
       "cwd": "${workspaceFolder}/backend",
+      "justMyCode": false,
       "args": ["--no-gui"]
     },
     {
@@ -26,6 +28,7 @@
       "module": "systembridgecli",
       "preLaunchTask": "CLI: pip install",
       "cwd": "${workspaceFolder}/cli",
+      "justMyCode": false,
       "args": ["--help"]
     },
     {
@@ -35,6 +38,7 @@
       "module": "systembridgegui",
       "preLaunchTask": "GUI: pip install",
       "cwd": "${workspaceFolder}/gui",
+      "justMyCode": false,
       "args": []
     },
     {
@@ -44,6 +48,7 @@
       "runtimeExecutable": "yarn",
       "preLaunchTask": "Frontend: install",
       "cwd": "${workspaceFolder}/frontend",
+      "justMyCode": false,
       "runtimeArgs": ["start:dev"]
     }
   ]
