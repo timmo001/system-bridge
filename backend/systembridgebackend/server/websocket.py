@@ -4,6 +4,24 @@ from uuid import uuid4
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    EVENT_DATA,
+    EVENT_ID,
+    EVENT_MESSAGE,
+    EVENT_MODULE,
+    EVENT_MODULES,
+    EVENT_SETTING,
+    EVENT_SUBTYPE,
+    EVENT_TYPE,
+    SUBTYPE_BAD_API_KEY,
+    SUBTYPE_BAD_JSON,
+    SUBTYPE_LISTENER_ALREADY_REGISTERED,
+    SUBTYPE_LISTENER_NOT_REGISTERED,
+    SUBTYPE_MISSING_API_KEY,
+    SUBTYPE_MISSING_MODULES,
+    SUBTYPE_MISSING_PATH_URL,
+    SUBTYPE_MISSING_SETTING,
+    SUBTYPE_MISSING_VALUE,
+    SUBTYPE_UNKNOWN_EVENT,
     TYPE_DATA_GET,
     TYPE_DATA_LISTENER_REGISTERED,
     TYPE_DATA_LISTENER_UNREGISTERED,
@@ -59,13 +77,25 @@ class WebSocketHandler(Base):
         if "api-key" not in data:
             self._logger.warning("No api-key provided")
             await self._websocket.send(
-                dumps({"type": TYPE_ERROR, "message": "No api-key provided"})
+                dumps(
+                    {
+                        EVENT_TYPE: TYPE_ERROR,
+                        EVENT_SUBTYPE: SUBTYPE_MISSING_API_KEY,
+                        EVENT_MESSAGE: "No api-key provided",
+                    }
+                )
             )
             return False
         if data["api-key"] != self._settings.get_secret(SECRET_API_KEY):
             self._logger.warning("Invalid api-key")
             await self._websocket.send(
-                dumps({"type": TYPE_ERROR, "message": "Invalid api-key"})
+                dumps(
+                    {
+                        EVENT_TYPE: TYPE_ERROR,
+                        EVENT_SUBTYPE: SUBTYPE_BAD_API_KEY,
+                        EVENT_MESSAGE: "Invalid api-key",
+                    }
+                )
             )
             return False
         return True
@@ -82,10 +112,10 @@ class WebSocketHandler(Base):
         await self._websocket.send(
             dumps(
                 {
-                    "type": TYPE_DATA_UPDATE,
-                    "message": "Data changed",
-                    "module": module,
-                    "data": data,
+                    EVENT_TYPE: TYPE_DATA_UPDATE,
+                    EVENT_MESSAGE: "Data changed",
+                    EVENT_MODULE: module,
+                    EVENT_DATA: data,
                 }
             )
         )
@@ -101,7 +131,13 @@ class WebSocketHandler(Base):
                 except JSONDecodeError as error:
                     self._logger.error("Invalid JSON: %s", error)
                     await self._websocket.send(
-                        dumps({"type": TYPE_ERROR, "message": "Invalid JSON"})
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_JSON,
+                                EVENT_MESSAGE: "Invalid JSON",
+                            }
+                        )
                     )
                     continue
 
@@ -120,9 +156,9 @@ class WebSocketHandler(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": TYPE_OPENED,
-                                    "message": "Path opened",
-                                    "id": listener_id,
+                                    EVENT_TYPE: TYPE_OPENED,
+                                    EVENT_MESSAGE: "Path opened",
+                                    EVENT_ID: listener_id,
                                     "path": data["path"],
                                 }
                             )
@@ -133,9 +169,9 @@ class WebSocketHandler(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": TYPE_OPENED,
-                                    "message": "URL opened",
-                                    "id": listener_id,
+                                    EVENT_TYPE: TYPE_OPENED,
+                                    EVENT_MESSAGE: "URL opened",
+                                    EVENT_ID: listener_id,
                                     "url": data["url"],
                                 }
                             )
@@ -145,17 +181,25 @@ class WebSocketHandler(Base):
                     self._logger.warning("No path or url provided")
                     await self._websocket.send(
                         dumps(
-                            {"type": TYPE_ERROR, "message": "No path or url provided"}
+                            {
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_MISSING_PATH_URL,
+                                EVENT_MESSAGE: "No path or url provided",
+                            }
                         )
                     )
                 elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
-                    if "modules" not in data:
+                    if EVENT_MODULES not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
                             dumps(
-                                {"type": TYPE_ERROR, "message": "No modules provided"}
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
+                                    EVENT_MESSAGE: "No modules provided",
+                                }
                             )
                         )
                         continue
@@ -163,21 +207,22 @@ class WebSocketHandler(Base):
                     self._logger.info(
                         "Registering data listener: %s - %s",
                         listener_id,
-                        data["modules"],
+                        data[EVENT_MODULES],
                     )
 
                     if await self._listeners.add_listener(
                         listener_id,
                         self._data_changed,
-                        data["modules"],
+                        data[EVENT_MODULES],
                     ):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": TYPE_ERROR,
-                                    "message": "Listener already registered with this connection",
-                                    "id": listener_id,
-                                    "modules": data["modules"],
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
+                                    EVENT_MESSAGE: "Listener already registered with this connection",
+                                    EVENT_ID: listener_id,
+                                    EVENT_MODULES: data[EVENT_MODULES],
                                 }
                             )
                         )
@@ -186,10 +231,10 @@ class WebSocketHandler(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_DATA_LISTENER_REGISTERED,
-                                "message": "Data listener registered",
-                                "id": listener_id,
-                                "modules": data["modules"],
+                                EVENT_TYPE: TYPE_DATA_LISTENER_REGISTERED,
+                                EVENT_MESSAGE: "Data listener registered",
+                                EVENT_ID: listener_id,
+                                EVENT_MODULES: data[EVENT_MODULES],
                             }
                         )
                     )
@@ -203,8 +248,9 @@ class WebSocketHandler(Base):
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": TYPE_ERROR,
-                                    "message": "Listener not registered with this connection",
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
+                                    EVENT_MESSAGE: "Listener not registered with this connection",
                                 }
                             )
                         )
@@ -213,44 +259,48 @@ class WebSocketHandler(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_DATA_LISTENER_UNREGISTERED,
-                                "message": "Data listener unregistered",
-                                "id": listener_id,
+                                EVENT_TYPE: TYPE_DATA_LISTENER_UNREGISTERED,
+                                EVENT_MESSAGE: "Data listener unregistered",
+                                EVENT_ID: listener_id,
                             }
                         )
                     )
                 elif data["event"] == TYPE_GET_DATA:
                     if not await self._check_api_key(data):
                         continue
-                    if "modules" not in data:
+                    if EVENT_MODULES not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
                             dumps(
-                                {"type": TYPE_ERROR, "message": "No modules provided"}
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
+                                    EVENT_MESSAGE: "No modules provided",
+                                }
                             )
                         )
                         continue
-                    self._logger.info("Getting data: %s", data["modules"])
+                    self._logger.info("Getting data: %s", data[EVENT_MODULES])
 
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_DATA_GET,
-                                "message": "Getting data",
-                                "modules": data["modules"],
+                                EVENT_TYPE: TYPE_DATA_GET,
+                                EVENT_MESSAGE: "Getting data",
+                                EVENT_MODULES: data[EVENT_MODULES],
                             }
                         )
                     )
 
-                    for module in data["modules"]:
+                    for module in data[EVENT_MODULES]:
                         data = self._database.table_data_to_ordered_dict(module)
                         await self._websocket.send(
                             dumps(
                                 {
-                                    "type": TYPE_DATA_UPDATE,
-                                    "message": "Data received",
-                                    "module": module,
-                                    "data": data,
+                                    EVENT_TYPE: TYPE_DATA_UPDATE,
+                                    EVENT_MESSAGE: "Data received",
+                                    EVENT_MODULE: module,
+                                    EVENT_DATA: data,
                                 }
                             )
                         )
@@ -262,9 +312,9 @@ class WebSocketHandler(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_SETTINGS_RESULT,
-                                "message": "Got settings",
-                                "data": self._settings.get_all(),
+                                EVENT_TYPE: TYPE_SETTINGS_RESULT,
+                                EVENT_MESSAGE: "Got settings",
+                                EVENT_DATA: self._settings.get_all(),
                             }
                         )
                     )
@@ -272,55 +322,69 @@ class WebSocketHandler(Base):
                 elif data["event"] == TYPE_GET_SETTING:
                     if not await self._check_api_key(data):
                         continue
-                    if "setting" not in data:
+                    if EVENT_SETTING not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
                             dumps(
-                                {"type": TYPE_ERROR, "message": "No setting provided"}
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
+                                    EVENT_MESSAGE: "No setting provided",
+                                }
                             )
                         )
                         continue
-                    self._logger.info("Getting setting: %s", data["setting"])
+                    self._logger.info("Getting setting: %s", data[EVENT_SETTING])
 
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_SETTING_RESULT,
-                                "message": "Got setting",
-                                "setting": data["setting"],
-                                "data": self._settings.get(data["setting"]),
+                                EVENT_TYPE: TYPE_SETTING_RESULT,
+                                EVENT_MESSAGE: "Got setting",
+                                EVENT_SETTING: data[EVENT_SETTING],
+                                EVENT_DATA: self._settings.get(data[EVENT_SETTING]),
                             }
                         )
                     )
                 elif data["event"] == TYPE_UPDATE_SETTING:
                     if not await self._check_api_key(data):
                         continue
-                    if "setting" not in data:
+                    if EVENT_SETTING not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
                             dumps(
-                                {"type": TYPE_ERROR, "message": "No setting provided"}
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
+                                    EVENT_MESSAGE: "No setting provided",
+                                }
                             )
                         )
                         continue
                     if "value" not in data:
                         self._logger.warning("No value provided")
                         await self._websocket.send(
-                            dumps({"type": TYPE_ERROR, "message": "No value provided"})
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
                         )
                         continue
                     self._logger.info(
-                        "Setting setting %s to: %s", data["setting"], data["value"]
+                        "Setting setting %s to: %s", data[EVENT_SETTING], data["value"]
                     )
 
-                    self._settings.set(data["setting"], data["value"])
+                    self._settings.set(data[EVENT_SETTING], data["value"])
 
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_SETTING_UPDATED,
-                                "message": "Setting updated",
-                                "setting": data["setting"],
+                                EVENT_TYPE: TYPE_SETTING_UPDATED,
+                                EVENT_MESSAGE: "Setting updated",
+                                EVENT_SETTING: data[EVENT_SETTING],
                                 "value": data["value"],
                             }
                         )
@@ -330,8 +394,9 @@ class WebSocketHandler(Base):
                     await self._websocket.send(
                         dumps(
                             {
-                                "type": TYPE_ERROR,
-                                "message": "Unknown event",
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_UNKNOWN_EVENT,
+                                EVENT_MESSAGE: "Unknown event",
                                 "event": data["event"],
                             }
                         )
