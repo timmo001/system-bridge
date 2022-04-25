@@ -50,11 +50,11 @@ class Sensors(Base):
             )
         )
         self._logger.info("Windows Sensors Path: %s", path)
-        pipe = subprocess.Popen(
+        with subprocess.Popen(
             [path],
             stdout=subprocess.PIPE,
-        )
-        result = pipe.communicate()[0].decode()
+        ) as pipe:
+            result = pipe.communicate()[0].decode()
         self._logger.info("result: %s", result)
 
         return json.loads(result)
