@@ -16,8 +16,10 @@ from aiogithubapi import (
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
+from semantic_version import Version
 
 from systembridgeshared.base import Base
+from systembridgeshared.database import Database
 
 
 class System(Base):
@@ -92,3 +94,20 @@ class System(Base):
                 "Unexpected error getting data from GitHub: %s", error
             )
         return None
+
+    def version_newer_avaliable(
+        self,
+        database: Database,
+    ) -> bool:
+        """Check if newer version is available"""
+        version = (
+            database.read_table_by_key("system", "version")
+            .to_dict(orient="records")[0]["value"]
+            .replace("v", "")
+        )
+        latest_version = (
+            database.read_table_by_key("system", "version_latest")
+            .to_dict(orient="records")[0]["value"]
+            .replace("v", "")
+        )
+        return Version(latest_version) > Version(version)

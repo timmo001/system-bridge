@@ -6,4 +6,5 @@ pyinstaller==5.0
 sanic-ext==22.3.1
 sanic-scheduler==1.0.7
 sanic==22.3.1
+semantic_version==2.9.0
 zeroconf==0.38.4

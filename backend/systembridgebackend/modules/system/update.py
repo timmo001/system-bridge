@@ -71,6 +71,14 @@ class SystemUpdate(ModuleUpdateBase):
         if release := await self._system.version_latest():
             self._database.write("system", "version_latest", release.tag_name)
 
+    async def update_version_newer_avaliable(self) -> None:
+        """Update newer version available"""
+        self._database.write(
+            "system",
+            "version_newer_avaliable",
+            self._system.version_newer_avaliable(self._database),
+        )
+
     async def update_all_data(self) -> None:
         """Update data"""
         await self.update_boot_time()
@@ -85,3 +93,4 @@ class SystemUpdate(ModuleUpdateBase):
         await self.update_uuid()
         await self.update_version()
         await self.update_version_latest()
+        await self.update_version_newer_avaliable()
