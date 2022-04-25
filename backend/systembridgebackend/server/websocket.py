@@ -166,7 +166,7 @@ class WebSocketHandler(Base):
                             )
                         )
                         continue
-                    elif "url" in data:
+                    if "url" in data:
                         open_url(data["url"])
                         await self._websocket.send(
                             dumps(
