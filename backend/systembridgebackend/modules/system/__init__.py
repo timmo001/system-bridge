@@ -1,13 +1,22 @@
 """System Bridge: System"""
+from __future__ import annotations
 import io
 import os
 import platform
 import re
 import socket
 import uuid
+from aiogithubapi import (
+    GitHubAPI,
+    GitHubConnectionException,
+    GitHubException,
+    GitHubRatelimitException,
+    GitHubReleaseModel,
+)
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
+
 from systembridgeshared.base import Base
 
 
@@ -65,3 +74,21 @@ class System(Base):
             encoding="utf-8",
         ) as file:
             return file.read().splitlines()[0]
+
+    async def version_latest(self) -> GitHubReleaseModel | None:
+        """Get latest version from GitHub"""
+        self._logger.info("Get latest version from GitHub")
+        try:
+            async with GitHubAPI() as github:
+                releases = await github.repos.releases.list("timmo001/system-bridge")
+            return releases.data[0]
+        except (
+            GitHubConnectionException,
+            GitHubRatelimitException,
+        ) as error:
+            self._logger.error("Error getting data from GitHub: %s", error)
+        except GitHubException as error:
+            self._logger.exception(
+                "Unexpected error getting data from GitHub: %s", error
+            )
+        return None
