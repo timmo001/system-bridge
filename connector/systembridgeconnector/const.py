@@ -9,6 +9,7 @@ SECRET_API_KEY = "api_key"
 
 # Event Keys
 EVENT_DATA = "data"
+EVENT_EVENT = "event"
 EVENT_ID = "id"
 EVENT_MESSAGE = "message"
 EVENT_MODULE = "module"

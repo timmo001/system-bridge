@@ -5,6 +5,7 @@ from uuid import uuid4
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_DATA,
+    EVENT_EVENT,
     EVENT_ID,
     EVENT_MESSAGE,
     EVENT_MODULE,
@@ -142,14 +143,14 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                self._logger.info("Received: %s", data["event"])
+                self._logger.info("Received: %s", data[EVENT_EVENT])
 
-                if data["event"] == TYPE_EXIT_APPLICATION:
+                if data[EVENT_EVENT] == TYPE_EXIT_APPLICATION:
                     if not await self._check_api_key(data):
                         continue
                     self._callback_exit_application()
                     self._logger.info("Exit application called")
-                elif data["event"] == TYPE_OPEN:
+                elif data[EVENT_EVENT] == TYPE_OPEN:
                     if not await self._check_api_key(data):
                         continue
                     if "path" in data:
@@ -189,7 +190,7 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
-                elif data["event"] == TYPE_REGISTER_DATA_LISTENER:
+                elif data[EVENT_EVENT] == TYPE_REGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
                     if EVENT_MODULES not in data:
@@ -239,7 +240,7 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
-                elif data["event"] == TYPE_UNREGISTER_DATA_LISTENER:
+                elif data[EVENT_EVENT] == TYPE_UNREGISTER_DATA_LISTENER:
                     if not await self._check_api_key(data):
                         continue
 
@@ -266,7 +267,7 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
-                elif data["event"] == TYPE_GET_DATA:
+                elif data[EVENT_EVENT] == TYPE_GET_DATA:
                     if not await self._check_api_key(data):
                         continue
                     if EVENT_MODULES not in data:
@@ -305,7 +306,7 @@ class WebSocketHandler(Base):
                                 }
                             )
                         )
-                elif data["event"] == TYPE_GET_SETTINGS:
+                elif data[EVENT_EVENT] == TYPE_GET_SETTINGS:
                     if not await self._check_api_key(data):
                         continue
                     self._logger.info("Getting settings")
@@ -320,7 +321,7 @@ class WebSocketHandler(Base):
                         )
                     )
 
-                elif data["event"] == TYPE_GET_SETTING:
+                elif data[EVENT_EVENT] == TYPE_GET_SETTING:
                     if not await self._check_api_key(data):
                         continue
                     if EVENT_SETTING not in data:
@@ -347,7 +348,7 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
-                elif data["event"] == TYPE_UPDATE_SETTING:
+                elif data[EVENT_EVENT] == TYPE_UPDATE_SETTING:
                     if not await self._check_api_key(data):
                         continue
                     if EVENT_SETTING not in data:
@@ -375,7 +376,9 @@ class WebSocketHandler(Base):
                         )
                         continue
                     self._logger.info(
-                        "Setting setting %s to: %s", data[EVENT_SETTING], data[EVENT_VALUE]
+                        "Setting setting %s to: %s",
+                        data[EVENT_SETTING],
+                        data[EVENT_VALUE],
                     )
 
                     self._settings.set(data[EVENT_SETTING], data[EVENT_VALUE])
@@ -391,14 +394,14 @@ class WebSocketHandler(Base):
                         )
                     )
                 else:
-                    self._logger.warning("Unknown event: %s", data["event"])
+                    self._logger.warning("Unknown event: %s", data[EVENT_EVENT])
                     await self._websocket.send(
                         dumps(
                             {
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_UNKNOWN_EVENT,
                                 EVENT_MESSAGE: "Unknown event",
-                                "event": data["event"],
+                                EVENT_EVENT: data[EVENT_EVENT],
                             }
                         )
                     )

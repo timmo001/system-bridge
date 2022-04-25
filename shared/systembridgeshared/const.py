@@ -21,6 +21,7 @@ SECRET_API_KEY = "api_key"
 
 # Event Keys
 EVENT_DATA = "data"
+EVENT_EVENT = "event"
 EVENT_ID = "id"
 EVENT_MESSAGE = "message"
 EVENT_MODULE = "module"
@@ -29,6 +30,7 @@ EVENT_SETTING = "setting"
 EVENT_SUBTYPE = "subtype"
 EVENT_TYPE = "type"
 EVENT_VALUE = "value"
+
 
 # Event Types
 SUBTYPE_BAD_API_KEY = "BAD_API_KEY"
