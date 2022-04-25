@@ -12,6 +12,7 @@ from systembridgeshared.const import (
     EVENT_SETTING,
     EVENT_SUBTYPE,
     EVENT_TYPE,
+    EVENT_VALUE,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_BAD_JSON,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
@@ -361,7 +362,7 @@ class WebSocketHandler(Base):
                             )
                         )
                         continue
-                    if "value" not in data:
+                    if EVENT_VALUE not in data:
                         self._logger.warning("No value provided")
                         await self._websocket.send(
                             dumps(
@@ -374,10 +375,10 @@ class WebSocketHandler(Base):
                         )
                         continue
                     self._logger.info(
-                        "Setting setting %s to: %s", data[EVENT_SETTING], data["value"]
+                        "Setting setting %s to: %s", data[EVENT_SETTING], data[EVENT_VALUE]
                     )
 
-                    self._settings.set(data[EVENT_SETTING], data["value"])
+                    self._settings.set(data[EVENT_SETTING], data[EVENT_VALUE])
 
                     await self._websocket.send(
                         dumps(
@@ -385,7 +386,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_SETTING_UPDATED,
                                 EVENT_MESSAGE: "Setting updated",
                                 EVENT_SETTING: data[EVENT_SETTING],
-                                "value": data["value"],
+                                EVENT_VALUE: data[EVENT_VALUE],
                             }
                         )
                     )
