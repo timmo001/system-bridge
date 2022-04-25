@@ -1,4 +1,5 @@
 """System Bridge: System"""
+from __future__ import annotations
 import io
 import os
 import platform
@@ -10,6 +11,7 @@ from aiogithubapi import (
     GitHubConnectionException,
     GitHubException,
     GitHubRatelimitException,
+    GitHubReleaseModel,
 )
 from plyer import uniqueid
 from psutil import boot_time, users
@@ -73,27 +75,13 @@ class System(Base):
         ) as file:
             return file.read().splitlines()[0]
 
-    async def version_latest(self) -> dict:
+    async def version_latest(self) -> GitHubReleaseModel | None:
         """Get latest version from GitHub"""
-        self._logger.info("Getting latest version from GitHub")
-        with io.open(
-            os.path.join(os.path.dirname(__file__), "github_version.graphql"),
-            encoding="utf-8",
-        ) as file:
-            query = file.read()
-        self._logger.info("Query: %s", query)
+        self._logger.info("Get latest version from GitHub")
         try:
             async with GitHubAPI() as github:
-                self._logger.info("GitHubAPI")
-                response = await github.graphql(
-                    query,
-                    variables={
-                        "owner": "timmo001",
-                        "repo": "system-bridge",
-                    },
-                )
-            self._logger.info("GitHub response: %s", response)
-            return response.data["data"]["repository"]["release"]
+                releases = await github.repos.releases.list("timmo001/system-bridge")
+            return releases.data[0]
         except (
             GitHubConnectionException,
             GitHubRatelimitException,
@@ -103,3 +91,4 @@ class System(Base):
             self._logger.exception(
                 "Unexpected error getting data from GitHub: %s", error
             )
+        return None
