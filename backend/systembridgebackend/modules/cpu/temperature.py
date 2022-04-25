@@ -75,8 +75,7 @@ class WindowsCPUTemperatureReader:
                 temperature = w.MSAcpi_ThermalZoneTemperature()[0]
                 temperature = float(temperature.CurrentTemperature / 10.0 - 273.15)
                 return temperature
-            except Exception as error:  # pylint: disable=broad-except
-                print(error.__class__.__name__)
+            except Exception:  # pylint: disable=broad-except
                 return None
 
         return temperature_reader
