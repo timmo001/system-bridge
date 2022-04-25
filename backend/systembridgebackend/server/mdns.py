@@ -1,14 +1,10 @@
 """MDNS/Zeroconf Advertisement"""
-import io
-import os
-import re
-import socket
-import uuid
+from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
-from plyer import uniqueid
 from systembridgeshared.base import Base
 from systembridgeshared.settings import SETTING_PORT_API, Settings
-from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
+
+from systembridgebackend.modules.system import System
 
 ZEROCONF_TYPE = "_system-bridge._tcp.local."
 
@@ -27,24 +23,14 @@ class MDNSAdvertisement(Base):
     def advertise_server(self) -> None:
         """Advertise server"""
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("8.8.8.8", 80))
+        system = System()
 
-        fqdn = socket.getfqdn()
-        hostname = socket.gethostname()
-        ip4 = sock.getsockname()[0]
-        # pylint: disable=consider-using-f-string
-        mac = ":".join(re.findall("..", "%012x" % uuid.getnode()))
+        fqdn = system.fqdn()
+        hostname = system.hostname()
+        ip_address_4 = system.ip_address_4()
+        mac_address = system.mac_address()
         port_api = int(self._settings.get(SETTING_PORT_API))
-        port_websocket = int(port_api)
-        system_id = uniqueid.id
-
-        # Get version from version.txt
-        with io.open(
-            os.path.join(os.path.dirname(__file__), "../../../version.txt"),
-            encoding="utf-8",
-        ) as file:
-            version = file.read().splitlines()[0]
+        system_id = system.uuid()
 
         zeroconf = Zeroconf(
             interfaces=InterfaceChoice.All,
@@ -55,19 +41,18 @@ class MDNSAdvertisement(Base):
             ZEROCONF_TYPE,
             name=f"{system_id}.{ZEROCONF_TYPE}",
             server=f"{system_id}.local.",
-            parsed_addresses=[ip4],
+            parsed_addresses=[ip_address_4],
             port=port_api,
             properties={
                 "address": f"http://{fqdn}:{port_api}",
                 "fqdn": fqdn,
                 "host": hostname,
-                "ip": ip4,
-                "mac": mac,
+                "ip": ip_address_4,
+                "mac": mac_address,
                 "port": port_api,
                 "uuid": system_id,
-                "version": version,
-                "websocketAddress": f"ws://{fqdn}:{port_websocket}",
-                "wsPort": port_websocket,
+                "version": system.version,
+                "websocketAddress": f"ws://{fqdn}:{port_api}/api/websocket",
             },
         )
 
