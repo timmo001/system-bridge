@@ -28,7 +28,19 @@ class SensorsUpdate(ModuleUpdateBase):
             for key, value in data.items():
                 self._database.write("sensors", f"temperatures_{key}", value)
 
+    async def update_windows_sensors(self) -> None:
+        """Update Windows Sensors"""
+        if data := self._sensors.windows_sensors():
+            for item in data:
+                for key in item["sensors"] or []:
+                    self._database.write(
+                        "sensors",
+                        key["id"],
+                        key["value"],
+                    )
+
     async def update_all_data(self) -> None:
         """Update data"""
         await self.update_fans()
         await self.update_temperatures()
+        await self.update_windows_sensors()

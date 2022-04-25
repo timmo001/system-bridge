@@ -10,9 +10,10 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-from systembridgeshared.base import Base
 
-from systembridgebackend.modules.cpu.temperature import get_temperature
+from systembridgeshared.database import Database
+
+from systembridgeshared.base import Base
 
 
 class CPU(Base):
@@ -40,9 +41,15 @@ class CPU(Base):
         """CPU stats"""
         return cpu_stats()
 
-    def temperature(self) -> float | None:
+    def temperature(
+        self,
+        database: Database,
+    ) -> float | None:
         """CPU temperature"""
-        return get_temperature()
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "cpu" in key and "temperature" in key:
+                return value
+        return None
 
     def times(self) -> pcputimes:
         """CPU times"""

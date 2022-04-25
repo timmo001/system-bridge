@@ -46,7 +46,9 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def update_temperature(self) -> None:
         """Update temperature"""
-        self._database.write("cpu", "temperature", self._cpu.temperature())
+        self._database.write(
+            "cpu", "temperature", self._cpu.temperature(self._database)
+        )
 
     async def update_times(self) -> None:
         """Update times"""
