@@ -1,12 +1,25 @@
 """Setup"""
 import io
 import os
+import platform
 
 from setuptools import find_packages, setup
 
 # Get packages from requirements.txt
 with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
+
+system = platform.system()
+# if system == "Linux":
+#     with io.open("requirements_linux.txt", encoding="utf-8") as f:
+#         for requirement in f.read().splitlines():
+#             requirements.append(requirement)
+if system == "Windows":
+    with io.open("requirements_windows.txt", encoding="utf-8") as f:
+        for requirement in f.read().splitlines():
+            requirements.append(requirement)
+
+print("Requirements:", requirements)
 
 # Get version from version.txt
 with io.open(

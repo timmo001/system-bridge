@@ -1,4 +1,5 @@
 """System Bridge: CPU"""
+from __future__ import annotations
 from psutil import (
     cpu_count,
     cpu_freq,
@@ -10,6 +11,8 @@ from psutil import (
 )
 from psutil._common import pcputimes, scpufreq, scpustats
 from systembridgeshared.base import Base
+
+from systembridgebackend.modules.cpu.temperature import get_temperature
 
 
 class CPU(Base):
@@ -36,6 +39,10 @@ class CPU(Base):
     def stats(self) -> scpustats:
         """CPU stats"""
         return cpu_stats()
+
+    def temperature(self) -> float | None:
+        """CPU temperature"""
+        return get_temperature()
 
     def times(self) -> pcputimes:
         """CPU times"""

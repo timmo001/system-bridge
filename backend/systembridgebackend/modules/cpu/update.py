@@ -44,6 +44,10 @@ class CPUUpdate(ModuleUpdateBase):
         for key, value in self._cpu.stats()._asdict().items():
             self._database.write("cpu", f"stats_{key}", value)
 
+    async def update_temperature(self) -> None:
+        """Update temperature"""
+        self._database.write("cpu", "temperature", self._cpu.temperature())
+
     async def update_times(self) -> None:
         """Update times"""
         for key, value in self._cpu.times()._asdict().items():
@@ -90,6 +94,7 @@ class CPUUpdate(ModuleUpdateBase):
         await self.update_frequency_per_cpu()
         await self.update_load_average()
         await self.update_stats()
+        await self.update_temperature()
         await self.update_times()
         await self.update_times_percent()
         await self.update_times_per_cpu()
