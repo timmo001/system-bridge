@@ -56,6 +56,6 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
     with:
       code-path: WindowsSensors
-      output-name: windowssensors-bin
+      output-name: windowssensors-build
       output-path: WindowsSensors/bin
       package: SystemBridgeWindowsSensors.sln
