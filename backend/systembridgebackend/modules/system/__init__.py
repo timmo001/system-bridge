@@ -72,7 +72,7 @@ class System(Base):
         """Get version"""
         # Get version from version.txt
         with io.open(
-            os.path.join(os.path.dirname(__file__), "../../../../version.txt"),
+            os.path.join(os.path.dirname(__file__), "../../version.txt"),
             encoding="utf-8",
         ) as file:
             return file.read().splitlines()[0]
