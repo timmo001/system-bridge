@@ -45,7 +45,7 @@ jobs:
     with:
       code-path: frontend
   build-windowssensors:
-    uses: timmo001/workflows/.github/workflows/build-dotnet-windows.yml@master
+    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
     with:
       code-path: WindowsSensors
       package: SystemBridgeWindowsSensors.sln
