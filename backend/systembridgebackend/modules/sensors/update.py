@@ -31,13 +31,32 @@ class SensorsUpdate(ModuleUpdateBase):
     async def update_windows_sensors(self) -> None:
         """Update Windows Sensors"""
         if data := self._sensors.windows_sensors():
-            for item in data:
+            for item in data["hardware"]:
                 for key in item["sensors"] or []:
                     self._database.write(
                         "sensors",
-                        f"windows_{key['id']}",
+                        f"windows_hardware_{key['id']}",
                         key["value"],
                     )
+
+            for key, value in data["nvidia"].items():
+                if isinstance(value, list):
+                    counter = 0
+                    for item in value:
+                        for subkey, subvalue in item.items():
+                            self._database.write(
+                                "sensors",
+                                f"windows_nvidia_{key}_{counter}_{subkey}",
+                                subvalue,
+                            )
+                        counter += 1
+                else:
+                    for subkey, subvalue in value.items():
+                        self._database.write(
+                            "sensors",
+                            f"windows_nvidia_{key}_{subkey}",
+                            subvalue,
+                        )
 
     async def update_all_data(self) -> None:
         """Update data"""
