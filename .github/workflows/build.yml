@@ -48,4 +48,4 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-dotnet-windows.yml@master
     with:
       code-path: WindowsSensors
-      project: SystemBridgeWindowsSensors.sln
+      package: SystemBridgeWindowsSensors.sln
