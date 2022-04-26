@@ -24,7 +24,7 @@ class Sensors(Base):
             return None
         return psutil.sensors_temperatures()
 
-    def windows_sensors(self) -> list[dict] | None:
+    def windows_sensors(self) -> dict | None:
         """Get windows sensors"""
         if sys.platform != "win32":
             return None
