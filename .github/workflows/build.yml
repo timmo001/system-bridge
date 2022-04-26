@@ -44,3 +44,7 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
     with:
       code-path: frontend
+  build-windowssensors:
+    uses: timmo001/workflows/.github/workflows/build-dotnet-windows.yml@master
+    with:
+      code-path: WindowsSensors
