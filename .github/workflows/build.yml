@@ -18,10 +18,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
+  build-backend-linux:
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    with:
+      code-path: backend
+      pre-install-command: |
+        cd ../shared && pip install .
+  build-backend-windows:
     needs:
       - build-windowssensors
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
     with:
       code-path: backend
       pre-install-command: |
