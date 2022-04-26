@@ -30,7 +30,7 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
     with:
       additional-artifacts-name: windowssensors-build
-      additional-artifacts-path: backend/WindowsSensors/bin
+      additional-artifacts-path: backend/systembridgebackend/WindowsSensors/bin
       code-path: backend
       pre-install-command: |
         cd ../shared && pip install .
@@ -57,7 +57,7 @@ jobs:
   build-windowssensors:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
     with:
-      code-path: backend/WindowsSensors
+      code-path: backend/systembridgebackend/WindowsSensors
       output-name: windowssensors-build
       output-path: backend/WindowsSensors/bin
       package: SystemBridgeWindowsSensors.sln
