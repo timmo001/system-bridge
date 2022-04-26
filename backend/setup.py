@@ -1,6 +1,7 @@
 """Setup"""
 import io
 import os
+import platform
 
 from setuptools import find_packages, setup
 
@@ -14,6 +15,13 @@ with io.open(
 ) as f:
     version = f.read().splitlines()[0]
 
+include_dirs = []
+if platform.system() == "Windows":
+    path = os.path.join(os.path.dirname(__file__), "WindowsSensors/bin")
+    if not os.path.exists(path):
+        raise Exception(f"Missing WindowsSensors build at {path}")
+    include_dirs.append(path)
+
 setup(
     name="systembridgebackend",
     version=version,
@@ -25,4 +33,5 @@ setup(
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),
     install_requires=requirements,
+    include_dirs=include_dirs,
 )
