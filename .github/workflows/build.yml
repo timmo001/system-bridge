@@ -29,6 +29,8 @@ jobs:
       - build-windowssensors
     uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
     with:
+      additional-artifacts-name: windowssensors-build
+      additional-artifacts-path: WindowsSensors/bin
       code-path: backend
       pre-install-command: |
         cd ../shared && pip install .
