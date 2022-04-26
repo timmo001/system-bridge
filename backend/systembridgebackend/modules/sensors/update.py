@@ -35,7 +35,7 @@ class SensorsUpdate(ModuleUpdateBase):
                 for key in item["sensors"] or []:
                     self._database.write(
                         "sensors",
-                        key["id"],
+                        f"windows_{key['id']}",
                         key["value"],
                     )
 

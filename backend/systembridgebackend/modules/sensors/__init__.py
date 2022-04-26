@@ -49,12 +49,12 @@ class Sensors(Base):
                 "WindowsSensors/bin/SystemBridgeWindowsSensors.exe",
             )
         )
-        self._logger.info("Windows Sensors Path: %s", path)
+        self._logger.debug("Windows sensors path: %s", path)
         with subprocess.Popen(
             [path],
             stdout=subprocess.PIPE,
         ) as pipe:
             result = pipe.communicate()[0].decode()
-        self._logger.info("result: %s", result)
+        self._logger.debug("Windows sensors result: %s", result)
 
         return json.loads(result)
