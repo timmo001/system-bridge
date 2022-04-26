@@ -19,6 +19,8 @@ concurrency:
 
 jobs:
   build-backend:
+    needs:
+      - build-windowssensors
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: backend
