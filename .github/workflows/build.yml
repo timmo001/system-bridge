@@ -53,6 +53,10 @@ jobs:
   build-frontend:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
     with:
+      additional-build-commands: |
+        yarn export
+      artifact-name: frontend-out
+      artifact-path: frontend/out
       code-path: frontend
   build-windowssensors:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
