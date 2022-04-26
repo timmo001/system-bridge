@@ -1,18 +1,37 @@
 """Setup"""
 import io
 import os
+import platform
 
 from setuptools import find_packages, setup
 
 # Get packages from requirements.txt
-with io.open("requirements.txt", encoding="utf-8") as f:
-    requirements = f.read().splitlines()
+with io.open("requirements.txt", encoding="utf-8") as file:
+    requirements = file.read().splitlines()
 
 # Get version from version.txt
 with io.open(
     os.path.join(os.path.dirname(__file__), "../version.txt"), encoding="utf-8"
-) as f:
-    version = f.read().splitlines()[0]
+) as file:
+    version = file.read().splitlines()[0]
+
+# Write version file into
+with io.open(
+    os.path.join(os.path.dirname(__file__), "systembridgebackend/version.txt"),
+    encoding="utf-8",
+    mode="w",
+) as file:
+    file.write(version)
+
+package_data = ["version.txt"]
+
+if platform.system() == "Windows":
+    windows_sensors_path = "systembridgebackend/WindowsSensors/bin"
+    if not os.path.exists(windows_sensors_path):
+        raise Exception(f"Missing WindowsSensors build at {windows_sensors_path}")
+    package_data.append("WindowsSensors/bin/*")
+
+print(package_data)
 
 setup(
     name="systembridgebackend",
@@ -25,4 +44,5 @@ setup(
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),
     install_requires=requirements,
+    package_data={"": package_data},
 )

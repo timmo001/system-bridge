@@ -1,4 +1,5 @@
 """System Bridge: CPU"""
+from __future__ import annotations
 from psutil import (
     cpu_count,
     cpu_freq,
@@ -9,6 +10,9 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
+
+from systembridgeshared.database import Database
+
 from systembridgeshared.base import Base
 
 
@@ -36,6 +40,21 @@ class CPU(Base):
     def stats(self) -> scpustats:
         """CPU stats"""
         return cpu_stats()
+
+    def temperature(
+        self,
+        database: Database,
+    ) -> float | None:
+        """CPU temperature"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if (
+                "cpu" in key
+                and "temperature" in key
+                and value is not None
+                and value != 0
+            ):
+                return value
+        return None
 
     def times(self) -> pcputimes:
         """CPU times"""

@@ -18,9 +18,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
+  build-backend-linux:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
+      code-path: backend
+      pre-install-command: |
+        cd ../shared && pip install .
+  build-backend-windows:
+    needs:
+      - build-windowssensors
+    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
+    with:
+      additional-artifacts-name: windowssensors-build
+      additional-artifacts-path: backend/systembridgebackend/WindowsSensors/bin
       code-path: backend
       pre-install-command: |
         cd ../shared && pip install .
@@ -43,4 +53,15 @@ jobs:
   build-frontend:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
     with:
+      additional-build-commands: |
+        yarn export
+      artifact-name: frontend-out
+      artifact-path: frontend/out
       code-path: frontend
+  build-windowssensors:
+    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
+    with:
+      code-path: backend/systembridgebackend/WindowsSensors
+      output-name: windowssensors-build
+      output-path: backend/systembridgebackend/WindowsSensors/bin
+      package: SystemBridgeWindowsSensors.sln
