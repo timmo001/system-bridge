@@ -11,6 +11,8 @@ from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
+    TYPE_KEYBOARD_KEYPRESS,
+    TYPE_KEYBOARD_TEXT,
     TYPE_OPEN,
     TYPE_REGISTER_DATA_LISTENER,
 )
@@ -54,11 +56,9 @@ class WebSocketClient(Base):
         url = f"ws://{self._api_host}:{self._api_port}/api/websocket"
         self._logger.info("Connecting to WebSocket: %s", url)
         try:
-            self._websocket = await asyncio.wait_for(
-                websockets.connect(url), timeout=30
-            )
+            self._websocket = await websockets.connect(url)
         except (
-            asyncio.exceptions.TimeoutError,
+            asyncio.TimeoutError,
             ConnectionRefusedError,
             InvalidHandshake,
         ) as error:
@@ -135,11 +135,57 @@ class WebSocketClient(Base):
         except (InvalidHandshake) as error:
             raise BadMessageException from error
 
+    async def keyboard_keypress(
+        self,
+        key: str,
+    ) -> None:
+        """Keyboard keypress"""
+        self._logger.info("Press key: %s", key)
+        try:
+            await self._websocket.send(
+                json.dumps(
+                    {
+                        "event": TYPE_KEYBOARD_KEYPRESS,
+                        "api-key": self._api_key,
+                        "key": key,
+                    }
+                )
+            )
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
+
+    async def keyboard_text(
+        self,
+        text: str,
+    ) -> None:
+        """Keyboard keypress"""
+        self._logger.info("Enter text: %s", text)
+        try:
+            await self._websocket.send(
+                json.dumps(
+                    {
+                        "event": TYPE_KEYBOARD_TEXT,
+                        "api-key": self._api_key,
+                        "text": text,
+                    }
+                )
+            )
+        except ConnectionClosed as error:
+            raise ConnectionClosedException from error
+        except (InvalidMessage) as error:
+            raise ConnectionErrorException from error
+        except (InvalidHandshake) as error:
+            raise BadMessageException from error
+
     async def open_path(
         self,
         path: str,
     ) -> None:
-        """Register data listener"""
+        """Open path"""
         self._logger.info("Opening path: %s", path)
         try:
             await self._websocket.send(
@@ -162,7 +208,7 @@ class WebSocketClient(Base):
         self,
         url: str,
     ) -> None:
-        """Register data listener"""
+        """Open url"""
         self._logger.info("Opening URL: %s", url)
         try:
             await self._websocket.send(
