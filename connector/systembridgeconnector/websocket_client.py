@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import websockets
 
-from websockets.client import connect
 from websockets.exceptions import ConnectionClosed, InvalidHandshake, InvalidMessage
 
 from systembridgeconnector.base import Base
@@ -54,7 +54,9 @@ class WebSocketClient(Base):
         url = f"ws://{self._api_host}:{self._api_port}/api/websocket"
         self._logger.info("Connecting to WebSocket: %s", url)
         try:
-            self._websocket = await connect(url)
+            self._websocket = await asyncio.wait_for(
+                websockets.connect(url), timeout=30
+            )
         except (
             asyncio.exceptions.TimeoutError,
             ConnectionRefusedError,
