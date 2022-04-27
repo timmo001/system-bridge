@@ -50,13 +50,21 @@ jobs:
       code-path: gui
       pre-install-command: |
         cd ../shared && pip install .
-  build-frontend:
+  build-frontend-node:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
     with:
       additional-build-commands: |
         yarn export
       artifact-name: frontend-out
       artifact-path: frontend/out
+      code-path: frontend
+  build-frontend:
+    needs:
+      - build-frontend-node
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
+    with:
+      additional-artifacts-name: frontend-out
+      additional-artifacts-path: frontend/out
       code-path: frontend
   build-windowssensors:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
