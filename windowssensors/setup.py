@@ -15,25 +15,25 @@ with io.open(
 ) as f:
     version = f.read().splitlines()[0]
 
-copy_tree("out", "systembridgefrontend/out")
+copy_tree("WindowsSensors/bin", "systembridgewindowssensors/bin")
 
 package_data = []
 
-for root, directories, files in os.walk("systembridgefrontend/out"):
+for root, directories, files in os.walk("systembridgewindowssensors/bin"):
     for file in files:
         package_data.append(
             os.path.join(root, "/".join(directories), file)
-            .replace("systembridgefrontend/", "")
+            .replace("systembridgewindowssensors/", "")
             .replace("\\", "/", -1)
         )
 
 print(package_data)
 
 setup(
-    name="systembridgefrontend",
+    name="systembridgewindowssensors",
     version=version,
-    description="System Bridge Frontend",
-    keywords="system bridge frontend",
+    description="System Bridge Windows Sensors",
+    keywords="system bridge windows sensors",
     author="Aidan Timson (Timmo)",
     author_email="contact@timmo.xyz",
     license="MIT",

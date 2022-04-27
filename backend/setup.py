@@ -1,7 +1,6 @@
 """Setup"""
 import io
 import os
-import platform
 
 from setuptools import find_packages, setup
 
@@ -24,14 +23,6 @@ with io.open(
     file.write(version)
 
 package_data = ["version.txt"]
-
-if platform.system() == "Windows":
-    windows_sensors_path = "systembridgebackend/WindowsSensors/bin"
-    if not os.path.exists(windows_sensors_path):
-        raise Exception(f"Missing WindowsSensors build at {windows_sensors_path}")
-    package_data.append("WindowsSensors/bin/*")
-
-print(package_data)
 
 setup(
     name="systembridgebackend",

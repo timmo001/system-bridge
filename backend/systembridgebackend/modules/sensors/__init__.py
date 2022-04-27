@@ -1,7 +1,6 @@
 """System Bridge: Sensors"""
 from __future__ import annotations
 import json
-import os
 import psutil
 import subprocess
 import sys
@@ -29,26 +28,11 @@ class Sensors(Base):
         if sys.platform != "win32":
             return None
 
-        path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "../../",
-            )
-        )
-        if not os.path.exists(
-            os.path.join(
-                path,
-                "WindowsSensors/bin/SystemBridgeWindowsSensors.exe",
-            )
-        ):
-            return None
+        # Import here to not raise error when importing file on linux
+        from systembridgewindowssensors import WindowsSensors
 
-        path = os.path.abspath(
-            os.path.join(
-                path,
-                "WindowsSensors/bin/SystemBridgeWindowsSensors.exe",
-            )
-        )
+        path = WindowsSensors().get_path()
+
         self._logger.debug("Windows sensors path: %s", path)
         with subprocess.Popen(
             [path],
