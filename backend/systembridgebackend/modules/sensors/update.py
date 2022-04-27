@@ -30,8 +30,7 @@ class SensorsUpdate(ModuleUpdateBase):
 
     async def update_windows_sensors(self) -> None:
         """Update Windows Sensors"""
-        data = self._sensors.windows_sensors()
-        if not data:
+        if not (data := self._sensors.windows_sensors()):
             return
         if "hardware" in data and data["hardware"] is not None:
             for item in data["hardware"]:
