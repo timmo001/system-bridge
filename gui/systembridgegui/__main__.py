@@ -56,6 +56,7 @@ class Main(Base):
         # Connect to WebSocket
         try:
             asyncio.run(self._websocket_client.connect())
+            asyncio.run(self._websocket_client.close())
         except ConnectionErrorException:
             self._logger.error("Could not connect to WebSocket")
             error_message = TimedMessageBox(
@@ -121,9 +122,9 @@ class Main(Base):
         """Exit the backend"""
         if not gui_only:
             self._logger.info("Exit Backend..")
-            if not self._websocket_client.connected:
-                await self._websocket_client.connect()
+            await self._websocket_client.connect()
             await self._websocket_client.exit_backend()
+            await self._websocket_client.close()
         self._logger.info("Exit GUI..")
         self._application.quit()
 
