@@ -43,6 +43,16 @@
     },
     {
       "name": "Frontend",
+      "type": "python",
+      "request": "launch",
+      "module": "systembridgefrontend",
+      "preLaunchTask": "Frontend: pip install",
+      "cwd": "${workspaceFolder}/frontend",
+      "justMyCode": false,
+      "args": []
+    },
+    {
+      "name": "Frontend (Dev)",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "yarn",

@@ -26,21 +26,6 @@ function HeaderLinks(): ReactElement {
   return (
     <Grid container alignContent="center" spacing={2}>
       <Grid item>
-        <Link href={{ pathname: "/app/data", query }} passHref>
-          <Button color="inherit" variant="text">
-            <Typography component="span">Data</Typography>
-          </Button>
-        </Link>
-      </Grid>
-      <Grid item>
-        <Link href={{ pathname: "/app/settings", query }} passHref>
-          <Button color="inherit" variant="text">
-            <Typography component="span">Settings</Typography>
-          </Button>
-        </Link>
-      </Grid>
-      <Grid item sx={{ padding: theme.spacing(1) }} />
-      <Grid item>
         <Tooltip title="Suggest a Feature / Report a Bug">
           <a
             href="https://github.com/timmo001/system-bridge/issues"

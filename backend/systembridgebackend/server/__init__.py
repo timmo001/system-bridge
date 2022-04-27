@@ -10,6 +10,7 @@ from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
+from systembridgefrontend import Frontend  # pylint: disable=import-error
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_PORT_API
 from systembridgeshared.database import Database
@@ -188,13 +189,18 @@ class Server(Base):
             methods=["POST"],
         )
 
+        frontend_path = Frontend().get_frontend_path()
+        self._logger.info("Serving frontend from: %s", frontend_path)
         self._server.static(
             "/",
-            "../frontend/out",
+            frontend_path,
             strict_slashes=False,
             content_type="text/html",
         )
-        self._server.add_websocket_route(_handler_websocket, "/api/websocket")
+        self._server.add_websocket_route(
+            _handler_websocket,
+            "/api/websocket",
+        )
 
     def _callback_exit_application(self) -> None:
         """Callback to exit application"""
