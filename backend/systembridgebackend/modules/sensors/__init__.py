@@ -29,9 +29,8 @@ class Sensors(Base):
             return None
 
         # Import here to not raise error when importing file on linux
-        from systembridgewindowssensors import (
-            WindowsSensors,
-        )  # pylint: disable=import-error
+        # pylint: disable=import-error, import-outside-toplevel
+        from systembridgewindowssensors import WindowsSensors
 
         path = WindowsSensors().get_path()
 
