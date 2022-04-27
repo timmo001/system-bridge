@@ -69,7 +69,9 @@ class SystemUpdate(ModuleUpdateBase):
     async def update_version_latest(self) -> None:
         """Update latest version"""
         if release := await self._system.version_latest():
-            self._database.write("system", "version_latest", release.tag_name)
+            self._database.write(
+                "system", "version_latest", release.tag_name.replace("v", "")
+            )
 
     async def update_version_newer_avaliable(self) -> None:
         """Update newer version available"""
