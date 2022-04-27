@@ -183,7 +183,7 @@ class WebSocketClient(Base):
         """Listen for messages"""
         self._logger.info("Listen for messages")
         while not self._websocket.closed:
-            callback(await self.receive_message())
+            await callback(await self.receive_message())
 
     async def receive_message(self) -> dict:
         """Receive message"""
@@ -193,7 +193,7 @@ class WebSocketClient(Base):
             raise ConnectionErrorException(self._websocket.exception())
 
         if message.type == aiohttp.WSMsgType.TEXT:
-            return json.loads(message)
+            return message.json()
 
         if message.type in (
             aiohttp.WSMsgType.CLOSE,
