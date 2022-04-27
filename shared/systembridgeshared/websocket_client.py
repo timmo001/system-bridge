@@ -32,7 +32,7 @@ class WebSocketClient(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._session = aiohttp.ClientSession()
+        self._session = None
         self._websocket = None
 
     @property
@@ -51,6 +51,7 @@ class WebSocketClient(Base):
 
     async def connect(self) -> None:
         """Connect to server"""
+        self._session = aiohttp.ClientSession()
         url = f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
         self._logger.info("Connecting to WebSocket: %s", url)
         try:
