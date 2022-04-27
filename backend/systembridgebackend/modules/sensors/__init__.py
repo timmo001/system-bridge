@@ -28,9 +28,13 @@ class Sensors(Base):
         if sys.platform != "win32":
             return None
 
-        # Import here to not raise error when importing file on linux
-        # pylint: disable=import-error, import-outside-toplevel
-        from systembridgewindowssensors import WindowsSensors
+        try:
+            # Import here to not raise error when importing file on linux
+            # pylint: disable=import-error, import-outside-toplevel
+            from systembridgewindowssensors import WindowsSensors
+        except (ImportError, ModuleNotFoundError) as error:
+            self._logger.error("Windows sensors not found: %s", error)
+            return None
 
         path = WindowsSensors().get_path()
 

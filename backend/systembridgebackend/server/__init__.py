@@ -200,8 +200,8 @@ class Server(Base):
                 strict_slashes=False,
                 content_type="text/html",
             )
-        except ImportError as error:
-            self._logger.info("Frontend not found: %s", error)
+        except (ImportError, ModuleNotFoundError) as error:
+            self._logger.error("Frontend not found: %s", error)
 
         self._server.add_websocket_route(
             _handler_websocket,
