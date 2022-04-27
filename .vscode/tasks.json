@@ -57,6 +57,39 @@
       "options": {
         "cwd": "frontend"
       }
+    },
+    {
+      "type": "npm",
+      "script": "Frontend: build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "build",
+      "detail": "build webapp",
+      "dependsOn": ["Frontend: install"],
+      "options": {
+        "cwd": "frontend"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "Frontend: export",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "export",
+      "detail": "export built webapp",
+      "dependsOn": ["Frontend: build"],
+      "options": {
+        "cwd": "frontend"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "Frontend: pip install",
+      "command": "pip install .",
+      "dependsOn": ["Frontend: export"],
+      "options": {
+        "cwd": "frontend"
+      }
     }
   ]
 }
