@@ -10,7 +10,7 @@ from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
-from systembridgefrontend import Frontend # pylint: disable=import-error
+from systembridgefrontend import Frontend  # pylint: disable=import-error
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_PORT_API
 from systembridgeshared.database import Database
