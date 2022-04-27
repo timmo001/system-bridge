@@ -58,7 +58,7 @@ jobs:
       artifact-name: frontend-out
       artifact-path: frontend/out
       code-path: frontend
-  build-frontend:
+  build-frontend-package:
     needs:
       - build-frontend-node
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
