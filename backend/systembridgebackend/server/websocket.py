@@ -19,9 +19,11 @@ from systembridgeshared.const import (
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
     SUBTYPE_MISSING_API_KEY,
+    SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_PATH_URL,
     SUBTYPE_MISSING_SETTING,
+    SUBTYPE_MISSING_TEXT,
     SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_DATA_GET,
@@ -33,6 +35,10 @@ from systembridgeshared.const import (
     TYPE_GET_DATA,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
+    TYPE_KEYBOARD_KEY_PRESSED,
+    TYPE_KEYBOARD_KEYPRESS,
+    TYPE_KEYBOARD_TEXT_SENT,
+    TYPE_KEYBOARD_TEXT,
     TYPE_OPEN,
     TYPE_OPENED,
     TYPE_REGISTER_DATA_LISTENER,
@@ -47,6 +53,7 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.open import open_path, open_url
+from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
 
 
 class WebSocketHandler(Base):
@@ -150,6 +157,62 @@ class WebSocketHandler(Base):
                         continue
                     self._callback_exit_application()
                     self._logger.info("Exit application called")
+                elif data[EVENT_EVENT] == TYPE_KEYBOARD_KEYPRESS:
+                    if not await self._check_api_key(data):
+                        continue
+                    if "key" not in data:
+                        self._logger.warning("No key provided")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
+                                    EVENT_MESSAGE: "No key provided",
+                                }
+                            )
+                        )
+                        continue
+
+                    keyboard_keypress(data["key"])
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_KEYBOARD_KEY_PRESSED,
+                                EVENT_MESSAGE: "Key pressed",
+                                EVENT_ID: listener_id,
+                                "key": data["key"],
+                            }
+                        )
+                    )
+                elif data[EVENT_EVENT] == TYPE_KEYBOARD_TEXT:
+                    if not await self._check_api_key(data):
+                        continue
+                    if "text" not in data:
+                        self._logger.warning("No text provided")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_TEXT,
+                                    EVENT_MESSAGE: "No text provided",
+                                }
+                            )
+                        )
+                        continue
+
+                    keyboard_text(data["text"])
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_KEYBOARD_TEXT_SENT,
+                                EVENT_MESSAGE: "Key pressed",
+                                EVENT_ID: listener_id,
+                                "text": data["text"],
+                            }
+                        )
+                    )
                 elif data[EVENT_EVENT] == TYPE_OPEN:
                     if not await self._check_api_key(data):
                         continue
