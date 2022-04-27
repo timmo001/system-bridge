@@ -57,4 +57,8 @@ class Sensors(Base):
             result = pipe.communicate()[0].decode()
         self._logger.debug("Windows sensors result: %s", result)
 
-        return json.loads(result)
+        try:
+            return json.loads(result)
+        except json.decoder.JSONDecodeError as error:
+            self._logger.error(error)
+            return None
