@@ -90,6 +90,15 @@
       "options": {
         "cwd": "frontend"
       }
+    },
+    {
+      "type": "shell",
+      "label": "Windows Sensors: pip install",
+      "command": "pip install .",
+      "dependsOn": [],
+      "options": {
+        "cwd": "windowssensors"
+      }
     }
   ]
 }
