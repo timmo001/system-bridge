@@ -3,12 +3,11 @@ name: Deploy
 
 # yamllint disable-line rule:truthy
 on:
-  push:
-    branches:
-      - master
   release:
     types:
       - published
+  schedule:
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 jobs:
