@@ -21,12 +21,32 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
+    directory: "/frontend"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
     directory: "/gui"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/shared"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/windowssensors"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
     directory: "/frontend"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "nuget"
+    directory: "/windowssensors"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
