@@ -15,7 +15,7 @@ with io.open("requirements.txt", encoding="utf-8") as f:
 
 copy_tree("out", "systembridgefrontend/out")
 
-package_data = []
+package_data = ["out/**/*"]
 
 for root, directories, files in os.walk("systembridgefrontend/out"):
     for file in files:
