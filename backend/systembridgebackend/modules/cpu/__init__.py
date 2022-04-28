@@ -90,6 +90,6 @@ class CPU(Base):
     ) -> float | None:
         """CPU voltage"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "cpu" in key and "voltage" in key and value is not None and value != 0:
+            if "cpu" in key and "voltage" in key:
                 return value
         return None
