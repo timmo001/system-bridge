@@ -9,12 +9,10 @@ A bridge for your systems.
 ## Features
 
 - System Information - Access your system's Audio, Battery, Bluetooth, CPU,
- Display, Filesystems, Graphics, Keyboard, Memory, Networking, OS, Process
- and System information via the API.
-- Send Commands and Open files and URLs - Automate your system by sending a
- command or opening a URL/path via the API.
+ Disks, Graphics, Keyboard, Memory and System information via the API.
+- Open files and URLs - Automate your system by opening a URL/path via the API.
 - Send Notifications - Send system notifications via the API.
-- Cross-Platform - Compatible with Windows, Mac and Linux.
+- Cross-Platform - Compatible with Windows and Linux.
 - Integrated with
  [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) -
  Interact with your Bridges using Home Assistant.
