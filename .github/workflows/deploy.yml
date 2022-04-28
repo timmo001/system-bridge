@@ -17,25 +17,29 @@ jobs:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   with:
   #     code-path: backend
+  #     module-name: systembridgebackend
   #     pre-install-command: |
   #       cd ../shared && pip install .
+  #     use-incremental: true
   # deploy-cli:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   with:
   #     code-path: cli
+  #     module-name: systembridgecli
   #     pre-install-command: |
   #       cd ../shared && pip install .
+  #     use-incremental: true
   deploy-connector:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     with:
       code-path: connector
       module-name: systembridgeconnector
-      pre-install-command: |
-        cd ../shared && pip install .
       use-incremental: true
   # deploy-gui:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   with:
   #     code-path: gui
+  #     module-name: systembridgegui
   #     pre-install-command: |
   #       cd ../shared && pip install .
+  #     use-incremental: true
