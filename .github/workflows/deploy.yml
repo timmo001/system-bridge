@@ -31,9 +31,9 @@ jobs:
   #     use-incremental: true
   deploy-connector:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-    env:
-      TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-      TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       code-path: connector
       module-name: systembridgeconnector
