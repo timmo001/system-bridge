@@ -1,5 +1,6 @@
 """System Bridge GUI: Main"""
 import asyncio
+import os
 import sys
 
 from PySide6.QtGui import QIcon
@@ -31,7 +32,7 @@ class Main(Base):
         self._websocket_client = WebSocketClient(self._settings)
 
         self._application = QApplication([])
-        self._icon = QIcon("../resources/system-bridge-circle.png")
+        self._icon = QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))
         self._application.setStyleSheet(
             """
             QWidget {
