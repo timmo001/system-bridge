@@ -13,18 +13,18 @@ on:
   workflow_dispatch:
 
 jobs:
-  # deploy-shared:
-  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-  #   secrets:
-  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-  #   with:
-  #     code-path: shared
-  #     module-name: systembridgeshared
-  #     pre-install-command: |
-  #       cd ../shared && pip install .
-  #     use-incremental: true
+  deploy-shared:
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: shared
+      module-name: systembridgeshared
+      use-incremental: true
   deploy-backend:
+    needs:
+      - deploy-shared
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -32,25 +32,25 @@ jobs:
     with:
       code-path: backend
       module-name: systembridgebackend
-      pre-install-command: |
-        cd ../shared && pip install .
+      # pre-install-command: |
+      #   cd ../shared && pip install .
       use-incremental: true
-  # deploy-cli:
-  #   needs:
-  #     - deploy-backend
-  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-  #   secrets:
-  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-  #   with:
-  #     code-path: cli
-  #     module-name: systembridgecli
-  #     pre-install-command: |
-  #       cd ../shared && pip install .
-  #     use-incremental: true
-  deploy-connector:
+  deploy-cli:
     needs:
       - deploy-backend
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: cli
+      module-name: systembridgecli
+      # pre-install-command: |
+      #   cd ../shared && pip install .
+      use-incremental: true
+  deploy-connector:
+    needs:
+      - deploy-cli
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -59,16 +59,16 @@ jobs:
       code-path: connector
       module-name: systembridgeconnector
       use-incremental: true
-  # deploy-gui:
-  #   needs:
-  #     - deploy-connector
-  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-  #   secrets:
-  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-  #   with:
-  #     code-path: gui
-  #     module-name: systembridgegui
-  #     pre-install-command: |
-  #       cd ../shared && pip install .
-  #     use-incremental: true
+  deploy-gui:
+    needs:
+      - deploy-connector
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: gui
+      module-name: systembridgegui
+      # pre-install-command: |
+      #   cd ../shared && pip install .
+      use-incremental: true
