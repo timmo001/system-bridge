@@ -190,9 +190,9 @@ class Server(Base):
 
         try:
             # pylint: disable=import-error, import-outside-toplevel
-            from systembridgefrontend import Frontend
+            from systembridgefrontend import get_frontend_path
 
-            frontend_path = Frontend().get_frontend_path()
+            frontend_path = get_frontend_path()
             self._logger.info("Serving frontend from: %s", frontend_path)
             self._server.static(
                 "/",

@@ -6,30 +6,104 @@ on:
   release:
     types:
       - published
+  schedule:
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 jobs:
-  deploy-backend:
+  deploy-shared:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: shared
+      module-name: systembridgeshared
+      use-incremental: true
+  deploy-backend:
+    needs:
+      - deploy-shared
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       code-path: backend
-      pre-install-command: |
-        cd ../shared && pip install .
+      module-name: systembridgebackend
+      use-incremental: true
   deploy-cli:
+    needs:
+      - deploy-backend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       code-path: cli
-      pre-install-command: |
-        cd ../shared && pip install .
+      module-name: systembridgecli
+      use-incremental: true
   deploy-connector:
+    needs:
+      - deploy-cli
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       code-path: connector
-      pre-install-command: |
-        cd ../shared && pip install .
+      module-name: systembridgeconnector
+      use-incremental: true
   deploy-gui:
+    needs:
+      - deploy-connector
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
       code-path: gui
-      pre-install-command: |
-        cd ../shared && pip install .
+      module-name: systembridgegui
+      use-incremental: true
+  build-frontend-node:
+    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
+    with:
+      additional-build-commands: |
+        yarn export
+      artifact-name: frontend-out
+      artifact-path: frontend/out
+      code-path: frontend
+  deploy-frontend:
+    needs:
+      - build-frontend-node
+      - deploy-gui
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      additional-artifacts-name: frontend-out
+      additional-artifacts-path: frontend/out
+      code-path: frontend
+      module-name: systembridgefrontend
+      use-incremental: true
+  build-windowssensors-dotnet:
+    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
+    with:
+      code-path: windowssensors/WindowsSensors
+      output-name: windowssensors-build
+      output-path: windowssensors/WindowsSensors/bin
+      package: SystemBridgeWindowsSensors.sln
+  deploy-windowssensors:
+    needs:
+      - build-windowssensors-dotnet
+      - deploy-frontend
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      additional-artifacts-name: windowssensors-build
+      additional-artifacts-path: windowssensors/WindowsSensors/bin
+      code-path: windowssensors
+      module-name: systembridgewindowssensors
+      use-incremental: true

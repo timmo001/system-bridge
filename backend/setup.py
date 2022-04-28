@@ -1,32 +1,18 @@
 """Setup"""
 import io
-import os
 
 from setuptools import find_packages, setup
 
+# Get setup packages from requirements.txt
+with io.open("requirements_setup.txt", encoding="utf-8") as f:
+    requirements_setup = f.read().splitlines()
+
 # Get packages from requirements.txt
-with io.open("requirements.txt", encoding="utf-8") as file:
-    requirements = file.read().splitlines()
-
-# Get version from version.txt
-with io.open(
-    os.path.join(os.path.dirname(__file__), "../version.txt"), encoding="utf-8"
-) as file:
-    version = file.read().splitlines()[0]
-
-# Write version file into
-with io.open(
-    os.path.join(os.path.dirname(__file__), "systembridgebackend/version.txt"),
-    encoding="utf-8",
-    mode="w",
-) as file:
-    file.write(version)
-
-package_data = ["version.txt"]
+with io.open("requirements.txt", encoding="utf-8") as f:
+    requirements = f.read().splitlines()
 
 setup(
     name="systembridgebackend",
-    version=version,
     description="System Bridge Backend",
     keywords="system bridge backend",
     author="Aidan Timson (Timmo)",
@@ -35,5 +21,6 @@ setup(
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),
     install_requires=requirements,
-    package_data={"": package_data},
+    setup_requires=requirements_setup,
+    use_incremental=True,
 )

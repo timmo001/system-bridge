@@ -21,6 +21,8 @@ from semantic_version import Version
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
+from systembridgebackend._version import __version__
+
 
 class System(Base):
     """System"""
@@ -70,12 +72,7 @@ class System(Base):
 
     def version(self) -> str:
         """Get version"""
-        # Get version from version.txt
-        with io.open(
-            os.path.join(os.path.dirname(__file__), "../../version.txt"),
-            encoding="utf-8",
-        ) as file:
-            return file.read().splitlines()[0]
+        return __version__.public()
 
     async def version_latest(self) -> GitHubReleaseModel | None:
         """Get latest version from GitHub"""

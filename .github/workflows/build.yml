@@ -22,14 +22,10 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: backend
-      pre-install-command: |
-        cd ../shared && pip install .
   build-cli:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: cli
-      pre-install-command: |
-        cd ../shared && pip install .
   build-connector:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
@@ -38,8 +34,6 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
     with:
       code-path: gui
-      pre-install-command: |
-        cd ../shared && pip install .
   build-frontend-node:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
     with:
