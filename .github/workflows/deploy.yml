@@ -26,6 +26,9 @@ jobs:
       use-incremental: true
   # deploy-cli:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   secrets:
+  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
   #   with:
   #     code-path: cli
   #     module-name: systembridgecli
@@ -43,6 +46,9 @@ jobs:
       use-incremental: true
   # deploy-gui:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   secrets:
+  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
   #   with:
   #     code-path: gui
   #     module-name: systembridgegui
