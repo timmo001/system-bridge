@@ -91,7 +91,7 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def update_voltage(self) -> None:
         """Update voltage"""
-        self._database.write("cpu", "voltage", self._cpu.voltage())
+        self._database.write("cpu", "voltage", self._cpu.voltage(self._database))
 
     async def update_all_data(self) -> None:
         """Update data"""
