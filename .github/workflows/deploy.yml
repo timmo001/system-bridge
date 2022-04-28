@@ -23,8 +23,6 @@ jobs:
       module-name: systembridgeshared
       use-incremental: true
   deploy-backend:
-    needs:
-      - deploy-shared
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -34,8 +32,6 @@ jobs:
       module-name: systembridgebackend
       use-incremental: true
   deploy-cli:
-    needs:
-      - deploy-backend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -45,8 +41,6 @@ jobs:
       module-name: systembridgecli
       use-incremental: true
   deploy-connector:
-    needs:
-      - deploy-cli
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -56,8 +50,6 @@ jobs:
       module-name: systembridgeconnector
       use-incremental: true
   deploy-gui:
-    needs:
-      - deploy-connector
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -77,7 +69,6 @@ jobs:
   deploy-frontend:
     needs:
       - build-frontend-node
-      - deploy-gui
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -98,7 +89,6 @@ jobs:
   deploy-windowssensors:
     needs:
       - build-windowssensors-dotnet
-      - deploy-frontend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
