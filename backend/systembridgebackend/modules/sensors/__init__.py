@@ -31,12 +31,12 @@ class Sensors(Base):
         try:
             # Import here to not raise error when importing file on linux
             # pylint: disable=import-error, import-outside-toplevel
-            from systembridgewindowssensors import WindowsSensors
+            from systembridgewindowssensors import get_windowssensors_path
         except (ImportError, ModuleNotFoundError) as error:
             self._logger.error("Windows sensors not found: %s", error)
             return None
 
-        path = WindowsSensors().get_path()
+        path = get_windowssensors_path()
 
         self._logger.debug("Windows sensors path: %s", path)
         with subprocess.Popen(
