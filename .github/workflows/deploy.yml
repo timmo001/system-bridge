@@ -32,8 +32,6 @@ jobs:
     with:
       code-path: backend
       module-name: systembridgebackend
-      # pre-install-command: |
-      #   cd ../shared && pip install .
       use-incremental: true
   deploy-cli:
     needs:
@@ -45,8 +43,6 @@ jobs:
     with:
       code-path: cli
       module-name: systembridgecli
-      # pre-install-command: |
-      #   cd ../shared && pip install .
       use-incremental: true
   deploy-connector:
     needs:
@@ -69,6 +65,47 @@ jobs:
     with:
       code-path: gui
       module-name: systembridgegui
-      # pre-install-command: |
-      #   cd ../shared && pip install .
+      use-incremental: true
+  build-frontend-node:
+    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
+    with:
+      additional-build-commands: |
+        yarn export
+      artifact-name: frontend-out
+      artifact-path: frontend/out
+      code-path: frontend
+  deploy-frontend:
+    needs:
+      - build-frontend-node
+      - deploy-gui
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      additional-artifacts-name: frontend-out
+      additional-artifacts-path: frontend/out
+      code-path: frontend
+      module-name: systembridgefrontend
+      use-incremental: true
+  build-windowssensors-dotnet:
+    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
+    with:
+      code-path: windowssensors/WindowsSensors
+      output-name: windowssensors-build
+      output-path: windowssensors/WindowsSensors/bin
+      package: SystemBridgeWindowsSensors.sln
+  deploy-windowssensors:
+    needs:
+      - build-windowssensors-dotnet
+      - deploy-frontend
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      additional-artifacts-name: windowssensors-build
+      additional-artifacts-path: windowssensors/WindowsSensors/bin
+      code-path: windowssensors
+      module-name: systembridgewindowssensors
       use-incremental: true
