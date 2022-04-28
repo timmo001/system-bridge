@@ -25,6 +25,8 @@ jobs:
         cd ../shared && pip install .
       use-incremental: true
   # deploy-cli:
+  #   needs:
+  #     - deploy-backend
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   secrets:
   #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -36,6 +38,8 @@ jobs:
   #       cd ../shared && pip install .
   #     use-incremental: true#
   deploy-connector:
+    needs:
+      - deploy-backend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -45,6 +49,8 @@ jobs:
       module-name: systembridgeconnector
       use-incremental: true
   # deploy-gui:
+  #   needs:
+  #     - deploy-connector
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   secrets:
   #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
