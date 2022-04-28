@@ -16,7 +16,7 @@ from aiogithubapi import (
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from semantic_version import Version
+from pkg_resources import parse_version
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
@@ -100,11 +100,9 @@ class System(Base):
         version = (
             database.read_table_by_key("system", "version")
             .to_dict(orient="records")[0]["value"]
-            .replace("v", "")
         )
         latest_version = (
             database.read_table_by_key("system", "version_latest")
             .to_dict(orient="records")[0]["value"]
-            .replace("v", "")
         )
-        return Version(latest_version) > Version(version)
+        return parse_version(latest_version) > parse_version(version)
