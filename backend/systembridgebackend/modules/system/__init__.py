@@ -97,12 +97,10 @@ class System(Base):
         database: Database,
     ) -> bool:
         """Check if newer version is available"""
-        version = (
-            database.read_table_by_key("system", "version")
-            .to_dict(orient="records")[0]["value"]
-        )
-        latest_version = (
-            database.read_table_by_key("system", "version_latest")
-            .to_dict(orient="records")[0]["value"]
-        )
+        version = database.read_table_by_key("system", "version").to_dict(
+            orient="records"
+        )[0]["value"]
+        latest_version = database.read_table_by_key("system", "version_latest").to_dict(
+            orient="records"
+        )[0]["value"]
         return parse_version(latest_version) > parse_version(version)

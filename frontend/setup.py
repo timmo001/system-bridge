@@ -18,6 +18,14 @@ copy_tree("out", "systembridgefrontend/out")
 package_data = ["out/**/*"]
 
 for root, directories, files in os.walk("systembridgefrontend/out"):
+    for directory in directories:
+        package_data.append(os.path.join(root, directory, "*"))
+        for file in files:
+            package_data.append(
+                os.path.join(root, "/".join(directories), file)
+                .replace("systembridgefrontend/", "")
+                .replace("\\", "/", -1)
+            )
     for file in files:
         package_data.append(
             os.path.join(root, "/".join(directories), file)
