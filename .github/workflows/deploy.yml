@@ -34,7 +34,7 @@ jobs:
   #     module-name: systembridgecli
   #     pre-install-command: |
   #       cd ../shared && pip install .
-  #     use-incremental: true#
+  #     use-incremental: true
   deploy-connector:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
