@@ -46,7 +46,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "nuget"
-    directory: "/windowssensors"
+    directory: "/windowssensors/WindowsSensors"
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
