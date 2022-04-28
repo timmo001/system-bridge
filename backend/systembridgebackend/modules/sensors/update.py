@@ -35,9 +35,24 @@ class SensorsUpdate(ModuleUpdateBase):
         if "hardware" in data and data["hardware"] is not None:
             for item in data["hardware"]:
                 for key in item["sensors"] or []:
+                    sensor_name = (
+                        key["name"]
+                        .replace(" ", "_", -1)
+                        .replace("(", "", -1)
+                        .replace(")", "", -1)
+                        .lower()
+                    )
+                    sensor_type = (
+                        key["type"]
+                        .replace(" ", "_", -1)
+                        .replace("(", "", -1)
+                        .replace(")", "", -1)
+                        .lower()
+                    )
+
                     self._database.write(
                         "sensors",
-                        f"windows_hardware_{key['id']}",
+                        f"windows_hardware_{sensor_name}_{sensor_type}",
                         key["value"],
                     )
 
