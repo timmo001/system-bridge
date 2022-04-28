@@ -3,33 +3,39 @@ name: Deploy
 
 # yamllint disable-line rule:truthy
 on:
+  push:
+    branches:
+      - master
+      - deploy-dev
   release:
     types:
       - published
   workflow_dispatch:
 
 jobs:
-  deploy-backend:
-    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-    with:
-      code-path: backend
-      pre-install-command: |
-        cd ../shared && pip install .
-  deploy-cli:
-    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-    with:
-      code-path: cli
-      pre-install-command: |
-        cd ../shared && pip install .
+  # deploy-backend:
+  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   with:
+  #     code-path: backend
+  #     pre-install-command: |
+  #       cd ../shared && pip install .
+  # deploy-cli:
+  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   with:
+  #     code-path: cli
+  #     pre-install-command: |
+  #       cd ../shared && pip install .
   deploy-connector:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     with:
       code-path: connector
+      module-name: systembridgeconnector
       pre-install-command: |
         cd ../shared && pip install .
-  deploy-gui:
-    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-    with:
-      code-path: gui
-      pre-install-command: |
-        cd ../shared && pip install .
+      use-incremental: true
+  # deploy-gui:
+  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   with:
+  #     code-path: gui
+  #     pre-install-command: |
+  #       cd ../shared && pip install .
