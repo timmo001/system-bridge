@@ -13,14 +13,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  # deploy-backend:
-  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-  #   with:
-  #     code-path: backend
-  #     module-name: systembridgebackend
-  #     pre-install-command: |
-  #       cd ../shared && pip install .
-  #     use-incremental: true
+  deploy-backend:
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: backend
+      module-name: systembridgebackend
+      pre-install-command: |
+        cd ../shared && pip install .
+      use-incremental: true
   # deploy-cli:
   #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
   #   with:
