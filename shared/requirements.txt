@@ -2,4 +2,5 @@ aiohttp==3.8.1
 appdirs==1.4.4
 colorlog==6.6.0
 cryptography==36.0.2
+incremental==21.3.0
 pandas==1.4.2

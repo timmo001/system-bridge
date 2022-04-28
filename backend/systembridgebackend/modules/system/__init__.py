@@ -23,6 +23,7 @@ from systembridgeshared.database import Database
 
 from systembridgebackend._version import __version__
 
+
 class System(Base):
     """System"""
 
@@ -72,7 +73,6 @@ class System(Base):
     def version(self) -> str:
         """Get version"""
         return __version__.public()
-
 
     async def version_latest(self) -> GitHubReleaseModel | None:
         """Get latest version from GitHub"""
