@@ -71,7 +71,7 @@ class System(Base):
 
     def version(self) -> str:
         """Get version"""
-        return __version__
+        return __version__.public()
 
 
     async def version_latest(self) -> GitHubReleaseModel | None:
