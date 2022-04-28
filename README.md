@@ -9,7 +9,7 @@ A bridge for your systems.
 ## Features
 
 - System Information - Access your system's Audio, Battery, Bluetooth, CPU,
- Disks, Graphics, Keyboard, Memory and System information via the API.
+ Disks, GPU, Keyboard, Memory and System information via the API.
 - Open files and URLs - Automate your system by opening a URL/path via the API.
 - Send Notifications - Send system notifications via the API.
 - Cross-Platform - Compatible with Windows and Linux.
