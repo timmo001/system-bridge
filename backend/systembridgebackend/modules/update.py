@@ -8,6 +8,7 @@ from systembridgebackend.modules.battery.update import BatteryUpdate
 from systembridgebackend.modules.bridge.update import BridgeUpdate
 from systembridgebackend.modules.cpu.update import CPUUpdate
 from systembridgebackend.modules.disk.update import DiskUpdate
+from systembridgebackend.modules.gpu.update import GPUUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
 from systembridgebackend.modules.network.update import NetworkUpdate
 from systembridgebackend.modules.sensors.update import SensorsUpdate
@@ -32,6 +33,7 @@ class Update(Base):
         ]
         self._classes_frequent = [
             {"name": "cpu", "cls": CPUUpdate(self._database)},
+            {"name": "gpu", "cls": GPUUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
             {"name": "network", "cls": NetworkUpdate(self._database)},
             {"name": "sensors", "cls": SensorsUpdate(self._database)},
