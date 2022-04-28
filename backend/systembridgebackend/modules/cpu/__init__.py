@@ -83,3 +83,13 @@ class CPU(Base):
     def usage_per_cpu(self) -> list[float]:  # pylint: disable=unsubscriptable-object
         """CPU usage per CPU"""
         return cpu_percent(interval=1, percpu=True)
+
+    def voltage(
+        self,
+        database: Database,
+    ) -> float | None:
+        """CPU voltage"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "cpu" in key and "voltage" in key and value is not None and value != 0:
+                return value
+        return None

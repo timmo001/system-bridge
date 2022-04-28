@@ -89,6 +89,10 @@ class CPUUpdate(ModuleUpdateBase):
             self._database.write("cpu", f"usage_{count}", value)
             count += 1
 
+    async def update_voltage(self) -> None:
+        """Update voltage"""
+        self._database.write("cpu", "voltage", self._cpu.voltage())
+
     async def update_all_data(self) -> None:
         """Update data"""
         await self.update_count()
@@ -103,3 +107,4 @@ class CPUUpdate(ModuleUpdateBase):
         await self.update_times_per_cpu_percent()
         await self.update_usage()
         await self.update_usage_per_cpu()
+        await self.update_voltage()
