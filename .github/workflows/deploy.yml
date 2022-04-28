@@ -13,6 +13,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  # deploy-shared:
+  #   uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+  #   secrets:
+  #     PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+  #     PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+  #   with:
+  #     code-path: shared
+  #     module-name: systembridgeshared
+  #     pre-install-command: |
+  #       cd ../shared && pip install .
+  #     use-incremental: true
   deploy-backend:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
@@ -36,7 +47,7 @@ jobs:
   #     module-name: systembridgecli
   #     pre-install-command: |
   #       cd ../shared && pip install .
-  #     use-incremental: true#
+  #     use-incremental: true
   deploy-connector:
     needs:
       - deploy-backend
