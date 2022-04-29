@@ -12,7 +12,7 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.sensor import Sensor
+from systembridgebackend.modules.sensors import Sensors
 
 
 class SensorsUpdate(Base):
@@ -38,7 +38,7 @@ class SensorsUpdate(Base):
                 (COLUMN_TIMESTAMP, "DOUBLE"),
             ],
         )
-        self._sensors = Sensor()
+        self._sensors = Sensors()
 
     async def update_fans(self) -> None:
         """Update Fan Sensors"""
