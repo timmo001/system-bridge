@@ -41,3 +41,13 @@ def convert_string_to_correct_type(
         return float(value)
     except ValueError:
         return value
+
+
+make_key = (
+    lambda x: x.replace(" ", "_", -1)
+    .replace("(", "", -1)
+    .replace(")", "", -1)
+    .replace("\\", "", -1)
+    .replace(".", "", -1)
+    .lower()
+)
