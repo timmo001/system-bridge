@@ -15,8 +15,11 @@ import DataItems from "components/Data/DataItems";
 
 const modules = [
   "battery",
+  "bridge",
   "cpu",
   "disk",
+  "display",
+  "gpu",
   "memory",
   "network",
   "sensors",
