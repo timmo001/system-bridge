@@ -25,11 +25,12 @@ namespace SystemBridgeWindowsSensors
 
       JObject root = new JObject
       {
-        ["hardware"] = hardwareData,
+        //["hardware"] = hardwareData,
         ["nvidia"] = nvidiaData,
       };
 
       Console.WriteLine(root.ToString(Formatting.None));
+      Console.ReadLine();
     }
   }
 }
