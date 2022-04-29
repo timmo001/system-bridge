@@ -11,7 +11,13 @@ from systembridgeshared.common import (
     convert_string_to_correct_type,
     get_user_data_directory,
 )
-from systembridgeshared.const import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgeshared.const import (
+    COLUMN_KEY,
+    COLUMN_NAME,
+    COLUMN_TIMESTAMP,
+    COLUMN_TYPE,
+    COLUMN_VALUE,
+)
 
 
 class Database(Base):
@@ -122,6 +128,32 @@ class Database(Base):
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
              VALUES ("{key}", "{value}", {timestamp})
+             ON CONFLICT({COLUMN_KEY}) DO
+             UPDATE SET {COLUMN_VALUE} = "{value}", {COLUMN_TIMESTAMP} = {timestamp}
+             WHERE {COLUMN_KEY} = "{key}"
+            """.replace(
+                "\n", ""
+            ).replace(
+                "            ", ""
+            ),
+        )
+
+    def write_sensor(
+        self,
+        table_name: str,
+        key: str,
+        name: str,
+        type: str,
+        value: str,
+        timestamp: float = None,
+    ) -> None:
+        """Write to table"""
+        if timestamp is None:
+            timestamp = time()
+        self.execute_sql(
+            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_NAME}, {COLUMN_TYPE},
+             {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
+             VALUES ("{key}", "{name}", "{type}", "{value}", {timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
              UPDATE SET {COLUMN_VALUE} = "{value}", {COLUMN_TIMESTAMP} = {timestamp}
              WHERE {COLUMN_KEY} = "{key}"

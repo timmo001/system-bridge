@@ -9,8 +9,10 @@ TABLE_SECRETS = "secrets"
 TABLE_SETTINGS = "settings"
 
 COLUMN_KEY = "key"
-COLUMN_VALUE = "value"
+COLUMN_NAME = "name"
 COLUMN_TIMESTAMP = "timestamp"
+COLUMN_TYPE = "type"
+COLUMN_VALUE = "value"
 
 # Settings
 SETTING_LOG_LEVEL = "log_level"
