@@ -69,7 +69,7 @@ class Server(Base):
         mdns_advertisement = MDNSAdvertisement(self._settings)
         mdns_advertisement.advertise_server()
 
-        @task(start=timedelta(seconds=5))
+        @task(start=timedelta(seconds=2))
         async def _after_startup(_) -> None:
             """After startup"""
             if "--no-gui" not in sys.argv:
@@ -79,12 +79,18 @@ class Server(Base):
                     self._logger.error("GUI could not be started. Exiting application")
                     await self._exit_application()
 
-        @task(timedelta(minutes=2))
+        @task(
+            start=timedelta(seconds=10),
+            period=timedelta(minutes=2),
+        )
         async def _update_data(_) -> None:
             """Update data"""
             await self._update.update_data(self._data_updated)
 
-        @task(timedelta(seconds=30))
+        @task(
+            start=timedelta(seconds=10),
+            period=timedelta(seconds=30),
+        )
         async def _update_frequent_data(_) -> None:
             """Update frequent data"""
             await self._update.update_frequent_data(self._data_updated)
