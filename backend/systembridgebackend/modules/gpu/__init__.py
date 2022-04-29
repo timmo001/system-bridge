@@ -1,9 +1,15 @@
 """System Bridge: GPU"""
 from __future__ import annotations
 
-from systembridgeshared.database import Database
-
 from systembridgeshared.base import Base
+from systembridgeshared.const import (
+    COLUMN_HARDWARE_TYPE,
+    COLUMN_KEY,
+    COLUMN_NAME,
+    COLUMN_TYPE,
+    COLUMN_VALUE,
+)
+from systembridgeshared.database import Database
 
 
 class GPU(Base):
@@ -14,10 +20,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU core clock"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "core" in key and "clock" in key:
-                self._logger.debug("Found GPU core clock: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "clock" in item[COLUMN_TYPE].lower()
+                and "core" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU core clock: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def core_load(
@@ -25,10 +39,16 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU core load"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "core" in key and "load" in key:
-                self._logger.debug("Found GPU core load: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "load" in item[COLUMN_TYPE].lower()
+                and "core" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU core load: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def fan_speed(
@@ -36,10 +56,15 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU fan speed"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "fan" in key:
-                self._logger.debug("Found GPU fan speed: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "fan" in item[COLUMN_TYPE].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU fan speed: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def memory_clock(
@@ -47,10 +72,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU memory clock"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "memory" in key and "clock" in key:
-                self._logger.debug("Found GPU memory clock: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "clock" in item[COLUMN_TYPE].lower()
+                and "memory" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU memory clock: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def memory_load(
@@ -58,10 +91,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU memory load"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "memory" in key and "load" in key:
-                self._logger.debug("Found GPU memory load: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "load" in item[COLUMN_TYPE].lower()
+                and "memory" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU memory load: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def memory_free(
@@ -69,10 +110,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU memory free"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "memory" in key and "free" in key:
-                self._logger.debug("Found GPU memory free: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "memory" in item[COLUMN_NAME].lower()
+                and "free" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU memory free: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def memory_used(
@@ -80,10 +129,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU memory used"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "memory" in key and "used" in key:
-                self._logger.debug("Found GPU memory used: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "memory" in item[COLUMN_NAME].lower()
+                and "used" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU memory used: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def memory_total(
@@ -91,10 +148,18 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU memory total"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "memory" in key and "total" in key:
-                self._logger.debug("Found GPU memory total: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "memory" in item[COLUMN_NAME].lower()
+                and "total" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU memory total: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def power(
@@ -102,10 +167,15 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU power usage"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "power" in key:
-                self._logger.debug("Found GPU power: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "power" in item[COLUMN_TYPE].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU power: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def temperature(
@@ -113,8 +183,16 @@ class GPU(Base):
         database: Database,
     ) -> float | None:
         """GPU temperature"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "gpu" in key and "temperature" in key:
-                self._logger.debug("Found GPU temperature: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "temperature" in item[COLUMN_TYPE].lower()
+                and "core" in item[COLUMN_NAME].lower()
+            ):
+                self._logger.debug(
+                    "Found GPU temperature: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None

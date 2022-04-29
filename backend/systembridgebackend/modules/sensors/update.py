@@ -2,6 +2,7 @@
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     COLUMN_HARDWARE_NAME,
+    COLUMN_HARDWARE_TYPE,
     COLUMN_KEY,
     COLUMN_NAME,
     COLUMN_TIMESTAMP,
@@ -39,6 +40,7 @@ class SensorsUpdate(Base):
                 (COLUMN_KEY, "TEXT PRIMARY KEY"),
                 (COLUMN_TYPE, "TEXT"),
                 (COLUMN_NAME, "TEXT"),
+                (COLUMN_HARDWARE_TYPE, "TEXT"),
                 (COLUMN_HARDWARE_NAME, "TEXT"),
                 (COLUMN_VALUE, "TEXT"),
                 (COLUMN_TIMESTAMP, "DOUBLE"),
@@ -76,6 +78,7 @@ class SensorsUpdate(Base):
                         f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
                         sensor["type"],
                         sensor["name"],
+                        hardware["type"],
                         hardware["name"],
                         sensor["value"] if "value" in sensor else None,
                     )
@@ -101,6 +104,7 @@ class SensorsUpdate(Base):
                                 f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
                                 sensor,
                                 subkey,
+                                hardware["type"] if "type" in hardware else "NVIDIA",
                                 name_hardware,
                                 subvalue,
                             )
@@ -112,7 +116,8 @@ class SensorsUpdate(Base):
                             f"windows_nvidia_{sensor}_{subkey}",
                             sensor,
                             subkey,
-                            value["name"] if "name" in value else None,
+                            value["type"] if "type" in value else "NVIDIA",
+                            value["name"] if "name" in value else "NVIDIA",
                             subvalue,
                         )
 

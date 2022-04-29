@@ -11,9 +11,14 @@ from psutil import (
 )
 from psutil._common import pcputimes, scpufreq, scpustats
 
-from systembridgeshared.database import Database
-
 from systembridgeshared.base import Base
+from systembridgeshared.database import Database
+from systembridgeshared.const import (
+    COLUMN_HARDWARE_TYPE,
+    COLUMN_KEY,
+    COLUMN_TYPE,
+    COLUMN_VALUE,
+)
 
 
 class CPU(Base):
@@ -46,10 +51,17 @@ class CPU(Base):
         database: Database,
     ) -> float | None:
         """CPU temperature"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "cpu" in key and "temperature" in key:
-                self._logger.debug("Found CPU temperature: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "temperature" in item[COLUMN_TYPE].lower()
+            ):
+                self._logger.debug(
+                    "Found CPU temperature: %s = %s",
+                    item[COLUMN_KEY],
+                    item[COLUMN_VALUE],
+                )
+                return item[COLUMN_VALUE]
         return None
 
     def times(self) -> pcputimes:
@@ -85,8 +97,13 @@ class CPU(Base):
         database: Database,
     ) -> float | None:
         """CPU voltage"""
-        for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if "cpu" in key and "voltage" in key:
-                self._logger.debug("Found CPU voltage: %s = %s", key, value)
-                return value
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and "voltage" in item[COLUMN_TYPE].lower()
+            ):
+                self._logger.debug(
+                    "Found CPU voltage: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
+                )
+                return item[COLUMN_VALUE]
         return None

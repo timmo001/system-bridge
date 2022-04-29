@@ -9,6 +9,7 @@ TABLE_SECRETS = "secrets"
 TABLE_SETTINGS = "settings"
 
 COLUMN_HARDWARE_NAME = "hardware_name"
+COLUMN_HARDWARE_TYPE = "hardware_type"
 COLUMN_KEY = "key"
 COLUMN_NAME = "name"
 COLUMN_TIMESTAMP = "timestamp"
