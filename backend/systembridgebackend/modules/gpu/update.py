@@ -17,6 +17,14 @@ class GPUUpdate(ModuleUpdateBase):
         super().__init__(database, "gpu")
         self._gpu = GPU()
 
+    async def update_name(
+        self,
+        gpu_key: str,
+        gpu_name: str,
+    ) -> None:
+        """Update name"""
+        self._database.write("gpu", f"{gpu_key}_name", gpu_name)
+
     async def update_core_clock(
         self,
         gpu_key: str,
@@ -109,6 +117,7 @@ class GPUUpdate(ModuleUpdateBase):
         """Update data"""
         for gpu_name in self._gpu.get_gpus(self._database):
             gpu_key = make_key(gpu_name)
+            await self.update_name(gpu_key, gpu_name)
             await self.update_core_clock(gpu_key)
             await self.update_core_load(gpu_key)
             await self.update_fan_speed(gpu_key)
