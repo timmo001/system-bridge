@@ -47,12 +47,8 @@ class CPU(Base):
     ) -> float | None:
         """CPU temperature"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if (
-                "cpu" in key
-                and "temperature" in key
-                and value is not None
-                and value != 0
-            ):
+            if "cpu" in key and "temperature" in key:
+                self._logger.debug("Found CPU temperature: %s = %s", key, value)
                 return value
         return None
 
@@ -91,5 +87,6 @@ class CPU(Base):
         """CPU voltage"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "cpu" in key and "voltage" in key:
+                self._logger.debug("Found CPU voltage: %s = %s", key, value)
                 return value
         return None

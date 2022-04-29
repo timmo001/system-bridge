@@ -117,5 +117,5 @@ class Listeners(Base):
                 )
                 return True
 
-        self._logger.warning("Listener not found: %s", listener_id)
+        self._logger.info("Listener not found: %s", listener_id)
         return False

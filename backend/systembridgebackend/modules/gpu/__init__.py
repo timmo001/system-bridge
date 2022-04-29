@@ -16,6 +16,7 @@ class GPU(Base):
         """GPU core clock"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "core" in key and "clock" in key:
+                self._logger.debug("Found GPU core clock: %s = %s", key, value)
                 return value
         return None
 
@@ -26,6 +27,7 @@ class GPU(Base):
         """GPU core load"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "core" in key and "load" in key:
+                self._logger.debug("Found GPU core load: %s = %s", key, value)
                 return value
         return None
 
@@ -36,6 +38,7 @@ class GPU(Base):
         """GPU memory clock"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "memory" in key and "clock" in key:
+                self._logger.debug("Found GPU memory clock: %s = %s", key, value)
                 return value
         return None
 
@@ -46,6 +49,7 @@ class GPU(Base):
         """GPU memory load"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "memory" in key and "load" in key:
+                self._logger.debug("Found GPU memory load: %s = %s", key, value)
                 return value
         return None
 
@@ -56,6 +60,7 @@ class GPU(Base):
         """GPU power usage"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "power" in key:
+                self._logger.debug("Found GPU power: %s = %s", key, value)
                 return value
         return None
 
@@ -66,5 +71,6 @@ class GPU(Base):
         """GPU temperature"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "temperature" in key:
+                self._logger.debug("Found GPU temperature: %s = %s", key, value)
                 return value
         return None
