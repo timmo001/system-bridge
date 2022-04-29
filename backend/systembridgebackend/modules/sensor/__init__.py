@@ -1,4 +1,4 @@
-"""System Bridge: Sensors"""
+"""System Bridge: Sensor"""
 from __future__ import annotations
 import json
 import psutil

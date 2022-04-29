@@ -1,4 +1,4 @@
-"""System Bridge: Update Sensors"""
+"""System Bridge: Update Sensor"""
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -38,7 +38,7 @@ class SensorUpdate(Base):
                 (COLUMN_TIMESTAMP, "DOUBLE"),
             ],
         )
-        self._sensors = Sensors()
+        self._sensors = Sensor()
 
     async def update_fans(self) -> None:
         """Update Fan Sensors"""
