@@ -1,11 +1,18 @@
 """System Bridge: Update Sensors"""
+from systembridgeshared.base import Base
+from systembridgeshared.const import (
+    COLUMN_KEY,
+    COLUMN_NAME,
+    COLUMN_TIMESTAMP,
+    COLUMN_TYPE,
+    COLUMN_VALUE,
+)
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.base import ModuleUpdateBase
 from systembridgebackend.modules.sensors import Sensors
 
 
-class SensorsUpdate(ModuleUpdateBase):
+class SensorsUpdate(Base):
     """Sensors Update"""
 
     def __init__(
@@ -13,7 +20,19 @@ class SensorsUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database, "sensors")
+        super().__init__()
+
+        self._database = database
+        self._database.create_table(
+            "sensors",
+            [
+                (COLUMN_KEY, "TEXT PRIMARY KEY"),
+                (COLUMN_NAME, "TEXT"),
+                (COLUMN_TYPE, "TEXT"),
+                (COLUMN_VALUE, "TEXT"),
+                (COLUMN_TIMESTAMP, "DOUBLE"),
+            ],
+        )
         self._sensors = Sensors()
 
     async def update_fans(self) -> None:
@@ -50,9 +69,11 @@ class SensorsUpdate(ModuleUpdateBase):
                         .lower()
                     )
 
-                    self._database.write(
+                    self._database.write_sensor(
                         "sensors",
                         f"windows_hardware_{sensor_name}_{sensor_type}",
+                        key["name"],
+                        sensor_type,
                         key["value"],
                     )
 
@@ -62,17 +83,21 @@ class SensorsUpdate(ModuleUpdateBase):
                     counter = 0
                     for item in value:
                         for subkey, subvalue in item.items():
-                            self._database.write(
+                            self._database.write_sensor(
                                 "sensors",
                                 f"windows_nvidia_{key}_{counter}_{subkey}",
+                                subkey,
+                                key,
                                 subvalue,
                             )
                         counter += 1
                 else:
                     for subkey, subvalue in value.items():
-                        self._database.write(
+                        self._database.write_sensor(
                             "sensors",
                             f"windows_nvidia_{key}_{subkey}",
+                            subkey,
+                            key,
                             subvalue,
                         )
 

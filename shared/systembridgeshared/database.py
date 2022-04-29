@@ -11,7 +11,13 @@ from systembridgeshared.common import (
     convert_string_to_correct_type,
     get_user_data_directory,
 )
-from systembridgeshared.const import COLUMN_KEY, COLUMN_TIMESTAMP, COLUMN_VALUE
+from systembridgeshared.const import (
+    COLUMN_KEY,
+    COLUMN_NAME,
+    COLUMN_TIMESTAMP,
+    COLUMN_TYPE,
+    COLUMN_VALUE,
+)
 
 
 class Database(Base):
@@ -112,19 +118,45 @@ class Database(Base):
     def write(
         self,
         table_name: str,
-        key: str,
-        value: str,
-        timestamp: float = None,
+        data_key: str,
+        data_value: str,
+        data_timestamp: float = None,
     ) -> None:
         """Write to table"""
-        if timestamp is None:
-            timestamp = time()
+        if data_timestamp is None:
+            data_timestamp = time()
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{key}", "{value}", {timestamp})
+             VALUES ("{data_key}", "{data_value}", {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = "{value}", {COLUMN_TIMESTAMP} = {timestamp}
-             WHERE {COLUMN_KEY} = "{key}"
+             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = "{data_key}"
+            """.replace(
+                "\n", ""
+            ).replace(
+                "            ", ""
+            ),
+        )
+
+    def write_sensor(
+        self,
+        table_name: str,
+        data_key: str,
+        data_name: str,
+        data_type: str,
+        data_value: str,
+        data_timestamp: float = None,
+    ) -> None:
+        """Write to table"""
+        if data_timestamp is None:
+            data_timestamp = time()
+        self.execute_sql(
+            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_NAME}, {COLUMN_TYPE},
+             {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
+             VALUES ("{data_key}", "{data_name}", "{data_type}", "{data_value}", {data_timestamp})
+             ON CONFLICT({COLUMN_KEY}) DO
+             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = "{data_key}"
             """.replace(
                 "\n", ""
             ).replace(
