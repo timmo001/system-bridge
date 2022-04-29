@@ -31,6 +31,17 @@ class GPU(Base):
                 return value
         return None
 
+    def fan_speed(
+        self,
+        database: Database,
+    ) -> float | None:
+        """GPU fan speed"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "gpu" in key and "fan" in key:
+                self._logger.debug("Found GPU fan speed: %s = %s", key, value)
+                return value
+        return None
+
     def memory_clock(
         self,
         database: Database,
@@ -50,6 +61,39 @@ class GPU(Base):
         for key, value in database.table_data_to_ordered_dict("sensors").items():
             if "gpu" in key and "memory" in key and "load" in key:
                 self._logger.debug("Found GPU memory load: %s = %s", key, value)
+                return value
+        return None
+
+    def memory_free(
+        self,
+        database: Database,
+    ) -> float | None:
+        """GPU memory free"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "gpu" in key and "memory" in key and "free" in key:
+                self._logger.debug("Found GPU memory free: %s = %s", key, value)
+                return value
+        return None
+
+    def memory_used(
+        self,
+        database: Database,
+    ) -> float | None:
+        """GPU memory used"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "gpu" in key and "memory" in key and "used" in key:
+                self._logger.debug("Found GPU memory used: %s = %s", key, value)
+                return value
+        return None
+
+    def memory_total(
+        self,
+        database: Database,
+    ) -> float | None:
+        """GPU memory total"""
+        for key, value in database.table_data_to_ordered_dict("sensors").items():
+            if "gpu" in key and "memory" in key and "total" in key:
+                self._logger.debug("Found GPU memory total: %s = %s", key, value)
                 return value
         return None
 
