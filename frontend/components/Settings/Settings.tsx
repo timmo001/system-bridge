@@ -24,7 +24,9 @@ function Settings(): ReactElement {
         console.log("Settings result:", event.data);
         let newSettings: SettingsObject = {};
         event.data.forEach((s: { key: string; value: SettingsValue }) => {
-          newSettings[s.key] = s.value;
+          if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
+            newSettings[s.key] = Number(s.value);
+          else newSettings[s.key] = s.value;
         });
         console.log("Settings:", newSettings);
         setSettings(newSettings);
