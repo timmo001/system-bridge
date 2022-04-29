@@ -12,6 +12,7 @@ from systembridgeshared.common import (
     get_user_data_directory,
 )
 from systembridgeshared.const import (
+    COLUMN_HARDWARE_NAME,
     COLUMN_KEY,
     COLUMN_NAME,
     COLUMN_TIMESTAMP,
@@ -142,8 +143,9 @@ class Database(Base):
         self,
         table_name: str,
         data_key: str,
-        data_name: str,
         data_type: str,
+        data_name: str,
+        data_hardware_name: str,
         data_value: str,
         data_timestamp: float = None,
     ) -> None:
@@ -151,9 +153,10 @@ class Database(Base):
         if data_timestamp is None:
             data_timestamp = time()
         self.execute_sql(
-            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_NAME}, {COLUMN_TYPE},
-             {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{data_key}", "{data_name}", "{data_type}", "{data_value}", {data_timestamp})
+            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_TYPE}, {COLUMN_NAME},
+             {COLUMN_HARDWARE_NAME}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
+             VALUES ("{data_key}", "{data_type}", "{data_name}", "{data_hardware_name}",
+             "{data_value}", {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
              UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
              WHERE {COLUMN_KEY} = "{data_key}"
