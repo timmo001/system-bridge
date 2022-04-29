@@ -48,12 +48,7 @@ class GPU(Base):
     ) -> float | None:
         """GPU memory load"""
         for key, value in database.table_data_to_ordered_dict("sensors").items():
-            if (
-                "gpu" in key
-                and "memory" in key
-                and "load" in key
-                and "controller" not in key
-            ):
+            if "gpu" in key and "memory" in key and "load" in key:
                 self._logger.debug("Found GPU memory load: %s = %s", key, value)
                 return value
         return None
