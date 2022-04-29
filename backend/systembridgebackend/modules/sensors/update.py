@@ -75,7 +75,7 @@ class SensorsUpdate(Base):
                         "sensors",
                         f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
                         sensor["name"],
-                        key_sensor_type,
+                        sensor["type"],
                         hardware["name"],
                         sensor["value"],
                     )
