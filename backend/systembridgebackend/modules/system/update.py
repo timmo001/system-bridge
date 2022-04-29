@@ -1,4 +1,5 @@
 """System Bridge: Update System"""
+import asyncio
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -85,16 +86,20 @@ class SystemUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_boot_time()
-        await self.update_fqdn()
-        await self.update_hostname()
-        await self.update_ip_address_4()
-        await self.update_mac_address()
-        await self.update_platform()
-        await self.update_platform_version()
-        await self.update_uptime()
-        await self.update_users()
-        await self.update_uuid()
-        await self.update_version()
-        await self.update_version_latest()
+        await asyncio.gather(
+            *[
+                self.update_boot_time(),
+                self.update_fqdn(),
+                self.update_hostname(),
+                self.update_ip_address_4(),
+                self.update_mac_address(),
+                self.update_platform(),
+                self.update_platform_version(),
+                self.update_uptime(),
+                self.update_users(),
+                self.update_uuid(),
+                self.update_version(),
+                self.update_version_latest(),
+            ]
+        )
         await self.update_version_newer_avaliable()

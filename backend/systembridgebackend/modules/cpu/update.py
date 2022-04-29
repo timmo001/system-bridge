@@ -1,4 +1,5 @@
 """System Bridge: Update CPU"""
+import asyncio
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -95,16 +96,20 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_count()
-        await self.update_frequency()
-        await self.update_frequency_per_cpu()
-        await self.update_load_average()
-        await self.update_stats()
-        await self.update_temperature()
-        await self.update_times()
-        await self.update_times_percent()
-        await self.update_times_per_cpu()
-        await self.update_times_per_cpu_percent()
-        await self.update_usage()
-        await self.update_usage_per_cpu()
-        await self.update_voltage()
+        await asyncio.gather(
+            *[
+                self.update_count(),
+                self.update_frequency(),
+                self.update_frequency_per_cpu(),
+                self.update_load_average(),
+                self.update_stats(),
+                self.update_temperature(),
+                self.update_times(),
+                self.update_times_percent(),
+                self.update_times_per_cpu(),
+                self.update_times_per_cpu_percent(),
+                self.update_usage(),
+                self.update_usage_per_cpu(),
+                self.update_voltage(),
+            ]
+        )

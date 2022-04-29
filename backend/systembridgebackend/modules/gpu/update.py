@@ -1,4 +1,5 @@
 """System Bridge: Update GPU"""
+import asyncio
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
@@ -117,14 +118,18 @@ class GPUUpdate(ModuleUpdateBase):
         """Update data"""
         for gpu_name in self._gpu.get_gpus(self._database):
             gpu_key = make_key(gpu_name)
-            await self.update_name(gpu_key, gpu_name)
-            await self.update_core_clock(gpu_key)
-            await self.update_core_load(gpu_key)
-            await self.update_fan_speed(gpu_key)
-            await self.update_memory_clock(gpu_key)
-            await self.update_memory_load(gpu_key)
-            await self.update_memory_free(gpu_key)
-            await self.update_memory_used(gpu_key)
-            await self.update_memory_total(gpu_key)
-            await self.update_power(gpu_key)
-            await self.update_temperature(gpu_key)
+            await asyncio.gather(
+                *[
+                    self.update_name(gpu_key, gpu_name),
+                    self.update_core_clock(gpu_key),
+                    self.update_core_load(gpu_key),
+                    self.update_fan_speed(gpu_key),
+                    self.update_memory_clock(gpu_key),
+                    self.update_memory_load(gpu_key),
+                    self.update_memory_free(gpu_key),
+                    self.update_memory_used(gpu_key),
+                    self.update_memory_total(gpu_key),
+                    self.update_power(gpu_key),
+                    self.update_temperature(gpu_key),
+                ]
+            )

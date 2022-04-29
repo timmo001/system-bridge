@@ -1,4 +1,5 @@
 """System Bridge: Update Disk"""
+import asyncio
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -48,7 +49,11 @@ class DiskUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_io_counters()
-        await self.update_io_counters_per_disk()
-        await self.update_partitions()
-        await self.update_usage()
+        await asyncio.gather(
+            *[
+                self.update_io_counters(),
+                self.update_io_counters_per_disk(),
+                self.update_partitions(),
+                self.update_usage(),
+            ]
+        )

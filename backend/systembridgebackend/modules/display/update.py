@@ -1,4 +1,5 @@
 """System Bridge: Update Display"""
+import asyncio
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
@@ -73,8 +74,12 @@ class DisplayUpdate(ModuleUpdateBase):
         """Update data"""
         for display_name in self._display.get_displays(self._database):
             display_key = make_key(display_name)
-            await self.update_name(display_key, display_name)
-            await self.update_pixel_clock(display_key)
-            await self.update_refresh_rate(display_key)
-            await self.update_resolution_horizontal(display_key)
-            await self.update_resolution_vertical(display_key)
+            await asyncio.gather(
+                *[
+                    self.update_name(display_key, display_name),
+                    self.update_pixel_clock(display_key),
+                    self.update_refresh_rate(display_key),
+                    self.update_resolution_horizontal(display_key),
+                    self.update_resolution_vertical(display_key),
+                ]
+            )

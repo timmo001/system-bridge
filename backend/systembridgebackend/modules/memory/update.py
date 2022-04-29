@@ -1,4 +1,5 @@
 """System Bridge: Update Memory"""
+import asyncio
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -28,5 +29,9 @@ class MemoryUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_swap()
-        await self.update_virtual()
+        await asyncio.gather(
+            *[
+                self.update_swap(),
+                self.update_virtual(),
+            ]
+        )

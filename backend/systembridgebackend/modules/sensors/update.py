@@ -1,4 +1,5 @@
 """System Bridge: Update Sensors"""
+import asyncio
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -119,6 +120,10 @@ class SensorsUpdate(Base):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_fans()
-        await self.update_temperatures()
-        await self.update_windows_sensors()
+        await asyncio.gather(
+            *[
+                self.update_fans(),
+                self.update_temperatures(),
+                self.update_windows_sensors(),
+            ]
+        )

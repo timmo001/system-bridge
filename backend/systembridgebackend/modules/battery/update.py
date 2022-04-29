@@ -1,4 +1,5 @@
 """System Bridge: Update Battery"""
+import asyncio
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
 
@@ -33,5 +34,9 @@ class BatteryUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-        await self.update_sensors()
-        await self.update_status()
+        await asyncio.gather(
+            *[
+                self.update_sensors(),
+                self.update_status(),
+            ]
+        )
