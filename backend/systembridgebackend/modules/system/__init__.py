@@ -1,6 +1,5 @@
 """System Bridge: System"""
 from __future__ import annotations
-import io
 import os
 import platform
 import re
@@ -95,7 +94,7 @@ class System(Base):
     def version_newer_avaliable(
         self,
         database: Database,
-    ) -> bool:
+    ) -> bool | None:
         """Check if newer version is available"""
         version = database.read_table_by_key("system", "version").to_dict(
             orient="records"
@@ -103,4 +102,6 @@ class System(Base):
         latest_version = database.read_table_by_key("system", "version_latest").to_dict(
             orient="records"
         )[0]["value"]
-        return parse_version(latest_version) > parse_version(version)
+        if version is not None and latest_version is not None:
+            return parse_version(latest_version) > parse_version(version)
+        return None
