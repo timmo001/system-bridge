@@ -1,4 +1,4 @@
-"""System Bridge: Update Sensor"""
+"""System Bridge: Update Sensors"""
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -15,8 +15,8 @@ from systembridgeshared.database import Database
 from systembridgebackend.modules.sensor import Sensor
 
 
-class SensorUpdate(Base):
-    """Sensor Update"""
+class SensorsUpdate(Base):
+    """Sensors Update"""
 
     def __init__(
         self,

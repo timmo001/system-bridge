@@ -1,4 +1,4 @@
-"""System Bridge: Sensor"""
+"""System Bridge: Sensors"""
 from __future__ import annotations
 import json
 import psutil
@@ -8,8 +8,8 @@ import sys
 from systembridgeshared.base import Base
 
 
-class Sensor(Base):
-    """Sensor"""
+class Sensors(Base):
+    """Sensors"""
 
     def fans(self) -> dict | None:
         """Get fans"""

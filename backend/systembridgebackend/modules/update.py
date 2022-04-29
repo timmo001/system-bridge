@@ -34,7 +34,7 @@ class Update(Base):
             {"name": "system", "cls": SystemUpdate(self._database)},
         ]
         self._classes_frequent = [
-            {"name": "sensors", "cls": SensorUpdate(self._database)},
+            {"name": "sensor", "cls": SensorUpdate(self._database)},
             {"name": "cpu", "cls": CPUUpdate(self._database)},
             {"name": "gpu", "cls": GPUUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
