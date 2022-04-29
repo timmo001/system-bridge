@@ -8,6 +8,7 @@ FORMAT = "%(asctime)s %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 TABLE_SECRETS = "secrets"
 TABLE_SETTINGS = "settings"
 
+COLUMN_HARDWARE_NAME = "hardware_name"
 COLUMN_KEY = "key"
 COLUMN_NAME = "name"
 COLUMN_TIMESTAMP = "timestamp"

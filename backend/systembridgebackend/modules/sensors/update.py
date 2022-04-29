@@ -1,6 +1,7 @@
 """System Bridge: Update Sensors"""
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    COLUMN_HARDWARE_NAME,
     COLUMN_KEY,
     COLUMN_NAME,
     COLUMN_TIMESTAMP,
@@ -10,6 +11,15 @@ from systembridgeshared.const import (
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.sensors import Sensors
+
+make_key = (
+    lambda x: x.replace(" ", "_", -1)
+    .replace("(", "", -1)
+    .replace(")", "", -1)
+    .replace("\\", "", -1)
+    .replace(".", "", -1)
+    .lower()
+)
 
 
 class SensorsUpdate(Base):
@@ -27,8 +37,9 @@ class SensorsUpdate(Base):
             "sensors",
             [
                 (COLUMN_KEY, "TEXT PRIMARY KEY"),
-                (COLUMN_NAME, "TEXT"),
                 (COLUMN_TYPE, "TEXT"),
+                (COLUMN_NAME, "TEXT"),
+                (COLUMN_HARDWARE_NAME, "TEXT"),
                 (COLUMN_VALUE, "TEXT"),
                 (COLUMN_TIMESTAMP, "DOUBLE"),
             ],
@@ -52,42 +63,45 @@ class SensorsUpdate(Base):
         if not (data := self._sensors.windows_sensors()):
             return
         if "hardware" in data and data["hardware"] is not None:
-            for item in data["hardware"]:
-                for key in item["sensors"] or []:
-                    sensor_name = (
-                        key["name"]
-                        .replace(" ", "_", -1)
-                        .replace("(", "", -1)
-                        .replace(")", "", -1)
-                        .lower()
-                    )
-                    sensor_type = (
-                        key["type"]
-                        .replace(" ", "_", -1)
-                        .replace("(", "", -1)
-                        .replace(")", "", -1)
-                        .lower()
-                    )
+            for hardware in data["hardware"]:
+                key_hardware = (
+                    make_key(f"_{hardware['name']}") if "name" in hardware else None
+                )
+                for sensor in hardware["sensors"] or []:
+                    key_sensor_name = make_key(sensor["name"])
+                    key_sensor_type = make_key(sensor["type"])
 
                     self._database.write_sensor(
                         "sensors",
-                        f"windows_hardware_{sensor_name}_{sensor_type}",
-                        key["name"],
-                        sensor_type,
-                        key["value"],
+                        f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
+                        sensor["type"],
+                        sensor["name"],
+                        hardware["name"],
+                        sensor["value"],
                     )
 
         if "nvidia" in data and data["nvidia"] is not None:
-            for key, value in data["nvidia"].items():
+            for sensor, value in data["nvidia"].items():
                 if isinstance(value, list):
                     counter = 0
-                    for item in value:
-                        for subkey, subvalue in item.items():
+                    for hardware in value:
+                        key_hardware = (
+                            make_key(f"_{hardware['name']}")
+                            if "name" in hardware
+                            else None
+                        )
+                        name_hardware = hardware["name"] if "name" in hardware else None
+                        if "DISPLAY" in name_hardware:
+                            name_hardware = (
+                                f"Display {name_hardware.split('DISPLAY')[1]}"
+                            )
+                        for subkey, subvalue in hardware.items():
                             self._database.write_sensor(
                                 "sensors",
-                                f"windows_nvidia_{key}_{counter}_{subkey}",
+                                f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
+                                sensor,
                                 subkey,
-                                key,
+                                name_hardware,
                                 subvalue,
                             )
                         counter += 1
@@ -95,9 +109,10 @@ class SensorsUpdate(Base):
                     for subkey, subvalue in value.items():
                         self._database.write_sensor(
                             "sensors",
-                            f"windows_nvidia_{key}_{subkey}",
+                            f"windows_nvidia_{sensor}_{subkey}",
+                            sensor,
                             subkey,
-                            key,
+                            value["name"] if "name" in value else None,
                             subvalue,
                         )
 
