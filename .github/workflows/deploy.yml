@@ -14,7 +14,7 @@ jobs:
   deploy-shared:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -26,7 +26,7 @@ jobs:
       - deploy-shared
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -38,7 +38,7 @@ jobs:
       - deploy-backend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -50,7 +50,7 @@ jobs:
       - deploy-cli
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -62,7 +62,7 @@ jobs:
       - deploy-connector
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -83,7 +83,7 @@ jobs:
       - deploy-gui
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
@@ -105,7 +105,7 @@ jobs:
       - deploy-frontend
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
     with:
