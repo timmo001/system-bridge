@@ -77,7 +77,7 @@ class SensorsUpdate(Base):
                         sensor["type"],
                         sensor["name"],
                         hardware["name"],
-                        sensor["value"],
+                        sensor["value"] if "value" in sensor else None,
                     )
 
         if "nvidia" in data and data["nvidia"] is not None:
