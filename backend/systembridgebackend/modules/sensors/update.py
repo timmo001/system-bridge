@@ -74,8 +74,8 @@ class SensorsUpdate(Base):
                     self._database.write_sensor(
                         "sensors",
                         f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
-                        sensor["name"],
                         sensor["type"],
+                        sensor["name"],
                         hardware["name"],
                         sensor["value"],
                     )
@@ -99,8 +99,8 @@ class SensorsUpdate(Base):
                             self._database.write_sensor(
                                 "sensors",
                                 f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
-                                subkey,
                                 sensor,
+                                subkey,
                                 name_hardware,
                                 subvalue,
                             )
@@ -110,8 +110,8 @@ class SensorsUpdate(Base):
                         self._database.write_sensor(
                             "sensors",
                             f"windows_nvidia_{sensor}_{subkey}",
-                            subkey,
                             sensor,
+                            subkey,
                             value["name"] if "name" in value else None,
                             subvalue,
                         )
