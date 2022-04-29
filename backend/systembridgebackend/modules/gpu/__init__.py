@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    COLUMN_HARDWARE_NAME,
     COLUMN_HARDWARE_TYPE,
     COLUMN_KEY,
     COLUMN_NAME,
@@ -14,6 +15,20 @@ from systembridgeshared.database import Database
 
 class GPU(Base):
     """GPU"""
+
+    def get_gpus(
+        self,
+        database: Database,
+    ) -> list[str]:
+        """Get GPUs"""
+        gpus = []
+        for item in database.read_table("sensors").to_dict(orient="records"):
+            if (
+                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                and item[COLUMN_HARDWARE_NAME] not in gpus
+            ):
+                gpus.append(item[COLUMN_HARDWARE_NAME])
+        return gpus
 
     def core_clock(
         self,

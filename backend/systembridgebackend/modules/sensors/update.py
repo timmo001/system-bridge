@@ -1,5 +1,6 @@
 """System Bridge: Update Sensors"""
 from systembridgeshared.base import Base
+from systembridgeshared.common import make_key
 from systembridgeshared.const import (
     COLUMN_HARDWARE_NAME,
     COLUMN_HARDWARE_TYPE,
@@ -12,15 +13,6 @@ from systembridgeshared.const import (
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.sensors import Sensors
-
-make_key = (
-    lambda x: x.replace(" ", "_", -1)
-    .replace("(", "", -1)
-    .replace(")", "", -1)
-    .replace("\\", "", -1)
-    .replace(".", "", -1)
-    .lower()
-)
 
 
 class SensorsUpdate(Base):
