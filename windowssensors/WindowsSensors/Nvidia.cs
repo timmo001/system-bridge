@@ -35,13 +35,18 @@ namespace SystemBridgeWindowsSensors
           ["avaliable"] = display.DisplayDevice.IsAvailable,
           ["connected"] = display.DisplayDevice.IsConnected,
           ["dynamic"] = display.DisplayDevice.IsDynamic,
+          ["aspect_horizontal"] = display.DisplayDevice.CurrentTiming.Extra.HorizontalAspect,
+          ["aspect_vertical"] = display.DisplayDevice.CurrentTiming.Extra.VerticalAspect,
           ["brightness_current"] = display.DigitalVibranceControl.CurrentLevel,
           ["brightness_default"] = display.DigitalVibranceControl.DefaultLevel,
           ["brightness_max"] = display.DigitalVibranceControl.MaximumLevel,
           ["brightness_min"] = display.DigitalVibranceControl.MinimumLevel,
+          ["color_depth"] = display.DisplayDevice.CurrentColorData.ColorDepth.Value.ToString(),
           ["connection_type"] = display.DisplayDevice.ConnectionType.ToString(),
           ["pixel_clock"] = display.DisplayDevice.CurrentTiming.PixelClockIn10KHertz,
           ["refresh_rate"] = display.DisplayDevice.CurrentTiming.Extra.RefreshRate,
+          ["resolution_horizontal"] = display.DisplayDevice.CurrentTiming.HorizontalVisible,
+          ["resolution_vertical"] = display.DisplayDevice.CurrentTiming.VerticalVisible,
         });
       }
 

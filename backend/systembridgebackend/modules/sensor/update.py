@@ -85,8 +85,12 @@ class SensorUpdate(Base):
                             if "name" in hardware
                             else None
                         )
+                        type_hardware = (
+                            hardware["type"] if "type" in hardware else "NVIDIA"
+                        )
                         name_hardware = hardware["name"] if "name" in hardware else None
                         if "DISPLAY" in name_hardware:
+                            type_hardware = "Display"
                             name_hardware = (
                                 f"Display {name_hardware.split('DISPLAY')[1]}"
                             )
@@ -96,7 +100,7 @@ class SensorUpdate(Base):
                                 f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
                                 sensor,
                                 subkey,
-                                hardware["type"] if "type" in hardware else "NVIDIA",
+                                type_hardware,
                                 name_hardware,
                                 subvalue,
                             )
