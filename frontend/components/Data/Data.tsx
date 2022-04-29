@@ -28,8 +28,11 @@ const modules = [
 
 const moduleMap: { [key: string]: string } = {
   battery: "Battery",
+  bridge: "Bridge",
   cpu: "CPU",
   disk: "Disk",
+  display: "Display",
+  gpu: "GPU",
   memory: "Memory",
   network: "Network",
   sensors: "Sensors",
