@@ -102,4 +102,5 @@ class SystemUpdate(ModuleUpdateBase):
                 self.update_version_latest(),
             ]
         )
+        # Run after other version updates
         await self.update_version_newer_avaliable()
