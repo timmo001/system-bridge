@@ -8,8 +8,8 @@ import sys
 from systembridgeshared.base import Base
 
 
-class Sensors(Base):
-    """Sensors"""
+class Sensor(Base):
+    """Sensor"""
 
     def fans(self) -> dict | None:
         """Get fans"""

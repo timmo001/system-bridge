@@ -12,11 +12,11 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.sensors import Sensors
+from systembridgebackend.modules.sensor import Sensor
 
 
-class SensorsUpdate(Base):
-    """Sensors Update"""
+class SensorUpdate(Base):
+    """Sensor Update"""
 
     def __init__(
         self,

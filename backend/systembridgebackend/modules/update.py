@@ -11,7 +11,7 @@ from systembridgebackend.modules.disk.update import DiskUpdate
 from systembridgebackend.modules.gpu.update import GPUUpdate
 from systembridgebackend.modules.memory.update import MemoryUpdate
 from systembridgebackend.modules.network.update import NetworkUpdate
-from systembridgebackend.modules.sensors.update import SensorsUpdate
+from systembridgebackend.modules.sensor.update import SensorsUpdate
 from systembridgebackend.modules.system.update import SystemUpdate
 
 
