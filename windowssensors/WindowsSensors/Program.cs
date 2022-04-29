@@ -30,7 +30,6 @@ namespace SystemBridgeWindowsSensors
       };
 
       Console.WriteLine(root.ToString(Formatting.None));
-      Console.ReadLine();
     }
   }
 }
