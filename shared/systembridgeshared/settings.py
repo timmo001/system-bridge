@@ -15,6 +15,7 @@ from systembridgeshared.const import (
     COLUMN_TIMESTAMP,
     COLUMN_VALUE,
     SECRET_API_KEY,
+    SETTING_AUTOSTART,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
     TABLE_SECRETS,
@@ -70,6 +71,8 @@ class Settings(Base):
             self.set_secret(SECRET_API_KEY, str(uuid4()))
 
         # Default Settings
+        if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_AUTOSTART):
+            self.set(SETTING_AUTOSTART, False)
         if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_LOG_LEVEL):
             self.set(SETTING_LOG_LEVEL, "INFO")
         if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_PORT_API):
@@ -82,13 +85,20 @@ class Settings(Base):
     def get(
         self,
         key: str,
-    ) -> str | None:
+    ) -> bool | float | int | str | None:
         """Get setting"""
         record = self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
             orient="records"
         )
         if record and len(record) > 0:
-            return record[0]["value"]
+            value = record[0]["value"]
+            if value == "True":
+                return True
+            if value == "False":
+                return False
+            if value == "None":
+                return None
+            return value
         return None
 
     def get_secret(
