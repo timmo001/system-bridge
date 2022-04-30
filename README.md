@@ -87,7 +87,7 @@ python -m systembridgecli `api-key` --reset
 
 ### `systembridgebackend`
 
-The main application which contains the API/WebSocket and data modules.
+The main application which contains the API/WebSocket and data modules. This package requires the `systembridgeshared` package.
 
 ### `systembridgecli`
 
