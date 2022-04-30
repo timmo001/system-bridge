@@ -55,9 +55,14 @@ class WebSocketClient(Base):
         if self._session is not None:
             await self._session.close()
 
-    async def connect(self) -> None:
+    async def connect(
+        self,
+        session: aiohttp.ClientSession = None,
+    ) -> None:
         """Connect to server"""
-        self._session = aiohttp.ClientSession()
+        if not session:
+            session = aiohttp.ClientSession()
+        self._session = session
         url = f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
         self._logger.info("Connecting to WebSocket: %s", url)
         try:
