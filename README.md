@@ -133,10 +133,6 @@ The deploy workflow will then publish the release for each platform.
 [sponsor-badge]: https://raw.githubusercontent.com/timmo001/home-panel/master/documentation/resources/sponsor.png
 [sponsor]: https://github.com/sponsors/timmo001?o=esc
 
-## Links
-
-- [Website](https://system-bridge.timmo.dev)
-
 ## Support my work
 
 If you like my work, and would like to send me a tip/donation, please use the
@@ -145,3 +141,7 @@ links below:
 [![Sponsor Timmo][sponsor-badge]][sponsor]
 
 [![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
+
+## Links
+
+- [Website](https://system-bridge.timmo.dev)
