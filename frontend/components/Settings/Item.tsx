@@ -22,34 +22,11 @@ import {
   mdiContentSaveOutline,
   mdiEye,
   mdiEyeOff,
-  mdiProtocol,
-  mdiTextBoxOutline,
 } from "@mdi/js";
 
 import { handleCopyToClipboard } from "components/Common/Utils";
+import { SettingDescription, settingsMap } from "components/Settings/Settings";
 import { SettingsValue } from "assets/entities/settings.entity";
-
-interface SettingDescription {
-  name: string;
-  description: string;
-  icon: string;
-  containerDisabled?: boolean;
-  isPassword?: boolean;
-  minimum?: number;
-}
-
-const settingsMap: { [key: string]: SettingDescription } = {
-  log_level: {
-    name: "Log Level",
-    description: "Log level for the application",
-    icon: mdiTextBoxOutline,
-  },
-  port_api: {
-    name: "API Port",
-    description: "Port for the API and WebSocket",
-    icon: mdiProtocol,
-  },
-};
 
 interface ItemProps {
   keyIn: string;
@@ -119,13 +96,13 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
         sx={{ userSelect: "none" }}
       />
       <ListItemSecondaryAction sx={{ width: 420, textAlign: "end" }}>
-        <Grid container alignContent="center" justifyContent="flex-end">
+        <Grid container alignItems="center" justifyContent="flex-end">
           <Grid item>
             {typeof value === "boolean" ? (
               <Switch
                 edge="end"
                 disabled={containerDisabled}
-                defaultChecked={value}
+                checked={value}
                 onChange={handleCheckedChanged}
               />
             ) : typeof value === "string" && keyIn === "api_key" ? (
