@@ -119,20 +119,6 @@ You can also install all current dev releases using the following command:
 pip install --upgrade --pre systembridgeshared systembridgebackend systembridgecli systembridgeconnector systembridgefrontend systembridgegui systembridgewindowssensors
 ```
 
-## Publishing
-
-> Make sure the version in `package.json` matches the release before publishing.
-
-1. Find the draft release created by the release drafter workflow.
-1. Publish the release.
-
-The deploy workflow will then publish the release for each platform.
-
-[buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
-[buymeacoffee]: https://www.buymeacoffee.com/timmo
-[sponsor-badge]: https://raw.githubusercontent.com/timmo001/home-panel/master/documentation/resources/sponsor.png
-[sponsor]: https://github.com/sponsors/timmo001?o=esc
-
 ## Support my work
 
 If you like my work, and would like to send me a tip/donation, please use the
@@ -145,3 +131,8 @@ links below:
 ## Links
 
 - [Website](https://system-bridge.timmo.dev)
+
+[buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymeacoffee]: https://www.buymeacoffee.com/timmo
+[sponsor-badge]: https://raw.githubusercontent.com/timmo001/home-panel/master/documentation/resources/sponsor.png
+[sponsor]: https://github.com/sponsors/timmo001?o=esc
