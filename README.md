@@ -13,8 +13,7 @@ A bridge for your systems.
 - Send Notifications - Send system notifications via the API/WebSocket.
 - Compatible with Windows and Linux.
 - Integrated with
- [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) -
- Interact with your Bridges using Home Assistant.
+ [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
 
 ## Android Companion App
 
