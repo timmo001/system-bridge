@@ -212,12 +212,12 @@ class WebSocketClient(Base):
             raise ConnectionClosedException("Connection closed to server")
 
         if message.type == aiohttp.WSMsgType.TEXT:
-            json = message.json()
+            message_json = message.json()
 
         if (
-            json[EVENT_TYPE] == TYPE_ERROR
-            and json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
+            message_json[EVENT_TYPE] == TYPE_ERROR
+            and message_json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
         ):
-            raise AuthenticationException(json[EVENT_MESSAGE])
+            raise AuthenticationException(message_json[EVENT_MESSAGE])
 
-        return json
+        return message_json
