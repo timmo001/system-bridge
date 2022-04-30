@@ -8,9 +8,9 @@ A bridge for your systems.
 
 ## Features
 
-- System Information - Access your system's Audio, Battery, Bluetooth, CPU, Disks, GPU, Keyboard, Memory and System information via the API.
-- Open files and URLs - Automate your system by opening a URL/path via the API.
-- Send Notifications - Send system notifications via the API.
+- System Information - Access your system's information via the API/WebSocket.
+- Open files and URLs - Automate your system by opening a URL/path via the API/WebSocket.
+- Send Notifications - Send system notifications via the API/WebSocket.
 - Cross-Platform - Compatible with Windows and Linux.
 - Integrated with
  [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) -
@@ -26,6 +26,10 @@ The source for this app can be found on
 ## API Endpoints
 
 You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api).
+
+## WebSocket
+
+You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
 
 ## Installation
 
