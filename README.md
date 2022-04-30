@@ -125,6 +125,39 @@ You can also install all current dev releases using the following command:
 pip install --upgrade --pre systembridgeshared systembridgebackend systembridgecli systembridgeconnector systembridgefrontend systembridgegui systembridgewindowssensors
 ```
 
+### Frontend
+
+To develop the frontend, enter into the `frontend` directory and use `yarn` to install the dependencies:
+
+```bash
+cd frontend
+yarn install
+```
+
+Then start the development server:
+
+```bash
+yarn start:dev
+```
+
+Once you have finished, you can build and export the frontend then install the python package by running:
+
+```bash
+yarn build
+yarn export
+pip install .
+```
+
+### Windows Sensors
+
+Open the .NET solution in the `windowssensors` directory, make your changes and build the solution.
+
+Then install the package by running:
+
+```bash
+pip install .
+```
+
 ## Support my work
 
 If you like my work, and would like to send me a tip/donation, please use the
