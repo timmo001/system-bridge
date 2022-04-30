@@ -6,6 +6,11 @@ import socket
 
 from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
+    EVENT_MESSAGE,
+    EVENT_SUBTYPE,
+    EVENT_TYPE,
+    SUBTYPE_BAD_API_KEY,
+    TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
     TYPE_KEYBOARD_KEYPRESS,
@@ -14,6 +19,7 @@ from systembridgeconnector.const import (
     TYPE_REGISTER_DATA_LISTENER,
 )
 from systembridgeconnector.exceptions import (
+    AuthenticationException,
     ConnectionClosedException,
     ConnectionErrorException,
 )
@@ -194,12 +200,20 @@ class WebSocketClient(Base):
         if message.type == aiohttp.WSMsgType.ERROR:
             raise ConnectionErrorException(self._websocket.exception())
 
-        if message.type == aiohttp.WSMsgType.TEXT:
-            return message.json()
-
         if message.type in (
             aiohttp.WSMsgType.CLOSE,
             aiohttp.WSMsgType.CLOSED,
             aiohttp.WSMsgType.CLOSING,
         ):
             raise ConnectionClosedException("Connection closed to server")
+
+        if message.type == aiohttp.WSMsgType.TEXT:
+            json = message.json()
+
+        if (
+            json[EVENT_TYPE] == TYPE_ERROR
+            and json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
+        ):
+            raise AuthenticationException(json[EVENT_MESSAGE])
+
+        return json
