@@ -8,10 +8,10 @@ A bridge for your systems.
 
 ## Features
 
-- System Information - Access your system's information via the API/WebSocket.
+- System Information - Access your system's information via the data modules using the API/WebSocket.
 - Open files and URLs - Automate your system by opening a URL/path via the API/WebSocket.
 - Send Notifications - Send system notifications via the API/WebSocket.
-- Cross-Platform - Compatible with Windows and Linux.
+- Compatible with Windows and Linux.
 - Integrated with
  [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) -
  Interact with your Bridges using Home Assistant.
