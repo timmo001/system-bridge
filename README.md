@@ -69,18 +69,18 @@ python -m systembridgecli --help
 
 This command will show you all available commands.
 
-#### Getting the api-key
+#### API Key
 
-To get the api-key, you can use the following command:
+To get the `api-key` for use in the API/WebSocket, you can use the following command:
 
 ```bash
-python -m systembridgecli api-key
+python -m systembridgecli `api-key`
 ```
 
-You can reset your api-key by using the following command:
+To reset your `api-key`, run this command:
 
 ```bash
-python -m systembridgecli api-key --reset
+python -m systembridgecli `api-key` --reset
 ```
 
 ## Packages
@@ -91,7 +91,7 @@ The main application which contains the API/WebSocket and data modules.
 
 ### `systembridgecli`
 
-The command line interface for the application. Here you can get the api-key and update settings and get data.
+The command line interface for the application. Here you can get the `api-key` and update settings and get data.
 
 ### `systembridgeconnector`
 
