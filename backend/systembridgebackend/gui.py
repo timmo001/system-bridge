@@ -1,7 +1,6 @@
 """System Bridge: GUI"""
 import asyncio
 from logging import Logger
-import os
 import subprocess
 import sys
 from threading import Thread
@@ -42,13 +41,6 @@ async def start_gui(
             sys.executable,
             "-m",
             "systembridgegui",
-        ]
-        if "python" in sys.executable.lower()
-        else [
-            os.path.join(
-                os.path.dirname(sys.executable),
-                f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
-            )
         ]
     ) as process:
         logger.info("GUI started with PID: %s", process.pid)
