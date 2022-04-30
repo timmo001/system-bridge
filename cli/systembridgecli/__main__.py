@@ -2,13 +2,14 @@
 import os
 import subprocess
 import sys
+import typer
+from tabulate import tabulate
+from uuid import uuid4
 
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
-from tabulate import tabulate
-import typer
 
 app = typer.Typer()
 database = Database()
@@ -16,9 +17,12 @@ settings = Settings(database)
 
 
 @app.command(name="api-key", short_help="Get api key")
-def api_key() -> None:
+def api_key(reset: bool = False) -> None:
     """Get API Key"""
-    secret(SECRET_API_KEY)
+    if reset:
+        secret(SECRET_API_KEY, True, str(uuid4()))
+    else:
+        secret(SECRET_API_KEY)
 
 
 @app.command(name="api-port", short_help="Get api port")
