@@ -48,7 +48,7 @@ You need these packages:
 You can install all applications using pip:
 
 ```bash
-pip install --upgrade systembridgeshared systembridgebackend systembridgecli systembridgefrontend systembridgegui
+python -m pip install --upgrade systembridgeshared systembridgebackend systembridgecli systembridgefrontend systembridgegui
 ```
 
 Not all packages are required. For just the base application without the GUI, you can remove the `systembridgegui` package from the above command. This is useful for running the application on a server.
@@ -58,7 +58,7 @@ Not all packages are required. For just the base application without the GUI, yo
 In windows there is an optional but recommended package which provides sensor data specific to Windows. You can install it using the following command:
 
 ```bash
-pip install --upgrade systembridgewindowssensors
+python -m pip install --upgrade systembridgewindowssensors
 ```
 
 ## Running
