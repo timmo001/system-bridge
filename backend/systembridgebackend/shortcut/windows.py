@@ -1,18 +1,23 @@
 """System Bridge: Shortcut Windows"""
 import os
+import platform
 import sys
-from winreg import (
-    HKEY_CURRENT_USER,
-    KEY_READ,
-    CloseKey,
-    OpenKey,
-    QueryValueEx,
-)
-from win32com.client import Dispatch
 
 
 def create_windows_shortcuts():
     """Create Windows shortcuts"""
+    if platform.system() != "Windows":
+        return
+
+    from winreg import (
+        HKEY_CURRENT_USER,
+        KEY_READ,
+        CloseKey,
+        OpenKey,
+        QueryValueEx,
+    )
+    from win32com.client import Dispatch
+
     registry_key = OpenKey(
         HKEY_CURRENT_USER,
         r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders",

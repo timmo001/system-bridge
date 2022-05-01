@@ -1,19 +1,21 @@
 """System Bridge: Autostart Windows"""
+import platform
 import sys
-
-from winreg import (
-    HKEY_CURRENT_USER,
-    KEY_ALL_ACCESS,
-    REG_SZ,
-    CloseKey,
-    DeleteValue,
-    OpenKey,
-    SetValueEx,
-)
 
 
 def autostart_windows_disable():
     """Disable autostart for Windows"""
+    if platform.system() != "Windows":
+        return
+
+    from winreg import (
+        HKEY_CURRENT_USER,
+        KEY_ALL_ACCESS,
+        CloseKey,
+        DeleteValue,
+        OpenKey,
+    )
+
     key = OpenKey(
         HKEY_CURRENT_USER,
         r"Software\Microsoft\Windows\CurrentVersion\Run",
@@ -26,6 +28,18 @@ def autostart_windows_disable():
 
 def autostart_windows_enable():
     """Enable autostart for Windows"""
+    if platform.system() != "Windows":
+        return
+
+    from winreg import (
+        HKEY_CURRENT_USER,
+        KEY_ALL_ACCESS,
+        REG_SZ,
+        CloseKey,
+        OpenKey,
+        SetValueEx,
+    )
+
     key = OpenKey(
         HKEY_CURRENT_USER,
         "Software\Microsoft\Windows\CurrentVersion\Run",

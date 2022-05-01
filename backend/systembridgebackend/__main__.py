@@ -34,12 +34,10 @@ class Main(Base):
         if platform.system() == "Windows" and "--silent" in sys.argv:
             self._logger.info("Hide console")
             # pylint: disable=import-error, import-outside-toplevel
-            import win32gui, win32con
+            from win32gui import GetForegroundWindow, ShowWindow
+            from win32con import SW_HIDE
 
-            win32gui.ShowWindow(
-                win32gui.GetForegroundWindow(),
-                win32con.SW_HIDE,
-            )
+            ShowWindow(GetForegroundWindow(), SW_HIDE)
 
         self._server = Server(database, settings)
 
