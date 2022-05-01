@@ -17,14 +17,19 @@ def autostart_windows_disable():
         OpenKey,
     )
 
-    key = OpenKey(
-        HKEY_CURRENT_USER,
-        r"Software\Microsoft\Windows\CurrentVersion\Run",
-        reserved=0,
-        access=KEY_ALL_ACCESS,
-    )
-    DeleteValue(key, "systembridgebackend")
-    CloseKey(key)
+    try:
+        key = OpenKey(
+            HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Run",
+            reserved=0,
+            access=KEY_ALL_ACCESS,
+        )
+        if key is None:
+            return
+        DeleteValue(key, "systembridgebackend")
+        CloseKey(key)
+    except OSError:
+        pass
 
 
 def autostart_windows_enable():
