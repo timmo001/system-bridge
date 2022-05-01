@@ -25,5 +25,5 @@ def autostart_linux_disable():
 def autostart_linux_enable():
     """Enable autostart for Linux"""
     if not os.path.exists(path):
-        with open(path, "w") as f:
-            f.write(desktop_entry)
+        with open(path, "w", encoding="utf-8") as file:
+            file.write(desktop_entry)
