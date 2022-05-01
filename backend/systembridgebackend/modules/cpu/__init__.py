@@ -53,7 +53,8 @@ class CPU(Base):
         """CPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "temperature" in item[COLUMN_TYPE].lower()
             ):
                 self._logger.debug(
@@ -99,7 +100,8 @@ class CPU(Base):
         """CPU voltage"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "voltage" in item[COLUMN_TYPE].lower()
             ):
                 self._logger.debug(

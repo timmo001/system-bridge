@@ -38,7 +38,8 @@ class GPU(Base):
         """GPU core clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "clock" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
             ):
@@ -57,7 +58,8 @@ class GPU(Base):
         """GPU core load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "load" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
             ):
@@ -74,7 +76,8 @@ class GPU(Base):
         """GPU fan speed"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "fan" in item[COLUMN_TYPE].lower()
             ):
                 self._logger.debug(
@@ -90,7 +93,8 @@ class GPU(Base):
         """GPU memory clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "clock" in item[COLUMN_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
             ):
@@ -109,7 +113,8 @@ class GPU(Base):
         """GPU memory load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "load" in item[COLUMN_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
             ):
@@ -128,7 +133,8 @@ class GPU(Base):
         """GPU memory free"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "free" in item[COLUMN_NAME].lower()
             ):
@@ -147,7 +153,8 @@ class GPU(Base):
         """GPU memory used"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "used" in item[COLUMN_NAME].lower()
             ):
@@ -166,7 +173,8 @@ class GPU(Base):
         """GPU memory total"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "total" in item[COLUMN_NAME].lower()
             ):
@@ -185,7 +193,8 @@ class GPU(Base):
         """GPU power usage"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "power" in item[COLUMN_TYPE].lower()
             ):
                 self._logger.debug(
@@ -201,7 +210,8 @@ class GPU(Base):
         """GPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "temperature" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
             ):

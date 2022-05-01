@@ -23,7 +23,8 @@ class Display(Base):
         displays = []
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
                 and item[COLUMN_HARDWARE_NAME] not in displays
             ):
                 displays.append(item[COLUMN_HARDWARE_NAME])
@@ -36,7 +37,8 @@ class Display(Base):
         """Display pixel clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "pixel" in item[COLUMN_NAME].lower()
                 and "clock" in item[COLUMN_NAME].lower()
             ):
@@ -55,7 +57,8 @@ class Display(Base):
         """Display refresh rate"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "refresh" in item[COLUMN_NAME].lower()
                 and "rate" in item[COLUMN_NAME].lower()
             ):
@@ -74,7 +77,8 @@ class Display(Base):
         """Display resolution horizontal"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "resolution" in item[COLUMN_NAME].lower()
                 and "horizontal" in item[COLUMN_NAME].lower()
             ):
@@ -93,7 +97,8 @@ class Display(Base):
         """Display resolution vertical"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "resolution" in item[COLUMN_NAME].lower()
                 and "vertical" in item[COLUMN_NAME].lower()
             ):
