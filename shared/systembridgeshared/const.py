@@ -17,6 +17,7 @@ COLUMN_TYPE = "type"
 COLUMN_VALUE = "value"
 
 # Settings
+SETTING_AUTOSTART = "autostart"
 SETTING_LOG_LEVEL = "log_level"
 SETTING_PORT_API = "port_api"
 

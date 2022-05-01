@@ -14,6 +14,7 @@ from systembridgeshared.const import (
     EVENT_SUBTYPE,
     EVENT_TYPE,
     EVENT_VALUE,
+    SETTING_AUTOSTART,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_BAD_JSON,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
@@ -51,9 +52,10 @@ from systembridgeshared.const import (
 from systembridgeshared.database import Database
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 
+from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.server.open import open_path, open_url
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
+from systembridgebackend.server.open import open_path, open_url
 
 
 class WebSocketHandler(Base):
@@ -456,6 +458,14 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
+
+                    if data[EVENT_SETTING] != SETTING_AUTOSTART:
+                        continue
+                    self._logger.info("Setting autostart to %s", data[EVENT_VALUE])
+                    if data[EVENT_VALUE]:
+                        autostart_enable()
+                    else:
+                        autostart_disable()
                 else:
                     self._logger.warning("Unknown event: %s", data[EVENT_EVENT])
                     await self._websocket.send(

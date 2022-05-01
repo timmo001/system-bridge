@@ -1,15 +1,48 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
+import { mdiProtocol, mdiRocketLaunch, mdiTextBoxOutline } from "@mdi/js";
 
 import { Event } from "assets/entities/event.entity";
+import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
 import { useSettings } from "components/Contexts/Settings";
 import { WebSocketConnection } from "components/Common/WebSocket";
 import Item from "components/Settings/Item";
 import Section from "components/Settings/Section";
-import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
 
 let ws: WebSocketConnection;
+
+interface SettingResult {
+  key: string;
+  value: SettingsValue;
+}
+
+export interface SettingDescription {
+  name: string;
+  description: string;
+  icon: string;
+  containerDisabled?: boolean;
+  isPassword?: boolean;
+  minimum?: number;
+}
+
+export const settingsMap: { [key: string]: SettingDescription } = {
+  autostart: {
+    name: "Autostart",
+    description: "Automatically start the application on startup",
+    icon: mdiRocketLaunch,
+  },
+  log_level: {
+    name: "Log Level",
+    description: "Log level for the application",
+    icon: mdiTextBoxOutline,
+  },
+  port_api: {
+    name: "API Port",
+    description: "Port for the API and WebSocket",
+    icon: mdiProtocol,
+  },
+};
 
 function Settings(): ReactElement {
   const [settings, setSettings] = useSettings();
@@ -23,11 +56,19 @@ function Settings(): ReactElement {
       if (event.type === "SETTINGS_RESULT") {
         console.log("Settings result:", event.data);
         let newSettings: SettingsObject = {};
-        event.data.forEach((s: { key: string; value: SettingsValue }) => {
-          if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
-            newSettings[s.key] = Number(s.value);
-          else newSettings[s.key] = s.value;
-        });
+        console.log("settingsMap:", settingsMap);
+        const settingsKeys = Object.keys(settingsMap);
+        event.data
+          .sort((a: SettingResult, b: SettingResult) =>
+            settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1
+          )
+          .forEach((s: SettingResult) => {
+            if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
+              newSettings[s.key] = Number(s.value);
+            else if (s.value === "True" || s.value === "False")
+              newSettings[s.key] = s.value === "True";
+            else newSettings[s.key] = s.value;
+          });
         console.log("Settings:", newSettings);
         setSettings(newSettings);
       }
