@@ -42,7 +42,7 @@ def autostart_windows_enable():
 
     key = OpenKey(
         HKEY_CURRENT_USER,
-        "Software\Microsoft\Windows\CurrentVersion\Run",
+        r"Software\Microsoft\Windows\CurrentVersion\Run",
         reserved=0,
         access=KEY_ALL_ACCESS,
     )
