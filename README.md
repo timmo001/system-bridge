@@ -39,9 +39,7 @@ You will need [Python 3](https://www.python.org/downloads) and Python pip to ins
 
 ### Linux
 
-You need these packages:
-
-- `lshw`: Used to get the system information such as the UUID.
+You will need the `lshw` package to get the system information such as the UUID.
 
 ## Installation
 
