@@ -459,12 +459,13 @@ class WebSocketHandler(Base):
                         )
                     )
 
-                    if data[EVENT_SETTING] == SETTING_AUTOSTART:
-                        self._logger.info("Setting autostart to %s", data[EVENT_VALUE])
-                        if data[EVENT_VALUE]:
-                            autostart_enable()
-                        else:
-                            autostart_disable()
+                    if data[EVENT_SETTING] != SETTING_AUTOSTART:
+                        continue
+                    self._logger.info("Setting autostart to %s", data[EVENT_VALUE])
+                    if data[EVENT_VALUE]:
+                        autostart_enable()
+                    else:
+                        autostart_disable()
                 else:
                     self._logger.warning("Unknown event: %s", data[EVENT_EVENT])
                     await self._websocket.send(
