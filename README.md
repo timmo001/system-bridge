@@ -44,6 +44,14 @@ You will need these packages:
 - `lshw`: Gets system information such as the UUID.
 - `upower`: (Optional) Gets battery information.
 
+### Windows 
+
+Windows requires the `pywin32` python package. Install it by running:
+
+```bash
+python -m pip install pywin32
+```
+
 ## Installation
 
 You can install all applications using pip:
