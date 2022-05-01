@@ -1,5 +1,8 @@
 """System Bridge: Main"""
 import logging
+import os
+import platform
+import sys
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
@@ -9,6 +12,7 @@ from systembridgeshared.settings import Settings
 
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.server import Server
+from systembridgebackend.shortcut import create_shortcuts
 
 
 class Main(Base):
@@ -25,6 +29,18 @@ class Main(Base):
             autostart_enable()
         else:
             autostart_disable()
+
+        create_shortcuts()
+
+        if platform.system() == "Windows" and "--silent" in sys.argv:
+            self._logger.info("Hide console")
+            # pylint: disable=import-error, import-outside-toplevel
+            import win32gui, win32con
+
+            win32gui.ShowWindow(
+                win32gui.GetForegroundWindow(),
+                win32con.SW_HIDE,
+            )
 
         self._server = Server(database, settings)
 

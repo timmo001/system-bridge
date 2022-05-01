@@ -16,7 +16,7 @@ def autostart_windows_disable():
     """Disable autostart for Windows"""
     key = OpenKey(
         HKEY_CURRENT_USER,
-        "Software\Microsoft\Windows\CurrentVersion\Run",
+        r"Software\Microsoft\Windows\CurrentVersion\Run",
         reserved=0,
         access=KEY_ALL_ACCESS,
     )
@@ -37,6 +37,6 @@ def autostart_windows_enable():
         "systembridgebackend",
         0,
         REG_SZ,
-        f'"{sys.executable}" -m systembridgebackend',
+        f'"{sys.executable}" -m systembridgebackend --silent',
     )
     CloseKey(key)
