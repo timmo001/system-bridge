@@ -35,6 +35,8 @@ You can find documentation for the WebSocket [here](https://system-bridge.timmo.
 
 ## Installation
 
+You will need [Python 3](https://www.python.org/downloads). The latest version is reccomended.
+
 You can install all applications using pip:
 
 ```bash
