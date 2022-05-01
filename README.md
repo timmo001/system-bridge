@@ -39,7 +39,10 @@ You will need [Python 3](https://www.python.org/downloads) and Python pip to ins
 
 ### Linux
 
-You will need the `lshw` package to get the system information such as the UUID.
+You will need these packages:
+
+- `lshw`: Gets system information such as the UUID.
+- `upower`: (Optional) Gets battery information.
 
 ## Installation
 
