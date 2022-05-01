@@ -33,9 +33,17 @@ You can find documentation for the API [here](https://system-bridge.timmo.dev/do
 
 You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
 
-## Installation
+## Prerequisites
 
-You will need [Python 3](https://www.python.org/downloads). The latest version is reccomended.
+You will need [Python 3](https://www.python.org/downloads) and Python pip to install the packages. The latest versions are reccomended.
+
+### Linux
+
+You need these packages:
+
+- `lshw`: Used to get the system information such as the UUID.
+
+## Installation
 
 You can install all applications using pip:
 
