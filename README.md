@@ -84,13 +84,13 @@ This command will show you all available commands.
 To get the `api-key` for use in the API/WebSocket, you can use the following command:
 
 ```bash
-python -m systembridgecli `api-key`
+python -m systembridgecli api-key
 ```
 
 To reset your `api-key`, run this command:
 
 ```bash
-python -m systembridgecli `api-key` --reset
+python -m systembridgecli api-key --reset
 ```
 
 ## Packages
@@ -124,7 +124,7 @@ Shared package required by the `systembridgebackend`, `systembridgecli` and `sys
 You can install each python module using pip:
 
 ```bash
-pip install .
+python -m pip install .
 ```
 
 inside each directory with a setup.py file.
@@ -132,7 +132,7 @@ inside each directory with a setup.py file.
 You can also install all current dev releases using the following command:
 
 ```bash
-pip install --upgrade --pre systembridgeshared systembridgebackend systembridgecli systembridgeconnector systembridgefrontend systembridgegui systembridgewindowssensors
+python -m pip install --upgrade --pre systembridgeshared systembridgebackend systembridgecli systembridgeconnector systembridgefrontend systembridgegui systembridgewindowssensors
 ```
 
 ### Frontend
@@ -155,7 +155,7 @@ Once you have finished, you can build and export the frontend then install the p
 ```bash
 yarn build
 yarn export
-pip install .
+python -m pip install .
 ```
 
 ### Windows Sensors
@@ -165,7 +165,7 @@ Open the .NET solution in the `windowssensors` directory, make your changes and 
 Then install the package by running:
 
 ```bash
-pip install .
+python -m pip install .
 ```
 
 ## Support my work
