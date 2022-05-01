@@ -24,7 +24,8 @@ class GPU(Base):
         gpus = []
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
-                "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                item[COLUMN_HARDWARE_TYPE] is not None
+                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and item[COLUMN_HARDWARE_NAME] not in gpus
             ):
                 gpus.append(item[COLUMN_HARDWARE_NAME])
