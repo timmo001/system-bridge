@@ -1,6 +1,5 @@
 """System Bridge: Main"""
 import logging
-import os
 import platform
 import sys
 
