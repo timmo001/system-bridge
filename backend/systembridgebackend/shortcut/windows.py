@@ -9,6 +9,7 @@ def create_windows_shortcuts():
     if platform.system() != "Windows":
         return
 
+    # pylint: disable=import-error, import-outside-toplevel
     from winreg import (
         HKEY_CURRENT_USER,
         KEY_READ,
