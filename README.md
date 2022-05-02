@@ -39,6 +39,10 @@ You can find instructions to run the application [here](https://system-bridge.ti
 
 You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/docs/modules).
 
+### CLI
+
+You can find documentation for the CLI [here](https://system-bridge.timmo.dev/docs/cli).
+
 ### API
 
 You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
