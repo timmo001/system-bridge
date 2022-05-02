@@ -46,21 +46,7 @@ You will need these packages:
 
 ## Installation
 
-You can install all applications using pip:
-
-```bash
-python -m pip install --upgrade systembridgeshared systembridgebackend systembridgecli systembridgefrontend systembridgegui
-```
-
-Not all packages are required. For just the base application without the GUI, you can remove the `systembridgegui` package from the above command. This is useful for running the application on a server.
-
-### Windows
-
-In windows there is an optional but recommended package which provides sensor data specific to Windows. You can install it using the following command:
-
-```bash
-python -m pip install --upgrade systembridgewindowssensors
-```
+You can find installation instructions [here](https://system-bridge.timmo.dev/docs/install)
 
 ## Running
 
