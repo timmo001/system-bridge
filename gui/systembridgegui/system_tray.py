@@ -46,18 +46,16 @@ class SystemTray(Base, QSystemTrayIcon):
         action_settings: QAction = menu.addAction("Open Settings")
         action_settings.triggered.connect(self._show_settings)
 
-        action_bridges_setup = menu.addAction("Setup Bridges")
-        action_bridges_setup.triggered.connect(self._show_bridges_setup)
-
-        menu.addSeparator()
-
         action_data: QAction = menu.addAction("View Data")
         action_data.triggered.connect(self._show_data)
 
-        menu.addSeparator()
+        # menu.addSeparator()
 
-        action_bridges_sendto = menu.addAction("Open URL On..")
-        action_bridges_sendto.triggered.connect(self._show_bridges_send_to)
+        # action_bridges_setup = menu.addAction("Setup Bridges")
+        # action_bridges_setup.triggered.connect(self._show_bridges_setup)
+
+        # action_bridges_sendto = menu.addAction("Open URL On..")
+        # action_bridges_sendto.triggered.connect(self._show_bridges_send_to)
 
         menu.addSeparator()
 
@@ -167,13 +165,13 @@ class SystemTray(Base, QSystemTrayIcon):
         self._logger.info("Open: %s", log_path)
         open_new_tab(log_path)
 
-    def _show_bridges_send_to(self) -> None:
-        """Show bridges open url on window"""
-        self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
+    # def _show_bridges_send_to(self) -> None:
+    #     """Show bridges open url on window"""
+    #     self.callback_show_window(PATH_BRIDGES_OPEN_ON, False, 620, 420)
 
-    def _show_bridges_setup(self) -> None:
-        """Show bridges setup window"""
-        self.callback_show_window(PATH_BRIDGES_SETUP, False)
+    # def _show_bridges_setup(self) -> None:
+    #     """Show bridges setup window"""
+    #     self.callback_show_window(PATH_BRIDGES_SETUP, False)
 
     def _show_data(self) -> None:
         """Show api data"""
