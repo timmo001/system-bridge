@@ -42,7 +42,10 @@ def bump_packages(arg: str) -> None:
         if "--newversion=" in arg:
             with subprocess.Popen(
                 [
-                    f'git commit -am "Bump {package["module"]} version to {arg.replace("--newversion=", "")}"',
+                    "git",
+                    "commit",
+                    "-am",
+                    f'"Bump {package["module"]} version to {arg.replace("--newversion=", "")}"',
                 ],
             ) as process:
                 result = process.wait()
