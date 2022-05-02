@@ -39,6 +39,16 @@ def bump_packages(arg: str) -> None:
             if result != 0:
                 print(f"Failed to bump {package['module']} package..")
                 sys.exit(1)
+        if "--newversion=" in arg:
+            with subprocess.Popen(
+                [
+                    f'git commit -am "Bump {package["module"]} version to {arg.replace("--newversion=", "")}"',
+                ],
+            ) as process:
+                result = process.wait()
+                if result != 0:
+                    print(f"Failed to commit {package['module']} package..")
+                    sys.exit(1)
 
 
 @app.command()
