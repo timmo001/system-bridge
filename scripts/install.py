@@ -2,33 +2,73 @@
 import platform
 import subprocess
 import sys
+import typer
 
-command = [
-    sys.executable,
-    "-m",
-    "pip",
-    "install",
-    "--upgrade",
-]
 
-if "--dev" in sys.argv:
-    command.append("--pre")
+app = typer.Typer()
 
-command = [
-    *command,
-    "systembridgeshared",
-    "systembridgebackend",
-    "systembridgecli",
-    "systembridgeconnector",
-    "systembridgefrontend",
-    "systembridgegui",
-]
 
-if "Windows" in platform.system():
-    command.append("systembridgewindowssensors")
+@app.command()
+def dev() -> None:
+    """Install dev packages"""
+    command = [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "--pre",
+    ]
 
-print("Installing..")
-print(command)
+    command = [
+        *command,
+        "systembridgeshared",
+        "systembridgebackend",
+        "systembridgecli",
+        "systembridgeconnector",
+        "systembridgefrontend",
+        "systembridgegui",
+    ]
 
-with subprocess.Popen(command) as process:
-    process.wait()
+    if "Windows" in platform.system():
+        command.append("systembridgewindowssensors")
+
+    print("Installing..")
+    print(command)
+
+    with subprocess.Popen(command) as process:
+        process.wait()
+
+
+@app.command()
+def production() -> None:
+    """Install production packages"""
+    command = [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+    ]
+
+    command = [
+        *command,
+        "systembridgeshared",
+        "systembridgebackend",
+        "systembridgecli",
+        "systembridgeconnector",
+        "systembridgefrontend",
+        "systembridgegui",
+    ]
+
+    if "Windows" in platform.system():
+        command.append("systembridgewindowssensors")
+
+    print("Installing..")
+    print(command)
+
+    with subprocess.Popen(command) as process:
+        process.wait()
+
+
+app()
