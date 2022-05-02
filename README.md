@@ -25,9 +25,9 @@ You can find the Android companion app on the
 The source for this app can be found on
 [GitHub](https://github.com/timmo001/system-bridge-android-companion).
 
-## API Endpoints
+## Data Modules
 
-You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api).
+You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/docs/modules).
 
 ## WebSocket
 
@@ -43,6 +43,14 @@ You will need these packages:
 
 - `lshw`: Gets system information such as the UUID.
 - `upower`: (Optional) Gets battery information.
+
+### Windows
+
+Windows requires the `pywin32` python package. Install it by running:
+
+```bash
+python -m pip install pywin32
+```
 
 ## Installation
 
