@@ -50,7 +50,7 @@ def dev() -> None:
 @app.command()
 def release(version: str) -> None:
     """Bump release"""
-    bump_packages(f"--newversion=={version}")
+    bump_packages(f"--newversion={version}")
 
 
 app()
