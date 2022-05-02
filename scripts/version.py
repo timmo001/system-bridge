@@ -45,7 +45,7 @@ def bump_packages(arg: str) -> None:
                     "git",
                     "commit",
                     "-am",
-                    f'"Bump {package["module"]} version to {arg.replace("--newversion=", "")}"',
+                    f"Bump {package['module']} version to {arg.replace('--newversion=', '')}",
                 ],
             ) as process:
                 result = process.wait()
