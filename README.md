@@ -25,70 +25,29 @@ You can find the Android companion app on the
 The source for this app can be found on
 [GitHub](https://github.com/timmo001/system-bridge-android-companion).
 
-## Data Modules
+## Documentation
+
+### Installation
+
+You can find installation instructions [here](https://system-bridge.timmo.dev/docs/install).
+
+### Running
+
+You can find instructions to run the application [here](https://system-bridge.timmo.dev/docs/running).
+
+### Data Modules
 
 You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/docs/modules).
 
-## WebSocket
+### API
 
 You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
 
-## Prerequisites
+### WebSocket
 
-You will need [Python 3](https://www.python.org/downloads) and Python pip to install the packages. The latest versions are reccomended.
+You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
 
-### Linux
-
-You will need these packages:
-
-- `lshw`: Gets system information such as the UUID.
-- `upower`: (Optional) Gets battery information.
-
-### Windows
-
-Windows requires the `pywin32` python package. Install it by running:
-
-```bash
-python -m pip install pywin32
-```
-
-## Installation
-
-You can find installation instructions [here](https://system-bridge.timmo.dev/docs/install)
-
-## Running
-
-To run the application, you can use the following command:
-
-```bash
-python -m systembridgebackend
-```
-
-### CLI
-
-To run the CLI, you can use the following command:
-
-```bash
-python -m systembridgecli --help
-```
-
-This command will show you all available commands.
-
-#### API Key
-
-To get the `api-key` for use in the API/WebSocket, you can use the following command:
-
-```bash
-python -m systembridgecli api-key
-```
-
-To reset your `api-key`, run this command:
-
-```bash
-python -m systembridgecli api-key --reset
-```
-
-## Packages
+### Packages
 
 ### `systembridgebackend`
 
@@ -114,7 +73,7 @@ The GUI for the application. This shows a system tray icon and allows you to int
 
 Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
 
-## Developing
+### Developing
 
 You can install each python module using pip:
 
@@ -130,7 +89,7 @@ You can also install all current dev releases using the following command:
 python -m pip install --upgrade --pre systembridgeshared systembridgebackend systembridgecli systembridgeconnector systembridgefrontend systembridgegui systembridgewindowssensors
 ```
 
-### Frontend
+#### Frontend
 
 To develop the frontend, enter into the `frontend` directory and use `yarn` to install the dependencies:
 
@@ -153,7 +112,7 @@ yarn export
 python -m pip install .
 ```
 
-### Windows Sensors
+#### Windows Sensors
 
 Open the .NET solution in the `windowssensors` directory, make your changes and build the solution.
 
@@ -171,10 +130,6 @@ links below:
 [![Sponsor Timmo][sponsor-badge]][sponsor]
 
 [![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
-
-## Links
-
-- [Website](https://system-bridge.timmo.dev)
 
 [buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
 [buymeacoffee]: https://www.buymeacoffee.com/timmo
