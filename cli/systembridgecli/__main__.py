@@ -11,6 +11,8 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SET
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
+from systembridgecli._version import __version__
+
 app = typer.Typer()
 database = Database()
 settings = Settings(database)
@@ -135,6 +137,12 @@ def open_logs_gui() -> None:
     else:
         opener = "open" if sys.platform == "darwin" else "xdg-open"
         subprocess.call([opener, path])
+
+
+@app.command(name="version", short_help="CLI Version")
+def version() -> None:
+    """CLI Version"""
+    typer.secho(__version__.public(), fg=typer.colors.CYAN)
 
 
 if __name__ == "__main__":

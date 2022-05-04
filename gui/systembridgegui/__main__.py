@@ -14,6 +14,7 @@ from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 
+from systembridgegui._version import __version__
 from systembridgegui.system_tray import SystemTray
 from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
@@ -25,7 +26,7 @@ class Main(Base):
     def __init__(self) -> None:
         """Initialize"""
         super().__init__()
-        self._logger.info("System Bridge GUI: Startup")
+        self._logger.info("System Bridge GUI %s: Startup", __version__.public())
 
         self._database = database
         self._settings = settings

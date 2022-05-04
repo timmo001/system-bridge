@@ -12,6 +12,7 @@ from systembridgeshared.settings import Settings
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.server import Server
 from systembridgebackend.shortcut import create_shortcuts
+from systembridgebackend.modules.system import System
 
 
 class Main(Base):
@@ -24,7 +25,7 @@ class Main(Base):
             self._logger.info("Initialized application. Exiting now.")
             sys.exit(0)
 
-        self._logger.info("System Bridge: Startup")
+        self._logger.info("System Bridge %s: Startup", System().version)
 
         if "--cli" not in sys.argv:
             autostart = settings.get(SETTING_AUTOSTART)
