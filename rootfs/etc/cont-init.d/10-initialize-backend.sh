@@ -1,5 +1,5 @@
 #!/bin/bash
 # ==============================================================================
-# Starts app
+# Initialize backend
 # ==============================================================================
-python3 -m systembridgebackend --cli --no-gui
+python3 -m systembridgebackend --cli --no-gui --init
