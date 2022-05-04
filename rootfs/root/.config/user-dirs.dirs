@@ -1,0 +1,8 @@
+XDG_DESKTOP_DIR="/data/user/desktop"
+XDG_DOCUMENTS_DIR="/data/user/documents"
+XDG_DOWNLOAD_DIR="/data/user/downloads"
+XDG_MUSIC_DIR="/data/user/music"
+XDG_PICTURES_DIR="/data/user/pictures"
+XDG_PUBLICSHARE_DIR="/data/user/public"
+XDG_TEMPLATES_DIR="/data/user/templates"
+XDG_VIDEOS_DIR="/data/user/videos"

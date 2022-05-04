@@ -160,18 +160,19 @@ cython_debug/
 #.idea/
 
 # Additional
+!public/app/.gitkeep
+!rootfs/**/downloads/
+.env
+.qt*
+*.apk
+*.app
+*.db*
+*.deb
+*.dmg
+*.key
+*.rpm
+*setup.exe
+junit.xml
 out/
 public/app/*
-!public/app/.gitkeep
-.env
-junit.xml
-*.db*
-*setup.exe
-*.apk
-*.deb
-*.rpm
-*.dmg
-*.app
-.qt*
 test.json
-*.key
