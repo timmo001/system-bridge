@@ -348,7 +348,6 @@ class Server(Base):
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )
-        self._logger.info("After server start")
 
     def stop_server(self) -> None:
         """Stop Server"""
