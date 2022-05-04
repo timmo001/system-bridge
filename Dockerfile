@@ -10,7 +10,8 @@ ARG BUILD_ARCH=amd64
 RUN \
     apt-get update \
     \
-    && apt-get install -y lshw \
+    && apt-get install -y \
+        lshw \
         upower \
         python3 \
         python3-pip \
