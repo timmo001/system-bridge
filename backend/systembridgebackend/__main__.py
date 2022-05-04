@@ -22,14 +22,15 @@ class Main(Base):
         super().__init__()
         self._logger.info("System Bridge: Startup")
 
-        autostart = settings.get(SETTING_AUTOSTART)
-        self._logger.info("Autostart enabled: %s", autostart)
-        if autostart:
-            autostart_enable()
-        else:
-            autostart_disable()
+        if "--cli" not in sys.argv:
+            autostart = settings.get(SETTING_AUTOSTART)
+            self._logger.info("Autostart enabled: %s", autostart)
+            if autostart:
+                autostart_enable()
+            else:
+                autostart_disable()
 
-        create_shortcuts()
+            create_shortcuts()
 
         if platform.system() == "Windows" and "--silent" in sys.argv:
             self._logger.info("Hide console")
