@@ -17,13 +17,7 @@ A bridge for your systems.
 - Compatible with Windows and Linux.
 - Integrated with
  [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
-
-## Android Companion App
-
-You can find the Android companion app on the
-[Play Store](https://play.google.com/store/apps/details?id=dev.timmo.systembridge).
-The source for this app can be found on
-[GitHub](https://github.com/timmo001/system-bridge-android-companion).
+- Android Companion App - You can find the Android companion app on the [Play Store](https://play.google.com/store/apps/details?id=dev.timmo.systembridge). The source for this app can be found on [GitHub](https://github.com/timmo001/system-bridge-android-companion).
 
 ## Documentation
 
