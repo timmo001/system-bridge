@@ -20,6 +20,10 @@ class Main(Base):
     def __init__(self) -> None:
         """Initialize"""
         super().__init__()
+        if "--init" in sys.argv:
+            self._logger.info("Initialized application. Exiting now.")
+            sys.exit(0)
+
         self._logger.info("System Bridge: Startup")
 
         if "--cli" not in sys.argv:
