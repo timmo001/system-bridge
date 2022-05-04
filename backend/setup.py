@@ -12,13 +12,6 @@ with io.open("requirements_setup.txt", encoding="utf-8") as f:
 with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
-if platform.system() == "Windows":
-    with io.open("requirements_windows.txt", encoding="utf-8") as f:
-        requirements = [
-            *requirements,
-            *f.read().splitlines(),
-        ]
-
 package_data = ["icon.png", "icon.ico"]
 
 setup(

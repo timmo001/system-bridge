@@ -348,6 +348,7 @@ class Server(Base):
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )
+        self._logger.info("After server start")
 
     def stop_server(self) -> None:
         """Stop Server"""
@@ -358,6 +359,5 @@ class Server(Base):
             pending_task.cancel()
         self._logger.info("Stop the event loop")
         loop.stop()
-        # self._server.enable_websocket(False)
         self._listeners.remove_all_listeners()
         self._server.stop()
