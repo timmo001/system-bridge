@@ -1,10 +1,7 @@
 ---
 services:
   system-bridge:
-    container_name: system-bridge
-    # build: .
-    # image: system-bridge:test
-    image: ghcr.io/timmo001/system-bridge/amd64:edge
+    build: .
     restart: unless-stopped
     ports:
       - target: 9170
