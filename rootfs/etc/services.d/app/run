@@ -2,4 +2,7 @@
 # ==============================================================================
 # Starts app
 # ==============================================================================
+export XDG_DATA_HOME="/data/user/local/share"
+export XDG_CONFIG_HOME="/data/user/config"
+
 python3 -m systembridgebackend --cli --no-gui
