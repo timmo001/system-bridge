@@ -21,6 +21,7 @@ RUN \
         systembridgeshared \
         systembridgebackend \
         systembridgecli \
+        systembridgefrontend \
     \
     && rm -fr \
         /tmp/* \
