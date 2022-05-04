@@ -194,20 +194,21 @@ class Server(Base):
             methods=["POST"],
         )
 
-        try:
-            # pylint: disable=import-error, import-outside-toplevel
-            from systembridgefrontend import get_frontend_path
+        if "--no-frontend" not in sys.argv:
+            try:
+                # pylint: disable=import-error, import-outside-toplevel
+                from systembridgefrontend import get_frontend_path
 
-            frontend_path = get_frontend_path()
-            self._logger.info("Serving frontend from: %s", frontend_path)
-            self._server.static(
-                "/",
-                frontend_path,
-                strict_slashes=False,
-                content_type="text/html",
-            )
-        except (ImportError, ModuleNotFoundError) as error:
-            self._logger.error("Frontend not found: %s", error)
+                frontend_path = get_frontend_path()
+                self._logger.info("Serving frontend from: %s", frontend_path)
+                self._server.static(
+                    "/",
+                    frontend_path,
+                    strict_slashes=False,
+                    content_type="text/html",
+                )
+            except (ImportError, ModuleNotFoundError) as error:
+                self._logger.error("Frontend not found: %s", error)
 
         self._server.add_websocket_route(
             _handler_websocket,
