@@ -37,14 +37,14 @@
     "axios": "0.27.2",
     "clsx": "1.1.1",
     "lodash": "4.17.21",
+    "moment": "2.29.3",
     "next": "12.1.6",
     "peerjs": "1.4.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "moment": "2.29.1",
     "react-json-view": "1.21.3",
-    "react-player": "2.9.0",
-    "rect-scaler": "1.0.0",
+    "react-player": "2.10.0",
+    "rect-scaler": "1.1.0",
     "uuid": "8.3.2"
   },
   "devDependencies": {
