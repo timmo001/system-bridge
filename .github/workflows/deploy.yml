@@ -92,6 +92,10 @@ jobs:
       code-path: frontend
       module-name: systembridgefrontend
       use-incremental: true
+  deploy-container:
+    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
+    with:
+      container-slug: system-bridge
   build-windowssensors-dotnet:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
     with:
