@@ -7,7 +7,7 @@ from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 
-from ..base import Base
+from systembridgeshared.base import Base
 
 
 class PlayerWindow(Base, QWidget):
