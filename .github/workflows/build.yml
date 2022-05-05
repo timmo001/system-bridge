@@ -65,7 +65,13 @@ jobs:
       additional-artifacts-name: windowssensors-build
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
-  build-container:
+  build-container-amd64:
     uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
     with:
+      architecture: amd64
+      container-slug: system-bridge
+  build-container-aarch64:
+    uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
+    with:
+      architecture: aarch64
       container-slug: system-bridge

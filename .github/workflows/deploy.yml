@@ -92,7 +92,7 @@ jobs:
       code-path: frontend
       module-name: systembridgefrontend
       use-incremental: true
-  deploy-container:
+  deploy-container-amd64:
     needs:
       - deploy-shared
       - deploy-backend
@@ -100,6 +100,17 @@ jobs:
       - deploy-frontend
     uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
     with:
+      architecture: amd64
+      container-slug: system-bridge
+  deploy-container-aarch64:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
+    with:
+      architecture: aarch64
       container-slug: system-bridge
   build-windowssensors-dotnet:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
