@@ -93,6 +93,11 @@ jobs:
       module-name: systembridgefrontend
       use-incremental: true
   deploy-container:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
     uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
     with:
       container-slug: system-bridge
