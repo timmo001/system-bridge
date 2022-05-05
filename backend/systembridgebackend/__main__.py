@@ -25,7 +25,7 @@ class Main(Base):
             self._logger.info("Initialized application. Exiting now.")
             sys.exit(0)
 
-        self._logger.info("System Bridge %s: Startup", System().version)
+        self._logger.info("System Bridge %s: Startup", System().version())
 
         if "--cli" not in sys.argv:
             autostart = settings.get(SETTING_AUTOSTART)
