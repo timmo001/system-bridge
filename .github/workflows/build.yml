@@ -65,3 +65,7 @@ jobs:
       additional-artifacts-name: windowssensors-build
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
+  build-container:
+    uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
+    with:
+      container-slug: system-bridge
