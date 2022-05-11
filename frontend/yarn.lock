@@ -504,11 +504,6 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.32.tgz#51d59d7a90ef2d0ae961791e0900cad2393a0149"
   integrity sha512-eAIcfAvhf/BkHcf4pkLJ7ECpBAhh9kcxRBpip9cTiO+hf+aJrsxYxBeS6OXvOd9WqNAJmavXVpZvY1rBjNsXmw==
 
-"@types/node@^10.14.33":
-  version "10.17.60"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.60.tgz#35f3d6213daed95da7f0f73e75bcc6980e90597b"
-  integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
-
 "@types/parse-json@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
@@ -2099,12 +2094,11 @@ peerjs-js-binarypack@1.0.1:
   resolved "https://registry.yarnpkg.com/peerjs-js-binarypack/-/peerjs-js-binarypack-1.0.1.tgz#80fa2b61c794a6b16d64253700405e476ada29be"
   integrity sha512-N6aeia3NhdpV7kiGxJV5xQiZZCVEEVjRz2T2C6UZQiBkHWHzUv/oWA4myQLcwBwO8LUoR1KWW5oStvwVesmfCg==
 
-peerjs@1.3.2:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/peerjs/-/peerjs-1.3.2.tgz#25cf5e8e7c143b41c2a5760a3d6ec0bb0bbb94d9"
-  integrity sha512-+PHfmsC7QGUU8Ye3OLi6tKQZGPCNy7QatUVNw4JtE8alkguF3+DdO5W0bzepqP2OtE9FqH/ltXt37qyvHw2CqA==
+peerjs@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/peerjs/-/peerjs-1.4.0.tgz#1c2e055f18ecf395df5989666c4412acb4b63107"
+  integrity sha512-l+aniWuGK8CZ70Yv4Q2HXKNpEifov3zFvtchbnTgnY4pSFKsNteZWs+FH6q5AhjETmYewzYPZKKmaVkZZ6IQbQ==
   dependencies:
-    "@types/node" "^10.14.33"
     eventemitter3 "^3.1.2"
     peerjs-js-binarypack "1.0.1"
     webrtc-adapter "^7.7.1"
