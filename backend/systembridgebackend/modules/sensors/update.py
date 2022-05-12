@@ -45,13 +45,17 @@ class SensorsUpdate(Base):
         """Update Fan Sensors"""
         if data := self._sensors.fans():
             for key, value in data.items():
-                self._database.write("sensors", f"fans_{key}", value)
+                for subkey, subvalue in value.items():
+                    self._database.write("sensors", f"fans_{key}_{subkey}", subvalue)
 
     async def update_temperatures(self) -> None:
         """Update Temperature Sensors"""
         if data := self._sensors.temperatures():
             for key, value in data.items():
-                self._database.write("sensors", f"temperatures_{key}", value)
+                for subkey, subvalue in value.items():
+                    self._database.write(
+                        "sensors", f"temperatures_{key}_{subkey}", subvalue
+                    )
 
     async def update_windows_sensors(self) -> None:
         """Update Windows Sensors"""
