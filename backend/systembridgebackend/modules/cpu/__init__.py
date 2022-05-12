@@ -57,7 +57,10 @@ class CPU(Base):
                     "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
                     and "temperature" in item[COLUMN_TYPE].lower()
                 )
-                or ("k10temp" in item[COLUMN_HARDWARE_TYPE].lower())
+                or (
+                    "k10temp" in item[COLUMN_HARDWARE_TYPE].lower()
+                    and "current" in item[COLUMN_TYPE].lower()
+                )
             ):
                 self._logger.debug(
                     "Found CPU temperature: %s = %s",
