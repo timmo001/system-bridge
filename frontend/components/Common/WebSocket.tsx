@@ -9,7 +9,7 @@ export class WebSocketConnection {
   private apiKey: string;
 
   constructor(port: number, apiKey: string, connected?: () => void) {
-    this.port = port;
+    this.port = port || 9170;
     this.apiKey = apiKey;
     (async () => {
       this.websocket = await this.connect();
@@ -28,7 +28,11 @@ export class WebSocketConnection {
   }
 
   private async connect(): Promise<WebSocket> {
-    const ws = new WebSocket(`ws://localhost:${this.port}/api/websocket`);
+    const ws = new WebSocket(
+      `ws://${window.location.hostname || "localhost"}:${
+        this.port
+      }/api/websocket`
+    );
     await new Promise<void>((resolve) => {
       ws.onopen = () => resolve();
     });
