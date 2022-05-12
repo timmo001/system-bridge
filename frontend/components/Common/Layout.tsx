@@ -1,9 +1,8 @@
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useCallback, useEffect } from "react";
 import { Container } from "@mui/material";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-import { useSettings } from "../Contexts/Settings";
 import Footer from "./Footer";
 import Header from "./Header";
 import HeaderLinks from "./HeaderLinks";
@@ -19,32 +18,41 @@ interface LayoutProps {
 }
 
 function Layout(props: LayoutProps): ReactElement {
-  const [settings, setSettings] = useSettings();
-
   const router = useRouter();
-  const query = router.query;
 
-  useEffect(() => {
-    if (
-      query &&
-      Object.keys(query).length > 0 &&
-      typeof window !== "undefined"
-    ) {
-      let newApiKey: string | null = null,
-        newApiPort: string | null = null;
-      if (!query?.apiKey)
-        newApiKey = window.prompt("Please enter your API key", "");
-      if (!query?.apiPort)
+  const checkQuery = useCallback(() => {
+    console.log(
+      "router.isReady:",
+      router.isReady,
+      "- router.query:",
+      router.query
+    );
+    if (router.isReady && typeof window !== "undefined") {
+      let newApiKey: string | null = (router.query?.apiKey as string) || "",
+        newApiPort: string | null = (router.query?.apiPort as string) || "9170",
+        needUpdate = false;
+      if (!router.query?.apiKey) {
+        needUpdate = true;
+        newApiKey = window.prompt("Please enter your API key", newApiKey);
+      }
+      if (!router.query?.apiPort) {
+        needUpdate = true;
         newApiPort = window.prompt(
           "Please enter your API port (default: 9170)",
-          (query.apiPort as string) || "9170"
+          newApiPort
         );
-      if (newApiKey && newApiPort)
-        router.replace(
-          `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`
-        );
+      }
+      if (needUpdate && newApiKey && newApiPort) {
+        const newUrl = `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`;
+        console.log("newUrl:", newUrl);
+        router.push(newUrl);
+      }
     }
-  }, [router, query]);
+  }, [router]);
+
+  useEffect(() => {
+    checkQuery();
+  }, [checkQuery]);
 
   return (
     <>
