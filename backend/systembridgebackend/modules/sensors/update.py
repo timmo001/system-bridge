@@ -47,8 +47,14 @@ class SensorsUpdate(Base):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._database.write(
-                            "sensors", f"fans_{key}_{subkey}", subvalue
+                        self._database.write_sensor(
+                            "sensors",
+                            f"fans_{key}_{subkey}",
+                            subkey,
+                            subkey,
+                            key,
+                            key,
+                            subvalue,
                         )
 
     async def update_temperatures(self) -> None:
@@ -57,8 +63,14 @@ class SensorsUpdate(Base):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._database.write(
-                            "sensors", f"temperatures_{key}_{subkey}", subvalue
+                        self._database.write_sensor(
+                            "sensors",
+                            f"temperatures_{key}_{subkey}",
+                            subkey,
+                            subkey,
+                            key,
+                            key,
+                            subvalue,
                         )
 
     async def update_windows_sensors(self) -> None:
