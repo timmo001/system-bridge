@@ -52,10 +52,12 @@ class CPU(Base):
     ) -> float | None:
         """CPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
-            if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "temperature" in item[COLUMN_TYPE].lower()
+            if item[COLUMN_HARDWARE_TYPE] is not None and (
+                (
+                    "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
+                    and "temperature" in item[COLUMN_TYPE].lower()
+                )
+                or ("k10temp" in item[COLUMN_HARDWARE_TYPE].lower())
             ):
                 self._logger.debug(
                     "Found CPU temperature: %s = %s",
