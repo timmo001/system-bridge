@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WindowsCPUMonitor")]
+[assembly: AssemblyTitle("SystemBridgeWindowsSensors")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WindowsCPUMonitor")]
+[assembly: AssemblyCompany("Timmo")]
+[assembly: AssemblyProduct("SystemBridgeWindowsSensors")]
 [assembly: AssemblyCopyright("Copyright © 2021-2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
