@@ -54,6 +54,9 @@
           "type": "number"
         }
       },
+      "additionalProperties": {
+        "type": "number"
+      },
       "required": [
         "io_counters_bytes_sent",
         "io_counters_bytes_recv",
@@ -66,6 +69,7 @@
       ]
     }
   },
+  "additionalProperties": {},
   "required": [
     "io_counters_bytes_sent",
     "io_counters_bytes_recv",

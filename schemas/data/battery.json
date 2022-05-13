@@ -18,8 +18,12 @@
           "type": "number"
         }
       },
+      "additionalProperties": {
+        "type": "number"
+      },
       "required": ["is_charging", "percentage"]
     }
   },
+  "additionalProperties": {},
   "required": ["is_charging", "percentage", "last_updated"]
 }
