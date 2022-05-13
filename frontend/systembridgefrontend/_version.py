@@ -7,5 +7,5 @@ Provides systembridgefrontend version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgefrontend", 3, 0, 4, dev=0)
+__version__ = Version("systembridgefrontend", 3, 0, 4)
 __all__ = ["__version__"]
