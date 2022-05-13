@@ -11,7 +11,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  deploy-connector:
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    secrets:
+      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    with:
+      code-path: connector
+      module-name: systembridgeconnector
+      use-incremental: true
   deploy-shared:
+    needs:
+      - deploy-connector
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -115,16 +127,4 @@ jobs:
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
       module-name: systembridgewindowssensors
-      use-incremental: true
-  deploy-connector:
-    needs:
-      - deploy-windowssensors
-    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
-    secrets:
-      PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-      PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-    with:
-      code-path: connector
-      module-name: systembridgeconnector
       use-incremental: true
