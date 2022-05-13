@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "Network",
   "properties": {
     "io_counters_bytes_sent": {
       "type": "integer"
@@ -28,6 +29,7 @@
     },
     "last_updated": {
       "type": "object",
+      "description": "Last updated",
       "properties": {
         "io_counters_bytes_sent": {
           "type": "number"

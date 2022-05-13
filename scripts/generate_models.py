@@ -45,24 +45,32 @@ def models() -> None:
     for root, _, files in os.walk(path_from_schemas):
         for file in files:
             if file.endswith(".json"):
-                file_name = file.split(".")[0]
+                module = file.split(".")[0]
 
                 path_from = os.path.join(root, file)
-                path_to = os.path.join(path_to_models_shared, file_name + ".py")
+                path_to = os.path.join(path_to_models_shared, module + ".py")
 
                 typer.secho(
-                    f"Generating model {file_name} from {path_from} to {path_to}",
+                    f"Generating model {module} from {path_from} to {path_to}",
                     fg=typer.colors.GREEN,
                 )
 
                 command = [
                     "datamodel-codegen",
+                    "--disable-timestamp",
+                    "--class-name",
+                    module,
                     "--input",
                     path_from,
                     "--input-file-type",
                     "jsonschema",
                     "--output",
                     path_to,
+                    "--target-python-version",
+                    "3.9",
+                    "--snake-case-field",
+                    "--use-schema-description",
+                    "--use-standard-collections",
                 ]
 
                 typer.secho(" ".join(command), fg=typer.colors.CYAN)

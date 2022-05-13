@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "Battery",
   "properties": {
     "is_charging": {
       "type": "boolean"
@@ -10,6 +11,7 @@
     },
     "last_updated": {
       "type": "object",
+      "description": "Last updated",
       "properties": {
         "is_charging": {
           "type": "number"

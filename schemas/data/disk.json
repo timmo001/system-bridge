@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "Disk",
   "properties": {
     "io_counters_read_count": {
       "type": "integer"
@@ -22,6 +23,7 @@
     },
     "last_updated": {
       "type": "object",
+      "description": "Last updated",
       "properties": {
         "io_counters_read_count": {
           "type": "number"

@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "System",
   "properties": {
     "boot_time": {
       "type": "number"
@@ -40,6 +41,7 @@
     },
     "last_updated": {
       "type": "object",
+      "description": "Last updated",
       "properties": {
         "boot_time": {
           "type": "number"

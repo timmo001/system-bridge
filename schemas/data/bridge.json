@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "Bridge",
   "properties": {
     "last_updated": {
       "type": "object",
+      "description": "Last updated",
       "additionalProperties": {
         "type": "number"
       }
