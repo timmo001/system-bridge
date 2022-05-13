@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "API Response",
+  "description": "Response",
   "properties": {
     "message": {
       "type": "string",
