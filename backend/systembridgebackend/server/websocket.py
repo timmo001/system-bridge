@@ -1,6 +1,6 @@
 """System Bridge: WebSocket handler"""
 from json import JSONDecodeError, dumps, loads
-from typing import Callable
+from collections.abc import Callable
 from uuid import uuid4
 
 from systembridgeshared.base import Base

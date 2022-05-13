@@ -1,5 +1,5 @@
 """System Bridge: Bridge"""
-from typing import Callable
+from collections.abc import Callable
 
 from systembridgeshared.base import Base
 from zeroconf import InterfaceChoice, ServiceBrowser, Zeroconf

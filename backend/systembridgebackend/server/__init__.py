@@ -1,10 +1,10 @@
 """System Bridge: Server"""
 import asyncio
+from collections.abc import Callable
 from datetime import timedelta
 import os
 from os import walk
 import sys
-from typing import Callable
 
 from sanic import Sanic
 from sanic.models.handler_types import ListenerType
@@ -234,8 +234,7 @@ class Server(Base):
 
     def start_server(self) -> None:
         """Start Server"""
-        port = self._settings.get(SETTING_PORT_API)
-        if port is None:
+        if (port := self._settings.get(SETTING_PORT_API)) is None:
             raise ValueError("Port not set")
         self._logger.info("Starting server on port: %s", port)
         self._server.run(

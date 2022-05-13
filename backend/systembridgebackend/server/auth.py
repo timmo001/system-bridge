@@ -1,6 +1,6 @@
 """System Bridge: Server Authentication"""
 from functools import wraps
-from typing import Callable
+from collections.abc import Callable
 
 from sanic import Sanic, exceptions
 from systembridgeshared.base import Base

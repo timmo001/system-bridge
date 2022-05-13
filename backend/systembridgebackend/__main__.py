@@ -56,8 +56,8 @@ if __name__ == "__main__":
     database = Database()
     settings = Settings(database)
 
-    log_level = str(settings.get(SETTING_LOG_LEVEL))
-    setup_logger(log_level, "system-bridge")
+    LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
+    setup_logger(LOG_LEVEL, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
     Main()

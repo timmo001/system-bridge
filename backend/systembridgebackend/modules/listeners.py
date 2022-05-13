@@ -1,7 +1,7 @@
 """System Bridge: Module Listeners"""
 
 import asyncio
-from typing import Callable
+from collections.abc import Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database

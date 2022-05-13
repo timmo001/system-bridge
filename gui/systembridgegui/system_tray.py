@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Callable
+from collections.abc import Callable
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
