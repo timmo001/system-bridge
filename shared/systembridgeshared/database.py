@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from collections.abc import Mapping
 import os
-from sqlite3 import Connection, connect
+from sqlite3 import connect
 from time import time
 
 from pandas import DataFrame, read_sql_query
