@@ -36,4 +36,4 @@ class Disk(BaseModel):
     io_counters_write_bytes: int
     io_counters_read_time: int
     io_counters_write_time: int
-    last_updated: LastUpdated = Field(..., description='Last updated')
+    last_updated: LastUpdated = Field(..., description="Last updated")

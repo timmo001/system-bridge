@@ -28,4 +28,4 @@ class Battery(BaseModel):
 
     is_charging: bool
     percentage: float
-    last_updated: LastUpdated = Field(..., description='Last updated')
+    last_updated: LastUpdated = Field(..., description="Last updated")

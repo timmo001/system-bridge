@@ -1,6 +1,7 @@
 """System Bridge: Version"""
 import os
 import subprocess
+import sys
 from distutils.dir_util import copy_tree
 
 import typer
@@ -71,6 +72,18 @@ def models() -> None:
                     "--snake-case-field",
                     "--use-schema-description",
                     "--use-standard-collections",
+                ]
+
+                typer.secho(" ".join(command), fg=typer.colors.CYAN)
+
+                with subprocess.Popen(command) as process:
+                    process.wait()
+
+                command = [
+                    sys.executable,
+                    "-m",
+                    "black",
+                    path_to,
                 ]
 
                 typer.secho(" ".join(command), fg=typer.colors.CYAN)

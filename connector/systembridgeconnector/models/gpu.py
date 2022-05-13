@@ -14,4 +14,4 @@ class Gpu(BaseModel):
     class Config:
         extra = Extra.allow
 
-    last_updated: dict[str, float] = Field(..., description='Last updated')
+    last_updated: dict[str, float] = Field(..., description="Last updated")

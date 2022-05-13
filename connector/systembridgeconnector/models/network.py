@@ -40,4 +40,4 @@ class Network(BaseModel):
     io_counters_errout: int
     io_counters_dropin: int
     io_counters_dropout: int
-    last_updated: LastUpdated = Field(..., description='Last updated')
+    last_updated: LastUpdated = Field(..., description="Last updated")

@@ -14,4 +14,4 @@ class Response(BaseModel):
     class Config:
         extra = Extra.allow
 
-    message: str = Field(..., description='Message')
+    message: str = Field(..., description="Message")

@@ -68,4 +68,4 @@ class Cpu(BaseModel):
     times_percent_dpc: float
     usage: float
     voltage: float
-    last_updated: LastUpdated = Field(..., description='Last updated')
+    last_updated: LastUpdated = Field(..., description="Last updated")
