@@ -27,6 +27,7 @@ from systembridgeconnector.exceptions import (
     ConnectionClosedException,
     ConnectionErrorException,
 )
+from systembridgeconnector.models.generic import Generic
 
 
 class WebSocketClient(Base):
@@ -235,13 +236,13 @@ class WebSocketClient(Base):
             while not self._websocket.closed:
                 await callback(await self.receive_message())
 
-    async def receive_message(self) -> dict:
+    async def receive_message(self) -> Generic | None:
         """Receive message"""
         if not self.connected:
             raise ConnectionClosedException("Connection is closed")
 
         if self._websocket is None:
-            return {}
+            return None
 
         message = await self._websocket.receive()
 
@@ -264,6 +265,6 @@ class WebSocketClient(Base):
             ):
                 raise AuthenticationException(message_json[EVENT_MESSAGE])
 
-            return message_json
+            return Generic(**message_json)
 
         raise BadMessageException(f"Unknown message type: {message.type}")
