@@ -28,7 +28,13 @@ from systembridgeshared.const import (
 class Database(Base):
     """Database"""
 
-    _connection: Connection
+    def __init__(self):
+        """Initialise"""
+        super().__init__()
+        self._connection = connect(
+            os.path.join(get_user_data_directory(), "systembridge.db"),
+            check_same_thread=False,
+        )
 
     @property
     def connected(self) -> bool:
