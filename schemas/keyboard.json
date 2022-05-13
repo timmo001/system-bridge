@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Keyboard",
+  "properties": {
+    "key": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    }
+  }
+}
