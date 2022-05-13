@@ -30,6 +30,14 @@ async def handler_open(
     request: Request,
 ) -> HTTPResponse:
     """Open a file or a URL in the default browser."""
+    if request.json is None:
+        return json(
+            {
+                "mesage": "Missing JSON body",
+            },
+            status=400,
+        )
+
     if "path" in request.json:
         open_path(request.json["path"])
         return json(

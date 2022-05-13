@@ -1,5 +1,6 @@
 """System Bridge: Update Sensors"""
 import asyncio
+
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -109,7 +110,7 @@ class SensorsUpdate(Base):
                         type_hardware = (
                             hardware["type"] if "type" in hardware else "NVIDIA"
                         )
-                        name_hardware = hardware["name"] if "name" in hardware else None
+                        name_hardware = hardware["name"] if "name" in hardware else ""
                         if "DISPLAY" in name_hardware:
                             type_hardware = "Display"
                             name_hardware = (

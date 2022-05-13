@@ -1,15 +1,17 @@
 """System Bridge CLI: Main"""
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
-import typer
-from tabulate import tabulate
 from uuid import uuid4
 
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
+from tabulate import tabulate
+import typer
 
 from systembridgecli._version import __version__
 
@@ -69,7 +71,7 @@ def settings_all():
 def setting(
     key: str,
     set_value: bool = False,
-    value: str = None,
+    value: str | None = None,
 ) -> None:
     """Get or Set Setting"""
     if set_value:
@@ -84,7 +86,7 @@ def setting(
 def secret(
     key: str,
     set_value: bool = False,
-    value: str = None,
+    value: str | None = None,
 ) -> None:
     """Get or Set Secret"""
     if set_value:

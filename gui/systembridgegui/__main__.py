@@ -5,7 +5,6 @@ import sys
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
-
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database

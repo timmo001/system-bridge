@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
@@ -28,8 +29,8 @@ class SystemTray(Base, QSystemTrayIcon):
         self,
         icon: QIcon,
         parent: QWidget,
-        callback_exit_application: callable,
-        callback_show_window: callable[[str, bool, int | None, int | None], None],
+        callback_exit_application: Callable,
+        callback_show_window: Callable[[str, bool, int | None, int | None], None],
     ) -> None:
         """Initialize the system tray"""
         Base.__init__(self)
@@ -39,15 +40,15 @@ class SystemTray(Base, QSystemTrayIcon):
 
         self.callback_show_window = callback_show_window
 
-        self.activated.connect(self._on_activated)
+        self.activated.connect(self._on_activated)  # type: ignore
 
         menu = QMenu()
 
         action_settings: QAction = menu.addAction("Open Settings")
-        action_settings.triggered.connect(self._show_settings)
+        action_settings.triggered.connect(self._show_settings)  # type: ignore
 
         action_data: QAction = menu.addAction("View Data")
-        action_data.triggered.connect(self._show_data)
+        action_data.triggered.connect(self._show_data)  # type: ignore
 
         # menu.addSeparator()
 
@@ -89,34 +90,34 @@ class SystemTray(Base, QSystemTrayIcon):
         #             })"""
 
         action_latest_release: QAction = menu.addAction(latest_version_text)
-        action_latest_release.triggered.connect(self._open_latest_releases)
+        action_latest_release.triggered.connect(self._open_latest_releases)  # type: ignore
 
         menu_help = menu.addMenu("Help")
 
         action_docs: QAction = menu_help.addAction("Documentation / Website")
-        action_docs.triggered.connect(self._open_docs)
+        action_docs.triggered.connect(self._open_docs)  # type: ignore
 
         action_feature: QAction = menu_help.addAction("Suggest a Feature")
-        action_feature.triggered.connect(self._open_feature_request)
+        action_feature.triggered.connect(self._open_feature_request)  # type: ignore
 
         action_issue: QAction = menu_help.addAction("Report an issue")
-        action_issue.triggered.connect(self._open_issues)
+        action_issue.triggered.connect(self._open_issues)  # type: ignore
 
         action_discussions: QAction = menu_help.addAction("Discussions")
-        action_discussions.triggered.connect(self._open_discussions)
+        action_discussions.triggered.connect(self._open_discussions)  # type: ignore
 
         menu_help.addSeparator()
 
         action_log: QAction = menu_help.addAction("Open Log File")
-        action_log.triggered.connect(self._open_log)
+        action_log.triggered.connect(self._open_log)  # type: ignore
 
         action_log_gui: QAction = menu_help.addAction("Open GUI Log File")
-        action_log_gui.triggered.connect(self._open_gui_log)
+        action_log_gui.triggered.connect(self._open_gui_log)  # type: ignore
 
         menu.addSeparator()
 
         action_exit: QAction = menu.addAction("Exit")
-        action_exit.triggered.connect(lambda: callback_exit_application(False))
+        action_exit.triggered.connect(lambda: callback_exit_application(False))  # type: ignore
 
         self.setContextMenu(menu)
 
@@ -175,8 +176,8 @@ class SystemTray(Base, QSystemTrayIcon):
 
     def _show_data(self) -> None:
         """Show api data"""
-        self.callback_show_window(PATH_DATA, False)
+        self.callback_show_window(PATH_DATA, False)  # type: ignore
 
     def _show_settings(self) -> None:
         """Show settings"""
-        self.callback_show_window(PATH_SETTINGS, False)
+        self.callback_show_window(PATH_SETTINGS, False)  # type: ignore

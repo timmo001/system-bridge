@@ -1,5 +1,6 @@
 """System Bridge: Update System"""
 import asyncio
+
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -70,11 +71,12 @@ class SystemUpdate(ModuleUpdateBase):
     async def update_version_latest(self) -> None:
         """Update latest version"""
         release = await self._system.version_latest()
-        self._database.write(
-            "system",
-            "version_latest",
-            release.tag_name.replace("v", "") if release is not None else None,
-        )
+        if release and release.tag_name:
+            self._database.write(
+                "system",
+                "version_latest",
+                release.tag_name.replace("v", "") if release is not None else None,
+            )
 
     async def update_version_newer_avaliable(self) -> None:
         """Update newer version available"""

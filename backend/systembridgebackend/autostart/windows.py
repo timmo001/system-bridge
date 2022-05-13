@@ -9,13 +9,7 @@ def autostart_windows_disable():
         return
 
     # pylint: disable=import-error, import-outside-toplevel
-    from winreg import (
-        HKEY_CURRENT_USER,
-        KEY_ALL_ACCESS,
-        CloseKey,
-        DeleteValue,
-        OpenKey,
-    )
+    from winreg import HKEY_CURRENT_USER, KEY_ALL_ACCESS, CloseKey, DeleteValue, OpenKey
 
     try:
         key = OpenKey(

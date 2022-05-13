@@ -1,5 +1,6 @@
 """System Bridge: CPU"""
 from __future__ import annotations
+
 from psutil import (
     cpu_count,
     cpu_freq,
@@ -10,15 +11,14 @@ from psutil import (
     getloadavg,
 )
 from psutil._common import pcputimes, scpufreq, scpustats
-
 from systembridgeshared.base import Base
-from systembridgeshared.database import Database
 from systembridgeshared.const import (
     COLUMN_HARDWARE_TYPE,
     COLUMN_KEY,
     COLUMN_TYPE,
     COLUMN_VALUE,
 )
+from systembridgeshared.database import Database
 
 
 class CPU(Base):
@@ -34,7 +34,7 @@ class CPU(Base):
 
     def freq_per_cpu(self) -> list[scpufreq]:  # pylint: disable=unsubscriptable-object
         """CPU frequency per CPU"""
-        return cpu_freq(percpu=True)
+        return cpu_freq(percpu=True)  # type: ignore
 
     def load_average(
         self,
@@ -96,7 +96,7 @@ class CPU(Base):
 
     def usage_per_cpu(self) -> list[float]:  # pylint: disable=unsubscriptable-object
         """CPU usage per CPU"""
-        return cpu_percent(interval=1, percpu=True)
+        return cpu_percent(interval=1, percpu=True)  # type: ignore
 
     def voltage(
         self,

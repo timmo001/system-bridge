@@ -10,9 +10,9 @@ from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 from systembridgebackend.autostart import autostart_disable, autostart_enable
+from systembridgebackend.modules.system import System
 from systembridgebackend.server import Server
 from systembridgebackend.shortcut import create_shortcuts
-from systembridgebackend.modules.system import System
 
 
 class Main(Base):
@@ -40,10 +40,10 @@ class Main(Base):
         if platform.system() == "Windows" and "--silent" in sys.argv:
             self._logger.info("Hide console")
             # pylint: disable=import-error, import-outside-toplevel
-            from win32gui import GetForegroundWindow, ShowWindow
             from win32con import SW_HIDE
+            from win32gui import GetForegroundWindow, ShowWindow
 
-            ShowWindow(GetForegroundWindow(), SW_HIDE)
+            ShowWindow(GetForegroundWindow(), SW_HIDE)  # type: ignore
 
         self._server = Server(database, settings)
 
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     database = Database()
     settings = Settings(database)
 
-    log_level = settings.get(SETTING_LOG_LEVEL)
-    setup_logger(log_level, "system-bridge")
+    LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
+    setup_logger(LOG_LEVEL, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
     Main()

@@ -1,5 +1,6 @@
 """System Bridge: Update Battery"""
 import asyncio
+
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
 

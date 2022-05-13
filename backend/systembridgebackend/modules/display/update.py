@@ -1,5 +1,6 @@
 """System Bridge: Update Display"""
 import asyncio
+
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 

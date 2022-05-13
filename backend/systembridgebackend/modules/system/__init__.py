@@ -1,10 +1,12 @@
 """System Bridge: System"""
 from __future__ import annotations
+
 import os
 import platform
 import re
 import socket
 import uuid
+
 from aiogithubapi import (
     GitHubAPI,
     GitHubConnectionException,
@@ -12,11 +14,10 @@ from aiogithubapi import (
     GitHubRatelimitException,
     GitHubReleaseModel,
 )
+from pkg_resources import parse_version
 from plyer import uniqueid
 from psutil import boot_time, users
 from psutil._common import suser
-from pkg_resources import parse_version
-
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 

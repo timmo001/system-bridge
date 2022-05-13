@@ -1,8 +1,11 @@
 """System Bridge Shared: WebSocket Client"""
 from __future__ import annotations
-import aiohttp
+
 import json
 import socket
+from collections.abc import Callable
+
+import aiohttp
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
@@ -22,6 +25,7 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.exceptions import (
     AuthenticationException,
+    BadMessageException,
     ConnectionClosedException,
     ConnectionErrorException,
 )
@@ -31,6 +35,9 @@ from systembridgeshared.settings import Settings
 class WebSocketClient(Base):
     """WebSocket Client"""
 
+    _session: aiohttp.ClientSession
+    _websocket: aiohttp.ClientWebSocketResponse
+
     def __init__(
         self,
         settings: Settings,
@@ -38,8 +45,6 @@ class WebSocketClient(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._session = None
-        self._websocket = None
 
     @property
     def connected(self) -> bool:
@@ -51,13 +56,12 @@ class WebSocketClient(Base):
         self._logger.info("Closing WebSocket connection")
         if self._websocket is not None:
             await self._websocket.close()
-            self._websocket = None
         if self._session is not None:
             await self._session.close()
 
     async def connect(
         self,
-        session: aiohttp.ClientSession = None,
+        session: aiohttp.ClientSession | None = None,
     ) -> None:
         """Connect to server"""
         if not session:
@@ -190,7 +194,7 @@ class WebSocketClient(Base):
 
     async def listen_for_messages(
         self,
-        callback: callable,
+        callback: Callable,
     ) -> None:
         """Listen for messages"""
         self._logger.info("Listen for messages")
@@ -214,10 +218,12 @@ class WebSocketClient(Base):
         if message.type == aiohttp.WSMsgType.TEXT:
             message_json = message.json()
 
-        if (
-            message_json[EVENT_TYPE] == TYPE_ERROR
-            and message_json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
-        ):
-            raise AuthenticationException(message_json[EVENT_MESSAGE])
+            if (
+                message_json[EVENT_TYPE] == TYPE_ERROR
+                and message_json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
+            ):
+                raise AuthenticationException(message_json[EVENT_MESSAGE])
 
-        return message_json
+            return message_json
+
+        raise BadMessageException(f"Unknown message type: {message.type}")

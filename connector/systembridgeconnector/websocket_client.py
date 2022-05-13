@@ -1,8 +1,11 @@
 """System Bridge Shared: WebSocket Client"""
 from __future__ import annotations
-import aiohttp
+
 import json
 import socket
+from collections.abc import Callable
+
+import aiohttp
 
 from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
@@ -20,6 +23,7 @@ from systembridgeconnector.const import (
 )
 from systembridgeconnector.exceptions import (
     AuthenticationException,
+    BadMessageException,
     ConnectionClosedException,
     ConnectionErrorException,
 )
@@ -27,6 +31,9 @@ from systembridgeconnector.exceptions import (
 
 class WebSocketClient(Base):
     """WebSocket Client"""
+
+    _session: aiohttp.ClientSession
+    _websocket: aiohttp.ClientWebSocketResponse
 
     def __init__(
         self,
@@ -39,8 +46,6 @@ class WebSocketClient(Base):
         self._api_host = api_host
         self._api_port = api_port
         self._api_key = api_key
-        self._session = None
-        self._websocket = None
 
     @property
     def connected(self) -> bool:
@@ -52,18 +57,16 @@ class WebSocketClient(Base):
         self._logger.info("Closing WebSocket connection")
         if self._websocket is not None:
             await self._websocket.close()
-            self._websocket = None
         if self._session is not None:
             await self._session.close()
 
     async def connect(
         self,
-        session: aiohttp.ClientSession = None,
+        session: aiohttp.ClientSession | None = None,
     ) -> None:
         """Connect to server"""
         if not session:
-            session = aiohttp.ClientSession()
-        self._session = session
+            self._session = aiohttp.ClientSession()
         url = f"ws://{self._api_host}:{self._api_port}/api/websocket"
         self._logger.info("Connecting to WebSocket: %s", url)
         try:
@@ -191,7 +194,7 @@ class WebSocketClient(Base):
 
     async def listen_for_messages(
         self,
-        callback: callable,
+        callback: Callable,
     ) -> None:
         """Listen for messages"""
         self._logger.info("Listen for messages")
@@ -215,10 +218,12 @@ class WebSocketClient(Base):
         if message.type == aiohttp.WSMsgType.TEXT:
             message_json = message.json()
 
-        if (
-            message_json[EVENT_TYPE] == TYPE_ERROR
-            and message_json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
-        ):
-            raise AuthenticationException(message_json[EVENT_MESSAGE])
+            if (
+                message_json[EVENT_TYPE] == TYPE_ERROR
+                and message_json[EVENT_SUBTYPE] == SUBTYPE_BAD_API_KEY
+            ):
+                raise AuthenticationException(message_json[EVENT_MESSAGE])
 
-        return message_json
+            return message_json
+
+        raise BadMessageException(f"Unknown message type: {message.type}")
