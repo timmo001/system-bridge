@@ -1,4 +1,2 @@
-aiohttp==3.8.1
-incremental==21.3.0
-incremental==21.3.0
-websockets==10.3
+aiohttp>=3.8.1
+incremental>=21.3.0
