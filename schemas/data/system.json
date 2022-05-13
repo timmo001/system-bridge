@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "boot_time": {
+      "type": "number"
+    },
+    "fqdn": {
+      "type": "string"
+    },
+    "hostname": {
+      "type": "string"
+    },
+    "ip_address_4": {
+      "type": "string"
+    },
+    "mac_address": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "platform_version": {
+      "type": "string"
+    },
+    "uptime": {
+      "type": "number"
+    },
+    "uuid": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "version_latest": {
+      "type": "string"
+    },
+    "version_newer_avaliable": {
+      "type": "boolean"
+    },
+    "last_updated": {
+      "type": "object",
+      "properties": {
+        "boot_time": {
+          "type": "number"
+        },
+        "fqdn": {
+          "type": "number"
+        },
+        "hostname": {
+          "type": "number"
+        },
+        "ip_address_4": {
+          "type": "number"
+        },
+        "mac_address": {
+          "type": "number"
+        },
+        "platform": {
+          "type": "number"
+        },
+        "platform_version": {
+          "type": "number"
+        },
+        "uptime": {
+          "type": "number"
+        },
+        "uuid": {
+          "type": "number"
+        },
+        "version": {
+          "type": "number"
+        },
+        "version_latest": {
+          "type": "number"
+        },
+        "version_newer_avaliable": {
+          "type": "number"
+        }
+      },
+      "additionalItems": {
+        "type": "number"
+      },
+      "required": [
+        "boot_time",
+        "fqdn",
+        "hostname",
+        "ip_address_4",
+        "mac_address",
+        "platform",
+        "platform_version",
+        "uptime",
+        "uuid",
+        "version",
+        "version_latest",
+        "version_newer_avaliable"
+      ]
+    }
+  },
+  "additionalItems": {},
+  "required": [
+    "boot_time",
+    "fqdn",
+    "hostname",
+    "ip_address_4",
+    "mac_address",
+    "platform",
+    "platform_version",
+    "uptime",
+    "uuid",
+    "version",
+    "version_latest",
+    "version_newer_avaliable",
+    "last_updated"
+  ]
+}

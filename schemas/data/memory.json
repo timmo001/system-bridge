@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "swap_total": {
+      "type": "integer"
+    },
+    "swap_used": {
+      "type": "integer"
+    },
+    "swap_free": {
+      "type": "number"
+    },
+    "swap_percent": {
+      "type": "number"
+    },
+    "swap_sin": {
+      "type": "integer"
+    },
+    "swap_sout": {
+      "type": "integer"
+    },
+    "virtual_total": {
+      "type": "integer"
+    },
+    "virtual_available": {
+      "type": "integer"
+    },
+    "virtual_percent": {
+      "type": "number"
+    },
+    "virtual_used": {
+      "type": "integer"
+    },
+    "virtual_free": {
+      "type": "integer"
+    },
+    "last_updated": {
+      "type": "object",
+      "properties": {
+        "swap_total": {
+          "type": "number"
+        },
+        "swap_used": {
+          "type": "number"
+        },
+        "swap_free": {
+          "type": "number"
+        },
+        "swap_percent": {
+          "type": "number"
+        },
+        "swap_sin": {
+          "type": "number"
+        },
+        "swap_sout": {
+          "type": "number"
+        },
+        "virtual_total": {
+          "type": "number"
+        },
+        "virtual_available": {
+          "type": "number"
+        },
+        "virtual_percent": {
+          "type": "number"
+        },
+        "virtual_used": {
+          "type": "number"
+        },
+        "virtual_free": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      },
+      "required": [
+        "swap_total",
+        "swap_used",
+        "swap_free",
+        "swap_percent",
+        "swap_sin",
+        "swap_sout",
+        "virtual_total",
+        "virtual_available",
+        "virtual_percent",
+        "virtual_used",
+        "virtual_free"
+      ]
+    }
+  },
+  "additionalProperties": {},
+  "required": [
+    "swap_total",
+    "swap_used",
+    "swap_free",
+    "swap_percent",
+    "swap_sin",
+    "swap_sout",
+    "virtual_total",
+    "virtual_available",
+    "virtual_percent",
+    "virtual_used",
+    "virtual_free",
+    "last_updated"
+  ]
+}
