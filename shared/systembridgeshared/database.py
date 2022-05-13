@@ -1,8 +1,11 @@
 """System Bridge Shared: Database"""
+from __future__ import annotations
+
 from collections import OrderedDict
 import os
 from sqlite3 import Connection, connect
 from time import time
+from typing import Mapping
 
 from pandas import DataFrame, read_sql_query
 
@@ -25,10 +28,7 @@ from systembridgeshared.const import (
 class Database(Base):
     """Database"""
 
-    def __init__(self) -> None:
-        """Initialize"""
-        super().__init__()
-        self._connection: Connection = None
+    _connection: Connection
 
     @property
     def connected(self) -> bool:
@@ -49,7 +49,7 @@ class Database(Base):
     def execute_sql_with_params(
         self,
         sql: str,
-        params: list[any],
+        params: Mapping,
     ) -> None:
         """Execute SQL"""
         self._logger.debug("Executing SQL: %s\n%s", sql, params)
@@ -66,7 +66,6 @@ class Database(Base):
     def close(self) -> None:
         """Close connection"""
         self._connection.close()
-        self._connection = None
 
     def check_table_for_key(
         self,
@@ -108,7 +107,7 @@ class Database(Base):
     def create_table(
         self,
         table_name: str,
-        columns: list[str, str],
+        columns: list[tuple],
     ) -> None:
         """Create table"""
         sql = f"CREATE TABLE IF NOT EXISTS {table_name} ("
@@ -121,8 +120,8 @@ class Database(Base):
         self,
         table_name: str,
         data_key: str,
-        data_value: str,
-        data_timestamp: float = None,
+        data_value: bool | float | int | str | None,
+        data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
@@ -149,7 +148,7 @@ class Database(Base):
         data_hardware_type: str,
         data_hardware_name: str,
         data_value: str,
-        data_timestamp: float = None,
+        data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
@@ -175,13 +174,15 @@ class Database(Base):
     ) -> OrderedDict:
         """Convert table to OrderedDict"""
         data_dict = self.read_table(table_name).to_dict(orient="records")
-        data = {"last_updated": {}}
+        data: dict = {
+            "last_updated": {},
+        }
         for item in data_dict:
             data = {
                 **data,
                 item[COLUMN_KEY]: convert_string_to_correct_type(item[COLUMN_VALUE]),
                 "last_updated": {
-                    **data["last_updated"],
+                    **data["last_updated"],  # type: ignore
                     item[COLUMN_KEY]: item["timestamp"],
                 },
             }

@@ -1,5 +1,6 @@
 """System Bridge: Update GPU"""
 import asyncio
+
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 

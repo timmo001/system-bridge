@@ -18,6 +18,14 @@ async def handler_keyboard(
     request: Request,
 ) -> HTTPResponse:
     """Send a keyboard event."""
+    if request.json is None:
+        return json(
+            {
+                "mesage": "Missing JSON body",
+            },
+            status=400,
+        )
+
     if "key" in request.json:
         keyboard_keypress(request.json["key"])
         return json(

@@ -10,13 +10,8 @@ def create_windows_shortcuts():
         return
 
     # pylint: disable=import-error, import-outside-toplevel
-    from winreg import (
-        HKEY_CURRENT_USER,
-        KEY_READ,
-        CloseKey,
-        OpenKey,
-        QueryValueEx,
-    )
+    from winreg import HKEY_CURRENT_USER, KEY_READ, CloseKey, OpenKey, QueryValueEx
+
     from win32com.client import Dispatch
 
     registry_key = OpenKey(

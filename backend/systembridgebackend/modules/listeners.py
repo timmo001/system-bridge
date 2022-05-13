@@ -1,6 +1,7 @@
 """System Bridge: Module Listeners"""
 
 import asyncio
+from typing import Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
@@ -12,7 +13,7 @@ class Listener:
     def __init__(
         self,
         listener_id: str,
-        data_changed_callback: callable,
+        data_changed_callback: Callable,
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
@@ -33,14 +34,14 @@ class Listeners(Base):
         super().__init__()
         self._database = database
         self._implemented_modules = implemented_modules
-        self._data = {module: {} for module in self._implemented_modules}
+        self._data: dict = {module: {} for module in self._implemented_modules}
         # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
 
     async def add_listener(
         self,
         listener_id: str,
-        data_changed_callback: callable,
+        data_changed_callback: Callable,
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> bool:
         """Add modules to listener"""

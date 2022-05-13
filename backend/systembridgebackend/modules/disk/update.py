@@ -1,5 +1,6 @@
 """System Bridge: Update Disk"""
 import asyncio
+
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase
@@ -24,7 +25,7 @@ class DiskUpdate(ModuleUpdateBase):
 
     async def update_io_counters_per_disk(self) -> None:
         """Update IO counters per disk"""
-        for key, value in self._disk.io_counters_per_disk().items():
+        for key, value in self._disk.io_counters_per_disk().items():  # type: ignore
             for subkey, subvalue in value._asdict().items():
                 self._database.write(
                     "disk", f"io_counters_per_disk_{key}_{subkey}", subvalue

@@ -27,7 +27,7 @@ class MainWindow(Base, QFrame):
         self.setWindowTitle("System Bridge")
         self.setWindowIcon(icon)
 
-        self.layout = QVBoxLayout(self)
+        self.layout = QVBoxLayout(self)  # type: ignore
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self._browser = QWebEngineView()

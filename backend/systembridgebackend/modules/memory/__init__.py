@@ -1,5 +1,5 @@
 """System Bridge: Memory"""
-from collections import namedtuple
+from typing import NamedTuple
 
 from psutil import swap_memory, virtual_memory
 from psutil._common import sswap
@@ -13,6 +13,6 @@ class Memory(Base):
         """Swap memory"""
         return swap_memory()
 
-    def virtual(self) -> namedtuple:  # svmem:
+    def virtual(self) -> NamedTuple:  # svmem:
         """Virtual memory"""
         return virtual_memory()

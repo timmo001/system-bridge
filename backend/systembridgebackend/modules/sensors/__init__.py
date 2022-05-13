@@ -1,10 +1,11 @@
 """System Bridge: Sensors"""
 from __future__ import annotations
+
 import json
-import psutil
 import subprocess
 import sys
 
+import psutil
 from systembridgeshared.base import Base
 
 
@@ -15,13 +16,13 @@ class Sensors(Base):
         """Get fans"""
         if not hasattr(psutil, "sensors_fans"):
             return None
-        return psutil.sensors_fans()
+        return psutil.sensors_fans()  # type: ignore
 
     def temperatures(self) -> dict | None:
         """Get temperatures"""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
-        return psutil.sensors_temperatures()
+        return psutil.sensors_temperatures()  # type: ignore
 
     def windows_sensors(self) -> dict | None:
         """Get windows sensors"""

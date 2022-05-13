@@ -1,8 +1,7 @@
 """MDNS/Zeroconf Advertisement"""
-from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
-
 from systembridgeshared.base import Base
 from systembridgeshared.settings import SETTING_PORT_API, Settings
+from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
 from systembridgebackend.modules.system import System
 
@@ -29,8 +28,11 @@ class MDNSAdvertisement(Base):
         hostname = system.hostname()
         ip_address_4 = system.ip_address_4()
         mac_address = system.mac_address()
-        port_api = int(self._settings.get(SETTING_PORT_API))
+        port_api = self._settings.get(SETTING_PORT_API)
         system_id = system.uuid()
+
+        if not port_api:
+            raise ValueError("Port API not set")
 
         zeroconf = Zeroconf(
             interfaces=InterfaceChoice.All,
@@ -42,7 +44,7 @@ class MDNSAdvertisement(Base):
             name=f"{system_id}.{ZEROCONF_TYPE}",
             server=f"{system_id}.local.",
             parsed_addresses=[ip_address_4],
-            port=port_api,
+            port=int(port_api),
             properties={
                 "address": f"http://{fqdn}:{port_api}",
                 "fqdn": fqdn,

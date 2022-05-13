@@ -1,5 +1,6 @@
 """System Bridge: WebSocket handler"""
 from json import JSONDecodeError, dumps, loads
+from typing import Callable
 from uuid import uuid4
 
 from systembridgeshared.base import Base
@@ -38,8 +39,8 @@ from systembridgeshared.const import (
     TYPE_GET_SETTINGS,
     TYPE_KEYBOARD_KEY_PRESSED,
     TYPE_KEYBOARD_KEYPRESS,
-    TYPE_KEYBOARD_TEXT_SENT,
     TYPE_KEYBOARD_TEXT,
+    TYPE_KEYBOARD_TEXT_SENT,
     TYPE_OPEN,
     TYPE_OPENED,
     TYPE_REGISTER_DATA_LISTENER,
@@ -68,7 +69,7 @@ class WebSocketHandler(Base):
         listeners: Listeners,
         implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket,
-        callback_exit_application: callable,
+        callback_exit_application: Callable,
     ) -> None:
         """Initialize"""
         super().__init__()

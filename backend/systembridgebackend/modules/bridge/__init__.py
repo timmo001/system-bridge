@@ -1,4 +1,6 @@
 """System Bridge: Bridge"""
+from typing import Callable
+
 from systembridgeshared.base import Base
 from zeroconf import InterfaceChoice, ServiceBrowser, Zeroconf
 
@@ -8,7 +10,7 @@ class Bridge(Base):
 
     def __init__(
         self,
-        callback: callable,
+        callback: Callable,
     ):
         super().__init__()
         ServiceBrowser(

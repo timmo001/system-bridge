@@ -1,5 +1,6 @@
 """System Bridge: Update CPU"""
 import asyncio
+
 from systembridgeshared.database import Database
 
 from systembridgebackend.modules.base import ModuleUpdateBase

@@ -1,9 +1,10 @@
 """System Bridge: Server"""
 import asyncio
 from datetime import timedelta
-from os import walk
 import os
+from os import walk
 import sys
+from typing import Callable
 
 from sanic import Sanic
 from sanic.models.handler_types import ListenerType
@@ -49,8 +50,8 @@ class Server(Base):
         self._database = database
         self._settings = settings
         self._server = Sanic("SystemBridge")
-        self._server.after_server_start(self._server_started)
 
+        implemented_modules = []
         for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
@@ -128,7 +129,7 @@ class Server(Base):
         @auth.key_required
         async def _handler_generic(
             request: Request,
-            function: callable,
+            function: Callable,
         ) -> HTTPResponse:
             """Generic handler"""
             return await function(request)
@@ -231,21 +232,15 @@ class Server(Base):
         self._logger.info("Exiting application")
         self.stop_server()
 
-    async def _server_started(
-        self,
-        _listener: ListenerType[Sanic],
-        _type: str,
-    ) -> None:
-        """Server started"""
-        self._logger.info("Server started")
-
     def start_server(self) -> None:
         """Start Server"""
         port = self._settings.get(SETTING_PORT_API)
+        if port is None:
+            raise ValueError("Port not set")
         self._logger.info("Starting server on port: %s", port)
         self._server.run(
             host="0.0.0.0",
-            port=port,
+            port=int(port),
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )

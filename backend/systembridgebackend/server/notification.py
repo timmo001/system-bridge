@@ -10,6 +10,14 @@ async def handler_notification(
     request: Request,
 ) -> HTTPResponse:
     """Send a notification."""
+    if request.json is None:
+        return json(
+            {
+                "mesage": "Missing JSON body",
+            },
+            status=400,
+        )
+
     if "message" not in request.json:
         return json(
             {

@@ -13,7 +13,7 @@ class Battery(Base):
         """Get battery sensors"""
         if not hasattr(psutil, "sensors_battery"):
             return None
-        return psutil.sensors_battery()
+        return psutil.sensors_battery()  # type: ignore
 
     def status(self) -> dict:
         """Get battery status"""

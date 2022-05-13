@@ -23,7 +23,7 @@ class TimedMessageBox(QtWidgets.QMessageBox):
         )
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(1000)
-        self.timer.timeout.connect(self._timer_changed)
+        self.timer.timeout.connect(self._timer_changed)  # type: ignore
         self.timer.start()
 
     def _timer_changed(self):
