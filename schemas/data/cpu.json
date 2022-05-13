@@ -1,0 +1,200 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "CPU",
+  "properties": {
+    "count": {
+      "type": "integer"
+    },
+    "frequency_current": {
+      "type": "number"
+    },
+    "frequency_min": {
+      "type": "number"
+    },
+    "frequency_max": {
+      "type": "number"
+    },
+    "load_average": {
+      "type": "number"
+    },
+    "stats_ctx_switches": {
+      "type": "integer"
+    },
+    "stats_interrupts": {
+      "type": "integer"
+    },
+    "stats_soft_interrupts": {
+      "type": "integer"
+    },
+    "stats_syscalls": {
+      "type": "integer"
+    },
+    "temperature": {
+      "type": "number"
+    },
+    "times_user": {
+      "type": "number"
+    },
+    "times_system": {
+      "type": "number"
+    },
+    "times_idle": {
+      "type": "number"
+    },
+    "times_interrupt": {
+      "type": "number"
+    },
+    "times_dpc": {
+      "type": "number"
+    },
+    "times_percent_user": {
+      "type": "number"
+    },
+    "times_percent_system": {
+      "type": "number"
+    },
+    "times_percent_idle": {
+      "type": "number"
+    },
+    "times_percent_interrupt": {
+      "type": "number"
+    },
+    "times_percent_dpc": {
+      "type": "number"
+    },
+    "usage": {
+      "type": "number"
+    },
+    "voltage": {
+      "type": "number"
+    },
+    "last_updated": {
+      "type": "object",
+      "description": "Last updated",
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "frequency_current": {
+          "type": "number"
+        },
+        "frequency_min": {
+          "type": "number"
+        },
+        "frequency_max": {
+          "type": "number"
+        },
+        "load_average": {
+          "type": "number"
+        },
+        "stats_ctx_switches": {
+          "type": "number"
+        },
+        "stats_interrupts": {
+          "type": "number"
+        },
+        "stats_soft_interrupts": {
+          "type": "number"
+        },
+        "stats_syscalls": {
+          "type": "number"
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "times_user": {
+          "type": "number"
+        },
+        "times_system": {
+          "type": "number"
+        },
+        "times_idle": {
+          "type": "number"
+        },
+        "times_interrupt": {
+          "type": "number"
+        },
+        "times_dpc": {
+          "type": "number"
+        },
+        "times_percent_user": {
+          "type": "number"
+        },
+        "times_percent_system": {
+          "type": "number"
+        },
+        "times_percent_idle": {
+          "type": "number"
+        },
+        "times_percent_interrupt": {
+          "type": "number"
+        },
+        "times_percent_dpc": {
+          "type": "number"
+        },
+        "usage": {
+          "type": "number"
+        },
+        "voltage": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      },
+      "required": [
+        "count",
+        "frequency_current",
+        "frequency_min",
+        "frequency_max",
+        "load_average",
+        "stats_ctx_switches",
+        "stats_interrupts",
+        "stats_soft_interrupts",
+        "stats_syscalls",
+        "temperature",
+        "times_user",
+        "times_system",
+        "times_idle",
+        "times_interrupt",
+        "times_dpc",
+        "times_percent_user",
+        "times_percent_system",
+        "times_percent_idle",
+        "times_percent_interrupt",
+        "times_percent_dpc",
+        "usage",
+        "voltage"
+      ]
+    }
+  },
+  "additionalProperties": {
+    "type": "number"
+  },
+  "required": [
+    "count",
+    "frequency_current",
+    "frequency_min",
+    "frequency_max",
+    "load_average",
+    "stats_ctx_switches",
+    "stats_interrupts",
+    "stats_soft_interrupts",
+    "stats_syscalls",
+    "temperature",
+    "times_user",
+    "times_system",
+    "times_idle",
+    "times_interrupt",
+    "times_dpc",
+    "times_percent_user",
+    "times_percent_system",
+    "times_percent_idle",
+    "times_percent_interrupt",
+    "times_percent_dpc",
+    "usage",
+    "voltage",
+    "last_updated"
+  ]
+}

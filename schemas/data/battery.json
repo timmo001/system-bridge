@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Battery",
+  "properties": {
+    "is_charging": {
+      "type": "boolean"
+    },
+    "percentage": {
+      "type": "number"
+    },
+    "last_updated": {
+      "type": "object",
+      "description": "Last updated",
+      "properties": {
+        "is_charging": {
+          "type": "number"
+        },
+        "percentage": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      },
+      "required": ["is_charging", "percentage"]
+    }
+  },
+  "additionalProperties": {},
+  "required": ["is_charging", "percentage", "last_updated"]
+}

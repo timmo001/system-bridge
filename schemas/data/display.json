@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Display",
+  "properties": {
+    "last_updated": {
+      "type": "object",
+      "description": "Last updated",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  },
+  "additionalProperties": {},
+  "required": ["last_updated"]
+}

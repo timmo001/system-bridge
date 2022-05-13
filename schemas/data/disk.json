@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Disk",
+  "properties": {
+    "io_counters_read_count": {
+      "type": "integer"
+    },
+    "io_counters_write_count": {
+      "type": "integer"
+    },
+    "io_counters_read_bytes": {
+      "type": "integer"
+    },
+    "io_counters_write_bytes": {
+      "type": "integer"
+    },
+    "io_counters_read_time": {
+      "type": "integer"
+    },
+    "io_counters_write_time": {
+      "type": "integer"
+    },
+    "last_updated": {
+      "type": "object",
+      "description": "Last updated",
+      "properties": {
+        "io_counters_read_count": {
+          "type": "number"
+        },
+        "io_counters_write_count": {
+          "type": "number"
+        },
+        "io_counters_read_bytes": {
+          "type": "number"
+        },
+        "io_counters_write_bytes": {
+          "type": "number"
+        },
+        "io_counters_read_time": {
+          "type": "number"
+        },
+        "io_counters_write_time": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      },
+      "required": [
+        "io_counters_read_count",
+        "io_counters_write_count",
+        "io_counters_read_bytes",
+        "io_counters_write_bytes",
+        "io_counters_read_time",
+        "io_counters_write_time"
+      ]
+    }
+  },
+  "additionalProperties": {},
+  "required": [
+    "io_counters_read_count",
+    "io_counters_write_count",
+    "io_counters_read_bytes",
+    "io_counters_write_bytes",
+    "io_counters_read_time",
+    "io_counters_write_time",
+    "last_updated"
+  ]
+}

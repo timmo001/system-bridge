@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Network",
+  "properties": {
+    "io_counters_bytes_sent": {
+      "type": "integer"
+    },
+    "io_counters_bytes_recv": {
+      "type": "integer"
+    },
+    "io_counters_packets_sent": {
+      "type": "integer"
+    },
+    "io_counters_packets_recv": {
+      "type": "integer"
+    },
+    "io_counters_errin": {
+      "type": "integer"
+    },
+    "io_counters_errout": {
+      "type": "integer"
+    },
+    "io_counters_dropin": {
+      "type": "integer"
+    },
+    "io_counters_dropout": {
+      "type": "integer"
+    },
+    "last_updated": {
+      "type": "object",
+      "description": "Last updated",
+      "properties": {
+        "io_counters_bytes_sent": {
+          "type": "number"
+        },
+        "io_counters_bytes_recv": {
+          "type": "number"
+        },
+        "io_counters_packets_sent": {
+          "type": "number"
+        },
+        "io_counters_packets_recv": {
+          "type": "number"
+        },
+        "io_counters_errin": {
+          "type": "number"
+        },
+        "io_counters_errout": {
+          "type": "number"
+        },
+        "io_counters_dropin": {
+          "type": "number"
+        },
+        "io_counters_dropout": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      },
+      "required": [
+        "io_counters_bytes_sent",
+        "io_counters_bytes_recv",
+        "io_counters_packets_sent",
+        "io_counters_packets_recv",
+        "io_counters_errin",
+        "io_counters_errout",
+        "io_counters_dropin",
+        "io_counters_dropout"
+      ]
+    }
+  },
+  "additionalProperties": {},
+  "required": [
+    "io_counters_bytes_sent",
+    "io_counters_bytes_recv",
+    "io_counters_packets_sent",
+    "io_counters_packets_recv",
+    "io_counters_errin",
+    "io_counters_errout",
+    "io_counters_dropin",
+    "io_counters_dropout",
+    "last_updated"
+  ]
+}
