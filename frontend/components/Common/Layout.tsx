@@ -22,14 +22,6 @@ function Layout(props: LayoutProps): ReactElement {
   const router = useRouter();
 
   useEffect(() => {
-    console.log(
-      "router.isReady:",
-      router.isReady,
-      "- router.query:",
-      router.query,
-      "- queryChecked:",
-      queryChecked
-    );
     if (typeof window !== "undefined" && router.isReady && !queryChecked) {
       queryChecked = true;
       let newApiKey: string | null = (router.query?.apiKey as string) || "",
@@ -48,7 +40,6 @@ function Layout(props: LayoutProps): ReactElement {
       }
       if (needUpdate && newApiKey && newApiPort) {
         const newUrl = `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`;
-        console.log("newUrl:", newUrl);
         router.replace(newUrl);
       }
     }
