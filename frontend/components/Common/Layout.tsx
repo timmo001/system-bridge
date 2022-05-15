@@ -17,17 +17,21 @@ interface LayoutProps {
   url?: string;
 }
 
+let queryChecked = false;
 function Layout(props: LayoutProps): ReactElement {
   const router = useRouter();
 
-  const checkQuery = useCallback(() => {
+  useEffect(() => {
     console.log(
       "router.isReady:",
       router.isReady,
       "- router.query:",
-      router.query
+      router.query,
+      "- queryChecked:",
+      queryChecked
     );
-    if (router.isReady && typeof window !== "undefined") {
+    if (typeof window !== "undefined" && router.isReady && !queryChecked) {
+      queryChecked = true;
       let newApiKey: string | null = (router.query?.apiKey as string) || "",
         newApiPort: string | null = (router.query?.apiPort as string) || "9170",
         needUpdate = false;
@@ -45,14 +49,10 @@ function Layout(props: LayoutProps): ReactElement {
       if (needUpdate && newApiKey && newApiPort) {
         const newUrl = `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`;
         console.log("newUrl:", newUrl);
-        router.push(newUrl);
+        router.replace(newUrl);
       }
     }
   }, [router]);
-
-  useEffect(() => {
-    checkQuery();
-  }, [checkQuery]);
 
   return (
     <>
