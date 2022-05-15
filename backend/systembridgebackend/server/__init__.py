@@ -240,6 +240,7 @@ class Server(Base):
         self._server.run(
             host="0.0.0.0",
             port=int(port),
+            access_log=False,
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )
