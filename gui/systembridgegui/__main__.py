@@ -77,6 +77,7 @@ class Main(Base):
         )
 
         self._system_tray_icon = SystemTray(
+            self._database,
             self._icon,
             self._application,
             self._callback_exit_application,

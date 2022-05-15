@@ -1,14 +1,15 @@
 """System Bridge GUI: System Tray"""
 from __future__ import annotations
 
-import os
 from collections.abc import Callable
+import os
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
 from systembridgeshared.base import Base
 from systembridgeshared.common import get_user_data_directory
+from systembridgeshared.database import Database
 
 PATH_BRIDGES_OPEN_ON = "/app/bridges/openon.html"
 PATH_BRIDGES_SETUP = "/app/bridges/setup.html"
@@ -27,6 +28,7 @@ class SystemTray(Base, QSystemTrayIcon):
     # pylint: disable=unsubscriptable-object
     def __init__(
         self,
+        database: Database,
         icon: QIcon,
         parent: QWidget,
         callback_exit_application: Callable,
@@ -35,6 +37,8 @@ class SystemTray(Base, QSystemTrayIcon):
         """Initialize the system tray"""
         Base.__init__(self)
         QSystemTrayIcon.__init__(self, icon, parent)
+
+        self._database = database
 
         self._logger.info("Setup system tray")
 
@@ -61,33 +65,20 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         latest_version_text = "Latest Version"
-        # if (
-        #     information is not None
-        #     and information.attributes is not None
-        #     and information.updates is not None
-        #     and information.updates.attributes is not None
-        # ):
-        #     if (
-        #         information.updates.available is not None
-        #         and information.updates.available
-        #     ):
-        #         latest_version_text = f"""Version {
-        #                 information.updates.version.new
-        #             } avaliable! ({
-        #                 information.updates.version.current
-        #             } -> {
-        #                 information.updates.version.new
-        #             })"""
-        #     elif information.updates.newer:
-        #         latest_version_text = f"""Version Newer ({
-        #                 information.updates.version.current
-        #             } > {
-        #                 information.updates.version.new
-        #             })"""
-        #     else:
-        #         latest_version_text = f"""Latest Version ({
-        #                 information.updates.version.current
-        #             })"""
+        version_current = self._database.read_table_by_key("system", "version").to_dict(
+            orient="records"
+        )[0]["value"]
+        version_latest = self._database.read_table_by_key(
+            "system", "version_latest"
+        ).to_dict(orient="records")[0]["value"]
+        version_newer_avaliable = self._database.read_table_by_key(
+            "system", "version_newer_avaliable"
+        ).to_dict(orient="records")[0]["value"]
+
+        if version_newer_avaliable.lower() == "true":
+            latest_version_text = f"{version_latest} (New)"
+        else:
+            latest_version_text += f" ({version_current})"
 
         action_latest_release: QAction = menu.addAction(latest_version_text)
         action_latest_release.triggered.connect(self._open_latest_releases)  # type: ignore
