@@ -7,9 +7,11 @@ from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
+from pyperclip import copy
 from systembridgeshared.base import Base
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.database import Database
+from systembridgeshared.settings import Settings
 
 PATH_BRIDGES_OPEN_ON = "/app/bridges/openon.html"
 PATH_BRIDGES_SETUP = "/app/bridges/setup.html"
@@ -29,6 +31,7 @@ class SystemTray(Base, QSystemTrayIcon):
     def __init__(
         self,
         database: Database,
+        settings: Settings,
         icon: QIcon,
         parent: QWidget,
         callback_exit_application: Callable,
@@ -39,6 +42,7 @@ class SystemTray(Base, QSystemTrayIcon):
         QSystemTrayIcon.__init__(self, icon, parent)
 
         self._database = database
+        self._settings = settings
 
         self._logger.info("Setup system tray")
 
@@ -99,6 +103,11 @@ class SystemTray(Base, QSystemTrayIcon):
 
         menu_help.addSeparator()
 
+        action_api_key: QAction = menu_help.addAction("Copy API key to clipboard")
+        action_api_key.triggered.connect(self._copy_api_key)  # type: ignore
+
+        menu_help.addSeparator()
+
         action_log: QAction = menu_help.addAction("Open Log File")
         action_log.triggered.connect(self._open_log)  # type: ignore
 
@@ -119,6 +128,13 @@ class SystemTray(Base, QSystemTrayIcon):
         """Handle the activated signal"""
         if reason == QSystemTrayIcon.Trigger:
             self.contextMenu().popup(QCursor.pos())
+
+    def _copy_api_key(self) -> None:
+        """Copy API key to clipboard"""
+        self._logger.info("Copy API key to clipboard")
+        key = self._settings.get_secret("api_key")
+        self._logger.debug(f"API key: {key}")
+        copy(key)
 
     def _open_latest_releases(self) -> None:
         """Open latest release"""
