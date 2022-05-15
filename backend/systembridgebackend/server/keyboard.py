@@ -27,7 +27,16 @@ async def handler_keyboard(
         )
 
     if "key" in request.json:
-        keyboard_keypress(request.json["key"])
+        try:
+            keyboard_keypress(request.json["key"])
+        except ValueError as err:
+            return json(
+                {
+                    "message": err.args[0],
+                },
+                status=400,
+            )
+
         return json(
             {
                 "message": "Keypress sent",

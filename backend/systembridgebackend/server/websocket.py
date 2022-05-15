@@ -1,6 +1,6 @@
 """System Bridge: WebSocket handler"""
-from json import JSONDecodeError, dumps, loads
 from collections.abc import Callable
+from json import JSONDecodeError, dumps, loads
 from uuid import uuid4
 
 from systembridgeshared.base import Base
@@ -176,7 +176,20 @@ class WebSocketHandler(Base):
                         )
                         continue
 
-                    keyboard_keypress(data["key"])
+                    try:
+                        keyboard_keypress(data["key"])
+                    except ValueError as err:
+                        self._logger.warning(err.args[0])
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
+                                    EVENT_MESSAGE: "Invalid key",
+                                }
+                            )
+                        )
+                        continue
 
                     await self._websocket.send(
                         dumps(
