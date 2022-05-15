@@ -133,7 +133,6 @@ class SystemTray(Base, QSystemTrayIcon):
         """Copy API key to clipboard"""
         self._logger.info("Copy API key to clipboard")
         key = self._settings.get_secret("api_key")
-        self._logger.debug(f"API key: {key}")
         copy(key)
 
     def _open_latest_releases(self) -> None:
