@@ -28,7 +28,7 @@
   "dependencies": {
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
-    "@fontsource/roboto": "4.5.5",
+    "@fontsource/roboto": "4.5.7",
     "@mdi/js": "6.6.96",
     "@mdi/react": "1.6.0",
     "@mui/lab": "5.0.0-alpha.81",
