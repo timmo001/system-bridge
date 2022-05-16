@@ -227,7 +227,7 @@ class WebSocketClient(Base):
 
     async def listen_for_data(
         self,
-        callback: Callable[[str, dict], None],
+        callback: Callable,
     ) -> None:
         """Listen for data"""
 
@@ -236,7 +236,7 @@ class WebSocketClient(Base):
             self._logger.debug("New message: %s", message[EVENT_TYPE])
             if message[EVENT_TYPE] == TYPE_DATA_UPDATE:
                 self._logger.debug("Set new data for: %s", message[EVENT_MODULE])
-                callback(message[EVENT_MODULE], message[EVENT_DATA])
+                await callback(message[EVENT_MODULE], message[EVENT_DATA])
             elif message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
                     self._logger.debug(message)

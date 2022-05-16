@@ -1,4 +1,14 @@
 """System Bridge Connector: Constants"""
+from systembridgeconnector.models.battery import Battery
+from systembridgeconnector.models.bridge import Bridge
+from systembridgeconnector.models.cpu import Cpu
+from systembridgeconnector.models.disk import Disk
+from systembridgeconnector.models.display import Display
+from systembridgeconnector.models.gpu import Gpu
+from systembridgeconnector.models.memory import Memory
+from systembridgeconnector.models.network import Network
+from systembridgeconnector.models.sensors import Sensors
+from systembridgeconnector.models.system import System
 
 # Settings
 SETTING_LOG_LEVEL = "log_level"
@@ -54,3 +64,28 @@ TYPE_SETTING_UPDATED = "SETTING_UPDATED"
 TYPE_SETTINGS_RESULT = "SETTINGS_RESULT"
 TYPE_UNREGISTER_DATA_LISTENER = "UNREGISTER_DATA_LISTENER"
 TYPE_UPDATE_SETTING = "UPDATE_SETTING"
+
+# Model
+MODEL_BATTERY = "battery"
+MODEL_BRIDGE = "bridge"
+MODEL_CPU = "cpu"
+MODEL_DISK = "disk"
+MODEL_DISPLAY = "display"
+MODEL_GPU = "gpu"
+MODEL_MEMORY = "memory"
+MODEL_NETWORK = "network"
+MODEL_SENSORS = "sensors"
+MODEL_SYSTEM = "system"
+
+MODEL_MAP = {
+    MODEL_BATTERY: Battery,
+    MODEL_BRIDGE: Bridge,
+    MODEL_CPU: Cpu,
+    MODEL_DISK: Disk,
+    MODEL_DISPLAY: Display,
+    MODEL_GPU: Gpu,
+    MODEL_MEMORY: Memory,
+    MODEL_NETWORK: Network,
+    MODEL_SENSORS: Sensors,
+    MODEL_SYSTEM: System,
+}

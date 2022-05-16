@@ -1,4 +1,14 @@
-"""System Bridge: Constants"""
+"""System Bridge Shared: Constants"""
+from systembridgeshared.models.battery import Battery
+from systembridgeshared.models.bridge import Bridge
+from systembridgeshared.models.cpu import Cpu
+from systembridgeshared.models.disk import Disk
+from systembridgeshared.models.display import Display
+from systembridgeshared.models.gpu import Gpu
+from systembridgeshared.models.memory import Memory
+from systembridgeshared.models.network import Network
+from systembridgeshared.models.sensors import Sensors
+from systembridgeshared.models.system import System
 
 # Logging
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -71,3 +81,28 @@ TYPE_SETTING_UPDATED = "SETTING_UPDATED"
 TYPE_SETTINGS_RESULT = "SETTINGS_RESULT"
 TYPE_UNREGISTER_DATA_LISTENER = "UNREGISTER_DATA_LISTENER"
 TYPE_UPDATE_SETTING = "UPDATE_SETTING"
+
+# Model
+MODEL_BATTERY = "battery"
+MODEL_BRIDGE = "bridge"
+MODEL_CPU = "cpu"
+MODEL_DISK = "disk"
+MODEL_DISPLAY = "display"
+MODEL_GPU = "gpu"
+MODEL_MEMORY = "memory"
+MODEL_NETWORK = "network"
+MODEL_SENSORS = "sensors"
+MODEL_SYSTEM = "system"
+
+MODEL_MAP = {
+    MODEL_BATTERY: Battery,
+    MODEL_BRIDGE: Bridge,
+    MODEL_CPU: Cpu,
+    MODEL_DISK: Disk,
+    MODEL_DISPLAY: Display,
+    MODEL_GPU: Gpu,
+    MODEL_MEMORY: Memory,
+    MODEL_NETWORK: Network,
+    MODEL_SENSORS: Sensors,
+    MODEL_SYSTEM: System,
+}
