@@ -9,10 +9,14 @@ import aiohttp
 
 from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
+    EVENT_DATA,
     EVENT_MESSAGE,
+    EVENT_MODULE,
     EVENT_SUBTYPE,
     EVENT_TYPE,
     SUBTYPE_BAD_API_KEY,
+    SUBTYPE_LISTENER_ALREADY_REGISTERED,
+    TYPE_DATA_UPDATE,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
@@ -221,6 +225,26 @@ class WebSocketClient(Base):
                     }
                 )
             )
+
+    async def listen_for_data(
+        self,
+        callback: Callable[[str, dict], None],
+    ) -> None:
+        """Listen for data"""
+
+        async def _callback_message(message: dict) -> None:
+            """Message Callback"""
+            self._logger.debug("New message: %s", message[EVENT_TYPE])
+            if message[EVENT_TYPE] == TYPE_DATA_UPDATE:
+                self._logger.debug("Set new data for: %s", message[EVENT_MODULE])
+                callback(message[EVENT_MODULE], message[EVENT_DATA])
+            elif message[EVENT_TYPE] == TYPE_ERROR:
+                if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
+                    self._logger.debug(message)
+                else:
+                    self._logger.warning("Error message: %s", message)
+
+        await self.listen_for_messages(callback=_callback_message)
 
     async def listen_for_messages(
         self,
