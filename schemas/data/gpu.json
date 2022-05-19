@@ -3,14 +3,22 @@
   "type": "object",
   "description": "GPU",
   "properties": {
+    "gpus": {
+      "type": "array"
+    },
     "last_updated": {
       "type": "object",
       "description": "Last updated",
+      "properties": {
+        "gpus": {
+          "type": "number"
+        }
+      },
       "additionalProperties": {
         "type": "number"
       }
     }
   },
   "additionalProperties": {},
-  "required": ["last_updated"]
+  "required": ["gpus", "last_updated"]
 }

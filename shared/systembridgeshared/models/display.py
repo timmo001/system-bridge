@@ -25,5 +25,5 @@ class Display(BaseModel):
     class Config:
         extra = Extra.allow
 
-    displays: list
+    displays: list[str]
     last_updated: LastUpdated = Field(..., description="Last updated")

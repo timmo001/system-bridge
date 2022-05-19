@@ -117,8 +117,10 @@ class GPUUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
+        gpu_list = []
         for gpu_name in self._gpu.get_gpus(self._database):
             gpu_key = make_key(gpu_name)
+            gpu_list.append(gpu_key)
             await asyncio.gather(
                 *[
                     self.update_name(gpu_key, gpu_name),
@@ -134,3 +136,4 @@ class GPUUpdate(ModuleUpdateBase):
                     self.update_temperature(gpu_key),
                 ]
             )
+        self._database.write("gpu", "gpus", str(gpu_list))

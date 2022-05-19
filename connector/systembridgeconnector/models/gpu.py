@@ -6,6 +6,17 @@ from __future__ import annotations
 from pydantic import BaseModel, Extra, Field
 
 
+class LastUpdated(BaseModel):
+    """
+    Last updated
+    """
+
+    class Config:
+        extra = Extra.allow
+
+    gpus: float
+
+
 class Gpu(BaseModel):
     """
     GPU
@@ -14,4 +25,5 @@ class Gpu(BaseModel):
     class Config:
         extra = Extra.allow
 
-    last_updated: dict[str, float] = Field(..., description="Last updated")
+    gpus: list[str]
+    last_updated: LastUpdated = Field(..., description="Last updated")

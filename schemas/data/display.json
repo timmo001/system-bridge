@@ -20,5 +20,5 @@
     }
   },
   "additionalProperties": {},
-  "required": ["last_updated"]
+  "required": ["displays", "last_updated"]
 }
