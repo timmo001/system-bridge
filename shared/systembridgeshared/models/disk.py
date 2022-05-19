@@ -20,6 +20,7 @@ class LastUpdated(BaseModel):
     io_counters_write_bytes: float
     io_counters_read_time: float
     io_counters_write_time: float
+    partitions: float
 
 
 class Disk(BaseModel):
@@ -36,4 +37,5 @@ class Disk(BaseModel):
     io_counters_write_bytes: int
     io_counters_read_time: int
     io_counters_write_time: int
+    partitions: list[str]
     last_updated: LastUpdated = Field(..., description="Last updated")

@@ -21,6 +21,9 @@
     "io_counters_write_time": {
       "type": "integer"
     },
+    "partitions": {
+      "type": "array"
+    },
     "last_updated": {
       "type": "object",
       "description": "Last updated",
