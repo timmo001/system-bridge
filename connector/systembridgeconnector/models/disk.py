@@ -14,6 +14,7 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
+    devices: float
     io_counters_read_count: float
     io_counters_write_count: float
     io_counters_read_bytes: float
@@ -31,6 +32,7 @@ class Disk(BaseModel):
     class Config:
         extra = Extra.allow
 
+    devices: list[str]
     io_counters_read_count: int
     io_counters_write_count: int
     io_counters_read_bytes: int

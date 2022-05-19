@@ -3,6 +3,9 @@
   "type": "object",
   "description": "Disk",
   "properties": {
+    "devices": {
+      "type": "array"
+    },
     "io_counters_read_count": {
       "type": "integer"
     },
