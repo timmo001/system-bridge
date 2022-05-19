@@ -41,10 +41,20 @@ class DiskUpdate(ModuleUpdateBase):
             partition_list.append(partition.mountpoint)
             for key, value in partition._asdict().items():
                 self._database.write(
-                    "disk", f"partitions_{partition.mountpoint}_{key}", value
+                    "disk",
+                    f"partitions_{partition.mountpoint}_{key}",
+                    value,
                 )
-        self._database.write("disk", "devices", device_list)
-        self._database.write("disk", "partitions", partition_list)
+        self._database.write(
+            "disk",
+            "devices",
+            str(device_list).replace("\\\\", "\\"),
+        )
+        self._database.write(
+            "disk",
+            "partitions",
+            str(partition_list).replace("\\\\", "\\"),
+        )
 
     async def update_usage(self) -> None:
         """Update usage"""
