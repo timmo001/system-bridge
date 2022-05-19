@@ -262,7 +262,8 @@ class WebSocketClient(Base):
         self._logger.info("Listen for messages")
         if self._websocket is not None:
             while not self._websocket.closed:
-                await callback(await self.receive_message())
+                if message := await self.receive_message() is not None:
+                    await callback(message)
 
     async def receive_message(self) -> dict | None:
         """Receive message"""
