@@ -14,6 +14,7 @@ from systembridgeshared.const import (
     EVENT_MODULE,
     EVENT_SUBTYPE,
     EVENT_TYPE,
+    MODEL_MAP,
     SECRET_API_KEY,
     SETTING_PORT_API,
     SUBTYPE_BAD_API_KEY,
@@ -236,7 +237,11 @@ class WebSocketClient(Base):
             self._logger.debug("New message: %s", message[EVENT_TYPE])
             if message[EVENT_TYPE] == TYPE_DATA_UPDATE:
                 self._logger.debug("Set new data for: %s", message[EVENT_MODULE])
-                await callback(message[EVENT_MODULE], message[EVENT_DATA])
+                await callback(
+                    message[EVENT_MODULE],
+                    message[EVENT_DATA],
+                    MODEL_MAP.get(message[EVENT_MODULE]),
+                )
             elif message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
                     self._logger.debug(message)
