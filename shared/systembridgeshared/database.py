@@ -192,7 +192,7 @@ class Database(Base):
                     item[COLUMN_KEY]: item["timestamp"],
                 },
             }
-        output = OrderedDict(data)
+        output = OrderedDict(sorted(data.items()))
         output.move_to_end("last_updated", last=True)
 
         return output
