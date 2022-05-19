@@ -3,9 +3,17 @@
   "type": "object",
   "description": "Display",
   "properties": {
+    "displays": {
+      "type": "array"
+    },
     "last_updated": {
       "type": "object",
       "description": "Last updated",
+      "properties": {
+        "displays": {
+          "type": "number"
+        }
+      },
       "additionalProperties": {
         "type": "number"
       }

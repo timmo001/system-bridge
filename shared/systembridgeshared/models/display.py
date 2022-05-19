@@ -6,6 +6,17 @@ from __future__ import annotations
 from pydantic import BaseModel, Extra, Field
 
 
+class LastUpdated(BaseModel):
+    """
+    Last updated
+    """
+
+    class Config:
+        extra = Extra.allow
+
+    displays: float
+
+
 class Display(BaseModel):
     """
     Display
@@ -14,4 +25,5 @@ class Display(BaseModel):
     class Config:
         extra = Extra.allow
 
-    last_updated: dict[str, float] = Field(..., description="Last updated")
+    displays: list
+    last_updated: LastUpdated = Field(..., description="Last updated")

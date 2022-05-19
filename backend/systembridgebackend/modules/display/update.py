@@ -73,8 +73,10 @@ class DisplayUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
+        display_list = []
         for display_name in self._display.get_displays(self._database):
             display_key = make_key(display_name)
+            display_list.append(display_key)
             await asyncio.gather(
                 *[
                     self.update_name(display_key, display_name),
@@ -84,3 +86,4 @@ class DisplayUpdate(ModuleUpdateBase):
                     self.update_resolution_vertical(display_key),
                 ]
             )
+        self._database.write("display", "displays", str(display_list))
