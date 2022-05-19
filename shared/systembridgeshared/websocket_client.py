@@ -266,7 +266,10 @@ class WebSocketClient(Base):
         if self._websocket is None:
             return None
 
-        message = await self._websocket.receive()
+        try:
+            message = await self._websocket.receive()
+        except RuntimeError:
+            return None
 
         if message.type == aiohttp.WSMsgType.ERROR:
             raise ConnectionErrorException(self._websocket.exception())
