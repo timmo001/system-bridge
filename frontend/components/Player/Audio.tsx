@@ -7,57 +7,52 @@ import {
   Grid,
   IconButton,
   Slider,
-  Theme,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
 import { mdiPause, mdiPlay, mdiVolumeMedium, mdiVolumeMute } from "@mdi/js";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
-import { AudioSource, PlayerStatus, usePlayer } from "./Utils";
+import { AudioSource, PlayerStatus, useHover, usePlayer } from "./Utils";
 
-interface AudioProps {
-  hovering?: boolean;
-}
+// const useStyles = makeStyles((theme: Theme) =>
+//   createStyles({
+//     root: {
+//       height: "100%",
+//     },
+//     center: {
+//       alignSelf: "center",
+//     },
+//     gridItem: {
+//       alignSelf: "center",
+//       margin: theme.spacing(0, 1, 0, 0),
+//     },
+//     overlay: {
+//       position: "absolute",
+//       display: "flex",
+//       background: "rgba(18, 18, 18, 0.6)",
+//       height: "100%",
+//       width: "100%",
+//       zIndex: 100,
+//     },
+//     overlayInner: {
+//       position: "relative",
+//       margin: "auto",
+//       fontSize: 82,
+//     },
+//     image: {
+//       height: 110,
+//       width: 110,
+//     },
+//   })
+// );
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      height: "100%",
-    },
-    center: {
-      alignSelf: "center",
-    },
-    gridItem: {
-      alignSelf: "center",
-      margin: theme.spacing(0, 1, 0, 0),
-    },
-    overlay: {
-      position: "absolute",
-      display: "flex",
-      background: "rgba(18, 18, 18, 0.6)",
-      height: "100%",
-      width: "100%",
-      zIndex: 100,
-    },
-    overlayInner: {
-      position: "relative",
-      margin: "auto",
-      fontSize: 82,
-    },
-    image: {
-      height: 110,
-      width: 110,
-    },
-  })
-);
-
-function AudioComponent({ hovering }: AudioProps) {
+function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
+  const [hoverRef, isHovering] = useHover();
 
   const ref = useRef<ReactPlayer>(null);
 
@@ -216,7 +211,7 @@ function AudioComponent({ hovering }: AudioProps) {
     if (position) handleUpdatePlayerPosition(position);
   }
 
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <>
@@ -244,47 +239,59 @@ function AudioComponent({ hovering }: AudioProps) {
         }) => handleSetPosition(playedSeconds)}
       />
       <Grid
-        className={classes.root}
         container
         direction="row"
         alignItems="center"
         justifyItems="center"
         wrap="nowrap"
       >
-        <Grid className={classes.gridItem} item>
-          <ButtonBase
-            aria-label={playing ? "Pause" : "Play"}
-            onClick={handleTogglePlaying}
-          >
-            {cover ? (
-              <Image
-                className={classes.image}
-                src={cover}
-                alt={`${artist} - ${album}`}
-              />
-            ) : (
-              <Box />
-            )}
-            <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
-              <div className={classes.overlay}>
-                {playing ? (
-                  <Icon
-                    className={classes.overlayInner}
-                    id="pause"
-                    path={mdiPause}
-                    size={2}
-                  />
-                ) : (
-                  <Icon
-                    className={classes.overlayInner}
-                    id="play"
-                    path={mdiPlay}
-                    size={2}
-                  />
-                )}
-              </div>
-            </Fade>
-          </ButtonBase>
+        <Grid item sx={{ margin: theme.spacing(0, 1, 0, 0) }}>
+          <Box ref={hoverRef}>
+            <ButtonBase
+              aria-label={playing ? "Pause" : "Play"}
+              onClick={handleTogglePlaying}
+            >
+              {cover ? (
+                <Image src={cover} alt={`${artist} - ${album}`} />
+              ) : (
+                <Box />
+              )}
+              <Fade in={isHovering} timeout={{ enter: 200, exit: 400 }}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    display: "flex",
+                    background: "rgba(18, 18, 18, 0.6)",
+                    height: "100%",
+                    width: "100%",
+                    zIndex: 100,
+                  }}
+                >
+                  {playing ? (
+                    <Icon
+                      id="pause"
+                      path={mdiPause}
+                      size={24}
+                      style={{
+                        position: "relative",
+                        margin: "auto",
+                      }}
+                    />
+                  ) : (
+                    <Icon
+                      id="play"
+                      path={mdiPlay}
+                      size={24}
+                      style={{
+                        position: "relative",
+                        margin: "auto",
+                      }}
+                    />
+                  )}
+                </Box>
+              </Fade>
+            </ButtonBase>
+          </Box>
         </Grid>
         <Grid item xs={8}>
           <Grid
@@ -314,18 +321,18 @@ function AudioComponent({ hovering }: AudioProps) {
               </Typography>
             </Grid>
 
-            <Grid item container spacing={2}>
+            <Grid item container spacing={2} alignContent="center">
               <Grid item xs={4} />
-              <Grid className={classes.center} item>
+              <Grid item>
                 <IconButton size="small" onClick={handleToggleMuted}>
                   {muted ? (
-                    <Icon id="mute" path={mdiVolumeMute} size={2} />
+                    <Icon id="mute" path={mdiVolumeMute} size={1.5} />
                   ) : (
-                    <Icon id="unmute" path={mdiVolumeMedium} size={2} />
+                    <Icon id="unmute" path={mdiVolumeMedium} size={1.5} />
                   )}
                 </IconButton>
               </Grid>
-              <Grid className={classes.gridItem} item xs>
+              {/* <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={1}
@@ -335,12 +342,12 @@ function AudioComponent({ hovering }: AudioProps) {
                     if (typeof value === "number") handleSetVolume(value);
                   }}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
 
             <Grid container>
-              <Grid className={classes.gridItem} item />
-              <Grid className={classes.gridItem} item xs>
+              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item />
+              {/* <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={duration}
@@ -353,8 +360,8 @@ function AudioComponent({ hovering }: AudioProps) {
                   onMouseUp={handleScrubEnd}
                   onKeyUp={handleScrubEnd}
                 />
-              </Grid>
-              <Grid className={classes.gridItem} item>
+              </Grid> */}
+              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item>
                 <Typography component="span" variant="body2">
                   {formattedPosition}
                 </Typography>

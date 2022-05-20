@@ -21,8 +21,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
   const query = router.query;
 
   useEffect(() => {
-    if (!playerStatus) {
-      console.log(query);
+    if (!playerStatus && router.isReady) {
       const volume = Number(query.volume);
       switch (playerType) {
         default:
@@ -64,7 +63,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           break;
       }
     }
-  }, [playerType, playerStatus, setPlayerStatus, query]);
+  }, [playerStatus, setPlayerStatus, playerType, router, query]);
 
   useEffect(() => {
     if (playerStatus) {
@@ -78,7 +77,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
       if (newStatus.source.type === "audio") delete newStatus.source.cover;
       if (!isEqual(newStatus, previousStatus)) {
         console.log(
-          "update\n\npreviousStatus:",
+          "Player update\n\npreviousStatus:",
           previousStatus,
           "\nnewStatus:",
           newStatus

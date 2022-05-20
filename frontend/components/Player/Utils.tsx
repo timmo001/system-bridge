@@ -2,6 +2,8 @@ import React, {
   createContext,
   ReactElement,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -62,3 +64,31 @@ export const usePlayer = (): [
   if (setPlayer === null) throw new Error(); // this will make setPlayer non-null
   return [player, setPlayer];
 };
+
+export function useHover() {
+  const [isHovering, setIsHovering] = React.useState(false);
+
+  const handleMouseOver = React.useCallback(() => setIsHovering(true), []);
+  const handleMouseOut = React.useCallback(() => setIsHovering(false), []);
+
+  const nodeRef = React.useRef<HTMLDivElement>();
+
+  const callbackRef = React.useCallback(
+    (node: HTMLDivElement) => {
+      if (nodeRef.current) {
+        nodeRef.current.removeEventListener("mouseover", handleMouseOver);
+        nodeRef.current.removeEventListener("mouseout", handleMouseOut);
+      }
+
+      nodeRef.current = node;
+
+      if (nodeRef.current) {
+        nodeRef.current.addEventListener("mouseover", handleMouseOver);
+        nodeRef.current.addEventListener("mouseout", handleMouseOut);
+      }
+    },
+    [handleMouseOver, handleMouseOut]
+  );
+
+  return [callbackRef, isHovering];
+}
