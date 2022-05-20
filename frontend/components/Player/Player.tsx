@@ -4,7 +4,6 @@ import { cloneDeep, isEqual } from "lodash";
 
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
-import { useSettings } from "../Contexts/Settings";
 import AudioComponent from "./Audio";
 import logo from "assets/media/system-bridge.svg";
 import VideoComponent from "./Video";
@@ -15,14 +14,14 @@ interface PlayerProps {
 }
 
 function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
-  const [settings] = useSettings();
   const [playerStatus, setPlayerStatus] = usePlayer();
   const previousPlayerStatus = usePrevious(playerStatus);
 
-  const query = useRouter().query;
+  const router = useRouter();
+  const query = router.query;
 
   useEffect(() => {
-    if (settings && !playerStatus) {
+    if (!playerStatus) {
       console.log(query);
       const volume = Number(query.volume);
       switch (playerType) {
@@ -45,11 +44,11 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
             volume: (volume > 0 ? volume : 40) / 100,
           });
           // });
-          console.log(
-            "OLD ipcRendererSend:",
-            "get-audio-metadata",
-            query.path || query.url
-          );
+          // console.log(
+          //   "OLD ipcRendererSend:",
+          //   "get-audio-metadata",
+          //   query.path || query.url
+          // );
           break;
         case "video":
           setPlayerStatus({
@@ -65,7 +64,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           break;
       }
     }
-  }, [settings, playerStatus, setPlayerStatus, query]);
+  }, [playerType, playerStatus, setPlayerStatus, query]);
 
   useEffect(() => {
     if (playerStatus) {
@@ -84,11 +83,11 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
-        try {
-          console.log("OLD ipcRendererSend:", "player-status", newStatus);
-        } catch (e) {
-          console.warn("Error calling window.api:", e);
-        }
+        // try {
+        //   console.log("OLD ipcRendererSend:", "player-status", newStatus);
+        // } catch (e) {
+        //   console.warn("Error calling window.api:", e);
+        // }
       }
     }
   }, [playerStatus, previousPlayerStatus]);

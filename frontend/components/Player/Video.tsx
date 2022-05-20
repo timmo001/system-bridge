@@ -126,7 +126,7 @@ function VideoComponent(): ReactElement {
   }, [handleUpdateThumbnail]);
 
   const handleSendCover = useCallback(
-    (event) => {
+    (event: any) => {
       console.log("handleSendCover");
       getThumbnail();
       event.sender.send("player-cover", thumbnail);

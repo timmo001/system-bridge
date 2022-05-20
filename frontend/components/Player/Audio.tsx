@@ -1,11 +1,7 @@
-import React, {
-  useState,
-  ChangeEvent,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
+import Image from "next/image";
 import {
+  Box,
   ButtonBase,
   Fade,
   Grid,
@@ -14,7 +10,8 @@ import {
   Theme,
   Typography,
 } from "@mui/material";
-import { Pause, PlayArrow, VolumeUp, VolumeMute } from "@mui/icons-material";
+import { Icon } from "@mdi/react";
+import { mdiPause, mdiPlay, mdiVolumeMedium, mdiVolumeMute } from "@mdi/js";
 import createStyles from "@mui/styles/createStyles";
 import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment";
@@ -148,7 +145,7 @@ function AudioComponent({ hovering }: AudioProps) {
   );
 
   const handleSendCover = useCallback(
-    (event) => {
+    (event: any) => {
       console.log("handleSendCover");
       event.sender.send("player-cover", cover);
     },
@@ -259,19 +256,30 @@ function AudioComponent({ hovering }: AudioProps) {
             aria-label={playing ? "Pause" : "Play"}
             onClick={handleTogglePlaying}
           >
-            <img
-              className={classes.image}
-              src={cover}
-              alt={`${artist} - ${album}`}
-            />
+            {cover ? (
+              <Image
+                className={classes.image}
+                src={cover}
+                alt={`${artist} - ${album}`}
+              />
+            ) : (
+              <Box />
+            )}
             <Fade in={hovering} timeout={{ enter: 200, exit: 400 }}>
               <div className={classes.overlay}>
                 {playing ? (
-                  <Pause className={classes.overlayInner} fontSize="large" />
-                ) : (
-                  <PlayArrow
+                  <Icon
                     className={classes.overlayInner}
-                    fontSize="large"
+                    id="pause"
+                    path={mdiPause}
+                    size={2}
+                  />
+                ) : (
+                  <Icon
+                    className={classes.overlayInner}
+                    id="play"
+                    path={mdiPlay}
+                    size={2}
                   />
                 )}
               </div>
@@ -310,7 +318,11 @@ function AudioComponent({ hovering }: AudioProps) {
               <Grid item xs={4} />
               <Grid className={classes.center} item>
                 <IconButton size="small" onClick={handleToggleMuted}>
-                  {muted ? <VolumeMute /> : <VolumeUp />}
+                  {muted ? (
+                    <Icon id="mute" path={mdiVolumeMute} size={2} />
+                  ) : (
+                    <Icon id="unmute" path={mdiVolumeMedium} size={2} />
+                  )}
                 </IconButton>
               </Grid>
               <Grid className={classes.gridItem} item xs>
