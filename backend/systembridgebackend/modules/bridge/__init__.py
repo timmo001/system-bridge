@@ -18,9 +18,6 @@ class Bridge(Base):
                 interfaces=InterfaceChoice.All,
                 unicast=True,
             ),
-            [
-                "_system-bridge._tcp.local.",
-                "_system-bridge._udp.local.",
-            ],
+            "_system-bridge._tcp.local.",
             handlers=[callback],
         )
