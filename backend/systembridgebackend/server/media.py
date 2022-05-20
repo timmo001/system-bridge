@@ -178,9 +178,9 @@ async def handler_media_file_write(
 
     if not os.path.exists(path):
         os.makedirs(path)
-    async with aiofiles.open(os.path.join(path, query_filename), "wb") as file:
-        await file.write(request.body)
-        await file.close()
+    async with aiofiles.open(os.path.join(path, query_filename), "wb") as f:
+        await f.write(request.body)
+        await f.close()
 
     return json(
         {
