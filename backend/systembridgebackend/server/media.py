@@ -37,6 +37,17 @@ def file_info_from_path(base_path: str, filepath: str) -> dict:
     }
 
 
+async def handler_media_directories(
+    _: Request,
+) -> HTTPResponse:
+    """Handler for media directories"""
+    return json(
+        {
+            "directories": BASE_DIRECTORIES,
+        }
+    )
+
+
 async def handler_media_files(
     request: Request,
 ) -> HTTPResponse:
