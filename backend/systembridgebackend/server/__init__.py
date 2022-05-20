@@ -23,6 +23,7 @@ from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.media import (
+    handler_media_directories,
     handler_media_file,
     handler_media_file_data,
     handler_media_file_write,
@@ -163,6 +164,11 @@ class Server(Base):
             lambda r: _handler_generic(r, handler_keyboard),
             "/api/keyboard",
             methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_media_directories),
+            "/api/media",
+            methods=["GET"],
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_files),
