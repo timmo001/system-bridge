@@ -1,13 +1,14 @@
 """System Bridge: Server Handler - Media"""
-# import aiofiles
 import os
 
+import aiofiles
 from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
 
 QUERY_BASE = "base"
 QUERY_PATH = "path"
+QUERY_FILENAME = "filename"
 
 BASE_DIRECTORIES = {
     "documents": storagepath.get_documents_dir(),
@@ -158,17 +159,34 @@ async def handler_media_file_write(
             {"message": "No path specified"},
             status=400,
         )
+    if not (query_filename := request.args.get(QUERY_FILENAME)):
+        return json(
+            {"message": "No filename specified"},
+            status=400,
+        )
     path = os.path.join(BASE_DIRECTORIES[query_base], query_path)
     if not path:
         return json(
             {"message": "Cannot find path", "path": path},
             status=400,
         )
+    if not request.body:
+        return json(
+            {"message": "No file specified"},
+            status=400,
+        )
 
-    # async with aiofiles.open(path, "wb") as file:
-    #     await file.write(request.files["file"][0].body)
-    #     file.close()
+    if not os.path.exists(path):
+        os.makedirs(path)
+    async with aiofiles.open(os.path.join(path, query_filename), "wb") as file:
+        await file.write(request.body)
+        await file.close()
 
-    # return json({"message": "File uploaded", path: path})
-
-    return json({"message": "Not implemented"})
+    return json(
+        {
+            "message": "File uploaded",
+            "path": path,
+            "filename": query_filename,
+        }
+    )
+    # return json({"message": "Not implemented"})
