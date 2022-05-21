@@ -2,15 +2,26 @@
 from systembridgeconnector.models.battery import Battery
 from systembridgeconnector.models.bridge import Bridge
 from systembridgeconnector.models.cpu import Cpu
+from systembridgeconnector.models.data import Data
 from systembridgeconnector.models.disk import Disk
 from systembridgeconnector.models.display import Display
+from systembridgeconnector.models.generic import Generic
 from systembridgeconnector.models.gpu import Gpu
+from systembridgeconnector.models.keyboard_key import KeyboardKey
+from systembridgeconnector.models.keyboard_text import KeyboardText
+from systembridgeconnector.models.media_directories import MediaDirectories
+from systembridgeconnector.models.media_files import File, MediaFiles
 from systembridgeconnector.models.memory import Memory
 from systembridgeconnector.models.network import Network
+from systembridgeconnector.models.notification import Notification
+from systembridgeconnector.models.open_path import OpenPath
+from systembridgeconnector.models.open_url import OpenUrl
+from systembridgeconnector.models.response import Response
 from systembridgeconnector.models.sensors import Sensors
 from systembridgeconnector.models.system import System
 
 # Settings
+SETTING_AUTOSTART = "autostart"
 SETTING_LOG_LEVEL = "log_level"
 SETTING_PORT_API = "port_api"
 
@@ -50,6 +61,9 @@ TYPE_DATA_UPDATE = "DATA_UPDATE"
 TYPE_ERROR = "ERROR"
 TYPE_EXIT_APPLICATION = "EXIT_APPLICATION"
 TYPE_GET_DATA = "GET_DATA"
+TYPE_GET_FILE = "GET_FILE"
+TYPE_GET_FILE_DATA = "GET_FILE_DATA"
+TYPE_GET_FILES = "GET_FILES"
 TYPE_GET_SETTING = "GET_SETTING"
 TYPE_GET_SETTINGS = "GET_SETTINGS"
 TYPE_KEYBOARD_KEY_PRESSED = "KEYBOARD_KEY_PRESSED"
@@ -69,11 +83,22 @@ TYPE_UPDATE_SETTING = "UPDATE_SETTING"
 MODEL_BATTERY = "battery"
 MODEL_BRIDGE = "bridge"
 MODEL_CPU = "cpu"
+MODEL_DATA = "data"
 MODEL_DISK = "disk"
 MODEL_DISPLAY = "display"
+MODEL_GENERIC = "generic"
 MODEL_GPU = "gpu"
+MODEL_KEYBOARD_KEY = "keyboard_key"
+MODEL_KEYBOARD_TEXT = "keyboard_text"
+MODEL_MEDIA_DIRECTORIES = "media_directories"
+MODEL_MEDIA_FILES = "media_files"
+MODEL_MEDIA_FILE = "media_file"
 MODEL_MEMORY = "memory"
 MODEL_NETWORK = "network"
+MODEL_NOTIFICATION = "notification"
+MODEL_OPEN_PATH = "open_path"
+MODEL_OPEN_URL = "open_url"
+MODEL_RESPONSE = "response"
 MODEL_SENSORS = "sensors"
 MODEL_SYSTEM = "system"
 
@@ -81,11 +106,22 @@ MODEL_MAP = {
     MODEL_BATTERY: Battery,
     MODEL_BRIDGE: Bridge,
     MODEL_CPU: Cpu,
+    MODEL_DATA: Data,
     MODEL_DISK: Disk,
     MODEL_DISPLAY: Display,
+    MODEL_GENERIC: Generic,
     MODEL_GPU: Gpu,
+    MODEL_KEYBOARD_KEY: KeyboardKey,
+    MODEL_KEYBOARD_TEXT: KeyboardText,
+    MODEL_MEDIA_DIRECTORIES: MediaDirectories,
+    MODEL_MEDIA_FILE: File,
+    MODEL_MEDIA_FILES: MediaFiles,
     MODEL_MEMORY: Memory,
     MODEL_NETWORK: Network,
+    MODEL_NOTIFICATION: Notification,
+    MODEL_OPEN_PATH: OpenPath,
+    MODEL_OPEN_URL: OpenUrl,
+    MODEL_RESPONSE: Response,
     MODEL_SENSORS: Sensors,
     MODEL_SYSTEM: System,
 }
