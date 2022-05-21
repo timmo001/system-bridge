@@ -3,12 +3,13 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
+
+class Directory(BaseModel):
+    key: str
+    path: str
 
 
 class MediaDirectories(BaseModel):
-    """
-    Media Directories
-    """
-
-    __root__: list[str] = Field(..., description="Media Directories")
+    directories: list[Directory]

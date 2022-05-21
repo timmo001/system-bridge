@@ -21,6 +21,19 @@ BASE_DIRECTORIES = {
 }
 
 
+def get_directories() -> list[dict]:
+    """Get directories"""
+    directories = []
+    for key, value in BASE_DIRECTORIES.items():
+        directories.append(
+            {
+                "key": key,
+                "path": value,
+            }
+        )
+    return directories
+
+
 def get_files(
     base_path: str,
     path: str,
@@ -74,7 +87,7 @@ async def handler_media_directories(
     """Handler for media directories"""
     return json(
         {
-            "directories": BASE_DIRECTORIES,
+            "directories": get_directories(),
         }
     )
 
