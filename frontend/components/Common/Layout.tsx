@@ -39,8 +39,20 @@ function Layout(props: LayoutProps): ReactElement {
         );
       }
       if (needUpdate && newApiKey && newApiPort) {
-        const newUrl = `${router.pathname}?apiKey=${newApiKey}&apiPort=${newApiPort}`;
-        router.replace(newUrl);
+        const path = router.asPath.split("?")[0];
+        router.replace({
+          pathname:
+            process.env.NODE_ENV === "development"
+              ? path
+              : path.includes(".html")
+              ? path
+              : `${path}.html`,
+          query: {
+            ...router.query,
+            apiKey: newApiKey,
+            apiPort: newApiPort,
+          },
+        });
       }
     }
   }, [router]);
