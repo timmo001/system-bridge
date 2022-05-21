@@ -336,16 +336,14 @@ class WebSocketClient(Base):
         self._logger.info("Listen for messages")
         if self._websocket is not None:
             while not self._websocket.closed:
-                if message := await self.receive_message() is not None:
+                message = await self.receive_message()
+                if type(message) is dict:
                     await callback(message)
 
     async def receive_message(self) -> dict | None:
         """Receive message"""
-        if not self.connected:
+        if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")
-
-        if self._websocket is None:
-            return None
 
         try:
             message = await self._websocket.receive()
