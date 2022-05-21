@@ -481,6 +481,7 @@ class WebSocketHandler(Base):
                             {
                                 EVENT_TYPE: TYPE_FILES,
                                 EVENT_FILES: get_files(data[EVENT_BASE], path),
+                                EVENT_PATH: path,
                             }
                         )
                     )
@@ -556,6 +557,7 @@ class WebSocketHandler(Base):
                                 EVENT_FILE: get_file(
                                     BASE_DIRECTORIES[data[EVENT_BASE]], path
                                 ),
+                                EVENT_PATH: path,
                             }
                         )
                     )
