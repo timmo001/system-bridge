@@ -31,6 +31,7 @@ from systembridgeshared.const import (
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
+    TYPE_GET_DIRECTORIES,
     TYPE_GET_FILE,
     TYPE_GET_FILES,
     TYPE_KEYBOARD_KEYPRESS,
@@ -133,6 +134,23 @@ class WebSocketClient(Base):
                         EVENT_EVENT: TYPE_GET_DATA,
                         EVENT_API_KEY: self._api_key,
                         EVENT_MODULES: modules,
+                    }
+                )
+            )
+
+    async def get_directories(self) -> None:
+        """Get directories"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Getting directories:")
+
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_GET_DIRECTORIES,
+                        EVENT_API_KEY: self._api_key,
                     }
                 )
             )
