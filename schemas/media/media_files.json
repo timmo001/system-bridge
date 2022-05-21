@@ -39,6 +39,9 @@
             },
             "is_link": {
               "type": "boolean"
+            },
+            "mime_type": {
+              "type": "string"
             }
           },
           "required": [
