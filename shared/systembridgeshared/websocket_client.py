@@ -309,7 +309,7 @@ class WebSocketClient(Base):
 
         async def _callback_message(message: dict) -> None:
             """Message Callback"""
-            self._logger.debug("New message: %s", message[EVENT_TYPE])
+            self._logger.debug("New message: %s", message)
             if message[EVENT_TYPE] == TYPE_DATA_UPDATE:
                 self._logger.debug("Set new data for: %s", message[EVENT_MODULE])
                 await callback(

@@ -29,7 +29,7 @@ SETTING_PORT_API = "port_api"
 SECRET_API_KEY = "api_key"
 
 # Event Keys
-EVENT_API_KEY = SECRET_API_KEY
+EVENT_API_KEY = "api-key"
 EVENT_BASE = "base"
 EVENT_DATA = "data"
 EVENT_DIRECTORIES = "directories"
