@@ -58,6 +58,7 @@ def get_file(
 async def get_file_data(
     filepath: str,
 ) -> HTTPResponse:
+    """Get file data"""
     return await file(filepath)
 
 

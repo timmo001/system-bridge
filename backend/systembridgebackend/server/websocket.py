@@ -73,12 +73,7 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
-from systembridgebackend.server.media import (
-    BASE_DIRECTORIES,
-    get_file,
-    get_file_data,
-    get_files,
-)
+from systembridgebackend.server.media import BASE_DIRECTORIES, get_file, get_files
 from systembridgebackend.server.open import open_path, open_url
 
 
