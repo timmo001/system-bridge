@@ -1,28 +1,39 @@
 """System Bridge: WebSocket handler"""
 from collections.abc import Callable
 from json import JSONDecodeError, dumps, loads
+import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    EVENT_BASE,
     EVENT_DATA,
+    EVENT_DIRECTORIES,
     EVENT_EVENT,
+    EVENT_FILE,
+    EVENT_FILES,
     EVENT_ID,
     EVENT_MESSAGE,
     EVENT_MODULE,
     EVENT_MODULES,
+    EVENT_PATH,
     EVENT_SETTING,
     EVENT_SUBTYPE,
     EVENT_TYPE,
     EVENT_VALUE,
     SETTING_AUTOSTART,
     SUBTYPE_BAD_API_KEY,
+    SUBTYPE_BAD_DIRECTORY,
+    SUBTYPE_BAD_FILE,
     SUBTYPE_BAD_JSON,
+    SUBTYPE_BAD_PATH,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
     SUBTYPE_MISSING_API_KEY,
+    SUBTYPE_MISSING_BASE,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MODULES,
+    SUBTYPE_MISSING_PATH,
     SUBTYPE_MISSING_PATH_URL,
     SUBTYPE_MISSING_SETTING,
     SUBTYPE_MISSING_TEXT,
@@ -32,9 +43,15 @@ from systembridgeshared.const import (
     TYPE_DATA_LISTENER_REGISTERED,
     TYPE_DATA_LISTENER_UNREGISTERED,
     TYPE_DATA_UPDATE,
+    TYPE_DIRECTORIES,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
+    TYPE_FILE,
+    TYPE_FILES,
     TYPE_GET_DATA,
+    TYPE_GET_DIRECTORIES,
+    TYPE_GET_FILE,
+    TYPE_GET_FILES,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
     TYPE_KEYBOARD_KEY_PRESSED,
@@ -56,6 +73,7 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
+from systembridgebackend.server.media import BASE_DIRECTORIES, get_file, get_files
 from systembridgebackend.server.open import open_path, open_url
 
 
@@ -385,6 +403,157 @@ class WebSocketHandler(Base):
                                 }
                             )
                         )
+                elif data[EVENT_EVENT] == TYPE_GET_DIRECTORIES:
+                    if not await self._check_api_key(data):
+                        continue
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_DIRECTORIES,
+                                EVENT_DIRECTORIES: BASE_DIRECTORIES,
+                            }
+                        )
+                    )
+                elif data[EVENT_EVENT] == TYPE_GET_FILES:
+                    if not await self._check_api_key(data):
+                        continue
+                    if EVENT_BASE not in data:
+                        self._logger.warning("No base provided")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
+                                    EVENT_MESSAGE: "No base provided",
+                                }
+                            )
+                        )
+                        continue
+                    path = (
+                        os.path.join(
+                            BASE_DIRECTORIES[data[EVENT_BASE]], data[EVENT_PATH]
+                        )
+                        if data.get(EVENT_PATH)
+                        else BASE_DIRECTORIES[data[EVENT_BASE]]
+                    )
+
+                    self._logger.info(
+                        "Getting files: %s - %s - %s",
+                        data[EVENT_BASE],
+                        data.get(EVENT_PATH),
+                        path,
+                    )
+
+                    if not os.path.exists(path):
+                        self._logger.warning("Cannot find path")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
+                                    EVENT_MESSAGE: "Cannot find path",
+                                    EVENT_PATH: path,
+                                }
+                            )
+                        )
+                        continue
+                    if not os.path.isdir(path):
+                        self._logger.warning("Path is not a directory")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_DIRECTORY,
+                                    EVENT_MESSAGE: "Path is not a directory",
+                                    EVENT_PATH: path,
+                                }
+                            )
+                        )
+                        continue
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_FILES,
+                                EVENT_FILES: get_files(data[EVENT_BASE], path),
+                            }
+                        )
+                    )
+                elif data[EVENT_EVENT] == TYPE_GET_FILE:
+                    if not await self._check_api_key(data):
+                        continue
+                    if EVENT_BASE not in data:
+                        self._logger.warning("No base provided")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
+                                    EVENT_MESSAGE: "No base provided",
+                                }
+                            )
+                        )
+                        continue
+                    if EVENT_PATH not in data:
+                        self._logger.warning("No path provided")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_PATH,
+                                    EVENT_MESSAGE: "No path provided",
+                                }
+                            )
+                        )
+                        continue
+                    path = os.path.join(
+                        BASE_DIRECTORIES[data[EVENT_BASE]], data[EVENT_PATH]
+                    )
+
+                    self._logger.info(
+                        "Getting file: %s - %s - %s",
+                        data[EVENT_BASE],
+                        data[EVENT_PATH],
+                        path,
+                    )
+
+                    if not os.path.exists(path):
+                        self._logger.warning("Cannot find path")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
+                                    EVENT_MESSAGE: "Cannot find path",
+                                    EVENT_PATH: path,
+                                }
+                            )
+                        )
+                        continue
+                    if not os.path.isfile(path):
+                        self._logger.warning("Path is not a file")
+                        await self._websocket.send(
+                            dumps(
+                                {
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_FILE,
+                                    EVENT_MESSAGE: "Path is not a file",
+                                    EVENT_PATH: path,
+                                }
+                            )
+                        )
+                        continue
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_FILE,
+                                EVENT_FILE: get_file(
+                                    BASE_DIRECTORIES[data[EVENT_BASE]], path
+                                ),
+                            }
+                        )
+                    )
                 elif data[EVENT_EVENT] == TYPE_GET_SETTINGS:
                     if not await self._check_api_key(data):
                         continue
@@ -399,7 +568,6 @@ class WebSocketHandler(Base):
                             }
                         )
                     )
-
                 elif data[EVENT_EVENT] == TYPE_GET_SETTING:
                     if not await self._check_api_key(data):
                         continue

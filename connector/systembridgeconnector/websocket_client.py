@@ -1,4 +1,4 @@
-"""System Bridge Shared: WebSocket Client"""
+"""System Bridge Connector: WebSocket Client"""
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -9,11 +9,19 @@ import aiohttp
 
 from systembridgeconnector.base import Base
 from systembridgeconnector.const import (
+    EVENT_API_KEY,
+    EVENT_BASE,
     EVENT_DATA,
+    EVENT_EVENT,
+    EVENT_KEY,
     EVENT_MESSAGE,
     EVENT_MODULE,
+    EVENT_MODULES,
+    EVENT_PATH,
     EVENT_SUBTYPE,
+    EVENT_TEXT,
     EVENT_TYPE,
+    EVENT_URL,
     MODEL_MAP,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
@@ -21,6 +29,9 @@ from systembridgeconnector.const import (
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
     TYPE_GET_DATA,
+    TYPE_GET_DIRECTORIES,
+    TYPE_GET_FILE,
+    TYPE_GET_FILES,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_OPEN,
@@ -47,7 +58,7 @@ class WebSocketClient(Base):
         super().__init__()
         self._api_host = api_host
         self._api_port = api_port
-        self._api_key = api_key  #
+        self._api_key = api_key
         self._session: aiohttp.ClientSession | None = None
         self._websocket: aiohttp.ClientWebSocketResponse | None = None
 
@@ -100,8 +111,8 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_EXIT_APPLICATION,
-                        "api-key": self._api_key,
+                        EVENT_EVENT: TYPE_EXIT_APPLICATION,
+                        EVENT_API_KEY: self._api_key,
                     }
                 )
             )
@@ -120,9 +131,72 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_GET_DATA,
-                        "api-key": self._api_key,
-                        "modules": modules,
+                        EVENT_EVENT: TYPE_GET_DATA,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_MODULES: modules,
+                    }
+                )
+            )
+
+    async def get_directories(self) -> None:
+        """Get directories"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Getting directories:")
+
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_GET_DIRECTORIES,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def get_files(
+        self,
+        base: str,
+        path: str | None = None,
+    ) -> None:
+        """Get files"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Getting files: %s - %s", base, path)
+
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_GET_FILES,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_BASE: base,
+                        EVENT_PATH: path,
+                    }
+                )
+            )
+
+    async def get_file(
+        self,
+        base: str,
+        path: str,
+    ) -> None:
+        """Get files"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Getting file: %s - %s", base, path)
+
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_GET_FILE,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_BASE: base,
+                        EVENT_PATH: path,
                     }
                 )
             )
@@ -140,9 +214,9 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_REGISTER_DATA_LISTENER,
-                        "api-key": self._api_key,
-                        "modules": modules,
+                        EVENT_EVENT: TYPE_REGISTER_DATA_LISTENER,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_MODULES: modules,
                     }
                 )
             )
@@ -160,9 +234,9 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_KEYBOARD_KEYPRESS,
-                        "api-key": self._api_key,
-                        "key": key,
+                        EVENT_EVENT: TYPE_KEYBOARD_KEYPRESS,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_KEY: key,
                     }
                 )
             )
@@ -180,9 +254,9 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_KEYBOARD_TEXT,
-                        "api-key": self._api_key,
-                        "text": text,
+                        EVENT_EVENT: TYPE_KEYBOARD_TEXT,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_TEXT: text,
                     }
                 )
             )
@@ -200,9 +274,9 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_OPEN,
-                        "api-key": self._api_key,
-                        "url": path,
+                        EVENT_EVENT: TYPE_OPEN,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_PATH: path,
                     }
                 )
             )
@@ -220,9 +294,9 @@ class WebSocketClient(Base):
             await self._websocket.send_str(
                 json.dumps(
                     {
-                        "event": TYPE_OPEN,
-                        "api-key": self._api_key,
-                        "url": url,
+                        EVENT_EVENT: TYPE_OPEN,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_URL: url,
                     }
                 )
             )

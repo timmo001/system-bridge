@@ -20,8 +20,25 @@ BASE_DIRECTORIES = {
 }
 
 
-def file_info_from_path(base_path: str, filepath: str) -> dict:
-    """Get file info from path"""
+def get_files(
+    base_path: str,
+    path: str,
+) -> list[dict]:
+    """Get files from path"""
+    files = []
+    for filename in os.listdir(path):
+        files.append(
+            get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
+        )
+
+    return files
+
+
+def get_file(
+    base_path: str,
+    filepath: str,
+) -> dict:
+    """Get file from path"""
     stat = os.stat(filepath)
 
     return {
@@ -36,6 +53,13 @@ def file_info_from_path(base_path: str, filepath: str) -> dict:
         "is_file": os.path.isfile(filepath),
         "is_link": os.path.islink(filepath),
     }
+
+
+async def get_file_data(
+    filepath: str,
+) -> HTTPResponse:
+    """Get file data"""
+    return await file(filepath)
 
 
 async def handler_media_directories(
@@ -75,15 +99,12 @@ async def handler_media_files(
             status=400,
         )
 
-    files = []
-    for filename in os.listdir(path):
-        files.append(
-            file_info_from_path(
-                BASE_DIRECTORIES[query_base], os.path.join(path, filename)
-            )
-        )
-
-    return json({"files": files, "path": path})
+    return json(
+        {
+            "files": get_files(query_base, path),
+            "path": path,
+        }
+    )
 
 
 async def handler_media_file(
@@ -112,7 +133,7 @@ async def handler_media_file(
             status=400,
         )
 
-    return json(file_info_from_path(BASE_DIRECTORIES[query_base], path))
+    return json(get_file(BASE_DIRECTORIES[query_base], path))
 
 
 async def handler_media_file_data(
@@ -142,7 +163,7 @@ async def handler_media_file_data(
             status=400,
         )
 
-    return await file(path)
+    return await get_file_data(path)
 
 
 async def handler_media_file_write(
