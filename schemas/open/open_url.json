@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Open URL",
+  "properties": {
+    "url": {
+      "type": "string"
+    }
+  },
+  "required": ["url"]
+}
