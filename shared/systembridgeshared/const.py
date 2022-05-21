@@ -45,6 +45,7 @@ SETTING_PORT_API = "port_api"
 SECRET_API_KEY = "api_key"
 
 # Event Keys
+EVENT_API_KEY = SECRET_API_KEY
 EVENT_BASE = "base"
 EVENT_DATA = "data"
 EVENT_DIRECTORIES = "directories"
@@ -53,13 +54,16 @@ EVENT_FILE = "file"
 EVENT_FILENAME = "filename"
 EVENT_FILES = "files"
 EVENT_ID = "id"
+EVENT_KEY = "key"
 EVENT_MESSAGE = "message"
 EVENT_MODULE = "module"
 EVENT_MODULES = "modules"
 EVENT_PATH = "path"
 EVENT_SETTING = "setting"
 EVENT_SUBTYPE = "subtype"
+EVENT_TEXT = "text"
 EVENT_TYPE = "type"
+EVENT_URL = "url"
 EVENT_VALUE = "value"
 
 # Event Types
