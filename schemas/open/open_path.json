@@ -1,13 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "Keyboard",
+  "description": "Open Path",
   "properties": {
-    "key": {
-      "type": "string"
-    },
-    "text": {
+    "path": {
       "type": "string"
     }
-  }
+  },
+  "required": ["path"]
 }
