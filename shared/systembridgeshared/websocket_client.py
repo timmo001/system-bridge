@@ -337,7 +337,7 @@ class WebSocketClient(Base):
         if self._websocket is not None:
             while not self._websocket.closed:
                 message = await self.receive_message()
-                if type(message) is dict:
+                if isinstance(message, dict):
                     await callback(message)
 
     async def receive_message(self) -> dict | None:
