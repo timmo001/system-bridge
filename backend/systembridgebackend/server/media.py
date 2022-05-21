@@ -1,4 +1,5 @@
 """System Bridge: Server Handler - Media"""
+import mimetypes
 import os
 
 import aiofiles
@@ -41,6 +42,10 @@ def get_file(
     """Get file from path"""
     stat = os.stat(filepath)
 
+    mime_type = None
+    if os.path.isfile(filepath):
+        mime_type = mimetypes.guess_type(filepath)[0]
+
     return {
         "name": os.path.basename(filepath),
         "path": filepath.removeprefix(base_path)[1:],
@@ -52,6 +57,7 @@ def get_file(
         "is_directory": os.path.isdir(filepath),
         "is_file": os.path.isfile(filepath),
         "is_link": os.path.islink(filepath),
+        "mime_type": mime_type,
     }
 
 
