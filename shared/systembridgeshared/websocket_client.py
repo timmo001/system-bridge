@@ -12,7 +12,10 @@ from systembridgeshared.const import (
     EVENT_API_KEY,
     EVENT_BASE,
     EVENT_DATA,
+    EVENT_DIRECTORIES,
     EVENT_EVENT,
+    EVENT_FILE,
+    EVENT_FILES,
     EVENT_KEY,
     EVENT_MESSAGE,
     EVENT_MODULE,
@@ -23,13 +26,19 @@ from systembridgeshared.const import (
     EVENT_TYPE,
     EVENT_URL,
     MODEL_MAP,
+    MODEL_MEDIA_DIRECTORIES,
+    MODEL_MEDIA_FILE,
+    MODEL_MEDIA_FILES,
     SECRET_API_KEY,
     SETTING_PORT_API,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     TYPE_DATA_UPDATE,
+    TYPE_DIRECTORIES,
     TYPE_ERROR,
     TYPE_EXIT_APPLICATION,
+    TYPE_FILE,
+    TYPE_FILES,
     TYPE_GET_DATA,
     TYPE_GET_DIRECTORIES,
     TYPE_GET_FILE,
@@ -301,27 +310,54 @@ class WebSocketClient(Base):
                 )
             )
 
-    async def listen_for_data(
+    async def listen(
         self,
         callback: Callable,
     ) -> None:
-        """Listen for data"""
+        """Listen for messages and map to modules"""
 
         async def _callback_message(message: dict) -> None:
             """Message Callback"""
-            self._logger.debug("New message: %s", message)
-            if message[EVENT_TYPE] == TYPE_DATA_UPDATE:
-                self._logger.debug("Set new data for: %s", message[EVENT_MODULE])
-                await callback(
-                    message[EVENT_MODULE],
-                    message[EVENT_DATA],
-                    MODEL_MAP.get(message[EVENT_MODULE]),
-                )
-            elif message[EVENT_TYPE] == TYPE_ERROR:
+            self._logger.debug("New message: %s", message[EVENT_TYPE])
+            if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
                     self._logger.debug(message)
                 else:
                     self._logger.warning("Error message: %s", message)
+            elif (
+                message[EVENT_TYPE] == TYPE_DATA_UPDATE
+                and message[EVENT_DATA] is not None
+            ):
+                self._logger.debug("New data for: %s", message[EVENT_MODULE])
+                model = MODEL_MAP.get(message[EVENT_MODULE])
+                if model is None:
+                    self._logger.warning("Unknown model: %s", message[EVENT_MODULE])
+                else:
+                    await callback(
+                        message[EVENT_MODULE],
+                        model(**message[EVENT_DATA]),
+                    )
+            elif message[EVENT_TYPE] == TYPE_DIRECTORIES:
+                self._logger.debug("New directories")
+                model = MODEL_MAP[MODEL_MEDIA_DIRECTORIES]
+                await callback(
+                    MODEL_MEDIA_DIRECTORIES,
+                    model(**message[EVENT_DIRECTORIES]),
+                )
+            elif message[EVENT_TYPE] == TYPE_FILES:
+                self._logger.debug("New files")
+                model = MODEL_MAP[MODEL_MEDIA_FILES]
+                await callback(
+                    MODEL_MEDIA_FILES,
+                    model(**message[EVENT_FILES]),
+                )
+            elif message[EVENT_TYPE] == TYPE_FILE:
+                self._logger.debug("New file")
+                model = MODEL_MAP[MODEL_MEDIA_FILE]
+                await callback(
+                    MODEL_MEDIA_FILE,
+                    model(**message[EVENT_FILE]),
+                )
 
         await self.listen_for_messages(callback=_callback_message)
 
