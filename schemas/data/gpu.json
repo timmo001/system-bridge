@@ -16,7 +16,8 @@
       },
       "additionalProperties": {
         "type": "number"
-      }
+      },
+      "required": ["gpus"]
     }
   },
   "additionalProperties": {},

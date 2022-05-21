@@ -25,5 +25,5 @@ class Gpu(BaseModel):
     class Config:
         extra = Extra.allow
 
-    gpus: list[str]
+    gpus: list
     last_updated: LastUpdated = Field(..., description="Last updated")
