@@ -52,7 +52,6 @@ from systembridgeconnector.exceptions import (
     ConnectionClosedException,
     ConnectionErrorException,
 )
-from systembridgeconnector.models.generic import Generic
 
 
 class WebSocketClient(Base):
