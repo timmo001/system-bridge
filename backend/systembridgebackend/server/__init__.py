@@ -31,6 +31,14 @@ from systembridgebackend.server.media import (
 )
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
+from systembridgebackend.server.power import (
+    handler_hibernate,
+    handler_lock,
+    handler_logout,
+    handler_restart,
+    handler_shutdown,
+    handler_sleep,
+)
 from systembridgebackend.server.websocket import WebSocketHandler
 
 
@@ -198,6 +206,36 @@ class Server(Base):
         self._server.add_route(
             lambda r: _handler_generic(r, handler_open),
             "/api/open",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_sleep),
+            "/api/power/sleep",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_hibernate),
+            "/api/power/hibernate",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_restart),
+            "/api/power/restart",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_shutdown),
+            "/api/power/shutdown",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_lock),
+            "/api/power/lock",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_logout),
+            "/api/power/logout",
             methods=["POST"],
         )
 

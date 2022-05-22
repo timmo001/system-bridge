@@ -44,6 +44,12 @@ from systembridgeconnector.const import (
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_OPEN,
+    TYPE_POWER_HIBERNATE,
+    TYPE_POWER_LOCK,
+    TYPE_POWER_LOGOUT,
+    TYPE_POWER_RESTART,
+    TYPE_POWER_SHUTDOWN,
+    TYPE_POWER_SLEEP,
     TYPE_REGISTER_DATA_LISTENER,
 )
 from systembridgeconnector.exceptions import (
@@ -306,6 +312,102 @@ class WebSocketClient(Base):
                         EVENT_EVENT: TYPE_OPEN,
                         EVENT_API_KEY: self._api_key,
                         EVENT_URL: url,
+                    }
+                )
+            )
+
+    async def power_sleep(self) -> None:
+        """Power sleep"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power sleep")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_SLEEP,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_hibernate(self) -> None:
+        """Power hibernate"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power hibernate")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_HIBERNATE,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_restart(self) -> None:
+        """Power restart"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power restart")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_RESTART,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_shutdown(self) -> None:
+        """Power shutdown"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power shutdown")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_SHUTDOWN,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_lock(self) -> None:
+        """Power lock"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power lock")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_LOCK,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_logout(self) -> None:
+        """Power logout"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power logout")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_LOGOUT,
+                        EVENT_API_KEY: self._api_key,
                     }
                 )
             )
