@@ -59,7 +59,7 @@ async def handler_sleep(
     _: Request,
 ) -> HTTPResponse:
     """Handle sleep requests."""
-    asyncio.get_running_loop().call_later(2, lambda: sleep())
+    asyncio.get_running_loop().call_later(2, sleep)
     return json(
         {
             "message": "Sleeping",
@@ -71,7 +71,7 @@ async def handler_hibernate(
     _: Request,
 ) -> HTTPResponse:
     """Handle hibernate requests."""
-    asyncio.get_running_loop().call_later(2, lambda: hibernate())
+    asyncio.get_running_loop().call_later(2, hibernate)
     return json(
         {
             "message": "Hibernating",
@@ -83,7 +83,7 @@ async def handler_restart(
     _: Request,
 ) -> HTTPResponse:
     """Handle restart requests."""
-    asyncio.get_running_loop().call_later(2, lambda: restart())
+    asyncio.get_running_loop().call_later(2, restart)
     return json(
         {
             "message": "Restarting",
@@ -95,7 +95,7 @@ async def handler_shutdown(
     _: Request,
 ) -> HTTPResponse:
     """Handle shutdown requests."""
-    asyncio.get_running_loop().call_later(2, lambda: shutdown())
+    asyncio.get_running_loop().call_later(2, shutdown)
     return json(
         {
             "message": "Shutting down",
@@ -107,7 +107,7 @@ async def handler_lock(
     _: Request,
 ) -> HTTPResponse:
     """Handle lock requests."""
-    asyncio.get_running_loop().call_later(2, lambda: lock())
+    asyncio.get_running_loop().call_later(2, lock)
     return json(
         {
             "message": "Locking",
@@ -119,7 +119,7 @@ async def handler_logout(
     _: Request,
 ) -> HTTPResponse:
     """Handle logout requests."""
-    asyncio.get_running_loop().call_later(2, lambda: logout())
+    asyncio.get_running_loop().call_later(2, logout)
     return json(
         {
             "message": "Logging out",
