@@ -62,6 +62,10 @@ from systembridgeshared.const import (
     TYPE_OPENED,
     TYPE_POWER_HIBERNATE,
     TYPE_POWER_HIBERNATING,
+    TYPE_POWER_LOCK,
+    TYPE_POWER_LOCKING,
+    TYPE_POWER_LOGGINGOUT,
+    TYPE_POWER_LOGOUT,
     TYPE_POWER_RESTART,
     TYPE_POWER_RESTARTING,
     TYPE_POWER_SHUTDOWN,
@@ -88,7 +92,14 @@ from systembridgebackend.server.media import (
     get_files,
 )
 from systembridgebackend.server.open import open_path, open_url
-from systembridgebackend.server.power import hibernate, restart, shutdown, sleep
+from systembridgebackend.server.power import (
+    hibernate,
+    lock,
+    logout,
+    restart,
+    shutdown,
+    sleep,
+)
 
 
 class WebSocketHandler(Base):
@@ -716,6 +727,32 @@ class WebSocketHandler(Base):
                         )
                     )
                     shutdown()
+                elif data[EVENT_EVENT] == TYPE_POWER_LOCK:
+                    if not await self._check_api_key(data):
+                        continue
+                    self._logger.info("Locking")
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_POWER_LOCKING,
+                                EVENT_MESSAGE: "Locking",
+                            }
+                        )
+                    )
+                    lock()
+                elif data[EVENT_EVENT] == TYPE_POWER_LOGOUT:
+                    if not await self._check_api_key(data):
+                        continue
+                    self._logger.info("Logging out")
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_POWER_LOGGINGOUT,
+                                EVENT_MESSAGE: "Logging out",
+                            }
+                        )
+                    )
+                    logout()
                 else:
                     self._logger.warning("Unknown event: %s", data[EVENT_EVENT])
                     await self._websocket.send(
