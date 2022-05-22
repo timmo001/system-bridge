@@ -1,4 +1,5 @@
 """System Bridge: Server Handler - Power"""
+import asyncio
 import os
 import sys
 
@@ -42,7 +43,7 @@ async def handler_sleep(
     _: Request,
 ) -> HTTPResponse:
     """Handle sleep requests."""
-    sleep()
+    asyncio.get_running_loop().call_later(5, lambda: sleep())
     return json(
         {
             "message": "Sleeping",
@@ -54,7 +55,7 @@ async def handler_hibernate(
     _: Request,
 ) -> HTTPResponse:
     """Handle hibernate requests."""
-    hibernate()
+    asyncio.get_running_loop().call_later(5, lambda: hibernate())
     return json(
         {
             "message": "Hibernating",
@@ -66,7 +67,7 @@ async def handler_restart(
     _: Request,
 ) -> HTTPResponse:
     """Handle restart requests."""
-    restart()
+    asyncio.get_running_loop().call_later(5, lambda: restart())
     return json(
         {
             "message": "Restarting",
@@ -78,7 +79,7 @@ async def handler_shutdown(
     _: Request,
 ) -> HTTPResponse:
     """Handle shutdown requests."""
-    shutdown()
+    asyncio.get_running_loop().call_later(5, lambda: shutdown())
     return json(
         {
             "message": "Shutting down",
