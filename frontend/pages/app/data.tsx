@@ -10,6 +10,8 @@ function PageData(): ReactElement {
       title="Data"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
+      noHeader
+      noFooter
     >
       <Container component="article" maxWidth="xl">
         <Data />
