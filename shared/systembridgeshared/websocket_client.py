@@ -47,6 +47,10 @@ from systembridgeshared.const import (
     TYPE_KEYBOARD_TEXT,
     TYPE_OPEN,
     TYPE_POWER_HIBERNATE,
+    TYPE_POWER_LOCK,
+    TYPE_POWER_LOCKING,
+    TYPE_POWER_LOGGINGOUT,
+    TYPE_POWER_LOGOUT,
     TYPE_POWER_RESTART,
     TYPE_POWER_SHUTDOWN,
     TYPE_POWER_SLEEP,
@@ -373,6 +377,38 @@ class WebSocketClient(Base):
                 json.dumps(
                     {
                         EVENT_EVENT: TYPE_POWER_SHUTDOWN,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_lock(self) -> None:
+        """Power lock"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power lock")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_LOCK,
+                        EVENT_API_KEY: self._api_key,
+                    }
+                )
+            )
+
+    async def power_logout(self) -> None:
+        """Power logout"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Power logout")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_POWER_LOGOUT,
                         EVENT_API_KEY: self._api_key,
                     }
                 )
