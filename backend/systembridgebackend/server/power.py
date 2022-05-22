@@ -52,7 +52,7 @@ def logout() -> None:
     if sys.platform == "linux":
         os.system("pkexec --user $(whoami) gdm-force-logout")
     elif sys.platform == "win32":
-        os.system("shutdown /l /t 0")
+        os.system("logoff")
 
 
 async def handler_sleep(
