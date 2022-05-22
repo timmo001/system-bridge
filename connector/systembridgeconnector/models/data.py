@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-
 from systembridgeconnector.models.battery import Battery
 from systembridgeconnector.models.bridge import Bridge
 from systembridgeconnector.models.cpu import Cpu

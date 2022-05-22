@@ -7,7 +7,6 @@ from os import walk
 import sys
 
 from sanic import Sanic
-from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
@@ -16,13 +15,14 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
+from systembridgebackend.data import Data
 from systembridgebackend.gui import GUIAttemptsExceededException, start_gui_threaded
 from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.media import (
+    handler_media_directories,
     handler_media_file,
     handler_media_file_data,
     handler_media_file_write,
@@ -30,6 +30,14 @@ from systembridgebackend.server.media import (
 )
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
+from systembridgebackend.server.power import (
+    handler_hibernate,
+    handler_lock,
+    handler_logout,
+    handler_restart,
+    handler_shutdown,
+    handler_sleep,
+)
 from systembridgebackend.server.websocket import WebSocketHandler
 
 
@@ -58,7 +66,7 @@ class Server(Base):
 
         SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
-        self._update = Update(self._database)
+        self._data = Data(self._database, self._data_updated)
 
         auth = ApiKeyAuthentication(
             app=self._server,
@@ -86,7 +94,7 @@ class Server(Base):
         )
         async def _update_data(_) -> None:
             """Update data"""
-            await self._update.update_data(self._data_updated)
+            self._data.request_update_data()
 
         @task(
             start=timedelta(seconds=10),
@@ -94,7 +102,7 @@ class Server(Base):
         )
         async def _update_frequent_data(_) -> None:
             """Update frequent data"""
-            await self._update.update_frequent_data(self._data_updated)
+            self._data.request_update_frequent_data()
 
         @auth.key_required
         async def _handler_data_all(
@@ -165,6 +173,11 @@ class Server(Base):
             methods=["POST"],
         )
         self._server.add_route(
+            lambda r: _handler_generic(r, handler_media_directories),
+            "/api/media",
+            methods=["GET"],
+        )
+        self._server.add_route(
             lambda r: _handler_generic(r, handler_media_files),
             "/api/media/files",
             methods=["GET"],
@@ -192,6 +205,36 @@ class Server(Base):
         self._server.add_route(
             lambda r: _handler_generic(r, handler_open),
             "/api/open",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_sleep),
+            "/api/power/sleep",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_hibernate),
+            "/api/power/hibernate",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_restart),
+            "/api/power/restart",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_shutdown),
+            "/api/power/shutdown",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_lock),
+            "/api/power/lock",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_logout),
+            "/api/power/logout",
             methods=["POST"],
         )
 

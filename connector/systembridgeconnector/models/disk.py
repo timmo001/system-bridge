@@ -14,12 +14,14 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
+    devices: float
     io_counters_read_count: float
     io_counters_write_count: float
     io_counters_read_bytes: float
     io_counters_write_bytes: float
     io_counters_read_time: float
     io_counters_write_time: float
+    partitions: float
 
 
 class Disk(BaseModel):
@@ -30,10 +32,12 @@ class Disk(BaseModel):
     class Config:
         extra = Extra.allow
 
+    devices: list
     io_counters_read_count: int
     io_counters_write_count: int
     io_counters_read_bytes: int
     io_counters_write_bytes: int
     io_counters_read_time: int
     io_counters_write_time: int
+    partitions: list
     last_updated: LastUpdated = Field(..., description="Last updated")

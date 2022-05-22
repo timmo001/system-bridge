@@ -3,6 +3,9 @@
   "type": "object",
   "description": "Disk",
   "properties": {
+    "devices": {
+      "type": "array"
+    },
     "io_counters_read_count": {
       "type": "integer"
     },
@@ -21,10 +24,16 @@
     "io_counters_write_time": {
       "type": "integer"
     },
+    "partitions": {
+      "type": "array"
+    },
     "last_updated": {
       "type": "object",
       "description": "Last updated",
       "properties": {
+        "devices": {
+          "type": "number"
+        },
         "io_counters_read_count": {
           "type": "number"
         },
@@ -42,29 +51,36 @@
         },
         "io_counters_write_time": {
           "type": "number"
+        },
+        "partitions": {
+          "type": "number"
         }
       },
       "additionalProperties": {
         "type": "number"
       },
       "required": [
+        "devices",
         "io_counters_read_count",
         "io_counters_write_count",
         "io_counters_read_bytes",
         "io_counters_write_bytes",
         "io_counters_read_time",
-        "io_counters_write_time"
+        "io_counters_write_time",
+        "partitions"
       ]
     }
   },
   "additionalProperties": {},
   "required": [
+    "devices",
     "io_counters_read_count",
     "io_counters_write_count",
     "io_counters_read_bytes",
     "io_counters_write_bytes",
     "io_counters_read_time",
     "io_counters_write_time",
+    "partitions",
     "last_updated"
   ]
 }

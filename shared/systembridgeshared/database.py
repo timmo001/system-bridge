@@ -126,7 +126,7 @@ class Database(Base):
         self,
         table_name: str,
         data_key: str,
-        data_value: bool | float | int | str | None,
+        data_value: bool | float | int | str | list | None,
         data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
@@ -192,7 +192,7 @@ class Database(Base):
                     item[COLUMN_KEY]: item["timestamp"],
                 },
             }
-        output = OrderedDict(data)
+        output = OrderedDict(sorted(data.items()))
         output.move_to_end("last_updated", last=True)
 
         return output

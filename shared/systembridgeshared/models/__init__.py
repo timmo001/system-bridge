@@ -1,1 +1,1 @@
-"""System Bridge Shared: Models"""
+"""System Bridge: Models"""

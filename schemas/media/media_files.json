@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Media Files",
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "description": "Media File",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "fullpath": {
+              "type": "string"
+            },
+            "size": {
+              "type": "integer"
+            },
+            "last_accessed": {
+              "type": "number"
+            },
+            "created": {
+              "type": "number"
+            },
+            "modified": {
+              "type": "number"
+            },
+            "is_directory": {
+              "type": "boolean"
+            },
+            "is_file": {
+              "type": "boolean"
+            },
+            "is_link": {
+              "type": "boolean"
+            },
+            "mime_type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "path",
+            "fullpath",
+            "size",
+            "last_accessed",
+            "created",
+            "modified",
+            "is_directory",
+            "is_file",
+            "is_link"
+          ]
+        }
+      ]
+    },
+    "path": {
+      "type": "string"
+    }
+  },
+  "required": ["files", "path"]
+}

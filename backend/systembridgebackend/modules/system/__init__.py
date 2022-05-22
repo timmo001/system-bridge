@@ -80,7 +80,7 @@ class System(Base):
         try:
             async with GitHubAPI() as github:
                 releases = await github.repos.releases.list("timmo001/system-bridge")
-            return releases.data[0]
+            return releases.data[0] if releases.data else None
         except (
             GitHubConnectionException,
             GitHubRatelimitException,
