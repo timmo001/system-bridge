@@ -16,7 +16,7 @@ def sleep() -> None:
 
 
 def hibernate() -> None:
-    """Send the system to hibernate."""
+    """Hibernate the system."""
     if sys.platform == "linux":
         os.system("systemctl hibernate")
     elif sys.platform == "win32":
@@ -43,7 +43,7 @@ async def handler_sleep(
     _: Request,
 ) -> HTTPResponse:
     """Handle sleep requests."""
-    asyncio.get_running_loop().call_later(5, lambda: sleep())
+    asyncio.get_running_loop().call_later(2, lambda: sleep())
     return json(
         {
             "message": "Sleeping",
@@ -55,7 +55,7 @@ async def handler_hibernate(
     _: Request,
 ) -> HTTPResponse:
     """Handle hibernate requests."""
-    asyncio.get_running_loop().call_later(5, lambda: hibernate())
+    asyncio.get_running_loop().call_later(2, lambda: hibernate())
     return json(
         {
             "message": "Hibernating",
@@ -67,7 +67,7 @@ async def handler_restart(
     _: Request,
 ) -> HTTPResponse:
     """Handle restart requests."""
-    asyncio.get_running_loop().call_later(5, lambda: restart())
+    asyncio.get_running_loop().call_later(2, lambda: restart())
     return json(
         {
             "message": "Restarting",
@@ -79,7 +79,7 @@ async def handler_shutdown(
     _: Request,
 ) -> HTTPResponse:
     """Handle shutdown requests."""
-    asyncio.get_running_loop().call_later(5, lambda: shutdown())
+    asyncio.get_running_loop().call_later(2, lambda: shutdown())
     return json(
         {
             "message": "Shutting down",
