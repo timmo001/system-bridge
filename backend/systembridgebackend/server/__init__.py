@@ -7,7 +7,6 @@ from os import walk
 import sys
 
 from sanic import Sanic
-from sanic.models.handler_types import ListenerType
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
@@ -16,9 +15,9 @@ from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
+from systembridgebackend.data import Data
 from systembridgebackend.gui import GUIAttemptsExceededException, start_gui_threaded
 from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.modules.update import Update
 from systembridgebackend.server.auth import ApiKeyAuthentication
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
@@ -67,7 +66,7 @@ class Server(Base):
 
         SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
-        self._update = Update(self._database)
+        self._data = Data(self._database, self._data_updated)
 
         auth = ApiKeyAuthentication(
             app=self._server,
@@ -95,7 +94,7 @@ class Server(Base):
         )
         async def _update_data(_) -> None:
             """Update data"""
-            await self._update.update_data(self._data_updated)
+            self._data.request_update_data()
 
         @task(
             start=timedelta(seconds=10),
@@ -103,7 +102,7 @@ class Server(Base):
         )
         async def _update_frequent_data(_) -> None:
             """Update frequent data"""
-            await self._update.update_frequent_data(self._data_updated)
+            self._data.request_update_frequent_data()
 
         @auth.key_required
         async def _handler_data_all(
