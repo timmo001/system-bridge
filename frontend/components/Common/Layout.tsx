@@ -1,11 +1,8 @@
-import React, { ReactElement, useCallback, useEffect } from "react";
-import { Container } from "@mui/material";
+import React, { ReactElement, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
-import Footer from "./Footer";
 import Header from "./Header";
-import HeaderLinks from "./HeaderLinks";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
