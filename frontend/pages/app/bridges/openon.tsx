@@ -10,7 +10,6 @@ function PageBridges(): ReactElement {
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
       noHeader
-      noFooter
     >
       <OpenOn />
     </Layout>

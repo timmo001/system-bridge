@@ -11,7 +11,6 @@ interface LayoutProps {
   children?: ReactElement | ReactElement[];
   description?: string;
   keywords?: string;
-  noFooter?: boolean;
   noHeader?: boolean;
   title?: string;
   url?: string;
@@ -83,15 +82,8 @@ function Layout(props: LayoutProps): ReactElement {
           }
         />
       </Head>
-      {!props.noHeader && (
-        <Header brand="System Bridge" rightLinks={<HeaderLinks />} />
-      )}
+      {!props.noHeader && <Header />}
       {props.children}
-      {!props.noFooter && (
-        <Container component="footer" maxWidth="xl">
-          <Footer />
-        </Container>
-      )}
     </>
   );
 }

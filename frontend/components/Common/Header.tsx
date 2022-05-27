@@ -21,11 +21,6 @@ import {
 import { Icon } from "@mdi/react";
 import { mdiMenu } from "@mdi/js";
 
-interface HeaderProps {
-  brand?: string;
-  rightLinks?: ReactElement;
-}
-
 interface ElevationScrollProps {
   children: ReactElement;
 }
@@ -41,7 +36,7 @@ function ElevationScroll({ children }: ElevationScrollProps) {
   });
 }
 
-function Header({ rightLinks, brand }: HeaderProps): ReactElement {
+function Header(): ReactElement {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = useCallback(() => {
@@ -82,34 +77,11 @@ function Header({ rightLinks, brand }: HeaderProps): ReactElement {
                         color: theme.palette.primary.contrastText,
                       }}
                     >
-                      {brand}
+                      System Bridge
                     </Typography>
                   </Button>
                 </Grid>
-                <Hidden lgDown implementation="css">
-                  {rightLinks}
-                </Hidden>
-                <Hidden mdUp>
-                  <IconButton
-                    color="inherit"
-                    aria-label="open drawer"
-                    onClick={handleDrawerToggle}
-                    size="large"
-                  >
-                    <Icon id="menu" path={mdiMenu} size={1} />
-                  </IconButton>
-                </Hidden>
               </Toolbar>
-              <Hidden mdUp implementation="css">
-                <Drawer
-                  variant="temporary"
-                  anchor={"right"}
-                  open={mobileOpen}
-                  onClose={handleDrawerToggle}
-                >
-                  <Box sx={{ margin: "20px 10px" }}>{rightLinks}</Box>
-                </Drawer>
-              </Hidden>
             </Container>
           </AppBar>
           <Box sx={{ height: theme.spacing(18) }} />
