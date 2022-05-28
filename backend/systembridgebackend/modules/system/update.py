@@ -78,12 +78,12 @@ class SystemUpdate(ModuleUpdateBase):
                 release.tag_name.replace("v", "") if release is not None else None,
             )
 
-    async def update_version_newer_avaliable(self) -> None:
+    async def update_version_newer_available(self) -> None:
         """Update newer version available"""
         self._database.write(
             "system",
-            "version_newer_avaliable",
-            self._system.version_newer_avaliable(self._database),
+            "version_newer_available",
+            self._system.version_newer_available(self._database),
         )
 
     async def update_all_data(self) -> None:
@@ -105,4 +105,4 @@ class SystemUpdate(ModuleUpdateBase):
             ]
         )
         # Run after other version updates
-        await self.update_version_newer_avaliable()
+        await self.update_version_newer_available()
