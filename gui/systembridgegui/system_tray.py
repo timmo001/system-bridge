@@ -75,11 +75,11 @@ class SystemTray(Base, QSystemTrayIcon):
         version_latest = self._database.read_table_by_key(
             "system", "version_latest"
         ).to_dict(orient="records")[0]["value"]
-        version_newer_avaliable = self._database.read_table_by_key(
-            "system", "version_newer_avaliable"
+        version_newer_available = self._database.read_table_by_key(
+            "system", "version_newer_available"
         ).to_dict(orient="records")[0]["value"]
 
-        if version_newer_avaliable.lower() == "true":
+        if version_newer_available.lower() == "true":
             latest_version_text = f"{version_latest} (New)"
         else:
             latest_version_text += f" ({version_current})"

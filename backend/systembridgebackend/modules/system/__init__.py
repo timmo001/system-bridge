@@ -92,7 +92,7 @@ class System(Base):
             )
         return None
 
-    def version_newer_avaliable(
+    def version_newer_available(
         self,
         database: Database,
     ) -> bool | None:

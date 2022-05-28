@@ -22,7 +22,7 @@ class LastUpdated(BaseModel):
     uuid: float
     version: float
     version_latest: float
-    version_newer_avaliable: float
+    version_newer_available: float
 
 
 class System(BaseModel):
@@ -41,5 +41,5 @@ class System(BaseModel):
     uuid: str
     version: str
     version_latest: str
-    version_newer_avaliable: bool
+    version_newer_available: bool
     last_updated: LastUpdated = Field(..., description="Last updated")

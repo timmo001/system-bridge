@@ -36,7 +36,7 @@
     "version_latest": {
       "type": "string"
     },
-    "version_newer_avaliable": {
+    "version_newer_available": {
       "type": "boolean"
     },
     "last_updated": {
@@ -76,7 +76,7 @@
         "version_latest": {
           "type": "number"
         },
-        "version_newer_avaliable": {
+        "version_newer_available": {
           "type": "number"
         }
       },
@@ -95,7 +95,7 @@
         "uuid",
         "version",
         "version_latest",
-        "version_newer_avaliable"
+        "version_newer_available"
       ]
     }
   },
@@ -112,7 +112,7 @@
     "uuid",
     "version",
     "version_latest",
-    "version_newer_avaliable",
+    "version_newer_available",
     "last_updated"
   ]
 }
