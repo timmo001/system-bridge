@@ -1,5 +1,4 @@
 """System Bridge: WebSocket handler"""
-import asyncio
 from collections.abc import Callable
 from json import JSONDecodeError, dumps, loads
 import os
