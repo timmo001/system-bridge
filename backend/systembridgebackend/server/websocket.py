@@ -6,7 +6,6 @@ import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
-from systembridgeshared.common import application_restart
 from systembridgeshared.const import (
     EVENT_BASE,
     EVENT_DATA,
@@ -211,8 +210,6 @@ class WebSocketHandler(Base):
                         data.get("version"),
                         wait=False,
                     )
-                    asyncio.get_running_loop().call_later(2, application_restart)
-
                     await self._websocket.send(
                         dumps(
                             {

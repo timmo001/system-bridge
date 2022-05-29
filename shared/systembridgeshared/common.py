@@ -58,8 +58,3 @@ make_key = (
     .replace(".", "", -1)
     .lower()
 )
-
-
-def application_restart() -> None:
-    """Restart the application"""
-    os.execl(sys.executable, sys.executable, *sys.argv)

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import importlib.util
 from json import loads
+import os
 import platform
 import subprocess
 import sys
@@ -38,6 +39,10 @@ class Update(Base):
             self._logger.info("Updating %s to version %s", package, version)
             if version:
                 self._install_package(f"{package}=={version}")
+
+        asyncio.get_running_loop().call_later(
+            5, os.execl, [sys.executable, sys.executable, *sys.argv]
+        )
 
     def update(
         self,
