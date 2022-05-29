@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 
 from appdirs import AppDirs
 
@@ -57,3 +58,8 @@ make_key = (
     .replace(".", "", -1)
     .lower()
 )
+
+
+def application_restart() -> None:
+    """Restart the application"""
+    os.execl(sys.executable, sys.executable, *sys.argv)

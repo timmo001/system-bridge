@@ -38,6 +38,7 @@ from systembridgebackend.server.power import (
     handler_shutdown,
     handler_sleep,
 )
+from systembridgebackend.server.update import handler_update
 from systembridgebackend.server.websocket import WebSocketHandler
 
 
@@ -235,6 +236,11 @@ class Server(Base):
         self._server.add_route(
             lambda r: _handler_generic(r, handler_logout),
             "/api/power/logout",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_update),
+            "/api/update",
             methods=["POST"],
         )
 
