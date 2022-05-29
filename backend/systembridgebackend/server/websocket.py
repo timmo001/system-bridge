@@ -1,10 +1,12 @@
 """System Bridge: WebSocket handler"""
+import asyncio
 from collections.abc import Callable
 from json import JSONDecodeError, dumps, loads
 import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
+from systembridgeshared.common import application_restart
 from systembridgeshared.const import (
     EVENT_BASE,
     EVENT_DATA,
@@ -21,6 +23,7 @@ from systembridgeshared.const import (
     EVENT_SUBTYPE,
     EVENT_TYPE,
     EVENT_VALUE,
+    EVENT_VERSIONS,
     SETTING_AUTOSTART,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_BAD_DIRECTORY,
@@ -39,6 +42,8 @@ from systembridgeshared.const import (
     SUBTYPE_MISSING_TEXT,
     SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
+    TYPE_APPLICATION_UPDATE,
+    TYPE_APPLICATION_UPDATING,
     TYPE_DATA_GET,
     TYPE_DATA_LISTENER_REGISTERED,
     TYPE_DATA_LISTENER_UNREGISTERED,
@@ -81,6 +86,7 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 from systembridgeshared.settings import SECRET_API_KEY, Settings
+from systembridgeshared.update import Update
 
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
@@ -198,7 +204,25 @@ class WebSocketHandler(Base):
 
                 self._logger.info("Received: %s", data[EVENT_EVENT])
 
-                if data[EVENT_EVENT] == TYPE_EXIT_APPLICATION:
+                if data[EVENT_EVENT] == TYPE_APPLICATION_UPDATE:
+                    if not await self._check_api_key(data):
+                        continue
+                    versions = Update().update(
+                        data.get("version"),
+                        wait=False,
+                    )
+                    asyncio.get_running_loop().call_later(2, application_restart)
+
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_APPLICATION_UPDATING,
+                                EVENT_MESSAGE: "Updating application",
+                                EVENT_VERSIONS: versions,
+                            }
+                        )
+                    )
+                elif data[EVENT_EVENT] == TYPE_EXIT_APPLICATION:
                     if not await self._check_api_key(data):
                         continue
                     self._callback_exit_application()

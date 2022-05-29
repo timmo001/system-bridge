@@ -25,6 +25,7 @@ from systembridgeshared.const import (
     EVENT_TEXT,
     EVENT_TYPE,
     EVENT_URL,
+    EVENT_VERSION,
     MODEL_MAP,
     MODEL_MEDIA_DIRECTORIES,
     MODEL_MEDIA_FILE,
@@ -33,6 +34,7 @@ from systembridgeshared.const import (
     SETTING_PORT_API,
     SUBTYPE_BAD_API_KEY,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
+    TYPE_APPLICATION_UPDATE,
     TYPE_DATA_UPDATE,
     TYPE_DIRECTORIES,
     TYPE_ERROR,
@@ -115,6 +117,26 @@ class WebSocketClient(Base):
             )
             raise ConnectionErrorException from error
         self._logger.info("Connected to WebSocket")
+
+    async def application_update(
+        self,
+        version: str | None = None,
+    ) -> None:
+        """Update application"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Updating application")
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_APPLICATION_UPDATE,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_VERSION: version,
+                    }
+                )
+            )
 
     async def exit_backend(self) -> None:
         """Exit backend"""
