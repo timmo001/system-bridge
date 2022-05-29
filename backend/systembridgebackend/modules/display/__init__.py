@@ -25,6 +25,7 @@ class Display(Base):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
+                and item[COLUMN_HARDWARE_NAME] is not None
                 and item[COLUMN_HARDWARE_NAME] not in displays
             ):
                 displays.append(item[COLUMN_HARDWARE_NAME])
