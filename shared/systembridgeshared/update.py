@@ -68,14 +68,14 @@ class Update(Base):
         ):
             packages["systembridgewindowssensors"] = version
 
-        for package, v in packages.items():
-            if v is None:
-                contents = urllib.request.urlopen(
+        for package, new_version in packages.items():
+            if new_version is None:
+                with urllib.request.urlopen(
                     f"https://pypi.org/pypi/{package}/json"
-                ).read()
-                data = loads(contents)
-                v = data["info"]["version"]
-                packages[package] = v
+                ) as response:
+                    data = loads(response.read())
+                new_version = data["info"]["version"]
+                packages[package] = new_version
 
         if wait:
             self._update(packages)
