@@ -51,8 +51,8 @@ def convert_string_to_correct_type(
         return value
 
 
-def make_key(x: str):
+def make_key(input: str):
     """Make a key from a string"""
-    x.replace(" ", "_", -1).replace("(", "", -1).replace(")", "", -1).replace(
+    input.replace(" ", "_", -1).replace("(", "", -1).replace(")", "", -1).replace(
         "\\", "", -1
     ).replace(".", "", -1).lower()
