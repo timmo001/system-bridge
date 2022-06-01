@@ -54,11 +54,7 @@ class Version(Base):
             ):
                 return information["version"]
         except ConnectionErrorException as exception:
-            if (
-                exception.args[0]
-                and exception.args[0].get("response")
-                and exception.args[0].get("response").get("status") == 404
-            ):
+            if exception.args[0] and exception.args[0]["status"] == 404:
                 return None
             raise exception
         return None
@@ -75,11 +71,7 @@ class Version(Base):
             ):
                 return system.version
         except ConnectionErrorException as exception:
-            if (
-                exception.args[0]
-                and exception.args[0].get("response")
-                and exception.args[0].get("response").get("status") == 404
-            ):
+            if exception.args[0] and exception.args[0]["status"] == 404:
                 return None
             raise exception
         return None
