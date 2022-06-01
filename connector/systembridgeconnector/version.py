@@ -54,8 +54,7 @@ class Version(Base):
             ):
                 return information["version"]
         except ConnectionErrorException as exception:
-            # pylint disable=invalid-sequence-index
-            if exception.args[0] and exception.args[0]["status"] == 404:
+            if exception.args[0] is not None and exception.args[0]["status"] == 404:
                 return None
             raise exception
         return None
@@ -72,8 +71,7 @@ class Version(Base):
             ):
                 return system.version
         except ConnectionErrorException as exception:
-            # pylint disable=invalid-sequence-index
-            if exception.args[0] and exception.args[0]["status"] == 404:
+            if exception.args[0] is not None and exception.args[0]["status"] == 404:
                 return None
             raise exception
         return None
