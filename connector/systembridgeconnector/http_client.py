@@ -1,0 +1,122 @@
+"""System Bridge Connector: HTTP Client"""
+from __future__ import annotations
+
+from typing import Any
+
+from aiohttp import ClientResponse, ClientSession
+import async_timeout
+
+from systembridgeconnector.base import Base
+from systembridgeconnector.exceptions import (
+    AuthenticationException,
+    ConnectionErrorException,
+)
+
+BASE_HEADERS = {
+    "Accept": "application/json",
+}
+
+
+class HTTPClient(Base):
+    """Client to handle API calls."""
+
+    def __init__(
+        self,
+        api_host: str,
+        api_port: int,
+        api_key: str,
+        session: ClientSession | None = None,
+    ) -> None:
+        """Initialize the client."""
+        self._api_key = api_key
+        self._base_url = f"http://{api_host}:{api_port}"
+        self._session = session if session else ClientSession()
+
+    async def get(
+        self,
+        path: str,
+    ) -> Any:
+        """Make a GET request"""
+        response: ClientResponse = await self.request(
+            "GET",
+            f"{self._base_url}{path}",
+            headers={
+                **BASE_HEADERS,
+                "api-key": self._api_key,
+            },
+        )
+        if "application/json" in response.headers.get("Content-Type", ""):
+            return await response.json()
+        return await response.text()
+
+    async def post(
+        self,
+        path: str,
+        payload: Any | None,
+    ) -> Any:
+        """Make a POST request"""
+        response: ClientResponse = await self.request(
+            "POST",
+            f"{self._base_url}{path}",
+            headers={
+                **BASE_HEADERS,
+                "api-key": self._api_key,
+            },
+            json=payload,
+        )
+        return await response.json()
+
+    async def put(
+        self,
+        path: str,
+        payload: Any | None,
+    ) -> Any:
+        """Make a PUT request"""
+        response: ClientResponse = await self.request(
+            "PUT",
+            f"{self._base_url}{path}",
+            headers={
+                **BASE_HEADERS,
+                "api-key": self._api_key,
+            },
+            json=payload,
+        )
+        return await response.json()
+
+    async def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs,
+    ) -> ClientResponse:
+        """Make a request."""
+        async with async_timeout.timeout(20):
+            response: ClientResponse = await self._session.request(
+                method,
+                url,
+                **kwargs,
+            )
+        if response.status not in (200, 201, 202, 204):
+            if response.status in (401, 403):
+                raise AuthenticationException(
+                    {
+                        "request": {
+                            "method": method,
+                            "url": url,
+                        },
+                        "response": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            else:
+                raise ConnectionErrorException(
+                    {
+                        "request": {
+                            "method": method,
+                            "url": url,
+                        },
+                        "response": await response.json(),
+                        "status": response.status,
+                    }
+                )
+        return response
