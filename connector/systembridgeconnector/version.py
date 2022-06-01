@@ -55,7 +55,10 @@ class Version(Base):
                 return information["version"]
         except ConnectionErrorException as exception:
             error: dict = exception.args[0]
-            if error is not None and error["status"] == 404:
+            if (
+                error is not None  # pylint: disable=invalid-sequence-index
+                and error["status"] == 404  # pylint: disable=invalid-sequence-index
+            ):
                 return None
             raise exception
         return None
@@ -73,7 +76,10 @@ class Version(Base):
                 return system.version
         except ConnectionErrorException as exception:
             error: dict = exception.args[0]
-            if error is not None and error["status"] == 404:
+            if (
+                error is not None  # pylint: disable=invalid-sequence-index
+                and error["status"] == 404  # pylint: disable=invalid-sequence-index
+            ):
                 return None
             raise exception
         return None
