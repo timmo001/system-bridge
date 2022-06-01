@@ -51,11 +51,13 @@ def convert_string_to_correct_type(
         return value
 
 
-make_key = (
-    lambda x: x.replace(" ", "_", -1)
-    .replace("(", "", -1)
-    .replace(")", "", -1)
-    .replace("\\", "", -1)
-    .replace(".", "", -1)
-    .lower()
-)
+def make_key(key_input: str) -> str:
+    """Make a key from a string"""
+    return (
+        key_input.replace(" ", "_", -1)
+        .replace("(", "", -1)
+        .replace(")", "", -1)
+        .replace("\\", "", -1)
+        .replace(".", "", -1)
+        .lower()
+    )

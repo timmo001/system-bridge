@@ -33,9 +33,10 @@ class Version(Base):
 
     async def check_supported(self) -> bool:
         """Check if the system is running a supported version."""
-        if await self.check_version_2() is not None:
-            return True
-        if (version := await self.check_version_3()) is not None:
+        if (
+            await self.check_version_2() is None
+            and (version := await self.check_version_3()) is not None
+        ):
             return parse_version(version) >= parse_version(SUPPORTED_VERSION)
         return False
 
@@ -52,8 +53,14 @@ class Version(Base):
                 )
             ):
                 return information["version"]
-        except ConnectionErrorException:
-            pass
+        except ConnectionErrorException as exception:
+            error: dict = exception.args[0]
+            if (
+                error is not None  # pylint: disable=invalid-sequence-index
+                and error["status"] == 404  # pylint: disable=invalid-sequence-index
+            ):
+                return None
+            raise exception
         return None
 
     async def check_version_3(self) -> str | None:
@@ -67,6 +74,12 @@ class Version(Base):
                 and parse_version(system.version) >= parse_version("3.0.0")
             ):
                 return system.version
-        except ConnectionErrorException:
-            pass
+        except ConnectionErrorException as exception:
+            error: dict = exception.args[0]
+            if (
+                error is not None  # pylint: disable=invalid-sequence-index
+                and error["status"] == 404  # pylint: disable=invalid-sequence-index
+            ):
+                return None
+            raise exception
         return None
