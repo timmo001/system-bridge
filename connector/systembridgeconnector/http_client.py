@@ -1,9 +1,11 @@
 """System Bridge Connector: HTTP Client"""
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from aiohttp import ClientResponse, ClientSession
+from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
 import async_timeout
 
 from systembridgeconnector.base import Base
@@ -91,15 +93,26 @@ class HTTPClient(Base):
         **kwargs,
     ) -> ClientResponse:
         """Make a request."""
-        async with async_timeout.timeout(20):
-            response: ClientResponse = await self._session.request(
-                method,
-                url,
-                **kwargs,
-            )
-        if response.status not in (200, 201, 202, 204):
-            if response.status in (401, 403):
-                raise AuthenticationException(
+        try:
+            async with async_timeout.timeout(20):
+                response: ClientResponse = await self._session.request(
+                    method,
+                    url,
+                    **kwargs,
+                )
+            if response.status not in (200, 201, 202, 204):
+                if response.status in (401, 403):
+                    raise AuthenticationException(
+                        {
+                            "request": {
+                                "method": method,
+                                "url": url,
+                            },
+                            "response": await response.json(),
+                            "status": response.status,
+                        }
+                    )
+                raise ConnectionErrorException(
                     {
                         "request": {
                             "method": method,
@@ -109,14 +122,28 @@ class HTTPClient(Base):
                         "status": response.status,
                     }
                 )
+            return response
+        except asyncio.TimeoutError as exception:
             raise ConnectionErrorException(
                 {
                     "request": {
                         "method": method,
                         "url": url,
                     },
-                    "response": await response.json(),
-                    "status": response.status,
+                    "status": "timeout",
                 }
-            )
-        return response
+            ) from exception
+        except (
+            ClientConnectorError,
+            ConnectionResetError,
+            ServerDisconnectedError,
+        ) as exception:
+            raise ConnectionErrorException(
+                {
+                    "request": {
+                        "method": method,
+                        "url": url,
+                    },
+                    "status": "connection error",
+                }
+            ) from exception
