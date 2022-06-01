@@ -59,7 +59,7 @@ class Version(Base):
     async def check_version_3(self) -> str | None:
         """Check if the system is running v3.x.x version."""
         try:
-            response = await self._http_client.get("/api/system")
+            response = await self._http_client.get("/api/data/system")
             system = System(**response)
             if (
                 system
