@@ -109,15 +109,14 @@ class HTTPClient(Base):
                         "status": response.status,
                     }
                 )
-            else:
-                raise ConnectionErrorException(
-                    {
-                        "request": {
-                            "method": method,
-                            "url": url,
-                        },
-                        "response": await response.json(),
-                        "status": response.status,
-                    }
-                )
+            raise ConnectionErrorException(
+                {
+                    "request": {
+                        "method": method,
+                        "url": url,
+                    },
+                    "response": await response.json(),
+                    "status": response.status,
+                }
+            )
         return response
