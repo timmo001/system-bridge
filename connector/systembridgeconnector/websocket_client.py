@@ -110,7 +110,7 @@ class WebSocketClient(Base):
             aiohttp.ClientConnectionError,
             socket.gaierror,
         ) as error:
-            self._logger.error(
+            self._logger.warning(
                 "Failed to connect to WebSocket: %s - %s",
                 error.__class__.__name__,
                 error,
