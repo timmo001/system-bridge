@@ -71,7 +71,6 @@ disable = [
     "duplicate-code",
     "inconsistent-return-statements",
     "locally-disabled",
-    "no-self-use",
     "not-context-manager",
     "too-few-public-methods",
     "too-many-ancestors",
