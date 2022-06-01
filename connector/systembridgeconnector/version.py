@@ -23,6 +23,7 @@ class Version(Base):
         session: ClientSession | None = None,
     ) -> None:
         """Initialize the client."""
+        super().__init__()
         self._http_client = HTTPClient(
             api_host,
             api_port,
@@ -34,8 +35,7 @@ class Version(Base):
         """Check if the system is running a supported version."""
         if await self.check_version_2() is not None:
             return True
-        version = await self.check_version_3()
-        if version is not None:
+        if (version := await self.check_version_3()) is not None:
             return parse_version(version) >= parse_version(SUPPORTED_VERSION)
         return False
 
