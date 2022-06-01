@@ -54,7 +54,8 @@ class Version(Base):
             ):
                 return information["version"]
         except ConnectionErrorException as exception:
-            if exception.args[0] is not None and exception.args[0]["status"] == 404:
+            error: dict = exception.args[0]
+            if error is not None and error["status"] == 404:
                 return None
             raise exception
         return None
@@ -71,7 +72,8 @@ class Version(Base):
             ):
                 return system.version
         except ConnectionErrorException as exception:
-            if exception.args[0] is not None and exception.args[0]["status"] == 404:
+            error: dict = exception.args[0]
+            if error is not None and error["status"] == 404:
                 return None
             raise exception
         return None
