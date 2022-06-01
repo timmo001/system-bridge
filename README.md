@@ -71,6 +71,10 @@ The GUI for the application. This shows a system tray icon and allows you to int
 
 Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
 
+### `systembridgewindowssensors`
+
+Specifically for windows, adds sensors to get windows system information.
+
 ### Developing
 
 You can install each python module using pip:
