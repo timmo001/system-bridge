@@ -9,7 +9,7 @@ from systembridgeconnector.exceptions import ConnectionErrorException
 from systembridgeconnector.http_client import HTTPClient
 from systembridgeconnector.models.system import System
 
-SUPPORTED_VERSION = "3.1.1"
+SUPPORTED_VERSION = "3.1.2"
 
 
 class Version(Base):
