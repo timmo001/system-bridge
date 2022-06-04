@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 
@@ -14,4 +16,5 @@ class Response(BaseModel):
     class Config:
         extra = Extra.allow
 
-    message: str = Field(..., description="Message")
+    type: Optional[str] = Field(None, description="Type")
+    message: Optional[str] = Field(None, description="Message")

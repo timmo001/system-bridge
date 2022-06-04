@@ -3,11 +3,14 @@
   "type": "object",
   "description": "Response",
   "properties": {
+    "type": {
+      "type": "string",
+      "description": "Type"
+    },
     "message": {
       "type": "string",
       "description": "Message"
     }
   },
-  "additionalProperties": {},
-  "required": ["message"]
+  "additionalProperties": {}
 }
