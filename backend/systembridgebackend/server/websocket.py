@@ -202,9 +202,10 @@ class WebSocketHandler(Base):
 
                 self._logger.info("Received: %s", data[EVENT_EVENT])
 
+                if not await self._check_api_key(data):
+                    continue
+
                 if data[EVENT_EVENT] == TYPE_APPLICATION_UPDATE:
-                    if not await self._check_api_key(data):
-                        continue
                     versions = Update().update(
                         data.get("version"),
                         wait=False,
@@ -219,13 +220,9 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_EXIT_APPLICATION:
-                    if not await self._check_api_key(data):
-                        continue
                     self._callback_exit_application()
                     self._logger.info("Exit application called")
                 elif data[EVENT_EVENT] == TYPE_KEYBOARD_KEYPRESS:
-                    if not await self._check_api_key(data):
-                        continue
                     if "key" not in data:
                         self._logger.warning("No key provided")
                         await self._websocket.send(
@@ -265,8 +262,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_KEYBOARD_TEXT:
-                    if not await self._check_api_key(data):
-                        continue
                     if "text" not in data:
                         self._logger.warning("No text provided")
                         await self._websocket.send(
@@ -293,8 +288,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_OPEN:
-                    if not await self._check_api_key(data):
-                        continue
                     if "path" in data:
                         open_path(data["path"])
                         await self._websocket.send(
@@ -333,8 +326,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_REGISTER_DATA_LISTENER:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_MODULES not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
@@ -383,9 +374,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_UNREGISTER_DATA_LISTENER:
-                    if not await self._check_api_key(data):
-                        continue
-
                     self._logger.info("Unregistering data listener %s", listener_id)
 
                     if not self._listeners.remove_listener(listener_id):
@@ -410,8 +398,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_GET_DATA:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_MODULES not in data:
                         self._logger.warning("No modules provided")
                         await self._websocket.send(
@@ -450,8 +436,6 @@ class WebSocketHandler(Base):
                                 )
                             )
                 elif data[EVENT_EVENT] == TYPE_GET_DIRECTORIES:
-                    if not await self._check_api_key(data):
-                        continue
                     await self._websocket.send(
                         dumps(
                             {
@@ -461,8 +445,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_GET_FILES:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_BASE not in data:
                         self._logger.warning("No base provided")
                         await self._websocket.send(
@@ -527,8 +509,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_GET_FILE:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_BASE not in data:
                         self._logger.warning("No base provided")
                         await self._websocket.send(
@@ -603,8 +583,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_GET_SETTINGS:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Getting settings")
 
                     await self._websocket.send(
@@ -617,8 +595,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_GET_SETTING:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_SETTING not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
@@ -644,8 +620,6 @@ class WebSocketHandler(Base):
                         )
                     )
                 elif data[EVENT_EVENT] == TYPE_UPDATE_SETTING:
-                    if not await self._check_api_key(data):
-                        continue
                     if EVENT_SETTING not in data:
                         self._logger.warning("No setting provided")
                         await self._websocket.send(
@@ -697,8 +671,6 @@ class WebSocketHandler(Base):
                     else:
                         autostart_disable()
                 elif data[EVENT_EVENT] == TYPE_POWER_SLEEP:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Sleeping")
                     await self._websocket.send(
                         dumps(
@@ -710,8 +682,6 @@ class WebSocketHandler(Base):
                     )
                     sleep()
                 elif data[EVENT_EVENT] == TYPE_POWER_HIBERNATE:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Sleeping")
                     await self._websocket.send(
                         dumps(
@@ -723,8 +693,6 @@ class WebSocketHandler(Base):
                     )
                     hibernate()
                 elif data[EVENT_EVENT] == TYPE_POWER_RESTART:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Sleeping")
                     await self._websocket.send(
                         dumps(
@@ -736,8 +704,6 @@ class WebSocketHandler(Base):
                     )
                     restart()
                 elif data[EVENT_EVENT] == TYPE_POWER_SHUTDOWN:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Sleeping")
                     await self._websocket.send(
                         dumps(
@@ -749,8 +715,6 @@ class WebSocketHandler(Base):
                     )
                     shutdown()
                 elif data[EVENT_EVENT] == TYPE_POWER_LOCK:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Locking")
                     await self._websocket.send(
                         dumps(
@@ -762,8 +726,6 @@ class WebSocketHandler(Base):
                     )
                     lock()
                 elif data[EVENT_EVENT] == TYPE_POWER_LOGOUT:
-                    if not await self._check_api_key(data):
-                        continue
                     self._logger.info("Logging out")
                     await self._websocket.send(
                         dumps(
