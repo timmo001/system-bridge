@@ -51,7 +51,7 @@ class Database(Base):
         self._logger.debug("Executing SQL: %s", sql)
         try:
             self._connection.commit()
-        except OperationalError as error:
+        except OperationalError:
             pass
         try:
             self._connection.execute(sql)
@@ -72,7 +72,7 @@ class Database(Base):
         self._logger.debug("Executing SQL: %s\n%s", sql, params)
         try:
             self._connection.commit()
-        except OperationalError as error:
+        except OperationalError:
             pass
         try:
             self._connection.execute(sql, params)
