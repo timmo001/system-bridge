@@ -36,7 +36,7 @@ def convert_string_to_correct_type(
                 convert_string_to_correct_type(item) for item in value[1:-1].split(", ")
             ]
         value_lower = value.lower()
-        if value_lower in ("none", "null"):
+        if value_lower in ("none", "null", "nan"):
             return None
         if value_lower == "true":
             return True
