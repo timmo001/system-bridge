@@ -117,6 +117,10 @@ class GPUUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
+
+        # Clear table in case of hardware changes since last run
+        self._database.clear_table("gpu")
+
         gpu_list = []
         for gpu_name in self._gpu.get_gpus(self._database):
             gpu_key = make_key(gpu_name)
