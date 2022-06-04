@@ -62,8 +62,8 @@
     <Reference Include="HidSharp, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\HidSharp.2.1.0\lib\net35\HidSharp.dll</HintPath>
     </Reference>
-    <Reference Include="LibreHardwareMonitorLib, Version=0.8.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\LibreHardwareMonitorLib.0.8.9\lib\net452\LibreHardwareMonitorLib.dll</HintPath>
+    <Reference Include="LibreHardwareMonitorLib, Version=0.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\LibreHardwareMonitorLib.0.9.0\lib\net47\LibreHardwareMonitorLib.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
