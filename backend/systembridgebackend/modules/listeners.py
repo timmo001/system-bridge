@@ -114,7 +114,8 @@ class Listeners(Base):
                 self._registered_listeners.remove(listener)
                 self._logger.info("Removed listener: %s", listener_id)
                 self._logger.info(
-                    "Registered listeners: %s", self._registered_listeners
+                    "Registered listeners: %s",
+                    (listener.id for listener in self._registered_listeners),
                 )
                 return True
 
