@@ -123,10 +123,6 @@ class Listeners(Base):
             if listener.id == listener_id:
                 self._registered_listeners.remove(listener)
                 self._logger.info("Removed listener: %s", listener_id)
-                self._logger.info(
-                    "Registered listeners: %s",
-                    str(listener.id for listener in self._registered_listeners),
-                )
                 return True
 
         self._logger.info("Listener not found: %s", listener_id)
