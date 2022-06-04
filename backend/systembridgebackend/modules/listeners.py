@@ -89,8 +89,7 @@ class Listeners(Base):
             self._logger.warning("Module to refresh not implemented: %s", module)
             return
 
-        model = MODEL_MAP.get(module)
-        if model is None:
+        if (model := MODEL_MAP.get(module)) is None:
             self._logger.warning("Unknown model: %s", module)
             return
 
