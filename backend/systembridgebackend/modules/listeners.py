@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Callable
 
 from systembridgeshared.base import Base
+from systembridgeshared.const import MODEL_MAP
 from systembridgeshared.database import Database
 
 
@@ -88,10 +89,18 @@ class Listeners(Base):
             self._logger.warning("Module to refresh not implemented: %s", module)
             return
 
+        if (model := MODEL_MAP.get(module)) is None:
+            self._logger.warning("Unknown model: %s", module)
+            return
+
         new_data = self._database.table_data_to_ordered_dict(module)
-        if new_data is not None and new_data != self._data[module]:
+        if new_data is None:
+            self._logger.warning("No data found for module: %s", module)
+            return
+
+        if new_data != self._data[module]:
             self._logger.info("Data changed for module: %s", module)
-            self._data[module] = new_data
+            self._data[module] = model(**new_data).dict()
             for listener in self._registered_listeners:
                 self._logger.info("Listener: %s - %s", listener.id, listener.modules)
                 if module in listener.modules:
@@ -113,10 +122,6 @@ class Listeners(Base):
             if listener.id == listener_id:
                 self._registered_listeners.remove(listener)
                 self._logger.info("Removed listener: %s", listener_id)
-                self._logger.info(
-                    "Registered listeners: %s",
-                    str(listener.id for listener in self._registered_listeners),
-                )
                 return True
 
         self._logger.info("Listener not found: %s", listener_id)
