@@ -179,7 +179,10 @@ class WebSocketHandler(Base):
             )
         )
 
-    async def _handler(self) -> None:
+    async def _handler(
+        self,
+        listener_id: str,
+    ) -> None:
         """Handler"""
         # Loop until the connection is closed
         while self._active:
@@ -749,7 +752,7 @@ class WebSocketHandler(Base):
         """Handler"""
         listener_id = str(uuid4())
         try:
-            await self._handler()
+            await self._handler(listener_id)
         except ConnectionError as error:
             self._logger.info("Connection closed: %s", error)
         finally:
