@@ -206,9 +206,11 @@ class Database(Base):
     def table_data_to_ordered_dict(
         self,
         table_name: str,
-    ) -> OrderedDict:
+    ) -> OrderedDict | None:
         """Convert table to OrderedDict"""
         data_dict = self.read_table(table_name).to_dict(orient="records")
+        if len(data_dict) == 0:
+            return None
         data: dict = {
             "last_updated": {},
         }
