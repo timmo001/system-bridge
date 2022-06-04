@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from collections.abc import Mapping
 import os
-from sqlite3 import connect
+from sqlite3 import OperationalError, connect
 from time import time
 
 from pandas import DataFrame, read_sql_query
@@ -49,8 +49,15 @@ class Database(Base):
         if not self.connected:
             self.connect()
         self._logger.debug("Executing SQL: %s", sql)
-        self._connection.execute(sql)
-        self._connection.commit()
+        try:
+            self._connection.execute(sql)
+            self._connection.commit()
+        except OperationalError as error:
+            self._logger.error(
+                "Error executing SQL: %s\n%s",
+                sql,
+                error,
+            )
 
     def execute_sql_with_params(
         self,
@@ -59,8 +66,15 @@ class Database(Base):
     ) -> None:
         """Execute SQL"""
         self._logger.debug("Executing SQL: %s\n%s", sql, params)
-        self._connection.execute(sql, params)
-        self._connection.commit()
+        try:
+            self._connection.execute(sql, params)
+            self._connection.commit()
+        except OperationalError as error:
+            self._logger.error(
+                "Error executing SQL: %s\n%s",
+                sql,
+                error,
+            )
 
     def connect(self) -> None:
         """Connect to database"""
@@ -122,6 +136,21 @@ class Database(Base):
         sql = sql[:-1] + ")"
         self.execute_sql(sql)
 
+    def clear_table(
+        self,
+        table_name: str,
+    ) -> None:
+        """Clear table"""
+        self.execute_sql(f"DELETE FROM {table_name}")
+
+    def clear_table_by_key(
+        self,
+        table_name: str,
+        key: str,
+    ) -> None:
+        """Clear table by key"""
+        self.execute_sql(f"DELETE FROM {table_name} WHERE {COLUMN_KEY} = '{key}'")
+
     def write(
         self,
         table_name: str,
@@ -153,7 +182,7 @@ class Database(Base):
         data_name: str,
         data_hardware_type: str,
         data_hardware_name: str,
-        data_value: str,
+        data_value: str | None,
         data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""

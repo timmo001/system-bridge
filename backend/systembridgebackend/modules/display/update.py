@@ -73,6 +73,10 @@ class DisplayUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
+
+        # Clear table in case of hardware changes since last run
+        self._database.clear_table("display")
+
         display_list = []
         for display_name in self._display.get_displays(self._database):
             display_key = make_key(display_name)
