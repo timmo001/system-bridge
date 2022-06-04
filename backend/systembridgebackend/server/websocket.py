@@ -438,16 +438,17 @@ class WebSocketHandler(Base):
 
                     for module in data[EVENT_MODULES]:
                         data = self._database.table_data_to_ordered_dict(module)
-                        await self._websocket.send(
-                            dumps(
-                                {
-                                    EVENT_TYPE: TYPE_DATA_UPDATE,
-                                    EVENT_MESSAGE: "Data received",
-                                    EVENT_MODULE: module,
-                                    EVENT_DATA: data,
-                                }
+                        if data is not None:
+                            await self._websocket.send(
+                                dumps(
+                                    {
+                                        EVENT_TYPE: TYPE_DATA_UPDATE,
+                                        EVENT_MESSAGE: "Data received",
+                                        EVENT_MODULE: module,
+                                        EVENT_DATA: data,
+                                    }
+                                )
                             )
-                        )
                 elif data[EVENT_EVENT] == TYPE_GET_DIRECTORIES:
                     if not await self._check_api_key(data):
                         continue

@@ -89,7 +89,7 @@ class Listeners(Base):
             return
 
         new_data = self._database.table_data_to_ordered_dict(module)
-        if new_data and new_data != self._data[module]:
+        if new_data is not None and new_data != self._data[module]:
             self._logger.info("Data changed for module: %s", module)
             self._data[module] = new_data
             for listener in self._registered_listeners:
