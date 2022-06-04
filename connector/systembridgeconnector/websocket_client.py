@@ -452,7 +452,9 @@ class WebSocketClient(Base):
                 message[EVENT_TYPE] == TYPE_DATA_UPDATE
                 and message[EVENT_DATA] is not None
             ):
-                self._logger.debug("New data for: %s", message[EVENT_MODULE])
+                self._logger.debug(
+                    "New data for: %s\n%s", message[EVENT_MODULE], message[EVENT_DATA]
+                )
                 model = MODEL_MAP.get(message[EVENT_MODULE])
                 if model is None:
                     self._logger.warning("Unknown model: %s", message[EVENT_MODULE])
