@@ -31,12 +31,11 @@ class Update(Base):
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
             {"name": "disk", "cls": DiskUpdate(self._database)},
-            {"name": "display", "cls": DisplayUpdate(self._database)},
             {"name": "system", "cls": SystemUpdate(self._database)},
         ]
         self._classes_frequent = [
-            {"name": "sensors", "cls": SensorsUpdate(self._database)},
             {"name": "cpu", "cls": CPUUpdate(self._database)},
+            {"name": "display", "cls": DisplayUpdate(self._database)},
             {"name": "gpu", "cls": GPUUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
             {"name": "network", "cls": NetworkUpdate(self._database)},
@@ -74,6 +73,10 @@ class Update(Base):
         self._logger.info("Update frequent data")
         if not self._database.connected:
             self._database.connect()
+
+        sensors_update = SensorsUpdate(self._database)
+        await sensors_update.update_all_data()
+        await updated_callback("sensors")
 
         tasks = [self._update(cls, updated_callback) for cls in self._classes_frequent]
         await asyncio.gather(*tasks)
