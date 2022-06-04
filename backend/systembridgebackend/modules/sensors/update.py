@@ -141,6 +141,10 @@ class SensorsUpdate(Base):
 
     async def update_all_data(self) -> None:
         """Update data"""
+
+        # Clear table in case of hardware changes since last run
+        self._database.clear_table("sensors")
+
         await asyncio.gather(
             *[
                 self.update_fans(),
