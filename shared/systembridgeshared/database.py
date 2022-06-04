@@ -122,6 +122,21 @@ class Database(Base):
         sql = sql[:-1] + ")"
         self.execute_sql(sql)
 
+    def clear_table(
+        self,
+        table_name: str,
+    ) -> None:
+        """Clear table"""
+        self.execute_sql(f"DELETE FROM {table_name}")
+
+    def clear_table_by_key(
+        self,
+        table_name: str,
+        key: str,
+    ) -> None:
+        """Clear table by key"""
+        self.execute_sql(f"DELETE FROM {table_name} WHERE {COLUMN_KEY} = '{key}'")
+
     def write(
         self,
         table_name: str,
@@ -153,7 +168,7 @@ class Database(Base):
         data_name: str,
         data_hardware_type: str,
         data_hardware_name: str,
-        data_value: str,
+        data_value: str | None,
         data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
