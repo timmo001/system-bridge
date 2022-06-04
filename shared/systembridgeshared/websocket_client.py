@@ -30,6 +30,7 @@ from systembridgeshared.const import (
     MODEL_MEDIA_DIRECTORIES,
     MODEL_MEDIA_FILE,
     MODEL_MEDIA_FILES,
+    MODEL_RESPONSE,
     SECRET_API_KEY,
     SETTING_PORT_API,
     SUBTYPE_BAD_API_KEY,
@@ -437,6 +438,7 @@ class WebSocketClient(Base):
     async def listen(
         self,
         callback: Callable,
+        accept_other_types: bool = False,
     ) -> None:
         """Listen for messages and map to modules"""
 
@@ -496,6 +498,15 @@ class WebSocketClient(Base):
                         }
                     ),
                 )
+            else:
+                self._logger.debug("Other message: %s", message[EVENT_TYPE])
+                if accept_other_types:
+                    model = MODEL_MAP.get(EVENT_TYPE, MODEL_MAP[MODEL_RESPONSE])
+                    if model is not None:
+                        await callback(
+                            message[EVENT_TYPE],
+                            model(**message),
+                        )
 
         await self.listen_for_messages(callback=_callback_message)
 
