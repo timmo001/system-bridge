@@ -41,9 +41,9 @@ def get_files(
     """Get files from path"""
     files = []
     for filename in os.listdir(path):
-        files.append(
-            get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
-        )
+        file = get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
+        if file is not None:
+            files.append(file)
 
     return files
 
@@ -51,9 +51,12 @@ def get_files(
 def get_file(
     base_path: str,
     filepath: str,
-) -> dict:
+) -> dict | None:
     """Get file from path"""
-    stat = os.stat(filepath)
+    try:
+        stat = os.stat(filepath)
+    except FileNotFoundError:
+        return None
 
     mime_type = None
     if os.path.isfile(filepath):
