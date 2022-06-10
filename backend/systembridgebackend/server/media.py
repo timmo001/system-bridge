@@ -42,6 +42,7 @@ def get_directories() -> list[dict]:
             "path": storagepath.get_videos_dir(),
         },
     ]
+
     return directories
 
 
@@ -223,8 +224,7 @@ async def handler_media_file_data(
         )
 
     query_path = request.args.get(QUERY_PATH)
-    path = os.path.join(root_path, query_path)
-    if not path:
+    if not (path := os.path.join(root_path, query_path)):
         return json(
             {"message": "Cannot find path", "path": path},
             status=400,
@@ -275,8 +275,7 @@ async def handler_media_file_write(
             {"message": "No filename specified"},
             status=400,
         )
-    path = os.path.join(root_path, query_path)
-    if not path:
+    if not (path := os.path.join(root_path, query_path)):
         return json(
             {"message": "Cannot find path", "path": path},
             status=400,
