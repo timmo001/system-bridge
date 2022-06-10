@@ -1,4 +1,6 @@
 """System Bridge: Server Handler - Media"""
+from __future__ import annotations
+
 import mimetypes
 import os
 
