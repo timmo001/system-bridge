@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 
@@ -27,15 +29,15 @@ class LastUpdated(BaseModel):
     times_user: float
     times_system: float
     times_idle: float
-    times_interrupt: float
-    times_dpc: float
+    times_interrupt: Optional[float] = None
+    times_dpc: Optional[float] = None
     times_percent_user: float
     times_percent_system: float
     times_percent_idle: float
-    times_percent_interrupt: float
-    times_percent_dpc: float
+    times_percent_interrupt: Optional[float] = None
+    times_percent_dpc: Optional[float] = None
     usage: float
-    voltage: float
+    voltage: Optional[float] = None
 
 
 class Cpu(BaseModel):
@@ -59,13 +61,13 @@ class Cpu(BaseModel):
     times_user: float
     times_system: float
     times_idle: float
-    times_interrupt: float
-    times_dpc: float
+    times_interrupt: Optional[float] = None
+    times_dpc: Optional[float] = None
     times_percent_user: float
     times_percent_system: float
     times_percent_idle: float
-    times_percent_interrupt: float
-    times_percent_dpc: float
+    times_percent_interrupt: Optional[float] = None
+    times_percent_dpc: Optional[float] = None
     usage: float
-    voltage: float
+    voltage: Optional[float] = None
     last_updated: LastUpdated = Field(..., description="Last updated")

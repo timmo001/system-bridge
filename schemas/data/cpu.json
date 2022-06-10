@@ -157,15 +157,10 @@
         "times_user",
         "times_system",
         "times_idle",
-        "times_interrupt",
-        "times_dpc",
         "times_percent_user",
         "times_percent_system",
         "times_percent_idle",
-        "times_percent_interrupt",
-        "times_percent_dpc",
-        "usage",
-        "voltage"
+        "usage"
       ]
     }
   },
@@ -186,15 +181,10 @@
     "times_user",
     "times_system",
     "times_idle",
-    "times_interrupt",
-    "times_dpc",
     "times_percent_user",
     "times_percent_system",
     "times_percent_idle",
-    "times_percent_interrupt",
-    "times_percent_dpc",
     "usage",
-    "voltage",
     "last_updated"
   ]
 }
