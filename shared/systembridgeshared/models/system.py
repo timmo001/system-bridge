@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -22,7 +24,7 @@ class LastUpdated(BaseModel):
     uuid: float
     version: float
     version_latest: float
-    version_newer_available: float
+    version_newer_available: Optional[float] = None
 
 
 class System(BaseModel):
@@ -41,5 +43,5 @@ class System(BaseModel):
     uuid: str
     version: str
     version_latest: str
-    version_newer_available: bool
+    version_newer_available: Optional[bool] = None
     last_updated: LastUpdated = Field(..., description="Last updated")
