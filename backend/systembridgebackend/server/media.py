@@ -1,4 +1,6 @@
 """System Bridge: Server Handler - Media"""
+from __future__ import annotations
+
 import mimetypes
 import os
 
@@ -39,21 +41,24 @@ def get_files(
     path: str,
 ) -> list[dict]:
     """Get files from path"""
-    files = []
+    files_info = []
     for filename in os.listdir(path):
-        files.append(
-            get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
-        )
+        file_info = get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
+        if file_info is not None:
+            files_info.append(file_info)
 
-    return files
+    return files_info
 
 
 def get_file(
     base_path: str,
     filepath: str,
-) -> dict:
+) -> dict | None:
     """Get file from path"""
-    stat = os.stat(filepath)
+    try:
+        stat = os.stat(filepath)
+    except FileNotFoundError:
+        return None
 
     mime_type = None
     if os.path.isfile(filepath):
