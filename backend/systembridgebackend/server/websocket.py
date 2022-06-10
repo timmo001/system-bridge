@@ -89,12 +89,7 @@ from systembridgeshared.update import Update
 from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
-from systembridgebackend.server.media import (
-    BASE_DIRECTORIES,
-    get_directories,
-    get_file,
-    get_files,
-)
+from systembridgebackend.server.media import get_directories, get_file, get_files
 from systembridgebackend.server.open import open_path, open_url
 from systembridgebackend.server.power import (
     hibernate,
@@ -458,10 +453,31 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
+
+                root_path = None
+                for item in get_directories():
+                    if item["key"] == data[EVENT_BASE]:
+                        root_path = item["path"]
+                        break
+
+                if root_path is None or not os.path.exists(root_path):
+                    self._logger.warning("Cannot find base path")
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
+                                EVENT_MESSAGE: "Cannot find base path",
+                                EVENT_BASE: data[EVENT_BASE],
+                            }
+                        )
+                    )
+                    continue
+
                 path = (
-                    os.path.join(BASE_DIRECTORIES[data[EVENT_BASE]], data[EVENT_PATH])
+                    os.path.join(root_path, data[EVENT_PATH])
                     if data.get(EVENT_PATH)
-                    else BASE_DIRECTORIES[data[EVENT_BASE]]
+                    else root_path
                 )
 
                 self._logger.info(
@@ -520,6 +536,27 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
+
+                root_path = None
+                for item in get_directories():
+                    if item["key"] == data[EVENT_BASE]:
+                        root_path = item["path"]
+                        break
+
+                if root_path is None or not os.path.exists(root_path):
+                    self._logger.warning("Cannot find base path")
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
+                                EVENT_MESSAGE: "Cannot find base path",
+                                EVENT_BASE: data[EVENT_BASE],
+                            }
+                        )
+                    )
+                    continue
+
                 if EVENT_PATH not in data:
                     self._logger.warning("No path provided")
                     await self._websocket.send(
@@ -532,9 +569,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                path = os.path.join(
-                    BASE_DIRECTORIES[data[EVENT_BASE]], data[EVENT_PATH]
-                )
+                path = os.path.join(root_path, data[EVENT_PATH])
 
                 self._logger.info(
                     "Getting file: %s - %s - %s",
@@ -574,9 +609,7 @@ class WebSocketHandler(Base):
                     dumps(
                         {
                             EVENT_TYPE: TYPE_FILE,
-                            EVENT_FILE: get_file(
-                                BASE_DIRECTORIES[data[EVENT_BASE]], path
-                            ),
+                            EVENT_FILE: get_file(root_path, path),
                             EVENT_PATH: path,
                         }
                     )
