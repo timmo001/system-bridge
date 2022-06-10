@@ -94,8 +94,7 @@
         "uptime",
         "uuid",
         "version",
-        "version_latest",
-        "version_newer_available"
+        "version_latest"
       ]
     }
   },
@@ -112,7 +111,6 @@
     "uuid",
     "version",
     "version_latest",
-    "version_newer_available",
     "last_updated"
   ]
 }
