@@ -15,6 +15,7 @@ from systembridgeshared.const import (
     COLUMN_TIMESTAMP,
     COLUMN_VALUE,
     SECRET_API_KEY,
+    SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_AUTOSTART,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
@@ -77,6 +78,10 @@ class Settings(Base):
             self.set(SETTING_LOG_LEVEL, "INFO")
         if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_PORT_API):
             self.set(SETTING_PORT_API, 9170)
+        if self._database.check_table_for_key(
+            TABLE_SETTINGS, SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+        ):
+            self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, [])
 
     def get_all(self) -> dict:
         """Get settings"""
