@@ -23,7 +23,7 @@ class LastUpdated(BaseModel):
     uptime: float
     uuid: float
     version: float
-    version_latest: float
+    version_latest: Optional[float] = None
     version_newer_available: Optional[float] = None
 
 
@@ -42,6 +42,6 @@ class System(BaseModel):
     uptime: float
     uuid: str
     version: str
-    version_latest: str
+    version_latest: Optional[str] = None
     version_newer_available: Optional[bool] = None
     last_updated: LastUpdated = Field(..., description="Last updated")

@@ -93,8 +93,7 @@
         "platform_version",
         "uptime",
         "uuid",
-        "version",
-        "version_latest"
+        "version"
       ]
     }
   },
@@ -110,7 +109,6 @@
     "uptime",
     "uuid",
     "version",
-    "version_latest",
     "last_updated"
   ]
 }

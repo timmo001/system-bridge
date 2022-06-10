@@ -70,7 +70,7 @@ class Version(Base):
             system = System(**response)
             if (
                 system
-                and system.version
+                and system.version is not None
                 and parse_version(system.version) >= parse_version("3.0.0")
             ):
                 return system.version
