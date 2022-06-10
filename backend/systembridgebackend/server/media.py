@@ -39,13 +39,13 @@ def get_files(
     path: str,
 ) -> list[dict]:
     """Get files from path"""
-    files = []
+    files_info = []
     for filename in os.listdir(path):
-        file = get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
-        if file is not None:
-            files.append(file)
+        file_info = get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
+        if file_info is not None:
+            files_info.append(file_info)
 
-    return files
+    return files_info
 
 
 def get_file(
