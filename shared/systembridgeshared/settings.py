@@ -84,13 +84,12 @@ class Settings(Base):
         ):
             self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, [])
 
-    def get_all(self) -> dict:
+    def get_all(self) -> list[dict]:
         """Get settings"""
         records = self._database.read_table(TABLE_SETTINGS).to_dict(orient="records")
-        return {
-            record["key"]: convert_string_to_correct_type(record["value"])
-            for record in records
-        }
+        for record in records:
+            record[COLUMN_VALUE] = convert_string_to_correct_type(record[COLUMN_VALUE])
+        return records
 
     def get(
         self,

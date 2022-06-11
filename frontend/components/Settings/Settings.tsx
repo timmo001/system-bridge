@@ -75,11 +75,12 @@ function Settings(): ReactElement {
             settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1
           )
           .forEach((s: SettingResult) => {
-            if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
-              newSettings[s.key] = Number(s.value);
-            else if (s.value === "True" || s.value === "False")
-              newSettings[s.key] = s.value === "True";
-            else newSettings[s.key] = s.value;
+            // if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
+            //   newSettings[s.key] = Number(s.value);
+            // else if (s.value === "True" || s.value === "False")
+            //   newSettings[s.key] = s.value === "True";
+            // else newSettings[s.key] = s.value;
+            newSettings[s.key] = s.value;
           });
         console.log("Settings:", newSettings);
         setSettings(newSettings);
