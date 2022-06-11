@@ -140,4 +140,4 @@ class GPUUpdate(ModuleUpdateBase):
                     self.update_temperature(gpu_key),
                 ]
             )
-        self._database.write("gpu", "gpus", str(gpu_list))
+        self._database.write("gpu", "gpus", gpu_list)

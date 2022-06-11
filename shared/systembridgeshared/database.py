@@ -179,10 +179,10 @@ class Database(Base):
 
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{data_key}", "{data_value}", {data_timestamp})
+             VALUES ('{data_key}', '{data_value}', {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = "{data_key}"
+             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = '{data_key}'
             """.replace(
                 "\n", ""
             ).replace(
@@ -214,11 +214,11 @@ class Database(Base):
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_TYPE}, {COLUMN_NAME},
              {COLUMN_HARDWARE_TYPE}, {COLUMN_HARDWARE_NAME}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{data_key}", "{data_type}", "{data_name}", "{data_hardware_type}",
-             "{data_hardware_name}", "{data_value}", {data_timestamp})
+             VALUES ('{data_key}', '{data_type}', '{data_name}', '{data_hardware_type}',
+             '{data_hardware_name}', '{data_value}', {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = "{data_key}"
+             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = '{data_key}'
             """.replace(
                 "\n", ""
             ).replace(

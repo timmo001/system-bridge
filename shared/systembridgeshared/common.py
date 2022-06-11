@@ -34,7 +34,7 @@ def convert_string_to_correct_type(
             value.startswith("{") and value.endswith("}")
         ):
             try:
-                json.loads(value)
+                return json.loads(value)
             except json.JSONDecodeError:
                 return value
         value_lower = value.lower()
