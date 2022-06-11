@@ -1,7 +1,12 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
-import { mdiProtocol, mdiRocketLaunch, mdiTextBoxOutline } from "@mdi/js";
+import {
+  mdiFolderMultipleOutline,
+  mdiProtocol,
+  mdiRocketLaunch,
+  mdiTextBoxOutline,
+} from "@mdi/js";
 
 import { Event } from "assets/entities/event.entity";
 import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
@@ -22,6 +27,7 @@ export interface SettingDescription {
   description: string;
   icon: string;
   containerDisabled?: boolean;
+  isList?: boolean;
   isPassword?: boolean;
   minimum?: number;
 }
@@ -41,6 +47,12 @@ export const settingsMap: { [key: string]: SettingDescription } = {
     name: "API Port",
     description: "Port for the API and WebSocket",
     icon: mdiProtocol,
+  },
+  additional_media_directories: {
+    name: "Additional Media Directories",
+    description: "Additional media directories for the media endpoint",
+    icon: mdiFolderMultipleOutline,
+    isList: true,
   },
 };
 

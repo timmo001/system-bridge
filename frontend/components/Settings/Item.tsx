@@ -6,7 +6,9 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
@@ -22,6 +24,7 @@ import {
   mdiContentSaveOutline,
   mdiEye,
   mdiEyeOff,
+  mdiPlus,
 } from "@mdi/js";
 
 import { handleCopyToClipboard } from "components/Common/Utils";
@@ -78,6 +81,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
     description,
     icon,
     containerDisabled,
+    isList,
     isPassword,
     minimum,
   }: SettingDescription = settingsMap[keyIn];
@@ -90,10 +94,9 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
         <Icon id="icon" title={name} size={1} path={icon} />
       </ListItemIcon>
       <ListItemText
-        style={{ maxWidth: "64%" }}
         primary={name}
         secondary={description}
-        sx={{ userSelect: "none" }}
+        sx={{ maxWidth: "64%", userSelect: "none" }}
       />
       <ListItemSecondaryAction sx={{ width: 420, textAlign: "end" }}>
         <Grid container alignItems="center" justifyContent="flex-end">
@@ -180,6 +183,70 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                   }
                 />
               </FormControl>
+            ) : typeof value === "string" && isList ? (
+              <List sx={{ width: 720 }}>
+                {JSON.parse(value).map(
+                  (item: { name: string; value: string }) => (
+                    <ListItem key={item.name}>
+                      <ListItemText primary={item.name} />
+                      <ListItemSecondaryAction>
+                        <Grid
+                          container
+                          alignItems="center"
+                          justifyContent="flex-end"
+                        >
+                          <Grid item>
+                            <TextField
+                              id="name"
+                              label="Name"
+                              variant="outlined"
+                              onChange={handleInputChanged}
+                              sx={{ width: 210 }}
+                            />
+                          </Grid>
+                          <Grid item>
+                            <TextField
+                              id="value"
+                              label="Value"
+                              variant="outlined"
+                              onChange={handleInputChanged}
+                              sx={{ width: 210 }}
+                            />
+                          </Grid>
+                        </Grid>
+
+                        <IconButton
+                          aria-label="Remove"
+                          onClick={() => handleChanged(keyIn, item)}
+                          edge="end"
+                          size="small"
+                        >
+                          <Icon
+                            id="remove-item"
+                            title="Remove"
+                            size={0.8}
+                            path={mdiContentSaveOutline}
+                          />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  )
+                )}
+                <ListItemButton
+                  sx={{ width: "100%" }}
+                  onClick={() =>
+                    handleChanged(keyIn, [
+                      ...JSON.parse(value),
+                      { name: "", value: "" },
+                    ])
+                  }
+                >
+                  <ListItemIcon>
+                    <Icon id="add" title="Add" size={1} path={mdiPlus} />
+                  </ListItemIcon>
+                  <ListItemText primary="Add" secondary="Add a new item" />
+                </ListItemButton>
+              </List>
             ) : typeof value === "string" ? (
               <TextField
                 type="text"
@@ -202,23 +269,27 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
               ""
             )}
           </Grid>
-          <Grid item>
-            <IconButton
-              disabled={valueChanged === false}
-              onClick={() => {
-                handleChanged(keyIn, value);
-              }}
-              sx={{ margin: theme.spacing(1) }}
-            >
-              <Icon
-                id="save"
-                title="Save"
-                size={1}
-                path={mdiContentSaveOutline}
-                style={{ opacity: valueChanged ? 1 : 0.25 }}
-              />
-            </IconButton>
-          </Grid>
+          {isList ? (
+            ""
+          ) : (
+            <Grid item>
+              <IconButton
+                disabled={valueChanged === false}
+                onClick={() => {
+                  handleChanged(keyIn, value);
+                }}
+                sx={{ margin: theme.spacing(1) }}
+              >
+                <Icon
+                  id="save"
+                  title="Save"
+                  size={1}
+                  path={mdiContentSaveOutline}
+                  style={{ opacity: valueChanged ? 1 : 0.25 }}
+                />
+              </IconButton>
+            </Grid>
+          )}
         </Grid>
       </ListItemSecondaryAction>
     </ListItem>

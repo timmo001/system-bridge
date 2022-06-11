@@ -10,6 +10,7 @@ from appdirs import AppDirs
 from cryptography.fernet import Fernet
 
 from systembridgeshared.base import Base
+from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
     COLUMN_KEY,
     COLUMN_TIMESTAMP,
@@ -85,26 +86,25 @@ class Settings(Base):
 
     def get_all(self) -> dict:
         """Get settings"""
-        return self._database.read_table(TABLE_SETTINGS).to_dict(orient="records")
+        records = self._database.read_table(TABLE_SETTINGS).to_dict(orient="records")
+        return {
+            record["key"]: convert_string_to_correct_type(record["value"])
+            for record in records
+        }
 
     def get(
         self,
         key: str,
-    ) -> bool | float | int | str | None:
+    ) -> bool | float | int | str | list | dict | None:
         """Get setting"""
         record = self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
             orient="records"
         )
-        if record and len(record) > 0:
-            value = record[0]["value"]
-            if value == "True":
-                return True
-            if value == "False":
-                return False
-            if value == "None":
-                return None
-            return value
-        return None
+        return (
+            convert_string_to_correct_type(record[0]["value"])
+            if record and len(record) > 0
+            else None
+        )
 
     def get_secret(
         self,
@@ -123,10 +123,10 @@ class Settings(Base):
     def set(
         self,
         key: str,
-        value: any,
+        value: bool | float | int | str | list | dict | None,
     ) -> None:
         """Set setting"""
-        self._database.write(TABLE_SETTINGS, key, str(value))
+        self._database.write(TABLE_SETTINGS, key, value)
 
     def set_secret(
         self,

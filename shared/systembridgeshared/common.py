@@ -1,6 +1,7 @@
 """System Bridge Shared: Common"""
 from __future__ import annotations
 
+import json
 import os
 import re
 
@@ -24,17 +25,18 @@ def camel_to_snake(name):
 
 def convert_string_to_correct_type(
     value: str,
-) -> str | int | float | bool | list | None:
+) -> str | int | float | bool | list | dict | None:
     """Convert string to correct data type"""
     try:
         if value.startswith("'") and value.endswith("'"):
             return convert_string_to_correct_type(value[1:-1])
-        if value == "[]":
-            return []
-        if value.startswith("[") and value.endswith("]"):
-            return [
-                convert_string_to_correct_type(item) for item in value[1:-1].split(", ")
-            ]
+        if (value.startswith("[") and value.endswith("]")) or (
+            value.startswith("{") and value.endswith("}")
+        ):
+            try:
+                json.loads(value)
+            except json.JSONDecodeError:
+                return value
         value_lower = value.lower()
         if value_lower in ("none", "null", "nan"):
             return None
