@@ -183,55 +183,53 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                   }
                 />
               </FormControl>
-            ) : typeof value === "string" && isList ? (
+            ) : Array.isArray(value) && isList ? (
               <List sx={{ width: 720 }}>
-                {JSON.parse(value).map(
-                  (item: { name: string; value: string }) => (
-                    <ListItem key={item.name}>
-                      <ListItemText primary={item.name} />
-                      <ListItemSecondaryAction>
-                        <Grid
-                          container
-                          alignItems="center"
-                          justifyContent="flex-end"
-                        >
-                          <Grid item>
-                            <TextField
-                              id="name"
-                              label="Name"
-                              variant="outlined"
-                              onChange={handleInputChanged}
-                              sx={{ width: 210 }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              id="value"
-                              label="Value"
-                              variant="outlined"
-                              onChange={handleInputChanged}
-                              sx={{ width: 210 }}
-                            />
-                          </Grid>
-                        </Grid>
-
-                        <IconButton
-                          aria-label="Remove"
-                          onClick={() => handleChanged(keyIn, item)}
-                          edge="end"
-                          size="small"
-                        >
-                          <Icon
-                            id="remove-item"
-                            title="Remove"
-                            size={0.8}
-                            path={mdiContentSaveOutline}
+                {value.map((item: { name: string; value: string }) => (
+                  <ListItem key={item.name}>
+                    <ListItemText primary={item.name} />
+                    <ListItemSecondaryAction>
+                      <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
+                        <Grid item>
+                          <TextField
+                            id="name"
+                            label="Name"
+                            variant="outlined"
+                            onChange={handleInputChanged}
+                            sx={{ width: 210 }}
                           />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  )
-                )}
+                        </Grid>
+                        <Grid item>
+                          <TextField
+                            id="value"
+                            label="Value"
+                            variant="outlined"
+                            onChange={handleInputChanged}
+                            sx={{ width: 210 }}
+                          />
+                        </Grid>
+                      </Grid>
+
+                      <IconButton
+                        aria-label="Remove"
+                        onClick={() => handleChanged(keyIn, item)}
+                        edge="end"
+                        size="small"
+                      >
+                        <Icon
+                          id="remove-item"
+                          title="Remove"
+                          size={0.8}
+                          path={mdiContentSaveOutline}
+                        />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
                 <ListItemButton
                   sx={{ width: "100%" }}
                   onClick={() =>

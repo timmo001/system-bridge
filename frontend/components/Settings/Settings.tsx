@@ -66,7 +66,7 @@ function Settings(): ReactElement {
     (event: Event) => {
       console.log("Event:", event);
       if (event.type === "SETTINGS_RESULT") {
-        console.log("Settings result:", event.data);
+        console.log("Settings result data:", event.data);
         let newSettings: SettingsObject = {};
         console.log("settingsMap:", settingsMap);
         const settingsKeys = Object.keys(settingsMap);
