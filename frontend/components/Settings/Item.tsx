@@ -2,7 +2,9 @@ import React, { ChangeEvent, ReactElement, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   Autocomplete,
+  Button,
   Dialog,
+  DialogActions,
   DialogContent,
   FormControl,
   Grid,
@@ -245,11 +247,19 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
         </ListItemSecondaryAction>
       </ItemContainer>
       {Array.isArray(value) ? (
-        <Dialog open={open} onClose={() => setOpen(false)}>
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          PaperProps={{
+            style: {
+              background: theme.palette.background.paper,
+            },
+          }}
+        >
           <DialogContent>
             <List sx={{ width: 540 }}>
               {value.map((item: any, key: number) => (
-                <ListItem key={item.name}>
+                <ListItem key={key}>
                   <ListItemText primary={item.name} />
                   <Grid
                     container
@@ -262,7 +272,12 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                         id="name"
                         label="Name"
                         variant="outlined"
-                        onChange={handleInputChanged}
+                        onChange={(event) => {
+                          const newValue = [...value];
+                          if (newValue && newValue[key] !== null)
+                            newValue[key].name = event.target.value;
+                          setValue(newValue);
+                        }}
                         sx={{ width: 210 }}
                       />
                     </Grid>
@@ -280,8 +295,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                   <IconButton
                     aria-label="Remove"
                     onClick={() => {
-                      item.splice(key, 1);
-                      handleChanged(keyIn, item);
+                      setValue(value.splice(key, 1));
                     }}
                     edge="end"
                     size="small"
@@ -299,7 +313,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                 sx={{ width: "100%" }}
                 onClick={() => {
                   value.push({ name: "", value: "" });
-                  handleChanged(keyIn, value);
+                  setValue(value);
                 }}
               >
                 <ListItemIcon>
@@ -309,6 +323,25 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
               </ListItemButton>
             </List>
           </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpen(false)}
+              color="primary"
+              variant="outlined"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setOpen(false);
+                handleChanged(keyIn, value);
+              }}
+              color="primary"
+              variant="outlined"
+            >
+              Save
+            </Button>
+          </DialogActions>
         </Dialog>
       ) : (
         ""
