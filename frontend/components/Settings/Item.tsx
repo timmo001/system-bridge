@@ -253,8 +253,9 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
             listIn={value}
             open={open}
             setOpen={setOpen}
-            handleChanged={(value: Array<SettingsObject>) => {
-              handleChanged(keyIn, value);
+            handleChanged={(newValue: Array<SettingsValue>) => {
+              setValue(newValue);
+              handleChanged(keyIn, newValue);
             }}
           />
         </>

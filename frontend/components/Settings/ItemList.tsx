@@ -16,21 +16,20 @@ import {
   TextField,
   useMediaQuery,
   useTheme,
-  useThemeProps,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
+import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
 import _ from "lodash";
 
-import { SettingsObject } from "assets/entities/settings.entity";
-import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
 import { SettingDescription } from "./Settings";
+import { SettingsValue } from "assets/entities/settings.entity";
 
 interface ItemListProps {
   setting: SettingDescription;
   listIn: Array<SettingsValue>;
   open: boolean;
   setOpen: (open: boolean) => void;
-  handleChanged: (list: Array<SettingsObject>) => void;
+  handleChanged: (list: Array<SettingsValue>) => void;
 }
 
 function ItemList({
@@ -40,7 +39,7 @@ function ItemList({
   setOpen,
   handleChanged,
 }: ItemListProps): ReactElement {
-  const [list, setList] = useState<Array<SettingsObject>>(listIn);
+  const [list, setList] = useState<Array<SettingsValue>>([listIn]);
 
   const { name, description, icon }: SettingDescription = setting;
 
