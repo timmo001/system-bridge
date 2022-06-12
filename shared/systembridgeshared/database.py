@@ -172,7 +172,7 @@ class Database(Base):
             data_timestamp = time()
 
         # Convert list or dict to JSON
-        if isinstance(data_value, list) or isinstance(data_value, dict):
+        if isinstance(data_value, (dict, list)):
             data_value = json.dumps(data_value)
         else:
             data_value = str(data_value)
@@ -206,7 +206,7 @@ class Database(Base):
             data_timestamp = time()
 
         # Convert list or dict to JSON
-        if isinstance(data_value, list) or isinstance(data_value, dict):
+        if isinstance(data_value, (dict, list)):
             data_value = json.dumps(data_value)
         else:
             data_value = str(data_value)
