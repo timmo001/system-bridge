@@ -1,9 +1,11 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   IconButton,
   List,
@@ -12,14 +14,19 @@ import {
   ListItemIcon,
   ListItemText,
   TextField,
+  useMediaQuery,
   useTheme,
+  useThemeProps,
 } from "@mui/material";
 import { Icon } from "@mdi/react";
+import _ from "lodash";
 
 import { SettingsObject } from "assets/entities/settings.entity";
 import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
+import { SettingDescription } from "./Settings";
 
 interface ItemListProps {
+  setting: SettingDescription;
   listIn: Array<SettingsObject>;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -27,6 +34,7 @@ interface ItemListProps {
 }
 
 function ItemList({
+  setting,
   listIn,
   open,
   setOpen,
@@ -34,27 +42,49 @@ function ItemList({
 }: ItemListProps): ReactElement {
   const [list, setList] = useState<Array<SettingsObject>>(listIn);
 
-  console.log("ItemList:", list);
+  const { name, description, icon }: SettingDescription = setting;
+
+  useEffect(() => {
+    if (!open) setList(listIn);
+  }, [listIn, open]);
 
   const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
     <Dialog
+      fullScreen={fullScreen}
+      fullWidth
+      maxWidth="lg"
       open={open}
-      onClose={() => setOpen(false)}
+      scroll="paper"
       PaperProps={{
         style: {
           background: theme.palette.background.paper,
         },
       }}
     >
+      <DialogTitle>
+        <Icon
+          id="copy-to-clipboard"
+          title="Copy to clipboard"
+          size={0.7}
+          path={icon}
+          style={{ marginRight: theme.spacing(1) }}
+        />
+        {name}
+      </DialogTitle>
+      <DialogContentText sx={{ margin: theme.spacing(0, 3) }}>
+        {description}
+      </DialogContentText>
       <DialogContent>
-        <List sx={{ width: 540 }}>
+        <List>
           {list.map((item: any, key: number) => (
             <ListItem key={key}>
               <Grid container alignItems="center">
                 <Grid
                   item
-                  xs
+                  xs={4}
                   sx={{
                     marginRight: theme.spacing(1),
                   }}
@@ -66,7 +96,7 @@ function ItemList({
                     variant="outlined"
                     value={item.name}
                     onChange={(event) => {
-                      const newList = [...list];
+                      const newList = _.cloneDeep(list);
                       if (newList && newList[key] !== null)
                         newList[key].name = event.target.value;
                       setList(newList);
@@ -87,36 +117,37 @@ function ItemList({
                     variant="outlined"
                     value={item.value}
                     onChange={(event) => {
-                      const newList = [...list];
+                      const newList = _.cloneDeep(list);
                       if (newList && newList[key] !== null)
                         newList[key].value = event.target.value;
                       setList(newList);
                     }}
-                    sx={{ width: 210 }}
                   />
                 </Grid>
-              </Grid>
-              <Grid item>
-                <IconButton
-                  aria-label="Remove"
-                  size="large"
-                  onClick={() => {
-                    setList(list.splice(key, 1));
-                  }}
-                >
-                  <Icon
-                    id="remove-item"
-                    title="Remove"
-                    size={0.8}
-                    path={mdiMinusBoxOutline}
-                  />
-                </IconButton>
+                <Grid item>
+                  <IconButton
+                    aria-label="Remove"
+                    size="large"
+                    onClick={() => {
+                      const newList = _.cloneDeep(list);
+                      newList.splice(key, 1);
+                      setList(newList);
+                    }}
+                  >
+                    <Icon
+                      id="remove-item"
+                      title="Remove"
+                      size={0.8}
+                      path={mdiMinusBoxOutline}
+                    />
+                  </IconButton>
+                </Grid>
               </Grid>
             </ListItem>
           ))}
           <ListItemButton
             onClick={() => {
-              const newList = [...list];
+              const newList = _.cloneDeep(list);
               newList.push({ name: "", value: "" });
               setList(newList);
             }}

@@ -249,6 +249,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
       {Array.isArray(value) ? (
         <>
           <ItemList
+            setting={settingsMap[keyIn]}
             listIn={value}
             open={open}
             setOpen={setOpen}
