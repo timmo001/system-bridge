@@ -124,7 +124,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                     checked={value}
                     onChange={handleCheckedChanged}
                   />
-                ) : typeof value === "string" && keyIn === "api_key" ? (
+                ) : typeof valueIn === "string" && keyIn === "api_key" ? (
                   <FormControl fullWidth variant="outlined">
                     <OutlinedInput
                       type="text"
@@ -148,7 +148,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                           </IconButton>
                           <IconButton
                             aria-label="Copy to clipboard"
-                            onClick={() => handleCopyToClipboard(value)}
+                            onClick={() => handleCopyToClipboard(String(value))}
                             size="large"
                             sx={{ margin: theme.spacing(-1, -0.5) }}
                           >
@@ -163,7 +163,9 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                       }
                     />
                   </FormControl>
-                ) : typeof value === "string" && keyIn === "log_level" ? (
+                ) : typeof valueIn === "string" &&
+                  typeof value === "string" &&
+                  keyIn === "log_level" ? (
                   <Autocomplete
                     id={keyIn}
                     options={["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]}
@@ -174,7 +176,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                     sx={{ width: 210 }}
                     value={value}
                   />
-                ) : typeof value === "string" && isPassword ? (
+                ) : typeof valueIn === "string" && isPassword ? (
                   <FormControl variant="outlined">
                     <OutlinedInput
                       type={showPassword ? "text" : "password"}
@@ -199,7 +201,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                       }
                     />
                   </FormControl>
-                ) : typeof value === "string" ? (
+                ) : typeof valueIn === "string" ? (
                   <TextField
                     type="text"
                     defaultValue={value}
@@ -207,9 +209,9 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                     onChange={handleInputChanged}
                     variant="outlined"
                   />
-                ) : typeof value === "number" ? (
+                ) : typeof valueIn === "number" ? (
                   <TextField
-                    error={minimum ? value < minimum : false}
+                    error={minimum ? Number(value) < minimum : false}
                     type="number"
                     disabled={containerDisabled}
                     inputProps={{ minimum: minimum }}
