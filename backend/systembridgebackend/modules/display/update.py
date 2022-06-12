@@ -90,4 +90,4 @@ class DisplayUpdate(ModuleUpdateBase):
                     self.update_resolution_vertical(display_key),
                 ]
             )
-        self._database.write("display", "displays", str(display_list))
+        self._database.write("display", "displays", display_list)

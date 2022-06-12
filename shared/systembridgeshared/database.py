@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from collections.abc import Mapping
+import json
 import os
 from sqlite3 import OperationalError, connect
 from time import time
@@ -163,18 +164,25 @@ class Database(Base):
         self,
         table_name: str,
         data_key: str,
-        data_value: bool | float | int | str | list | None,
+        data_value: bool | float | int | str | list | dict | None,
         data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
             data_timestamp = time()
+
+        # Convert list or dict to JSON
+        if isinstance(data_value, (dict, list)):
+            data_value = json.dumps(data_value)
+        else:
+            data_value = str(data_value)
+
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{data_key}", "{data_value}", {data_timestamp})
+             VALUES ('{data_key}', '{data_value}', {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = "{data_key}"
+             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = '{data_key}'
             """.replace(
                 "\n", ""
             ).replace(
@@ -190,20 +198,27 @@ class Database(Base):
         data_name: str,
         data_hardware_type: str,
         data_hardware_name: str,
-        data_value: str | None,
+        data_value: bool | float | int | str | list | dict | None,
         data_timestamp: float | None = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
             data_timestamp = time()
+
+        # Convert list or dict to JSON
+        if isinstance(data_value, (dict, list)):
+            data_value = json.dumps(data_value)
+        else:
+            data_value = str(data_value)
+
         self.execute_sql(
             f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_TYPE}, {COLUMN_NAME},
              {COLUMN_HARDWARE_TYPE}, {COLUMN_HARDWARE_NAME}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ("{data_key}", "{data_type}", "{data_name}", "{data_hardware_type}",
-             "{data_hardware_name}", "{data_value}", {data_timestamp})
+             VALUES ('{data_key}', '{data_type}', '{data_name}', '{data_hardware_type}',
+             '{data_hardware_name}', '{data_value}', {data_timestamp})
              ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = "{data_value}", {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = "{data_key}"
+             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
+             WHERE {COLUMN_KEY} = '{data_key}'
             """.replace(
                 "\n", ""
             ).replace(

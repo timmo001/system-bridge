@@ -8,42 +8,74 @@ import aiofiles
 from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
+from systembridgeshared.const import SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+from systembridgeshared.settings import Settings
 
 QUERY_BASE = "base"
 QUERY_PATH = "path"
 QUERY_FILENAME = "filename"
 
-BASE_DIRECTORIES = {
-    "documents": storagepath.get_documents_dir(),
-    "downloads": storagepath.get_downloads_dir(),
-    "home": storagepath.get_home_dir(),
-    "music": storagepath.get_music_dir(),
-    "pictures": storagepath.get_pictures_dir(),
-    "videos": storagepath.get_videos_dir(),
-}
 
-
-def get_directories() -> list[dict]:
+def get_directories(settings: Settings) -> list[dict]:
     """Get directories"""
-    directories = []
-    for key, value in BASE_DIRECTORIES.items():
-        directories.append(
-            {
-                "key": key,
-                "path": value,
-            }
-        )
+    directories = [
+        {
+            "key": "documents",
+            "path": storagepath.get_documents_dir(),
+        },
+        {
+            "key": "downloads",
+            "path": storagepath.get_downloads_dir(),
+        },
+        {
+            "key": "home",
+            "path": storagepath.get_home_dir(),
+        },
+        {
+            "key": "music",
+            "path": storagepath.get_music_dir(),
+        },
+        {
+            "key": "pictures",
+            "path": storagepath.get_pictures_dir(),
+        },
+        {
+            "key": "videos",
+            "path": storagepath.get_videos_dir(),
+        },
+    ]
+
+    additional_directories = settings.get(SETTING_ADDITIONAL_MEDIA_DIRECTORIES)
+    if additional_directories is not None and isinstance(additional_directories, list):
+        for directory in additional_directories:
+            directories.append(
+                {
+                    "key": directory["name"],
+                    "path": directory["value"],
+                }
+            )
+
     return directories
 
 
 def get_files(
+    settings: Settings,
     base_path: str,
     path: str,
 ) -> list[dict]:
     """Get files from path"""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == base_path:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return []
+
     files_info = []
     for filename in os.listdir(path):
-        file_info = get_file(BASE_DIRECTORIES[base_path], os.path.join(path, filename))
+        file_info = get_file(root_path, os.path.join(path, filename))
         if file_info is not None:
             files_info.append(file_info)
 
@@ -88,17 +120,19 @@ async def get_file_data(
 
 async def handler_media_directories(
     _: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media directories"""
     return json(
         {
-            "directories": get_directories(),
+            "directories": get_directories(settings),
         }
     )
 
 
 async def handler_media_files(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media files"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -106,12 +140,21 @@ async def handler_media_files(
             {"message": "No base specified"},
             status=400,
         )
+
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return json(
+            {"message": "Cannot find base", "base": query_base},
+            status=404,
+        )
+
     query_path = request.args.get(QUERY_PATH)
-    path = (
-        os.path.join(BASE_DIRECTORIES[query_base], query_path)
-        if query_path
-        else BASE_DIRECTORIES[query_base]
-    )
+    path = os.path.join(root_path, query_path) if query_path else root_path
     if not os.path.exists(path):
         return json(
             {"message": "Cannot find path", "path": path},
@@ -125,7 +168,7 @@ async def handler_media_files(
 
     return json(
         {
-            "files": get_files(query_base, path),
+            "files": get_files(settings, query_base, path),
             "path": path,
         }
     )
@@ -133,6 +176,7 @@ async def handler_media_files(
 
 async def handler_media_file(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -140,12 +184,25 @@ async def handler_media_file(
             {"message": "No base specified"},
             status=400,
         )
+
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return json(
+            {"message": "Cannot find base", "base": query_base},
+            status=404,
+        )
+
     if not (query_path := request.args.get(QUERY_PATH)):
         return json(
             {"message": "No path specified"},
             status=400,
         )
-    path = os.path.join(BASE_DIRECTORIES[query_base], query_path)
+    path = os.path.join(root_path, query_path)
     if not os.path.exists(path):
         return json(
             {"message": "Cannot find path", "path": path},
@@ -157,11 +214,12 @@ async def handler_media_file(
             status=400,
         )
 
-    return json(get_file(BASE_DIRECTORIES[query_base], path))
+    return json(get_file(root_path, path))
 
 
 async def handler_media_file_data(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -169,9 +227,21 @@ async def handler_media_file_data(
             {"message": "No base specified"},
             status=400,
         )
+
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return json(
+            {"message": "Cannot find base", "base": query_base},
+            status=404,
+        )
+
     query_path = request.args.get(QUERY_PATH)
-    path = os.path.join(BASE_DIRECTORIES[query_base], query_path)
-    if not path:
+    if not (path := os.path.join(root_path, query_path)):
         return json(
             {"message": "Cannot find path", "path": path},
             status=400,
@@ -192,6 +262,7 @@ async def handler_media_file_data(
 
 async def handler_media_file_write(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file write requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -199,6 +270,19 @@ async def handler_media_file_write(
             {"message": "No base specified"},
             status=400,
         )
+
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return json(
+            {"message": "Cannot find base", "base": query_base},
+            status=404,
+        )
+
     if not (query_path := request.args.get(QUERY_PATH)):
         return json(
             {"message": "No path specified"},
@@ -209,8 +293,7 @@ async def handler_media_file_write(
             {"message": "No filename specified"},
             status=400,
         )
-    path = os.path.join(BASE_DIRECTORIES[query_base], query_path)
-    if not path:
+    if not (path := os.path.join(root_path, query_path)):
         return json(
             {"message": "Cannot find path", "path": path},
             status=400,

@@ -1,7 +1,12 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
-import { mdiProtocol, mdiRocketLaunch, mdiTextBoxOutline } from "@mdi/js";
+import {
+  mdiFolderMultipleOutline,
+  mdiProtocol,
+  mdiRocketLaunch,
+  mdiTextBoxOutline,
+} from "@mdi/js";
 
 import { Event } from "assets/entities/event.entity";
 import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
@@ -22,6 +27,7 @@ export interface SettingDescription {
   description: string;
   icon: string;
   containerDisabled?: boolean;
+  isList?: boolean;
   isPassword?: boolean;
   minimum?: number;
 }
@@ -42,6 +48,12 @@ export const settingsMap: { [key: string]: SettingDescription } = {
     description: "Port for the API and WebSocket",
     icon: mdiProtocol,
   },
+  additional_media_directories: {
+    name: "Additional Media Directories",
+    description: "Additional media directories for the media endpoint",
+    icon: mdiFolderMultipleOutline,
+    isList: true,
+  },
 };
 
 function Settings(): ReactElement {
@@ -54,7 +66,7 @@ function Settings(): ReactElement {
     (event: Event) => {
       console.log("Event:", event);
       if (event.type === "SETTINGS_RESULT") {
-        console.log("Settings result:", event.data);
+        console.log("Settings result data:", event.data);
         let newSettings: SettingsObject = {};
         console.log("settingsMap:", settingsMap);
         const settingsKeys = Object.keys(settingsMap);
@@ -63,11 +75,12 @@ function Settings(): ReactElement {
             settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1
           )
           .forEach((s: SettingResult) => {
-            if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
-              newSettings[s.key] = Number(s.value);
-            else if (s.value === "True" || s.value === "False")
-              newSettings[s.key] = s.value === "True";
-            else newSettings[s.key] = s.value;
+            // if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
+            //   newSettings[s.key] = Number(s.value);
+            // else if (s.value === "True" || s.value === "False")
+            //   newSettings[s.key] = s.value === "True";
+            // else newSettings[s.key] = s.value;
+            newSettings[s.key] = s.value;
           });
         console.log("Settings:", newSettings);
         setSettings(newSettings);
