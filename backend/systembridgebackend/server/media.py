@@ -8,13 +8,15 @@ import aiofiles
 from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
+from systembridgeshared.const import SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+from systembridgeshared.settings import Settings
 
 QUERY_BASE = "base"
 QUERY_PATH = "path"
 QUERY_FILENAME = "filename"
 
 
-def get_directories() -> list[dict]:
+def get_directories(settings: Settings) -> list[dict]:
     """Get directories"""
     directories = [
         {
@@ -43,16 +45,27 @@ def get_directories() -> list[dict]:
         },
     ]
 
+    additional_directories = settings.get(SETTING_ADDITIONAL_MEDIA_DIRECTORIES)
+    if additional_directories is not None and isinstance(additional_directories, list):
+        for directory in additional_directories:
+            directories.append(
+                {
+                    "key": directory["name"],
+                    "path": directory["value"],
+                }
+            )
+
     return directories
 
 
 def get_files(
+    settings: Settings,
     base_path: str,
     path: str,
 ) -> list[dict]:
     """Get files from path"""
     root_path = None
-    for item in get_directories():
+    for item in get_directories(settings):
         if item["key"] == base_path:
             root_path = item["path"]
             break
@@ -107,17 +120,19 @@ async def get_file_data(
 
 async def handler_media_directories(
     _: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media directories"""
     return json(
         {
-            "directories": get_directories(),
+            "directories": get_directories(settings),
         }
     )
 
 
 async def handler_media_files(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media files"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -127,7 +142,7 @@ async def handler_media_files(
         )
 
     root_path = None
-    for item in get_directories():
+    for item in get_directories(settings):
         if item["key"] == query_base:
             root_path = item["path"]
             break
@@ -153,7 +168,7 @@ async def handler_media_files(
 
     return json(
         {
-            "files": get_files(query_base, path),
+            "files": get_files(settings, query_base, path),
             "path": path,
         }
     )
@@ -161,6 +176,7 @@ async def handler_media_files(
 
 async def handler_media_file(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -170,7 +186,7 @@ async def handler_media_file(
         )
 
     root_path = None
-    for item in get_directories():
+    for item in get_directories(settings):
         if item["key"] == query_base:
             root_path = item["path"]
             break
@@ -203,6 +219,7 @@ async def handler_media_file(
 
 async def handler_media_file_data(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -212,7 +229,7 @@ async def handler_media_file_data(
         )
 
     root_path = None
-    for item in get_directories():
+    for item in get_directories(settings):
         if item["key"] == query_base:
             root_path = item["path"]
             break
@@ -245,6 +262,7 @@ async def handler_media_file_data(
 
 async def handler_media_file_write(
     request: Request,
+    settings: Settings,
 ) -> HTTPResponse:
     """Handler for media file write requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
@@ -254,7 +272,7 @@ async def handler_media_file_write(
         )
 
     root_path = None
-    for item in get_directories():
+    for item in get_directories(settings):
         if item["key"] == query_base:
             root_path = item["path"]
             break

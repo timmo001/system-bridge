@@ -141,7 +141,7 @@ class Server(Base):
             function: Callable,
         ) -> HTTPResponse:
             """Generic handler"""
-            return await function(request)
+            return await function(request, self._settings)
 
         async def _handler_websocket(
             _: Request,

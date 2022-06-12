@@ -436,7 +436,7 @@ class WebSocketHandler(Base):
                     dumps(
                         {
                             EVENT_TYPE: TYPE_DIRECTORIES,
-                            EVENT_DIRECTORIES: get_directories(),
+                            EVENT_DIRECTORIES: get_directories(self._settings),
                         }
                     )
                 )
@@ -455,7 +455,7 @@ class WebSocketHandler(Base):
                     continue
 
                 root_path = None
-                for item in get_directories():
+                for item in get_directories(self._settings):
                     if item["key"] == data[EVENT_BASE]:
                         root_path = item["path"]
                         break
@@ -518,7 +518,9 @@ class WebSocketHandler(Base):
                     dumps(
                         {
                             EVENT_TYPE: TYPE_FILES,
-                            EVENT_FILES: get_files(data[EVENT_BASE], path),
+                            EVENT_FILES: get_files(
+                                self._settings, data[EVENT_BASE], path
+                            ),
                             EVENT_PATH: path,
                         }
                     )
@@ -538,7 +540,7 @@ class WebSocketHandler(Base):
                     continue
 
                 root_path = None
-                for item in get_directories():
+                for item in get_directories(self._settings):
                     if item["key"] == data[EVENT_BASE]:
                         root_path = item["path"]
                         break
