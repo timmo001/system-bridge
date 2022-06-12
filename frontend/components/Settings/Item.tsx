@@ -29,6 +29,7 @@ import { handleCopyToClipboard } from "components/Common/Utils";
 import { SettingDescription, settingsMap } from "components/Settings/Settings";
 import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
 import ItemList from "components/Settings/ItemList";
+import { instanceOfNameValue, NameValue } from "assets/entities/types.entity";
 
 interface ItemProps {
   keyIn: string;
@@ -248,14 +249,14 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
           </ListItemSecondaryAction>
         </>
       </ItemContainer>
-      {isList && Array.isArray(value) ? (
+      {isList && Array.isArray(value) && instanceOfNameValue(value[0]) ? (
         <>
           <ItemList
             setting={settingsMap[keyIn]}
-            listIn={value}
+            listIn={value as unknown as Array<NameValue>}
             open={open}
             setOpen={setOpen}
-            handleChanged={(newValue: Array<SettingsValue>) => {
+            handleChanged={(newValue: Array<NameValue>) => {
               setValue(newValue);
               handleChanged(keyIn, newValue);
             }}

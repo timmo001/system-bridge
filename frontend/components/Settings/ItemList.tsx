@@ -21,15 +21,15 @@ import { Icon } from "@mdi/react";
 import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
 import _ from "lodash";
 
-import { SettingDescription } from "./Settings";
-import { SettingsValue } from "assets/entities/settings.entity";
+import { NameValue } from "assets/entities/types.entity";
+import { SettingDescription } from "components/Settings/Settings";
 
 interface ItemListProps {
   setting: SettingDescription;
-  listIn: Array<SettingsValue>;
+  listIn: Array<NameValue>;
   open: boolean;
   setOpen: (open: boolean) => void;
-  handleChanged: (list: Array<SettingsValue>) => void;
+  handleChanged: (list: Array<NameValue>) => void;
 }
 
 function ItemList({
@@ -39,12 +39,12 @@ function ItemList({
   setOpen,
   handleChanged,
 }: ItemListProps): ReactElement {
-  const [list, setList] = useState<Array<SettingsValue>>([listIn]);
+  const [list, setList] = useState<Array<NameValue>>([]);
 
   const { name, description, icon }: SettingDescription = setting;
 
   useEffect(() => {
-    if (!open) setList(listIn);
+    if (!open && listIn) setList(listIn);
   }, [listIn, open]);
 
   const theme = useTheme();
@@ -95,10 +95,11 @@ function ItemList({
                     variant="outlined"
                     value={item.name}
                     onChange={(event) => {
-                      const newList = _.cloneDeep(list);
-                      if (newList && newList[key] !== null)
+                      const newList: Array<NameValue> = _.cloneDeep(list);
+                      if (key && newList && newList[key]) {
                         newList[key].name = event.target.value;
-                      setList(newList);
+                        setList(newList);
+                      }
                     }}
                   />
                 </Grid>
@@ -117,9 +118,10 @@ function ItemList({
                     value={item.value}
                     onChange={(event) => {
                       const newList = _.cloneDeep(list);
-                      if (newList && newList[key] !== null)
+                      if (key && newList && newList[key]) {
                         newList[key].value = event.target.value;
-                      setList(newList);
+                        setList(newList);
+                      }
                     }}
                   />
                 </Grid>
@@ -171,7 +173,11 @@ function ItemList({
         <Button
           onClick={() => {
             setOpen(false);
-            handleChanged(list);
+            handleChanged(
+              list.sort((a: NameValue, b: NameValue) =>
+                a.name.localeCompare(b.name)
+              )
+            );
           }}
           color="primary"
           variant="outlined"
