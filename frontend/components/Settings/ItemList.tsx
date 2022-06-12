@@ -27,7 +27,7 @@ import { SettingDescription } from "./Settings";
 
 interface ItemListProps {
   setting: SettingDescription;
-  listIn: Array<SettingsObject>;
+  listIn: Array<SettingsValue>;
   open: boolean;
   setOpen: (open: boolean) => void;
   handleChanged: (list: Array<SettingsObject>) => void;

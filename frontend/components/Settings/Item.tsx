@@ -246,7 +246,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
           </ListItemSecondaryAction>
         </>
       </ItemContainer>
-      {Array.isArray(value) ? (
+      {isList && Array.isArray(value) ? (
         <>
           <ItemList
             setting={settingsMap[keyIn]}
