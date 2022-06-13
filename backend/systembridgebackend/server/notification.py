@@ -22,9 +22,9 @@ def send_notification(
         app_name=app_name,
         app_icon=app_icon
         if app_icon is not None
-        else "./resources/system-bridge-circle.ico"
+        else os.path.join(os.path.dirname(__file__), "../icon.ico")
         if os.name == "nt"
-        else "./resources/system-bridge-circle.png",
+        else os.path.join(os.path.dirname(__file__), "../icon.png"),
         timeout=timeout,
     )
 
