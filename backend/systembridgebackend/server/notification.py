@@ -1,9 +1,32 @@
 """System Bridge: Server Handler - Notification"""
+from __future__ import annotations
+
 import os
 
 from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+
+
+def send_notification(
+    message: str,
+    title: str | None = None,
+    app_name: str = "System Bridge",
+    app_icon: str | None = None,
+    timeout: int = 5,
+) -> None:
+    """Send a notification."""
+    notification.notify(
+        title=title,
+        message=message,
+        app_name=app_name,
+        app_icon=app_icon
+        if app_icon is not None
+        else "./resources/system-bridge-circle.ico"
+        if os.name == "nt"
+        else "./resources/system-bridge-circle.png",
+        timeout=timeout,
+    )
 
 
 async def handler_notification(
@@ -26,18 +49,12 @@ async def handler_notification(
             status=400,
         )
 
-    notification.notify(
-        title=request.json["title"] if "title" in request.json else "",
+    send_notification(
         message=request.json["message"],
-        app_name=request.json["app_name"]
-        if "app_name" in request.json
-        else "System Bridge",
-        app_icon=request.json["icon"]
-        if "icon" in request.json
-        else "./resources/system-bridge-circle.ico"
-        if os.name == "nt"
-        else "./resources/system-bridge-circle.png",
-        timeout=request.json["timeout"] if "timeout" in request.json else 10,
+        title=request.json.get("title"),
+        app_name=request.json.get("app_name"),
+        app_icon=request.json.get("app_icon"),
+        timeout=request.json.get("timeout"),
     )
 
     return json(
