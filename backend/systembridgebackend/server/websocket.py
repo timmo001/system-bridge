@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
+    EVENT_APP_ICON,
+    EVENT_APP_NAME,
     EVENT_BASE,
     EVENT_DATA,
     EVENT_DIRECTORIES,
@@ -19,6 +21,8 @@ from systembridgeshared.const import (
     EVENT_PATH,
     EVENT_SETTING,
     EVENT_SUBTYPE,
+    EVENT_TIMEOUT,
+    EVENT_TITLE,
     EVENT_TYPE,
     EVENT_VALUE,
     EVENT_VERSIONS,
@@ -33,6 +37,7 @@ from systembridgeshared.const import (
     SUBTYPE_MISSING_API_KEY,
     SUBTYPE_MISSING_BASE,
     SUBTYPE_MISSING_KEY,
+    SUBTYPE_MISSING_MESSAGE,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_PATH,
     SUBTYPE_MISSING_PATH_URL,
@@ -61,6 +66,8 @@ from systembridgeshared.const import (
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_KEYBOARD_TEXT_SENT,
+    TYPE_NOTIFICATION,
+    TYPE_NOTIFICATION_SENT,
     TYPE_OPEN,
     TYPE_OPENED,
     TYPE_POWER_HIBERNATE,
@@ -90,6 +97,7 @@ from systembridgebackend.autostart import autostart_disable, autostart_enable
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
 from systembridgebackend.server.media import get_directories, get_file, get_files
+from systembridgebackend.server.notification import send_notification
 from systembridgebackend.server.open import open_path, open_url
 from systembridgebackend.server.power import (
     hibernate,
@@ -280,6 +288,37 @@ class WebSocketHandler(Base):
                             EVENT_MESSAGE: "Key pressed",
                             EVENT_ID: listener_id,
                             "text": data["text"],
+                        }
+                    )
+                )
+            elif data[EVENT_EVENT] == TYPE_NOTIFICATION:
+                if "message" not in data:
+                    self._logger.warning("No message provided")
+                    await self._websocket.send(
+                        dumps(
+                            {
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_MISSING_MESSAGE,
+                                EVENT_MESSAGE: "No message provided",
+                            }
+                        )
+                    )
+                    continue
+
+                send_notification(
+                    data[EVENT_MESSAGE],
+                    data.get(EVENT_TITLE),
+                    data.get(EVENT_APP_NAME),
+                    data.get(EVENT_APP_ICON),
+                    data.get(EVENT_TIMEOUT),
+                )
+
+                await self._websocket.send(
+                    dumps(
+                        {
+                            EVENT_TYPE: TYPE_NOTIFICATION_SENT,
+                            EVENT_MESSAGE: "Notification sent",
+                            EVENT_ID: listener_id,
                         }
                     )
                 )

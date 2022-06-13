@@ -10,6 +10,8 @@ import aiohttp
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_API_KEY,
+    EVENT_APP_ICON,
+    EVENT_APP_NAME,
     EVENT_BASE,
     EVENT_DATA,
     EVENT_DIRECTORIES,
@@ -23,6 +25,8 @@ from systembridgeshared.const import (
     EVENT_PATH,
     EVENT_SUBTYPE,
     EVENT_TEXT,
+    EVENT_TIMEOUT,
+    EVENT_TITLE,
     EVENT_TYPE,
     EVENT_URL,
     EVENT_VERSION,
@@ -48,6 +52,7 @@ from systembridgeshared.const import (
     TYPE_GET_FILES,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
+    TYPE_NOTIFICATION,
     TYPE_OPEN,
     TYPE_POWER_HIBERNATE,
     TYPE_POWER_LOCK,
@@ -295,6 +300,34 @@ class WebSocketClient(Base):
                         EVENT_EVENT: TYPE_KEYBOARD_TEXT,
                         EVENT_API_KEY: self._api_key,
                         EVENT_TEXT: text,
+                    }
+                )
+            )
+
+    async def send_notification(
+        self,
+        message: str,
+        title: str | None = None,
+        app_name: str | None = None,
+        app_icon: str | None = None,
+        timeout: int = 5,
+    ) -> None:
+        """Send notification"""
+        if not self.connected:
+            raise ConnectionClosedException("Connection is closed")
+
+        self._logger.info("Send notification: %s", message)
+        if self._websocket is not None:
+            await self._websocket.send_str(
+                json.dumps(
+                    {
+                        EVENT_EVENT: TYPE_NOTIFICATION,
+                        EVENT_API_KEY: self._api_key,
+                        EVENT_MESSAGE: message,
+                        EVENT_TITLE: title,
+                        EVENT_APP_NAME: app_name,
+                        EVENT_APP_ICON: app_icon,
+                        EVENT_TIMEOUT: timeout,
                     }
                 )
             )
