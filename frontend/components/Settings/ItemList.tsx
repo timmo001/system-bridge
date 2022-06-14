@@ -96,6 +96,7 @@ function ItemList({
                     value={item.name}
                     onChange={(event) => {
                       const newList: Array<NameValue> = _.cloneDeep(list);
+                      console.log("Update name:", key, newList, newList[key]);
                       if (key && newList && newList[key]) {
                         newList[key].name = event.target.value;
                         setList(newList);
@@ -118,6 +119,7 @@ function ItemList({
                     value={item.value}
                     onChange={(event) => {
                       const newList = _.cloneDeep(list);
+                      console.log("Update value:", key, newList, newList[key]);
                       if (key && newList && newList[key]) {
                         newList[key].value = event.target.value;
                         setList(newList);
