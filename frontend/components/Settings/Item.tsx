@@ -26,10 +26,10 @@ import {
 } from "@mdi/js";
 
 import { handleCopyToClipboard } from "components/Common/Utils";
+import { NameValue } from "assets/entities/types.entity";
 import { SettingDescription, settingsMap } from "components/Settings/Settings";
-import { SettingsObject, SettingsValue } from "assets/entities/settings.entity";
+import { SettingsValue } from "assets/entities/settings.entity";
 import ItemList from "components/Settings/ItemList";
-import { instanceOfNameValue, NameValue } from "assets/entities/types.entity";
 
 interface ItemProps {
   keyIn: string;
@@ -249,7 +249,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
           </ListItemSecondaryAction>
         </>
       </ItemContainer>
-      {isList && Array.isArray(value) && instanceOfNameValue(value[0]) ? (
+      {isList && Array.isArray(value) ? (
         <>
           <ItemList
             setting={settingsMap[keyIn]}
