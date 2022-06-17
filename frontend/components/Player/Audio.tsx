@@ -5,7 +5,6 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import Image from "next/image";
 import {
   Box,
   Fade,
@@ -258,11 +257,13 @@ function AudioComponent() {
               aria-label={playing ? "Pause" : "Play"}
               onClick={handleTogglePlaying}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 alt={`${artist} - ${album}`}
-                loader={({ src }) => src}
-                src={cover || logo}
-                unoptimized
+                src={
+                  cover ||
+                  "https://raw.githubusercontent.com/timmo001/system-bridge/master/resources/system-bridge-dimmed.svg"
+                }
               />
               <Fade
                 in={isHovering ? true : false}
