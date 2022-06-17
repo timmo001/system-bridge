@@ -237,6 +237,7 @@ function AudioComponent() {
                   alt={`${artist} - ${album}`}
                   loader={({ src }) => src}
                   src={cover}
+                  unoptimized
                 />
               ) : (
                 <Box />
