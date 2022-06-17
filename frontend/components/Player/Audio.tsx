@@ -141,9 +141,8 @@ function AudioComponent() {
   );
 
   useEffect(() => {
-    if (loaded) {
-      handleSetLoaded(true);
-      handleSetPlaying(true);
+    if (!loaded) {
+      // handleSetPlaying(true);
 
       //   window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
       //   window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
@@ -183,6 +182,8 @@ function AudioComponent() {
       //   );
       //   window.api.ipcRendererRemoveAllListeners("player-get-cover");
       //   window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
+
+      handleSetLoaded(true);
     }
   }, [loaded, handleSetLoaded, handleSetPlaying]);
   //   handleToggleMuted,
