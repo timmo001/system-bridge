@@ -20,7 +20,7 @@ import { AudioSource, PlayerStatus, useHover, usePlayer } from "./Utils";
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
-  const [hoverRef, isHovering] = useHover();
+  const [hoveringRef, isHovering] = useHover();
 
   const ref = useRef<ReactPlayer>(null);
 
@@ -212,10 +212,11 @@ function AudioComponent() {
         alignItems="center"
         justifyItems="center"
         wrap="nowrap"
+        sx={{ padding: theme.spacing(1, 2) }}
       >
-        <Grid item xs={3} sx={{ margin: theme.spacing(0, 1, 0, 0) }}>
-          <Box ref={hoverRef}>
-            <ButtonBase
+        <Grid item sx={{ width: 320, margin: theme.spacing(0, 1, 0, 0) }}>
+          <Box ref={hoveringRef}>
+            <IconButton
               aria-label={playing ? "Pause" : "Play"}
               onClick={handleTogglePlaying}
             >
@@ -232,7 +233,7 @@ function AudioComponent() {
                   sx={{
                     position: "absolute",
                     display: "flex",
-                    background: "rgba(18, 18, 18, 0.6)",
+                    // background: "rgba(18, 18, 18, 0.6)",
                     height: "100%",
                     width: "100%",
                     zIndex: 100,
@@ -241,7 +242,7 @@ function AudioComponent() {
                   <Icon
                     id={playing ? "pause" : "play"}
                     path={playing ? mdiPause : mdiPlay}
-                    size={24}
+                    size={12}
                     style={{
                       position: "relative",
                       margin: "auto",
@@ -249,10 +250,10 @@ function AudioComponent() {
                   />
                 </Box>
               </Fade>
-            </ButtonBase>
+            </IconButton>
           </Box>
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs>
           <Grid
             container
             direction="column"

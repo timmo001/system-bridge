@@ -2,10 +2,9 @@ import React, {
   createContext,
   ReactElement,
   useContext,
-  useEffect,
-  useRef,
   useState,
 } from "react";
+import { Box } from "@mui/material";
 
 export interface Source {
   type: "audio" | "video";
@@ -71,7 +70,7 @@ export function useHover() {
   const handleMouseOver = React.useCallback(() => setIsHovering(true), []);
   const handleMouseOut = React.useCallback(() => setIsHovering(false), []);
 
-  const nodeRef = React.useRef<HTMLDivElement>();
+  const nodeRef = React.useRef<HTMLElement>();
 
   const callbackRef = React.useCallback(
     (node: HTMLDivElement) => {

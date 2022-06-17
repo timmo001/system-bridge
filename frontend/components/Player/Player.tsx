@@ -5,7 +5,7 @@ import { cloneDeep, isEqual } from "lodash";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
 import AudioComponent from "./Audio";
-import logo from "assets/media/system-bridge.svg";
+import logo from "assets/media/system-bridge-dimmed.svg";
 import VideoComponent from "./Video";
 
 interface PlayerProps {
