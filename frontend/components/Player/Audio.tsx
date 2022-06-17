@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
-import Image from "next/image";
 import {
   Box,
   Fade,
@@ -233,12 +232,8 @@ function AudioComponent() {
               onClick={handleTogglePlaying}
             >
               {cover ? (
-                <Image
-                  alt={`${artist} - ${album}`}
-                  loader={({ src }) => src}
-                  src={cover}
-                  unoptimized
-                />
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={cover} alt={`${artist} - ${album}`} />
               ) : (
                 <Box />
               )}
