@@ -224,7 +224,10 @@ function AudioComponent() {
               ) : (
                 <Box />
               )}
-              <Fade in={isHovering} timeout={{ enter: 200, exit: 400 }}>
+              <Fade
+                in={isHovering ? true : false}
+                timeout={{ enter: 200, exit: 400 }}
+              >
                 <Box
                   sx={{
                     position: "absolute",
@@ -235,27 +238,15 @@ function AudioComponent() {
                     zIndex: 100,
                   }}
                 >
-                  {playing ? (
-                    <Icon
-                      id="pause"
-                      path={mdiPause}
-                      size={24}
-                      style={{
-                        position: "relative",
-                        margin: "auto",
-                      }}
-                    />
-                  ) : (
-                    <Icon
-                      id="play"
-                      path={mdiPlay}
-                      size={24}
-                      style={{
-                        position: "relative",
-                        margin: "auto",
-                      }}
-                    />
-                  )}
+                  <Icon
+                    id={playing ? "pause" : "play"}
+                    path={playing ? mdiPause : mdiPlay}
+                    size={24}
+                    style={{
+                      position: "relative",
+                      margin: "auto",
+                    }}
+                  />
                 </Box>
               </Fade>
             </ButtonBase>
@@ -292,7 +283,7 @@ function AudioComponent() {
             <Grid item container spacing={2} alignContent="center">
               <Grid item xs={4} />
               <Grid item>
-                <IconButton size="small" onClick={handleToggleMuted}>
+                <IconButton onClick={handleToggleMuted}>
                   {muted ? (
                     <Icon id="mute" path={mdiVolumeMute} size={1.5} />
                   ) : (
@@ -300,7 +291,7 @@ function AudioComponent() {
                   )}
                 </IconButton>
               </Grid>
-              {/* <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
+              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={1}
@@ -310,12 +301,12 @@ function AudioComponent() {
                     if (typeof value === "number") handleSetVolume(value);
                   }}
                 />
-              </Grid> */}
+              </Grid>
             </Grid>
 
             <Grid container>
               <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item />
-              {/* <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
+              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={duration}
@@ -328,7 +319,7 @@ function AudioComponent() {
                   onMouseUp={handleScrubEnd}
                   onKeyUp={handleScrubEnd}
                 />
-              </Grid> */}
+              </Grid>
               <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item>
                 <Typography component="span" variant="body2">
                   {formattedPosition}
