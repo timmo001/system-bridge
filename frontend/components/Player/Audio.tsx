@@ -222,6 +222,7 @@ function AudioComponent() {
         sx={{ padding: theme.spacing(1, 2) }}
       >
         <Grid item sx={{ width: 320, margin: theme.spacing(0, 1, 0, 0) }}>
+          {/* @ts-ignore */}
           <Box ref={hoveringRef}>
             <IconButton
               aria-label={playing ? "Pause" : "Play"}
