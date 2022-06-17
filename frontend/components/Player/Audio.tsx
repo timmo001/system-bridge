@@ -28,6 +28,10 @@ function AudioComponent() {
     [playerStatus]
   );
 
+  const formattedVolume = useMemo(() => {
+    return `${volume * 100}%`;
+  }, [volume]);
+
   const formattedPosition = useMemo(() => {
     const md = moment.duration(position, "seconds");
     return `${md.minutes().toString().padStart(2, "0")}:${md
@@ -288,18 +292,18 @@ function AudioComponent() {
               </Typography>
             </Grid>
 
-            <Grid item container spacing={2} alignContent="center">
+            <Grid item container alignContent="center">
               <Grid item xs={4} />
-              <Grid item>
-                <IconButton onClick={handleToggleMuted}>
+              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item>
+                <IconButton size="small" onClick={handleToggleMuted}>
                   {muted ? (
-                    <Icon id="mute" path={mdiVolumeMute} size={1.5} />
+                    <Icon id="mute" path={mdiVolumeMute} size={1.25} />
                   ) : (
-                    <Icon id="unmute" path={mdiVolumeMedium} size={1.5} />
+                    <Icon id="unmute" path={mdiVolumeMedium} size={1.25} />
                   )}
                 </IconButton>
               </Grid>
-              <Grid sx={{ margin: theme.spacing(1.25, 1, 0, 0) }} item xs>
+              <Grid sx={{ margin: theme.spacing(0.6, 2, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={1}
@@ -310,15 +314,25 @@ function AudioComponent() {
                   }}
                 />
               </Grid>
+              <Grid
+                sx={{
+                  margin: theme.spacing(0.9, volume > 0.999 ? 1 : 2, 0, 0),
+                }}
+                item
+              >
+                <Typography component="span" variant="body2">
+                  {formattedVolume}
+                </Typography>
+              </Grid>
             </Grid>
 
             <Grid container>
-              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item>
+              <Grid sx={{ margin: theme.spacing(0.25, 2, 0, 0) }} item>
                 <Typography component="span" variant="body2">
                   {formattedPosition}
                 </Typography>
               </Grid>
-              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item xs>
+              <Grid sx={{ margin: theme.spacing(0, 2, 0, 0) }} item xs>
                 <Slider
                   min={0}
                   max={duration}
@@ -332,7 +346,7 @@ function AudioComponent() {
                   onKeyUp={handleScrubEnd}
                 />
               </Grid>
-              <Grid sx={{ margin: theme.spacing(0, 1, 0, 0) }} item>
+              <Grid sx={{ margin: theme.spacing(0.25, 1, 0, 0) }} item>
                 <Typography component="span" variant="body2">
                   {formattedDuration}
                 </Typography>
