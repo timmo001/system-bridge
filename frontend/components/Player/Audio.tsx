@@ -233,7 +233,11 @@ function AudioComponent() {
               onClick={handleTogglePlaying}
             >
               {cover ? (
-                <Image src={cover} alt={`${artist} - ${album}`} />
+                <Image
+                  alt={`${artist} - ${album}`}
+                  loader={({ src }) => src}
+                  src={cover}
+                />
               ) : (
                 <Box />
               )}
