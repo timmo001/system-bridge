@@ -57,7 +57,6 @@ class Main(Base):
         # Connect to WebSocket
         try:
             asyncio.run(self._websocket_client.connect())
-            asyncio.run(self._websocket_client.close())
         except ConnectionErrorException:
             self._logger.error("Could not connect to WebSocket")
             error_message = TimedMessageBox(
@@ -99,19 +98,24 @@ class Main(Base):
         self,
         path: str,
         maximized: bool,
-        width: int = 1280,
-        height: int = 720,
+        width: int | None,
+        height: int | None,
     ) -> None:
         """Show the main window"""
         self._logger.info("Showing window: %s", path)
+
+        if width is None:
+            width = 1280
+        if height is None:
+            height = 720
 
         self._main_window.hide()
         self._main_window.setup(path)
         self._main_window.resize(width, height)
         screen_geometry = self._application.primaryScreen().availableSize()
         self._main_window.move(
-            (screen_geometry.width() - self._main_window.width()) / 2,
-            (screen_geometry.height() - self._main_window.height()) / 2,
+            int((screen_geometry.width() - self._main_window.width()) / 2),
+            int((screen_geometry.height() - self._main_window.height()) / 2),
         )
         if maximized:
             self._main_window.showMaximized()

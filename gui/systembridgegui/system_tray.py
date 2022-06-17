@@ -6,7 +6,7 @@ import os
 from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
-from PySide6.QtWidgets import QMenu, QSystemTrayIcon, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 from pyperclip import copy
 from systembridgeshared.base import Base
 from systembridgeshared.common import get_user_data_directory
@@ -33,7 +33,7 @@ class SystemTray(Base, QSystemTrayIcon):
         database: Database,
         settings: Settings,
         icon: QIcon,
-        parent: QWidget,
+        parent: QApplication,
         callback_exit_application: Callable,
         callback_show_window: Callable[[str, bool, int | None, int | None], None],
     ) -> None:
