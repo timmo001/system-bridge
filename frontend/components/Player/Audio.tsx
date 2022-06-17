@@ -1,4 +1,11 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
+import Image from "next/image";
 import {
   Box,
   Fade,
@@ -22,10 +29,8 @@ function AudioComponent() {
 
   const ref = useRef<ReactPlayer>(null);
 
-  const { duration, playing, muted, position, volume } = useMemo<PlayerStatus>(
-    () => playerStatus as PlayerStatus,
-    [playerStatus]
-  );
+  const { duration, playing, muted, loaded, position, volume } =
+    useMemo<PlayerStatus>(() => playerStatus as PlayerStatus, [playerStatus]);
 
   const formattedVolume = useMemo<string>(() => {
     return `${(volume * 100).toFixed(0)}%`;
@@ -52,25 +57,34 @@ function AudioComponent() {
     return status.source as AudioSource;
   }, [playerStatus]);
 
-  const handleSetPlaying = useCallback(
-    (playing: boolean) => setPlayerStatus({ ...playerStatus!!, playing }),
+  const handleSetLoaded = useCallback(
+    (loaded: boolean) => {
+      setPlayerStatus({ ...playerStatus!!, loaded });
+    },
     [playerStatus, setPlayerStatus]
   );
 
-  const handleTogglePlaying = useCallback(
-    () => handleSetPlaying(!playing),
-    [playing, handleSetPlaying]
+  const handleSetPlaying = useCallback(
+    (playing: boolean) => {
+      setPlayerStatus({ ...playerStatus!!, playing });
+    },
+    [playerStatus, setPlayerStatus]
   );
+
+  const handleTogglePlaying = useCallback(() => {
+    handleSetPlaying(!playing);
+  }, [playing, handleSetPlaying]);
 
   const handleSetMuted = useCallback(
-    (muted: boolean) => setPlayerStatus({ ...playerStatus!!, muted }),
+    (muted: boolean) => {
+      setPlayerStatus({ ...playerStatus!!, muted });
+    },
     [playerStatus, setPlayerStatus]
   );
 
-  const handleToggleMuted = useCallback(
-    () => handleSetMuted(!muted),
-    [muted, handleSetMuted]
-  );
+  const handleToggleMuted = useCallback(() => {
+    handleSetMuted(!muted);
+  }, [muted, handleSetMuted]);
 
   const handleSetVolume = useCallback(
     (v: number, type?: "down" | "up") => {
@@ -87,11 +101,12 @@ function AudioComponent() {
   );
 
   const handleSetDuration = useCallback(
-    (duration: number) =>
+    (duration: number) => {
       setPlayerStatus({
         ...playerStatus!!,
         duration,
-      }),
+      });
+    },
     [playerStatus, setPlayerStatus]
   );
 
@@ -125,46 +140,51 @@ function AudioComponent() {
     [cover]
   );
 
-  // useEffect(() => {
-  //   window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
-  //   window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
-  //     handleToggleMuted()
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-mute");
-  //   window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
-  //     handleSetMuted(v)
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-pause");
-  //   window.api.ipcRendererOn("player-pause", (_e: Event) =>
-  //     handleSetPlaying(false)
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-play");
-  //   window.api.ipcRendererOn("player-play", (_e: Event) =>
-  //     handleSetPlaying(true)
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-playpause");
-  //   window.api.ipcRendererOn("player-playpause", (_e: Event) =>
-  //     handleTogglePlaying()
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-volume");
-  //   window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
-  //     handleSetVolume(v)
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-volume-down");
-  //   window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
-  //     handleSetVolume(v, "down")
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-volume-up");
-  //   window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
-  //     handleSetVolume(v, "up")
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-seek");
-  //   window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
-  //     handleUpdatePlayerPosition(v)
-  //   );
-  //   window.api.ipcRendererRemoveAllListeners("player-get-cover");
-  //   window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
-  // }, [
+  useEffect(() => {
+    if (loaded) {
+      handleSetLoaded(true);
+      handleSetPlaying(true);
+
+      //   window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
+      //   window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
+      //     handleToggleMuted()
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-mute");
+      //   window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
+      //     handleSetMuted(v)
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-pause");
+      //   window.api.ipcRendererOn("player-pause", (_e: Event) =>
+      //     handleSetPlaying(false)
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-play");
+      //   window.api.ipcRendererOn("player-play", (_e: Event) =>
+      //     handleSetPlaying(true)
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-playpause");
+      //   window.api.ipcRendererOn("player-playpause", (_e: Event) =>
+      //     handleTogglePlaying()
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-volume");
+      //   window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
+      //     handleSetVolume(v)
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-volume-down");
+      //   window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
+      //     handleSetVolume(v, "down")
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-volume-up");
+      //   window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
+      //     handleSetVolume(v, "up")
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-seek");
+      //   window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
+      //     handleUpdatePlayerPosition(v)
+      //   );
+      //   window.api.ipcRendererRemoveAllListeners("player-get-cover");
+      //   window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
+    }
+  }, [loaded, handleSetLoaded, handleSetPlaying]);
   //   handleToggleMuted,
   //   handleSetMuted,
   //   handleSetPlaying,
@@ -232,8 +252,12 @@ function AudioComponent() {
               onClick={handleTogglePlaying}
             >
               {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={cover} alt={`${artist} - ${album}`} />
+                <Image
+                  alt={`${artist} - ${album}`}
+                  loader={({ src }) => src}
+                  src={cover}
+                  unoptimized
+                />
               ) : (
                 <Box />
               )}

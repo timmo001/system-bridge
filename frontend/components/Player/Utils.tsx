@@ -28,6 +28,7 @@ export interface PlayerStatus {
   duration?: number;
   muted: boolean;
   playing: boolean;
+  loaded: boolean;
   position?: number;
   source: AudioSource | VideoSource;
   volume: number;

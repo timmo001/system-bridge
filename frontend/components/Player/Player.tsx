@@ -31,6 +31,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           setPlayerStatus({
             muted: false,
             playing: true,
+            loaded: false,
             position: 0,
             duration: 1,
             source: {
@@ -55,6 +56,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           setPlayerStatus({
             muted: false,
             playing: true,
+            loaded: false,
             position: 0,
             duration: 1,
             source: {
