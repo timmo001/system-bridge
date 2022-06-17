@@ -6,7 +6,6 @@ from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
-
 from systembridgeshared.base import Base
 
 
