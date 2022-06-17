@@ -29,7 +29,7 @@ function AudioComponent() {
   );
 
   const formattedVolume = useMemo(() => {
-    return `${volume * 100}%`;
+    return `${(volume * 100).toFixed(0)}%`;
   }, [volume]);
 
   const formattedPosition = useMemo(() => {
@@ -316,7 +316,7 @@ function AudioComponent() {
               </Grid>
               <Grid
                 sx={{
-                  margin: theme.spacing(0.9, volume > 0.999 ? 1 : 2, 0, 0),
+                  margin: theme.spacing(0.9, volume >= 1 ? 1 : 2, 0, 0),
                 }}
                 item
               >
