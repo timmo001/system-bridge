@@ -31,6 +31,8 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           setPlayerStatus({
             muted: false,
             playing: true,
+            position: 0,
+            duration: 1,
             source: {
               type: "audio",
               source: String(query.url),
@@ -53,6 +55,8 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           setPlayerStatus({
             muted: false,
             playing: true,
+            position: 0,
+            duration: 1,
             source: {
               type: "video",
               source: String(query.url),
