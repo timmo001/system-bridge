@@ -14,14 +14,13 @@ class PlayerWindow(Base, QWidget):
 
     def __init__(
         self,
-        args: Namespace,
         application: QApplication,
         icon: QIcon,
         video: bool,
         params: dict,
     ) -> None:
         """Initialize the window"""
-        Base.__init__(self, args)
+        Base.__init__(self)
         QWidget.__init__(
             self,
             WindowFlags=Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint,

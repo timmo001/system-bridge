@@ -138,7 +138,7 @@ if __name__ == "__main__":
     database = Database()
     settings = Settings(database)
 
-    log_level = settings.get(SETTING_LOG_LEVEL)
+    log_level: str = str(settings.get(SETTING_LOG_LEVEL))
 
     setup_logger(log_level, "system-bridge-gui")
 
