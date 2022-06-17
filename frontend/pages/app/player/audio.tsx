@@ -12,7 +12,6 @@ function PageLogs(): ReactElement {
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
       noHeader
-      noFooter
     >
       <PlayerProvider>
         <Player playerType="audio" />
