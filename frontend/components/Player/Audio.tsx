@@ -28,11 +28,11 @@ function AudioComponent() {
     [playerStatus]
   );
 
-  const formattedVolume = useMemo(() => {
+  const formattedVolume = useMemo<string>(() => {
     return `${(volume * 100).toFixed(0)}%`;
   }, [volume]);
 
-  const formattedPosition = useMemo(() => {
+  const formattedPosition = useMemo<string>(() => {
     const md = moment.duration(position, "seconds");
     return `${md.minutes().toString().padStart(2, "0")}:${md
       .seconds()
@@ -40,7 +40,7 @@ function AudioComponent() {
       .padStart(2, "0")}`;
   }, [position]);
 
-  const formattedDuration = useMemo(() => {
+  const formattedDuration = useMemo<string>(() => {
     const md = moment.duration(duration, "seconds");
     return `${md.minutes().toString().padStart(2, "0")}:${md
       .seconds()
@@ -97,12 +97,12 @@ function AudioComponent() {
   );
 
   const handleSetPosition = useCallback(
-    (p: number) => {
-      if (duration && p > duration) p = duration;
-      if (p < 0) p = 0;
+    (pos: number) => {
+      if (duration && pos > duration) pos = duration;
+      if (pos < 0) pos = 0;
       setPlayerStatus({
         ...playerStatus!!,
-        position: p,
+        position: pos,
       });
     },
     [playerStatus, duration, setPlayerStatus]
