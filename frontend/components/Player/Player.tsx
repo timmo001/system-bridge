@@ -5,7 +5,6 @@ import { cloneDeep, isEqual } from "lodash";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
 import AudioComponent from "./Audio";
-import logo from "assets/media/system-bridge-dimmed.svg";
 import VideoComponent from "./Video";
 
 interface PlayerProps {
@@ -39,7 +38,6 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
               source: String(query.url),
               album: "Album",
               artist: "Aritst",
-              cover: logo,
               title: "Title",
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },

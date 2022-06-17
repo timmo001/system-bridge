@@ -20,7 +20,13 @@ import { mdiPause, mdiPlay, mdiVolumeMedium, mdiVolumeMute } from "@mdi/js";
 import moment from "moment";
 import ReactPlayer from "react-player/lazy";
 
-import { AudioSource, PlayerStatus, useHover, usePlayer } from "./Utils";
+import {
+  AudioSource,
+  PlayerStatus,
+  useHover,
+  usePlayer,
+} from "components/Player/Utils";
+import logo from "assets/media/system-bridge-dimmed.svg";
 
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -252,16 +258,12 @@ function AudioComponent() {
               aria-label={playing ? "Pause" : "Play"}
               onClick={handleTogglePlaying}
             >
-              {cover ? (
-                <Image
-                  alt={`${artist} - ${album}`}
-                  loader={({ src }) => src}
-                  src={cover}
-                  unoptimized
-                />
-              ) : (
-                <Box />
-              )}
+              <Image
+                alt={`${artist} - ${album}`}
+                loader={({ src }) => src}
+                src={cover || logo}
+                unoptimized
+              />
               <Fade
                 in={isHovering ? true : false}
                 timeout={{ enter: 200, exit: 400 }}
