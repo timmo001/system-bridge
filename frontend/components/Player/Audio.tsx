@@ -17,38 +17,6 @@ import ReactPlayer from "react-player/lazy";
 
 import { AudioSource, PlayerStatus, useHover, usePlayer } from "./Utils";
 
-// const useStyles = makeStyles((theme: Theme) =>
-//   createStyles({
-//     root: {
-//       height: "100%",
-//     },
-//     center: {
-//       alignSelf: "center",
-//     },
-//     gridItem: {
-//       alignSelf: "center",
-//       margin: theme.spacing(0, 1, 0, 0),
-//     },
-//     overlay: {
-//       position: "absolute",
-//       display: "flex",
-//       background: "rgba(18, 18, 18, 0.6)",
-//       height: "100%",
-//       width: "100%",
-//       zIndex: 100,
-//     },
-//     overlayInner: {
-//       position: "relative",
-//       margin: "auto",
-//       fontSize: 82,
-//     },
-//     image: {
-//       height: 110,
-//       width: 110,
-//     },
-//   })
-// );
-
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const [seeking, setSeeking] = useState<boolean>(false);
@@ -245,7 +213,7 @@ function AudioComponent() {
         justifyItems="center"
         wrap="nowrap"
       >
-        <Grid item sx={{ margin: theme.spacing(0, 1, 0, 0) }}>
+        <Grid item xs={3} sx={{ margin: theme.spacing(0, 1, 0, 0) }}>
           <Box ref={hoverRef}>
             <ButtonBase
               aria-label={playing ? "Pause" : "Play"}
