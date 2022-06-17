@@ -29,7 +29,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           // window.api.ipcRendererOn("audio-metadata", (_event, data) => {
           setPlayerStatus({
             muted: false,
-            playing: true,
+            playing: false,
             loaded: false,
             position: 0,
             duration: 1,
@@ -53,7 +53,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
         case "video":
           setPlayerStatus({
             muted: false,
-            playing: true,
+            playing: false,
             loaded: false,
             position: 0,
             duration: 1,
