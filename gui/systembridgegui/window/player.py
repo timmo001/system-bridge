@@ -7,6 +7,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QFrame, QVBoxLayout
 from systembridgeshared.base import Base
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 
@@ -19,7 +20,7 @@ class PlayerWindow(Base, QFrame):
         icon: QIcon,
         application: QApplication,
         video: bool,
-        params: dict,
+        params: MediaPlay,
     ) -> None:
         """Initialize the window"""
         Base.__init__(self)
@@ -58,7 +59,7 @@ class PlayerWindow(Base, QFrame):
             f"""http://localhost:{api_port}/app/player/{"video" if video else "audio"}?{urlencode({
                     "apiKey": api_key,
                     "apiPort": api_port,
-                    **params,
+                    **params.dict(),
                 })}"""
         )
         self._logger.info("Open URL: %s", url)

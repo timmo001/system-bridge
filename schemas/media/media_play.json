@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Media Play",
+  "properties": {
+    "autoplay": {
+      "type": "boolean",
+      "default": false
+    },
+    "url": {
+      "type": "string"
+    },
+    "volume": {
+      "type": "number",
+      "default": 40
+    }
+  },
+  "required": ["url"]
+}
