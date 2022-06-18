@@ -5,20 +5,20 @@ import asyncio
 import os
 import sys
 
+from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
-from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 
 from systembridgegui._version import __version__
 from systembridgegui.system_tray import SystemTray
-from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
+from systembridgegui.worker import Worker
 
 
 class Main(Base):
@@ -56,21 +56,13 @@ class Main(Base):
             """
         )
 
-        # Connect to WebSocket
-        try:
-            asyncio.run(self._websocket_client.connect())
-        except ConnectionErrorException:
-            self._logger.error("Could not connect to WebSocket")
-            error_message = TimedMessageBox(
-                10,
-                "Could not connect to System Bridge Backend! Exiting in",
-            )
-            error_message.setIcon(QMessageBox.Critical)
-            error_message.setWindowTitle("Error")
-            error_message.exec()
-            # Exit cleanly
-            self._callback_exit_application(True)
-            sys.exit(1)
+        worker = Worker(
+            self._application,
+            self._websocket_client,
+        )
+
+        self._thread_pool = QThreadPool()
+        self._thread_pool.start(worker)
 
         self._main_window = MainWindow(
             self._settings,
