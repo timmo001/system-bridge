@@ -92,8 +92,8 @@ class Main(Base):
         self,
         path: str,
         maximized: bool,
-        width: int | None,
-        height: int | None,
+        width: int | None = 1280,
+        height: int | None = 720,
     ) -> None:
         """Show the main window"""
         self._logger.info("Showing window: %s", path)

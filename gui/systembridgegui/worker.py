@@ -93,7 +93,10 @@ class Worker(Base, QRunnable):
         """Listen for data from the WebSocket client"""
         try:
             asyncio.create_task(
-                self._websocket_client.listen(callback=self._callback_module_update)
+                self._websocket_client.listen(
+                    callback=self._callback_module_update,
+                    accept_other_types=True,
+                )
             )
             await self._websocket_client.get_data(MODULES)
             await self._websocket_client.register_data_listener(MODULES)
