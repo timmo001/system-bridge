@@ -72,7 +72,7 @@ async def start_gui(
 def start_gui_sync(
     logger: Logger,
     settings: Settings,
-    type: str = "main",
+    command: str = "main",
     *kwargs,
 ) -> None:
     """Start the GUI in a synchronous thread"""
@@ -81,7 +81,7 @@ def start_gui_sync(
             logger,
             settings,
             1,
-            type,
+            command,
             *kwargs,
         )
     )
@@ -90,7 +90,7 @@ def start_gui_sync(
 def start_gui_threaded(
     logger: Logger,
     settings: Settings,
-    type: str = "main",
+    command: str = "main",
     *kwargs,
 ) -> None:
     """Start the GUI in a thread"""
@@ -99,7 +99,7 @@ def start_gui_threaded(
         args=(
             logger,
             settings,
-            type,
+            command,
             *kwargs,
         ),
     )
