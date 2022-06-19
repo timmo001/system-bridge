@@ -45,6 +45,16 @@ SETTING_PORT_API = "port_api"
 # Secrets
 SECRET_API_KEY = "api_key"
 
+# Query Parameters
+QUERY_API_KEY = "apiKey"
+QUERY_API_PORT = "apiPort"
+QUERY_AUTOPLAY = "autoplay"
+QUERY_BASE = "base"
+QUERY_FILENAME = "filename"
+QUERY_PATH = "path"
+QUERY_URL = "url"
+QUERY_VOLUME = "volume"
+
 # Event Keys
 EVENT_API_KEY = "api-key"
 EVENT_APP_ICON = "app_icon"

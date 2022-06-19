@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import sys
 
-from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 import async_timeout
@@ -17,28 +17,33 @@ from systembridgeshared.exceptions import (
     ConnectionErrorException,
 )
 from systembridgeshared.logger import setup_logger
+from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
+from typer import Typer
 
 from systembridgegui._version import __version__
 from systembridgegui.system_tray import SystemTray
 from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
+from systembridgegui.window.player import PlayerWindow
 
 
 class Main(Base):
     """Main"""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        type: str = "main",
+        gui_only: bool = False,
+        data: dict | None = None,
+    ) -> None:
         """Initialize"""
         super().__init__()
         self._logger.info("System Bridge GUI %s: Startup", __version__.public())
 
-        self._gui_only = sys.argv[1] == "gui-only"
-
         self._database = database
         self._settings = settings
-        self._websocket_client = WebSocketClient(self._settings)
 
         self._application = QApplication([])
         self._icon = QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))
@@ -63,24 +68,56 @@ class Main(Base):
             """
         )
 
-        self._thread_pool = QThreadPool()
+        if type == "main":
+            self._logger.info("Main: Setup")
 
-        asyncio.run(self._setup())
+            self._gui_only = gui_only
+            self._websocket_client = WebSocketClient(self._settings)
 
-        self._main_window = MainWindow(
-            self._settings,
-            self._icon,
-        )
+            asyncio.run(self._setup_websocket())
 
-        self._system_tray_icon = SystemTray(
-            self._database,
-            self._settings,
-            self._icon,
-            self._application,
-            self._callback_exit_application,
-            self._callback_show_window,
-        )
-        self._system_tray_icon.show()
+            self._window = MainWindow(
+                self._settings,
+                self._icon,
+            )
+
+            self._system_tray_icon = SystemTray(
+                self._database,
+                self._settings,
+                self._icon,
+                self._application,
+                self._callback_exit_application,
+                self._callback_show_window,
+            )
+            self._system_tray_icon.show()
+        elif type == "media-player-audio":
+            self._logger.info("Media Player: Audio")
+            if data is None:
+                self._logger.error("No data provided!")
+                self._startup_error("No data provided!")
+                sys.exit(1)
+            media_play = MediaPlay(**data)
+            self._window = PlayerWindow(
+                self._settings,
+                self._icon,
+                self._application,
+                "audio",
+                media_play,
+            )
+        elif type == "media-player-video":
+            self._logger.info("Media Player: Video")
+            if data is None:
+                self._logger.error("No data provided!")
+                self._startup_error("No data provided!")
+                sys.exit(1)
+            media_play = MediaPlay(**data)
+            self._window = PlayerWindow(
+                self._settings,
+                self._icon,
+                self._application,
+                "video",
+                media_play,
+            )
 
         sys.exit(self._application.exec())
 
@@ -103,24 +140,24 @@ class Main(Base):
         if height is None:
             height = 720
 
-        self._main_window.hide()
-        self._main_window.setup(path)
-        self._main_window.resize(width, height)
+        self._window.hide()
+        self._window.setup(path)
+        self._window.resize(width, height)
         screen_geometry = self._application.primaryScreen().availableSize()
-        self._main_window.move(
-            int((screen_geometry.width() - self._main_window.width()) / 2),
-            int((screen_geometry.height() - self._main_window.height()) / 2),
+        self._window.move(
+            int((screen_geometry.width() - self._window.width()) / 2),
+            int((screen_geometry.height() - self._window.height()) / 2),
         )
         if maximized:
-            self._main_window.showMaximized()
+            self._window.showMaximized()
         else:
-            self._main_window.showNormal()
+            self._window.showNormal()
 
-    def _connection_error(
+    def _startup_error(
         self,
         message: str,
     ) -> None:
-        """Handle a connection error"""
+        """Handle a startup error"""
         error_message = TimedMessageBox(
             10,
             f"{message} Exiting in",
@@ -147,10 +184,6 @@ class Main(Base):
         self._logger.info("Exit GUI..")
         self._application.quit()
 
-    async def _setup(self) -> None:
-        """Setup"""
-        await self._setup_websocket()
-
     async def _setup_websocket(self) -> None:
         """Setup the WebSocket client"""
         try:
@@ -158,18 +191,37 @@ class Main(Base):
                 await self._websocket_client.connect()
         except AuthenticationException as exception:
             self._logger.error("Authentication failed: %s", exception)
-            self._connection_error("Authentication failed!")
+            self._startup_error("Authentication failed!")
         except ConnectionErrorException as exception:
             self._logger.error("Could not connect to WebSocket: %s", exception)
-            self._connection_error("Could not connect to WebSocket!")
+            self._startup_error("Could not connect to WebSocket!")
         except asyncio.TimeoutError as exception:
             self._logger.error("Connection timeout to WebSocket: %s", exception)
-            self._connection_error("Connection timeout to WebSocket!")
+            self._startup_error("Connection timeout to WebSocket!")
+
+
+app = Typer()
+
+
+@app.command(name="main", help="Run the main application")
+def main(
+    gui_only: bool = False,
+) -> None:
+    """Run the main application"""
+    Main(type="main", gui_only=gui_only)
+
+
+@app.command(name="media-player", help="Run the media player")
+def media_player(
+    type: str,
+    data: str,
+) -> None:
+    """Run the media player"""
+    Main(type=f"media-player-{type}", data=json.loads(data))
 
 
 if __name__ == "__main__":
     asyncio.set_event_loop(asyncio.new_event_loop())
-
     database = Database()
     settings = Settings(database)
 
@@ -177,4 +229,4 @@ if __name__ == "__main__":
 
     setup_logger(log_level, "system-bridge-gui")
 
-    Main()
+    app()

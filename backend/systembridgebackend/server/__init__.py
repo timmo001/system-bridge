@@ -11,8 +11,14 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_LOG_LEVEL, SETTING_PORT_API
+from systembridgeshared.const import (
+    QUERY_API_KEY,
+    SECRET_API_KEY,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+)
 from systembridgeshared.database import Database
+from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 from systembridgebackend.data import Data
@@ -27,6 +33,7 @@ from systembridgebackend.server.media import (
     handler_media_file_data,
     handler_media_file_write,
     handler_media_files,
+    handler_media_play,
 )
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
@@ -67,11 +74,11 @@ class Server(Base):
 
         SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
-        self._data = Data(self._database, self._data_updated)
+        self._data = Data(self._database, self._callback_data_updated)
 
         auth = ApiKeyAuthentication(
             app=self._server,
-            arg="apiKey",
+            arg=QUERY_API_KEY,
             header="api-key",
             keys=[self._settings.get_secret(SECRET_API_KEY)],
         )
@@ -84,7 +91,7 @@ class Server(Base):
             """After startup"""
             if "--no-gui" not in sys.argv:
                 try:
-                    await start_gui_threaded(self._logger, self._settings)
+                    start_gui_threaded(self._logger, self._settings)
                 except GUIAttemptsExceededException:
                     self._logger.error("GUI could not be started. Exiting application")
                     await self._exit_application()
@@ -143,6 +150,15 @@ class Server(Base):
             """Generic handler"""
             return await function(request, self._settings)
 
+        @auth.key_required
+        async def _handler_media_play(request: Request) -> HTTPResponse:
+            """Media play handler"""
+            return await handler_media_play(
+                request,
+                self._settings,
+                self._callback_media_play,
+            )
+
         async def _handler_websocket(
             _: Request,
             socket,
@@ -196,6 +212,11 @@ class Server(Base):
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_file_write),
             "/api/media/file/write",
+            methods=["POST"],
+        )
+        self._server.add_route(
+            _handler_media_play,
+            "/api/media/play",
             methods=["POST"],
         )
         self._server.add_route(
@@ -265,21 +286,35 @@ class Server(Base):
             "/api/websocket",
         )
 
-    def _callback_exit_application(self) -> None:
-        """Callback to exit application"""
-        asyncio.create_task(self._exit_application())
-
-    async def _data_updated(
+    async def _callback_data_updated(
         self,
         module: str,
     ) -> None:
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
 
+    def _callback_exit_application(self) -> None:
+        """Callback to exit application"""
+        asyncio.create_task(self._exit_application())
+
     async def _exit_application(self) -> None:
         """Exit application"""
         self._logger.info("Exiting application")
         self.stop_server()
+
+    def _callback_media_play(
+        self,
+        media_type: str,
+        media_play: MediaPlay,
+    ) -> None:
+        """Callback to open media player"""
+        start_gui_threaded(
+            self._logger,
+            self._settings,
+            "media-player",
+            media_type,
+            media_play.json(),
+        )
 
     def start_server(self) -> None:
         """Start Server"""

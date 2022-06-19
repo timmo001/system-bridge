@@ -17,36 +17,54 @@ class GUIAttemptsExceededException(BaseException):
 async def start_gui(
     logger: Logger,
     settings: Settings,
-    attempt=1,
+    attempt: int = 1,
+    type: str = "main",
+    *args,
 ) -> None:
     """Start the GUI"""
     if attempt > 2:
         logger.error("Failed to start GUI after 2 attempts")
         raise GUIAttemptsExceededException("Failed to start GUI after 3 attempts")
-    logger.info("Test WebSocket connection before starting GUI. Attempt #%s", attempt)
-    websocket_client = WebSocketClient(settings)
-    try:
-        await websocket_client.connect()
-        await websocket_client.close()
-    except ConnectionErrorException:
-        logger.warning("Could not connect to WebSocket. Retrying in 5 seconds")
-        await asyncio.sleep(5)
-        await start_gui(logger, settings, attempt + 1)
-        return
+    if type == "main":
+        logger.info(
+            "Test WebSocket connection before starting GUI. Attempt #%s", attempt
+        )
+        websocket_client = WebSocketClient(settings)
+        try:
+            await websocket_client.connect()
+            await websocket_client.close()
+        except ConnectionErrorException:
+            logger.warning("Could not connect to WebSocket. Retrying in 5 seconds")
+            await asyncio.sleep(5)
+            await start_gui(
+                logger,
+                settings,
+                attempt + 1,
+                type,
+                *args,
+            )
+            return
 
-    logger.info("Executable: %s", sys.executable)
-    logger.info("Starting GUI")
-    with subprocess.Popen(
-        [
-            sys.executable,
-            "-m",
-            "systembridgegui",
-        ]
-    ) as process:
+    pgm_args = [
+        sys.executable,
+        "-m",
+        "systembridgegui",
+        type,
+        *args,
+    ]
+
+    logger.info("Starting GUI: %s", pgm_args)
+    with subprocess.Popen(pgm_args) as process:
         logger.info("GUI started with PID: %s", process.pid)
         if (exit_code := process.wait()) != 0:
             logger.error("GUI exited with code: %s", exit_code)
-            await start_gui(logger, settings, attempt + 1)
+            await start_gui(
+                logger,
+                settings,
+                attempt + 1,
+                type,
+                *args,
+            )
             return
         logger.info("GUI exited with code: %s", exit_code)
 
@@ -54,15 +72,35 @@ async def start_gui(
 def start_gui_sync(
     logger: Logger,
     settings: Settings,
+    type: str = "main",
+    *args,
 ) -> None:
     """Start the GUI in a synchronous thread"""
-    asyncio.run(start_gui(logger, settings))
+    asyncio.run(
+        start_gui(
+            logger,
+            settings,
+            1,
+            type,
+            *args,
+        )
+    )
 
 
-async def start_gui_threaded(
+def start_gui_threaded(
     logger: Logger,
     settings: Settings,
+    type: str = "main",
+    *args,
 ) -> None:
     """Start the GUI in a thread"""
-    thread = Thread(target=start_gui_sync, args=(logger, settings))
+    thread = Thread(
+        target=start_gui_sync,
+        args=(
+            logger,
+            settings,
+            type,
+            *args,
+        ),
+    )
     thread.start()

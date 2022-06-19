@@ -3,17 +3,28 @@ from __future__ import annotations
 
 import mimetypes
 import os
+from typing import Callable
+from urllib.parse import urlencode
 
 import aiofiles
 from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
-from systembridgeshared.const import SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+from systembridgeshared.const import (
+    QUERY_API_KEY,
+    QUERY_API_PORT,
+    QUERY_AUTOPLAY,
+    QUERY_BASE,
+    QUERY_FILENAME,
+    QUERY_PATH,
+    QUERY_URL,
+    QUERY_VOLUME,
+    SECRET_API_KEY,
+    SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
+    SETTING_PORT_API,
+)
+from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
-
-QUERY_BASE = "base"
-QUERY_PATH = "path"
-QUERY_FILENAME = "filename"
 
 
 def get_directories(settings: Settings) -> list[dict]:
@@ -315,5 +326,95 @@ async def handler_media_file_write(
             "message": "File uploaded",
             "path": path,
             "filename": query_filename,
+        }
+    )
+
+
+async def handler_media_play(
+    request: Request,
+    settings: Settings,
+    callback: Callable[[str, MediaPlay], None],
+) -> HTTPResponse:
+    """Handler for media play requests"""
+    if not (query_base := request.args.get(QUERY_BASE)):
+        return json(
+            {"message": "No base specified"},
+            status=400,
+        )
+
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        return json(
+            {"message": "Cannot find base", "base": query_base},
+            status=404,
+        )
+
+    query_path = request.args.get(QUERY_PATH)
+    if not (path := os.path.join(root_path, query_path)):
+        return json(
+            {"message": "Cannot find path", "path": path},
+            status=400,
+        )
+    if not os.path.exists(path):
+        return json(
+            {"message": "File does not exist", "path": path},
+            status=404,
+        )
+    if not os.path.isfile(path):
+        return json(
+            {"message": "Path is not a file", "path": path},
+            status=400,
+        )
+
+    url = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                    QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                    QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                    QUERY_BASE: query_base,
+                    QUERY_PATH: query_path,
+                })}"""
+
+    mime_type, _ = mimetypes.guess_type(path)
+    if mime_type is None:
+        return json(
+            {"message": "Cannot determine mime type", "path": path},
+            status=400,
+        )
+
+    media_type = (
+        "audio" if "audio" in mime_type else "video" if "video" in mime_type else None
+    )
+
+    if media_type is None:
+        return json(
+            {
+                "message": "Unsupported file type",
+                "path": path,
+                "mime_type": mime_type,
+            },
+            status=400,
+        )
+
+    media_play = MediaPlay(
+        **{
+            QUERY_AUTOPLAY: bool(request.args.get(QUERY_AUTOPLAY, default=False)),
+            QUERY_URL: url,
+            QUERY_VOLUME: float(request.args.get(QUERY_VOLUME, default=40)),
+        }
+    )
+
+    callback(media_type, media_play)
+
+    return json(
+        {
+            "message": "Opened media player",
+            "media_type": media_type,
+            "mime_type": mime_type,
+            "path": path,
+            **media_play.dict(),
         }
     )

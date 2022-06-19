@@ -6,7 +6,15 @@ from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QFrame, QVBoxLayout
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.const import (
+    QUERY_API_KEY,
+    QUERY_API_PORT,
+    QUERY_AUTOPLAY,
+    QUERY_URL,
+    QUERY_VOLUME,
+    SECRET_API_KEY,
+    SETTING_PORT_API,
+)
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
@@ -19,8 +27,8 @@ class PlayerWindow(Base, QFrame):
         settings: Settings,
         icon: QIcon,
         application: QApplication,
-        video: bool,
-        params: MediaPlay,
+        type: str,
+        media_play: MediaPlay,
     ) -> None:
         """Initialize the window"""
         Base.__init__(self)
@@ -32,18 +40,18 @@ class PlayerWindow(Base, QFrame):
         self._settings = settings
 
         self.layout = QVBoxLayout(self)  # type: ignore
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setContentsMargins(0, 0, 0, 0)  # type: ignore
 
         self.browser = QWebEngineView()
 
-        self.layout.addWidget(self.browser)
+        self.layout.addWidget(self.browser)  # type: ignore
 
         self.setWindowTitle("System Bridge - Player")
         self.setWindowIcon(icon)
 
-        if video:
+        if type == "audio":
             self.resize(480, 270)
-        else:
+        elif type == "video":
             self.resize(460, 130)
 
         screen_geometry = application.primaryScreen().availableSize()
@@ -56,10 +64,12 @@ class PlayerWindow(Base, QFrame):
         api_port = self._settings.get(SETTING_PORT_API)
         api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
-            f"""http://localhost:{api_port}/app/player/{"video" if video else "audio"}?{urlencode({
-                    "apiKey": api_key,
-                    "apiPort": api_port,
-                    **params.dict(),
+            f"""http://localhost:{api_port}/app/player/{type}.html?{urlencode({
+                    QUERY_API_KEY: api_key,
+                    QUERY_API_PORT: api_port,
+                    QUERY_AUTOPLAY: media_play.autoplay,
+                    QUERY_URL: media_play.url,
+                    QUERY_VOLUME: media_play.volume,
                 })}"""
         )
         self._logger.info("Open URL: %s", url)
