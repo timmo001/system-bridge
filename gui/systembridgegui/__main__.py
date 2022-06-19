@@ -213,11 +213,11 @@ def main(
 
 @app.command(name="media-player", help="Run the media player")
 def media_player(
-    type: str,
+    media_type: str,
     data: str,
 ) -> None:
     """Run the media player"""
-    Main(command=f"media-player-{type}", data=json.loads(data))
+    Main(command=f"media-player-{media_type}", data=json.loads(data))
 
 
 if __name__ == "__main__":
