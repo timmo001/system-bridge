@@ -564,11 +564,8 @@ class WebSocketClient(Base):
         if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")
 
-        self._logger.info("Receive message")
-
         try:
             message = await self._websocket.receive()
-            self._logger.info("Received message: %s", message)
         except RuntimeError:
             return None
 

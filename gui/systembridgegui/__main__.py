@@ -7,18 +7,23 @@ import sys
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
+import async_timeout
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
+from systembridgeshared.exceptions import (
+    AuthenticationException,
+    ConnectionErrorException,
+)
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 
 from systembridgegui._version import __version__
 from systembridgegui.system_tray import SystemTray
+from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
-from systembridgegui.worker import Worker
 
 
 class Main(Base):
@@ -28,6 +33,8 @@ class Main(Base):
         """Initialize"""
         super().__init__()
         self._logger.info("System Bridge GUI %s: Startup", __version__.public())
+
+        self._gui_only = sys.argv[1] == "gui-only"
 
         self._database = database
         self._settings = settings
@@ -56,14 +63,9 @@ class Main(Base):
             """
         )
 
-        worker = Worker(
-            self._application,
-            self._websocket_client,
-        )
-
         self._thread_pool = QThreadPool()
-        self._thread_pool.start(worker)
-        self._logger.debug("Threads: %s", self._thread_pool.activeThreadCount())
+
+        asyncio.run(self._setup())
 
         self._main_window = MainWindow(
             self._settings,
@@ -82,12 +84,9 @@ class Main(Base):
 
         sys.exit(self._application.exec())
 
-    def _callback_exit_application(
-        self,
-        gui_only: bool,
-    ) -> None:
+    def _callback_exit_application(self) -> None:
         """Exit the application"""
-        asyncio.run(self._exit_application(gui_only))
+        asyncio.run(self._exit_application(self._gui_only))
 
     def _callback_show_window(
         self,
@@ -117,6 +116,23 @@ class Main(Base):
         else:
             self._main_window.showNormal()
 
+    def _connection_error(
+        self,
+        message: str,
+    ) -> None:
+        """Handle a connection error"""
+        error_message = TimedMessageBox(
+            10,
+            f"{message} Exiting in",
+        )
+        error_message.setIcon(QMessageBox.Critical)
+        error_message.setWindowTitle("Error")
+        error_message.exec()
+        # Exit cleanly
+        self._logger.info("Exit GUI..")
+        self._application.quit()
+        sys.exit(1)
+
     async def _exit_application(
         self,
         gui_only: bool,
@@ -130,6 +146,25 @@ class Main(Base):
             await self._websocket_client.close()
         self._logger.info("Exit GUI..")
         self._application.quit()
+
+    async def _setup(self) -> None:
+        """Setup"""
+        await self._setup_websocket()
+
+    async def _setup_websocket(self) -> None:
+        """Setup the WebSocket client"""
+        try:
+            async with async_timeout.timeout(20):
+                await self._websocket_client.connect()
+        except AuthenticationException as exception:
+            self._logger.error("Authentication failed: %s", exception)
+            self._connection_error("Authentication failed!")
+        except ConnectionErrorException as exception:
+            self._logger.error("Could not connect to WebSocket: %s", exception)
+            self._connection_error("Could not connect to WebSocket!")
+        except asyncio.TimeoutError as exception:
+            self._logger.error("Connection timeout to WebSocket: %s", exception)
+            self._connection_error("Connection timeout to WebSocket!")
 
 
 if __name__ == "__main__":
