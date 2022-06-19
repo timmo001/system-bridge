@@ -20,7 +20,7 @@ async def start_gui(
     attempt: int = 1,
     command: str = "main",
     *args,
-) -> None:
+) -> None:  # pylint: disable=keyword-arg-before-vararg
     """Start the GUI"""
     if attempt > 2:
         logger.error("Failed to start GUI after 2 attempts")
@@ -74,7 +74,7 @@ def start_gui_sync(
     settings: Settings,
     command: str = "main",
     *args,
-) -> None:
+) -> None:  # pylint: disable=keyword-arg-before-vararg
     """Start the GUI in a synchronous thread"""
     asyncio.run(
         start_gui(
@@ -92,7 +92,7 @@ def start_gui_threaded(
     settings: Settings,
     command: str = "main",
     *args,
-) -> None:
+) -> None:  # pylint: disable=keyword-arg-before-vararg
     """Start the GUI in a thread"""
     thread = Thread(
         target=start_gui_sync,
