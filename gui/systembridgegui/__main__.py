@@ -123,7 +123,8 @@ class Main(Base):
         """Exit the backend"""
         if not gui_only:
             self._logger.info("Exit Backend..")
-            await self._websocket_client.connect()
+            if not self._websocket_client.connected:
+                await self._websocket_client.connect()
             await self._websocket_client.exit_backend()
             await self._websocket_client.close()
         self._logger.info("Exit GUI..")
