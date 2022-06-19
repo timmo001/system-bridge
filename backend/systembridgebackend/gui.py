@@ -14,13 +14,13 @@ class GUIAttemptsExceededException(BaseException):
     """Raise this when the GUI attempts to start more too many times."""
 
 
-async def start_gui(
+async def start_gui(  # pylint: disable=keyword-arg-before-vararg
     logger: Logger,
     settings: Settings,
     attempt: int = 1,
     command: str = "main",
     *args,
-) -> None:  # pylint: disable=keyword-arg-before-vararg
+) -> None:
     """Start the GUI"""
     if attempt > 2:
         logger.error("Failed to start GUI after 2 attempts")
@@ -69,12 +69,12 @@ async def start_gui(
         logger.info("GUI exited with code: %s", exit_code)
 
 
-def start_gui_sync(
+def start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
     logger: Logger,
     settings: Settings,
     command: str = "main",
     *args,
-) -> None:  # pylint: disable=keyword-arg-before-vararg
+) -> None:
     """Start the GUI in a synchronous thread"""
     asyncio.run(
         start_gui(
@@ -87,12 +87,12 @@ def start_gui_sync(
     )
 
 
-def start_gui_threaded(
+def start_gui_threaded(  # pylint: disable=keyword-arg-before-vararg
     logger: Logger,
     settings: Settings,
     command: str = "main",
     *args,
-) -> None:  # pylint: disable=keyword-arg-before-vararg
+) -> None:
     """Start the GUI in a thread"""
     thread = Thread(
         target=start_gui_sync,
