@@ -1,8 +1,6 @@
 """System Bridge GUI: Worker"""
 import asyncio
-from cmath import e
 import sys
-import time
 
 from PySide6.QtCore import QRunnable, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox
