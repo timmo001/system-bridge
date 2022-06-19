@@ -1,9 +1,9 @@
 """System Bridge: Server Handler - Media"""
 from __future__ import annotations
 
+from collections.abc import Callable
 import mimetypes
 import os
-from typing import Callable
 from urllib.parse import urlencode
 
 import aiofiles

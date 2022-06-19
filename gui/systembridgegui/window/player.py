@@ -27,7 +27,7 @@ class PlayerWindow(Base, QFrame):
         settings: Settings,
         icon: QIcon,
         application: QApplication,
-        type: str,
+        media_type: str,
         media_play: MediaPlay,
     ) -> None:
         """Initialize the window"""
@@ -49,9 +49,9 @@ class PlayerWindow(Base, QFrame):
         self.setWindowTitle("System Bridge - Player")
         self.setWindowIcon(icon)
 
-        if type == "audio":
+        if media_type == "audio":
             self.resize(480, 270)
-        elif type == "video":
+        elif media_type == "video":
             self.resize(460, 130)
 
         screen_geometry = application.primaryScreen().availableSize()
@@ -64,7 +64,7 @@ class PlayerWindow(Base, QFrame):
         api_port = self._settings.get(SETTING_PORT_API)
         api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
-            f"""http://localhost:{api_port}/app/player/{type}.html?{urlencode({
+            f"""http://localhost:{api_port}/app/player/{media_type}.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
                     QUERY_AUTOPLAY: media_play.autoplay,

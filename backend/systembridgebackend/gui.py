@@ -18,14 +18,14 @@ async def start_gui(
     logger: Logger,
     settings: Settings,
     attempt: int = 1,
-    type: str = "main",
+    command: str = "main",
     *args,
 ) -> None:
     """Start the GUI"""
     if attempt > 2:
         logger.error("Failed to start GUI after 2 attempts")
         raise GUIAttemptsExceededException("Failed to start GUI after 3 attempts")
-    if type == "main":
+    if command == "main":
         logger.info(
             "Test WebSocket connection before starting GUI. Attempt #%s", attempt
         )
@@ -40,7 +40,7 @@ async def start_gui(
                 logger,
                 settings,
                 attempt + 1,
-                type,
+                command,
                 *args,
             )
             return
@@ -49,7 +49,7 @@ async def start_gui(
         sys.executable,
         "-m",
         "systembridgegui",
-        type,
+        command,
         *args,
     ]
 
@@ -62,7 +62,7 @@ async def start_gui(
                 logger,
                 settings,
                 attempt + 1,
-                type,
+                command,
                 *args,
             )
             return
