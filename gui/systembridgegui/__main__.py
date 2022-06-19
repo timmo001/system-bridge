@@ -34,7 +34,7 @@ class Main(Base):
 
     def __init__(
         self,
-        type: str = "main",
+        command: str = "main",
         gui_only: bool = False,
         data: dict | None = None,
     ) -> None:
@@ -68,7 +68,7 @@ class Main(Base):
             """
         )
 
-        if type == "main":
+        if command == "main":
             self._logger.info("Main: Setup")
 
             self._gui_only = gui_only
@@ -90,7 +90,7 @@ class Main(Base):
                 self._callback_show_window,
             )
             self._system_tray_icon.show()
-        elif type == "media-player-audio":
+        elif command == "media-player-audio":
             self._logger.info("Media Player: Audio")
             if data is None:
                 self._logger.error("No data provided!")
@@ -104,7 +104,7 @@ class Main(Base):
                 "audio",
                 media_play,
             )
-        elif type == "media-player-video":
+        elif command == "media-player-video":
             self._logger.info("Media Player: Video")
             if data is None:
                 self._logger.error("No data provided!")
@@ -208,7 +208,7 @@ def main(
     gui_only: bool = False,
 ) -> None:
     """Run the main application"""
-    Main(type="main", gui_only=gui_only)
+    Main(command="main", gui_only=gui_only)
 
 
 @app.command(name="media-player", help="Run the media player")
@@ -217,7 +217,7 @@ def media_player(
     data: str,
 ) -> None:
     """Run the media player"""
-    Main(type=f"media-player-{type}", data=json.loads(data))
+    Main(command=f"media-player-{type}", data=json.loads(data))
 
 
 if __name__ == "__main__":

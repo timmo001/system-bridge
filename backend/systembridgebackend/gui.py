@@ -19,7 +19,7 @@ async def start_gui(
     settings: Settings,
     attempt: int = 1,
     command: str = "main",
-    *args,
+    *kwargs,
 ) -> None:
     """Start the GUI"""
     if attempt > 2:
@@ -41,20 +41,20 @@ async def start_gui(
                 settings,
                 attempt + 1,
                 command,
-                *args,
+                *kwargs,
             )
             return
 
-    pgm_args = [
+    pgm_kwargs = [
         sys.executable,
         "-m",
         "systembridgegui",
         command,
-        *args,
+        *kwargs,
     ]
 
-    logger.info("Starting GUI: %s", pgm_args)
-    with subprocess.Popen(pgm_args) as process:
+    logger.info("Starting GUI: %s", pgm_kwargs)
+    with subprocess.Popen(pgm_kwargs) as process:
         logger.info("GUI started with PID: %s", process.pid)
         if (exit_code := process.wait()) != 0:
             logger.error("GUI exited with code: %s", exit_code)
@@ -63,7 +63,7 @@ async def start_gui(
                 settings,
                 attempt + 1,
                 command,
-                *args,
+                *kwargs,
             )
             return
         logger.info("GUI exited with code: %s", exit_code)
@@ -73,7 +73,7 @@ def start_gui_sync(
     logger: Logger,
     settings: Settings,
     type: str = "main",
-    *args,
+    *kwargs,
 ) -> None:
     """Start the GUI in a synchronous thread"""
     asyncio.run(
@@ -82,7 +82,7 @@ def start_gui_sync(
             settings,
             1,
             type,
-            *args,
+            *kwargs,
         )
     )
 
@@ -91,7 +91,7 @@ def start_gui_threaded(
     logger: Logger,
     settings: Settings,
     type: str = "main",
-    *args,
+    *kwargs,
 ) -> None:
     """Start the GUI in a thread"""
     thread = Thread(
@@ -100,7 +100,7 @@ def start_gui_threaded(
             logger,
             settings,
             type,
-            *args,
+            *kwargs,
         ),
     )
     thread.start()
