@@ -63,6 +63,7 @@ class Main(Base):
 
         self._thread_pool = QThreadPool()
         self._thread_pool.start(worker)
+        self._logger.debug("Threads: %s", self._thread_pool.activeThreadCount())
 
         self._main_window = MainWindow(
             self._settings,

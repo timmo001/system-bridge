@@ -41,8 +41,9 @@ class Worker(Base, QRunnable):
     def run(self):
         """Run"""
         self._logger.info("Starting worker thread")
-        # Setup WebSocket
         asyncio.run(self._setup_websocket())
+        asyncio.run(self._listen_for_data())
+        self._logger.info("Worker thread finished")
 
     async def _callback_module_update(
         self,
@@ -85,8 +86,6 @@ class Worker(Base, QRunnable):
             self._logger.error("Connection timeout to WebSocket: %s", exception)
             self._connection_error("Connection timeout to WebSocket!")
 
-        await self._listen_for_data()
-
     async def _listen_for_data(self) -> None:
         """Listen for data from the WebSocket client"""
         try:
@@ -106,9 +105,11 @@ class Worker(Base, QRunnable):
                 "WebSocket connection closed. Will retry: %s", exception
             )
             await self._setup_websocket()
+            await self._listen_for_data()
         except ConnectionErrorException as exception:
             self._logger.warning(
                 "WebSocket connection error occurred. Will retry: %s",
                 exception,
             )
             await self._setup_websocket()
+            await self._listen_for_data()
