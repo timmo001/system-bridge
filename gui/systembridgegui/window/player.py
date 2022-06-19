@@ -50,9 +50,9 @@ class PlayerWindow(Base, QFrame):
         self.setWindowIcon(icon)
 
         if media_type == "audio":
-            self.resize(480, 270)
+            self.resize(520, 160)
         elif media_type == "video":
-            self.resize(460, 130)
+            self.resize(480, 270)
 
         screen_geometry = application.primaryScreen().availableSize()
 
@@ -74,3 +74,5 @@ class PlayerWindow(Base, QFrame):
         )
         self._logger.info("Open URL: %s", url)
         self.browser.load(url)
+
+        self.showNormal()
