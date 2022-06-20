@@ -67,7 +67,7 @@ class PlayerWindow(Base, QFrame):
             f"""http://localhost:{api_port}/app/player/{media_type}.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
-                    **media_play.dict(),
+                    **media_play.dict(exclude_none=True),
                 })}"""
         )
         self._logger.info("Open URL: %s", url)

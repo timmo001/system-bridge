@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
+import io
 import mimetypes
 import os
+import re
 from urllib.parse import urlencode
 
 import aiofiles
@@ -12,15 +15,12 @@ from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
 from systembridgeshared.const import (
-    QUERY_ALBUM,
     QUERY_API_KEY,
     QUERY_API_PORT,
-    QUERY_ARTIST,
     QUERY_AUTOPLAY,
     QUERY_BASE,
     QUERY_FILENAME,
     QUERY_PATH,
-    QUERY_TITLE,
     QUERY_URL,
     QUERY_VOLUME,
     SECRET_API_KEY,
@@ -36,27 +36,27 @@ def get_directories(settings: Settings) -> list[dict]:
     directories = [
         {
             "key": "documents",
-            "path": storagepath.get_documents_dir(),
+            "path": storagepath.get_documents_dir(),  # type: ignore
         },
         {
             "key": "downloads",
-            "path": storagepath.get_downloads_dir(),
+            "path": storagepath.get_downloads_dir(),  # type: ignore
         },
         {
             "key": "home",
-            "path": storagepath.get_home_dir(),
+            "path": storagepath.get_home_dir(),  # type: ignore
         },
         {
             "key": "music",
-            "path": storagepath.get_music_dir(),
+            "path": storagepath.get_music_dir(),  # type: ignore
         },
         {
             "key": "pictures",
-            "path": storagepath.get_pictures_dir(),
+            "path": storagepath.get_pictures_dir(),  # type: ignore
         },
         {
             "key": "videos",
-            "path": storagepath.get_videos_dir(),
+            "path": storagepath.get_videos_dir(),  # type: ignore
         },
     ]
 
@@ -416,17 +416,57 @@ async def handler_media_play(
         album = metadata.get("album")
         artist = metadata.get("artist")
         title = metadata.get("title")
-        cover = metadata.get("cover")
-        if (album) is not None and len(album) > 0:
+
+        if album is not None and len(album) > 0:
             media_play.album = album[0]
-        if (artist) is not None and len(artist) > 0:
+        if artist is not None and len(artist) > 0:
             media_play.artist = artist[0]
-        if (title) is not None and len(title) > 0:
+        if title is not None and len(title) > 0:
             media_play.title = title[0]
-        if (cover) is not None and len(cover) > 0:
+
+        # MP3 etc.
+        cover = metadata.get("covr")
+        if cover is None:
+            cover = metadata.get("APIC")
+        if cover is None:
+            cover = metadata.get("APIC:")
+        if cover is not None and len(cover) > 0:
             media_play.cover = cover[0]
 
+        # FLAC
+        if media_play.cover is None:
+            try:
+                if (
+                    getattr(metadata, "pictures") is not None
+                    and len(metadata.pictures) > 0
+                ):
+                    cover_mime_type = metadata.pictures[0].mime
+                    cover_extension = mimetypes.guess_extension(cover_mime_type)
+                    cover_data = metadata.pictures[0].data
+
+                    file_path = os.path.join(
+                        storagepath.get_pictures_dir(),  # type: ignore
+                        re.sub(
+                            "[^-a-zA-Z0-9_.() ]+",
+                            "",
+                            f"{album[0] if album is not None else 'unknown'}__{datetime.timestamp}{cover_extension}",
+                        ),
+                    )
+                    with io.open(file_path, "wb") as cover_file:
+                        cover_file.write(cover_data)
+                    media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                                    QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                                    QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                    QUERY_BASE: "pictures",
+                                    QUERY_PATH: file_path,
+                                })}"""
+            except Exception:
+                pass
+
     callback(media_type, media_play)
+
+    api_port = settings.get(SETTING_PORT_API)
+    api_key = settings.get_secret(SECRET_API_KEY)
 
     return json(
         {
@@ -434,6 +474,11 @@ async def handler_media_play(
             "media_type": media_type,
             "mime_type": mime_type,
             "path": path,
+            "player_url": f"""{request.scheme}://{request.host}/app/player/{media_type}.html?{urlencode({
+                    QUERY_API_KEY: api_key,
+                    QUERY_API_PORT: api_port,
+                    **media_play.dict(exclude_none=True),
+                })}""",
             **media_play.dict(),
         }
     )

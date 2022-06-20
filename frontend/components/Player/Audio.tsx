@@ -25,7 +25,6 @@ import {
   useHover,
   usePlayer,
 } from "components/Player/Utils";
-import logo from "assets/media/system-bridge-dimmed.svg";
 
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -147,8 +146,6 @@ function AudioComponent() {
 
   useEffect(() => {
     if (!loaded) {
-      // handleSetPlaying(true);
-
       //   window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
       //   window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
       //     handleToggleMuted()
@@ -191,15 +188,6 @@ function AudioComponent() {
       handleSetLoaded(true);
     }
   }, [loaded, handleSetLoaded, handleSetPlaying]);
-  //   handleToggleMuted,
-  //   handleSetMuted,
-  //   handleSetPlaying,
-  //   handleTogglePlaying,
-  //   handleSetVolume,
-  //   handleSetPosition,
-  //   handleUpdatePlayerPosition,
-  //   handleSendCover,
-  // ]);
 
   function handleScrub(_event: Event, value: number | number[]) {
     if (typeof value === "number") {

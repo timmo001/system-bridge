@@ -29,7 +29,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           // window.api.ipcRendererOn("audio-metadata", (_event, data) => {
           setPlayerStatus({
             muted: false,
-            playing: false,
+            playing: query.autoplay?.toLowerCase() === "true",
             loaded: false,
             position: 0,
             duration: 1,
