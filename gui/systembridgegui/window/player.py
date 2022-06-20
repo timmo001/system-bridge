@@ -9,9 +9,6 @@ from systembridgeshared.base import Base
 from systembridgeshared.const import (
     QUERY_API_KEY,
     QUERY_API_PORT,
-    QUERY_AUTOPLAY,
-    QUERY_URL,
-    QUERY_VOLUME,
     SECRET_API_KEY,
     SETTING_PORT_API,
 )

@@ -323,7 +323,7 @@ function AudioComponent() {
                 <Slider
                   min={0}
                   max={1}
-                  step={0.05}
+                  step={0.01}
                   value={volume}
                   onChange={(_event: Event, value: number | number[]) => {
                     if (typeof value === "number") handleSetVolume(value);

@@ -439,8 +439,7 @@ async def handler_media_play(
         # MP3 etc.
         for key in metadata.keys():
             if key.startswith("APIC"):
-                cover = metadata.get(key)
-                if cover is not None:
+                if (cover := metadata.get(key)) is not None:
                     cover_filename = _save_cover_from_binary(
                         cover.data,
                         cover.mime,
@@ -476,7 +475,7 @@ async def handler_media_play(
                                                 QUERY_PATH: cover_filename,
                                             })}"""
                         asyncio.create_task(_delete_cover_delayed(cover_filename))
-            except Exception:
+            except AttributeError:
                 pass
 
     callback(media_type, media_play)
