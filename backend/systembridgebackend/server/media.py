@@ -503,8 +503,12 @@ async def _delete_cover_delayed(
 ) -> None:
     """Delete cover after delay."""
     await asyncio.sleep(delay)
-    if os.path.exists(file_name):
-        os.remove(file_name)
+    file_path = os.path.join(
+        storagepath.get_pictures_dir(),  # type: ignore
+        file_name,
+    )
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 def _save_cover_from_binary(
