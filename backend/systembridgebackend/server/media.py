@@ -1,6 +1,7 @@
 """System Bridge: Server Handler - Media"""
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from datetime import datetime
 import io
@@ -411,27 +412,49 @@ async def handler_media_play(
         }
     )
 
+    api_port = settings.get(SETTING_PORT_API)
+    api_key = settings.get_secret(SECRET_API_KEY)
+
     if media_type == "audio":
         metadata = MutagenFile(path)
-        album = metadata.get("album")
-        artist = metadata.get("artist")
-        title = metadata.get("title")
 
+        album = metadata.get("album")
         if album is not None and len(album) > 0:
             media_play.album = album[0]
+        elif (album := metadata.get("TALB")) is not None:
+            media_play.album = album.text[0]
+
+        artist = metadata.get("artist")
         if artist is not None and len(artist) > 0:
             media_play.artist = artist[0]
+        elif (artist := metadata.get("TPE1")) is not None:
+            media_play.artist = artist.text[0]
+
+        title = metadata.get("title")
         if title is not None and len(title) > 0:
             media_play.title = title[0]
+        elif (title := metadata.get("TIT2")) is not None:
+            media_play.title = title.text[0]
 
         # MP3 etc.
-        cover = metadata.get("covr")
-        if cover is None:
-            cover = metadata.get("APIC")
-        if cover is None:
-            cover = metadata.get("APIC:")
-        if cover is not None and len(cover) > 0:
-            media_play.cover = cover[0]
+        for key in metadata.keys():
+            if key.startswith("APIC"):
+                cover = metadata.get(key)
+                if cover is not None:
+                    cover_filename = _save_cover_from_binary(
+                        cover.data,
+                        cover.mime,
+                        media_play.album,
+                    )
+                    if cover_filename is not None:
+                        media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_BASE: "pictures",
+                                                QUERY_PATH: cover_filename,
+                                            })}"""
+                        asyncio.create_task(_delete_cover_delayed(cover_filename))
+                    break
 
         # FLAC
         if media_play.cover is None:
@@ -440,33 +463,23 @@ async def handler_media_play(
                     getattr(metadata, "pictures") is not None
                     and len(metadata.pictures) > 0
                 ):
-                    cover_mime_type = metadata.pictures[0].mime
-                    cover_extension = mimetypes.guess_extension(cover_mime_type)
-                    cover_data = metadata.pictures[0].data
-
-                    file_path = os.path.join(
-                        storagepath.get_pictures_dir(),  # type: ignore
-                        re.sub(
-                            "[^-a-zA-Z0-9_.() ]+",
-                            "",
-                            f"{album[0] if album is not None else 'unknown'}__{datetime.timestamp}{cover_extension}",
-                        ),
+                    cover_filename = _save_cover_from_binary(
+                        metadata.pictures[0].data,
+                        metadata.pictures[0].mime,
+                        media_play.album,
                     )
-                    with io.open(file_path, "wb") as cover_file:
-                        cover_file.write(cover_data)
-                    media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
-                                    QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                                    QUERY_API_PORT: settings.get(SETTING_PORT_API),
-                                    QUERY_BASE: "pictures",
-                                    QUERY_PATH: file_path,
-                                })}"""
+                    if cover_filename is not None:
+                        media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                                                QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                                                QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                                                QUERY_BASE: "pictures",
+                                                QUERY_PATH: cover_filename,
+                                            })}"""
+                        asyncio.create_task(_delete_cover_delayed(cover_filename))
             except Exception:
                 pass
 
     callback(media_type, media_play)
-
-    api_port = settings.get(SETTING_PORT_API)
-    api_key = settings.get_secret(SECRET_API_KEY)
 
     return json(
         {
@@ -482,3 +495,34 @@ async def handler_media_play(
             **media_play.dict(),
         }
     )
+
+
+async def _delete_cover_delayed(
+    file_name: str,
+    delay: float = 20,
+) -> None:
+    """Delete cover after delay."""
+    await asyncio.sleep(delay)
+    if os.path.exists(file_name):
+        os.remove(file_name)
+
+
+def _save_cover_from_binary(
+    data: bytes,
+    mime_type: str,
+    name: str | None,
+) -> str:
+    """Save cover from binary."""
+    cover_extension = mimetypes.guess_extension(mime_type)
+    file_name = re.sub(
+        "[^-a-zA-Z0-9_.() ]+",
+        "",
+        f"{name if name is not None else 'unknown'}__{datetime.timestamp(datetime.now())}{cover_extension}",
+    )
+    file_path = os.path.join(
+        storagepath.get_pictures_dir(),  # type: ignore
+        file_name,
+    )
+    with io.open(file_path, "wb") as cover_file:
+        cover_file.write(data)
+    return file_name
