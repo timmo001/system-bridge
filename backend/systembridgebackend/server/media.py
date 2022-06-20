@@ -7,16 +7,20 @@ import os
 from urllib.parse import urlencode
 
 import aiofiles
+from mutagen import File as MutagenFile
 from plyer import storagepath
 from sanic.request import Request
 from sanic.response import HTTPResponse, file, json
 from systembridgeshared.const import (
+    QUERY_ALBUM,
     QUERY_API_KEY,
     QUERY_API_PORT,
+    QUERY_ARTIST,
     QUERY_AUTOPLAY,
     QUERY_BASE,
     QUERY_FILENAME,
     QUERY_PATH,
+    QUERY_TITLE,
     QUERY_URL,
     QUERY_VOLUME,
     SECRET_API_KEY,
@@ -406,6 +410,21 @@ async def handler_media_play(
             QUERY_VOLUME: float(request.args.get(QUERY_VOLUME, default=40)),
         }
     )
+
+    if media_type == "audio":
+        metadata = MutagenFile(path)
+        album = metadata.get("album")
+        artist = metadata.get("artist")
+        title = metadata.get("title")
+        cover = metadata.get("cover")
+        if (album) is not None and len(album) > 0:
+            media_play.album = album[0]
+        if (artist) is not None and len(artist) > 0:
+            media_play.artist = artist[0]
+        if (title) is not None and len(title) > 0:
+            media_play.title = title[0]
+        if (cover) is not None and len(cover) > 0:
+            media_play.cover = cover[0]
 
     callback(media_type, media_play)
 

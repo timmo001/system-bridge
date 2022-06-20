@@ -17,7 +17,7 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
   const previousPlayerStatus = usePrevious(playerStatus);
 
   const router = useRouter();
-  const query = router.query;
+  const query = router.query as NodeJS.Dict<string>;
 
   useEffect(() => {
     if (!playerStatus && router.isReady) {
@@ -35,10 +35,11 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
             duration: 1,
             source: {
               type: "audio",
-              source: String(query.url),
-              album: "Album",
-              artist: "Aritst",
-              title: "Title",
+              source: query.url,
+              album: query.album || "Unknown Album",
+              artist: query.artist || "Unknown Aritst",
+              cover: query.cover,
+              title: query.title || "Unknown Title",
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },
             volume: (volume > 0 ? volume : 40) / 100,

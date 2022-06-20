@@ -3,9 +3,21 @@
   "type": "object",
   "description": "Media Play",
   "properties": {
+    "album": {
+      "type": "string"
+    },
+    "artist": {
+      "type": "string"
+    },
     "autoplay": {
       "type": "boolean",
       "default": false
+    },
+    "cover": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
     },
     "url": {
       "type": "string"
