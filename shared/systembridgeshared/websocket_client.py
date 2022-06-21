@@ -555,6 +555,7 @@ class WebSocketClient(Base):
         if self._websocket is not None:
             while not self._websocket.closed:
                 message = await self.receive_message()
+                self._logger.info("Message: %s", message)
                 if isinstance(message, dict):
                     await callback(message)
 

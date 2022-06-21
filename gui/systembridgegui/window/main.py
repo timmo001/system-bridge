@@ -6,7 +6,12 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 from systembridgeshared.base import Base
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.const import (
+    QUERY_API_KEY,
+    QUERY_API_PORT,
+    SECRET_API_KEY,
+    SETTING_PORT_API,
+)
 from systembridgeshared.settings import Settings
 
 
@@ -52,8 +57,8 @@ class MainWindow(Base, QFrame):
         api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
             f"""http://localhost:{api_port}{path}?{urlencode({
-                    "apiKey": api_key,
-                    "apiPort": api_port,
+                    QUERY_API_KEY: api_key,
+                    QUERY_API_PORT: api_port,
                 })}"""
         )
         self._logger.info("Open URL: %s", url)

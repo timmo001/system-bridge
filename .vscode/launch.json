@@ -39,7 +39,7 @@
       "preLaunchTask": "GUI: pip install",
       "cwd": "${workspaceFolder}/gui",
       "justMyCode": false,
-      "args": []
+      "args": ["--gui-only"]
     },
     {
       "name": "Frontend",
@@ -58,7 +58,6 @@
       "runtimeExecutable": "yarn",
       "preLaunchTask": "Frontend: install",
       "cwd": "${workspaceFolder}/frontend",
-      "justMyCode": false,
       "runtimeArgs": ["start:dev"]
     }
   ]
