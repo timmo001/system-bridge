@@ -25,7 +25,7 @@ class LastUpdated(BaseModel):
     stats_interrupts: float
     stats_soft_interrupts: float
     stats_syscalls: float
-    temperature: float
+    temperature: Optional[float] = None
     times_user: float
     times_system: float
     times_idle: float
@@ -57,7 +57,7 @@ class Cpu(BaseModel):
     stats_interrupts: int
     stats_soft_interrupts: int
     stats_syscalls: int
-    temperature: float
+    temperature: Optional[float] = None
     times_user: float
     times_system: float
     times_idle: float
