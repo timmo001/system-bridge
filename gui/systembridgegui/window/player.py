@@ -47,7 +47,7 @@ class PlayerWindow(Base, QFrame):
         self.setWindowIcon(icon)
 
         if media_type == "audio":
-            self.resize(520, 160)
+            self.resize(540, 140)
         elif media_type == "video":
             self.resize(480, 270)
 

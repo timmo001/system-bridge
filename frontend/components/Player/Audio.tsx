@@ -237,8 +237,12 @@ function AudioComponent() {
         alignItems="center"
         justifyItems="center"
         wrap="nowrap"
+        sx={{
+          height: 140,
+          width: 540,
+        }}
       >
-        <Grid item sx={{ width: 140, margin: theme.spacing(0, 2, 0, 0) }}>
+        <Grid item sx={{ width: 140, margin: theme.spacing(0, 1, 0, 0) }}>
           {/* @ts-ignore */}
           <Box ref={hoveringRef}>
             <ButtonBase
