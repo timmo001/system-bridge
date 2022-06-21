@@ -240,6 +240,7 @@ function AudioComponent() {
         sx={{
           height: 140,
           width: 540,
+          overflow: "hidden",
         }}
       >
         <Grid item sx={{ width: 140, margin: theme.spacing(0, 1, 0, 0) }}>
