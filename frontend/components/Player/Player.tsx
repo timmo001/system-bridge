@@ -26,7 +26,6 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
         default:
           break;
         case "audio":
-          // window.api.ipcRendererOn("audio-metadata", (_event, data) => {
           setPlayerStatus({
             muted: false,
             playing: query.autoplay?.toLowerCase() === "true",
@@ -44,12 +43,6 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
             },
             volume: (volume > 0 ? volume : 40) / 100,
           });
-          // });
-          // console.log(
-          //   "OLD ipcRendererSend:",
-          //   "get-audio-metadata",
-          //   query.path || query.url
-          // );
           break;
         case "video":
           setPlayerStatus({
@@ -87,11 +80,6 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
-        // try {
-        //   console.log("OLD ipcRendererSend:", "player-status", newStatus);
-        // } catch (e) {
-        //   console.warn("Error calling window.api:", e);
-        // }
       }
     }
   }, [playerStatus, previousPlayerStatus]);

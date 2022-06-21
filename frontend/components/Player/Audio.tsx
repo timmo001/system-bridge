@@ -137,55 +137,8 @@ function AudioComponent() {
     [playing, handleSetPlaying]
   );
 
-  const handleSendCover = useCallback(
-    (event: any) => {
-      console.log("handleSendCover");
-      event.sender.send("player-cover", cover);
-    },
-    [cover]
-  );
-
   useEffect(() => {
     if (!loaded) {
-      //   window.api.ipcRendererRemoveAllListeners("player-mute-toggle");
-      //   window.api.ipcRendererOn("player-mute-toggle", (_e: Event) =>
-      //     handleToggleMuted()
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-mute");
-      //   window.api.ipcRendererOn("player-mute", (_e: Event, v: boolean) =>
-      //     handleSetMuted(v)
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-pause");
-      //   window.api.ipcRendererOn("player-pause", (_e: Event) =>
-      //     handleSetPlaying(false)
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-play");
-      //   window.api.ipcRendererOn("player-play", (_e: Event) =>
-      //     handleSetPlaying(true)
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-playpause");
-      //   window.api.ipcRendererOn("player-playpause", (_e: Event) =>
-      //     handleTogglePlaying()
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-volume");
-      //   window.api.ipcRendererOn("player-volume", (_e: Event, v: number) =>
-      //     handleSetVolume(v)
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-volume-down");
-      //   window.api.ipcRendererOn("player-volume-down", (_e: Event, v: number) =>
-      //     handleSetVolume(v, "down")
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-volume-up");
-      //   window.api.ipcRendererOn("player-volume-up", (_e: Event, v: number) =>
-      //     handleSetVolume(v, "up")
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-seek");
-      //   window.api.ipcRendererOn("player-seek", (_e: Event, v: number) =>
-      //     handleUpdatePlayerPosition(v)
-      //   );
-      //   window.api.ipcRendererRemoveAllListeners("player-get-cover");
-      //   window.api.ipcRendererOn("player-get-cover", (e) => handleSendCover(e));
-
       handleSetLoaded(true);
     }
   }, [loaded, handleSetLoaded, handleSetPlaying]);
