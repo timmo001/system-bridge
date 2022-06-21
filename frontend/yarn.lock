@@ -2242,10 +2242,10 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-player@2.10.0:
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/react-player/-/react-player-2.10.0.tgz#bd3e0f10ae756cc644efb14177a515d455d97e20"
-  integrity sha512-PccIqea9nxSHAdai6R+Yj9lp6tb2lyXWbaF6YVHi5uO4FiXYMKKr9rMXJrivwV5vXwQa65rYKBmwebsBmRTT3w==
+react-player@2.10.1:
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/react-player/-/react-player-2.10.1.tgz#f2ee3ec31393d7042f727737545414b951ffc7e4"
+  integrity sha512-ova0jY1Y1lqLYxOehkzbNEju4rFXYVkr5rdGD71nsiG4UKPzRXQPTd3xjoDssheoMNjZ51mjT5ysTrdQ2tEvsg==
   dependencies:
     deepmerge "^4.0.0"
     load-script "^1.0.0"
