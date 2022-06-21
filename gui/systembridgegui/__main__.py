@@ -75,6 +75,7 @@ class Main(Base):
             self._websocket_client = WebSocketClient(self._settings)
 
             asyncio.run(self._setup_websocket())
+            asyncio.run(self._websocket_client.close())
 
             self._main_window = MainWindow(
                 self._settings,
@@ -177,8 +178,7 @@ class Main(Base):
         """Exit the backend"""
         if not gui_only:
             self._logger.info("Exit Backend..")
-            if not self._websocket_client.connected:
-                await self._websocket_client.connect()
+            await self._setup_websocket()
             await self._websocket_client.exit_backend()
             await self._websocket_client.close()
         self._logger.info("Exit GUI..")
