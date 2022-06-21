@@ -76,7 +76,7 @@ class Main(Base):
 
             asyncio.run(self._setup_websocket())
 
-            self._window = MainWindow(
+            self._main_window = MainWindow(
                 self._settings,
                 self._icon,
             )
@@ -97,7 +97,7 @@ class Main(Base):
                 self._startup_error("No data provided!")
                 sys.exit(1)
             media_play = MediaPlay(**data)
-            self._window = PlayerWindow(
+            self._player_window = PlayerWindow(
                 self._settings,
                 self._icon,
                 self._application,
@@ -111,7 +111,7 @@ class Main(Base):
                 self._startup_error("No data provided!")
                 sys.exit(1)
             media_play = MediaPlay(**data)
-            self._window = PlayerWindow(
+            self._player_window = PlayerWindow(
                 self._settings,
                 self._icon,
                 self._application,
@@ -140,18 +140,18 @@ class Main(Base):
         if height is None:
             height = 720
 
-        self._window.hide()
-        self._window.setup(path)
-        self._window.resize(width, height)
+        self._main_window.hide()
+        self._main_window.setup(path)
+        self._main_window.resize(width, height)
         screen_geometry = self._application.primaryScreen().availableSize()
-        self._window.move(
-            int((screen_geometry.width() - self._window.width()) / 2),
-            int((screen_geometry.height() - self._window.height()) / 2),
+        self._main_window.move(
+            int((screen_geometry.width() - self._main_window.width()) / 2),
+            int((screen_geometry.height() - self._main_window.height()) / 2),
         )
         if maximized:
-            self._window.showMaximized()
+            self._main_window.showMaximized()
         else:
-            self._window.showNormal()
+            self._main_window.showNormal()
 
     def _startup_error(
         self,
