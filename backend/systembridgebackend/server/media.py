@@ -491,7 +491,7 @@ async def handler_media_play(
                     QUERY_API_PORT: api_port,
                     **media_play.dict(exclude_none=True),
                 })}""",
-            **media_play.dict(),
+            **media_play.dict(exclude_none=True),
         }
     )
 
