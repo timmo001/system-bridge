@@ -238,7 +238,7 @@ function AudioComponent() {
         wrap="nowrap"
         sx={{ padding: theme.spacing(1, 2) }}
       >
-        <Grid item sx={{ width: 320, margin: theme.spacing(0, 1, 0, 0) }}>
+        <Grid item sx={{ width: 160, margin: theme.spacing(0, 1, 0, 0) }}>
           {/* @ts-ignore */}
           <Box ref={hoveringRef}>
             <IconButton
@@ -252,6 +252,7 @@ function AudioComponent() {
                   cover ||
                   "https://raw.githubusercontent.com/timmo001/system-bridge/master/resources/system-bridge-dimmed.svg"
                 }
+                width={160}
               />
               <Fade
                 in={isHovering ? true : false}
@@ -269,7 +270,7 @@ function AudioComponent() {
                   <Icon
                     id={playing ? "pause" : "play"}
                     path={playing ? mdiPause : mdiPlay}
-                    size={12}
+                    size={6}
                     style={{
                       position: "relative",
                       margin: "auto",
