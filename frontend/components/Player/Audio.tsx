@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import {
   Box,
+  ButtonBase,
   Fade,
   Grid,
   IconButton,
@@ -236,12 +237,11 @@ function AudioComponent() {
         alignItems="center"
         justifyItems="center"
         wrap="nowrap"
-        sx={{ padding: theme.spacing(1, 2) }}
       >
-        <Grid item sx={{ width: 160, margin: theme.spacing(0, 1, 0, 0) }}>
+        <Grid item sx={{ width: 140, margin: theme.spacing(0, 2, 0, 0) }}>
           {/* @ts-ignore */}
           <Box ref={hoveringRef}>
-            <IconButton
+            <ButtonBase
               aria-label={playing ? "Pause" : "Play"}
               onClick={handleTogglePlaying}
             >
@@ -252,7 +252,7 @@ function AudioComponent() {
                   cover ||
                   "https://raw.githubusercontent.com/timmo001/system-bridge/master/resources/system-bridge-dimmed.svg"
                 }
-                width={160}
+                width={140}
               />
               <Fade
                 in={isHovering ? true : false}
@@ -278,7 +278,7 @@ function AudioComponent() {
                   />
                 </Box>
               </Fade>
-            </IconButton>
+            </ButtonBase>
           </Box>
         </Grid>
         <Grid item xs>
