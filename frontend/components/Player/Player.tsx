@@ -1,23 +1,89 @@
-import React, { ReactElement, useEffect, useMemo } from "react";
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/dist/client/router";
 import { cloneDeep, isEqual } from "lodash";
 
+import { Event } from "assets/entities/event.entity";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
+import { WebSocketConnection } from "components/Common/WebSocket";
 import AudioComponent from "./Audio";
 import VideoComponent from "./Video";
 
 interface PlayerProps {
   playerType: "audio" | "video";
-  entered?: boolean;
 }
 
-function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
+let websocket: WebSocketConnection;
+function PlayerComponent({ playerType }: PlayerProps): ReactElement {
+  const [webSocketSetup, setWebSocketSetup] = useState<boolean>(false);
   const [playerStatus, setPlayerStatus] = usePlayer();
   const previousPlayerStatus = usePrevious(playerStatus);
 
   const router = useRouter();
   const query = router.query as NodeJS.Dict<string>;
+
+  const eventHandler = useCallback(
+    (event: Event) => {
+      console.log("Event:", event);
+      switch (event.type) {
+        case "MEDIA_PAUSE":
+          setPlayerStatus({ ...playerStatus!!, playing: false });
+          break;
+        case "MEDIA_PLAY":
+          setPlayerStatus({ ...playerStatus!!, playing: true });
+          break;
+        case "MEDIA_VOLUME_DOWN":
+          if (event.volume)
+            setPlayerStatus({
+              ...playerStatus!!,
+              volume: playerStatus!!.volume - event.volume,
+            });
+          break;
+        case "MEDIA_VOLUME_UP":
+          if (event.volume)
+            setPlayerStatus({
+              ...playerStatus!!,
+              volume: playerStatus!!.volume + event.volume,
+            });
+          break;
+        case "MEDIA_VOLUME_SET":
+          if (event.volume)
+            setPlayerStatus({ ...playerStatus!!, volume: event.volume });
+          break;
+        case "MEDIA_VOLUME_SET":
+          if (event.position)
+            setPlayerStatus({ ...playerStatus!!, position: event.position });
+          break;
+        default:
+          break;
+      }
+    },
+    [playerStatus, setPlayerStatus]
+  );
+
+  const handleSetupWebSocket = useCallback(
+    (port: number, apiKey: string) => {
+      console.log("Setup WebSocketConnection");
+      websocket = new WebSocketConnection(port, apiKey, async () => {
+        console.log("Connected to WebSocket");
+      });
+      websocket.onEvent = eventHandler;
+    },
+    [eventHandler]
+  );
+
+  useEffect(() => {
+    if (!webSocketSetup && query && query.apiKey) {
+      setWebSocketSetup(true);
+      handleSetupWebSocket(Number(query.apiPort) || 9170, String(query.apiKey));
+    }
+  }, [webSocketSetup, handleSetupWebSocket, query]);
 
   useEffect(() => {
     if (!playerStatus && router.isReady) {
@@ -80,6 +146,13 @@ function PlayerComponent({ playerType, entered }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
+        if (!websocket) return;
+        if (!websocket.isConnected()) {
+          setWebSocketSetup(false);
+          console.warn("WebSocket not connected");
+          return;
+        }
+        websocket.sendPlayerStatus(newStatus);
       }
     }
   }, [playerStatus, previousPlayerStatus]);

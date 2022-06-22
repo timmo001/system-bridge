@@ -1,4 +1,5 @@
 import { SettingsValue } from "assets/entities/settings.entity";
+import { PlayerStatus } from "components/Player/Utils";
 import { Event } from "../../assets/entities/event.entity";
 
 export class WebSocketConnection {
@@ -45,64 +46,75 @@ export class WebSocketConnection {
     return ws;
   }
 
-  getData(modules: Array<string>): void {
-    if (!this.websocket) return;
-    console.log("Get data:", modules);
-    this.websocket.send(
-      JSON.stringify({
-        event: "GET_DATA",
-        "api-key": this.apiKey,
-        modules: modules,
-      })
+  isConnected(): boolean {
+    console.log(
+      "isConnected:",
+      this.websocket ? true : false,
+      this.websocket?.readyState
     );
+    return this.websocket?.readyState === WebSocket.OPEN;
+  }
+
+  getData(modules: Array<string>): void {
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Get data:", modules);
+      this.websocket.send(
+        JSON.stringify({
+          "api-key": this.apiKey,
+          event: "GET_DATA",
+          modules: modules,
+        })
+      );
+    }
   }
 
   getSettings(): void {
-    if (!this.websocket) return;
-    console.log("Get settings");
-    this.websocket.send(
-      JSON.stringify({
-        event: "GET_SETTINGS",
-        "api-key": this.apiKey,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Get settings");
+      this.websocket.send(
+        JSON.stringify({
+          "api-key": this.apiKey,
+          event: "GET_SETTINGS",
+        })
+      );
+    }
   }
 
   registerDataListener(modules: Array<string>): void {
-    if (!this.websocket) return;
-    console.log("Register data listener:", modules);
-    this.websocket.send(
-      JSON.stringify({
-        event: "REGISTER_DATA_LISTENER",
-        "api-key": this.apiKey,
-        modules: modules,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Register data listener:", modules);
+      this.websocket.send(
+        JSON.stringify({
+          "api-key": this.apiKey,
+          event: "REGISTER_DATA_LISTENER",
+          modules: modules,
+        })
+      );
+    }
   }
 
-  sendEvent(event: Event): void {
+  sendPlayerStatus(status: PlayerStatus): void {
     if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
       this.websocket.send(
         JSON.stringify({
-          event: "events",
-          data: {
-            "api-key": this.apiKey,
-            data: event,
-          },
+          "api-key": this.apiKey,
+          event: "MEDIA_STATUS",
+          status: status,
         })
       );
   }
 
   updateSetting(key: string, value: SettingsValue): void {
-    if (!this.websocket) return;
-    console.log("Update setting:", { key, value });
-    this.websocket.send(
-      JSON.stringify({
-        event: "UPDATE_SETTING",
-        "api-key": this.apiKey,
-        setting: key,
-        value: value,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Update setting:", { key, value });
+      this.websocket.send(
+        JSON.stringify({
+          "api-key": this.apiKey,
+          event: "UPDATE_SETTING",
+          setting: key,
+          value: value,
+        })
+      );
+    }
   }
 }
