@@ -5,4 +5,6 @@ export interface Event {
   modules?: Array<string>;
   module?: string;
   data?: any;
+  position?: number;
+  volume?: number;
 }
