@@ -2,6 +2,7 @@
 from keyboard import press_and_release, write
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+from systembridgeshared.settings import Settings
 
 
 def keyboard_keypress(key: str):
@@ -16,6 +17,7 @@ def keyboard_text(text: str):
 
 async def handler_keyboard(
     request: Request,
+    _: Settings,
 ) -> HTTPResponse:
     """Send a keyboard event."""
     if request.json is None:
