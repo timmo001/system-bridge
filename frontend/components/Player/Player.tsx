@@ -146,7 +146,8 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
-        if (!websocket?.isConnected()) {
+        if (!websocket) return;
+        if (!websocket.isConnected()) {
           setWebSocketSetup(false);
           console.warn("WebSocket not connected");
           return;
