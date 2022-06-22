@@ -28,41 +28,44 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   const router = useRouter();
   const query = router.query as NodeJS.Dict<string>;
 
-  const eventHandler = useCallback((event: Event) => {
-    console.log("Event:", event);
-    switch (event.type) {
-      case "MEDIA_PAUSE":
-        setPlayerStatus({ ...playerStatus!!, playing: false });
-        break;
-      case "MEDIA_PLAY":
-        setPlayerStatus({ ...playerStatus!!, playing: true });
-        break;
-      case "MEDIA_VOLUME_DOWN":
-        if (event.volume)
-          setPlayerStatus({
-            ...playerStatus!!,
-            volume: playerStatus!!.volume - event.volume,
-          });
-        break;
-      case "MEDIA_VOLUME_UP":
-        if (event.volume)
-          setPlayerStatus({
-            ...playerStatus!!,
-            volume: playerStatus!!.volume + event.volume,
-          });
-        break;
-      case "MEDIA_VOLUME_SET":
-        if (event.volume)
-          setPlayerStatus({ ...playerStatus!!, volume: event.volume });
-        break;
-      case "MEDIA_VOLUME_SET":
-        if (event.position)
-          setPlayerStatus({ ...playerStatus!!, position: event.position });
-        break;
-      default:
-        break;
-    }
-  }, []);
+  const eventHandler = useCallback(
+    (event: Event) => {
+      console.log("Event:", event);
+      switch (event.type) {
+        case "MEDIA_PAUSE":
+          setPlayerStatus({ ...playerStatus!!, playing: false });
+          break;
+        case "MEDIA_PLAY":
+          setPlayerStatus({ ...playerStatus!!, playing: true });
+          break;
+        case "MEDIA_VOLUME_DOWN":
+          if (event.volume)
+            setPlayerStatus({
+              ...playerStatus!!,
+              volume: playerStatus!!.volume - event.volume,
+            });
+          break;
+        case "MEDIA_VOLUME_UP":
+          if (event.volume)
+            setPlayerStatus({
+              ...playerStatus!!,
+              volume: playerStatus!!.volume + event.volume,
+            });
+          break;
+        case "MEDIA_VOLUME_SET":
+          if (event.volume)
+            setPlayerStatus({ ...playerStatus!!, volume: event.volume });
+          break;
+        case "MEDIA_VOLUME_SET":
+          if (event.position)
+            setPlayerStatus({ ...playerStatus!!, position: event.position });
+          break;
+        default:
+          break;
+      }
+    },
+    [playerStatus, setPlayerStatus]
+  );
 
   const handleSetupWebSocket = useCallback(
     (port: number, apiKey: string) => {
@@ -143,12 +146,12 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
-        if (ws && !ws.isConnected()) {
+        if (!ws?.isConnected()) {
           setWebSocketSetup(false);
           console.warn("WebSocket not connected");
           return;
         }
-        if (ws) ws.sendPlayerStatus(newStatus);
+        ws.sendPlayerStatus(newStatus);
       }
     }
   }, [playerStatus, previousPlayerStatus]);
