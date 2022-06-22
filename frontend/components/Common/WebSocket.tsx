@@ -1,4 +1,5 @@
 import { SettingsValue } from "assets/entities/settings.entity";
+import { PlayerStatus } from "components/Player/Utils";
 import { Event } from "../../assets/entities/event.entity";
 
 export class WebSocketConnection {
@@ -46,7 +47,7 @@ export class WebSocketConnection {
   }
 
   isConnected(): boolean {
-    return this.websocket?.readyState !== WebSocket.CLOSED;
+    return this.websocket?.readyState === WebSocket.OPEN;
   }
 
   getData(modules: Array<string>): void {
@@ -84,14 +85,14 @@ export class WebSocketConnection {
     );
   }
 
-  sendEvent(event: Event): void {
+  sendPlayerStatus(status: PlayerStatus): void {
     if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
       this.websocket.send(
         JSON.stringify({
-          event: "events",
+          event: "MEDIA_STATUS",
           data: {
             "api-key": this.apiKey,
-            data: event,
+            status: status,
           },
         })
       );
