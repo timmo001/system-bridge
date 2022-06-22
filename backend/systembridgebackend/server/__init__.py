@@ -178,91 +178,109 @@ class Server(Base):
             _handler_data_all,
             "/api/data/<table:str>",
             methods=["GET"],
+            name="Data",
         )
         self._server.add_route(
             _handler_data_by_key,
             "/api/data/<table:str>/<key:str>",
             methods=["GET"],
+            name="Data by Key",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_keyboard),
             "/api/keyboard",
             methods=["POST"],
+            name="Keyboard",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_directories),
             "/api/media",
             methods=["GET"],
+            name="Media Directories",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_files),
             "/api/media/files",
             methods=["GET"],
+            name="Media Files",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_file),
             "/api/media/file",
             methods=["GET"],
+            name="Media File",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_file_data),
             "/api/media/file/data",
             methods=["GET"],
+            name="Media File Data",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_media_file_write),
             "/api/media/file/write",
             methods=["POST"],
+            name="Media File Write",
         )
         self._server.add_route(
             _handler_media_play,
             "/api/media/play",
             methods=["POST"],
+            name="Media Play",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_notification),
             "/api/notification",
             methods=["POST"],
+            name="Notification",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_open),
             "/api/open",
             methods=["POST"],
+            name="Open",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_sleep),
             "/api/power/sleep",
             methods=["POST"],
+            name="Power Sleep",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_hibernate),
             "/api/power/hibernate",
             methods=["POST"],
+            name="Power Hibernate",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_restart),
             "/api/power/restart",
             methods=["POST"],
+            name="Power Restart",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_shutdown),
             "/api/power/shutdown",
             methods=["POST"],
+            name="Power Shutdown",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_lock),
             "/api/power/lock",
             methods=["POST"],
+            name="Power Lock",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_logout),
             "/api/power/logout",
             methods=["POST"],
+            name="Power Logout",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_update),
             "/api/update",
             methods=["POST"],
+            name="Update",
         )
 
         if "--no-frontend" not in sys.argv:
@@ -277,6 +295,7 @@ class Server(Base):
                     frontend_path,
                     strict_slashes=False,
                     content_type="text/html",
+                    name="Frontend",
                 )
             except (ImportError, ModuleNotFoundError) as error:
                 self._logger.error("Frontend not found: %s", error)
@@ -284,6 +303,7 @@ class Server(Base):
         self._server.add_websocket_route(
             _handler_websocket,
             "/api/websocket",
+            name="WebSocket",
         )
 
     async def _callback_data_updated(
