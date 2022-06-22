@@ -1,6 +1,6 @@
 export interface Event {
   type: string;
-  message: string;
+  message?: string;
   id?: string;
   modules?: Array<string>;
   module?: string;
