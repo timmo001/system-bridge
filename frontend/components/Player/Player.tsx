@@ -19,7 +19,7 @@ interface PlayerProps {
   playerType: "audio" | "video";
 }
 
-let ws: WebSocketConnection;
+let websocket: WebSocketConnection;
 function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   const [webSocketSetup, setWebSocketSetup] = useState<boolean>(false);
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -70,10 +70,10 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   const handleSetupWebSocket = useCallback(
     (port: number, apiKey: string) => {
       console.log("Setup WebSocketConnection");
-      const ws = new WebSocketConnection(port, apiKey, async () => {
+      websocket = new WebSocketConnection(port, apiKey, async () => {
         console.log("Connected to WebSocket");
       });
-      ws.onEvent = eventHandler;
+      websocket.onEvent = eventHandler;
     },
     [eventHandler]
   );
@@ -146,12 +146,12 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
-        if (!ws?.isConnected()) {
+        if (!websocket?.isConnected()) {
           setWebSocketSetup(false);
           console.warn("WebSocket not connected");
           return;
         }
-        ws.sendPlayerStatus(newStatus);
+        websocket.sendPlayerStatus(newStatus);
       }
     }
   }, [playerStatus, previousPlayerStatus]);
