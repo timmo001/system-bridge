@@ -19,6 +19,7 @@ interface PlayerProps {
   playerType: "audio" | "video";
 }
 
+let ws: WebSocketConnection;
 function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   const [webSocketSetup, setWebSocketSetup] = useState<boolean>(false);
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -142,6 +143,10 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
+        ws.sendEvent({
+          type: "MEDIA_STATUS",
+          data: newStatus,
+        });
       }
     }
   }, [playerStatus, previousPlayerStatus]);
