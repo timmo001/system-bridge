@@ -45,6 +45,10 @@ export class WebSocketConnection {
     return ws;
   }
 
+  isConnected(): boolean {
+    return this.websocket?.readyState !== WebSocket.CLOSED;
+  }
+
   getData(modules: Array<string>): void {
     if (!this.websocket) return;
     console.log("Get data:", modules);

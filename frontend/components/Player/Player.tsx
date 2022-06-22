@@ -143,6 +143,11 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "\nnewStatus:",
           newStatus
         );
+        if (!ws.isConnected()) {
+          setWebSocketSetup(false);
+          console.warn("WebSocket not connected");
+          return;
+        }
         ws.sendEvent({
           type: "MEDIA_STATUS",
           data: newStatus,
