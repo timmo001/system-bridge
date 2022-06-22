@@ -51,38 +51,41 @@ export class WebSocketConnection {
   }
 
   getData(modules: Array<string>): void {
-    if (!this.websocket) return;
-    console.log("Get data:", modules);
-    this.websocket.send(
-      JSON.stringify({
-        event: "GET_DATA",
-        "api-key": this.apiKey,
-        modules: modules,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Get data:", modules);
+      this.websocket.send(
+        JSON.stringify({
+          event: "GET_DATA",
+          "api-key": this.apiKey,
+          modules: modules,
+        })
+      );
+    }
   }
 
   getSettings(): void {
-    if (!this.websocket) return;
-    console.log("Get settings");
-    this.websocket.send(
-      JSON.stringify({
-        event: "GET_SETTINGS",
-        "api-key": this.apiKey,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Get settings");
+      this.websocket.send(
+        JSON.stringify({
+          event: "GET_SETTINGS",
+          "api-key": this.apiKey,
+        })
+      );
+    }
   }
 
   registerDataListener(modules: Array<string>): void {
-    if (!this.websocket) return;
-    console.log("Register data listener:", modules);
-    this.websocket.send(
-      JSON.stringify({
-        event: "REGISTER_DATA_LISTENER",
-        "api-key": this.apiKey,
-        modules: modules,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Register data listener:", modules);
+      this.websocket.send(
+        JSON.stringify({
+          event: "REGISTER_DATA_LISTENER",
+          "api-key": this.apiKey,
+          modules: modules,
+        })
+      );
+    }
   }
 
   sendPlayerStatus(status: PlayerStatus): void {
@@ -99,15 +102,16 @@ export class WebSocketConnection {
   }
 
   updateSetting(key: string, value: SettingsValue): void {
-    if (!this.websocket) return;
-    console.log("Update setting:", { key, value });
-    this.websocket.send(
-      JSON.stringify({
-        event: "UPDATE_SETTING",
-        "api-key": this.apiKey,
-        setting: key,
-        value: value,
-      })
-    );
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
+      console.log("Update setting:", { key, value });
+      this.websocket.send(
+        JSON.stringify({
+          event: "UPDATE_SETTING",
+          "api-key": this.apiKey,
+          setting: key,
+          value: value,
+        })
+      );
+    }
   }
 }
