@@ -7,6 +7,7 @@ import platform
 from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+from systembridgeshared.settings import Settings
 
 
 def send_notification(
@@ -41,6 +42,7 @@ def send_notification(
 
 async def handler_notification(
     request: Request,
+    _: Settings,
 ) -> HTTPResponse:
     """Send a notification."""
     if request.json is None:
