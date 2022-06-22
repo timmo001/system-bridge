@@ -176,6 +176,15 @@ async def handler_media_files(
             {"message": "Cannot find path", "path": path},
             status=404,
         )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        return json(
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+            status=400,
+        )
     if not os.path.isdir(path):
         return json(
             {"message": "Path is not a directory", "path": path},
@@ -224,6 +233,15 @@ async def handler_media_file(
             {"message": "Cannot find path", "path": path},
             status=404,
         )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        return json(
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+            status=400,
+        )
     if not os.path.isfile(path):
         return json(
             {"message": "Path is not a file", "path": path},
@@ -266,6 +284,15 @@ async def handler_media_file_data(
         return json(
             {"message": "File does not exist", "path": path},
             status=404,
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        return json(
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+            status=400,
         )
     if not os.path.isfile(path):
         return json(
@@ -322,6 +349,15 @@ async def handler_media_file_write(
 
     if not os.path.exists(path):
         os.makedirs(path)
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        return json(
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+            status=400,
+        )
     async with aiofiles.open(os.path.join(path, query_filename), "wb") as new_file:
         await new_file.write(request.body)
         await new_file.close()
@@ -369,6 +405,15 @@ async def handler_media_play(
         return json(
             {"message": "File does not exist", "path": path},
             status=404,
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        return json(
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+            status=400,
         )
     if not os.path.isfile(path):
         return json(
