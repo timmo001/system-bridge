@@ -3,5 +3,5 @@ appdirs==1.4.4
 colorlog==6.6.0
 cryptography==37.0.2
 incremental==21.3.0
-pandas==1.4.2
+pandas==1.4.3
 pydantic==1.9.1
