@@ -47,11 +47,6 @@ export class WebSocketConnection {
   }
 
   isConnected(): boolean {
-    console.log(
-      "isConnected:",
-      this.websocket ? true : false,
-      this.websocket?.readyState
-    );
     return this.websocket?.readyState === WebSocket.OPEN;
   }
 
@@ -94,7 +89,7 @@ export class WebSocketConnection {
   }
 
   sendPlayerStatus(status: PlayerStatus): void {
-    if (this.websocket && this.websocket.readyState === this.websocket.OPEN)
+    if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
       this.websocket.send(
         JSON.stringify({
           "api-key": this.apiKey,
@@ -102,6 +97,7 @@ export class WebSocketConnection {
           status: status,
         })
       );
+    }
   }
 
   updateSetting(key: string, value: SettingsValue): void {

@@ -150,6 +150,7 @@ function AudioComponent() {
   }
 
   function handleScrubStart(): void {
+    handleSetPlaying(false);
     setSeeking(true);
   }
 
@@ -170,7 +171,7 @@ function AudioComponent() {
         url={source}
         volume={volume}
         onDuration={(duration: number) => {
-          if (!seeking) handleSetDuration(duration);
+          handleSetDuration(duration);
         }}
         onPause={() => handleSetPlaying(false)}
         onPlay={() => handleSetPlaying(true)}
@@ -182,7 +183,9 @@ function AudioComponent() {
           playedSeconds: number;
           loaded: number;
           loadedSeconds: number;
-        }) => handleSetPosition(playedSeconds)}
+        }) => {
+          if (!seeking) handleSetPosition(playedSeconds);
+        }}
       />
       <Grid
         container
