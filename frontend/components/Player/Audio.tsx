@@ -129,10 +129,10 @@ function AudioComponent() {
 
   const handleUpdatePlayerPosition = useCallback(
     (p: number) => {
+      ref.current?.seekTo(p, "seconds");
+      setSeeking(false);
       // If not already playing, start
       if (!playing) handleSetPlaying(true);
-      setSeeking(false);
-      ref.current?.seekTo(p);
     },
     [playing, handleSetPlaying]
   );
@@ -144,9 +144,7 @@ function AudioComponent() {
   }, [loaded, handleSetLoaded, handleSetPlaying]);
 
   function handleScrub(_event: Event, value: number | number[]) {
-    if (typeof value === "number") {
-      handleSetPosition(value);
-    }
+    handleSetPosition(value as number);
   }
 
   function handleScrubStart(): void {
@@ -168,14 +166,21 @@ function AudioComponent() {
         width="0px"
         muted={muted}
         playing={playing}
+        stopOnUnmount
         url={source}
         volume={volume}
         onDuration={(duration: number) => {
           handleSetDuration(duration);
         }}
-        onPause={() => handleSetPlaying(false)}
-        onPlay={() => handleSetPlaying(true)}
-        onStart={() => handleSetPlaying(true)}
+        onPause={() => {
+          handleSetPlaying(false);
+        }}
+        onPlay={() => {
+          handleSetPlaying(true);
+        }}
+        onStart={() => {
+          handleSetPlaying(true);
+        }}
         onProgress={({
           playedSeconds,
         }: {
