@@ -1,6 +1,5 @@
 """System Bridge: Main"""
 import logging
-import platform
 import sys
 
 from systembridgeshared.base import Base
