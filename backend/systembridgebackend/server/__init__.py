@@ -94,7 +94,7 @@ class Server(Base):
                     start_gui_threaded(self._logger, self._settings)
                 except GUIAttemptsExceededException:
                     self._logger.error("GUI could not be started. Exiting application")
-                    await self._exit_application()
+                    self._exit_application()
 
         @task(
             start=timedelta(seconds=10),
@@ -170,7 +170,7 @@ class Server(Base):
                 self._listeners,
                 implemented_modules,
                 socket,
-                self._callback_exit_application,
+                self._exit_application,
             )
             await websocket.handler()
 
@@ -313,14 +313,11 @@ class Server(Base):
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
 
-    def _callback_exit_application(self) -> None:
-        """Callback to exit application"""
-        asyncio.create_task(self._exit_application())
-
-    async def _exit_application(self) -> None:
+    def _exit_application(self) -> None:
         """Exit application"""
-        self._logger.info("Exiting application")
         self.stop_server()
+        self._logger.info("Server stopped. Exiting application")
+        sys.exit(0)
 
     def _callback_media_play(
         self,
