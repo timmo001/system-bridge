@@ -358,6 +358,5 @@ class Server(Base):
             pending_task.cancel()
         self._logger.info("Stop the event loop")
         loop.stop()
-        # self._server.enable_websocket(False)
         self._listeners.remove_all_listeners()
         self._server.stop()

@@ -1,4 +1,5 @@
 """System Bridge: Autostart Windows"""
+import os
 import platform
 import sys
 
@@ -52,6 +53,6 @@ def autostart_windows_enable():
         "systembridgebackend",
         0,
         REG_SZ,
-        f'"{sys.executable}" -m systembridgebackend --silent',
+        f'"{os.path.join(os.path.dirname(sys.executable), "pythonw.exe")}" -m systembridgebackend --silent',
     )
     CloseKey(key)

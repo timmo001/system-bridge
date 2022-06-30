@@ -37,6 +37,6 @@ def create_windows_shortcuts():
     shortcut.Arguments = "-m systembridgebackend --silent"
     shortcut.Description = "System Bridge"
     shortcut.IconLocation = os.path.join(os.path.dirname(__file__), "../icon.ico")
-    shortcut.Targetpath = sys.executable
+    shortcut.Targetpath = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
     shortcut.WorkingDirectory = sys.prefix
     shortcut.save()
