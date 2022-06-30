@@ -37,14 +37,6 @@ class Main(Base):
 
             create_shortcuts()
 
-        if platform.system() == "Windows" and "--silent" in sys.argv:
-            self._logger.info("Hide console")
-            # pylint: disable=import-error, import-outside-toplevel
-            from win32con import SW_HIDE
-            from win32gui import GetForegroundWindow, ShowWindow
-
-            ShowWindow(GetForegroundWindow(), SW_HIDE)  # type: ignore
-
         self._server = Server(database, settings)
 
         # Start the server
