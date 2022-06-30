@@ -1,6 +1,5 @@
 """Setup"""
 import io
-import platform
 
 from setuptools import find_packages, setup
 
