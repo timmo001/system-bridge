@@ -150,39 +150,6 @@ class WebSocketHandler(Base):
         self._logger.debug("Sending message: %s", message)
         await self._websocket.send(message)
 
-    async def _check_api_key(
-        self,
-        request: Request,
-    ) -> bool:
-        """Check API key"""
-        if request.api_key is None:
-            self._logger.warning("No api-key provided")
-            await self._send_response(
-                Response(
-                    **{
-                        EVENT_ID: request.id,
-                        EVENT_TYPE: TYPE_ERROR,
-                        EVENT_SUBTYPE: SUBTYPE_MISSING_API_KEY,
-                        EVENT_MESSAGE: "No api-key provided",
-                    }
-                )
-            )
-            return False
-        if request.api_key != self._settings.get_secret(SECRET_API_KEY):
-            self._logger.warning("Invalid api-key")
-            await self._send_response(
-                Response(
-                    **{
-                        EVENT_ID: request.id,
-                        EVENT_TYPE: TYPE_ERROR,
-                        EVENT_SUBTYPE: SUBTYPE_BAD_API_KEY,
-                        EVENT_MESSAGE: "Invalid api-key",
-                    }
-                )
-            )
-            return False
-        return True
-
     async def _data_changed(
         self,
         module: str,
@@ -242,7 +209,18 @@ class WebSocketHandler(Base):
 
             self._logger.info("Received: %s", request.event)
 
-            if not await self._check_api_key(request):
+            if request.api_key != self._settings.get_secret(SECRET_API_KEY):
+                self._logger.warning("Invalid api-key")
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
+                            EVENT_TYPE: TYPE_ERROR,
+                            EVENT_SUBTYPE: SUBTYPE_BAD_API_KEY,
+                            EVENT_MESSAGE: "Invalid api-key",
+                        }
+                    )
+                )
                 continue
 
             if request.event == TYPE_APPLICATION_UPDATE:
