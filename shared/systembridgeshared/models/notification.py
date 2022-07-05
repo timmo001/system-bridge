@@ -16,3 +16,6 @@ class Notification(BaseModel):
     title: Optional[str] = None
     message: str
     icon: Optional[str] = None
+    app_name: Optional[str] = None
+    app_icon: Optional[str] = None
+    timeout: Optional[float] = None

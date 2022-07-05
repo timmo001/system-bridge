@@ -11,6 +11,15 @@
     },
     "icon": {
       "type": "string"
+    },
+    "app_name": {
+      "type": "string"
+    },
+    "app_icon": {
+      "type": "string"
+    },
+    "timeout": {
+      "type": "number"
     }
   },
   "required": ["message"]
