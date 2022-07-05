@@ -147,7 +147,7 @@ class WebSocketHandler(Base):
         if not self._active:
             return
         message = response.json()
-        self._logger.info("Sending response: %s", message)
+        self._logger.debug("Sending message: %s", message)
         await self._websocket.send(message)
 
     async def _check_api_key(
