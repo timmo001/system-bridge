@@ -1,13 +1,11 @@
 """System Bridge: WebSocket handler"""
 from collections.abc import Callable
-from json import JSONDecodeError, dumps, loads
+from json import JSONDecodeError, loads
 import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
-    EVENT_APP_ICON,
-    EVENT_APP_NAME,
     EVENT_BASE,
     EVENT_DATA,
     EVENT_DIRECTORIES,
@@ -21,9 +19,8 @@ from systembridgeshared.const import (
     EVENT_PATH,
     EVENT_SETTING,
     EVENT_SUBTYPE,
-    EVENT_TIMEOUT,
-    EVENT_TITLE,
     EVENT_TYPE,
+    EVENT_URL,
     EVENT_VALUE,
     EVENT_VERSIONS,
     SETTING_AUTOSTART,
@@ -32,6 +29,7 @@ from systembridgeshared.const import (
     SUBTYPE_BAD_FILE,
     SUBTYPE_BAD_JSON,
     SUBTYPE_BAD_PATH,
+    SUBTYPE_BAD_REQUEST,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
     SUBTYPE_MISSING_API_KEY,
@@ -90,6 +88,16 @@ from systembridgeshared.const import (
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.get_data import GetData
+from systembridgeshared.models.keyboard_key import KeyboardKey
+from systembridgeshared.models.keyboard_text import KeyboardText
+from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.open_path import OpenPath
+from systembridgeshared.models.open_url import OpenUrl
+from systembridgeshared.models.register_data_listener import RegisterDataListener
+from systembridgeshared.models.request import Request
+from systembridgeshared.models.response import Response
+from systembridgeshared.models.update import Update as UpdateModel
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
@@ -131,16 +139,28 @@ class WebSocketHandler(Base):
         self._callback_exit_application = callback_exit_application
         self._active = True
 
+    async def _send_response(
+        self,
+        response: Response,
+    ) -> None:
+        """Send response"""
+        if not self._active:
+            return
+        message = response.json()
+        self._logger.info("Sending response: %s", message)
+        await self._websocket.send(message)
+
     async def _check_api_key(
         self,
-        data: dict,
+        request: Request,
     ) -> bool:
         """Check API key"""
-        if "api-key" not in data:
+        if request.api_key is None:
             self._logger.warning("No api-key provided")
-            await self._websocket.send(
-                dumps(
-                    {
+            await self._send_response(
+                Response(
+                    **{
+                        EVENT_ID: request.id,
                         EVENT_TYPE: TYPE_ERROR,
                         EVENT_SUBTYPE: SUBTYPE_MISSING_API_KEY,
                         EVENT_MESSAGE: "No api-key provided",
@@ -148,11 +168,12 @@ class WebSocketHandler(Base):
                 )
             )
             return False
-        if data["api-key"] != self._settings.get_secret(SECRET_API_KEY):
+        if request.api_key != self._settings.get_secret(SECRET_API_KEY):
             self._logger.warning("Invalid api-key")
-            await self._websocket.send(
-                dumps(
-                    {
+            await self._send_response(
+                Response(
+                    **{
+                        EVENT_ID: request.id,
                         EVENT_TYPE: TYPE_ERROR,
                         EVENT_SUBTYPE: SUBTYPE_BAD_API_KEY,
                         EVENT_MESSAGE: "Invalid api-key",
@@ -171,9 +192,9 @@ class WebSocketHandler(Base):
         if module not in self._implemented_modules:
             self._logger.info("Data module %s not in registered modules", module)
             return
-        await self._websocket.send(
-            dumps(
-                {
+        await self._send_response(
+            Response(
+                **{
                     EVENT_TYPE: TYPE_DATA_UPDATE,
                     EVENT_MESSAGE: "Data changed",
                     EVENT_MODULE: module,
@@ -191,47 +212,66 @@ class WebSocketHandler(Base):
         while self._active:
             try:
                 data = loads(await self._websocket.recv())
+                request = Request(**data)
             except JSONDecodeError as error:
-                self._logger.error("Invalid JSON: %s", error)
-                await self._websocket.send(
-                    dumps(
-                        {
+                message = "Invalid JSON: %s" % error
+                self._logger.error(message)
+                await self._send_response(
+                    Response(
+                        **{
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_BAD_JSON,
-                            EVENT_MESSAGE: "Invalid JSON",
+                            EVENT_MESSAGE: message,
+                        }
+                    )
+                )
+                continue
+            except ValueError as error:
+                message = f"Invalid request: {error}"
+                self._logger.error(message)
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_TYPE: TYPE_ERROR,
+                            EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                            EVENT_MESSAGE: message,
                         }
                     )
                 )
                 continue
 
-            self._logger.info("Received: %s", data[EVENT_EVENT])
+            self._logger.info("Received: %s", request.event)
 
-            if not await self._check_api_key(data):
+            if not await self._check_api_key(request):
                 continue
 
-            if data[EVENT_EVENT] == TYPE_APPLICATION_UPDATE:
+            if request.event == TYPE_APPLICATION_UPDATE:
+                model = UpdateModel(**data)
                 versions = Update().update(
-                    data.get("version"),
+                    model.version,
                     wait=False,
                 )
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_APPLICATION_UPDATING,
                             EVENT_MESSAGE: "Updating application",
                             EVENT_VERSIONS: versions,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_EXIT_APPLICATION:
+            elif request.event == TYPE_EXIT_APPLICATION:
                 self._callback_exit_application()
                 self._logger.info("Exit application called")
-            elif data[EVENT_EVENT] == TYPE_KEYBOARD_KEYPRESS:
-                if "key" not in data:
+            elif request.event == TYPE_KEYBOARD_KEYPRESS:
+                model = KeyboardKey(**data)
+                if model.key is None:
                     self._logger.warning("No key provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
                                 EVENT_MESSAGE: "No key provided",
@@ -241,12 +281,13 @@ class WebSocketHandler(Base):
                     continue
 
                 try:
-                    keyboard_keypress(data["key"])
+                    keyboard_keypress(model.key)
                 except ValueError as err:
                     self._logger.warning(err.args[0])
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
                                 EVENT_MESSAGE: "Invalid key",
@@ -255,22 +296,25 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_KEYBOARD_KEY_PRESSED,
                             EVENT_MESSAGE: "Key pressed",
                             EVENT_ID: listener_id,
-                            "key": data["key"],
+                            "key": model.key,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_KEYBOARD_TEXT:
-                if "text" not in data:
+            elif request.event == TYPE_KEYBOARD_TEXT:
+                model = KeyboardText(**data)
+                if model.text is None:
                     self._logger.warning("No text provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_TEXT,
                                 EVENT_MESSAGE: "No text provided",
@@ -279,24 +323,27 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                keyboard_text(data["text"])
+                keyboard_text(model.text)
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_KEYBOARD_TEXT_SENT,
                             EVENT_MESSAGE: "Key pressed",
                             EVENT_ID: listener_id,
-                            "text": data["text"],
+                            "text": model.text,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_NOTIFICATION:
-                if "message" not in data:
+            elif request.event == TYPE_NOTIFICATION:
+                model = Notification(**data)
+                if model.message is None:
                     self._logger.warning("No message provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_MESSAGE,
                                 EVENT_MESSAGE: "No message provided",
@@ -305,67 +352,66 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                send_notification(
-                    data[EVENT_MESSAGE],
-                    data.get(EVENT_TITLE),
-                    data.get(EVENT_APP_NAME),
-                    data.get(EVENT_APP_ICON),
-                    data.get(EVENT_TIMEOUT),
-                )
+                send_notification(model)
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_NOTIFICATION_SENT,
                             EVENT_MESSAGE: "Notification sent",
-                            EVENT_ID: listener_id,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_OPEN:
+            elif request.event == TYPE_OPEN:
                 if "path" in data:
+                    model = OpenPath(**data)
                     open_path(data["path"])
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_OPENED,
                                 EVENT_MESSAGE: "Path opened",
-                                EVENT_ID: listener_id,
-                                "path": data["path"],
+                                EVENT_PATH: data["path"],
                             }
                         )
                     )
                     continue
                 if "url" in data:
-                    open_url(data["url"])
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    model = OpenUrl(**data)
+                    open_url(model.url)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_OPENED,
                                 EVENT_MESSAGE: "URL opened",
-                                EVENT_ID: listener_id,
-                                "url": data["url"],
+                                EVENT_URL: model.url,
                             }
                         )
                     )
                     continue
 
                 self._logger.warning("No path or url provided")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_MISSING_PATH_URL,
                             EVENT_MESSAGE: "No path or url provided",
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_REGISTER_DATA_LISTENER:
-                if EVENT_MODULES not in data:
+            elif request.event == TYPE_REGISTER_DATA_LISTENER:
+                model = RegisterDataListener(**data)
+                if model.modules is None or len(model.modules) == 0:
                     self._logger.warning("No modules provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
                                 EVENT_MESSAGE: "No modules provided",
@@ -377,44 +423,45 @@ class WebSocketHandler(Base):
                 self._logger.info(
                     "Registering data listener: %s - %s",
                     listener_id,
-                    data[EVENT_MODULES],
+                    model.modules,
                 )
 
                 if await self._listeners.add_listener(
                     listener_id,
                     self._data_changed,
-                    data[EVENT_MODULES],
+                    model.modules,
                 ):
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
                                 EVENT_MESSAGE: "Listener already registered with this connection",
-                                EVENT_ID: listener_id,
-                                EVENT_MODULES: data[EVENT_MODULES],
+                                EVENT_MODULES: model.modules,
                             }
                         )
                     )
                     continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DATA_LISTENER_REGISTERED,
                             EVENT_MESSAGE: "Data listener registered",
-                            EVENT_ID: listener_id,
-                            EVENT_MODULES: data[EVENT_MODULES],
+                            EVENT_MODULES: model.modules,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_UNREGISTER_DATA_LISTENER:
+            elif request.event == TYPE_UNREGISTER_DATA_LISTENER:
                 self._logger.info("Unregistering data listener %s", listener_id)
 
                 if not self._listeners.remove_listener(listener_id):
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
                                 EVENT_MESSAGE: "Listener not registered with this connection",
@@ -423,21 +470,23 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DATA_LISTENER_UNREGISTERED,
                             EVENT_MESSAGE: "Data listener unregistered",
-                            EVENT_ID: listener_id,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_GET_DATA:
-                if EVENT_MODULES not in data:
+            elif request.event == TYPE_GET_DATA:
+                model = GetData(**data)
+                if model.modules is None or len(model.modules) == 0:
                     self._logger.warning("No modules provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
                                 EVENT_MESSAGE: "No modules provided",
@@ -445,24 +494,25 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                self._logger.info("Getting data: %s", data[EVENT_MODULES])
+                self._logger.info("Getting data: %s", model.modules)
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
                             EVENT_TYPE: TYPE_DATA_GET,
                             EVENT_MESSAGE: "Getting data",
-                            EVENT_MODULES: data[EVENT_MODULES],
+                            EVENT_MODULES: model.modules,
                         }
                     )
                 )
 
-                for module in data[EVENT_MODULES]:
+                for module in model.modules:
                     data = self._database.table_data_to_ordered_dict(module)
                     if data is not None:
-                        await self._websocket.send(
-                            dumps(
-                                {
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
                                     EVENT_TYPE: TYPE_DATA_UPDATE,
                                     EVENT_MESSAGE: "Data received",
                                     EVENT_MODULE: module,
@@ -470,21 +520,23 @@ class WebSocketHandler(Base):
                                 }
                             )
                         )
-            elif data[EVENT_EVENT] == TYPE_GET_DIRECTORIES:
-                await self._websocket.send(
-                    dumps(
-                        {
+            elif request.event == TYPE_GET_DIRECTORIES:
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DIRECTORIES,
                             EVENT_DIRECTORIES: get_directories(self._settings),
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_GET_FILES:
+            elif request.event == TYPE_GET_FILES:
                 if EVENT_BASE not in data:
                     self._logger.warning("No base provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
                                 EVENT_MESSAGE: "No base provided",
@@ -501,9 +553,10 @@ class WebSocketHandler(Base):
 
                 if root_path is None or not os.path.exists(root_path):
                     self._logger.warning("Cannot find base path")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
@@ -528,9 +581,10 @@ class WebSocketHandler(Base):
 
                 if not os.path.exists(path):
                     self._logger.warning("Cannot find path")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find path",
@@ -541,9 +595,10 @@ class WebSocketHandler(Base):
                     continue
                 if not os.path.isdir(path):
                     self._logger.warning("Path is not a directory")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_DIRECTORY,
                                 EVENT_MESSAGE: "Path is not a directory",
@@ -553,9 +608,10 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_FILES,
                             EVENT_FILES: get_files(
                                 self._settings, data[EVENT_BASE], path
@@ -564,12 +620,13 @@ class WebSocketHandler(Base):
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_GET_FILE:
+            elif request.event == TYPE_GET_FILE:
                 if EVENT_BASE not in data:
                     self._logger.warning("No base provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
                                 EVENT_MESSAGE: "No base provided",
@@ -586,9 +643,10 @@ class WebSocketHandler(Base):
 
                 if root_path is None or not os.path.exists(root_path):
                     self._logger.warning("Cannot find base path")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
@@ -600,9 +658,10 @@ class WebSocketHandler(Base):
 
                 if EVENT_PATH not in data:
                     self._logger.warning("No path provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_PATH,
                                 EVENT_MESSAGE: "No path provided",
@@ -621,9 +680,10 @@ class WebSocketHandler(Base):
 
                 if not os.path.exists(path):
                     self._logger.warning("Cannot find path")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find path",
@@ -634,9 +694,10 @@ class WebSocketHandler(Base):
                     continue
                 if not os.path.isfile(path):
                     self._logger.warning("Path is not a file")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_FILE,
                                 EVENT_MESSAGE: "Path is not a file",
@@ -646,33 +707,35 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_FILE,
                             EVENT_FILE: get_file(root_path, path),
                             EVENT_PATH: path,
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_GET_SETTINGS:
+            elif request.event == TYPE_GET_SETTINGS:
                 self._logger.info("Getting settings")
-
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_SETTINGS_RESULT,
                             EVENT_MESSAGE: "Got settings",
                             EVENT_DATA: self._settings.get_all(),
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_GET_SETTING:
+            elif request.event == TYPE_GET_SETTING:
                 if EVENT_SETTING not in data:
                     self._logger.warning("No setting provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
                                 EVENT_MESSAGE: "No setting provided",
@@ -682,9 +745,10 @@ class WebSocketHandler(Base):
                     continue
                 self._logger.info("Getting setting: %s", data[EVENT_SETTING])
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_SETTING_RESULT,
                             EVENT_MESSAGE: "Got setting",
                             EVENT_SETTING: data[EVENT_SETTING],
@@ -692,12 +756,13 @@ class WebSocketHandler(Base):
                         }
                     )
                 )
-            elif data[EVENT_EVENT] == TYPE_UPDATE_SETTING:
+            elif request.event == TYPE_UPDATE_SETTING:
                 if EVENT_SETTING not in data:
                     self._logger.warning("No setting provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
                                 EVENT_MESSAGE: "No setting provided",
@@ -707,9 +772,10 @@ class WebSocketHandler(Base):
                     continue
                 if EVENT_VALUE not in data:
                     self._logger.warning("No value provided")
-                    await self._websocket.send(
-                        dumps(
-                            {
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
                                 EVENT_MESSAGE: "No value provided",
@@ -725,9 +791,10 @@ class WebSocketHandler(Base):
 
                 self._settings.set(data[EVENT_SETTING], data[EVENT_VALUE])
 
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_SETTING_UPDATED,
                             EVENT_MESSAGE: "Setting updated",
                             EVENT_SETTING: data[EVENT_SETTING],
@@ -743,66 +810,72 @@ class WebSocketHandler(Base):
                     autostart_enable()
                 else:
                     autostart_disable()
-            elif data[EVENT_EVENT] == TYPE_POWER_SLEEP:
+            elif request.event == TYPE_POWER_SLEEP:
                 self._logger.info("Sleeping")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_SLEEPING,
                             EVENT_MESSAGE: "Sleeping",
                         }
                     )
                 )
                 sleep()
-            elif data[EVENT_EVENT] == TYPE_POWER_HIBERNATE:
+            elif request.event == TYPE_POWER_HIBERNATE:
                 self._logger.info("Sleeping")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_HIBERNATING,
                             EVENT_MESSAGE: "Hiibernating",
                         }
                     )
                 )
                 hibernate()
-            elif data[EVENT_EVENT] == TYPE_POWER_RESTART:
+            elif request.event == TYPE_POWER_RESTART:
                 self._logger.info("Sleeping")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_RESTARTING,
                             EVENT_MESSAGE: "Restarting",
                         }
                     )
                 )
                 restart()
-            elif data[EVENT_EVENT] == TYPE_POWER_SHUTDOWN:
+            elif request.event == TYPE_POWER_SHUTDOWN:
                 self._logger.info("Sleeping")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_SHUTTINGDOWN,
                             EVENT_MESSAGE: "Shutting down",
                         }
                     )
                 )
                 shutdown()
-            elif data[EVENT_EVENT] == TYPE_POWER_LOCK:
+            elif request.event == TYPE_POWER_LOCK:
                 self._logger.info("Locking")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_LOCKING,
                             EVENT_MESSAGE: "Locking",
                         }
                     )
                 )
                 lock()
-            elif data[EVENT_EVENT] == TYPE_POWER_LOGOUT:
+            elif request.event == TYPE_POWER_LOGOUT:
                 self._logger.info("Logging out")
-                await self._websocket.send(
-                    dumps(
-                        {
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_LOGGINGOUT,
                             EVENT_MESSAGE: "Logging out",
                         }
@@ -810,14 +883,15 @@ class WebSocketHandler(Base):
                 )
                 logout()
             else:
-                self._logger.warning("Unknown event: %s", data[EVENT_EVENT])
-                await self._websocket.send(
-                    dumps(
-                        {
+                self._logger.warning("Unknown event: %s", request.event)
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_UNKNOWN_EVENT,
                             EVENT_MESSAGE: "Unknown event",
-                            EVENT_EVENT: data[EVENT_EVENT],
+                            EVENT_EVENT: request.event,
                         }
                     )
                 )
