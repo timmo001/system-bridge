@@ -310,17 +310,17 @@
     "@emotion/cache" "^11.7.1"
     prop-types "^15.8.1"
 
-"@mui/styles@5.8.6":
-  version "5.8.6"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.8.6.tgz#26a0b9055e7c5eec18f04c7d3372cac7ecc2cae9"
-  integrity sha512-0IvwctufjczoS5qERihquoeVwsz3/buHRpVIt6hNb9Jab2dKH38fhxvIHJTTmmJMQazchaAeVh7T3duOV2Vl2g==
+"@mui/styles@5.8.7":
+  version "5.8.7"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.8.7.tgz#7d1cc0ff4ae3e2798629fffab4a077faa8a37f61"
+  integrity sha512-TMP3TL7P/9tJXOkthUHT9uuuBf4d0PzkrzHyU3q3qyoMBs0sMyoSsNOJAKkbG5DUCcSEGbmbarYItHH4Y/6vOg==
   dependencies:
     "@babel/runtime" "^7.17.2"
     "@emotion/hash" "^0.8.0"
     "@mui/private-theming" "^5.8.6"
     "@mui/types" "^7.1.4"
     "@mui/utils" "^5.8.6"
-    clsx "^1.1.1"
+    clsx "^1.2.0"
     csstype "^3.1.0"
     hoist-non-react-statics "^3.3.2"
     jss "^10.8.2"
@@ -798,7 +798,7 @@ chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-clsx@1.2.0, clsx@^1.1.1:
+clsx@1.2.0, clsx@^1.1.1, clsx@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.2.0.tgz#b0e415ea7537dbac01b169c5cec1caeb11d86566"
   integrity sha512-EPRP7XJsM1y0iCU3Z7C7jFKdQboXSeHgEfzQUTlz7m5NP3hDrlz48aUsmNGp4pC+JOW9WA3vIRqlYuo/bl4Drw==
