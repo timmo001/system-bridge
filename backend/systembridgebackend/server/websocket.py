@@ -32,15 +32,12 @@ from systembridgeshared.const import (
     SUBTYPE_BAD_REQUEST,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
-    SUBTYPE_MISSING_BASE,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MESSAGE,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_PATH,
     SUBTYPE_MISSING_PATH_URL,
-    SUBTYPE_MISSING_SETTING,
     SUBTYPE_MISSING_TEXT,
-    SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
@@ -88,8 +85,11 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 from systembridgeshared.models.get_data import GetData
+from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
+from systembridgeshared.models.media_get_file import MediaGetFile
+from systembridgeshared.models.media_get_files import MediaGetFiles
 from systembridgeshared.models.notification import Notification
 from systembridgeshared.models.open_path import OpenPath
 from systembridgeshared.models.open_url import OpenUrl
@@ -97,6 +97,7 @@ from systembridgeshared.models.register_data_listener import RegisterDataListene
 from systembridgeshared.models.request import Request
 from systembridgeshared.models.response import Response
 from systembridgeshared.models.update import Update as UpdateModel
+from systembridgeshared.models.update_setting import UpdateSetting
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
@@ -222,7 +223,22 @@ class WebSocketHandler(Base):
                 )
                 continue
             if request.event == TYPE_APPLICATION_UPDATE:
-                model = UpdateModel(**data)
+                try:
+                    model = UpdateModel(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 versions = Update().update(
                     model.version,
                     wait=False,
@@ -241,7 +257,22 @@ class WebSocketHandler(Base):
                 self._callback_exit_application()
                 self._logger.info("Exit application called")
             elif request.event == TYPE_KEYBOARD_KEYPRESS:
-                model = KeyboardKey(**data)
+                try:
+                    model = KeyboardKey(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 if model.key is None:
                     self._logger.warning("No key provided")
                     await self._send_response(
@@ -284,7 +315,22 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_KEYBOARD_TEXT:
-                model = KeyboardText(**data)
+                try:
+                    model = KeyboardText(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 if model.text is None:
                     self._logger.warning("No text provided")
                     await self._send_response(
@@ -313,7 +359,22 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_NOTIFICATION:
-                model = Notification(**data)
+                try:
+                    model = Notification(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 if model.message is None:
                     self._logger.warning("No message provided")
                     await self._send_response(
@@ -341,21 +402,51 @@ class WebSocketHandler(Base):
                 )
             elif request.event == TYPE_OPEN:
                 if "path" in data:
-                    model = OpenPath(**data)
-                    open_path(data["path"])
+                    try:
+                        model = OpenPath(**data)
+                    except ValueError as error:
+                        message = f"Invalid request: {error}"
+                        self._logger.warning(message)
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                    EVENT_MESSAGE: message,
+                                }
+                            )
+                        )
+                        continue
+                    open_path(model.path)
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_OPENED,
                                 EVENT_MESSAGE: "Path opened",
-                                EVENT_PATH: data["path"],
+                                EVENT_PATH: model.path,
                             }
                         )
                     )
                     continue
                 if "url" in data:
-                    model = OpenUrl(**data)
+                    try:
+                        model = OpenUrl(**data)
+                    except ValueError as error:
+                        message = f"Invalid request: {error}"
+                        self._logger.warning(message)
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                    EVENT_MESSAGE: message,
+                                }
+                            )
+                        )
+                        continue
                     open_url(model.url)
                     await self._send_response(
                         Response(
@@ -381,7 +472,22 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_REGISTER_DATA_LISTENER:
-                model = RegisterDataListener(**data)
+                try:
+                    model = RegisterDataListener(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 if model.modules is None or len(model.modules) == 0:
                     self._logger.warning("No modules provided")
                     await self._send_response(
@@ -456,7 +562,22 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_GET_DATA:
-                model = GetData(**data)
+                try:
+                    model = GetData(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
                 if model.modules is None or len(model.modules) == 0:
                     self._logger.warning("No modules provided")
                     await self._send_response(
@@ -475,6 +596,7 @@ class WebSocketHandler(Base):
                 await self._send_response(
                     Response(
                         **{
+                            EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DATA_GET,
                             EVENT_MESSAGE: "Getting data",
                             EVENT_MODULES: model.modules,
@@ -507,15 +629,18 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_GET_FILES:
-                if EVENT_BASE not in data:
-                    self._logger.warning("No base provided")
+                try:
+                    model = MediaGetFiles(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
-                                EVENT_MESSAGE: "No base provided",
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
                             }
                         )
                     )
@@ -523,7 +648,7 @@ class WebSocketHandler(Base):
 
                 root_path = None
                 for item in get_directories(self._settings):
-                    if item["key"] == data[EVENT_BASE]:
+                    if item["key"] == model.base:
                         root_path = item["path"]
                         break
 
@@ -536,22 +661,22 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
-                                EVENT_BASE: data[EVENT_BASE],
+                                EVENT_BASE: model.base,
                             }
                         )
                     )
                     continue
 
                 path = (
-                    os.path.join(root_path, data[EVENT_PATH])
-                    if data.get(EVENT_PATH)
+                    os.path.join(root_path, model.path)
+                    if model.path is not None
                     else root_path
                 )
 
                 self._logger.info(
                     "Getting files: %s - %s - %s",
-                    data[EVENT_BASE],
-                    data.get(EVENT_PATH),
+                    model.base,
+                    model.path,
                     path,
                 )
 
@@ -589,23 +714,24 @@ class WebSocketHandler(Base):
                         **{
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_FILES,
-                            EVENT_FILES: get_files(
-                                self._settings, data[EVENT_BASE], path
-                            ),
+                            EVENT_FILES: get_files(self._settings, model.base, path),
                             EVENT_PATH: path,
                         }
                     )
                 )
             elif request.event == TYPE_GET_FILE:
-                if EVENT_BASE not in data:
-                    self._logger.warning("No base provided")
+                try:
+                    model = MediaGetFile(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_BASE,
-                                EVENT_MESSAGE: "No base provided",
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
                             }
                         )
                     )
@@ -613,7 +739,7 @@ class WebSocketHandler(Base):
 
                 root_path = None
                 for item in get_directories(self._settings):
-                    if item["key"] == data[EVENT_BASE]:
+                    if item["key"] == model.base:
                         root_path = item["path"]
                         break
 
@@ -626,7 +752,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
-                                EVENT_BASE: data[EVENT_BASE],
+                                EVENT_BASE: model.base,
                             }
                         )
                     )
@@ -645,12 +771,13 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                path = os.path.join(root_path, data[EVENT_PATH])
+
+                path = os.path.join(root_path, model.path)
 
                 self._logger.info(
                     "Getting file: %s - %s - %s",
-                    data[EVENT_BASE],
-                    data[EVENT_PATH],
+                    model.base,
+                    model.path,
                     path,
                 )
 
@@ -706,20 +833,24 @@ class WebSocketHandler(Base):
                     )
                 )
             elif request.event == TYPE_GET_SETTING:
-                if EVENT_SETTING not in data:
-                    self._logger.warning("No setting provided")
+                try:
+                    model = GetSetting(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
-                                EVENT_MESSAGE: "No setting provided",
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
                             }
                         )
                     )
                     continue
-                self._logger.info("Getting setting: %s", data[EVENT_SETTING])
+
+                self._logger.info("Getting setting: %s", model.setting)
 
                 await self._send_response(
                     Response(
@@ -727,45 +858,36 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_SETTING_RESULT,
                             EVENT_MESSAGE: "Got setting",
-                            EVENT_SETTING: data[EVENT_SETTING],
-                            EVENT_DATA: self._settings.get(data[EVENT_SETTING]),
+                            EVENT_SETTING: model.setting,
+                            EVENT_DATA: self._settings.get(model.setting),
                         }
                     )
                 )
             elif request.event == TYPE_UPDATE_SETTING:
-                if EVENT_SETTING not in data:
-                    self._logger.warning("No setting provided")
+                try:
+                    model = UpdateSetting(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_SETTING,
-                                EVENT_MESSAGE: "No setting provided",
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
                             }
                         )
                     )
                     continue
-                if EVENT_VALUE not in data:
-                    self._logger.warning("No value provided")
-                    await self._send_response(
-                        Response(
-                            **{
-                                EVENT_ID: request.id,
-                                EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-                                EVENT_MESSAGE: "No value provided",
-                            }
-                        )
-                    )
-                    continue
+
                 self._logger.info(
                     "Setting setting %s to: %s",
-                    data[EVENT_SETTING],
-                    data[EVENT_VALUE],
+                    model.setting,
+                    model.value,
                 )
 
-                self._settings.set(data[EVENT_SETTING], data[EVENT_VALUE])
+                self._settings.set(model.setting, model.value)
 
                 await self._send_response(
                     Response(
@@ -773,16 +895,16 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_SETTING_UPDATED,
                             EVENT_MESSAGE: "Setting updated",
-                            EVENT_SETTING: data[EVENT_SETTING],
-                            EVENT_VALUE: data[EVENT_VALUE],
+                            EVENT_SETTING: model.setting,
+                            EVENT_VALUE: model.value,
                         }
                     )
                 )
 
-                if data[EVENT_SETTING] != SETTING_AUTOSTART:
+                if model.setting != SETTING_AUTOSTART:
                     continue
-                self._logger.info("Setting autostart to %s", data[EVENT_VALUE])
-                if data[EVENT_VALUE]:
+                self._logger.info("Setting autostart to %s", model.value)
+                if model.value:
                     autostart_enable()
                 else:
                     autostart_disable()

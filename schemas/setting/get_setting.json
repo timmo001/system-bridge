@@ -1,14 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "Get File",
+  "description": "Get Setting",
   "properties": {
-    "base": {
-      "type": "string"
-    },
-    "path": {
+    "setting": {
       "type": "string"
     }
   },
-  "required": ["base", "path"]
+  "required": ["setting"]
 }

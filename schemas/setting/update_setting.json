@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "Get File",
+  "description": "Update Setting",
   "properties": {
-    "base": {
+    "setting": {
       "type": "string"
     },
-    "path": {
+    "value": {
       "type": "string"
     }
   },
-  "required": ["base", "path"]
+  "required": ["setting", "value"]
 }
