@@ -452,41 +452,6 @@ class WebSocketClient(Base):
                         message[EVENT_MODULE],
                         model(**message[EVENT_DATA]),
                     )
-            elif message[EVENT_TYPE] == TYPE_DIRECTORIES:
-                self._logger.debug("New directories")
-                model = MODEL_MAP[MODEL_MEDIA_DIRECTORIES]
-                await callback(
-                    MODEL_MEDIA_DIRECTORIES,
-                    model(
-                        **{
-                            EVENT_DIRECTORIES: message[EVENT_DIRECTORIES],
-                        }
-                    ),
-                )
-            elif message[EVENT_TYPE] == TYPE_FILES:
-                self._logger.debug("New files")
-                model = MODEL_MAP[MODEL_MEDIA_FILES]
-                await callback(
-                    MODEL_MEDIA_FILES,
-                    model(
-                        **{
-                            EVENT_FILES: message[EVENT_FILES],
-                            EVENT_PATH: message[EVENT_PATH],
-                        }
-                    ),
-                )
-            elif message[EVENT_TYPE] == TYPE_FILE:
-                self._logger.debug("New file")
-                model = MODEL_MAP[MODEL_MEDIA_FILE]
-                await callback(
-                    MODEL_MEDIA_FILE,
-                    model(
-                        **{
-                            EVENT_FILE: message[EVENT_FILE],
-                            EVENT_PATH: message[EVENT_PATH],
-                        }
-                    ),
-                )
             else:
                 self._logger.debug("Other message: %s", message[EVENT_TYPE])
                 if accept_other_types:
