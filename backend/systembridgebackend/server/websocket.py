@@ -221,10 +221,6 @@ class WebSocketHandler(Base):
                     )
                 )
                 continue
-{
-"api-key": "",
-"event": "something"
-}
             if request.event == TYPE_APPLICATION_UPDATE:
                 model = UpdateModel(**data)
                 versions = Update().update(
