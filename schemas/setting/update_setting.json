@@ -6,9 +6,7 @@
     "setting": {
       "type": "string"
     },
-    "value": {
-      "type": "string"
-    }
+    "value": {}
   },
   "required": ["setting", "value"]
 }

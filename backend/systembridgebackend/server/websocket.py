@@ -758,20 +758,6 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                if EVENT_PATH not in data:
-                    self._logger.warning("No path provided")
-                    await self._send_response(
-                        Response(
-                            **{
-                                EVENT_ID: request.id,
-                                EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_PATH,
-                                EVENT_MESSAGE: "No path provided",
-                            }
-                        )
-                    )
-                    continue
-
                 path = os.path.join(root_path, model.path)
 
                 self._logger.info(
@@ -904,7 +890,7 @@ class WebSocketHandler(Base):
                 if model.setting != SETTING_AUTOSTART:
                     continue
                 self._logger.info("Setting autostart to %s", model.value)
-                if model.value:
+                if model.value is True:
                     autostart_enable()
                 else:
                     autostart_disable()
