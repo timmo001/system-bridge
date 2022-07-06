@@ -194,7 +194,7 @@ class WebSocketClient(Base):
                 }
             )
         )
-        return MediaDirectories(**response.dict()[EVENT_DIRECTORIES])
+        return MediaDirectories(**response.dict())
 
     async def get_files(
         self,
@@ -212,7 +212,7 @@ class WebSocketClient(Base):
                 }
             )
         )
-        return MediaFiles(**response.dict()[EVENT_DIRECTORIES])
+        return MediaFiles(**response.dict())
 
     async def get_file(
         self,
@@ -230,7 +230,7 @@ class WebSocketClient(Base):
                 }
             )
         )
-        return MediaFile(**response.dict()[EVENT_FILE])
+        return MediaFile(**response.dict())
 
     async def register_data_listener(
         self,
