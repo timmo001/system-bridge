@@ -16,5 +16,7 @@ class Response(BaseModel):
     class Config:
         extra = Extra.allow
 
-    type: Optional[str] = Field(None, description="Type")
+    id: Optional[str] = Field(None, description="Message ID")
+    type: str = Field(..., description="Type")
+    subtype: Optional[str] = Field(None, description="Subtype")
     message: Optional[str] = Field(None, description="Message")

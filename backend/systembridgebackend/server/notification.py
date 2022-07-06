@@ -1,23 +1,25 @@
 """System Bridge: Server Handler - Notification"""
 from __future__ import annotations
 
+from json import loads
 import os
 import platform
 
 from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
+from systembridgeshared.models.notification import Notification as NotificationModel
 from systembridgeshared.settings import Settings
 
 
-def send_notification(
-    message: str,
-    title: str | None = None,
-    app_name: str | None = None,
-    app_icon: str | None = None,
-    timeout: int | None = 5,
-) -> None:
+def send_notification(data: NotificationModel) -> None:
     """Send a notification."""
+    title = data.title
+    message = data.message
+    app_name = data.app_name
+    app_icon = data.app_icon
+    timeout = data.timeout
+
     if title is None:
         title = "System Bridge"
     if app_name is None:
@@ -61,13 +63,7 @@ async def handler_notification(
             status=400,
         )
 
-    send_notification(
-        message=request.json["message"],
-        title=request.json.get("title"),
-        app_name=request.json.get("app_name"),
-        app_icon=request.json.get("app_icon"),
-        timeout=request.json.get("timeout"),
-    )
+    send_notification(NotificationModel(**loads(request.json)))
 
     return json(
         {

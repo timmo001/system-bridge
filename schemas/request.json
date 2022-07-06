@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Request",
+  "properties": {
+    "api-key": {
+      "type": "string",
+      "description": "API Key"
+    },
+    "id": {
+      "type": "string",
+      "description": "Message ID"
+    },
+    "event": {
+      "type": "string",
+      "description": "Event"
+    }
+  },
+  "required": ["api-key", "event"],
+  "additionalProperties": {}
+}

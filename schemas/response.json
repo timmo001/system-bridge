@@ -3,14 +3,23 @@
   "type": "object",
   "description": "Response",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Message ID"
+    },
     "type": {
       "type": "string",
       "description": "Type"
+    },
+    "subtype": {
+      "type": "string",
+      "description": "Subtype"
     },
     "message": {
       "type": "string",
       "description": "Message"
     }
   },
+  "required": ["type"],
   "additionalProperties": {}
 }
