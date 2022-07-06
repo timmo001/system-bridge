@@ -412,8 +412,20 @@ class WebSocketClient(Base):
             if message.get(EVENT_ID) is not None:
                 future = self._response_futures.get(message[EVENT_ID])
                 if future is not None:
-                    self._logger.info("Responding to %s", message[EVENT_ID])
-                    future.set_result(Response(**message))
+                    response = Response(**message)
+                    self._logger.info(
+                        "Response: %s",
+                        response.json(
+                            include={
+                                EVENT_ID,
+                                EVENT_TYPE,
+                                EVENT_SUBTYPE,
+                                EVENT_MESSAGE,
+                            },
+                            exclude_unset=True,
+                        ),
+                    )
+                    future.set_result(response)
 
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
