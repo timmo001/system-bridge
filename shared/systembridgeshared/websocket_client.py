@@ -70,6 +70,8 @@ from systembridgeshared.exceptions import (
     ConnectionClosedException,
     ConnectionErrorException,
 )
+from systembridgeshared.models.media_directories import MediaDirectories
+from systembridgeshared.models.media_files import File as MediaFile, MediaFiles
 from systembridgeshared.models.request import Request
 from systembridgeshared.models.response import Response
 from systembridgeshared.settings import Settings
@@ -189,25 +191,26 @@ class WebSocketClient(Base):
             )
         )
 
-    async def get_directories(self) -> Response:
+    async def get_directories(self) -> MediaDirectories:
         """Get directories"""
         self._logger.info("Getting directories:")
-        return await self._send_message(
+        response = await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_DIRECTORIES,
                 }
             )
         )
+        return MediaDirectories(**response.dict()[EVENT_DIRECTORIES])
 
     async def get_files(
         self,
         base: str,
         path: str | None = None,
-    ) -> Response:
+    ) -> MediaFiles:
         """Get files"""
         self._logger.info("Getting files: %s - %s", base, path)
-        return await self._send_message(
+        response = await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILES,
@@ -216,15 +219,16 @@ class WebSocketClient(Base):
                 }
             )
         )
+        return MediaFiles(**response.dict()[EVENT_DIRECTORIES])
 
     async def get_file(
         self,
         base: str,
         path: str,
-    ) -> Response:
+    ) -> MediaFile:
         """Get files"""
         self._logger.info("Getting file: %s - %s", base, path)
-        return await self._send_message(
+        response = await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILE,
@@ -233,6 +237,7 @@ class WebSocketClient(Base):
                 }
             )
         )
+        return MediaFile(**response.dict()[EVENT_FILE])
 
     async def register_data_listener(
         self,
