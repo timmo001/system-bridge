@@ -20,6 +20,7 @@ from systembridgeshared.const import (
     EVENT_EVENT,
     EVENT_FILE,
     EVENT_FILES,
+    EVENT_ID,
     EVENT_KEY,
     EVENT_MESSAGE,
     EVENT_MODULE,
@@ -424,6 +425,11 @@ class WebSocketClient(Base):
         async def _callback_message(message: dict) -> None:
             """Message Callback"""
             self._logger.debug("New message: %s", message[EVENT_TYPE])
+
+            future = self._response_futures.get(message[EVENT_ID])
+            if future is not None:
+                future.set_result(Response(**message))
+
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
                     self._logger.debug(message)
