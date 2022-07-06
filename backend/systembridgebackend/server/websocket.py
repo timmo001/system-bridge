@@ -32,7 +32,6 @@ from systembridgeshared.const import (
     SUBTYPE_BAD_REQUEST,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
-    SUBTYPE_MISSING_API_KEY,
     SUBTYPE_MISSING_BASE,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MESSAGE,
@@ -181,7 +180,7 @@ class WebSocketHandler(Base):
                 data = loads(await self._websocket.recv())
                 request = Request(**data)
             except JSONDecodeError as error:
-                message = "Invalid JSON: %s" % error
+                message = f"Invalid JSON: {error}"
                 self._logger.error(message)
                 await self._send_response(
                     Response(
@@ -222,7 +221,10 @@ class WebSocketHandler(Base):
                     )
                 )
                 continue
-
+{
+"api-key": "",
+"event": "something"
+}
             if request.event == TYPE_APPLICATION_UPDATE:
                 model = UpdateModel(**data)
                 versions = Update().update(
