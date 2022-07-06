@@ -108,16 +108,17 @@ class Settings(Base):
     def get_secret(
         self,
         key: str,
-    ) -> str | None:
+    ) -> str:
         """Get secret"""
         record = self._database.read_table_by_key(TABLE_SECRETS, key).to_dict(
             orient="records"
         )
-        if record and len(record) > 0:
-            secret = record[0]["value"]
-            fernet = Fernet(self._encryption_key)
-            return fernet.decrypt(secret.encode()).decode()
-        return None
+        if not record or len(record) < 1:
+            raise KeyError(f"Secret {key} not found")
+
+        secret = record[0]["value"]
+        fernet = Fernet(self._encryption_key)  # type: ignore
+        return fernet.decrypt(secret.encode()).decode()
 
     def set(
         self,
@@ -133,7 +134,7 @@ class Settings(Base):
         value: str,
     ) -> None:
         """Set secret"""
-        fernet = Fernet(self._encryption_key)
+        fernet = Fernet(self._encryption_key)  # type: ignore
 
         self._database.write(
             TABLE_SECRETS, key, fernet.encrypt(value.encode()).decode()

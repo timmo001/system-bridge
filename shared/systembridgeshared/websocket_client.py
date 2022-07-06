@@ -103,6 +103,7 @@ class WebSocketClient(Base):
         if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")
 
+        request.api_key = self._api_key
         request.id = uuid4().hex
         future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
         self._response_futures[request.id] = future
@@ -156,7 +157,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_APPLICATION_UPDATE,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_VERSION: version,
                 }
             )
@@ -169,7 +169,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_EXIT_APPLICATION,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -184,7 +183,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_DATA,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_MODULES: modules,
                 }
             )
@@ -197,7 +195,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_DIRECTORIES,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -213,7 +210,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILES,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_BASE: base,
                     EVENT_PATH: path,
                 }
@@ -231,7 +227,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILE,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_BASE: base,
                     EVENT_PATH: path,
                 }
@@ -248,7 +243,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_REGISTER_DATA_LISTENER,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_MODULES: modules,
                 }
             )
@@ -264,7 +258,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_KEYBOARD_KEYPRESS,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_KEY: key,
                 }
             )
@@ -280,7 +273,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_KEYBOARD_TEXT,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_TEXT: text,
                 }
             )
@@ -300,7 +292,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_NOTIFICATION,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_MESSAGE: message,
                     EVENT_TITLE: title,
                     EVENT_APP_NAME: app_name,
@@ -320,7 +311,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_OPEN,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_PATH: path,
                 }
             )
@@ -336,7 +326,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_OPEN,
-                    EVENT_API_KEY: self._api_key,
                     EVENT_URL: url,
                 }
             )
@@ -349,7 +338,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_SLEEP,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -361,7 +349,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_HIBERNATE,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -373,7 +360,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_RESTART,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -385,7 +371,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_SHUTDOWN,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -397,7 +382,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_LOCK,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
@@ -409,7 +393,6 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_POWER_LOGOUT,
-                    EVENT_API_KEY: self._api_key,
                 }
             )
         )
