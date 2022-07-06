@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import socket
-from typing import Dict
 from uuid import uuid4
 
 import aiohttp
@@ -87,7 +86,7 @@ class WebSocketClient(Base):
         self._api_host = api_host
         self._api_port = api_port
         self._api_key = api_key
-        self._response_futures: Dict[str, asyncio.Future] = {}
+        self._response_futures: dict[str, asyncio.Future] = {}
         self._session: aiohttp.ClientSession | None = None
         self._websocket: aiohttp.ClientWebSocketResponse | None = None
 

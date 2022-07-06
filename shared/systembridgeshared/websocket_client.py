@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import socket
-from typing import Dict
 from uuid import uuid4
 
 import aiohttp
@@ -86,7 +85,7 @@ class WebSocketClient(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._response_futures: Dict[str, asyncio.Future] = {}
+        self._response_futures: dict[str, asyncio.Future] = {}
         self._session: aiohttp.ClientSession | None = None
         self._websocket: aiohttp.ClientWebSocketResponse | None = None
         self._api_key = self._settings.get_secret(SECRET_API_KEY)
