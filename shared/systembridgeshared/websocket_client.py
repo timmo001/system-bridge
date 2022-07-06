@@ -108,6 +108,7 @@ class WebSocketClient(Base):
         future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
         self._response_futures[request.id] = future
         await self._websocket.send_str(request.json())
+        self._logger.debug("Sent message: %s", request.json(exclude={EVENT_API_KEY}))
         try:
             return await future
         finally:

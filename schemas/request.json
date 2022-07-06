@@ -16,6 +16,6 @@
       "description": "Event"
     }
   },
-  "required": ["api-key", "event"],
+  "required": ["event"],
   "additionalProperties": {}
 }
