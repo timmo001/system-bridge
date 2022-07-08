@@ -16,7 +16,10 @@ Categories=Application;
 
 def create_linux_shortcuts():
     """Create Linux shortcuts"""
-    path = os.path.expanduser("~/.local/share/applications/systembridge.desktop")
+    path = os.path.expanduser("~/.local/share/applications")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    path = os.path.join(path, "systembridge.desktop")
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as file:
             file.write(desktop_entry)
