@@ -91,6 +91,7 @@ class WebSocketClient(Base):
     async def _send_message(
         self,
         request: Request,
+        wait_for_response: bool = True,
     ) -> Response:
         """Send a message to the WebSocket"""
         if not self.connected or self._websocket is None:
@@ -102,10 +103,18 @@ class WebSocketClient(Base):
         self._response_futures[request.id] = future
         await self._websocket.send_str(request.json())
         self._logger.debug("Sent message: %s", request.json(exclude={EVENT_API_KEY}))
-        try:
-            return await future
-        finally:
-            self._response_futures.pop(request.id)
+        if wait_for_response:
+            try:
+                return await future
+            finally:
+                self._response_futures.pop(request.id)
+        return Response(
+            **{
+                EVENT_ID: request.id,
+                EVENT_TYPE: "N/A",
+                EVENT_MESSAGE: "Message sent",
+            }
+        )
 
     async def close(self) -> None:
         """Close connection"""
@@ -153,7 +162,8 @@ class WebSocketClient(Base):
                     EVENT_EVENT: TYPE_APPLICATION_UPDATE,
                     EVENT_VERSION: version,
                 }
-            )
+            ),
+            wait_for_response=False,
         )
 
     async def exit_backend(self) -> Response:
@@ -164,7 +174,8 @@ class WebSocketClient(Base):
                 **{
                     EVENT_EVENT: TYPE_EXIT_APPLICATION,
                 }
-            )
+            ),
+            wait_for_response=False,
         )
 
     async def get_data(
