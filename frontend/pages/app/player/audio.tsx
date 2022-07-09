@@ -5,7 +5,7 @@ import { PlayerProvider } from "../../../components/Player/Utils";
 import Layout from "../../../components/Common/Layout";
 import Player from "../../../components/Player/Player";
 
-function PageLogs(): ReactElement {
+function PagePlayerAudio(): ReactElement {
   return (
     <Layout
       title="Audio Player"
@@ -27,4 +27,4 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 };
 
-export default PageLogs;
+export default PagePlayerAudio;
