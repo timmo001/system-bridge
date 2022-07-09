@@ -33,10 +33,10 @@ from systembridgeshared.const import (
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
     SUBTYPE_MISSING_KEY,
-    SUBTYPE_MISSING_MESSAGE,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_PATH_URL,
     SUBTYPE_MISSING_TEXT,
+    SUBTYPE_MISSING_TITLE,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
@@ -101,10 +101,10 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
 from systembridgebackend.autostart import autostart_disable, autostart_enable
+from systembridgebackend.gui import start_gui_threaded
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
 from systembridgebackend.server.media import get_directories, get_file, get_files
-from systembridgebackend.server.notification import send_notification
 from systembridgebackend.server.open import open_path, open_url
 from systembridgebackend.server.power import (
     hibernate,
@@ -374,21 +374,26 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                if model.message is None:
-                    self._logger.warning("No message provided")
+                if model.title is None:
+                    self._logger.warning("No title provided")
                     await self._send_response(
                         Response(
                             **{
                                 EVENT_ID: request.id,
                                 EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_MISSING_MESSAGE,
-                                EVENT_MESSAGE: "No message provided",
+                                EVENT_SUBTYPE: SUBTYPE_MISSING_TITLE,
+                                EVENT_MESSAGE: "No title provided",
                             }
                         )
                     )
                     continue
 
-                send_notification(model)
+                start_gui_threaded(
+                    self._logger,
+                    self._settings,
+                    "notification",
+                    model.json(),
+                )
 
                 await self._send_response(
                     Response(
