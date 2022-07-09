@@ -84,7 +84,7 @@ class NotificationWindow(Base, QFrame):
         self.browser.load(url)
 
         if notification.timeout is None or notification.timeout < 1:
-            notification.timeout = 1
+            notification.timeout = 5
         self.time_to_wait = int(notification.timeout)
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(1000)
