@@ -40,12 +40,16 @@ class Sensors(Base):
         path = get_windowssensors_path()
 
         self._logger.debug("Windows sensors path: %s", path)
-        with subprocess.Popen(
-            [path],
-            stdout=subprocess.PIPE,
-        ) as pipe:
-            result = pipe.communicate()[0].decode()
-        self._logger.debug("Windows sensors result: %s", result)
+        try:
+            with subprocess.Popen(
+                [path],
+                stdout=subprocess.PIPE,
+            ) as pipe:
+                result = pipe.communicate()[0].decode()
+            self._logger.debug("Windows sensors result: %s", result)
+        except Exception as error:
+            self._logger.error("Windows sensors error: %s", error)
+            return None
 
         try:
             return json.loads(result)
