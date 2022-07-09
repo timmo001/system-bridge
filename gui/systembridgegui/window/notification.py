@@ -55,6 +55,8 @@ class NotificationWindow(Base, QFrame):
             self._logger.info("Message Lines: %s", message_lines)
             if message_lines > 1:
                 height += 20 * message_lines
+        if notification.image is not None:
+            height += 280
 
         self._logger.info("Height: %s", height)
 
