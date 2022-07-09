@@ -7,7 +7,7 @@ import Layout from "components/Common/Layout";
 
 function PageNotification(): ReactElement {
   const router = useRouter();
-  const { title, content, icon, image } = router.query as NodeJS.Dict<string>;
+  const { title, message, icon, image } = router.query as NodeJS.Dict<string>;
 
   const theme = useTheme();
   return (
@@ -57,7 +57,7 @@ function PageNotification(): ReactElement {
             {title}
           </Typography>
         </Stack>
-        {content && (
+        {message && (
           <Typography
             component="div"
             variant="body2"
@@ -66,7 +66,7 @@ function PageNotification(): ReactElement {
               padding: theme.spacing(0, icon ? 7 : 2, 1),
             }}
           >
-            {content}
+            {message}
           </Typography>
         )}
         {image && (
