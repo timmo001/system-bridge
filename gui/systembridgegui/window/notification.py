@@ -1,6 +1,8 @@
 """System Bridge GUI: Player Window"""
+import sys
 from urllib.parse import urlencode
 
+from PySide6 import QtCore
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -81,4 +83,20 @@ class NotificationWindow(Base, QFrame):
         self._logger.info("Open URL: %s", url)
         self.browser.load(url)
 
+        if notification.timeout is None or notification.timeout < 1:
+            notification.timeout = 1
+        self.time_to_wait = int(notification.timeout)
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self._timer_changed)  # type: ignore
+
         self.showNormal()
+
+        self.timer.start()
+
+    def _timer_changed(self):
+        """Change the content of the message box"""
+        self.time_to_wait -= 1
+        if self.time_to_wait < 0:
+            self.close()
+            sys.exit(0)
