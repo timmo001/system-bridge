@@ -19,6 +19,7 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 from systembridgeshared.models.media_play import MediaPlay
+from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
 
 from systembridgebackend.data import Data
@@ -159,6 +160,15 @@ class Server(Base):
                 self._callback_media_play,
             )
 
+        @auth.key_required
+        async def _handler_notification(request: Request) -> HTTPResponse:
+            """Notification handler"""
+            return await handler_notification(
+                request,
+                self._settings,
+                self._callback_notification,
+            )
+
         async def _handler_websocket(
             _: Request,
             socket,
@@ -229,7 +239,7 @@ class Server(Base):
             name="Media Play",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_notification),
+            _handler_notification,
             "/api/notification",
             methods=["POST"],
             name="Notification",
@@ -333,6 +343,18 @@ class Server(Base):
             media_play.json(),
         )
 
+    def _callback_notification(
+        self,
+        notification: Notification,
+    ) -> None:
+        """Callback to open media player"""
+        start_gui_threaded(
+            self._logger,
+            self._settings,
+            "notification",
+            notification.json(),
+        )
+
     def start_server(self) -> None:
         """Start Server"""
         if (port := self._settings.get(SETTING_PORT_API)) is None:
@@ -340,7 +362,7 @@ class Server(Base):
         self._logger.info("Starting server on port: %s", port)
         self._server.run(
             host="0.0.0.0",
-            port=int(port),
+            port=int(port),  # type: ignore
             access_log=False,
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,

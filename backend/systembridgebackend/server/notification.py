@@ -2,49 +2,18 @@
 from __future__ import annotations
 
 from json import loads
-import os
-import platform
+from typing import Callable
 
-from plyer import notification
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from systembridgeshared.models.notification import Notification as NotificationModel
 from systembridgeshared.settings import Settings
 
 
-def send_notification(data: NotificationModel) -> None:
-    """Send a notification."""
-    title = data.title
-    message = data.message
-    app_name = data.app_name
-    app_icon = data.app_icon
-    timeout = data.timeout
-
-    if title is None:
-        title = "System Bridge"
-    if app_name is None:
-        app_name = "System Bridge"
-    if app_icon is None:
-        app_icon = (
-            os.path.join(os.path.dirname(__file__), "../icon.ico")
-            if "Windows" in platform.system()
-            else os.path.join(os.path.dirname(__file__), "../icon.png")
-        )
-    if timeout is None:
-        timeout = 5
-
-    notification.notify(
-        title=title,
-        message=message,
-        app_name=app_name,
-        app_icon=app_icon,
-        timeout=timeout,
-    )
-
-
 async def handler_notification(
     request: Request,
     _: Settings,
+    callback: Callable[[NotificationModel], None],
 ) -> HTTPResponse:
     """Send a notification."""
     if request.json is None:
@@ -55,15 +24,19 @@ async def handler_notification(
             status=400,
         )
 
-    if "message" not in request.json:
+    if "title" not in request.json:
         return json(
             {
-                "message": "No message provided",
+                "message": "No title provided",
             },
             status=400,
         )
 
-    send_notification(NotificationModel(**loads(request.json)))
+    notification = NotificationModel(**request.json)
+    if notification.timeout is None:
+        notification.timeout = 5
+
+    callback(notification)
 
     return json(
         {

@@ -18,6 +18,7 @@ from systembridgeshared.exceptions import (
 )
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.media_play import MediaPlay
+from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 from typer import Typer
@@ -26,6 +27,7 @@ from systembridgegui._version import __version__
 from systembridgegui.system_tray import SystemTray
 from systembridgegui.widgets.timed_message_box import TimedMessageBox
 from systembridgegui.window.main import MainWindow
+from systembridgegui.window.notification import NotificationWindow
 from systembridgegui.window.player import PlayerWindow
 
 
@@ -118,6 +120,18 @@ class Main(Base):
                 self._application,
                 "video",
                 media_play,
+            )
+        elif command == "notification":
+            self._logger.info("Notification")
+            if data is None:
+                self._logger.error("No data provided!")
+                self._startup_error("No data provided!")
+                sys.exit(1)
+            self._player_window = NotificationWindow(
+                self._settings,
+                self._icon,
+                self._application,
+                Notification(**data),
             )
 
         sys.exit(self._application.exec())
@@ -218,6 +232,14 @@ def media_player(
 ) -> None:
     """Run the media player"""
     Main(command=f"media-player-{media_type}", data=json.loads(data))
+
+
+@app.command(name="notification", help="Show a notification")
+def notification(
+    data: str,
+) -> None:
+    """Show a notification"""
+    Main(command="notification", data=json.loads(data))
 
 
 if __name__ == "__main__":
