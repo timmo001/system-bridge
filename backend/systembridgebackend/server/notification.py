@@ -1,8 +1,7 @@
 """System Bridge: Server Handler - Notification"""
 from __future__ import annotations
 
-from json import loads
-from typing import Callable
+from collections.abc import Callable
 
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
