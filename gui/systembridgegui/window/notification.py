@@ -45,16 +45,16 @@ class NotificationWindow(Base, QFrame):
         self.setWindowIcon(icon)
 
         height: int = 48
-        title_lines: int = int(round(len(notification.title) / 52, 0))
+        title_lines: int = 1 + int(round(len(notification.title) / 52, 0))
         self._logger.info("Title Lines: %s", title_lines)
-        if title_lines > 0:
+        if title_lines > 1:
             height += 64 * title_lines
         if notification.message is not None:
-            height += 20
-            message_lines: int = int(round(len(notification.message) / 62, 0))
+            height += 24
+            message_lines: int = 1 + int(round(len(notification.message) / 62, 0))
             self._logger.info("Message Lines: %s", message_lines)
-            if message_lines > 0:
-                height += 64 * message_lines
+            if message_lines > 1:
+                height += 20 * message_lines
 
         self._logger.info("Height: %s", height)
 
