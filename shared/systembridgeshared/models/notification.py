@@ -13,9 +13,8 @@ class Notification(BaseModel):
     Keyboard
     """
 
-    title: Optional[str] = None
-    message: str
+    title: str
+    message: Optional[str] = None
     icon: Optional[str] = None
-    app_name: Optional[str] = None
-    app_icon: Optional[str] = None
+    image: Optional[str] = None
     timeout: Optional[float] = None
