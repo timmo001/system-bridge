@@ -26,8 +26,6 @@ function PageNotification(): ReactElement {
     return null;
   }, [actions]);
 
-  console.log("actionsArr:", actionsArr);
-
   const theme = useTheme();
   return (
     <Layout
