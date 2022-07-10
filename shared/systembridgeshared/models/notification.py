@@ -8,13 +8,23 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class Action(BaseModel):
+    """
+    Notification Action
+    """
+
+    command: str
+    label: str
+
+
 class Notification(BaseModel):
     """
-    Keyboard
+    Notification
     """
 
     title: str
     message: Optional[str] = None
     icon: Optional[str] = None
     image: Optional[str] = None
+    actions: Optional[list[Action]] = None
     timeout: Optional[float] = None
