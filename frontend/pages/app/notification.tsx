@@ -24,7 +24,7 @@ function PageNotification(): ReactElement {
         new API(Number(apiPort) || 9170, String(apiKey))
           .request(action.data as APIRequest)
           .then((response) => {
-            console.log(response);
+            console.log(response.data);
           })
           .catch((error) => {
             console.error(error);
