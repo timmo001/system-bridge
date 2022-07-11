@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react";
-import { GetStaticProps } from "next";
 
 import { PlayerProvider } from "../../../components/Player/Utils";
 import Layout from "../../../components/Common/Layout";
@@ -11,6 +10,7 @@ function PagePlayerAudio(): ReactElement {
       title="Audio Player"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
+      closeButton
       noHeader
     >
       <PlayerProvider>
@@ -19,12 +19,5 @@ function PagePlayerAudio(): ReactElement {
     </Layout>
   );
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-  return {
-    props: {},
-    revalidate: 1,
-  };
-};
 
 export default PagePlayerAudio;
