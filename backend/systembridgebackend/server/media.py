@@ -8,9 +8,11 @@ import io
 import mimetypes
 import os
 import re
+import tempfile
 from urllib.parse import urlencode
 
 import aiofiles
+from aiohttp import ClientSession
 from mutagen import File as MutagenFile
 from plyer import storagepath
 from sanic.request import Request
@@ -377,77 +379,100 @@ async def handler_media_play(
     callback: Callable[[str, MediaPlay], None],
 ) -> HTTPResponse:
     """Handler for media play requests"""
-    if not (query_base := request.args.get(QUERY_BASE)):
-        return json(
-            {"message": "No base specified"},
-            status=400,
+    media_type = request.args.get("type", "video")
+    mime_type = None
+    path = None
+    if "url" not in request.args:
+        if not (query_base := request.args.get(QUERY_BASE)):
+            return json(
+                {"message": "No base specified"},
+                status=400,
+            )
+
+        root_path = None
+        for item in get_directories(settings):
+            if item["key"] == query_base:
+                root_path = item["path"]
+                break
+
+        if root_path is None or not os.path.exists(root_path):
+            return json(
+                {"message": "Cannot find base", "base": query_base},
+                status=404,
+            )
+
+        query_path = request.args.get(QUERY_PATH)
+        if not (path := os.path.join(root_path, query_path)):
+            return json(
+                {"message": "Cannot find path", "path": path},
+                status=400,
+            )
+        if not os.path.exists(path):
+            return json(
+                {"message": "File does not exist", "path": path},
+                status=404,
+            )
+        if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+            return json(
+                {
+                    "message": "Path is not underneath base path",
+                    "base": root_path,
+                    "path": path,
+                },
+                status=400,
+            )
+        if not os.path.isfile(path):
+            return json(
+                {"message": "Path is not a file", "path": path},
+                status=400,
+            )
+
+        url = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                        QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
+                        QUERY_API_PORT: settings.get(SETTING_PORT_API),
+                        QUERY_BASE: query_base,
+                        QUERY_PATH: query_path,
+                    })}"""
+
+        mime_type, _ = mimetypes.guess_type(path)
+        if mime_type is None:
+            return json(
+                {"message": "Cannot determine mime type", "path": path},
+                status=400,
+            )
+
+        media_type = (
+            "audio"
+            if "audio" in mime_type
+            else "video"
+            if "video" in mime_type
+            else None
         )
 
-    root_path = None
-    for item in get_directories(settings):
-        if item["key"] == query_base:
-            root_path = item["path"]
-            break
+        if media_type is None:
+            return json(
+                {
+                    "message": "Unsupported file type",
+                    "path": path,
+                    "mime_type": mime_type,
+                },
+                status=400,
+            )
+    else:
+        url = request.args.get("url")
 
-    if root_path is None or not os.path.exists(root_path):
-        return json(
-            {"message": "Cannot find base", "base": query_base},
-            status=404,
-        )
-
-    query_path = request.args.get(QUERY_PATH)
-    if not (path := os.path.join(root_path, query_path)):
-        return json(
-            {"message": "Cannot find path", "path": path},
-            status=400,
-        )
-    if not os.path.exists(path):
-        return json(
-            {"message": "File does not exist", "path": path},
-            status=404,
-        )
-    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-        return json(
-            {
-                "message": "Path is not underneath base path",
-                "base": root_path,
-                "path": path,
-            },
-            status=400,
-        )
-    if not os.path.isfile(path):
-        return json(
-            {"message": "Path is not a file", "path": path},
-            status=400,
-        )
-
-    url = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
-                    QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                    QUERY_API_PORT: settings.get(SETTING_PORT_API),
-                    QUERY_BASE: query_base,
-                    QUERY_PATH: query_path,
-                })}"""
-
-    mime_type, _ = mimetypes.guess_type(path)
-    if mime_type is None:
-        return json(
-            {"message": "Cannot determine mime type", "path": path},
-            status=400,
-        )
-
-    media_type = (
-        "audio" if "audio" in mime_type else "video" if "video" in mime_type else None
-    )
-
-    if media_type is None:
-        return json(
-            {
-                "message": "Unsupported file type",
-                "path": path,
-                "mime_type": mime_type,
-            },
-            status=400,
-        )
+        if media_type == "audio":
+            path = os.path.join(tempfile.gettempdir(), "tmp.mp3")
+            # Download local version to get metadata
+            async with ClientSession() as session:
+                async with session.get(url) as response:
+                    data = await response.read()
+                    async with aiofiles.open(
+                        path,
+                        "wb",
+                    ) as new_file:
+                        await new_file.write(data)
+                        await new_file.close()
 
     media_play = MediaPlay(
         **{
@@ -461,6 +486,13 @@ async def handler_media_play(
     api_key = settings.get_secret(SECRET_API_KEY)
 
     if media_type == "audio":
+        if path is None:
+            return json(
+                {
+                    "message": "Failed to get path for audio file",
+                },
+                status=400,
+            )
         metadata = MutagenFile(path)
 
         album = metadata.get("album")
