@@ -24,6 +24,9 @@
           "command": {
             "type": "string"
           },
+          "data": {
+            "type": "object"
+          },
           "label": {
             "type": "string"
           }
