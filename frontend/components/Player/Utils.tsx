@@ -25,6 +25,7 @@ export interface VideoSource extends Source {
 }
 
 export interface PlayerStatus {
+  autoplay?: boolean;
   duration?: number;
   muted: boolean;
   playing: boolean;

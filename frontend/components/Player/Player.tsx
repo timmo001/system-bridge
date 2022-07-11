@@ -93,8 +93,9 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           break;
         case "audio":
           setPlayerStatus({
+            autoplay: query.autoplay?.toLowerCase() === "true",
             muted: false,
-            playing: query.autoplay?.toLowerCase() === "true",
+            playing: false,
             loaded: false,
             position: 0,
             duration: 1,
@@ -112,6 +113,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           break;
         case "video":
           setPlayerStatus({
+            autoplay: query.autoplay?.toLowerCase() === "true",
             muted: false,
             playing: false,
             loaded: false,
