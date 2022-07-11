@@ -26,6 +26,7 @@ from systembridgebackend.data import Data
 from systembridgebackend.gui import GUIAttemptsExceededException, start_gui_threaded
 from systembridgebackend.modules.listeners import Listeners
 from systembridgebackend.server.auth import ApiKeyAuthentication
+from systembridgebackend.server.cors import add_cors_headers
 from systembridgebackend.server.keyboard import handler_keyboard
 from systembridgebackend.server.mdns import MDNSAdvertisement
 from systembridgebackend.server.media import (
@@ -38,6 +39,7 @@ from systembridgebackend.server.media import (
 )
 from systembridgebackend.server.notification import handler_notification
 from systembridgebackend.server.open import handler_open
+from systembridgebackend.server.options import setup_options
 from systembridgebackend.server.power import (
     handler_hibernate,
     handler_lock,
@@ -67,6 +69,10 @@ class Server(Base):
         self._database = database
         self._settings = settings
         self._server = Sanic("SystemBridge")
+        # Add OPTIONS handlers to any route that is missing it
+        self._server.register_listener(setup_options, "before_server_start")
+        # Fill in CORS headers
+        self._server.register_middleware(add_cors_headers, "response")
 
         implemented_modules = []
         for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
