@@ -30,7 +30,7 @@ export class API {
       },
       method,
       params,
-      url: `/${endpoint}`,
+      url: `/api/${endpoint}`,
     };
     return await axios.request<T, AxiosResponse>(config);
   }
