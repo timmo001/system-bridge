@@ -91,6 +91,8 @@ class NotificationWindow(Base, QFrame):
         self._logger.info("Open URL: %s", url)
         self.browser.load(url)
 
+        self.browser.urlChanged.connect(self._url_changed)  # type: ignore
+
         if notification.timeout is None or notification.timeout < 1:
             notification.timeout = 5
         self.time_to_wait = int(notification.timeout)
@@ -106,5 +108,13 @@ class NotificationWindow(Base, QFrame):
         """Change the content of the message box"""
         self.time_to_wait -= 1
         if self.time_to_wait < 0:
+            self.close()
+            sys.exit(0)
+
+    def _url_changed(self, url: QUrl):
+        """Handle URL changes"""
+        self._logger.info("URL Changed: %s", url)
+        if url.host() == "close.window":
+            self._logger.info("Close Window Requested. Closing Window.")
             self.close()
             sys.exit(0)

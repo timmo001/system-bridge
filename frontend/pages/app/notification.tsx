@@ -17,6 +17,10 @@ function PageNotification(): ReactElement {
   const { apiPort, apiKey, title, message, icon, image, actions } =
     router.query as NodeJS.Dict<string>;
 
+  function handleClose(): void {
+    window.location.href = "http://close.window";
+  }
+
   function handleActionClick(action: NotificationAction): void {
     console.log("Action clicked:", action);
     switch (action.command) {
@@ -31,7 +35,7 @@ function PageNotification(): ReactElement {
           });
         break;
       case "close":
-        console.log("TODO: close notification");
+        handleClose();
         break;
       default:
         break;
@@ -55,6 +59,7 @@ function PageNotification(): ReactElement {
       title="Notification"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
+      closeButton
       noHeader
     >
       <Stack
