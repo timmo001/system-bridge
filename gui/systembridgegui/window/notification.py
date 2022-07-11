@@ -1,4 +1,5 @@
 """System Bridge GUI: Player Window"""
+from json import dumps
 import sys
 from urllib.parse import urlencode
 
@@ -73,13 +74,18 @@ class NotificationWindow(Base, QFrame):
             screen_geometry.height() - self.height() - 8,
         )
 
+        notification_dict = notification.dict(exclude_none=True)
+        if "actions" in notification_dict:
+            # Fix encoding issue by converting array to json
+            notification_dict["actions"] = dumps(notification_dict["actions"])
+
         api_port = self._settings.get(SETTING_PORT_API)
         api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
             f"""http://localhost:{api_port}/app/notification.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
-                    **notification.dict(exclude_none=True),
+                    **notification_dict,
                 })}"""
         )
         self._logger.info("Open URL: %s", url)
