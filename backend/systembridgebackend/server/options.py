@@ -1,5 +1,5 @@
+"""System Bridge: Options"""
 from collections import defaultdict
-from typing import Dict, FrozenSet
 
 from sanic import Sanic, response
 from sanic_routing.router import Route
@@ -7,7 +7,8 @@ from sanic_routing.router import Route
 from systembridgebackend.server.cors import _add_cors_headers
 
 
-def _compile_routes_needing_options(routes: Dict[str, Route]) -> Dict[str, FrozenSet]:
+def _compile_routes_needing_options(routes: dict[str, Route]) -> dict[str, frozenset]:
+    """Compile a list of routes that need OPTIONS."""
     needs_options = defaultdict(list)
     for route in routes.values():
         if "OPTIONS" not in route.methods:
@@ -17,7 +18,10 @@ def _compile_routes_needing_options(routes: Dict[str, Route]) -> Dict[str, Froze
 
 
 def _options_wrapper(handler, methods):
+    """Wrap a handler with CORS headers."""
+
     def wrapped_handler(request, *args, **kwargs):
+        """Wrapper for handler."""
         nonlocal methods
         return handler(request, methods)
 
@@ -25,12 +29,14 @@ def _options_wrapper(handler, methods):
 
 
 async def options_handler(_, methods) -> response.HTTPResponse:
+    """Handle OPTIONS requests."""
     resp = response.empty()
     _add_cors_headers(resp, methods)
     return resp
 
 
 def setup_options(app: Sanic, _):
+    """Setup OPTIONS handlers."""
     app.router.reset()
     needs_options = _compile_routes_needing_options(app.router.routes_all)  # type: ignore
     for uri, methods in needs_options.items():

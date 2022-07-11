@@ -1,7 +1,9 @@
-from typing import Iterable
+"""System Bridge: CORS"""
+from collections.abc import Iterable
 
 
 def _add_cors_headers(response, methods: Iterable[str]) -> None:
+    """Add CORS headers to a response."""
     allow_methods = list(set(methods))
     if "OPTIONS" not in allow_methods:
         allow_methods.append("OPTIONS")
@@ -19,6 +21,7 @@ def _add_cors_headers(response, methods: Iterable[str]) -> None:
 
 
 def add_cors_headers(request, response):
+    """Add CORS headers to a response."""
     if request.method != "OPTIONS":
         methods = [method for method in request.route.methods]
         _add_cors_headers(response, methods)
