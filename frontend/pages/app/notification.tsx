@@ -3,18 +3,40 @@ import { useRouter } from "next/router";
 
 import { Button, CardMedia, Stack, Typography, useTheme } from "@mui/material";
 
+import { API, APIRequest } from "components/Common/API";
 import Layout from "components/Common/Layout";
 
 interface NotificationAction {
   command: string;
-  data: NodeJS.Dict<any>;
+  data?: NodeJS.Dict<any>;
   label: string;
 }
 
 function PageNotification(): ReactElement {
   const router = useRouter();
-  const { title, message, icon, image, actions } =
+  const { apiPort, apiKey, title, message, icon, image, actions } =
     router.query as NodeJS.Dict<string>;
+
+  function handleActionClick(action: NotificationAction): void {
+    console.log("Action clicked:", action);
+    switch (action.command) {
+      case "api":
+        new API(Number(apiPort) || 9170, String(apiKey))
+          .request(action.data as APIRequest)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case "close":
+        console.log("TODO: close notification");
+        break;
+      default:
+        break;
+    }
+  }
 
   const actionsArr = useMemo<Array<NotificationAction> | null>(() => {
     if (actions) {
@@ -116,9 +138,7 @@ function PageNotification(): ReactElement {
                 sx={{
                   margin: theme.spacing(1, 0.5, 1, 0.5),
                 }}
-                onClick={() => {
-                  console.log(action);
-                }}
+                onClick={() => handleActionClick(action)}
               >
                 {action.label}
               </Button>
