@@ -1,13 +1,57 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useMemo } from "react";
 import { useRouter } from "next/router";
 
-import { CardMedia, Stack, Typography, useTheme } from "@mui/material";
+import { Button, CardMedia, Stack, Typography, useTheme } from "@mui/material";
 
+import { API, APIRequest } from "components/Common/API";
 import Layout from "components/Common/Layout";
+
+interface NotificationAction {
+  command: string;
+  data?: NodeJS.Dict<any>;
+  label: string;
+}
 
 function PageNotification(): ReactElement {
   const router = useRouter();
-  const { title, message, icon, image } = router.query as NodeJS.Dict<string>;
+  const { apiPort, apiKey, title, message, icon, image, actions } =
+    router.query as NodeJS.Dict<string>;
+
+  function handleClose(): void {
+    window.location.href = "http://close.window";
+  }
+
+  function handleActionClick(action: NotificationAction): void {
+    console.log("Action clicked:", action);
+    switch (action.command) {
+      case "api":
+        new API(Number(apiPort) || 9170, String(apiKey))
+          .request(action.data as APIRequest)
+          .then((response) => {
+            console.log("API Response:", response.data);
+          })
+          .catch((error) => {
+            console.error("API Error:", error);
+          });
+        break;
+      case "close":
+        handleClose();
+        break;
+      default:
+        break;
+    }
+  }
+
+  const actionsArr = useMemo<Array<NotificationAction> | null>(() => {
+    if (actions) {
+      try {
+        return JSON.parse(actions) as Array<NotificationAction>;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  }, [actions]);
 
   const theme = useTheme();
   return (
@@ -15,6 +59,7 @@ function PageNotification(): ReactElement {
       title="Notification"
       url="https://system-bridge.timmo.dev"
       description="Frontend for System Bridge"
+      closeButton
       noHeader
     >
       <Stack
@@ -22,9 +67,8 @@ function PageNotification(): ReactElement {
         alignContent="center"
         justifyContent="flex-start"
         style={{
-          overflow: "hidden",
           height: "100vh",
-          width: "100vw",
+          width: "100%",
         }}
       >
         <Stack
@@ -75,12 +119,36 @@ function PageNotification(): ReactElement {
             image={image}
             alt="Notification Image"
             sx={{
-              height: "100%",
-              maxHeight: "100%",
+              height: "280px",
+              maxHeight: "280px",
               maxWidth: "100%",
               objectFit: "contain",
             }}
           />
+        )}
+        {actionsArr && (
+          <Stack
+            direction="row"
+            alignContent="center"
+            justifyContent="flex-end"
+            sx={{
+              padding: theme.spacing(1),
+            }}
+          >
+            {actionsArr.map((action: NotificationAction) => (
+              <Button
+                key={action.label}
+                variant="contained"
+                color="primary"
+                sx={{
+                  margin: theme.spacing(1, 0.5, 1, 0.5),
+                }}
+                onClick={() => handleActionClick(action)}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </Stack>
         )}
       </Stack>
     </Layout>

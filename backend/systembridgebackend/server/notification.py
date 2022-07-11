@@ -31,7 +31,15 @@ async def handler_notification(
             status=400,
         )
 
-    notification = NotificationModel(**request.json)
+    try:
+        notification = NotificationModel(**request.json)
+    except ValueError as error:
+        return json(
+            {
+                "message": str(error),
+            },
+            status=400,
+        )
     if notification.timeout is None:
         notification.timeout = 5
 

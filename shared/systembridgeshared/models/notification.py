@@ -3,18 +3,29 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
 
+class Action(BaseModel):
+    """
+    Notification Action
+    """
+
+    command: str
+    data: Optional[dict[str, Any]] = None
+    label: str
+
+
 class Notification(BaseModel):
     """
-    Keyboard
+    Notification
     """
 
     title: str
     message: Optional[str] = None
     icon: Optional[str] = None
     image: Optional[str] = None
+    actions: Optional[list[Action]] = None
     timeout: Optional[float] = None

@@ -2,10 +2,15 @@ import React, { ReactElement, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
+import { IconButton } from "@mui/material";
+import { Icon } from "@mdi/react";
+import { mdiClose } from "@mdi/js";
+
 import Header from "./Header";
 
 interface LayoutProps {
   children?: ReactElement | ReactElement[];
+  closeButton?: boolean;
   description?: string;
   keywords?: string;
   noHeader?: boolean;
@@ -80,6 +85,21 @@ function Layout(props: LayoutProps): ReactElement {
         />
       </Head>
       {!props.noHeader && <Header />}
+      {props.closeButton && (
+        <IconButton
+          size="small"
+          sx={{
+            position: "absolute",
+            top: 4,
+            right: 4,
+          }}
+          onClick={() => {
+            window.location.href = "http://close.window";
+          }}
+        >
+          <Icon id="close" path={mdiClose} size={1} />
+        </IconButton>
+      )}
       {props.children}
     </>
   );

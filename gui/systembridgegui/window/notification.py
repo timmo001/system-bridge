@@ -1,4 +1,5 @@
 """System Bridge GUI: Player Window"""
+from json import dumps
 import sys
 from urllib.parse import urlencode
 
@@ -59,6 +60,8 @@ class NotificationWindow(Base, QFrame):
                 height += 20 * message_lines
         if notification.image is not None:
             height += 280
+        if notification.actions is not None and len(notification.actions) > 0:
+            height += 52
 
         self._logger.info("Height: %s", height)
 
@@ -71,17 +74,24 @@ class NotificationWindow(Base, QFrame):
             screen_geometry.height() - self.height() - 8,
         )
 
+        notification_dict = notification.dict(exclude_none=True)
+        if "actions" in notification_dict:
+            # Fix encoding issue by converting array to json
+            notification_dict["actions"] = dumps(notification_dict["actions"])
+
         api_port = self._settings.get(SETTING_PORT_API)
         api_key = self._settings.get_secret(SECRET_API_KEY)
         url = QUrl(
             f"""http://localhost:{api_port}/app/notification.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
-                    **notification.dict(exclude_none=True),
+                    **notification_dict,
                 })}"""
         )
         self._logger.info("Open URL: %s", url)
         self.browser.load(url)
+
+        self.browser.urlChanged.connect(self._url_changed)  # type: ignore
 
         if notification.timeout is None or notification.timeout < 1:
             notification.timeout = 5
@@ -98,5 +108,13 @@ class NotificationWindow(Base, QFrame):
         """Change the content of the message box"""
         self.time_to_wait -= 1
         if self.time_to_wait < 0:
+            self.close()
+            sys.exit(0)
+
+    def _url_changed(self, url: QUrl):
+        """Handle URL changes"""
+        self._logger.info("URL Changed: %s", url)
+        if url.host() == "close.window":
+            self._logger.info("Close Window Requested. Closing Window.")
             self.close()
             sys.exit(0)
