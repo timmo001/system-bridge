@@ -71,9 +71,14 @@ function VideoComponent(): ReactElement {
         pip
         ref={ref}
         playing={playing}
-        height="100%"
-        width="100%"
-        style={{ margin: 0, overflow: "hidden" }}
+        height="270px"
+        width="480px"
+        style={{
+          position: "absolute",
+          top: "0",
+          left: "0",
+          overflow: "hidden",
+        }}
         url={source}
         muted={muted}
         volume={volume}
