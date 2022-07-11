@@ -1,4 +1,5 @@
 """System Bridge GUI: Player Window"""
+import sys
 from urllib.parse import urlencode
 
 from PySide6.QtCore import QUrl
@@ -70,4 +71,14 @@ class PlayerWindow(Base, QFrame):
         self._logger.info("Open URL: %s", url)
         self.browser.load(url)
 
+        self.browser.urlChanged.connect(self._url_changed)  # type: ignore
+
         self.showNormal()
+
+    def _url_changed(self, url: QUrl):
+        """Handle URL changes"""
+        self._logger.info("URL Changed: %s", url)
+        if url.host() == "close.window":
+            self._logger.info("Close Window Requested. Closing Window.")
+            self.close()
+            sys.exit(0)
