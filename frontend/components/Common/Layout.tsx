@@ -92,6 +92,7 @@ function Layout(props: LayoutProps): ReactElement {
             position: "absolute",
             top: 4,
             right: 4,
+            zIndex: 1000,
           }}
           onClick={() => {
             window.location.href = "http://close.window";
