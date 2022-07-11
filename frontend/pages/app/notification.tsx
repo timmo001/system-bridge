@@ -7,6 +7,7 @@ import Layout from "components/Common/Layout";
 
 interface NotificationAction {
   command: string;
+  data: NodeJS.Dict<any>;
   label: string;
 }
 
