@@ -33,7 +33,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update core clock"""
         self._database.write(
-            "gpu", f"{gpu_key}_core_clock", self._gpu.core_clock(self._database)
+            "gpu",
+            f"{gpu_key}_core_clock",
+            self._gpu.core_clock(self._database, gpu_key),
         )
 
     async def update_core_load(
@@ -42,7 +44,7 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update core load"""
         self._database.write(
-            "gpu", f"{gpu_key}_core_load", self._gpu.core_load(self._database)
+            "gpu", f"{gpu_key}_core_load", self._gpu.core_load(self._database, gpu_key)
         )
 
     async def update_fan_speed(
@@ -51,7 +53,7 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update fan speed"""
         self._database.write(
-            "gpu", f"{gpu_key}_fan_speed", self._gpu.fan_speed(self._database)
+            "gpu", f"{gpu_key}_fan_speed", self._gpu.fan_speed(self._database, gpu_key)
         )
 
     async def update_memory_clock(
@@ -60,7 +62,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update memory clock"""
         self._database.write(
-            "gpu", f"{gpu_key}_memory_clock", self._gpu.memory_clock(self._database)
+            "gpu",
+            f"{gpu_key}_memory_clock",
+            self._gpu.memory_clock(self._database, gpu_key),
         )
 
     async def update_memory_load(
@@ -69,7 +73,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update memory load"""
         self._database.write(
-            "gpu", f"{gpu_key}_memory_load", self._gpu.memory_load(self._database)
+            "gpu",
+            f"{gpu_key}_memory_load",
+            self._gpu.memory_load(self._database, gpu_key),
         )
 
     async def update_memory_free(
@@ -78,7 +84,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update memory free"""
         self._database.write(
-            "gpu", f"{gpu_key}_memory_free", self._gpu.memory_free(self._database)
+            "gpu",
+            f"{gpu_key}_memory_free",
+            self._gpu.memory_free(self._database, gpu_key),
         )
 
     async def update_memory_used(
@@ -87,7 +95,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update memory used"""
         self._database.write(
-            "gpu", f"{gpu_key}_memory_used", self._gpu.memory_used(self._database)
+            "gpu",
+            f"{gpu_key}_memory_used",
+            self._gpu.memory_used(self._database, gpu_key),
         )
 
     async def update_memory_total(
@@ -96,7 +106,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update memory total"""
         self._database.write(
-            "gpu", f"{gpu_key}_memory_total", self._gpu.memory_total(self._database)
+            "gpu",
+            f"{gpu_key}_memory_total",
+            self._gpu.memory_total(self._database, gpu_key),
         )
 
     async def update_power(
@@ -104,7 +116,9 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update power"""
-        self._database.write("gpu", f"{gpu_key}_power", self._gpu.power(self._database))
+        self._database.write(
+            "gpu", f"{gpu_key}_power", self._gpu.power(self._database, gpu_key)
+        )
 
     async def update_temperature(
         self,
@@ -112,7 +126,9 @@ class GPUUpdate(ModuleUpdateBase):
     ) -> None:
         """Update temperature"""
         self._database.write(
-            "gpu", f"{gpu_key}_temperature", self._gpu.temperature(self._database)
+            "gpu",
+            f"{gpu_key}_temperature",
+            self._gpu.temperature(self._database, gpu_key),
         )
 
     async def update_all_data(self) -> None:
