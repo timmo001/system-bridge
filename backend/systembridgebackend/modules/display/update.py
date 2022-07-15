@@ -35,7 +35,7 @@ class DisplayUpdate(ModuleUpdateBase):
         self._database.write(
             "display",
             f"{display_key}_pixel_clock",
-            self._display.pixel_clock(self._database),
+            self._display.pixel_clock(self._database, display_key),
         )
 
     async def update_refresh_rate(
@@ -46,7 +46,7 @@ class DisplayUpdate(ModuleUpdateBase):
         self._database.write(
             "display",
             f"{display_key}_refresh_rate",
-            self._display.refresh_rate(self._database),
+            self._display.refresh_rate(self._database, display_key),
         )
 
     async def update_resolution_horizontal(
@@ -57,7 +57,7 @@ class DisplayUpdate(ModuleUpdateBase):
         self._database.write(
             "display",
             f"{display_key}_resolution_horizontal",
-            self._display.resolution_horizontal(self._database),
+            self._display.resolution_horizontal(self._database, display_key),
         )
 
     async def update_resolution_vertical(
@@ -68,7 +68,7 @@ class DisplayUpdate(ModuleUpdateBase):
         self._database.write(
             "display",
             f"{display_key}_resolution_vertical",
-            self._display.resolution_vertical(self._database),
+            self._display.resolution_vertical(self._database, display_key),
         )
 
     async def update_all_data(self) -> None:

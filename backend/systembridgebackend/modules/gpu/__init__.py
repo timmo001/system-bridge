@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from systembridgeshared.base import Base
+from systembridgeshared.common import make_key
 from systembridgeshared.const import (
     COLUMN_HARDWARE_NAME,
     COLUMN_HARDWARE_TYPE,
@@ -34,6 +35,7 @@ class GPU(Base):
     def core_clock(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU core clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -42,6 +44,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "clock" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU core clock: %s = %s",
@@ -54,6 +57,7 @@ class GPU(Base):
     def core_load(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU core load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -62,6 +66,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "load" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU core load: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
@@ -72,6 +77,7 @@ class GPU(Base):
     def fan_speed(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU fan speed"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -79,6 +85,7 @@ class GPU(Base):
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "fan" in item[COLUMN_TYPE].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU fan speed: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
@@ -89,6 +96,7 @@ class GPU(Base):
     def memory_clock(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU memory clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -97,6 +105,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "clock" in item[COLUMN_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory clock: %s = %s",
@@ -109,6 +118,7 @@ class GPU(Base):
     def memory_load(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU memory load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -117,6 +127,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "load" in item[COLUMN_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory load: %s = %s",
@@ -129,6 +140,7 @@ class GPU(Base):
     def memory_free(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU memory free"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -137,6 +149,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "free" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory free: %s = %s",
@@ -149,6 +162,7 @@ class GPU(Base):
     def memory_used(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU memory used"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -157,6 +171,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "used" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory used: %s = %s",
@@ -169,6 +184,7 @@ class GPU(Base):
     def memory_total(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU memory total"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -177,6 +193,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "memory" in item[COLUMN_NAME].lower()
                 and "total" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory total: %s = %s",
@@ -189,6 +206,7 @@ class GPU(Base):
     def power(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU power usage"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -196,6 +214,7 @@ class GPU(Base):
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "power" in item[COLUMN_TYPE].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU power: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
@@ -206,6 +225,7 @@ class GPU(Base):
     def temperature(
         self,
         database: Database,
+        gpu_key: str,
     ) -> float | None:
         """GPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
@@ -214,6 +234,7 @@ class GPU(Base):
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
                 and "temperature" in item[COLUMN_TYPE].lower()
                 and "core" in item[COLUMN_NAME].lower()
+                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU temperature: %s = %s",
