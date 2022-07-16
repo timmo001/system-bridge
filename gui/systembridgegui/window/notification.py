@@ -61,7 +61,7 @@ class NotificationWindow(Base, QFrame):
         if notification.image is not None:
             height += 280
         if notification.actions is not None and len(notification.actions) > 0:
-            height += 52
+            height += 72
 
         self._logger.info("Height: %s", height)
 
