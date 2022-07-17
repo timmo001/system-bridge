@@ -11,24 +11,13 @@ import aiohttp
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_API_KEY,
-    EVENT_APP_ICON,
-    EVENT_APP_NAME,
-    EVENT_BASE,
     EVENT_DATA,
     EVENT_EVENT,
     EVENT_ID,
-    EVENT_KEY,
     EVENT_MESSAGE,
     EVENT_MODULE,
-    EVENT_MODULES,
-    EVENT_PATH,
     EVENT_SUBTYPE,
-    EVENT_TEXT,
-    EVENT_TIMEOUT,
-    EVENT_TITLE,
     EVENT_TYPE,
-    EVENT_URL,
-    EVENT_VERSION,
     MODEL_MAP,
     MODEL_RESPONSE,
     SECRET_API_KEY,
@@ -61,10 +50,20 @@ from systembridgeshared.exceptions import (
     ConnectionClosedException,
     ConnectionErrorException,
 )
+from systembridgeshared.models.get_data import GetData
+from systembridgeshared.models.keyboard_key import KeyboardKey
+from systembridgeshared.models.keyboard_text import KeyboardText
 from systembridgeshared.models.media_directories import MediaDirectories
 from systembridgeshared.models.media_files import File as MediaFile, MediaFiles
+from systembridgeshared.models.media_get_file import MediaGetFile
+from systembridgeshared.models.media_get_files import MediaGetFiles
+from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.open_path import OpenPath
+from systembridgeshared.models.open_url import OpenUrl
+from systembridgeshared.models.register_data_listener import RegisterDataListener
 from systembridgeshared.models.request import Request
 from systembridgeshared.models.response import Response
+from systembridgeshared.models.update import Update
 from systembridgeshared.settings import Settings
 
 
@@ -152,7 +151,7 @@ class WebSocketClient(Base):
 
     async def application_update(
         self,
-        version: str | None = None,
+        model: Update,
     ) -> Response:
         """Update application"""
         self._logger.info("Updating application")
@@ -160,7 +159,7 @@ class WebSocketClient(Base):
             Request(
                 **{
                     EVENT_EVENT: TYPE_APPLICATION_UPDATE,
-                    EVENT_VERSION: version,
+                    **model.dict(),
                 }
             ),
             wait_for_response=False,
@@ -180,15 +179,15 @@ class WebSocketClient(Base):
 
     async def get_data(
         self,
-        modules: list[str],
+        model: GetData,
     ) -> Response:
         """Get data from server"""
-        self._logger.info("Getting data from server: %s", modules)
+        self._logger.info("Getting data from server: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_DATA,
-                    EVENT_MODULES: modules,
+                    **model.dict(),
                 }
             )
         )
@@ -207,17 +206,15 @@ class WebSocketClient(Base):
 
     async def get_files(
         self,
-        base: str,
-        path: str | None = None,
+        model: MediaGetFiles,
     ) -> MediaFiles:
         """Get files"""
-        self._logger.info("Getting files: %s - %s", base, path)
+        self._logger.info("Getting files: %s", model.json())
         response = await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILES,
-                    EVENT_BASE: base,
-                    EVENT_PATH: path,
+                    **model.dict(),
                 }
             )
         )
@@ -225,17 +222,15 @@ class WebSocketClient(Base):
 
     async def get_file(
         self,
-        base: str,
-        path: str,
+        model: MediaGetFile,
     ) -> MediaFile:
         """Get files"""
-        self._logger.info("Getting file: %s - %s", base, path)
+        self._logger.info("Getting file: %s", model.json())
         response = await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_GET_FILE,
-                    EVENT_BASE: base,
-                    EVENT_PATH: path,
+                    **model.dict(),
                 }
             )
         )
@@ -243,98 +238,90 @@ class WebSocketClient(Base):
 
     async def register_data_listener(
         self,
-        modules: list[str],
+        model: RegisterDataListener,
     ) -> Response:
         """Register data listener"""
-        self._logger.info("Registering data listener: %s", modules)
+        self._logger.info("Registering data listener: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_REGISTER_DATA_LISTENER,
-                    EVENT_MODULES: modules,
+                    **model.dict(),
                 }
             )
         )
 
     async def keyboard_keypress(
         self,
-        key: str,
+        model: KeyboardKey,
     ) -> Response:
         """Keyboard keypress"""
-        self._logger.info("Press key: %s", key)
+        self._logger.info("Press key: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_KEYBOARD_KEYPRESS,
-                    EVENT_KEY: key,
+                    **model.dict(),
                 }
             )
         )
 
     async def keyboard_text(
         self,
-        text: str,
+        model: KeyboardText,
     ) -> Response:
         """Keyboard keypress"""
-        self._logger.info("Enter text: %s", text)
+        self._logger.info("Enter text: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_KEYBOARD_TEXT,
-                    EVENT_TEXT: text,
+                    **model.dict(),
                 }
             )
         )
 
     async def send_notification(
         self,
-        message: str,
-        title: str | None = None,
-        app_name: str | None = None,
-        app_icon: str | None = None,
-        timeout: int = 5,
+        model: Notification,
     ) -> Response:
         """Send notification"""
-        self._logger.info("Send notification: %s", message)
+        self._logger.info("Send notification: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_NOTIFICATION,
-                    EVENT_MESSAGE: message,
-                    EVENT_TITLE: title,
-                    EVENT_APP_NAME: app_name,
-                    EVENT_APP_ICON: app_icon,
-                    EVENT_TIMEOUT: timeout,
+                    **model.dict(),
                 }
             )
         )
 
     async def open_path(
         self,
-        path: str,
+        model: OpenPath,
     ) -> Response:
         """Open path"""
-        self._logger.info("Opening path: %s", path)
+        self._logger.info("Opening path: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_OPEN,
-                    EVENT_PATH: path,
+                    **model.dict(),
                 }
             )
         )
 
     async def open_url(
         self,
-        url: str,
+        model: OpenUrl,
     ) -> Response:
         """Open url"""
-        self._logger.info("Opening URL: %s", url)
+        self._logger.info("Opening URL: %s", model.json())
         return await self._send_message(
             Request(
                 **{
                     EVENT_EVENT: TYPE_OPEN,
-                    EVENT_URL: url,
+                    **model.dict(),
                 }
             )
         )
