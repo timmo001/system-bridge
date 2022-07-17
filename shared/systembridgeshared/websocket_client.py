@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import socket
+from typing import Any, Awaitable
 from uuid import uuid4
 
 import aiohttp
@@ -394,7 +395,7 @@ class WebSocketClient(Base):
 
     async def listen(
         self,
-        callback: Callable,
+        callback: Callable[[str, Any], Awaitable[None]] | None = None,
         accept_other_types: bool = False,
     ) -> None:
         """Listen for messages and map to modules"""
@@ -437,15 +438,16 @@ class WebSocketClient(Base):
                 if model is None:
                     self._logger.warning("Unknown model: %s", message[EVENT_MODULE])
                 else:
-                    await callback(
-                        message[EVENT_MODULE],
-                        model(**message[EVENT_DATA]),
-                    )
+                    if callback is not None:
+                        await callback(
+                            message[EVENT_MODULE],
+                            model(**message[EVENT_DATA]),
+                        )
             else:
                 self._logger.debug("Other message: %s", message[EVENT_TYPE])
                 if accept_other_types:
                     model = MODEL_MAP.get(EVENT_TYPE, MODEL_MAP[MODEL_RESPONSE])
-                    if model is not None:
+                    if model is not None and callback is not None:
                         await callback(
                             message[EVENT_TYPE],
                             model(**message),
