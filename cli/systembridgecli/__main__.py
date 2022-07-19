@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from uuid import uuid4
+from typing import Optional
 
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
@@ -71,7 +72,7 @@ def settings_all():
 def setting(
     key: str,
     set_value: bool = False,
-    value: str | None = None,
+    value: Optional[str] = None,
 ) -> None:
     """Get or Set Setting"""
     if set_value:
@@ -86,7 +87,7 @@ def setting(
 def secret(
     key: str,
     set_value: bool = False,
-    value: str | None = None,
+    value: Optional[str] = None,
 ) -> None:
     """Get or Set Secret"""
     if set_value:

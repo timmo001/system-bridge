@@ -1,7 +1,7 @@
 """System Bridge: Disk"""
 from __future__ import annotations
 
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 from psutil import disk_io_counters, disk_partitions, disk_usage
 from psutil._common import sdiskio, sdiskpart
@@ -23,7 +23,7 @@ class Disk(Base):
         """Disk partitions"""
         return disk_partitions(all=True)
 
-    def usage(self, path: str) -> NamedTuple | None:
+    def usage(self, path: str) -> Optional[NamedTuple]:
         """Disk usage"""
         try:
             return disk_usage(path)

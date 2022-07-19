@@ -7,6 +7,7 @@ import json
 import os
 from sqlite3 import OperationalError, connect
 from time import time
+from typing import Optional, Union
 
 from pandas import DataFrame, read_sql_query
 
@@ -164,8 +165,8 @@ class Database(Base):
         self,
         table_name: str,
         data_key: str,
-        data_value: bool | float | int | str | list | dict | None,
-        data_timestamp: float | None = None,
+        data_value: Union[bool, float, int, str, list, dict, None],
+        data_timestamp: Optional[float] = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
@@ -198,8 +199,8 @@ class Database(Base):
         data_name: str,
         data_hardware_type: str,
         data_hardware_name: str,
-        data_value: bool | float | int | str | list | dict | None,
-        data_timestamp: float | None = None,
+        data_value: Union[bool, float, int, str, list, dict, None],
+        data_timestamp: Optional[float] = None,
     ) -> None:
         """Write to table"""
         if data_timestamp is None:
@@ -229,7 +230,7 @@ class Database(Base):
     def table_data_to_ordered_dict(
         self,
         table_name: str,
-    ) -> OrderedDict | None:
+    ) -> Optional[OrderedDict]:
         """Convert table to OrderedDict"""
         data_dict = self.read_table(table_name).to_dict(orient="records")
         if len(data_dict) == 0:

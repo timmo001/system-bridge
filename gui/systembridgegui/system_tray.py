@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections.abc import Callable
 import os
 from webbrowser import open_new_tab
+from typing import Optional
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
@@ -35,7 +36,7 @@ class SystemTray(Base, QSystemTrayIcon):
         icon: QIcon,
         parent: QApplication,
         callback_exit_application: Callable,
-        callback_show_window: Callable[[str, bool, int | None, int | None], None],
+        callback_show_window: Callable[[str, bool, Optional[int], Optional[int]], None],
     ) -> None:
         """Initialize the system tray"""
         Base.__init__(self)

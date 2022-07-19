@@ -1,6 +1,8 @@
 """System Bridge: Display"""
 from __future__ import annotations
 
+from typing import Optional
+
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -36,7 +38,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """Display pixel clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -58,7 +60,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """Display refresh rate"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -80,7 +82,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> int | None:
+    ) -> Optional[int]:
         """Display resolution horizontal"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -102,7 +104,7 @@ class Display(Base):
         self,
         database: Database,
         display_key: str,
-    ) -> int | None:
+    ) -> Optional[int]:
         """Display resolution vertical"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (

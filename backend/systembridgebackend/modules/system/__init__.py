@@ -5,6 +5,7 @@ import os
 import platform
 import re
 import socket
+from typing import Optional
 import uuid
 
 from aiogithubapi import (
@@ -74,7 +75,7 @@ class System(Base):
         """Get version"""
         return __version__.public()
 
-    async def version_latest(self) -> GitHubReleaseModel | None:
+    async def version_latest(self) -> Optional[GitHubReleaseModel]:
         """Get latest version from GitHub"""
         self._logger.info("Get latest version from GitHub")
         try:
@@ -95,7 +96,7 @@ class System(Base):
     def version_newer_available(
         self,
         database: Database,
-    ) -> bool | None:
+    ) -> Optional[bool]:
         """Check if newer version is available"""
         version = database.read_table_by_key("system", "version").to_dict(
             orient="records"

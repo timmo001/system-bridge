@@ -10,6 +10,7 @@ import os
 import re
 import tempfile
 from urllib.parse import urlencode
+from typing import Optional, Dict
 
 import aiofiles
 from aiohttp import ClientSession
@@ -103,7 +104,7 @@ def get_files(
 def get_file(
     base_path: str,
     filepath: str,
-) -> dict | None:
+) -> Optional[Dict]:
     """Get file from path"""
     try:
         stat = os.stat(filepath)
@@ -590,7 +591,7 @@ async def _delete_cover_delayed(
 def _save_cover_from_binary(
     data: bytes,
     mime_type: str,
-    name: str | None,
+    name: Optional[str],
 ) -> str:
     """Save cover from binary."""
     cover_extension = mimetypes.guess_extension(mime_type)

@@ -9,6 +9,7 @@ import platform
 import subprocess
 import sys
 import urllib.request
+from typing import Optional
 
 from systembridgeshared.base import Base
 
@@ -33,7 +34,7 @@ class Update(Base):
             result = pipe.communicate()[0].decode()
         self._logger.info("Result: %s", result)
 
-    def _update(self, packages: dict[str, str | None]) -> None:
+    def _update(self, packages: dict[str, Optional[str]]) -> None:
         """Update each package."""
         for package, version in packages.items():
             self._logger.info("Updating %s to version %s", package, version)
@@ -46,9 +47,9 @@ class Update(Base):
 
     def update(
         self,
-        version: str | None,
+        version: Optional[str],
         wait: bool = False,
-    ) -> dict[str, str | None]:
+    ) -> dict[str, Optional[str]]:
         """Update the application."""
         packages = {
             "systembridgeshared": version,

@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 import socket
-from typing import Any
+from typing import Any, Optional, Dict
 from uuid import uuid4
 
 import aiohttp
@@ -79,9 +79,9 @@ class WebSocketClient(Base):
         self._api_host = api_host
         self._api_port = api_port
         self._api_key = api_key
-        self._responses: dict[str, tuple[asyncio.Future, str | None]] = {}
-        self._session: aiohttp.ClientSession | None = None
-        self._websocket: aiohttp.ClientWebSocketResponse | None = None
+        self._responses: dict[str, tuple[asyncio.Future, Optional[str]]] = {}
+        self._session: Optional[aiohttp.ClientSession] = None
+        self._websocket: Optional[aiohttp.ClientWebSocketResponse] = None
 
     @property
     def connected(self) -> bool:
@@ -127,7 +127,7 @@ class WebSocketClient(Base):
 
     async def connect(
         self,
-        session: aiohttp.ClientSession | None = None,
+        session: Optional[aiohttp.ClientSession] = None,
     ) -> None:
         """Connect to server"""
         if session:
@@ -397,7 +397,7 @@ class WebSocketClient(Base):
 
     async def listen(
         self,
-        callback: Callable[[str, Any], Awaitable[None]] | None = None,
+        callback: Optional[Callable[[str, Any], Awaitable[None]]] = None,
         accept_other_types: bool = False,
     ) -> None:
         """Listen for messages and map to modules"""
@@ -489,7 +489,7 @@ class WebSocketClient(Base):
                 if isinstance(message, dict):
                     await callback(message)
 
-    async def receive_message(self) -> dict | None:
+    async def receive_message(self) -> Optional[Dict]:
         """Receive message"""
         if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")

@@ -1,6 +1,8 @@
 """System Bridge: CPU"""
 from __future__ import annotations
 
+from typing import Optional
+
 from psutil import (
     cpu_count,
     cpu_freq,
@@ -49,7 +51,7 @@ class CPU(Base):
     def temperature(
         self,
         database: Database,
-    ) -> float | None:
+    ) -> Optional[float]:
         """CPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if item[COLUMN_HARDWARE_TYPE] is not None and (
@@ -101,7 +103,7 @@ class CPU(Base):
     def voltage(
         self,
         database: Database,
-    ) -> float | None:
+    ) -> Optional[float]:
         """CPU voltage"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (

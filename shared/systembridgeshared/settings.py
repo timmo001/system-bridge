@@ -4,6 +4,7 @@ from __future__ import annotations
 import io
 import os
 from os.path import exists
+from typing import Union
 from uuid import uuid4
 
 from appdirs import AppDirs
@@ -94,7 +95,7 @@ class Settings(Base):
     def get(
         self,
         key: str,
-    ) -> bool | float | int | str | list | dict | None:
+    ) -> Union[bool, float, int, str, list, dict, None]:
         """Get setting"""
         record = self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
             orient="records"
@@ -123,7 +124,7 @@ class Settings(Base):
     def set(
         self,
         key: str,
-        value: bool | float | int | str | list | dict | None,
+        value: Union[bool, float, int, str, list, dict, None],
     ) -> None:
         """Set setting"""
         self._database.write(TABLE_SETTINGS, key, value)
