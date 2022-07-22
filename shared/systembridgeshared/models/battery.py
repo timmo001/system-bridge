@@ -28,6 +28,7 @@ class Battery(BaseModel):
     class Config:
         extra = Extra.allow
 
+    id: Optional[str] = Field(None, description="Event ID")
     is_charging: Optional[bool] = None
     percentage: Optional[float] = None
     last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

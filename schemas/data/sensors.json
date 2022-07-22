@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Sensors",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "last_updated": {
       "type": "object",
       "description": "Last updated",

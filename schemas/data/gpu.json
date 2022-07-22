@@ -3,6 +3,10 @@
   "type": "object",
   "description": "GPU",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "gpus": {
       "type": "array"
     },

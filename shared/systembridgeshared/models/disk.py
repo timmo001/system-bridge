@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 
@@ -32,6 +34,7 @@ class Disk(BaseModel):
     class Config:
         extra = Extra.allow
 
+    id: Optional[str] = Field(None, description="Event ID")
     devices: list
     io_counters_read_count: int
     io_counters_write_count: int

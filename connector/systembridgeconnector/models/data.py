@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from systembridgeconnector.models.battery import Battery
-from systembridgeconnector.models.bridge import Bridge
-from systembridgeconnector.models.cpu import Cpu
-from systembridgeconnector.models.disk import Disk
-from systembridgeconnector.models.display import Display
-from systembridgeconnector.models.gpu import Gpu
-from systembridgeconnector.models.memory import Memory
-from systembridgeconnector.models.network import Network
-from systembridgeconnector.models.sensors import Sensors
-from systembridgeconnector.models.system import System
+from systembridgeshared.models.battery import Battery
+from systembridgeshared.models.bridge import Bridge
+from systembridgeshared.models.cpu import Cpu
+from systembridgeshared.models.disk import Disk
+from systembridgeshared.models.display import Display
+from systembridgeshared.models.gpu import Gpu
+from systembridgeshared.models.memory import Memory
+from systembridgeshared.models.network import Network
+from systembridgeshared.models.sensors import Sensors
+from systembridgeshared.models.system import System
 
 
 class Data(BaseModel):

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 
@@ -25,5 +27,6 @@ class Gpu(BaseModel):
     class Config:
         extra = Extra.allow
 
+    id: Optional[str] = Field(None, description="Event ID")
     gpus: list
     last_updated: LastUpdated = Field(..., description="Last updated")

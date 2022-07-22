@@ -3,6 +3,10 @@
   "type": "object",
   "description": "System",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "boot_time": {
       "type": "number"
     },
