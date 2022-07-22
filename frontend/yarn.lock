@@ -205,10 +205,10 @@
   resolved "https://registry.yarnpkg.com/@mdi/js/-/js-7.0.96.tgz#8e7a54d5cb38831e3150632cc19e380f54d9edd6"
   integrity sha512-lNqhkV3cpPfYb/Avh+vXLFukUTbHbyHoFo4Jdc7Oc9UvURGVhamFIpgOVvEf2bNA78zvjXTZeVWExUTR+DLBfQ==
 
-"@mdi/react@1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.6.0.tgz#09b470c6b444a626206a1bd8901abcecf56bb3eb"
-  integrity sha512-FdeJ3Ee+m9nbBkZXW0XgSkDvevgOCloLRFrBlF6pRGWgT8v2U1M2aeXi8+uRM5FZ58o3dfVFduAtmCq7quclNA==
+"@mdi/react@1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.6.1.tgz#624313593ae8065d2a09878ca81beb3e4b676b03"
+  integrity sha512-4qZeDcluDFGFTWkHs86VOlHkm6gnKaMql13/gpIcUQ8kzxHgpj31NuCkD8abECVfbULJ3shc7Yt4HJ6Wu6SN4w==
   dependencies:
     prop-types "^15.7.2"
 
