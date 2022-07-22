@@ -1,8 +1,7 @@
 """System Bridge: Data"""
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from threading import Thread
-from typing import Awaitable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database

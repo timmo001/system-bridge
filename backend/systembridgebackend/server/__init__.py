@@ -5,7 +5,7 @@ from datetime import timedelta
 import os
 from os import walk
 import sys
-from typing import Awaitable
+from collections.abc import Awaitable
 
 from sanic import Sanic
 from sanic.request import Request

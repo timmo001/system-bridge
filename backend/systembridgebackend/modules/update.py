@@ -1,7 +1,7 @@
 """System Bridge: Modules Update"""
 import asyncio
 from collections.abc import Callable
-from typing import Awaitable
+from collections.abc import Awaitable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
