@@ -1,11 +1,10 @@
 """System Bridge: Server"""
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import timedelta
 import os
 from os import walk
 import sys
-from collections.abc import Awaitable
 
 from sanic import Sanic
 from sanic.request import Request
