@@ -1,6 +1,6 @@
 """System Bridge: Server"""
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import timedelta
 import os
 from os import walk
@@ -152,7 +152,7 @@ class Server(Base):
         @auth.key_required
         async def _handler_generic(
             request: Request,
-            function: Callable,
+            function: Callable[[Request, Settings], Awaitable[HTTPResponse]],
         ) -> HTTPResponse:
             """Generic handler"""
             return await function(request, self._settings)

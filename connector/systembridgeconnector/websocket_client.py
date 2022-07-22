@@ -457,7 +457,7 @@ class WebSocketClient(Base):
 
     async def listen_for_messages(
         self,
-        callback: Callable,
+        callback: Callable[[dict[Any, Any]], Awaitable[None]],
     ) -> None:
         """Listen for messages"""
         if not self.connected:

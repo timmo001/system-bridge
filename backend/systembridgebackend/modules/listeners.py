@@ -2,6 +2,7 @@
 
 import asyncio
 from collections.abc import Callable
+from collections.abc import Awaitable
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import MODEL_MAP
@@ -14,7 +15,7 @@ class Listener:
     def __init__(
         self,
         listener_id: str,
-        data_changed_callback: Callable,
+        data_changed_callback: Callable[[str, dict], Awaitable[None]],
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
@@ -42,7 +43,7 @@ class Listeners(Base):
     async def add_listener(
         self,
         listener_id: str,
-        data_changed_callback: Callable,
+        data_changed_callback: Callable[[str, dict], Awaitable[None]],
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> bool:
         """Add modules to listener"""

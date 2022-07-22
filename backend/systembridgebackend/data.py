@@ -1,6 +1,6 @@
 """System Bridge: Data"""
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from threading import Thread
 
 from systembridgeshared.base import Base
@@ -15,7 +15,7 @@ class UpdateThread(Thread):
     def __init__(
         self,
         database: Database,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -34,7 +34,7 @@ class UpdateFrequentThread(Thread):
     def __init__(
         self,
         database: Database,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -53,7 +53,7 @@ class Data(Base):
     def __init__(
         self,
         database: Database,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Initialize"""
         super().__init__()
