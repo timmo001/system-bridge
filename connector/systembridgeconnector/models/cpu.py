@@ -48,6 +48,7 @@ class Cpu(BaseModel):
     class Config:
         extra = Extra.allow
 
+    id: Optional[str] = Field(None, description="Event ID")
     count: int
     frequency_current: float
     frequency_min: float

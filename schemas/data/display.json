@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Display",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "displays": {
       "type": "array"
     },

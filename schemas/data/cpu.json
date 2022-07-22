@@ -3,6 +3,10 @@
   "type": "object",
   "description": "CPU",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "count": {
       "type": "integer"
     },

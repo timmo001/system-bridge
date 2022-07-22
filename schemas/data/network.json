@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Network",
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event ID"
+    },
     "io_counters_bytes_sent": {
       "type": "integer"
     },

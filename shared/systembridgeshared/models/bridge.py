@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 
@@ -14,4 +16,5 @@ class Bridge(BaseModel):
     class Config:
         extra = Extra.allow
 
+    id: Optional[str] = Field(None, description="Event ID")
     last_updated: dict[str, float] = Field(..., description="Last updated")
