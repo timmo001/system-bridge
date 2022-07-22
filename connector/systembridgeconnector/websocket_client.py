@@ -79,7 +79,7 @@ class WebSocketClient(Base):
         self._api_host = api_host
         self._api_port = api_port
         self._api_key = api_key
-        self._response_futures: dict[str, asyncio.Future] = {}
+        self._responses: dict[str, tuple[asyncio.Future, str | None]] = {}
         self._session: aiohttp.ClientSession | None = None
         self._websocket: aiohttp.ClientWebSocketResponse | None = None
 
@@ -92,6 +92,7 @@ class WebSocketClient(Base):
         self,
         request: Request,
         wait_for_response: bool = True,
+        response_type: str | None = None,
     ) -> Response:
         """Send a message to the WebSocket"""
         if not self.connected or self._websocket is None:
@@ -100,14 +101,14 @@ class WebSocketClient(Base):
         request.api_key = self._api_key
         request.id = uuid4().hex
         future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
-        self._response_futures[request.id] = future
+        self._responses[request.id] = future, response_type
         await self._websocket.send_str(request.json())
         self._logger.debug("Sent message: %s", request.json(exclude={EVENT_API_KEY}))
         if wait_for_response:
             try:
                 return await future
             finally:
-                self._response_futures.pop(request.id)
+                self._responses.pop(request.id)
         return Response(
             **{
                 EVENT_ID: request.id,
@@ -190,7 +191,8 @@ class WebSocketClient(Base):
                     EVENT_EVENT: TYPE_GET_DATA,
                     **model.dict(),
                 }
-            )
+            ),
+            response_type=TYPE_DATA_UPDATE,
         )
 
     async def get_directories(self) -> MediaDirectories:
@@ -405,22 +407,33 @@ class WebSocketClient(Base):
             self._logger.debug("New message: %s", message[EVENT_TYPE])
 
             if message.get(EVENT_ID) is not None:
-                future = self._response_futures.get(message[EVENT_ID])
-                if future is not None:
-                    response = Response(**message)
-                    self._logger.info(
-                        "Response: %s",
-                        response.json(
-                            include={
-                                EVENT_ID,
-                                EVENT_TYPE,
-                                EVENT_SUBTYPE,
-                                EVENT_MESSAGE,
-                            },
-                            exclude_unset=True,
-                        ),
-                    )
-                    future.set_result(response)
+                response_tuple = self._responses.get(message[EVENT_ID])
+                if response_tuple is not None:
+                    future, response_type = response_tuple
+                    if (
+                        response_type is not None
+                        and response_type != message[EVENT_TYPE]
+                    ):
+                        self._logger.info(
+                            "Response type '%s' does not match requested type '%s'.",
+                            message[EVENT_TYPE],
+                            response_type,
+                        )
+                    else:
+                        response = Response(**message)
+                        self._logger.info(
+                            "Response: %s",
+                            response.json(
+                                include={
+                                    EVENT_ID,
+                                    EVENT_TYPE,
+                                    EVENT_SUBTYPE,
+                                    EVENT_MESSAGE,
+                                },
+                                exclude_unset=True,
+                            ),
+                        )
+                        future.set_result(response)
 
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
