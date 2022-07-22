@@ -126,7 +126,7 @@ class WebSocketHandler(Base):
         listeners: Listeners,
         implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket,
-        callback_exit_application: Callable,
+        callback_exit_application: Callable[..., None],
     ) -> None:
         """Initialize"""
         super().__init__()

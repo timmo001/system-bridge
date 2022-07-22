@@ -1,8 +1,9 @@
 """System Bridge: Server Authentication"""
-from functools import wraps
 from collections.abc import Callable
+from functools import wraps
 
 from sanic import Sanic, exceptions
+from sanic.request import Request
 from systembridgeshared.base import Base
 
 
@@ -54,11 +55,19 @@ class ApiKeyAuthentication(Base):
         """Add API Key"""
         self.api_keys.append(key)
 
-    def key_required(self, handler: Callable):
+    def key_required(
+        self,
+        handler: Callable,
+    ):
         """Wrap handler with key check"""
 
         @wraps(handler)
-        async def wrapper(request, *args, **kwargs) -> Callable:
+        async def wrapper(
+            request: Request,
+            *args,
+            **kwargs,
+        ) -> Callable:
+            """Wrap handler with key check"""
             if not await self._is_api_key(request):
                 raise exceptions.Unauthorized(self.error)
             return await handler(request, *args, **kwargs)

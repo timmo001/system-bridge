@@ -1,6 +1,7 @@
 """System Bridge: Modules Update"""
 import asyncio
 from collections.abc import Callable
+from typing import Awaitable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
@@ -45,7 +46,7 @@ class Update(Base):
     async def _update(
         self,
         class_obj: dict,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Update"""
         await class_obj["cls"].update_all_data()
@@ -53,7 +54,7 @@ class Update(Base):
 
     async def update_data(
         self,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Update Data"""
         self._logger.info("Update data")
@@ -67,7 +68,7 @@ class Update(Base):
 
     async def update_frequent_data(
         self,
-        updated_callback: Callable,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Update Data"""
         self._logger.info("Update frequent data")

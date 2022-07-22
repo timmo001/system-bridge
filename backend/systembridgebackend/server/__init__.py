@@ -5,6 +5,7 @@ from datetime import timedelta
 import os
 from os import walk
 import sys
+from typing import Awaitable
 
 from sanic import Sanic
 from sanic.request import Request
@@ -152,7 +153,7 @@ class Server(Base):
         @auth.key_required
         async def _handler_generic(
             request: Request,
-            function: Callable,
+            function: Callable[[Request, Settings], Awaitable[HTTPResponse]],
         ) -> HTTPResponse:
             """Generic handler"""
             return await function(request, self._settings)
