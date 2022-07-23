@@ -433,7 +433,13 @@ class WebSocketClient(Base):
                                 exclude_unset=True,
                             ),
                         )
-                        future.set_result(response)
+                        try:
+                            future.set_result(response)
+                        except asyncio.InvalidStateError:
+                            self._logger.warning(
+                                "Future already set for response ID: %s",
+                                message[EVENT_ID],
+                            )
 
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
