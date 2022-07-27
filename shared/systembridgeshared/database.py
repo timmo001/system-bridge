@@ -59,7 +59,7 @@ class Database(Base):
             self._connection.execute(sql)
             self._connection.commit()
         except OperationalError as error:
-            self._logger.error(
+            self._logger.warning(
                 "Error executing SQL: %s\n%s",
                 sql,
                 error,
