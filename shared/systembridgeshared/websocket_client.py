@@ -92,7 +92,7 @@ class WebSocketClient(Base):
         self,
         request: Request,
         wait_for_response: bool = True,
-        response_type: str | None = None,
+        response_type: Optional[str] = None,
     ) -> Response:
         """Send a message to the WebSocket"""
         if not self.connected or self._websocket is None:
