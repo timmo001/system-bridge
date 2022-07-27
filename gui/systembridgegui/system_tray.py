@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import os
-from webbrowser import open_new_tab
 from typing import Optional
+from webbrowser import open_new_tab
 
 from PySide6.QtGui import QAction, QCursor, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon

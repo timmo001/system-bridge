@@ -72,6 +72,7 @@ disable = [
     "format",
     "inconsistent-return-statements",
     "locally-disabled",
+    "no-name-in-module",
     "not-context-manager",
     "too-few-public-methods",
     "too-many-ancestors",
