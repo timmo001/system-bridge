@@ -1,6 +1,8 @@
 """System Bridge: GPU"""
 from __future__ import annotations
 
+from typing import Optional
+
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
@@ -36,7 +38,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU core clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -58,7 +60,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU core load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -78,7 +80,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU fan speed"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -97,7 +99,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU memory clock"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -119,7 +121,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU memory load"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -141,7 +143,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU memory free"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -163,7 +165,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU memory used"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -185,7 +187,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU memory total"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -207,7 +209,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU power usage"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (
@@ -226,7 +228,7 @@ class GPU(Base):
         self,
         database: Database,
         gpu_key: str,
-    ) -> float | None:
+    ) -> Optional[float]:
         """GPU temperature"""
         for item in database.read_table("sensors").to_dict(orient="records"):
             if (

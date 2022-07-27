@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import sys
+from typing import Optional, Dict
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -38,7 +39,7 @@ class Main(Base):
         self,
         command: str = "main",
         gui_only: bool = False,
-        data: dict | None = None,
+        data: Optional[Dict] = None,
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -144,8 +145,8 @@ class Main(Base):
         self,
         path: str,
         maximized: bool,
-        width: int | None = 1280,
-        height: int | None = 720,
+        width: Optional[int] = 1280,
+        height: Optional[int] = 720,
     ) -> None:
         """Show the main window"""
         self._logger.info("Showing window: %s", path)

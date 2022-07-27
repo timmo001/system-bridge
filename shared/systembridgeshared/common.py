@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from typing import Union
 
 from appdirs import AppDirs
 
@@ -25,7 +26,7 @@ def camel_to_snake(name):
 
 def convert_string_to_correct_type(
     value: str,
-) -> str | int | float | bool | list | dict | None:
+) -> Union[bool, float, int, str, list, dict, None]:
     """Convert string to correct data type"""
     try:
         if value.startswith("'") and value.endswith("'"):

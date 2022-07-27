@@ -1,6 +1,8 @@
 """System Bridge: Battery"""
 from __future__ import annotations
 
+from typing import Optional
+
 from plyer import battery
 import psutil
 from systembridgeshared.base import Base
@@ -9,7 +11,7 @@ from systembridgeshared.base import Base
 class Battery(Base):
     """Battery"""
 
-    def sensors(self) -> psutil._common.sfan | None:
+    def sensors(self) -> Optional[psutil._common.sfan]:
         """Get battery sensors"""
         if not hasattr(psutil, "sensors_battery"):
             return None

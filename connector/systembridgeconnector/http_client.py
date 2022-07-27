@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import Any, Optional
 
 from aiohttp import ClientResponse, ClientSession
 from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
@@ -27,7 +27,7 @@ class HTTPClient(Base):
         api_host: str,
         api_port: int,
         api_key: str,
-        session: ClientSession | None = None,
+        session: Optional[ClientSession] = None,
     ) -> None:
         """Initialize the client."""
         super().__init__()
@@ -55,7 +55,7 @@ class HTTPClient(Base):
     async def post(
         self,
         path: str,
-        payload: Any | None,
+        payload: Optional[Any],
     ) -> Any:
         """Make a POST request"""
         response: ClientResponse = await self.request(
@@ -72,7 +72,7 @@ class HTTPClient(Base):
     async def put(
         self,
         path: str,
-        payload: Any | None,
+        payload: Optional[Any],
     ) -> Any:
         """Make a PUT request"""
         response: ClientResponse = await self.request(
