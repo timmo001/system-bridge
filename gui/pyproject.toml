@@ -65,13 +65,13 @@ good-names = [
 # too-many-ancestors - it's too strict.
 # wrong-import-order - isort guards this
 disable = [
-    "format",
     "abstract-method",
+    "consider-alternative-union-syntax",
     "cyclic-import",
     "duplicate-code",
+    "format",
     "inconsistent-return-statements",
     "locally-disabled",
-    "no-name-in-module",
     "not-context-manager",
     "too-few-public-methods",
     "too-many-ancestors",
