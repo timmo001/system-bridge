@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 import socket
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 from uuid import uuid4
 
 import aiohttp
@@ -489,7 +489,7 @@ class WebSocketClient(Base):
                 if isinstance(message, dict):
                     await callback(message)
 
-    async def receive_message(self) -> Optional[Dict]:
+    async def receive_message(self) -> Optional[dict]:
         """Receive message"""
         if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")

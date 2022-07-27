@@ -231,7 +231,7 @@ class Database(Base):
         self,
         table_name: str,
     ) -> Optional[OrderedDict]:
-        """Convert table to OrderedDict"""
+        """Convert table to Ordereddict"""
         data_dict = self.read_table(table_name).to_dict(orient="records")
         if len(data_dict) == 0:
             return None

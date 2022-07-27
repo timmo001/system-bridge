@@ -9,8 +9,8 @@ import mimetypes
 import os
 import re
 import tempfile
+from typing import Optional
 from urllib.parse import urlencode
-from typing import Optional, Dict
 
 import aiofiles
 from aiohttp import ClientSession
@@ -104,7 +104,7 @@ def get_files(
 def get_file(
     base_path: str,
     filepath: str,
-) -> Optional[Dict]:
+) -> Optional[dict]:
     """Get file from path"""
     try:
         stat = os.stat(filepath)

@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from typing import Optional, Dict
+from typing import Optional
 
 import psutil
 from systembridgeshared.base import Base
@@ -13,19 +13,19 @@ from systembridgeshared.base import Base
 class Sensors(Base):
     """Sensors"""
 
-    def fans(self) -> Optional[Dict]:
+    def fans(self) -> Optional[dict]:
         """Get fans"""
         if not hasattr(psutil, "sensors_fans"):
             return None
         return psutil.sensors_fans()  # type: ignore
 
-    def temperatures(self) -> Optional[Dict]:
+    def temperatures(self) -> Optional[dict]:
         """Get temperatures"""
         if not hasattr(psutil, "sensors_temperatures"):
             return None
         return psutil.sensors_temperatures()  # type: ignore
 
-    def windows_sensors(self) -> Optional[Dict]:
+    def windows_sensors(self) -> Optional[dict]:
         """Get windows sensors"""
         if sys.platform != "win32":
             return None

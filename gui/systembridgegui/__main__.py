@@ -5,7 +5,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Optional, Dict
+from typing import Optional
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -39,7 +39,7 @@ class Main(Base):
         self,
         command: str = "main",
         gui_only: bool = False,
-        data: Optional[Dict] = None,
+        data: Optional[dict] = None,
     ) -> None:
         """Initialize"""
         super().__init__()
