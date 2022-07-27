@@ -96,3 +96,10 @@
 - name: "unable-to-reproduce"
   color: ffee58
   description: "This issue cannot be reproduced. It may be configuration or system related."
+
+- name: "linux"
+  color: ffeb3b
+  description: "This issue is related to Linux."
+- name: "windows"
+  color: 03a9f4
+  description: "This issue is related to Windows."
