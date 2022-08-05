@@ -78,7 +78,7 @@ class WebSocketClient(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._responses: dict[str, tuple[asyncio.Future, Optional[str]]] = {}
+        self._responses: dict[str, tuple[asyncio.Future[Response], Optional[str]]] = {}
         self._session: Optional[aiohttp.ClientSession] = None
         self._websocket: Optional[aiohttp.ClientWebSocketResponse] = None
         self._api_key = self._settings.get_secret(SECRET_API_KEY)
@@ -420,26 +420,45 @@ class WebSocketClient(Base):
                             response_type,
                         )
                     else:
-                        response = Response(**message)
-                        self._logger.info(
-                            "Response: %s",
-                            response.json(
-                                include={
-                                    EVENT_ID,
-                                    EVENT_TYPE,
-                                    EVENT_SUBTYPE,
-                                    EVENT_MESSAGE,
-                                },
-                                exclude_unset=True,
-                            ),
-                        )
                         try:
-                            future.set_result(response)
-                        except asyncio.InvalidStateError:
-                            self._logger.warning(
-                                "Future already set for response ID: %s",
-                                message[EVENT_ID],
+                            response = Response(**message)
+
+                            if (
+                                response.type == TYPE_DATA_UPDATE
+                                and response.module is not None
+                                and message[EVENT_DATA] is not None
+                            ):
+                                # Find model from module
+                                model = MODEL_MAP.get(message[EVENT_MODULE])
+                                if model is None:
+                                    self._logger.warning(
+                                        "Unknown model: %s", message[EVENT_MODULE]
+                                    )
+                                else:
+                                    response.data = model(**message[EVENT_DATA])
+
+                            self._logger.info(
+                                "Response: %s",
+                                response.json(
+                                    include={
+                                        EVENT_ID,
+                                        EVENT_TYPE,
+                                        EVENT_SUBTYPE,
+                                        EVENT_MESSAGE,
+                                    },
+                                    exclude_unset=True,
+                                ),
                             )
+
+                            try:
+                                future.set_result(response)
+                            except asyncio.InvalidStateError:
+                                self._logger.warning(
+                                    "Future already set for response ID: %s",
+                                    message[EVENT_ID],
+                                )
+                        except ValueError as error:
+                            self._logger.error("Invalid response: %s", error)
 
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
