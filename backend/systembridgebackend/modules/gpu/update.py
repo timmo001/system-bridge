@@ -4,8 +4,8 @@ import asyncio
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.gpu import GPU
+from . import GPU
+from ..base import ModuleUpdateBase
 
 
 class GPUUpdate(ModuleUpdateBase):

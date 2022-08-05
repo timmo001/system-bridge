@@ -8,10 +8,10 @@ from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
-from systembridgebackend.autostart import autostart_disable, autostart_enable
-from systembridgebackend.modules.system import System
-from systembridgebackend.server import Server
-from systembridgebackend.shortcut import create_shortcuts
+from .autostart import autostart_disable, autostart_enable
+from .modules.system import System
+from .server import Server
+from .shortcut import create_shortcuts
 
 
 class Main(Base):

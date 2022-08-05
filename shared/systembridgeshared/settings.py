@@ -4,7 +4,7 @@ from __future__ import annotations
 import io
 import os
 from os.path import exists
-from typing import Union
+from typing import Any, Union
 from uuid import uuid4
 
 from appdirs import AppDirs
@@ -13,18 +13,18 @@ from cryptography.fernet import Fernet
 from systembridgeshared.base import Base
 from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
-    COLUMN_KEY,
-    COLUMN_TIMESTAMP,
-    COLUMN_VALUE,
     SECRET_API_KEY,
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_AUTOSTART,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
-    TABLE_SECRETS,
-    TABLE_SETTINGS,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import (
+    Data as DatabaseData,
+    Secrets as DatabaseSecrets,
+    Settings as DatabaseSettings,
+)
 
 
 class Settings(Base):
@@ -36,28 +36,10 @@ class Settings(Base):
     ) -> None:
         """Initialize"""
         super().__init__()
-
         self._database = database
-        self._database.create_table(
-            TABLE_SECRETS,
-            [
-                (COLUMN_KEY, "TEXT PRIMARY KEY"),
-                (COLUMN_VALUE, "TEXT"),
-                (COLUMN_TIMESTAMP, "DOUBLE"),
-            ],
-        )
-
-        self._database.create_table(
-            TABLE_SETTINGS,
-            [
-                (COLUMN_KEY, "TEXT PRIMARY KEY"),
-                (COLUMN_VALUE, "TEXT"),
-                (COLUMN_TIMESTAMP, "DOUBLE"),
-            ],
-        )
 
         # Generate default encryption key
-        self._encryption_key = None
+        self._encryption_key: str = ""
         secret_key_path = os.path.join(
             AppDirs("systembridge", "timmo001").user_data_dir, "secret.key"
         )
@@ -65,69 +47,84 @@ class Settings(Base):
             with io.open(secret_key_path, encoding="utf-8") as file:
                 self._encryption_key = file.read().splitlines()[0]
         if not self._encryption_key:
-            self._encryption_key = Fernet.generate_key()
+            self._encryption_key = Fernet.generate_key().decode()
             with io.open(secret_key_path, "w", encoding="utf-8") as file:
-                file.write(self._encryption_key.decode())
+                file.write(self._encryption_key)
 
         # Default Secrets
-        if self._database.check_table_for_key(TABLE_SECRETS, SECRET_API_KEY):
+        if (
+            self._database.get_data_item_by_key(DatabaseSecrets, SECRET_API_KEY)
+            is not None
+        ):
             self.set_secret(SECRET_API_KEY, str(uuid4()))
 
         # Default Settings
-        if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_AUTOSTART):
+        if (
+            self._database.get_data_item_by_key(DatabaseSettings, SETTING_AUTOSTART)
+            is not None
+        ):
             self.set(SETTING_AUTOSTART, False)
-        if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_LOG_LEVEL):
+        if (
+            self._database.get_data_item_by_key(DatabaseSettings, SETTING_LOG_LEVEL)
+            is not None
+        ):
             self.set(SETTING_LOG_LEVEL, "INFO")
-        if self._database.check_table_for_key(TABLE_SETTINGS, SETTING_PORT_API):
+        if (
+            self._database.get_data_item_by_key(DatabaseSettings, SETTING_PORT_API)
+            is not None
+        ):
             self.set(SETTING_PORT_API, 9170)
-        if self._database.check_table_for_key(
-            TABLE_SETTINGS, SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+        if (
+            self._database.get_data_item_by_key(
+                DatabaseSettings, SETTING_ADDITIONAL_MEDIA_DIRECTORIES
+            )
+            is not None
         ):
             self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, [])
 
-    def get_all(self) -> list[dict]:
+    def get_all(self) -> list[DatabaseData]:
         """Get settings"""
-        records = self._database.read_table(TABLE_SETTINGS).to_dict(orient="records")
-        for record in records:
-            record[COLUMN_VALUE] = convert_string_to_correct_type(record[COLUMN_VALUE])
+        records = self._database.get_data(DatabaseSettings)
+        # for record in records:
+        #     if record.value is not None:
+        #         record.value = convert_string_to_correct_type(record.value)
         return records
 
     def get(
         self,
         key: str,
-    ) -> Union[bool, float, int, str, list, dict, None]:
+    ) -> Union[bool, float, int, str, list[Any], dict[str, Any], None]:
         """Get setting"""
-        record = self._database.read_table_by_key(TABLE_SETTINGS, key).to_dict(
-            orient="records"
-        )
-        return (
-            convert_string_to_correct_type(record[0]["value"])
-            if record and len(record) > 0
-            else None
-        )
+        record = self._database.get_data_item_by_key(DatabaseSettings, key)
+        if record is None or record.value is None:
+            return None
+        return convert_string_to_correct_type(record.value)
 
     def get_secret(
         self,
         key: str,
     ) -> str:
         """Get secret"""
-        record = self._database.read_table_by_key(TABLE_SECRETS, key).to_dict(
-            orient="records"
-        )
-        if not record or len(record) < 1:
+        record = self._database.get_data_item_by_key(DatabaseSecrets, key)
+        if record is None or record.value is None:
             raise KeyError(f"Secret {key} not found")
 
-        secret = record[0]["value"]
-        fernet = Fernet(self._encryption_key)  # type: ignore
+        secret = record.value
+        fernet = Fernet(self._encryption_key)
         return fernet.decrypt(secret.encode()).decode()
 
     def set(
         self,
         key: str,
-        value: Union[bool, float, int, str, list, dict, None],
+        value: Union[bool, float, int, str, list[Any], dict[str, Any], None],
     ) -> None:
         """Set setting"""
-        self._database.write(TABLE_SETTINGS, key, value)
+        self._database.add_data(
+            self._database.create_data(
+                key,
+                value,
+            )
+        )
 
     def set_secret(
         self,
@@ -135,8 +132,11 @@ class Settings(Base):
         value: str,
     ) -> None:
         """Set secret"""
-        fernet = Fernet(self._encryption_key)  # type: ignore
+        fernet = Fernet(self._encryption_key)
 
-        self._database.write(
-            TABLE_SECRETS, key, fernet.encrypt(value.encode()).decode()
+        self._database.add_data(
+            self._database.create_data(
+                key,
+                fernet.encrypt(value.encode()).decode(),
+            )
         )

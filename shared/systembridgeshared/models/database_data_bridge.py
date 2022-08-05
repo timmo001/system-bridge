@@ -7,7 +7,7 @@ from typing import Optional
 from sqlmodel import Field, SQLModel
 
 
-class DatabaseDataBridge(SQLModel, table=True):
+class Bridge(SQLModel, table=True):
     """Database Data Bridge"""
 
     uuid: str = Field(primary_key=True, nullable=False)

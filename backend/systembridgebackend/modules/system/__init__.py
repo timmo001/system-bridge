@@ -22,7 +22,7 @@ from psutil._common import suser
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from systembridgebackend._version import __version__
+from ..._version import __version__
 
 
 class System(Base):

@@ -4,8 +4,8 @@ import asyncio
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.display import Display
+from . import Display
+from ..base import ModuleUpdateBase
 
 
 class DisplayUpdate(ModuleUpdateBase):

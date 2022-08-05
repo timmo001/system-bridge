@@ -1,21 +1,20 @@
 """System Bridge: Modules Update"""
 import asyncio
-from collections.abc import Callable
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.battery.update import BatteryUpdate
-from systembridgebackend.modules.bridge.update import BridgeUpdate
-from systembridgebackend.modules.cpu.update import CPUUpdate
-from systembridgebackend.modules.disk.update import DiskUpdate
-from systembridgebackend.modules.display.update import DisplayUpdate
-from systembridgebackend.modules.gpu.update import GPUUpdate
-from systembridgebackend.modules.memory.update import MemoryUpdate
-from systembridgebackend.modules.network.update import NetworkUpdate
-from systembridgebackend.modules.sensors.update import SensorsUpdate
-from systembridgebackend.modules.system.update import SystemUpdate
+from .battery.update import BatteryUpdate
+from .bridge.update import BridgeUpdate
+from .cpu.update import CPUUpdate
+from .disk.update import DiskUpdate
+from .display.update import DisplayUpdate
+from .gpu.update import GPUUpdate
+from .memory.update import MemoryUpdate
+from .network.update import NetworkUpdate
+from .sensors.update import SensorsUpdate
+from .system.update import SystemUpdate
 
 
 class Update(Base):
@@ -31,15 +30,15 @@ class Update(Base):
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
-            {"name": "disk", "cls": DiskUpdate(self._database)},
-            {"name": "system", "cls": SystemUpdate(self._database)},
+            # {"name": "disk", "cls": DiskUpdate(self._database)},
+            # {"name": "system", "cls": SystemUpdate(self._database)},
         ]
         self._classes_frequent = [
             {"name": "cpu", "cls": CPUUpdate(self._database)},
-            {"name": "display", "cls": DisplayUpdate(self._database)},
-            {"name": "gpu", "cls": GPUUpdate(self._database)},
-            {"name": "memory", "cls": MemoryUpdate(self._database)},
-            {"name": "network", "cls": NetworkUpdate(self._database)},
+            # {"name": "display", "cls": DisplayUpdate(self._database)},
+            # {"name": "gpu", "cls": GPUUpdate(self._database)},
+            # {"name": "memory", "cls": MemoryUpdate(self._database)},
+            # {"name": "network", "cls": NetworkUpdate(self._database)},
         ]
         BridgeUpdate(self._database)
 
@@ -58,8 +57,6 @@ class Update(Base):
     ) -> None:
         """Update Data"""
         self._logger.info("Update data")
-        if not self._database.connected:
-            self._database.connect()
 
         tasks = [self._update(cls, updated_callback) for cls in self._classes]
         await asyncio.gather(*tasks)
@@ -72,8 +69,6 @@ class Update(Base):
     ) -> None:
         """Update Data"""
         self._logger.info("Update frequent data")
-        if not self._database.connected:
-            self._database.connect()
 
         sensors_update = SensorsUpdate(self._database)
         await sensors_update.update_all_data()

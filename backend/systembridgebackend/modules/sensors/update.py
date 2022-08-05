@@ -1,7 +1,6 @@
 """System Bridge: Update Sensors"""
 import asyncio
 
-from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.const import (
     COLUMN_HARDWARE_NAME,
@@ -14,10 +13,11 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.sensors import Sensors
+from . import Sensors
+from ..base import ModuleUpdateBase
 
 
-class SensorsUpdate(Base):
+class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update"""
 
     def __init__(
@@ -25,21 +25,7 @@ class SensorsUpdate(Base):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__()
-
-        self._database = database
-        self._database.create_table(
-            "sensors",
-            [
-                (COLUMN_KEY, "TEXT PRIMARY KEY"),
-                (COLUMN_TYPE, "TEXT"),
-                (COLUMN_NAME, "TEXT"),
-                (COLUMN_HARDWARE_TYPE, "TEXT"),
-                (COLUMN_HARDWARE_NAME, "TEXT"),
-                (COLUMN_VALUE, "TEXT"),
-                (COLUMN_TIMESTAMP, "DOUBLE"),
-            ],
-        )
+        super().__init__(database)
         self._sensors = Sensors()
 
     async def update_fans(self) -> None:

@@ -6,7 +6,7 @@ from threading import Thread
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.update import Update
+from .modules.update import Update
 
 
 class UpdateThread(Thread):

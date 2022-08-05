@@ -3,8 +3,8 @@ import asyncio
 
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.disk import Disk
+from . import Disk
+from ..base import ModuleUpdateBase
 
 
 class DiskUpdate(ModuleUpdateBase):

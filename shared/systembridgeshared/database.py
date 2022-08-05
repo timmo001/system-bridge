@@ -1,15 +1,13 @@
 """System Bridge Shared: Database"""
 from __future__ import annotations
 
-from collections import OrderedDict
 from collections.abc import Mapping
 import json
 import os
-from sqlite3 import OperationalError, connect
 from time import time
-from typing import Optional, Union
+from typing import Any, List, Optional, Union
 
-from pandas import DataFrame, read_sql_query
+from sqlmodel import Column, Session, SQLModel, Table, create_engine, select
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import (
@@ -17,14 +15,83 @@ from systembridgeshared.common import (
     get_user_data_directory,
 )
 from systembridgeshared.const import (
-    COLUMN_HARDWARE_NAME,
-    COLUMN_HARDWARE_TYPE,
-    COLUMN_KEY,
-    COLUMN_NAME,
-    COLUMN_TIMESTAMP,
-    COLUMN_TYPE,
-    COLUMN_VALUE,
+    MODEL_BATTERY,
+    MODEL_BRIDGE,
+    MODEL_CPU,
+    MODEL_DISK,
+    MODEL_DISPLAY,
+    MODEL_GPU,
+    MODEL_MEMORY,
+    MODEL_NETWORK,
+    MODEL_SECRETS,
+    MODEL_SENSORS,
+    MODEL_SETTINGS,
+    MODEL_SYSTEM,
 )
+from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.database_data import (
+    CPU,
+    GPU,
+    Battery,
+    Data,
+    Disk,
+    Display,
+    Memory,
+    Network,
+    Secrets,
+    Settings,
+    System,
+)
+from systembridgeshared.models.database_data_bridge import Bridge
+from systembridgeshared.models.database_data_sensors import Sensors
+
+# TABLES: List[Table] = [
+#     Table(MODEL_BATTERY, Battery),
+#     Table(MODEL_BRIDGE, Bridge),
+#     Table(MODEL_CPU, CPU),
+#     Table(MODEL_DISK, Disk),
+#     Table(MODEL_DISPLAY, Display),
+#     Table(MODEL_GPU, GPU),
+#     Table(MODEL_MEMORY, Memory),
+#     Table(MODEL_NETWORK, Network),
+#     Table(MODEL_SECRETS, Secrets),
+#     Table(MODEL_SENSORS, Sensors),
+#     Table(MODEL_SETTINGS, Settings),
+#     Table(MODEL_SYSTEM, System),
+# ]
+
+# TABLE_MAP: Mapping[str, Any] = {table.name: table.metadata for table in TABLES}
+
+TABLE_MAP: Mapping[str, Any] = {
+    MODEL_BATTERY: Battery,
+    MODEL_BRIDGE: Bridge,
+    MODEL_CPU: CPU,
+    MODEL_DISK: Disk,
+    MODEL_DISPLAY: Display,
+    MODEL_GPU: GPU,
+    MODEL_MEMORY: Memory,
+    MODEL_NETWORK: Network,
+    MODEL_SECRETS: Secrets,
+    MODEL_SENSORS: Sensors,
+    MODEL_SETTINGS: Settings,
+    MODEL_SYSTEM: System,
+}
+
+
+TableDataType = Union[
+    Battery,
+    Bridge,
+    CPU,
+    Disk,
+    Display,
+    GPU,
+    Memory,
+    Network,
+    Secrets,
+    Sensors,
+    Settings,
+    System,
+]
 
 
 class Database(Base):
@@ -33,221 +100,116 @@ class Database(Base):
     def __init__(self):
         """Initialise"""
         super().__init__()
-        self._connection = connect(
-            os.path.join(get_user_data_directory(), "systembridge.db"),
-            check_same_thread=False,
+        self._engine = create_engine(
+            f"sqlite:///{os.path.join(get_user_data_directory(), 'systembridge.db')}"
+        )
+        SQLModel.metadata.create_all(
+            self._engine,
+            # tables=TABLES,
         )
 
-    @property
-    def connected(self) -> bool:
-        """Check if connected"""
-        return self._connection is not None
-
-    def execute_sql(
+    def add_data(
         self,
-        sql: str,
+        data: Any,
     ) -> None:
-        """Execute SQL"""
-        if not self.connected:
-            self.connect()
-        self._logger.debug("Executing SQL: %s", sql)
-        try:
-            self._connection.commit()
-        except OperationalError:
-            pass
-        try:
-            self._connection.execute(sql)
-            self._connection.commit()
-        except OperationalError as error:
-            self._logger.warning(
-                "Error executing SQL: %s\n%s",
-                sql,
-                error,
-            )
+        """Add data to database"""
+        with Session(self._engine) as session:
+            session.add(data)
+            session.commit()
 
-    def execute_sql_with_params(
+    def create_data(
         self,
-        sql: str,
-        params: Mapping,
-    ) -> None:
-        """Execute SQL"""
-        self._logger.debug("Executing SQL: %s\n%s", sql, params)
-        try:
-            self._connection.commit()
-        except OperationalError:
-            pass
-        try:
-            self._connection.execute(sql, params)
-            self._connection.commit()
-        except OperationalError as error:
-            self._logger.warning(
-                "Error executing SQL: %s\n%s",
-                sql,
-                error,
-            )
-
-    def connect(self) -> None:
-        """Connect to database"""
-        self._connection = connect(
-            os.path.join(get_user_data_directory(), "systembridge.db"),
-            check_same_thread=False,
-        )
-
-    def close(self) -> None:
-        """Close connection"""
-        self._connection.close()
-
-    def check_table_for_key(
-        self,
-        table_name: str,
         key: str,
-    ) -> bool:
-        """Check if key exists in table"""
-        return self.read_table_by_key(table_name, key).empty
-
-    def read_table(
-        self,
-        table_name: str,
-    ) -> DataFrame:
-        """Read table"""
-        return self.read_query(
-            f"SELECT * FROM {table_name}",
-        )
-
-    def read_table_by_key(
-        self,
-        table_name: str,
-        key: str,
-    ) -> DataFrame:
-        """Read table by key"""
-        return self.read_query(
-            f"SELECT * FROM {table_name} WHERE {COLUMN_KEY} = '{key}'",
-        )
-
-    def read_query(
-        self,
-        query: str,
-    ) -> DataFrame:
-        """Read SQL"""
-        if not self.connected:
-            self.connect()
-        self._logger.debug("Reading SQL: %s", query)
-        return read_sql_query(query, self._connection)
-
-    def create_table(
-        self,
-        table_name: str,
-        columns: list[tuple],
-    ) -> None:
-        """Create table"""
-        sql = f"CREATE TABLE IF NOT EXISTS {table_name} ("
-        for column in columns:
-            sql += f"{column[0]} {column[1]},"
-        sql = sql[:-1] + ")"
-        self.execute_sql(sql)
-
-    def clear_table(
-        self,
-        table_name: str,
-    ) -> None:
-        """Clear table"""
-        self.execute_sql(f"DELETE FROM {table_name}")
-
-    def clear_table_by_key(
-        self,
-        table_name: str,
-        key: str,
-    ) -> None:
-        """Clear table by key"""
-        self.execute_sql(f"DELETE FROM {table_name} WHERE {COLUMN_KEY} = '{key}'")
-
-    def write(
-        self,
-        table_name: str,
-        data_key: str,
-        data_value: Union[bool, float, int, str, list, dict, None],
-        data_timestamp: Optional[float] = None,
-    ) -> None:
-        """Write to table"""
-        if data_timestamp is None:
-            data_timestamp = time()
+        value: Union[bool, float, int, str, list, dict, None],
+        timestamp: Optional[float] = None,
+    ) -> Data:
+        """Create data"""
+        if timestamp is None:
+            timestamp = time()
 
         # Convert list or dict to JSON
-        if isinstance(data_value, (dict, list)):
-            data_value = json.dumps(data_value)
+        if isinstance(value, (dict, list)):
+            value = json.dumps(value)
         else:
-            data_value = str(data_value)
+            value = str(value)
 
-        self.execute_sql(
-            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ('{data_key}', '{data_value}', {data_timestamp})
-             ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = '{data_key}'
-            """.replace(
-                "\n", ""
-            ).replace(
-                "            ", ""
-            ),
+        return Data(
+            key=key,
+            value=value,
+            timestamp=timestamp,
         )
 
-    def write_sensor(
+    def create_sensor_data(
         self,
-        table_name: str,
-        data_key: str,
-        data_type: str,
-        data_name: str,
-        data_hardware_type: str,
-        data_hardware_name: str,
-        data_value: Union[bool, float, int, str, list, dict, None],
-        data_timestamp: Optional[float] = None,
-    ) -> None:
-        """Write to table"""
-        if data_timestamp is None:
-            data_timestamp = time()
+        key: str,
+        type: str,
+        name: str,
+        hardware_type: str,
+        hardware_name: str,
+        value: Union[bool, float, int, str, list, dict, None],
+        timestamp: Optional[float] = None,
+    ) -> Sensors:
+        """Create data"""
+        if timestamp is None:
+            timestamp = time()
 
         # Convert list or dict to JSON
-        if isinstance(data_value, (dict, list)):
-            data_value = json.dumps(data_value)
+        if isinstance(value, (dict, list)):
+            value = json.dumps(value)
         else:
-            data_value = str(data_value)
+            value = str(value)
 
-        self.execute_sql(
-            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_TYPE}, {COLUMN_NAME},
-             {COLUMN_HARDWARE_TYPE}, {COLUMN_HARDWARE_NAME}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ('{data_key}', '{data_type}', '{data_name}', '{data_hardware_type}',
-             '{data_hardware_name}', '{data_value}', {data_timestamp})
-             ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = '{data_key}'
-            """.replace(
-                "\n", ""
-            ).replace(
-                "            ", ""
-            ),
+        return Sensors(
+            key=key,
+            type=type,
+            name=name,
+            hardware_type=hardware_type,
+            hardware_name=hardware_name,
+            value=value,
+            timestamp=timestamp,
         )
 
-    def table_data_to_ordered_dict(
+    def get_data(
         self,
-        table_name: str,
-    ) -> Optional[OrderedDict]:
-        """Convert table to Ordereddict"""
-        data_dict = self.read_table(table_name).to_dict(orient="records")
-        if len(data_dict) == 0:
-            return None
-        data: dict = {
-            "last_updated": {},
-        }
-        for item in data_dict:
-            data = {
-                **data,
-                item[COLUMN_KEY]: convert_string_to_correct_type(item[COLUMN_VALUE]),
-                "last_updated": {
-                    **data["last_updated"],  # type: ignore
-                    item[COLUMN_KEY]: item["timestamp"],
-                },
-            }
-        output = OrderedDict(sorted(data.items()))
-        output.move_to_end("last_updated", last=True)
+        table,
+    ) -> List[Data]:
+        """Get data from database"""
+        with Session(self._engine) as session:
+            return session.exec(select(table)).all()
 
-        return output
+    def get_data_by_key(
+        self,
+        table,
+        key: str,
+    ) -> List[Data]:
+        """Get data from database by key"""
+        with Session(self._engine) as session:
+            return session.exec(select(table).where(table.key == key)).all()
+
+    def get_data_item_by_key(
+        self,
+        table,
+        key: str,
+    ) -> Optional[Data]:
+        """Get data item from database by key"""
+        with Session(self._engine) as session:
+            return session.exec(select(table).where(table.key == key)).first()
+
+    def get_data_dict(
+        self,
+        table,
+    ) -> DataDict:
+        """Get data from database as dictionary"""
+        data: dict[str, Any] = {"last_updated": {}}
+        result = self.get_data(table)
+        for item in result:
+            if item.value is None:
+                data[item.key] = None
+            else:
+                data[item.key] = convert_string_to_correct_type(item.value)
+            if item.timestamp is None:
+                data["last_updated"][item.key] = None
+            else:
+                data["last_updated"][item.key] = item.timestamp
+
+        return DataDict(**data)

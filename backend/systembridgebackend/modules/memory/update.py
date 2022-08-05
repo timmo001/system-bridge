@@ -1,9 +1,10 @@
 """System Bridge: Update Memory"""
 import asyncio
+
 from systembridgeshared.database import Database
 
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.memory import Memory
+from . import Memory
+from ..base import ModuleUpdateBase
 
 
 class MemoryUpdate(ModuleUpdateBase):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 from systembridgeshared.models.battery import Battery
 from systembridgeshared.models.bridge import Bridge
@@ -29,3 +29,10 @@ class Data(BaseModel):
     network: Network = Field(..., alias="network")
     sensors: Sensors = Field(..., alias="sensors")
     system: System = Field(..., alias="system")
+
+
+class DataDict(BaseModel):
+    class Config:
+        extra = Extra.allow
+
+    last_updated: dict[str, float] = Field(..., description="Last updated")
