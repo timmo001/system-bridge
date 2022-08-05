@@ -18,6 +18,13 @@
     "message": {
       "type": "string",
       "description": "Message"
+    },
+    "module": {
+      "type": "string",
+      "description": "Module"
+    },
+    "data": {
+      "description": "Data"
     }
   },
   "required": ["type"],

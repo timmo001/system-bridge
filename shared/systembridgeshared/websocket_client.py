@@ -78,7 +78,7 @@ class WebSocketClient(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._responses: dict[str, tuple[asyncio.Future, Optional[str]]] = {}
+        self._responses: dict[str, tuple[asyncio.Future[Response], Optional[str]]] = {}
         self._session: Optional[aiohttp.ClientSession] = None
         self._websocket: Optional[aiohttp.ClientWebSocketResponse] = None
         self._api_key = self._settings.get_secret(SECRET_API_KEY)
@@ -421,6 +421,21 @@ class WebSocketClient(Base):
                         )
                     else:
                         response = Response(**message)
+
+                        if (
+                            response.type == TYPE_DATA_UPDATE
+                            and response.module is not None
+                            and message[EVENT_DATA] is not None
+                        ):
+                            # Find model from module
+                            model = MODEL_MAP.get(message[EVENT_MODULE])
+                            if model is None:
+                                self._logger.warning(
+                                    "Unknown model: %s", message[EVENT_MODULE]
+                                )
+                            else:
+                                response.data = model(**message[EVENT_DATA])
+
                         self._logger.info(
                             "Response: %s",
                             response.json(
@@ -433,6 +448,7 @@ class WebSocketClient(Base):
                                 exclude_unset=True,
                             ),
                         )
+
                         try:
                             future.set_result(response)
                         except asyncio.InvalidStateError:

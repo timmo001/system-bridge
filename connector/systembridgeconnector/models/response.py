@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Extra, Field
 
@@ -20,3 +20,5 @@ class Response(BaseModel):
     type: str = Field(..., description="Type")
     subtype: Optional[str] = Field(None, description="Subtype")
     message: Optional[str] = Field(None, description="Message")
+    module: Optional[str] = Field(None, description="Module")
+    data: Optional[Any] = Field(None, description="Data")
