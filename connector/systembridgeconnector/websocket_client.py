@@ -420,45 +420,42 @@ class WebSocketClient(Base):
                             response_type,
                         )
                     else:
-                        try:
-                            response = Response(**message)
+                        response = Response(**message)
 
-                            if (
-                                response.type == TYPE_DATA_UPDATE
-                                and response.module is not None
-                                and message[EVENT_DATA] is not None
-                            ):
-                                # Find model from module
-                                model = MODEL_MAP.get(message[EVENT_MODULE])
-                                if model is None:
-                                    self._logger.warning(
-                                        "Unknown model: %s", message[EVENT_MODULE]
-                                    )
-                                else:
-                                    response.data = model(**message[EVENT_DATA])
-
-                            self._logger.info(
-                                "Response: %s",
-                                response.json(
-                                    include={
-                                        EVENT_ID,
-                                        EVENT_TYPE,
-                                        EVENT_SUBTYPE,
-                                        EVENT_MESSAGE,
-                                    },
-                                    exclude_unset=True,
-                                ),
-                            )
-
-                            try:
-                                future.set_result(response)
-                            except asyncio.InvalidStateError:
+                        if (
+                            response.type == TYPE_DATA_UPDATE
+                            and response.module is not None
+                            and message[EVENT_DATA] is not None
+                        ):
+                            # Find model from module
+                            model = MODEL_MAP.get(message[EVENT_MODULE])
+                            if model is None:
                                 self._logger.warning(
-                                    "Future already set for response ID: %s",
-                                    message[EVENT_ID],
+                                    "Unknown model: %s", message[EVENT_MODULE]
                                 )
-                        except ValueError as error:
-                            self._logger.error("Invalid response: %s", error)
+                            else:
+                                response.data = model(**message[EVENT_DATA])
+
+                        self._logger.info(
+                            "Response: %s",
+                            response.json(
+                                include={
+                                    EVENT_ID,
+                                    EVENT_TYPE,
+                                    EVENT_SUBTYPE,
+                                    EVENT_MESSAGE,
+                                },
+                                exclude_unset=True,
+                            ),
+                        )
+
+                        try:
+                            future.set_result(response)
+                        except asyncio.InvalidStateError:
+                            self._logger.warning(
+                                "Future already set for response ID: %s",
+                                message[EVENT_ID],
+                            )
 
             if message[EVENT_TYPE] == TYPE_ERROR:
                 if message[EVENT_SUBTYPE] == SUBTYPE_LISTENER_ALREADY_REGISTERED:
