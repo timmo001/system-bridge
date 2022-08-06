@@ -152,7 +152,7 @@ class SystemUpdate(ModuleUpdateBase):
             DatabaseModel,
             DatabaseModel(
                 key="version_newer_available",
-                value=str(value) if value else None,
+                value=str(value) if value else str(False),
             ),
         )
 
