@@ -8,11 +8,8 @@ from aiohttp import ClientResponse, ClientSession
 from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
 import async_timeout
 
-from systembridgeconnector.base import Base
-from systembridgeconnector.exceptions import (
-    AuthenticationException,
-    ConnectionErrorException,
-)
+from .base import Base
+from .exceptions import AuthenticationException, ConnectionErrorException
 
 BASE_HEADERS = {
     "Accept": "application/json",

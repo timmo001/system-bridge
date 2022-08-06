@@ -1,14 +1,15 @@
 """System Bridge Connector: Version"""
 from __future__ import annotations
 
-from aiohttp import ClientSession
-from pkg_resources import parse_version
 from typing import Optional
 
-from systembridgeconnector.base import Base
-from systembridgeconnector.exceptions import ConnectionErrorException
-from systembridgeconnector.http_client import HTTPClient
-from systembridgeconnector.models.system import System
+from aiohttp import ClientSession
+from pkg_resources import parse_version
+
+from .base import Base
+from .exceptions import ConnectionErrorException
+from .http_client import HTTPClient
+from .models.system import System
 
 SUPPORTED_VERSION = "3.1.2"
 

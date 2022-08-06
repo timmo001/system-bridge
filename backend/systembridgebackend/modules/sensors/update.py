@@ -1,23 +1,15 @@
 """System Bridge: Update Sensors"""
 import asyncio
 
-from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
-from systembridgeshared.const import (
-    COLUMN_HARDWARE_NAME,
-    COLUMN_HARDWARE_TYPE,
-    COLUMN_KEY,
-    COLUMN_NAME,
-    COLUMN_TIMESTAMP,
-    COLUMN_TYPE,
-    COLUMN_VALUE,
-)
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data_sensors import Sensors as DatabaseModel
 
-from systembridgebackend.modules.sensors import Sensors
+from . import Sensors
+from ..base import ModuleUpdateBase
 
 
-class SensorsUpdate(Base):
+class SensorsUpdate(ModuleUpdateBase):
     """Sensors Update"""
 
     def __init__(
@@ -25,21 +17,7 @@ class SensorsUpdate(Base):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__()
-
-        self._database = database
-        self._database.create_table(
-            "sensors",
-            [
-                (COLUMN_KEY, "TEXT PRIMARY KEY"),
-                (COLUMN_TYPE, "TEXT"),
-                (COLUMN_NAME, "TEXT"),
-                (COLUMN_HARDWARE_TYPE, "TEXT"),
-                (COLUMN_HARDWARE_NAME, "TEXT"),
-                (COLUMN_VALUE, "TEXT"),
-                (COLUMN_TIMESTAMP, "DOUBLE"),
-            ],
-        )
+        super().__init__(database)
         self._sensors = Sensors()
 
     async def update_fans(self) -> None:
@@ -48,14 +26,16 @@ class SensorsUpdate(Base):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._database.write_sensor(
-                            "sensors",
-                            f"fans_{key}_{subkey}",
-                            subkey,
-                            subkey,
-                            key,
-                            key,
-                            subvalue,
+                        self._database.update_data(
+                            DatabaseModel,
+                            DatabaseModel(
+                                key=f"fans_{key}_{subkey}",
+                                type=subkey,
+                                name=subkey,
+                                hardware_type=key,
+                                hardware_name=key,
+                                value=subvalue,
+                            ),
                         )
 
     async def update_temperatures(self) -> None:
@@ -64,14 +44,16 @@ class SensorsUpdate(Base):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._database.write_sensor(
-                            "sensors",
-                            f"temperatures_{key}_{subkey}",
-                            subkey,
-                            subkey,
-                            key,
-                            key,
-                            subvalue,
+                        self._database.update_data(
+                            DatabaseModel,
+                            DatabaseModel(
+                                key=f"temperatures_{key}_{subkey}",
+                                type=subkey,
+                                name=subkey,
+                                hardware_type=key,
+                                hardware_name=key,
+                                value=subvalue,
+                            ),
                         )
 
     async def update_windows_sensors(self) -> None:
@@ -87,14 +69,16 @@ class SensorsUpdate(Base):
                     key_sensor_name = make_key(sensor["name"])
                     key_sensor_type = make_key(sensor["type"])
 
-                    self._database.write_sensor(
-                        "sensors",
-                        f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
-                        sensor["type"],
-                        sensor["name"],
-                        hardware["type"],
-                        hardware["name"],
-                        sensor["value"] if "value" in sensor else None,
+                    self._database.update_data(
+                        DatabaseModel,
+                        DatabaseModel(
+                            key=f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
+                            type=sensor["type"],
+                            name=sensor["name"],
+                            hardware_type=hardware["type"],
+                            hardware_name=hardware["name"],
+                            value=sensor["value"] if "value" in sensor else None,
+                        ),
                     )
 
         if "nvidia" in data and data["nvidia"] is not None:
@@ -117,34 +101,41 @@ class SensorsUpdate(Base):
                                 f"Display {name_hardware.split('DISPLAY')[1]}"
                             )
                         for subkey, subvalue in hardware.items():
-                            self._database.write_sensor(
-                                "sensors",
-                                f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
-                                sensor,
-                                subkey,
-                                type_hardware,
-                                name_hardware,
-                                subvalue,
+                            self._database.update_data(
+                                DatabaseModel,
+                                DatabaseModel(
+                                    key=f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
+                                    type=sensor,
+                                    name=subkey,
+                                    hardware_type=type_hardware,
+                                    hardware_name=name_hardware,
+                                    value=subvalue,
+                                ),
                             )
                         counter += 1
                 else:
                     for subkey, subvalue in value.items():
-                        self._database.write_sensor(
-                            "sensors",
-                            f"windows_nvidia_{sensor}_{subkey}",
-                            sensor,
-                            subkey,
-                            value["type"] if "type" in value else "NVIDIA",
-                            value["name"] if "name" in value else "NVIDIA",
-                            subvalue,
+                        self._database.update_data(
+                            DatabaseModel,
+                            DatabaseModel(
+                                key=f"windows_nvidia_{sensor}_{subkey}",
+                                type=sensor,
+                                name=subkey,
+                                hardware_type=value["type"]
+                                if "type" in value
+                                else "NVIDIA",
+                                hardware_name=value["name"]
+                                if "name" in value
+                                else "NVIDIA",
+                                value=subvalue,
+                            ),
                         )
 
     async def update_all_data(self) -> None:
         """Update data"""
 
         # Clear table in case of hardware changes since last run
-        self._database.clear_table("sensors")
-
+        self._database.clear_table(DatabaseModel)
         await asyncio.gather(
             *[
                 self.update_fans(),

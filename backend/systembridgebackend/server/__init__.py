@@ -11,25 +11,26 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 from systembridgeshared.base import Base
+from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
     QUERY_API_KEY,
     SECRET_API_KEY,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
 )
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
 
-from systembridgebackend.data import Data
-from systembridgebackend.gui import GUIAttemptsExceededException, start_gui_threaded
-from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.server.auth import ApiKeyAuthentication
-from systembridgebackend.server.cors import add_cors_headers
-from systembridgebackend.server.keyboard import handler_keyboard
-from systembridgebackend.server.mdns import MDNSAdvertisement
-from systembridgebackend.server.media import (
+from ..data import Data
+from ..gui import GUIAttemptsExceededException, start_gui_threaded
+from ..modules.listeners import Listeners
+from ..server.auth import ApiKeyAuthentication
+from ..server.cors import add_cors_headers
+from ..server.keyboard import handler_keyboard
+from ..server.mdns import MDNSAdvertisement
+from ..server.media import (
     handler_media_directories,
     handler_media_file,
     handler_media_file_data,
@@ -37,10 +38,10 @@ from systembridgebackend.server.media import (
     handler_media_files,
     handler_media_play,
 )
-from systembridgebackend.server.notification import handler_notification
-from systembridgebackend.server.open import handler_open
-from systembridgebackend.server.options import setup_options
-from systembridgebackend.server.power import (
+from ..server.notification import handler_notification
+from ..server.open import handler_open
+from ..server.options import setup_options
+from ..server.power import (
     handler_hibernate,
     handler_lock,
     handler_logout,
@@ -48,8 +49,8 @@ from systembridgebackend.server.power import (
     handler_shutdown,
     handler_sleep,
 )
-from systembridgebackend.server.update import handler_update
-from systembridgebackend.server.websocket import WebSocketHandler
+from ..server.update import handler_update
+from ..server.websocket import WebSocketHandler
 
 
 class ApplicationExitException(BaseException):
@@ -125,9 +126,10 @@ class Server(Base):
             table: str,
         ) -> HTTPResponse:
             """Data handler all"""
-            if table not in implemented_modules:
+            table_module = TABLE_MAP.get(table)
+            if table not in implemented_modules or table_module is None:
                 return json({"message": f"Data module {table} not found"}, status=404)
-            return json(self._database.table_data_to_ordered_dict(table))
+            return json(self._database.get_data_dict(table_module).dict())
 
         @auth.key_required
         async def _handler_data_by_key(
@@ -136,16 +138,18 @@ class Server(Base):
             key: str,
         ) -> HTTPResponse:
             """Data handler by key"""
-            if table not in implemented_modules:
+            table_module = TABLE_MAP.get(table)
+            if table not in implemented_modules or table_module is None:
                 return json({"message": f"Data module {table} not found"}, status=404)
 
-            data = self._database.read_table_by_key(table, key).to_dict(
-                orient="records"
-            )[0]
+            data = self._database.get_data_item_by_key(table_module, key)
+            if data is None:
+                return json({"message": f"Data item {key} not found"}, status=404)
+
             return json(
                 {
-                    data["key"]: data["value"],
-                    "last_updated": data["timestamp"],
+                    data.key: convert_string_to_correct_type(data.value),
+                    "last_updated": data.timestamp,
                 }
             )
 

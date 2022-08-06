@@ -1,24 +1,23 @@
 """System Bridge Connector: Constants"""
-from systembridgeconnector.models.battery import Battery
-from systembridgeconnector.models.bridge import Bridge
-from systembridgeconnector.models.cpu import Cpu
-from systembridgeconnector.models.data import Data
-from systembridgeconnector.models.disk import Disk
-from systembridgeconnector.models.display import Display
-from systembridgeconnector.models.generic import Generic
-from systembridgeconnector.models.gpu import Gpu
-from systembridgeconnector.models.keyboard_key import KeyboardKey
-from systembridgeconnector.models.keyboard_text import KeyboardText
-from systembridgeconnector.models.media_directories import MediaDirectories
-from systembridgeconnector.models.media_files import File, MediaFiles
-from systembridgeconnector.models.memory import Memory
-from systembridgeconnector.models.network import Network
-from systembridgeconnector.models.notification import Notification
-from systembridgeconnector.models.open_path import OpenPath
-from systembridgeconnector.models.open_url import OpenUrl
-from systembridgeconnector.models.response import Response
-from systembridgeconnector.models.sensors import Sensors
-from systembridgeconnector.models.system import System
+from .models.battery import Battery
+from .models.cpu import Cpu
+from .models.data import Data
+from .models.disk import Disk
+from .models.display import Display
+from .models.generic import Generic
+from .models.gpu import Gpu
+from .models.keyboard_key import KeyboardKey
+from .models.keyboard_text import KeyboardText
+from .models.media_directories import MediaDirectories
+from .models.media_files import File, MediaFiles
+from .models.memory import Memory
+from .models.network import Network
+from .models.notification import Notification
+from .models.open_path import OpenPath
+from .models.open_url import OpenUrl
+from .models.response import Response
+from .models.sensors import Sensors
+from .models.system import System
 
 # Settings
 SETTING_ADDITIONAL_MEDIA_DIRECTORIES = "additional_media_directories"
@@ -138,7 +137,6 @@ TYPE_UPDATE_SETTING = "UPDATE_SETTING"
 
 # Model
 MODEL_BATTERY = "battery"
-MODEL_BRIDGE = "bridge"
 MODEL_CPU = "cpu"
 MODEL_DATA = "data"
 MODEL_DISK = "disk"
@@ -148,20 +146,21 @@ MODEL_GPU = "gpu"
 MODEL_KEYBOARD_KEY = "keyboard_key"
 MODEL_KEYBOARD_TEXT = "keyboard_text"
 MODEL_MEDIA_DIRECTORIES = "media_directories"
-MODEL_MEDIA_FILES = "media_files"
 MODEL_MEDIA_FILE = "media_file"
+MODEL_MEDIA_FILES = "media_files"
 MODEL_MEMORY = "memory"
 MODEL_NETWORK = "network"
 MODEL_NOTIFICATION = "notification"
 MODEL_OPEN_PATH = "open_path"
 MODEL_OPEN_URL = "open_url"
 MODEL_RESPONSE = "response"
+MODEL_SECRETS = "secrets"
 MODEL_SENSORS = "sensors"
+MODEL_SETTINGS = "settings"
 MODEL_SYSTEM = "system"
 
 MODEL_MAP = {
     MODEL_BATTERY: Battery,
-    MODEL_BRIDGE: Bridge,
     MODEL_CPU: Cpu,
     MODEL_DATA: Data,
     MODEL_DISK: Disk,

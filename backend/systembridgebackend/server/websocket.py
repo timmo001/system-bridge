@@ -82,7 +82,8 @@ from systembridgeshared.const import (
     TYPE_UNREGISTER_DATA_LISTENER,
     TYPE_UPDATE_SETTING,
 )
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
@@ -100,20 +101,13 @@ from systembridgeshared.models.update_setting import UpdateSetting
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
-from systembridgebackend.autostart import autostart_disable, autostart_enable
-from systembridgebackend.gui import start_gui_threaded
-from systembridgebackend.modules.listeners import Listeners
-from systembridgebackend.server.keyboard import keyboard_keypress, keyboard_text
-from systembridgebackend.server.media import get_directories, get_file, get_files
-from systembridgebackend.server.open import open_path, open_url
-from systembridgebackend.server.power import (
-    hibernate,
-    lock,
-    logout,
-    restart,
-    shutdown,
-    sleep,
-)
+from ..autostart import autostart_disable, autostart_enable
+from ..gui import start_gui_threaded
+from ..modules.listeners import Listeners
+from ..server.keyboard import keyboard_keypress, keyboard_text
+from ..server.media import get_directories, get_file, get_files
+from ..server.open import open_path, open_url
+from ..server.power import hibernate, lock, logout, restart, shutdown, sleep
 
 
 class WebSocketHandler(Base):
@@ -152,7 +146,7 @@ class WebSocketHandler(Base):
     async def _data_changed(
         self,
         module: str,
-        data: dict,
+        data: DataDict,
     ) -> None:
         """Data changed"""
         if module not in self._implemented_modules:
@@ -609,7 +603,8 @@ class WebSocketHandler(Base):
                 )
 
                 for module in model.modules:
-                    data = self._database.table_data_to_ordered_dict(module)
+                    table = TABLE_MAP.get(module)
+                    data = self._database.get_data_dict(table)
                     if data is not None:
                         await self._send_response(
                             Response(

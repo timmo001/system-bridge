@@ -28,5 +28,5 @@ class Display(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    displays: list
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    displays: Optional[list] = None
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

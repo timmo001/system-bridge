@@ -1,30 +1,79 @@
 """System Bridge Shared: Database"""
 from __future__ import annotations
 
-from collections import OrderedDict
 from collections.abc import Mapping
-import json
 import os
-from sqlite3 import OperationalError, connect
 from time import time
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
-from pandas import DataFrame, read_sql_query
+from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel.sql.expression import Select, SelectOfScalar
 
-from systembridgeshared.base import Base
-from systembridgeshared.common import (
-    convert_string_to_correct_type,
-    get_user_data_directory,
+from .base import Base
+from .common import convert_string_to_correct_type, get_user_data_directory
+from .const import (
+    MODEL_BATTERY,
+    MODEL_CPU,
+    MODEL_DISK,
+    MODEL_DISPLAY,
+    MODEL_GPU,
+    MODEL_MEMORY,
+    MODEL_NETWORK,
+    MODEL_SECRETS,
+    MODEL_SENSORS,
+    MODEL_SETTINGS,
+    MODEL_SYSTEM,
 )
-from systembridgeshared.const import (
-    COLUMN_HARDWARE_NAME,
-    COLUMN_HARDWARE_TYPE,
-    COLUMN_KEY,
-    COLUMN_NAME,
-    COLUMN_TIMESTAMP,
-    COLUMN_TYPE,
-    COLUMN_VALUE,
+from .models.data import DataDict
+from .models.database_data import (
+    CPU,
+    GPU,
+    Battery,
+    Data,
+    Disk,
+    Display,
+    Memory,
+    Network,
+    Secrets,
+    Settings,
+    System,
 )
+from .models.database_data_bridge import Bridge
+from .models.database_data_sensors import Sensors
+
+TABLE_MAP: Mapping[str, Any] = {
+    MODEL_BATTERY: Battery,
+    MODEL_CPU: CPU,
+    MODEL_DISK: Disk,
+    MODEL_DISPLAY: Display,
+    MODEL_GPU: GPU,
+    MODEL_MEMORY: Memory,
+    MODEL_NETWORK: Network,
+    MODEL_SECRETS: Secrets,
+    MODEL_SENSORS: Sensors,
+    MODEL_SETTINGS: Settings,
+    MODEL_SYSTEM: System,
+}
+
+
+TableDataType = Union[
+    Battery,
+    Bridge,
+    CPU,
+    Disk,
+    Display,
+    GPU,
+    Memory,
+    Network,
+    Secrets,
+    Sensors,
+    Settings,
+    System,
+]
+
+
+SelectOfScalar.inherit_cache = True  # type: ignore
+Select.inherit_cache = True  # type: ignore
 
 
 class Database(Base):
@@ -33,221 +82,85 @@ class Database(Base):
     def __init__(self):
         """Initialise"""
         super().__init__()
-        self._connection = connect(
-            os.path.join(get_user_data_directory(), "systembridge.db"),
-            check_same_thread=False,
+        self._engine = create_engine(
+            f"sqlite:///{os.path.join(get_user_data_directory(), 'systembridge.db')}"
         )
-
-    @property
-    def connected(self) -> bool:
-        """Check if connected"""
-        return self._connection is not None
-
-    def execute_sql(
-        self,
-        sql: str,
-    ) -> None:
-        """Execute SQL"""
-        if not self.connected:
-            self.connect()
-        self._logger.debug("Executing SQL: %s", sql)
-        try:
-            self._connection.commit()
-        except OperationalError:
-            pass
-        try:
-            self._connection.execute(sql)
-            self._connection.commit()
-        except OperationalError as error:
-            self._logger.warning(
-                "Error executing SQL: %s\n%s",
-                sql,
-                error,
-            )
-
-    def execute_sql_with_params(
-        self,
-        sql: str,
-        params: Mapping,
-    ) -> None:
-        """Execute SQL"""
-        self._logger.debug("Executing SQL: %s\n%s", sql, params)
-        try:
-            self._connection.commit()
-        except OperationalError:
-            pass
-        try:
-            self._connection.execute(sql, params)
-            self._connection.commit()
-        except OperationalError as error:
-            self._logger.warning(
-                "Error executing SQL: %s\n%s",
-                sql,
-                error,
-            )
-
-    def connect(self) -> None:
-        """Connect to database"""
-        self._connection = connect(
-            os.path.join(get_user_data_directory(), "systembridge.db"),
-            check_same_thread=False,
+        SQLModel.metadata.create_all(
+            self._engine,
+            # tables=TABLES,
         )
-
-    def close(self) -> None:
-        """Close connection"""
-        self._connection.close()
-
-    def check_table_for_key(
-        self,
-        table_name: str,
-        key: str,
-    ) -> bool:
-        """Check if key exists in table"""
-        return self.read_table_by_key(table_name, key).empty
-
-    def read_table(
-        self,
-        table_name: str,
-    ) -> DataFrame:
-        """Read table"""
-        return self.read_query(
-            f"SELECT * FROM {table_name}",
-        )
-
-    def read_table_by_key(
-        self,
-        table_name: str,
-        key: str,
-    ) -> DataFrame:
-        """Read table by key"""
-        return self.read_query(
-            f"SELECT * FROM {table_name} WHERE {COLUMN_KEY} = '{key}'",
-        )
-
-    def read_query(
-        self,
-        query: str,
-    ) -> DataFrame:
-        """Read SQL"""
-        if not self.connected:
-            self.connect()
-        self._logger.debug("Reading SQL: %s", query)
-        return read_sql_query(query, self._connection)
-
-    def create_table(
-        self,
-        table_name: str,
-        columns: list[tuple],
-    ) -> None:
-        """Create table"""
-        sql = f"CREATE TABLE IF NOT EXISTS {table_name} ("
-        for column in columns:
-            sql += f"{column[0]} {column[1]},"
-        sql = sql[:-1] + ")"
-        self.execute_sql(sql)
 
     def clear_table(
         self,
-        table_name: str,
+        table: Any,
     ) -> None:
         """Clear table"""
-        self.execute_sql(f"DELETE FROM {table_name}")
+        with Session(self._engine, autoflush=True) as session:
+            for sensor in session.exec(select(table)).all():
+                session.delete(sensor)
+            session.commit()
 
-    def clear_table_by_key(
+    def get_data(
         self,
-        table_name: str,
+        table: Any,
+    ) -> list[Any]:
+        """Get data from database"""
+        with Session(self._engine, autoflush=True) as session:
+            return session.exec(select(table)).all()
+
+    def get_data_by_key(
+        self,
+        table: Any,
         key: str,
-    ) -> None:
-        """Clear table by key"""
-        self.execute_sql(f"DELETE FROM {table_name} WHERE {COLUMN_KEY} = '{key}'")
+    ) -> list[Data]:
+        """Get data from database by key"""
+        with Session(self._engine, autoflush=True) as session:
+            return session.exec(select(table).where(table.key == key)).all()
 
-    def write(
+    def get_data_item_by_key(
         self,
-        table_name: str,
-        data_key: str,
-        data_value: Union[bool, float, int, str, list, dict, None],
-        data_timestamp: Optional[float] = None,
-    ) -> None:
-        """Write to table"""
-        if data_timestamp is None:
-            data_timestamp = time()
+        table: Any,
+        key: str,
+    ) -> Optional[Data]:
+        """Get data item from database by key"""
+        with Session(self._engine, autoflush=True) as session:
+            return session.exec(select(table).where(table.key == key)).first()
 
-        # Convert list or dict to JSON
-        if isinstance(data_value, (dict, list)):
-            data_value = json.dumps(data_value)
-        else:
-            data_value = str(data_value)
-
-        self.execute_sql(
-            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ('{data_key}', '{data_value}', {data_timestamp})
-             ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = '{data_key}'
-            """.replace(
-                "\n", ""
-            ).replace(
-                "            ", ""
-            ),
-        )
-
-    def write_sensor(
+    def get_data_dict(
         self,
-        table_name: str,
-        data_key: str,
-        data_type: str,
-        data_name: str,
-        data_hardware_type: str,
-        data_hardware_name: str,
-        data_value: Union[bool, float, int, str, list, dict, None],
-        data_timestamp: Optional[float] = None,
-    ) -> None:
-        """Write to table"""
-        if data_timestamp is None:
-            data_timestamp = time()
+        table: Any,
+    ) -> DataDict:
+        """Get data from database as dictionary"""
+        data: dict[str, Any] = {}
+        data_last_updated: dict[str, float | None] = {}
+        result = self.get_data(table)
+        for item in result:
+            if item.value is None:
+                data[item.key] = None
+            else:
+                data[item.key] = convert_string_to_correct_type(item.value)
+            if item.timestamp is None:
+                data_last_updated[item.key] = None
+            else:
+                data_last_updated[item.key] = item.timestamp
 
-        # Convert list or dict to JSON
-        if isinstance(data_value, (dict, list)):
-            data_value = json.dumps(data_value)
-        else:
-            data_value = str(data_value)
+        return DataDict(**data, last_updated=data_last_updated)
 
-        self.execute_sql(
-            f"""INSERT INTO {table_name} ({COLUMN_KEY}, {COLUMN_TYPE}, {COLUMN_NAME},
-             {COLUMN_HARDWARE_TYPE}, {COLUMN_HARDWARE_NAME}, {COLUMN_VALUE}, {COLUMN_TIMESTAMP})
-             VALUES ('{data_key}', '{data_type}', '{data_name}', '{data_hardware_type}',
-             '{data_hardware_name}', '{data_value}', {data_timestamp})
-             ON CONFLICT({COLUMN_KEY}) DO
-             UPDATE SET {COLUMN_VALUE} = '{data_value}', {COLUMN_TIMESTAMP} = {data_timestamp}
-             WHERE {COLUMN_KEY} = '{data_key}'
-            """.replace(
-                "\n", ""
-            ).replace(
-                "            ", ""
-            ),
-        )
-
-    def table_data_to_ordered_dict(
+    def update_data(
         self,
-        table_name: str,
-    ) -> Optional[OrderedDict]:
-        """Convert table to Ordereddict"""
-        data_dict = self.read_table(table_name).to_dict(orient="records")
-        if len(data_dict) == 0:
-            return None
-        data: dict = {
-            "last_updated": {},
-        }
-        for item in data_dict:
-            data = {
-                **data,
-                item[COLUMN_KEY]: convert_string_to_correct_type(item[COLUMN_VALUE]),
-                "last_updated": {
-                    **data["last_updated"],  # type: ignore
-                    item[COLUMN_KEY]: item["timestamp"],
-                },
-            }
-        output = OrderedDict(sorted(data.items()))
-        output.move_to_end("last_updated", last=True)
-
-        return output
+        table,
+        data: Any,
+    ) -> None:
+        """Update data"""
+        with Session(self._engine, autoflush=True) as session:
+            result = session.exec(select(table).where(table.key == data.key))
+            if (old_data := result.first()) is None:
+                data.timestamp = time()
+                session.add(data)
+            else:
+                old_data.value = data.value
+                old_data.timestamp = time()
+                session.add(old_data)
+            session.commit()
+            if old_data is not None:
+                session.refresh(old_data)

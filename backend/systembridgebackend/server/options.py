@@ -4,7 +4,7 @@ from collections import defaultdict
 from sanic import Sanic, response
 from sanic_routing.router import Route
 
-from systembridgebackend.server.cors import _add_cors_headers
+from .cors import _add_cors_headers
 
 
 def _compile_routes_needing_options(routes: dict[str, Route]) -> dict[str, frozenset]:

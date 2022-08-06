@@ -3,7 +3,7 @@ from systembridgeshared.base import Base
 from systembridgeshared.settings import SETTING_PORT_API, Settings
 from zeroconf import InterfaceChoice, ServiceInfo, Zeroconf
 
-from systembridgebackend.modules.system import System
+from ..modules.system import System
 
 ZEROCONF_TYPE = "_system-bridge._tcp.local."
 

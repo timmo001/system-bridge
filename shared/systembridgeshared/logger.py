@@ -5,8 +5,8 @@ import os
 
 from colorlog import ColoredFormatter
 
-from systembridgeshared.common import get_user_data_directory
-from systembridgeshared.const import DATE_FORMAT, FORMAT
+from .common import get_user_data_directory
+from .const import DATE_FORMAT, FORMAT
 
 
 def setup_logger(

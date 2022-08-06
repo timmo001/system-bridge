@@ -1,11 +1,13 @@
 """System Bridge: Update GPU"""
 import asyncio
+from json import dumps
 
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import GPU as DatabaseModel
 
-from systembridgebackend.modules.base import ModuleUpdateBase
-from systembridgebackend.modules.gpu import GPU
+from . import GPU
+from ..base import ModuleUpdateBase
 
 
 class GPUUpdate(ModuleUpdateBase):
@@ -16,7 +18,7 @@ class GPUUpdate(ModuleUpdateBase):
         database: Database,
     ) -> None:
         """Initialize"""
-        super().__init__(database, "gpu")
+        super().__init__(database)
         self._gpu = GPU()
 
     async def update_name(
@@ -25,17 +27,26 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_name: str,
     ) -> None:
         """Update name"""
-        self._database.write("gpu", f"{gpu_key}_name", gpu_name)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_name",
+                value=gpu_name,
+            ),
+        )
 
     async def update_core_clock(
         self,
         gpu_key: str,
     ) -> None:
         """Update core clock"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_core_clock",
-            self._gpu.core_clock(self._database, gpu_key),
+        value = self._gpu.core_clock(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_core_clock",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_core_load(
@@ -43,8 +54,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update core load"""
-        self._database.write(
-            "gpu", f"{gpu_key}_core_load", self._gpu.core_load(self._database, gpu_key)
+        value = self._gpu.core_load(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_core_load",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_fan_speed(
@@ -52,8 +68,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update fan speed"""
-        self._database.write(
-            "gpu", f"{gpu_key}_fan_speed", self._gpu.fan_speed(self._database, gpu_key)
+        value = self._gpu.fan_speed(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_fan_speed",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_memory_clock(
@@ -61,10 +82,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update memory clock"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_memory_clock",
-            self._gpu.memory_clock(self._database, gpu_key),
+        value = self._gpu.memory_clock(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_memory_clock",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_memory_load(
@@ -72,10 +96,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update memory load"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_memory_load",
-            self._gpu.memory_load(self._database, gpu_key),
+        value = self._gpu.memory_load(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_memory_load",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_memory_free(
@@ -83,10 +110,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update memory free"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_memory_free",
-            self._gpu.memory_free(self._database, gpu_key),
+        value = self._gpu.memory_free(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_memory_free",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_memory_used(
@@ -94,10 +124,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update memory used"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_memory_used",
-            self._gpu.memory_used(self._database, gpu_key),
+        value = self._gpu.memory_used(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_memory_used",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_memory_total(
@@ -105,10 +138,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update memory total"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_memory_total",
-            self._gpu.memory_total(self._database, gpu_key),
+        value = self._gpu.memory_total(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_memory_total",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_power(
@@ -116,8 +152,13 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update power"""
-        self._database.write(
-            "gpu", f"{gpu_key}_power", self._gpu.power(self._database, gpu_key)
+        value = self._gpu.power(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_power",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_temperature(
@@ -125,17 +166,20 @@ class GPUUpdate(ModuleUpdateBase):
         gpu_key: str,
     ) -> None:
         """Update temperature"""
-        self._database.write(
-            "gpu",
-            f"{gpu_key}_temperature",
-            self._gpu.temperature(self._database, gpu_key),
+        value = self._gpu.temperature(self._database, gpu_key)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key=f"{gpu_key}_temperature",
+                value=str(value) if value else None,
+            ),
         )
 
     async def update_all_data(self) -> None:
         """Update data"""
 
         # Clear table in case of hardware changes since last run
-        self._database.clear_table("gpu")
+        self._database.clear_table(DatabaseModel)
 
         gpu_list = []
         for gpu_name in self._gpu.get_gpus(self._database):
@@ -156,4 +200,10 @@ class GPUUpdate(ModuleUpdateBase):
                     self.update_temperature(gpu_key),
                 ]
             )
-        self._database.write("gpu", "gpus", gpu_list)
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="gpus",
+                value=dumps(gpu_list),
+            ),
+        )

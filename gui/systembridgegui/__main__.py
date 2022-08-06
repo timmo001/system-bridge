@@ -24,12 +24,12 @@ from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 from typer import Typer
 
-from systembridgegui._version import __version__
-from systembridgegui.system_tray import SystemTray
-from systembridgegui.widgets.timed_message_box import TimedMessageBox
-from systembridgegui.window.main import MainWindow
-from systembridgegui.window.notification import NotificationWindow
-from systembridgegui.window.player import PlayerWindow
+from ._version import __version__
+from .system_tray import SystemTray
+from .widgets.timed_message_box import TimedMessageBox
+from .window.main import MainWindow
+from .window.notification import NotificationWindow
+from .window.player import PlayerWindow
 
 
 class Main(Base):

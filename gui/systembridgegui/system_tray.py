@@ -12,6 +12,7 @@ from pyperclip import copy
 from systembridgeshared.base import Base
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import System as DatabaseSystem
 from systembridgeshared.settings import Settings
 
 PATH_BRIDGES_OPEN_ON = "/app/bridges/openon.html"
@@ -70,19 +71,26 @@ class SystemTray(Base, QSystemTrayIcon):
         menu.addSeparator()
 
         latest_version_text = "Latest Version"
-        version_current = self._database.read_table_by_key("system", "version").to_dict(
-            orient="records"
-        )[0]["value"]
-        version_latest = self._database.read_table_by_key(
-            "system", "version_latest"
-        ).to_dict(orient="records")[0]["value"]
-        record_version_newer_available = self._database.read_table_by_key(
-            "system", "version_newer_available"
+        result_version_current = self._database.get_data_item_by_key(
+            DatabaseSystem, "version"
         )
-        version_newer_available = (
-            record_version_newer_available.to_dict(orient="records")[0]["value"]
-            if not record_version_newer_available.empty
-            else "False"
+        version_current = (
+            result_version_current.value if result_version_current is not None else None
+        )
+        result_version_latest = self._database.get_data_item_by_key(
+            DatabaseSystem, "version_latest"
+        )
+        version_latest = (
+            result_version_latest.value if result_version_latest is not None else None
+        )
+        result_version_newer_available = self._database.get_data_item_by_key(
+            DatabaseSystem, "version_newer_available"
+        )
+        version_newer_available: str = (
+            result_version_newer_available.value
+            if result_version_newer_available is not None
+            and result_version_newer_available.value is not None
+            else ""
         )
 
         if version_newer_available.lower() == "true":

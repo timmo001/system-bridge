@@ -9,8 +9,8 @@ from uuid import uuid4
 
 import aiohttp
 
-from systembridgeconnector.base import Base
-from systembridgeconnector.const import (
+from .base import Base
+from .const import (
     EVENT_API_KEY,
     EVENT_DATA,
     EVENT_EVENT,
@@ -43,26 +43,26 @@ from systembridgeconnector.const import (
     TYPE_POWER_SLEEP,
     TYPE_REGISTER_DATA_LISTENER,
 )
-from systembridgeconnector.exceptions import (
+from .exceptions import (
     AuthenticationException,
     BadMessageException,
     ConnectionClosedException,
     ConnectionErrorException,
 )
-from systembridgeconnector.models.get_data import GetData
-from systembridgeconnector.models.keyboard_key import KeyboardKey
-from systembridgeconnector.models.keyboard_text import KeyboardText
-from systembridgeconnector.models.media_directories import MediaDirectories
-from systembridgeconnector.models.media_files import File as MediaFile, MediaFiles
-from systembridgeconnector.models.media_get_file import MediaGetFile
-from systembridgeconnector.models.media_get_files import MediaGetFiles
-from systembridgeconnector.models.notification import Notification
-from systembridgeconnector.models.open_path import OpenPath
-from systembridgeconnector.models.open_url import OpenUrl
-from systembridgeconnector.models.register_data_listener import RegisterDataListener
-from systembridgeconnector.models.request import Request
-from systembridgeconnector.models.response import Response
-from systembridgeconnector.models.update import Update
+from .models.get_data import GetData
+from .models.keyboard_key import KeyboardKey
+from .models.keyboard_text import KeyboardText
+from .models.media_directories import MediaDirectories
+from .models.media_files import File as MediaFile, MediaFiles
+from .models.media_get_file import MediaGetFile
+from .models.media_get_files import MediaGetFiles
+from .models.notification import Notification
+from .models.open_path import OpenPath
+from .models.open_url import OpenUrl
+from .models.register_data_listener import RegisterDataListener
+from .models.request import Request
+from .models.response import Response
+from .models.update import Update
 
 
 class WebSocketClient(Base):

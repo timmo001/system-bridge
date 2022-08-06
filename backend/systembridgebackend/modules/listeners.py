@@ -1,12 +1,12 @@
 """System Bridge: Module Listeners"""
 
 import asyncio
-from collections.abc import Callable
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Callable
 
 from systembridgeshared.base import Base
 from systembridgeshared.const import MODEL_MAP
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.data import DataDict
 
 
 class Listener:
@@ -15,7 +15,7 @@ class Listener:
     def __init__(
         self,
         listener_id: str,
-        data_changed_callback: Callable[[str, dict], Awaitable[None]],
+        data_changed_callback: Callable[[str, DataDict], Awaitable[None]],
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> None:
         """Initialize"""
@@ -34,8 +34,8 @@ class Listeners(Base):
     ) -> None:
         """Initialize"""
         super().__init__()
-        self._database = database
-        self._implemented_modules = implemented_modules
+        self._database: Database = database
+        self._implemented_modules: list[str] = implemented_modules
         self._data: dict = {module: {} for module in self._implemented_modules}
         # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
@@ -43,7 +43,7 @@ class Listeners(Base):
     async def add_listener(
         self,
         listener_id: str,
-        data_changed_callback: Callable[[str, dict], Awaitable[None]],
+        data_changed_callback: Callable[[str, DataDict], Awaitable[None]],
         modules: list[str],  # pylint: disable=unsubscriptable-object
     ) -> bool:
         """Add modules to listener"""
@@ -62,9 +62,6 @@ class Listeners(Base):
 
     async def refresh_data(self) -> None:
         """Refresh data"""
-        if not self._database.connected:
-            self._database.connect()
-
         # Get modules from registered listeners
         modules = []
         for listener in self._registered_listeners:
@@ -94,14 +91,14 @@ class Listeners(Base):
             self._logger.warning("Unknown model: %s", module)
             return
 
-        new_data = self._database.table_data_to_ordered_dict(module)
+        new_data = self._database.get_data_dict(TABLE_MAP[module])
         if new_data is None:
             self._logger.warning("No data found for module: %s", module)
             return
 
         if new_data != self._data[module]:
             self._logger.info("Data changed for module: %s", module)
-            self._data[module] = model(**new_data).dict()
+            self._data[module] = model(**new_data.dict())
             for listener in self._registered_listeners:
                 self._logger.info("Listener: %s - %s", listener.id, listener.modules)
                 if module in listener.modules:
