@@ -90,7 +90,7 @@ class Database(Base):
         table: Any,
     ) -> None:
         """Clear table"""
-        with Session(self._engine) as session:
+        with Session(self._engine, autoflush=True) as session:
             for sensor in session.exec(select(table)).all():
                 session.delete(sensor)
             session.commit()
@@ -100,7 +100,7 @@ class Database(Base):
         table: Any,
     ) -> list[Any]:
         """Get data from database"""
-        with Session(self._engine) as session:
+        with Session(self._engine, autoflush=True) as session:
             return session.exec(select(table)).all()
 
     def get_data_by_key(
@@ -109,7 +109,7 @@ class Database(Base):
         key: str,
     ) -> list[Data]:
         """Get data from database by key"""
-        with Session(self._engine) as session:
+        with Session(self._engine, autoflush=True) as session:
             return session.exec(select(table).where(table.key == key)).all()
 
     def get_data_item_by_key(
@@ -118,7 +118,7 @@ class Database(Base):
         key: str,
     ) -> Optional[Data]:
         """Get data item from database by key"""
-        with Session(self._engine) as session:
+        with Session(self._engine, autoflush=True) as session:
             return session.exec(select(table).where(table.key == key)).first()
 
     def get_data_dict(
@@ -141,17 +141,13 @@ class Database(Base):
 
         return DataDict(**data, last_updated=data_last_updated)
 
-    def get_session(self) -> Session:
-        """Get session"""
-        return Session(self._engine)
-
     def update_data(
         self,
         table,
         data: Any,
     ) -> None:
         """Update data"""
-        with Session(self._engine) as session:
+        with Session(self._engine, autoflush=True) as session:
             result = session.exec(select(table).where(table.key == data.key))
             if (old_data := result.first()) is None:
                 data.timestamp = time()
