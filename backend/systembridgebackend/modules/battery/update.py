@@ -1,7 +1,6 @@
 """System Bridge: Update Battery"""
 import asyncio
 
-from sqlmodel import Session
 from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Battery as DatabaseModel

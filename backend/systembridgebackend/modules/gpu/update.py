@@ -3,6 +3,7 @@ import asyncio
 
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import GPU as DatabaseModel
 
 from . import GPU
 from ..base import ModuleUpdateBase

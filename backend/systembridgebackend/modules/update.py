@@ -7,14 +7,13 @@ from systembridgeshared.database import Database
 
 from .battery.update import BatteryUpdate
 from .cpu.update import CPUUpdate
+from .disk.update import DiskUpdate
+from .display.update import DisplayUpdate
+from .gpu.update import GPUUpdate
+from .memory.update import MemoryUpdate
+from .network.update import NetworkUpdate
 from .sensors.update import SensorsUpdate
-
-# from .disk.update import DiskUpdate
-# from .display.update import DisplayUpdate
-# from .gpu.update import GPUUpdate
-# from .memory.update import MemoryUpdate
-# from .network.update import NetworkUpdate
-# from .system.update import SystemUpdate
+from .system.update import SystemUpdate
 
 
 class Update(Base):
@@ -30,15 +29,15 @@ class Update(Base):
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
-            # {"name": "disk", "cls": DiskUpdate(self._database)},
-            # {"name": "system", "cls": SystemUpdate(self._database)},
+            {"name": "disk", "cls": DiskUpdate(self._database)},
+            {"name": "system", "cls": SystemUpdate(self._database)},
         ]
         self._classes_frequent = [
             {"name": "cpu", "cls": CPUUpdate(self._database)},
-            # {"name": "display", "cls": DisplayUpdate(self._database)},
-            # {"name": "gpu", "cls": GPUUpdate(self._database)},
-            # {"name": "memory", "cls": MemoryUpdate(self._database)},
-            # {"name": "network", "cls": NetworkUpdate(self._database)},
+            {"name": "display", "cls": DisplayUpdate(self._database)},
+            {"name": "gpu", "cls": GPUUpdate(self._database)},
+            {"name": "memory", "cls": MemoryUpdate(self._database)},
+            {"name": "network", "cls": NetworkUpdate(self._database)},
         ]
 
     async def _update(

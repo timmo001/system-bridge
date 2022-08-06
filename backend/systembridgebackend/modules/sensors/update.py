@@ -1,7 +1,6 @@
 """System Bridge: Update Sensors"""
 import asyncio
 
-from sqlmodel import Session, select
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_sensors import Sensors as DatabaseModel
