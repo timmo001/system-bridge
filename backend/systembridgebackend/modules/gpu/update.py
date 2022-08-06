@@ -179,7 +179,7 @@ class GPUUpdate(ModuleUpdateBase):
         """Update data"""
 
         # Clear table in case of hardware changes since last run
-        self._database.clear_table("gpu")
+        self._database.clear_table(DatabaseModel)
 
         gpu_list = []
         for gpu_name in self._gpu.get_gpus(self._database):

@@ -95,7 +95,7 @@ class DisplayUpdate(ModuleUpdateBase):
         """Update data"""
 
         # Clear table in case of hardware changes since last run
-        self._database.clear_table("display")
+        self._database.clear_table(DatabaseModel)
 
         display_list = []
         for display_name in self._display.get_displays(self._database):
