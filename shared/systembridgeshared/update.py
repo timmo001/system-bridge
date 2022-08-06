@@ -8,10 +8,10 @@ import os
 import platform
 import subprocess
 import sys
-import urllib.request
 from typing import Optional
+import urllib.request
 
-from systembridgeshared.base import Base
+from .base import Base
 
 
 class Update(Base):
