@@ -42,9 +42,12 @@ def data(module: str, key=None) -> None:
     """Get data"""
     table_module = TABLE_MAP.get(module)
     if key:
-        output = database.get_data_by_key(table_module, key)
+        result = database.get_data_by_key(table_module, key)
     else:
-        output = database.get_data(table_module)
+        result = database.get_data(table_module)
+
+    output = [item.dict() for item in result]
+
     table_data = tabulate(output, headers="keys", tablefmt="psql")
     typer.secho(table_data, fg=typer.colors.GREEN)
 
@@ -64,7 +67,9 @@ def data_value(
 def settings_all():
     """Get all Settings"""
     table_data = tabulate(
-        database.get_data(SettingsDatabaseModule), headers="keys", tablefmt="psql"
+        [item.dict() for item in database.get_data(SettingsDatabaseModule)],
+        headers="keys",
+        tablefmt="psql",
     )
     typer.secho(table_data, fg=typer.colors.CYAN)
 
