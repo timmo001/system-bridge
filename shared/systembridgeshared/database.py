@@ -108,36 +108,36 @@ class Database(Base):
             # tables=TABLES,
         )
 
-    def add_data(
-        self,
-        data: Any,
-    ) -> None:
-        """Add data to database"""
-        with Session(self._engine) as session:
-            session.add(data)
-            session.commit()
+    # def add_data(
+    #     self,
+    #     data: TableDataType,
+    # ) -> None:
+    #     """Add data to database"""
+    #     with Session(self._engine) as session:
+    #         session.add(data)
+    #         session.commit()
 
-    def create_data(
-        self,
-        key: str,
-        value: Union[bool, float, int, str, list, dict, None],
-        timestamp: Optional[float] = None,
-    ) -> Data:
-        """Create data"""
-        if timestamp is None:
-            timestamp = time()
+    # def create_data(
+    #     self,
+    #     key: str,
+    #     value: Union[bool, float, int, str, list, dict, None],
+    #     timestamp: Optional[float] = None,
+    # ) -> Data:
+    #     """Create data"""
+    #     if timestamp is None:
+    #         timestamp = time()
 
-        # Convert list or dict to JSON
-        if isinstance(value, (dict, list)):
-            value = json.dumps(value)
-        else:
-            value = str(value)
+    #     # Convert list or dict to JSON
+    #     if isinstance(value, (dict, list)):
+    #         value = json.dumps(value)
+    #     else:
+    #         value = str(value)
 
-        return Data(
-            key=key,
-            value=value,
-            timestamp=timestamp,
-        )
+    #     return Data(
+    #         key=key,
+    #         value=value,
+    #         timestamp=timestamp,
+    #     )
 
     def create_sensor_data(
         self,
@@ -213,3 +213,7 @@ class Database(Base):
                 data["last_updated"][item.key] = item.timestamp
 
         return DataDict(**data)
+
+    def get_session(self) -> Session:
+        """Get session"""
+        return Session(self._engine)

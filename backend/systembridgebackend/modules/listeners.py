@@ -98,7 +98,7 @@ class Listeners(Base):
 
         if new_data != self._data[module]:
             self._logger.info("Data changed for module: %s", module)
-            self._data[module] = model(**new_data).dict()
+            self._data[module] = model(**new_data.dict())
             for listener in self._registered_listeners:
                 self._logger.info("Listener: %s - %s", listener.id, listener.modules)
                 if module in listener.modules:

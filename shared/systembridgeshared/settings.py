@@ -10,17 +10,17 @@ from uuid import uuid4
 from appdirs import AppDirs
 from cryptography.fernet import Fernet
 
-from systembridgeshared.base import Base
-from systembridgeshared.common import convert_string_to_correct_type
-from systembridgeshared.const import (
+from .base import Base
+from .common import convert_string_to_correct_type
+from .const import (
     SECRET_API_KEY,
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_AUTOSTART,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
 )
-from systembridgeshared.database import Database
-from systembridgeshared.models.database_data import (
+from .database import Database
+from .models.database_data import (
     Data as DatabaseData,
     Secrets as DatabaseSecrets,
     Settings as DatabaseSettings,
@@ -63,7 +63,7 @@ class Settings(Base):
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_AUTOSTART)
             is not None
         ):
-            self.set(SETTING_AUTOSTART, False)
+            self.set(SETTING_AUTOSTART, str(False))
         if (
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_LOG_LEVEL)
             is not None
@@ -73,14 +73,14 @@ class Settings(Base):
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_PORT_API)
             is not None
         ):
-            self.set(SETTING_PORT_API, 9170)
+            self.set(SETTING_PORT_API, str(9170))
         if (
             self._database.get_data_item_by_key(
                 DatabaseSettings, SETTING_ADDITIONAL_MEDIA_DIRECTORIES
             )
             is not None
         ):
-            self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, [])
+            self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, str([]))
 
     def get_all(self) -> list[DatabaseData]:
         """Get settings"""
@@ -116,13 +116,13 @@ class Settings(Base):
     def set(
         self,
         key: str,
-        value: Union[bool, float, int, str, list[Any], dict[str, Any], None],
+        value: str,
     ) -> None:
         """Set setting"""
-        self._database.add_data(
-            self._database.create_data(
-                key,
-                value,
+        self._database.get_session().add(
+            DatabaseSettings(
+                key=key,
+                value=value,
             )
         )
 
@@ -134,9 +134,9 @@ class Settings(Base):
         """Set secret"""
         fernet = Fernet(self._encryption_key)
 
-        self._database.add_data(
-            self._database.create_data(
-                key,
-                fernet.encrypt(value.encode()).decode(),
+        self._database.get_session().add(
+            DatabaseSecrets(
+                key=key,
+                value=fernet.encrypt(value.encode()).decode(),
             )
         )
