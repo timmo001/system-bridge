@@ -5,7 +5,6 @@ from __future__ import annotations
 from pydantic import BaseModel, Extra, Field
 
 from systembridgeshared.models.battery import Battery
-from systembridgeshared.models.bridge import Bridge
 from systembridgeshared.models.cpu import Cpu
 from systembridgeshared.models.disk import Disk
 from systembridgeshared.models.display import Display
