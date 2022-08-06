@@ -6,7 +6,6 @@ from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
 from .battery.update import BatteryUpdate
-from .bridge.update import BridgeUpdate
 from .cpu.update import CPUUpdate
 from .disk.update import DiskUpdate
 from .display.update import DisplayUpdate
@@ -40,7 +39,6 @@ class Update(Base):
             # {"name": "memory", "cls": MemoryUpdate(self._database)},
             # {"name": "network", "cls": NetworkUpdate(self._database)},
         ]
-        BridgeUpdate(self._database)
 
     async def _update(
         self,
