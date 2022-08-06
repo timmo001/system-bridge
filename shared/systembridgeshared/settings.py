@@ -116,15 +116,13 @@ class Settings(Base):
         value: str,
     ) -> None:
         """Set setting"""
-        session = self._database.get_session()
-        session.add(
+        self._database.update_data(
+            DatabaseSettings,
             DatabaseSettings(
                 key=key,
                 value=value,
-            )
+            ),
         )
-        session.commit()
-        session.close()
 
     def set_secret(
         self,
@@ -134,12 +132,10 @@ class Settings(Base):
         """Set secret"""
         fernet = Fernet(self._encryption_key)
 
-        session = self._database.get_session()
-        session.add(
+        self._database.update_data(
+            DatabaseSecrets,
             DatabaseSecrets(
                 key=key,
                 value=fernet.encrypt(value.encode()).decode(),
-            )
+            ),
         )
-        session.commit()
-        session.close()
