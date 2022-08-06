@@ -20,7 +20,6 @@ class Data(BaseModel):
     """Data"""
 
     battery: Battery = Field(..., alias="battery")
-    bridge: Bridge = Field(..., alias="bridge")
     cpu: Cpu = Field(..., alias="cpu")
     disk: Disk = Field(..., alias="disk")
     display: Display = Field(..., alias="display")

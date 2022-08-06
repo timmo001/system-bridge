@@ -15,7 +15,6 @@ import DataItems from "components/Data/DataItems";
 
 const modules = [
   "battery",
-  "bridge",
   "cpu",
   "disk",
   "display",
@@ -28,7 +27,6 @@ const modules = [
 
 const moduleMap: { [key: string]: string } = {
   battery: "Battery",
-  bridge: "Bridge",
   cpu: "CPU",
   disk: "Disk",
   display: "Display",

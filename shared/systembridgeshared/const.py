@@ -153,7 +153,6 @@ TYPE_UPDATE_SETTING = "UPDATE_SETTING"
 
 # Model
 MODEL_BATTERY = "battery"
-MODEL_BRIDGE = "bridge"
 MODEL_CPU = "cpu"
 MODEL_DATA = "data"
 MODEL_DISK = "disk"
