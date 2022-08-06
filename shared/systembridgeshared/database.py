@@ -2,19 +2,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-import json
 import os
 from time import time
 from typing import Any, List, Optional, Union
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from systembridgeshared.base import Base
-from systembridgeshared.common import (
-    convert_string_to_correct_type,
-    get_user_data_directory,
-)
-from systembridgeshared.const import (
+from .base import Base
+from .common import convert_string_to_correct_type, get_user_data_directory
+from .const import (
     MODEL_BATTERY,
     MODEL_CPU,
     MODEL_DISK,
@@ -27,8 +23,8 @@ from systembridgeshared.const import (
     MODEL_SETTINGS,
     MODEL_SYSTEM,
 )
-from systembridgeshared.models.data import DataDict
-from systembridgeshared.models.database_data import (
+from .models.data import DataDict
+from .models.database_data import (
     CPU,
     GPU,
     Battery,
@@ -41,8 +37,8 @@ from systembridgeshared.models.database_data import (
     Settings,
     System,
 )
-from systembridgeshared.models.database_data_bridge import Bridge
-from systembridgeshared.models.database_data_sensors import Sensors
+from .models.database_data_bridge import Bridge
+from .models.database_data_sensors import Sensors
 
 TABLE_MAP: Mapping[str, Any] = {
     MODEL_BATTERY: Battery,
@@ -130,7 +126,8 @@ class Database(Base):
         table: Any,
     ) -> DataDict:
         """Get data from database as dictionary"""
-        data: dict[str, Any] = {"last_updated": {}}
+        data: dict[str, Any] = {}
+        data_last_updated: dict[str, float | None] = {}
         result = self.get_data(table)
         for item in result:
             if item.value is None:
@@ -138,11 +135,11 @@ class Database(Base):
             else:
                 data[item.key] = convert_string_to_correct_type(item.value)
             if item.timestamp is None:
-                data["last_updated"][item.key] = None
+                data_last_updated[item.key] = None
             else:
-                data["last_updated"][item.key] = item.timestamp
+                data_last_updated[item.key] = item.timestamp
 
-        return DataDict(**data)
+        return DataDict(**data, last_updated=data_last_updated)
 
     def get_session(self) -> Session:
         """Get session"""

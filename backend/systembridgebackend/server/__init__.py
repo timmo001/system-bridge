@@ -11,13 +11,14 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic_scheduler import SanicScheduler, task
 from systembridgeshared.base import Base
+from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
     QUERY_API_KEY,
     SECRET_API_KEY,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
 )
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
@@ -125,9 +126,10 @@ class Server(Base):
             table: str,
         ) -> HTTPResponse:
             """Data handler all"""
-            if table not in implemented_modules:
+            table_module = TABLE_MAP.get(table)
+            if table not in implemented_modules or table_module is None:
                 return json({"message": f"Data module {table} not found"}, status=404)
-            return json(self._database.get_data_dict(table))
+            return json(self._database.get_data_dict(table_module).dict())
 
         @auth.key_required
         async def _handler_data_by_key(
@@ -136,16 +138,17 @@ class Server(Base):
             key: str,
         ) -> HTTPResponse:
             """Data handler by key"""
-            if table not in implemented_modules:
+            table_module = TABLE_MAP.get(table)
+            if table not in implemented_modules or table_module is None:
                 return json({"message": f"Data module {table} not found"}, status=404)
 
-            data = self._database.get_data_item_by_key(table, key)
+            data = self._database.get_data_item_by_key(table_module, key)
             if data is None:
                 return json({"message": f"Data item {key} not found"}, status=404)
 
             return json(
                 {
-                    data.key: data.value,
+                    data.key: convert_string_to_correct_type(data.value),
                     "last_updated": data.timestamp,
                 }
             )

@@ -25,9 +25,11 @@ def camel_to_snake(name):
 
 
 def convert_string_to_correct_type(
-    value: str,
+    value: str | None,
 ) -> Union[bool, float, int, str, list[Any], dict[str, Any], None]:
     """Convert string to correct data type"""
+    if value is None:
+        return None
     try:
         if value.startswith("'") and value.endswith("'"):
             return convert_string_to_correct_type(value[1:-1])

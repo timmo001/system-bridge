@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Extra, Field
 
 from systembridgeshared.models.battery import Battery
@@ -33,4 +35,4 @@ class DataDict(BaseModel):
     class Config:
         extra = Extra.allow
 
-    last_updated: dict[str, float] = Field(..., description="Last updated")
+    last_updated: dict[str, Optional[float]] = Field(..., description="Last updated")

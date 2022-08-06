@@ -613,7 +613,7 @@ class WebSocketHandler(Base):
                                     EVENT_TYPE: TYPE_DATA_UPDATE,
                                     EVENT_MESSAGE: "Data received",
                                     EVENT_MODULE: module,
-                                    EVENT_DATA: data,
+                                    EVENT_DATA: data.json(),
                                 }
                             )
                         )
