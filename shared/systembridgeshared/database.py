@@ -16,7 +16,6 @@ from systembridgeshared.common import (
 )
 from systembridgeshared.const import (
     MODEL_BATTERY,
-    MODEL_BRIDGE,
     MODEL_CPU,
     MODEL_DISK,
     MODEL_DISPLAY,
@@ -47,7 +46,6 @@ from systembridgeshared.models.database_data_sensors import Sensors
 
 TABLE_MAP: Mapping[str, Any] = {
     MODEL_BATTERY: Battery,
-    MODEL_BRIDGE: Bridge,
     MODEL_CPU: CPU,
     MODEL_DISK: Disk,
     MODEL_DISPLAY: Display,

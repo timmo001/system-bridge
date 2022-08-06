@@ -177,7 +177,6 @@ MODEL_SYSTEM = "system"
 
 MODEL_MAP = {
     MODEL_BATTERY: Battery,
-    MODEL_BRIDGE: Bridge,
     MODEL_CPU: Cpu,
     MODEL_DATA: Data,
     MODEL_DISK: Disk,

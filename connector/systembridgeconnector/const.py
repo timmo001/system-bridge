@@ -138,7 +138,6 @@ TYPE_UPDATE_SETTING = "UPDATE_SETTING"
 
 # Model
 MODEL_BATTERY = "battery"
-MODEL_BRIDGE = "bridge"
 MODEL_CPU = "cpu"
 MODEL_DATA = "data"
 MODEL_DISK = "disk"
@@ -163,7 +162,6 @@ MODEL_SYSTEM = "system"
 
 MODEL_MAP = {
     MODEL_BATTERY: Battery,
-    MODEL_BRIDGE: Bridge,
     MODEL_CPU: Cpu,
     MODEL_DATA: Data,
     MODEL_DISK: Disk,
