@@ -4,7 +4,6 @@ from json import JSONDecodeError, loads
 import os
 from uuid import uuid4
 
-from shared.systembridgeshared.database import TABLE_MAP
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -83,7 +82,7 @@ from systembridgeshared.const import (
     TYPE_UNREGISTER_DATA_LISTENER,
     TYPE_UPDATE_SETTING,
 )
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
