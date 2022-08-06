@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 import os
 from time import time
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
@@ -98,7 +98,7 @@ class Database(Base):
     def get_data(
         self,
         table: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Get data from database"""
         with Session(self._engine) as session:
             return session.exec(select(table)).all()
@@ -107,7 +107,7 @@ class Database(Base):
         self,
         table: Any,
         key: str,
-    ) -> List[Data]:
+    ) -> list[Data]:
         """Get data from database by key"""
         with Session(self._engine) as session:
             return session.exec(select(table).where(table.key == key)).all()
@@ -153,8 +153,7 @@ class Database(Base):
         """Update data"""
         with Session(self._engine) as session:
             result = session.exec(select(table).where(table.key == data.key))
-            old_data = result.first()
-            if old_data is None:
+            if (old_data := result.first()) is None:
                 data.timestamp = time()
                 session.add(data)
             else:
