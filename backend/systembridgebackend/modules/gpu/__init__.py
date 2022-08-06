@@ -14,6 +14,9 @@ from systembridgeshared.const import (
     COLUMN_VALUE,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data_sensors import (
+    Sensors as SensorsDatabaseModel,
+)
 
 
 class GPU(Base):
@@ -25,7 +28,7 @@ class GPU(Base):
     ) -> list[str]:
         """Get GPUs"""
         gpus = []
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -40,7 +43,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU core clock"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -62,7 +65,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU core load"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -82,7 +85,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU fan speed"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -101,7 +104,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU memory clock"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -123,7 +126,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU memory load"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -145,7 +148,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU memory free"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -167,7 +170,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU memory used"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -189,7 +192,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU memory total"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -211,7 +214,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU power usage"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -230,7 +233,7 @@ class GPU(Base):
         gpu_key: str,
     ) -> Optional[float]:
         """GPU temperature"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()

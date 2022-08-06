@@ -13,6 +13,9 @@ from systembridgeshared.const import (
     COLUMN_VALUE,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data_sensors import (
+    Sensors as SensorsDatabaseModel,
+)
 
 
 class Display(Base):
@@ -24,7 +27,7 @@ class Display(Base):
     ) -> list[str]:
         """Get Displays"""
         displays = []
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -40,7 +43,7 @@ class Display(Base):
         display_key: str,
     ) -> Optional[float]:
         """Display pixel clock"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -62,7 +65,7 @@ class Display(Base):
         display_key: str,
     ) -> Optional[float]:
         """Display refresh rate"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -84,7 +87,7 @@ class Display(Base):
         display_key: str,
     ) -> Optional[int]:
         """Display resolution horizontal"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -106,7 +109,7 @@ class Display(Base):
         display_key: str,
     ) -> Optional[int]:
         """Display resolution vertical"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "display" in item[COLUMN_HARDWARE_TYPE].lower()
