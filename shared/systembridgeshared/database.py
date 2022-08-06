@@ -7,6 +7,7 @@ from time import time
 from typing import Any, Optional, Union
 
 from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel.sql.expression import Select, SelectOfScalar
 
 from .base import Base
 from .common import convert_string_to_correct_type, get_user_data_directory
@@ -69,6 +70,10 @@ TableDataType = Union[
     Settings,
     System,
 ]
+
+
+SelectOfScalar.inherit_cache = True  # type: ignore
+Select.inherit_cache = True  # type: ignore
 
 
 class Database(Base):
