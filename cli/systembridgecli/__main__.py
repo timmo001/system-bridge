@@ -15,7 +15,7 @@ from systembridgeshared.settings import Settings
 from tabulate import tabulate
 import typer
 
-from systembridgecli._version import __version__
+from ._version import __version__
 
 app = typer.Typer()
 database = Database()
