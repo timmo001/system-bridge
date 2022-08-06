@@ -7,13 +7,14 @@ from systembridgeshared.database import Database
 
 from .battery.update import BatteryUpdate
 from .cpu.update import CPUUpdate
-from .disk.update import DiskUpdate
-from .display.update import DisplayUpdate
-from .gpu.update import GPUUpdate
-from .memory.update import MemoryUpdate
-from .network.update import NetworkUpdate
 from .sensors.update import SensorsUpdate
-from .system.update import SystemUpdate
+
+# from .disk.update import DiskUpdate
+# from .display.update import DisplayUpdate
+# from .gpu.update import GPUUpdate
+# from .memory.update import MemoryUpdate
+# from .network.update import NetworkUpdate
+# from .system.update import SystemUpdate
 
 
 class Update(Base):
