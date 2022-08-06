@@ -4,12 +4,13 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-from uuid import uuid4
 from typing import Optional
+from uuid import uuid4
 
 from systembridgeshared.common import get_user_data_directory
-from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API, TABLE_SETTINGS
-from systembridgeshared.database import Database
+from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
+from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.database_data import Settings as SettingsDatabaseModule
 from systembridgeshared.settings import Settings
 from tabulate import tabulate
 import typer
@@ -39,10 +40,11 @@ def api_port() -> None:
 @app.command(name="data", short_help="Get data")
 def data(module: str, key=None) -> None:
     """Get data"""
+    table_module = TABLE_MAP.get(module)
     if key:
-        output = database.read_table_by_key(module, key)
+        output = database.get_data_by_key(table_module, key)
     else:
-        output = database.read_table(module)
+        output = database.get_data(table_module)
     table_data = tabulate(output, headers="keys", tablefmt="psql")
     typer.secho(table_data, fg=typer.colors.GREEN)
 
@@ -53,17 +55,16 @@ def data_value(
     key: str,
 ) -> None:
     """Get data value"""
-    output = database.read_table_by_key(module, key).to_dict(orient="records")[0][
-        "value"
-    ]
-    typer.secho(output, fg=typer.colors.GREEN)
+    table_module = TABLE_MAP.get(module)
+    output = database.get_data_item_by_key(table_module, key)
+    typer.secho(output.value if output else None, fg=typer.colors.GREEN)
 
 
 @app.command(name="settings", short_help="Get all settings")
 def settings_all():
     """Get all Settings"""
     table_data = tabulate(
-        database.read_table(TABLE_SETTINGS), headers="keys", tablefmt="psql"
+        database.get_data(SettingsDatabaseModule), headers="keys", tablefmt="psql"
     )
     typer.secho(table_data, fg=typer.colors.CYAN)
 
