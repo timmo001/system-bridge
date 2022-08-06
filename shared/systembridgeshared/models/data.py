@@ -6,15 +6,15 @@ from typing import Optional
 
 from pydantic import BaseModel, Extra, Field
 
-from systembridgeshared.models.battery import Battery
-from systembridgeshared.models.cpu import Cpu
-from systembridgeshared.models.disk import Disk
-from systembridgeshared.models.display import Display
-from systembridgeshared.models.gpu import Gpu
-from systembridgeshared.models.memory import Memory
-from systembridgeshared.models.network import Network
-from systembridgeshared.models.sensors import Sensors
-from systembridgeshared.models.system import System
+from .battery import Battery
+from .cpu import Cpu
+from .disk import Disk
+from .display import Display
+from .gpu import Gpu
+from .memory import Memory
+from .network import Network
+from .sensors import Sensors
+from .system import System
 
 
 class Data(BaseModel):

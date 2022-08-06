@@ -1,24 +1,23 @@
 """System Bridge Shared: Constants"""
-from systembridgeshared.models.battery import Battery
-from systembridgeshared.models.bridge import Bridge
-from systembridgeshared.models.cpu import Cpu
-from systembridgeshared.models.data import Data
-from systembridgeshared.models.disk import Disk
-from systembridgeshared.models.display import Display
-from systembridgeshared.models.generic import Generic
-from systembridgeshared.models.gpu import Gpu
-from systembridgeshared.models.keyboard_key import KeyboardKey
-from systembridgeshared.models.keyboard_text import KeyboardText
-from systembridgeshared.models.media_directories import MediaDirectories
-from systembridgeshared.models.media_files import File, MediaFiles
-from systembridgeshared.models.memory import Memory
-from systembridgeshared.models.network import Network
-from systembridgeshared.models.notification import Notification
-from systembridgeshared.models.open_path import OpenPath
-from systembridgeshared.models.open_url import OpenUrl
-from systembridgeshared.models.response import Response
-from systembridgeshared.models.sensors import Sensors
-from systembridgeshared.models.system import System
+from .models.battery import Battery
+from .models.cpu import Cpu
+from .models.data import Data
+from .models.disk import Disk
+from .models.display import Display
+from .models.generic import Generic
+from .models.gpu import Gpu
+from .models.keyboard_key import KeyboardKey
+from .models.keyboard_text import KeyboardText
+from .models.media_directories import MediaDirectories
+from .models.media_files import File, MediaFiles
+from .models.memory import Memory
+from .models.network import Network
+from .models.notification import Notification
+from .models.open_path import OpenPath
+from .models.open_url import OpenUrl
+from .models.response import Response
+from .models.sensors import Sensors
+from .models.system import System
 
 # Logging
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
