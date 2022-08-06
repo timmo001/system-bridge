@@ -24,6 +24,5 @@
       "required": ["gpus"]
     }
   },
-  "additionalProperties": {},
-  "required": ["gpus", "last_updated"]
+  "additionalProperties": {}
 }

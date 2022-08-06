@@ -28,5 +28,5 @@ class Gpu(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    gpus: list
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    gpus: Optional[list] = None
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")
