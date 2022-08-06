@@ -161,4 +161,6 @@ class Database(Base):
                 old_data.value = data.value
                 old_data.timestamp = time()
                 session.add(old_data)
-                # session.refresh(old_data)
+            session.commit()
+            if old_data is not None:
+                session.refresh(old_data)

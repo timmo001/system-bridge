@@ -5,14 +5,6 @@ from typing import Optional
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
-from systembridgeshared.const import (
-    COLUMN_HARDWARE_NAME,
-    COLUMN_HARDWARE_TYPE,
-    COLUMN_KEY,
-    COLUMN_NAME,
-    COLUMN_TYPE,
-    COLUMN_VALUE,
-)
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_sensors import (
     Sensors as SensorsDatabaseModel,
@@ -30,11 +22,11 @@ class GPU(Base):
         gpus = []
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and item[COLUMN_HARDWARE_NAME] not in gpus
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and item.hardware_name not in gpus
             ):
-                gpus.append(item[COLUMN_HARDWARE_NAME])
+                gpus.append(item.hardware_name)
         return gpus
 
     def core_clock(
@@ -45,18 +37,18 @@ class GPU(Base):
         """GPU core clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "clock" in item[COLUMN_TYPE].lower()
-                and "core" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "clock" in item.type.lower()
+                and "core" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU core clock: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def core_load(
@@ -67,16 +59,14 @@ class GPU(Base):
         """GPU core load"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "load" in item[COLUMN_TYPE].lower()
-                and "core" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "load" in item.type.lower()
+                and "core" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
-                self._logger.debug(
-                    "Found GPU core load: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
-                )
-                return item[COLUMN_VALUE]
+                self._logger.debug("Found GPU core load: %s = %s", item.key, item.value)
+                return item.value
         return None
 
     def fan_speed(
@@ -87,15 +77,13 @@ class GPU(Base):
         """GPU fan speed"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "fan" in item[COLUMN_TYPE].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "fan" in item.type.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
-                self._logger.debug(
-                    "Found GPU fan speed: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
-                )
-                return item[COLUMN_VALUE]
+                self._logger.debug("Found GPU fan speed: %s = %s", item.key, item.value)
+                return item.value
         return None
 
     def memory_clock(
@@ -106,18 +94,18 @@ class GPU(Base):
         """GPU memory clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "clock" in item[COLUMN_TYPE].lower()
-                and "memory" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "clock" in item.type.lower()
+                and "memory" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory clock: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def memory_load(
@@ -128,18 +116,18 @@ class GPU(Base):
         """GPU memory load"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "load" in item[COLUMN_TYPE].lower()
-                and "memory" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "load" in item.type.lower()
+                and "memory" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory load: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def memory_free(
@@ -150,18 +138,18 @@ class GPU(Base):
         """GPU memory free"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "memory" in item[COLUMN_NAME].lower()
-                and "free" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "memory" in item.name.lower()
+                and "free" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory free: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def memory_used(
@@ -172,18 +160,18 @@ class GPU(Base):
         """GPU memory used"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "memory" in item[COLUMN_NAME].lower()
-                and "used" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "memory" in item.name.lower()
+                and "used" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory used: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def memory_total(
@@ -194,18 +182,18 @@ class GPU(Base):
         """GPU memory total"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "memory" in item[COLUMN_NAME].lower()
-                and "total" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "memory" in item.name.lower()
+                and "total" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU memory total: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def power(
@@ -216,15 +204,13 @@ class GPU(Base):
         """GPU power usage"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "power" in item[COLUMN_TYPE].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "power" in item.type.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
-                self._logger.debug(
-                    "Found GPU power: %s = %s", item[COLUMN_KEY], item[COLUMN_VALUE]
-                )
-                return item[COLUMN_VALUE]
+                self._logger.debug("Found GPU power: %s = %s", item.key, item.value)
+                return item.value
         return None
 
     def temperature(
@@ -235,16 +221,16 @@ class GPU(Base):
         """GPU temperature"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "gpu" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "temperature" in item[COLUMN_TYPE].lower()
-                and "core" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == gpu_key
+                item.hardware_type is not None
+                and "gpu" in item.hardware_type.lower()
+                and "temperature" in item.type.lower()
+                and "core" in item.name.lower()
+                and make_key(item.hardware_name) == gpu_key
             ):
                 self._logger.debug(
                     "Found GPU temperature: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None

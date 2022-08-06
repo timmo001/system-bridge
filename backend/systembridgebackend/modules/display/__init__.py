@@ -5,13 +5,6 @@ from typing import Optional
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
-from systembridgeshared.const import (
-    COLUMN_HARDWARE_NAME,
-    COLUMN_HARDWARE_TYPE,
-    COLUMN_KEY,
-    COLUMN_NAME,
-    COLUMN_VALUE,
-)
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_sensors import (
     Sensors as SensorsDatabaseModel,
@@ -29,12 +22,12 @@ class Display(Base):
         displays = []
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
-                and item[COLUMN_HARDWARE_NAME] is not None
-                and item[COLUMN_HARDWARE_NAME] not in displays
+                item.hardware_type is not None
+                and "display" in item.hardware_type.lower()
+                and item.hardware_name is not None
+                and item.hardware_name not in displays
             ):
-                displays.append(item[COLUMN_HARDWARE_NAME])
+                displays.append(item.hardware_name)
         return displays
 
     def pixel_clock(
@@ -45,18 +38,18 @@ class Display(Base):
         """Display pixel clock"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "pixel" in item[COLUMN_NAME].lower()
-                and "clock" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == display_key
+                item.hardware_type is not None
+                and "display" in item.hardware_type.lower()
+                and "pixel" in item.name.lower()
+                and "clock" in item.name.lower()
+                and make_key(item.hardware_name) == display_key
             ):
                 self._logger.debug(
                     "Found display pixel clock: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def refresh_rate(
@@ -67,18 +60,18 @@ class Display(Base):
         """Display refresh rate"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "refresh" in item[COLUMN_NAME].lower()
-                and "rate" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == display_key
+                item.hardware_type is not None
+                and "display" in item.hardware_type.lower()
+                and "refresh" in item.name.lower()
+                and "rate" in item.name.lower()
+                and make_key(item.hardware_name) == display_key
             ):
                 self._logger.debug(
                     "Found display refresh rate: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def resolution_horizontal(
@@ -89,18 +82,18 @@ class Display(Base):
         """Display resolution horizontal"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "resolution" in item[COLUMN_NAME].lower()
-                and "horizontal" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == display_key
+                item.hardware_type is not None
+                and "display" in item.hardware_type.lower()
+                and "resolution" in item.name.lower()
+                and "horizontal" in item.name.lower()
+                and make_key(item.hardware_name) == display_key
             ):
                 self._logger.debug(
                     "Found display resolution horizontal: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
 
     def resolution_vertical(
@@ -111,16 +104,16 @@ class Display(Base):
         """Display resolution vertical"""
         for item in database.get_data(SensorsDatabaseModel):
             if (
-                item[COLUMN_HARDWARE_TYPE] is not None
-                and "display" in item[COLUMN_HARDWARE_TYPE].lower()
-                and "resolution" in item[COLUMN_NAME].lower()
-                and "vertical" in item[COLUMN_NAME].lower()
-                and make_key(item[COLUMN_HARDWARE_NAME]) == display_key
+                item.hardware_type is not None
+                and "display" in item.hardware_type.lower()
+                and "resolution" in item.name.lower()
+                and "vertical" in item.name.lower()
+                and make_key(item.hardware_name) == display_key
             ):
                 self._logger.debug(
                     "Found display resolution vertical: %s = %s",
-                    item[COLUMN_KEY],
-                    item[COLUMN_VALUE],
+                    item.key,
+                    item.value,
                 )
-                return item[COLUMN_VALUE]
+                return item.value
         return None
