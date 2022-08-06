@@ -28,6 +28,9 @@ SETTING_PORT_API = "port_api"
 # Secrets
 SECRET_API_KEY = "api_key"
 
+# Header Properties
+HEADER_API_KEY = "api-key"
+
 # Query Parameters
 QUERY_ALBUM = "album"
 QUERY_API_KEY = "apiKey"

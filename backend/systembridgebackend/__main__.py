@@ -1,45 +1,56 @@
 """System Bridge: Main"""
+import asyncio
 import logging
+from os import walk
+from os.path import join
+from posixpath import dirname
 import sys
 
+from fastapi import Body, Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from systembridgeshared.base import Base
-from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
+from systembridgeshared.const import (
+    QUERY_API_KEY,
+    SECRET_API_KEY,
+    SETTING_AUTOSTART,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+)
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
+import uvicorn
 
 from .autostart import autostart_disable, autostart_enable
+from .data import Data
+from .gui import GUIAttemptsExceededException, start_gui_threaded
+from .modules.listeners import Listeners
 from .modules.system import System
-from .server import Server
+from .server import app
+from .server.mdns import MDNSAdvertisement
 from .shortcut import create_shortcuts
 
 
-class Main(Base):
-    """Main"""
+async def callback_data_updated(module: str) -> None:
+    """Data updated"""
+    await listeners.refresh_data_by_module(module)
 
-    def __init__(self) -> None:
-        """Initialize"""
-        super().__init__()
-        if "--init" in sys.argv:
-            self._logger.info("Initialized application. Exiting now.")
-            sys.exit(0)
 
-        self._logger.info("System Bridge %s: Startup", System().version())
+async def start_server() -> None:
+    """Start Server"""
+    logger.info("Starting server")
+    await server.serve()
 
-        if "--cli" not in sys.argv:
-            autostart = settings.get(SETTING_AUTOSTART)
-            self._logger.info("Autostart enabled: %s", autostart)
-            if autostart:
-                autostart_enable()
-            else:
-                autostart_disable()
 
-            create_shortcuts()
-
-        self._server = Server(database, settings)
-
-        # Start the server
-        self._server.start_server()
+async def stop_server() -> None:
+    """Stop Server"""
+    logger.info("Stopping server")
+    await server.shutdown()
+    logger.info("Cancel any pending tasks")
+    for pending_task in asyncio.all_tasks():
+        pending_task.cancel()
+    logger.info("Stop the event loop")
+    listeners.remove_all_listeners()
 
 
 if __name__ == "__main__":
@@ -51,4 +62,45 @@ if __name__ == "__main__":
     setup_logger(LOG_LEVEL, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
-    Main()
+    logger = logging.getLogger(__name__)
+
+    if "--init" in sys.argv:
+        logger.info("Initialized application. Exiting now.")
+        sys.exit(0)
+
+    logger.info("System Bridge %s: Startup", System().version())
+
+    if "--cli" not in sys.argv:
+        autostart = settings.get(SETTING_AUTOSTART)
+        logger.info("Autostart enabled: %s", autostart)
+        if autostart:
+            autostart_enable()
+        else:
+            autostart_disable()
+
+        create_shortcuts()
+
+    mdns_advertisement = MDNSAdvertisement(settings)
+    mdns_advertisement.advertise_server()
+
+    if (port := settings.get(SETTING_PORT_API)) is None:
+        raise ValueError("Port not set")
+    log_level = settings.get(SETTING_LOG_LEVEL)
+    logger.info("Configuring server for port: %s", port)
+
+    config = uvicorn.Config(
+        app,
+        port=int(port),  # type: ignore
+        log_level=str(log_level).lower() if log_level is not None else "info",
+    )
+    server = uvicorn.Server(config)
+
+    implemented_modules = []
+    for _, dirs, _ in walk(join(dirname(__file__), "./modules")):
+        implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+        break
+
+    listeners = Listeners(database, implemented_modules)
+    data = Data(database, callback_data_updated)
+
+    asyncio.run(start_server())

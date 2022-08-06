@@ -1,11 +1,10 @@
 aiogithubapi==22.3.1
+fastapi==0.79.0
 incremental==21.3.0
 keyboard==0.13.5
 mutagen==1.45.1
 plyer==2.0.0
 psutil==5.9.1
 pyinstaller==5.3
-sanic-ext==22.6.2
-sanic-scheduler==1.0.7
-sanic==22.6.1
+uvicorn[standard]==0.18.2
 zeroconf==0.38.7
