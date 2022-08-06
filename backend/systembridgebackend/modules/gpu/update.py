@@ -81,8 +81,8 @@ class GPUUpdate(ModuleUpdateBase):
         self,
         gpu_key: str,
     ) -> None:
-        value = self._gpu.memory_clock(self._database, gpu_key)
         """Update memory clock"""
+        value = self._gpu.memory_clock(self._database, gpu_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(

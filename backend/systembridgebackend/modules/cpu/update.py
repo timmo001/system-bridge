@@ -1,7 +1,6 @@
 """System Bridge: Update CPU"""
 import asyncio
 
-from sqlmodel import Session
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import CPU as DatabaseModel
 
