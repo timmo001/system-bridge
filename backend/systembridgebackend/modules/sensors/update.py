@@ -141,7 +141,9 @@ class SensorsUpdate(ModuleUpdateBase):
 
         # Clear table in case of hardware changes since last run
         session = self._database.get_session()
-        session.delete(select(DatabaseModel))
+        for sensor in session.exec(select(DatabaseModel)).all():
+            session.delete(sensor)
+        session.commit()
         await asyncio.gather(
             *[
                 self.update_fans(session),

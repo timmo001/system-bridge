@@ -52,33 +52,30 @@ class Settings(Base):
                 file.write(self._encryption_key)
 
         # Default Secrets
-        if (
-            self._database.get_data_item_by_key(DatabaseSecrets, SECRET_API_KEY)
-            is not None
-        ):
+        if self._database.get_data_item_by_key(DatabaseSecrets, SECRET_API_KEY) is None:
             self.set_secret(SECRET_API_KEY, str(uuid4()))
 
         # Default Settings
         if (
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_AUTOSTART)
-            is not None
+            is None
         ):
             self.set(SETTING_AUTOSTART, str(False))
         if (
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_LOG_LEVEL)
-            is not None
+            is None
         ):
             self.set(SETTING_LOG_LEVEL, "INFO")
         if (
             self._database.get_data_item_by_key(DatabaseSettings, SETTING_PORT_API)
-            is not None
+            is None
         ):
             self.set(SETTING_PORT_API, str(9170))
         if (
             self._database.get_data_item_by_key(
                 DatabaseSettings, SETTING_ADDITIONAL_MEDIA_DIRECTORIES
             )
-            is not None
+            is None
         ):
             self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, str([]))
 
