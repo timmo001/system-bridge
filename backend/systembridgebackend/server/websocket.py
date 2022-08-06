@@ -158,7 +158,7 @@ class WebSocketHandler(Base):
                     EVENT_TYPE: TYPE_DATA_UPDATE,
                     EVENT_MESSAGE: "Data changed",
                     EVENT_MODULE: module,
-                    EVENT_DATA: data.json(),
+                    EVENT_DATA: data,
                 }
             )
         )
@@ -613,7 +613,7 @@ class WebSocketHandler(Base):
                                     EVENT_TYPE: TYPE_DATA_UPDATE,
                                     EVENT_MESSAGE: "Data received",
                                     EVENT_MODULE: module,
-                                    EVENT_DATA: data.json(),
+                                    EVENT_DATA: data,
                                 }
                             )
                         )
