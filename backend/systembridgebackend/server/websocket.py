@@ -4,6 +4,7 @@ from json import JSONDecodeError, loads
 import os
 from uuid import uuid4
 
+from shared.systembridgeshared.database import TABLE_MAP
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -83,6 +84,7 @@ from systembridgeshared.const import (
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
@@ -145,7 +147,7 @@ class WebSocketHandler(Base):
     async def _data_changed(
         self,
         module: str,
-        data: dict,
+        data: DataDict,
     ) -> None:
         """Data changed"""
         if module not in self._implemented_modules:
@@ -157,7 +159,7 @@ class WebSocketHandler(Base):
                     EVENT_TYPE: TYPE_DATA_UPDATE,
                     EVENT_MESSAGE: "Data changed",
                     EVENT_MODULE: module,
-                    EVENT_DATA: data,
+                    EVENT_DATA: data.json(),
                 }
             )
         )
@@ -602,7 +604,8 @@ class WebSocketHandler(Base):
                 )
 
                 for module in model.modules:
-                    data = self._database.table_data_to_ordered_dict(module)
+                    table = TABLE_MAP.get(module)
+                    data = self._database.get_data_dict(table)
                     if data is not None:
                         await self._send_response(
                             Response(

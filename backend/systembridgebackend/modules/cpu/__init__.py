@@ -21,6 +21,9 @@ from systembridgeshared.const import (
     COLUMN_VALUE,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data_sensors import (
+    Sensors as SensorsDatabaseModel,
+)
 
 
 class CPU(Base):
@@ -53,7 +56,7 @@ class CPU(Base):
         database: Database,
     ) -> Optional[float]:
         """CPU temperature"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if item[COLUMN_HARDWARE_TYPE] is not None and (
                 (
                     "cpu" in item[COLUMN_HARDWARE_TYPE].lower()
@@ -105,7 +108,7 @@ class CPU(Base):
         database: Database,
     ) -> Optional[float]:
         """CPU voltage"""
-        for item in database.read_table("sensors").to_dict(orient="records"):
+        for item in database.get_data(SensorsDatabaseModel):
             if (
                 item[COLUMN_HARDWARE_TYPE] is not None
                 and "cpu" in item[COLUMN_HARDWARE_TYPE].lower()

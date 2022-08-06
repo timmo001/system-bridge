@@ -21,25 +21,14 @@ class SensorsUpdate(ModuleUpdateBase):
         super().__init__(database)
         self._sensors = Sensors()
 
-    def _update_data(
-        self,
-        session: Session,
-        data: DatabaseModel,
-    ) -> None:
-        """Update data"""
-        session.add(data)
-
-    async def update_fans(
-        self,
-        session: Session,
-    ) -> None:
+    async def update_fans(self) -> None:
         """Update Fan Sensors"""
         if data := self._sensors.fans():
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._update_data(
-                            session,
+                        self._database.update_data(
+                            DatabaseModel,
                             DatabaseModel(
                                 key=f"fans_{key}_{subkey}",
                                 type=subkey,
@@ -50,17 +39,14 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def update_temperatures(
-        self,
-        session: Session,
-    ) -> None:
+    async def update_temperatures(self) -> None:
         """Update Temperature Sensors"""
         if data := self._sensors.temperatures():
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        self._update_data(
-                            session,
+                        self._database.update_data(
+                            DatabaseModel,
                             DatabaseModel(
                                 key=f"temperatures_{key}_{subkey}",
                                 type=subkey,
@@ -71,10 +57,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             ),
                         )
 
-    async def update_windows_sensors(
-        self,
-        session: Session,
-    ) -> None:
+    async def update_windows_sensors(self) -> None:
         """Update Windows Sensors"""
         if not (data := self._sensors.windows_sensors()):
             return
@@ -87,8 +70,8 @@ class SensorsUpdate(ModuleUpdateBase):
                     key_sensor_name = make_key(sensor["name"])
                     key_sensor_type = make_key(sensor["type"])
 
-                    self._update_data(
-                        session,
+                    self._database.update_data(
+                        DatabaseModel,
                         DatabaseModel(
                             key=f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
                             type=sensor["type"],
@@ -119,8 +102,8 @@ class SensorsUpdate(ModuleUpdateBase):
                                 f"Display {name_hardware.split('DISPLAY')[1]}"
                             )
                         for subkey, subvalue in hardware.items():
-                            self._update_data(
-                                session,
+                            self._database.update_data(
+                                DatabaseModel,
                                 DatabaseModel(
                                     key=f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
                                     type=sensor,
@@ -133,8 +116,8 @@ class SensorsUpdate(ModuleUpdateBase):
                         counter += 1
                 else:
                     for subkey, subvalue in value.items():
-                        self._update_data(
-                            session,
+                        self._database.update_data(
+                            DatabaseModel,
                             DatabaseModel(
                                 key=f"windows_nvidia_{sensor}_{subkey}",
                                 type=sensor,
@@ -153,16 +136,11 @@ class SensorsUpdate(ModuleUpdateBase):
         """Update data"""
 
         # Clear table in case of hardware changes since last run
-        session = self._database.get_session()
-        for sensor in session.exec(select(DatabaseModel)).all():
-            session.delete(sensor)
-        session.commit()
+        self._database.clear_table(DatabaseModel)
         await asyncio.gather(
             *[
-                self.update_fans(session),
-                self.update_temperatures(session),
-                self.update_windows_sensors(session),
+                self.update_fans(),
+                self.update_temperatures(),
+                self.update_windows_sensors(),
             ]
         )
-        session.commit()
-        session.close()

@@ -7,7 +7,7 @@ import os
 from time import time
 from typing import Any, List, Optional, Union
 
-from sqlmodel import Column, Session, SQLModel, Table, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from systembridgeshared.base import Base
 from systembridgeshared.common import (
@@ -44,23 +44,6 @@ from systembridgeshared.models.database_data import (
 )
 from systembridgeshared.models.database_data_bridge import Bridge
 from systembridgeshared.models.database_data_sensors import Sensors
-
-# TABLES: List[Table] = [
-#     Table(MODEL_BATTERY, Battery),
-#     Table(MODEL_BRIDGE, Bridge),
-#     Table(MODEL_CPU, CPU),
-#     Table(MODEL_DISK, Disk),
-#     Table(MODEL_DISPLAY, Display),
-#     Table(MODEL_GPU, GPU),
-#     Table(MODEL_MEMORY, Memory),
-#     Table(MODEL_NETWORK, Network),
-#     Table(MODEL_SECRETS, Secrets),
-#     Table(MODEL_SENSORS, Sensors),
-#     Table(MODEL_SETTINGS, Settings),
-#     Table(MODEL_SYSTEM, System),
-# ]
-
-# TABLE_MAP: Mapping[str, Any] = {table.name: table.metadata for table in TABLES}
 
 TABLE_MAP: Mapping[str, Any] = {
     MODEL_BATTERY: Battery,
@@ -108,78 +91,27 @@ class Database(Base):
             # tables=TABLES,
         )
 
-    # def add_data(
-    #     self,
-    #     data: TableDataType,
-    # ) -> None:
-    #     """Add data to database"""
-    #     with Session(self._engine) as session:
-    #         session.add(data)
-    #         session.commit()
-
-    # def create_data(
-    #     self,
-    #     key: str,
-    #     value: Union[bool, float, int, str, list, dict, None],
-    #     timestamp: Optional[float] = None,
-    # ) -> Data:
-    #     """Create data"""
-    #     if timestamp is None:
-    #         timestamp = time()
-
-    #     # Convert list or dict to JSON
-    #     if isinstance(value, (dict, list)):
-    #         value = json.dumps(value)
-    #     else:
-    #         value = str(value)
-
-    #     return Data(
-    #         key=key,
-    #         value=value,
-    #         timestamp=timestamp,
-    #     )
-
-    def create_sensor_data(
+    def clear_table(
         self,
-        key: str,
-        type: str,
-        name: str,
-        hardware_type: str,
-        hardware_name: str,
-        value: Union[bool, float, int, str, list, dict, None],
-        timestamp: Optional[float] = None,
-    ) -> Sensors:
-        """Create data"""
-        if timestamp is None:
-            timestamp = time()
-
-        # Convert list or dict to JSON
-        if isinstance(value, (dict, list)):
-            value = json.dumps(value)
-        else:
-            value = str(value)
-
-        return Sensors(
-            key=key,
-            type=type,
-            name=name,
-            hardware_type=hardware_type,
-            hardware_name=hardware_name,
-            value=value,
-            timestamp=timestamp,
-        )
+        table: Any,
+    ) -> None:
+        """Clear table"""
+        with Session(self._engine) as session:
+            for sensor in session.exec(select(table)).all():
+                session.delete(sensor)
+            session.commit()
 
     def get_data(
         self,
-        table,
-    ) -> List[Data]:
+        table: Any,
+    ) -> List[Any]:
         """Get data from database"""
         with Session(self._engine) as session:
             return session.exec(select(table)).all()
 
     def get_data_by_key(
         self,
-        table,
+        table: Any,
         key: str,
     ) -> List[Data]:
         """Get data from database by key"""
@@ -188,7 +120,7 @@ class Database(Base):
 
     def get_data_item_by_key(
         self,
-        table,
+        table: Any,
         key: str,
     ) -> Optional[Data]:
         """Get data item from database by key"""
@@ -197,7 +129,7 @@ class Database(Base):
 
     def get_data_dict(
         self,
-        table,
+        table: Any,
     ) -> DataDict:
         """Get data from database as dictionary"""
         data: dict[str, Any] = {"last_updated": {}}
@@ -217,3 +149,21 @@ class Database(Base):
     def get_session(self) -> Session:
         """Get session"""
         return Session(self._engine)
+
+    def update_data(
+        self,
+        table,
+        data: Any,
+    ) -> None:
+        """Update data"""
+        with Session(self._engine) as session:
+            result = session.exec(select(table).where(table.key == data.key))
+            old_data = result.first()
+            if old_data is None:
+                data.timestamp = time()
+                session.add(data)
+            else:
+                old_data.value = data.value
+                old_data.timestamp = time()
+                session.add(old_data)
+                # session.refresh(old_data)
