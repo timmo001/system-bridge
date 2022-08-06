@@ -21,6 +21,14 @@ class SensorsUpdate(ModuleUpdateBase):
         super().__init__(database)
         self._sensors = Sensors()
 
+    def _update_data(
+        self,
+        session: Session,
+        data: DatabaseModel,
+    ) -> None:
+        """Update data"""
+        session.add(data)
+
     async def update_fans(
         self,
         session: Session,
@@ -30,7 +38,8 @@ class SensorsUpdate(ModuleUpdateBase):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        session.add(
+                        self._update_data(
+                            session,
                             DatabaseModel(
                                 key=f"fans_{key}_{subkey}",
                                 type=subkey,
@@ -38,7 +47,7 @@ class SensorsUpdate(ModuleUpdateBase):
                                 hardware_type=key,
                                 hardware_name=key,
                                 value=subvalue,
-                            )
+                            ),
                         )
 
     async def update_temperatures(
@@ -50,7 +59,8 @@ class SensorsUpdate(ModuleUpdateBase):
             for key, value in data.items():
                 for item in value:
                     for subkey, subvalue in item._asdict().items():
-                        session.add(
+                        self._update_data(
+                            session,
                             DatabaseModel(
                                 key=f"temperatures_{key}_{subkey}",
                                 type=subkey,
@@ -58,7 +68,7 @@ class SensorsUpdate(ModuleUpdateBase):
                                 hardware_type=key,
                                 hardware_name=key,
                                 value=subvalue,
-                            )
+                            ),
                         )
 
     async def update_windows_sensors(
@@ -73,11 +83,12 @@ class SensorsUpdate(ModuleUpdateBase):
                 key_hardware = (
                     make_key(f"_{hardware['name']}") if "name" in hardware else None
                 )
-                for sensor in hardware[DatabaseModel] or []:
+                for sensor in hardware["sensors"] or []:
                     key_sensor_name = make_key(sensor["name"])
                     key_sensor_type = make_key(sensor["type"])
 
-                    session.add(
+                    self._update_data(
+                        session,
                         DatabaseModel(
                             key=f"windows_hardware{key_hardware}_{key_sensor_name}_{key_sensor_type}",
                             type=sensor["type"],
@@ -85,7 +96,7 @@ class SensorsUpdate(ModuleUpdateBase):
                             hardware_type=hardware["type"],
                             hardware_name=hardware["name"],
                             value=sensor["value"] if "value" in sensor else None,
-                        )
+                        ),
                     )
 
         if "nvidia" in data and data["nvidia"] is not None:
@@ -108,7 +119,8 @@ class SensorsUpdate(ModuleUpdateBase):
                                 f"Display {name_hardware.split('DISPLAY')[1]}"
                             )
                         for subkey, subvalue in hardware.items():
-                            session.add(
+                            self._update_data(
+                                session,
                                 DatabaseModel(
                                     key=f"windows_nvidia{key_hardware}_{sensor}_{counter}_{subkey}",
                                     type=sensor,
@@ -116,12 +128,13 @@ class SensorsUpdate(ModuleUpdateBase):
                                     hardware_type=type_hardware,
                                     hardware_name=name_hardware,
                                     value=subvalue,
-                                )
+                                ),
                             )
                         counter += 1
                 else:
                     for subkey, subvalue in value.items():
-                        session.add(
+                        self._update_data(
+                            session,
                             DatabaseModel(
                                 key=f"windows_nvidia_{sensor}_{subkey}",
                                 type=sensor,
@@ -133,7 +146,7 @@ class SensorsUpdate(ModuleUpdateBase):
                                 if "name" in value
                                 else "NVIDIA",
                                 value=subvalue,
-                            )
+                            ),
                         )
 
     async def update_all_data(self) -> None:
