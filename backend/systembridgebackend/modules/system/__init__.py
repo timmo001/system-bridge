@@ -21,6 +21,7 @@ from psutil import boot_time, users
 from psutil._common import suser
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
+from systembridgeshared.models.database_data import System as DatabaseModel
 
 from ..._version import __version__
 
@@ -98,12 +99,16 @@ class System(Base):
         database: Database,
     ) -> Optional[bool]:
         """Check if newer version is available"""
-        version = database.read_table_by_key("system", "version").to_dict(
-            orient="records"
-        )[0]["value"]
-        latest_version = database.read_table_by_key("system", "version_latest").to_dict(
-            orient="records"
-        )[0]["value"]
+        version_record = database.get_data_item_by_key(DatabaseModel, "version")
+        if version_record is None:
+            return None
+        version = version_record.value
+        latest_version_record = database.get_data_item_by_key(
+            DatabaseModel, "version_latest"
+        )
+        if latest_version_record is None:
+            return None
+        latest_version = latest_version_record.value
         if version is not None and latest_version is not None:
             return parse_version(latest_version) > parse_version(version)
         return None
