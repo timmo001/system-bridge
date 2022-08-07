@@ -6,7 +6,7 @@ from typing import Optional
 
 from sqlmodel import Field
 
-from systembridgeshared.models.database_data import Data
+from .database_data import Data
 
 
 class Sensors(Data, table=True):

@@ -2,7 +2,6 @@
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Security, status
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.models import APIKey
 from fastapi.openapi.utils import get_openapi
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
 from starlette.responses import JSONResponse, RedirectResponse
@@ -14,9 +13,11 @@ from starlette.status import (
 from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
 from systembridgeshared.database import TABLE_MAP, Database
+from systembridgeshared.models.keyboard import Keyboard
 from systembridgeshared.settings import Settings
 
 from ..modules.system import System
+from .keyboard import keyboard_keypress, keyboard_text
 
 database = Database()
 settings = Settings(database)
@@ -77,19 +78,11 @@ async def get_root() -> dict:
     tags=["documentation"],
     dependencies=[Depends(auth_api_key)],
 )
-async def get_documentation(api_key: APIKey = Depends(auth_api_key)):
+async def get_documentation(api_key: str = Depends(auth_api_key)):
     """GET documentation"""
     response = get_swagger_ui_html(
         title="System Bridge",
-        openapi_url="/docs/json",
-    )
-    response.set_cookie(
-        HEADER_API_KEY,
-        value=api_key,  # type: ignore
-        domain="localhost",
-        httponly=True,
-        max_age=1800,
-        expires=1800,
+        openapi_url=f"/docs/json?{QUERY_API_KEY}={api_key}",
     )
     return response
 
@@ -149,7 +142,7 @@ async def get_data_by_key(
     module: str,
     key: str,
 ) -> dict:
-    """GET data"""
+    """GET data by key"""
     table_module = TABLE_MAP.get(module)
     if table_module is None:
         raise HTTPException(
@@ -168,3 +161,28 @@ async def get_data_by_key(
         data.key: convert_string_to_correct_type(data.value),
         "last_updated": data.timestamp,
     }
+
+
+@app.post(
+    "/api/keyboard",
+    tags=["api"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_keyboard(keyboard: Keyboard) -> dict:
+    """POST keyboard"""
+    if keyboard.key is not None:
+        keyboard_keypress(keyboard.key)
+        return {
+            "message": "Keypress sent",
+            "key": keyboard.key,
+        }
+    if keyboard.text is not None:
+        keyboard_text(keyboard.text)
+        return {
+            "message": "Text sent",
+            "text": keyboard.text,
+        }
+    raise HTTPException(
+        status_code=HTTP_400_BAD_REQUEST,
+        detail="key or text required",
+    )
