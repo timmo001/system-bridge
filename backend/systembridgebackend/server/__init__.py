@@ -107,9 +107,9 @@ listeners = Listeners(database, implemented_modules)
 
 logger.info("Setup Schedule")
 
-data = Data(database, callback_data_updated)
-schedule.every(30).seconds.do(data.request_update_frequent_data)
-schedule.every(4).minutes.do(data.request_update_data)
+data_updater = Data(database, callback_data_updated)
+schedule.every(30).seconds.do(data_updater.request_update_frequent_data)
+schedule.every(4).minutes.do(data_updater.request_update_data)
 schedule.run_all(delay_seconds=10)
 thread = threading.Thread(target=run_schedule)
 thread.start()
