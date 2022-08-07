@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Write File",
+  "properties": {
+    "base": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    }
+  },
+  "required": ["base", "filename"]
+}

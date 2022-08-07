@@ -2,14 +2,26 @@
 
 import logging
 from os import walk
-from os.path import dirname, join
+from os.path import abspath, dirname, exists, isdir, isfile, join
 import sys
 import threading
 import time
+from typing import Optional, Union
 
-from fastapi import Depends, FastAPI, HTTPException, Security, WebSocket
+from fastapi import (
+    Body,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Path,
+    Query,
+    Security,
+    UploadFile,
+    WebSocket,
+)
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import FileResponse
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
 import schedule
 from starlette.responses import JSONResponse, RedirectResponse
@@ -22,6 +34,10 @@ from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.keyboard import Keyboard
+from systembridgeshared.models.media_directories import MediaDirectories
+from systembridgeshared.models.media_get_file import MediaGetFile
+from systembridgeshared.models.media_get_files import MediaGetFiles
+from systembridgeshared.models.media_write_file import MediaWriteFile
 from systembridgeshared.settings import Settings
 
 from ..data import Data
@@ -30,6 +46,7 @@ from ..modules.listeners import Listeners
 from ..modules.system import System
 from .keyboard import keyboard_keypress, keyboard_text
 from .mdns import MDNSAdvertisement
+from .media import get_directories, get_file, get_file_data, get_files, write_file
 from .websocket import WebSocketHandler
 
 logger = logging.getLogger(__name__)
@@ -188,10 +205,10 @@ async def get_api() -> dict:
 
 @app.get(
     "/api/data/{module}",
-    tags=["api"],
+    tags=["api", "data"],
     dependencies=[Depends(auth_api_key)],
 )
-async def get_data(module: str) -> dict:
+async def get_data(module: str = Path(title="Name of module")) -> dict:
     """GET data"""
     table_module = TABLE_MAP.get(module)
     if table_module is None:
@@ -204,12 +221,12 @@ async def get_data(module: str) -> dict:
 
 @app.get(
     "/api/data/{module}/{key}",
-    tags=["api"],
+    tags=["api", "data"],
     dependencies=[Depends(auth_api_key)],
 )
 async def get_data_by_key(
-    module: str,
-    key: str,
+    module: str = Path(title="Name of module"),
+    key: str = Path(title="Key of item in module"),
 ) -> dict:
     """GET data by key"""
     table_module = TABLE_MAP.get(module)
@@ -234,7 +251,7 @@ async def get_data_by_key(
 
 @app.post(
     "/api/keyboard",
-    tags=["api"],
+    tags=["api", "keyboard"],
     dependencies=[Depends(auth_api_key)],
 )
 async def post_keyboard(keyboard: Keyboard) -> dict:
@@ -255,6 +272,184 @@ async def post_keyboard(keyboard: Keyboard) -> dict:
         status_code=HTTP_400_BAD_REQUEST,
         detail="key or text required",
     )
+
+
+@app.get(
+    "/api/media",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def get_media_directories() -> MediaDirectories:
+    """GET media directories"""
+    return get_directories(settings)
+
+
+@app.get(
+    "/api/media/files",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def get_media_files(query: MediaGetFiles = Depends()) -> dict:
+    """GET media files"""
+    root_path = None
+    for item in get_directories(settings).directories:
+        if item.key == query.base:
+            root_path = item.path
+            break
+
+    if root_path is None or not exists(root_path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find base: {query.base}",
+        )
+
+    path = join(root_path, query.path) if query.path else root_path
+    if not exists(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find path: {path}",
+        )
+    if not abspath(path).startswith(abspath(root_path)):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not in base: {path}",
+        )
+    if not isdir(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not a directory: {path}",
+        )
+
+    return {
+        "files": get_files(settings, query.base, path),
+        "path": path,
+    }
+
+
+@app.get(
+    "/api/media/file",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def get_media_file(query: MediaGetFile = Depends()) -> Optional[dict]:
+    """GET media file"""
+    root_path = None
+    for item in get_directories(settings).directories:
+        if item.key == query.base:
+            root_path = item.path
+            break
+
+    if root_path is None or not exists(root_path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find base: {query.base}",
+        )
+
+    path = join(root_path, query.path) if query.path else root_path
+    if not exists(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find path: {path}",
+        )
+    if not abspath(path).startswith(abspath(root_path)):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not in base: {path}",
+        )
+    if not isfile(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not a file: {path}",
+        )
+
+    return get_file(root_path, path)
+
+
+@app.get(
+    "/api/media/file/data",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def get_media_file_data(query: MediaGetFile = Depends()) -> FileResponse:
+    """GET media file data"""
+    root_path = None
+    for item in get_directories(settings).directories:
+        if item.key == query.base:
+            root_path = item.path
+            break
+
+    if root_path is None or not exists(root_path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find base: {query.base}",
+        )
+
+    path = join(root_path, query.path) if query.path else root_path
+    if not exists(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find path: {path}",
+        )
+    if not abspath(path).startswith(abspath(root_path)):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not in base: {path}",
+        )
+    if not isfile(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not a file: {path}",
+        )
+
+    return get_file_data(path)
+
+
+@app.post(
+    "/api/media/file/write",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def get_media_file_write(
+    body: bytes,
+    query: MediaWriteFile = Depends(),
+) -> dict:
+    """POST media file"""
+    root_path = None
+    for item in get_directories(settings).directories:
+        if item.key == query.base:
+            root_path = item.path
+            break
+
+    if root_path is None or not exists(root_path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find base: {query.base}",
+        )
+
+    path = join(root_path, query.path) if query.path else root_path
+    if not exists(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Cannot find path: {path}",
+        )
+    if not abspath(path).startswith(abspath(root_path)):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not in base: {path}",
+        )
+    if not isdir(path):
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Path is not a directory: {path}",
+        )
+
+    await write_file(path, query.filename, body)
+
+    return {
+        "message": "File written",
+        "path": path,
+        "filename": query.filename,
+    }
 
 
 @app.websocket("/api/websocket")
