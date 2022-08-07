@@ -682,9 +682,9 @@ class WebSocketHandler(Base):
                     continue
 
                 root_path = None
-                for item in get_directories(self._settings):
-                    if item["key"] == model.base:
-                        root_path = item["path"]
+                for item in get_directories(self._settings).directories:
+                    if item.key == model.base:
+                        root_path = item.path
                         break
 
                 if root_path is None or not os.path.exists(root_path):
@@ -778,9 +778,9 @@ class WebSocketHandler(Base):
                     continue
 
                 root_path = None
-                for item in get_directories(self._settings):
-                    if item["key"] == model.base:
-                        root_path = item["path"]
+                for item in get_directories(self._settings).directories:
+                    if item.key == model.base:
+                        root_path = item.path
                         break
 
                 if root_path is None or not os.path.exists(root_path):
