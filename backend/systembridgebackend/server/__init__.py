@@ -152,15 +152,15 @@ mdns_advertisement.advertise_server()
 
 
 async def auth_api_key(
-    api_key_query: str = Security(
+    api_key_query: str = Security(  # pylint: disable=redefined-outer-name
         api_key_query
-    ),  # pylint: disable=redefined-outer-name
-    api_key_header: str = Security(
+    ),
+    api_key_header: str = Security(  # pylint: disable=redefined-outer-name
         api_key_header
-    ),  # pylint: disable=redefined-outer-name
-    api_key_cookie: str = Security(
+    ),
+    api_key_cookie: str = Security(  # pylint: disable=redefined-outer-name
         api_key_cookie
-    ),  # pylint: disable=redefined-outer-name
+    ),
 ):
     """Get API Key"""
     api_key = settings.get_secret(SECRET_API_KEY)
