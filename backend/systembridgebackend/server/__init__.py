@@ -6,19 +6,9 @@ from os.path import abspath, dirname, exists, isdir, isfile, join
 import sys
 import threading
 import time
-from typing import Optional, Union
+from typing import Optional
 
-from fastapi import (
-    Body,
-    Depends,
-    FastAPI,
-    HTTPException,
-    Path,
-    Query,
-    Security,
-    UploadFile,
-    WebSocket,
-)
+from fastapi import Depends, FastAPI, File, HTTPException, Path, Security, WebSocket
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import FileResponse
@@ -410,8 +400,8 @@ async def get_media_file_data(query: MediaGetFile = Depends()) -> FileResponse:
     dependencies=[Depends(auth_api_key)],
 )
 async def get_media_file_write(
-    body: bytes,
     query: MediaWriteFile = Depends(),
+    file: bytes = File(),
 ) -> dict:
     """POST media file"""
     root_path = None
@@ -443,7 +433,7 @@ async def get_media_file_write(
             detail=f"Path is not a directory: {path}",
         )
 
-    await write_file(path, query.filename, body)
+    await write_file(path, query.filename, file)
 
     return {
         "message": "File written",
