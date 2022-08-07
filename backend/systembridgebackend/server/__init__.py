@@ -152,9 +152,15 @@ mdns_advertisement.advertise_server()
 
 
 async def auth_api_key(
-    api_key_query: str = Security(api_key_query),
-    api_key_header: str = Security(api_key_header),
-    api_key_cookie: str = Security(api_key_cookie),
+    api_key_query: str = Security(
+        api_key_query
+    ),  # pylint: disable=redefined-outer-name
+    api_key_header: str = Security(
+        api_key_header
+    ),  # pylint: disable=redefined-outer-name
+    api_key_cookie: str = Security(
+        api_key_cookie
+    ),  # pylint: disable=redefined-outer-name
 ):
     """Get API Key"""
     api_key = settings.get_secret(SECRET_API_KEY)
@@ -246,8 +252,7 @@ async def get_api() -> dict:
 )
 async def get_data(module: str = Path(title="Name of module")) -> dict:
     """GET data"""
-    table_module = TABLE_MAP.get(module)
-    if table_module is None:
+    if (table_module := TABLE_MAP.get(module)) is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
             detail=f"Data module {module} not found",
@@ -265,15 +270,13 @@ async def get_data_by_key(
     key: str = Path(title="Key of item in module"),
 ) -> dict:
     """GET data by key"""
-    table_module = TABLE_MAP.get(module)
-    if table_module is None:
+    if (table_module := TABLE_MAP.get(module)) is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
             detail=f"Data module {module} not found",
         )
 
-    data = database.get_data_item_by_key(table_module, key)
-    if data is None:
+    if (data := database.get_data_item_by_key(table_module, key)) is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
             detail=f"Data item {key} not found",
