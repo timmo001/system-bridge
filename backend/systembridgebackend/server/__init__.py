@@ -28,6 +28,7 @@ from systembridgeshared.models.keyboard import Keyboard
 from systembridgeshared.models.media_directories import MediaDirectories
 from systembridgeshared.models.media_get_file import MediaGetFile
 from systembridgeshared.models.media_get_files import MediaGetFiles
+from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.media_write_file import MediaWriteFile
 from systembridgeshared.settings import Settings
 
@@ -37,7 +38,14 @@ from ..modules.listeners import Listeners
 from ..modules.system import System
 from .keyboard import keyboard_keypress, keyboard_text
 from .mdns import MDNSAdvertisement
-from .media import get_directories, get_file, get_file_data, get_files, write_file
+from .media import (
+    get_directories,
+    get_file,
+    get_file_data,
+    get_files,
+    handler_media_play,
+    write_file,
+)
 from .websocket import WebSocketHandler
 
 logger = logging.getLogger(__name__)
@@ -407,7 +415,7 @@ async def get_media_file_data(query: MediaGetFile = Depends()) -> FileResponse:
     tags=["api", "media"],
     dependencies=[Depends(auth_api_key)],
 )
-async def get_media_file_write(
+async def post_media_file_write(
     query: MediaWriteFile = Depends(),
     file: bytes = File(),
 ) -> dict:
@@ -448,6 +456,16 @@ async def get_media_file_write(
         "path": path,
         "filename": query.filename,
     }
+
+
+@app.post(
+    "/api/media/play",
+    tags=["api", "media"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_media_play(query: MediaPlay = Depends()) -> dict:
+    """POST media play"""
+    return await handler_media_play(settings, query, )
 
 
 @app.websocket("/api/websocket")

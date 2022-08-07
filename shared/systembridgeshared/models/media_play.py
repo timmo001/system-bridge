@@ -13,10 +13,13 @@ class MediaPlay(BaseModel):
     Media Play
     """
 
+    type: Optional[str] = None
+    base: Optional[str] = None
+    path: Optional[str] = None
     album: Optional[str] = None
     artist: Optional[str] = None
     autoplay: Optional[bool] = False
     cover: Optional[str] = None
     title: Optional[str] = None
-    url: str
+    url: Optional[str] = None
     volume: Optional[float] = 40
