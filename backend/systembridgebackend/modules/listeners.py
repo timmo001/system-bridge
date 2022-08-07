@@ -16,7 +16,7 @@ class Listener:
         self,
         listener_id: str,
         data_changed_callback: Callable[[str, DataDict], Awaitable[None]],
-        modules: list[str],  # pylint: disable=unsubscriptable-object
+        modules: list[str],
     ) -> None:
         """Initialize"""
         self.id = listener_id
@@ -30,21 +30,20 @@ class Listeners(Base):
     def __init__(
         self,
         database: Database,
-        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
+        implemented_modules: list[str],
     ) -> None:
         """Initialize"""
         super().__init__()
         self._database: Database = database
         self._implemented_modules: list[str] = implemented_modules
         self._data: dict = {module: {} for module in self._implemented_modules}
-        # pylint: disable=unsubscriptable-object
         self._registered_listeners: list[Listener] = []
 
     async def add_listener(
         self,
         listener_id: str,
         data_changed_callback: Callable[[str, DataDict], Awaitable[None]],
-        modules: list[str],  # pylint: disable=unsubscriptable-object
+        modules: list[str],
     ) -> bool:
         """Add modules to listener"""
         for listner in self._registered_listeners:

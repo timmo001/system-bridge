@@ -1,9 +1,6 @@
 """System Bridge: Main"""
 import asyncio
 import logging
-from os import walk
-from os.path import join
-from posixpath import dirname
 import sys
 
 from systembridgeshared.const import (
@@ -17,17 +14,10 @@ from systembridgeshared.settings import Settings
 import uvicorn
 
 from .autostart import autostart_disable, autostart_enable
-from .data import Data
-from .modules.listeners import Listeners
 from .modules.system import System
 from .server import app
 from .server.mdns import MDNSAdvertisement
 from .shortcut import create_shortcuts
-
-
-async def callback_data_updated(module: str) -> None:
-    """Data updated"""
-    await listeners.refresh_data_by_module(module)
 
 
 async def start_server() -> None:
@@ -44,7 +34,6 @@ async def stop_server() -> None:
     for pending_task in asyncio.all_tasks():
         pending_task.cancel()
     logger.info("Stop the event loop")
-    listeners.remove_all_listeners()
 
 
 if __name__ == "__main__":
@@ -88,13 +77,5 @@ if __name__ == "__main__":
         log_level=str(log_level).lower() if log_level is not None else "info",
     )
     server = uvicorn.Server(config)
-
-    implemented_modules = []
-    for _, dirs, _ in walk(join(dirname(__file__), "./modules")):
-        implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-        break
-
-    listeners = Listeners(database, implemented_modules)
-    data = Data(database, callback_data_updated)
 
     asyncio.run(start_server())

@@ -1,11 +1,17 @@
 """System Bridge: Server"""
 
+import logging
+from os import walk
+from os.path import dirname, join
 import sys
+import threading
+import time
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Security, WebSocket, status
+from fastapi import Depends, FastAPI, HTTPException, Security, WebSocket
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
+import schedule
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -18,18 +24,72 @@ from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.keyboard import Keyboard
 from systembridgeshared.settings import Settings
 
+from ..data import Data
+from ..gui import GUIAttemptsExceededException, start_gui_threaded
+from ..modules.listeners import Listeners
 from ..modules.system import System
 from .keyboard import keyboard_keypress, keyboard_text
 from .websocket import WebSocketHandler
 
+logger = logging.getLogger(__name__)
+
 database = Database()
 settings = Settings(database)
+
+implemented_modules = []
+for _, dirs, _ in walk(join(dirname(__file__), "../modules")):  # type: ignore
+    implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+    break
+
+
+def exit_application() -> None:
+    """Exit application"""
+    schedule.clear()
+    listeners.remove_all_listeners()
+    sys.exit(0)
+
+
+async def callback_data_updated(module: str) -> None:
+    """Data updated"""
+    await listeners.refresh_data_by_module(module)
+
+
+def run_schedule():
+    """Run Schedule"""
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+logger.info("Setup Listeners")
+
+listeners = Listeners(database, implemented_modules)
+
+logger.info("Setup Schedule")
+
+data = Data(database, callback_data_updated)
+schedule.every(30).seconds.do(data.request_update_frequent_data)
+schedule.every(4).minutes.do(data.request_update_data)
+schedule.run_all(delay_seconds=10)
+thread = threading.Thread(target=run_schedule)
+thread.start()
+
+logger.info("Setup API")
 
 api_key_query = APIKeyQuery(name=QUERY_API_KEY, auto_error=False)
 api_key_header = APIKeyHeader(name=HEADER_API_KEY, auto_error=False)
 api_key_cookie = APIKeyCookie(name=HEADER_API_KEY, auto_error=False)
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+
+logger.info("Start GUI")
+
+if "--no-gui" not in sys.argv:
+    try:
+        start_gui_threaded(logger, settings)
+    except GUIAttemptsExceededException:
+        logger.error("GUI could not be started. Exiting application")
+        exit_application()
 
 
 async def auth_api_key(
@@ -49,11 +109,6 @@ async def auth_api_key(
         status_code=HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
     )
-
-
-def exit_application(self) -> None:
-    """Exit application"""
-    sys.exit(0)
 
 
 @app.get(
@@ -203,8 +258,8 @@ async def use_websocket(websocket: WebSocket):
     websocket_handler = WebSocketHandler(
         database,
         settings,
-        # listeners,
-        # implemented_modules,
+        listeners,
+        implemented_modules,
         websocket,
         exit_application,
     )
