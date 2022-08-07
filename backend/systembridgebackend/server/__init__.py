@@ -29,6 +29,7 @@ from ..gui import GUIAttemptsExceededException, start_gui_threaded
 from ..modules.listeners import Listeners
 from ..modules.system import System
 from .keyboard import keyboard_keypress, keyboard_text
+from .mdns import MDNSAdvertisement
 from .websocket import WebSocketHandler
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,11 @@ if "--no-gui" not in sys.argv:
     except GUIAttemptsExceededException:
         logger.error("GUI could not be started. Exiting application")
         exit_application()
+
+logger.info("Advertise API")
+
+mdns_advertisement = MDNSAdvertisement(settings)
+mdns_advertisement.advertise_server()
 
 
 async def auth_api_key(
