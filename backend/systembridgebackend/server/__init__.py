@@ -593,6 +593,7 @@ async def post_update(data: Update) -> dict:
 
 @app.websocket("/api/websocket")
 async def use_websocket(websocket: WebSocket):
+    """Websocket"""
     await websocket.accept()
 
     websocket_handler = WebSocketHandler(
