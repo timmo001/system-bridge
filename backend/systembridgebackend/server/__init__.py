@@ -9,6 +9,7 @@ import time
 from typing import Optional
 
 from fastapi import Depends, FastAPI, File, HTTPException, Path, Security, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import FileResponse
@@ -89,6 +90,13 @@ api_key_header = APIKeyHeader(name=HEADER_API_KEY, auto_error=False)
 api_key_cookie = APIKeyCookie(name=HEADER_API_KEY, auto_error=False)
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger.info("Start GUI")
 
