@@ -1,22 +1,15 @@
 """System Bridge: Server Handler - Update"""
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
-from systembridgeshared.settings import Settings
+from systembridgeshared.models.update import Update as UpdateModel
 from systembridgeshared.update import Update
 
 
-async def handler_update(
-    request: Request,
-    _: Settings,
-) -> HTTPResponse:
+async def handler_update(data: UpdateModel) -> dict:
     """Handle the update request."""
     versions = Update().update(
-        request.args.get("version"),
+        data.update,
         wait=False,
     )
-    return json(
-        {
-            "message": "Updating the application",
-            "versions": versions,
-        }
-    )
+    return {
+        "message": "Updating the application",
+        "versions": versions,
+    }

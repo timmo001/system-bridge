@@ -213,7 +213,7 @@ async def handler_media_play(
                 detail=f"Cannot find base: {query.base}",
             )
 
-        if not (path := join(root_path, query.path)):
+        if (path := join(root_path, query.path)) is None:  # type: ignore
             raise HTTPException(
                 status_code=HTTP_404_NOT_FOUND,
                 detail=f"Cannot find path: {query.path}",

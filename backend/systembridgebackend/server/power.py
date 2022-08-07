@@ -3,8 +3,6 @@ import asyncio
 import os
 import sys
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.settings import Settings
 
 
@@ -56,79 +54,49 @@ def logout() -> None:
         os.system("logoff")
 
 
-async def handler_sleep(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_sleep() -> dict:
     """Handle sleep requests."""
     asyncio.get_running_loop().call_later(2, sleep)
-    return json(
-        {
-            "message": "Sleeping",
-        }
-    )
+    return {
+        "message": "Sleeping",
+    }
 
 
-async def handler_hibernate(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_hibernate() -> dict:
     """Handle hibernate requests."""
     asyncio.get_running_loop().call_later(2, hibernate)
-    return json(
-        {
-            "message": "Hibernating",
-        }
-    )
+    return {
+        "message": "Hibernating",
+    }
 
 
-async def handler_restart(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_restart() -> dict:
     """Handle restart requests."""
     asyncio.get_running_loop().call_later(2, restart)
-    return json(
-        {
-            "message": "Restarting",
-        }
-    )
+    return {
+        "message": "Restarting",
+    }
 
 
-async def handler_shutdown(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_shutdown() -> dict:
     """Handle shutdown requests."""
     asyncio.get_running_loop().call_later(2, shutdown)
-    return json(
-        {
-            "message": "Shutting down",
-        }
-    )
+    return {
+        "message": "Shutting down",
+    }
 
 
-async def handler_lock(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_lock() -> dict:
     """Handle lock requests."""
     asyncio.get_running_loop().call_later(2, lock)
-    return json(
-        {
-            "message": "Locking",
-        }
-    )
+    return {
+        "message": "Locking",
+    }
 
 
-async def handler_logout(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
+async def handler_logout() -> dict:
     """Handle logout requests."""
     asyncio.get_running_loop().call_later(2, logout)
-    return json(
-        {
-            "message": "Logging out",
-        }
-    )
+    return {
+        "message": "Logging out",
+    }

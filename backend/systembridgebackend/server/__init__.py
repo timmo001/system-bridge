@@ -30,6 +30,9 @@ from systembridgeshared.models.media_get_file import MediaGetFile
 from systembridgeshared.models.media_get_files import MediaGetFiles
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.media_write_file import MediaWriteFile
+from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.open import Open
+from systembridgeshared.models.update import Update
 from systembridgeshared.settings import Settings
 
 from ..data import Data
@@ -46,6 +49,17 @@ from .media import (
     handler_media_play,
     write_file,
 )
+from .notification import handler_notification
+from .open import handler_open
+from .power import (
+    handler_hibernate,
+    handler_lock,
+    handler_logout,
+    handler_restart,
+    handler_shutdown,
+    handler_sleep,
+)
+from .update import handler_update
 from .websocket import WebSocketHandler
 
 logger = logging.getLogger(__name__)
@@ -465,7 +479,97 @@ async def post_media_file_write(
 )
 async def post_media_play(query: MediaPlay = Depends()) -> dict:
     """POST media play"""
-    return await handler_media_play(settings, query, )
+    return await handler_media_play(settings, query)
+
+
+@app.post(
+    "/api/notification",
+    tags=["api", "notification"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_notification(data: Notification) -> dict:
+    """POST notification"""
+    return await handler_notification(settings, data)
+
+
+@app.post(
+    "/api/open",
+    tags=["api", "open"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_open(data: Open) -> dict:
+    """POST open"""
+    return await handler_open(data)
+
+
+@app.post(
+    "/api/power/sleep",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_sleep() -> dict:
+    """POST power sleep"""
+    return await handler_sleep()
+
+
+@app.post(
+    "/api/power/hibernate",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_hibernate() -> dict:
+    """POST power hibernate"""
+    return await handler_hibernate()
+
+
+@app.post(
+    "/api/power/restart",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_restart() -> dict:
+    """POST power restart"""
+    return await handler_restart()
+
+
+@app.post(
+    "/api/power/shutdown",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_shutdown() -> dict:
+    """POST power shutdown"""
+    return await handler_shutdown()
+
+
+@app.post(
+    "/api/power/lock",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_lock() -> dict:
+    """POST power lock"""
+    return await handler_lock()
+
+
+@app.post(
+    "/api/power/logout",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_power_logout() -> dict:
+    """POST power logout"""
+    return await handler_logout()
+
+
+@app.post(
+    "/api/update",
+    tags=["api", "power"],
+    dependencies=[Depends(auth_api_key)],
+)
+async def post_update(data: Update) -> dict:
+    """POST update"""
+    return await handler_update(data)
 
 
 @app.websocket("/api/websocket")

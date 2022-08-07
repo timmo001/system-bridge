@@ -4,9 +4,9 @@ import subprocess
 import sys
 from webbrowser import open_new_tab
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
-from systembridgeshared.settings import Settings
+from fastapi import HTTPException
+from starlette.status import HTTP_400_BAD_REQUEST
+from systembridgeshared.models.open import Open
 
 
 def open_path(
@@ -27,37 +27,20 @@ def open_url(
     open_new_tab(url)
 
 
-async def handler_open(
-    request: Request,
-    _: Settings,
-) -> HTTPResponse:
-    """Open a file or a URL in the default browser."""
-    if request.json is None:
-        return json(
-            {
-                "mesage": "Missing JSON body",
-            },
-            status=400,
-        )
+async def handler_open(data: Open) -> dict:
+    """Open a file or a URL."""
+    if data.path is not None:
+        open_path(data.path)
+        return {
+            "message": f"Opening path: {data.path}",
+        }
+    if data.url is not None:
+        open_url(data.url)
+        return {
+            "message": f"Opening URL: {data.url}",
+        }
 
-    if "path" in request.json:
-        open_path(request.json["path"])
-        return json(
-            {
-                "message": f"Opening path: {request.json['path']}",
-            }
-        )
-    if "url" in request.json:
-        open_url(request.json["url"])
-        return json(
-            {
-                "message": f"Opening URL: {request.json['url']}",
-            }
-        )
-
-    return json(
-        {
-            "message": "No path or url provided",
-        },
-        status=400,
+    raise HTTPException(
+        status_code=HTTP_400_BAD_REQUEST,
+        detail="No path or url provided",
     )
