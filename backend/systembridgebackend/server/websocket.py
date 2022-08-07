@@ -4,6 +4,7 @@ from json import JSONDecodeError, loads
 import os
 from uuid import uuid4
 
+from fastapi import WebSocket
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -117,17 +118,17 @@ class WebSocketHandler(Base):
         self,
         database: Database,
         settings: Settings,
-        listeners: Listeners,
-        implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
-        websocket,
+        # listeners: Listeners,
+        # implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
+        websocket: WebSocket,
         callback_exit_application: Callable[..., None],
     ) -> None:
         """Initialize"""
         super().__init__()
         self._database = database
         self._settings = settings
-        self._listeners = listeners
-        self._implemented_modules = implemented_modules
+        # self._listeners = listeners
+        # self._implemented_modules = implemented_modules
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
         self._active = True
@@ -139,7 +140,7 @@ class WebSocketHandler(Base):
         """Send response"""
         if not self._active:
             return
-        message = response.json()
+        message = response.dict()
         self._logger.debug("Sending message: %s", message)
         await self._websocket.send(message)
 
@@ -149,9 +150,9 @@ class WebSocketHandler(Base):
         data: DataDict,
     ) -> None:
         """Data changed"""
-        if module not in self._implemented_modules:
-            self._logger.info("Data module %s not in registered modules", module)
-            return
+        # if module not in self._implemented_modules:
+        #     self._logger.info("Data module %s not in registered modules", module)
+        #     return
         await self._send_response(
             Response(
                 **{
@@ -171,7 +172,7 @@ class WebSocketHandler(Base):
         # Loop until the connection is closed
         while self._active:
             try:
-                data = loads(await self._websocket.recv())
+                data = await self._websocket.receive_json()
                 request = Request(**data)
             except JSONDecodeError as error:
                 message = f"Invalid JSON: {error}"
@@ -506,23 +507,23 @@ class WebSocketHandler(Base):
                     model.modules,
                 )
 
-                if await self._listeners.add_listener(
-                    listener_id,
-                    self._data_changed,
-                    model.modules,
-                ):
-                    await self._send_response(
-                        Response(
-                            **{
-                                EVENT_ID: request.id,
-                                EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
-                                EVENT_MESSAGE: "Listener already registered with this connection",
-                                EVENT_MODULES: model.modules,
-                            }
-                        )
-                    )
-                    continue
+                # if await self._listeners.add_listener(
+                #     listener_id,
+                #     self._data_changed,
+                #     model.modules,
+                # ):
+                #     await self._send_response(
+                #         Response(
+                #             **{
+                #                 EVENT_ID: request.id,
+                #                 EVENT_TYPE: TYPE_ERROR,
+                #                 EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
+                #                 EVENT_MESSAGE: "Listener already registered with this connection",
+                #                 EVENT_MODULES: model.modules,
+                #             }
+                #         )
+                #     )
+                #     continue
 
                 await self._send_response(
                     Response(
@@ -537,18 +538,18 @@ class WebSocketHandler(Base):
             elif request.event == TYPE_UNREGISTER_DATA_LISTENER:
                 self._logger.info("Unregistering data listener %s", listener_id)
 
-                if not self._listeners.remove_listener(listener_id):
-                    await self._send_response(
-                        Response(
-                            **{
-                                EVENT_ID: request.id,
-                                EVENT_TYPE: TYPE_ERROR,
-                                EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
-                                EVENT_MESSAGE: "Listener not registered with this connection",
-                            }
-                        )
-                    )
-                    continue
+                # if not self._listeners.remove_listener(listener_id):
+                #     await self._send_response(
+                #         Response(
+                #             **{
+                #                 EVENT_ID: request.id,
+                #                 EVENT_TYPE: TYPE_ERROR,
+                #                 EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
+                #                 EVENT_MESSAGE: "Listener not registered with this connection",
+                #             }
+                #         )
+                #     )
+                #     continue
 
                 await self._send_response(
                     Response(
@@ -988,7 +989,7 @@ class WebSocketHandler(Base):
             self._logger.info("Connection closed: %s", error)
         finally:
             self._logger.info("Unregistering data listener %s", listener_id)
-            self._listeners.remove_listener(listener_id)
+            # self._listeners.remove_listener(listener_id)
 
     def set_active(
         self,

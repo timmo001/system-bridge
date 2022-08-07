@@ -6,12 +6,7 @@ from os.path import join
 from posixpath import dirname
 import sys
 
-from fastapi import Body, Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from systembridgeshared.base import Base
 from systembridgeshared.const import (
-    QUERY_API_KEY,
-    SECRET_API_KEY,
     SETTING_AUTOSTART,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
@@ -23,7 +18,6 @@ import uvicorn
 
 from .autostart import autostart_disable, autostart_enable
 from .data import Data
-from .gui import GUIAttemptsExceededException, start_gui_threaded
 from .modules.listeners import Listeners
 from .modules.system import System
 from .server import app

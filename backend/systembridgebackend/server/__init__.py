@@ -1,6 +1,8 @@
 """System Bridge: Server"""
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Security, status
+import sys
+
+from fastapi import Body, Depends, FastAPI, HTTPException, Security, WebSocket, status
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
@@ -18,6 +20,7 @@ from systembridgeshared.settings import Settings
 
 from ..modules.system import System
 from .keyboard import keyboard_keypress, keyboard_text
+from .websocket import WebSocketHandler
 
 database = Database()
 settings = Settings(database)
@@ -46,6 +49,11 @@ async def auth_api_key(
         status_code=HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
     )
+
+
+def exit_application(self) -> None:
+    """Exit application"""
+    sys.exit(0)
 
 
 @app.get(
@@ -186,3 +194,18 @@ async def post_keyboard(keyboard: Keyboard) -> dict:
         status_code=HTTP_400_BAD_REQUEST,
         detail="key or text required",
     )
+
+
+@app.websocket("/api/websocket")
+async def use_websocket(websocket: WebSocket):
+    await websocket.accept()
+
+    websocket_handler = WebSocketHandler(
+        database,
+        settings,
+        # listeners,
+        # implemented_modules,
+        websocket,
+        exit_application,
+    )
+    await websocket_handler.handler()
