@@ -82,9 +82,9 @@ class Settings(Base):
     def get_all(self) -> list[DatabaseData]:
         """Get settings"""
         records = self._database.get_data(DatabaseSettings)
-        # for record in records:
-        #     if record.value is not None:
-        #         record.value = convert_string_to_correct_type(record.value)
+        for record in records:
+            if record.value is not None:
+                record.value = convert_string_to_correct_type(record.value)
         return records
 
     def get(
