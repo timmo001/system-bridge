@@ -21,4 +21,5 @@ class Response(BaseModel):
     subtype: Optional[str] = Field(None, description="Subtype")
     message: Optional[str] = Field(None, description="Message")
     module: Optional[str] = Field(None, description="Module")
+    timestamp: Optional[str] = Field(None, description="Timestamp")
     data: Optional[Any] = Field(None, description="Data")

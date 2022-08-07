@@ -23,6 +23,10 @@
       "type": "string",
       "description": "Module"
     },
+    "timestamp": {
+      "type": "string",
+      "description": "Timestamp"
+    },
     "data": {
       "description": "Data"
     }

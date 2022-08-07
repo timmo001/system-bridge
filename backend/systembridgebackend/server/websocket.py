@@ -1,5 +1,6 @@
 """System Bridge: WebSocket handler"""
 from collections.abc import Callable
+from datetime import datetime
 from json import JSONDecodeError
 import os
 from uuid import uuid4
@@ -20,6 +21,7 @@ from systembridgeshared.const import (
     EVENT_PATH,
     EVENT_SETTING,
     EVENT_SUBTYPE,
+    EVENT_TIMESTAMP,
     EVENT_TYPE,
     EVENT_URL,
     EVENT_VALUE,
@@ -159,6 +161,7 @@ class WebSocketHandler(Base):
                     EVENT_TYPE: TYPE_DATA_UPDATE,
                     EVENT_MESSAGE: "Data changed",
                     EVENT_MODULE: module,
+                    EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                     EVENT_DATA: data,
                 }
             )
@@ -183,6 +186,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_BAD_JSON,
                             EVENT_MESSAGE: message,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -196,6 +200,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                             EVENT_MESSAGE: message,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -212,6 +217,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_BAD_API_KEY,
                             EVENT_MESSAGE: "Invalid api-key",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -229,6 +235,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -244,6 +251,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_APPLICATION_UPDATING,
                             EVENT_MESSAGE: "Updating application",
                             EVENT_VERSIONS: versions,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -263,6 +271,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -276,6 +285,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
                                 EVENT_MESSAGE: "No key provided",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -292,6 +302,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_KEY,
                                 EVENT_MESSAGE: "Invalid key",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -304,6 +315,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_KEYBOARD_KEY_PRESSED,
                             EVENT_MESSAGE: "Key pressed",
                             EVENT_ID: listener_id,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             "key": model.key,
                         }
                     )
@@ -321,6 +333,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -334,6 +347,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_TEXT,
                                 EVENT_MESSAGE: "No text provided",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -348,6 +362,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_KEYBOARD_TEXT_SENT,
                             EVENT_MESSAGE: "Key pressed",
                             EVENT_ID: listener_id,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             "text": model.text,
                         }
                     )
@@ -365,6 +380,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -378,6 +394,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_TITLE,
                                 EVENT_MESSAGE: "No title provided",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -396,6 +413,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_NOTIFICATION_SENT,
                             EVENT_MESSAGE: "Notification sent",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -413,6 +431,7 @@ class WebSocketHandler(Base):
                                     EVENT_TYPE: TYPE_ERROR,
                                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                     EVENT_MESSAGE: message,
+                                    EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                                 }
                             )
                         )
@@ -425,6 +444,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_OPENED,
                                 EVENT_MESSAGE: "Path opened",
                                 EVENT_PATH: model.path,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -442,6 +462,7 @@ class WebSocketHandler(Base):
                                     EVENT_TYPE: TYPE_ERROR,
                                     EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                     EVENT_MESSAGE: message,
+                                    EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                                 }
                             )
                         )
@@ -454,6 +475,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_OPENED,
                                 EVENT_MESSAGE: "URL opened",
                                 EVENT_URL: model.url,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -467,6 +489,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_ERROR,
                             EVENT_SUBTYPE: SUBTYPE_MISSING_PATH_URL,
                             EVENT_MESSAGE: "No path or url provided",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -483,6 +506,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -496,6 +520,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
                                 EVENT_MESSAGE: "No modules provided",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -520,6 +545,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_LISTENER_ALREADY_REGISTERED,
                                 EVENT_MESSAGE: "Listener already registered with this connection",
                                 EVENT_MODULES: model.modules,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -532,6 +558,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_DATA_LISTENER_REGISTERED,
                             EVENT_MESSAGE: "Data listener registered",
                             EVENT_MODULES: model.modules,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -546,6 +573,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_LISTENER_NOT_REGISTERED,
                                 EVENT_MESSAGE: "Listener not registered with this connection",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -557,6 +585,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DATA_LISTENER_UNREGISTERED,
                             EVENT_MESSAGE: "Data listener unregistered",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -573,6 +602,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -586,6 +616,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_MISSING_MODULES,
                                 EVENT_MESSAGE: "No modules provided",
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -599,6 +630,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_DATA_GET,
                             EVENT_MESSAGE: "Getting data",
                             EVENT_MODULES: model.modules,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -614,6 +646,7 @@ class WebSocketHandler(Base):
                                     EVENT_TYPE: TYPE_DATA_UPDATE,
                                     EVENT_MESSAGE: "Data received",
                                     EVENT_MODULE: module,
+                                    EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                                     EVENT_DATA: data,
                                 }
                             )
@@ -625,6 +658,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_DIRECTORIES,
                             EVENT_DIRECTORIES: get_directories(self._settings),
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -641,6 +675,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -662,6 +697,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
                                 EVENT_BASE: model.base,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -690,6 +726,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find path",
                                 EVENT_PATH: path,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -704,6 +741,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_DIRECTORY,
                                 EVENT_MESSAGE: "Path is not a directory",
                                 EVENT_PATH: path,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -716,6 +754,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_FILES,
                             EVENT_FILES: get_files(self._settings, model.base, path),
                             EVENT_PATH: path,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -732,6 +771,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -753,6 +793,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find base path",
                                 EVENT_BASE: model.base,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -777,6 +818,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_PATH,
                                 EVENT_MESSAGE: "Cannot find path",
                                 EVENT_PATH: path,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -791,6 +833,7 @@ class WebSocketHandler(Base):
                                 EVENT_SUBTYPE: SUBTYPE_BAD_FILE,
                                 EVENT_MESSAGE: "Path is not a file",
                                 EVENT_PATH: path,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -803,6 +846,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_FILE,
                             EVENT_FILE: get_file(root_path, path),
                             EVENT_PATH: path,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -815,6 +859,7 @@ class WebSocketHandler(Base):
                             EVENT_TYPE: TYPE_SETTINGS_RESULT,
                             EVENT_MESSAGE: "Got settings",
                             EVENT_DATA: self._settings.get_all(),
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -831,6 +876,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -846,6 +892,7 @@ class WebSocketHandler(Base):
                             EVENT_MESSAGE: "Got setting",
                             EVENT_SETTING: model.setting,
                             EVENT_DATA: self._settings.get(model.setting),
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -862,6 +909,7 @@ class WebSocketHandler(Base):
                                 EVENT_TYPE: TYPE_ERROR,
                                 EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
                                 EVENT_MESSAGE: message,
+                                EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                             }
                         )
                     )
@@ -883,6 +931,7 @@ class WebSocketHandler(Base):
                             EVENT_MESSAGE: "Setting updated",
                             EVENT_SETTING: model.setting,
                             EVENT_VALUE: model.value,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -902,6 +951,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_SLEEPING,
                             EVENT_MESSAGE: "Sleeping",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -914,6 +964,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_HIBERNATING,
                             EVENT_MESSAGE: "Hiibernating",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -926,6 +977,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_RESTARTING,
                             EVENT_MESSAGE: "Restarting",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -938,6 +990,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_SHUTTINGDOWN,
                             EVENT_MESSAGE: "Shutting down",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -950,6 +1003,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_LOCKING,
                             EVENT_MESSAGE: "Locking",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -962,6 +1016,7 @@ class WebSocketHandler(Base):
                             EVENT_ID: request.id,
                             EVENT_TYPE: TYPE_POWER_LOGGINGOUT,
                             EVENT_MESSAGE: "Logging out",
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
@@ -976,6 +1031,7 @@ class WebSocketHandler(Base):
                             EVENT_SUBTYPE: SUBTYPE_UNKNOWN_EVENT,
                             EVENT_MESSAGE: "Unknown event",
                             EVENT_EVENT: request.event,
+                            EVENT_TIMESTAMP: datetime.utcnow().isoformat(),
                         }
                     )
                 )
