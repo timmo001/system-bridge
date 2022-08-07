@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
-from fastapi.routing import Mount
 from fastapi.security.api_key import APIKeyCookie, APIKeyHeader, APIKeyQuery
 from fastapi.staticfiles import StaticFiles
 import schedule
@@ -122,24 +121,6 @@ api_key_header = APIKeyHeader(name=HEADER_API_KEY, auto_error=False)
 api_key_cookie = APIKeyCookie(name=HEADER_API_KEY, auto_error=False)
 
 routes: list[BaseRoute] = []
-# if "--no-frontend" not in sys.argv:
-#     try:
-#         # pylint: disable=import-error, import-outside-toplevel
-#         from systembridgefrontend import get_frontend_path
-
-#         frontend_path = get_frontend_path()
-#         logger.info("Serving frontend from: %s", frontend_path)
-#         routes.append(
-#             Mount(
-#                 "/",
-#                 StaticFiles(
-#                     directory=frontend_path,
-#                     html=True,
-#                 ),
-#             )
-#         )
-#     except (ImportError, ModuleNotFoundError) as error:
-#         logger.error("Frontend not found: %s", error)
 
 app = FastAPI(
     docs_url=None,

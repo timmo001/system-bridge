@@ -234,13 +234,6 @@ async def handler_media_play(
                 detail=f"Path is not a file: {path}",
             )
 
-        url = f"""/api/media/file/data?{urlencode({
-                        QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
-                        QUERY_API_PORT: settings.get(SETTING_PORT_API),
-                        query.base: query.base,
-                        query.path: query.path,
-                    })}"""
-
         mime_type, _ = mimetypes.guess_type(path)
         if mime_type is None:
             raise HTTPException(

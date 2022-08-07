@@ -3,8 +3,6 @@ import asyncio
 import os
 import sys
 
-from systembridgeshared.settings import Settings
-
 
 def sleep() -> None:
     """Send the system to sleep."""
