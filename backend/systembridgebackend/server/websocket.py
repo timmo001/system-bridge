@@ -142,7 +142,7 @@ class WebSocketHandler(Base):
             return
         message = response.dict()
         self._logger.debug("Sending message: %s", message)
-        await self._websocket.send(message)
+        await self._websocket.send_json(message)
 
     async def _data_changed(
         self,
