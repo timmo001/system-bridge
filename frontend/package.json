@@ -39,7 +39,7 @@
     "lodash": "4.17.21",
     "moment": "2.29.4",
     "next": "12.2.4",
-    "peerjs": "1.4.6",
+    "peerjs": "1.4.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-json-view": "1.21.3",
