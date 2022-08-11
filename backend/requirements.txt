@@ -7,5 +7,5 @@ psutil==5.9.1
 pyinstaller==5.3
 sanic-ext==22.6.2
 sanic-scheduler==1.0.7
-sanic==22.6.1
+sanic==22.6.2
 zeroconf==0.39.0
