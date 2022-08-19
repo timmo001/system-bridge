@@ -481,10 +481,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.184.tgz#23f96cd2a21a28e106dc24d825d4aa966de7a9fe"
   integrity sha512-RoZphVtHbxPZizt4IcILciSWiC6dcn+eZ8oX9IWEYfDMcocdd42f7NPI6fQj+6zI8y4E0L7gu2pcZKLGTRaV9Q==
 
-"@types/node@18.7.6":
-  version "18.7.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.6.tgz#31743bc5772b6ac223845e18c3fc26f042713c83"
-  integrity sha512-EdxgKRXgYsNITy5mjjXjVE/CS8YENSdhiagGrLqjG0pvA2owgJ6i4l7wy/PFZGC0B1/H20lWKN7ONVDNYDZm7A==
+"@types/node@18.7.7":
+  version "18.7.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.7.tgz#2f7e3443fb434315ff594c49043486fe49937182"
+  integrity sha512-sTKYCtQmaUpsAT+AbUTKg0Ya0dYyh20t3TBQebWrGXQHFmkrEyeedok2/IpTthlJopPSbUoc1hAKoK6UeFRCZw==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
