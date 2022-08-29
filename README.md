@@ -30,7 +30,7 @@ You can find instructions to run the application [here](https://system-bridge.ti
 
 ### Data Modules
 
-You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/docs/modules).
+You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/#modules).
 
 ### CLI
 
@@ -38,11 +38,11 @@ You can find documentation for the CLI [here](https://system-bridge.timmo.dev/do
 
 ### API
 
-You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
+You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api/data).
 
 ### WebSocket
 
-You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket).
+You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket/data-get).
 
 ### Packages
 
