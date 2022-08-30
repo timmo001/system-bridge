@@ -5,4 +5,4 @@ cryptography==37.0.4
 incremental==21.3.0
 pandas==1.4.3
 pydantic==1.9.2
-sqlmodel==0.0.7
+sqlmodel==0.0.8
