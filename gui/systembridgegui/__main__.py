@@ -101,7 +101,7 @@ class Main(Base):
                 self._startup_error("No data provided!")
                 sys.exit(1)
             media_play = MediaPlay(**data)
-            self._player_window = PlayerWindow(
+            self._main_window = PlayerWindow(
                 self._settings,
                 self._icon,
                 self._application,
@@ -115,7 +115,7 @@ class Main(Base):
                 self._startup_error("No data provided!")
                 sys.exit(1)
             media_play = MediaPlay(**data)
-            self._player_window = PlayerWindow(
+            self._main_window = PlayerWindow(
                 self._settings,
                 self._icon,
                 self._application,
@@ -128,7 +128,7 @@ class Main(Base):
                 self._logger.error("No data provided!")
                 self._startup_error("No data provided!")
                 sys.exit(1)
-            self._player_window = NotificationWindow(
+            self._main_window = NotificationWindow(
                 self._settings,
                 self._icon,
                 self._application,
