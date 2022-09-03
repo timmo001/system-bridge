@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from screeninfo import Monitor, get_monitors
+from pydantic import BaseModel, Field
+from screeninfo import get_monitors
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
@@ -12,12 +13,32 @@ from systembridgeshared.models.database_data_sensors import (
 )
 
 
+class DisplayModel(BaseModel):
+
+    name: str = Field(..., description="Display name")
+    pixel_clock: Optional[float] = Field(None, description="Pixel clock")
+    refresh_rate: Optional[float] = Field(None, description="Refresh rate")
+    resolution_horizontal: Optional[int] = Field(
+        None, description="Resolution horizontal"
+    )
+    resolution_vertical: Optional[int] = Field(None, description="Resolution vertical")
+
+
 class Display(Base):
     """Display"""
 
-    def get_displays(self) -> list[Monitor]:
+    def get_displays(self) -> list[DisplayModel]:
         """Get Displays"""
-        return get_monitors()
+        return [
+            DisplayModel(
+                name=monitor.name if monitor.name is not None else str(id),
+                pixel_clock=None,
+                refresh_rate=None,
+                resolution_horizontal=monitor.width,
+                resolution_vertical=monitor.height,
+            )
+            for id, monitor in enumerate(get_monitors())
+        ]
 
     def sensors_get_displays(
         self,

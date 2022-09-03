@@ -128,12 +128,13 @@ class DisplayUpdate(ModuleUpdateBase):
                 display_list.append(display_key)
                 await asyncio.gather(
                     *[
-                        self.update_name(
-                            display_key,
-                            str(id) if display.name is None else display.name,
+                        self.update_name(display_key, display.name),
+                        self.update_resolution_horizontal(
+                            display_key, display.resolution_horizontal
                         ),
-                        self.update_resolution_horizontal(display_key, display.width),
-                        self.update_resolution_vertical(display_key, display.height),
+                        self.update_resolution_vertical(
+                            display_key, display.resolution_vertical
+                        ),
                     ]
                 )
 
