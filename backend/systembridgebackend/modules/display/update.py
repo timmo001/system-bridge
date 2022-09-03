@@ -39,9 +39,11 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_pixel_clock(
         self,
         display_key: str,
+        value: Optional[float] = None,
     ) -> None:
         """Update pixel clock"""
-        value = self._display.sensors_pixel_clock(self._database, display_key)
+        if value is None:
+            value = self._display.sensors_pixel_clock(self._database, display_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -53,9 +55,11 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_refresh_rate(
         self,
         display_key: str,
+        value: Optional[float] = None,
     ) -> None:
         """Update refresh rate"""
-        value = self._display.sensors_refresh_rate(self._database, display_key)
+        if value is None:
+            value = self._display.sensors_refresh_rate(self._database, display_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -130,6 +134,8 @@ class DisplayUpdate(ModuleUpdateBase):
                 await asyncio.gather(
                     *[
                         self.update_name(display_key, display.name),
+                        self.update_pixel_clock(display_key, display.pixel_clock),
+                        self.update_refresh_rate(display_key, display.refresh_rate),
                         self.update_resolution_horizontal(
                             display_key, display.resolution_horizontal
                         ),

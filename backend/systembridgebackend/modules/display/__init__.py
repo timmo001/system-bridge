@@ -19,10 +19,8 @@ class DisplayModel(BaseModel):
     name: str = Field(..., description="Display name")
     pixel_clock: Optional[float] = Field(None, description="Pixel clock")
     refresh_rate: Optional[float] = Field(None, description="Refresh rate")
-    resolution_horizontal: Optional[int] = Field(
-        None, description="Resolution horizontal"
-    )
-    resolution_vertical: Optional[int] = Field(None, description="Resolution vertical")
+    resolution_horizontal: int = Field(..., description="Resolution horizontal")
+    resolution_vertical: int = Field(..., description="Resolution vertical")
 
 
 class Display(Base):
