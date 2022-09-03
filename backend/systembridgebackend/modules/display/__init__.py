@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from screeninfo import Monitor, get_monitors
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
@@ -14,7 +15,11 @@ from systembridgeshared.models.database_data_sensors import (
 class Display(Base):
     """Display"""
 
-    def get_displays(
+    def get_displays(self) -> list[Monitor]:
+        """Get Displays"""
+        return get_monitors()
+
+    def sensors_get_displays(
         self,
         database: Database,
     ) -> list[str]:
@@ -30,7 +35,7 @@ class Display(Base):
                 displays.append(item.hardware_name)
         return displays
 
-    def pixel_clock(
+    def sensors_pixel_clock(
         self,
         database: Database,
         display_key: str,
@@ -52,7 +57,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def refresh_rate(
+    def sensors_refresh_rate(
         self,
         database: Database,
         display_key: str,
@@ -74,7 +79,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def resolution_horizontal(
+    def sensors_resolution_horizontal(
         self,
         database: Database,
         display_key: str,
@@ -96,7 +101,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def resolution_vertical(
+    def sensors_resolution_vertical(
         self,
         database: Database,
         display_key: str,

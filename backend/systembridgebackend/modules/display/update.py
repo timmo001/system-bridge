@@ -40,7 +40,7 @@ class DisplayUpdate(ModuleUpdateBase):
         display_key: str,
     ) -> None:
         """Update pixel clock"""
-        value = self._display.pixel_clock(self._database, display_key)
+        value = self._display.sensors_pixel_clock(self._database, display_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -54,7 +54,7 @@ class DisplayUpdate(ModuleUpdateBase):
         display_key: str,
     ) -> None:
         """Update refresh rate"""
-        value = self._display.refresh_rate(self._database, display_key)
+        value = self._display.sensors_refresh_rate(self._database, display_key)
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -66,9 +66,13 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_horizontal(
         self,
         display_key: str,
+        value: int | None = None,
     ) -> None:
         """Update resolution horizontal"""
-        value = self._display.resolution_horizontal(self._database, display_key)
+        if value is None:
+            value = self._display.sensors_resolution_horizontal(
+                self._database, display_key
+            )
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -80,9 +84,13 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_vertical(
         self,
         display_key: str,
+        value: int | None = None,
     ) -> None:
         """Update resolution vertical"""
-        value = self._display.resolution_vertical(self._database, display_key)
+        if value is None:
+            value = self._display.sensors_resolution_vertical(
+                self._database, display_key
+            )
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
@@ -98,7 +106,7 @@ class DisplayUpdate(ModuleUpdateBase):
         self._database.clear_table(DatabaseModel)
 
         display_list = []
-        for display_name in self._display.get_displays(self._database):
+        for display_name in self._display.sensors_get_displays(self._database):
             display_key = make_key(display_name)
             display_list.append(display_key)
             await asyncio.gather(
@@ -110,6 +118,25 @@ class DisplayUpdate(ModuleUpdateBase):
                     self.update_resolution_vertical(display_key),
                 ]
             )
+
+        if len(display_list) == 0:
+            self._logger.debug("No displays found. Using alternative")
+            for id, display in enumerate(self._display.get_displays()):
+                display_key = (
+                    str(id) if display.name is None else make_key(display.name)
+                )
+                display_list.append(display_key)
+                await asyncio.gather(
+                    *[
+                        self.update_name(
+                            display_key,
+                            str(id) if display.name is None else display.name,
+                        ),
+                        self.update_resolution_horizontal(display_key, display.width),
+                        self.update_resolution_vertical(display_key, display.height),
+                    ]
+                )
+
         self._database.update_data(
             DatabaseModel,
             DatabaseModel(
