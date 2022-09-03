@@ -31,13 +31,13 @@ class Display(Base):
         """Get Displays"""
         return [
             DisplayModel(
-                name=monitor.name if monitor.name is not None else str(id),
+                name=monitor.name if monitor.name is not None else str(key),
                 pixel_clock=None,
                 refresh_rate=None,
                 resolution_horizontal=monitor.width,
                 resolution_vertical=monitor.height,
             )
-            for id, monitor in enumerate(get_monitors())
+            for key, monitor in enumerate(get_monitors())
         ]
 
     def sensors_get_displays(

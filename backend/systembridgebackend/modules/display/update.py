@@ -1,6 +1,7 @@
 """System Bridge: Update Display"""
 import asyncio
 from json import dumps
+from typing import Optional
 
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
@@ -66,7 +67,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_horizontal(
         self,
         display_key: str,
-        value: int | None = None,
+        value: Optional[int] = None,
     ) -> None:
         """Update resolution horizontal"""
         if value is None:
@@ -84,7 +85,7 @@ class DisplayUpdate(ModuleUpdateBase):
     async def update_resolution_vertical(
         self,
         display_key: str,
-        value: int | None = None,
+        value: Optional[int] = None,
     ) -> None:
         """Update resolution vertical"""
         if value is None:
@@ -121,9 +122,9 @@ class DisplayUpdate(ModuleUpdateBase):
 
         if len(display_list) == 0:
             self._logger.debug("No displays found. Using alternative")
-            for id, display in enumerate(self._display.get_displays()):
+            for key, display in enumerate(self._display.get_displays()):
                 display_key = (
-                    str(id) if display.name is None else make_key(display.name)
+                    str(key) if display.name is None else make_key(display.name)
                 )
                 display_list.append(display_key)
                 await asyncio.gather(
