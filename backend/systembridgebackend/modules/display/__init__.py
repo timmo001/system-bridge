@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
+from screeninfo import get_monitors
 from systembridgeshared.base import Base
 from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
@@ -11,10 +13,35 @@ from systembridgeshared.models.database_data_sensors import (
 )
 
 
+class DisplayModel(BaseModel):
+    """Display Model"""
+
+    name: str = Field(..., description="Display name")
+    pixel_clock: Optional[float] = Field(None, description="Pixel clock")
+    refresh_rate: Optional[float] = Field(None, description="Refresh rate")
+    resolution_horizontal: Optional[int] = Field(
+        None, description="Resolution horizontal"
+    )
+    resolution_vertical: Optional[int] = Field(None, description="Resolution vertical")
+
+
 class Display(Base):
     """Display"""
 
-    def get_displays(
+    def get_displays(self) -> list[DisplayModel]:
+        """Get Displays"""
+        return [
+            DisplayModel(
+                name=monitor.name if monitor.name is not None else str(key),
+                pixel_clock=None,
+                refresh_rate=None,
+                resolution_horizontal=monitor.width,
+                resolution_vertical=monitor.height,
+            )
+            for key, monitor in enumerate(get_monitors())
+        ]
+
+    def sensors_get_displays(
         self,
         database: Database,
     ) -> list[str]:
@@ -30,7 +57,7 @@ class Display(Base):
                 displays.append(item.hardware_name)
         return displays
 
-    def pixel_clock(
+    def sensors_pixel_clock(
         self,
         database: Database,
         display_key: str,
@@ -52,7 +79,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def refresh_rate(
+    def sensors_refresh_rate(
         self,
         database: Database,
         display_key: str,
@@ -74,7 +101,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def resolution_horizontal(
+    def sensors_resolution_horizontal(
         self,
         database: Database,
         display_key: str,
@@ -96,7 +123,7 @@ class Display(Base):
                 return item.value
         return None
 
-    def resolution_vertical(
+    def sensors_resolution_vertical(
         self,
         database: Database,
         display_key: str,
