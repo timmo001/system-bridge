@@ -88,9 +88,9 @@ class GUI(Base):
         self._name = command
 
         self._logger.info("Starting GUI: %s", pgm_args)
-        process = subprocess.Popen(pgm_args)
-        self._logger.info("GUI started with PID: %s", process.pid)
-        if (exit_code := process.wait()) != 0:
+        self._process = subprocess.Popen(pgm_args)
+        self._logger.info("GUI started with PID: %s", self._process.pid)
+        if (exit_code := self._process.wait()) != 0:
             self._logger.error("GUI exited with code: %s", exit_code)
             await self._start_gui(
                 attempt + 1,
@@ -131,8 +131,11 @@ class GUI(Base):
     def stop(self) -> None:
         """Stop the GUI"""
         self._logger.info("Stopping GUI: %s", self._name)
-        if self._thread:
+        if self._thread is not None:
             self._thread.stop()
+        if self._process is not None:
+            self._process.terminate()
+        if self._thread is not None:
             self._thread.join()
 
     def is_running(self) -> bool:
