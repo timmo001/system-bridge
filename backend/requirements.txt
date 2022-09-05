@@ -3,7 +3,7 @@ incremental==21.3.0
 keyboard==0.13.5
 mutagen==1.45.1
 plyer==2.0.0
-psutil==5.9.1
+psutil==5.9.2
 pyinstaller==5.3
 sanic-ext==22.6.3
 sanic-scheduler==1.0.7
