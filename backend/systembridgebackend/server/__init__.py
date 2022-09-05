@@ -5,6 +5,7 @@ from datetime import timedelta
 import os
 from os import walk
 import sys
+from typing import Optional
 
 from sanic import Sanic
 from sanic.request import Request
@@ -24,7 +25,7 @@ from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
 
 from ..data import Data
-from ..gui import GUIAttemptsExceededException, start_gui_threaded
+from ..gui import GUI, GUIAttemptsExceededException
 from ..modules.listeners import Listeners
 from ..server.auth import ApiKeyAuthentication
 from ..server.cors import add_cors_headers
@@ -83,6 +84,9 @@ class Server(Base):
         SanicScheduler(self._server, utc=True)
         self._listeners = Listeners(self._database, implemented_modules)
         self._data = Data(self._database, self._callback_data_updated)
+        self._gui: Optional[GUI] = None
+        self._gui_notification: Optional[GUI] = None
+        self._gui_player: Optional[GUI] = None
 
         auth = ApiKeyAuthentication(
             app=self._server,
@@ -98,8 +102,9 @@ class Server(Base):
         async def _after_startup(_) -> None:
             """After startup"""
             if "--no-gui" not in sys.argv:
+                self._gui = GUI(self._settings)
                 try:
-                    start_gui_threaded(self._logger, self._settings)
+                    self._gui.start()
                 except GUIAttemptsExceededException:
                     self._logger.error("GUI could not be started. Exiting application")
                     self._exit_application()
@@ -335,8 +340,11 @@ class Server(Base):
 
     def _exit_application(self) -> None:
         """Exit application"""
+        self._logger.info("Exit application")
         self.stop_server()
-        self._logger.info("Server stopped. Exiting application")
+        self._logger.info("Server stopped. Exiting GUI(s) (if any)")
+        self.stop_guis()
+        self._logger.info("Exiting application")
         sys.exit(0)
 
     def _callback_media_play(
@@ -345,9 +353,8 @@ class Server(Base):
         media_play: MediaPlay,
     ) -> None:
         """Callback to open media player"""
-        start_gui_threaded(
-            self._logger,
-            self._settings,
+        self._gui_player = GUI(self._settings)
+        self._gui_player.start(
             "media-player",
             media_type,
             media_play.json(),
@@ -358,9 +365,8 @@ class Server(Base):
         notification: Notification,
     ) -> None:
         """Callback to open media player"""
-        start_gui_threaded(
-            self._logger,
-            self._settings,
+        self._gui_notification = GUI(self._settings)
+        self._gui_notification.start(
             "notification",
             notification.json(),
         )
@@ -377,15 +383,33 @@ class Server(Base):
             debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
             motd=False,
         )
+        self._logger.info("Server stopped. Exiting application")
+        self._exit_application()
 
     def stop_server(self) -> None:
         """Stop Server"""
-        self._logger.info("Stopping server")
-        loop = self._server.loop
-        self._logger.info("Cancel any pending tasks")
-        for pending_task in asyncio.all_tasks():
-            pending_task.cancel()
-        self._logger.info("Stop the event loop")
-        loop.stop()
+        self._logger.info("Remove listeners")
         self._listeners.remove_all_listeners()
-        self._server.stop()
+        if self._server is not None and self._server.is_running:
+            loop = self._server.loop
+            self._logger.info("Stop the event loop")
+            loop.stop()
+            self._logger.info("Stopping server")
+            self._server.stop()
+        self._logger.info("Cancel any pending tasks")
+        event_loop = asyncio.get_event_loop()
+        if event_loop is not None and event_loop.is_running():
+            for pending_task in asyncio.all_tasks():
+                pending_task.cancel()
+
+    def stop_guis(self) -> None:
+        """Stop GUIs"""
+        if self._gui is not None and self._gui.is_running():
+            self._gui.stop()
+            self._gui = None
+        if self._gui_notification is not None and self._gui_notification.is_running():
+            self._gui_notification.stop()
+            self._gui_notification = None
+        if self._gui_player is not None and self._gui_player.is_running():
+            self._gui_player.stop()
+            self._gui_player = None
