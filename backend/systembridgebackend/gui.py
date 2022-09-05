@@ -1,10 +1,11 @@
 """System Bridge: GUI"""
 import asyncio
-from logging import Logger
 import subprocess
 import sys
-from threading import Thread
+from threading import Event, Thread
+from typing import Optional
 
+from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
@@ -14,93 +15,135 @@ class GUIAttemptsExceededException(BaseException):
     """Raise this when the GUI attempts to start more too many times."""
 
 
-async def start_gui(  # pylint: disable=keyword-arg-before-vararg
-    logger: Logger,
-    settings: Settings,
-    attempt: int = 1,
-    command: str = "main",
-    *args,
-) -> None:
-    """Start the GUI"""
-    if attempt > 2:
-        logger.error("Failed to start GUI after 2 attempts")
-        raise GUIAttemptsExceededException("Failed to start GUI after 3 attempts")
-    if command == "main":
-        logger.info(
-            "Test WebSocket connection before starting GUI. Attempt #%s", attempt
-        )
-        websocket_client = WebSocketClient(settings)
-        try:
-            await websocket_client.connect()
-            await websocket_client.close()
-        except ConnectionErrorException:
-            logger.warning("Could not connect to WebSocket. Retrying in 5 seconds")
-            await asyncio.sleep(5)
-            await start_gui(
-                logger,
-                settings,
-                attempt + 1,
-                command,
-                *args,
-            )
-            return
+class StoppableThread(Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
 
-    pgm_args = [
-        sys.executable,
-        "-m",
-        "systembridgegui",
-        command,
+    def __init__(
+        self,
         *args,
-    ]
+        **kwargs,
+    ):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = Event()
 
-    logger.info("Starting GUI: %s", pgm_args)
-    with subprocess.Popen(pgm_args) as process:
-        logger.info("GUI started with PID: %s", process.pid)
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
+
+class GUI(Base):
+    """GUI"""
+
+    def __init__(
+        self,
+        settings: Settings,
+    ):
+        """Initialize"""
+        super().__init__()
+        self._settings = settings
+        self._thread: Optional[StoppableThread] = None
+        self._name = "GUI"
+
+    async def _start_gui(  # pylint: disable=keyword-arg-before-vararg
+        self,
+        attempt: int = 1,
+        command: str = "main",
+        *args,
+    ) -> None:
+        """Start the GUI"""
+        if attempt > 2:
+            self._logger.error("Failed to start GUI after 2 attempts")
+            raise GUIAttemptsExceededException("Failed to start GUI after 3 attempts")
+        if command == "main":
+            self._logger.info(
+                "Test WebSocket connection before starting GUI. Attempt #%s", attempt
+            )
+            websocket_client = WebSocketClient(self._settings)
+            try:
+                await websocket_client.connect()
+                await websocket_client.close()
+            except ConnectionErrorException:
+                self._logger.warning(
+                    "Could not connect to WebSocket. Retrying in 5 seconds"
+                )
+                await asyncio.sleep(5)
+                await self._start_gui(
+                    attempt + 1,
+                    command,
+                    *args,
+                )
+                return
+
+        pgm_args = [
+            sys.executable,
+            "-m",
+            "systembridgegui",
+            command,
+            *args,
+        ]
+
+        self._name = command
+
+        self._logger.info("Starting GUI: %s", pgm_args)
+        process = subprocess.Popen(pgm_args)
+        self._logger.info("GUI started with PID: %s", process.pid)
         if (exit_code := process.wait()) != 0:
-            logger.error("GUI exited with code: %s", exit_code)
-            await start_gui(
-                logger,
-                settings,
+            self._logger.error("GUI exited with code: %s", exit_code)
+            await self._start_gui(
                 attempt + 1,
                 command,
                 *args,
             )
-            return
-        logger.info("GUI exited with code: %s", exit_code)
+        self._logger.info("GUI exited with code: %s", exit_code)
 
-
-def start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
-    logger: Logger,
-    settings: Settings,
-    command: str = "main",
-    *args,
-) -> None:
-    """Start the GUI in a synchronous thread"""
-    asyncio.run(
-        start_gui(
-            logger,
-            settings,
-            1,
-            command,
-            *args,
+    def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
+        self,
+        command: str = "main",
+        *args,
+    ) -> None:
+        """Start the GUI in a synchronous thread"""
+        asyncio.run(
+            self._start_gui(
+                1,
+                command,
+                *args,
+            )
         )
-    )
 
+    def start(
+        self,
+        command: str = "main",
+        *args,
+    ) -> None:
+        """Start the GUI"""
+        self._thread = StoppableThread(
+            target=self._start_gui_sync,
+            args=(
+                command,
+                *args,
+            ),
+        )
+        self._thread.start()
 
-def start_gui_threaded(  # pylint: disable=keyword-arg-before-vararg
-    logger: Logger,
-    settings: Settings,
-    command: str = "main",
-    *args,
-) -> None:
-    """Start the GUI in a thread"""
-    thread = Thread(
-        target=start_gui_sync,
-        args=(
-            logger,
-            settings,
-            command,
-            *args,
-        ),
-    )
-    thread.start()
+    def stop(self) -> None:
+        """Stop the GUI"""
+        self._logger.info("Stopping GUI: %s", self._name)
+        if self._thread:
+            self._thread.stop()
+            self._thread.join()
+
+    def is_running(self) -> bool:
+        """Return True if the GUI is running"""
+        return self._thread is not None and self._thread.is_alive()
+
+    def restart(
+        self,
+        command: str = "main",
+        *args,
+    ) -> None:
+        """Restart the GUI"""
+        self.stop()
+        self.start(command, *args)

@@ -102,7 +102,7 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
 from ..autostart import autostart_disable, autostart_enable
-from ..gui import start_gui_threaded
+from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.media import get_directories, get_file, get_files
@@ -382,9 +382,8 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                start_gui_threaded(
-                    self._logger,
-                    self._settings,
+                gui_notification = GUI(self._settings)
+                gui_notification.start(
                     "notification",
                     model.json(),
                 )
