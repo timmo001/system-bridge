@@ -17,6 +17,9 @@ class Battery(Base):
             return None
         return psutil.sensors_battery()  # type: ignore
 
-    def status(self) -> dict:
+    def status(self) -> Optional[dict]:
         """Get battery status"""
-        return battery.status
+        try:
+            return battery.status
+        except ValueError:
+            return None
