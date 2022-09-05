@@ -23,14 +23,17 @@ class StoppableThread(Thread):
         self,
         *args,
         **kwargs,
-    ):
-        super(StoppableThread, self).__init__(*args, **kwargs)
+    ) -> None:
+        """Initialize the thread."""
+        super().__init__(*args, **kwargs)
         self._stop_event = Event()
 
-    def stop(self):
+    def stop(self) -> None:
+        """Stop the thread."""
         self._stop_event.set()
 
-    def stopped(self):
+    def stopped(self) -> bool:
+        """Return if the thread is stopped."""
         return self._stop_event.is_set()
 
 
@@ -91,17 +94,17 @@ class GUI(Base):
         self._name = command
 
         self._logger.info("Starting GUI: %s", pgm_args)
-        self._process = subprocess.Popen(pgm_args)
-        self._logger.info("GUI started with PID: %s", self._process.pid)
-        if (exit_code := self._process.wait()) != 0:
-            self._logger.error("GUI exited with code: %s", exit_code)
-            if not self._stopping:
-                await self._start_gui(
-                    attempt + 1,
-                    command,
-                    *args,
-                )
-        self._logger.info("GUI exited with code: %s", exit_code)
+        with subprocess.Popen(pgm_args) as self._process:
+            self._logger.info("GUI started with PID: %s", self._process.pid)
+            if (exit_code := self._process.wait()) != 0:
+                self._logger.error("GUI exited with code: %s", exit_code)
+                if not self._stopping:
+                    await self._start_gui(
+                        attempt + 1,
+                        command,
+                        *args,
+                    )
+            self._logger.info("GUI exited with code: %s", exit_code)
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
         self,
@@ -117,7 +120,7 @@ class GUI(Base):
             )
         )
 
-    def start(
+    def start(  # pylint: disable=keyword-arg-before-vararg
         self,
         command: str = "main",
         *args,
@@ -147,7 +150,7 @@ class GUI(Base):
         """Return True if the GUI is running"""
         return self._thread is not None and self._thread.is_alive()
 
-    def restart(
+    def restart(  # pylint: disable=keyword-arg-before-vararg
         self,
         command: str = "main",
         *args,
