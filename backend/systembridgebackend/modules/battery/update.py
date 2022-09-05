@@ -37,14 +37,15 @@ class BatteryUpdate(ModuleUpdateBase):
 
     async def update_status(self) -> None:
         """Update Battery Status"""
-        for key, value in self._battery.status().items():
-            self._database.update_data(
-                DatabaseModel,
-                DatabaseModel(
-                    key=camel_to_snake(key),
-                    value=value,
-                ),
-            )
+        if data := self._battery.status():
+            for key, value in data.items():
+                self._database.update_data(
+                    DatabaseModel,
+                    DatabaseModel(
+                        key=camel_to_snake(key),
+                        value=value,
+                    ),
+                )
 
     async def update_all_data(self) -> None:
         """Update data"""
