@@ -7,5 +7,5 @@ Provides systembridgeshared version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgeshared", 3, 4, 6, dev=0)
+__version__ = Version("systembridgeshared", 3, 4, 6)
 __all__ = ["__version__"]
