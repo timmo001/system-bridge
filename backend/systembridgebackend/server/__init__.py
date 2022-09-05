@@ -390,17 +390,17 @@ class Server(Base):
         """Stop Server"""
         self._logger.info("Remove listeners")
         self._listeners.remove_all_listeners()
-        self._logger.info("Cancel any pending tasks")
-        event_loop = asyncio.get_event_loop()
-        if event_loop is not None and event_loop.is_running():
-            for pending_task in asyncio.all_tasks():
-                pending_task.cancel()
         if self._server is not None and self._server.is_running:
             loop = self._server.loop
             self._logger.info("Stop the event loop")
             loop.stop()
             self._logger.info("Stopping server")
             self._server.stop()
+        self._logger.info("Cancel any pending tasks")
+        event_loop = asyncio.get_event_loop()
+        if event_loop is not None and event_loop.is_running():
+            for pending_task in asyncio.all_tasks():
+                pending_task.cancel()
 
     def stop_guis(self) -> None:
         """Stop GUIs"""
