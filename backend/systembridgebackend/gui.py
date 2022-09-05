@@ -44,8 +44,11 @@ class GUI(Base):
         """Initialize"""
         super().__init__()
         self._settings = settings
-        self._thread: Optional[StoppableThread] = None
+
         self._name = "GUI"
+        self._process: Optional[subprocess.Popen] = None
+        self._stopping = False
+        self._thread: Optional[StoppableThread] = None
 
     async def _start_gui(  # pylint: disable=keyword-arg-before-vararg
         self,
@@ -92,11 +95,12 @@ class GUI(Base):
         self._logger.info("GUI started with PID: %s", self._process.pid)
         if (exit_code := self._process.wait()) != 0:
             self._logger.error("GUI exited with code: %s", exit_code)
-            await self._start_gui(
-                attempt + 1,
-                command,
-                *args,
-            )
+            if not self._stopping:
+                await self._start_gui(
+                    attempt + 1,
+                    command,
+                    *args,
+                )
         self._logger.info("GUI exited with code: %s", exit_code)
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
@@ -127,15 +131,16 @@ class GUI(Base):
             ),
         )
         self._thread.start()
+        self._stopping = False
 
     def stop(self) -> None:
         """Stop the GUI"""
         self._logger.info("Stopping GUI: %s", self._name)
-        if self._thread is not None:
-            self._thread.stop()
+        self._stopping = True
         if self._process is not None:
             self._process.terminate()
         if self._thread is not None:
+            self._thread.stop()
             self._thread.join()
 
     def is_running(self) -> bool:
