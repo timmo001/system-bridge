@@ -32,7 +32,7 @@
     "@mdi/js": "7.0.96",
     "@mdi/react": "1.6.1",
     "@mui/lab": "5.0.0-alpha.98",
-    "@mui/material": "5.10.3",
+    "@mui/material": "5.10.4",
     "@mui/styles": "5.10.3",
     "axios": "0.27.2",
     "clsx": "1.2.1",
