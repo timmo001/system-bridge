@@ -1,5 +1,5 @@
 incremental==21.3.0
-pyinstaller==5.3
+pyinstaller==5.4.1
 shellingham==1.5.0
 tabulate==0.8.10
 typer==0.6.1
