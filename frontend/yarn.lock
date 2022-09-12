@@ -234,20 +234,6 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@mui/base@5.0.0-alpha.96":
-  version "5.0.0-alpha.96"
-  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.96.tgz#2189dd1012d0969ace69c3479b0aec2dbe9bbdc1"
-  integrity sha512-GZf2YguepLFMWGG8vQNLRl7FlXPDeyxQBYgrkHxwNJYeRw55rrGrJxHzL1iCbk71VZ2IIAIs5IAxNpyHK9iqPQ==
-  dependencies:
-    "@babel/runtime" "^7.18.9"
-    "@emotion/is-prop-valid" "^1.2.0"
-    "@mui/types" "^7.2.0"
-    "@mui/utils" "^5.10.3"
-    "@popperjs/core" "^2.11.6"
-    clsx "^1.2.1"
-    prop-types "^15.8.1"
-    react-is "^18.2.0"
-
 "@mui/base@5.0.0-alpha.97":
   version "5.0.0-alpha.97"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.97.tgz#bd12db4ed3bb1dbc2879944bbdb68b559641b02a"
@@ -267,14 +253,14 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.10.5.tgz#be060b633268b124d27474e772e506bb3f39ca51"
   integrity sha512-sZYg85rQdlgDYU3V4WcT2Dl+k+y2wYqN04aUvVkFksRR0j81sj6KmfXx4842HJQcq5rjzcTvh4N+yv66XR/9fA==
 
-"@mui/lab@5.0.0-alpha.98":
-  version "5.0.0-alpha.98"
-  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.98.tgz#d79ab98a24f035c13cfc4919f5aa50e0d6ad369d"
-  integrity sha512-a6MJw+fMdFP5lyvrtlEgmCYoomv5lnmkcBt+LXM2hZ+RzCwEk2aTXsJFkuuyfIL0eCezcl+qN89cX1z97YQuAw==
+"@mui/lab@5.0.0-alpha.99":
+  version "5.0.0-alpha.99"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.99.tgz#b643b323df4b98b35c36faeb6f06650ed7d23789"
+  integrity sha512-GBjpeugp59KEHdIGJ4w9uqWcxNSPr2q6IEjzjWkut6GpprSruVYgXGn5PqBdrcSEtLKTd8bQ0xBFPSmoVqkJUw==
   dependencies:
     "@babel/runtime" "^7.18.9"
-    "@mui/base" "5.0.0-alpha.96"
-    "@mui/system" "^5.10.4"
+    "@mui/base" "5.0.0-alpha.97"
+    "@mui/system" "^5.10.5"
     "@mui/utils" "^5.10.3"
     clsx "^1.2.1"
     prop-types "^15.8.1"
@@ -340,7 +326,7 @@
     jss-plugin-vendor-prefixer "^10.9.2"
     prop-types "^15.8.1"
 
-"@mui/system@^5.10.4", "@mui/system@^5.10.5":
+"@mui/system@^5.10.5":
   version "5.10.5"
   resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.10.5.tgz#b0c8494aa9230fb3b8e33c4aee05207925519569"
   integrity sha512-GUPiDVZTKp9yH3FVeLSIw3Bqsyl7qLxtAK1ZiZmC8e+zdH7bcnZZXvWK3vPIbx35ZyhQpvAOWQFpiF9TjdA77w==
