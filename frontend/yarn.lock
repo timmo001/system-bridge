@@ -303,10 +303,10 @@
     csstype "^3.1.0"
     prop-types "^15.8.1"
 
-"@mui/styles@5.10.6":
-  version "5.10.6"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.6.tgz#cef0774c64429c868ba85ddd34fd49c0dc92a926"
-  integrity sha512-QmT/PXDKOSttkSWV97SVw1isfmc+iNMQBUtVwafRju1T6+O26tf9Hz0QjILuXIk74lg/nrbQn5S5c9h6FZWPXQ==
+"@mui/styles@5.10.7":
+  version "5.10.7"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.7.tgz#73807e93cda7aa15682a19b8246d6f5b570ffde2"
+  integrity sha512-veBd1ldZL3OEl2+V1J+zSfGPKzag8tONqLVITnvt31PVejztzrwDDllUG+Mo86tF5709zsfFo6Va7qK4+MK05g==
   dependencies:
     "@babel/runtime" "^7.19.0"
     "@emotion/hash" "^0.9.0"
@@ -314,7 +314,7 @@
     "@mui/types" "^7.2.0"
     "@mui/utils" "^5.10.6"
     clsx "^1.2.1"
-    csstype "^3.1.0"
+    csstype "^3.1.1"
     hoist-non-react-statics "^3.3.2"
     jss "^10.9.2"
     jss-plugin-camel-case "^10.9.2"
@@ -875,10 +875,10 @@ css-vendor@^2.0.8:
     "@babel/runtime" "^7.8.3"
     is-in-browser "^1.0.2"
 
-csstype@^3.0.2, csstype@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.0.tgz#4ddcac3718d787cf9df0d1b7d15033925c8f29f2"
-  integrity sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==
+csstype@^3.0.2, csstype@^3.1.0, csstype@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.1.tgz#841b532c45c758ee546a11d5bd7b7b473c8c30b9"
+  integrity sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==
 
 damerau-levenshtein@^1.0.7:
   version "1.0.8"
