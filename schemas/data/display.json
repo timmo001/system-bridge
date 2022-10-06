@@ -23,5 +23,6 @@
       }
     }
   },
-  "additionalProperties": {}
+  "additionalProperties": {},
+  "required": ["last_updated"]
 }

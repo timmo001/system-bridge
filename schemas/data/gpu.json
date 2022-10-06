@@ -20,9 +20,9 @@
       },
       "additionalProperties": {
         "type": "number"
-      },
-      "required": ["gpus"]
+      }
     }
   },
-  "additionalProperties": {}
+  "additionalProperties": {},
+  "required": ["last_updated"]
 }

@@ -16,17 +16,17 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    swap_total: float
-    swap_used: float
-    swap_free: float
-    swap_percent: float
-    swap_sin: float
-    swap_sout: float
-    virtual_total: float
-    virtual_available: float
-    virtual_percent: float
-    virtual_used: float
-    virtual_free: float
+    swap_total: Optional[float] = None
+    swap_used: Optional[float] = None
+    swap_free: Optional[float] = None
+    swap_percent: Optional[float] = None
+    swap_sin: Optional[float] = None
+    swap_sout: Optional[float] = None
+    virtual_total: Optional[float] = None
+    virtual_available: Optional[float] = None
+    virtual_percent: Optional[float] = None
+    virtual_used: Optional[float] = None
+    virtual_free: Optional[float] = None
 
 
 class Memory(BaseModel):
@@ -38,15 +38,15 @@ class Memory(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    swap_total: int
-    swap_used: int
-    swap_free: float
-    swap_percent: float
-    swap_sin: int
-    swap_sout: int
-    virtual_total: int
-    virtual_available: int
-    virtual_percent: float
-    virtual_used: int
-    virtual_free: int
+    swap_total: Optional[int] = None
+    swap_used: Optional[int] = None
+    swap_free: Optional[float] = None
+    swap_percent: Optional[float] = None
+    swap_sin: Optional[int] = None
+    swap_sout: Optional[int] = None
+    virtual_total: Optional[int] = None
+    virtual_available: Optional[int] = None
+    virtual_percent: Optional[float] = None
+    virtual_used: Optional[int] = None
+    virtual_free: Optional[int] = None
     last_updated: LastUpdated = Field(..., description="Last updated")

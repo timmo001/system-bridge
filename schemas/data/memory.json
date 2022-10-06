@@ -80,35 +80,9 @@
       },
       "additionalProperties": {
         "type": "number"
-      },
-      "required": [
-        "swap_total",
-        "swap_used",
-        "swap_free",
-        "swap_percent",
-        "swap_sin",
-        "swap_sout",
-        "virtual_total",
-        "virtual_available",
-        "virtual_percent",
-        "virtual_used",
-        "virtual_free"
-      ]
+      }
     }
   },
   "additionalProperties": {},
-  "required": [
-    "swap_total",
-    "swap_used",
-    "swap_free",
-    "swap_percent",
-    "swap_sin",
-    "swap_sout",
-    "virtual_total",
-    "virtual_available",
-    "virtual_percent",
-    "virtual_used",
-    "virtual_free",
-    "last_updated"
-  ]
+  "required": ["last_updated"]
 }

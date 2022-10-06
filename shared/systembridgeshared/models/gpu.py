@@ -16,7 +16,7 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    gpus: float
+    gpus: Optional[float] = None
 
 
 class Gpu(BaseModel):
@@ -29,4 +29,4 @@ class Gpu(BaseModel):
 
     id: Optional[str] = Field(None, description="Event ID")
     gpus: Optional[list] = None
-    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")
+    last_updated: LastUpdated = Field(..., description="Last updated")
