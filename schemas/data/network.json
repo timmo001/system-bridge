@@ -62,29 +62,9 @@
       },
       "additionalProperties": {
         "type": "number"
-      },
-      "required": [
-        "io_counters_bytes_sent",
-        "io_counters_bytes_recv",
-        "io_counters_packets_sent",
-        "io_counters_packets_recv",
-        "io_counters_errin",
-        "io_counters_errout",
-        "io_counters_dropin",
-        "io_counters_dropout"
-      ]
+      }
     }
   },
   "additionalProperties": {},
-  "required": [
-    "io_counters_bytes_sent",
-    "io_counters_bytes_recv",
-    "io_counters_packets_sent",
-    "io_counters_packets_recv",
-    "io_counters_errin",
-    "io_counters_errout",
-    "io_counters_dropin",
-    "io_counters_dropout",
-    "last_updated"
-  ]
+  "required": ["last_updated"]
 }

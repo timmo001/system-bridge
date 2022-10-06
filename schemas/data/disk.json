@@ -63,28 +63,9 @@
       "additionalProperties": {
         "type": "number"
       },
-      "required": [
-        "devices",
-        "io_counters_read_count",
-        "io_counters_write_count",
-        "io_counters_read_bytes",
-        "io_counters_write_bytes",
-        "io_counters_read_time",
-        "io_counters_write_time",
-        "partitions"
-      ]
+      "required": ["devices", "partitions"]
     }
   },
   "additionalProperties": {},
-  "required": [
-    "devices",
-    "io_counters_read_count",
-    "io_counters_write_count",
-    "io_counters_read_bytes",
-    "io_counters_write_bytes",
-    "io_counters_read_time",
-    "io_counters_write_time",
-    "partitions",
-    "last_updated"
-  ]
+  "required": ["devices", "partitions", "last_updated"]
 }

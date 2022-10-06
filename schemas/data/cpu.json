@@ -146,47 +146,11 @@
       },
       "additionalProperties": {
         "type": "number"
-      },
-      "required": [
-        "count",
-        "frequency_current",
-        "frequency_min",
-        "frequency_max",
-        "load_average",
-        "stats_ctx_switches",
-        "stats_interrupts",
-        "stats_soft_interrupts",
-        "stats_syscalls",
-        "times_user",
-        "times_system",
-        "times_idle",
-        "times_percent_user",
-        "times_percent_system",
-        "times_percent_idle",
-        "usage"
-      ]
+      }
     }
   },
   "additionalProperties": {
     "type": "number"
   },
-  "required": [
-    "count",
-    "frequency_current",
-    "frequency_min",
-    "frequency_max",
-    "load_average",
-    "stats_ctx_switches",
-    "stats_interrupts",
-    "stats_soft_interrupts",
-    "stats_syscalls",
-    "times_user",
-    "times_system",
-    "times_idle",
-    "times_percent_user",
-    "times_percent_system",
-    "times_percent_idle",
-    "usage",
-    "last_updated"
-  ]
+  "required": ["last_updated"]
 }
