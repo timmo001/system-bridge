@@ -112,7 +112,6 @@
     "platform_version",
     "uptime",
     "uuid",
-    "version",
-    "last_updated"
+    "version"
   ]
 }

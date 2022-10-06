@@ -31,4 +31,4 @@ class Battery(BaseModel):
     id: Optional[str] = Field(None, description="Event ID")
     is_charging: Optional[bool] = None
     percentage: Optional[float] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

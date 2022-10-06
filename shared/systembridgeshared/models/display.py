@@ -29,4 +29,4 @@ class Display(BaseModel):
 
     id: Optional[str] = Field(None, description="Event ID")
     displays: Optional[list] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

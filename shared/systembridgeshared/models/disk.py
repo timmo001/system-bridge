@@ -43,4 +43,4 @@ class Disk(BaseModel):
     io_counters_read_time: Optional[int] = None
     io_counters_write_time: Optional[int] = None
     partitions: list
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

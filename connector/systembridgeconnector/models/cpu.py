@@ -71,4 +71,4 @@ class Cpu(BaseModel):
     times_percent_dpc: Optional[float] = None
     usage: Optional[float] = None
     voltage: Optional[float] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

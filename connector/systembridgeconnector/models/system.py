@@ -45,4 +45,4 @@ class System(BaseModel):
     version: str
     version_latest: Optional[str] = None
     version_newer_available: Optional[bool] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

@@ -49,4 +49,4 @@ class Memory(BaseModel):
     virtual_percent: Optional[float] = None
     virtual_used: Optional[int] = None
     virtual_free: Optional[int] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")

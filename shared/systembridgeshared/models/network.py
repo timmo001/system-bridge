@@ -43,4 +43,4 @@ class Network(BaseModel):
     io_counters_errout: Optional[int] = None
     io_counters_dropin: Optional[int] = None
     io_counters_dropout: Optional[int] = None
-    last_updated: LastUpdated = Field(..., description="Last updated")
+    last_updated: Optional[LastUpdated] = Field(None, description="Last updated")
