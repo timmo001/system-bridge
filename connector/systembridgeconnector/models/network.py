@@ -16,14 +16,14 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    io_counters_bytes_sent: float
-    io_counters_bytes_recv: float
-    io_counters_packets_sent: float
-    io_counters_packets_recv: float
-    io_counters_errin: float
-    io_counters_errout: float
-    io_counters_dropin: float
-    io_counters_dropout: float
+    io_counters_bytes_sent: Optional[float] = None
+    io_counters_bytes_recv: Optional[float] = None
+    io_counters_packets_sent: Optional[float] = None
+    io_counters_packets_recv: Optional[float] = None
+    io_counters_errin: Optional[float] = None
+    io_counters_errout: Optional[float] = None
+    io_counters_dropin: Optional[float] = None
+    io_counters_dropout: Optional[float] = None
 
 
 class Network(BaseModel):
@@ -35,12 +35,12 @@ class Network(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    io_counters_bytes_sent: int
-    io_counters_bytes_recv: int
-    io_counters_packets_sent: int
-    io_counters_packets_recv: int
-    io_counters_errin: int
-    io_counters_errout: int
-    io_counters_dropin: int
-    io_counters_dropout: int
+    io_counters_bytes_sent: Optional[int] = None
+    io_counters_bytes_recv: Optional[int] = None
+    io_counters_packets_sent: Optional[int] = None
+    io_counters_packets_recv: Optional[int] = None
+    io_counters_errin: Optional[int] = None
+    io_counters_errout: Optional[int] = None
+    io_counters_dropin: Optional[int] = None
+    io_counters_dropout: Optional[int] = None
     last_updated: LastUpdated = Field(..., description="Last updated")

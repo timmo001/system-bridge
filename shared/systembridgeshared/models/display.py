@@ -16,7 +16,7 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    displays: float
+    displays: Optional[float] = None
 
 
 class Display(BaseModel):

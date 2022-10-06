@@ -16,27 +16,27 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    count: float
-    frequency_current: float
-    frequency_min: float
-    frequency_max: float
-    load_average: float
-    stats_ctx_switches: float
-    stats_interrupts: float
-    stats_soft_interrupts: float
-    stats_syscalls: float
+    count: Optional[float] = None
+    frequency_current: Optional[float] = None
+    frequency_min: Optional[float] = None
+    frequency_max: Optional[float] = None
+    load_average: Optional[float] = None
+    stats_ctx_switches: Optional[float] = None
+    stats_interrupts: Optional[float] = None
+    stats_soft_interrupts: Optional[float] = None
+    stats_syscalls: Optional[float] = None
     temperature: Optional[float] = None
-    times_user: float
-    times_system: float
-    times_idle: float
+    times_user: Optional[float] = None
+    times_system: Optional[float] = None
+    times_idle: Optional[float] = None
     times_interrupt: Optional[float] = None
     times_dpc: Optional[float] = None
-    times_percent_user: float
-    times_percent_system: float
-    times_percent_idle: float
+    times_percent_user: Optional[float] = None
+    times_percent_system: Optional[float] = None
+    times_percent_idle: Optional[float] = None
     times_percent_interrupt: Optional[float] = None
     times_percent_dpc: Optional[float] = None
-    usage: float
+    usage: Optional[float] = None
     voltage: Optional[float] = None
 
 
@@ -49,26 +49,26 @@ class Cpu(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    count: int
-    frequency_current: float
-    frequency_min: float
-    frequency_max: float
-    load_average: float
-    stats_ctx_switches: int
-    stats_interrupts: int
-    stats_soft_interrupts: int
-    stats_syscalls: int
+    count: Optional[int] = None
+    frequency_current: Optional[float] = None
+    frequency_min: Optional[float] = None
+    frequency_max: Optional[float] = None
+    load_average: Optional[float] = None
+    stats_ctx_switches: Optional[int] = None
+    stats_interrupts: Optional[int] = None
+    stats_soft_interrupts: Optional[int] = None
+    stats_syscalls: Optional[int] = None
     temperature: Optional[float] = None
-    times_user: float
-    times_system: float
-    times_idle: float
+    times_user: Optional[float] = None
+    times_system: Optional[float] = None
+    times_idle: Optional[float] = None
     times_interrupt: Optional[float] = None
     times_dpc: Optional[float] = None
-    times_percent_user: float
-    times_percent_system: float
-    times_percent_idle: float
+    times_percent_user: Optional[float] = None
+    times_percent_system: Optional[float] = None
+    times_percent_idle: Optional[float] = None
     times_percent_interrupt: Optional[float] = None
     times_percent_dpc: Optional[float] = None
-    usage: float
+    usage: Optional[float] = None
     voltage: Optional[float] = None
     last_updated: LastUpdated = Field(..., description="Last updated")
