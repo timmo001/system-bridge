@@ -67,5 +67,5 @@
     }
   },
   "additionalProperties": {},
-  "required": ["devices", "partitions", "last_updated"]
+  "required": ["devices", "partitions"]
 }

@@ -16,7 +16,7 @@ class LastUpdated(BaseModel):
     class Config:
         extra = Extra.allow
 
-    gpus: float
+    gpus: Optional[float] = None
 
 
 class Gpu(BaseModel):

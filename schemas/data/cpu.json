@@ -151,6 +151,5 @@
   },
   "additionalProperties": {
     "type": "number"
-  },
-  "required": ["last_updated"]
+  }
 }

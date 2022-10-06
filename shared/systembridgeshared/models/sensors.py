@@ -17,4 +17,4 @@ class Sensors(BaseModel):
         extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
-    last_updated: dict[str, float] = Field(..., description="Last updated")
+    last_updated: Optional[dict[str, float]] = Field(None, description="Last updated")
