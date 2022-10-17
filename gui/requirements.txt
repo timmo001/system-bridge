@@ -1,4 +1,4 @@
-incremental==21.3.0
+incremental==22.10.0
 pyinstaller==5.5
 pyperclip==1.8.2
 PySide6==6.3.2
