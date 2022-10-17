@@ -1,5 +1,5 @@
 aiogithubapi==22.3.1
-incremental==21.3.0
+incremental==22.10.0
 keyboard==0.13.5
 mutagen==1.46.0
 plyer==2.0.0
