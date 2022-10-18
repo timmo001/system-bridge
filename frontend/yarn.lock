@@ -313,10 +313,10 @@
     csstype "^3.1.1"
     prop-types "^15.8.1"
 
-"@mui/styles@5.10.9":
-  version "5.10.9"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.9.tgz#a627c46a29f39ce745deb7bbd89fb77fbfa312c1"
-  integrity sha512-dK6tsHkEp88MkwEDCxbqscj4Fa2aYBkfwy1MXMCexzx9TqxuahC0KSxBHfMMWZ0zV7xW5Suzwu8vveCp4uFN5A==
+"@mui/styles@5.10.10":
+  version "5.10.10"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.10.tgz#9b44bfbb89e735b737acd95ba4b8136f116ec30a"
+  integrity sha512-utr87q/euocRdc2ekFX7DL1gqTVfogSVeu74Nspr8rtK/afC9QwF3ScP/XThVXWPcQKjBWHMKWtAO9BSVE4KDg==
   dependencies:
     "@babel/runtime" "^7.19.0"
     "@emotion/hash" "^0.9.0"
