@@ -66,6 +66,30 @@ class CPUUpdate(ModuleUpdateBase):
             ),
         )
 
+    async def update_power_package(self) -> None:
+        """Update package power"""
+        self._database.update_data(
+            DatabaseModel,
+            DatabaseModel(
+                key="power_package",
+                value=str(self._cpu.power_package(self._database)),
+            ),
+        )
+
+    async def update_power_per_cpu(self) -> None:
+        """Update per cpu power"""
+        result = self._cpu.power_per_cpu(self._database)
+        if result is None:
+            return None
+        for key, value in result:
+            self._database.update_data(
+                DatabaseModel,
+                DatabaseModel(
+                    key=f"power_per_cpu_{key}",
+                    value=str(value),
+                ),
+            )
+
     async def update_stats(self) -> None:
         """Update stats"""
         for key, value in self._cpu.stats()._asdict().items():
@@ -178,6 +202,8 @@ class CPUUpdate(ModuleUpdateBase):
                 self.update_frequency(),
                 self.update_frequency_per_cpu(),
                 self.update_load_average(),
+                self.update_power_package(),
+                self.update_power_per_cpu(),
                 self.update_stats(),
                 self.update_temperature(),
                 self.update_times(),
