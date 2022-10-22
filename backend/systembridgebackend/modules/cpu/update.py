@@ -78,8 +78,7 @@ class CPUUpdate(ModuleUpdateBase):
 
     async def update_power_per_cpu(self) -> None:
         """Update per cpu power"""
-        result = self._cpu.power_per_cpu(self._database)
-        if result is None:
+        if (result := self._cpu.power_per_cpu(self._database)) is None:
             return None
         for key, value in result:
             self._database.update_data(
