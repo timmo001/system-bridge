@@ -21,6 +21,7 @@ class LastUpdated(BaseModel):
     frequency_min: Optional[float] = None
     frequency_max: Optional[float] = None
     load_average: Optional[float] = None
+    power_package: Optional[float] = None
     stats_ctx_switches: Optional[float] = None
     stats_interrupts: Optional[float] = None
     stats_soft_interrupts: Optional[float] = None
@@ -54,6 +55,7 @@ class Cpu(BaseModel):
     frequency_min: Optional[float] = None
     frequency_max: Optional[float] = None
     load_average: Optional[float] = None
+    power_package: Optional[float] = None
     stats_ctx_switches: Optional[int] = None
     stats_interrupts: Optional[int] = None
     stats_soft_interrupts: Optional[int] = None

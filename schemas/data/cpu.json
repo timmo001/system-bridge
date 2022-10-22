@@ -22,6 +22,9 @@
     "load_average": {
       "type": "number"
     },
+    "power_package": {
+      "type": "number"
+    },
     "stats_ctx_switches": {
       "type": "integer"
     },
@@ -90,6 +93,9 @@
           "type": "number"
         },
         "load_average": {
+          "type": "number"
+        },
+        "power_package": {
           "type": "number"
         },
         "stats_ctx_switches": {
