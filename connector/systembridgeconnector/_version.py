@@ -7,5 +7,5 @@ Provides systembridgeconnector version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgeconnector", 3, 4, 9, dev=0)
+__version__ = Version("systembridgeconnector", 3, 4, 9)
 __all__ = ["__version__"]
