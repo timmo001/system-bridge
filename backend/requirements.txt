@@ -1,4 +1,4 @@
-aiogithubapi==22.3.1
+aiogithubapi==22.10.1
 incremental==22.10.0
 keyboard==0.13.5
 mutagen==1.46.0
