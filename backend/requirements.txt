@@ -9,4 +9,4 @@ sanic-ext==22.9.0
 sanic-scheduler==1.0.7
 sanic==22.6.2
 screeninfo==0.8.1
-zeroconf==0.39.2
+zeroconf==0.39.3
