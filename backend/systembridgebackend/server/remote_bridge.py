@@ -1,7 +1,4 @@
 """System Bridge: Server Handler - Remote Bridge"""
-from json import dumps
-from typing import List
-
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from systembridgeshared.database import Database
@@ -10,7 +7,7 @@ from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 
 def get_remote_bridges(
     database: Database,
-) -> List[RemoteBridge]:
+) -> list[RemoteBridge]:
     """Get all remote bridges."""
     return database.get_data(RemoteBridge)
 
