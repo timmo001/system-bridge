@@ -1,10 +1,10 @@
 """System Bridge: Server"""
 import asyncio
+import os
+import sys
 from collections.abc import Awaitable, Callable
 from datetime import timedelta
-import os
 from os import walk
-import sys
 from typing import Optional
 
 from sanic import Sanic
@@ -52,6 +52,7 @@ from ..server.power import (
 )
 from ..server.update import handler_update
 from ..server.websocket import WebSocketHandler
+from .remote_bridge import handler_remote_bridge
 
 
 class ApplicationExitException(BaseException):
@@ -184,6 +185,14 @@ class Server(Base):
                 self._callback_notification,
             )
 
+        @auth.key_required
+        async def _handler_remote_bridge(request: Request) -> HTTPResponse:
+            """Remote bridge handler"""
+            return await handler_remote_bridge(
+                request,
+                self._database,
+            )
+
         async def _handler_websocket(
             _: Request,
             socket,
@@ -300,6 +309,12 @@ class Server(Base):
             "/api/power/logout",
             methods=["POST"],
             name="Power Logout",
+        )
+        self._server.add_route(
+            _handler_remote_bridge,
+            "/api/remote",
+            methods=["POST", "PUT"],
+            name="Remote Bridge",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_update),

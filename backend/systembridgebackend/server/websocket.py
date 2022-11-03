@@ -1,7 +1,7 @@
 """System Bridge: WebSocket handler"""
+import os
 from collections.abc import Callable
 from json import JSONDecodeError, loads
-import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
@@ -76,6 +76,8 @@ from systembridgeshared.const import (
     TYPE_POWER_SLEEP,
     TYPE_POWER_SLEEPING,
     TYPE_REGISTER_DATA_LISTENER,
+    TYPE_REMOTE_BRIDGE,
+    TYPE_REMOTE_BRIDGE_RESULT,
     TYPE_SETTING_RESULT,
     TYPE_SETTING_UPDATED,
     TYPE_SETTINGS_RESULT,
@@ -84,6 +86,7 @@ from systembridgeshared.const import (
 )
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
@@ -844,6 +847,41 @@ class WebSocketHandler(Base):
                             EVENT_MESSAGE: "Got setting",
                             EVENT_SETTING: model.setting,
                             EVENT_DATA: self._settings.get(model.setting),
+                        }
+                    )
+                )
+            elif request.event == TYPE_REMOTE_BRIDGE:
+                try:
+                    model = RemoteBridge(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
+
+                self._logger.info("Remote bridge: %s", model)
+
+                self._database.update_data(
+                    RemoteBridge,
+                    model,
+                )
+
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
+                            EVENT_TYPE: TYPE_REMOTE_BRIDGE_RESULT,
+                            EVENT_MESSAGE: "Data updated",
+                            EVENT_DATA: model,
                         }
                     )
                 )
