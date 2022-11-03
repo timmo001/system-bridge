@@ -1,8 +1,8 @@
 """System Bridge Shared: Database"""
 from __future__ import annotations
 
-from collections.abc import Mapping
 import os
+from collections.abc import Mapping
 from time import time
 from typing import Any, Optional, Union
 
@@ -38,7 +38,7 @@ from .models.database_data import (
     Settings,
     System,
 )
-from .models.database_data_bridge import Bridge
+from .models.database_data_remote_bridge import RemoteBridge
 from .models.database_data_sensors import Sensors
 
 TABLE_MAP: Mapping[str, Any] = {
@@ -58,13 +58,13 @@ TABLE_MAP: Mapping[str, Any] = {
 
 TableDataType = Union[
     Battery,
-    Bridge,
     CPU,
     Disk,
     Display,
     GPU,
     Memory,
     Network,
+    RemoteBridge,
     Secrets,
     Sensors,
     Settings,
