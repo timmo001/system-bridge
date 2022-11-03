@@ -174,9 +174,16 @@ class Database(Base):
             result = session.exec(
                 select(RemoteBridge).where(RemoteBridge.key == data.key)
             )
-            old_data = result.first()
-            data.timestamp = time()
-            session.add(data)
+            if (old_data := result.first()) is None:
+                data.timestamp = time()
+                session.add(data)
+            else:
+                old_data.name = data.name
+                old_data.host = data.host
+                old_data.port = data.port
+                old_data.api_key = data.api_key
+                old_data.timestamp = time()
+                session.add(old_data)
             session.commit()
             if old_data is not None:
                 session.refresh(old_data)
