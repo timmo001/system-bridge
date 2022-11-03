@@ -164,3 +164,19 @@ class Database(Base):
             session.commit()
             if old_data is not None:
                 session.refresh(old_data)
+
+    def update_remote_bridge(
+        self,
+        data: RemoteBridge,
+    ) -> None:
+        """Update data"""
+        with Session(self._engine, autoflush=True) as session:
+            result = session.exec(
+                select(RemoteBridge).where(RemoteBridge.key == data.key)
+            )
+            old_data = result.first()
+            data.timestamp = time()
+            session.add(data)
+            session.commit()
+            if old_data is not None:
+                session.refresh(old_data)
