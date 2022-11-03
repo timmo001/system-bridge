@@ -168,7 +168,7 @@ class Database(Base):
     def update_remote_bridge(
         self,
         data: RemoteBridge,
-    ) -> None:
+    ) -> RemoteBridge:
         """Update data"""
         with Session(self._engine, autoflush=True) as session:
             result = session.exec(
@@ -187,3 +187,5 @@ class Database(Base):
             session.commit()
             if old_data is not None:
                 session.refresh(old_data)
+                return old_data
+            return data

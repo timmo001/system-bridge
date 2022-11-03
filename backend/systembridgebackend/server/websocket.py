@@ -885,7 +885,7 @@ class WebSocketHandler(Base):
 
                 self._logger.info("Remote bridge: %s", model)
 
-                self._database.update_remote_bridge(model)
+                model = self._database.update_remote_bridge(model)
 
                 await self._send_response(
                     Response(

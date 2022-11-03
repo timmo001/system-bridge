@@ -42,15 +42,7 @@ async def handler_update_remote_bridge(
 
     remote_bridge: RemoteBridge = RemoteBridge(**request.json)
 
-    database.update_remote_bridge(
-        RemoteBridge(
-            key=remote_bridge.key,
-            name=remote_bridge.name,
-            host=remote_bridge.host,
-            port=remote_bridge.port,
-            api_key=remote_bridge.api_key,
-        )
-    )
+    remote_bridge = database.update_remote_bridge(remote_bridge)
 
     return json(
         {
