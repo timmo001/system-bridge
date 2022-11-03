@@ -35,7 +35,7 @@ function BridgesSetupComponent(): ReactElement {
         query.apiHost || typeof window !== "undefined"
           ? window.location.hostname
           : "localhost"
-      }:${query.apiPort || 9170}/bridges`,
+      }:${query.apiPort || 9170}/api/remote`,
       {
         headers: { "api-key": query.apiKey as string },
       }
