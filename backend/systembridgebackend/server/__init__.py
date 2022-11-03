@@ -52,7 +52,7 @@ from ..server.power import (
 )
 from ..server.update import handler_update
 from ..server.websocket import WebSocketHandler
-from .remote_bridge import handler_remote_bridge
+from .remote_bridge import handler_get_remote_bridges, handler_update_remote_bridge
 
 
 class ApplicationExitException(BaseException):
@@ -186,9 +186,14 @@ class Server(Base):
             )
 
         @auth.key_required
-        async def _handler_remote_bridge(request: Request) -> HTTPResponse:
-            """Remote bridge handler"""
-            return await handler_remote_bridge(
+        async def _handler_get_remote_bridge(_: Request) -> HTTPResponse:
+            """Get remote bridge handler"""
+            return await handler_get_remote_bridges(self._database)
+
+        @auth.key_required
+        async def _handler_update_remote_bridge(request: Request) -> HTTPResponse:
+            """Update remote bridge handler"""
+            return await handler_update_remote_bridge(
                 request,
                 self._database,
             )
@@ -311,10 +316,16 @@ class Server(Base):
             name="Power Logout",
         )
         self._server.add_route(
-            _handler_remote_bridge,
+            _handler_get_remote_bridge,
+            "/api/remote",
+            methods=["GET"],
+            name="Get Remote Bridges",
+        )
+        self._server.add_route(
+            _handler_update_remote_bridge,
             "/api/remote",
             methods=["POST", "PUT"],
-            name="Remote Bridge",
+            name="Update Remote Bridge",
         )
         self._server.add_route(
             lambda r: _handler_generic(r, handler_update),
