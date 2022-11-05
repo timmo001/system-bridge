@@ -46,23 +46,6 @@ from ..server.media import (
 )
 from ..server.websocket import WebSocketHandler
 
-# from ..server.notification import handler_notification
-# from ..server.open import handler_open
-# from ..server.power import (
-#     handler_hibernate,
-#     handler_lock,
-#     handler_logout,
-#     handler_restart,
-#     handler_shutdown,
-#     handler_sleep,
-# )
-# from ..server.update import handler_update
-# from .remote_bridge import (
-#     handler_delete_remote_bridge,
-#     handler_get_remote_bridges,
-#     handler_update_remote_bridge,
-# )
-
 database = Database()
 settings = Settings(database)
 
@@ -445,6 +428,17 @@ async def send_media_play(
         request_host=request.url.hostname,
         request_scheme=request.url.scheme,
     )
+
+
+@app.post("/api/notification", dependencies=[Depends(security_api_key)])
+async def send_notification(
+    notification: Notification,
+) -> dict[str, str]:
+    """Send notification."""
+    callback_notification(notification)
+    return {
+        "message": "Notification sent",
+    }
 
 
 @app.websocket("/api/websocket")
