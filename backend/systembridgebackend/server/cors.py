@@ -14,12 +14,12 @@ def _add_cors_headers(response, methods: Iterable[str]) -> None:
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Headers": (
                 "accept, "
-                "api-key"
+                "api-key, "
                 "authorization, "
                 "content-type, "
                 "origin, "
                 "x-request-id, "
-                "x-xsrf-token, "
+                "x-xsrf-token"
             ),
         }
     )
