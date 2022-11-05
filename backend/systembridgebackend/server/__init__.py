@@ -8,7 +8,7 @@ from datetime import timedelta
 from os import walk
 from typing import Optional, Union
 
-from fastapi import FastAPI, Security, status
+from fastapi import Depends, FastAPI, Header, Query, Security, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader, APIKeyQuery
@@ -18,9 +18,9 @@ from systembridgeshared.const import (
     QUERY_API_KEY,
     SECRET_API_KEY,
     SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
 )
 from systembridgeshared.database import Database
+from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
@@ -63,48 +63,80 @@ from .._version import __version__
 #     handler_update_remote_bridge,
 # )
 
-logger = logging.getLogger(__name__)
-
 database = Database()
 settings = Settings(database)
 
+log_level = str(settings.get(SETTING_LOG_LEVEL))
+setup_logger(log_level, "system-bridge")
 
-auth_api_key_header = APIKeyHeader(
-    auto_error=True,
-    name=HEADER_API_KEY,
-    description="API Key",
-)
-auth_api_key_query = APIKeyQuery(
-    auto_error=True,
-    name=QUERY_API_KEY,
-    description="API Key",
-)
+logger = logging.getLogger("systembridgebackend.server")
+logger.info("System Bridge %s: Server", __version__.public())
+
+# auth_api_key_header = APIKeyHeader(
+#     auto_error=True,
+#     name=HEADER_API_KEY,
+#     description="API Key Header",
+# )
+# auth_api_key_query = APIKeyQuery(
+#     auto_error=True,
+#     name=QUERY_API_KEY,
+#     description="API Key Query Parameter",
+# )
 
 
-async def auth_api_key(
-    api_key_header: str = Security(auth_api_key_header),
-    api_key_query: str = Security(auth_api_key_query),
+def security_api_key_header(
+    api_key_header: Optional[str] = Header(alias=HEADER_API_KEY, default=None),
 ):
     """Get API key from request."""
     key = str(settings.get_secret(SECRET_API_KEY))
-    if api_key_header != key and api_key_query != key:
+    logger.info("API Key: %s", key)
+    logger.info("API Key Header: %s", api_key_header)
+    if api_key_header is not None and api_key_header == key:
+        logger.info("Authorized with API Key Header")
+        return True
+    return False
+
+
+def security_api_key_query(
+    api_key_query: Optional[str] = Query(alias=QUERY_API_KEY, default=None),
+):
+    """Get API key from request."""
+    key = str(settings.get_secret(SECRET_API_KEY))
+    logger.info("API Key: %s", key)
+    logger.info("API Key Query: %s", api_key_query)
+    if api_key_query is not None and api_key_query == key:
+        logger.info("Authorized with API Key Query Parameter")
+        return True
+    return False
+
+
+def security_api_key(
+    api_key_header_result: bool = Depends(security_api_key_header),
+    api_key_query_result: bool = Depends(security_api_key_query),
+):
+    """Get API key from request."""
+    logger.info("API Key Header Result: %s", api_key_header_result)
+    logger.info("API Key Query Result: %s", api_key_query_result)
+    if not (api_key_header_result or api_key_query_result):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API Key",
         )
 
 
-app = FastAPI(dependencies=[Security(auth_api_key)])
+app = FastAPI(
+    version=__version__.public(),
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins="*",
     allow_headers=[
-        "Accept",
+        "accept",
         "api-key",
-        "Content-Type",
-        "Origin",
+        "content-type",
+        "origin",
     ],
     allow_methods=[
         "DELETE",
@@ -115,6 +147,24 @@ app.add_middleware(
     ],
 )
 
+
+@app.get("/")
+def get_root() -> dict[str, str]:
+    """Get root."""
+    return {
+        "message": "Hello!",
+    }
+
+
+@app.get("/api", dependencies=[Depends(security_api_key)])
+def get_api_root() -> dict[str, str]:
+    """Get API root."""
+    return {
+        "message": "Hello!",
+        "version": __version__.public(),
+    }
+
+
 if "--no-frontend" not in sys.argv:
     try:
         # pylint: disable=import-error, import-outside-toplevel
@@ -123,8 +173,8 @@ if "--no-frontend" not in sys.argv:
         frontend_path = get_frontend_path()
         logger.info("Serving frontend from: %s", frontend_path)
         app.mount(
-            "/",
-            StaticFiles(
+            path="/",
+            app=StaticFiles(
                 directory=frontend_path,
                 html=True,
             ),
@@ -132,14 +182,6 @@ if "--no-frontend" not in sys.argv:
         )
     except (ImportError, ModuleNotFoundError) as error:
         logger.error("Frontend not found: %s", error)
-
-
-# @app.get("/")
-# def read_root() -> dict[str, str]:
-#     """Get root."""
-#     return {
-#         "version": __version__.public(),
-#     }
 
 
 # @app.get("/items/{item_id}")
