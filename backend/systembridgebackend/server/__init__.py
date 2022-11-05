@@ -583,7 +583,7 @@ def send_update(
     query_version: str = Query(..., alias="version")
 ) -> dict[str, dict[str, Optional[str]] | str]:
     """Send update."""
-    versions = await version_update(query_version)
+    versions = version_update(query_version)
     if versions is None:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
@@ -596,7 +596,7 @@ def send_update(
 
 
 @app.websocket("/api/websocket")
-def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket):
     """Websocket endpoint."""
     await websocket.accept()
     websocket_handler = WebSocketHandler(

@@ -5,7 +5,7 @@ from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
 
-async def version_update(
+def version_update(
     version: str,
 ) -> dict[str, Optional[str]]:
     """Handle the update request."""
