@@ -7,7 +7,7 @@ from datetime import timedelta
 from os import walk
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, Query, status
+from fastapi import Depends, FastAPI, Header, Query, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -29,10 +29,10 @@ from .._version import __version__
 from ..data import Data
 from ..gui import GUI, GUIAttemptsExceededException
 from ..modules.listeners import Listeners
+from ..server.mdns import MDNSAdvertisement
+from ..server.websocket import WebSocketHandler
 
 # from ..server.keyboard import handler_keyboard
-from ..server.mdns import MDNSAdvertisement
-
 # from ..server.media import (
 #     handler_media_directories,
 #     handler_media_file,
@@ -52,7 +52,6 @@ from ..server.mdns import MDNSAdvertisement
 #     handler_sleep,
 # )
 # from ..server.update import handler_update
-# from ..server.websocket import WebSocketHandler
 # from .remote_bridge import (
 #     handler_delete_remote_bridge,
 #     handler_get_remote_bridges,
@@ -195,18 +194,31 @@ def get_data_by_key(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
         )
-
     data = database.get_data_item_by_key(table_module, key)
     if data is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data item {key} in module {module} not found"},
         )
-
     return {
         data.key: convert_string_to_correct_type(data.value),
         "last_updated": data.timestamp,
     }
+
+
+@app.websocket("/api/websocket")
+async def websocket_endpoint(websocket: WebSocket):
+    """Websocket endpoint."""
+    await websocket.accept()
+    websocket_handler = WebSocketHandler(
+        database,
+        settings,
+        listeners,
+        implemented_modules,
+        websocket,
+        exit_application,
+    )
+    await websocket_handler.handler()
 
 
 if "--no-frontend" not in sys.argv:

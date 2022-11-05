@@ -9,4 +9,5 @@ psutil==5.9.3
 pyinstaller==5.6.2
 screeninfo==0.8.1
 uvicorn[standard]==0.19.0
+websockets==10.4
 zeroconf==0.39.4
