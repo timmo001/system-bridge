@@ -1,8 +1,6 @@
 """System Bridge: Server Handler - Remote Bridge"""
 from typing import Optional
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 
@@ -17,7 +15,7 @@ def get_remote_bridges(
 async def handler_delete_remote_bridge(
     key: str,
     database: Database,
-) -> HTTPResponse:
+):
     """Handle delete remote bridges request."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
     remote_bridge: Optional[RemoteBridge] = None
@@ -46,7 +44,7 @@ async def handler_delete_remote_bridge(
 
 async def handler_get_remote_bridges(
     database: Database,
-) -> HTTPResponse:
+):
     """Handle get remote bridges request."""
     return json(
         {
@@ -57,9 +55,9 @@ async def handler_get_remote_bridges(
 
 
 async def handler_update_remote_bridge(
-    request: Request,
+    request,
     database: Database,
-) -> HTTPResponse:
+):
     """Handle the update remote bridge request."""
     if request.json is None:
         return json(

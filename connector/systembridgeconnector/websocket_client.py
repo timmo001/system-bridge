@@ -90,7 +90,7 @@ class WebSocketClient(Base):
 
     async def _send_message(
         self,
-        request: Request,
+        request,
         wait_for_response: bool = True,
         response_type: Optional[str] = None,
     ) -> Response:
@@ -111,7 +111,7 @@ class WebSocketClient(Base):
                 self._responses.pop(request.id)
         return Response(
             **{
-                EVENT_ID: request.id,
+                EVENT_ID.id,
                 EVENT_TYPE: "N/A",
                 EVENT_MESSAGE: "Message sent",
             }

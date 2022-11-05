@@ -2,15 +2,20 @@
 import logging
 import sys
 
+import uvicorn
 from systembridgeshared.base import Base
-from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
+from systembridgeshared.const import (
+    SETTING_AUTOSTART,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+)
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 from .autostart import autostart_disable, autostart_enable
 from .modules.system import System
-from .server import Server
+from .server import app
 from .shortcut import create_shortcuts
 
 
@@ -36,10 +41,13 @@ class Main(Base):
 
             create_shortcuts()
 
-        self._server = Server(database, settings)
+        port = int(str(settings.get(SETTING_PORT_API)))
 
-        # Start the server
-        self._server.start_server()
+        uvicorn.run(
+            app,
+            port=port,
+            log_level=log_level.lower(),
+        )
 
 
 if __name__ == "__main__":
@@ -47,8 +55,8 @@ if __name__ == "__main__":
     database = Database()
     settings = Settings(database)
 
-    LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
-    setup_logger(LOG_LEVEL, "system-bridge")
+    log_level = str(settings.get(SETTING_LOG_LEVEL))
+    logger = setup_logger(log_level, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
     Main()

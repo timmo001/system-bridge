@@ -3,17 +3,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.models.notification import Notification as NotificationModel
 from systembridgeshared.settings import Settings
 
 
 async def handler_notification(
-    request: Request,
+    request,
     _: Settings,
     callback: Callable[[NotificationModel], None],
-) -> HTTPResponse:
+):
     """Send a notification."""
     if request.json is None:
         return json(

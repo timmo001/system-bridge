@@ -4,8 +4,6 @@ import subprocess
 import sys
 from webbrowser import open_new_tab
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.settings import Settings
 
 
@@ -28,9 +26,9 @@ def open_url(
 
 
 async def handler_open(
-    request: Request,
+    request,
     _: Settings,
-) -> HTTPResponse:
+):
     """Open a file or a URL in the default browser."""
     if request.json is None:
         return json(

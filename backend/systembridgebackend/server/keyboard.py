@@ -1,7 +1,5 @@
 """System Bridge: Server Handler - Keyboard"""
 from keyboard import press_and_release, write
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.settings import Settings
 
 
@@ -16,9 +14,9 @@ def keyboard_text(text: str):
 
 
 async def handler_keyboard(
-    request: Request,
+    request,
     _: Settings,
-) -> HTTPResponse:
+):
     """Send a keyboard event."""
     if request.json is None:
         return json(
@@ -42,7 +40,7 @@ async def handler_keyboard(
         return json(
             {
                 "message": "Keypress sent",
-                "key": request.json["key"],
+                "key".json["key"],
             }
         )
     if "text" in request.json:
@@ -50,7 +48,7 @@ async def handler_keyboard(
         return json(
             {
                 "message": "Text sent",
-                "text": request.json["text"],
+                "text".json["text"],
             }
         )
 

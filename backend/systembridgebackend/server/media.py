@@ -2,22 +2,20 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
-from datetime import datetime
 import io
 import mimetypes
 import os
 import re
 import tempfile
+from collections.abc import Callable
+from datetime import datetime
 from typing import Optional
 from urllib.parse import urlencode
 
 import aiofiles
 from aiohttp import ClientSession
-from mutagen import File as MutagenFile
+from mutagen._file import File as MutagenFile
 from plyer import storagepath
-from sanic.request import Request
-from sanic.response import HTTPResponse, file, json
 from systembridgeshared.const import (
     QUERY_API_KEY,
     QUERY_API_PORT,
@@ -132,15 +130,15 @@ def get_file(
 
 async def get_file_data(
     filepath: str,
-) -> HTTPResponse:
+):
     """Get file data"""
     return await file(filepath)
 
 
 async def handler_media_directories(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handler for media directories"""
     return json(
         {
@@ -150,9 +148,9 @@ async def handler_media_directories(
 
 
 async def handler_media_files(
-    request: Request,
+    request,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handler for media files"""
     if not (query_base := request.args.get(QUERY_BASE)):
         return json(
@@ -203,9 +201,9 @@ async def handler_media_files(
 
 
 async def handler_media_file(
-    request: Request,
+    request,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
         return json(
@@ -255,9 +253,9 @@ async def handler_media_file(
 
 
 async def handler_media_file_data(
-    request: Request,
+    request,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handler for media file requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
         return json(
@@ -307,9 +305,9 @@ async def handler_media_file_data(
 
 
 async def handler_media_file_write(
-    request: Request,
+    request,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handler for media file write requests"""
     if not (query_base := request.args.get(QUERY_BASE)):
         return json(
@@ -375,10 +373,10 @@ async def handler_media_file_write(
 
 
 async def handler_media_play(
-    request: Request,
+    request,
     settings: Settings,
     callback: Callable[[str, MediaPlay], None],
-) -> HTTPResponse:
+):
     """Handler for media play requests"""
     media_type = request.args.get("type", "video")
     mime_type = None

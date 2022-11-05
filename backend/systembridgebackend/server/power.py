@@ -3,8 +3,6 @@ import asyncio
 import os
 import sys
 
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
 from systembridgeshared.settings import Settings
 
 
@@ -57,9 +55,9 @@ def logout() -> None:
 
 
 async def handler_sleep(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle sleep requests."""
     asyncio.get_running_loop().call_later(2, sleep)
     return json(
@@ -70,9 +68,9 @@ async def handler_sleep(
 
 
 async def handler_hibernate(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle hibernate requests."""
     asyncio.get_running_loop().call_later(2, hibernate)
     return json(
@@ -83,9 +81,9 @@ async def handler_hibernate(
 
 
 async def handler_restart(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle restart requests."""
     asyncio.get_running_loop().call_later(2, restart)
     return json(
@@ -96,9 +94,9 @@ async def handler_restart(
 
 
 async def handler_shutdown(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle shutdown requests."""
     asyncio.get_running_loop().call_later(2, shutdown)
     return json(
@@ -109,9 +107,9 @@ async def handler_shutdown(
 
 
 async def handler_lock(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle lock requests."""
     asyncio.get_running_loop().call_later(2, lock)
     return json(
@@ -122,9 +120,9 @@ async def handler_lock(
 
 
 async def handler_logout(
-    _: Request,
+    _,
     settings: Settings,
-) -> HTTPResponse:
+):
     """Handle logout requests."""
     asyncio.get_running_loop().call_later(2, logout)
     return json(
