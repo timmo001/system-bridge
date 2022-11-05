@@ -7,7 +7,7 @@ from datetime import timedelta
 from os import walk
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, File, Header, Query, WebSocket, status
+from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -41,6 +41,7 @@ from ..server.media import (
     get_file,
     get_file_data,
     get_files,
+    play_media,
     write_file,
 )
 from ..server.websocket import WebSocketHandler
@@ -291,7 +292,7 @@ def get_media_file(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
 ) -> MediaFile:
-    """Get media file."""
+    """Get media file info."""
     root_path = None
     for item in get_directories(settings):
         if item["key"] == query_base:
@@ -339,7 +340,7 @@ def get_media_file_data(
     query_base: str = Query(..., alias="base"),
     query_path: str = Query(..., alias="path"),
 ) -> FileResponse:
-    """Get media file."""
+    """Get media file data."""
     root_path = None
     for item in get_directories(settings):
         if item["key"] == query_base:
@@ -383,7 +384,7 @@ async def send_media_file(
     query_filename: str = Query(..., alias="filename"),
     file: bytes = File(...),
 ) -> dict[str, str]:
-    """Get media file."""
+    """Send media file."""
     root_path = None
     for item in get_directories(settings):
         if item["key"] == query_base:
@@ -419,6 +420,31 @@ async def send_media_file(
         "path": path,
         "filename": query_filename,
     }
+
+
+@app.post("/api/media/play", dependencies=[Depends(security_api_key)])
+async def send_media_play(
+    request: Request,
+    query_autoplay: Optional[bool] = Query(False, alias="autoplay"),
+    query_base: Optional[str] = Query(None, alias="base"),
+    query_path: Optional[str] = Query(None, alias="path"),
+    query_type: Optional[str] = Query(None, alias="type"),
+    query_url: Optional[str] = Query(None, alias="url"),
+    query_volume: Optional[float] = Query(40, alias="volume"),
+) -> dict[str, str]:
+    """Play media."""
+    return await play_media(
+        settings,
+        callback_media_play,
+        query_autoplay=query_autoplay,
+        query_base=query_base,
+        query_path=query_path,
+        query_type=query_type,
+        query_url=query_url,
+        query_volume=query_volume,
+        request_host=request.url.hostname,
+        request_scheme=request.url.scheme,
+    )
 
 
 @app.websocket("/api/websocket")
