@@ -75,7 +75,7 @@ class Server(Base):
         super().__init__()
         self._database = database
         self._settings = settings
-        self._server = Sanic("SystemBridge")
+        self._server = Sanic(name="systembridgebackend")
         # Add OPTIONS handlers to any route that is missing it
         self._server.register_listener(setup_options, "before_server_start")
         # Fill in CORS headers
@@ -366,7 +366,6 @@ class Server(Base):
                     "/",
                     frontend_path,
                     strict_slashes=False,
-                    content_type="text/html",
                     name="Frontend",
                 )
             except (ImportError, ModuleNotFoundError) as error:
