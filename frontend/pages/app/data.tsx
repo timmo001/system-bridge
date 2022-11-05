@@ -1,8 +1,8 @@
 import React, { ReactElement } from "react";
 import { Container } from "@mui/material";
 
-import Data from "../../components/Data/Data";
-import Layout from "../../components/Common/Layout";
+import Data from "components/Data/Data";
+import Layout from "components/Common/Layout";
 
 function PageData(): ReactElement {
   return (

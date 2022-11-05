@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 
-import Layout from "../../../components/Common/Layout";
-import Setup from "../../../components/Bridges/Setup";
+import Layout from "components/Common/Layout";
+import Setup from "components/Bridges/Setup";
 
 function PageBridges(): ReactElement {
   return (

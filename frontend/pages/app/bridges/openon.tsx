@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 
-import OpenOn from "../../../components/Bridges/OpenOn";
-import Layout from "../../../components/Common/Layout";
+import OpenOn from "components/Bridges/OpenOn";
+import Layout from "components/Common/Layout";
 
 function PageBridges(): ReactElement {
   return (
