@@ -51,6 +51,7 @@ from ..server.open import open_path, open_url
 from ..server.websocket import WebSocketHandler
 from .power import hibernate, lock, logout, restart, shutdown, sleep
 from .remote_bridge import get_remote_bridges
+from .update import version_update
 
 database = Database()
 settings = Settings(database)
@@ -133,7 +134,7 @@ for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):  
 listeners = Listeners(database, implemented_modules)
 
 
-async def callback_data_updated(module: str) -> None:
+def callback_data_updated(module: str) -> None:
     """Data updated"""
     await listeners.refresh_data_by_module(module)
 
@@ -437,7 +438,7 @@ async def send_media_play(
 
 
 @app.post("/api/notification", dependencies=[Depends(security_api_key)])
-async def send_notification(notification: Notification) -> dict[str, str]:
+def send_notification(notification: Notification) -> dict[str, str]:
     """Send notification."""
     callback_notification(notification)
     return {
@@ -446,7 +447,7 @@ async def send_notification(notification: Notification) -> dict[str, str]:
 
 
 @app.post("/api/open", dependencies=[Depends(security_api_key)])
-async def send_open(open: Open) -> dict[str, str]:
+def send_open(open: Open) -> dict[str, str]:
     """Send notification."""
     if open.path is not None:
         open_path(open.path)
@@ -465,49 +466,49 @@ async def send_open(open: Open) -> dict[str, str]:
 
 
 @app.post("/api/power/sleep", dependencies=[Depends(security_api_key)])
-async def send_power_sleep() -> dict[str, str]:
+def send_power_sleep() -> dict[str, str]:
     """Send power sleep."""
     asyncio.get_running_loop().call_later(2, sleep)
     return {"message": "Sleeping"}
 
 
 @app.post("/api/power/hibernate", dependencies=[Depends(security_api_key)])
-async def send_power_hibernate() -> dict[str, str]:
+def send_power_hibernate() -> dict[str, str]:
     """Send power hibernate."""
     asyncio.get_running_loop().call_later(2, hibernate)
     return {"message": "Hibernating"}
 
 
 @app.post("/api/power/restart", dependencies=[Depends(security_api_key)])
-async def send_power_restart() -> dict[str, str]:
+def send_power_restart() -> dict[str, str]:
     """Send power restart."""
     asyncio.get_running_loop().call_later(2, restart)
     return {"message": "Restarting"}
 
 
 @app.post("/api/power/shutdown", dependencies=[Depends(security_api_key)])
-async def send_power_shutdown() -> dict[str, str]:
+def send_power_shutdown() -> dict[str, str]:
     """Send power shutdown."""
     asyncio.get_running_loop().call_later(2, shutdown)
     return {"message": "Shutting down"}
 
 
 @app.post("/api/power/lock", dependencies=[Depends(security_api_key)])
-async def send_power_lock() -> dict[str, str]:
+def send_power_lock() -> dict[str, str]:
     """Send power lock."""
     asyncio.get_running_loop().call_later(2, lock)
     return {"message": "Locking"}
 
 
 @app.post("/api/power/logout", dependencies=[Depends(security_api_key)])
-async def send_power_logout() -> dict[str, str]:
+def send_power_logout() -> dict[str, str]:
     """Send power logout."""
     asyncio.get_running_loop().call_later(2, logout)
     return {"message": "Logging out"}
 
 
 @app.delete("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-async def delete_remote(key: str) -> dict[str, dict | str]:
+def delete_remote(key: str) -> dict[str, dict | str]:
     """Delete remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
     remote_bridge: Optional[RemoteBridge] = None
@@ -533,7 +534,7 @@ async def delete_remote(key: str) -> dict[str, dict | str]:
 
 
 @app.get("/api/remote", dependencies=[Depends(security_api_key)])
-async def get_remote() -> dict[str, list[dict] | str]:
+def get_remote() -> dict[str, list[dict] | str]:
     """Get remote bridges."""
     return {
         "message": "Got remote bridges",
@@ -542,7 +543,7 @@ async def get_remote() -> dict[str, list[dict] | str]:
 
 
 @app.post("/api/remote", dependencies=[Depends(security_api_key)])
-async def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
+def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
     """Send remote bridge."""
     database.update_remote_bridge(remote)
     return {
@@ -552,7 +553,7 @@ async def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
 
 
 @app.put("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-async def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
+def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
     """Update remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
     remote_bridge: Optional[RemoteBridge] = None
@@ -577,8 +578,25 @@ async def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]
     }
 
 
+@app.post("/api/update", dependencies=[Depends(security_api_key)])
+def send_update(
+    query_version: str = Query(..., alias="version")
+) -> dict[str, dict[str, Optional[str]] | str]:
+    """Send update."""
+    versions = await version_update(query_version)
+    if versions is None:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {"message": "Invalid version"},
+        )
+    return {
+        "message": "Updating the application",
+        "versions": versions,
+    }
+
+
 @app.websocket("/api/websocket")
-async def websocket_endpoint(websocket: WebSocket):
+def websocket_endpoint(websocket: WebSocket):
     """Websocket endpoint."""
     await websocket.accept()
     websocket_handler = WebSocketHandler(

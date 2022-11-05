@@ -1,20 +1,16 @@
 """System Bridge: Server Handler - Update"""
+from typing import Optional
+
 from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
 
-async def handler_update(
-    request,
-    _: Settings,
-):
+async def version_update(
+    version: str,
+) -> dict[str, Optional[str]]:
     """Handle the update request."""
     versions = Update().update(
-        request.args.get("version"),
+        version,
         wait=False,
     )
-    return json(
-        {
-            "message": "Updating the application",
-            "versions": versions,
-        }
-    )
+    return versions
