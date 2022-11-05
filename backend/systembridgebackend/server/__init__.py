@@ -23,6 +23,7 @@ from systembridgeshared.const import (
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
 from systembridgeshared.models.media_files import File as MediaFile
@@ -49,6 +50,7 @@ from ..server.media import (
 from ..server.open import open_path, open_url
 from ..server.websocket import WebSocketHandler
 from .power import hibernate, lock, logout, restart, shutdown, sleep
+from .remote_bridge import get_remote_bridges
 
 database = Database()
 settings = Settings(database)
@@ -502,6 +504,77 @@ async def send_power_logout() -> dict[str, str]:
     """Send power logout."""
     asyncio.get_running_loop().call_later(2, logout)
     return {"message": "Logging out"}
+
+
+@app.delete("/api/remote/{key}", dependencies=[Depends(security_api_key)])
+async def delete_remote(key: str) -> dict[str, dict | str]:
+    """Delete remote bridge."""
+    bridges: list[RemoteBridge] = get_remote_bridges(database)
+    remote_bridge: Optional[RemoteBridge] = None
+
+    for bridge in bridges:
+        if bridge.key == key:
+            remote_bridge = bridge
+
+    if remote_bridge is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {
+                "message": "Remote bridge not found",
+            },
+        )
+
+    database.delete_remote_bridge(remote_bridge.key)
+
+    return {
+        "message": "Deleted remote bridge",
+        "data": remote_bridge.dict(),
+    }
+
+
+@app.get("/api/remote", dependencies=[Depends(security_api_key)])
+async def get_remote() -> dict[str, list[dict] | str]:
+    """Get remote bridges."""
+    return {
+        "message": "Got remote bridges",
+        "data": [bridge.dict() for bridge in get_remote_bridges(database)],
+    }
+
+
+@app.post("/api/remote", dependencies=[Depends(security_api_key)])
+async def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
+    """Send remote bridge."""
+    database.update_remote_bridge(remote)
+    return {
+        "message": "Added remote bridge",
+        "data": remote.dict(),
+    }
+
+
+@app.put("/api/remote/{key}", dependencies=[Depends(security_api_key)])
+async def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
+    """Update remote bridge."""
+    bridges: list[RemoteBridge] = get_remote_bridges(database)
+    remote_bridge: Optional[RemoteBridge] = None
+
+    for bridge in bridges:
+        if bridge.key == key:
+            remote_bridge = bridge
+
+    if remote_bridge is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {
+                "message": "Remote bridge not found",
+            },
+        )
+
+    database.update_remote_bridge(remote)
+
+    return {
+        "message": "Updated remote bridge",
+        "data": remote.dict(),
+    }
 
 
 @app.websocket("/api/websocket")
