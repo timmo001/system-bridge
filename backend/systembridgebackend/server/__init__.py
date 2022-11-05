@@ -1,4 +1,5 @@
 """System Bridge: Server"""
+import asyncio
 import logging
 import os
 import sys
@@ -28,6 +29,7 @@ from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_files import MediaFiles
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.open import Open
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
@@ -44,7 +46,9 @@ from ..server.media import (
     play_media,
     write_file,
 )
+from ..server.open import open_path, open_url
 from ..server.websocket import WebSocketHandler
+from .power import hibernate, lock, logout, restart, shutdown, sleep
 
 database = Database()
 settings = Settings(database)
@@ -431,14 +435,73 @@ async def send_media_play(
 
 
 @app.post("/api/notification", dependencies=[Depends(security_api_key)])
-async def send_notification(
-    notification: Notification,
-) -> dict[str, str]:
+async def send_notification(notification: Notification) -> dict[str, str]:
     """Send notification."""
     callback_notification(notification)
     return {
         "message": "Notification sent",
     }
+
+
+@app.post("/api/open", dependencies=[Depends(security_api_key)])
+async def send_open(open: Open) -> dict[str, str]:
+    """Send notification."""
+    if open.path is not None:
+        open_path(open.path)
+        return {
+            "message": f"Opening path: {open.url}",
+        }
+    elif open.url is not None:
+        open_url(open.url)
+        return {
+            "message": f"Opening URL: {open.url}",
+        }
+    raise HTTPException(
+        status.HTTP_400_BAD_REQUEST,
+        {"message": "No path or URL specified"},
+    )
+
+
+@app.post("/api/power/sleep", dependencies=[Depends(security_api_key)])
+async def send_power_sleep() -> dict[str, str]:
+    """Send power sleep."""
+    asyncio.get_running_loop().call_later(2, sleep)
+    return {"message": "Sleeping"}
+
+
+@app.post("/api/power/hibernate", dependencies=[Depends(security_api_key)])
+async def send_power_hibernate() -> dict[str, str]:
+    """Send power hibernate."""
+    asyncio.get_running_loop().call_later(2, hibernate)
+    return {"message": "Hibernating"}
+
+
+@app.post("/api/power/restart", dependencies=[Depends(security_api_key)])
+async def send_power_restart() -> dict[str, str]:
+    """Send power restart."""
+    asyncio.get_running_loop().call_later(2, restart)
+    return {"message": "Restarting"}
+
+
+@app.post("/api/power/shutdown", dependencies=[Depends(security_api_key)])
+async def send_power_shutdown() -> dict[str, str]:
+    """Send power shutdown."""
+    asyncio.get_running_loop().call_later(2, shutdown)
+    return {"message": "Shutting down"}
+
+
+@app.post("/api/power/lock", dependencies=[Depends(security_api_key)])
+async def send_power_lock() -> dict[str, str]:
+    """Send power lock."""
+    asyncio.get_running_loop().call_later(2, lock)
+    return {"message": "Locking"}
+
+
+@app.post("/api/power/logout", dependencies=[Depends(security_api_key)])
+async def send_power_logout() -> dict[str, str]:
+    """Send power logout."""
+    asyncio.get_running_loop().call_later(2, logout)
+    return {"message": "Logging out"}
 
 
 @app.websocket("/api/websocket")
