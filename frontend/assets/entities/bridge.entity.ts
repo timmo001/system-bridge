@@ -3,5 +3,5 @@ export interface Bridge {
   name: string;
   host: string;
   port: number;
-  apiKey?: string;
+  api_key?: string;
 }

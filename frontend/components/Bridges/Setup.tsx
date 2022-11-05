@@ -13,6 +13,7 @@ import {
 import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
+import { Response } from "../../assets/entities/response.entity";
 import { useSettings } from "../Contexts/Settings";
 import BridgeEdit, { EditBridge } from "./Edit";
 
@@ -30,7 +31,7 @@ function BridgesSetupComponent(): ReactElement {
 
   const handleSetup = useCallback(async () => {
     console.log("Setup Bridges");
-    const response = await axios.get<Array<Bridge>>(
+    const response = await axios.get<Response<Array<Bridge>>>(
       `http://${
         query.apiHost || typeof window !== "undefined"
           ? window.location.hostname
@@ -41,7 +42,7 @@ function BridgesSetupComponent(): ReactElement {
       }
     );
     if (response && response.status < 400) {
-      setBridges(response.data);
+      setBridges(response.data.data);
     }
   }, [query.apiHost, query.apiPort, query.apiKey]);
 
@@ -97,10 +98,10 @@ function BridgesSetupComponent(): ReactElement {
                   >
                     <ListItemText
                       primary={`${bridge.name} ${
-                        bridge.apiKey ? "" : "(Not Configured)"
+                        bridge.api_key ? "" : "(Not Configured)"
                       }`}
                       secondary={`${bridge.host}:${bridge.port}`}
-                      color={bridge.apiKey ? "primary" : "error"}
+                      color={bridge.api_key ? "primary" : "error"}
                     />
                   </ListItem>
                 ))}
