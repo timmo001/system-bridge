@@ -24,7 +24,6 @@ from systembridgeshared.const import (
     QUERY_API_PORT,
     QUERY_AUTOPLAY,
     QUERY_BASE,
-    QUERY_FILENAME,
     QUERY_PATH,
     QUERY_URL,
     QUERY_VOLUME,
@@ -33,7 +32,6 @@ from systembridgeshared.const import (
     SETTING_PORT_API,
 )
 from systembridgeshared.models.media_files import File as MediaFile
-from systembridgeshared.models.media_files import MediaFiles
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
