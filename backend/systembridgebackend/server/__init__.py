@@ -437,7 +437,7 @@ class Server(Base):
         """Stop Server"""
         self._logger.info("Remove listeners")
         self._listeners.remove_all_listeners()
-        if self._server is not None and self._server.is_running:
+        if self._server is not None:
             loop = self._server.loop
             self._logger.info("Stop the event loop")
             loop.stop()
