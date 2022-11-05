@@ -1,9 +1,6 @@
 """System Bridge: Server Handler - Power"""
-import asyncio
 import os
 import sys
-
-from systembridgeshared.settings import Settings
 
 
 def sleep() -> None:
