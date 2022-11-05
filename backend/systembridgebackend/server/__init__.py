@@ -7,9 +7,10 @@ from datetime import timedelta
 from os import walk
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, Query, WebSocket, status
+from fastapi import Depends, FastAPI, File, Header, Query, WebSocket, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
@@ -23,6 +24,8 @@ from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
+from systembridgeshared.models.media_files import File as MediaFile
+from systembridgeshared.models.media_files import MediaFiles
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
@@ -33,16 +36,15 @@ from ..gui import GUI, GUIAttemptsExceededException
 from ..modules.listeners import Listeners
 from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.mdns import MDNSAdvertisement
+from ..server.media import (
+    get_directories,
+    get_file,
+    get_file_data,
+    get_files,
+    write_file,
+)
 from ..server.websocket import WebSocketHandler
 
-# from ..server.media import (
-#     handler_media_directories,
-#     handler_media_file,
-#     handler_media_file_data,
-#     handler_media_file_write,
-#     handler_media_files,
-#     handler_media_play,
-# )
 # from ..server.notification import handler_notification
 # from ..server.open import handler_open
 # from ..server.power import (
@@ -134,7 +136,7 @@ app.add_middleware(
 )
 
 implemented_modules = []
-for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
+for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):  # type: ignore
     implemented_modules = list(filter(lambda d: "__" not in d, dirs))
     break
 
@@ -229,6 +231,194 @@ def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str,
             **keyboard_event.dict(),
         }
     raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid keyboard event")
+
+
+@app.get("/api/media", dependencies=[Depends(security_api_key)])
+def get_media_directories() -> dict[str, list[dict[str, str]]]:
+    """Get media directories."""
+    return {
+        "directories": get_directories(settings),
+    }
+
+
+@app.get("/api/media/files", dependencies=[Depends(security_api_key)])
+def get_media_files(
+    query_base: str = Query(..., alias="base"),
+    query_path: Optional[str] = Query(None, alias="path"),
+) -> MediaFiles:
+    """Get media files."""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": "Cannot find base", "base": query_base},
+        )
+
+    path = os.path.join(root_path, query_path) if query_path else root_path
+    if not os.path.exists(path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot find path", "path": path},
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+        )
+    if not os.path.isdir(path):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {"message": "Path is not a directory", "path": path},
+        )
+
+    return MediaFiles(
+        files=get_files(settings, query_base, path),
+        path=path,
+    )
+
+
+@app.get("/api/media/file", dependencies=[Depends(security_api_key)])
+def get_media_file(
+    query_base: str = Query(..., alias="base"),
+    query_path: str = Query(..., alias="path"),
+) -> MediaFile:
+    """Get media file."""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": "Cannot find base", "base": query_base},
+        )
+
+    path = os.path.join(root_path, query_path) if query_path else root_path
+    if not os.path.exists(path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot find path", "path": path},
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+        )
+    if not os.path.isfile(path):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {"message": "Path is not a file", "path": path},
+        )
+
+    file = get_file(query_base, path)
+    if file is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot get file", "path": path},
+        )
+    return file
+
+
+@app.get("/api/media/file/data", dependencies=[Depends(security_api_key)])
+def get_media_file_data(
+    query_base: str = Query(..., alias="base"),
+    query_path: str = Query(..., alias="path"),
+) -> FileResponse:
+    """Get media file."""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": "Cannot find base", "base": query_base},
+        )
+
+    path = os.path.join(root_path, query_path) if query_path else root_path
+    if not os.path.exists(path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot find path", "path": path},
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+        )
+    if not os.path.isfile(path):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {"message": "Path is not a file", "path": path},
+        )
+
+    return get_file_data(path)
+
+
+@app.post("/api/media/file/write", dependencies=[Depends(security_api_key)])
+async def send_media_file(
+    query_base: str = Query(..., alias="base"),
+    query_path: str = Query(..., alias="path"),
+    query_filename: str = Query(..., alias="filename"),
+    file: bytes = File(...),
+) -> dict[str, str]:
+    """Get media file."""
+    root_path = None
+    for item in get_directories(settings):
+        if item["key"] == query_base:
+            root_path = item["path"]
+            break
+
+    if root_path is None or not os.path.exists(root_path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": "Cannot find base", "base": query_base},
+        )
+
+    path = os.path.join(root_path, query_path) if query_path else root_path
+    if not os.path.exists(path):
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            {"message": "Cannot find path", "path": path},
+        )
+    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Path is not underneath base path",
+                "base": root_path,
+                "path": path,
+            },
+        )
+
+    await write_file(os.path.join(path, query_filename), file)
+
+    return {
+        "message": "File uploaded",
+        "path": path,
+        "filename": query_filename,
+    }
 
 
 @app.websocket("/api/websocket")
