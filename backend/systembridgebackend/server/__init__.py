@@ -1,10 +1,10 @@
 """System Bridge: Server"""
 import asyncio
+import os
+import sys
 from collections.abc import Awaitable, Callable
 from datetime import timedelta
-import os
 from os import walk
-import sys
 from typing import Optional
 
 from sanic import Sanic
@@ -52,6 +52,11 @@ from ..server.power import (
 )
 from ..server.update import handler_update
 from ..server.websocket import WebSocketHandler
+from .remote_bridge import (
+    handler_delete_remote_bridge,
+    handler_get_remote_bridges,
+    handler_update_remote_bridge,
+)
 
 
 class ApplicationExitException(BaseException):
@@ -184,6 +189,30 @@ class Server(Base):
                 self._callback_notification,
             )
 
+        @auth.key_required
+        async def _handler_delete_remote_bridge(
+            _: Request,
+            key: str,
+        ) -> HTTPResponse:
+            """Get remote bridge handler"""
+            return await handler_delete_remote_bridge(
+                key,
+                self._database,
+            )
+
+        @auth.key_required
+        async def _handler_get_remote_bridge(_: Request) -> HTTPResponse:
+            """Get remote bridge handler"""
+            return await handler_get_remote_bridges(self._database)
+
+        @auth.key_required
+        async def _handler_update_remote_bridge(request: Request) -> HTTPResponse:
+            """Update remote bridge handler"""
+            return await handler_update_remote_bridge(
+                request,
+                self._database,
+            )
+
         async def _handler_websocket(
             _: Request,
             socket,
@@ -200,109 +229,127 @@ class Server(Base):
             await websocket.handler()
 
         self._server.add_route(
-            _handler_data_all,
+            _handler_data_all,  # type: ignore
             "/api/data/<table:str>",
             methods=["GET"],
             name="Data",
         )
         self._server.add_route(
-            _handler_data_by_key,
+            _handler_data_by_key,  # type: ignore
             "/api/data/<table:str>/<key:str>",
             methods=["GET"],
             name="Data by Key",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_keyboard),
+            lambda r: _handler_generic(r, handler_keyboard),  # type: ignore
             "/api/keyboard",
             methods=["POST"],
             name="Keyboard",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_directories),
+            lambda r: _handler_generic(r, handler_media_directories),  # type: ignore
             "/api/media",
             methods=["GET"],
             name="Media Directories",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_files),
+            lambda r: _handler_generic(r, handler_media_files),  # type: ignore
             "/api/media/files",
             methods=["GET"],
             name="Media Files",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file),
+            lambda r: _handler_generic(r, handler_media_file),  # type: ignore
             "/api/media/file",
             methods=["GET"],
             name="Media File",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file_data),
+            lambda r: _handler_generic(r, handler_media_file_data),  # type: ignore
             "/api/media/file/data",
             methods=["GET"],
             name="Media File Data",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file_write),
+            lambda r: _handler_generic(r, handler_media_file_write),  # type: ignore
             "/api/media/file/write",
             methods=["POST"],
             name="Media File Write",
         )
         self._server.add_route(
-            _handler_media_play,
+            _handler_media_play,  # type: ignore
             "/api/media/play",
             methods=["POST"],
             name="Media Play",
         )
         self._server.add_route(
-            _handler_notification,
+            _handler_notification,  # type: ignore
             "/api/notification",
             methods=["POST"],
             name="Notification",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_open),
+            lambda r: _handler_generic(r, handler_open),  # type: ignore
             "/api/open",
             methods=["POST"],
             name="Open",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_sleep),
+            lambda r: _handler_generic(r, handler_sleep),  # type: ignore
             "/api/power/sleep",
             methods=["POST"],
             name="Power Sleep",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_hibernate),
+            lambda r: _handler_generic(r, handler_hibernate),  # type: ignore
             "/api/power/hibernate",
             methods=["POST"],
             name="Power Hibernate",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_restart),
+            lambda r: _handler_generic(r, handler_restart),  # type: ignore
             "/api/power/restart",
             methods=["POST"],
             name="Power Restart",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_shutdown),
+            lambda r: _handler_generic(r, handler_shutdown),  # type: ignore
             "/api/power/shutdown",
             methods=["POST"],
             name="Power Shutdown",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_lock),
+            lambda r: _handler_generic(r, handler_lock),  # type: ignore
             "/api/power/lock",
             methods=["POST"],
             name="Power Lock",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_logout),
+            lambda r: _handler_generic(r, handler_logout),  # type: ignore
             "/api/power/logout",
             methods=["POST"],
             name="Power Logout",
         )
         self._server.add_route(
-            lambda r: _handler_generic(r, handler_update),
+            _handler_delete_remote_bridge,  # type: ignore
+            "/api/remote/<key:str>",
+            methods=["DELETE"],
+            name="Get Remote Bridges",
+        )
+        self._server.add_route(
+            _handler_get_remote_bridge,  # type: ignore
+            "/api/remote",
+            methods=["GET"],
+            name="Get Remote Bridges",
+        )
+        self._server.add_route(
+            _handler_update_remote_bridge,  # type: ignore
+            "/api/remote",
+            methods=["POST", "PUT"],
+            name="Update Remote Bridge",
+        )
+        self._server.add_route(
+            lambda r: _handler_generic(r, handler_update),  # type: ignore
             "/api/update",
             methods=["POST"],
             name="Update",

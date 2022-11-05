@@ -20,6 +20,7 @@ import {
 import axios from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
+import { Response } from "../../assets/entities/response.entity";
 import { useSettings } from "../Contexts/Settings";
 
 function BridgesOpenOnComponent(): ReactElement {
@@ -32,17 +33,24 @@ function BridgesOpenOnComponent(): ReactElement {
   const [url, setUrl] = useState<string>("");
 
   const handleSetup = useCallback(async () => {
-    setUrl(query.url as string);
-    const response = await axios.get<Array<Bridge>>(
+    setUrl((query.url as string) || "");
+    const response = await axios.get<Response<Array<Bridge>>>(
       `http://${
         query.apiHost || typeof window !== "undefined"
           ? window.location.hostname
           : "localhost"
-      }:${query.apiPort || 9170}/bridges`,
-      { headers: { "api-key": query.apiKey as string } }
+      }:${query.apiPort || 9170}/api/remote`,
+      {
+        headers: { "api-key": query.apiKey as string },
+      }
     );
-    if (response && response.status < 400)
-      setBridges(response.data.filter((bridge: Bridge) => bridge.apiKey));
+    if (response && response.status < 400) {
+      const newBridges = response.data.data.filter(
+        (bridge: Bridge) => bridge.api_key
+      );
+      setBridges(newBridges);
+      setBridgeSelected(newBridges[0]);
+    }
   }, [query.apiHost, query.apiPort, query.apiKey, query.url]);
 
   function handleUrlChanged(event: ChangeEvent<HTMLInputElement>): void {
@@ -50,12 +58,12 @@ function BridgesOpenOnComponent(): ReactElement {
   }
 
   async function handleOpenOn(): Promise<void> {
-    if (bridgeSelected?.apiKey) {
+    if (bridgeSelected?.api_key) {
       try {
         const response = await axios.post<{ path: string }>(
-          `http://${bridgeSelected.host}:${bridgeSelected.port}/open`,
-          { path: url },
-          { headers: { "api-key": bridgeSelected.apiKey } }
+          `http://${bridgeSelected.host}:${bridgeSelected.port}/api/open`,
+          { [url.includes("://") ? "url" : "path"]: url },
+          { headers: { "api-key": bridgeSelected.api_key } }
         );
         if (response && response.status < 400) {
           console.log(response.data);
@@ -94,10 +102,10 @@ function BridgesOpenOnComponent(): ReactElement {
               variant="h3"
               sx={{ margin: theme.spacing(2, 1.5, 6) }}
             >
-              Open URL On..
+              Open Path / URL On..
             </Typography>
 
-            {bridges ? (
+            {bridges && bridgeSelected ? (
               <Autocomplete
                 id="bridge"
                 options={bridges}
@@ -120,7 +128,7 @@ function BridgesOpenOnComponent(): ReactElement {
             <TextField
               fullWidth
               id="url"
-              label="URL"
+              label="Path / URL"
               onChange={handleUrlChanged}
               type="url"
               value={url}

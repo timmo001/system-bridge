@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
 import { Bridge } from "../../assets/entities/bridge.entity";
-import { Information } from "assets/entities/information.entity";
+import { System } from "assets/entities/system.entity";
 
 export interface EditBridge {
   edit: boolean;
@@ -58,7 +58,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
         query.apiHost || typeof window !== "undefined"
           ? window.location.hostname
           : "localhost"
-      }:${query.apiPort || 9170}/bridges/${bridge.key}`,
+      }:${query.apiPort || 9170}/api/remote/${bridge.key}`,
       { headers: { "api-key": query.apiKey as string } }
     );
     if (response && response.status < 400) props.handleClose();
@@ -66,17 +66,17 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
   }
 
   async function handleSave() {
-    const information = await handleTestBridge();
-    if (information && information.uuid) {
+    const system = await handleTestBridge();
+    if (system && system.uuid) {
       const bridgeData = {
         ...bridge,
-        key: information.uuid,
+        key: system.uuid,
       };
       const url = `http://${
         query.apiHost || typeof window !== "undefined"
           ? window.location.hostname
           : "localhost"
-      }:${query.apiPort || 9170}/bridges`;
+      }:${query.apiPort || 9170}/api/remote`;
       console.log("Save:", { url, bridgeData });
       let response: AxiosResponse<Partial<Bridge>, any>;
       try {
@@ -99,18 +99,18 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
     }
   }
 
-  async function handleTestBridge(): Promise<Information | null> {
+  async function handleTestBridge(): Promise<System | null> {
     setTestingMessage({ text: "Testing bridge..", error: false });
-    if (bridge?.apiKey)
+    if (bridge?.api_key)
       try {
-        const response = await axios.get<Information>(
-          `http://${bridge.host}:${bridge.port}/information`,
+        const response = await axios.get<System>(
+          `http://${bridge.host}:${bridge.port}/api/data/system`,
           {
-            headers: { "api-key": bridge.apiKey },
+            headers: { "api-key": bridge.api_key },
           }
         );
         if (response && response.status < 400) {
-          console.log("Information:", response.data);
+          console.log("System:", response.data);
           setTestingMessage({
             text: "Successfully connected to bridge.",
             error: false,
@@ -181,19 +181,24 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
 
         <TextField
           fullWidth
-          id="apiKey"
+          id="api_key"
           label="API Key"
-          onChange={handleTextChanged("apiKey")}
+          onChange={handleTextChanged("api_key")}
           type="text"
-          value={bridge.apiKey || ""}
+          value={bridge.api_key || ""}
           variant="outlined"
           sx={{ margin: theme.spacing(1, 0) }}
         />
       </DialogContent>
-      <DialogActions>
+      <DialogActions
+        sx={{
+          padding: theme.spacing(0, 2, 1),
+        }}
+      >
         <Button
+          disabled={bridge.key === undefined}
           onClick={handleDelete}
-          color="inherit"
+          color="error"
           variant="contained"
           sx={{ margin: theme.spacing(1, 0) }}
         >

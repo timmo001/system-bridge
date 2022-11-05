@@ -1,7 +1,7 @@
 """System Bridge: WebSocket handler"""
+import os
 from collections.abc import Callable
 from json import JSONDecodeError, loads
-import os
 from uuid import uuid4
 
 from systembridgeshared.base import Base
@@ -53,6 +53,8 @@ from systembridgeshared.const import (
     TYPE_GET_DIRECTORIES,
     TYPE_GET_FILE,
     TYPE_GET_FILES,
+    TYPE_GET_REMOTE_BRIDGES,
+    TYPE_GET_REMOTE_BRIDGES_RESULT,
     TYPE_GET_SETTING,
     TYPE_GET_SETTINGS,
     TYPE_KEYBOARD_KEY_PRESSED,
@@ -80,10 +82,13 @@ from systembridgeshared.const import (
     TYPE_SETTING_UPDATED,
     TYPE_SETTINGS_RESULT,
     TYPE_UNREGISTER_DATA_LISTENER,
+    TYPE_UPDATE_REMOTE_BRIDGE,
+    TYPE_UPDATE_REMOTE_BRIDGE_RESULT,
     TYPE_UPDATE_SETTING,
 )
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
@@ -108,6 +113,7 @@ from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.media import get_directories, get_file, get_files
 from ..server.open import open_path, open_url
 from ..server.power import hibernate, lock, logout, restart, shutdown, sleep
+from ..server.remote_bridge import get_remote_bridges
 
 
 class WebSocketHandler(Base):
@@ -844,6 +850,50 @@ class WebSocketHandler(Base):
                             EVENT_MESSAGE: "Got setting",
                             EVENT_SETTING: model.setting,
                             EVENT_DATA: self._settings.get(model.setting),
+                        }
+                    )
+                )
+            elif request.event == TYPE_GET_REMOTE_BRIDGES:
+                self._logger.info("Getting remote bridges")
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
+                            EVENT_TYPE: TYPE_GET_REMOTE_BRIDGES_RESULT,
+                            EVENT_MESSAGE: "Got remote bridges",
+                            EVENT_DATA: get_remote_bridges(self._database),
+                        }
+                    )
+                )
+            elif request.event == TYPE_UPDATE_REMOTE_BRIDGE:
+                try:
+                    model = RemoteBridge(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
+
+                self._logger.info("Remote bridge: %s", model)
+
+                model = self._database.update_remote_bridge(model)
+
+                await self._send_response(
+                    Response(
+                        **{
+                            EVENT_ID: request.id,
+                            EVENT_TYPE: TYPE_UPDATE_REMOTE_BRIDGE_RESULT,
+                            EVENT_MESSAGE: "Data updated",
+                            EVENT_DATA: model,
                         }
                     )
                 )

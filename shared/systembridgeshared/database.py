@@ -1,8 +1,8 @@
 """System Bridge Shared: Database"""
 from __future__ import annotations
 
-from collections.abc import Mapping
 import os
+from collections.abc import Mapping
 from time import time
 from typing import Any, Optional, Union
 
@@ -38,7 +38,7 @@ from .models.database_data import (
     Settings,
     System,
 )
-from .models.database_data_bridge import Bridge
+from .models.database_data_remote_bridge import RemoteBridge
 from .models.database_data_sensors import Sensors
 
 TABLE_MAP: Mapping[str, Any] = {
@@ -58,13 +58,13 @@ TABLE_MAP: Mapping[str, Any] = {
 
 TableDataType = Union[
     Battery,
-    Bridge,
     CPU,
     Disk,
     Display,
     GPU,
     Memory,
     Network,
+    RemoteBridge,
     Secrets,
     Sensors,
     Settings,
@@ -164,3 +164,39 @@ class Database(Base):
             session.commit()
             if old_data is not None:
                 session.refresh(old_data)
+
+    def delete_remote_bridge(
+        self,
+        key: str,
+    ) -> None:
+        """Delete remote bridge"""
+        with Session(self._engine, autoflush=True) as session:
+            result = session.exec(select(RemoteBridge).where(RemoteBridge.key == key))
+            if (data := result.first()) is not None:
+                session.delete(data)
+                session.commit()
+
+    def update_remote_bridge(
+        self,
+        data: RemoteBridge,
+    ) -> RemoteBridge:
+        """Update remote bridge"""
+        with Session(self._engine, autoflush=True) as session:
+            result = session.exec(
+                select(RemoteBridge).where(RemoteBridge.key == data.key)
+            )
+            if (old_data := result.first()) is None:
+                data.timestamp = time()
+                session.add(data)
+            else:
+                old_data.name = data.name
+                old_data.host = data.host
+                old_data.port = data.port
+                old_data.api_key = data.api_key
+                old_data.timestamp = time()
+                session.add(old_data)
+            session.commit()
+            if old_data is not None:
+                session.refresh(old_data)
+                return old_data
+            return data
