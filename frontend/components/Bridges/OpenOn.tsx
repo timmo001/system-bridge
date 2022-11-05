@@ -102,7 +102,7 @@ function BridgesOpenOnComponent(): ReactElement {
               variant="h3"
               sx={{ margin: theme.spacing(2, 1.5, 6) }}
             >
-              Open URL On..
+              Open Path / URL On..
             </Typography>
 
             {bridges && bridgeSelected ? (
