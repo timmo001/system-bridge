@@ -190,10 +190,15 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           sx={{ margin: theme.spacing(1, 0) }}
         />
       </DialogContent>
-      <DialogActions>
+      <DialogActions
+        sx={{
+          padding: theme.spacing(0, 2, 1),
+        }}
+      >
         <Button
+          disabled={bridge.key === undefined}
           onClick={handleDelete}
-          color="inherit"
+          color="error"
           variant="contained"
           sx={{ margin: theme.spacing(1, 0) }}
         >

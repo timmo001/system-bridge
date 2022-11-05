@@ -165,11 +165,22 @@ class Database(Base):
             if old_data is not None:
                 session.refresh(old_data)
 
+    def delete_remote_bridge(
+        self,
+        key: str,
+    ) -> None:
+        """Delete remote bridge"""
+        with Session(self._engine, autoflush=True) as session:
+            result = session.exec(select(RemoteBridge).where(RemoteBridge.key == key))
+            if (data := result.first()) is not None:
+                session.delete(data)
+                session.commit()
+
     def update_remote_bridge(
         self,
         data: RemoteBridge,
     ) -> RemoteBridge:
-        """Update data"""
+        """Update remote bridge"""
         with Session(self._engine, autoflush=True) as session:
             result = session.exec(
                 select(RemoteBridge).where(RemoteBridge.key == data.key)
