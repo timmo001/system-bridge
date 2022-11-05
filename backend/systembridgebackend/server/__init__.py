@@ -1,42 +1,38 @@
 """System Bridge: Server"""
-import asyncio
 import logging
 import os
 import sys
 from collections.abc import Awaitable, Callable
 from datetime import timedelta
 from os import walk
-from typing import Optional, Union
+from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, Query, Security, status
+from fastapi import Depends, FastAPI, Header, Query, status
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import APIKeyHeader, APIKeyQuery
 from fastapi.staticfiles import StaticFiles
+from systembridgeshared.common import convert_string_to_correct_type
 from systembridgeshared.const import (
     HEADER_API_KEY,
     QUERY_API_KEY,
     SECRET_API_KEY,
     SETTING_LOG_LEVEL,
 )
-from systembridgeshared.database import Database
+from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.logger import setup_logger
+from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.media_play import MediaPlay
+from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
+from ..data import Data
+from ..gui import GUI, GUIAttemptsExceededException
+from ..modules.listeners import Listeners
 
-# from systembridgeshared.base import Base
-# from systembridgeshared.common import convert_string_to_correct_type
-# from systembridgeshared.database import TABLE_MAP, Database
-# from systembridgeshared.models.media_play import MediaPlay
-# from systembridgeshared.models.notification import Notification
-
-
-# from ..data import Data
-# from ..gui import GUI, GUIAttemptsExceededException
-# from ..modules.listeners import Listeners
 # from ..server.keyboard import handler_keyboard
-# from ..server.mdns import MDNSAdvertisement
+from ..server.mdns import MDNSAdvertisement
+
 # from ..server.media import (
 #     handler_media_directories,
 #     handler_media_file,
@@ -71,17 +67,6 @@ setup_logger(log_level, "system-bridge")
 
 logger = logging.getLogger("systembridgebackend.server")
 logger.info("System Bridge %s: Server", __version__.public())
-
-# auth_api_key_header = APIKeyHeader(
-#     auto_error=True,
-#     name=HEADER_API_KEY,
-#     description="API Key Header",
-# )
-# auth_api_key_query = APIKeyQuery(
-#     auto_error=True,
-#     name=QUERY_API_KEY,
-#     description="API Key Query Parameter",
-# )
 
 
 def security_api_key_header(
@@ -147,6 +132,27 @@ app.add_middleware(
     ],
 )
 
+implemented_modules = []
+for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
+    implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+    break
+
+listeners = Listeners(database, implemented_modules)
+
+
+async def callback_data_updated(module: str) -> None:
+    """Data updated"""
+    await listeners.refresh_data_by_module(module)
+
+
+data = Data(database, callback_data_updated)
+gui: Optional[GUI] = None
+gui_notification: Optional[GUI] = None
+gui_player: Optional[GUI] = None
+
+mdns_advertisement = MDNSAdvertisement(settings)
+mdns_advertisement.advertise_server()
+
 
 @app.get("/")
 def get_root() -> dict[str, str]:
@@ -162,6 +168,44 @@ def get_api_root() -> dict[str, str]:
     return {
         "message": "Hello!",
         "version": __version__.public(),
+    }
+
+
+@app.get("/api/data/{module}", dependencies=[Depends(security_api_key)])
+def get_data(module: str) -> DataDict:
+    """Get data from module."""
+    table_module = TABLE_MAP.get(module)
+    if module not in implemented_modules or table_module is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data module {module} not found"},
+        )
+    return database.get_data_dict(table_module)
+
+
+@app.get("/api/data/{module}/{key}", dependencies=[Depends(security_api_key)])
+def get_data_by_key(
+    module: str,
+    key: str,
+) -> dict[str, Any]:
+    """Get data from module by key."""
+    table_module = TABLE_MAP.get(module)
+    if module not in implemented_modules or table_module is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data module {module} not found"},
+        )
+
+    data = database.get_data_item_by_key(table_module, key)
+    if data is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail={"message": f"Data item {key} in module {module} not found"},
+        )
+
+    return {
+        data.key: convert_string_to_correct_type(data.value),
+        "last_updated": data.timestamp,
     }
 
 
@@ -184,105 +228,70 @@ if "--no-frontend" not in sys.argv:
         logger.error("Frontend not found: %s", error)
 
 
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: Union[str, None] = None):
-#     return {"item_id": item_id, "q": q}
+def exit_application() -> None:
+    """Exit application"""
+    logger.info("Exit application")
+    # stop_server()
+    logger.info("Server stopped. Exiting GUI(s) (if any)")
+    # stop_guis()
+    logger.info("Exiting application")
+    sys.exit(0)
 
 
-# def __init__(
-#     self,
-#     database: Database,
-#     settings: Settings,
-# ) -> None:
-#     """Initialize"""
-#     super().__init__()
-#     self._database = database
-#     self._settings = settings
+def callback_media_play(
+    media_type: str,
+    media_play: MediaPlay,
+) -> None:
+    """Callback to open media player"""
+    gui_player = GUI(settings)
+    gui_player.start(
+        "media-player",
+        media_type,
+        media_play.json(),
+    )
 
-#     implemented_modules = []
-#     for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
-#         implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-#         break
 
-#     self._listeners = Listeners(self._database, implemented_modules)
-#     self._data = Data(self._database, self._callback_data_updated)
-#     self._gui: Optional[GUI] = None
-#     self._gui_notification: Optional[GUI] = None
-#     self._gui_player: Optional[GUI] = None
+def callback_notification(notification: Notification) -> None:
+    """Callback to open media player"""
+    gui_notification = GUI(settings)
+    gui_notification.start(
+        "notification",
+        notification.json(),
+    )
 
-#     mdns_advertisement = MDNSAdvertisement(self._settings)
-#     mdns_advertisement.advertise_server()
 
-# async def _callback_data_updated(
-#     self,
-#     module: str,
-# ) -> None:
-#     """Data updated"""
-#     await self._listeners.refresh_data_by_module(module)
-
-# def _exit_application(self) -> None:
-#     """Exit application"""
-#     self._logger.info("Exit application")
-#     self.stop_server()
-#     self._logger.info("Server stopped. Exiting GUI(s) (if any)")
-#     self.stop_guis()
-#     self._logger.info("Exiting application")
-#     sys.exit(0)
-
-# def _callback_media_play(
-#     self,
-#     media_type: str,
-#     media_play: MediaPlay,
-# ) -> None:
-#     """Callback to open media player"""
-#     self._gui_player = GUI(self._settings)
-#     self._gui_player.start(
-#         "media-player",
-#         media_type,
-#         media_play.json(),
-#     )
-
-# def _callback_notification(
-#     self,
-#     notification: Notification,
-# ) -> None:
-#     """Callback to open media player"""
-#     self._gui_notification = GUI(self._settings)
-#     self._gui_notification.start(
-#         "notification",
-#         notification.json(),
-#     )
-
-# def start_server(self) -> None:
+# def start_server() -> None:
 #     """Start Server"""
-#     if (port := self._settings.get(SETTING_PORT_API)) is None:
+#     if (port := settings.get(SETTING_PORT_API)) is None:
 #         raise ValueError("Port not set")
-#     self._logger.info("Starting server on port: %s", port)
+#     logger.info("Starting server on port: %s", port)
 
-#     self._logger.info("Server stopped. Exiting application")
-#     self._exit_application()
+#     logger.info("Server stopped. Exiting application")
+#     exit_application()
 
-# def stop_server(self) -> None:
+
+# def stop_server() -> None:
 #     """Stop Server"""
-#     self._logger.info("Remove listeners")
-#     self._listeners.remove_all_listeners()
-#     # if self._server is not None:
-#     #     self._logger.info("Stop the event loop")
-#     #     self._logger.info("Stopping server")
-#     self._logger.info("Cancel any pending tasks")
+#     logger.info("Remove listeners")
+#     listeners.remove_all_listeners()
+#     # if server is not None:
+#     #     logger.info("Stop the event loop")
+#     #     logger.info("Stopping server")
+#     logger.info("Cancel any pending tasks")
 #     event_loop = asyncio.get_event_loop()
 #     if event_loop is not None and event_loop.is_running():
 #         for pending_task in asyncio.all_tasks():
 #             pending_task.cancel()
 
-# def stop_guis(self) -> None:
+
+# def stop_guis() -> None:
 #     """Stop GUIs"""
-#     if self._gui is not None and self._gui.is_running():
-#         self._gui.stop()
-#         self._gui = None
-#     if self._gui_notification is not None and self._gui_notification.is_running():
-#         self._gui_notification.stop()
-#         self._gui_notification = None
-#     if self._gui_player is not None and self._gui_player.is_running():
-#         self._gui_player.stop()
-#         self._gui_player = None
+#     if gui is not None and gui.is_running():
+#         gui.stop()
+#         gui = None
+#     if gui_notification is not None and gui_notification.is_running():
+#         gui_notification.stop()
+#         gui_notification = None
+#     if gui_player is not None and gui_player.is_running():
+#         gui_player.stop()
+#         gui_player = None
