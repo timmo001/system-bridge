@@ -134,7 +134,7 @@ for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):  
 listeners = Listeners(database, implemented_modules)
 
 
-def callback_data_updated(module: str) -> None:
+async def callback_data_updated(module: str) -> None:
     """Data updated"""
     await listeners.refresh_data_by_module(module)
 
