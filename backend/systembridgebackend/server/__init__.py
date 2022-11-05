@@ -21,6 +21,8 @@ from systembridgeshared.const import (
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.data import DataDict
+from systembridgeshared.models.keyboard_key import KeyboardKey
+from systembridgeshared.models.keyboard_text import KeyboardText
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
 from systembridgeshared.settings import Settings
@@ -29,10 +31,10 @@ from .._version import __version__
 from ..data import Data
 from ..gui import GUI, GUIAttemptsExceededException
 from ..modules.listeners import Listeners
+from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.mdns import MDNSAdvertisement
 from ..server.websocket import WebSocketHandler
 
-# from ..server.keyboard import handler_keyboard
 # from ..server.media import (
 #     handler_media_directories,
 #     handler_media_file,
@@ -206,6 +208,29 @@ def get_data_by_key(
     }
 
 
+@app.post("/api/keyboard", dependencies=[Depends(security_api_key)])
+def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str, str]:
+    """Send keyboard event."""
+    if isinstance(keyboard_event, KeyboardKey):
+        try:
+            keyboard_keypress(keyboard_event.key)
+        except ValueError as error:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail={"error": str(error)}
+            )
+        return {
+            "message": "Keypress sent",
+            **keyboard_event.dict(),
+        }
+    elif isinstance(keyboard_event, KeyboardText):
+        keyboard_text(keyboard_event.text)
+        return {
+            "message": "Text sent",
+            **keyboard_event.dict(),
+        }
+    raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid keyboard event")
+
+
 @app.websocket("/api/websocket")
 async def websocket_endpoint(websocket: WebSocket):
     """Websocket endpoint."""
@@ -242,10 +267,6 @@ if "--no-frontend" not in sys.argv:
 
 def exit_application() -> None:
     """Exit application"""
-    logger.info("Exit application")
-    # stop_server()
-    logger.info("Server stopped. Exiting GUI(s) (if any)")
-    # stop_guis()
     logger.info("Exiting application")
     sys.exit(0)
 
@@ -270,40 +291,3 @@ def callback_notification(notification: Notification) -> None:
         "notification",
         notification.json(),
     )
-
-
-# def start_server() -> None:
-#     """Start Server"""
-#     if (port := settings.get(SETTING_PORT_API)) is None:
-#         raise ValueError("Port not set")
-#     logger.info("Starting server on port: %s", port)
-
-#     logger.info("Server stopped. Exiting application")
-#     exit_application()
-
-
-# def stop_server() -> None:
-#     """Stop Server"""
-#     logger.info("Remove listeners")
-#     listeners.remove_all_listeners()
-#     # if server is not None:
-#     #     logger.info("Stop the event loop")
-#     #     logger.info("Stopping server")
-#     logger.info("Cancel any pending tasks")
-#     event_loop = asyncio.get_event_loop()
-#     if event_loop is not None and event_loop.is_running():
-#         for pending_task in asyncio.all_tasks():
-#             pending_task.cancel()
-
-
-# def stop_guis() -> None:
-#     """Stop GUIs"""
-#     if gui is not None and gui.is_running():
-#         gui.stop()
-#         gui = None
-#     if gui_notification is not None and gui_notification.is_running():
-#         gui_notification.stop()
-#         gui_notification = None
-#     if gui_player is not None and gui_player.is_running():
-#         gui_player.stop()
-#         gui_player = None

@@ -1,6 +1,5 @@
 """System Bridge: Server Handler - Keyboard"""
 from keyboard import press_and_release, write
-from systembridgeshared.settings import Settings
 
 
 def keyboard_keypress(key: str):
@@ -11,50 +10,3 @@ def keyboard_keypress(key: str):
 def keyboard_text(text: str):
     """Type text"""
     write(text)
-
-
-async def handler_keyboard(
-    request,
-    _: Settings,
-):
-    """Send a keyboard event."""
-    if request.json is None:
-        return json(
-            {
-                "mesage": "Missing JSON body",
-            },
-            status=400,
-        )
-
-    if "key" in request.json:
-        try:
-            keyboard_keypress(request.json["key"])
-        except ValueError as err:
-            return json(
-                {
-                    "message": err.args[0],
-                },
-                status=400,
-            )
-
-        return json(
-            {
-                "message": "Keypress sent",
-                "key".json["key"],
-            }
-        )
-    if "text" in request.json:
-        keyboard_text(request.json["text"])
-        return json(
-            {
-                "message": "Text sent",
-                "text".json["text"],
-            }
-        )
-
-    return json(
-        {
-            "message": "No key or text provided",
-        },
-        status=400,
-    )
