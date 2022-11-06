@@ -48,6 +48,7 @@ class Server(Base):
         database: Database,
         settings: Settings,
         listeners: Listeners,
+        implemented_modules: list[str],
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -60,6 +61,11 @@ class Server(Base):
 
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
+
+        api_app.callback_exit = self.exit_application
+        api_app.callback_open_gui = self.callback_open_gui
+        api_app.listeners = listeners
+        api_app.implemented_modules = implemented_modules
 
         self._api_server = APIServer(
             config=uvicorn.Config(
@@ -109,6 +115,43 @@ class Server(Base):
     ) -> None:
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
+
+    def callback_open_gui(
+        self,
+        type: str,
+        data: str,
+    ) -> None:
+        """Open GUI"""
+        if type == "notification":
+            if self._gui_notification:
+                self._gui_notification.stop()
+            self._gui_notification = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui_notification.start(
+                        self.exit_application,
+                        1,
+                        type,
+                        data,
+                    ),
+                    name="GUI Notification",
+                )
+            )
+        elif type == "player":
+            if self._gui_player:
+                self._gui_player.stop()
+            self._gui_player = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui_player.start(
+                        self.exit_application,
+                        1,
+                        type,
+                        data,
+                    ),
+                    name="GUI Media Player",
+                )
+            )
 
     def exit_application(self) -> None:
         """Exit application"""

@@ -25,7 +25,7 @@ class GUI(Base):
 
     async def start(  # pylint: disable=keyword-arg-before-vararg
         self,
-        failed_callback: Callable[[], None],
+        failed_callback: Optional[Callable[[], None]],
         attempt: int = 1,
         command: str = "main",
         *args,
@@ -33,7 +33,9 @@ class GUI(Base):
         """Start the GUI"""
         if attempt > 2:
             self._logger.error("Failed to start GUI after 2 attempts")
-            failed_callback()
+            if failed_callback is not None:
+                failed_callback()
+            return
         if command == "main":
             self._logger.info(
                 "Test WebSocket connection before starting GUI. Attempt #%s", attempt

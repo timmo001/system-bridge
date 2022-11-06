@@ -3,7 +3,7 @@ import asyncio
 import logging
 import os
 import sys
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
 from fastapi.exceptions import HTTPException
@@ -47,11 +47,6 @@ settings = Settings(database)
 
 logger = logging.getLogger("systembridgebackend.server.api")
 
-implemented_modules = []
-for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "../modules")):  # type: ignore
-    implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-    break
-
 
 def security_api_key_header(
     api_key_header: Optional[str] = Header(alias=HEADER_API_KEY, default=None),
@@ -89,27 +84,42 @@ def security_api_key(
         )
 
 
-app = FastAPI(
-    version=__version__.public(),
-)
+class API(FastAPI):
+    """Extended FastAPI"""
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins="*",
-    allow_headers=[
-        "accept",
-        "api-key",
-        "content-type",
-        "origin",
-    ],
-    allow_methods=[
-        "DELETE",
-        "GET",
-        "OPTIONS",
-        "POST",
-        "PUT",
-    ],
+    def __init__(
+        self,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize"""
+        super().__init__(**kwargs)
+        self.add_middleware(
+            CORSMiddleware,
+            allow_credentials=True,
+            allow_origins="*",
+            allow_headers=[
+                "accept",
+                "api-key",
+                "content-type",
+                "origin",
+            ],
+            allow_methods=[
+                "DELETE",
+                "GET",
+                "OPTIONS",
+                "POST",
+                "PUT",
+            ],
+        )
+        self.callback_exit: Callable[[], None]
+        self.callback_open_gui: Callable[[str, str], None]
+        self.listeners: Listeners
+        self.implemented_modules: list[str] = []
+
+
+app = API(
+    title="System Bridge",
+    version=__version__.public(),
 )
 
 
@@ -134,7 +144,7 @@ def get_api_root() -> dict[str, str]:
 def get_data(module: str) -> DataDict:
     """Get data from module."""
     table_module = TABLE_MAP.get(module)
-    if module not in implemented_modules or table_module is None:
+    if module not in app.implemented_modules or table_module is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
@@ -149,7 +159,7 @@ def get_data_by_key(
 ) -> dict[str, Any]:
     """Get data from module by key."""
     table_module = TABLE_MAP.get(module)
-    if module not in implemented_modules or table_module is None:
+    if module not in app.implemented_modules or table_module is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail={"message": f"Data module {module} not found"},
@@ -405,10 +415,8 @@ async def send_media_play(
 @app.post("/api/notification", dependencies=[Depends(security_api_key)])
 def send_notification(notification: Notification) -> dict[str, str]:
     """Send notification."""
-    callback_notification(notification)
-    return {
-        "message": "Notification sent",
-    }
+    app.callback_open_gui("notification", notification.json())
+    return {"message": "Notification sent"}
 
 
 @app.post("/api/open", dependencies=[Depends(security_api_key)])
@@ -560,19 +568,20 @@ def send_update(
     }
 
 
-# @app.websocket("/api/websocket")
-# async def websocket_endpoint(websocket: WebSocket):
-#     """Websocket endpoint."""
-#     await websocket.accept()
-#     websocket_handler = WebSocketHandler(
-#         database,
-#         settings,
-#         listeners,
-#         implemented_modules,
-#         websocket,
-#         exit_application,
-#     )
-#     await websocket_handler.handler()
+@app.websocket("/api/websocket")
+async def websocket_endpoint(websocket: WebSocket):
+    """Websocket endpoint."""
+    await websocket.accept()
+    websocket_handler = WebSocketHandler(
+        database,
+        settings,
+        app.listeners,
+        app.implemented_modules,
+        websocket,
+        app.callback_exit,
+        app.callback_open_gui,
+    )
+    await websocket_handler.handler()
 
 
 if "--no-frontend" not in sys.argv:
@@ -602,7 +611,7 @@ def callback_media_play(
     gui_player = GUI(settings)
     asyncio.create_task(
         gui_player.start(
-            exit_application,
+            app.callback_exit,
             1,
             "media-player",
             media_type,
@@ -610,25 +619,3 @@ def callback_media_play(
         ),
         name="GUI media player",
     )
-
-
-def callback_notification(
-    notification: Notification,
-) -> None:
-    """Callback to open media player"""
-    gui_notification = GUI(settings)
-    asyncio.create_task(
-        gui_notification.start(
-            exit_application,
-            1,
-            "notification",
-            notification.json(),
-        ),
-        name="GUI notification",
-    )
-
-
-def exit_application() -> None:
-    """Exit application"""
-    logger.info("Exiting application")
-    sys.exit(0)

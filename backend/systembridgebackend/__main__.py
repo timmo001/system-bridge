@@ -49,15 +49,13 @@ class Main(Base):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        self._server = Server(database, settings, listeners)
+        self._server = Server(
+            database,
+            settings,
+            listeners,
+            implemented_modules,
+        )
         loop.run_until_complete(self._server.start())
-
-        # port = int(str(settings.get(SETTING_PORT_API)))
-        # uvicorn.run(
-        #     app,
-        #     port=port,
-        #     log_level=log_level.lower(),
-        # )
 
 
 if __name__ == "__main__":

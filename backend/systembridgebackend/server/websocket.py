@@ -2,6 +2,7 @@
 import os
 from collections.abc import Callable
 from json import JSONDecodeError
+from typing import Optional
 from uuid import uuid4
 
 from fastapi import WebSocket
@@ -108,7 +109,6 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
 from ..autostart import autostart_disable, autostart_enable
-from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.media import get_directories, get_file, get_files
@@ -127,7 +127,8 @@ class WebSocketHandler(Base):
         listeners: Listeners,
         implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
         websocket: WebSocket,
-        callback_exit_application: Callable[..., None],
+        callback_exit_application: Callable[[], None],
+        callback_open_gui: Callable[[str, str], None],
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -137,6 +138,7 @@ class WebSocketHandler(Base):
         self._implemented_modules = implemented_modules
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
+        self._callback_open_gui = callback_open_gui
         self._active = True
 
     async def _send_response(
@@ -389,11 +391,7 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                gui_notification = GUI(self._settings)
-                gui_notification.start(
-                    "notification",
-                    model.json(),
-                )
+                self._callback_open_gui("notification", model.json())
 
                 await self._send_response(
                     Response(
