@@ -134,7 +134,11 @@ class WebSocketClient(Base):
         else:
             self._session = aiohttp.ClientSession()
         url = f"ws://{self._api_host}:{self._api_port}/api/websocket"
-        self._logger.info("Connecting to WebSocket: %s", url)
+        self._logger.info(
+            "Connecting to WebSocket: %s (aiohttp: %s)",
+            url,
+            aiohttp.__version__,
+        )
         try:
             self._websocket = await self._session.ws_connect(url=url, heartbeat=30)
         except (

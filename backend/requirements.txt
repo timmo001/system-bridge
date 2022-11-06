@@ -1,5 +1,6 @@
 aiofiles==22.1.0
 aiogithubapi==22.10.1
+aiohttp==3.8.3
 fastapi==0.86.0
 incremental==22.10.0
 keyboard==0.13.5
@@ -10,5 +11,4 @@ pyinstaller==5.6.2
 python-multipart==0.0.5
 screeninfo==0.8.1
 uvicorn[standard]==0.19.0
-websockets==10.4
 zeroconf==0.39.4

@@ -88,24 +88,24 @@ class Server(Base):
                     self._api_server.serve(),
                     name="API",
                 ),
-                asyncio.create_task(
-                    self.update_data(),
-                    name="Update data",
-                ),
-                asyncio.create_task(
-                    self.update_frequent_data(),
-                    name="Update frequent data",
-                ),
+                # asyncio.create_task(
+                #     self.update_data(),
+                #     name="Update data",
+                # ),
+                # asyncio.create_task(
+                #     self.update_frequent_data(),
+                #     name="Update frequent data",
+                # ),
             ]
         )
-        # if "--no-gui" not in sys.argv:
-        #     self._gui = GUI(self._settings)
-        #     self._tasks.append(
-        #         asyncio.create_task(
-        #             self._gui.start(self.exit_application),
-        #             name="GUI",
-        #         )
-        #     )
+        if "--no-gui" not in sys.argv:
+            self._gui = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui.start(self.exit_application),
+                    name="GUI",
+                )
+            )
 
         await asyncio.wait(self._tasks)
 

@@ -4,6 +4,7 @@ import subprocess
 import sys
 from typing import Callable, Optional
 
+import async_timeout
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
@@ -41,8 +42,9 @@ class GUI(Base):
             )
             websocket_client = WebSocketClient(self._settings)
             try:
-                await websocket_client.connect()
-                await websocket_client.close()
+                async with async_timeout.timeout(20):
+                    await websocket_client.connect()
+                    await websocket_client.close()
             except ConnectionErrorException:
                 self._logger.warning(
                     "Could not connect to WebSocket. Retrying in 5 seconds"
@@ -55,6 +57,20 @@ class GUI(Base):
                     *args,
                 )
                 return
+            except asyncio.TimeoutError:
+                self._logger.warning(
+                    "Connection timeout to WebSocket. Retrying in 5 seconds"
+                )
+                await asyncio.sleep(5)
+                await self.start(
+                    failed_callback,
+                    attempt + 1,
+                    command,
+                    *args,
+                )
+                return
+
+        self._logger.info("Connection test passed")
 
         pgm_args = [
             sys.executable,

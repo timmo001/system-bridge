@@ -7,16 +7,13 @@ import os
 import sys
 from typing import Optional
 
+import async_timeout
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
-import async_timeout
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
-from systembridgeshared.exceptions import (
-    AuthenticationException,
-    ConnectionErrorException,
-)
+from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
@@ -175,20 +172,19 @@ class Main(Base):
     ) -> None:
         """Handle a startup error"""
         error_message = TimedMessageBox(
-            10,
+            5,
             f"{message} Exiting in",
         )
         error_message.setIcon(QMessageBox.Critical)
         error_message.setWindowTitle("Error")
         error_message.exec()
         # Exit cleanly
-        self._logger.info("Exit GUI..")
-        self._application.quit()
-        sys.exit(1)
+        asyncio.create_task(self._exit_application(True, 1))
 
     async def _exit_application(
         self,
         gui_only: bool,
+        code: int = 0,
     ) -> None:
         """Exit the backend"""
         if not gui_only:
@@ -198,15 +194,13 @@ class Main(Base):
             await self._websocket_client.close()
         self._logger.info("Exit GUI..")
         self._application.quit()
+        sys.exit(code)
 
     async def _setup_websocket(self) -> None:
         """Setup the WebSocket client"""
         try:
             async with async_timeout.timeout(20):
                 await self._websocket_client.connect()
-        except AuthenticationException as exception:
-            self._logger.error("Authentication failed: %s", exception)
-            self._startup_error("Authentication failed!")
         except ConnectionErrorException as exception:
             self._logger.error("Could not connect to WebSocket: %s", exception)
             self._startup_error("Could not connect to WebSocket!")
