@@ -22,7 +22,8 @@ from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_files import MediaFiles
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.models.notification import Notification
-from systembridgeshared.models.open import Open
+from systembridgeshared.models.open_path import OpenPath
+from systembridgeshared.models.open_url import OpenUrl
 from systembridgeshared.settings import Settings
 
 from .._version import __version__
@@ -422,14 +423,14 @@ def send_notification(notification: Notification) -> dict[str, str]:
 
 
 @app.post("/api/open", dependencies=[Depends(security_api_key)])
-def send_open(open_model: Open) -> dict[str, str]:
+def send_open(open_model: Union[OpenPath, OpenUrl]) -> dict[str, str]:
     """Send notification."""
-    if open_model.path is not None:
+    if isinstance(open_model, OpenPath) and open_model.path is not None:
         open_path(open_model.path)
         return {
-            "message": f"Opening path: {open_model.url}",
+            "message": f"Opening path: {open_model.path}",
         }
-    if open_model.url is not None:
+    if isinstance(open_model, OpenUrl) and open_model.url is not None:
         open_url(open_model.url)
         return {
             "message": f"Opening URL: {open_model.url}",
