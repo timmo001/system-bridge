@@ -111,11 +111,9 @@ class WebSocketClient(Base):
             finally:
                 self._responses.pop(request.id)
         return Response(
-            **{
-                EVENT_ID: request.id,
-                EVENT_TYPE: "N/A",
-                EVENT_MESSAGE: "Message sent",
-            }
+            id=request.id,
+            type="N/A",
+            message="Message sent",
         )
 
     async def close(self) -> None:
