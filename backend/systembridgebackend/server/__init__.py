@@ -1,16 +1,18 @@
 """System Bridge: Server"""
 import asyncio
 import sys
-from typing import Optional
+from typing import Callable, Optional
 
 import uvicorn
-from rocketry import Rocketry
-from rocketry.conds import every
 from systembridgeshared.base import Base
+from systembridgeshared.const import (
+    SETTING_AUTOSTART,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+)
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
-from .._version import __version__
 from ..data import Data
 from ..gui import GUI, GUIAttemptsExceededException
 from ..modules.listeners import Listeners
@@ -22,10 +24,19 @@ class APIServer(uvicorn.Server):
     """Customized uvicorn.Server
 
     Uvicorn server overrides signals and we need to include
-    Rocketry to the signals."""
+    Tasks to the signals."""
+
+    def __init__(
+        self,
+        config: uvicorn.Config,
+        exit_callback: Callable[[], None],
+    ) -> None:
+        super().__init__(config)
+        self._exit_callback = exit_callback
 
     def handle_exit(self, sig: int, frame) -> None:
-        # app_rocketry.session.shut_down()
+        """Handle exit."""
+        self._exit_callback()
         return super().handle_exit(sig, frame)
 
 
@@ -45,31 +56,45 @@ class Server(Base):
         self._gui: Optional[GUI] = None
         self._listeners = listeners
         self._settings = settings
+        self._tasks: list[asyncio.Task] = []
 
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
 
         self._api_server = APIServer(
-            config=uvicorn.Config(api_app, workers=1, loop="asyncio")
+            config=uvicorn.Config(
+                api_app,
+                loop="asyncio",
+                log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
+                port=int(str(settings.get(SETTING_PORT_API))),
+                workers=1,
+            ),
+            exit_callback=self.exit_application,
         )
         self._data = Data(database, self.callback_data_updated)
-        self._scheduler = Rocketry(execution="async")
-        self._scheduler.task(self.update_data, every("2 minutes"))
-        self._scheduler.task(self.update_frequent_data, every("30 seconds"))
 
     async def start(self) -> None:
         """Start the server"""
-        self._logger.info("System Bridge %s: Server", __version__.public())
-        # self._scheduler.run()
-        asyncio.create_task(self._api_server.serve())
-        asyncio.create_task(self._scheduler.serve())
-        if "--no-gui" not in sys.argv:
-            gui = GUI(self._settings)
-            try:
-                gui.start()
-            except GUIAttemptsExceededException:
-                self._logger.error("GUI could not be started. Exiting application")
-                self.exit_application()
+        self._logger.info("Start server")
+        self._tasks.extend(
+            [
+                asyncio.create_task(self._api_server.serve(), name="API"),
+                asyncio.create_task(self.update_data(), name="Update data"),
+                asyncio.create_task(
+                    self.update_frequent_data(), name="Update frequent data"
+                ),
+            ]
+        )
+        # if "--no-gui" not in sys.argv:
+        #     self._gui = GUI(self._settings)
+        #     try:
+        #         self._gui.start()
+        #     except GUIAttemptsExceededException:
+        #         self._logger.error("GUI could not be started. Exiting application")
+        #         self.exit_application()
+        #         return
+
+        await asyncio.wait(self._tasks)
 
     async def callback_data_updated(
         self,
@@ -81,14 +106,28 @@ class Server(Base):
     def exit_application(self) -> None:
         """Exit application"""
         self._logger.info("Exiting application")
+        for task in self._tasks:
+            task.cancel()
+        if self._gui:
+            self._gui.stop()
+        if self._gui_notification:
+            self._gui_notification.stop()
+        if self._gui_player:
+            self._gui_player.stop()
         sys.exit(0)
 
-    # @scheduler.task(every("2 minutes"))
     async def update_data(self) -> None:
         """Update data"""
+        self._logger.info("Update data")
         self._data.request_update_data()
+        self._logger.info("Schedule next update in 2 minutes")
+        await asyncio.sleep(120)
+        await self.update_data()
 
-    # @scheduler.task(every("30 seconds"))
     async def update_frequent_data(self) -> None:
         """Update frequent data"""
+        self._logger.info("Update frequent data")
         self._data.request_update_frequent_data()
+        self._logger.info("Schedule next frequent update in 30 seconds")
+        await asyncio.sleep(30)
+        await self.update_frequent_data()

@@ -5,11 +5,7 @@ import os
 import sys
 
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
-    SETTING_AUTOSTART,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
+from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -44,9 +40,7 @@ class Main(Base):
             create_shortcuts()
 
         implemented_modules = []
-        for _, dirs, _ in os.walk(
-            os.path.join(os.path.dirname(__file__), "../modules")
-        ):
+        for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "./modules")):
             implemented_modules = list(filter(lambda d: "__" not in d, dirs))
             break
 
