@@ -1,7 +1,8 @@
 """System Bridge: Server"""
 import asyncio
 import sys
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
 import uvicorn
 from systembridgeshared.base import Base
