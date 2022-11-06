@@ -115,11 +115,11 @@ class Server(Base):
 
     def callback_open_gui(
         self,
-        type: str,
+        command: str,
         data: str,
     ) -> None:
         """Open GUI"""
-        if type == "notification":
+        if command == "notification":
             if self._gui_notification:
                 self._gui_notification.stop()
             self._gui_notification = GUI(self._settings)
@@ -127,13 +127,13 @@ class Server(Base):
                 asyncio.create_task(
                     self._gui_notification.start(
                         self.exit_application,
-                        type,
+                        command,
                         data,
                     ),
                     name="GUI Notification",
                 )
             )
-        elif type == "player":
+        elif command == "player":
             if self._gui_player:
                 self._gui_player.stop()
             self._gui_player = GUI(self._settings)
@@ -141,7 +141,7 @@ class Server(Base):
                 asyncio.create_task(
                     self._gui_player.start(
                         self.exit_application,
-                        type,
+                        command,
                         data,
                     ),
                     name="GUI Media Player",

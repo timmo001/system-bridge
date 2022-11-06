@@ -3,7 +3,8 @@ import asyncio
 import logging
 import os
 import sys
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
 from fastapi.exceptions import HTTPException
@@ -185,12 +186,12 @@ def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str,
         except ValueError as error:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, detail={"error": str(error)}
-            )
+            ) from error
         return {
             "message": "Keypress sent",
             **keyboard_event.dict(),
         }
-    elif isinstance(keyboard_event, KeyboardText):
+    if isinstance(keyboard_event, KeyboardText):
         keyboard_text(keyboard_event.text)
         return {
             "message": "Text sent",
