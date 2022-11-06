@@ -59,11 +59,13 @@ class Server(Base):
         self._mdns_advertisement = MDNSAdvertisement(settings)
         self._mdns_advertisement.advertise_server()
 
+        self._logger.info("Setup API app")
         api_app.callback_exit = self.exit_application
         api_app.callback_open_gui = self.callback_open_gui
         api_app.listeners = listeners
         api_app.implemented_modules = implemented_modules
 
+        self._logger.info("Setup API server")
         self._api_server = APIServer(
             config=uvicorn.Config(
                 api_app,
@@ -76,6 +78,7 @@ class Server(Base):
             exit_callback=self.exit_application,
         )
         self._data = Data(database, self.callback_data_updated)
+        self._logger.info("Server initialized")
 
     async def start(self) -> None:
         """Start the server"""
