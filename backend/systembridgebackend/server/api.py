@@ -591,10 +591,7 @@ if "--no-frontend" not in sys.argv:
         logger.info("Serving frontend from: %s", frontend_path)
         app.mount(
             path="/",
-            app=StaticFiles(
-                directory=frontend_path,
-                html=True,
-            ),
+            app=StaticFiles(directory=frontend_path),
             name="Frontend",
         )
     except (ImportError, ModuleNotFoundError) as err:
