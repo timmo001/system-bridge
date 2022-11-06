@@ -130,7 +130,6 @@ class Server(Base):
                 asyncio.create_task(
                     self._gui_notification.start(
                         self.exit_application,
-                        1,
                         type,
                         data,
                     ),
@@ -145,7 +144,6 @@ class Server(Base):
                 asyncio.create_task(
                     self._gui_player.start(
                         self.exit_application,
-                        1,
                         type,
                         data,
                     ),
