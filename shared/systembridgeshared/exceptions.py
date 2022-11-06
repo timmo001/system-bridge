@@ -1,6 +1,10 @@
 """System Bridge Shared: Exceptions"""
 
 
+class ApplicationExitException(BaseException):
+    """Forces application to close."""
+
+
 class AuthenticationException(BaseException):
     """Raise this when there is an authentication issue."""
 

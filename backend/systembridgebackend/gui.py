@@ -3,16 +3,13 @@ import asyncio
 import subprocess
 import sys
 from threading import Event, Thread
-from typing import Optional
+from typing import Callable, Optional
 
+import async_timeout
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
-
-
-class GUIAttemptsExceededException(BaseException):
-    """Raise this when the GUI attempts to start more too many times."""
 
 
 class StoppableThread(Thread):
@@ -53,8 +50,9 @@ class GUI(Base):
         self._stopping = False
         self._thread: Optional[StoppableThread] = None
 
-    async def _start_gui(  # pylint: disable=keyword-arg-before-vararg
+    async def _start(  # pylint: disable=keyword-arg-before-vararg
         self,
+        failed_callback: Optional[Callable[[], None]],
         attempt: int = 1,
         command: str = "main",
         *args,
@@ -62,26 +60,44 @@ class GUI(Base):
         """Start the GUI"""
         if attempt > 2:
             self._logger.error("Failed to start GUI after 2 attempts")
-            raise GUIAttemptsExceededException("Failed to start GUI after 3 attempts")
+            if failed_callback is not None:
+                failed_callback()
+            return
         if command == "main":
             self._logger.info(
                 "Test WebSocket connection before starting GUI. Attempt #%s", attempt
             )
             websocket_client = WebSocketClient(self._settings)
             try:
-                await websocket_client.connect()
-                await websocket_client.close()
+                async with async_timeout.timeout(20):
+                    await websocket_client.connect()
+                    await websocket_client.close()
             except ConnectionErrorException:
                 self._logger.warning(
                     "Could not connect to WebSocket. Retrying in 5 seconds"
                 )
                 await asyncio.sleep(5)
-                await self._start_gui(
+                await self._start(
+                    failed_callback,
                     attempt + 1,
                     command,
                     *args,
                 )
                 return
+            except asyncio.TimeoutError:
+                self._logger.warning(
+                    "Connection timeout to WebSocket. Retrying in 5 seconds"
+                )
+                await asyncio.sleep(5)
+                await self._start(
+                    failed_callback,
+                    attempt + 1,
+                    command,
+                    *args,
+                )
+                return
+
+        self._logger.info("Connection test passed")
 
         pgm_args = [
             sys.executable,
@@ -98,30 +114,33 @@ class GUI(Base):
             self._logger.info("GUI started with PID: %s", self._process.pid)
             if (exit_code := self._process.wait()) != 0:
                 self._logger.error("GUI exited with code: %s", exit_code)
-                if not self._stopping:
-                    await self._start_gui(
-                        attempt + 1,
-                        command,
-                        *args,
-                    )
+                await self._start(
+                    failed_callback,
+                    attempt + 1,
+                    command,
+                    *args,
+                )
             self._logger.info("GUI exited with code: %s", exit_code)
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
         self,
+        failed_callback: Optional[Callable[[], None]],
         command: str = "main",
         *args,
     ) -> None:
         """Start the GUI in a synchronous thread"""
         asyncio.run(
-            self._start_gui(
+            self._start(
+                failed_callback,
                 1,
                 command,
                 *args,
             )
         )
 
-    def start(  # pylint: disable=keyword-arg-before-vararg
+    async def start(  # pylint: disable=keyword-arg-before-vararg
         self,
+        failed_callback: Optional[Callable[[], None]],
         command: str = "main",
         *args,
     ) -> None:
@@ -129,6 +148,7 @@ class GUI(Base):
         self._thread = StoppableThread(
             target=self._start_gui_sync,
             args=(
+                failed_callback,
                 command,
                 *args,
             ),
@@ -142,19 +162,9 @@ class GUI(Base):
         self._stopping = True
         if self._process is not None:
             self._process.terminate()
+            self._process.wait()
+            self._process = None
+            self._logger.info("GUI stopped")
         if self._thread is not None:
             self._thread.stop()
             self._thread.join()
-
-    def is_running(self) -> bool:
-        """Return True if the GUI is running"""
-        return self._thread is not None and self._thread.is_alive()
-
-    def restart(  # pylint: disable=keyword-arg-before-vararg
-        self,
-        command: str = "main",
-        *args,
-    ) -> None:
-        """Restart the GUI"""
-        self.stop()
-        self.start(command, *args)

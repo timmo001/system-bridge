@@ -1,66 +1,40 @@
 """System Bridge: Server"""
 import asyncio
-import os
 import sys
-from collections.abc import Awaitable, Callable
-from datetime import timedelta
-from os import walk
+from collections.abc import Callable
 from typing import Optional
 
-from sanic import Sanic
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
-from sanic_scheduler import SanicScheduler, task
+import uvicorn
 from systembridgeshared.base import Base
-from systembridgeshared.common import convert_string_to_correct_type
-from systembridgeshared.const import (
-    QUERY_API_KEY,
-    SECRET_API_KEY,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
-from systembridgeshared.database import TABLE_MAP, Database
-from systembridgeshared.models.media_play import MediaPlay
-from systembridgeshared.models.notification import Notification
+from systembridgeshared.const import SETTING_LOG_LEVEL, SETTING_PORT_API
+from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
 from ..data import Data
-from ..gui import GUI, GUIAttemptsExceededException
+from ..gui import GUI
 from ..modules.listeners import Listeners
-from ..server.auth import ApiKeyAuthentication
-from ..server.cors import add_cors_headers
-from ..server.keyboard import handler_keyboard
 from ..server.mdns import MDNSAdvertisement
-from ..server.media import (
-    handler_media_directories,
-    handler_media_file,
-    handler_media_file_data,
-    handler_media_file_write,
-    handler_media_files,
-    handler_media_play,
-)
-from ..server.notification import handler_notification
-from ..server.open import handler_open
-from ..server.options import setup_options
-from ..server.power import (
-    handler_hibernate,
-    handler_lock,
-    handler_logout,
-    handler_restart,
-    handler_shutdown,
-    handler_sleep,
-)
-from ..server.update import handler_update
-from ..server.websocket import WebSocketHandler
-from .remote_bridge import (
-    handler_delete_remote_bridge,
-    handler_get_remote_bridges,
-    handler_update_remote_bridge,
-)
+from .api import app as api_app
 
 
-class ApplicationExitException(BaseException):
-    """Forces application to close."""
+class APIServer(uvicorn.Server):
+    """Customized uvicorn.Server
+
+    Uvicorn server overrides signals and we need to include
+    Tasks to the signals."""
+
+    def __init__(
+        self,
+        config: uvicorn.Config,
+        exit_callback: Callable[[], None],
+    ) -> None:
+        super().__init__(config)
+        self._exit_callback = exit_callback
+
+    def handle_exit(self, sig: int, frame) -> None:
+        """Handle exit."""
+        self._exit_callback()
+        return super().handle_exit(sig, frame)
 
 
 class Server(Base):
@@ -70,393 +44,138 @@ class Server(Base):
         self,
         database: Database,
         settings: Settings,
+        listeners: Listeners,
+        implemented_modules: list[str],
     ) -> None:
         """Initialize"""
         super().__init__()
-        self._database = database
-        self._settings = settings
-        self._server = Sanic("SystemBridge")
-        # Add OPTIONS handlers to any route that is missing it
-        self._server.register_listener(setup_options, "before_server_start")
-        # Fill in CORS headers
-        self._server.register_middleware(add_cors_headers, "response")
-
-        implemented_modules = []
-        for _, dirs, _ in walk(os.path.join(os.path.dirname(__file__), "../modules")):
-            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-            break
-
-        SanicScheduler(self._server, utc=True)
-        self._listeners = Listeners(self._database, implemented_modules)
-        self._data = Data(self._database, self._callback_data_updated)
-        self._gui: Optional[GUI] = None
         self._gui_notification: Optional[GUI] = None
         self._gui_player: Optional[GUI] = None
+        self._gui: Optional[GUI] = None
+        self._listeners = listeners
+        self._settings = settings
+        self._tasks: list[asyncio.Task] = []
 
-        auth = ApiKeyAuthentication(
-            app=self._server,
-            arg=QUERY_API_KEY,
-            header="api-key",
-            keys=[self._settings.get_secret(SECRET_API_KEY)],
-        )
+        self._mdns_advertisement = MDNSAdvertisement(settings)
+        self._mdns_advertisement.advertise_server()
 
-        mdns_advertisement = MDNSAdvertisement(self._settings)
-        mdns_advertisement.advertise_server()
+        api_app.callback_exit = self.exit_application
+        api_app.callback_open_gui = self.callback_open_gui
+        api_app.listeners = listeners
+        api_app.implemented_modules = implemented_modules
 
-        @task(start=timedelta(seconds=2))
-        async def _after_startup(_) -> None:
-            """After startup"""
-            if "--no-gui" not in sys.argv:
-                self._gui = GUI(self._settings)
-                try:
-                    self._gui.start()
-                except GUIAttemptsExceededException:
-                    self._logger.error("GUI could not be started. Exiting application")
-                    self._exit_application()
+        self._api_server = APIServer(
+            config=uvicorn.Config(
+                api_app,
+                host="0.0.0.0",
+                loop="asyncio",
+                log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
+                port=int(str(settings.get(SETTING_PORT_API))),
+                workers=4,
+            ),
+            exit_callback=self.exit_application,
+        )
+        self._data = Data(database, self.callback_data_updated)
 
-        @task(
-            start=timedelta(seconds=10),
-            period=timedelta(minutes=2),
+    async def start(self) -> None:
+        """Start the server"""
+        self._logger.info("Start server")
+        self._tasks.extend(
+            [
+                asyncio.create_task(
+                    self._api_server.serve(),
+                    name="API",
+                ),
+                asyncio.create_task(
+                    self.update_data(),
+                    name="Update data",
+                ),
+                asyncio.create_task(
+                    self.update_frequent_data(),
+                    name="Update frequent data",
+                ),
+            ]
         )
-        async def _update_data(_) -> None:
-            """Update data"""
-            self._data.request_update_data()
-
-        @task(
-            start=timedelta(seconds=10),
-            period=timedelta(seconds=30),
-        )
-        async def _update_frequent_data(_) -> None:
-            """Update frequent data"""
-            self._data.request_update_frequent_data()
-
-        @auth.key_required
-        async def _handler_data_all(
-            _: Request,
-            table: str,
-        ) -> HTTPResponse:
-            """Data handler all"""
-            table_module = TABLE_MAP.get(table)
-            if table not in implemented_modules or table_module is None:
-                return json({"message": f"Data module {table} not found"}, status=404)
-            return json(self._database.get_data_dict(table_module).dict())
-
-        @auth.key_required
-        async def _handler_data_by_key(
-            _: Request,
-            table: str,
-            key: str,
-        ) -> HTTPResponse:
-            """Data handler by key"""
-            table_module = TABLE_MAP.get(table)
-            if table not in implemented_modules or table_module is None:
-                return json({"message": f"Data module {table} not found"}, status=404)
-
-            data = self._database.get_data_item_by_key(table_module, key)
-            if data is None:
-                return json({"message": f"Data item {key} not found"}, status=404)
-
-            return json(
-                {
-                    data.key: convert_string_to_correct_type(data.value),
-                    "last_updated": data.timestamp,
-                }
-            )
-
-        @auth.key_required
-        async def _handler_generic(
-            request: Request,
-            function: Callable[[Request, Settings], Awaitable[HTTPResponse]],
-        ) -> HTTPResponse:
-            """Generic handler"""
-            return await function(request, self._settings)
-
-        @auth.key_required
-        async def _handler_media_play(request: Request) -> HTTPResponse:
-            """Media play handler"""
-            return await handler_media_play(
-                request,
-                self._settings,
-                self._callback_media_play,
-            )
-
-        @auth.key_required
-        async def _handler_notification(request: Request) -> HTTPResponse:
-            """Notification handler"""
-            return await handler_notification(
-                request,
-                self._settings,
-                self._callback_notification,
-            )
-
-        @auth.key_required
-        async def _handler_delete_remote_bridge(
-            _: Request,
-            key: str,
-        ) -> HTTPResponse:
-            """Get remote bridge handler"""
-            return await handler_delete_remote_bridge(
-                key,
-                self._database,
-            )
-
-        @auth.key_required
-        async def _handler_get_remote_bridge(_: Request) -> HTTPResponse:
-            """Get remote bridge handler"""
-            return await handler_get_remote_bridges(self._database)
-
-        @auth.key_required
-        async def _handler_update_remote_bridge(request: Request) -> HTTPResponse:
-            """Update remote bridge handler"""
-            return await handler_update_remote_bridge(
-                request,
-                self._database,
-            )
-
-        async def _handler_websocket(
-            _: Request,
-            socket,
-        ) -> None:
-            """WebSocket handler"""
-            websocket = WebSocketHandler(
-                self._database,
-                self._settings,
-                self._listeners,
-                implemented_modules,
-                socket,
-                self._exit_application,
-            )
-            await websocket.handler()
-
-        self._server.add_route(
-            _handler_data_all,  # type: ignore
-            "/api/data/<table:str>",
-            methods=["GET"],
-            name="Data",
-        )
-        self._server.add_route(
-            _handler_data_by_key,  # type: ignore
-            "/api/data/<table:str>/<key:str>",
-            methods=["GET"],
-            name="Data by Key",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_keyboard),  # type: ignore
-            "/api/keyboard",
-            methods=["POST"],
-            name="Keyboard",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_directories),  # type: ignore
-            "/api/media",
-            methods=["GET"],
-            name="Media Directories",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_files),  # type: ignore
-            "/api/media/files",
-            methods=["GET"],
-            name="Media Files",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file),  # type: ignore
-            "/api/media/file",
-            methods=["GET"],
-            name="Media File",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file_data),  # type: ignore
-            "/api/media/file/data",
-            methods=["GET"],
-            name="Media File Data",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_media_file_write),  # type: ignore
-            "/api/media/file/write",
-            methods=["POST"],
-            name="Media File Write",
-        )
-        self._server.add_route(
-            _handler_media_play,  # type: ignore
-            "/api/media/play",
-            methods=["POST"],
-            name="Media Play",
-        )
-        self._server.add_route(
-            _handler_notification,  # type: ignore
-            "/api/notification",
-            methods=["POST"],
-            name="Notification",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_open),  # type: ignore
-            "/api/open",
-            methods=["POST"],
-            name="Open",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_sleep),  # type: ignore
-            "/api/power/sleep",
-            methods=["POST"],
-            name="Power Sleep",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_hibernate),  # type: ignore
-            "/api/power/hibernate",
-            methods=["POST"],
-            name="Power Hibernate",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_restart),  # type: ignore
-            "/api/power/restart",
-            methods=["POST"],
-            name="Power Restart",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_shutdown),  # type: ignore
-            "/api/power/shutdown",
-            methods=["POST"],
-            name="Power Shutdown",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_lock),  # type: ignore
-            "/api/power/lock",
-            methods=["POST"],
-            name="Power Lock",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_logout),  # type: ignore
-            "/api/power/logout",
-            methods=["POST"],
-            name="Power Logout",
-        )
-        self._server.add_route(
-            _handler_delete_remote_bridge,  # type: ignore
-            "/api/remote/<key:str>",
-            methods=["DELETE"],
-            name="Get Remote Bridges",
-        )
-        self._server.add_route(
-            _handler_get_remote_bridge,  # type: ignore
-            "/api/remote",
-            methods=["GET"],
-            name="Get Remote Bridges",
-        )
-        self._server.add_route(
-            _handler_update_remote_bridge,  # type: ignore
-            "/api/remote",
-            methods=["POST", "PUT"],
-            name="Update Remote Bridge",
-        )
-        self._server.add_route(
-            lambda r: _handler_generic(r, handler_update),  # type: ignore
-            "/api/update",
-            methods=["POST"],
-            name="Update",
-        )
-
-        if "--no-frontend" not in sys.argv:
-            try:
-                # pylint: disable=import-error, import-outside-toplevel
-                from systembridgefrontend import get_frontend_path
-
-                frontend_path = get_frontend_path()
-                self._logger.info("Serving frontend from: %s", frontend_path)
-                self._server.static(
-                    "/",
-                    frontend_path,
-                    strict_slashes=False,
-                    content_type="text/html",
-                    name="Frontend",
+        if "--no-gui" not in sys.argv:
+            self._gui = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui.start(self.exit_application),
+                    name="GUI",
                 )
-            except (ImportError, ModuleNotFoundError) as error:
-                self._logger.error("Frontend not found: %s", error)
+            )
 
-        self._server.add_websocket_route(
-            _handler_websocket,
-            "/api/websocket",
-            name="WebSocket",
-        )
+        await asyncio.wait(self._tasks)
 
-    async def _callback_data_updated(
+    async def callback_data_updated(
         self,
         module: str,
     ) -> None:
         """Data updated"""
         await self._listeners.refresh_data_by_module(module)
 
-    def _exit_application(self) -> None:
+    def callback_open_gui(
+        self,
+        command: str,
+        data: str,
+    ) -> None:
+        """Open GUI"""
+        if command == "notification":
+            if self._gui_notification:
+                self._gui_notification.stop()
+            self._gui_notification = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui_notification.start(
+                        self.exit_application,
+                        command,
+                        data,
+                    ),
+                    name="GUI Notification",
+                )
+            )
+        elif command == "player":
+            if self._gui_player:
+                self._gui_player.stop()
+            self._gui_player = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui_player.start(
+                        self.exit_application,
+                        command,
+                        data,
+                    ),
+                    name="GUI Media Player",
+                )
+            )
+
+    def exit_application(self) -> None:
         """Exit application"""
-        self._logger.info("Exit application")
-        self.stop_server()
-        self._logger.info("Server stopped. Exiting GUI(s) (if any)")
-        self.stop_guis()
         self._logger.info("Exiting application")
+        for task in self._tasks:
+            task.cancel()
+        self._logger.info("Tasks cancelled")
+        if self._gui:
+            self._gui.stop()
+        if self._gui_notification:
+            self._gui_notification.stop()
+        if self._gui_player:
+            self._gui_player.stop()
+        self._logger.info("GUI stopped. Exiting Application")
         sys.exit(0)
 
-    def _callback_media_play(
-        self,
-        media_type: str,
-        media_play: MediaPlay,
-    ) -> None:
-        """Callback to open media player"""
-        self._gui_player = GUI(self._settings)
-        self._gui_player.start(
-            "media-player",
-            media_type,
-            media_play.json(),
-        )
+    async def update_data(self) -> None:
+        """Update data"""
+        self._logger.info("Update data")
+        self._data.request_update_data()
+        self._logger.info("Schedule next update in 2 minutes")
+        await asyncio.sleep(120)
+        await self.update_data()
 
-    def _callback_notification(
-        self,
-        notification: Notification,
-    ) -> None:
-        """Callback to open media player"""
-        self._gui_notification = GUI(self._settings)
-        self._gui_notification.start(
-            "notification",
-            notification.json(),
-        )
-
-    def start_server(self) -> None:
-        """Start Server"""
-        if (port := self._settings.get(SETTING_PORT_API)) is None:
-            raise ValueError("Port not set")
-        self._logger.info("Starting server on port: %s", port)
-        self._server.run(
-            host="0.0.0.0",
-            port=int(port),  # type: ignore
-            access_log=False,
-            debug=self._settings.get(SETTING_LOG_LEVEL) == "DEBUG",
-            motd=False,
-        )
-        self._logger.info("Server stopped. Exiting application")
-        self._exit_application()
-
-    def stop_server(self) -> None:
-        """Stop Server"""
-        self._logger.info("Remove listeners")
-        self._listeners.remove_all_listeners()
-        if self._server is not None and self._server.is_running:
-            loop = self._server.loop
-            self._logger.info("Stop the event loop")
-            loop.stop()
-            self._logger.info("Stopping server")
-            self._server.stop()
-        self._logger.info("Cancel any pending tasks")
-        event_loop = asyncio.get_event_loop()
-        if event_loop is not None and event_loop.is_running():
-            for pending_task in asyncio.all_tasks():
-                pending_task.cancel()
-
-    def stop_guis(self) -> None:
-        """Stop GUIs"""
-        if self._gui is not None and self._gui.is_running():
-            self._gui.stop()
-            self._gui = None
-        if self._gui_notification is not None and self._gui_notification.is_running():
-            self._gui_notification.stop()
-            self._gui_notification = None
-        if self._gui_player is not None and self._gui_player.is_running():
-            self._gui_player.stop()
-            self._gui_player = None
+    async def update_frequent_data(self) -> None:
+        """Update frequent data"""
+        self._logger.info("Update frequent data")
+        self._data.request_update_frequent_data()
+        self._logger.info("Schedule next frequent update in 30 seconds")
+        await asyncio.sleep(30)
+        await self.update_frequent_data()

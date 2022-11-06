@@ -1,8 +1,8 @@
 import React, { ReactElement } from "react";
 import { Container } from "@mui/material";
 
-import Layout from "../../components/Common/Layout";
-import Settings from "../../components/Settings/Settings";
+import Layout from "components/Common/Layout";
+import Settings from "components/Settings/Settings";
 
 function PageSettings(): ReactElement {
   return (

@@ -1,9 +1,11 @@
 """System Bridge: WebSocket handler"""
 import os
 from collections.abc import Callable
-from json import JSONDecodeError, loads
+from json import JSONDecodeError
 from uuid import uuid4
 
+from fastapi import WebSocket
+from starlette.websockets import WebSocketDisconnect
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -107,7 +109,6 @@ from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
 from ..autostart import autostart_disable, autostart_enable
-from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.keyboard import keyboard_keypress, keyboard_text
 from ..server.media import get_directories, get_file, get_files
@@ -125,8 +126,9 @@ class WebSocketHandler(Base):
         settings: Settings,
         listeners: Listeners,
         implemented_modules: list[str],  # pylint: disable=unsubscriptable-object
-        websocket,
-        callback_exit_application: Callable[..., None],
+        websocket: WebSocket,
+        callback_exit_application: Callable[[], None],
+        callback_open_gui: Callable[[str, str], None],
     ) -> None:
         """Initialize"""
         super().__init__()
@@ -136,6 +138,7 @@ class WebSocketHandler(Base):
         self._implemented_modules = implemented_modules
         self._websocket = websocket
         self._callback_exit_application = callback_exit_application
+        self._callback_open_gui = callback_open_gui
         self._active = True
 
     async def _send_response(
@@ -145,9 +148,9 @@ class WebSocketHandler(Base):
         """Send response"""
         if not self._active:
             return
-        message = response.json()
+        message = response.dict()
         self._logger.debug("Sending message: %s", message)
-        await self._websocket.send(message)
+        await self._websocket.send_json(message)
 
     async def _data_changed(
         self,
@@ -177,7 +180,7 @@ class WebSocketHandler(Base):
         # Loop until the connection is closed
         while self._active:
             try:
-                data = loads(await self._websocket.recv())
+                data = await self._websocket.receive_json()
                 request = Request(**data)
             except JSONDecodeError as error:
                 message = f"Invalid JSON: {error}"
@@ -388,11 +391,7 @@ class WebSocketHandler(Base):
                     )
                     continue
 
-                gui_notification = GUI(self._settings)
-                gui_notification.start(
-                    "notification",
-                    model.json(),
-                )
+                self._callback_open_gui("notification", model.json())
 
                 await self._send_response(
                     Response(
@@ -1033,7 +1032,7 @@ class WebSocketHandler(Base):
         listener_id = str(uuid4())
         try:
             await self._handler(listener_id)
-        except ConnectionError as error:
+        except (ConnectionError, WebSocketDisconnect) as error:
             self._logger.info("Connection closed: %s", error)
         finally:
             self._logger.info("Unregistering data listener %s", listener_id)

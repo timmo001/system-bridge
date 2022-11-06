@@ -2,28 +2,28 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
-from datetime import datetime
 import io
 import mimetypes
 import os
 import re
 import tempfile
+from collections.abc import Callable
+from datetime import datetime
 from typing import Optional
 from urllib.parse import urlencode
 
 import aiofiles
 from aiohttp import ClientSession
-from mutagen import File as MutagenFile
+from fastapi import status
+from fastapi.exceptions import HTTPException
+from fastapi.responses import FileResponse
+from mutagen._file import File as MutagenFile
 from plyer import storagepath
-from sanic.request import Request
-from sanic.response import HTTPResponse, file, json
 from systembridgeshared.const import (
     QUERY_API_KEY,
     QUERY_API_PORT,
     QUERY_AUTOPLAY,
     QUERY_BASE,
-    QUERY_FILENAME,
     QUERY_PATH,
     QUERY_URL,
     QUERY_VOLUME,
@@ -31,11 +31,12 @@ from systembridgeshared.const import (
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_PORT_API,
 )
+from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 
-def get_directories(settings: Settings) -> list[dict]:
+def get_directories(settings: Settings) -> list[dict[str, str]]:
     """Get directories"""
     directories = [
         {
@@ -81,7 +82,7 @@ def get_files(
     settings: Settings,
     base_path: str,
     path: str,
-) -> list[dict]:
+) -> list[MediaFile]:
     """Get files from path"""
     root_path = None
     for item in get_directories(settings):
@@ -104,7 +105,7 @@ def get_files(
 def get_file(
     base_path: str,
     filepath: str,
-) -> Optional[dict]:
+) -> Optional[MediaFile]:
     """Get file from path"""
     try:
         stat = os.stat(filepath)
@@ -115,279 +116,63 @@ def get_file(
     if os.path.isfile(filepath):
         mime_type = mimetypes.guess_type(filepath)[0]
 
-    return {
-        "name": os.path.basename(filepath),
-        "path": filepath.removeprefix(base_path)[1:],
-        "fullpath": filepath,
-        "size": stat.st_size,
-        "last_accessed": stat.st_atime,
-        "created": stat.st_ctime,
-        "modified": stat.st_mtime,
-        "is_directory": os.path.isdir(filepath),
-        "is_file": os.path.isfile(filepath),
-        "is_link": os.path.islink(filepath),
-        "mime_type": mime_type,
-    }
+    return MediaFile(
+        name=os.path.basename(filepath),
+        path=filepath.removeprefix(base_path)[1:],
+        fullpath=filepath,
+        size=stat.st_size,
+        last_accessed=stat.st_atime,
+        created=stat.st_ctime,
+        modified=stat.st_mtime,
+        is_directory=os.path.isdir(filepath),
+        is_file=os.path.isfile(filepath),
+        is_link=os.path.islink(filepath),
+        mime_type=mime_type,
+    )
 
 
-async def get_file_data(
+def get_file_data(
     filepath: str,
-) -> HTTPResponse:
+) -> FileResponse:
     """Get file data"""
-    return await file(filepath)
+    return FileResponse(filepath)
 
 
-async def handler_media_directories(
-    _: Request,
-    settings: Settings,
-) -> HTTPResponse:
-    """Handler for media directories"""
-    return json(
-        {
-            "directories": get_directories(settings),
-        }
-    )
-
-
-async def handler_media_files(
-    request: Request,
-    settings: Settings,
-) -> HTTPResponse:
-    """Handler for media files"""
-    if not (query_base := request.args.get(QUERY_BASE)):
-        return json(
-            {"message": "No base specified"},
-            status=400,
-        )
-
-    root_path = None
-    for item in get_directories(settings):
-        if item["key"] == query_base:
-            root_path = item["path"]
-            break
-
-    if root_path is None or not os.path.exists(root_path):
-        return json(
-            {"message": "Cannot find base", "base": query_base},
-            status=404,
-        )
-
-    query_path = request.args.get(QUERY_PATH)
-    path = os.path.join(root_path, query_path) if query_path else root_path
-    if not os.path.exists(path):
-        return json(
-            {"message": "Cannot find path", "path": path},
-            status=404,
-        )
-    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-        return json(
-            {
-                "message": "Path is not underneath base path",
-                "base": root_path,
-                "path": path,
-            },
-            status=400,
-        )
-    if not os.path.isdir(path):
-        return json(
-            {"message": "Path is not a directory", "path": path},
-            status=400,
-        )
-
-    return json(
-        {
-            "files": get_files(settings, query_base, path),
-            "path": path,
-        }
-    )
-
-
-async def handler_media_file(
-    request: Request,
-    settings: Settings,
-) -> HTTPResponse:
-    """Handler for media file requests"""
-    if not (query_base := request.args.get(QUERY_BASE)):
-        return json(
-            {"message": "No base specified"},
-            status=400,
-        )
-
-    root_path = None
-    for item in get_directories(settings):
-        if item["key"] == query_base:
-            root_path = item["path"]
-            break
-
-    if root_path is None or not os.path.exists(root_path):
-        return json(
-            {"message": "Cannot find base", "base": query_base},
-            status=404,
-        )
-
-    if not (query_path := request.args.get(QUERY_PATH)):
-        return json(
-            {"message": "No path specified"},
-            status=400,
-        )
-    path = os.path.join(root_path, query_path)
-    if not os.path.exists(path):
-        return json(
-            {"message": "Cannot find path", "path": path},
-            status=404,
-        )
-    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-        return json(
-            {
-                "message": "Path is not underneath base path",
-                "base": root_path,
-                "path": path,
-            },
-            status=400,
-        )
-    if not os.path.isfile(path):
-        return json(
-            {"message": "Path is not a file", "path": path},
-            status=400,
-        )
-
-    return json(get_file(root_path, path))
-
-
-async def handler_media_file_data(
-    request: Request,
-    settings: Settings,
-) -> HTTPResponse:
-    """Handler for media file requests"""
-    if not (query_base := request.args.get(QUERY_BASE)):
-        return json(
-            {"message": "No base specified"},
-            status=400,
-        )
-
-    root_path = None
-    for item in get_directories(settings):
-        if item["key"] == query_base:
-            root_path = item["path"]
-            break
-
-    if root_path is None or not os.path.exists(root_path):
-        return json(
-            {"message": "Cannot find base", "base": query_base},
-            status=404,
-        )
-
-    query_path = request.args.get(QUERY_PATH)
-    if not (path := os.path.join(root_path, query_path)):
-        return json(
-            {"message": "Cannot find path", "path": path},
-            status=400,
-        )
-    if not os.path.exists(path):
-        return json(
-            {"message": "File does not exist", "path": path},
-            status=404,
-        )
-    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-        return json(
-            {
-                "message": "Path is not underneath base path",
-                "base": root_path,
-                "path": path,
-            },
-            status=400,
-        )
-    if not os.path.isfile(path):
-        return json(
-            {"message": "Path is not a file", "path": path},
-            status=400,
-        )
-
-    return await get_file_data(path)
-
-
-async def handler_media_file_write(
-    request: Request,
-    settings: Settings,
-) -> HTTPResponse:
-    """Handler for media file write requests"""
-    if not (query_base := request.args.get(QUERY_BASE)):
-        return json(
-            {"message": "No base specified"},
-            status=400,
-        )
-
-    root_path = None
-    for item in get_directories(settings):
-        if item["key"] == query_base:
-            root_path = item["path"]
-            break
-
-    if root_path is None or not os.path.exists(root_path):
-        return json(
-            {"message": "Cannot find base", "base": query_base},
-            status=404,
-        )
-
-    if not (query_path := request.args.get(QUERY_PATH)):
-        return json(
-            {"message": "No path specified"},
-            status=400,
-        )
-    if not (query_filename := request.args.get(QUERY_FILENAME)):
-        return json(
-            {"message": "No filename specified"},
-            status=400,
-        )
-    if not (path := os.path.join(root_path, query_path)):
-        return json(
-            {"message": "Cannot find path", "path": path},
-            status=400,
-        )
-    if not request.body:
-        return json(
-            {"message": "No file specified"},
-            status=400,
-        )
-
-    if not os.path.exists(path):
-        os.makedirs(path)
-    if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-        return json(
-            {
-                "message": "Path is not underneath base path",
-                "base": root_path,
-                "path": path,
-            },
-            status=400,
-        )
-    async with aiofiles.open(os.path.join(path, query_filename), "wb") as new_file:
-        await new_file.write(request.body)
+async def write_file(
+    filepath: str,
+    data: bytes,
+) -> None:
+    """Write file"""
+    async with aiofiles.open(filepath, "wb") as new_file:
+        await new_file.write(data)
         await new_file.close()
 
-    return json(
-        {
-            "message": "File uploaded",
-            "path": path,
-            "filename": query_filename,
-        }
-    )
 
-
-async def handler_media_play(
-    request: Request,
+async def play_media(
     settings: Settings,
     callback: Callable[[str, MediaPlay], None],
-) -> HTTPResponse:
+    query_autoplay: Optional[bool] = False,
+    query_base: Optional[str] = None,
+    query_path: Optional[str] = None,
+    query_type: Optional[str] = "video",
+    query_url: Optional[str] = None,
+    query_volume: Optional[float] = 40,
+    request_host: Optional[str] = None,
+    request_scheme: Optional[str] = "http",
+):
     """Handler for media play requests"""
-    media_type = request.args.get("type", "video")
     mime_type = None
     path = None
-    if "url" not in request.args:
-        if not (query_base := request.args.get(QUERY_BASE)):
-            return json(
+    if query_url is None:
+        if query_base is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {"message": "No base specified"},
-                status=400,
+            )
+        if query_path is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                {"message": "No path specified"},
             )
 
         root_path = None
@@ -397,38 +182,37 @@ async def handler_media_play(
                 break
 
         if root_path is None or not os.path.exists(root_path):
-            return json(
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
                 {"message": "Cannot find base", "base": query_base},
-                status=404,
             )
 
-        query_path = request.args.get(QUERY_PATH)
         if not (path := os.path.join(root_path, query_path)):
-            return json(
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {"message": "Cannot find path", "path": path},
-                status=400,
             )
         if not os.path.exists(path):
-            return json(
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
                 {"message": "File does not exist", "path": path},
-                status=404,
             )
         if not os.path.abspath(path).startswith(os.path.abspath(root_path)):
-            return json(
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {
                     "message": "Path is not underneath base path",
                     "base": root_path,
                     "path": path,
                 },
-                status=400,
             )
         if not os.path.isfile(path):
-            return json(
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {"message": "Path is not a file", "path": path},
-                status=400,
             )
 
-        url = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+        query_url = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
                         QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
                         QUERY_API_PORT: settings.get(SETTING_PORT_API),
                         QUERY_BASE: query_base,
@@ -437,12 +221,12 @@ async def handler_media_play(
 
         mime_type, _ = mimetypes.guess_type(path)
         if mime_type is None:
-            return json(
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {"message": "Cannot determine mime type", "path": path},
-                status=400,
             )
 
-        media_type = (
+        query_type = (
             "audio"
             if "audio" in mime_type
             else "video"
@@ -450,23 +234,21 @@ async def handler_media_play(
             else None
         )
 
-        if media_type is None:
-            return json(
+        if query_type is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {
                     "message": "Unsupported file type",
                     "path": path,
                     "mime_type": mime_type,
                 },
-                status=400,
             )
     else:
-        url = request.args.get("url")
-
-        if media_type == "audio":
+        if query_type == "audio":
             path = os.path.join(tempfile.gettempdir(), "tmp.mp3")
             # Download local version to get metadata
             async with ClientSession() as session:
-                async with session.get(url) as response:
+                async with session.get(query_url) as response:
                     data = await response.read()
                     async with aiofiles.open(
                         path,
@@ -477,24 +259,31 @@ async def handler_media_play(
 
     media_play = MediaPlay(
         **{
-            QUERY_AUTOPLAY: bool(request.args.get(QUERY_AUTOPLAY, default=False)),
-            QUERY_URL: url,
-            QUERY_VOLUME: float(request.args.get(QUERY_VOLUME, default=40)),
+            QUERY_AUTOPLAY: query_autoplay,
+            QUERY_URL: query_url,
+            QUERY_VOLUME: query_volume,
         }
     )
 
     api_port = settings.get(SETTING_PORT_API)
     api_key = settings.get_secret(SECRET_API_KEY)
 
-    if media_type == "audio":
+    if query_type == "audio":
         if path is None:
-            return json(
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
                 {
                     "message": "Failed to get path for audio file",
                 },
-                status=400,
             )
-        metadata = MutagenFile(path)
+
+        if (metadata := MutagenFile(path)) is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                {
+                    "message": "Failed to get metadata for audio file",
+                },
+            )
 
         album = metadata.get("album")
         if album is not None and len(album) > 0:
@@ -524,7 +313,7 @@ async def handler_media_play(
                         media_play.album,
                     )
                     if cover_filename is not None:
-                        media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                        media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
                                                 QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
                                                 QUERY_API_PORT: settings.get(SETTING_PORT_API),
                                                 QUERY_BASE: "pictures",
@@ -546,7 +335,7 @@ async def handler_media_play(
                         media_play.album,
                     )
                     if cover_filename is not None:
-                        media_play.cover = f"""{request.scheme}://{request.host}/api/media/file/data?{urlencode({
+                        media_play.cover = f"""{request_scheme}://{request_host}/api/media/file/data?{urlencode({
                                                 QUERY_API_KEY: settings.get_secret(SECRET_API_KEY),
                                                 QUERY_API_PORT: settings.get(SETTING_PORT_API),
                                                 QUERY_BASE: "pictures",
@@ -556,22 +345,30 @@ async def handler_media_play(
             except AttributeError:
                 pass
 
-    callback(media_type, media_play)
+    if query_type is None:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            {
+                "message": "Unsupported file type",
+                "path": path,
+                "mime_type": mime_type,
+            },
+        )
 
-    return json(
-        {
-            "message": "Opened media player",
-            "media_type": media_type,
-            "mime_type": mime_type,
-            "path": path,
-            "player_url": f"""{request.scheme}://{request.host}/app/player/{media_type}.html?{urlencode({
+    callback(query_type, media_play)
+
+    return {
+        "message": "Opened media player",
+        "media_type": query_type,
+        "mime_type": mime_type,
+        "path": path,
+        "player_url": f"""{request_scheme}://{request_host}/app/player/{query_type}.html?{urlencode({
                     QUERY_API_KEY: api_key,
                     QUERY_API_PORT: api_port,
                     **media_play.dict(exclude_none=True),
                 })}""",
-            **media_play.dict(exclude_none=True),
-        }
-    )
+        **media_play.dict(exclude_none=True),
+    }
 
 
 async def _delete_cover_delayed(

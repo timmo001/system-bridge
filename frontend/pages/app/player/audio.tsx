@@ -1,8 +1,8 @@
 import React, { ReactElement } from "react";
 
-import { PlayerProvider } from "../../../components/Player/Utils";
-import Layout from "../../../components/Common/Layout";
-import Player from "../../../components/Player/Player";
+import { PlayerProvider } from "components/Player/Utils";
+import Layout from "components/Common/Layout";
+import Player from "components/Player/Player";
 
 function PagePlayerAudio(): ReactElement {
   return (
