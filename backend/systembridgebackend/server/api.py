@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from fastapi import Depends, FastAPI, File, Header, Query, Request, WebSocket, status
 from fastapi.exceptions import HTTPException
@@ -178,7 +178,9 @@ def get_data_by_key(
 
 
 @app.post("/api/keyboard", dependencies=[Depends(security_api_key)])
-def send_keyboard_event(keyboard_event: KeyboardKey | KeyboardText) -> dict[str, str]:
+def send_keyboard_event(
+    keyboard_event: Union[KeyboardKey, KeyboardText]
+) -> dict[str, str]:
     """Send keyboard event."""
     if isinstance(keyboard_event, KeyboardKey):
         try:
@@ -481,7 +483,7 @@ def send_power_logout() -> dict[str, str]:
 
 
 @app.delete("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def delete_remote(key: str) -> dict[str, dict | str]:
+def delete_remote(key: str) -> dict[str, Union[dict, str]]:
     """Delete remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
     remote_bridge: Optional[RemoteBridge] = None
@@ -507,7 +509,7 @@ def delete_remote(key: str) -> dict[str, dict | str]:
 
 
 @app.get("/api/remote", dependencies=[Depends(security_api_key)])
-def get_remote() -> dict[str, list[dict] | str]:
+def get_remote() -> dict[str, Union[list[dict], str]]:
     """Get remote bridges."""
     return {
         "message": "Got remote bridges",
@@ -516,7 +518,7 @@ def get_remote() -> dict[str, list[dict] | str]:
 
 
 @app.post("/api/remote", dependencies=[Depends(security_api_key)])
-def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
+def send_remote(remote: RemoteBridge) -> dict[str, Union[dict, str]]:
     """Send remote bridge."""
     database.update_remote_bridge(remote)
     return {
@@ -526,7 +528,7 @@ def send_remote(remote: RemoteBridge) -> dict[str, dict | str]:
 
 
 @app.put("/api/remote/{key}", dependencies=[Depends(security_api_key)])
-def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
+def update_remote(key: str, remote: RemoteBridge) -> dict[str, Union[dict, str]]:
     """Update remote bridge."""
     bridges: list[RemoteBridge] = get_remote_bridges(database)
     remote_bridge: Optional[RemoteBridge] = None
@@ -554,7 +556,7 @@ def update_remote(key: str, remote: RemoteBridge) -> dict[str, dict | str]:
 @app.post("/api/update", dependencies=[Depends(security_api_key)])
 def send_update(
     query_version: str = Query(..., alias="version")
-) -> dict[str, dict[str, Optional[str]] | str]:
+) -> dict[str, Union[dict[str, Optional[str]], str]]:
     """Send update."""
     if (versions := version_update(query_version)) is None:
         raise HTTPException(
