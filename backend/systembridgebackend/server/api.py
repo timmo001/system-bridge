@@ -600,10 +600,15 @@ def callback_media_play(
 ) -> None:
     """Callback to open media player"""
     gui_player = GUI(settings)
-    gui_player.start(
-        "media-player",
-        media_type,
-        media_play.json(),
+    asyncio.create_task(
+        gui_player.start(
+            exit_application,
+            1,
+            "media-player",
+            media_type,
+            media_play.json(),
+        ),
+        name="GUI media player",
     )
 
 
@@ -612,9 +617,14 @@ def callback_notification(
 ) -> None:
     """Callback to open media player"""
     gui_notification = GUI(settings)
-    gui_notification.start(
-        "notification",
-        notification.json(),
+    asyncio.create_task(
+        gui_notification.start(
+            exit_application,
+            1,
+            "notification",
+            notification.json(),
+        ),
+        name="GUI notification",
     )
 
 
