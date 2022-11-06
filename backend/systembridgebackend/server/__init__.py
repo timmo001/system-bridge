@@ -71,6 +71,7 @@ class Server(Base):
                 api_app,
                 host="0.0.0.0",
                 loop="asyncio",
+                log_config=None,
                 log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
                 port=int(str(settings.get(SETTING_PORT_API))),
                 workers=4,
