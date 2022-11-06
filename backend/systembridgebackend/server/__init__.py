@@ -5,11 +5,7 @@ from typing import Callable, Optional
 
 import uvicorn
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
-    SETTING_AUTOSTART,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
+from systembridgeshared.const import SETTING_LOG_LEVEL, SETTING_PORT_API
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
@@ -70,6 +66,7 @@ class Server(Base):
         self._api_server = APIServer(
             config=uvicorn.Config(
                 api_app,
+                host="0.0.0.0",
                 loop="asyncio",
                 log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
                 port=int(str(settings.get(SETTING_PORT_API))),
