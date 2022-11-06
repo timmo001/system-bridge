@@ -167,4 +167,3 @@ class GUI(Base):
             self._logger.info("GUI stopped")
         if self._thread is not None:
             self._thread.stop()
-            self._thread.join()
