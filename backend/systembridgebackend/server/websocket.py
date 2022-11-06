@@ -5,6 +5,7 @@ from json import JSONDecodeError
 from uuid import uuid4
 
 from fastapi import WebSocket
+from starlette.websockets import WebSocketDisconnect
 from systembridgeshared.base import Base
 from systembridgeshared.const import (
     EVENT_BASE,
@@ -1031,7 +1032,7 @@ class WebSocketHandler(Base):
         listener_id = str(uuid4())
         try:
             await self._handler(listener_id)
-        except ConnectionError as error:
+        except (ConnectionError, WebSocketDisconnect) as error:
             self._logger.info("Connection closed: %s", error)
         finally:
             self._logger.info("Unregistering data listener %s", listener_id)
