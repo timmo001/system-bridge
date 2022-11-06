@@ -597,8 +597,8 @@ if "--no-frontend" not in sys.argv:
             ),
             name="Frontend",
         )
-    except (ImportError, ModuleNotFoundError) as error:
-        logger.error("Frontend not found: %s", error)
+    except (ImportError, ModuleNotFoundError) as err:
+        logger.error("Frontend not found: %s", err)
 
 
 def callback_media_play(
