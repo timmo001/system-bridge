@@ -276,9 +276,8 @@ async def play_media(
                     "message": "Failed to get path for audio file",
                 },
             )
-        metadata = MutagenFile(path)
 
-        if metadata is None:
+        if (metadata := MutagenFile(path)) is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 {

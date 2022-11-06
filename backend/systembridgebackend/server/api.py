@@ -291,8 +291,7 @@ def get_media_file(
             {"message": "Path is not a file", "path": path},
         )
 
-    file = get_file(query_base, path)
-    if file is None:
+    if (file := get_file(query_base, path)) is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             {"message": "Cannot get file", "path": path},
@@ -427,7 +426,7 @@ def send_open(open: Open) -> dict[str, str]:
         return {
             "message": f"Opening path: {open.url}",
         }
-    elif open.url is not None:
+    if open.url is not None:
         open_url(open.url)
         return {
             "message": f"Opening URL: {open.url}",
@@ -556,8 +555,7 @@ def send_update(
     query_version: str = Query(..., alias="version")
 ) -> dict[str, dict[str, Optional[str]] | str]:
     """Send update."""
-    versions = version_update(query_version)
-    if versions is None:
+    if (versions := version_update(query_version)) is None:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             {"message": "Invalid version"},

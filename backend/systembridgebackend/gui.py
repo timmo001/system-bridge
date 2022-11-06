@@ -2,7 +2,6 @@
 import asyncio
 import subprocess
 import sys
-from threading import Event, Thread
 from typing import Callable, Optional
 
 from systembridgeshared.base import Base

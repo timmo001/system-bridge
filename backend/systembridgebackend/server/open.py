@@ -4,8 +4,6 @@ import subprocess
 import sys
 from webbrowser import open_new_tab
 
-from systembridgeshared.settings import Settings
-
 
 def open_path(
     path: str,

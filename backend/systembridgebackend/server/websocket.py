@@ -2,7 +2,6 @@
 import os
 from collections.abc import Callable
 from json import JSONDecodeError
-from typing import Optional
 from uuid import uuid4
 
 from fastapi import WebSocket

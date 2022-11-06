@@ -1,7 +1,6 @@
 """System Bridge: Server Handler - Update"""
 from typing import Optional
 
-from systembridgeshared.settings import Settings
 from systembridgeshared.update import Update
 
 
