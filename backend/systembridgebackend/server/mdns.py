@@ -28,7 +28,7 @@ class MDNSAdvertisement(Base):
         hostname = system.hostname()
         ip_address_4 = system.ip_address_4()
         mac_address = system.mac_address()
-        port_api = self._settings.get(SETTING_PORT_API)
+        port_api = str(self._settings.get(SETTING_PORT_API))
         system_id = system.uuid()
 
         if not port_api:

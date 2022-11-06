@@ -1,21 +1,19 @@
 """System Bridge: Main"""
+import asyncio
 import logging
+import os
 import sys
 
-import uvicorn
 from systembridgeshared.base import Base
-from systembridgeshared.const import (
-    SETTING_AUTOSTART,
-    SETTING_LOG_LEVEL,
-    SETTING_PORT_API,
-)
+from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 from .autostart import autostart_disable, autostart_enable
+from .modules.listeners import Listeners
 from .modules.system import System
-from .server import app
+from .server import Server
 from .shortcut import create_shortcuts
 
 
@@ -41,13 +39,25 @@ class Main(Base):
 
             create_shortcuts()
 
-        port = int(str(settings.get(SETTING_PORT_API)))
+        implemented_modules = []
+        for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "./modules")):
+            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
+            break
 
-        uvicorn.run(
-            app,
-            port=port,
-            log_level=log_level.lower(),
-        )
+        listeners = Listeners(database, implemented_modules)
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        self._server = Server(database, settings, listeners)
+        loop.run_until_complete(self._server.start())
+
+        # port = int(str(settings.get(SETTING_PORT_API)))
+        # uvicorn.run(
+        #     app,
+        #     port=port,
+        #     log_level=log_level.lower(),
+        # )
 
 
 if __name__ == "__main__":
