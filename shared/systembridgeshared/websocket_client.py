@@ -132,6 +132,7 @@ class WebSocketClient(Base):
         if session:
             self._session = session
         else:
+            self._logger.info("Creating new aiohttp client session")
             self._session = aiohttp.ClientSession()
         url = f"ws://localhost:{self._settings.get(SETTING_PORT_API)}/api/websocket"
         self._logger.info(
