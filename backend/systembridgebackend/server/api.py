@@ -58,8 +58,6 @@ def security_api_key_header(
 ):
     """Get API key from request."""
     key = str(settings.get_secret(SECRET_API_KEY))
-    logger.info("API Key: %s", key)
-    logger.info("API Key Header: %s", api_key_header)
     if api_key_header is not None and api_key_header == key:
         logger.info("Authorized with API Key Header")
         return True
@@ -71,8 +69,6 @@ def security_api_key_query(
 ):
     """Get API key from request."""
     key = str(settings.get_secret(SECRET_API_KEY))
-    logger.info("API Key: %s", key)
-    logger.info("API Key Query: %s", api_key_query)
     if api_key_query is not None and api_key_query == key:
         logger.info("Authorized with API Key Query Parameter")
         return True
