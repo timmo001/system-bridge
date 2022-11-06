@@ -67,4 +67,7 @@ if __name__ == "__main__":
     logger = setup_logger(LOG_LEVEL, "system-bridge")
     logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
-    Main()
+    try:
+        Main()
+    except Exception as exception:
+        logger.fatal("Unhandled error in application", exc_info=exception)
