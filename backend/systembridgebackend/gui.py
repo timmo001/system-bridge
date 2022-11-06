@@ -113,13 +113,15 @@ class GUI(Base):
         with subprocess.Popen(pgm_args) as self._process:
             self._logger.info("GUI started with PID: %s", self._process.pid)
             if (exit_code := self._process.wait()) != 0:
-                self._logger.error("GUI exited with code: %s", exit_code)
-                await self._start(
-                    failed_callback,
-                    attempt + 1,
-                    command,
-                    *args,
-                )
+                if not self._stopping:
+                    self._logger.error("GUI exited with code: %s", exit_code)
+                    await self._start(
+                        failed_callback,
+                        attempt + 1,
+                        command,
+                        *args,
+                    )
+                    return
             self._logger.info("GUI exited with code: %s", exit_code)
 
     def _start_gui_sync(  # pylint: disable=keyword-arg-before-vararg
