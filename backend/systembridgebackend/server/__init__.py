@@ -73,7 +73,7 @@ class Server(Base):
                 loop="asyncio",
                 log_level=str(settings.get(SETTING_LOG_LEVEL)).lower(),
                 port=int(str(settings.get(SETTING_PORT_API))),
-                workers=1,
+                workers=4,
             ),
             exit_callback=self.exit_application,
         )
