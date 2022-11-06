@@ -69,5 +69,5 @@ if __name__ == "__main__":
 
     try:
         Main()
-    except Exception as exception:
+    except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
