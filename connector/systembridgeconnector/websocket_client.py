@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
 import socket
+from collections.abc import Awaitable, Callable
 from typing import Any, Optional
 from uuid import uuid4
 
@@ -53,7 +53,8 @@ from .models.get_data import GetData
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_directories import MediaDirectories
-from .models.media_files import File as MediaFile, MediaFiles
+from .models.media_files import File as MediaFile
+from .models.media_files import MediaFiles
 from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.notification import Notification
@@ -110,11 +111,9 @@ class WebSocketClient(Base):
             finally:
                 self._responses.pop(request.id)
         return Response(
-            **{
-                EVENT_ID.id,
-                EVENT_TYPE: "N/A",
-                EVENT_MESSAGE: "Message sent",
-            }
+            id=request.id,
+            type="N/A",
+            message="Message sent",
         )
 
     async def close(self) -> None:
