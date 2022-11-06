@@ -148,7 +148,7 @@ class WebSocketHandler(Base):
         """Send response"""
         if not self._active:
             return
-        message = response.json()
+        message = response.dict()
         self._logger.debug("Sending message: %s", message)
         await self._websocket.send_json(message)
 
