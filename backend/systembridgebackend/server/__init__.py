@@ -14,7 +14,7 @@ from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
 from ..data import Data
-from ..gui import GUI, GUIAttemptsExceededException
+from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from .api import app as api_app
@@ -78,21 +78,28 @@ class Server(Base):
         self._logger.info("Start server")
         self._tasks.extend(
             [
-                asyncio.create_task(self._api_server.serve(), name="API"),
-                asyncio.create_task(self.update_data(), name="Update data"),
                 asyncio.create_task(
-                    self.update_frequent_data(), name="Update frequent data"
+                    self._api_server.serve(),
+                    name="API",
+                ),
+                asyncio.create_task(
+                    self.update_data(),
+                    name="Update data",
+                ),
+                asyncio.create_task(
+                    self.update_frequent_data(),
+                    name="Update frequent data",
                 ),
             ]
         )
-        # if "--no-gui" not in sys.argv:
-        #     self._gui = GUI(self._settings)
-        #     try:
-        #         self._gui.start()
-        #     except GUIAttemptsExceededException:
-        #         self._logger.error("GUI could not be started. Exiting application")
-        #         self.exit_application()
-        #         return
+        if "--no-gui" not in sys.argv:
+            self._gui = GUI(self._settings)
+            self._tasks.append(
+                asyncio.create_task(
+                    self._gui.start(self.exit_application),
+                    name="GUI",
+                )
+            )
 
         await asyncio.wait(self._tasks)
 
@@ -108,12 +115,14 @@ class Server(Base):
         self._logger.info("Exiting application")
         for task in self._tasks:
             task.cancel()
+        self._logger.info("Tasks cancelled")
         if self._gui:
             self._gui.stop()
         if self._gui_notification:
             self._gui_notification.stop()
         if self._gui_player:
             self._gui_player.stop()
+        self._logger.info("GUI stopped. Exiting Application")
         sys.exit(0)
 
     async def update_data(self) -> None:
