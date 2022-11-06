@@ -420,17 +420,17 @@ def send_notification(notification: Notification) -> dict[str, str]:
 
 
 @app.post("/api/open", dependencies=[Depends(security_api_key)])
-def send_open(open: Open) -> dict[str, str]:
+def send_open(open_model: Open) -> dict[str, str]:
     """Send notification."""
-    if open.path is not None:
-        open_path(open.path)
+    if open_model.path is not None:
+        open_path(open_model.path)
         return {
-            "message": f"Opening path: {open.url}",
+            "message": f"Opening path: {open_model.url}",
         }
-    if open.url is not None:
-        open_url(open.url)
+    if open_model.url is not None:
+        open_url(open_model.url)
         return {
-            "message": f"Opening URL: {open.url}",
+            "message": f"Opening URL: {open_model.url}",
         }
     raise HTTPException(
         status.HTTP_400_BAD_REQUEST,
