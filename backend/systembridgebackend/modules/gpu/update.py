@@ -6,8 +6,8 @@ from systembridgeshared.common import make_key
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import GPU as DatabaseModel
 
-from . import GPU
 from ..base import ModuleUpdateBase
+from . import GPU
 
 
 class GPUUpdate(ModuleUpdateBase):
@@ -177,33 +177,34 @@ class GPUUpdate(ModuleUpdateBase):
 
     async def update_all_data(self) -> None:
         """Update data"""
-
-        # Clear table in case of hardware changes since last run
-        self._database.clear_table(DatabaseModel)
-
         gpu_list = []
-        for gpu_name in self._gpu.get_gpus(self._database):
-            gpu_key = make_key(gpu_name)
-            gpu_list.append(gpu_key)
-            await asyncio.gather(
-                *[
-                    self.update_name(gpu_key, gpu_name),
-                    self.update_core_clock(gpu_key),
-                    self.update_core_load(gpu_key),
-                    self.update_fan_speed(gpu_key),
-                    self.update_memory_clock(gpu_key),
-                    self.update_memory_load(gpu_key),
-                    self.update_memory_free(gpu_key),
-                    self.update_memory_used(gpu_key),
-                    self.update_memory_total(gpu_key),
-                    self.update_power(gpu_key),
-                    self.update_temperature(gpu_key),
-                ]
+        gpus = self._gpu.get_gpus(self._database)
+
+        if gpus is not None and len(gpus) > 0:
+            # Clear table in case of hardware changes since last run
+            self._database.clear_table(DatabaseModel)
+            for gpu_name in gpus:
+                gpu_key = make_key(gpu_name)
+                gpu_list.append(gpu_key)
+                await asyncio.gather(
+                    *[
+                        self.update_name(gpu_key, gpu_name),
+                        self.update_core_clock(gpu_key),
+                        self.update_core_load(gpu_key),
+                        self.update_fan_speed(gpu_key),
+                        self.update_memory_clock(gpu_key),
+                        self.update_memory_load(gpu_key),
+                        self.update_memory_free(gpu_key),
+                        self.update_memory_used(gpu_key),
+                        self.update_memory_total(gpu_key),
+                        self.update_power(gpu_key),
+                        self.update_temperature(gpu_key),
+                    ]
+                )
+            self._database.update_data(
+                DatabaseModel,
+                DatabaseModel(
+                    key="gpus",
+                    value=dumps(gpu_list),
+                ),
             )
-        self._database.update_data(
-            DatabaseModel,
-            DatabaseModel(
-                key="gpus",
-                value=dumps(gpu_list),
-            ),
-        )
