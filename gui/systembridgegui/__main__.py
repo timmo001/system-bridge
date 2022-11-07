@@ -193,7 +193,8 @@ class Main(Base):
             await self._websocket_client.exit_backend()
             await self._websocket_client.close()
         self._logger.info("Exit GUI..")
-        self._application.quit()
+        self._system_tray_icon.hide()
+        self._application.exit(code)
         sys.exit(code)
 
     async def _setup_websocket(self) -> None:
