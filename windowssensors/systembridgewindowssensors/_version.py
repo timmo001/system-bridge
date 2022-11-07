@@ -7,5 +7,5 @@ Provides systembridgewindowssensors version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgewindowssensors", 3, 5, 0)
+__version__ = Version("systembridgewindowssensors", 3, 5, 1, dev=0)
 __all__ = ["__version__"]
