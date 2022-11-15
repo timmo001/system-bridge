@@ -303,15 +303,6 @@
     "@mui/utils" "^5.10.14"
     prop-types "^15.8.1"
 
-"@mui/private-theming@^5.10.9":
-  version "5.10.9"
-  resolved "https://registry.yarnpkg.com/@mui/private-theming/-/private-theming-5.10.9.tgz#c427bfa736455703975cdb108dbde6a174ba7971"
-  integrity sha512-BN7/CnsVPVyBaQpDTij4uV2xGYHHHhOgpdxeYLlIu+TqnsVM7wUeF+37kXvHovxM6xmL5qoaVUD98gDC0IZnHg==
-  dependencies:
-    "@babel/runtime" "^7.19.0"
-    "@mui/utils" "^5.10.9"
-    prop-types "^15.8.1"
-
 "@mui/styled-engine@^5.10.14":
   version "5.10.14"
   resolved "https://registry.yarnpkg.com/@mui/styled-engine/-/styled-engine-5.10.14.tgz#4395198a1919254a3edabf6e8fc8d43c9c59b5c3"
@@ -322,16 +313,16 @@
     csstype "^3.1.1"
     prop-types "^15.8.1"
 
-"@mui/styles@5.10.10":
-  version "5.10.10"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.10.tgz#9b44bfbb89e735b737acd95ba4b8136f116ec30a"
-  integrity sha512-utr87q/euocRdc2ekFX7DL1gqTVfogSVeu74Nspr8rtK/afC9QwF3ScP/XThVXWPcQKjBWHMKWtAO9BSVE4KDg==
+"@mui/styles@5.10.14":
+  version "5.10.14"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.10.14.tgz#c568d5d1831539dda7525b8a738ec844f76ea6dd"
+  integrity sha512-efmROE5O+9qV1Wj7Q/Cz3ZplsuqSwqWRFTUWwTuTedoLetAO6ExgV4vGD1bkFsr9+VkAfJV/Zy4KPM0ouok7aA==
   dependencies:
-    "@babel/runtime" "^7.19.0"
+    "@babel/runtime" "^7.20.1"
     "@emotion/hash" "^0.9.0"
-    "@mui/private-theming" "^5.10.9"
-    "@mui/types" "^7.2.0"
-    "@mui/utils" "^5.10.9"
+    "@mui/private-theming" "^5.10.14"
+    "@mui/types" "^7.2.1"
+    "@mui/utils" "^5.10.14"
     clsx "^1.2.1"
     csstype "^3.1.1"
     hoist-non-react-statics "^3.3.2"
