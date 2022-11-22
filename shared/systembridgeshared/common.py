@@ -1,6 +1,7 @@
 """System Bridge Shared: Common"""
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
@@ -66,3 +67,17 @@ def make_key(key_input: str) -> str:
         .replace(".", "", -1)
         .lower()
     )
+
+
+def asyncio_get_loop() -> asyncio.AbstractEventLoop:
+    """Get the event loop"""
+    try:
+        loop = asyncio.get_event_loop()
+        if not loop.is_running():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        return loop
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop

@@ -1,6 +1,17 @@
 """System Bridge: Server Handler - Power"""
+import asyncio
 import os
 import sys
+from typing import Callable
+
+
+async def schedule_power_event(
+    time: int,
+    action: Callable[[], None],
+) -> None:
+    """Schedule a power event."""
+    await asyncio.sleep(time)
+    action()
 
 
 def sleep() -> None:

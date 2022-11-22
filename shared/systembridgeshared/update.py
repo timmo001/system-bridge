@@ -1,17 +1,17 @@
 """System Bridge: Update"""
 from __future__ import annotations
 
-import asyncio
 import importlib.util
-from json import loads
 import os
 import platform
 import subprocess
 import sys
-from typing import Optional
 import urllib.request
+from json import loads
+from typing import Optional
 
 from .base import Base
+from .common import asyncio_get_loop
 
 
 class Update(Base):
@@ -41,7 +41,7 @@ class Update(Base):
             if version:
                 self._install_package(f"{package}=={version}")
 
-        asyncio.get_running_loop().call_later(
+        asyncio_get_loop().call_later(
             5, os.execl, sys.executable, sys.executable, *sys.argv
         )
 
@@ -81,6 +81,6 @@ class Update(Base):
         if wait:
             self._update(packages)
         else:
-            asyncio.get_running_loop().call_later(2, self._update, packages)
+            asyncio_get_loop().call_later(2, self._update, packages)
 
         return packages

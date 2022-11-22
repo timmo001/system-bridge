@@ -11,7 +11,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from systembridgeshared.common import convert_string_to_correct_type
+from systembridgeshared.common import asyncio_get_loop, convert_string_to_correct_type
 from systembridgeshared.const import HEADER_API_KEY, QUERY_API_KEY, SECRET_API_KEY
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.data import DataDict
@@ -40,7 +40,15 @@ from ..server.media import (
 )
 from ..server.open import open_path, open_url
 from ..server.websocket import WebSocketHandler
-from .power import hibernate, lock, logout, restart, shutdown, sleep
+from .power import (
+    hibernate,
+    lock,
+    logout,
+    restart,
+    schedule_power_event,
+    shutdown,
+    sleep,
+)
 from .remote_bridge import get_remote_bridges
 from .update import version_update
 
@@ -117,6 +125,7 @@ class API(FastAPI):
         self.callback_open_gui: Callable[[str, str], None]
         self.listeners: Listeners
         self.implemented_modules: list[str] = []
+        self.loop: asyncio.AbstractEventLoop = asyncio_get_loop()
 
 
 app = API(
@@ -444,42 +453,60 @@ def send_open(open_model: Union[OpenPath, OpenUrl]) -> dict[str, str]:
 @app.post("/api/power/sleep", dependencies=[Depends(security_api_key)])
 def send_power_sleep() -> dict[str, str]:
     """Send power sleep."""
-    asyncio.get_running_loop().call_later(2, sleep)
+    app.loop.create_task(
+        schedule_power_event(2, sleep),
+        name="Power Sleep",
+    )
     return {"message": "Sleeping"}
 
 
 @app.post("/api/power/hibernate", dependencies=[Depends(security_api_key)])
 def send_power_hibernate() -> dict[str, str]:
     """Send power hibernate."""
-    asyncio.get_running_loop().call_later(2, hibernate)
+    app.loop.create_task(
+        schedule_power_event(2, hibernate),
+        name="Power Hibernate",
+    )
     return {"message": "Hibernating"}
 
 
 @app.post("/api/power/restart", dependencies=[Depends(security_api_key)])
 def send_power_restart() -> dict[str, str]:
     """Send power restart."""
-    asyncio.get_running_loop().call_later(2, restart)
+    app.loop.create_task(
+        schedule_power_event(2, restart),
+        name="Power Restart",
+    )
     return {"message": "Restarting"}
 
 
 @app.post("/api/power/shutdown", dependencies=[Depends(security_api_key)])
 def send_power_shutdown() -> dict[str, str]:
     """Send power shutdown."""
-    asyncio.get_running_loop().call_later(2, shutdown)
+    app.loop.create_task(
+        schedule_power_event(2, shutdown),
+        name="Power Shutdown",
+    )
     return {"message": "Shutting down"}
 
 
 @app.post("/api/power/lock", dependencies=[Depends(security_api_key)])
 def send_power_lock() -> dict[str, str]:
     """Send power lock."""
-    asyncio.get_running_loop().call_later(2, lock)
+    app.loop.create_task(
+        schedule_power_event(2, lock),
+        name="Power Lock",
+    )
     return {"message": "Locking"}
 
 
 @app.post("/api/power/logout", dependencies=[Depends(security_api_key)])
 def send_power_logout() -> dict[str, str]:
     """Send power logout."""
-    asyncio.get_running_loop().call_later(2, logout)
+    app.loop.create_task(
+        schedule_power_event(2, logout),
+        name="Power Logout",
+    )
     return {"message": "Logging out"}
 
 
@@ -608,7 +635,7 @@ def callback_media_play(
 ) -> None:
     """Callback to open media player"""
     gui_player = GUI(settings)
-    asyncio.create_task(
+    app.loop.create_task(
         gui_player.start(
             app.callback_exit,
             "media-player",
