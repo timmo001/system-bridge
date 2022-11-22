@@ -2,7 +2,7 @@
 import asyncio
 import os
 import sys
-from typing import Callable
+from collections.abc import Callable
 
 
 async def schedule_power_event(
