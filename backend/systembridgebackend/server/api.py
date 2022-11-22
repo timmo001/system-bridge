@@ -611,7 +611,6 @@ def callback_media_play(
     asyncio.create_task(
         gui_player.start(
             app.callback_exit,
-            1,
             "media-player",
             media_type,
             media_play.json(),
