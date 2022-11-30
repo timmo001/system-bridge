@@ -31,10 +31,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "command",
-          "label"
-        ]
+        "required": ["command", "label"]
       }
     },
     "timeout": {
@@ -52,12 +49,8 @@
           "maximum": 100
         }
       },
-      "required": [
-        "source"
-      ]
+      "required": ["source"]
     }
   },
-  "required": [
-    "title"
-  ]
+  "required": ["title"]
 }
