@@ -87,15 +87,15 @@ class Server(Base):
         self._logger.info("Start server")
         self._tasks.extend(
             [
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self._api_server.serve(),
                     name="API",
                 ),
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self.update_data(),
                     name="Update data",
                 ),
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self.update_frequent_data(),
                     name="Update frequent data",
                 ),
@@ -104,7 +104,7 @@ class Server(Base):
         if "--no-gui" not in sys.argv:
             self._gui = GUI(self._settings)
             self._tasks.append(
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self._gui.start(self.exit_application),
                     name="GUI",
                 )
@@ -130,7 +130,7 @@ class Server(Base):
                 self._gui_notification.stop()
             self._gui_notification = GUI(self._settings)
             self._tasks.append(
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self._gui_notification.start(
                         self.exit_application,
                         command,
@@ -144,7 +144,7 @@ class Server(Base):
                 self._gui_player.stop()
             self._gui_player = GUI(self._settings)
             self._tasks.append(
-                asyncio.create_task(
+                api_app.loop.create_task(
                     self._gui_player.start(
                         self.exit_application,
                         command,
