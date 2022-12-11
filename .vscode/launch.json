@@ -39,7 +39,7 @@
       "preLaunchTask": "GUI: pip install",
       "cwd": "${workspaceFolder}/gui",
       "justMyCode": false,
-      "args": ["--gui-only"]
+      "args": ["main"]
     },
     {
       "name": "Frontend",
