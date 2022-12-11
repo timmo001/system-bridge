@@ -105,13 +105,13 @@ class NotificationWindow(Base, QFrame):
             self._logger.info("Playing audio: %s", notification.audio.dict())
             player = QMediaPlayer()
             audio_output = QAudioOutput()
+            player.setAudioOutput(audio_output)
+            player.setSource(QUrl(notification.audio.source))
             audio_output.setVolume(
                 notification.audio.volume
                 if notification.audio.volume is not None
                 else 100
             )
-            player.setAudioOutput(audio_output)
-            player.setSource(QUrl(notification.audio.source))
             player.play()
 
         self.showNormal()
