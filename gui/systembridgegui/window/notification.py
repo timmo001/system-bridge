@@ -1,4 +1,4 @@
-"""System Bridge GUI: Player Window"""
+"""System Bridge GUI: Notification Window"""
 import sys
 from json import dumps
 from urllib.parse import urlencode
