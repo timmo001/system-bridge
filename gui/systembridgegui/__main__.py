@@ -18,7 +18,7 @@ from systembridgeshared.database import Database
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.media_play import MediaPlay
-from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.notification import Notification as NotificationData
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 from typer import Typer
@@ -128,24 +128,24 @@ class Main(Base):
                 self._startup_error("No data provided!")
                 sys.exit(1)
 
-            notification = Notification(**data)
+            notification_data = NotificationData(**data)
 
             self._main_window = NotificationWindow(
                 self._settings,
                 self._icon,
                 self._application,
-                notification,
+                notification_data,
             )
 
-            if notification.audio is not None:
-                self._logger.info("Playing audio: %s", notification.audio.dict())
+            if notification_data.audio is not None:
+                self._logger.info("Playing audio: %s", notification_data.audio.dict())
                 player = QMediaPlayer()
-                player.setSource(QUrl(notification.audio.source))
+                player.setSource(QUrl(notification_data.audio.source))
                 audio_output = QAudioOutput()
                 audio_output.setVolume(
                     (
-                        notification.audio.volume
-                        if notification.audio.volume is not None
+                        notification_data.audio.volume
+                        if notification_data.audio.volume is not None
                         else 100
                     )
                     / 100
