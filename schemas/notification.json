@@ -36,6 +36,20 @@
     },
     "timeout": {
       "type": "number"
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "volume": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": ["source"]
     }
   },
   "required": ["title"]

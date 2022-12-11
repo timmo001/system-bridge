@@ -1,10 +1,9 @@
-"""System Bridge GUI: Player Window"""
-from json import dumps
+"""System Bridge GUI: Notification Window"""
 import sys
+from json import dumps
 from urllib.parse import urlencode
 
-from PySide6 import QtCore
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QFrame, QVBoxLayout
@@ -96,7 +95,7 @@ class NotificationWindow(Base, QFrame):
         if notification.timeout is None or notification.timeout < 1:
             notification.timeout = 5
         self.time_to_wait = int(notification.timeout)
-        self.timer = QtCore.QTimer(self)
+        self.timer = QTimer(self)
         self.timer.setInterval(1000)
         self.timer.timeout.connect(self._timer_changed)  # type: ignore
 

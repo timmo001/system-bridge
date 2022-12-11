@@ -8,7 +8,9 @@ import sys
 from typing import Optional
 
 import async_timeout
+from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QApplication, QMessageBox
 from systembridgeshared.base import Base
 from systembridgeshared.const import SETTING_LOG_LEVEL
@@ -16,7 +18,7 @@ from systembridgeshared.database import Database
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.models.media_play import MediaPlay
-from systembridgeshared.models.notification import Notification
+from systembridgeshared.models.notification import Notification as NotificationData
 from systembridgeshared.settings import Settings
 from systembridgeshared.websocket_client import WebSocketClient
 from typer import Typer
@@ -125,12 +127,31 @@ class Main(Base):
                 self._logger.error("No data provided!")
                 self._startup_error("No data provided!")
                 sys.exit(1)
+
+            notification_data = NotificationData(**data)
+
             self._main_window = NotificationWindow(
                 self._settings,
                 self._icon,
                 self._application,
-                Notification(**data),
+                notification_data,
             )
+
+            if notification_data.audio is not None:
+                self._logger.info("Playing audio: %s", notification_data.audio.dict())
+                player = QMediaPlayer()
+                player.setSource(QUrl(notification_data.audio.source))
+                audio_output = QAudioOutput()
+                audio_output.setVolume(
+                    (
+                        notification_data.audio.volume
+                        if notification_data.audio.volume is not None
+                        else 100
+                    )
+                    / 100
+                )
+                player.setAudioOutput(audio_output)
+                player.play()
 
         sys.exit(self._application.exec())
 
@@ -154,7 +175,7 @@ class Main(Base):
             height = 720
 
         self._main_window.hide()
-        self._main_window.setup(path)
+        self._main_window.setup(path)  # type: ignore
         self._main_window.resize(width, height)
         screen_geometry = self._application.primaryScreen().availableSize()
         self._main_window.move(
@@ -175,7 +196,7 @@ class Main(Base):
             5,
             f"{message} Exiting in",
         )
-        error_message.setIcon(QMessageBox.Critical)
+        error_message.setIcon(QMessageBox.Critical)  # type: ignore
         error_message.setWindowTitle("Error")
         error_message.exec()
         # Exit cleanly

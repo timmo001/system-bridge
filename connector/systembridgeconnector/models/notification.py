@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, confloat
 
 
 class Action(BaseModel):
@@ -16,6 +16,11 @@ class Action(BaseModel):
     command: str
     data: Optional[dict[str, Any]] = None
     label: str
+
+
+class Audio(BaseModel):
+    source: str
+    volume: Optional[confloat(ge=0.0, le=100.0)] = None
 
 
 class Notification(BaseModel):
@@ -29,3 +34,4 @@ class Notification(BaseModel):
     image: Optional[str] = None
     actions: Optional[list[Action]] = None
     timeout: Optional[float] = None
+    audio: Optional[Audio] = None
