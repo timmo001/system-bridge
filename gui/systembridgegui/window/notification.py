@@ -6,7 +6,6 @@ from urllib.parse import urlencode
 from PySide6 import QtCore
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon, Qt
-from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QApplication, QFrame, QVBoxLayout
 from systembridgeshared.base import Base
@@ -100,19 +99,6 @@ class NotificationWindow(Base, QFrame):
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(1000)
         self.timer.timeout.connect(self._timer_changed)  # type: ignore
-
-        if notification.audio is not None:
-            self._logger.info("Playing audio: %s", notification.audio.dict())
-            player = QMediaPlayer()
-            audio_output = QAudioOutput()
-            player.setAudioOutput(audio_output)
-            player.setSource(QUrl(notification.audio.source))
-            audio_output.setVolume(
-                notification.audio.volume
-                if notification.audio.volume is not None
-                else 100
-            )
-            player.play()
 
         self.showNormal()
 
