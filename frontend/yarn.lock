@@ -229,20 +229,6 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@mui/base@5.0.0-alpha.109":
-  version "5.0.0-alpha.109"
-  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.109.tgz#a536c5c03196ade78681166e750eb44f5682937d"
-  integrity sha512-UQxoONPI3ntzxcD/cbFHl+Lp2xsVj6HpKmU9QhUZ2kZ2K2yej2QJyU1gnADoWl/Hu94VrvwSSRnjTjR3HvXO/g==
-  dependencies:
-    "@babel/runtime" "^7.20.1"
-    "@emotion/is-prop-valid" "^1.2.0"
-    "@mui/types" "^7.2.2"
-    "@mui/utils" "^5.10.16"
-    "@popperjs/core" "^2.11.6"
-    clsx "^1.2.1"
-    prop-types "^15.8.1"
-    react-is "^18.2.0"
-
 "@mui/base@5.0.0-alpha.110":
   version "5.0.0-alpha.110"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.110.tgz#61174f64b23e667387708b2cbb31339e58c714cf"
@@ -262,16 +248,16 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.11.0.tgz#7ae98a3df113270097f3024c713c4efce5537c6a"
   integrity sha512-Bmogung451ezVv2YI1RvweOIVsTj2RQ4Fk61+e/+8LFPLTFEwVGbL0YhNy1VB5tri8pzGNV228kxtWVTFooQkg==
 
-"@mui/lab@5.0.0-alpha.111":
-  version "5.0.0-alpha.111"
-  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.111.tgz#9cb0083be35e35d74c3bcb4ab2bfb36c101f93a4"
-  integrity sha512-N6p+CmI0NFig7pbRe4bcBuo+RDifej7RRT5ILF3ncOvW81p5UKFqtYaNCgqeaIGNVnVnHXtAMsud7PCaJ3wevA==
+"@mui/lab@5.0.0-alpha.112":
+  version "5.0.0-alpha.112"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.112.tgz#e30589f0f337e57adf83b9ed59eb3bd234895032"
+  integrity sha512-XKxxUevHup9l9THXWhPcWxm8LZj+E8KDOz6cWqXOnXfSZwFYsvK/nB2R4PCiy/wobURk/+qxIAzryBA9pnSk2g==
   dependencies:
-    "@babel/runtime" "^7.20.1"
-    "@mui/base" "5.0.0-alpha.109"
-    "@mui/system" "^5.10.17"
-    "@mui/types" "^7.2.2"
-    "@mui/utils" "^5.10.16"
+    "@babel/runtime" "^7.20.6"
+    "@mui/base" "5.0.0-alpha.110"
+    "@mui/system" "^5.11.0"
+    "@mui/types" "^7.2.3"
+    "@mui/utils" "^5.11.0"
     clsx "^1.2.1"
     prop-types "^15.8.1"
     react-is "^18.2.0"
@@ -345,7 +331,7 @@
     jss-plugin-vendor-prefixer "^10.9.2"
     prop-types "^15.8.1"
 
-"@mui/system@^5.10.17", "@mui/system@^5.11.0":
+"@mui/system@^5.11.0":
   version "5.11.0"
   resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.11.0.tgz#9938d5beeddfee3e419911ec43e5f9a6f55fe161"
   integrity sha512-HFUT7Dlmyq6Wfuxsw8QBXZxXDYIQQaJ4YHaZd7s+nDMcjerLnILxjh2g3a6umtOUM+jEcRaFJAtvLZvlGfa5fw==
