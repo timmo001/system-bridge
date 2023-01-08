@@ -25,8 +25,10 @@ class BatteryUpdate(ModuleUpdateBase):
         if data := self._battery.sensors():
             for key, value in data._asdict().items():
                 # From status
-                if key == "percent":
+                if key == "percent" or key == "power_plugged":
                     continue
+                if key == "secsleft":
+                    value = str(float(value))
                 self._database.update_data(
                     DatabaseModel,
                     DatabaseModel(
