@@ -5,8 +5,8 @@ from systembridgeshared.common import camel_to_snake
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Battery as DatabaseModel
 
-from . import Battery
 from ..base import ModuleUpdateBase
+from . import Battery
 
 
 class BatteryUpdate(ModuleUpdateBase):
@@ -30,7 +30,7 @@ class BatteryUpdate(ModuleUpdateBase):
                 self._database.update_data(
                     DatabaseModel,
                     DatabaseModel(
-                        key="sensors_{key}",
+                        key=f"sensors_{key}",
                         value=value,
                     ),
                 )
