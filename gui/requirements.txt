@@ -2,5 +2,5 @@ aiohttp==3.8.3
 incremental==22.10.0
 pyinstaller==5.7.0
 pyperclip==1.8.2
-PySide6==6.4.1
+PySide6==6.4.2
 typer==0.7.0
