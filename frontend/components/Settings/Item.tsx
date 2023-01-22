@@ -115,118 +115,126 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
             secondary={description}
             sx={{ maxWidth: "64%", userSelect: "none" }}
           />
-          <ListItemSecondaryAction sx={{ width: 420, textAlign: "end" }}>
-            <Grid container alignItems="center" justifyContent="flex-end">
-              <Grid item>
-                {typeof value === "boolean" ? (
-                  <Switch
-                    edge="end"
-                    disabled={containerDisabled}
-                    checked={value}
-                    onChange={handleCheckedChanged}
-                  />
-                ) : typeof valueIn === "string" && keyIn === "api_key" ? (
-                  <FormControl fullWidth variant="outlined">
-                    <OutlinedInput
-                      type="text"
-                      disabled
-                      value={value}
-                      endAdornment={
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="Generate Api Key"
-                            onClick={handleGenerateApiKey}
-                            edge="end"
-                            size="large"
-                            sx={{ margin: theme.spacing(-1, -0.5) }}
-                          >
-                            <Icon
-                              id="generate-api-key"
-                              title="Generate API Key"
-                              size={1}
-                              path={mdiCached}
-                            />
-                          </IconButton>
-                          <IconButton
-                            aria-label="Copy to clipboard"
-                            onClick={() => handleCopyToClipboard(String(value))}
-                            size="large"
-                            sx={{ margin: theme.spacing(-1, -0.5) }}
-                          >
-                            <Icon
-                              id="copy-to-clipboard"
-                              title="Copy to clipboard"
-                              size={0.8}
-                              path={mdiContentCopy}
-                            />
-                          </IconButton>
-                        </InputAdornment>
-                      }
+          {isList ? (
+            ""
+          ) : (
+            <ListItemSecondaryAction sx={{ width: 420, textAlign: "end" }}>
+              <Grid container alignItems="center" justifyContent="flex-end">
+                <Grid item>
+                  {typeof value === "boolean" ? (
+                    <Switch
+                      edge="end"
+                      disabled={containerDisabled}
+                      checked={value}
+                      onChange={handleCheckedChanged}
                     />
-                  </FormControl>
-                ) : typeof valueIn === "string" &&
-                  typeof value === "string" &&
-                  keyIn === "log_level" ? (
-                  <Autocomplete
-                    id={keyIn}
-                    options={["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]}
-                    renderInput={(params) => (
-                      <TextField {...params} variant="outlined" />
-                    )}
-                    onChange={handleAutocompleteChanged}
-                    sx={{ width: 210 }}
-                    value={value}
-                  />
-                ) : typeof valueIn === "string" && isPassword ? (
-                  <FormControl variant="outlined">
-                    <OutlinedInput
-                      type={showPassword ? "text" : "password"}
+                  ) : typeof valueIn === "string" && keyIn === "api_key" ? (
+                    <FormControl fullWidth variant="outlined">
+                      <OutlinedInput
+                        type="text"
+                        disabled
+                        value={value}
+                        endAdornment={
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="Generate Api Key"
+                              onClick={handleGenerateApiKey}
+                              edge="end"
+                              size="large"
+                              sx={{ margin: theme.spacing(-1, -0.5) }}
+                            >
+                              <Icon
+                                id="generate-api-key"
+                                title="Generate API Key"
+                                size={1}
+                                path={mdiCached}
+                              />
+                            </IconButton>
+                            <IconButton
+                              aria-label="Copy to clipboard"
+                              onClick={() =>
+                                handleCopyToClipboard(String(value))
+                              }
+                              size="large"
+                              sx={{ margin: theme.spacing(-1, -0.5) }}
+                            >
+                              <Icon
+                                id="copy-to-clipboard"
+                                title="Copy to clipboard"
+                                size={0.8}
+                                path={mdiContentCopy}
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                      />
+                    </FormControl>
+                  ) : typeof valueIn === "string" &&
+                    typeof value === "string" &&
+                    keyIn === "log_level" ? (
+                    <Autocomplete
+                      id={keyIn}
+                      options={[
+                        "DEBUG",
+                        "INFO",
+                        "WARNING",
+                        "ERROR",
+                        "CRITICAL",
+                      ]}
+                      renderInput={(params) => (
+                        <TextField {...params} variant="outlined" />
+                      )}
+                      onChange={handleAutocompleteChanged}
+                      sx={{ width: 210 }}
+                      value={value}
+                    />
+                  ) : typeof valueIn === "string" && isPassword ? (
+                    <FormControl variant="outlined">
+                      <OutlinedInput
+                        type={showPassword ? "text" : "password"}
+                        defaultValue={value}
+                        onChange={handleInputChanged}
+                        endAdornment={
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="Toggle visibility"
+                              onClick={handleClickShowPassword}
+                              onMouseDown={handleMouseDownPassword}
+                              size="large"
+                            >
+                              <Icon
+                                id="copy-to-clipboard"
+                                title="Copy to clipboard"
+                                size={0.8}
+                                path={showPassword ? mdiEye : mdiEyeOff}
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                      />
+                    </FormControl>
+                  ) : typeof valueIn === "string" ? (
+                    <TextField
+                      type="text"
+                      defaultValue={value}
+                      disabled={containerDisabled}
+                      onChange={handleInputChanged}
+                      variant="outlined"
+                    />
+                  ) : typeof valueIn === "number" ? (
+                    <TextField
+                      error={minimum ? Number(value) < minimum : false}
+                      type="number"
+                      disabled={containerDisabled}
+                      inputProps={{ minimum: minimum }}
                       defaultValue={value}
                       onChange={handleInputChanged}
-                      endAdornment={
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="Toggle visibility"
-                            onClick={handleClickShowPassword}
-                            onMouseDown={handleMouseDownPassword}
-                            size="large"
-                          >
-                            <Icon
-                              id="copy-to-clipboard"
-                              title="Copy to clipboard"
-                              size={0.8}
-                              path={showPassword ? mdiEye : mdiEyeOff}
-                            />
-                          </IconButton>
-                        </InputAdornment>
-                      }
+                      variant="outlined"
                     />
-                  </FormControl>
-                ) : typeof valueIn === "string" ? (
-                  <TextField
-                    type="text"
-                    defaultValue={value}
-                    disabled={containerDisabled}
-                    onChange={handleInputChanged}
-                    variant="outlined"
-                  />
-                ) : typeof valueIn === "number" ? (
-                  <TextField
-                    error={minimum ? Number(value) < minimum : false}
-                    type="number"
-                    disabled={containerDisabled}
-                    inputProps={{ minimum: minimum }}
-                    defaultValue={value}
-                    onChange={handleInputChanged}
-                    variant="outlined"
-                  />
-                ) : (
-                  ""
-                )}
-              </Grid>
-              {isList ? (
-                ""
-              ) : (
+                  ) : (
+                    ""
+                  )}
+                </Grid>
                 <Grid item>
                   <IconButton
                     disabled={valueChanged === false}
@@ -244,21 +252,22 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
                     />
                   </IconButton>
                 </Grid>
-              )}
-            </Grid>
-          </ListItemSecondaryAction>
+              </Grid>
+            </ListItemSecondaryAction>
+          )}
         </>
       </ItemContainer>
       {isList && Array.isArray(value) ? (
         <>
           <ItemList
+            id={keyIn}
             setting={settingsMap[keyIn]}
             listIn={value as unknown as Array<NameValue>}
             open={open}
             setOpen={setOpen}
             handleChanged={(newValue: Array<NameValue>) => {
               setValue(newValue);
-              handleChanged(keyIn, newValue);
+              handleChanged(keyIn, JSON.stringify(newValue));
             }}
           />
         </>

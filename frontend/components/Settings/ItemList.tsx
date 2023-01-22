@@ -24,7 +24,24 @@ import _ from "lodash";
 import { NameValue } from "assets/entities/types.entity";
 import { SettingDescription } from "components/Settings/Settings";
 
+interface NameValueAlias {
+  name: string;
+  value: string;
+}
+
+const nameValueMap: { [key: string]: NameValueAlias } = {
+  additional_media_directories: {
+    name: "Name",
+    value: "Path",
+  },
+  keyboard_hotkeys: {
+    name: "Hotkey",
+    value: "Action",
+  },
+};
+
 interface ItemListProps {
+  id: string;
   setting: SettingDescription;
   listIn: Array<NameValue>;
   open: boolean;
@@ -33,6 +50,7 @@ interface ItemListProps {
 }
 
 function ItemList({
+  id,
   setting,
   listIn,
   open,
@@ -90,7 +108,7 @@ function ItemList({
                 >
                   <TextField
                     id="name"
-                    label="Name"
+                    label={nameValueMap[id]?.name || "Name"}
                     fullWidth
                     variant="outlined"
                     value={item.name}
@@ -113,7 +131,7 @@ function ItemList({
                 >
                   <TextField
                     id="value"
-                    label="Value"
+                    label={nameValueMap[id]?.value || "Value"}
                     fullWidth
                     variant="outlined"
                     value={item.value}
@@ -175,11 +193,7 @@ function ItemList({
         <Button
           onClick={() => {
             setOpen(false);
-            handleChanged(
-              list.sort((a: NameValue, b: NameValue) =>
-                a.name.localeCompare(b.name)
-              )
-            );
+            handleChanged(list);
           }}
           color="primary"
           variant="outlined"
