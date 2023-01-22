@@ -1,4 +1,4 @@
-"""System Bridge: Module Base"""
+"""System Bridge: Modules Base"""
 
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database

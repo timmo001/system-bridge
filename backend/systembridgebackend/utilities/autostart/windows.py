@@ -1,4 +1,4 @@
-"""System Bridge: Autostart Windows"""
+"""System Bridge: Windows Autostart"""
 import os
 import platform
 import sys

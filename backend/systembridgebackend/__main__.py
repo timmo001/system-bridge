@@ -10,10 +10,10 @@ from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
-from .autostart import autostart_disable, autostart_enable
 from .modules.listeners import Listeners
 from .modules.system import System
 from .server import Server
+from .utilities.autostart import autostart_disable, autostart_enable
 from .utilities.shortcuts import create_shortcuts
 
 
