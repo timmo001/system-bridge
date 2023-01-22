@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Update"""
+"""System Bridge: Update Utilities"""
 from typing import Optional
 
 from systembridgeshared.update import Update

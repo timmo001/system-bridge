@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Open"""
+"""System Bridge: Open Utilities"""
 import os
 import subprocess
 import sys
