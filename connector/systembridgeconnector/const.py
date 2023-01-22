@@ -22,6 +22,7 @@ from .models.system import System
 # Settings
 SETTING_ADDITIONAL_MEDIA_DIRECTORIES = "additional_media_directories"
 SETTING_AUTOSTART = "autostart"
+SETTING_KEYBOARD_HOTKEYS = "keyboard_hotkeys"
 SETTING_LOG_LEVEL = "log_level"
 SETTING_PORT_API = "port_api"
 

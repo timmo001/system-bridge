@@ -3,6 +3,7 @@ import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
 import {
   mdiFolderMultipleOutline,
+  mdiKeyboardOutline,
   mdiProtocol,
   mdiRocketLaunch,
   mdiTextBoxOutline,
@@ -52,6 +53,12 @@ export const settingsMap: { [key: string]: SettingDescription } = {
     name: "Additional Media Directories",
     description: "Additional media directories for the media endpoint",
     icon: mdiFolderMultipleOutline,
+    isList: true,
+  },
+  keyboard_hotkeys: {
+    name: "Keyboard Hotkeys",
+    description: "Setup hotkeys for triggering actions",
+    icon: mdiKeyboardOutline,
     isList: true,
   },
 };

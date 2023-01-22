@@ -16,15 +16,14 @@ from .const import (
     SECRET_API_KEY,
     SETTING_ADDITIONAL_MEDIA_DIRECTORIES,
     SETTING_AUTOSTART,
+    SETTING_KEYBOARD_HOTKEYS,
     SETTING_LOG_LEVEL,
     SETTING_PORT_API,
 )
 from .database import Database
-from .models.database_data import (
-    Data as DatabaseData,
-    Secrets as DatabaseSecrets,
-    Settings as DatabaseSettings,
-)
+from .models.database_data import Data as DatabaseData
+from .models.database_data import Secrets as DatabaseSecrets
+from .models.database_data import Settings as DatabaseSettings
 
 
 class Settings(Base):
@@ -78,6 +77,13 @@ class Settings(Base):
             is None
         ):
             self.set(SETTING_ADDITIONAL_MEDIA_DIRECTORIES, str([]))
+        if (
+            self._database.get_data_item_by_key(
+                DatabaseSettings, SETTING_KEYBOARD_HOTKEYS
+            )
+            is None
+        ):
+            self.set(SETTING_KEYBOARD_HOTKEYS, str([]))
 
     def get_all(self) -> list[DatabaseData]:
         """Get settings"""
