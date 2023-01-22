@@ -1,5 +1,5 @@
 """System Bridge: Keyboard Utilities"""
-from typing import Callable
+from collections.abc import Callable
 
 from keyboard import (
     add_hotkey,
@@ -20,7 +20,10 @@ def keyboard_text(text: str) -> None:
     write(text)
 
 
-def keyboard_hotkey_register(key: str, callback: Callable) -> None:
+def keyboard_hotkey_register(
+    key: str,
+    callback: Callable,
+) -> None:
     """Register a hotkey"""
     add_hotkey(key, callback)
 
