@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Media"""
+"""System Bridge: Media Utilities"""
 from __future__ import annotations
 
 import asyncio

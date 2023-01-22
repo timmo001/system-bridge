@@ -1,4 +1,4 @@
-"""System Bridge: Module Listeners"""
+"""System Bridge: Modules Listeners"""
 
 import asyncio
 from collections.abc import Awaitable, Callable

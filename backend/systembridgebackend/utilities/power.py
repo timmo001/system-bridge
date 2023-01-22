@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Power"""
+"""System Bridge: Power Utilities"""
 import asyncio
 import os
 import sys

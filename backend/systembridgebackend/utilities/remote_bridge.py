@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Remote Bridge"""
+"""System Bridge: Remote Bridge Utilities"""
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 

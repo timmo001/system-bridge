@@ -1,4 +1,4 @@
-"""System Bridge: Shortcut"""
+"""System Bridge: Shortcuts"""
 import platform
 
 

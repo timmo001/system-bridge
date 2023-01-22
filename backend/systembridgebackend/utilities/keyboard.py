@@ -1,4 +1,4 @@
-"""System Bridge: Server Handler - Keyboard"""
+"""System Bridge: Keyboard Utilities"""
 from keyboard import press_and_release, write
 
 
