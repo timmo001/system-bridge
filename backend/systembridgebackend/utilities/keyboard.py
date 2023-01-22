@@ -1,7 +1,13 @@
 """System Bridge: Keyboard Utilities"""
 from typing import Callable
 
-from keyboard import add_hotkey, press_and_release, remove_hotkey, write
+from keyboard import (
+    add_hotkey,
+    press_and_release,
+    remove_hotkey,
+    unhook_all_hotkeys,
+    write,
+)
 
 
 def keyboard_keypress(key: str) -> None:
@@ -22,3 +28,8 @@ async def keyboard_hotkey_register(key: str, callback: Callable) -> None:
 def keyboard_hotkey_unregister(key: str) -> None:
     """Unregister a hotkey"""
     remove_hotkey(key)
+
+
+def keyboard_hotkey_unregister_all() -> None:
+    """Unregister all hotkeys"""
+    unhook_all_hotkeys()

@@ -21,7 +21,10 @@ from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from ..utilities.action import ActionHandler
-from ..utilities.keyboard import keyboard_hotkey_register
+from ..utilities.keyboard import (
+    keyboard_hotkey_register,
+    keyboard_hotkey_unregister_all,
+)
 from .api import app as api_app
 
 
@@ -189,6 +192,7 @@ class Server(Base):
         action_handler = ActionHandler(self._settings)
         hotkeys = self._settings.get(SETTING_KEYBOARD_HOTKEYS)
         if hotkeys is not None and isinstance(hotkeys, list):
+            self._logger.info("Found %s hotkeys", len(hotkeys))
             for item in hotkeys:
                 hotkey = item["name"]
                 self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])

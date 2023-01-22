@@ -32,6 +32,23 @@ class HTTPClient(Base):
         self._base_url = f"http://{api_host}:{api_port}"
         self._session = session if session else ClientSession()
 
+    async def delete(
+        self,
+        path: str,
+        payload: Optional[Any],
+    ) -> Any:
+        """Make a DELETE request"""
+        response: ClientResponse = await self.request(
+            "DELETE",
+            f"{self._base_url}{path}",
+            headers={
+                **BASE_HEADERS,
+                "api-key": self._api_key,
+            },
+            json=payload,
+        )
+        return await response.json()
+
     async def get(
         self,
         path: str,
