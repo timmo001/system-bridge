@@ -2,18 +2,26 @@
 import asyncio
 import sys
 from collections.abc import Callable
+from json import loads
 from typing import Optional
 
 import uvicorn
 from systembridgeshared.base import Base
-from systembridgeshared.const import SETTING_LOG_LEVEL, SETTING_PORT_API
+from systembridgeshared.const import (
+    SETTING_KEYBOARD_HOTKEYS,
+    SETTING_LOG_LEVEL,
+    SETTING_PORT_API,
+)
 from systembridgeshared.database import Database
+from systembridgeshared.models.action import Action
 from systembridgeshared.settings import Settings
 
 from ..data import Data
 from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
+from ..utilities.action import ActionHandler
+from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
 
@@ -103,11 +111,17 @@ class Server(Base):
         )
         if "--no-gui" not in sys.argv:
             self._gui = GUI(self._settings)
-            self._tasks.append(
-                api_app.loop.create_task(
-                    self._gui.start(self.exit_application),
-                    name="GUI",
-                )
+            self._tasks.extend(
+                [
+                    api_app.loop.create_task(
+                        self._gui.start(self.exit_application),
+                        name="GUI",
+                    ),
+                    api_app.loop.create_task(
+                        self.register_hotkeys(),
+                        name="Register hotkeys",
+                    ),
+                ]
             )
 
         await asyncio.wait(self._tasks)
@@ -168,6 +182,21 @@ class Server(Base):
             self._gui_player.stop()
         self._logger.info("GUI stopped. Exiting Application")
         sys.exit(0)
+
+    async def register_hotkeys(self) -> None:
+        """Register hotkeys"""
+        self._logger.info("Register hotkeys")
+        action_handler = ActionHandler(self._settings)
+        hotkeys = self._settings.get(SETTING_KEYBOARD_HOTKEYS)
+        if hotkeys is not None and isinstance(hotkeys, list):
+            for item in hotkeys:
+                hotkey = item["name"]
+                self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])
+                action = Action(**loads(item["value"]))
+                await keyboard_hotkey_register(
+                    hotkey,
+                    lambda: api_app.loop.create_task(action_handler.handle(action)),
+                )
 
     async def update_data(self) -> None:
         """Update data"""
