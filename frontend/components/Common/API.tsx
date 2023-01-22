@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
+import axios, { AxiosResponse, Method, RawAxiosRequestConfig } from "axios";
 
 export interface APIRequest {
   body?: NodeJS.Dict<any>;
@@ -22,7 +22,7 @@ export class API {
     method,
     params,
   }: APIRequest): Promise<AxiosResponse<T>> {
-    const config: AxiosRequestConfig = {
+    const config: RawAxiosRequestConfig = {
       baseURL: `http://localhost:${this.port}`,
       data: body,
       headers: {
