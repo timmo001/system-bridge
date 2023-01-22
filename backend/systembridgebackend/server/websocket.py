@@ -108,8 +108,8 @@ from systembridgeshared.models.update_setting import UpdateSetting
 from systembridgeshared.settings import SECRET_API_KEY, Settings
 from systembridgeshared.update import Update
 
-from ..autostart import autostart_disable, autostart_enable
 from ..modules.listeners import Listeners
+from ..utilities.autostart import autostart_disable, autostart_enable
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import get_directories, get_file, get_files
 from ..utilities.open import open_path, open_url
