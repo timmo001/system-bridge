@@ -14,7 +14,7 @@ from .autostart import autostart_disable, autostart_enable
 from .modules.listeners import Listeners
 from .modules.system import System
 from .server import Server
-from .shortcut import create_shortcuts
+from .utilities.shortcut import create_shortcuts
 
 
 class Main(Base):

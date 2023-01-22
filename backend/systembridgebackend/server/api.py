@@ -29,8 +29,8 @@ from systembridgeshared.settings import Settings
 from .._version import __version__
 from ..gui import GUI
 from ..modules.listeners import Listeners
-from ..server.keyboard import keyboard_keypress, keyboard_text
-from ..server.media import (
+from ..utilities.keyboard import keyboard_keypress, keyboard_text
+from ..utilities.media import (
     get_directories,
     get_file,
     get_file_data,
@@ -38,9 +38,8 @@ from ..server.media import (
     play_media,
     write_file,
 )
-from ..server.open import open_path, open_url
-from ..server.websocket import WebSocketHandler
-from .power import (
+from ..utilities.open import open_path, open_url
+from ..utilities.power import (
     hibernate,
     lock,
     logout,
@@ -49,8 +48,9 @@ from .power import (
     shutdown,
     sleep,
 )
-from .remote_bridge import get_remote_bridges
-from .update import version_update
+from ..utilities.remote_bridge import get_remote_bridges
+from ..utilities.update import version_update
+from .websocket import WebSocketHandler
 
 database = Database()
 settings = Settings(database)

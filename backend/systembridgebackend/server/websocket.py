@@ -110,11 +110,11 @@ from systembridgeshared.update import Update
 
 from ..autostart import autostart_disable, autostart_enable
 from ..modules.listeners import Listeners
-from ..server.keyboard import keyboard_keypress, keyboard_text
-from ..server.media import get_directories, get_file, get_files
-from ..server.open import open_path, open_url
-from ..server.power import hibernate, lock, logout, restart, shutdown, sleep
-from ..server.remote_bridge import get_remote_bridges
+from ..utilities.keyboard import keyboard_keypress, keyboard_text
+from ..utilities.media import get_directories, get_file, get_files
+from ..utilities.open import open_path, open_url
+from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
+from ..utilities.remote_bridge import get_remote_bridges
 
 
 class WebSocketHandler(Base):
