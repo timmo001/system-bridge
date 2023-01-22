@@ -13,7 +13,5 @@
       "type": "string"
     }
   },
-  "required": [
-    "command"
-  ]
+  "required": ["command"]
 }
