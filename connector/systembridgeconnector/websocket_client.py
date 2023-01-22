@@ -114,6 +114,9 @@ class WebSocketClient(Base):
             id=request.id,
             type="N/A",
             message="Message sent",
+            subtype=None,
+            module=None,
+            data=None,
         )
 
     async def close(self) -> None:
