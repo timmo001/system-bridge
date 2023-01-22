@@ -20,7 +20,7 @@ def keyboard_text(text: str) -> None:
     write(text)
 
 
-async def keyboard_hotkey_register(key: str, callback: Callable) -> None:
+def keyboard_hotkey_register(key: str, callback: Callable) -> None:
     """Register a hotkey"""
     add_hotkey(key, callback)
 

@@ -28,6 +28,7 @@ class ActionHandler(Base):
         action: Action,
     ) -> None:
         """Handle an action"""
+        self._logger.info("Action: %s", action.json())
         if action.command == "api" and action.data is not None:
             await self.api_action(action.data)
         else:

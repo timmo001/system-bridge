@@ -189,18 +189,31 @@ class Server(Base):
     async def register_hotkeys(self) -> None:
         """Register hotkeys"""
         self._logger.info("Register hotkeys")
-        action_handler = ActionHandler(self._settings)
         hotkeys = self._settings.get(SETTING_KEYBOARD_HOTKEYS)
         if hotkeys is not None and isinstance(hotkeys, list):
             self._logger.info("Found %s hotkeys", len(hotkeys))
             for item in hotkeys:
-                hotkey = item["name"]
-                self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])
-                action = Action(**loads(item["value"]))
-                await keyboard_hotkey_register(
-                    hotkey,
-                    lambda: api_app.loop.create_task(action_handler.handle(action)),
-                )
+                self.register_hotkey(item)
+
+    def register_hotkey(
+        self,
+        item: dict,
+    ) -> None:
+        """Register hotkey"""
+        hotkey = item["name"]
+        self._logger.info("Register hotkey '%s' to: %s", hotkey, item["value"])
+        action = Action(**loads(item["value"]))
+
+        def hotkey_callback() -> None:
+            """Hotkey callback"""
+            self._logger.info("Hotkey '%s' pressed", hotkey)
+            action_handler = ActionHandler(self._settings)
+            api_app.loop.create_task(action_handler.handle(action))
+
+        keyboard_hotkey_register(
+            hotkey,
+            hotkey_callback,
+        )
 
     async def update_data(self) -> None:
         """Update data"""
