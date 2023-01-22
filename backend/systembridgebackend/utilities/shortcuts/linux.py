@@ -1,4 +1,4 @@
-"""System Bridge: Shortcut Linux"""
+"""System Bridge: Linux Shortcuts"""
 import os
 import sys
 

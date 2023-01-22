@@ -1,4 +1,4 @@
-"""System Bridge: Shortcut Windows"""
+"""System Bridge: Windows Shortcuts"""
 import os
 import platform
 import sys

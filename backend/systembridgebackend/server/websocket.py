@@ -1,4 +1,4 @@
-"""System Bridge: WebSocket handler"""
+"""System Bridge: WebSocket Handler"""
 import os
 from collections.abc import Callable
 from json import JSONDecodeError
