@@ -1,4 +1,4 @@
-"""System Bridge Connector: HTTP Client"""
+"""System Bridge Shared: HTTP Client"""
 from __future__ import annotations
 
 import asyncio

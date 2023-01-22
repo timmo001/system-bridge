@@ -3,6 +3,7 @@ import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
 import {
   mdiFolderMultipleOutline,
+  mdiKeyboardOutline,
   mdiProtocol,
   mdiRocketLaunch,
   mdiTextBoxOutline,
@@ -54,6 +55,12 @@ export const settingsMap: { [key: string]: SettingDescription } = {
     icon: mdiFolderMultipleOutline,
     isList: true,
   },
+  keyboard_hotkeys: {
+    name: "Keyboard Hotkeys",
+    description: "Setup hotkeys for triggering actions",
+    icon: mdiKeyboardOutline,
+    isList: true,
+  },
 };
 
 function Settings(): ReactElement {
@@ -75,12 +82,10 @@ function Settings(): ReactElement {
             settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1
           )
           .forEach((s: SettingResult) => {
-            // if (typeof s.value !== "boolean" && !Number.isNaN(Number(s.value)))
-            //   newSettings[s.key] = Number(s.value);
-            // else if (s.value === "True" || s.value === "False")
-            //   newSettings[s.key] = s.value === "True";
-            // else newSettings[s.key] = s.value;
-            newSettings[s.key] = s.value;
+            // Parse JSON if the value is a stringified list
+            if (settingsMap[s.key]?.isList && typeof s.value === "string") {
+              newSettings[s.key] = JSON.parse(s.value);
+            } else newSettings[s.key] = s.value;
           });
         console.log("Settings:", newSettings);
         setSettings(newSettings);
