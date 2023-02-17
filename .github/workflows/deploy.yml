@@ -87,13 +87,6 @@ jobs:
     with:
       architecture: amd64
       container-slug: system-bridge
-  deploy-container-aarch64:
-    needs:
-      - deploy-frontend
-    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
-    with:
-      architecture: aarch64
-      container-slug: system-bridge
   deploy-gui:
     needs:
       - deploy-frontend

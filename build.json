@@ -1,9 +1,5 @@
 {
   "build_from": {
-    "aarch64": "ghcr.io/timmo001/container-debian-base/aarch64:stable",
-    "amd64": "ghcr.io/timmo001/container-debian-base/amd64:stable",
-    "armhf": "ghcr.io/timmo001/container-debian-base/armhf:stable",
-    "armv7": "ghcr.io/timmo001/container-debian-base/armv7:stable",
-    "i386": "ghcr.io/timmo001/container-debian-base/i386:stable"
+    "amd64": "ghcr.io/timmo001/container-debian-base/amd64:stable"
   }
 }
