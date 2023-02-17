@@ -59,7 +59,6 @@ class Main(Base):
 
 
 if __name__ == "__main__":
-
     database = Database()
     settings = Settings(database)
 
