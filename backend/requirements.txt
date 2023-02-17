@@ -1,6 +1,6 @@
 aiofiles==22.1.0
 aiogithubapi==22.12.2
-aiohttp==3.8.3
+aiohttp==3.8.4
 fastapi==0.89.1
 incremental==22.10.0
 keyboard==0.13.5
