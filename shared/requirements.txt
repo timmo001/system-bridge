@@ -1,4 +1,4 @@
-aiohttp==3.8.3
+aiohttp==3.8.4
 appdirs==1.4.4
 colorlog==6.7.0
 cryptography==39.0.0
