@@ -7,7 +7,7 @@ keyboard==0.13.5
 mutagen==1.46.0
 plyer==2.1.0
 psutil==5.9.4
-pyinstaller==5.7.0
+pyinstaller==5.8.0
 python-multipart==0.0.5
 screeninfo==0.8.1
 uvicorn[standard]==0.20.0
