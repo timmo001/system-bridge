@@ -1,4 +1,4 @@
-aiohttp==3.8.3
+aiohttp==3.8.4
 incremental==22.10.0
 pyinstaller==5.8.0
 pyperclip==1.8.2
