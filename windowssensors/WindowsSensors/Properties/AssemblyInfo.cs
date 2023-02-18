@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Timmo")]
 [assembly: AssemblyProduct("SystemBridgeWindowsSensors")]
-[assembly: AssemblyCopyright("Copyright © 2021-2022")]
+[assembly: AssemblyCopyright("Copyright © Timmo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
