@@ -58,6 +58,23 @@ settings = Settings(database)
 logger = logging.getLogger("systembridgebackend.server.api")
 
 
+def callback_media_play(
+    media_type: str,
+    media_play: MediaPlay,
+) -> None:
+    """Callback to open media player"""
+    gui_player = GUI(settings)
+    app.loop.create_task(
+        gui_player.start(
+            app.callback_exit,
+            "media-player",
+            media_type,
+            media_play.json(),
+        ),
+        name="GUI media player",
+    )
+
+
 def security_api_key_header(
     api_key_header: Optional[str] = Header(alias=HEADER_API_KEY, default=None),
 ):
@@ -627,20 +644,3 @@ if "--no-frontend" not in sys.argv:
         )
     except (ImportError, ModuleNotFoundError) as err:
         logger.error("Frontend not found: %s", err)
-
-
-def callback_media_play(
-    media_type: str,
-    media_play: MediaPlay,
-) -> None:
-    """Callback to open media player"""
-    gui_player = GUI(settings)
-    app.loop.create_task(
-        gui_player.start(
-            app.callback_exit,
-            "media-player",
-            media_type,
-            media_play.json(),
-        ),
-        name="GUI media player",
-    )
