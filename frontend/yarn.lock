@@ -230,21 +230,35 @@
     prop-types "^15.8.1"
     react-is "^18.2.0"
 
+"@mui/base@5.0.0-alpha.120":
+  version "5.0.0-alpha.120"
+  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.120.tgz#d576f62af476af51a6ced948cf51a688a9ed10e8"
+  integrity sha512-UoIXLjbl8ghK7OSD1dYzHIj79sx9v5S2J7vYeuhxUS0QR0FwGZ3WLHd31TQ2CT2faPX/AXsHQeFn93wKSnjPUQ==
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@emotion/is-prop-valid" "^1.2.0"
+    "@mui/types" "^7.2.3"
+    "@mui/utils" "^5.11.12"
+    "@popperjs/core" "^2.11.6"
+    clsx "^1.2.1"
+    prop-types "^15.8.1"
+    react-is "^18.2.0"
+
 "@mui/core-downloads-tracker@^5.11.12":
   version "5.11.12"
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.11.12.tgz#b2ea89ba71321a79c89dfb6b2a1b1886dc7de6e4"
   integrity sha512-LHh8HZQ5nPVcW5QnyLwkAZ40txc/S2bzKMQ3bTO+5mjuwAJ2AzQrjZINLVy1geY7ei1pHXVqO1hcWHg/QdT44w==
 
-"@mui/lab@5.0.0-alpha.121":
-  version "5.0.0-alpha.121"
-  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.121.tgz#bb8586cdec41ead32bd90a30278779012967d15a"
-  integrity sha512-/W5H09zje9psma3RixtilTf1Tk2zUuK9j16e1W+V7oe/1pW6hNj6aZfm8y0t4qPUDQfxMBzlQm26XQx9i8F9PA==
+"@mui/lab@5.0.0-alpha.122":
+  version "5.0.0-alpha.122"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.122.tgz#271d4edb45613c598b6a9ab2fbe356454805f90f"
+  integrity sha512-rJyu9llUWAluUQgDEmN0WrpcFxeTdJgu+XYriJtp/MchdvKl/qVTlx+vhnIhqas2bySj5N1VQnkI6qOvfXiYvQ==
   dependencies:
     "@babel/runtime" "^7.21.0"
-    "@mui/base" "5.0.0-alpha.119"
-    "@mui/system" "^5.11.11"
+    "@mui/base" "5.0.0-alpha.120"
+    "@mui/system" "^5.11.12"
     "@mui/types" "^7.2.3"
-    "@mui/utils" "^5.11.11"
+    "@mui/utils" "^5.11.12"
     clsx "^1.2.1"
     prop-types "^15.8.1"
     react-is "^18.2.0"
@@ -309,7 +323,7 @@
     jss-plugin-vendor-prefixer "^10.10.0"
     prop-types "^15.8.1"
 
-"@mui/system@^5.11.11", "@mui/system@^5.11.12":
+"@mui/system@^5.11.12":
   version "5.11.12"
   resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.11.12.tgz#e7234c4e73e9af2b8e985fbed048d8b274338561"
   integrity sha512-sYjsXkiwKpZDC3aS6O/6KTjji0jGINLQcrD5EJ5NTkIDiLf19I4HJhnufgKqlTWNfoDBlRohuTf3TzfM06c4ug==
