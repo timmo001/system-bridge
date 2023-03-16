@@ -10,5 +10,5 @@ psutil==5.9.4
 pyinstaller==5.8.0
 python-multipart==0.0.6
 screeninfo==0.8.1
-uvicorn[standard]==0.21.0
+uvicorn[standard]==0.21.1
 zeroconf==0.47.3
