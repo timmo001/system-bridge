@@ -108,7 +108,7 @@ class WebSocketClient(Base):
         if wait_for_response:
             try:
                 return await future
-            finally:Fclo
+            finally:
                 self._responses.pop(request.id)
         return Response(
             id=request.id,
