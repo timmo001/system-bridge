@@ -351,12 +351,12 @@
     csstype "^3.1.2"
     prop-types "^15.8.1"
 
-"@mui/types@^7.2.3", "@mui/types@^7.2.4":
+"@mui/types@^7.2.4":
   version "7.2.4"
   resolved "https://registry.yarnpkg.com/@mui/types/-/types-7.2.4.tgz#b6fade19323b754c5c6de679a38f068fd50b9328"
   integrity sha512-LBcwa8rN84bKF+f5sDyku42w1NTxaPgPyYKODsh01U1fVstTClbUoSA96oyRBnSNyEiAVjKm6Gwx9vjR+xyqHA==
 
-"@mui/utils@^5.11.13", "@mui/utils@^5.12.0":
+"@mui/utils@^5.12.0":
   version "5.12.0"
   resolved "https://registry.yarnpkg.com/@mui/utils/-/utils-5.12.0.tgz#284db48b36ac26f3d34076379072c1dc8aed1ad0"
   integrity sha512-RmQwgzF72p7Yr4+AAUO6j1v2uzt6wr7SWXn68KBsnfVpdOHyclCzH2lr/Xu6YOw9su4JRtdAIYfJFXsS6Cjkmw==
@@ -527,10 +527,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@18.0.34":
-  version "18.0.34"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.34.tgz#e553444a578f023e6e1ac499514688fb80b0a984"
-  integrity sha512-NO1UO8941541CJl1BeOXi8a9dNKFK09Gnru5ZJqkm4Q3/WoQJtHvmwt0VX0SB9YCEwe7TfSSxDuaNmx6H2BAIQ==
+"@types/react@*", "@types/react@18.0.35":
+  version "18.0.35"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.35.tgz#192061cb1044fe01f2d3a94272cd35dd50502741"
+  integrity sha512-6Laome31HpetaIUGFWl1VQ3mdSImwxtFZ39rh059a1MNnKGqBpC88J6NJ8n/Is3Qx7CefDGLgf/KhN/sYCf7ag==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
