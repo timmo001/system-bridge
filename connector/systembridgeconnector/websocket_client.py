@@ -457,7 +457,7 @@ class WebSocketClient(Base):
                         try:
                             future.set_result(response)
                         except asyncio.InvalidStateError:
-                            self._logger.warning(
+                            self._logger.debug(
                                 "Future already set for response ID: %s",
                                 message[EVENT_ID],
                             )
