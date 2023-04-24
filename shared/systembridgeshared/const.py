@@ -8,6 +8,7 @@ from .models.generic import Generic
 from .models.gpu import Gpu
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
+from .models.media import Media
 from .models.media_directories import MediaDirectories
 from .models.media_files import File, MediaFiles
 from .models.memory import Memory
@@ -171,6 +172,7 @@ MODEL_KEYBOARD_TEXT = "keyboard_text"
 MODEL_MEDIA_DIRECTORIES = "media_directories"
 MODEL_MEDIA_FILE = "media_file"
 MODEL_MEDIA_FILES = "media_files"
+MODEL_MEDIA = "media"
 MODEL_MEMORY = "memory"
 MODEL_NETWORK = "network"
 MODEL_NOTIFICATION = "notification"
@@ -195,6 +197,7 @@ MODEL_MAP = {
     MODEL_MEDIA_DIRECTORIES: MediaDirectories,
     MODEL_MEDIA_FILE: File,
     MODEL_MEDIA_FILES: MediaFiles,
+    MODEL_MEDIA: Media,
     MODEL_MEMORY: Memory,
     MODEL_NETWORK: Network,
     MODEL_NOTIFICATION: Notification,

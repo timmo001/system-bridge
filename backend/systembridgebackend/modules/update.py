@@ -10,6 +10,7 @@ from .cpu.update import CPUUpdate
 from .disk.update import DiskUpdate
 from .display.update import DisplayUpdate
 from .gpu.update import GPUUpdate
+from .media.update import MediaUpdate
 from .memory.update import MemoryUpdate
 from .network.update import NetworkUpdate
 from .sensors.update import SensorsUpdate
@@ -36,6 +37,7 @@ class Update(Base):
             {"name": "cpu", "cls": CPUUpdate(self._database)},
             {"name": "display", "cls": DisplayUpdate(self._database)},
             {"name": "gpu", "cls": GPUUpdate(self._database)},
+            {"name": "media", "cls": MediaUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
             {"name": "network", "cls": NetworkUpdate(self._database)},
         ]
