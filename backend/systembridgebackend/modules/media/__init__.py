@@ -18,11 +18,11 @@ class Media(Base):
         if platform.system() != "Windows":
             return None
 
-        from winsdk.windows.media.control import (
-            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,  # pylint: disable=import-error,import-outside-toplevel
-        )
+        import winsdk.windows.media.control as wmc  # pylint: disable=import-error,import-outside-toplevel
 
-        sessions = await wmc_session_manager.request_async()
+        sessions = (
+            await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
+        )
         if current_session := sessions.get_current_session():
             media_info = MediaInfo()
             if info := current_session.get_playback_info():
