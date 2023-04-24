@@ -3,6 +3,6 @@ appdirs==1.4.4
 colorlog==6.7.0
 cryptography==40.0.2
 incremental==22.10.0
-pandas==2.0.0
+pandas==2.0.1
 pydantic==1.10.7
 sqlmodel==0.0.8
