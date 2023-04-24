@@ -18,11 +18,11 @@ class Media(Base):
         if platform.system() != "Windows":
             return None
 
-        import winsdk.windows.media.control as wmc
-
-        sessions = (
-            await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
+        from winsdk.windows.media.control import (
+            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,
         )
+
+        sessions = await wmc_session_manager.request_async()
         current_session = sessions.get_current_session()
         if current_session:
             if properties := await current_session.try_get_media_properties_async():
