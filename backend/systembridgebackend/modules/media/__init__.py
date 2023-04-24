@@ -35,7 +35,9 @@ class Media(Base):
                 if info.playback_type:
                     media_info.type = info.playback_type.name
                 if info.controls:
-                    media_info.is_fast_forward_enabled = (info.controls.is_fast_forward_enabled)
+                    media_info.is_fast_forward_enabled = (
+                        info.controls.is_fast_forward_enabled
+                    )
                     media_info.is_next_enabled = info.controls.is_next_enabled
                     media_info.is_pause_enabled = info.controls.is_pause_enabled
                     media_info.is_play_enabled = info.controls.is_play_enabled
