@@ -1,9 +1,9 @@
 """System Bridge: Media"""
 from __future__ import annotations
 
+import platform
 from typing import Optional
 
-import winsdk.windows.media.control as wmc
 from systembridgeshared.base import Base
 from systembridgeshared.models.media import Media as MediaInfo
 
@@ -15,6 +15,11 @@ class Media(Base):
         self,
     ) -> Optional[MediaInfo]:
         """Get media info from the current session."""
+        if platform.system() != "Windows":
+            return None
+
+        import winsdk.windows.media.control as wmc
+
         sessions = (
             await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
         )
