@@ -13,10 +13,24 @@ class Media(BaseModel):
     Media Info
     """
 
-    title: Optional[str] = None
-    subtitle: Optional[str] = None
     album_artist: Optional[str] = None
     album_title: Optional[str] = None
     artist: Optional[str] = None
+    duration: Optional[float] = None
+    is_fast_forward_enabled: Optional[bool] = None
+    is_next_enabled: Optional[bool] = None
+    is_pause_enabled: Optional[bool] = None
+    is_play_enabled: Optional[bool] = None
+    is_previous_enabled: Optional[bool] = None
+    is_rewind_enabled: Optional[bool] = None
+    is_stop_enabled: Optional[bool] = None
+    playback_rate: Optional[float] = None
+    position: Optional[float] = None
+    repeat: Optional[str] = None
+    shuffle: Optional[bool] = None
+    status: Optional[str] = None
+    subtitle: Optional[str] = None
     thumbnail: Optional[str] = None
+    title: Optional[str] = None
     track_number: Optional[int] = None
+    type: Optional[str] = None
