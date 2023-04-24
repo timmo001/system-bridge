@@ -19,7 +19,7 @@ class Media(Base):
             return None
 
         from winsdk.windows.media.control import (
-            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,  # pylint: disable=import-outside-toplevel
+            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,  # pylint: disable=import-error,import-outside-toplevel
         )
 
         sessions = await wmc_session_manager.request_async()
