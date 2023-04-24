@@ -68,7 +68,7 @@ for root, _, files in os.walk(path_from_schemas):
                 "-m",
                 "black",
                 "-t",
-                "py38",
+                "py39",
                 path_to,
             ]
 
