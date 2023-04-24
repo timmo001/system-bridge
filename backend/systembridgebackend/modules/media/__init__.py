@@ -19,12 +19,11 @@ class Media(Base):
             return None
 
         from winsdk.windows.media.control import (
-            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,
+            GlobalSystemMediaTransportControlsSessionManager as wmc_session_manager,  # pylint: disable=import-outside-toplevel
         )
 
         sessions = await wmc_session_manager.request_async()
-        current_session = sessions.get_current_session()
-        if current_session:
+        if current_session := sessions.get_current_session():
             media_info = MediaInfo()
             if info := current_session.get_playback_info():
                 media_info.status = info.playback_status.name
