@@ -25,8 +25,7 @@ class Media(Base):
         )
         current_session = sessions.get_current_session()
         if current_session:
-            properties = await current_session.try_get_media_properties_async()
-            if properties:
+            if properties := await current_session.try_get_media_properties_async():
                 return MediaInfo(
                     title=properties.title,
                     subtitle=properties.subtitle,
