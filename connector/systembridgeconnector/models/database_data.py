@@ -35,6 +35,10 @@ class GPU(Data, table=True):
     """Database Data GPU"""
 
 
+class Media(Data, table=True):
+    """Media Data Memory"""
+
+
 class Memory(Data, table=True):
     """Database Data Memory"""
 

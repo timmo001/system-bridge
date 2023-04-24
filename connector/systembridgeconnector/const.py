@@ -8,6 +8,7 @@ from .models.generic import Generic
 from .models.gpu import Gpu
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
+from .models.media import Media
 from .models.media_directories import MediaDirectories
 from .models.media_files import File, MediaFiles
 from .models.memory import Memory
@@ -41,7 +42,6 @@ QUERY_PATH = "path"
 QUERY_TITLE = "title"
 QUERY_URL = "url"
 QUERY_VOLUME = "volume"
-
 
 # Event Keys
 EVENT_API_KEY = "api-key"
@@ -107,6 +107,8 @@ TYPE_GET_DATA = "GET_DATA"
 TYPE_GET_DIRECTORIES = "GET_DIRECTORIES"
 TYPE_GET_FILE = "GET_FILE"
 TYPE_GET_FILES = "GET_FILES"
+TYPE_GET_REMOTE_BRIDGES = "GET_REMOTE_BRIDGES"
+TYPE_GET_REMOTE_BRIDGES_RESULT = "GET_REMOTE_BRIDGES_RESULT"
 TYPE_GET_SETTING = "GET_SETTING"
 TYPE_GET_SETTINGS = "GET_SETTINGS"
 TYPE_KEYBOARD_KEY_PRESSED = "KEYBOARD_KEY_PRESSED"
@@ -134,6 +136,8 @@ TYPE_SETTING_RESULT = "SETTING_RESULT"
 TYPE_SETTING_UPDATED = "SETTING_UPDATED"
 TYPE_SETTINGS_RESULT = "SETTINGS_RESULT"
 TYPE_UNREGISTER_DATA_LISTENER = "UNREGISTER_DATA_LISTENER"
+TYPE_UPDATE_REMOTE_BRIDGE = "UPDATE_REMOTE_BRIDGE"
+TYPE_UPDATE_REMOTE_BRIDGE_RESULT = "UPDATE_REMOTE_BRIDGE_RESULT"
 TYPE_UPDATE_SETTING = "UPDATE_SETTING"
 
 # Model
@@ -149,6 +153,7 @@ MODEL_KEYBOARD_TEXT = "keyboard_text"
 MODEL_MEDIA_DIRECTORIES = "media_directories"
 MODEL_MEDIA_FILE = "media_file"
 MODEL_MEDIA_FILES = "media_files"
+MODEL_MEDIA = "media"
 MODEL_MEMORY = "memory"
 MODEL_NETWORK = "network"
 MODEL_NOTIFICATION = "notification"
@@ -173,6 +178,7 @@ MODEL_MAP = {
     MODEL_MEDIA_DIRECTORIES: MediaDirectories,
     MODEL_MEDIA_FILE: File,
     MODEL_MEDIA_FILES: MediaFiles,
+    MODEL_MEDIA: Media,
     MODEL_MEMORY: Memory,
     MODEL_NETWORK: Network,
     MODEL_NOTIFICATION: Notification,

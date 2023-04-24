@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": {},
+  "description": "Media Info",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "album_artist": {
+      "type": "string"
+    },
+    "album_title": {
+      "type": "string"
+    },
+    "artist": {
+      "type": "string"
+    },
+    "thumbnail": {
+      "type": "string"
+    },
+    "track_number": {
+      "type": "integer"
+    }
+  },
+  "type": "object"
+}
