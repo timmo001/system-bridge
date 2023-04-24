@@ -5,16 +5,13 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Field
 
 
 class LastUpdated(BaseModel):
     """
     Last updated
     """
-
-    class Config:
-        extra = Extra.allow
 
     count: Optional[float] = None
     frequency_current: Optional[float] = None
@@ -45,9 +42,6 @@ class Cpu(BaseModel):
     """
     CPU
     """
-
-    class Config:
-        extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
     count: Optional[int] = None

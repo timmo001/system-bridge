@@ -5,16 +5,13 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Field
 
 
 class LastUpdated(BaseModel):
     """
     Last updated
     """
-
-    class Config:
-        extra = Extra.allow
 
     devices: float
     io_counters_read_count: Optional[float] = None
@@ -30,9 +27,6 @@ class Disk(BaseModel):
     """
     Disk
     """
-
-    class Config:
-        extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
     devices: list
