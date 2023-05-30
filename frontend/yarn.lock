@@ -197,10 +197,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.41.0.tgz#080321c3b68253522f7646b55b577dd99d2950b3"
   integrity sha512-LxcyMGxwmTh2lY9FwHPGWOHmYFCZvbrFCBZL4FzSSsxsRPuhrYUg/49/0KDfW8tnIEaEHtfmn6+NPN+1DqaNmA==
 
-"@fontsource/roboto@5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.0.1.tgz#c9d374fc71553d356986b393ec8aace1bf740d58"
-  integrity sha512-pWF64nF35Tfoh2kWgOuJYEFTLkpn+O3/GIR//u1MGD9b1yR+UBwYKXmcNx9CRyNPjMdWjkdN9GKDHhaWZRYbnw==
+"@fontsource/roboto@5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.0.2.tgz#06f10be117be622e6c720a1c6579b00475420bcd"
+  integrity sha512-SLw0o3kWwJ53/Ogyk8GGwSaULNX6Hogs+GsVempDdqpX8wm5hKBLYgUkdUPk+NogiViPp1x++OnkuLA+fAd9Kg==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
