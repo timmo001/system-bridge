@@ -4,5 +4,5 @@ colorlog==6.7.0
 cryptography==41.0.0
 incremental==22.10.0
 pandas==2.0.2
-pydantic==1.10.8
+pydantic==1.10.9
 sqlmodel==0.0.8
