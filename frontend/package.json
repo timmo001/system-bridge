@@ -51,7 +51,7 @@
     "@types/lodash": "4.14.195",
     "@types/node": "20.3.1",
     "@types/react": "18.2.13",
-    "@types/react-dom": "18.2.5",
+    "@types/react-dom": "18.2.6",
     "@types/uuid": "9.0.2",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.6",
