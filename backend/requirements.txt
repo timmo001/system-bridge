@@ -11,4 +11,4 @@ pyinstaller==5.12.0
 python-multipart==0.0.6
 screeninfo==0.8.1
 uvicorn[standard]==0.22.0
-zeroconf==0.66.0
+zeroconf==0.69.0
