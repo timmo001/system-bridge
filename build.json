@@ -1,0 +1,5 @@
+{
+  "build_from": {
+    "amd64": "ghcr.io/timmo001/container-debian-base/amd64:stable"
+  }
+}
