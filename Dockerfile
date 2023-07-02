@@ -5,6 +5,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Setup base
 ARG BUILD_ARCH=amd64
+
 RUN \
     apt-get update \
     \
@@ -14,15 +15,17 @@ RUN \
         python3 \
         python3-pip \
         python3-setuptools \
-        python3-wheel \
-    \
-    && pip install --upgrade \
+        python3-wheel
+
+RUN \
+    pip install --upgrade \
         systembridgeshared \
         systembridgebackend \
         systembridgecli \
-        systembridgefrontend \
-    \
-    && rm -fr \
+        systembridgefrontend
+
+RUN \
+    rm -fr \
         /tmp/* \
         /var/{cache,log}/* \
         /var/lib/apt/lists/*
