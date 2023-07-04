@@ -1,0 +1,18 @@
+#!/bin/bash
+# ==============================================================================
+# Initialize backend
+# ==============================================================================
+python3 -m systembridgebackend --cli --no-gui --init
+
+SB_API_KEY="$(python3 -m systembridgecli api-key)"
+echo "--------------------------------------------------"
+echo "Your API key is: $SB_API_KEY"
+echo "--------------------------------------------------"
+
+# ==============================================================================
+# Start app
+# ==============================================================================
+export XDG_CONFIG_HOME="/data/user/config"
+export XDG_DATA_HOME="/data/user/local/share"
+
+python3 -m systembridgebackend --cli --no-gui
