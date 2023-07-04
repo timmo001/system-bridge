@@ -202,10 +202,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.44.0.tgz#961a5903c74139390478bdc808bcde3fc45ab7af"
   integrity sha512-Ag+9YM4ocKQx9AarydN0KY2j0ErMHNIocPDrVo8zAE44xLTjEtz81OdR68/cydGtk6m6jDb5Za3r2useMzYmSw==
 
-"@fontsource/roboto@5.0.3":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.0.3.tgz#bff6ce627b8c537e8f56e6f2bba221f425bfdf78"
-  integrity sha512-jbZDFwEFARDlo8TqG7th/xjhuq87GYfFpFb+uxuy+0Ng1bhRVgBRWlLj8+WIKhCTOr+h4QXbjpybLWFLUirOwQ==
+"@fontsource/roboto@5.0.4":
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.0.4.tgz#69fed200b4d3af0478c9066b05dbfcbda5e2bbfd"
+  integrity sha512-4aVlY+8u/8V15zP8Z4tscGebdD62trVo1CVNW8OsvLWYduebFxxETj7yzfkR/131fVGy/lO1RTeLf6CT7eD8CQ==
 
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
