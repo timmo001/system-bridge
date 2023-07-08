@@ -55,6 +55,5 @@ class Media(Base):
                 media_info.album_artist = properties.album_artist
                 media_info.album_title = properties.album_title
                 media_info.track_number = properties.track_number
-                # media_info.thumbnail
             return media_info
         return None
