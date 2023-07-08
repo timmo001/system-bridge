@@ -30,7 +30,7 @@ export const SettingsProvider = ({
 
 export const useSettings = (): [
   settings: SettingsObject | undefined,
-  setSettings: React.Dispatch<React.SetStateAction<SettingsObject | undefined>>
+  setSettings: React.Dispatch<React.SetStateAction<SettingsObject | undefined>>,
 ] => {
   const settings = useContext(SettingsContext);
   const setSettings = useContext(SetSettingsContext);

@@ -79,7 +79,7 @@ function Settings(): ReactElement {
         const settingsKeys = Object.keys(settingsMap);
         event.data
           .sort((a: SettingResult, b: SettingResult) =>
-            settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1
+            settingsKeys.indexOf(a.key) > settingsKeys.indexOf(b.key) ? 1 : -1,
           )
           .forEach((s: SettingResult) => {
             // Parse JSON if the value is a stringified list
@@ -91,7 +91,7 @@ function Settings(): ReactElement {
         setSettings(newSettings);
       }
     },
-    [setSettings]
+    [setSettings],
   );
 
   const handleSetup = useCallback(
@@ -102,7 +102,7 @@ function Settings(): ReactElement {
       });
       ws.onEvent = eventHandler;
     },
-    [eventHandler]
+    [eventHandler],
   );
 
   const handleChanged = useCallback(
@@ -110,7 +110,7 @@ function Settings(): ReactElement {
       ws.updateSetting(key, value);
       setSettings({ ...settings, [key]: value });
     },
-    [settings, setSettings]
+    [settings, setSettings],
   );
 
   useEffect(() => {

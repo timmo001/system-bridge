@@ -52,7 +52,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
 
   function handleCheckedChanged(
     _event: ChangeEvent<HTMLInputElement>,
-    checked: boolean
+    checked: boolean,
   ): void {
     handleSetSetting(checked);
   }
@@ -70,7 +70,7 @@ function Item({ keyIn, valueIn, handleChanged }: ItemProps): ReactElement {
   }
 
   function handleMouseDownPassword(
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement>,
   ): void {
     event.preventDefault();
   }

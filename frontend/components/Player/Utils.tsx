@@ -58,7 +58,7 @@ export const PlayerProvider = ({
 
 export const usePlayer = (): [
   player: PlayerStatus | undefined,
-  setPlayer: React.Dispatch<React.SetStateAction<PlayerStatus | undefined>>
+  setPlayer: React.Dispatch<React.SetStateAction<PlayerStatus | undefined>>,
 ] => {
   const player = useContext(PlayerContext);
   const setPlayer = useContext(SetPlayerContext);
@@ -88,7 +88,7 @@ export function useHover() {
         nodeRef.current.addEventListener("mouseout", handleMouseOut);
       }
     },
-    [handleMouseOver, handleMouseOut]
+    [handleMouseOver, handleMouseOut],
   );
 
   return [callbackRef, isHovering];

@@ -33,7 +33,7 @@ interface BridgeEditProps {
 
 function BridgeEditComponent(props: BridgeEditProps): ReactElement {
   const [bridge, setBridge] = useState<Partial<Bridge>>(
-    props.bridgeEdit.bridge
+    props.bridgeEdit.bridge,
   );
   const [testingMessage, setTestingMessage] = useState<TestingMessage>({
     text: "",
@@ -59,7 +59,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           ? window.location.hostname
           : "localhost"
       }:${query.apiPort || 9170}/api/remote/${bridge.key}`,
-      { headers: { "api-key": query.apiKey as string } }
+      { headers: { "api-key": query.apiKey as string } },
     );
     if (response && response.status < 400) props.handleClose();
     else setTestingMessage({ text: "Failed to delete bridge", error: true });
@@ -86,7 +86,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
               bridgeData,
               {
                 headers: { "api-key": query.apiKey as string },
-              }
+              },
             )
           : await axios.post<Partial<Bridge>>(url, bridgeData, {
               headers: { "api-key": query.apiKey as string },
@@ -107,7 +107,7 @@ function BridgeEditComponent(props: BridgeEditProps): ReactElement {
           `http://${bridge.host}:${bridge.port}/api/data/system`,
           {
             headers: { "api-key": bridge.api_key },
-          }
+          },
         );
         if (response && response.status < 400) {
           console.log("System:", response.data);

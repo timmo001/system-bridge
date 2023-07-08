@@ -18,7 +18,7 @@ function VideoComponent(): ReactElement {
     (loaded: boolean) => {
       setPlayerStatus({ ...playerStatus!!, loaded });
     },
-    [playerStatus, setPlayerStatus]
+    [playerStatus, setPlayerStatus],
   );
 
   const handleSetPlaying = useCallback(
@@ -26,14 +26,14 @@ function VideoComponent(): ReactElement {
       console.log("Set playing:", playing);
       setPlayerStatus({ ...playerStatus!!, playing });
     },
-    [playerStatus, setPlayerStatus]
+    [playerStatus, setPlayerStatus],
   );
 
   const handleSetMuted = useCallback(
     (muted: boolean) => {
       setPlayerStatus({ ...playerStatus!!, muted });
     },
-    [playerStatus, setPlayerStatus]
+    [playerStatus, setPlayerStatus],
   );
 
   const handleSetVolume = useCallback(
@@ -47,7 +47,7 @@ function VideoComponent(): ReactElement {
       });
       if (muted) handleSetMuted(false);
     },
-    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
+    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted],
   );
 
   const handleSetDuration = useCallback(
@@ -56,7 +56,7 @@ function VideoComponent(): ReactElement {
         ...playerStatus!!,
         duration,
       }),
-    [playerStatus, setPlayerStatus]
+    [playerStatus, setPlayerStatus],
   );
 
   const handleSetPosition = useCallback(
@@ -68,7 +68,7 @@ function VideoComponent(): ReactElement {
         position: p,
       });
     },
-    [playerStatus, duration, setPlayerStatus]
+    [playerStatus, duration, setPlayerStatus],
   );
 
   useEffect(() => {

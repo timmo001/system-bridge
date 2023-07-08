@@ -39,7 +39,7 @@ function BridgesSetupComponent(): ReactElement {
       }:${query.apiPort || 9170}/api/remote`,
       {
         headers: { "api-key": query.apiKey as string },
-      }
+      },
     );
     if (response && response.status < 400) {
       setBridges(response.data.data);

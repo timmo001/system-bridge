@@ -42,11 +42,11 @@ function BridgesOpenOnComponent(): ReactElement {
       }:${query.apiPort || 9170}/api/remote`,
       {
         headers: { "api-key": query.apiKey as string },
-      }
+      },
     );
     if (response && response.status < 400) {
       const newBridges = response.data.data.filter(
-        (bridge: Bridge) => bridge.api_key
+        (bridge: Bridge) => bridge.api_key,
       );
       setBridges(newBridges);
       setBridgeSelected(newBridges[0]);
@@ -63,7 +63,7 @@ function BridgesOpenOnComponent(): ReactElement {
         const response = await axios.post<{ path: string }>(
           `http://${bridgeSelected.host}:${bridgeSelected.port}/api/open`,
           { [url.includes("://") ? "url" : "path"]: url },
-          { headers: { "api-key": bridgeSelected.api_key } }
+          { headers: { "api-key": bridgeSelected.api_key } },
         );
         if (response && response.status < 400) {
           console.log(response.data);

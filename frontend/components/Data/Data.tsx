@@ -70,7 +70,7 @@ function DataComponent(): ReactElement {
 
   const handleChangeTab = (
     _event: React.ChangeEvent<any>,
-    newValue: number
+    newValue: number,
   ) => {
     setTab(newValue);
   };
@@ -96,7 +96,7 @@ function DataComponent(): ReactElement {
       });
       ws.onEvent = eventHandler;
     },
-    [eventHandler]
+    [eventHandler],
   );
 
   useEffect(() => {

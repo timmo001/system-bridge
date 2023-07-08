@@ -64,7 +64,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           break;
       }
     },
-    [playerStatus, setPlayerStatus]
+    [playerStatus, setPlayerStatus],
   );
 
   const handleSetupWebSocket = useCallback(
@@ -75,7 +75,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
       });
       websocket.onEvent = eventHandler;
     },
-    [eventHandler]
+    [eventHandler],
   );
 
   useEffect(() => {
@@ -146,7 +146,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           "Player update\n\npreviousStatus:",
           previousStatus,
           "\nnewStatus:",
-          newStatus
+          newStatus,
         );
         if (!newStatus.loaded) return;
         if (!websocket) return;

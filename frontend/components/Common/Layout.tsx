@@ -36,7 +36,7 @@ function Layout(props: LayoutProps): ReactElement {
         needUpdate = true;
         newApiPort = window.prompt(
           "Please enter your API port (default: 9170)",
-          newApiPort
+          newApiPort,
         );
       }
       if (needUpdate && newApiKey && newApiPort) {
