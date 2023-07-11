@@ -322,10 +322,10 @@
     csstype "^3.1.2"
     prop-types "^15.8.1"
 
-"@mui/styles@5.13.7":
-  version "5.13.7"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.13.7.tgz#b3d98741ccfaad32c6341c9b1dc5072578327d66"
-  integrity sha512-RWoQwMYzW4gg2ksVGBIGeMjz1bFz6H+FcHOgncYytaZbvXiMXRkChomb+do4cx41BuXpe94YLP63keM7tjNFpg==
+"@mui/styles@5.14.0":
+  version "5.14.0"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.14.0.tgz#21da486a114de0ada05c7bb8914e885f7c6626b9"
+  integrity sha512-+nXPk/7qhlJn2QGSBlB42gM9G4shLDEAfkTqjUoCDsS3qPo7ZlpM2X5SgnCNoYhXCn820R0YxaJYd19rmC3FSA==
   dependencies:
     "@babel/runtime" "^7.22.5"
     "@emotion/hash" "^0.9.1"
