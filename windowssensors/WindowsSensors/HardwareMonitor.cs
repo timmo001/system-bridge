@@ -56,9 +56,9 @@ namespace SystemBridgeWindowsSensors
         {
           JObject objSubHardware = new JObject
           {
-            ["id"] = hardware.Identifier.ToString(),
-            ["name"] = hardware.Name,
-            ["type"] = hardware.HardwareType.ToString(),
+            ["id"] = subhardware.Identifier.ToString(),
+            ["name"] = subhardware.Name,
+            ["type"] = subhardware.HardwareType.ToString(),
           };
 
           JArray arrSubHardwareSensors = new JArray();
