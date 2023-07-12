@@ -211,8 +211,14 @@ class WebSocketHandler(Base):
 
             self._logger.info("Received: %s", request.event)
 
-            if request.api_key != self._settings.get_secret(SECRET_API_KEY):
-                self._logger.warning("Invalid api-key")
+            api_key = self._settings.get_secret(SECRET_API_KEY)
+
+            if request.api_key != api_key:
+                self._logger.warning(
+                    "Invalid api-key: %s != %s",
+                    request.api_key,
+                    api_key,
+                )
                 await self._send_response(
                     Response(
                         **{

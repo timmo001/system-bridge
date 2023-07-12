@@ -13,6 +13,6 @@ class Request(BaseModel):
     Request
     """
 
-    api_key: Optional[str] = Field(None, alias="api-key", description="API Key")
+    api_key: Optional[str] = Field(None, description="API Key")
     id: Optional[str] = Field(None, description="Message ID")
     event: str = Field(..., description="Event")
