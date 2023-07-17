@@ -100,7 +100,7 @@ jobs:
         --collect-all "systembridgefrontend" \
         --collect-all "plyer"
       entry-point-file: systembridge.py
-      create-setup: true
+      create-setup: false
   build-container-amd64:
     uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
     with:
