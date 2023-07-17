@@ -81,6 +81,7 @@ jobs:
         --collect-all "systembridgegui" \
         --collect-all "systembridgefrontend" \
         --collect-all "plyer"
+      create-setup: false
       entry-point-file: systembridge.py
   package-python-pyinstaller-windows:
     needs:
@@ -99,8 +100,8 @@ jobs:
         --collect-all "systembridgegui" \
         --collect-all "systembridgefrontend" \
         --collect-all "plyer"
-      entry-point-file: systembridge.py
       create-setup: false
+      entry-point-file: systembridge.py
   build-container-amd64:
     uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
     with:
