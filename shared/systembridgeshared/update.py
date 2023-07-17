@@ -42,7 +42,11 @@ class Update(Base):
                 self._install_package(f"{package}=={version}")
 
         asyncio_get_loop().call_later(
-            5, os.execl, sys.executable, sys.executable, *sys.argv
+            5,
+            os.execl,
+            sys.executable,
+            sys.executable,
+            *sys.argv,
         )
 
     def update(
