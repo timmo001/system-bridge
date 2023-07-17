@@ -80,7 +80,7 @@ jobs:
         --collect-all "systembridgebackend" \
         --collect-all "systembridgegui" \
         --collect-all "systembridgefrontend" \
-        --collect-all "plyer"
+        --collect-all "plyer" \
       create-setup: false
       entry-point-file: systembridge.py
   package-python-pyinstaller-windows:
@@ -99,7 +99,7 @@ jobs:
         --collect-all "systembridgebackend" \
         --collect-all "systembridgegui" \
         --collect-all "systembridgefrontend" \
-        --collect-all "plyer"
+        --collect-all "plyer" \
       create-setup: false
       entry-point-file: systembridge.py
   build-container-amd64:
