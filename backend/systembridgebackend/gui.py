@@ -99,13 +99,22 @@ class GUI(Base):
 
         self._logger.info("Connection test passed")
 
-        pgm_args = [
-            sys.executable,
-            "-m",
-            "systembridgegui",
-            command,
-            *args,
-        ]
+        pgm_args = (
+            [
+                sys.executable,
+                "-m",
+                "systembridgegui",
+                command,
+                *args,
+            ]
+            if "python" in sys.executable
+            else [
+                sys.executable,
+                "gui",
+                command,
+                *args,
+            ]
+        )
 
         self._name = command
 
