@@ -5,8 +5,8 @@ import os
 import platform
 import re
 import socket
-from typing import Optional
 import uuid
+from typing import Optional
 
 from aiogithubapi import (
     GitHubAPI,
@@ -70,7 +70,7 @@ class System(Base):
 
     def uuid(self) -> str:
         """Get UUID"""
-        return uniqueid.id
+        return str(uuid.getnode())
 
     def version(self) -> str:
         """Get version"""
