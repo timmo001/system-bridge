@@ -21,10 +21,7 @@ from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..server.mdns import MDNSAdvertisement
 from ..utilities.action import ActionHandler
-from ..utilities.keyboard import (
-    keyboard_hotkey_register,
-    keyboard_hotkey_unregister_all,
-)
+from ..utilities.keyboard import keyboard_hotkey_register
 from .api import app as api_app
 
 
@@ -57,9 +54,14 @@ class Server(Base):
         settings: Settings,
         listeners: Listeners,
         implemented_modules: list[str],
+        no_frontend: bool = False,
+        no_gui: bool = False,
     ) -> None:
         """Initialize"""
         super().__init__()
+        self.no_frontend = no_frontend
+        self.no_gui = no_gui
+
         self._gui_notification: Optional[GUI] = None
         self._gui_player: Optional[GUI] = None
         self._gui: Optional[GUI] = None
@@ -112,7 +114,7 @@ class Server(Base):
                 ),
             ]
         )
-        if "--no-gui" not in sys.argv:
+        if not self.no_gui:
             self._gui = GUI(self._settings)
             self._tasks.extend(
                 [

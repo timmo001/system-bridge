@@ -1,72 +1,44 @@
 """System Bridge: Main"""
-import asyncio
 import logging
-import os
-import sys
 
-from systembridgeshared.base import Base
-from systembridgeshared.const import SETTING_AUTOSTART, SETTING_LOG_LEVEL
+import typer
+from systembridgeshared.const import SETTING_LOG_LEVEL
 from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
-from .modules.listeners import Listeners
-from .modules.system import System
-from .server import Server
-from .utilities.autostart import autostart_disable, autostart_enable
-from .utilities.shortcuts import create_shortcuts
+from . import Application
+
+app = typer.Typer()
+
+database = Database()
+settings = Settings(database)
+
+LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
+logger = setup_logger(LOG_LEVEL, "system-bridge")
+logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
 
-class Main(Base):
-    """Main"""
-
-    def __init__(self) -> None:
-        """Initialize"""
-        super().__init__()
-        if "--init" in sys.argv:
-            self._logger.info("Initialized application. Exiting now.")
-            sys.exit(0)
-
-        self._logger.info("System Bridge %s: Startup", System().version())
-
-        if "--cli" not in sys.argv:
-            autostart = settings.get(SETTING_AUTOSTART)
-            self._logger.info("Autostart enabled: %s", autostart)
-            if autostart:
-                autostart_enable()
-            else:
-                autostart_disable()
-
-            create_shortcuts()
-
-        implemented_modules = []
-        for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "./modules")):
-            implemented_modules = list(filter(lambda d: "__" not in d, dirs))
-            break
-
-        listeners = Listeners(database, implemented_modules)
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        self._server = Server(
+@app.command(name=None, short_help="Main Application")
+def main(
+    cli: bool = typer.Option(False, "--cli", help="CLI"),
+    init: bool = typer.Option(False, "--init", help="Initialize"),
+    no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
+    no_gui: bool = typer.Option(False, "--no-gui", help="No GUI"),
+) -> None:
+    """Main Application"""
+    try:
+        Application(
             database,
             settings,
-            listeners,
-            implemented_modules,
+            cli=cli,
+            init=init,
+            no_frontend=no_frontend,
+            no_gui=no_gui,
         )
-        loop.run_until_complete(self._server.start())
+    except Exception as exception:  # pylint: disable=broad-except
+        logger.fatal("Unhandled error in application", exc_info=exception)
 
 
 if __name__ == "__main__":
-    database = Database()
-    settings = Settings(database)
-
-    LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
-    logger = setup_logger(LOG_LEVEL, "system-bridge")
-    logging.getLogger("zeroconf").setLevel(logging.ERROR)
-
-    try:
-        Main()
-    except Exception as exception:  # pylint: disable=broad-except
-        logger.fatal("Unhandled error in application", exc_info=exception)
+    app()
