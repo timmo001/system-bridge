@@ -32,7 +32,7 @@ export class WebSocketConnection {
     const ws = new WebSocket(
       `ws://${window.location.hostname || "localhost"}:${
         this.port
-      }/api/websocket`,
+      }/api/websocket`
     );
     await new Promise<void>((resolve) => {
       ws.onopen = () => resolve();
@@ -55,10 +55,10 @@ export class WebSocketConnection {
       console.log("Get data:", modules);
       this.websocket.send(
         JSON.stringify({
-          "api-key": this.apiKey,
+          api_key: this.apiKey,
           event: "GET_DATA",
           modules: modules,
-        }),
+        })
       );
     }
   }
@@ -68,9 +68,9 @@ export class WebSocketConnection {
       console.log("Get settings");
       this.websocket.send(
         JSON.stringify({
-          "api-key": this.apiKey,
+          api_key: this.apiKey,
           event: "GET_SETTINGS",
-        }),
+        })
       );
     }
   }
@@ -80,10 +80,10 @@ export class WebSocketConnection {
       console.log("Register data listener:", modules);
       this.websocket.send(
         JSON.stringify({
-          "api-key": this.apiKey,
+          api_key: this.apiKey,
           event: "REGISTER_DATA_LISTENER",
           modules: modules,
-        }),
+        })
       );
     }
   }
@@ -92,10 +92,10 @@ export class WebSocketConnection {
     if (this.websocket && this.websocket.readyState === this.websocket.OPEN) {
       this.websocket.send(
         JSON.stringify({
-          "api-key": this.apiKey,
+          api_key: this.apiKey,
           event: "MEDIA_STATUS",
           status: status,
-        }),
+        })
       );
     }
   }
@@ -105,11 +105,11 @@ export class WebSocketConnection {
       console.log("Update setting:", { key, value });
       this.websocket.send(
         JSON.stringify({
-          "api-key": this.apiKey,
+          api_key: this.apiKey,
           event: "UPDATE_SETTING",
           setting: key,
           value: value,
-        }),
+        })
       );
     }
   }
