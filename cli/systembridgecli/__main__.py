@@ -7,13 +7,13 @@ import sys
 from typing import Optional
 from uuid import uuid4
 
+import typer
 from systembridgeshared.common import get_user_data_directory
 from systembridgeshared.const import SECRET_API_KEY, SETTING_PORT_API
 from systembridgeshared.database import TABLE_MAP, Database
 from systembridgeshared.models.database_data import Settings as SettingsDatabaseModule
 from systembridgeshared.settings import Settings
 from tabulate import tabulate
-import typer
 
 from ._version import __version__
 
