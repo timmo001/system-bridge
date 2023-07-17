@@ -76,11 +76,12 @@ jobs:
         --onedir \
         --icon "resources/system-bridge.png" \
         --name "systembridge" \
-        --collect-all "systembridgeshared" \
-        --collect-all "systembridgebackend" \
-        --collect-all "systembridgegui" \
-        --collect-all "systembridgefrontend" \
         --collect-all "plyer" \
+        --collect-all "systembridgebackend" \
+        --collect-all "systembridgefrontend" \
+        --collect-all "systembridgegui" \
+        --collect-all "systembridgeshared" \
+        --collect-all "typer" \
       create-setup: false
       entry-point-file: systembridge.py
   package-python-pyinstaller-windows:
@@ -95,11 +96,12 @@ jobs:
         --onedir `
         --icon "resources/system-bridge.ico" `
         --name "systembridge" `
-        --collect-all "systembridgeshared" `
-        --collect-all "systembridgebackend" `
-        --collect-all "systembridgegui" `
-        --collect-all "systembridgefrontend" `
         --collect-all "plyer" `
+        --collect-all "systembridgebackend" `
+        --collect-all "systembridgefrontend" `
+        --collect-all "systembridgegui" `
+        --collect-all "systembridgeshared" `
+        --collect-all "typer" `
       create-setup: false
       entry-point-file: systembridge.py
   build-container-amd64:
