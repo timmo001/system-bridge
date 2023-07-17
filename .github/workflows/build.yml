@@ -74,7 +74,7 @@ jobs:
     with:
       additional-pyinstaller-options: |
         --onedir \
-        --icon "resources/system-bridge.ico" \
+        --icon "resources/system-bridge.png" \
         --name "systembridge" \
         --collect-all "systembridgeshared" \
         --collect-all "systembridgebackend" \
