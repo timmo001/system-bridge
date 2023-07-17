@@ -19,7 +19,7 @@ logger = setup_logger(LOG_LEVEL, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
 
-@app.command(name=None, short_help="Main Application")
+@app.command(name="main", short_help="Main Application")
 def main(
     cli: bool = typer.Option(False, "--cli", help="CLI"),
     init: bool = typer.Option(False, "--init", help="Initialize"),
