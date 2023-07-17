@@ -65,6 +65,42 @@ jobs:
       additional-artifacts-name: windowssensors-build
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
+  package-python-pyinstaller-linux:
+    needs:
+      - build-backend
+      - build-gui
+      - build-frontend-package
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --icon "resources/system-bridge.ico" \
+        --name "systembridge" \
+        --collect-all "systembridgeshared" \
+        --collect-all "systembridgebackend" \
+        --collect-all "systembridgegui" \
+        --collect-all "systembridgefrontend" \
+        --collect-all "plyer"
+      entry-point-file: systembridge.py
+  package-python-pyinstaller-windows:
+    needs:
+      - build-backend
+      - build-gui
+      - build-frontend-package
+      - build-windowssensors-package
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --icon "resources/system-bridge.ico" \
+        --name "systembridge" \
+        --collect-all "systembridgeshared" \
+        --collect-all "systembridgebackend" \
+        --collect-all "systembridgegui" \
+        --collect-all "systembridgefrontend" \
+        --collect-all "plyer"
+      entry-point-file: systembridge.py
+      create-setup: true
   build-container-amd64:
     uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
     with:
