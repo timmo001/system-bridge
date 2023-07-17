@@ -81,7 +81,6 @@ jobs:
         --collect-all "systembridgefrontend" \
         --collect-all "systembridgegui" \
         --collect-all "systembridgeshared" \
-        --collect-all "typer" \
       create-setup: false
       entry-point-file: systembridge.py
   package-python-pyinstaller-windows:
@@ -101,7 +100,6 @@ jobs:
         --collect-all "systembridgefrontend" `
         --collect-all "systembridgegui" `
         --collect-all "systembridgeshared" `
-        --collect-all "typer" `
       create-setup: false
       entry-point-file: systembridge.py
   build-container-amd64:
