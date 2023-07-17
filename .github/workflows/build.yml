@@ -92,14 +92,14 @@ jobs:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
-        --onedir \
-        --icon "resources/system-bridge.ico" \
-        --name "systembridge" \
-        --collect-all "systembridgeshared" \
-        --collect-all "systembridgebackend" \
-        --collect-all "systembridgegui" \
-        --collect-all "systembridgefrontend" \
-        --collect-all "plyer" \
+        --onedir `
+        --icon "resources/system-bridge.ico" `
+        --name "systembridge" `
+        --collect-all "systembridgeshared" `
+        --collect-all "systembridgebackend" `
+        --collect-all "systembridgegui" `
+        --collect-all "systembridgefrontend" `
+        --collect-all "plyer" `
       create-setup: false
       entry-point-file: systembridge.py
   build-container-amd64:
