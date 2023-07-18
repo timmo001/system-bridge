@@ -123,7 +123,7 @@ jobs:
     needs:
       - build-windowssensors-dotnet
       - deploy-gui
-    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
+    uses: timmo001/workflows/.github/workflows/deploy-python-windows.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
