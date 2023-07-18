@@ -46,6 +46,7 @@ jobs:
       module-name: systembridgebackend
       pre-install-command: |
         pip install --upgrade --pre systembridgeshared
+        pip install .
       use-incremental: true
   deploy-cli:
     needs:
@@ -60,6 +61,7 @@ jobs:
       module-name: systembridgecli
       pre-install-command: |
         pip install --upgrade --pre systembridgeshared
+        pip install .
       use-incremental: true
   build-frontend-node:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
@@ -85,6 +87,7 @@ jobs:
       module-name: systembridgefrontend
       pre-install-command: |
         pip install --upgrade --pre systembridgeshared
+        pip install .
       use-incremental: true
   deploy-container-amd64:
     needs:
@@ -106,6 +109,7 @@ jobs:
       module-name: systembridgegui
       pre-install-command: |
         pip install --upgrade --pre systembridgeshared
+        pip install .
       use-incremental: true
   build-windowssensors-dotnet:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
@@ -130,4 +134,5 @@ jobs:
       module-name: systembridgewindowssensors
       pre-install-command: |
         pip install --upgrade --pre systembridgeshared
+        pip install .
       use-incremental: true
