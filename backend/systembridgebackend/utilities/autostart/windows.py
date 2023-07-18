@@ -53,6 +53,8 @@ def autostart_windows_enable():
         "systembridgebackend",
         0,
         REG_SZ,
-        f'"{os.path.join(os.path.dirname(sys.executable), "pythonw.exe")}" -m systembridgebackend --silent',
+        f'"{os.path.join(os.path.dirname(sys.executable), "pythonw.exe")}" -m systembridgebackend --silent'
+        if "python" in sys.executable
+        else f'"{sys.executable}" --silent',
     )
     CloseKey(key)
