@@ -137,3 +137,65 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
+  package-python-pyinstaller-linux:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+      - deploy-gui
+      - deploy-windowssensors
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: >
+        --onedir
+        --windowed
+        --icon "resources/system-bridge.png"
+        --name "systembridge"
+        --collect-all "plyer"
+        --collect-all "systembridgebackend"
+        --collect-all "systembridgefrontend"
+        --collect-all "systembridgegui"
+        --collect-all "systembridgeshared"
+      create-setup: false
+      entry-point-file: systembridge.py
+      pre-package-command: |
+        pip install \
+          --upgrade \
+          --pre \
+          systembridgeshared \
+          systembridgebackend \
+          systembridgecli \
+          systembridgefrontend \
+          systembridgegui
+  package-python-pyinstaller-windows:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+      - deploy-gui
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: >
+        --onedir
+        --windowed
+        --icon "resources/system-bridge.ico"
+        --name "systembridge"
+        --collect-all "plyer"
+        --collect-all "systembridgebackend"
+        --collect-all "systembridgefrontend"
+        --collect-all "systembridgegui"
+        --collect-all "systembridgeshared"
+      create-setup: false
+      entry-point-file: systembridge.py
+      pre-package-command: |
+        pip install \
+          --upgrade \
+          --pre \
+          systembridgeshared \
+          systembridgebackend \
+          systembridgecli \
+          systembridgefrontend \
+          systembridgegui \
+          systembridgewindowssensors
