@@ -108,6 +108,7 @@ jobs:
       code-path: gui
       module-name: systembridgegui
       pre-install-command: |
+        sudo apt install libegl-dev libgles2-dev libgbm-dev libxkbcommon-dev
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
