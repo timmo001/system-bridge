@@ -1,5 +1,5 @@
 ---
-name: Deploy
+name: Deploy and Package
 
 # yamllint disable-line rule:truthy
 on:
@@ -153,10 +153,10 @@ jobs:
         --icon "resources/system-bridge.png"
         --name "systembridge"
         --collect-all "plyer"
+        --collect-all "systembridgeshared"
         --collect-all "systembridgebackend"
         --collect-all "systembridgefrontend"
         --collect-all "systembridgegui"
-        --collect-all "systembridgeshared"
       create-setup: false
       entry-point-file: systembridge.py
       pre-package-command: |
@@ -183,10 +183,12 @@ jobs:
         --icon "resources/system-bridge.ico"
         --name "systembridge"
         --collect-all "plyer"
+        --collect-all "systembridgeshared"
         --collect-all "systembridgebackend"
+        --collect-all "systembridgecli"
         --collect-all "systembridgefrontend"
         --collect-all "systembridgegui"
-        --collect-all "systembridgeshared"
+        --collect-all "systembridgewindowssensors"
       create-setup: false
       entry-point-file: systembridge.py
       pre-package-command: |
