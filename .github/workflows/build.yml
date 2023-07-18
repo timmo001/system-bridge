@@ -77,7 +77,7 @@ jobs:
       - build-frontend-package
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
-      additional-pyinstaller-options: |
+      additional-pyinstaller-options: >
         --onedir \
         --windowed \
         --icon "resources/system-bridge.png" \
@@ -97,7 +97,7 @@ jobs:
       - build-windowssensors-package
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
-      additional-pyinstaller-options: |
+      additional-pyinstaller-options: >
         --onedir `
         --windowed `
         --icon "resources/system-bridge.ico" `
