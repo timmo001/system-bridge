@@ -6,7 +6,7 @@ desktop_entry = f"""
 [Desktop Entry]
 Name=System Bridge
 Comment=System Bridge
-Exec={'{sys.executable} -m systembridgebackend' if 'python' in sys.executable else sys.executable}
+Exec={'{sys.executable} -m systembridgebackend' if 'python' in sys.executable else sys.executable} --silent
 Icon={os.path.join(os.path.dirname(__file__),'../../icon.png')}
 Terminal=false
 Type=Application

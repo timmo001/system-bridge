@@ -34,9 +34,15 @@ def create_windows_shortcuts():
     link_path = os.path.join(directory, "System Bridge.lnk")
     shell = Dispatch("WScript.Shell")
     shortcut = shell.CreateShortCut(link_path)
-    shortcut.Arguments = "-m systembridgebackend --silent"
+    shortcut.Arguments = (
+        "-m systembridgebackend --silent" if "python" in sys.executable else "--silent"
+    )
     shortcut.Description = "System Bridge"
     shortcut.IconLocation = os.path.join(os.path.dirname(__file__), "../../icon.ico")
-    shortcut.Targetpath = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+    shortcut.Targetpath = (
+        os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+        if "python" in sys.executable
+        else sys.executable
+    )
     shortcut.WorkingDirectory = sys.prefix
     shortcut.save()
