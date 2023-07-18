@@ -115,7 +115,7 @@ jobs:
     needs:
       - deploy-shared
       - build-windowssensors-dotnet
-    uses: timmo001/workflows/.github/workflows/deploy-python-windows.yml@master
+    uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
