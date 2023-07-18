@@ -7,5 +7,5 @@ Provides systembridgecli version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgecli", 3, 8, 0, dev=15)
+__version__ = Version("systembridgecli", 3, 8, 0, dev=16)
 __all__ = ["__version__"]
