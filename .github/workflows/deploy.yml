@@ -161,7 +161,7 @@ jobs:
         --collect-all "systembridgecli" \
         --collect-all "systembridgefrontend" \
         --collect-all "systembridgegui" \
-      create-setup: false
+      create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
         pip install \
@@ -194,7 +194,7 @@ jobs:
         --collect-all "systembridgefrontend" `
         --collect-all "systembridgegui" `
         --collect-all "systembridgewindowssensors" `
-      create-setup: false
+      create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
         pip install `
