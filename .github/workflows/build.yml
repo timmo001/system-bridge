@@ -65,6 +65,11 @@ jobs:
       additional-artifacts-name: windowssensors-build
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
+  build-container-amd64:
+    uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
+    with:
+      architecture: amd64
+      container-slug: system-bridge
   package-python-pyinstaller-linux:
     needs:
       - build-backend
@@ -104,8 +109,3 @@ jobs:
         --collect-all "systembridgeshared" `
       create-setup: false
       entry-point-file: systembridge.py
-  build-container-amd64:
-    uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
-    with:
-      architecture: amd64
-      container-slug: system-bridge
