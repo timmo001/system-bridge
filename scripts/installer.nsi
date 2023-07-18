@@ -30,6 +30,10 @@
 ;Interface Settings
 
   !define MUI_ABORTWARNING
+  !define MUI_ICON "..\resources\system-bridge.ico"
+  !define MUI_HEADERIMAGE
+  !define MUI_HEADERIMAGE_BITMAP "..\resources\system-bridge-win32-installer.bmp"
+  !define MUI_HEADERIMAGE_RIGHT
 
 ;--------------------------------
 ;Pages
@@ -58,11 +62,11 @@
 ;--------------------------------
 ;Installer Sections
 
-Section "System Bridge"
-
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
+  File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
+  File /nonfatal /a /r "..\resources\system-bridge.png" $INSTDIR
   File /nonfatal /a /r "..\dist\systembridge\" $INSTDIR
 
   ;Store installation folder
@@ -81,8 +85,6 @@ Section "System Bridge"
     CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
-
-SectionEnd
 
 ;--------------------------------
 ;Uninstaller Section
