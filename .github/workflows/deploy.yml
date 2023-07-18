@@ -44,6 +44,8 @@ jobs:
     with:
       code-path: backend
       module-name: systembridgebackend
+      pre-install-command: |
+        pip install --upgrade --pre systembridgeshared
       use-incremental: true
   deploy-cli:
     needs:
@@ -56,6 +58,8 @@ jobs:
     with:
       code-path: cli
       module-name: systembridgecli
+      pre-install-command: |
+        pip install --upgrade --pre systembridgeshared
       use-incremental: true
   build-frontend-node:
     uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
@@ -79,6 +83,8 @@ jobs:
       additional-artifacts-path: frontend/out
       code-path: frontend
       module-name: systembridgefrontend
+      pre-install-command: |
+        pip install --upgrade --pre systembridgeshared
       use-incremental: true
   deploy-container-amd64:
     needs:
@@ -98,6 +104,8 @@ jobs:
     with:
       code-path: gui
       module-name: systembridgegui
+      pre-install-command: |
+        pip install --upgrade --pre systembridgeshared
       use-incremental: true
   build-windowssensors-dotnet:
     uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
@@ -120,4 +128,6 @@ jobs:
       additional-artifacts-path: windowssensors/WindowsSensors/bin
       code-path: windowssensors
       module-name: systembridgewindowssensors
+      pre-install-command: |
+        pip install --upgrade --pre systembridgeshared
       use-incremental: true
