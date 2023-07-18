@@ -62,6 +62,8 @@
 ;--------------------------------
 ;Installer Sections
 
+Section "System Bridge"
+
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
@@ -85,6 +87,8 @@
     CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
+
+SectionEnd
 
 ;--------------------------------
 ;Uninstaller Section
