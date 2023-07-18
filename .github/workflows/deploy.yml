@@ -11,6 +11,21 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-frontend-node:
+    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
+    with:
+      additional-build-commands: |
+        yarn export
+      artifact-name: frontend-out
+      artifact-path: frontend/out
+      code-path: frontend
+  build-windowssensors-dotnet:
+    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
+    with:
+      code-path: windowssensors/WindowsSensors
+      output-name: windowssensors-build
+      output-path: windowssensors/WindowsSensors/bin
+      package: SystemBridgeWindowsSensors.sln
   deploy-connector:
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
@@ -22,8 +37,6 @@ jobs:
       module-name: systembridgeconnector
       use-incremental: true
   deploy-shared:
-    needs:
-      - deploy-connector
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -50,7 +63,7 @@ jobs:
       use-incremental: true
   deploy-cli:
     needs:
-      - deploy-backend
+      - deploy-shared
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -63,18 +76,10 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
-  build-frontend-node:
-    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
-    with:
-      additional-build-commands: |
-        yarn export
-      artifact-name: frontend-out
-      artifact-path: frontend/out
-      code-path: frontend
   deploy-frontend:
     needs:
+      - deploy-shared
       - build-frontend-node
-      - deploy-cli
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -89,16 +94,9 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
-  deploy-container-amd64:
-    needs:
-      - deploy-frontend
-    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
-    with:
-      architecture: amd64
-      container-slug: system-bridge
   deploy-gui:
     needs:
-      - deploy-frontend
+      - deploy-shared
     uses: timmo001/workflows/.github/workflows/deploy-python-linux.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -112,17 +110,10 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
-  build-windowssensors-dotnet:
-    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
-    with:
-      code-path: windowssensors/WindowsSensors
-      output-name: windowssensors-build
-      output-path: windowssensors/WindowsSensors/bin
-      package: SystemBridgeWindowsSensors.sln
   deploy-windowssensors:
     needs:
+      - deploy-shared
       - build-windowssensors-dotnet
-      - deploy-gui
     uses: timmo001/workflows/.github/workflows/deploy-python-windows.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
@@ -137,6 +128,18 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
+  deploy-container-amd64:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+      - deploy-gui
+      - deploy-windowssensors
+    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
+    with:
+      architecture: amd64
+      container-slug: system-bridge
   package-python-pyinstaller-linux:
     needs:
       - deploy-shared
@@ -193,6 +196,7 @@ jobs:
       create-setup: false
       entry-point-file: systembridge.py
       pre-package-command: |
+        sudo apt install libegl-dev libpulse0
         pip install `
           --upgrade `
           --pre `
