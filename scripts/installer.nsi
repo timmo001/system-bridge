@@ -63,7 +63,7 @@ Section "System Bridge"
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE...
-  File /nonfatal /a /r "..\dist\systembridge" $INSTDIR
+  File /nonfatal /a /r "..\dist\systembridge\" $INSTDIR
 
   ;Store installation folder
   WriteRegStr HKCU "Software\systembridge" "" $INSTDIR
