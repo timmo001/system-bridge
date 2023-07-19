@@ -126,9 +126,7 @@ jobs:
       code-path: windowssensors
       module-name: systembridgewindowssensors
       pre-install-command: |
-        ls
-        ls WindowsSensors
-        ls WindowsSensors/bin
+        ls WindowsSensors/bin/net7.0-windows
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
