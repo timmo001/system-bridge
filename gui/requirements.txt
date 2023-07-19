@@ -1,4 +1,4 @@
-aiohttp==3.8.4
+aiohttp==3.8.5
 incremental==22.10.0
 pyperclip==1.8.2
 PySide6==6.5.1.1
