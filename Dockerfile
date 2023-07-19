@@ -60,7 +60,7 @@ RUN \
     && mkdir -p /etc/fix-attrs.d \
     && mkdir -p /etc/services.d \
     \
-    && pip install --upgrade \
+    && pip install --upgrade --pre \
         systembridgeshared \
         systembridgebackend \
         systembridgecli \
