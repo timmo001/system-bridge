@@ -1,5 +1,5 @@
 ---
-name: Deploy and Package
+name: Deploy
 
 # yamllint disable-line rule:truthy
 on:
@@ -141,68 +141,3 @@ jobs:
     with:
       architecture: amd64
       container-slug: system-bridge
-  package-python-pyinstaller-linux:
-    needs:
-      - deploy-shared
-      - deploy-backend
-      - deploy-cli
-      - deploy-frontend
-      - deploy-gui
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
-    with:
-      additional-pyinstaller-options: |
-        --onedir \
-        --windowed \
-        --icon "resources/system-bridge.png" \
-        --name "systembridge" \
-        --collect-all "plyer" \
-        --collect-all "systembridgeshared" \
-        --collect-all "systembridgebackend" \
-        --collect-all "systembridgecli" \
-        --collect-all "systembridgefrontend" \
-        --collect-all "systembridgegui" \
-      create-setup: true
-      entry-point-file: systembridge.py
-      pre-package-command: |
-        pip install \
-          --upgrade \
-          --pre \
-          systembridgeshared \
-          systembridgebackend \
-          systembridgecli \
-          systembridgefrontend \
-          systembridgegui
-  package-python-pyinstaller-windows:
-    needs:
-      - deploy-shared
-      - deploy-backend
-      - deploy-cli
-      - deploy-frontend
-      - deploy-gui
-      - deploy-windowssensors
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
-    with:
-      additional-pyinstaller-options: |
-        --onedir `
-        --windowed `
-        --icon "resources/system-bridge.ico" `
-        --name "systembridge" `
-        --collect-all "plyer" `
-        --collect-all "systembridgeshared" `
-        --collect-all "systembridgebackend" `
-        --collect-all "systembridgecli" `
-        --collect-all "systembridgefrontend" `
-        --collect-all "systembridgegui" `
-        --collect-all "systembridgewindowssensors" `
-      create-setup: true
-      entry-point-file: systembridge.py
-      pre-package-command: |
-        pip install `
-          --upgrade `
-          --pre `
-          systembridgeshared `
-          systembridgebackend `
-          systembridgecli `
-          systembridgefrontend `
-          systembridgegui `
-          systembridgewindowssensors
