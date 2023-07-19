@@ -129,3 +129,20 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
+  deploy-container:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+    uses: ./.github/workflows/deploy-container.yml
+  package:
+    needs:
+      - deploy-shared
+      - deploy-backend
+      - deploy-cli
+      - deploy-frontend
+      - deploy-gui
+      - deploy-windowssensors
+    uses: ./.github/workflows/package.yml
+
