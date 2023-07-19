@@ -16,6 +16,7 @@ jobs:
     with:
       additional-pyinstaller-options: |
         --onedir \
+        --windowed \
         --icon "resources/system-bridge.png" \
         --name "systembridge" \
         --collect-all "plyer" \
@@ -40,6 +41,7 @@ jobs:
     with:
       additional-pyinstaller-options: |
         --onedir `
+        --windowed `
         --icon "resources/system-bridge.ico" `
         --name "systembridge" `
         --collect-all "plyer" `
