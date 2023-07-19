@@ -1,8 +1,8 @@
 """Setup"""
 import io
 import os
-
 from distutils.dir_util import copy_tree
+
 from setuptools import find_packages, setup
 
 # Get setup packages from requirements.txt
@@ -13,7 +13,10 @@ with io.open("requirements_setup.txt", encoding="utf-8") as f:
 with io.open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
-copy_tree("WindowsSensors/bin", "systembridgewindowssensors/bin")
+copy_tree(
+    "WindowsSensors/bin/net7.0-windows",
+    "systembridgewindowssensors/bin",
+)
 
 package_data = []
 
