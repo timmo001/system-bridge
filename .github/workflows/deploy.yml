@@ -129,15 +129,3 @@ jobs:
         pip install --upgrade --pre systembridgeshared
         pip install .
       use-incremental: true
-  deploy-container-amd64:
-    needs:
-      - deploy-shared
-      - deploy-backend
-      - deploy-cli
-      - deploy-frontend
-      - deploy-gui
-      - deploy-windowssensors
-    uses: timmo001/workflows/.github/workflows/deploy-container-linux.yml@master
-    with:
-      architecture: amd64
-      container-slug: system-bridge
