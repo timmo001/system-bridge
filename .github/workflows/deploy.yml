@@ -145,4 +145,3 @@ jobs:
       - deploy-gui
       - deploy-windowssensors
     uses: ./.github/workflows/package.yml
-
