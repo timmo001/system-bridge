@@ -34,7 +34,7 @@
     <StartupObject>SystemBridgeWindowsSensors.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>system-bridge.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -50,7 +50,7 @@
     <PackageIcon>system-bridge.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="icon.ico" />
+    <Content Include="system-bridge.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
