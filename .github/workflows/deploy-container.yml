@@ -3,11 +3,7 @@ name: Deploy Container
 
 # yamllint disable-line rule:truthy
 on:
-  workflow_run:
-    types:
-      - completed
-    workflows:
-      - Deploy
+  workflow_call:
   workflow_dispatch:
 
 jobs:
