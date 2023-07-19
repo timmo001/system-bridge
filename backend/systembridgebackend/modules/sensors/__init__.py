@@ -49,7 +49,11 @@ class Sensors(Base):
                 result = pipe.communicate()[0].decode()
             self._logger.debug("Windows sensors result: %s", result)
         except Exception as error:  # pylint: disable=broad-except
-            self._logger.error("Windows sensors error: %s", error)
+            self._logger.error(
+                "Windows sensors error: %s (%s)",
+                error,
+                path,
+            )
             return None
 
         try:
