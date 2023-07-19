@@ -13,7 +13,7 @@
   Unicode True
 
   ;Default installation folder
-  InstallDir "$LOCALAPPDATA\systembridge"
+  InstallDir "$LOCALAPPDATA\timmo001\systembridge"
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\systembridge" ""
