@@ -70,7 +70,7 @@ class System(Base):
 
     def uuid(self) -> str:
         """Get UUID"""
-        return str(uuid.getnode())
+        return uniqueid.id or self.mac_address()
 
     def version(self) -> str:
         """Get version"""
