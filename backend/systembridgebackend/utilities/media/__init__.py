@@ -165,7 +165,7 @@ async def control_shuffle(shuffle: bool) -> None:
 async def control_repeat(repeat: int) -> None:
     """Set repeat"""
     if platform.system() == "Windows":
-        from winsdk.windows.media import (  # pylint: disable=import-outside-toplevel
+        from winsdk.windows.media import (  # pylint: disable=import-error, import-outside-toplevel
             MediaPlaybackAutoRepeatMode,
         )
 
