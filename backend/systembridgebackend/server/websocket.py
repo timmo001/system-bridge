@@ -1179,7 +1179,7 @@ class WebSocketHandler(Base):
                     data,
                     request,
                 )
-            except Exception as error:
+            except Exception as error: # pylint: disable=broad-except
                 self._logger.error(error)
                 await self._send_response(
                     Response(
