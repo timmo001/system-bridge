@@ -36,6 +36,56 @@ from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 
+def control_play() -> None:
+    """Play current media"""
+    pass
+
+
+def control_pause() -> None:
+    """Pause current media"""
+    pass
+
+
+def control_stop() -> None:
+    """Stop current media"""
+    pass
+
+
+def control_next() -> None:
+    """Play next media"""
+    pass
+
+
+def control_previous() -> None:
+    """Play previous media"""
+    pass
+
+
+def control_mute(mute: bool) -> None:
+    """Set mute"""
+    pass
+
+
+def control_volume(volume: float) -> None:
+    """Set volume"""
+    pass
+
+
+def control_seek(position: int) -> None:
+    """Set position"""
+    pass
+
+
+def control_shuffle(shuffle: bool) -> None:
+    """Set shuffle"""
+    pass
+
+
+def control_repeat(repeat: bool) -> None:
+    """Set repeat"""
+    pass
+
+
 def get_directories(settings: Settings) -> list[dict[str, str]]:
     """Get directories"""
     directories = [
