@@ -18,6 +18,8 @@ from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
+from systembridgeshared.models.media_control import Action as MediaAction
+from systembridgeshared.models.media_control import MediaControl
 from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_files import MediaFiles
 from systembridgeshared.models.media_play import MediaPlay
@@ -31,6 +33,19 @@ from ..gui import GUI
 from ..modules.listeners import Listeners
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
 from ..utilities.media import (
+    control_fastforward,
+    control_mute,
+    control_next,
+    control_pause,
+    control_play,
+    control_previous,
+    control_repeat,
+    control_rewind,
+    control_seek,
+    control_shuffle,
+    control_stop,
+    control_volume_down,
+    control_volume_up,
     get_directories,
     get_file,
     get_file_data,
@@ -227,6 +242,69 @@ def send_keyboard_event(
             **keyboard_event.dict(),
         }
     raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid keyboard event")
+
+
+@app.post("/api/media/control", dependencies=[Depends(security_api_key)])
+async def send_media_control(
+    data: MediaControl,
+) -> dict[str, str]:
+    """Send media control."""
+    if data.action not in MediaAction:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="Invalid media action",
+        )
+    if data.action == MediaAction.play:
+        await control_play()
+    elif data.action == MediaAction.pause:
+        await control_pause()
+    elif data.action == MediaAction.stop:
+        await control_stop()
+    elif data.action == MediaAction.previous:
+        await control_previous()
+    elif data.action == MediaAction.next:
+        await control_next()
+    elif data.action == MediaAction.seek:
+        if data.value is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail="Invalid seek value",
+            )
+        await control_seek(data.value)
+    elif data.action == MediaAction.rewind:
+        await control_rewind()
+    elif data.action == MediaAction.fastforward:
+        await control_fastforward()
+    elif data.action == MediaAction.shuffle:
+        if data.value is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail="Invalid shuffle value",
+            )
+        await control_shuffle(data.value)
+    elif data.action == MediaAction.repeat:
+        if data.value is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail="Invalid repeat value",
+            )
+        await control_repeat(data.value)
+    elif data.action == MediaAction.mute:
+        await control_mute()
+    elif data.action == MediaAction.volumedown:
+        await control_volume_down()
+    elif data.action == MediaAction.volumeup:
+        await control_volume_up()
+    else:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="Invalid media action",
+        )
+
+    return {
+        "message": "Media control sent",
+        **data.dict(),
+    }
 
 
 @app.get("/api/media", dependencies=[Depends(security_api_key)])

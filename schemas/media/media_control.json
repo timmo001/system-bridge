@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Media Control",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "PLAY",
+        "PAUSE",
+        "STOP",
+        "PREVIOUS",
+        "NEXT",
+        "SEEK",
+        "REWIND",
+        "FASTFORWARD",
+        "SHUFFLE",
+        "REPEAT",
+        "MUTE",
+        "VOLUMEDOWN",
+        "VOLUMEUP"
+      ]
+    },
+    "value": {}
+  },
+  "required": ["action"]
+}
