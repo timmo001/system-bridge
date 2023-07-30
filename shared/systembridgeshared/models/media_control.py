@@ -10,19 +10,19 @@ from pydantic import BaseModel
 
 
 class Action(Enum):
-    play = "play"
-    pause = "pause"
-    stop = "stop"
-    previous = "previous"
-    next = "next"
-    seek = "seek"
-    rewind = "rewind"
-    fastforward = "fastforward"
-    shuffle = "shuffle"
-    repeat = "repeat"
-    mute = "mute"
-    volumedown = "volumedown"
-    volumeup = "volumeup"
+    play = "PLAY"
+    pause = "PAUSE"
+    stop = "STOP"
+    previous = "PREVIOUS"
+    next = "NEXT"
+    seek = "SEEK"
+    rewind = "REWIND"
+    fastforward = "FASTFORWARD"
+    shuffle = "SHUFFLE"
+    repeat = "REPEAT"
+    mute = "MUTE"
+    volumedown = "VOLUMEDOWN"
+    volumeup = "VOLUMEUP"
 
 
 class MediaControl(BaseModel):

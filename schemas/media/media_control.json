@@ -6,19 +6,19 @@
     "action": {
       "type": "string",
       "enum": [
-        "play",
-        "pause",
-        "stop",
-        "previous",
-        "next",
-        "seek",
-        "rewind",
-        "fastforward",
-        "shuffle",
-        "repeat",
-        "mute",
-        "volumedown",
-        "volumeup"
+        "PLAY",
+        "PAUSE",
+        "STOP",
+        "PREVIOUS",
+        "NEXT",
+        "SEEK",
+        "REWIND",
+        "FASTFORWARD",
+        "SHUFFLE",
+        "REPEAT",
+        "MUTE",
+        "VOLUMEDOWN",
+        "VOLUMEUP"
       ]
     },
     "value": {}
