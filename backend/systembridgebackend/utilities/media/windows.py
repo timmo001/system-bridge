@@ -5,6 +5,12 @@ from winsdk.windows.media import (  # pylint: disable=import-error
 from winsdk.windows.media import control as wmc  # pylint: disable=import-error
 
 
+class WindowsMediaException(Exception):
+    """Windows Media Exception"""
+
+    pass
+
+
 async def _get_current_session() -> wmc.GlobalSystemMediaTransportControlsSession:
     """Get current media session"""
     sessions = (
@@ -13,7 +19,7 @@ async def _get_current_session() -> wmc.GlobalSystemMediaTransportControlsSessio
     if current_session := sessions.get_current_session():
         return current_session
     else:
-        raise Exception("No current session")
+        raise WindowsMediaException("No current session")
 
 
 async def windows_control_play():
