@@ -91,7 +91,7 @@ class WebSocketClient(Base):
 
     async def _send_message(
         self,
-        request,
+        request: Request,
         wait_for_response: bool = True,
         response_type: Optional[str] = None,
     ) -> Response:
