@@ -4,6 +4,21 @@ import subprocess
 import sys
 from distutils.dir_util import copy_tree
 
+# Install datamodel-code-generator and black
+print("Updating datamodel-code-generator and black..")
+command = [
+    sys.executable,
+    "-m",
+    "pip",
+    "install",
+    "--upgrade",
+    "datamodel-code-generator",
+    "black",
+]
+print(" ".join(command))
+with subprocess.Popen(command) as process:
+    process.wait()
+
 print("Generating models..")
 
 path_from_schemas = os.path.abspath(
@@ -31,20 +46,6 @@ path_to_models_shared = os.path.abspath(
         "models",
     )
 )
-
-# Install datamodel-code-generator and black
-command = [
-    sys.executable,
-    "-m",
-    "pip",
-    "install",
-    "--upgrade",
-    "datamodel-code-generator",
-    "black",
-]
-print(" ".join(command))
-with subprocess.Popen(command) as process:
-    process.wait()
 
 for root, _, files in os.walk(path_from_schemas):
     for file in files:
