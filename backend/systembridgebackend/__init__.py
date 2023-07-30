@@ -14,7 +14,6 @@ from .modules.listeners import Listeners
 from .modules.system import System
 from .server import Server
 from .utilities.autostart import autostart_disable, autostart_enable
-from .utilities.shortcuts import create_shortcuts
 
 
 class Application(Base):
@@ -44,8 +43,6 @@ class Application(Base):
                 autostart_enable()
             else:
                 autostart_disable()
-
-            create_shortcuts()
 
         implemented_modules = []
         for _, dirs, _ in os.walk(os.path.join(os.path.dirname(__file__), "./modules")):
