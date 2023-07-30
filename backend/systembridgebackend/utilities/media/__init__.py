@@ -36,53 +36,87 @@ from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
+from ..keyboard import keyboard_keypress
+
 
 async def control_play() -> None:
     """Play current media"""
-    if platform.system() == "Windows":
-        from .windows import windows_control_play
+    try:
+        if platform.system() == "Windows":
+            from .windows import windows_control_play
 
-        await windows_control_play()
-    # elif platform.system() == "Linux":
-    #     from .linux import macos_control_play
-    #     await linux_control_play()
+            await windows_control_play()
+        else:
+            keyboard_keypress("playpause")
+    except Exception:
+        keyboard_keypress("playpause")
 
 
 async def control_pause() -> None:
     """Pause current media"""
-    if platform.system() == "Windows":
-        from .windows import windows_control_pause
+    try:
+        if platform.system() == "Windows":
+            from .windows import windows_control_pause
 
-        await windows_control_pause()
-    # elif platform.system() == "Linux":
-    #     from .linux import macos_control_play
-    #     await linux_control_play()
+            await windows_control_pause()
+        else:
+            keyboard_keypress("playpause")
+    except Exception:
+        keyboard_keypress("playpause")
 
 
 async def control_stop() -> None:
     """Stop current media"""
-    pass
+    try:
+        if platform.system() == "Windows":
+            from .windows import windows_control_stop
+
+            await windows_control_stop()
+        else:
+            keyboard_keypress("stop")
+    except Exception:
+        keyboard_keypress("stop")
 
 
 async def control_previous() -> None:
     """Play previous media"""
-    pass
+    try:
+        if platform.system() == "Windows":
+            from .windows import windows_control_previous
+
+            await windows_control_previous()
+        else:
+            keyboard_keypress("prevtrack")
+    except Exception:
+        keyboard_keypress("prevtrack")
 
 
 async def control_next() -> None:
     """Play next media"""
-    pass
+    try:
+        if platform.system() == "Windows":
+            from .windows import windows_control_next
+
+            await windows_control_next()
+        else:
+            keyboard_keypress("nexttrack")
+    except Exception:
+        keyboard_keypress("nexttrack")
 
 
-async def control_mute(mute: bool) -> None:
+async def control_mute() -> None:
     """Set mute"""
-    pass
+    keyboard_keypress("volumemute")
 
 
-async def control_volume(volume: float) -> None:
-    """Set volume"""
-    pass
+async def control_volume_up() -> None:
+    """Increase volume"""
+    keyboard_keypress("volumeup")
 
+
+async def control_volume_down() -> None:
+    """Decrease volume"""
+    keyboard_keypress("volumedown")
 
 async def control_seek(position: int) -> None:
     """Set position"""

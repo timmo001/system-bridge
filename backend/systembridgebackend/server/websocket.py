@@ -129,7 +129,8 @@ from ..utilities.media import (
     control_seek,
     control_shuffle,
     control_stop,
-    control_volume,
+    control_volume_down,
+    control_volume_up,
     get_directories,
     get_file,
     get_files,
@@ -491,35 +492,11 @@ class WebSocketHandler(Base):
                         continue
                     await control_repeat(model.value)
                 elif model.action == MediaAction.mute:
-                    if model.value is None:
-                        self._logger.warning("No mute value provided")
-                        await self._send_response(
-                            Response(
-                                **{
-                                    EVENT_ID: request.id,
-                                    EVENT_TYPE: TYPE_ERROR,
-                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-                                    EVENT_MESSAGE: "No value provided",
-                                }
-                            )
-                        )
-                        continue
-                    await control_mute(model.value)
-                elif model.action == MediaAction.volume:
-                    if model.value is None:
-                        self._logger.warning("No volume value provided")
-                        await self._send_response(
-                            Response(
-                                **{
-                                    EVENT_ID: request.id,
-                                    EVENT_TYPE: TYPE_ERROR,
-                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
-                                    EVENT_MESSAGE: "No value provided",
-                                }
-                            )
-                        )
-                        continue
-                    await control_volume(model.value)
+                    await control_mute()
+                elif model.action == MediaAction.volumedown:
+                    await control_volume_down()
+                elif model.action == MediaAction.volumeup:
+                    await control_volume_up()
 
             elif request.event == TYPE_NOTIFICATION:
                 try:

@@ -21,7 +21,8 @@ class Action(Enum):
     shuffle = "shuffle"
     repeat = "repeat"
     mute = "mute"
-    volume = "volume"
+    volumedown = "volumedown"
+    volumeup = "volumeup"
 
 
 class MediaControl(BaseModel):

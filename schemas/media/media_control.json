@@ -17,7 +17,8 @@
         "shuffle",
         "repeat",
         "mute",
-        "volume"
+        "volumedown",
+        "volumeup"
       ]
     },
     "value": {}

@@ -44,7 +44,8 @@ from ..utilities.media import (
     control_seek,
     control_shuffle,
     control_stop,
-    control_volume,
+    control_volume_down,
+    control_volume_up,
     get_directories,
     get_file,
     get_file_data,
@@ -289,19 +290,11 @@ async def send_media_control(
             )
         await control_repeat(data.value)
     elif data.action == MediaAction.mute:
-        if data.value is None:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail="Invalid mute value",
-            )
-        await control_mute(data.value)
-    elif data.action == MediaAction.volume:
-        if data.value is None:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                detail="Invalid volume value",
-            )
-        await control_volume(data.value)
+        await control_mute()
+    elif data.action == MediaAction.volumedown:
+        await control_volume_down()
+    elif data.action == MediaAction.volumeup:
+        await control_volume_up()
     else:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
