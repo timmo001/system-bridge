@@ -123,7 +123,7 @@ async def control_seek(position: int) -> None:
 
         await windows_control_seek(position)
     else:
-        raise Exception("Not implemented")
+        raise NotImplementedError("Not implemented")
 
 
 async def control_rewind() -> None:
@@ -135,7 +135,7 @@ async def control_rewind() -> None:
 
         await windows_control_rewind()
     else:
-        raise Exception("Not implemented")
+        raise NotImplementedError("Not implemented")
 
 
 async def control_fastforward() -> None:
@@ -147,7 +147,7 @@ async def control_fastforward() -> None:
 
         await windows_control_fastforward()
     else:
-        raise Exception("Not implemented")
+        raise NotImplementedError("Not implemented")
 
 
 async def control_shuffle(shuffle: bool) -> None:
@@ -159,7 +159,7 @@ async def control_shuffle(shuffle: bool) -> None:
 
         await windows_control_shuffle(shuffle)
     else:
-        raise Exception("Not implemented")
+        raise NotImplementedError("Not implemented")
 
 
 async def control_repeat(repeat: int) -> None:
@@ -180,7 +180,7 @@ async def control_repeat(repeat: int) -> None:
             )
         )
     else:
-        raise Exception("Not implemented")
+        raise NotImplementedError("Not implemented")
 
 
 async def control_mute() -> None:
