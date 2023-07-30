@@ -1,6 +1,8 @@
 """System Bridge: Windows Media Utilities"""
-import winsdk.windows.media.control as wmc
-from winsdk.windows.media import MediaPlaybackAutoRepeatMode
+from winsdk.windows.media import (  # pylint: disable=import-error
+    MediaPlaybackAutoRepeatMode,
+)
+from winsdk.windows.media import control as wmc  # pylint: disable=import-error
 
 
 async def _get_current_session() -> wmc.GlobalSystemMediaTransportControlsSession:
