@@ -33,6 +33,7 @@ from .const import (
     TYPE_GET_FILES,
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
+    TYPE_MEDIA_CONTROL,
     TYPE_NOTIFICATION,
     TYPE_OPEN,
     TYPE_POWER_HIBERNATE,
@@ -299,7 +300,7 @@ class WebSocketClient(Base):
         return await self._send_message(
             Request(
                 **{
-                    EVENT_EVENT: TYPE_KEYBOARD_TEXT,
+                    EVENT_EVENT: TYPE_MEDIA_CONTROL,
                     **model.dict(),
                 }
             )
