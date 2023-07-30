@@ -9,7 +9,7 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 
-class ActionEnum(Enum):
+class Action(Enum):
     play = "play"
     pause = "pause"
     stop = "stop"
@@ -29,5 +29,5 @@ class MediaControl(BaseModel):
     Media Control
     """
 
-    action: list[ActionEnum]
+    action: Action
     value: Optional[Any] = None

@@ -5,22 +5,20 @@
   "properties": {
     "action": {
       "type": "string",
-      "items": {
-        "enum": [
-          "play",
-          "pause",
-          "stop",
-          "previous",
-          "next",
-          "seek",
-          "rewind",
-          "fastforward",
-          "shuffle",
-          "repeat",
-          "mute",
-          "volume"
-        ]
-      }
+      "enum": [
+        "play",
+        "pause",
+        "stop",
+        "previous",
+        "next",
+        "seek",
+        "rewind",
+        "fastforward",
+        "shuffle",
+        "repeat",
+        "mute",
+        "volume"
+      ]
     },
     "value": {}
   },

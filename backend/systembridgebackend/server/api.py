@@ -18,7 +18,7 @@ from systembridgeshared.models.data import DataDict
 from systembridgeshared.models.database_data_remote_bridge import RemoteBridge
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
-from systembridgeshared.models.media_control import ActionEnum as MediaActionEnum
+from systembridgeshared.models.media_control import Action as MediaAction
 from systembridgeshared.models.media_control import MediaControl
 from systembridgeshared.models.media_files import File as MediaFile
 from systembridgeshared.models.media_files import MediaFiles
@@ -248,54 +248,54 @@ async def send_media_control(
     data: MediaControl,
 ) -> dict[str, str]:
     """Send media control."""
-    if data.action not in MediaActionEnum:
+    if data.action not in MediaAction:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             detail="Invalid media action",
         )
-    if data.action == MediaActionEnum.play:
+    if data.action == MediaAction.play:
         await control_play()
-    elif data.action == MediaActionEnum.pause:
+    elif data.action == MediaAction.pause:
         await control_pause()
-    elif data.action == MediaActionEnum.stop:
+    elif data.action == MediaAction.stop:
         await control_stop()
-    elif data.action == MediaActionEnum.previous:
+    elif data.action == MediaAction.previous:
         await control_previous()
-    elif data.action == MediaActionEnum.next:
+    elif data.action == MediaAction.next:
         await control_next()
-    elif data.action == MediaActionEnum.seek:
+    elif data.action == MediaAction.seek:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid seek value",
             )
         await control_seek(data.value)
-    elif data.action == MediaActionEnum.rewind:
+    elif data.action == MediaAction.rewind:
         await control_rewind()
-    elif data.action == MediaActionEnum.fastforward:
+    elif data.action == MediaAction.fastforward:
         await control_fastforward()
-    elif data.action == MediaActionEnum.shuffle:
+    elif data.action == MediaAction.shuffle:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid shuffle value",
             )
         await control_shuffle(data.value)
-    elif data.action == MediaActionEnum.repeat:
+    elif data.action == MediaAction.repeat:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid repeat value",
             )
         await control_repeat(data.value)
-    elif data.action == MediaActionEnum.mute:
+    elif data.action == MediaAction.mute:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid mute value",
             )
         await control_mute(data.value)
-    elif data.action == MediaActionEnum.volume:
+    elif data.action == MediaAction.volume:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,

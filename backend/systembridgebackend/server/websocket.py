@@ -99,7 +99,7 @@ from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
-from systembridgeshared.models.media_control import ActionEnum as MediaActionEnum
+from systembridgeshared.models.media_control import Action as MediaAction
 from systembridgeshared.models.media_control import MediaControl
 from systembridgeshared.models.media_get_file import MediaGetFile
 from systembridgeshared.models.media_get_files import MediaGetFiles
@@ -418,7 +418,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                if model.action not in MediaActionEnum:
+                if model.action not in MediaAction:
                     self._logger.warning("Invalid action provided")
                     await self._send_response(
                         Response(
@@ -431,17 +431,17 @@ class WebSocketHandler(Base):
                         )
                     )
                     continue
-                if model.action == MediaActionEnum.play:
+                if model.action == MediaAction.play:
                     await control_play()
-                elif model.action == MediaActionEnum.pause:
+                elif model.action == MediaAction.pause:
                     await control_pause()
-                elif model.action == MediaActionEnum.stop:
+                elif model.action == MediaAction.stop:
                     await control_stop()
-                elif model.action == MediaActionEnum.previous:
+                elif model.action == MediaAction.previous:
                     await control_previous()
-                elif model.action == MediaActionEnum.next:
+                elif model.action == MediaAction.next:
                     await control_next()
-                elif model.action == MediaActionEnum.seek:
+                elif model.action == MediaAction.seek:
                     if model.value is None:
                         self._logger.warning("No position value provided")
                         await self._send_response(
@@ -456,11 +456,11 @@ class WebSocketHandler(Base):
                         )
                         continue
                     await control_seek(model.value)
-                elif model.action == MediaActionEnum.rewind:
+                elif model.action == MediaAction.rewind:
                     await control_rewind()
-                elif model.action == MediaActionEnum.fastforward:
+                elif model.action == MediaAction.fastforward:
                     await control_fastforward()
-                elif model.action == MediaActionEnum.shuffle:
+                elif model.action == MediaAction.shuffle:
                     if model.value is None:
                         self._logger.warning("No shuffle value provided")
                         await self._send_response(
@@ -475,7 +475,7 @@ class WebSocketHandler(Base):
                         )
                         continue
                     await control_shuffle(model.value)
-                elif model.action == MediaActionEnum.repeat:
+                elif model.action == MediaAction.repeat:
                     if model.value is None:
                         self._logger.warning("No repeat value provided")
                         await self._send_response(
@@ -490,7 +490,7 @@ class WebSocketHandler(Base):
                         )
                         continue
                     await control_repeat(model.value)
-                elif model.action == MediaActionEnum.mute:
+                elif model.action == MediaAction.mute:
                     if model.value is None:
                         self._logger.warning("No mute value provided")
                         await self._send_response(
@@ -505,7 +505,7 @@ class WebSocketHandler(Base):
                         )
                         continue
                     await control_mute(model.value)
-                elif model.action == MediaActionEnum.volume:
+                elif model.action == MediaAction.volume:
                     if model.value is None:
                         self._logger.warning("No volume value provided")
                         await self._send_response(
