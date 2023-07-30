@@ -32,6 +32,20 @@ path_to_models_shared = os.path.abspath(
     )
 )
 
+# Install datamodel-codegen and black
+command = [
+    sys.executable,
+    "-m",
+    "pip",
+    "install",
+    "--upgrade",
+    "datamodel-codegen",
+    "black",
+]
+print(" ".join(command))
+with subprocess.Popen(command) as process:
+    process.wait()
+
 for root, _, files in os.walk(path_from_schemas):
     for file in files:
         if file.endswith(".json"):
