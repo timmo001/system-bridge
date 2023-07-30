@@ -3,7 +3,7 @@
   "type": "object",
   "description": "Request",
   "properties": {
-    "api-key": {
+    "api_key": {
       "type": "string",
       "description": "API Key"
     },

@@ -32,13 +32,16 @@ from systembridgeshared.const import (
     SUBTYPE_BAD_JSON,
     SUBTYPE_BAD_PATH,
     SUBTYPE_BAD_REQUEST,
+    SUBTYPE_INVALID_ACTION,
     SUBTYPE_LISTENER_ALREADY_REGISTERED,
     SUBTYPE_LISTENER_NOT_REGISTERED,
+    SUBTYPE_MISSING_ACTION,
     SUBTYPE_MISSING_KEY,
     SUBTYPE_MISSING_MODULES,
     SUBTYPE_MISSING_PATH_URL,
     SUBTYPE_MISSING_TEXT,
     SUBTYPE_MISSING_TITLE,
+    SUBTYPE_MISSING_VALUE,
     SUBTYPE_UNKNOWN_EVENT,
     TYPE_APPLICATION_UPDATE,
     TYPE_APPLICATION_UPDATING,
@@ -63,6 +66,7 @@ from systembridgeshared.const import (
     TYPE_KEYBOARD_KEYPRESS,
     TYPE_KEYBOARD_TEXT,
     TYPE_KEYBOARD_TEXT_SENT,
+    TYPE_MEDIA_CONTROL,
     TYPE_NOTIFICATION,
     TYPE_NOTIFICATION_SENT,
     TYPE_OPEN,
@@ -95,6 +99,8 @@ from systembridgeshared.models.get_data import GetData
 from systembridgeshared.models.get_setting import GetSetting
 from systembridgeshared.models.keyboard_key import KeyboardKey
 from systembridgeshared.models.keyboard_text import KeyboardText
+from systembridgeshared.models.media_control import ActionEnum as MediaActionEnum
+from systembridgeshared.models.media_control import MediaControl
 from systembridgeshared.models.media_get_file import MediaGetFile
 from systembridgeshared.models.media_get_files import MediaGetFiles
 from systembridgeshared.models.notification import Notification
@@ -111,7 +117,23 @@ from systembridgeshared.update import Update
 from ..modules.listeners import Listeners
 from ..utilities.autostart import autostart_disable, autostart_enable
 from ..utilities.keyboard import keyboard_keypress, keyboard_text
-from ..utilities.media import get_directories, get_file, get_files
+from ..utilities.media import (
+    control_fastforward,
+    control_mute,
+    control_next,
+    control_pause,
+    control_play,
+    control_previous,
+    control_repeat,
+    control_rewind,
+    control_seek,
+    control_shuffle,
+    control_stop,
+    control_volume,
+    get_directories,
+    get_file,
+    get_files,
+)
 from ..utilities.open import open_path, open_url
 from ..utilities.power import hibernate, lock, logout, restart, shutdown, sleep
 from ..utilities.remote_bridge import get_remote_bridges
@@ -366,6 +388,139 @@ class WebSocketHandler(Base):
                         }
                     )
                 )
+            elif request.event == TYPE_MEDIA_CONTROL:
+                try:
+                    model = MediaControl(**data)
+                except ValueError as error:
+                    message = f"Invalid request: {error}"
+                    self._logger.warning(message)
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_BAD_REQUEST,
+                                EVENT_MESSAGE: message,
+                            }
+                        )
+                    )
+                    continue
+                if model.action is None:
+                    self._logger.warning("No action provided")
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_MISSING_ACTION,
+                                EVENT_MESSAGE: "No action provided",
+                            }
+                        )
+                    )
+                    continue
+                if model.action not in MediaActionEnum:
+                    self._logger.warning("Invalid action provided")
+                    await self._send_response(
+                        Response(
+                            **{
+                                EVENT_ID: request.id,
+                                EVENT_TYPE: TYPE_ERROR,
+                                EVENT_SUBTYPE: SUBTYPE_INVALID_ACTION,
+                                EVENT_MESSAGE: "Invalid action provided",
+                            }
+                        )
+                    )
+                    continue
+                if model.action == MediaActionEnum.play:
+                    await control_play()
+                elif model.action == MediaActionEnum.pause:
+                    await control_pause()
+                elif model.action == MediaActionEnum.stop:
+                    await control_stop()
+                elif model.action == MediaActionEnum.previous:
+                    await control_previous()
+                elif model.action == MediaActionEnum.next:
+                    await control_next()
+                elif model.action == MediaActionEnum.seek:
+                    if model.value is None:
+                        self._logger.warning("No position value provided")
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
+                        )
+                        continue
+                    await control_seek(model.value)
+                elif model.action == MediaActionEnum.rewind:
+                    await control_rewind()
+                elif model.action == MediaActionEnum.fastforward:
+                    await control_fastforward()
+                elif model.action == MediaActionEnum.shuffle:
+                    if model.value is None:
+                        self._logger.warning("No shuffle value provided")
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
+                        )
+                        continue
+                    await control_shuffle(model.value)
+                elif model.action == MediaActionEnum.repeat:
+                    if model.value is None:
+                        self._logger.warning("No repeat value provided")
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
+                        )
+                        continue
+                    await control_repeat(model.value)
+                elif model.action == MediaActionEnum.mute:
+                    if model.value is None:
+                        self._logger.warning("No mute value provided")
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
+                        )
+                        continue
+                    await control_mute(model.value)
+                elif model.action == MediaActionEnum.volume:
+                    if model.value is None:
+                        self._logger.warning("No volume value provided")
+                        await self._send_response(
+                            Response(
+                                **{
+                                    EVENT_ID: request.id,
+                                    EVENT_TYPE: TYPE_ERROR,
+                                    EVENT_SUBTYPE: SUBTYPE_MISSING_VALUE,
+                                    EVENT_MESSAGE: "No value provided",
+                                }
+                            )
+                        )
+                        continue
+                    await control_volume(model.value)
+
             elif request.event == TYPE_NOTIFICATION:
                 try:
                     model = Notification(**data)
