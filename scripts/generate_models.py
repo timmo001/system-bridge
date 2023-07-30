@@ -32,14 +32,14 @@ path_to_models_shared = os.path.abspath(
     )
 )
 
-# Install datamodel-codegen and black
+# Install datamodel-code-generator and black
 command = [
     sys.executable,
     "-m",
     "pip",
     "install",
     "--upgrade",
-    "datamodel-codegen",
+    "datamodel-code-generator",
     "black",
 ]
 print(" ".join(command))
