@@ -30,6 +30,8 @@ class MediaUpdate(ModuleUpdateBase):
                         value=value,
                     ),
                 )
+        else:
+            self._database.clear_table(DatabaseModel)
 
     async def update_all_data(self) -> None:
         """Update data"""
