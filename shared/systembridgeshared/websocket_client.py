@@ -54,6 +54,7 @@ from .exceptions import (
 from .models.get_data import GetData
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
+from .models.media_control import MediaControl
 from .models.media_directories import MediaDirectories
 from .models.media_files import File as MediaFile
 from .models.media_files import MediaFiles
@@ -282,6 +283,21 @@ class WebSocketClient(Base):
     ) -> Response:
         """Keyboard keypress"""
         self._logger.info("Enter text: %s", model.json())
+        return await self._send_message(
+            Request(
+                **{
+                    EVENT_EVENT: TYPE_KEYBOARD_TEXT,
+                    **model.dict(),
+                }
+            )
+        )
+
+    async def media_control(
+        self,
+        model: MediaControl,
+    ) -> Response:
+        """Media control"""
+        self._logger.info("Media control: %s", model.json())
         return await self._send_message(
             Request(
                 **{
