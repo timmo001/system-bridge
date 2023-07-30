@@ -24,15 +24,18 @@ async def windows_control_pause() -> None:
     session = await _get_current_session()
     await session.try_pause_async()
 
+
 async def windows_control_stop() -> None:
     """Stop current media"""
     session = await _get_current_session()
     await session.try_stop_async()
 
+
 async def windows_control_previous() -> None:
     """Previous current media"""
     session = await _get_current_session()
     await session.try_skip_previous_async()
+
 
 async def windows_control_next() -> None:
     """Next current media"""
