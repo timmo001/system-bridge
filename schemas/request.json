@@ -17,5 +17,5 @@
     }
   },
   "required": ["event"],
-  "additionalProperties": {}
+  "additionalProperties": true
 }

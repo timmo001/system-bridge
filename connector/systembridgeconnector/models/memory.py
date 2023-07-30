@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 
 class LastUpdated(BaseModel):
@@ -30,6 +30,9 @@ class Memory(BaseModel):
     """
     Memory
     """
+
+    class Config:
+        extra = Extra.allow
 
     id: Optional[str] = Field(None, description="Event ID")
     swap_total: Optional[int] = None

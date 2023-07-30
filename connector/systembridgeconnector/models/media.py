@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 
 class Media(BaseModel):
     """
     Media Info
     """
+
+    class Config:
+        extra = Extra.allow
 
     album_artist: Optional[str] = None
     album_title: Optional[str] = None

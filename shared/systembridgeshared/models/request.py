@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 
 
 class Request(BaseModel):
     """
     Request
     """
+
+    class Config:
+        extra = Extra.allow
 
     api_key: Optional[str] = Field(None, description="API Key")
     id: Optional[str] = Field(None, description="Message ID")
