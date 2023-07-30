@@ -1,5 +1,6 @@
 """Setup"""
 import io
+import json
 import os
 from distutils.dir_util import copy_tree
 
@@ -20,6 +21,10 @@ copy_tree(
 
 package_data = []
 
+for file in os.listdir("systembridgewindowssensors/bin"):
+    if os.path.isfile(os.path.join("systembridgewindowssensors/bin", file)):
+        package_data.append(os.path.join("bin", file).replace("\\", "/", -1))
+
 for root, directories, files in os.walk("systembridgewindowssensors/bin"):
     for file in files:
         package_data.append(
@@ -28,7 +33,7 @@ for root, directories, files in os.walk("systembridgewindowssensors/bin"):
             .replace("\\", "/", -1)
         )
 
-print(package_data)
+print(json.dumps(package_data))
 
 setup(
     name="systembridgewindowssensors",
