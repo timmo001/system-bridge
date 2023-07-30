@@ -10,7 +10,7 @@ import re
 import tempfile
 from collections.abc import Callable
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 from urllib.parse import urlencode
 
 import aiofiles
@@ -104,43 +104,76 @@ async def control_next() -> None:
         keyboard_keypress("nexttrack")
 
 
+async def control_seek(position: int) -> None:
+    """Set position"""
+    if platform.system() == "Windows":
+        from .windows import windows_control_seek
+
+        await windows_control_seek(position)
+    else:
+        raise Exception("Not implemented")
+
+
+async def control_rewind() -> None:
+    """Rewind"""
+    if platform.system() == "Windows":
+        from .windows import windows_control_rewind
+
+        await windows_control_rewind()
+    else:
+        raise Exception("Not implemented")
+
+
+async def control_fastforward() -> None:
+    """Fast forward"""
+    if platform.system() == "Windows":
+        from .windows import windows_control_fastforward
+
+        await windows_control_fastforward()
+    else:
+        raise Exception("Not implemented")
+
+
+async def control_shuffle(shuffle: bool) -> None:
+    """Set shuffle"""
+    if platform.system() == "Windows":
+        from .windows import windows_control_shuffle
+
+        await windows_control_shuffle(shuffle)
+    else:
+        raise Exception("Not implemented")
+
+
+async def control_repeat(repeat: int) -> None:
+    """Set repeat"""
+    if platform.system() == "Windows":
+        from winsdk.windows.media import MediaPlaybackAutoRepeatMode
+
+        from .windows import windows_control_repeat
+
+        await windows_control_repeat(
+            cast(
+                MediaPlaybackAutoRepeatMode,
+                repeat,
+            )
+        )
+    else:
+        raise Exception("Not implemented")
+
+
 async def control_mute() -> None:
     """Set mute"""
     keyboard_keypress("volumemute")
-
-
-async def control_volume_up() -> None:
-    """Increase volume"""
-    keyboard_keypress("volumeup")
 
 
 async def control_volume_down() -> None:
     """Decrease volume"""
     keyboard_keypress("volumedown")
 
-async def control_seek(position: int) -> None:
-    """Set position"""
-    pass
 
-
-async def control_rewind() -> None:
-    """Rewind"""
-    pass
-
-
-async def control_fastforward() -> None:
-    """Fast forward"""
-    pass
-
-
-async def control_shuffle(shuffle: bool) -> None:
-    """Set shuffle"""
-    pass
-
-
-async def control_repeat(repeat: bool) -> None:
-    """Set repeat"""
-    pass
+async def control_volume_up() -> None:
+    """Increase volume"""
+    keyboard_keypress("volumeup")
 
 
 def get_directories(settings: Settings) -> list[dict[str, str]]:
