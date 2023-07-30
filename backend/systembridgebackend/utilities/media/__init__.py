@@ -41,76 +41,61 @@ from ..keyboard import keyboard_keypress
 
 async def control_play() -> None:
     """Play current media"""
-    try:
-        if platform.system() == "Windows":
-            from .windows import (  # pylint: disable=import-outside-toplevel
-                windows_control_play,
-            )
+    if platform.system() == "Windows":
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_play,
+        )
 
-            await windows_control_play()
-        else:
-            keyboard_keypress("playpause")
-    except Exception:  # pylint: disable=broad-except
+        await windows_control_play()
+    else:
         keyboard_keypress("playpause")
 
 
 async def control_pause() -> None:
     """Pause current media"""
-    try:
-        if platform.system() == "Windows":
-            from .windows import (  # pylint: disable=import-outside-toplevel
-                windows_control_pause,
-            )
+    if platform.system() == "Windows":
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_pause,
+        )
 
-            await windows_control_pause()
-        else:
-            keyboard_keypress("playpause")
-    except Exception:  # pylint: disable=broad-except
+        await windows_control_pause()
+    else:
         keyboard_keypress("playpause")
 
 
 async def control_stop() -> None:
     """Stop current media"""
-    try:
-        if platform.system() == "Windows":
-            from .windows import (  # pylint: disable=import-outside-toplevel
-                windows_control_stop,
-            )
+    if platform.system() == "Windows":
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_stop,
+        )
 
-            await windows_control_stop()
-        else:
-            keyboard_keypress("stop")
-    except Exception:  # pylint: disable=broad-except
+        await windows_control_stop()
+    else:
         keyboard_keypress("stop")
 
 
 async def control_previous() -> None:
     """Play previous media"""
-    try:
-        if platform.system() == "Windows":
-            from .windows import (  # pylint: disable=import-outside-toplevel
-                windows_control_previous,
-            )
+    if platform.system() == "Windows":
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_previous,
+        )
 
-            await windows_control_previous()
-        else:
-            keyboard_keypress("prevtrack")
-    except Exception:  # pylint: disable=broad-except
+        await windows_control_previous()
+    else:
         keyboard_keypress("prevtrack")
 
 
 async def control_next() -> None:
     """Play next media"""
-    try:
-        if platform.system() == "Windows":
-            from .windows import (  # pylint: disable=import-outside-toplevel
-                windows_control_next,
-            )
+    if platform.system() == "Windows":
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_next,
+        )
 
-            await windows_control_next()
-        else:
-            keyboard_keypress("nexttrack")
-    except Exception:  # pylint: disable=broad-except
+        await windows_control_next()
+    else:
         keyboard_keypress("nexttrack")
 
 
