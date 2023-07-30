@@ -5,6 +5,7 @@ import asyncio
 import io
 import mimetypes
 import os
+import platform
 import re
 import tempfile
 from collections.abc import Callable
@@ -36,52 +37,74 @@ from systembridgeshared.models.media_play import MediaPlay
 from systembridgeshared.settings import Settings
 
 
-def control_play() -> None:
+async def control_play() -> None:
     """Play current media"""
-    pass
+    if platform.system() == "Windows":
+        from .windows import windows_control_play
+
+        await windows_control_play()
+    # elif platform.system() == "Linux":
+    #     from .linux import macos_control_play
+    #     await linux_control_play()
 
 
-def control_pause() -> None:
+async def control_pause() -> None:
     """Pause current media"""
-    pass
+    if platform.system() == "Windows":
+        from .windows import windows_control_pause
+
+        await windows_control_pause()
+    # elif platform.system() == "Linux":
+    #     from .linux import macos_control_play
+    #     await linux_control_play()
 
 
-def control_stop() -> None:
+async def control_stop() -> None:
     """Stop current media"""
     pass
 
 
-def control_next() -> None:
-    """Play next media"""
-    pass
-
-
-def control_previous() -> None:
+async def control_previous() -> None:
     """Play previous media"""
     pass
 
 
-def control_mute(mute: bool) -> None:
+async def control_next() -> None:
+    """Play next media"""
+    pass
+
+
+async def control_mute(mute: bool) -> None:
     """Set mute"""
     pass
 
 
-def control_volume(volume: float) -> None:
+async def control_volume(volume: float) -> None:
     """Set volume"""
     pass
 
 
-def control_seek(position: int) -> None:
+async def control_seek(position: int) -> None:
     """Set position"""
     pass
 
 
-def control_shuffle(shuffle: bool) -> None:
+async def control_rewind() -> None:
+    """Rewind"""
+    pass
+
+
+async def control_fastforward() -> None:
+    """Fast forward"""
+    pass
+
+
+async def control_shuffle(shuffle: bool) -> None:
     """Set shuffle"""
     pass
 
 
-def control_repeat(repeat: bool) -> None:
+async def control_repeat(repeat: bool) -> None:
     """Set repeat"""
     pass
 
