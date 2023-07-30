@@ -44,7 +44,9 @@ async def windows_control_next() -> None:
     await session.try_skip_next_async()
 
 
-async def windows_control_seek(position: int) -> None:
+async def windows_control_seek(
+    position: int,
+) -> None:
     """Seek current media"""
     session = await _get_current_session()
     await session.try_change_playback_position_async(position)
@@ -62,7 +64,9 @@ async def windows_control_fastforward() -> None:
     await session.try_fast_forward_async()
 
 
-async def windows_control_shuffle(shuffle: bool) -> None:
+async def windows_control_shuffle(
+    shuffle: bool,
+) -> None:
     """Shuffle current media"""
     session = await _get_current_session()
     await session.try_change_shuffle_active_async(shuffle)

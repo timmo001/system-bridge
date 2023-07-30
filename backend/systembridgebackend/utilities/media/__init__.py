@@ -43,12 +43,14 @@ async def control_play() -> None:
     """Play current media"""
     try:
         if platform.system() == "Windows":
-            from .windows import windows_control_play
+            from .windows import (  # pylint: disable=import-outside-toplevel
+                windows_control_play,
+            )
 
             await windows_control_play()
         else:
             keyboard_keypress("playpause")
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         keyboard_keypress("playpause")
 
 
@@ -56,12 +58,14 @@ async def control_pause() -> None:
     """Pause current media"""
     try:
         if platform.system() == "Windows":
-            from .windows import windows_control_pause
+            from .windows import (  # pylint: disable=import-outside-toplevel
+                windows_control_pause,
+            )
 
             await windows_control_pause()
         else:
             keyboard_keypress("playpause")
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         keyboard_keypress("playpause")
 
 
@@ -69,12 +73,14 @@ async def control_stop() -> None:
     """Stop current media"""
     try:
         if platform.system() == "Windows":
-            from .windows import windows_control_stop
+            from .windows import (  # pylint: disable=import-outside-toplevel
+                windows_control_stop,
+            )
 
             await windows_control_stop()
         else:
             keyboard_keypress("stop")
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         keyboard_keypress("stop")
 
 
@@ -82,12 +88,14 @@ async def control_previous() -> None:
     """Play previous media"""
     try:
         if platform.system() == "Windows":
-            from .windows import windows_control_previous
+            from .windows import (  # pylint: disable=import-outside-toplevel
+                windows_control_previous,
+            )
 
             await windows_control_previous()
         else:
             keyboard_keypress("prevtrack")
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         keyboard_keypress("prevtrack")
 
 
@@ -95,19 +103,23 @@ async def control_next() -> None:
     """Play next media"""
     try:
         if platform.system() == "Windows":
-            from .windows import windows_control_next
+            from .windows import (  # pylint: disable=import-outside-toplevel
+                windows_control_next,
+            )
 
             await windows_control_next()
         else:
             keyboard_keypress("nexttrack")
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         keyboard_keypress("nexttrack")
 
 
 async def control_seek(position: int) -> None:
     """Set position"""
     if platform.system() == "Windows":
-        from .windows import windows_control_seek
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_seek,
+        )
 
         await windows_control_seek(position)
     else:
@@ -117,7 +129,9 @@ async def control_seek(position: int) -> None:
 async def control_rewind() -> None:
     """Rewind"""
     if platform.system() == "Windows":
-        from .windows import windows_control_rewind
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_rewind,
+        )
 
         await windows_control_rewind()
     else:
@@ -127,7 +141,9 @@ async def control_rewind() -> None:
 async def control_fastforward() -> None:
     """Fast forward"""
     if platform.system() == "Windows":
-        from .windows import windows_control_fastforward
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_fastforward,
+        )
 
         await windows_control_fastforward()
     else:
@@ -137,7 +153,9 @@ async def control_fastforward() -> None:
 async def control_shuffle(shuffle: bool) -> None:
     """Set shuffle"""
     if platform.system() == "Windows":
-        from .windows import windows_control_shuffle
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_shuffle,
+        )
 
         await windows_control_shuffle(shuffle)
     else:
@@ -147,9 +165,13 @@ async def control_shuffle(shuffle: bool) -> None:
 async def control_repeat(repeat: int) -> None:
     """Set repeat"""
     if platform.system() == "Windows":
-        from winsdk.windows.media import MediaPlaybackAutoRepeatMode
+        from winsdk.windows.media import (  # pylint: disable=import-outside-toplevel
+            MediaPlaybackAutoRepeatMode,
+        )
 
-        from .windows import windows_control_repeat
+        from .windows import (  # pylint: disable=import-outside-toplevel
+            windows_control_repeat,
+        )
 
         await windows_control_repeat(
             cast(
