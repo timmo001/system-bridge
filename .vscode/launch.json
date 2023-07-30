@@ -2,6 +2,17 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Application",
+      "type": "python",
+      "request": "launch",
+      "program": "systembridge.py",
+      "console": "integratedTerminal",
+      "preLaunchTask": "Application: install",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "args": []
+    },
+    {
       "name": "Backend",
       "type": "python",
       "request": "launch",

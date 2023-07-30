@@ -3,6 +3,12 @@
   "tasks": [
     {
       "type": "shell",
+      "label": "Application: install",
+      "dependsOn": ["Frontend: pip install", "Backend: pip install"],
+      "options": {}
+    },
+    {
+      "type": "shell",
       "label": "Shared: pip install",
       "command": "python -m pip install .",
       "dependsOn": [],
