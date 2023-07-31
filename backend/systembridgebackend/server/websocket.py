@@ -405,7 +405,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     return
-                await control_seek(model.value)
+                await control_seek(int(model.value))
             elif model.action == MediaAction.rewind:
                 await control_rewind()
             elif model.action == MediaAction.fastforward:
@@ -424,7 +424,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     return
-                await control_shuffle(model.value)
+                await control_shuffle(bool(model.value))
             elif model.action == MediaAction.repeat:
                 if model.value is None:
                     self._logger.warning("No repeat value provided")
@@ -439,7 +439,7 @@ class WebSocketHandler(Base):
                         )
                     )
                     return
-                await control_repeat(model.value)
+                await control_repeat(int(model.value))
             elif model.action == MediaAction.mute:
                 await control_mute()
             elif model.action == MediaAction.volumedown:

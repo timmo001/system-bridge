@@ -11,6 +11,7 @@ from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Media as DatabaseModel
 from systembridgeshared.models.media import Media as MediaInfo
+from winsdk.windows.foundation import EventRegistrationToken
 
 
 class Media(Base):
@@ -29,6 +30,13 @@ class Media(Base):
         ] = None
         self.current_session: Optional[
             wmc.GlobalSystemMediaTransportControlsSession
+        ] = None
+        self.current_session_changed_handler_token: Optional[
+            EventRegistrationToken
+        ] = None
+        self.properties_changed_handler_token: Optional[EventRegistrationToken] = None
+        self.playback_info_changed_handler_token: Optional[
+            EventRegistrationToken
         ] = None
 
     def _current_session_changed_handler(
@@ -88,21 +96,41 @@ class Media(Base):
         if platform.system() != "Windows":
             return None
 
+        if self.sessions is not None and self.current_session_changed_handler_token is not None:
+            self.sessions.remove_current_session_changed(
+                self.current_session_changed_handler_token
+            )
+
         self.sessions = (
             await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
         )
-        self.sessions.add_current_session_changed(self._current_session_changed_handler)
+        self.current_session_changed_handler_token = (
+            self.sessions.add_current_session_changed(
+                self._current_session_changed_handler
+            )
+        )
+
+        if self.current_session is not None:
+            if self.properties_changed_handler_token is not None:
+                self.current_session.remove_media_properties_changed(
+                    self.properties_changed_handler_token
+                )
+            if self.playback_info_changed_handler_token is not None:
+                self.current_session.remove_playback_info_changed(
+                    self.playback_info_changed_handler_token
+                )
 
         self.current_session = self.sessions.get_current_session()
         if self.current_session:
-            self.current_session.add_media_properties_changed(
-                self._properties_changed_handler
+            self.properties_changed_handler_token = (
+                self.current_session.add_media_properties_changed(
+                    self._properties_changed_handler
+                )
             )
-            self.current_session.add_timeline_properties_changed(
-                self._properties_changed_handler
-            )
-            self.current_session.add_playback_info_changed(
-                self._playback_info_changed_handler
+            self.playback_info_changed_handler_token = (
+                self.current_session.add_playback_info_changed(
+                    self._playback_info_changed_handler
+                )
             )
             media_info = MediaInfo()
             if info := self.current_session.get_playback_info():
