@@ -10,7 +10,6 @@ from .cpu.update import CPUUpdate
 from .disk.update import DiskUpdate
 from .display.update import DisplayUpdate
 from .gpu.update import GPUUpdate
-from .media.update import MediaUpdate
 from .memory.update import MemoryUpdate
 from .network.update import NetworkUpdate
 from .sensors.update import SensorsUpdate
@@ -23,10 +22,12 @@ class Update(Base):
     def __init__(
         self,
         database: Database,
+        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Initialize"""
         super().__init__()
         self._database = database  # pylint: disable=duplicate-code
+        self.updated_callback = updated_callback
 
         self._classes = [
             {"name": "battery", "cls": BatteryUpdate(self._database)},
@@ -44,54 +45,29 @@ class Update(Base):
     async def _update(
         self,
         class_obj: dict,
-        updated_callback: Callable[[str], Awaitable[None]],
     ) -> None:
         """Update"""
         await class_obj["cls"].update_all_data()
-        await updated_callback(class_obj["name"])
+        await self.updated_callback(class_obj["name"])
 
-    async def update_data(
-        self,
-        updated_callback: Callable[[str], Awaitable[None]],
-    ) -> None:
+    async def update_data(self) -> None:
         """Update Data"""
         self._logger.info("Update data")
 
-        tasks = [self._update(cls, updated_callback) for cls in self._classes]
+        tasks = [self._update(cls) for cls in self._classes]
         await asyncio.gather(*tasks)
 
         self._logger.info("Finished updating data")
 
-    async def update_frequent_data(
-        self,
-        updated_callback: Callable[[str], Awaitable[None]],
-    ) -> None:
+    async def update_frequent_data(self) -> None:
         """Update Data"""
         self._logger.info("Update frequent data")
 
         sensors_update = SensorsUpdate(self._database)
         await sensors_update.update_all_data()
-        await updated_callback("sensors")
+        await self.updated_callback("sensors")
 
-        tasks = [self._update(cls, updated_callback) for cls in self._classes_frequent]
+        tasks = [self._update(cls) for cls in self._classes_frequent]
         await asyncio.gather(*tasks)
 
         self._logger.info("Finished updating frequent data")
-
-        await self.update_media_data(updated_callback)
-
-    async def update_media_data(
-        self,
-        updated_callback: Callable[[str], Awaitable[None]],
-    ) -> None:
-        """Update Media Data"""
-        self._logger.info("Update media data")
-
-        media_update = MediaUpdate(
-            self._database,
-            lambda: asyncio.ensure_future(self.update_media_data(updated_callback)),
-        )
-        await media_update.update_all_data()
-        await updated_callback("media")
-
-        self._logger.info("Finished updating media data")
