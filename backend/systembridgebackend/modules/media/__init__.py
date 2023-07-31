@@ -178,6 +178,7 @@ class Media(Base):
 
             if media_info.status == "PLAYING":
                 self._logger.info("Schedule media update in 5 seconds..")
+                await asyncio.sleep(5)
                 await self.update_media_info()
         else:
             await self._update_data(
