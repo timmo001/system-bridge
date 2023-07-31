@@ -139,11 +139,11 @@ class Database(Base):
         data_last_updated: dict[str, float | None] = {}
         result = self.get_data(table)
         for item in result:
-            if item.value is None:
+            if item is None or item.value is None:
                 data[item.key] = None
             else:
                 data[item.key] = convert_string_to_correct_type(item.value)
-            if item.timestamp is None:
+            if item is None or item.timestamp is None:
                 data_last_updated[item.key] = None
             else:
                 data_last_updated[item.key] = item.timestamp
