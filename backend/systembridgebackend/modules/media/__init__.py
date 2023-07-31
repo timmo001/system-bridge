@@ -173,6 +173,10 @@ class Media(Base):
             media_info.updated_at = datetime.datetime.now().timestamp()
 
             await self._update_data(media_info)
+
+            if media_info.status == "PLAYING":
+                self._logger.info("Schedule media update in 5 seconds..")
+                await self.update_media_info()
         else:
             await self._update_data(
                 MediaInfo(updated_at=datetime.datetime.now().timestamp())
