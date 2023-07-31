@@ -21,17 +21,30 @@ class Media(Base):
         super().__init__()
         self._changed_callback = changed_callback
 
-    def _changed_handler(
+    def _session_changed_handler(
         self,
         _sender,
-        args,
+        result,
     ) -> None:
-        """Changed handler"""
-        self._logger.debug("Media changed: %s", args)
+        """Session changed handler"""
+        self._logger.debug("Session changed: %s", result)
         if self._changed_callback is not None:
             asyncio.create_task(
                 self._changed_callback(),
-                name="Media Changed",
+                name="Session changed",
+            )
+
+    def _media_properties_changed_handler(
+        self,
+        _sender,
+        result,
+    ) -> None:
+        """Media properties changed handler"""
+        self._logger.debug("Media properties changed: %s", result)
+        if self._changed_callback is not None:
+            asyncio.create_task(
+                self._changed_callback(),
+                name="Media properties changed",
             )
 
     async def get_media_info(self) -> Optional[MediaInfo]:
@@ -45,9 +58,11 @@ class Media(Base):
             await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
         )
 
-        sessions.add_current_session_changed(self._changed_handler)
+        sessions.add_current_session_changed(self._session_changed_handler)
         if current_session := sessions.get_current_session():
-            current_session.add_media_properties_changed(self._changed_handler)
+            current_session.add_media_properties_changed(
+                self._media_properties_changed_handler
+            )
             media_info = MediaInfo()
             if info := current_session.get_playback_info():
                 media_info.status = info.playback_status.name
