@@ -7,7 +7,6 @@ from threading import Thread
 from systembridgeshared.base import Base
 from systembridgeshared.database import Database
 
-from .modules.media import Media
 from .modules.update import Update
 
 
@@ -43,6 +42,10 @@ class UpdateEventsThread(Thread):
 
         if platform.system() != "Windows":
             return
+
+        from .modules.media import (  # pylint: disable=import-error, import-outside-toplevel
+            Media,
+        )
 
         self._media = Media(
             database,
