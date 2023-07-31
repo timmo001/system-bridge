@@ -229,6 +229,12 @@ class Server(Base):
         await asyncio.sleep(120)
         await self.update_data()
 
+    async def update_events_data(self) -> None:
+        """Update events data"""
+        self._logger.info("Update events data")
+        self._data.request_update_events_data()
+        asyncio.get_running_loop().run_forever()
+
     async def update_frequent_data(self) -> None:
         """Update frequent data"""
         self._logger.info("Update frequent data")
@@ -236,9 +242,3 @@ class Server(Base):
         self._logger.info("Schedule next frequent update in 30 seconds")
         await asyncio.sleep(30)
         await self.update_frequent_data()
-
-    async def update_events_data(self) -> None:
-        """Update events data"""
-        self._logger.info("Update events data")
-        self._data.request_update_events_data()
-        asyncio.get_running_loop().run_forever()

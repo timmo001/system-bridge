@@ -30,25 +30,6 @@ class UpdateThread(Thread):
         asyncio.run(self._update.update_data())
 
 
-class UpdateFrequentThread(Thread):
-    """Update frequent thread"""
-
-    def __init__(
-        self,
-        database: Database,
-        updated_callback: Callable[[str], Awaitable[None]],
-    ) -> None:
-        """Initialize"""
-        super().__init__()
-        self._database = database
-        self._updated_callback = updated_callback
-        self._update = Update(self._database, self._updated_callback)
-
-    def run(self) -> None:
-        """Run"""
-        asyncio.run(self._update.update_frequent_data())
-
-
 class UpdateEventsThread(Thread):
     """Update events thread"""
 
@@ -76,6 +57,25 @@ class UpdateEventsThread(Thread):
         asyncio.run(self._media.update_media_info())
 
 
+class UpdateFrequentThread(Thread):
+    """Update frequent thread"""
+
+    def __init__(
+        self,
+        database: Database,
+        updated_callback: Callable[[str], Awaitable[None]],
+    ) -> None:
+        """Initialize"""
+        super().__init__()
+        self._database = database
+        self._updated_callback = updated_callback
+        self._update = Update(self._database, self._updated_callback)
+
+    def run(self) -> None:
+        """Run"""
+        asyncio.run(self._update.update_frequent_data())
+
+
 class Data(Base):
     """Data"""
 
@@ -97,17 +97,17 @@ class Data(Base):
         )
         thread.start()
 
-    def request_update_frequent_data(self) -> None:
-        """Request update frequent data"""
-        thread = UpdateFrequentThread(
+    def request_update_events_data(self) -> None:
+        """Request update events data"""
+        thread = UpdateEventsThread(
             self._database,
             self._updated_callback,
         )
         thread.start()
 
-    def request_update_events_data(self) -> None:
-        """Request update events data"""
-        thread = UpdateEventsThread(
+    def request_update_frequent_data(self) -> None:
+        """Request update frequent data"""
+        thread = UpdateFrequentThread(
             self._database,
             self._updated_callback,
         )
