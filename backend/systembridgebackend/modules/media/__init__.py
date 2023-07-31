@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import platform
 from collections.abc import Awaitable, Callable
 from typing import Optional
@@ -96,7 +97,10 @@ class Media(Base):
         if platform.system() != "Windows":
             return None
 
-        if self.sessions is not None and self.current_session_changed_handler_token is not None:
+        if (
+            self.sessions is not None
+            and self.current_session_changed_handler_token is not None
+        ):
             self.sessions.remove_current_session_changed(
                 self.current_session_changed_handler_token
             )
@@ -166,6 +170,10 @@ class Media(Base):
                 media_info.album_title = properties.album_title
                 media_info.track_number = properties.track_number
 
+            media_info.updated_at = datetime.datetime.now().timestamp()
+
             await self._update_data(media_info)
         else:
-            await self._update_data()
+            await self._update_data(
+                MediaInfo(updated_at=datetime.datetime.now().timestamp())
+            )
