@@ -98,6 +98,9 @@ class Media(Base):
             self.current_session.add_media_properties_changed(
                 self._properties_changed_handler
             )
+            self.current_session.add_timeline_properties_changed(
+                self._properties_changed_handler
+            )
             self.current_session.add_playback_info_changed(
                 self._playback_info_changed_handler
             )
