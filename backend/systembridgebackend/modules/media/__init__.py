@@ -41,12 +41,22 @@ class Media(Base):
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
 
-    def _media_properties_changed_handler(
+    def _properties_changed_handler(
         self,
         _sender,
         _result,
     ) -> None:
-        """Media properties changed handler"""
+        """Properties changed handler"""
+        self._logger.info("Media properties changed")
+        if self._changed_callback is not None:
+            asyncio.run(self.update_media_info())
+
+    def _playback_info_changed_handler(
+        self,
+        _sender,
+        _result,
+    ) -> None:
+        """Playback info changed handler"""
         self._logger.info("Media properties changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
@@ -86,7 +96,10 @@ class Media(Base):
         self.current_session = self.sessions.get_current_session()
         if self.current_session:
             self.current_session.add_media_properties_changed(
-                self._media_properties_changed_handler
+                self._properties_changed_handler
+            )
+            self.current_session.add_playback_info_changed(
+                self._playback_info_changed_handler
             )
             media_info = MediaInfo()
             if info := self.current_session.get_playback_info():
