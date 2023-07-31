@@ -34,20 +34,20 @@ class Media(Base):
     def _current_session_changed_handler(
         self,
         _sender,
-        result,
+        _result,
     ) -> None:
         """Session changed handler"""
-        self._logger.info("Session changed: %s", result)
+        self._logger.info("Session changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
 
     def _media_properties_changed_handler(
         self,
         _sender,
-        result,
+        _result,
     ) -> None:
         """Media properties changed handler"""
-        self._logger.info("Media properties changed: %s", result)
+        self._logger.info("Media properties changed")
         if self._changed_callback is not None:
             asyncio.run(self.update_media_info())
 
