@@ -37,3 +37,4 @@ class Media(BaseModel):
     title: Optional[str] = None
     track_number: Optional[int] = None
     type: Optional[str] = None
+    updated_at: Optional[float] = None

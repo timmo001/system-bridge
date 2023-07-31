@@ -65,6 +65,9 @@
     },
     "type": {
       "type": "string"
+    },
+    "updated_at": {
+      "type": "number"
     }
   },
   "type": "object"

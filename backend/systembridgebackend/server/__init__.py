@@ -112,6 +112,10 @@ class Server(Base):
                     self.update_frequent_data(),
                     name="Update frequent data",
                 ),
+                api_app.loop.create_task(
+                    self.update_events_data(),
+                    name="Update events data",
+                ),
             ]
         )
         if not self.no_gui:
@@ -224,6 +228,12 @@ class Server(Base):
         self._logger.info("Schedule next update in 2 minutes")
         await asyncio.sleep(120)
         await self.update_data()
+
+    async def update_events_data(self) -> None:
+        """Update events data"""
+        self._logger.info("Update events data")
+        self._data.request_update_events_data()
+        asyncio.get_running_loop().run_forever()
 
     async def update_frequent_data(self) -> None:
         """Update frequent data"""

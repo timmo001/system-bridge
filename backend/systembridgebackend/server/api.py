@@ -270,7 +270,7 @@ async def send_media_control(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid seek value",
             )
-        await control_seek(data.value)
+        await control_seek(int(data.value))
     elif data.action == MediaAction.rewind:
         await control_rewind()
     elif data.action == MediaAction.fastforward:
@@ -281,14 +281,14 @@ async def send_media_control(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid shuffle value",
             )
-        await control_shuffle(data.value)
+        await control_shuffle(bool(data.value))
     elif data.action == MediaAction.repeat:
         if data.value is None:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 detail="Invalid repeat value",
             )
-        await control_repeat(data.value)
+        await control_repeat(int(data.value))
     elif data.action == MediaAction.mute:
         await control_mute()
     elif data.action == MediaAction.volumedown:
