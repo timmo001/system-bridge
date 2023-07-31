@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import platform
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from typing import Optional
 
 from systembridgeshared.base import Base
