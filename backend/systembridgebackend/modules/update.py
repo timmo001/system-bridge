@@ -37,7 +37,6 @@ class Update(Base):
             {"name": "cpu", "cls": CPUUpdate(self._database)},
             {"name": "display", "cls": DisplayUpdate(self._database)},
             {"name": "gpu", "cls": GPUUpdate(self._database)},
-            {"name": "media", "cls": MediaUpdate(self._database)},
             {"name": "memory", "cls": MemoryUpdate(self._database)},
             {"name": "network", "cls": NetworkUpdate(self._database)},
         ]
@@ -78,3 +77,21 @@ class Update(Base):
         await asyncio.gather(*tasks)
 
         self._logger.info("Finished updating frequent data")
+
+        await self.update_media_data(updated_callback)
+
+    async def update_media_data(
+        self,
+        updated_callback: Callable[[str], Awaitable[None]],
+    ) -> None:
+        """Update Media Data"""
+        self._logger.info("Update media data")
+
+        media_update = MediaUpdate(
+            self._database,
+            lambda: asyncio.ensure_future(self.update_media_data(updated_callback)),
+        )
+        await media_update.update_all_data()
+        await updated_callback("media")
+
+        self._logger.info("Finished updating media data")

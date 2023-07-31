@@ -1,5 +1,7 @@
 """System Bridge: Update Media"""
 import asyncio
+from collections.abc import Awaitable, Callable
+from typing import Optional
 
 from systembridgeshared.database import Database
 from systembridgeshared.models.database_data import Media as DatabaseModel
@@ -14,10 +16,11 @@ class MediaUpdate(ModuleUpdateBase):
     def __init__(
         self,
         database: Database,
+        changed_callback: Optional[Callable] = None,
     ) -> None:
         """Initialize"""
         super().__init__(database)
-        self._media = Media()
+        self._media = Media(changed_callback)
 
     async def update_media_info(self) -> None:
         """Update media info"""

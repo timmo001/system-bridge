@@ -1,7 +1,9 @@
 """System Bridge: Media"""
 from __future__ import annotations
 
+import asyncio
 import platform
+from collections.abc import Awaitable, Callable
 from typing import Optional
 
 from systembridgeshared.base import Base
@@ -11,9 +13,28 @@ from systembridgeshared.models.media import Media as MediaInfo
 class Media(Base):
     """Media"""
 
-    async def get_media_info(
+    def __init__(
         self,
-    ) -> Optional[MediaInfo]:
+        changed_callback: Optional[Callable] = None,
+    ) -> None:
+        """Initialize"""
+        super().__init__()
+        self._changed_callback = changed_callback
+
+    def _changed_handler(
+        self,
+        _sender,
+        args,
+    ) -> None:
+        """Changed handler"""
+        self._logger.debug("Media changed: %s", args)
+        if self._changed_callback is not None:
+            asyncio.create_task(
+                self._changed_callback(),
+                name="Media Changed",
+            )
+
+    async def get_media_info(self) -> Optional[MediaInfo]:
         """Get media info from the current session."""
         if platform.system() != "Windows":
             return None
@@ -23,7 +44,10 @@ class Media(Base):
         sessions = (
             await wmc.GlobalSystemMediaTransportControlsSessionManager.request_async()
         )
+
+        sessions.add_current_session_changed(self._changed_handler)
         if current_session := sessions.get_current_session():
+            current_session.add_media_properties_changed(self._changed_handler)
             media_info = MediaInfo()
             if info := current_session.get_playback_info():
                 media_info.status = info.playback_status.name
