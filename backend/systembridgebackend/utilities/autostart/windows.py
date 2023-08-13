@@ -21,7 +21,7 @@ def autostart_windows_disable():
         )
         if key is None:
             return
-        DeleteValue(key, "systembridgebackend")
+        DeleteValue(key, "systembridge")
         CloseKey(key)
     except OSError:
         pass
@@ -50,7 +50,7 @@ def autostart_windows_enable():
     )
     SetValueEx(
         key,
-        "systembridgebackend",
+        "systembridge",
         0,
         REG_SZ,
         f'"{os.path.join(os.path.dirname(sys.executable), "pythonw.exe")}" -m systembridgebackend --silent'
