@@ -7,5 +7,5 @@ Provides systembridgegui version information.
 
 from incremental import Version
 
-__version__ = Version("systembridgegui", 3, 8, 2)
+__version__ = Version("systembridgegui", 3, 8, 3, dev=0)
 __all__ = ["__version__"]
