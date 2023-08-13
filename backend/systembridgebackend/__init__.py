@@ -6,7 +6,7 @@ import os
 import sys
 
 from systembridgeshared.base import Base
-from systembridgeshared.const import SETTING_AUTOSTART
+from systembridgeshared.const import SECRET_API_KEY, SETTING_AUTOSTART
 from systembridgeshared.database import Database
 from systembridgeshared.settings import Settings
 
@@ -36,7 +36,10 @@ class Application(Base):
 
         self._logger.info("System Bridge %s: Startup", System().version())
 
-        self._logger.info("Your api-key is: %s", settings.get("api-key"))
+        self._logger.info(
+            "Your api-key is: %s",
+            str(settings.get_secret(SECRET_API_KEY)),
+        )
 
         if not cli:
             autostart = settings.get(SETTING_AUTOSTART)
