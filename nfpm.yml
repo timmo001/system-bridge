@@ -14,6 +14,8 @@ license: "MIT"
 contents:
   - src: ./dist/systembridge
     dst: /usr/local/share/systembridge
+  - src: ./resources/system-bridge.png
+    dst: /usr/local/share/systembridge/system-bridge.png
   - src: ./scripts/systembridge.desktop
     dst: /usr/share/applications/systembridge.desktop
   - src: /usr/local/share/systembridge/systembridge
