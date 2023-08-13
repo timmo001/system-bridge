@@ -36,6 +36,8 @@ class Application(Base):
 
         self._logger.info("System Bridge %s: Startup", System().version())
 
+        self._logger.info("Your api-key is: %s", settings.get("api-key"))
+
         if not cli:
             autostart = settings.get(SETTING_AUTOSTART)
             self._logger.info("Autostart enabled: %s", autostart)
