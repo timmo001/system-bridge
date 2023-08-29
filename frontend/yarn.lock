@@ -332,15 +332,6 @@
     react-is "^18.2.0"
     react-transition-group "^4.4.5"
 
-"@mui/private-theming@^5.14.6":
-  version "5.14.6"
-  resolved "https://registry.yarnpkg.com/@mui/private-theming/-/private-theming-5.14.6.tgz#bd80c91bea94b6e54a74764f8d3fb0d4ec418acb"
-  integrity sha512-3VBLFGizBXfofyk33bwRg6t9L648aKnLmOKPfY1wFuiXq3AEYwobK65iDci/tHKxm/VKbZ6A7PFjLejvB3EvRQ==
-  dependencies:
-    "@babel/runtime" "^7.22.10"
-    "@mui/utils" "^5.14.6"
-    prop-types "^15.8.1"
-
 "@mui/private-theming@^5.14.7":
   version "5.14.7"
   resolved "https://registry.yarnpkg.com/@mui/private-theming/-/private-theming-5.14.7.tgz#c9fec31e59bf66b12959e724b0e8ec3bb4a3d923"
@@ -360,16 +351,16 @@
     csstype "^3.1.2"
     prop-types "^15.8.1"
 
-"@mui/styles@5.14.6":
-  version "5.14.6"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.14.6.tgz#57e005b02defdabffd900566b1f13665f37d4fdf"
-  integrity sha512-zobdWsC3S8vw6nyD30aaIduC1VwiBu2EKwIuKUc9MH3EmL6QhB5WuV4gZFtFPfBIGRGOjKKOKnnKgjmeQktPbQ==
+"@mui/styles@5.14.7":
+  version "5.14.7"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.14.7.tgz#e704f465b39e6dbfcd30090b191cf8140f7a9e42"
+  integrity sha512-5qA81gIRBUd3ur2FtGO10UmArpqaGWL+eUGFVSf68SjhahhHr86/JgqsXqUPyW/LPnyW92SZxhQ6El6Co8i7AQ==
   dependencies:
     "@babel/runtime" "^7.22.10"
     "@emotion/hash" "^0.9.1"
-    "@mui/private-theming" "^5.14.6"
+    "@mui/private-theming" "^5.14.7"
     "@mui/types" "^7.2.4"
-    "@mui/utils" "^5.14.6"
+    "@mui/utils" "^5.14.7"
     clsx "^2.0.0"
     csstype "^3.1.2"
     hoist-non-react-statics "^3.3.2"
