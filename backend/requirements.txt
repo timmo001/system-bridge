@@ -4,7 +4,7 @@ aiohttp==3.8.5
 fastapi==0.103.1
 incremental==22.10.0
 keyboard==0.13.5
-mutagen==1.46.0
+mutagen==1.47.0
 plyer==2.1.0
 psutil==5.9.5
 pyinstaller==5.13.2
