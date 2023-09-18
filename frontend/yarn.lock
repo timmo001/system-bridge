@@ -300,19 +300,6 @@
   resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.8.0.tgz#4210deb771ee3912964f14a15ddfb5ff877e70b9"
   integrity sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==
 
-"@mui/base@5.0.0-beta.15":
-  version "5.0.0-beta.15"
-  resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-beta.15.tgz#76bebd377cc3b7fdc80924759a4100e5319ed0f9"
-  integrity sha512-Xtom3YSdi0iwYPtyVRFUEGoRwi6IHWixPwifDKaK+4PkEPtUWMU5YOIJfTsmC59ri+dFvA3oBNSiTPUGGrklZw==
-  dependencies:
-    "@babel/runtime" "^7.22.15"
-    "@floating-ui/react-dom" "^2.0.2"
-    "@mui/types" "^7.2.4"
-    "@mui/utils" "^5.14.9"
-    "@popperjs/core" "^2.11.8"
-    clsx "^2.0.0"
-    prop-types "^15.8.1"
-
 "@mui/base@5.0.0-beta.16":
   version "5.0.0-beta.16"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-beta.16.tgz#5869b8cc83ea5da0083bb11790bda007c2384564"
@@ -326,10 +313,10 @@
     clsx "^2.0.0"
     prop-types "^15.8.1"
 
-"@mui/core-downloads-tracker@^5.14.9":
-  version "5.14.9"
-  resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.14.9.tgz#97a4e2decce1583983b4a0cded8bcb2be1b1cb31"
-  integrity sha512-JAU/R5hM3l2zP1Q4KnioDRhq5V3vZ4mmjEZ+TwARDb2xFhg3p59McacQuzkSu0sUHJnH9aJos36+hU5sPQBcFQ==
+"@mui/core-downloads-tracker@^5.14.10":
+  version "5.14.10"
+  resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.14.10.tgz#32a8581be98344bbda5ed31fc7b41788bd2e3bc5"
+  integrity sha512-kPHu/NhZq1k+vSZR5wq3AyUfD4bnfWAeuKpps0+8PS7ZHQ2Lyv1cXJh+PlFdCIOa0PK98rk3JPwMzS8BMhdHwQ==
 
 "@mui/lab@5.0.0-alpha.145":
   version "5.0.0-alpha.145"
@@ -345,17 +332,17 @@
     clsx "^2.0.0"
     prop-types "^15.8.1"
 
-"@mui/material@5.14.9":
-  version "5.14.9"
-  resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.14.9.tgz#d536505a3728441cfe8003443f143ae87457767b"
-  integrity sha512-pbBy5kc5iUGXPxgbb+t+yEPvLK5nE3bPUb8WbAafJ8iZ40ZGui0xC4xiiIyzbVexzsLmyN7MaSo4LkxLmPKqUQ==
+"@mui/material@5.14.10":
+  version "5.14.10"
+  resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.14.10.tgz#b8c6ba17c25c0df54053cb0f1bb35083bc91dace"
+  integrity sha512-ejFMppnO+lzBXpzju+N4SSz0Mhmi5sihXUGcr5FxpgB6bfUP0Lpe32O0Sw/3s8xlmLEvG1fqVT0rRyAVMlCA+A==
   dependencies:
     "@babel/runtime" "^7.22.15"
-    "@mui/base" "5.0.0-beta.15"
-    "@mui/core-downloads-tracker" "^5.14.9"
-    "@mui/system" "^5.14.9"
+    "@mui/base" "5.0.0-beta.16"
+    "@mui/core-downloads-tracker" "^5.14.10"
+    "@mui/system" "^5.14.10"
     "@mui/types" "^7.2.4"
-    "@mui/utils" "^5.14.9"
+    "@mui/utils" "^5.14.10"
     "@types/react-transition-group" "^4.4.6"
     clsx "^2.0.0"
     csstype "^3.1.2"
@@ -414,7 +401,7 @@
     jss-plugin-vendor-prefixer "^10.10.0"
     prop-types "^15.8.1"
 
-"@mui/system@^5.14.10", "@mui/system@^5.14.9":
+"@mui/system@^5.14.10":
   version "5.14.10"
   resolved "https://registry.yarnpkg.com/@mui/system/-/system-5.14.10.tgz#b125f8370c1c92af04f1839c40e034d4edc4ad29"
   integrity sha512-QQmtTG/R4gjmLiL5ECQ7kRxLKDm8aKKD7seGZfbINtRVJDyFhKChA1a+K2bfqIAaBo1EMDv+6FWNT1Q5cRKjFA==
