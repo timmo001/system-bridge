@@ -1,7 +1,7 @@
 aiohttp==3.8.5
 appdirs==1.4.4
 colorlog==6.7.0
-cryptography==41.0.3
+cryptography==41.0.4
 incremental==22.10.0
 pandas==2.1.0
 pydantic==1.10.9
