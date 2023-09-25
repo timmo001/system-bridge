@@ -2616,10 +2616,10 @@ peerjs-js-binarypack@^2.0.0:
   resolved "https://registry.yarnpkg.com/peerjs-js-binarypack/-/peerjs-js-binarypack-2.0.0.tgz#3645edce4575c806c9cabbf3a3cfe8a7a9937db6"
   integrity sha512-wu+L0Qeg4IH2DXm3B6xKP5ODeCIovwEEO/Fu3MVqApPQeVLzSdZpFzQzPobh+sdhUWMQGEO7YxHeiwpPngLjqQ==
 
-peerjs@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/peerjs/-/peerjs-1.5.0.tgz#176649d4ee8871007beb041bf98d7aa1b999368e"
-  integrity sha512-NLZ73jRNE4aLq2pmVTiSkWmwf6cvt9cH72qJHnzaLH+I2CtoWVvY42U9/O0/tYE6UYwRYJ1ktKRs2DdZ1Jrgcg==
+peerjs@1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/peerjs/-/peerjs-1.5.1.tgz#e1e217e8cfcd758cbaef018d19c76e677776b5c3"
+  integrity sha512-jpE2jPZ99vuSVHBAhn7bVCPKlwsPgcAqgcDKEZR4L7SaMaEL6wqD/G6VI0+awmhuEFcUN2ttusly+sKQGD64hQ==
   dependencies:
     "@msgpack/msgpack" "^2.8.0"
     cbor-x "^1.5.3"
