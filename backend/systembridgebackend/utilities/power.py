@@ -33,7 +33,7 @@ def hibernate() -> None:
 def restart() -> None:
     """Restart the system."""
     if sys.platform == "linux":
-        os.system("systemctl restart")
+        os.system("systemctl reboot")
     elif sys.platform == "win32":
         os.system("shutdown /r /t 0")
 
