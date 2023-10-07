@@ -22,7 +22,7 @@ class Gpu(BaseModel):
     """
 
     class Config:
-        extra = Extra.allow
+        extra = "allow"
 
     id: Optional[str] = Field(None, description="Event ID")
     gpus: Optional[list] = None

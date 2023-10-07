@@ -29,7 +29,7 @@ class Disk(BaseModel):
     """
 
     class Config:
-        extra = Extra.allow
+        extra = "allow"
 
     id: Optional[str] = Field(None, description="Event ID")
     devices: list
