@@ -14,7 +14,7 @@ class Media(BaseModel):
     """
 
     class Config:
-        extra = Extra.allow
+        extra = "allow"
 
     album_artist: Optional[str] = None
     album_title: Optional[str] = None

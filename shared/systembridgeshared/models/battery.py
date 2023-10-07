@@ -23,7 +23,7 @@ class Battery(BaseModel):
     """
 
     class Config:
-        extra = Extra.allow
+        extra = "allow"
 
     id: Optional[str] = Field(None, description="Event ID")
     is_charging: Optional[bool] = None
