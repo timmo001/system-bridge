@@ -46,7 +46,6 @@ class Cpu(BaseModel):
     class Config:
         extra = "allow"
 
-
     id: Optional[str] = Field(None, description="Event ID")
     count: Optional[int] = None
     frequency_current: Optional[float] = None
