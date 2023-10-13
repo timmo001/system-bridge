@@ -512,23 +512,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/private-theming@npm:^5.14.12":
-  version: 5.14.12
-  resolution: "@mui/private-theming@npm:5.14.12"
-  dependencies:
-    "@babel/runtime": ^7.23.1
-    "@mui/utils": ^5.14.12
-    prop-types: ^15.8.1
-  peerDependencies:
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: f8127347dc29126fece3b530cb156f6ababf747b64bb1c712874375e6efae6c738c014304d9553001d67a59b24ca6a665f2d03bb5ae137f03bdba90815f0ecc1
-  languageName: node
-  linkType: hard
-
 "@mui/private-theming@npm:^5.14.13":
   version: 5.14.13
   resolution: "@mui/private-theming@npm:5.14.13"
@@ -626,18 +609,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/types@npm:^7.2.5":
-  version: 7.2.5
-  resolution: "@mui/types@npm:7.2.5"
-  peerDependencies:
-    "@types/react": ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 2807e9a8eb251294eee6384a4d68b2159f7660466625f1781e9efea282aa7c6ff35b42bc7039c2d43e7a5ac80291dcb85c4110022b0b6de4e12b6406b62f3dc1
-  languageName: node
-  linkType: hard
-
 "@mui/types@npm:^7.2.6":
   version: 7.2.6
   resolution: "@mui/types@npm:7.2.6"
@@ -647,24 +618,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: eb92f9c2fa5df048bcf182a611131bee2799ce1de64acfca12855f349d0b69f5f92c953b7e6c4e341e1df48f0e86f1329ed0251be4835ed194f53342827bd576
-  languageName: node
-  linkType: hard
-
-"@mui/utils@npm:^5.14.12":
-  version: 5.14.12
-  resolution: "@mui/utils@npm:5.14.12"
-  dependencies:
-    "@babel/runtime": ^7.23.1
-    "@types/prop-types": ^15.7.7
-    prop-types: ^15.8.1
-    react-is: ^18.2.0
-  peerDependencies:
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 41470b6292b7a46c71fb0a0acc6a5f05a5e080648106b8805555de920e8f748669c7e8d39cbbcf0f52be9053927bb8439a748e24bd02bc1a220c9bded4435f42
   languageName: node
   linkType: hard
 
@@ -906,12 +859,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.8.4":
-  version: 20.8.4
-  resolution: "@types/node@npm:20.8.4"
+"@types/node@npm:20.8.5":
+  version: 20.8.5
+  resolution: "@types/node@npm:20.8.5"
   dependencies:
     undici-types: ~5.25.1
-  checksum: 2106b9ef9750297cac68249428d7067c4d22c26908854165b70a164e34e900f4c34bb9bf3887c9391206b500d3e87171d03b1846e25788925236a0354390d278
+  checksum: 4bca4e4f6307a6f5dc78812015eca9c5a998b35fcf3ba4058c9851d3dde2b22c914fa25a85b804eab5af2ab95375d15943dce8e9ba5e01d15f4bf516ca0d2816
   languageName: node
   linkType: hard
 
@@ -5032,7 +4985,7 @@ __metadata:
     "@mui/material": 5.14.13
     "@mui/styles": 5.14.13
     "@types/lodash": 4.14.199
-    "@types/node": 20.8.4
+    "@types/node": 20.8.5
     "@types/react": 18.2.28
     "@types/react-dom": 18.2.13
     "@types/uuid": 9.0.5
