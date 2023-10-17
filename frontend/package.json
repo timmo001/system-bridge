@@ -33,7 +33,7 @@
     "@mdi/react": "1.6.1",
     "@mui/lab": "5.0.0-alpha.148",
     "@mui/material": "5.14.14",
-    "@mui/styles": "5.14.13",
+    "@mui/styles": "5.14.14",
     "axios": "1.5.1",
     "clsx": "2.0.0",
     "lodash": "4.17.21",

@@ -589,13 +589,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/styles@npm:5.14.13":
-  version: 5.14.13
-  resolution: "@mui/styles@npm:5.14.13"
+"@mui/styles@npm:5.14.14":
+  version: 5.14.14
+  resolution: "@mui/styles@npm:5.14.14"
   dependencies:
     "@babel/runtime": ^7.23.1
     "@emotion/hash": ^0.9.1
-    "@mui/private-theming": ^5.14.13
+    "@mui/private-theming": ^5.14.14
     "@mui/types": ^7.2.6
     "@mui/utils": ^5.14.13
     clsx: ^2.0.0
@@ -616,7 +616,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 1059c2791381d45294c6d39f9ae3e07010ec3b39684b677a202d200e4a3aba2b8c053cd05b50b0b62e861901ab80205334ef9e008f3477a93129788fdd8cfe5c
+  checksum: 354bdc6335675035bd98095269d14b2bb2d7e51014818052fae50866c836c655bddff4887f9096bd4c6c41f4f76ff4c4747cf0d6de1bc103c46d24659d73233d
   languageName: node
   linkType: hard
 
@@ -5050,7 +5050,7 @@ __metadata:
     "@mdi/react": 1.6.1
     "@mui/lab": 5.0.0-alpha.148
     "@mui/material": 5.14.14
-    "@mui/styles": 5.14.13
+    "@mui/styles": 5.14.14
     "@types/lodash": 4.14.199
     "@types/node": 20.8.6
     "@types/react": 18.2.28
