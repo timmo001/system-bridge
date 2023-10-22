@@ -5,7 +5,6 @@ import sys
 from threading import Event, Thread
 from typing import Callable, Optional
 
-import async_timeout
 from systembridgeshared.base import Base
 from systembridgeshared.exceptions import ConnectionErrorException
 from systembridgeshared.settings import Settings
@@ -69,7 +68,7 @@ class GUI(Base):
             )
             websocket_client = WebSocketClient(self._settings)
             try:
-                async with async_timeout.timeout(20):
+                async with asyncio.timeout(20):
                     await websocket_client.connect()
                     await websocket_client.close()
             except ConnectionErrorException:
