@@ -24,14 +24,7 @@ jobs:
       create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
-        pip install \
-          --upgrade \
-          --pre \
-          systembridgeshared \
-          systembridgebackend \
-          systembridgecli \
-          systembridgefrontend \
-          systembridgegui
+        pip install -r requirements_linux.txt
   package-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
@@ -52,14 +45,4 @@ jobs:
       create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
-        pip install `
-          --upgrade `
-          --pre `
-          pywin32 `
-          winsdk `
-          systembridgeshared `
-          systembridgebackend `
-          systembridgecli `
-          systembridgefrontend `
-          systembridgegui `
-          systembridgewindowssensors
+        pip install -r requirements_windows.txt
