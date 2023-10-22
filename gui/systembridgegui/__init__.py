@@ -6,7 +6,6 @@ import os
 import sys
 from typing import Optional
 
-import async_timeout
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
@@ -219,7 +218,7 @@ class Application(Base):
     async def _setup_websocket(self) -> None:
         """Setup the WebSocket client"""
         try:
-            async with async_timeout.timeout(20):
+            async with asyncio.timeout(20):
                 await self._websocket_client.connect()
         except ConnectionErrorException as exception:
             self._logger.error("Could not connect to WebSocket: %s", exception)

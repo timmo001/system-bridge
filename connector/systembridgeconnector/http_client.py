@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Optional
 
-import async_timeout
 from aiohttp import ClientResponse, ClientSession
 from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
 
@@ -108,7 +107,7 @@ class HTTPClient(Base):
     ) -> ClientResponse:
         """Make a request."""
         try:
-            async with async_timeout.timeout(20):
+            async with asyncio.timeout(20):
                 response: ClientResponse = await self._session.request(
                     method,
                     url,
