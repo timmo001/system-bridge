@@ -11,65 +11,6 @@
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
       "args": []
-    },
-    {
-      "name": "Backend",
-      "type": "python",
-      "request": "launch",
-      "module": "systembridgebackend",
-      "preLaunchTask": "Backend: pip install",
-      "cwd": "${workspaceFolder}/backend",
-      "justMyCode": false,
-      "args": []
-    },
-    {
-      "name": "Backend (No GUI)",
-      "type": "python",
-      "request": "launch",
-      "module": "systembridgebackend",
-      "preLaunchTask": "Backend: pip install",
-      "cwd": "${workspaceFolder}/backend",
-      "justMyCode": false,
-      "args": ["--no-gui"]
-    },
-    {
-      "name": "CLI",
-      "type": "python",
-      "request": "launch",
-      "module": "systembridgecli",
-      "preLaunchTask": "CLI: pip install",
-      "cwd": "${workspaceFolder}/cli",
-      "justMyCode": false,
-      "args": ["--help"]
-    },
-    {
-      "name": "GUI",
-      "type": "python",
-      "request": "launch",
-      "module": "systembridgegui",
-      "preLaunchTask": "GUI: pip install",
-      "cwd": "${workspaceFolder}/gui",
-      "justMyCode": false,
-      "args": ["main"]
-    },
-    {
-      "name": "Frontend",
-      "type": "python",
-      "request": "launch",
-      "module": "systembridgefrontend",
-      "preLaunchTask": "Frontend: pip install",
-      "cwd": "${workspaceFolder}/frontend",
-      "justMyCode": false,
-      "args": []
-    },
-    {
-      "name": "Frontend (Dev)",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "yarn",
-      "preLaunchTask": "Frontend: install",
-      "cwd": "${workspaceFolder}/frontend",
-      "runtimeArgs": ["start:dev"]
     }
   ]
 }

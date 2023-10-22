@@ -1,4 +1,0 @@
-{
-  "python.formatting.provider": "black",
-  "dotnet.defaultSolution": "windowssensors\\WindowsSensors\\SystemBridgeWindowsSensors.sln"
-}
