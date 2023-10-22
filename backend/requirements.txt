@@ -1,6 +1,7 @@
 aiofiles==23.2.1
 aiogithubapi==23.2.1
-aiohttp==3.8.6
+aiohttp==3.9.0b0;python_version>='3.12'
+aiohttp==3.8.6;python_version<'3.12'
 fastapi==0.104.0
 incremental==22.10.0
 keyboard==0.13.5

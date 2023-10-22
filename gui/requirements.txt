@@ -1,4 +1,5 @@
-aiohttp==3.8.6
+aiohttp==3.9.0b0;python_version>='3.12'
+aiohttp==3.8.6;python_version<'3.12'
 incremental==22.10.0
 pyperclip==1.8.2
 PySide6==6.6.0
