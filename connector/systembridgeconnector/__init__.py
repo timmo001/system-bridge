@@ -1,1 +1,0 @@
-"""System Bridge Connector"""
