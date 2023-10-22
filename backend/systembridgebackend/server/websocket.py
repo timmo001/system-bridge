@@ -289,7 +289,6 @@ class WebSocketHandler(Base):
                         EVENT_ID: request.id,
                         EVENT_TYPE: TYPE_KEYBOARD_KEY_PRESSED,
                         EVENT_MESSAGE: "Key pressed",
-                        EVENT_ID: listener_id,
                         "key": model.key,
                     }
                 )
@@ -333,7 +332,6 @@ class WebSocketHandler(Base):
                         EVENT_ID: request.id,
                         EVENT_TYPE: TYPE_KEYBOARD_TEXT_SENT,
                         EVENT_MESSAGE: "Key pressed",
-                        EVENT_ID: listener_id,
                         "text": model.text,
                     }
                 )
