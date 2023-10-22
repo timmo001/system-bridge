@@ -1,5 +1,5 @@
 {
   "build_from": {
-    "amd64": "python:3.11-bookworm"
+    "amd64": "python:3.12-bookworm"
   }
 }
