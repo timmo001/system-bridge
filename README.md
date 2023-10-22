@@ -46,30 +46,30 @@ You can find documentation for the WebSocket [here](https://system-bridge.timmo.
 
 ### Packages
 
-### `systembridgebackend`
+### [systembridgebackend](https://github.com/timmo001/system-bridge-backend)
 
 The main application which contains the API/WebSocket and data modules. This package requires the `systembridgeshared` package.
 
-### `systembridgecli`
+### [systembridgecli](https://github.com/timmo001/system-bridge-cli)
 
 The command line interface for the application. Here you can get the `api-key` and update settings and get data.
 
-### `systembridgeconnector`
+### [systembridgeconnector](https://github.com/timmo001/system-bridge-connector)
 
 Allows other applications to connect to the backend. For example, in the [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) integration.
 
-### `systembridgefrontend`
+### [systembridgefrontend](https://github.com/timmo001/system-bridge-frontend)
 
 The frontend for the application. This is used by the `systembridgegui` module to show settings etc.
 
-### `systembridgegui`
+### [systembridgegui](https://github.com/timmo001/system-bridge-gui)
 
 The GUI for the application. This shows a system tray icon and allows you to interact with the application.
 
-### `systembridgeshared`
+### [systembridgeshared](https://github.com/timmo001/system-bridge-shared)
 
 Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
 
-### `systembridgewindowssensors`
+### [systembridgewindowssensors](https://github.com/timmo001/system-bridge-windows-sensors)
 
 Specifically for windows, adds sensors to get windows system information.
