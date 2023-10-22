@@ -1,5 +1,5 @@
 ---
-name: Sync labels
+name: "Sync labels"
 
 # yamllint disable-line rule:truthy
 on:

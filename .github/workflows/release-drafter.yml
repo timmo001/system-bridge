@@ -1,5 +1,5 @@
 ---
-name: Release Drafter
+name: "Release Drafter"
 
 # yamllint disable-line rule:truthy
 on:
@@ -10,6 +10,6 @@ on:
 
 jobs:
   release-drafter:
-    uses: timmo001/workflows/.github/workflows/release-drafter-python-monorepo.yml@master
+    uses: timmo001/workflows/.github/workflows/release-drafter-python-package.yml@master
     secrets:
       PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}

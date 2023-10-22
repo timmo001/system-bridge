@@ -18,53 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-backend:
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    with:
-      code-path: backend
-  build-cli:
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    with:
-      code-path: cli
-  build-connector:
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    with:
-      code-path: connector
-  build-gui:
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    with:
-      code-path: gui
-  build-frontend-node:
-    uses: timmo001/workflows/.github/workflows/build-node-linux.yml@master
-    with:
-      additional-build-commands: |
-        yarn export
-      artifact-name: frontend-out
-      artifact-path: frontend/out
-      code-path: frontend
-  build-frontend-package:
-    needs:
-      - build-frontend-node
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@master
-    with:
-      additional-artifacts-name: frontend-out
-      additional-artifacts-path: frontend/out
-      code-path: frontend
-  build-windowssensors-dotnet:
-    uses: timmo001/workflows/.github/workflows/build-msbuild-windows.yml@master
-    with:
-      code-path: windowssensors/WindowsSensors
-      output-name: windowssensors-build
-      output-path: windowssensors/WindowsSensors/bin
-      package: SystemBridgeWindowsSensors.sln
-  build-windowssensors-package:
-    needs:
-      - build-windowssensors-dotnet
-    uses: timmo001/workflows/.github/workflows/build-python-windows.yml@master
-    with:
-      additional-artifacts-name: windowssensors-build
-      additional-artifacts-path: windowssensors/WindowsSensors/bin
-      code-path: windowssensors
   build-container-amd64:
     uses: timmo001/workflows/.github/workflows/build-container-linux.yml@master
     with:
