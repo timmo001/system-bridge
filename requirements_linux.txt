@@ -1,4 +1,3 @@
-pyinstaller==6.1.0
 systembridgebackend==3.8.4
 systembridgecli==3.9.5
 systembridgefrontend==3.9.0
