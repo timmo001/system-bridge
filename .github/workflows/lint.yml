@@ -1,5 +1,5 @@
 ---
-name: Lint
+name: "Lint"
 
 # yamllint disable-line rule:truthy
 on:

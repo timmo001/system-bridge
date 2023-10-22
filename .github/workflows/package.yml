@@ -1,5 +1,5 @@
 ---
-name: Package
+name: "Package"
 
 # yamllint disable-line rule:truthy
 on:
