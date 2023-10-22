@@ -4,5 +4,5 @@ systembridgecli==3.9.5
 systembridgefrontend==3.9.0
 systembridgegui==3.8.4
 systembridgeshared==3.9.0
-systembridgewindowssensors==3.8.4
+systembridgewindowssensors==3.9.0
 winsdk==1.0.0b10
