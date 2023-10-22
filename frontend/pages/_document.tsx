@@ -9,7 +9,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <meta name="author" content="Aidan Timson <contact@timmo.xyz>" />
+          <meta name="author" content="Aidan Timson <aidan@timmo.dev>" />
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         </Head>

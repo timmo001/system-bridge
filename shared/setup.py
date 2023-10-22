@@ -16,7 +16,7 @@ setup(
     description="System Bridge Shared",
     keywords="system bridge shared",
     author="Aidan Timson (Timmo)",
-    author_email="contact@timmo.xyz",
+    author_email="aidan@timmo.dev",
     license="MIT",
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),

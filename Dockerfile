@@ -93,11 +93,11 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    maintainer="Aidan Timson <contact@timmo.xyz>" \
+    maintainer="Aidan Timson <aidan@timmo.dev>" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
     org.opencontainers.image.vendor="Timmo" \
-    org.opencontainers.image.authors="Aidan Timson <contact@timmo.xyz>" \
+    org.opencontainers.image.authors="Aidan Timson <aidan@timmo.dev>" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.url="https://system-bridge.timmo.dev" \
     org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \

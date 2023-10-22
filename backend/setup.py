@@ -25,7 +25,7 @@ setup(
     description="System Bridge Backend",
     keywords="system bridge backend",
     author="Aidan Timson (Timmo)",
-    author_email="contact@timmo.xyz",
+    author_email="aidan@timmo.dev",
     license="MIT",
     url="https://github.com/timmo001/system-bridge",
     packages=find_packages(exclude=["tests", "generator"]),

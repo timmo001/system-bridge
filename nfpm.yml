@@ -5,7 +5,7 @@ version: "3.8.5"
 version_schema: semver
 section: "default"
 priority: "extra"
-maintainer: "Aidan Timson <contact@timmo.xyz>"
+maintainer: "Aidan Timson <aidan@timmo.dev>"
 description: |
   A bridge for your systems.
 vendor: "Timmo"
