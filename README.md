@@ -18,58 +18,56 @@ A bridge for your systems.
 - Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge).
 - Android Companion App - You can find the Android companion app on the [Play Store](https://play.google.com/store/apps/details?id=dev.timmo.systembridge). The source for this app can be found [here](https://github.com/timmo001/system-bridge-android-companion).
 
-## Documentation
-
-### Installation
+## Installation
 
 You can find installation instructions [here](https://system-bridge.timmo.dev/docs/install).
 
-### Running
+## Running
 
 You can find instructions to run the application [here](https://system-bridge.timmo.dev/docs/running).
 
-### Data Modules
+## Data Modules
 
 You can find documentation data modules that can be accessed via the API/WebSocket [here](https://system-bridge.timmo.dev/#modules).
 
-### CLI
+## CLI
 
 You can find documentation for the CLI [here](https://system-bridge.timmo.dev/docs/cli).
 
-### API
+## API
 
 You can find documentation for the API [here](https://system-bridge.timmo.dev/docs/api/data).
 
-### WebSocket
+## WebSocket
 
 You can find documentation for the WebSocket [here](https://system-bridge.timmo.dev/docs/websocket/data-get).
 
-### Packages
+## Packages
 
-### [systembridgebackend](https://github.com/timmo001/system-bridge-backend)
+### [Backend](https://github.com/timmo001/system-bridge-backend)
 
 The main application which contains the API/WebSocket and data modules. This package requires the `systembridgeshared` package.
 
-### [systembridgecli](https://github.com/timmo001/system-bridge-cli)
+### [CLI](https://github.com/timmo001/system-bridge-cli)
 
 The command line interface for the application. Here you can get the `api-key` and update settings and get data.
 
-### [systembridgeconnector](https://github.com/timmo001/system-bridge-connector)
+### [Connector](https://github.com/timmo001/system-bridge-connector)
 
 Allows other applications to connect to the backend. For example, in the [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) integration.
 
-### [systembridgefrontend](https://github.com/timmo001/system-bridge-frontend)
+### [Frontend](https://github.com/timmo001/system-bridge-frontend)
 
 The frontend for the application. This is used by the `systembridgegui` module to show settings etc.
 
-### [systembridgegui](https://github.com/timmo001/system-bridge-gui)
+### [GUI](https://github.com/timmo001/system-bridge-gui)
 
 The GUI for the application. This shows a system tray icon and allows you to interact with the application.
 
-### [systembridgeshared](https://github.com/timmo001/system-bridge-shared)
+### [Shared](https://github.com/timmo001/system-bridge-shared)
 
 Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
 
-### [systembridgewindowssensors](https://github.com/timmo001/system-bridge-windows-sensors)
+### [Windows Sensors](https://github.com/timmo001/system-bridge-windows-sensors)
 
 Specifically for windows, adds sensors to get windows system information.
