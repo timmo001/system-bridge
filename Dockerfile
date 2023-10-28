@@ -21,6 +21,9 @@ ENV \
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Copy requirements
+COPY requirements_docker.txt requirements_docker.txt /tmp/
+
 # Setup base
 ARG BUILD_ARCH=amd64
 ARG S6_OVERLAY_VERSION="3.1.5.0"
@@ -60,7 +63,7 @@ RUN \
     && mkdir -p /etc/fix-attrs.d \
     && mkdir -p /etc/services.d \
     \
-    && pip install -r requirements_docker.txt \
+    && pip install -r /tmp/requirements_docker.txt \
     \
     && apt-get purge -y --auto-remove \
         curl \
