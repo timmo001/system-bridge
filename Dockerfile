@@ -21,6 +21,9 @@ ENV \
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Copy requirements
+COPY requirements_docker.txt /tmp/requirements_docker.txt
+
 # Setup base
 ARG BUILD_ARCH=amd64
 ARG S6_OVERLAY_VERSION="3.1.5.0"
@@ -60,11 +63,7 @@ RUN \
     && mkdir -p /etc/fix-attrs.d \
     && mkdir -p /etc/services.d \
     \
-    && pip install --upgrade --pre \
-        systembridgeshared \
-        systembridgebackend \
-        systembridgecli \
-        systembridgefrontend \
+    && pip install -r /tmp/requirements_docker.txt \
     \
     && apt-get purge -y --auto-remove \
         curl \
@@ -74,7 +73,6 @@ RUN \
         /tmp/* \
         /var/{cache,log}/* \
         /var/lib/apt/lists/*
-
 
 # Copy root filesystem
 COPY rootfs /
