@@ -60,11 +60,7 @@ RUN \
     && mkdir -p /etc/fix-attrs.d \
     && mkdir -p /etc/services.d \
     \
-    && pip install --upgrade --pre \
-        systembridgeshared \
-        systembridgebackend \
-        systembridgecli \
-        systembridgefrontend \
+    && pip install -r requirements_docker.txt \
     \
     && apt-get purge -y --auto-remove \
         curl \
