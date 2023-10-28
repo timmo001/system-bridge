@@ -22,7 +22,7 @@ ENV \
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Copy requirements
-COPY requirements_docker.txt requirements_docker.txt /tmp/
+COPY requirements_docker.txt /tmp/requirements_docker.txt
 
 # Setup base
 ARG BUILD_ARCH=amd64
