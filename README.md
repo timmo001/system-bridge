@@ -68,6 +68,10 @@ The GUI for the application. This shows a system tray icon and allows you to int
 
 Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
 
+### [Models](https://github.com/timmo001/system-bridge-models)
+
+Shared package used by most of the other packages containing the models used by the application.
+
 ### [Windows Sensors](https://github.com/timmo001/system-bridge-windows-sensors)
 
 Specifically for windows, adds sensors to get windows system information.
