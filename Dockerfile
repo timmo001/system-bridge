@@ -74,7 +74,6 @@ RUN \
         /var/{cache,log}/* \
         /var/lib/apt/lists/*
 
-
 # Copy root filesystem
 COPY rootfs /
 
