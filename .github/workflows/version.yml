@@ -1,0 +1,55 @@
+---
+name: "Version"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-version:
+    name: ✏️ Update Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4.1.1
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.PUSH_TOKEN }}
+      - name: ↘️ Get version from systembridgebackend package
+        id: get-version
+        run: |
+          # Get version from systembridgebackend package using requirements_linux.txt
+          version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
+          echo "Version: $version"
+          echo "::set-output name=version::$version"
+      - name: ✏ Set Version File
+        run: |
+          echo "Version: ${{ steps.get-version.outputs.version }}"
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+          sudo add-apt-repository ppa:rmescandon/yq
+          sudo apt update
+          sudo apt install yq
+          yq eval '.version = "${{ steps.get-version.outputs.version }}"' nfpm.yml -i
+      - name: ⤵️ Pull latest changes from GitHub
+        run: |
+          git pull --ff
+      - name: 🖊 Commit
+        uses: stefanzweifel/git-auto-commit-action@v5.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        with:
+          commit_message: |
+            Update version to ${{ steps.get-version.outputs.version }}
+          push_options: "--force"
