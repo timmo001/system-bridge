@@ -21,6 +21,8 @@ jobs:
   update-version:
     name: ✏️ Update Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4.1.1
@@ -53,3 +55,10 @@ jobs:
           commit_message: |
             Update version to ${{ steps.get-version.outputs.version }}
           push_options: "--force"
+      - name: 🖊️ Create draft release for ${{ steps.get-version.outputs.version }}
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          draft: true
+          generateReleaseNotes: true
+          name: ${{ steps.get-version.outputs.version }}
+          tag: ${{ steps.get-version.outputs.version }}
