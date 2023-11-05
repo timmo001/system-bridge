@@ -22,7 +22,7 @@ ENV \
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Copy requirements
-COPY requirements_docker.txt /tmp/requirements_docker.txt
+COPY requirements_linux_headless.txt /tmp/requirements_linux_headless.txt
 
 # Setup base
 ARG BUILD_ARCH=amd64
@@ -63,7 +63,7 @@ RUN \
     && mkdir -p /etc/fix-attrs.d \
     && mkdir -p /etc/services.d \
     \
-    && pip install -r /tmp/requirements_docker.txt \
+    && pip install -r /tmp/requirements_linux_headless.txt \
     \
     && apt-get purge -y --auto-remove \
         curl \
