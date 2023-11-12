@@ -1,5 +1,5 @@
 pywin32==306
-systembridgebackend==3.10.2
+systembridgebackend==3.11.0
 systembridgecli==3.9.12
 systembridgefrontend==3.10.0
 systembridgegui==3.9.5
