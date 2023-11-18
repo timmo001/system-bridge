@@ -2,6 +2,6 @@ pywin32==306
 systembridgebackend==3.11.1
 systembridgecli==3.9.12
 systembridgefrontend==3.10.1
-systembridgegui==3.9.5
+systembridgegui==3.9.7
 systembridgewindowssensors==3.9.1
 winsdk==1.0.0b10
