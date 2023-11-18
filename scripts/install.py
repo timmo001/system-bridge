@@ -2,8 +2,8 @@
 import platform
 import subprocess
 import sys
-import typer
 
+import typer
 
 app = typer.Typer()
 

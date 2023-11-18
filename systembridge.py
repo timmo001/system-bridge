@@ -1,7 +1,6 @@
 """System Bridge"""
 import json
 import logging
-from typing import Optional
 
 import typer
 from systembridgeshared.const import SETTING_LOG_LEVEL
@@ -33,8 +32,8 @@ def application(
     try:
         if type == "gui":
             from systembridgegui import (
-                Application as GUIApplication,  # pylint: disable=import-outside-toplevel
-            )
+                Application as GUIApplication,
+            )  # pylint: disable=import-outside-toplevel
 
             setup_logger(LOG_LEVEL, "system-bridge-gui")
             GUIApplication(
@@ -45,8 +44,8 @@ def application(
             )
         else:
             from systembridgebackend import (
-                Application as BackendApplication,  # pylint: disable=import-outside-toplevel
-            )
+                Application as BackendApplication,
+            )  # pylint: disable=import-outside-toplevel
 
             BackendApplication(
                 database,
