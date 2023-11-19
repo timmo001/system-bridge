@@ -25,7 +25,7 @@ def application(
     command: str = typer.Argument("main", help="Command"),
     data: Optional[str] = typer.Argument(None, help="Data"),
     cli: bool = typer.Option(False, "--cli", help="CLI"),
-    init: bool = typer.Option(False, "--init", help="Initialize"),
+    init: bool = typer.Option(False, "--init", help="Initialise"),
     no_frontend: bool = typer.Option(False, "--no-frontend", help="No Frontend"),
     no_gui: bool = typer.Option(False, "--no-gui", help="No GUI"),
 ) -> None:
