@@ -4,9 +4,9 @@
 # ==============================================================================
 python3 -m systembridgebackend --cli --no-gui --init
 
-SB_API_KEY="$(python3 -m systembridgecli api-key)"
+SB_TOKEN="$(python3 -m systembridgecli api-key)"
 echo "--------------------------------------------------"
-echo "Your API key is: $SB_API_KEY"
+echo "Your token is: $SB_TOKEN"
 echo "--------------------------------------------------"
 
 # ==============================================================================
