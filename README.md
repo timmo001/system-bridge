@@ -50,7 +50,7 @@ The main application which contains the API/WebSocket and data modules. This pac
 
 ### [CLI](https://github.com/timmo001/system-bridge-cli)
 
-The command line interface for the application. Here you can get the `api-key` and update settings and get data.
+The command line interface for the application. Here you can get the `token` and update settings and get data.
 
 ### [Connector](https://github.com/timmo001/system-bridge-connector)
 
