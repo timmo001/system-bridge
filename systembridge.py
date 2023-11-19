@@ -4,17 +4,14 @@ import logging
 from typing import Optional
 
 import typer
-from systembridgeshared.const import SETTING_LOG_LEVEL
-from systembridgeshared.database import Database
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
 app = typer.Typer()
 
-database = Database()
-settings = Settings(database)
+settings = Settings()
 
-LOG_LEVEL = str(settings.get(SETTING_LOG_LEVEL))
+LOG_LEVEL = settings.data.log_level
 logger = setup_logger(LOG_LEVEL, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
@@ -38,7 +35,6 @@ def application(
 
             setup_logger(LOG_LEVEL, "system-bridge-gui")
             GUIApplication(
-                database,
                 settings,
                 command=command,
                 data=json.loads(data) if data else None,
@@ -49,7 +45,6 @@ def application(
             )
 
             BackendApplication(
-                database,
                 settings,
                 cli=cli,
                 init=init,
