@@ -1,4 +1,4 @@
-"""System Bridge: Version"""
+"""Version"""
 import os
 import subprocess
 import sys

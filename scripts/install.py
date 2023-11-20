@@ -1,4 +1,4 @@
-"""System Bridge: Install"""
+"""Install"""
 import platform
 import subprocess
 import sys
