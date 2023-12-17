@@ -5,7 +5,7 @@
       "name": "Application",
       "type": "python",
       "request": "launch",
-      "program": "systembridge.py",
+      "program": "application.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
