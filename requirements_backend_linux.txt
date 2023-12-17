@@ -1,2 +1,2 @@
-systembridgebackend==4.0.0.dev0
-systembridgefrontend==4.0.0.dev0
+systembridgebackend>=4.0.0.dev0
+systembridgefrontend>=4.0.0.dev0
