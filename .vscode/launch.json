@@ -7,7 +7,26 @@
       "request": "launch",
       "program": "systembridge.py",
       "console": "integratedTerminal",
-      "preLaunchTask": "Application: install",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "args": []
+    },
+    {
+      "name": "Application: Backend",
+      "type": "python",
+      "request": "launch",
+      "program": "application_backend.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "args": []
+    },
+    {
+      "name": "Application: GUI",
+      "type": "python",
+      "request": "launch",
+      "program": "application_gui.py",
+      "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
       "args": []

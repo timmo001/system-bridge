@@ -13,5 +13,5 @@ on:
 jobs:
   deploy-container:
     uses: ./.github/workflows/deploy-container.yml
-  package:
-    uses: ./.github/workflows/package.yml
+  package-application:
+    uses: ./.github/workflows/package-application.yml

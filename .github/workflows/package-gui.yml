@@ -1,5 +1,5 @@
 ---
-name: "Package"
+name: "Package GUI"
 
 # yamllint disable-line rule:truthy
 on:
@@ -26,17 +26,14 @@ jobs:
         --onedir \
         --windowed \
         --icon "resources/system-bridge.png" \
-        --name "systembridge" \
-        --collect-all "plyer" \
+        --name "systembridgegui" \
         --collect-all "systembridgeshared" \
-        --collect-all "systembridgebackend" \
-        --collect-all "systembridgecli" \
-        --collect-all "systembridgefrontend" \
         --collect-all "systembridgegui" \
+        --collect-all "typer" \
       create-setup: true
       entry-point-file: systembridge.py
       pre-package-command: |
-        pip install -r requirements_linux.txt
+        pip install -r requirements_gui_linux.txt
   package-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
@@ -44,17 +41,11 @@ jobs:
         --onedir `
         --windowed `
         --icon "resources/system-bridge.ico" `
-        --name "systembridge" `
-        --collect-all "plyer" `
-        --collect-all "pywin32" `
-        --collect-all "winsdk" `
+        --name "systembridgegui" `
         --collect-all "systembridgeshared" `
-        --collect-all "systembridgebackend" `
-        --collect-all "systembridgecli" `
-        --collect-all "systembridgefrontend" `
         --collect-all "systembridgegui" `
-        --collect-all "systembridgewindowssensors" `
+        --collect-all "typer" `
       create-setup: true
-      entry-point-file: systembridge.py
+      entry-point-file: application_gui.py
       pre-package-command: |
-        pip install -r requirements_windows.txt
+        pip install -r requirements_gui_windows.txt

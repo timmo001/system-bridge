@@ -1,0 +1,49 @@
+---
+name: "Package Application"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package-application-python-pyinstaller-linux:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --windowed \
+        --icon "resources/system-bridge.png" \
+        --name "systembridge" \
+        --collect-all "systembridgeshared" \
+        --collect-all "typer" \
+      create-setup: true
+      entry-point-file: application.py
+      pre-package-command: |
+        pip install -r requirements_application.txt
+  package-application-python-pyinstaller-windows:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir `
+        --windowed `
+        --icon "resources/system-bridge.ico" `
+        --name "systembridge" `
+        --collect-all "systembridgeshared" `
+        --collect-all "typer" `
+      create-setup: true
+      entry-point-file: application.py
+      pre-package-command: |
+        pip install -r requirements_application.txt
