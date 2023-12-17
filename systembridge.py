@@ -15,6 +15,7 @@ LOG_LEVEL = settings.data.log_level
 logger = setup_logger(LOG_LEVEL, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
+# TODO: Launch backend and gui from package
 
 @app.command()
 def application(

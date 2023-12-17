@@ -1,4 +1,4 @@
-systembridgebackend==3.11.2
+systembridgebackend==4.0.0.dev0
 systembridgecli==3.9.14
-systembridgefrontend==3.11.1
-systembridgegui==3.9.7
+systembridgefrontend==4.0.0.dev0
+systembridgegui==4.0.0.dev0
