@@ -157,5 +157,9 @@ Set-Location cli && git pull && python -m pip install . && Set-Location ..
 Write-Output "Install backend.."
 Set-Location backend && git pull && python -m pip install . && Set-Location ..
 
+Write-Output "This next step requires you to build the windows-sensors/WindowsSensors/WindowsSensors.sln solution in Visual Studio. Press Enter to continue.."
+Write-Output "Install windows-sensors.."
+Set-Location windows-sensors && git pull && python -m pip install . && Set-Location ..
+
 Write-Output "Install complete!"
 ```
