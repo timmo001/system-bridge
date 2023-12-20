@@ -40,6 +40,7 @@ jobs:
       entry-point-file: application_backend.py
       pre-package-command: |
         pip install -r requirements_backend_linux.txt
+      upload-executable: true
   package-backend-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
@@ -61,6 +62,7 @@ jobs:
       entry-point-file: application_backend.py
       pre-package-command: |
         pip install -r requirements_backend_windows.txt
+      upload-executable: true
   package-gui-python-pyinstaller-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
@@ -76,6 +78,7 @@ jobs:
       entry-point-file: application_gui.py
       pre-package-command: |
         pip install -r requirements_gui_linux.txt
+      upload-executable: true
   package-gui-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
@@ -91,9 +94,12 @@ jobs:
       entry-point-file: application_gui.py
       pre-package-command: |
         pip install -r requirements_gui_windows.txt
+      upload-executable: true
   package-application-python-pyinstaller-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
+      additional-artifacts-name: "linux-application"
+      additional-artifacts-path: "dist"
       additional-pyinstaller-options: |
         --onedir \
         --windowed \
@@ -105,9 +111,12 @@ jobs:
       entry-point-file: application.py
       pre-package-command: |
         pip install -r requirements_application.txt
+      upload-executable: true
   package-application-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
+      additional-artifacts-name: "windows-application"
+      additional-artifacts-path: "dist"
       additional-pyinstaller-options: |
         --onedir `
         --windowed `
@@ -119,3 +128,4 @@ jobs:
       entry-point-file: application.py
       pre-package-command: |
         pip install -r requirements_application.txt
+      upload-executable: true
