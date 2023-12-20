@@ -1,2 +1,2 @@
-systembridgeshared>=4.0.0.dev1
+systembridgeshared>=4.0.0.dev2
 typer==0.9.0
