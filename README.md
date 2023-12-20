@@ -1,8 +1,8 @@
 # System Bridge
 
 [![CodeQL](https://github.com/timmo001/system-bridge/actions/workflows/codeql.yml/badge.svg)](https://github.com/timmo001/system-bridge/actions/workflows/codeql.yml)
-[![Deploy](https://github.com/timmo001/system-bridge/actions/workflows/deploy.yml/badge.svg)](https://github.com/timmo001/system-bridge/actions/workflows/deploy.yml)
 [![Lint](https://github.com/timmo001/system-bridge/actions/workflows/lint.yml/badge.svg)](https://github.com/timmo001/system-bridge/actions/workflows/lint.yml)
+[![Package](https://github.com/timmo001/system-bridge/actions/workflows/package.yml/badge.svg)](https://github.com/timmo001/system-bridge/actions/workflows/package.yml)
 
 A bridge for your systems.
 
