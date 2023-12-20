@@ -57,6 +57,7 @@ disable = [
     "consider-alternative-union-syntax",
     "cyclic-import",
     "duplicate-code",
+    "fixme",
     "format",
     "inconsistent-return-statements",
     "locally-disabled",
