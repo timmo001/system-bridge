@@ -1,0 +1,121 @@
+---
+name: "Package Application"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  release:
+    types:
+      - published
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package-backend-python-pyinstaller-linux:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --windowed \
+        --icon "resources/system-bridge.png" \
+        --name "systembridgebackend" \
+        --collect-all "plyer" \
+        --collect-all "systembridgeshared" \
+        --collect-all "systembridgebackend" \
+        --collect-all "systembridgeconnector" \
+        --collect-all "systembridgefrontend" \
+        --collect-all "typer" \
+      create-setup: false
+      entry-point-file: application_backend.py
+      pre-package-command: |
+        pip install -r requirements_backend_linux.txt
+  package-backend-python-pyinstaller-windows:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir `
+        --windowed `
+        --icon "resources/system-bridge.ico" `
+        --name "systembridgebackend" `
+        --collect-all "plyer" `
+        --collect-all "pywin32" `
+        --collect-all "winsdk" `
+        --collect-all "systembridgeshared" `
+        --collect-all "systembridgebackend" `
+        --collect-all "systembridgeconnector" `
+        --collect-all "systembridgefrontend" `
+        --collect-all "systembridgewindowssensors" `
+        --collect-all "typer" `
+      create-setup: false
+      entry-point-file: application_backend.py
+      pre-package-command: |
+        pip install -r requirements_backend_windows.txt
+  package-gui-python-pyinstaller-linux:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --windowed \
+        --icon "resources/system-bridge.png" \
+        --name "systembridgegui" \
+        --collect-all "systembridgeshared" \
+        --collect-all "systembridgegui" \
+        --collect-all "typer" \
+      create-setup: false
+      entry-point-file: application_gui.py
+      pre-package-command: |
+        pip install -r requirements_gui_linux.txt
+  package-gui-python-pyinstaller-windows:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir `
+        --windowed `
+        --icon "resources/system-bridge.ico" `
+        --name "systembridgegui" `
+        --collect-all "systembridgeshared" `
+        --collect-all "systembridgegui" `
+        --collect-all "typer" `
+      create-setup: false
+      entry-point-file: application_gui.py
+      pre-package-command: |
+        pip install -r requirements_gui_windows.txt
+  package-application-python-pyinstaller-linux:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir \
+        --windowed \
+        --icon "resources/system-bridge.png" \
+        --name "systembridge" \
+        --collect-all "systembridgeshared" \
+        --collect-all "typer" \
+      create-setup: true
+      entry-point-file: application.py
+      pre-package-command: |
+        pip install -r requirements_application.txt
+  package-application-python-pyinstaller-windows:
+    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
+    with:
+      additional-pyinstaller-options: |
+        --onedir `
+        --windowed `
+        --icon "resources/system-bridge.ico" `
+        --name "systembridge" `
+        --collect-all "systembridgeshared" `
+        --collect-all "typer" `
+      create-setup: true
+      entry-point-file: application.py
+      pre-package-command: |
+        pip install -r requirements_application.txt
