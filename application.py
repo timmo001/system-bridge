@@ -1,7 +1,7 @@
 """System Bridge."""
 import logging
+from os import path
 import subprocess
-import sys
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -24,9 +24,12 @@ def application_launch_and_keep_alive(name: str) -> None:
     """Launch application and keep alive."""
     logger.info("Launching %s", name)
 
+    application_path = path.join("..", name, name)
+    logger.info("Application path: %s", application_path)
+
     # Run application process
     with subprocess.Popen(
-        [sys.executable, "-m", name],
+        [application_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ) as process:
