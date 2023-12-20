@@ -1,3 +1,0 @@
-systembridgebackend==3.11.2
-systembridgecli==3.9.14
-systembridgefrontend==3.11.1

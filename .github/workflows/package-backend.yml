@@ -1,5 +1,5 @@
 ---
-name: "Package"
+name: "Package Backend"
 
 # yamllint disable-line rule:truthy
 on:
@@ -11,6 +11,9 @@ on:
       - opened
       - reopened
       - synchronize
+  release:
+    types:
+      - published
   workflow_call:
   workflow_dispatch:
 
@@ -26,17 +29,17 @@ jobs:
         --onedir \
         --windowed \
         --icon "resources/system-bridge.png" \
-        --name "systembridge" \
+        --name "systembridgebackend" \
         --collect-all "plyer" \
         --collect-all "systembridgeshared" \
         --collect-all "systembridgebackend" \
-        --collect-all "systembridgecli" \
+        --collect-all "systembridgeconnector" \
         --collect-all "systembridgefrontend" \
-        --collect-all "systembridgegui" \
+        --collect-all "typer" \
       create-setup: true
-      entry-point-file: systembridge.py
+      entry-point-file: application_backend.py
       pre-package-command: |
-        pip install -r requirements_linux.txt
+        pip install -r requirements_backend_linux.txt
   package-python-pyinstaller-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
@@ -44,17 +47,17 @@ jobs:
         --onedir `
         --windowed `
         --icon "resources/system-bridge.ico" `
-        --name "systembridge" `
+        --name "systembridgebackend" `
         --collect-all "plyer" `
         --collect-all "pywin32" `
         --collect-all "winsdk" `
         --collect-all "systembridgeshared" `
         --collect-all "systembridgebackend" `
-        --collect-all "systembridgecli" `
+        --collect-all "systembridgeconnector" `
         --collect-all "systembridgefrontend" `
-        --collect-all "systembridgegui" `
         --collect-all "systembridgewindowssensors" `
+        --collect-all "typer" `
       create-setup: true
-      entry-point-file: systembridge.py
+      entry-point-file: application_backend.py
       pre-package-command: |
-        pip install -r requirements_windows.txt
+        pip install -r requirements_backend_windows.txt
