@@ -38,6 +38,7 @@ jobs:
         --collect-all "typer" \
       create-setup: false
       entry-point-file: application_backend.py
+      name: "systembridgebackend"
       pre-package-command: |
         pip install -r requirements_backend_linux.txt
       upload-executable: true
@@ -60,6 +61,7 @@ jobs:
         --collect-all "typer" `
       create-setup: false
       entry-point-file: application_backend.py
+      name: "systembridgebackend"
       pre-package-command: |
         pip install -r requirements_backend_windows.txt
       upload-executable: true
@@ -76,6 +78,7 @@ jobs:
         --collect-all "typer" \
       create-setup: false
       entry-point-file: application_gui.py
+      name: "systembridgegui"
       pre-package-command: |
         pip install -r requirements_gui_linux.txt
       upload-executable: true
@@ -92,6 +95,7 @@ jobs:
         --collect-all "typer" `
       create-setup: false
       entry-point-file: application_gui.py
+      name: "systembridgegui"
       pre-package-command: |
         pip install -r requirements_gui_windows.txt
       upload-executable: true
@@ -101,8 +105,10 @@ jobs:
       - package-backend-python-pyinstaller-linux
       - package-gui-python-pyinstaller-linux
     with:
-      additional-artifacts-name: "linux-application"
-      additional-artifacts-path: "dist"
+      additional-artifact-1-name: "linux-executable-systembridgebackend"
+      additional-artifact-1-path: "dist"
+      additional-artifact-2-name: "linux-executable-systembridgegui"
+      additional-artifact-2-path: "dist"
       additional-pyinstaller-options: |
         --onedir \
         --windowed \
@@ -112,6 +118,7 @@ jobs:
         --collect-all "typer" \
       create-setup: true
       entry-point-file: application.py
+      name: "systembridge"
       pre-package-command: |
         pip install -r requirements_application.txt
       upload-executable: true
@@ -121,8 +128,10 @@ jobs:
       - package-backend-python-pyinstaller-windows
       - package-gui-python-pyinstaller-windows
     with:
-      additional-artifacts-name: "windows-application"
-      additional-artifacts-path: "dist"
+      additional-artifact-1-name: "windows-executable-systembridgebackend"
+      additional-artifact-1-path: "dist"
+      additional-artifact-2-name: "windows-executable-systembridgegui"
+      additional-artifact-2-path: "dist"
       additional-pyinstaller-options: |
         --onedir `
         --windowed `
@@ -132,6 +141,7 @@ jobs:
         --collect-all "typer" `
       create-setup: true
       entry-point-file: application.py
+      name: "systembridge"
       pre-package-command: |
         pip install -r requirements_application.txt
       upload-executable: true
