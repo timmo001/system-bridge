@@ -37,7 +37,7 @@ jobs:
         --collect-all "systembridgefrontend" \
         --collect-all "typer" \
       create-setup: true
-      entry-point-file: systembridge.py
+      entry-point-file: application_backend.py
       pre-package-command: |
         pip install -r requirements_backend_linux.txt
   package-python-pyinstaller-windows:
