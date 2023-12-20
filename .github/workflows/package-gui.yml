@@ -34,7 +34,7 @@ jobs:
         --collect-all "systembridgegui" \
         --collect-all "typer" \
       create-setup: true
-      entry-point-file: systembridge.py
+      entry-point-file: application_gui.py
       pre-package-command: |
         pip install -r requirements_gui_linux.txt
   package-python-pyinstaller-windows:
