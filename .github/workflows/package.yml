@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  package-backend-python-pyinstaller-linux:
+  package-backend-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
       additional-pyinstaller-options: |
@@ -42,7 +42,7 @@ jobs:
       pre-package-command: |
         pip install -r requirements_backend_linux.txt
       upload-executable: true
-  package-backend-python-pyinstaller-windows:
+  package-backend-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
@@ -65,7 +65,7 @@ jobs:
       pre-package-command: |
         pip install -r requirements_backend_windows.txt
       upload-executable: true
-  package-gui-python-pyinstaller-linux:
+  package-gui-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
       additional-pyinstaller-options: |
@@ -82,7 +82,7 @@ jobs:
       pre-package-command: |
         pip install -r requirements_gui_linux.txt
       upload-executable: true
-  package-gui-python-pyinstaller-windows:
+  package-gui-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
@@ -99,11 +99,11 @@ jobs:
       pre-package-command: |
         pip install -r requirements_gui_windows.txt
       upload-executable: true
-  package-application-python-pyinstaller-linux:
+  package-application-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     needs:
-      - package-backend-python-pyinstaller-linux
-      - package-gui-python-pyinstaller-linux
+      - package-backend-linux
+      - package-gui-linux
     with:
       additional-artifact-1-name: "linux-executable-systembridgebackend"
       additional-artifact-1-path: "dist"
@@ -122,11 +122,11 @@ jobs:
       pre-package-command: |
         pip install -r requirements_application.txt
       upload-executable: true
-  package-application-python-pyinstaller-windows:
+  package-application-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     needs:
-      - package-backend-python-pyinstaller-windows
-      - package-gui-python-pyinstaller-windows
+      - package-backend-windows
+      - package-gui-windows
     with:
       additional-artifact-1-name: "windows-executable-systembridgebackend"
       additional-artifact-1-path: "dist"
