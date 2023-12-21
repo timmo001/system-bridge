@@ -64,27 +64,27 @@
 
 Section "System Bridge"
 
+  SetOutPath $INSTDIR
+
   ;ADD YOUR OWN FILES HERE...
-  File /nonfatal /a /r "..\resources\system-bridge.ico" $LOCALAPPDATA\timmo001\systembridge
-  File /nonfatal /a /r "..\resources\system-bridge.png" $LOCALAPPDATA\timmo001\systembridge
-  File /nonfatal /a /r "..\dist\" $LOCALAPPDATA\timmo001\systembridge
+  File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
+  File /nonfatal /a /r "..\resources\system-bridge.png" $INSTDIR
+  File /nonfatal /a /r "..\dist\" $INSTDIR
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\systembridge" "" $LOCALAPPDATA\timmo001\systembridge
+  WriteRegStr HKCU "Software\systembridge" "" $INSTDIR
 
   ;Create uninstaller
-  WriteUninstaller "$LOCALAPPDATA\timmo001\systembridge\systembridgeuninstall.exe"
-
-  SetOutPath $LOCALAPPDATA\timmo001\systembridge\systembridge
+  WriteUninstaller "$INSTDIR\systembridgeuninstall.exe"
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortcut "$LOCALAPPDATA\timmo001\systembridge\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridgeuninstall.exe"
-    CreateShortcut "$DESKTOP\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
+    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\systembridgeuninstall.exe"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -97,9 +97,9 @@ Section "Uninstall"
 
   ;ADD YOUR OWN FILES HERE...
 
-  Delete "$LOCALAPPDATA\timmo001\systembridge\systembridgeuninstall.exe"
+  Delete "$INSTDIR\systembridgeuninstall.exe"
 
-  RMDir /r "$LOCALAPPDATA\timmo001\systembridge"
+  RMDir /r "$INSTDIR"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
 
