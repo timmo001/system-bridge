@@ -85,6 +85,7 @@ def main() -> None:
     asyncio.set_event_loop(loop)
 
     for application in applications:
+        logger.info("Create launch task for: %s", application.name)
         application.task = loop.create_task(
             application_launch_and_keep_alive(application),
             name=application.name,
