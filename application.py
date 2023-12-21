@@ -29,12 +29,24 @@ class Application:
 
 applications = [
     Application(
-        name="backend",
-        path=path.join("..", "systembridge", "systembridge"),
+        name="systembridgebackend",
+        path=path.abspath(
+            path.join(
+                "..",
+                "systembridgebackend",
+                "systembridgebackend",
+            )
+        ),
     ),
     Application(
-        name="frontend",
-        path=path.join("..", "systembridge", "systembridge", "frontend", "frontend"),
+        name="systembridgegui",
+        path=path.abspath(
+            path.join(
+                "..",
+                "systembridgebackend",
+                "systembridgebackend",
+            )
+        ),
     ),
 ]
 
