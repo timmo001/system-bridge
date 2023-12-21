@@ -16,7 +16,7 @@
   InstallDir "$LOCALAPPDATA\timmo001\systembridge"
 
   ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\systembridge" ""
+  InstallDirRegKey HKCU "Software\timmo001\systembridge" ""
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel user
@@ -64,7 +64,7 @@
 
 Section "System Bridge"
 
-  SetOutPath "$INSTDIR"
+  SetOutPath "$INSTDIR\systembridge"
 
   ;ADD YOUR OWN FILES HERE...
   File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
@@ -81,10 +81,10 @@ Section "System Bridge"
 
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\systembridge\system-bridge.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\systembridge\system-bridge.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\systembridge\systembridgeuninstall.exe"
-    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\systembridge\system-bridge.ico"
+    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\systembridgeuninstall.exe"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -97,7 +97,7 @@ Section "Uninstall"
 
   ;ADD YOUR OWN FILES HERE...
 
-  Delete "$INSTDIR\systembridge\systembridgeuninstall.exe"
+  Delete "$INSTDIR\systembridgeuninstall.exe"
 
   RMDir /r "$INSTDIR"
 
