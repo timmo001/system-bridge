@@ -1,9 +1,10 @@
 """System Bridge."""
 import asyncio
-import logging
-import subprocess
 from dataclasses import dataclass
+import logging
 from os import path
+import subprocess
+import sys
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -34,7 +35,7 @@ applications = [
             path.join(
                 "..",
                 "systembridgebackend",
-                "systembridgebackend",
+                f"systembridgebackend{'.exe' if sys.platform == 'win32' else ''}",
             )
         ),
     ),
@@ -43,8 +44,8 @@ applications = [
         path=path.abspath(
             path.join(
                 "..",
-                "systembridgebackend",
-                "systembridgebackend",
+                "systembridgegui",
+                f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
             )
         ),
     ),
