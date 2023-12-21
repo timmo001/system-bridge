@@ -81,10 +81,10 @@ Section "System Bridge"
 
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-    CreateShortcut "$LOCALAPPDATA\timmo001\systembridge\System Bridge.lnk" "$OUTDIR\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
-    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$OUTDIR\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
+    CreateShortcut "$LOCALAPPDATA\timmo001\systembridge\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
     CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridgeuninstall.exe"
-    CreateShortcut "$DESKTOP\System Bridge.lnk" "$OUTDIR\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$LOCALAPPDATA\timmo001\systembridge\systembridge\systembridge.exe" "" "$LOCALAPPDATA\timmo001\systembridge\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
