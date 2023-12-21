@@ -1,10 +1,10 @@
 """System Bridge."""
 import asyncio
+from dataclasses import dataclass
 import logging
+from os import path
 import subprocess
 import sys
-from dataclasses import dataclass
-from os import path
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -24,8 +24,6 @@ class Application:
 
     name: str
     path: str
-    task: asyncio.Task | None = None
-    process: subprocess.Popen | None = None
 
 
 applications = [
@@ -33,6 +31,7 @@ applications = [
         name="systembridgebackend",
         path=path.abspath(
             path.join(
+                "dist" if sys.argv[0].endswith(".py") else ".",
                 "systembridgebackend",
                 f"systembridgebackend{'.exe' if sys.platform == 'win32' else ''}",
             )
@@ -42,6 +41,7 @@ applications = [
         name="systembridgegui",
         path=path.abspath(
             path.join(
+                "dist" if sys.argv[0].endswith(".py") else ".",
                 "systembridgegui",
                 f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
             )
@@ -81,17 +81,18 @@ def main() -> None:
     """Launch Applications."""
     logger.info("Launching applications")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    async def run_all_applications():
+        # Create a list of tasks
+        tasks = [
+            application_launch_and_keep_alive(application)
+            for application in applications
+        ]
 
-    for application in applications:
-        logger.info("Create launch task for: %s", application.name)
-        application.task = loop.create_task(
-            application_launch_and_keep_alive(application),
-            name=application.name,
-        )
+        # Run all tasks concurrently
+        await asyncio.gather(*tasks)
 
-    loop.run_forever()
+    # Run the async function
+    asyncio.run(run_all_applications())
 
 
 if __name__ == "__main__":
