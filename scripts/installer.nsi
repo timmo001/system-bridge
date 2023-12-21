@@ -69,12 +69,12 @@ Section "System Bridge"
   ;ADD YOUR OWN FILES HERE...
   File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
   File /nonfatal /a /r "..\resources\system-bridge.png" $INSTDIR
-  File /nonfatal /a /r "..\dist\systembridge" $INSTDIR
+  File /nonfatal /a /r "..\dist\systembridge\*" $INSTDIR
   File /nonfatal /a /r "..\dist\systembridgebackend" $INSTDIR\systembridgebackend
   File /nonfatal /a /r "..\dist\systembridgegui" $INSTDIR\systembridgegui
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\systembridge" "" $INSTDIR
+  WriteRegStr HKCU "Software\timmo001\systembridge" "" $INSTDIR
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\systembridgeuninstall.exe"
