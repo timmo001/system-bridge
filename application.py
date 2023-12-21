@@ -1,7 +1,9 @@
 """System Bridge."""
+import asyncio
 import logging
-from os import path
 import subprocess
+from dataclasses import dataclass
+from os import path
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -14,22 +16,36 @@ settings = Settings()
 logger = setup_logger(settings.data.log_level, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
+
+@dataclass
+class Application:
+    """Application."""
+
+    name: str
+    path: str
+    task: asyncio.Task | None = None
+    process: subprocess.Popen | None = None
+
+
 applications = [
-    "systembridgebackend",
-    "systembridgegui",
+    Application(
+        name="backend",
+        path=path.join("..", "systembridge", "systembridge"),
+    ),
+    Application(
+        name="frontend",
+        path=path.join("..", "systembridge", "systembridge", "frontend", "frontend"),
+    ),
 ]
 
 
-def application_launch_and_keep_alive(name: str) -> None:
+async def application_launch_and_keep_alive(application: Application) -> None:
     """Launch application and keep alive."""
-    logger.info("Launching %s", name)
-
-    application_path = path.join("..", name, name)
-    logger.info("Application path: %s", application_path)
+    logger.info("Launching application: %s", application)
 
     # Run application process
     with subprocess.Popen(
-        [application_path],
+        [application.path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ) as process:
@@ -37,20 +53,33 @@ def application_launch_and_keep_alive(name: str) -> None:
         process.wait()
 
         if code := process.wait() == 0:
-            logger.info("Application %s exited normally with code %s", name, code)
+            logger.info(
+                "Application %s exited normally with code %s",
+                application.name,
+                code,
+            )
             return
 
-    logger.error("Application %s exited with code %s", name, code)
-    logger.info("Restarting application %s", name)
-    application_launch_and_keep_alive(name)
+    logger.error("Application %s exited with code %s", application.name, code)
+    logger.info("Restarting application: %s", application)
+    await application_launch_and_keep_alive(application)
 
 
-@app.command(name="application", short_help="Launch Application")
-def application() -> None:
-    """Launch Application."""
-    logger.info("Launching application")
-    for name in applications:
-        application_launch_and_keep_alive(name)
+@app.command(name="main", short_help="Launch Applications")
+def main() -> None:
+    """Launch Applications."""
+    logger.info("Launching applications")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    for application in applications:
+        application.task = loop.create_task(
+            application_launch_and_keep_alive(application),
+            name=application.name,
+        )
+
+    loop.run_forever()
 
 
 if __name__ == "__main__":
