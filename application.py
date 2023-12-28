@@ -1,10 +1,11 @@
 """System Bridge."""
 import asyncio
-from dataclasses import dataclass
+import concurrent.futures
 import logging
-from os import path
 import subprocess
 import sys
+from dataclasses import dataclass
+from os import path
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -84,18 +85,14 @@ def main() -> None:
     """Launch Applications."""
     logger.info("Launching applications")
 
-    async def run_all_applications():
-        # Create a list of tasks
-        tasks = [
-            application_launch_and_keep_alive(application)
-            for application in applications
-        ]
+    # Create a list of tasks
+    tasks = [
+        application_launch_and_keep_alive(application) for application in applications
+    ]
 
-        # Run all tasks concurrently
-        await asyncio.gather(*tasks)
-
-    # Run the async function
-    asyncio.run(run_all_applications())
+    # Run all tasks concurrently on separate threads
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(lambda task: asyncio.run(task), tasks)
 
 
 if __name__ == "__main__":
