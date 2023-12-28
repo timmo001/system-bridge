@@ -10,6 +10,8 @@ from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 from typer import Typer
 
+python_mode = sys.argv[0].endswith(".py")
+
 app = Typer()
 
 settings = Settings()
@@ -31,7 +33,6 @@ applications = [
         name="systembridgebackend",
         path=path.abspath(
             path.join(
-                "dist" if sys.argv[0].endswith(".py") else ".",
                 "systembridgebackend",
                 f"systembridgebackend{'.exe' if sys.platform == 'win32' else ''}",
             )
@@ -41,7 +42,6 @@ applications = [
         name="systembridgegui",
         path=path.abspath(
             path.join(
-                "dist" if sys.argv[0].endswith(".py") else ".",
                 "systembridgegui",
                 f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
             )
@@ -52,11 +52,14 @@ applications = [
 
 async def application_launch_and_keep_alive(application: Application) -> None:
     """Launch application and keep alive."""
-    logger.info("Launching application: %s", application)
+    app_path = (
+        [sys.executable, "-m", application.name] if python_mode else [application.path]
+    )
+    logger.info("Launching application: %s", app_path)
 
     # Run application process
     with subprocess.Popen(
-        [application.path],
+        app_path,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ) as process:
