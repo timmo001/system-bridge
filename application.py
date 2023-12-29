@@ -71,9 +71,7 @@ async def application_launch_and_keep_alive(application: Application) -> None:
         stderr=subprocess.PIPE,
     ) as process:
         # Wait for process to finish
-        process.wait()
-
-        if code := process.wait() == 0:
+        if (code := process.wait()) == 0:
             logger.info(
                 "Application %s exited normally with code %s",
                 application.name,
