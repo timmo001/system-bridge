@@ -48,7 +48,7 @@ applications = [
                 f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
             )
         ),
-        delay=3,
+        delay=5,
     ),
 ]
 
