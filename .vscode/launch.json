@@ -9,6 +9,7 @@
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
+      "preLaunchTask": "Install all dependencies",
       "args": []
     },
     {
@@ -19,6 +20,7 @@
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
+      "preLaunchTask": "Install backend dependencies",
       "args": []
     },
     {
@@ -29,6 +31,7 @@
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
+      "preLaunchTask": "Install gui dependencies",
       "args": []
     }
   ]

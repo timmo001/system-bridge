@@ -27,6 +27,7 @@ class Application:
 
     name: str
     path: str
+    delay: int = 0
 
 
 applications = [
@@ -47,6 +48,7 @@ applications = [
                 f"systembridgegui{'.exe' if sys.platform == 'win32' else ''}",
             )
         ),
+        delay=5,
     ),
 ]
 
@@ -56,7 +58,11 @@ async def application_launch_and_keep_alive(application: Application) -> None:
     app_path = (
         [sys.executable, "-m", application.name] if python_mode else [application.path]
     )
-    logger.info("Launching application: %s", app_path)
+    logger.info("Launching application in %s seconds: %s", application.delay, app_path)
+
+    if application.delay > 0:
+        # Wait for delay
+        await asyncio.sleep(application.delay)
 
     # Run application process
     with subprocess.Popen(

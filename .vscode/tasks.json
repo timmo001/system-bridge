@@ -1,4 +1,52 @@
 {
   "version": "2.0.0",
-  "tasks": []
+  "tasks": [
+    {
+      "label": "Install all dependencies",
+      "dependsOn": [
+        "Install application dependencies",
+        "Install backend dependencies",
+        "Install gui dependencies",
+      ],
+    },
+    {
+      "label": "Install application dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements_application.txt",
+    },
+    {
+      "label": "Install backend dependencies",
+      "dependsOn": [
+        "Install backend linux dependencies",
+        "Install backend windows dependencies"
+      ],
+    },
+    {
+      "label": "Install gui dependencies",
+      "dependsOn": [
+        "Install gui linux dependencies",
+        "Install gui windows dependencies"
+      ],
+    },
+    {
+      "label": "Install backend linux dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements_backend_linux.txt",
+    },
+    {
+      "label": "Install backend windows dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements_backend_windows.txt",
+    },
+    {
+      "label": "Install gui linux dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements_gui_linux.txt",
+    },
+    {
+      "label": "Install gui windows dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements_gui_windows.txt",
+    }
+  ]
 }
