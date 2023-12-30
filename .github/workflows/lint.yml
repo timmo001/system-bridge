@@ -18,8 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-black:
-    uses: timmo001/workflows/.github/workflows/lint-black.yml@master
   lint-jsonlint:
     uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@master
   lint-markdown-links:
@@ -30,5 +28,7 @@ jobs:
     uses: timmo001/workflows/.github/workflows/lint-prettier.yml@master
     with:
       file-types: "{json,yml,yaml}"
+  lint-ruff:
+    uses: timmo001/workflows/.github/workflows/lint-ruff.yml@master
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master
