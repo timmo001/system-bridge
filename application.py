@@ -1,11 +1,11 @@
 """System Bridge."""
 import asyncio
 import concurrent.futures
-from dataclasses import dataclass
 import logging
-from os import path
 import subprocess
 import sys
+from dataclasses import dataclass
+from os import path
 
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
@@ -96,7 +96,7 @@ def main() -> None:
 
     # Run all tasks concurrently on separate threads
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.map(lambda task: asyncio.run(task), tasks)
+        executor.map(asyncio.run, tasks)
 
 
 if __name__ == "__main__":
