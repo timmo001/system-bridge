@@ -1,2 +1,2 @@
-systembridgebackend>=4.0.0.dev6
+systembridgebackend>=4.0.0.dev7
 systembridgefrontend>=4.0.0.dev2
