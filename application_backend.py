@@ -1,10 +1,11 @@
 """System Bridge Backend."""
 import logging
 
+from typer import Option, Typer
+
 from systembridgebackend import Application
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
-from typer import Option, Typer
 
 app = Typer()
 

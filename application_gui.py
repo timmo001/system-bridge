@@ -3,10 +3,11 @@ import json
 import logging
 from typing import Optional
 
+from typer import Argument, Typer
+
 from systembridgegui import Application
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
-from typer import Argument, Typer
 
 app = Typer()
 
