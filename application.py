@@ -21,7 +21,7 @@ logging.getLogger("zeroconf").setLevel(logging.ERROR)
 def application(
     app_type: str = Argument("main", help="Application type"),
     command: str = Argument("main", help="Command"),
-    data: str | None = Argument(None, help="Data"),
+    data: str = Argument(None, help="Data"),
     init: bool = Option(False, "--init", help="Initialise"),
     no_frontend: bool = Option(False, "--no-frontend", help="No Frontend"),
     no_gui: bool = Option(False, "--no-gui", help="No GUI"),
@@ -41,7 +41,7 @@ def application(
             GUIApplication(
                 settings,
                 command=command,
-                data=loads(data) if data is not None else None,
+                data=None if data is None or data == "" else loads(data),
             )
     except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
