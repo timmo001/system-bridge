@@ -1,9 +1,11 @@
 """System Bridge Backend."""
+from json import loads
 import logging
 
-from typer import Option, Typer
+from typer import Argument, Option, Typer
 
-from systembridgebackend import Application
+from systembridgebackend import Application as BackendApplication
+from systembridgegui import Application as GUIApplication
 from systembridgeshared.logger import setup_logger
 from systembridgeshared.settings import Settings
 
@@ -15,19 +17,32 @@ logger = setup_logger(settings.data.log_level, "system-bridge")
 logging.getLogger("zeroconf").setLevel(logging.ERROR)
 
 
-@app.command(name="backend", short_help="Launch backend")
-def backend(
+@app.command()
+def application(
+    app_type: str = Argument("main", help="Application type"),
+    command: str = Argument("main", help="Command"),
+    data: str | None = Argument(None, help="Data"),
     init: bool = Option(False, "--init", help="Initialise"),
     no_frontend: bool = Option(False, "--no-frontend", help="No Frontend"),
+    no_gui: bool = Option(False, "--no-gui", help="No GUI"),
 ) -> None:
     """Launch backend."""
     try:
-        logger.info("Launching Backend")
-        Application(
-            settings,
-            init=init,
-            no_frontend=no_frontend,
-        )
+        if app_type == "main":
+            logger.info("Launching Backend")
+            BackendApplication(
+                settings,
+                init=init,
+                no_frontend=no_frontend,
+                no_gui=no_gui,
+            )
+        elif app_type == "gui":
+            logger.info("Launching GUI")
+            GUIApplication(
+                settings,
+                command=command,
+                data=loads(data) if data is not None else None,
+            )
     except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
 
