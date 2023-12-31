@@ -69,7 +69,7 @@ Section "System Bridge"
   ;ADD YOUR OWN FILES HERE...
   File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
   File /nonfatal /a /r "..\resources\system-bridge.png" $INSTDIR
-  File /nonfatal /a /r "..\dist\*" $INSTDIR
+  File /nonfatal /a /r "..\dist\systembridge\*" $INSTDIR
 
   ;Store installation folder
   WriteRegStr HKCU "Software\timmo001\systembridge" "" $INSTDIR
