@@ -2,14 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Application",
+      "name": "Application: Windows",
       "type": "python",
       "request": "launch",
       "program": "application.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false,
-      "preLaunchTask": "Install all dependencies",
+      "preLaunchTask": "Install application dependencies (Windows)",
+      "args": []
+    },
+    {
+      "name": "Application: Linux",
+      "type": "python",
+      "request": "launch",
+      "program": "application.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "preLaunchTask": "Install application dependencies (Linux)",
       "args": []
     }
   ]
