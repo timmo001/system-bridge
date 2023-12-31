@@ -1,2 +1,0 @@
-systembridgebackend>=4.0.0.dev8
-systembridgefrontend>=4.0.0.dev2

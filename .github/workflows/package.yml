@@ -22,34 +22,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  package-backend-linux:
+  package-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
       additional-pyinstaller-options: |
         --onedir \
         --windowed \
         --icon "resources/system-bridge.png" \
-        --name "systembridgebackend" \
+        --name "systembridge" \
         --collect-all "plyer" \
-        --collect-all "systembridgeshared" \
         --collect-all "systembridgebackend" \
         --collect-all "systembridgeconnector" \
         --collect-all "systembridgefrontend" \
+        --collect-all "systembridgegui" \
+        --collect-all "systembridgeshared" \
         --collect-all "typer" \
       create-setup: false
-      entry-point-file: application_backend.py
-      name: "systembridgebackend"
+      entry-point-file: application.py
+      name: "systembridge"
       pre-package-command: |
-        pip install -r requirements_backend_linux.txt
+        pip install -r requirements_linux.txt
       upload-executable: true
-  package-backend-windows:
+  package-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
         --onedir `
         --windowed `
         --icon "resources/system-bridge.ico" `
-        --name "systembridgebackend" `
+        --name "systembridge" `
         --collect-all "plyer" `
         --collect-all "pywin32" `
         --collect-all "winsdk" `
@@ -57,91 +58,12 @@ jobs:
         --collect-all "systembridgebackend" `
         --collect-all "systembridgeconnector" `
         --collect-all "systembridgefrontend" `
+        --collect-all "systembridgegui" `
         --collect-all "systembridgewindowssensors" `
         --collect-all "typer" `
       create-setup: false
-      entry-point-file: application_backend.py
-      name: "systembridgebackend"
-      pre-package-command: |
-        pip install -r requirements_backend_windows.txt
-      upload-executable: true
-  package-gui-linux:
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
-    with:
-      additional-pyinstaller-options: |
-        --onedir \
-        --windowed \
-        --icon "resources/system-bridge.png" \
-        --name "systembridgegui" \
-        --collect-all "systembridgeshared" \
-        --collect-all "systembridgegui" \
-        --collect-all "typer" \
-      create-setup: false
-      entry-point-file: application_gui.py
-      name: "systembridgegui"
-      pre-package-command: |
-        pip install -r requirements_gui_linux.txt
-      upload-executable: true
-  package-gui-windows:
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
-    with:
-      additional-pyinstaller-options: |
-        --onedir `
-        --windowed `
-        --icon "resources/system-bridge.ico" `
-        --name "systembridgegui" `
-        --collect-all "systembridgeshared" `
-        --collect-all "systembridgegui" `
-        --collect-all "typer" `
-      create-setup: false
-      entry-point-file: application_gui.py
-      name: "systembridgegui"
-      pre-package-command: |
-        pip install -r requirements_gui_windows.txt
-      upload-executable: true
-  package-application-linux:
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
-    needs:
-      - package-backend-linux
-      - package-gui-linux
-    with:
-      additional-artifact-1-name: "linux-executable-systembridgebackend"
-      additional-artifact-1-path: "dist"
-      additional-artifact-2-name: "linux-executable-systembridgegui"
-      additional-artifact-2-path: "dist"
-      additional-pyinstaller-options: |
-        --onedir \
-        --windowed \
-        --icon "resources/system-bridge.png" \
-        --name "systembridge" \
-        --collect-all "systembridgeshared" \
-        --collect-all "typer" \
-      create-setup: true
       entry-point-file: application.py
       name: "systembridge"
       pre-package-command: |
-        pip install -r requirements_application.txt
-      upload-executable: true
-  package-application-windows:
-    uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
-    needs:
-      - package-backend-windows
-      - package-gui-windows
-    with:
-      additional-artifact-1-name: "windows-executable-systembridgebackend"
-      additional-artifact-1-path: "dist"
-      additional-artifact-2-name: "windows-executable-systembridgegui"
-      additional-artifact-2-path: "dist"
-      additional-pyinstaller-options: |
-        --onedir `
-        --windowed `
-        --icon "resources/system-bridge.ico" `
-        --name "systembridge" `
-        --collect-all "systembridgeshared" `
-        --collect-all "typer" `
-      create-setup: true
-      entry-point-file: application.py
-      name: "systembridge"
-      pre-package-command: |
-        pip install -r requirements_application.txt
+        pip install -r requirements_windows.txt
       upload-executable: true

@@ -1,2 +1,0 @@
-systembridgeshared>=4.0.0.dev3
-typer==0.9.0
