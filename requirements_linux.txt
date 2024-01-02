@@ -1,5 +1,5 @@
 systembridgebackend>=4.0.0.dev15
 systembridgefrontend>=4.0.0.dev2
 systembridgegui>=4.0.0.dev9
-systembridgeshared>=4.0.0.dev6
+systembridgeshared>=4.0.0.dev7
 typer==0.9.0
