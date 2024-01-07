@@ -26,7 +26,7 @@ def application(
     no_frontend: bool = Option(False, "--no-frontend", help="No Frontend"),
     no_gui: bool = Option(False, "--no-gui", help="No GUI"),
 ) -> None:
-    """Launch backend."""
+    """Launch application."""
     try:
         if app_type == "main":
             logger.info("Launching Backend")
