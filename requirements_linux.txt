@@ -1,4 +1,4 @@
-systembridgebackend>=4.0.0.dev19
+systembridgebackend>=4.0.0
 systembridgefrontend>=4.0.0
 systembridgegui>=4.0.0
 systembridgeshared>=4.0.0
