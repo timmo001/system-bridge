@@ -28,7 +28,7 @@ jobs:
         id: get-version
         run: |
           # Get version from systembridgebackend package using requirements_linux.txt
-          version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f2)
+          version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
           echo "Version: $version"
           echo "::set-output name=version::$version"
       - name: ✏ Set Version File
