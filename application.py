@@ -1,4 +1,4 @@
-"""System Bridge Backend."""
+"""System Bridge."""
 from json import loads
 import logging
 
