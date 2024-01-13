@@ -1,6 +1,7 @@
 """System Bridge."""
 from json import loads
 import logging
+import sys
 
 from typer import Argument, Option, Typer
 
@@ -46,7 +47,8 @@ def application(
     except Exception as exception:  # pylint: disable=broad-except
         logger.fatal("Unhandled error in application", exc_info=exception)
 
-    logger.info("Application closed")
+    logger.info("Application closed: %s", app_type)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
