@@ -51,7 +51,7 @@ jobs:
             Update version to ${{ steps.get-version.outputs.version }}
           push_options: "--force"
       - name: 🖊️ Create draft release for ${{ steps.get-version.outputs.version }}
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           draft: true
           generateReleaseNotes: true
