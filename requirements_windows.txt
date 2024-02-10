@@ -1,6 +1,6 @@
 pywin32==306
 systembridgebackend==4.0.2
-systembridgefrontend==4.0.0
+systembridgefrontend==4.0.1
 systembridgegui==4.0.0
 systembridgeshared==4.0.0
 systembridgewindowssensors==4.0.0
