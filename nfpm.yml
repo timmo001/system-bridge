@@ -1,7 +1,7 @@
 name: "systembridge"
 arch: "amd64"
 platform: "linux"
-version: "4.0.2"
+version: "4.0.3"
 version_schema: semver
 section: "default"
 priority: "extra"
