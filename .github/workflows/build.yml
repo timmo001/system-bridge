@@ -1,0 +1,22 @@
+---
+name: "Build"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: timmo001/workflows/.github/workflows/build-tauri.yml@master

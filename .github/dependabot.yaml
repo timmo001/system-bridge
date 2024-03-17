@@ -1,12 +1,15 @@
 ---
 version: 2
 updates:
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "daily"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: daily
-  - package-ecosystem: "pip"
+      interval: "daily"
+  - package-ecosystem: "npm"
     directory: "/"
-    open-pull-requests-limit: 20
     schedule:
       interval: "daily"

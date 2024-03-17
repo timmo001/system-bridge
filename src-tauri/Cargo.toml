@@ -1,0 +1,23 @@
+[package]
+name = "systembridge"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-beta", features = [] }
+
+[dependencies]
+reqwest = "0.11.26"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sysinfo = "0.30.7"
+tauri = { version = "2.0.0-beta", features = ["tray-icon"] }
+tauri-plugin-autostart = "2.0.0-beta.2"
+tauri-plugin-clipboard-manager = "2.0.0-beta.2"
+tauri-plugin-shell = "2.0.0-beta"
+tauri-plugin-updater = "2.0.0-beta.2"
+tokio = { version = "1.36.0", features = ["full"] }
