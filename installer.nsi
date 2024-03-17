@@ -39,7 +39,7 @@
 ;Pages
 
   !insertmacro MUI_PAGE_LICENSE "LICENSE"
-  !insertmacro MUI_PAGE_COMPONENTS
+  ; !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
 
   ;Start Menu Folder Page Configuration
@@ -69,7 +69,9 @@ Section "System Bridge"
   ;ADD YOUR OWN FILES HERE...
   File /nonfatal /a /r "resources\system-bridge.ico" $INSTDIR
   File /nonfatal /a /r "resources\system-bridge.png" $INSTDIR
-  File /nonfatal /a /r "dist\systembridgebackend\*" $INSTDIR
+  File /nonfatal /a /r "dist\systembridgecli\*" "$INSTDIR\cli"
+  File /nonfatal /a /r "dist\systembridgebackend\*" "$INSTDIR\backend"
+  File /nonfatal /a /r "dist\systembridgegui\*" "$INSTDIR\gui"
 
   ;Store installation folder
   WriteRegStr HKCU "Software\timmo001\systembridge" "" $INSTDIR
@@ -82,9 +84,9 @@ Section "System Bridge"
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
     CreateShortcut "$SMPROGRAMS\$StartMenuFolder\Uninstall System Bridge.lnk" "$INSTDIR\systembridgeuninstall.exe"
-    ; CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
-    ; CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
-    ; CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\systembridge.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$INSTDIR\System Bridge.lnk" "$INSTDIR\gui\systembridgegui.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$SMPROGRAMS\$StartMenuFolder\System Bridge.lnk" "$INSTDIR\gui\systembridgegui.exe" "" "$INSTDIR\system-bridge.ico"
+    CreateShortcut "$DESKTOP\System Bridge.lnk" "$INSTDIR\gui\systembridgegui.exe" "" "$INSTDIR\system-bridge.ico"
 
   !insertmacro MUI_STARTMENU_WRITE_END
 
