@@ -1,5 +1,3 @@
 systembridgebackend==4.0.5.dev0
 systembridgefrontend==4.0.1
-systembridgegui==4.0.4
 systembridgeshared==4.0.0
-typer==0.9.0
