@@ -17,7 +17,6 @@ use tauri_plugin_shell::ShellExt;
 // use tauri_plugin_updater::UpdaterExt;
 use tokio;
 
-// TODO: Add a way to close the backend server when the app is closed
 // TODO: Restart the backend server if it's not running
 
 #[derive(Serialize, Deserialize)]
@@ -181,7 +180,10 @@ async fn check_backend_api(base_url: String, token: String) -> Result<(), Box<dy
 async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     let exe = std::env::current_exe()?;
     let dir = exe.parent().expect("Executable must be in some directory");
-    let backend_dir: String = format!("{}/_up_/dist/systembridgebackend/systembridgebackend", dir.to_str().unwrap());
+    let backend_dir: String = format!(
+        "{}/_up_/dist/systembridgebackend/systembridgebackend",
+        dir.to_str().unwrap()
+    );
 
     let backend_path = Path::new(&backend_dir);
     let backend_path_str = backend_path.to_str().unwrap();
@@ -215,7 +217,7 @@ fn stop_backend() -> Result<(), Box<dyn Error>> {
     sys.refresh_processes();
 
     for (pid, process) in sys.processes() {
-        if process.name().contains("systembridge") {
+        if process.name().contains("systembridgebackend") {
             println!("Killing process: {}", pid);
             let _ = process.kill();
         }
@@ -249,9 +251,9 @@ fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
     .parse()
     .unwrap();
 
-    let window = app.get_webview_window("main");
-    if window.is_some() {
-        let mut window: tauri::WebviewWindow = window.unwrap();
+    let webview_window_result = app.get_webview_window("main");
+    if webview_window_result.is_some() {
+        let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
         window.show().unwrap();
         window.navigate(url);
         window.set_title(title.as_str()).unwrap();
@@ -464,7 +466,10 @@ async fn main() {
                         app.shell().open(backend_log_path, None).unwrap();
                     }
                     "exit" => {
-                        let _ = stop_backend();
+                        let stop_result = stop_backend();
+                        if stop_result.is_err() {
+                            println!("Failed to stop the backend server");
+                        }
                         app.exit(0);
                     }
                     _ => (),
@@ -473,6 +478,12 @@ async fn main() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app_handle, event| match event {
+            tauri::RunEvent::ExitRequested { api, .. } => {
+                api.prevent_exit();
+            }
+            _ => {}
+        });
 }
