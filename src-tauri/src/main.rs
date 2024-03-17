@@ -15,9 +15,22 @@ use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
 // use tauri_plugin_updater::UpdaterExt;
+use std::process::{Child, Command};
 use tokio;
 
 // TODO: Restart the backend server if it's not running
+
+struct ChildGuard(Child);
+
+impl Drop for ChildGuard {
+    fn drop(&mut self) {
+        // You can check std::thread::panicking() here
+        match self.0.kill() {
+            Err(e) => println!("Could not kill child process: {}", e),
+            Ok(_) => println!("Successfully killed child process"),
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
@@ -188,10 +201,11 @@ async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     let backend_path = Path::new(&backend_dir);
     let backend_path_str = backend_path.to_str().unwrap();
     println!("Starting backend server: {}", backend_path_str);
-    let process = std::process::Command::new(backend_path_str).spawn();
+    let process = Command::new(backend_path_str).spawn();
     if process.is_err() {
         return Err("Failed to start the backend server".into());
     }
+    let _guard = ChildGuard(process.unwrap());
 
     println!("Backend server started");
     // Wait for the backend server to start
@@ -470,6 +484,7 @@ async fn main() {
                         if stop_result.is_err() {
                             println!("Failed to stop the backend server");
                         }
+                        println!("Exiting application");
                         app.exit(0);
                     }
                     _ => (),
@@ -482,6 +497,7 @@ async fn main() {
         .expect("error while building tauri application")
         .run(|_app_handle, event| match event {
             tauri::RunEvent::ExitRequested { api, .. } => {
+                println!("Exit requested");
                 api.prevent_exit();
             }
             _ => {}
