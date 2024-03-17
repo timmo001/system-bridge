@@ -66,7 +66,7 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: >
           wget \
-            -O systembridgebackend.py \
+            -O backend.py \
             https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py
 
           pyinstaller \
@@ -80,10 +80,10 @@ jobs:
             --collect-all "systembridgeshared" \
             --collect-all "systembridgebackend" \
             --collect-all "systembridgefrontend" \
-            systembridgebackend.py
+            backend.py
 
           wget \
-            -O systembridgecli.py \
+            -O cli.py \
             https://raw.githubusercontent.com/timmo001/system-bridge-cli/master/systembridgecli/__main__.py
 
           pyinstaller \
@@ -95,13 +95,13 @@ jobs:
             --name "systembridgecli" \
             --collect-all "systembridgeshared" \
             --collect-all "systembridgecli" \
-            systembridgecli.py
+            cli.py
       - name: 📦 Create executable (windows)
         if: matrix.platform == 'windows-latest'
         run: >
           Invoke-WebRequest `
             -Uri https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py `
-            -OutFile systembridgebackend.py
+            -OutFile backend.py
 
           pyinstaller `
             --clean `
@@ -117,11 +117,11 @@ jobs:
             --collect-all "systembridgebackend" `
             --collect-all "systembridgefrontend" `
             --collect-all "systembridgewindowssensors" `
-            systembridgebackend.py
+            backend.py
 
             Invoke-WebRequest `
               -Uri https://raw.githubusercontent.com/timmo001/system-bridge-cli/master/systembridgecli/__main__.py `
-              -OutFile systembridgecli.py
+              -OutFile cli.py
 
             pyinstaller `
               --clean `
@@ -132,7 +132,7 @@ jobs:
               --name "systembridgecli" `
               --collect-all "systembridgeshared" `
               --collect-all "systembridgecli" `
-              systembridgecli.py
+              cli.py
       - name: Install frontend dependencies
         run: yarn install
       - name: Build the app

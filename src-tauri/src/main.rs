@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::{error::Error, time::Duration};
-use tauri_plugin_shell::ShellExt;
-
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -13,28 +13,48 @@ use tauri::{
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
+use tauri_plugin_shell::ShellExt;
 // use tauri_plugin_updater::UpdaterExt;
 use tokio;
 
 // TODO: Add a way to close the backend server when the app is closed
 // TODO: Restart the backend server if it's not running
 
-#[derive(serde::Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
     version: String,
 }
 
-#[derive(serde::Deserialize)]
-struct Settings {
-    api: SettingsAPI,
-    autostart: bool,
-    // log_level: String,
+#[derive(Serialize, Deserialize)]
+pub struct Settings {
+    pub api: SettingsAPI,
+    pub autostart: bool,
+    pub keyboard_hotkeys: Vec<SettingsKeyboardHotkeys>,
+    pub log_level: String,
+    pub media: SettingsMedia,
 }
 
-#[derive(serde::Deserialize)]
-struct SettingsAPI {
+#[derive(Serialize, Deserialize)]
+pub struct SettingsAPI {
     token: String,
-    port: i32,
+    port: i64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SettingsKeyboardHotkeys {
+    name: String,
+    key: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SettingsMedia {
+    directories: Vec<SettingsMediaDirectories>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SettingsMediaDirectories {
+    name: String,
+    path: String,
 }
 
 const BACKEND_HOST: &str = "127.0.0.1";
@@ -46,19 +66,57 @@ fn page_title_map() -> Vec<(&'static str, &'static str)> {
     vec![("data", "Data"), ("settings", "Settings")]
 }
 
-fn get_install_path() -> String {
-    format!(
+fn get_config_path() -> String {
+    let path = format!(
         "{}/timmo001/systembridge",
         std::env::var("LOCALAPPDATA").unwrap()
-    )
+    );
+
+    if !std::path::Path::new(&path).exists() {
+        std::fs::create_dir_all(&path).unwrap();
+    }
+
+    path
+}
+
+fn create_settings() -> Result<Settings, Box<dyn Error>> {
+    // Get install directory from &localappdata%\timmo001\systembridge
+    let config_path = get_config_path();
+
+    // Create a uuid v4 token
+    let token = uuid::Uuid::new_v4().to_string();
+
+    // Create settings from {config_path}\settings.json
+    let settings = Settings {
+        api: SettingsAPI {
+            token: token.to_string(),
+            port: 9170,
+        },
+        autostart: false,
+        keyboard_hotkeys: vec![],
+        log_level: "INFO".to_string(),
+        media: SettingsMedia {
+            directories: vec![],
+        },
+    };
+
+    // Create settings string
+    let settings_string = serde_json::to_string(&settings)?;
+    println!("Creating settings file: {}", settings_string);
+
+    // Write settings to {config_path}\settings.json
+    let settings_path = format!("{}/settings.json", config_path);
+    std::fs::write(settings_path, settings_string)?;
+
+    Ok(settings)
 }
 
 fn get_settings() -> Result<Settings, Box<dyn Error>> {
     // Get install directory from &localappdata%\timmo001\systembridge
-    let install_path = get_install_path();
+    let config_path = get_config_path();
 
-    // Read settings from {install_path}\settings.json
-    let settings_path = format!("{}/settings.json", install_path);
+    // Read settings from {config_path}\settings.json
+    let settings_path = format!("{}/settings.json", config_path);
     if !std::path::Path::new(&settings_path).exists() {
         return Err("Settings file not found".into());
     }
@@ -120,12 +178,15 @@ async fn check_backend_api(base_url: String, token: String) -> Result<(), Box<dy
     Ok(())
 }
 
-async fn start_backend(install_path: String, base_url: String) -> Result<(), Box<dyn Error>> {
-    let backend_path = format!("{}/backend/systembridge", install_path);
-    println!("Starting backend server: {} --no-gui", backend_path);
-    let process = std::process::Command::new(backend_path)
-        .args(["--no-gui"])
-        .spawn();
+async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
+    let exe = std::env::current_exe()?;
+    let dir = exe.parent().expect("Executable must be in some directory");
+    let backend_dir: String = format!("{}/_up_/dist/systembridgebackend/systembridgebackend", dir.to_str().unwrap());
+
+    let backend_path = Path::new(&backend_dir);
+    let backend_path_str = backend_path.to_str().unwrap();
+    println!("Starting backend server: {}", backend_path_str);
+    let process = std::process::Command::new(backend_path_str).spawn();
     if process.is_err() {
         return Err("Failed to start the backend server".into());
     }
@@ -209,18 +270,13 @@ fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
 
 #[tokio::main]
 async fn main() {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let install_path = get_install_path();
-
-    // Read settings from {install_path}\settings.json
-    let settings_path = format!("{}/settings.json", install_path);
-    if !std::path::Path::new(&settings_path).exists() {
-        println!("Settings file not found");
-        std::process::exit(1);
-    }
-
     // Get settings
-    let settings = get_settings().unwrap();
+    let mut settings_result = get_settings();
+    if settings_result.is_err() {
+        println!("Failed to read settings file");
+        settings_result = create_settings();
+    }
+    let settings: Settings = settings_result.unwrap();
 
     let base_url = format!(
         "http://{}:{}",
@@ -232,7 +288,7 @@ async fn main() {
     let backend_active = check_backend(base_url.clone()).await;
     if !backend_active.is_ok() {
         // Start the backend server
-        let backend_start = start_backend(install_path.clone(), base_url.clone()).await;
+        let backend_start = start_backend(base_url.clone()).await;
         if !backend_start.is_ok() {
             println!("Failed to start the backend server");
             std::process::exit(1);
@@ -399,8 +455,8 @@ async fn main() {
                             .unwrap();
                     }
                     "open_logs_backend" => {
-                        let install_path = get_install_path();
-                        let backend_log_path = format!("{}/systembridgebackend.log", install_path);
+                        let config_path = get_config_path();
+                        let backend_log_path = format!("{}/systembridgebackend.log", config_path);
                         if !std::path::Path::new(&backend_log_path).exists() {
                             println!("Backend log file not found at: {}", backend_log_path);
                             return;

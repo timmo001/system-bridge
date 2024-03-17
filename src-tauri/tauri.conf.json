@@ -17,6 +17,14 @@
   },
   "bundle": {
     "active": true,
+    "externalBin": [],
+    "resources": [
+      "../dist/systembridgebackend/*",
+      "../dist/systembridgecli/*",
+      "../resources/system-bridge.ico",
+      "../resources/system-bridge.png",
+      "../resources/system-bridge.svg"
+    ],
     "targets": "all",
     "icon": [
       "icons/32x32.png",
