@@ -9,7 +9,7 @@
 
   ;Name and file
   Name "System Bridge"
-  OutFile "..\systembridgesetup.exe"
+  OutFile "systembridgesetup.exe"
   Unicode True
 
   ;Default installation folder
@@ -30,15 +30,15 @@
 ;Interface Settings
 
   !define MUI_ABORTWARNING
-  !define MUI_ICON "..\resources\system-bridge.ico"
+  !define MUI_ICON "resources\system-bridge.ico"
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "..\resources\system-bridge-win32-installer.bmp"
+  !define MUI_HEADERIMAGE_BITMAP "resources\system-bridge-win32-installer.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "..\LICENSE"
+  !insertmacro MUI_PAGE_LICENSE "LICENSE"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
 
@@ -67,9 +67,9 @@ Section "System Bridge"
   SetOutPath $INSTDIR
 
   ;ADD YOUR OWN FILES HERE...
-  File /nonfatal /a /r "..\resources\system-bridge.ico" $INSTDIR
-  File /nonfatal /a /r "..\resources\system-bridge.png" $INSTDIR
-  File /nonfatal /a /r "..\dist\systembridge\*" $INSTDIR
+  File /nonfatal /a /r "resources\system-bridge.ico" $INSTDIR
+  File /nonfatal /a /r "resources\system-bridge.png" $INSTDIR
+  File /nonfatal /a /r "dist\systembridgebackend\*" $INSTDIR
 
   ;Store installation folder
   WriteRegStr HKCU "Software\timmo001\systembridge" "" $INSTDIR
