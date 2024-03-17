@@ -1,7 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-use futures::{stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -17,7 +15,6 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-use tokio;
 // use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Serialize, Deserialize)]
@@ -61,6 +58,35 @@ const BACKEND_HOST: &str = "127.0.0.1";
 
 const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
+
+async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
+    // Get settings
+    let mut settings_result = get_settings();
+    if settings_result.is_err() {
+        println!("Failed to read settings file");
+        settings_result = create_settings();
+    }
+    let settings: Settings = settings_result.unwrap();
+
+    let base_url = format!(
+        "http://{}:{}",
+        BACKEND_HOST,
+        settings.api.port.to_string().clone()
+    );
+
+    // Check if the backend server is running
+    let backend_active = check_backend(base_url.clone()).await;
+    if !backend_active.is_ok() {
+        // Start the backend server
+        let backend_start = start_backend(base_url.clone()).await;
+        if !backend_start.is_ok() {
+            println!("Failed to start the backend server");
+            std::process::exit(1);
+        }
+    }
+
+    Ok(())
+}
 
 fn page_title_map() -> Vec<(&'static str, &'static str)> {
     vec![("data", "Data"), ("settings", "Settings")]
@@ -127,14 +153,16 @@ fn get_settings() -> Result<Settings, Box<dyn Error>> {
     Ok(settings)
 }
 
-fn setup_autostart(app: &mut App, autostart: bool) -> Result<(), Box<dyn Error>> {
-    println!("Autostart: {}", autostart);
+fn setup_autostart(app: &mut App) -> Result<(), Box<dyn Error>> {
+    let settings = get_settings().unwrap();
+
+    println!("Autostart: {}", settings.autostart);
 
     // Get the autostart manager
     let autostart_manager: tauri::State<'_, tauri_plugin_autostart::AutoLaunchManager> =
         app.autolaunch();
 
-    if autostart {
+    if settings.autostart {
         let _ = autostart_manager.enable();
     } else {
         let _ = autostart_manager.disable();
@@ -254,50 +282,7 @@ fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
 
 #[tokio::main]
 async fn main() {
-    // Get settings
-    let mut settings_result = get_settings();
-    if settings_result.is_err() {
-        println!("Failed to read settings file");
-        settings_result = create_settings();
-    }
-    let settings: Settings = settings_result.unwrap();
-
-    let base_url = format!(
-        "http://{}:{}",
-        BACKEND_HOST,
-        settings.api.port.to_string().clone()
-    );
-
-    // Check if the backend server is running
-    let backend_active = check_backend(base_url.clone()).await;
-    if !backend_active.is_ok() {
-        // Start the backend server
-        let backend_start = start_backend(base_url.clone()).await;
-        if !backend_start.is_ok() {
-            println!("Failed to start the backend server");
-            std::process::exit(1);
-        }
-    }
-
-    // Run a timer to check if the backend server is still running
-    let interval = tokio::time::interval(Duration::from_secs(30));
-    let forever = stream::unfold(interval, |mut interval| async {
-        interval.tick().await;
-
-        // Check if the backend server is running
-        let backend_active = check_backend(base_url.clone()).await;
-        if !backend_active.is_ok() {
-            // Start the backend server
-            let backend_start = start_backend(base_url.clone()).await;
-            if !backend_start.is_ok() {
-                println!("Failed to start the backend server");
-                std::process::exit(1);
-            }
-        }
-
-        Some(((), interval))
-    });
-    forever.for_each(|_| async {}).await;
+    let _ = setup_app().await;
 
     // Create the main window
     tauri::Builder::default()
@@ -326,7 +311,7 @@ async fn main() {
             // });
 
             // Setup autostart from settings
-            setup_autostart(app, settings.autostart.clone()).unwrap();
+            setup_autostart(app).unwrap();
 
             // Setup the tray menu
             let separator = PredefinedMenuItem::separator(app)?;
@@ -471,6 +456,19 @@ async fn main() {
                     _ => (),
                 },
             );
+
+            // TODO: Check backend server every 30 seconds
+            // tauri::async_runtime::spawn(async {
+            //     let mut interval = interval(Duration::from_secs(30));
+            //     loop {
+            //         println!("Waiting for 30 seconds before checking the backend server again");
+            //         interval.tick().await;
+
+            //         if let Err(e) = setup_app().await {
+            //             return Err::<(), Box<dyn std::error::Error + std::marker::Send + Sync>>(e);
+            //         }
+            //     }
+            // });
 
             Ok(())
         })
