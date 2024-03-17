@@ -1,5 +1,3 @@
-!public/app/.gitkeep
-!rootfs/**/downloads/
 .env
 .qt*
 *.apk
@@ -8,10 +6,12 @@
 *.deb
 *.dmg
 *.key
+*.py
 *.rpm
+*.spec
 *setup.exe
+build/
+dist/
 junit.xml
 out/
-public/app/*
 test.json
-*.py
