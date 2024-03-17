@@ -451,7 +451,8 @@ async fn main() {
                             println!("Failed to stop the backend server");
                         }
                         println!("Exiting application");
-                        app.exit(0);
+                        // app.exit(0);
+                        std::process::exit(0);
                     }
                     _ => (),
                 },
