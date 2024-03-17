@@ -14,3 +14,4 @@ junit.xml
 out/
 public/app/*
 test.json
+*.py
