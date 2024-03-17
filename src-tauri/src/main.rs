@@ -1,10 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use futures::{stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 use std::path::Path;
-use std::{error::Error, time::Duration};
+use std::process::Command;
+use std::time::Duration;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -14,23 +17,8 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-// use tauri_plugin_updater::UpdaterExt;
-use std::process::{Child, Command};
 use tokio;
-
-// TODO: Restart the backend server if it's not running
-
-struct ChildGuard(Child);
-
-impl Drop for ChildGuard {
-    fn drop(&mut self) {
-        // You can check std::thread::panicking() here
-        match self.0.kill() {
-            Err(e) => println!("Could not kill child process: {}", e),
-            Ok(_) => println!("Successfully killed child process"),
-        }
-    }
-}
+// use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
@@ -170,26 +158,6 @@ async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     }
 }
 
-async fn check_backend_api(base_url: String, token: String) -> Result<(), Box<dyn Error>> {
-    // Check if the backend server is running
-    let client = Client::builder().timeout(Duration::from_secs(5)).build()?;
-    let response = client
-        .get(format!("{}/api?token={}", base_url, token))
-        .send()
-        .await?;
-
-    if !response.status().is_success() {
-        let response_code = response.status().as_u16();
-        // Return error with the response code
-        return Err(format!("Backend server returned an error: {}", response_code).into());
-    }
-
-    let response: APIBaseResponse = response.json().await?;
-    println!("Backend server version: {}", response.version);
-
-    Ok(())
-}
-
 async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     let exe = std::env::current_exe()?;
     let dir = exe.parent().expect("Executable must be in some directory");
@@ -205,9 +173,9 @@ async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     if process.is_err() {
         return Err("Failed to start the backend server".into());
     }
-    let _guard = ChildGuard(process.unwrap());
 
     println!("Backend server started");
+
     // Wait for the backend server to start
     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
@@ -311,12 +279,25 @@ async fn main() {
         }
     }
 
-    // Check the backend API
-    let api_active = check_backend_api(base_url.clone(), settings.api.token.clone()).await;
-    if !api_active.is_ok() {
-        println!("Backend API is not running");
-        std::process::exit(1);
-    }
+    // Run a timer to check if the backend server is still running
+    let interval = tokio::time::interval(Duration::from_secs(30));
+    let forever = stream::unfold(interval, |mut interval| async {
+        interval.tick().await;
+
+        // Check if the backend server is running
+        let backend_active = check_backend(base_url.clone()).await;
+        if !backend_active.is_ok() {
+            // Start the backend server
+            let backend_start = start_backend(base_url.clone()).await;
+            if !backend_start.is_ok() {
+                println!("Failed to start the backend server");
+                std::process::exit(1);
+            }
+        }
+
+        Some(((), interval))
+    });
+    forever.for_each(|_| async {}).await;
 
     // Create the main window
     tauri::Builder::default()
