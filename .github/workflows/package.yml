@@ -22,48 +22,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  package-linux:
+  package-backend-linux:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-linux.yml@master
     with:
       additional-pyinstaller-options: |
         --onedir \
         --windowed \
         --icon "resources/system-bridge.png" \
-        --name "systembridge" \
+        --name "systembridgebackend" \
         --collect-all "plyer" \
         --collect-all "systembridgebackend" \
-        --collect-all "systembridgeconnector" \
         --collect-all "systembridgefrontend" \
-        --collect-all "systembridgegui" \
-        --collect-all "systembridgeshared" \
-        --collect-all "typer" \
       create-setup: true
-      entry-point-file: application.py
-      name: "systembridge"
+      entry-point-file: https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py
+      name: "systembridgebackend"
       pre-package-command: |
         pip install -r requirements_linux.txt
       upload-executable: true
-  package-windows:
+  package-backend-windows:
     uses: timmo001/workflows/.github/workflows/package-python-pyinstaller-windows.yml@master
     with:
       additional-pyinstaller-options: |
         --onedir `
         --windowed `
         --icon "resources/system-bridge.ico" `
-        --name "systembridge" `
+        --name "systembridgebackend" `
         --collect-all "plyer" `
         --collect-all "pywin32" `
         --collect-all "winsdk" `
-        --collect-all "systembridgeshared" `
         --collect-all "systembridgebackend" `
-        --collect-all "systembridgeconnector" `
         --collect-all "systembridgefrontend" `
-        --collect-all "systembridgegui" `
         --collect-all "systembridgewindowssensors" `
-        --collect-all "typer" `
       create-setup: true
-      entry-point-file: application.py
-      name: "systembridge"
+      entry-point-file: https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py
+      name: "systembridgebackend"
       pre-package-command: |
         pip install -r requirements_windows.txt
       upload-executable: true
