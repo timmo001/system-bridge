@@ -294,7 +294,7 @@ async fn main() {
         .plugin(tauri_plugin_shell::init())
         // .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(move |app: &mut App| {
-            // Check for updates
+            // TODO: Check for updates
             // let handle: &tauri::AppHandle = app.handle();
             // tauri::async_runtime::spawn(async move {
             //     let response: Result<
