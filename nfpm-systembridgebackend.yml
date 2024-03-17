@@ -12,14 +12,14 @@ vendor: "Timmo"
 homepage: "https://system-bridge.timmo.dev"
 license: "Apache-2.0"
 contents:
-  - src: ./dist/systembridge
-    dst: /usr/local/share/systembridge
+  - src: ./dist/systembridgebackend
+    dst: /usr/local/share/systembridge/backend
   - src: ./resources/system-bridge.png
     dst: /usr/local/share/systembridge/system-bridge.png
-  - src: ./scripts/systembridge.desktop
+  - src: ./systembridgebackend.desktop
     dst: /usr/share/applications/systembridge.desktop
-  - src: /usr/local/share/systembridge/systembridge
-    dst: /usr/bin/systembridge
+  - src: /usr/local/share/systembridge/backend/systembridgebackend
+    dst: /usr/bin/systembridgebackend
     type: symlink
 depends:
   - libavahi-compat-libdnssd-dev
