@@ -15,7 +15,6 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
@@ -294,19 +293,6 @@ async fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
-            // Check for updates
-            let app_handle: AppHandle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                let response = app_handle.updater().unwrap().check().await;
-                if response.is_ok() {
-                    let update: Option<tauri_plugin_updater::Update> = response.unwrap();
-                    if update.is_some() {
-                        let update: tauri_plugin_updater::Update = update.unwrap();
-                        println!("Update available: {}", update.version);
-                    }
-                }
-            });
-
             // Setup autostart from settings
             setup_autostart(app).unwrap();
 
