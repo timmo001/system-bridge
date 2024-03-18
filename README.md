@@ -59,10 +59,6 @@ Allows other applications to connect to the backend. For example, in the [Home A
 
 The frontend for the application.
 
-### [GUI](https://github.com/timmo001/system-bridge-gui)
-
-The GUI for the application. This shows a system tray icon and allows you to interact with the application.
-
 ### [Shared](https://github.com/timmo001/system-bridge-shared)
 
 Shared package required by the `systembridgebackend` and `systembridgecli` packages.
@@ -102,7 +98,6 @@ gh repo clone timmo001/system-bridge-backend backend
 gh repo clone timmo001/system-bridge-cli cli
 gh repo clone timmo001/system-bridge-connector connector
 gh repo clone timmo001/system-bridge-frontend frontend
-gh repo clone timmo001/system-bridge-gui gui
 gh repo clone timmo001/system-bridge-shared shared
 gh repo clone timmo001/system-bridge-models models
 gh repo clone timmo001/system-bridge-windows-sensors windows-sensors
@@ -145,9 +140,6 @@ Set-Location connector && git pull && python -m pip install . && Set-Location ..
 
 Write-Output "Install frontend.."
 Set-Location frontend && git pull && yarn install && yarn build && python -m pip install . && Set-Location ..
-
-Write-Output "Install gui.."
-Set-Location gui && git pull && python -m pip install . && Set-Location ..
 
 Write-Output "Install cli.."
 Set-Location cli && git pull && python -m pip install . && Set-Location ..
