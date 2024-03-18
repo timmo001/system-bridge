@@ -464,9 +464,7 @@ async fn main() {
             //         println!("Waiting for 30 seconds before checking the backend server again");
             //         interval.tick().await;
 
-            //         if let Err(e) = setup_app().await {
-            //             return Err::<(), Box<dyn std::error::Error + std::marker::Send + Sync>>(e);
-            //         }
+            //         setup_app().await;
             //     }
             // });
 
