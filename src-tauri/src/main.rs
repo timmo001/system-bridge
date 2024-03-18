@@ -303,7 +303,6 @@ async fn main() {
                     if update.is_some() {
                         let update: tauri_plugin_updater::Update = update.unwrap();
                         println!("Update available: {}", update.version);
-                        update.install(bytes::Bytes::new()).await.unwrap();
                     }
                 }
             });
@@ -377,26 +376,17 @@ async fn main() {
                     create_window(app_handle, "data".to_string()).unwrap();
                 }
                 "check_for_updates" => {
-                    let handle: AppHandle = app_handle.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let response = handle.updater().unwrap().check().await;
-                        if response.is_ok() {
-                            let update: Option<tauri_plugin_updater::Update> = response.unwrap();
-                            if update.is_some() {
-                                let update: tauri_plugin_updater::Update = update.unwrap();
-                                println!("Update available: {}", update.version);
-                                update.install(bytes::Bytes::new()).await.unwrap();
-                            }
-                        }
-                    });
+                    // TODO: Check for updates with a page
                 }
                 "open_docs" => {
-                    app_handle.shell()
+                    app_handle
+                        .shell()
                         .open("https://system-bridge.timmo.dev", None)
                         .unwrap();
                 }
                 "open_suggestions" => {
-                    app_handle.shell()
+                    app_handle
+                        .shell()
                         .open(
                             "https://github.com/timmo001/system-bridge/issues/new/choose",
                             None,
@@ -404,7 +394,8 @@ async fn main() {
                         .unwrap();
                 }
                 "open_issues" => {
-                    app_handle.shell()
+                    app_handle
+                        .shell()
                         .open(
                             "https://github.com/timmo001/system-bridge/issues/new/choose",
                             None,
@@ -412,7 +403,8 @@ async fn main() {
                         .unwrap();
                 }
                 "open_discussions" => {
-                    app_handle.shell()
+                    app_handle
+                        .shell()
                         .open(
                             "https://github.com/timmo001/system-bridge/discussions",
                             None,
@@ -421,7 +413,8 @@ async fn main() {
                 }
                 "copy_token" => {
                     let settings = get_settings().unwrap();
-                    app_handle.clipboard()
+                    app_handle
+                        .clipboard()
                         .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
                             label: Some("System Bridge Token".to_string()),
                             text: settings.api.token.clone(),
