@@ -15,7 +15,7 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-// use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
@@ -292,23 +292,21 @@ async fn main() {
         ))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
-        // .plugin(tauri_plugin_updater::Builder::new().build())
-        .setup(move |app: &mut App| {
-            // TODO: Check for updates
-            // let handle: &tauri::AppHandle = app.handle();
-            // tauri::async_runtime::spawn(async move {
-            //     let response: Result<
-            //         Option<tauri_plugin_updater::Update>,
-            //         tauri_plugin_updater::Error,
-            //     > = handle.updater().expect("REASON").check().await;
-            //     if response.is_ok() {
-            //         let update: Option<tauri_plugin_updater::Update> = response.unwrap();
-            //         if update.is_some() {
-            //             let update: tauri_plugin_updater::Update = update.unwrap();
-            //             println!("Update available: {}", update.version);
-            //         }
-            //     }
-            // });
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .setup(|app| {
+            // Check for updates
+            let app_handle: AppHandle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                let response = app_handle.updater().unwrap().check().await;
+                if response.is_ok() {
+                    let update: Option<tauri_plugin_updater::Update> = response.unwrap();
+                    if update.is_some() {
+                        let update: tauri_plugin_updater::Update = update.unwrap();
+                        println!("Update available: {}", update.version);
+                        update.install(bytes::Bytes::new()).await.unwrap();
+                    }
+                }
+            });
 
             // Setup autostart from settings
             setup_autostart(app).unwrap();
@@ -371,91 +369,84 @@ async fn main() {
                 }
                 _ => (),
             });
-            tray.on_menu_event(
-                move |app: &tauri::AppHandle, event: tauri::menu::MenuEvent| match event
-                    .id()
-                    .as_ref()
-                {
-                    "show_settings" => {
-                        create_window(app, "settings".to_string()).unwrap();
-                    }
-                    "show_data" => {
-                        create_window(app, "data".to_string()).unwrap();
-                    }
-                    "check_for_updates" => {
-                        // let handle: &tauri::AppHandle = app;
-                        // tauri::async_runtime::spawn(async move {
-                        //     let response: Result<
-                        //         Option<tauri_plugin_updater::Update>,
-                        //         tauri_plugin_updater::Error,
-                        //     > = handle.updater().expect("REASON").check().await;
-                        //     if response.is_ok() {
-                        //         let update: Option<tauri_plugin_updater::Update> = response.unwrap();
-                        //         if update.is_some() {
-                        //             let update: tauri_plugin_updater::Update = update.unwrap();
-                        //             println!("Update available: {}", update.version);
-                        //         }
-                        //     }
-                        // });
-                    }
-                    "open_docs" => {
-                        app.shell()
-                            .open("https://system-bridge.timmo.dev", None)
-                            .unwrap();
-                    }
-                    "open_suggestions" => {
-                        app.shell()
-                            .open(
-                                "https://github.com/timmo001/system-bridge/issues/new/choose",
-                                None,
-                            )
-                            .unwrap();
-                    }
-                    "open_issues" => {
-                        app.shell()
-                            .open(
-                                "https://github.com/timmo001/system-bridge/issues/new/choose",
-                                None,
-                            )
-                            .unwrap();
-                    }
-                    "open_discussions" => {
-                        app.shell()
-                            .open(
-                                "https://github.com/timmo001/system-bridge/discussions",
-                                None,
-                            )
-                            .unwrap();
-                    }
-                    "copy_token" => {
-                        let settings = get_settings().unwrap();
-                        app.clipboard()
-                            .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
-                                label: Some("System Bridge Token".to_string()),
-                                text: settings.api.token.clone(),
-                            })
-                            .unwrap();
-                    }
-                    "open_logs_backend" => {
-                        let config_path = get_config_path();
-                        let backend_log_path = format!("{}/systembridgebackend.log", config_path);
-                        if !std::path::Path::new(&backend_log_path).exists() {
-                            println!("Backend log file not found at: {}", backend_log_path);
-                            return;
+            tray.on_menu_event(move |app_handle, event| match event.id().as_ref() {
+                "show_settings" => {
+                    create_window(app_handle, "settings".to_string()).unwrap();
+                }
+                "show_data" => {
+                    create_window(app_handle, "data".to_string()).unwrap();
+                }
+                "check_for_updates" => {
+                    let handle: AppHandle = app_handle.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let response = handle.updater().unwrap().check().await;
+                        if response.is_ok() {
+                            let update: Option<tauri_plugin_updater::Update> = response.unwrap();
+                            if update.is_some() {
+                                let update: tauri_plugin_updater::Update = update.unwrap();
+                                println!("Update available: {}", update.version);
+                                update.install(bytes::Bytes::new()).await.unwrap();
+                            }
                         }
-                        app.shell().open(backend_log_path, None).unwrap();
+                    });
+                }
+                "open_docs" => {
+                    app_handle.shell()
+                        .open("https://system-bridge.timmo.dev", None)
+                        .unwrap();
+                }
+                "open_suggestions" => {
+                    app_handle.shell()
+                        .open(
+                            "https://github.com/timmo001/system-bridge/issues/new/choose",
+                            None,
+                        )
+                        .unwrap();
+                }
+                "open_issues" => {
+                    app_handle.shell()
+                        .open(
+                            "https://github.com/timmo001/system-bridge/issues/new/choose",
+                            None,
+                        )
+                        .unwrap();
+                }
+                "open_discussions" => {
+                    app_handle.shell()
+                        .open(
+                            "https://github.com/timmo001/system-bridge/discussions",
+                            None,
+                        )
+                        .unwrap();
+                }
+                "copy_token" => {
+                    let settings = get_settings().unwrap();
+                    app_handle.clipboard()
+                        .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
+                            label: Some("System Bridge Token".to_string()),
+                            text: settings.api.token.clone(),
+                        })
+                        .unwrap();
+                }
+                "open_logs_backend" => {
+                    let config_path = get_config_path();
+                    let backend_log_path = format!("{}/systembridgebackend.log", config_path);
+                    if !std::path::Path::new(&backend_log_path).exists() {
+                        println!("Backend log file not found at: {}", backend_log_path);
+                        return;
                     }
-                    "exit" => {
-                        let stop_result = stop_backend();
-                        if stop_result.is_err() {
-                            println!("Failed to stop the backend server");
-                        }
-                        println!("Exiting application");
-                        std::process::exit(0);
+                    app_handle.shell().open(backend_log_path, None).unwrap();
+                }
+                "exit" => {
+                    let stop_result = stop_backend();
+                    if stop_result.is_err() {
+                        println!("Failed to stop the backend server");
                     }
-                    _ => (),
-                },
-            );
+                    println!("Exiting application");
+                    std::process::exit(0);
+                }
+                _ => (),
+            });
 
             // TODO: Check backend server every 30 seconds
             // tauri::async_runtime::spawn(async {
