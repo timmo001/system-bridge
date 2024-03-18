@@ -2,8 +2,13 @@
   "productName": "System Bridge",
   "version": "4.1.0",
   "identifier": "dev.timmo.systembridge",
+  "build": {
+    "beforeDevCommand": "yarn dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "yarn build",
+    "frontendDist": "../dist"
+  },
   "app": {
-    "withGlobalTauri": true,
     "security": {
       "csp": null
     },
