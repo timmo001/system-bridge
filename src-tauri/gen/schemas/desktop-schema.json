@@ -1223,41 +1223,6 @@
           ]
         },
         {
-          "description": "updater:default -> Allows checking for new updates and installing them",
-          "type": "string",
-          "enum": [
-            "updater:default"
-          ]
-        },
-        {
-          "description": "updater:allow-check -> Enables the check command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "updater:allow-check"
-          ]
-        },
-        {
-          "description": "updater:allow-download-and-install -> Enables the download_and_install command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "updater:allow-download-and-install"
-          ]
-        },
-        {
-          "description": "updater:deny-check -> Denies the check command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "updater:deny-check"
-          ]
-        },
-        {
-          "description": "updater:deny-download-and-install -> Denies the download_and_install command without any pre-configured scope.",
-          "type": "string",
-          "enum": [
-            "updater:deny-download-and-install"
-          ]
-        },
-        {
           "description": "webview:default -> Default permissions for the plugin.",
           "type": "string",
           "enum": [

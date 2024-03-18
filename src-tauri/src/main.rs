@@ -291,7 +291,6 @@ async fn main() {
         ))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // Setup autostart from settings
             setup_autostart(app).unwrap();
