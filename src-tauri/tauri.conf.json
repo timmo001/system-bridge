@@ -13,7 +13,6 @@
       "csp": null
     },
     "trayIcon": {
-      "iconAsTemplate": false,
       "iconPath": "icons/icon.png",
       "menuOnLeftClick": true,
       "title": "System Bridge",
