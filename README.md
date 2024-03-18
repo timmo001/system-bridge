@@ -57,7 +57,7 @@ Allows other applications to connect to the backend. For example, in the [Home A
 
 ### [Frontend](https://github.com/timmo001/system-bridge-frontend)
 
-The frontend for the application. This is used by the `systembridgegui` module to show settings etc.
+The frontend for the application.
 
 ### [GUI](https://github.com/timmo001/system-bridge-gui)
 
@@ -65,7 +65,7 @@ The GUI for the application. This shows a system tray icon and allows you to int
 
 ### [Shared](https://github.com/timmo001/system-bridge-shared)
 
-Shared package required by the `systembridgebackend`, `systembridgecli` and `systembridgegui` packages.
+Shared package required by the `systembridgebackend` and `systembridgecli` packages.
 
 ### [Models](https://github.com/timmo001/system-bridge-models)
 
@@ -128,7 +128,6 @@ python -m pip uninstall systembridgebackend -y
 python -m pip uninstall systembridgecli -y
 python -m pip uninstall systembridgeconnector -y
 python -m pip uninstall systembridgefrontend -y
-python -m pip uninstall systembridgegui -y
 python -m pip uninstall systembridgeshared -y
 python -m pip uninstall systembridgemodels -y
 python -m pip uninstall systembridgewindowssensors -y

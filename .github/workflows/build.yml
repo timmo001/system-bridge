@@ -1,0 +1,154 @@
+---
+name: "Build"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 🏗️ Build Tauri Application
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2.7.3
+        with:
+          workspaces: "./src-tauri -> target"
+      - name: Sync node version and setup cache
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: "lts/*"
+          cache: "yarn"
+      - name: 🏗 Set up Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: "3.12"
+          architecture: "x64"
+          cache: "pip"
+      - name: 🏗 Install setuptools, wheel, pyinstaller
+        run: |
+          pip install --upgrade setuptools wheel pyinstaller
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libayatana-appindicator3-dev \
+            libgtk-3-dev \
+            libjavascriptcoregtk-4.1-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libwebkit2gtk-4.1-dev
+
+          pip install -r requirements_linux.txt
+      - name: Install dependencies (windows only)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          pip install -r requirements_windows.txt
+      - name: 📦 Create executable (linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: >
+          wget \
+            -O backend.py \
+            https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py
+
+          pyinstaller \
+            --clean \
+            --noconfirm \
+            --onedir \
+            --windowed \
+            --icon "resources/system-bridge.png" \
+            --name "systembridgebackend" \
+            --collect-all "plyer" \
+            --collect-all "systembridgeshared" \
+            --collect-all "systembridgebackend" \
+            --collect-all "systembridgefrontend" \
+            backend.py
+
+          wget \
+            -O cli.py \
+            https://raw.githubusercontent.com/timmo001/system-bridge-cli/master/systembridgecli/__main__.py
+
+          pyinstaller \
+            --clean \
+            --noconfirm \
+            --onedir \
+            --windowed \
+            --icon "resources/system-bridge.png" \
+            --name "systembridgecli" \
+            --collect-all "systembridgeshared" \
+            --collect-all "systembridgecli" \
+            cli.py
+      - name: 📦 Create executable (windows)
+        if: matrix.platform == 'windows-latest'
+        run: >
+          Invoke-WebRequest `
+            -Uri https://raw.githubusercontent.com/timmo001/system-bridge-backend/master/systembridgebackend/__main__.py `
+            -OutFile backend.py
+
+          pyinstaller `
+            --clean `
+            --noconfirm `
+            --onedir `
+            --windowed `
+            --icon "resources/system-bridge.ico" `
+            --name "systembridgebackend" `
+            --collect-all "plyer" `
+            --collect-all "pywin32" `
+            --collect-all "winsdk" `
+            --collect-all "systembridgeshared" `
+            --collect-all "systembridgebackend" `
+            --collect-all "systembridgefrontend" `
+            --collect-all "systembridgewindowssensors" `
+            backend.py
+
+            Invoke-WebRequest `
+              -Uri https://raw.githubusercontent.com/timmo001/system-bridge-cli/master/systembridgecli/__main__.py `
+              -OutFile cli.py
+
+            pyinstaller `
+              --clean `
+              --noconfirm `
+              --onedir `
+              --windowed `
+              --icon "resources/system-bridge.ico" `
+              --name "systembridgecli" `
+              --collect-all "systembridgeshared" `
+              --collect-all "systembridgecli" `
+              cli.py
+      - name: Install frontend dependencies
+        run: yarn install
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0.5.1
+        with:
+          updaterJsonPreferNsis: true
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: tauri-app-${{ matrix.platform }}
+          path: |
+            src-tauri/target/release/bundle

@@ -27,8 +27,6 @@ jobs:
   lint-prettier:
     uses: timmo001/workflows/.github/workflows/lint-prettier.yml@master
     with:
-      file-types: "{json,yml,yaml}"
-  lint-ruff:
-    uses: timmo001/workflows/.github/workflows/lint-ruff.yml@master
+      file-types: "{json,yml}"
   lint-yamllint:
     uses: timmo001/workflows/.github/workflows/lint-yamllint.yml@master

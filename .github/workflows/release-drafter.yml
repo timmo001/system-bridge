@@ -1,0 +1,13 @@
+---
+name: "Release Drafter"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  release-drafter:
+    uses: timmo001/workflows/.github/workflows/release-drafter.yml@master
