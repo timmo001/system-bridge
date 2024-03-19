@@ -2,10 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 use std::time::Duration;
+use std::{error::Error, thread};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -15,6 +15,8 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
+use tokio::runtime::Runtime;
+use tokio::time::interval;
 
 #[derive(Serialize, Deserialize)]
 struct APIBaseResponse {
@@ -426,16 +428,21 @@ async fn main() {
                 _ => (),
             });
 
-            // TODO: Check backend server every 30 seconds
-            // tauri::async_runtime::spawn(async {
-            //     let mut interval = interval(Duration::from_secs(30));
-            //     loop {
-            //         println!("Waiting for 30 seconds before checking the backend server again");
-            //         interval.tick().await;
+            // Check backend server is running every 30 seconds
+            let handle = thread::spawn(|| {
+                let rt = Runtime::new().unwrap();
+                rt.block_on(async {
+                    let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
+                    loop {
+                        println!("Waiting for 60 seconds before checking the backend server again");
+                        interval.tick().await;
 
-            //         setup_app().await;
-            //     }
-            // });
+                        setup_app().await.unwrap();
+                    }
+                });
+            });
+
+            // handle.join().unwrap();
 
             Ok(())
         })
