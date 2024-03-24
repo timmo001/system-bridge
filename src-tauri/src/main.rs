@@ -364,6 +364,10 @@ async fn main() {
                 }
                 "check_for_updates" => {
                     // TODO: Check for updates with a page
+                    app_handle
+                        .shell()
+                        .open("https://github.com/timmo001/system-bridge/releases", None)
+                        .unwrap();
                 }
                 "open_docs" => {
                     app_handle
