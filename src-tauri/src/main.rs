@@ -429,7 +429,7 @@ async fn main() {
             });
 
             // Check backend server is running every 30 seconds
-            let handle = thread::spawn(|| {
+            let _handle = thread::spawn(|| {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
                     let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
@@ -441,8 +441,6 @@ async fn main() {
                     }
                 });
             });
-
-            // handle.join().unwrap();
 
             Ok(())
         })
