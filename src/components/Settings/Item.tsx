@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactElement, useMemo, useState } from "react";
+import { ChangeEvent, ReactElement, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   Autocomplete,
@@ -25,9 +25,9 @@ import {
   mdiEyeOff,
 } from "@mdi/js";
 
-import { handleCopyToClipboard } from "components/Common/Utils";
-import { SettingDescription, settingsMap } from "components/Settings/Settings";
-import ItemList from "components/Settings/ItemList";
+import { handleCopyToClipboard } from "../Common/Utils";
+import { SettingDescription, settingsMap } from "../Settings/Settings";
+import ItemList from "../Settings/ItemList";
 
 function Item({
   keyIn,

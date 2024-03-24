@@ -1,4 +1,4 @@
-import React, { cloneElement, ReactElement } from "react";
+import { cloneElement, ReactElement } from "react";
 import {
   AppBar,
   Box,

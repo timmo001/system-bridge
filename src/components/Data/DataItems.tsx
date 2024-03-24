@@ -1,13 +1,8 @@
 import { ReactElement } from "react";
 import { CircularProgress, Grid, Typography } from "@mui/material";
-import { type CollapsedFieldProps } from "react-json-view";
-import dynamic from "next/dynamic";
+import ReactJsonView, { type CollapsedFieldProps } from "react-json-view";
 
-import { type Modules } from "types/models";
-
-const BrowserReactJsonView = dynamic(() => import("react-json-view"), {
-  ssr: false,
-});
+import { type Modules } from "../../types/models";
 
 export default function DataItemsComponent({
   title,
@@ -23,7 +18,7 @@ export default function DataItemsComponent({
       </Typography>
       {data ? (
         <>
-          <BrowserReactJsonView
+          <ReactJsonView
             collapseStringsAfterLength={120}
             displayDataTypes={false}
             displayObjectSize

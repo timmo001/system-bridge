@@ -9,6 +9,24 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "windows": [
+      {
+        "label": "data",
+        "title": "Data | System Bridge",
+        "focus": true,
+        "visible": true,
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "label": "settings",
+        "title": "Settings | System Bridge",
+        "focus": true,
+        "visible": false,
+        "width": 1280,
+        "height": 720
+      }
+    ],
     "security": {
       "csp": null
     },

@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   Box,
   ButtonBase,
@@ -25,7 +19,7 @@ import {
   PlayerStatus,
   useHover,
   usePlayer,
-} from "components/Player/Utils";
+} from "../Player/Utils";
 
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();
@@ -66,14 +60,14 @@ function AudioComponent() {
     (loaded: boolean) => {
       setPlayerStatus({ ...playerStatus!!, loaded });
     },
-    [playerStatus, setPlayerStatus],
+    [playerStatus, setPlayerStatus]
   );
 
   const handleSetPlaying = useCallback(
     (playing: boolean) => {
       setPlayerStatus({ ...playerStatus!!, playing });
     },
-    [playerStatus, setPlayerStatus],
+    [playerStatus, setPlayerStatus]
   );
 
   const handleTogglePlaying = useCallback(() => {
@@ -84,7 +78,7 @@ function AudioComponent() {
     (muted: boolean) => {
       setPlayerStatus({ ...playerStatus!!, muted });
     },
-    [playerStatus, setPlayerStatus],
+    [playerStatus, setPlayerStatus]
   );
 
   const handleToggleMuted = useCallback(() => {
@@ -102,7 +96,7 @@ function AudioComponent() {
       });
       if (muted) handleSetMuted(false);
     },
-    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted],
+    [muted, volume, playerStatus, setPlayerStatus, handleSetMuted]
   );
 
   const handleSetDuration = useCallback(
@@ -112,7 +106,7 @@ function AudioComponent() {
         duration,
       });
     },
-    [playerStatus, setPlayerStatus],
+    [playerStatus, setPlayerStatus]
   );
 
   const handleSetPosition = useCallback(
@@ -124,7 +118,7 @@ function AudioComponent() {
         position: pos,
       });
     },
-    [playerStatus, duration, setPlayerStatus],
+    [playerStatus, duration, setPlayerStatus]
   );
 
   const handleUpdatePlayerPosition = useCallback(
@@ -134,7 +128,7 @@ function AudioComponent() {
       // If not already playing, start
       if (!playing) handleSetPlaying(true);
     },
-    [playing, handleSetPlaying],
+    [playing, handleSetPlaying]
   );
 
   useEffect(() => {

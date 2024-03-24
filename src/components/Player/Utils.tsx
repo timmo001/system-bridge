@@ -1,10 +1,13 @@
-import React, {
+import {
+  type Dispatch,
+  type ReactElement,
+  type SetStateAction,
   createContext,
-  ReactElement,
+  useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
-import { Box } from "@mui/material";
 
 export interface Source {
   type: "audio" | "video";
@@ -36,8 +39,8 @@ export interface PlayerStatus {
 }
 
 const PlayerContext = createContext<PlayerStatus | undefined>(undefined);
-const SetPlayerContext = createContext<null | React.Dispatch<
-  React.SetStateAction<PlayerStatus | undefined>
+const SetPlayerContext = createContext<null | Dispatch<
+  SetStateAction<PlayerStatus | undefined>
 >>(null);
 
 export const PlayerProvider = ({
@@ -58,7 +61,7 @@ export const PlayerProvider = ({
 
 export const usePlayer = (): [
   player: PlayerStatus | undefined,
-  setPlayer: React.Dispatch<React.SetStateAction<PlayerStatus | undefined>>,
+  setPlayer: Dispatch<SetStateAction<PlayerStatus | undefined>>
 ] => {
   const player = useContext(PlayerContext);
   const setPlayer = useContext(SetPlayerContext);
@@ -67,14 +70,14 @@ export const usePlayer = (): [
 };
 
 export function useHover() {
-  const [isHovering, setIsHovering] = React.useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-  const handleMouseOver = React.useCallback(() => setIsHovering(true), []);
-  const handleMouseOut = React.useCallback(() => setIsHovering(false), []);
+  const handleMouseOver = useCallback(() => setIsHovering(true), []);
+  const handleMouseOut = useCallback(() => setIsHovering(false), []);
 
-  const nodeRef = React.useRef<HTMLElement>();
+  const nodeRef = useRef<HTMLElement>();
 
-  const callbackRef = React.useCallback(
+  const callbackRef = useCallback(
     (node: HTMLDivElement) => {
       if (nodeRef.current) {
         nodeRef.current.removeEventListener("mouseover", handleMouseOver);
@@ -88,7 +91,7 @@ export function useHover() {
         nodeRef.current.addEventListener("mouseout", handleMouseOut);
       }
     },
-    [handleMouseOver, handleMouseOut],
+    [handleMouseOver, handleMouseOut]
   );
 
   return [callbackRef, isHovering];

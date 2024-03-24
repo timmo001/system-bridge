@@ -1,17 +1,10 @@
-import React, {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { useRouter } from "next/dist/client/router";
+import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import { cloneDeep, isEqual } from "lodash";
 
-// import { WebSocketResponse } from "types/websocket";
+// import { WebSocketResponse } from "../../types/websocket";
 import { PlayerStatus, usePlayer } from "./Utils";
 import { usePrevious } from "../Common/Utils";
-import { WebSocketConnection } from "components/Common/WebSocket";
+import { WebSocketConnection } from "../Common/WebSocket";
 import AudioComponent from "./Audio";
 import VideoComponent from "./Video";
 
@@ -25,11 +18,11 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   const [playerStatus, setPlayerStatus] = usePlayer();
   const previousPlayerStatus = usePrevious(playerStatus);
 
-  const router = useRouter();
-  const query = router.query as NodeJS.Dict<string>;
+  // const query = router.query as NodeJS.Dict<string>;
 
   const eventHandler = useCallback(
-    (event: any) => { // WebSocketResponse
+    (event: any) => {
+      // WebSocketResponse
       console.log("Event:", event);
       switch (event.type) {
         case "MEDIA_PAUSE":
@@ -78,58 +71,58 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
     [eventHandler]
   );
 
-  useEffect(() => {
-    if (!webSocketSetup && query && query.token) {
-      setWebSocketSetup(true);
-      handleSetupWebSocket(Number(query.apiPort) || 9170, String(query.token));
-    }
-  }, [webSocketSetup, handleSetupWebSocket, query]);
+  // useEffect(() => {
+  //   if (!webSocketSetup && query && query.token) {
+  //     setWebSocketSetup(true);
+  //     handleSetupWebSocket(Number(query.apiPort) || 9170, String(query.token));
+  //   }
+  // }, [webSocketSetup, handleSetupWebSocket, query]);
 
-  useEffect(() => {
-    if (!playerStatus && router.isReady) {
-      const volume = Number(query.volume);
-      switch (playerType) {
-        default:
-          break;
-        case "audio":
-          setPlayerStatus({
-            autoplay: query.autoplay?.toLowerCase() === "true",
-            muted: false,
-            playing: false,
-            loaded: false,
-            position: 0,
-            duration: 1,
-            source: {
-              type: "audio",
-              source: query.url,
-              album: query.album || "Unknown Album",
-              artist: query.artist || "Unknown Aritst",
-              cover: query.cover,
-              title: query.title || "Unknown Title",
-              volumeInitial: (volume > 0 ? volume : 40) / 100,
-            },
-            volume: (volume > 0 ? volume : 40) / 100,
-          });
-          break;
-        case "video":
-          setPlayerStatus({
-            autoplay: query.autoplay?.toLowerCase() === "true",
-            muted: false,
-            playing: false,
-            loaded: false,
-            position: 0,
-            duration: 1,
-            source: {
-              type: "video",
-              source: String(query.url),
-              volumeInitial: (volume > 0 ? volume : 40) / 100,
-            },
-            volume: (volume > 0 ? volume : 40) / 100,
-          });
-          break;
-      }
-    }
-  }, [playerStatus, setPlayerStatus, playerType, router, query]);
+  // useEffect(() => {
+  //   if (!playerStatus && router.isReady) {
+  //     const volume = Number(query.volume);
+  //     switch (playerType) {
+  //       default:
+  //         break;
+  //       case "audio":
+  //         setPlayerStatus({
+  //           autoplay: query.autoplay?.toLowerCase() === "true",
+  //           muted: false,
+  //           playing: false,
+  //           loaded: false,
+  //           position: 0,
+  //           duration: 1,
+  //           source: {
+  //             type: "audio",
+  //             source: query.url,
+  //             album: query.album || "Unknown Album",
+  //             artist: query.artist || "Unknown Aritst",
+  //             cover: query.cover,
+  //             title: query.title || "Unknown Title",
+  //             volumeInitial: (volume > 0 ? volume : 40) / 100,
+  //           },
+  //           volume: (volume > 0 ? volume : 40) / 100,
+  //         });
+  //         break;
+  //       case "video":
+  //         setPlayerStatus({
+  //           autoplay: query.autoplay?.toLowerCase() === "true",
+  //           muted: false,
+  //           playing: false,
+  //           loaded: false,
+  //           position: 0,
+  //           duration: 1,
+  //           source: {
+  //             type: "video",
+  //             source: String(query.url),
+  //             volumeInitial: (volume > 0 ? volume : 40) / 100,
+  //           },
+  //           volume: (volume > 0 ? volume : 40) / 100,
+  //         });
+  //         break;
+  //     }
+  //   }
+  // }, [playerStatus, setPlayerStatus, playerType, router, query]);
 
   useEffect(() => {
     if (playerStatus) {

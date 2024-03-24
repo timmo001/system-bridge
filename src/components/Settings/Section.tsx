@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
 import { Grid, List, Paper, Typography } from "@mui/material";
 
 export interface SectionProps {

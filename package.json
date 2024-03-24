@@ -22,14 +22,20 @@
     "@tauri-apps/plugin-clipboard-manager": "2.1.0-beta.0",
     "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
     "axios": "1.6.8",
+    "lodash": "4.17.21",
+    "moment": "2.30.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-json-view": "1.21.3"
+    "react-json-view": "1.21.3",
+    "react-player": "2.15.1",
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": ">=2.0.0-beta.11",
+    "@types/lodash": "4.17.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/uuid": "9.0.8",
     "@vitejs/plugin-react": "^4.2.1",
     "typescript": "^5.4.3",
     "vite": "^5.2.2"

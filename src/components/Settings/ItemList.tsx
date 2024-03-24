@@ -21,7 +21,7 @@ import { Icon } from "@mdi/react";
 import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
 import _ from "lodash";
 
-import { SettingDescription } from "components/Settings/Settings";
+import { SettingDescription } from "../Settings/Settings";
 
 interface NameValueAlias {
   name: string;

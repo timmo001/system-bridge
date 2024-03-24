@@ -9,7 +9,7 @@ use std::{error::Error, thread};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
-    App, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
+    App, Manager,
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_autostart::ManagerExt;
@@ -57,9 +57,6 @@ pub struct SettingsMediaDirectories {
 
 const BACKEND_HOST: &str = "127.0.0.1";
 
-const WINDOW_WIDTH: f64 = 1280.0;
-const WINDOW_HEIGHT: f64 = 720.0;
-
 async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     // Get settings
     let mut settings_result = get_settings();
@@ -87,10 +84,6 @@ async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-}
-
-fn page_title_map() -> Vec<(&'static str, &'static str)> {
-    vec![("data", "Data"), ("settings", "Settings")]
 }
 
 fn get_config_path() -> String {
@@ -237,50 +230,6 @@ fn stop_backend() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
-    println!("Creating window: {}", page);
-
-    let settings = get_settings().unwrap();
-
-    let title = format!(
-        "{} | System Bridge",
-        page_title_map()
-            .iter()
-            .find(|(key, _)| key == &page)
-            .unwrap()
-            .1
-    );
-
-    let url: tauri::Url = format!(
-        "http://{}:{}/app/{}.html?apiPort={}&token={}",
-        BACKEND_HOST,
-        settings.api.port.to_string().clone(),
-        page,
-        settings.api.port.clone(),
-        settings.api.token.clone()
-    )
-    .parse()
-    .unwrap();
-
-    let webview_window_result = app.get_webview_window("main");
-    if webview_window_result.is_some() {
-        let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
-        window.show().unwrap();
-        window.navigate(url);
-        window.set_title(title.as_str()).unwrap();
-        window.set_focus().unwrap();
-        return Ok(());
-    }
-
-    WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
-        .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        .title(title)
-        .build()
-        .unwrap();
-
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     let _ = setup_app().await;
@@ -349,21 +298,37 @@ async fn main() {
             tray.set_menu(Some(menu))?;
             tray.on_tray_icon_event(|tray, event| match event.click_type {
                 ClickType::Double => {
-                    let app = tray.app_handle();
+                    let app_handle = tray.app_handle();
 
-                    create_window(app, "data".to_string()).unwrap();
+                    app_handle
+                        .get_webview_window("data")
+                        .unwrap()
+                        .show()
+                        .unwrap();
                 }
                 _ => (),
             });
             tray.on_menu_event(move |app_handle, event| match event.id().as_ref() {
                 "show_settings" => {
-                    create_window(app_handle, "settings".to_string()).unwrap();
+                    app_handle
+                        .get_webview_window("settings")
+                        .unwrap()
+                        .show()
+                        .unwrap();
                 }
                 "show_data" => {
-                    create_window(app_handle, "data".to_string()).unwrap();
+                    app_handle
+                        .get_webview_window("data")
+                        .unwrap()
+                        .show()
+                        .unwrap();
                 }
                 "check_for_updates" => {
                     // TODO: Check for updates with a page
+                    app_handle
+                        .shell()
+                        .open("https://github.com/timmo001/system-bridge/releases", None)
+                        .unwrap();
                 }
                 "open_docs" => {
                     app_handle

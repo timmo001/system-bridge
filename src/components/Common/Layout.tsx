@@ -1,6 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
-import { useRouter } from "next/router";
-import Head from "next/head";
+import { ReactElement, useEffect } from "react";
 
 import { IconButton } from "@mui/material";
 import { Icon } from "@mdi/react";
@@ -20,47 +18,47 @@ interface LayoutProps {
 
 let queryChecked = false;
 function Layout(props: LayoutProps): ReactElement {
-  const router = useRouter();
+  // const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && router.isReady && !queryChecked) {
-      queryChecked = true;
-      let newToken: string | null = (router.query?.token as string) || "",
-        newApiPort: string | null = (router.query?.apiPort as string) || "9170",
-        needUpdate = false;
-      if (!router.query?.token) {
-        needUpdate = true;
-        newToken = window.prompt("Please enter your Token", newToken);
-      }
-      if (!router.query?.apiPort) {
-        needUpdate = true;
-        newApiPort = window.prompt(
-          "Please enter your API port (default: 9170)",
-          newApiPort,
-        );
-      }
-      if (needUpdate && newToken && newApiPort) {
-        const path = router.asPath.split("?")[0];
-        router.replace({
-          pathname:
-            process.env.NODE_ENV === "development"
-              ? path
-              : path.includes(".html")
-              ? path
-              : `${path}.html`,
-          query: {
-            ...router.query,
-            token: newToken,
-            apiPort: newApiPort,
-          },
-        });
-      }
-    }
-  }, [router]);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && router.isReady && !queryChecked) {
+  //     queryChecked = true;
+  //     let newToken: string | null = (router.query?.token as string) || "",
+  //       newApiPort: string | null = (router.query?.apiPort as string) || "9170",
+  //       needUpdate = false;
+  //     if (!router.query?.token) {
+  //       needUpdate = true;
+  //       newToken = window.prompt("Please enter your Token", newToken);
+  //     }
+  //     if (!router.query?.apiPort) {
+  //       needUpdate = true;
+  //       newApiPort = window.prompt(
+  //         "Please enter your API port (default: 9170)",
+  //         newApiPort
+  //       );
+  //     }
+  //     if (needUpdate && newToken && newApiPort) {
+  //       const path = router.asPath.split("?")[0];
+  //       router.replace({
+  //         pathname:
+  //           process.env.NODE_ENV === "development"
+  //             ? path
+  //             : path.includes(".html")
+  //             ? path
+  //             : `${path}.html`,
+  //         query: {
+  //           ...router.query,
+  //           token: newToken,
+  //           apiPort: newApiPort,
+  //         },
+  //       });
+  //     }
+  //   }
+  // }, [router]);
 
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>
           {props.title ? `${props.title} - System Bridge` : `System Bridge`}
         </title>
@@ -83,7 +81,7 @@ function Layout(props: LayoutProps): ReactElement {
               : `system-bridge, system, bridge, typescript`
           }
         />
-      </Head>
+      </Head> */}
       {!props.noHeader && <Header />}
       {props.closeButton && (
         <IconButton

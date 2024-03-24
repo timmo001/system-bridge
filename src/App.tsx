@@ -1,9 +1,6 @@
-import { type ReactElement } from "react";
-import {
-  CssBaseline,
-  ThemeProvider,
-  StyledEngineProvider,
-} from "@mui/material";
+import { type ReactElement, useEffect, useMemo } from "react";
+import { window } from "@tauri-apps/api";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import "@fontsource/roboto";
 
@@ -11,18 +8,24 @@ import { SettingsProvider } from "./components/Contexts/Settings";
 import theme from "./components/Common/Theme";
 
 function App(): ReactElement {
+  const label = useMemo<string>(() => {
+    return window.getCurrent().label;
+  }, []);
+
+  console.log("label:", label);
+
   return (
     <>
-      <StyledEngineProvider injectFirst>
+      <SettingsProvider>
         <ThemeProvider theme={theme}>
-          <SettingsProvider>
-            <>
-              <CssBaseline />
-              <Component {...pageProps} />
-            </>
-          </SettingsProvider>
+          <>
+            <CssBaseline />
+            <main>
+              <p>Hello, {label}!</p>
+            </main>
+          </>
         </ThemeProvider>
-      </StyledEngineProvider>
+      </SettingsProvider>
     </>
   );
 }

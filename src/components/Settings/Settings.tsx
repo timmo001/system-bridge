@@ -1,6 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import { CircularProgress, Grid, TextField, useTheme } from "@mui/material";
-import { useRouter } from "next/router";
+import { CircularProgress, Grid, useTheme } from "@mui/material";
 import {
   mdiFolderMultipleOutline,
   mdiKeyboardOutline,
@@ -9,12 +8,12 @@ import {
   mdiTextBoxOutline,
 } from "@mdi/js";
 
-import { SettingDirectory, SettingHotkey, type Settings } from "types/settings";
-import { type WebSocketResponse } from "types/websocket";
-import { useSettings } from "components/Contexts/Settings";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import Section from "components/Settings/Section";
-import Item from "components/Settings/Item";
+import { SettingDirectory, SettingHotkey, type Settings } from "../../types/settings";
+import { type WebSocketResponse } from "../../types/websocket";
+import { useSettings } from "../Contexts/Settings";
+import { WebSocketConnection } from "../Common/WebSocket";
+import Section from "../Settings/Section";
+import Item from "../Settings/Item";
 
 let ws: WebSocketConnection;
 
@@ -67,7 +66,7 @@ function Settings(): ReactElement {
   const [settings, setSettings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
 
-  const query = useRouter().query;
+  // const query = useRouter().query;
 
   const eventHandler = useCallback(
     (event: WebSocketResponse) => {
@@ -98,12 +97,12 @@ function Settings(): ReactElement {
     [settings, setSettings]
   );
 
-  useEffect(() => {
-    if (!setup && query && query.token) {
-      setSetup(true);
-      handleSetup(Number(query.apiPort) || 9170, String(query.token));
-    }
-  }, [setup, handleSetup, query]);
+  // useEffect(() => {
+  //   if (!setup && query && query.token) {
+  //     setSetup(true);
+  //     handleSetup(Number(query.apiPort) || 9170, String(query.token));
+  //   }
+  // }, [setup, handleSetup, query]);
 
   const theme = useTheme();
 

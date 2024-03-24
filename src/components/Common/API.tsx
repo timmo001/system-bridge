@@ -1,10 +1,10 @@
 import axios, { AxiosResponse, Method, RawAxiosRequestConfig } from "axios";
 
 export interface APIRequest {
-  body?: NodeJS.Dict<any>;
+  body?: Record<string, any>;
   endpoint: string;
   method: Method;
-  params?: NodeJS.Dict<any>;
+  params?: Record<string, any>;
 }
 
 export class API {

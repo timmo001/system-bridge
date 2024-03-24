@@ -3,10 +3,8 @@ import {
   ReactElement,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
-import { useRouter } from "next/router";
 import {
   CircularProgress,
   Grid,
@@ -24,17 +22,17 @@ import {
   Module,
   moduleMap,
   modules,
-} from "types/models";
-import { type WebSocketResponse } from "types/websocket";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import DataItems from "components/Data/DataItems";
+} from "../../types/models";
+import { type WebSocketResponse } from "../../types/websocket";
+import { WebSocketConnection } from "../Common/WebSocket";
+import DataItems from "../Data/DataItems";
 
 function DataComponent(): ReactElement {
   const [data, setData] = useState<ModuleData>({});
   const [setup, setSetup] = useState<boolean>(false);
   const [tab, setTab] = useState<number>(0);
 
-  const query = useRouter().query;
+  // const query = useRouter().query;
 
   const handleChangeTab = (
     _event: React.ChangeEvent<any>,
@@ -65,12 +63,12 @@ function DataComponent(): ReactElement {
     [eventHandler]
   );
 
-  useEffect(() => {
-    if (!setup && query && query.token) {
-      setSetup(true);
-      handleSetup(Number(query.apiPort) || 9170, String(query.token));
-    }
-  }, [setup, handleSetup, query]);
+  // useEffect(() => {
+  //   if (!setup && query && query.token) {
+  //     setSetup(true);
+  //     handleSetup(Number(query.apiPort) || 9170, String(query.token));
+  //   }
+  // }, [setup, handleSetup, query]);
 
   console.log("Data:", data);
 

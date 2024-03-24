@@ -1,11 +1,11 @@
-import React, {
+import {
   createContext,
   ReactElement,
   useContext,
   useState,
 } from "react";
 
-import { Settings } from "types/settings";
+import { type Settings } from "../../types/settings";
 
 const SettingsContext = createContext<Settings | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<
