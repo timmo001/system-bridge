@@ -8,6 +8,7 @@
       "csp": null
     },
     "trayIcon": {
+      "id": "main",
       "iconAsTemplate": false,
       "iconPath": "icons/icon.png",
       "menuOnLeftClick": true,

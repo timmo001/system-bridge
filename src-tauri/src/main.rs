@@ -345,7 +345,7 @@ async fn main() {
                 .build()?;
 
             // Setup the tray
-            let tray = app.tray().unwrap();
+            let tray = app.tray_by_id("main").unwrap();
             tray.set_menu(Some(menu))?;
             tray.on_tray_icon_event(|tray, event| match event.click_type {
                 ClickType::Double => {
