@@ -142,6 +142,12 @@
                 "identifier": {
                   "oneOf": [
                     {
+                      "type": "string",
+                      "enum": [
+                        "shell:default"
+                      ]
+                    },
+                    {
                       "description": "shell:allow-execute -> Enables the execute command without any pre-configured scope.",
                       "type": "string",
                       "enum": [
@@ -355,6 +361,12 @@
           ]
         },
         {
+          "type": "string",
+          "enum": [
+            "autostart:default"
+          ]
+        },
+        {
           "description": "autostart:allow-disable -> Enables the disable command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -394,6 +406,12 @@
           "type": "string",
           "enum": [
             "autostart:deny-is-enabled"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "clipboard-manager:default"
           ]
         },
         {
@@ -1031,6 +1049,12 @@
           "type": "string",
           "enum": [
             "resources:deny-close"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "shell:default"
           ]
         },
         {
