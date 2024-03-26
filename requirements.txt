@@ -3,4 +3,4 @@ pyperclip==1.8.2
 PySide6==6.6.3
 systembridgeconnector>=4.0.3
 systembridgeshared>=4.0.0
-typer==0.9.0
+typer==0.10.0
