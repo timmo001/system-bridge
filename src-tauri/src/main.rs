@@ -363,7 +363,6 @@ async fn main() {
                     create_window(app_handle, "data".to_string()).unwrap();
                 }
                 "check_for_updates" => {
-                    // TODO: Check for updates with a page
                     app_handle
                         .shell()
                         .open("https://github.com/timmo001/system-bridge/releases", None)
