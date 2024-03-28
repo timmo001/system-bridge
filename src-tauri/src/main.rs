@@ -62,12 +62,7 @@ const WINDOW_HEIGHT: f64 = 720.0;
 
 async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     // Get settings
-    let mut settings_result = get_settings();
-    if settings_result.is_err() {
-        println!("Failed to read settings file");
-        settings_result = create_settings();
-    }
-    let settings: Settings = settings_result.unwrap();
+    let settings: Settings = get_settings();
 
     let base_url = format!(
         "http://{}:{}",
@@ -106,7 +101,7 @@ fn get_config_path() -> String {
     path
 }
 
-fn create_settings() -> Result<Settings, Box<dyn Error>> {
+fn create_settings() -> Settings {
     // Get install directory from &localappdata%\timmo001\systembridge
     let config_path = get_config_path();
 
@@ -128,34 +123,41 @@ fn create_settings() -> Result<Settings, Box<dyn Error>> {
     };
 
     // Create settings string
-    let settings_string = serde_json::to_string(&settings)?;
+    let settings_string = serde_json::to_string(&settings).unwrap();
+
     println!("Creating settings file: {}", settings_string);
 
     // Write settings to {config_path}\settings.json
     let settings_path = format!("{}/settings.json", config_path);
-    std::fs::write(settings_path, settings_string)?;
+    std::fs::write(settings_path, settings_string).unwrap();
 
-    Ok(settings)
+    settings
 }
 
-fn get_settings() -> Result<Settings, Box<dyn Error>> {
+fn get_settings() -> Settings {
     // Get install directory from &localappdata%\timmo001\systembridge
     let config_path = get_config_path();
 
     // Read settings from {config_path}\settings.json
     let settings_path = format!("{}/settings.json", config_path);
     if !std::path::Path::new(&settings_path).exists() {
-        return Err("Settings file not found".into());
+        return create_settings();
     }
 
-    let settings = std::fs::read_to_string(settings_path)?;
-    let settings = serde_json::from_str(&settings)?;
+    let settings = std::fs::read_to_string(settings_path);
+    if settings.is_err() {
+        return create_settings();
+    }
+    let settings = serde_json::from_str(&settings.unwrap());
+    if settings.is_err() {
+        return create_settings();
+    }
 
-    Ok(settings)
+    settings.unwrap()
 }
 
 fn setup_autostart(app: &mut App) -> Result<(), Box<dyn Error>> {
-    let settings = get_settings().unwrap();
+    let settings = get_settings();
 
     println!("Autostart: {}", settings.autostart);
 
@@ -240,7 +242,7 @@ fn stop_backend() -> Result<(), Box<dyn Error>> {
 fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
     println!("Creating window: {}", page);
 
-    let settings = get_settings().unwrap();
+    let settings: Settings = get_settings();
 
     let title = format!(
         "{} | System Bridge",
@@ -402,7 +404,7 @@ async fn main() {
                         .unwrap();
                 }
                 "copy_token" => {
-                    let settings = get_settings().unwrap();
+                    let settings: Settings = get_settings();
                     app_handle
                         .clipboard()
                         .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
@@ -431,10 +433,10 @@ async fn main() {
                 _ => (),
             });
 
-            // Check backend server is running every 30 seconds
             let _handle = thread::spawn(|| {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
+                    // Check backend server is running every 60 seconds
                     let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
                     loop {
                         println!("Waiting for 60 seconds before checking the backend server again");
