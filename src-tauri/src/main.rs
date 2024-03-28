@@ -211,8 +211,9 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
             match response.r#type.as_str() {
                 "DATA_UPDATE" => {
                     println!("Received data update: {:?}", response.data);
+                    // TODO: Handle data update
                 }
-                "CREATE_NOTIFICATION" => {
+                "NOTIFICATION" => {
                     println!("Received notification: {:?}", response.data);
 
                     let notification_result = serde_json::from_value(response.data);
