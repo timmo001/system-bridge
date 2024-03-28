@@ -228,6 +228,7 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
                         continue;
                     }
                     let notification: Notification = notification_result.unwrap();
+                    let timeout = notification.timeout.unwrap_or(5.0) as u64;
 
                     let query_string_result = serde_urlencoded::to_string(notification);
                     if query_string_result.is_err() {
@@ -240,11 +241,23 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
                     let query_string = format!("&{}", query_string_result.unwrap());
                     println!("Query string: {}", query_string);
 
+                    let app_handle_clone_1 = app_handle.clone();
+                    let app_handle_clone_2 = app_handle.clone();
                     create_window(
-                        app_handle.clone(),
+                        app_handle_clone_1,
                         "notification".to_string(),
                         Some(query_string),
                     );
+
+                    let _handle = thread::spawn(move || {
+                        let rt = Runtime::new().unwrap();
+                        rt.block_on(async {
+                            println!("Waiting for {} seconds to close the notification", timeout);
+                            thread::sleep(Duration::from_secs(timeout));
+
+                            close_window(app_handle_clone_2, "notification".to_string());
+                        });
+                    });
                 }
                 _ => {
                     println!("Received event: {}", response.r#type);
@@ -525,6 +538,18 @@ fn create_window(app_handle: AppHandle, page: String, query_additional: Option<S
     }
 }
 
+#[tauri::command]
+fn close_window(app_handle: AppHandle, label: String) {
+    println!("Closing window: {}", label);
+
+    let webview_window_result = app_handle.get_webview_window(label.as_str());
+    if webview_window_result.is_some() {
+        let window: tauri::WebviewWindow = webview_window_result.unwrap();
+        window.close().unwrap();
+        window.destroy().unwrap();
+    }
+}
+
 #[tokio::main]
 async fn main() {
     setup_app().await.unwrap();
@@ -538,6 +563,7 @@ async fn main() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![create_window])
+        .invoke_handler(tauri::generate_handler![close_window])
         .invoke_handler(tauri::generate_handler![get_settings])
         .setup(|app| {
             // Setup autostart from settings
