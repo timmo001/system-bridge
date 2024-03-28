@@ -11,6 +11,7 @@ use std::process::Command;
 use std::str::FromStr;
 use std::time::Duration;
 use std::{error::Error, thread};
+use tauri::PhysicalPosition;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -113,6 +114,8 @@ const BACKEND_HOST: &str = "127.0.0.1";
 
 const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
+const WINDOW_NOTIFICATION_WIDTH: f64 = 420.0;
+const WINDOW_NOTIFICATION_HEIGHT: f64 = 48.0;
 
 async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     // Get settings
@@ -436,26 +439,90 @@ fn create_window(app_handle: AppHandle, page: String, query_additional: Option<S
         page,
         settings.api.port.clone(),
         settings.api.token.clone(),
-        query_additional.unwrap_or("".to_string())
+        query_additional.clone().unwrap_or("".to_string())
     )
     .parse()
     .unwrap();
 
-    let webview_window_result = app_handle.get_webview_window("main");
-    if webview_window_result.is_some() {
-        let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
-        window.show().unwrap();
-        window.navigate(url);
-        window.set_title(title.as_str()).unwrap();
-        window.set_focus().unwrap();
-        return;
-    }
+    if page == "notification" {
+        let query_additional = query_additional.clone().unwrap().clone();
 
-    WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
-        .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        .title(title)
-        .build()
-        .unwrap();
+        // Deserialize the notification
+        let notification: Notification = serde_urlencoded::from_str(&query_additional).unwrap();
+
+        // Calculate the window height
+        let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
+        let title_lines: i32 = 1 + (notification.title.len() as f64 / 52.0).round() as i32;
+        println!("Title Lines: {}", title_lines);
+        if title_lines > 1 {
+            height += 64 * title_lines;
+        }
+        if let Some(message) = &notification.message {
+            height += 24;
+            let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
+            println!("Message Lines: {}", message_lines);
+            if message_lines > 1 {
+                height += 20 * message_lines;
+            }
+        }
+        if notification.image.is_some() {
+            height += 280;
+        }
+        if let Some(actions) = &notification.actions {
+            if !actions.is_empty() {
+                height += 72;
+            }
+        }
+        println!("Window Height: {}", height);
+
+        let window =
+            WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
+                .always_on_top(true)
+                .decorations(false)
+                .inner_size(WINDOW_NOTIFICATION_WIDTH, height as f64)
+                .resizable(false)
+                .skip_taskbar(true)
+                .title(title)
+                .visible(false)
+                .build()
+                .unwrap();
+
+        // Get the display size
+        let monitor = window
+            .primary_monitor()
+            .expect("No primary monitor available")
+            .unwrap();
+        let size = monitor.size();
+        println!("Display size: {}, {}", size.width, size.height);
+
+        let window_x = (size.width - ((WINDOW_NOTIFICATION_WIDTH as u32) * 2) - 112) as f64;
+        let window_y = (size.height - ((height as u32) * 2) - 132) as f64;
+        println!("Window position: {}, {}", window_x, window_y);
+
+        window
+            .set_position(PhysicalPosition {
+                x: window_x,
+                y: window_y,
+            })
+            .unwrap();
+        window.show().unwrap();
+    } else {
+        let webview_window_result = app_handle.get_webview_window("main");
+        if webview_window_result.is_some() {
+            let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
+            window.show().unwrap();
+            window.navigate(url);
+            window.set_title(title.as_str()).unwrap();
+            window.set_focus().unwrap();
+            return;
+        }
+
+        WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
+            .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+            .title(title)
+            .build()
+            .unwrap();
+    }
 }
 
 #[tokio::main]
