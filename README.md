@@ -76,8 +76,6 @@ Specifically for windows, adds sensors to get windows system information.
 - [Node.js](https://nodejs.org/en/download/)
 - [Yarn](https://yarnpkg.com/getting-started/install)
 
-### Setup
-
 #### Windows
 
 
@@ -87,10 +85,24 @@ Specifically for windows, adds sensors to get windows system information.
 
 #### Linux
 
-
 ```bash
 ./setup.sh
 ```
+
+### Build
+
+```bash
+yarn install
+yarn tauri build
+```
+
+### Run
+
+```bash
+yarn install
+yarn tauri dev
+```
+
 
 ## Module Development
 
