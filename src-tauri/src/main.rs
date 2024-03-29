@@ -87,6 +87,11 @@ fn create_window(
                 .skip_taskbar(true)
                 .title(title)
                 .visible(false)
+                .on_page_load(move |window, _payload| {
+                    if window.url().as_str().contains("close.window") {
+                        window.close().unwrap();
+                    }
+                })
                 .build()
                 .unwrap();
 
@@ -110,6 +115,7 @@ fn create_window(
                 y: window_y,
             })
             .unwrap();
+
         window.show().unwrap();
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
