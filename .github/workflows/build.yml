@@ -23,9 +23,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - ubuntu-latest
-          - windows-latest
+        include:
+          - platform: ubuntu-latest
+            rust-targets: x86_64-unknown-linux-gnu
+            tauri-target: x86_64-unknown-linux-gnu
+          - platform: windows-latest
+            rust-targets: x86_64-pc-windows-msvc
+            tauri-target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -34,15 +38,20 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
       - name: Rust cache
+        if: matrix.platform == 'ubuntu-latest'
         uses: swatinem/rust-cache@v2.7.3
         with:
+          shared-key: shared
           workspaces: "./src-tauri -> target"
       - name: Sync node version and setup cache
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: "lts/*"
           cache: "yarn"
+          check-latest: true
+          node-version: "lts/*"
       - name: 🏗 Set up Python
         uses: actions/setup-python@v5.1.0
         with:
@@ -58,11 +67,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libayatana-appindicator3-dev \
+            libayatana-appindicator3-dev \
             libgtk-3-dev \
             libjavascriptcoregtk-4.1-dev \
             librsvg2-dev \
+            librsvg2-dev \
             libsoup-3.0-dev \
-            libwebkit2gtk-4.1-dev
+            libwebkit2gtk-4.1-dev \
+            patchelf
 
           pip install -r requirements_linux.txt
       - name: Install dependencies (windows only)
@@ -142,20 +154,10 @@ jobs:
               cli.py
       - name: Install frontend dependencies
         run: yarn install
-      - name: Set args (linux)
-        if: matrix.platform == 'ubuntu-latest'
-        run: |
-          # Set TAURI_ARGS for linux
-          echo "TAURI_ARGS=-v" >> $GITHUB_ENV
-      - name: Set args (windows)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          # Set TAURI_ARGS for windows
-          echo "TAURI_ARGS=-v -t x86_64-pc-windows-msvc" >> $env:GITHUB_ENV
       - name: Build the app
         uses: tauri-apps/tauri-action@v0.5.1
         with:
-          args: ${{ env.TAURI_ARGS }}
+          args: --target ${{ matrix.tauri-target }}
           updaterJsonPreferNsis: true
       - name: Publish artifacts
         uses: actions/upload-artifact@v4.3.1

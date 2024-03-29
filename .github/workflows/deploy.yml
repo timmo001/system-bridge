@@ -16,9 +16,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - ubuntu-latest
-          - windows-latest
+        include:
+          - platform: ubuntu-latest
+            rust-targets: x86_64-unknown-linux-gnu
+            tauri-target: x86_64-unknown-linux-gnu
+          - platform: windows-latest
+            rust-targets: x86_64-pc-windows-msvc
+            tauri-target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -27,15 +31,20 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
       - name: Rust cache
+        if: matrix.platform == 'ubuntu-latest'
         uses: swatinem/rust-cache@v2.7.3
         with:
+          shared-key: shared
           workspaces: "./src-tauri -> target"
       - name: Sync node version and setup cache
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: "lts/*"
           cache: "yarn"
+          check-latest: true
+          node-version: "lts/*"
       - name: 🏗 Set up Python
         uses: actions/setup-python@v5.1.0
         with:
@@ -150,7 +159,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: ${{ env.TAURI_ARGS }}
+          args: --target ${{ matrix.tauri-target }}
           tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
           releaseName: "App Name v__VERSION__" # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: "See the assets to download and install this version."
