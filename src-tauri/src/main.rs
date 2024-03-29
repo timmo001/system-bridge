@@ -95,10 +95,12 @@ fn create_window(
             .expect("No primary monitor available")
             .unwrap();
         let size = monitor.size();
-        println!("Display size: {}, {}", size.width, size.height);
+        let window_width = size.width as f64;
+        let window_height = size.height as f64;
+        println!("Display size: {}, {}", window_width, window_height);
 
-        let window_x = (size.width - (WINDOW_NOTIFICATION_WIDTH) - 28) as f64;
-        let window_y = (size.height - (height) - 28) as f64;
+        let window_x = (window_width - (WINDOW_NOTIFICATION_WIDTH * 1.5) - 28.0) as f64;
+        let window_y = (window_height - (height * 1.5) - 100.0) as f64;
         println!("Window position: {}, {}", window_x, window_y);
 
         window

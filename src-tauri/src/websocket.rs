@@ -23,7 +23,7 @@ pub struct Notification {
     icon: Option<String>,
     image: Option<String>,
     actions: Option<Vec<Action>>,
-    timeout: Option<f32>,
+    timeout: Option<u64>,
     audio: Option<Audio>,
 }
 
@@ -137,30 +137,30 @@ pub async fn setup_websocket_client(
                         continue;
                     }
                     let notification: Notification = notification_result.unwrap();
-                    let timeout = notification.timeout.unwrap_or(5.0) as f32;
+                    let timeout = notification.timeout.unwrap_or(5) as u64;
 
                     // Calculate the window height
                     let mut height: f64 = WINDOW_NOTIFICATION_HEIGHT as f64;
                     let title_lines: f64 =
-                        1 + (notification.title.len() as f64 / 52.0).round() as f64;
+                        1.0 + (notification.title.len() as f64 / 52.0).round() as f64;
                     println!("Title Lines: {}", title_lines);
-                    if title_lines > 1 {
-                        height += 64 * title_lines;
+                    if title_lines > 1.0 {
+                        height += 64.0 * title_lines;
                     }
                     if let Some(message) = &notification.message {
-                        height += 24;
-                        let message_lines: f64 = 1 + (message.len() as f64 / 62.0).round() as f64;
+                        height += 24.0;
+                        let message_lines: f64 = 1.0 + (message.len() as f64 / 62.0).round() as f64;
                         println!("Message Lines: {}", message_lines);
-                        if message_lines > 1 {
-                            height += 20 * message_lines;
+                        if message_lines > 1.0 {
+                            height += 20.0 * message_lines;
                         }
                     }
                     if notification.image.is_some() {
-                        height += 280;
+                        height += 280.0;
                     }
                     if let Some(actions) = &notification.actions {
                         if !actions.is_empty() {
-                            height += 72;
+                            height += 72.0;
                         }
                     }
                     println!("Window Height: {}", height);
