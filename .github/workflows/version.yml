@@ -24,13 +24,9 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PUSH_TOKEN }}
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
       - name: ↘️ Get version from systembridgebackend package
         id: get-version
         run: |
-          cargo add cargo-edit
-
           # Get version from systembridgebackend package using requirements_linux.txt
           version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
           echo "Version: $version"
@@ -55,8 +51,8 @@ jobs:
             mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
 
           # Update version in src-tauri/Cargo.toml
-          cd src-tauri
-          cargo set-version ${{ steps.get-version.outputs.version }}
+          sed -i '0,/version/s/^version = "\([0-9.]*\)"$/version = "${{ steps.get-version.outputs.version }}"/' src-tauri/Cargo.toml
+
       - name: ⤵️ Pull latest changes from GitHub
         run: |
           git pull --ff
