@@ -67,7 +67,29 @@ Shared package used by most of the other packages containing the models used by 
 
 Specifically for windows, adds sensors to get windows system information.
 
-## Development
+## Application Development
+
+### Prerequisites
+
+- [Python 3.12](https://www.python.org/downloads/)
+- [Node.js](https://nodejs.org/en/download/)
+- [Yarn](https://yarnpkg.com/getting-started/install)
+
+### Setup
+
+#### Windows
+
+```powershell
+.\setup.ps1
+```
+
+#### Linux
+
+```bash
+./setup.sh
+```
+
+## Module Development
 
 A way to get started with all the repositories is to use the scripts
 
