@@ -79,19 +79,19 @@ Specifically for windows, adds sensors to get windows system information.
 
 #### Windows
 
+
 ```powershell
 .\setup.ps1
 ```
 
 #### Linux
 
+
 ```bash
 ./setup.sh
 ```
 
 ## Module Development
-
-A way to get started with all the repositories is to use the scripts
 
 ### Windows
 
