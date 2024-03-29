@@ -1,11 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use futures_util::{SinkExt, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
+use std::str::FromStr;
 use std::time::Duration;
 use std::{error::Error, thread};
+use tauri::PhysicalPosition;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -17,13 +23,14 @@ use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
 use tokio::runtime::Runtime;
 use tokio::time::interval;
+use tokio_websockets::{ClientBuilder, Message};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct APIBaseResponse {
     version: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Settings {
     pub api: SettingsAPI,
     pub autostart: bool,
@@ -32,43 +39,89 @@ pub struct Settings {
     pub media: SettingsMedia,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SettingsAPI {
     token: String,
     port: i64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SettingsKeyboardHotkeys {
     name: String,
     key: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SettingsMedia {
     directories: Vec<SettingsMediaDirectories>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SettingsMediaDirectories {
     name: String,
     path: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Notification {
+    title: String,
+    message: Option<String>,
+    icon: Option<String>,
+    image: Option<String>,
+    actions: Option<Vec<Action>>,
+    timeout: Option<f32>,
+    audio: Option<Audio>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Action {
+    command: String,
+    label: String,
+    data: Option<HashMap<String, String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Audio {
+    source: String,
+    volume: Option<f32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetData {
+    modules: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Request {
+    id: String,
+    event: String,
+    data: HashMap<String, String>,
+    #[doc(hidden)]
+    token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Response {
+    id: String,
+    r#type: String,
+    data: Value,
+    subtype: Option<String>,
+    message: Option<String>,
+    module: Option<String>,
 }
 
 const BACKEND_HOST: &str = "127.0.0.1";
 
 const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
+const WINDOW_NOTIFICATION_WIDTH: f64 = 420.0;
+const WINDOW_NOTIFICATION_HEIGHT: f64 = 48.0;
 
 async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     // Get settings
     let settings: Settings = get_settings();
 
-    let base_url = format!(
-        "http://{}:{}",
-        BACKEND_HOST,
-        settings.api.port.to_string().clone()
-    );
+    let base_url = format!("http://{}:{}", BACKEND_HOST, settings.api.port.to_string());
 
     // Check if the backend server is running
     let backend_active = check_backend(base_url.clone()).await;
@@ -84,80 +137,171 @@ async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn page_title_map() -> Vec<(&'static str, &'static str)> {
-    vec![("data", "Data"), ("settings", "Settings")]
-}
+async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    // Get settings
+    let settings: Settings = get_settings();
 
-fn get_config_path() -> String {
-    let path = format!(
-        "{}/timmo001/systembridge",
-        std::env::var("LOCALAPPDATA").unwrap()
+    let ws_url = format!(
+        "ws://{}:{}/api/websocket",
+        BACKEND_HOST,
+        settings.api.port.to_string(),
     );
+    let ws_uri = http::uri::Uri::from_str(ws_url.as_str()).unwrap();
 
-    if !std::path::Path::new(&path).exists() {
-        std::fs::create_dir_all(&path).unwrap();
-    }
+    let (mut client, _) = ClientBuilder::from_uri(ws_uri).connect().await?;
 
-    path
-}
-
-fn create_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let config_path = get_config_path();
-
-    // Create a uuid v4 token
-    let token = uuid::Uuid::new_v4().to_string();
-
-    // Create settings from {config_path}\settings.json
-    let settings = Settings {
-        api: SettingsAPI {
-            token: token.to_string(),
-            port: 9170,
-        },
-        autostart: false,
-        keyboard_hotkeys: vec![],
-        log_level: "INFO".to_string(),
-        media: SettingsMedia {
-            directories: vec![],
-        },
+    let mut request = Request {
+        id: uuid::Uuid::new_v4().to_string(),
+        event: "".to_string(),
+        data: HashMap::new(),
+        token: settings.api.token.clone(),
     };
 
-    // Create settings string
-    let settings_string = serde_json::to_string(&settings).unwrap();
+    request.event = "REGISTER_DATA_LISTENER".to_string();
+    let mut request_json = json!(request);
+    request_json["data"] = json!({
+      "modules": ["system"]
+    });
 
-    println!("Creating settings file: {}", settings_string);
+    let request_string = serde_json::to_string(&request_json).unwrap();
+    println!("Sending request: {}", request_string);
+    client.send(Message::text(request_string)).await?;
 
-    // Write settings to {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
-    std::fs::write(settings_path, settings_string).unwrap();
+    while let Some(item) = client.next().await {
+        // Read the message
+        let message = item.unwrap();
 
-    settings
-}
+        if message.is_close() {
+            break;
+        }
 
-fn get_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let config_path = get_config_path();
+        if message.is_text() {
+            let message_string = message.as_text().unwrap();
+            println!("Received message: {}", message_string);
 
-    // Read settings from {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
-    if !std::path::Path::new(&settings_path).exists() {
-        return create_settings();
+            // Deserialize the message
+            let response_result = serde_json::from_str(&message_string);
+            if response_result.is_err() {
+                println!(
+                    "Failed to deserialize message: {}",
+                    response_result.unwrap_err()
+                );
+                continue;
+            }
+            let response: Response = response_result.unwrap();
+
+            // Handle the message
+            match response.r#type.as_str() {
+                "DATA_UPDATE" => {
+                    println!("Received data update: {:?}", response.data);
+                    // TODO: Handle data update
+                }
+                "NOTIFICATION" => {
+                    println!("Received notification: {:?}", response.data);
+
+                    let notification_result = serde_json::from_value(response.data);
+                    if notification_result.is_err() {
+                        println!(
+                            "Failed to deserialize notification: {}",
+                            notification_result.unwrap_err()
+                        );
+                        continue;
+                    }
+                    let notification: Notification = notification_result.unwrap();
+                    let timeout = notification.timeout.unwrap_or(5.0) as u64;
+
+                    // Calculate the window height
+                    let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
+                    let title_lines: i32 =
+                        1 + (notification.title.len() as f64 / 52.0).round() as i32;
+                    println!("Title Lines: {}", title_lines);
+                    if title_lines > 1 {
+                        height += 64 * title_lines;
+                    }
+                    if let Some(message) = &notification.message {
+                        height += 24;
+                        let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
+                        println!("Message Lines: {}", message_lines);
+                        if message_lines > 1 {
+                            height += 20 * message_lines;
+                        }
+                    }
+                    if notification.image.is_some() {
+                        height += 280;
+                    }
+                    if let Some(actions) = &notification.actions {
+                        if !actions.is_empty() {
+                            height += 72;
+                        }
+                    }
+                    println!("Window Height: {}", height);
+
+                    let actions_string = if notification.actions.is_some() {
+                        serde_json::to_string(notification.actions.as_ref().unwrap()).unwrap()
+                    } else {
+                        "".to_string()
+                    };
+
+                    let audio_string = if notification.audio.is_some() {
+                        serde_json::to_string(notification.audio.as_ref().unwrap()).unwrap()
+                    } else {
+                        "".to_string()
+                    };
+
+                    let notification_json = json!({
+                        "title": notification.title,
+                        "message": notification.message.unwrap_or_else(|| String::from("") ),
+                        "icon": notification.icon.unwrap_or_else(|| String::from("") ),
+                        "image": notification.image.unwrap_or_else(|| String::from("") ),
+                        "actions": actions_string,
+                        "timeout": timeout.to_string(),
+                        "audio": audio_string,
+                    });
+                    println!("Notification JSON: {}", notification_json.to_string());
+
+                    let query_string_result = serde_urlencoded::to_string(notification_json);
+                    if query_string_result.is_err() {
+                        println!(
+                            "Failed to serialize notification to query string: {}",
+                            query_string_result.unwrap_err()
+                        );
+                        continue;
+                    }
+                    let query_string = format!("&{}", query_string_result.unwrap());
+                    println!("Query string: {}", query_string);
+
+                    let app_handle_clone_1 = app_handle.clone();
+                    let app_handle_clone_2 = app_handle.clone();
+                    create_window(
+                        app_handle_clone_1,
+                        "notification".to_string(),
+                        Some(query_string),
+                        Some(height),
+                    );
+
+                    let _handle = thread::spawn(move || {
+                        let rt = Runtime::new().unwrap();
+                        rt.block_on(async {
+                            println!("Waiting for {} seconds to close the notification", timeout);
+                            thread::sleep(Duration::from_secs(timeout));
+
+                            close_window(app_handle_clone_2, "notification".to_string());
+                        });
+                    });
+                }
+                _ => {
+                    println!("Received event: {}", response.r#type);
+                }
+            }
+        }
     }
 
-    let settings = std::fs::read_to_string(settings_path);
-    if settings.is_err() {
-        return create_settings();
-    }
-    let settings = serde_json::from_str(&settings.unwrap());
-    if settings.is_err() {
-        return create_settings();
-    }
-
-    settings.unwrap()
+    Ok(())
 }
 
 fn setup_autostart(app: &mut App) -> Result<(), Box<dyn Error>> {
-    let settings = get_settings();
+    // Get settings
+    let settings: Settings = get_settings();
 
     println!("Autostart: {}", settings.autostart);
 
@@ -239,9 +383,92 @@ fn stop_backend() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
-    println!("Creating window: {}", page);
+fn page_title_map() -> Vec<(&'static str, &'static str)> {
+    vec![
+        ("data", "Data"),
+        ("settings", "Settings"),
+        ("notification", "Notification"),
+    ]
+}
 
+fn get_config_path() -> String {
+    let path = format!(
+        "{}/timmo001/systembridge",
+        std::env::var("LOCALAPPDATA").unwrap()
+    );
+
+    if !std::path::Path::new(&path).exists() {
+        std::fs::create_dir_all(&path).unwrap();
+    }
+
+    path
+}
+
+fn create_settings() -> Settings {
+    // Get install directory from &localappdata%\timmo001\systembridge
+    let config_path = get_config_path();
+
+    // Create a uuid v4 token
+    let token = uuid::Uuid::new_v4().to_string();
+
+    // Create settings from {config_path}\settings.json
+    let settings = Settings {
+        api: SettingsAPI {
+            token: token.to_string(),
+            port: 9170,
+        },
+        autostart: false,
+        keyboard_hotkeys: vec![],
+        log_level: "INFO".to_string(),
+        media: SettingsMedia {
+            directories: vec![],
+        },
+    };
+
+    // Create settings string
+    let settings_string = serde_json::to_string(&settings).unwrap();
+
+    println!("Creating settings file: {}", settings_string);
+
+    // Write settings to {config_path}\settings.json
+    let settings_path = format!("{}/settings.json", config_path);
+    std::fs::write(settings_path, settings_string).unwrap();
+
+    settings
+}
+
+#[tauri::command]
+fn get_settings() -> Settings {
+    // Get install directory from &localappdata%\timmo001\systembridge
+    let config_path = get_config_path();
+
+    // Read settings from {config_path}\settings.json
+    let settings_path = format!("{}/settings.json", config_path);
+    if !std::path::Path::new(&settings_path).exists() {
+        return create_settings();
+    }
+
+    let settings = std::fs::read_to_string(settings_path);
+    if settings.is_err() {
+        return create_settings();
+    }
+    let settings = serde_json::from_str(&settings.unwrap());
+    if settings.is_err() {
+        return create_settings();
+    }
+
+    settings.unwrap()
+}
+
+#[tauri::command]
+fn create_window(
+    app_handle: AppHandle,
+    page: String,
+    query_additional: Option<String>,
+    height: Option<i32>,
+) {
+    println!("Creating window: {}", page);
+    // Get settings
     let settings: Settings = get_settings();
 
     let title = format!(
@@ -254,38 +481,85 @@ fn create_window(app: &AppHandle, page: String) -> Result<(), Box<dyn Error>> {
     );
 
     let url: tauri::Url = format!(
-        "http://{}:{}/app/{}.html?apiPort={}&token={}",
+        "http://{}:{}/app/{}.html?apiPort={}&token={}{}",
         BACKEND_HOST,
         settings.api.port.to_string().clone(),
         page,
         settings.api.port.clone(),
-        settings.api.token.clone()
+        settings.api.token.clone(),
+        query_additional.clone().unwrap_or("".to_string())
     )
     .parse()
     .unwrap();
 
-    let webview_window_result = app.get_webview_window("main");
-    if webview_window_result.is_some() {
-        let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
+    if page == "notification" {
+        let height = height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as i32);
+
+        let window =
+            WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
+                .always_on_top(true)
+                .decorations(false)
+                .inner_size(WINDOW_NOTIFICATION_WIDTH, height as f64)
+                .resizable(false)
+                .skip_taskbar(true)
+                .title(title)
+                .visible(false)
+                .build()
+                .unwrap();
+
+        // Get the display size
+        let monitor = window
+            .primary_monitor()
+            .expect("No primary monitor available")
+            .unwrap();
+        let size = monitor.size();
+        println!("Display size: {}, {}", size.width, size.height);
+
+        let window_x = (size.width - ((WINDOW_NOTIFICATION_WIDTH as u32) * 2) - 128) as f64;
+        let window_y = (size.height - ((height as u32) * 2) - 192) as f64;
+        println!("Window position: {}, {}", window_x, window_y);
+
+        window
+            .set_position(PhysicalPosition {
+                x: window_x,
+                y: window_y,
+            })
+            .unwrap();
         window.show().unwrap();
-        window.navigate(url);
-        window.set_title(title.as_str()).unwrap();
-        window.set_focus().unwrap();
-        return Ok(());
+    } else {
+        let webview_window_result = app_handle.get_webview_window("main");
+        if webview_window_result.is_some() {
+            let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
+            window.show().unwrap();
+            window.navigate(url);
+            window.set_title(title.as_str()).unwrap();
+            window.set_focus().unwrap();
+            return;
+        }
+
+        WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
+            .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+            .title(title)
+            .build()
+            .unwrap();
     }
+}
 
-    WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
-        .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        .title(title)
-        .build()
-        .unwrap();
+#[tauri::command]
+fn close_window(app_handle: AppHandle, label: String) {
+    println!("Closing window: {}", label);
 
-    Ok(())
+    let webview_window_result = app_handle.get_webview_window(label.as_str());
+    if webview_window_result.is_some() {
+        let window: tauri::WebviewWindow = webview_window_result.unwrap();
+        window.close().unwrap();
+        window.destroy().unwrap();
+    }
 }
 
 #[tokio::main]
 async fn main() {
-    let _ = setup_app().await;
+    setup_app().await.unwrap();
 
     // Create the main window
     tauri::Builder::default()
@@ -295,6 +569,9 @@ async fn main() {
         ))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
+        .invoke_handler(tauri::generate_handler![create_window])
+        .invoke_handler(tauri::generate_handler![close_window])
+        .invoke_handler(tauri::generate_handler![get_settings])
         .setup(|app| {
             // Setup autostart from settings
             setup_autostart(app).unwrap();
@@ -351,18 +628,18 @@ async fn main() {
             tray.set_menu(Some(menu))?;
             tray.on_tray_icon_event(|tray, event| match event.click_type {
                 ClickType::Double => {
-                    let app = tray.app_handle();
+                    let app_handle = tray.app_handle();
 
-                    create_window(app, "data".to_string()).unwrap();
+                    create_window(app_handle.clone(), "data".to_string(), None, None);
                 }
                 _ => (),
             });
             tray.on_menu_event(move |app_handle, event| match event.id().as_ref() {
                 "show_settings" => {
-                    create_window(app_handle, "settings".to_string()).unwrap();
+                    create_window(app_handle.clone(), "settings".to_string(), None, None);
                 }
                 "show_data" => {
-                    create_window(app_handle, "data".to_string()).unwrap();
+                    create_window(app_handle.clone(), "data".to_string(), None, None);
                 }
                 "check_for_updates" => {
                     app_handle
@@ -404,7 +681,9 @@ async fn main() {
                         .unwrap();
                 }
                 "copy_token" => {
+                    // Get settings
                     let settings: Settings = get_settings();
+
                     app_handle
                         .clipboard()
                         .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
@@ -433,6 +712,7 @@ async fn main() {
                 _ => (),
             });
 
+            let app_handle_clone = app.handle().clone();
             let _handle = thread::spawn(|| {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
@@ -444,6 +724,13 @@ async fn main() {
 
                         setup_app().await.unwrap();
                     }
+                });
+            });
+
+            let _websocket_handle = thread::spawn(|| {
+                let rt = Runtime::new().unwrap();
+                rt.block_on(async {
+                    setup_websocket_client(app_handle_clone).await.unwrap();
                 });
             });
 
