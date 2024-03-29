@@ -1,16 +1,16 @@
-sudo apt-get update
+sudo apt update
 
-sudo apt-get install -y \
+sudo apt install -y \
   libayatana-appindicator3-dev \
   libgtk-3-dev \
   libjavascriptcoregtk-4.1-dev \
-  librsvg2-dev \
+  librsvg2-dev \  
   libsoup-3.0-dev \
   libwebkit2gtk-4.1-dev
 
-pip install --upgrade setuptools wheel pyinstaller
+python -m pip install --upgrade setuptools wheel pyinstaller
 
-pip install -r requirements_linux.txt
+python -m pip install -r requirements_linux.txt
 
 wget \
   -O backend.py \
