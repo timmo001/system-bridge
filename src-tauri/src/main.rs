@@ -144,8 +144,6 @@ fn close_window(app_handle: AppHandle, label: String) {
 
 #[tokio::main]
 async fn main() {
-    setup_backend().await.unwrap();
-
     // Create the main window
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
@@ -298,15 +296,19 @@ async fn main() {
             });
 
             let app_handle_clone = app.handle().clone();
-            let _handle = thread::spawn(|| {
+            let _handle = thread::spawn(move || {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
+                    // Setup the backend server
+                    setup_backend().await.unwrap();
+
                     // Check backend server is running every 60 seconds
                     let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
                     loop {
                         println!("Waiting for 60 seconds before checking the backend server again");
                         interval.tick().await;
 
+                        // Setup the backend server
                         setup_backend().await.unwrap();
                     }
                 });
