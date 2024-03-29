@@ -75,65 +75,54 @@ fn create_window(
     .unwrap();
 
     if page == "notification" {
-        let height = height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as f64);
+        let webview_window_result = app_handle.get_webview_window("notification");
+        if webview_window_result.is_some() {
+            let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
+            window.navigate(url);
+            window.show().unwrap();
+            return;
+        }
 
-        let window =
+        let window_result =
             WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
                 .always_on_top(true)
                 .decorations(false)
                 .focused(false)
-                .inner_size(WINDOW_NOTIFICATION_WIDTH, height as f64)
+                .inner_size(
+                    WINDOW_NOTIFICATION_WIDTH,
+                    height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as f64),
+                )
+                .position(28.0, 28.0)
                 .resizable(false)
                 .skip_taskbar(true)
                 .title(title)
-                .visible(false)
+                .visible(true)
                 .on_page_load(move |window, _payload| {
                     if window.url().as_str().contains("close.window") {
                         window.close().unwrap();
                     }
                 })
-                .build()
-                .unwrap();
-
-        // Get the display size
-        let monitor = window
-            .primary_monitor()
-            .expect("No primary monitor available")
-            .unwrap();
-        let size = monitor.size();
-        let window_width = size.width as f64;
-        let window_height = size.height as f64;
-        println!("Display size: {}, {}", window_width, window_height);
-
-        let window_x = 28.0 as f64;
-        let window_y = 28.0 as f64;
-        println!("Window position: {}, {}", window_x, window_y);
-
-        window
-            .set_position(PhysicalPosition {
-                x: window_x,
-                y: window_y,
-            })
-            .unwrap();
-
-        window.show().unwrap();
+                .build();
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
         if webview_window_result.is_some() {
             let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
-            window.show().unwrap();
             window.navigate(url);
+            window.show().unwrap();
             window.set_title(title.as_str()).unwrap();
             window.set_focus().unwrap();
             return;
         }
 
-        WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
-            .focused(true)
-            .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-            .title(title)
-            .build()
-            .unwrap();
+        let window_result =
+            WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
+                .focused(true)
+                .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+                .title(title)
+                .build();
+    }
+    if window_result.is_err() {
+        println!("Failed to create window: {:?}", window_result.err());
     }
 }
 
@@ -286,7 +275,7 @@ async fn main() {
                 }
                 "open_logs_backend" => {
                     let config_path = get_config_path();
-                    let backend_log_path = format!("{}/systembridgebackend.log", config_path);
+                    let backend_log_path = format!("{}/system-bridge-backend.log", config_path);
                     if !std::path::Path::new(&backend_log_path).exists() {
                         println!("Backend log file not found at: {}", backend_log_path);
                         return;
