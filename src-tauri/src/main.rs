@@ -1,387 +1,38 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use futures_util::{SinkExt, StreamExt};
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use serde_json::Value;
-use std::collections::HashMap;
-use std::path::Path;
-use std::process::Command;
-use std::str::FromStr;
+mod api;
+mod autostart;
+mod backend;
+mod settings;
+mod websocket;
+
+use std::thread;
 use std::time::Duration;
-use std::{error::Error, thread};
 use tauri::PhysicalPosition;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
-    App, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
+    AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
 use tokio::runtime::Runtime;
 use tokio::time::interval;
-use tokio_websockets::{ClientBuilder, Message};
 
-#[derive(Debug, Serialize, Deserialize)]
-struct APIBaseResponse {
-    version: String,
-}
+use crate::{
+    autostart::setup_autostart,
+    backend::{setup_backend, stop_backend},
+    settings::{get_config_path, get_settings, Settings},
+    websocket::setup_websocket_client,
+};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Settings {
-    pub api: SettingsAPI,
-    pub autostart: bool,
-    pub keyboard_hotkeys: Vec<SettingsKeyboardHotkeys>,
-    pub log_level: String,
-    pub media: SettingsMedia,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SettingsAPI {
-    token: String,
-    port: i64,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SettingsKeyboardHotkeys {
-    name: String,
-    key: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SettingsMedia {
-    directories: Vec<SettingsMediaDirectories>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SettingsMediaDirectories {
-    name: String,
-    path: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Notification {
-    title: String,
-    message: Option<String>,
-    icon: Option<String>,
-    image: Option<String>,
-    actions: Option<Vec<Action>>,
-    timeout: Option<f32>,
-    audio: Option<Audio>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Action {
-    command: String,
-    label: String,
-    data: Option<HashMap<String, String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Audio {
-    source: String,
-    volume: Option<f32>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct GetData {
-    modules: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Request {
-    id: String,
-    event: String,
-    data: HashMap<String, String>,
-    #[doc(hidden)]
-    token: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Response {
-    id: String,
-    r#type: String,
-    data: Value,
-    subtype: Option<String>,
-    message: Option<String>,
-    module: Option<String>,
-}
-
-const BACKEND_HOST: &str = "127.0.0.1";
+pub const BACKEND_HOST: &str = "127.0.0.1";
 
 const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
 const WINDOW_NOTIFICATION_WIDTH: f64 = 420.0;
 const WINDOW_NOTIFICATION_HEIGHT: f64 = 48.0;
-
-async fn setup_app() -> Result<(), Box<dyn std::error::Error>> {
-    // Get settings
-    let settings: Settings = get_settings();
-
-    let base_url = format!("http://{}:{}", BACKEND_HOST, settings.api.port.to_string());
-
-    // Check if the backend server is running
-    let backend_active = check_backend(base_url.clone()).await;
-    if !backend_active.is_ok() {
-        // Start the backend server
-        let backend_start = start_backend(base_url.clone()).await;
-        if !backend_start.is_ok() {
-            println!("Failed to start the backend server");
-            std::process::exit(1);
-        }
-    }
-
-    Ok(())
-}
-
-async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    // Get settings
-    let settings: Settings = get_settings();
-
-    let ws_url = format!(
-        "ws://{}:{}/api/websocket",
-        BACKEND_HOST,
-        settings.api.port.to_string(),
-    );
-    let ws_uri = http::uri::Uri::from_str(ws_url.as_str()).unwrap();
-
-    let (mut client, _) = ClientBuilder::from_uri(ws_uri).connect().await?;
-
-    let mut request = Request {
-        id: uuid::Uuid::new_v4().to_string(),
-        event: "".to_string(),
-        data: HashMap::new(),
-        token: settings.api.token.clone(),
-    };
-
-    request.event = "REGISTER_DATA_LISTENER".to_string();
-    let mut request_json = json!(request);
-    request_json["data"] = json!({
-      "modules": ["system"]
-    });
-
-    let request_string = serde_json::to_string(&request_json).unwrap();
-    println!("Sending request: {}", request_string);
-    client.send(Message::text(request_string)).await?;
-
-    while let Some(item) = client.next().await {
-        // Read the message
-        let message = item.unwrap();
-
-        if message.is_close() {
-            break;
-        }
-
-        if message.is_text() {
-            let message_string = message.as_text().unwrap();
-            println!("Received message: {}", message_string);
-
-            // Deserialize the message
-            let response_result = serde_json::from_str(&message_string);
-            if response_result.is_err() {
-                println!(
-                    "Failed to deserialize message: {}",
-                    response_result.unwrap_err()
-                );
-                continue;
-            }
-            let response: Response = response_result.unwrap();
-
-            // Handle the message
-            match response.r#type.as_str() {
-                "DATA_UPDATE" => {
-                    println!("Received data update: {:?}", response.data);
-                    // TODO: Handle data update
-                }
-                "NOTIFICATION" => {
-                    println!("Received notification: {:?}", response.data);
-
-                    let notification_result = serde_json::from_value(response.data);
-                    if notification_result.is_err() {
-                        println!(
-                            "Failed to deserialize notification: {}",
-                            notification_result.unwrap_err()
-                        );
-                        continue;
-                    }
-                    let notification: Notification = notification_result.unwrap();
-                    let timeout = notification.timeout.unwrap_or(5.0) as u64;
-
-                    // Calculate the window height
-                    let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
-                    let title_lines: i32 =
-                        1 + (notification.title.len() as f64 / 52.0).round() as i32;
-                    println!("Title Lines: {}", title_lines);
-                    if title_lines > 1 {
-                        height += 64 * title_lines;
-                    }
-                    if let Some(message) = &notification.message {
-                        height += 24;
-                        let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
-                        println!("Message Lines: {}", message_lines);
-                        if message_lines > 1 {
-                            height += 20 * message_lines;
-                        }
-                    }
-                    if notification.image.is_some() {
-                        height += 280;
-                    }
-                    if let Some(actions) = &notification.actions {
-                        if !actions.is_empty() {
-                            height += 72;
-                        }
-                    }
-                    println!("Window Height: {}", height);
-
-                    let actions_string = if notification.actions.is_some() {
-                        serde_json::to_string(notification.actions.as_ref().unwrap()).unwrap()
-                    } else {
-                        "".to_string()
-                    };
-
-                    let audio_string = if notification.audio.is_some() {
-                        serde_json::to_string(notification.audio.as_ref().unwrap()).unwrap()
-                    } else {
-                        "".to_string()
-                    };
-
-                    let notification_json = json!({
-                        "title": notification.title,
-                        "message": notification.message.unwrap_or_else(|| String::from("") ),
-                        "icon": notification.icon.unwrap_or_else(|| String::from("") ),
-                        "image": notification.image.unwrap_or_else(|| String::from("") ),
-                        "actions": actions_string,
-                        "timeout": timeout.to_string(),
-                        "audio": audio_string,
-                    });
-                    println!("Notification JSON: {}", notification_json.to_string());
-
-                    let query_string_result = serde_urlencoded::to_string(notification_json);
-                    if query_string_result.is_err() {
-                        println!(
-                            "Failed to serialize notification to query string: {}",
-                            query_string_result.unwrap_err()
-                        );
-                        continue;
-                    }
-                    let query_string = format!("&{}", query_string_result.unwrap());
-                    println!("Query string: {}", query_string);
-
-                    let app_handle_clone_1 = app_handle.clone();
-                    let app_handle_clone_2 = app_handle.clone();
-                    create_window(
-                        app_handle_clone_1,
-                        "notification".to_string(),
-                        Some(query_string),
-                        Some(height),
-                    );
-
-                    let _handle = thread::spawn(move || {
-                        let rt = Runtime::new().unwrap();
-                        rt.block_on(async {
-                            println!("Waiting for {} seconds to close the notification", timeout);
-                            thread::sleep(Duration::from_secs(timeout));
-
-                            close_window(app_handle_clone_2, "notification".to_string());
-                        });
-                    });
-                }
-                _ => {
-                    println!("Received event: {}", response.r#type);
-                }
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn setup_autostart(app: &mut App) -> Result<(), Box<dyn Error>> {
-    // Get settings
-    let settings: Settings = get_settings();
-
-    println!("Autostart: {}", settings.autostart);
-
-    // Get the autostart manager
-    let autostart_manager: tauri::State<'_, tauri_plugin_autostart::AutoLaunchManager> =
-        app.autolaunch();
-
-    if settings.autostart {
-        let _ = autostart_manager.enable();
-    } else {
-        let _ = autostart_manager.disable();
-    }
-
-    Ok(())
-}
-
-async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
-    println!("Checking backend server: {}/", base_url);
-
-    // Check if the backend server is running
-    let client = Client::builder().timeout(Duration::from_secs(5)).build()?;
-    let response = client.get(format!("{}/", base_url)).send().await?;
-
-    if response.status().is_success() {
-        println!("Backend server is already running");
-        Ok(())
-    } else {
-        Err(format!("Backend server is not running").into())
-    }
-}
-
-async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
-    let exe = std::env::current_exe()?;
-    let dir = exe.parent().expect("Executable must be in some directory");
-    let backend_dir: String = format!(
-        "{}/_up_/dist/systembridgebackend/systembridgebackend",
-        dir.to_str().unwrap()
-    );
-
-    let backend_path = Path::new(&backend_dir);
-    let backend_path_str = backend_path.to_str().unwrap();
-    println!("Starting backend server: {}", backend_path_str);
-    let process = Command::new(backend_path_str).spawn();
-    if process.is_err() {
-        return Err("Failed to start the backend server".into());
-    }
-
-    println!("Backend server started");
-
-    // Wait for the backend server to start
-    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-
-    // Check if the backend server is running
-    let backend_active = check_backend(base_url.clone()).await;
-    if !backend_active.is_ok() {
-        return Err("Failed to start the backend server".into());
-    }
-
-    println!("Backend server is running");
-
-    Ok(())
-}
-
-fn stop_backend() -> Result<(), Box<dyn Error>> {
-    println!("Stopping backend server");
-
-    // Find any running backend server processes
-    sysinfo::set_open_files_limit(0);
-    let mut sys = sysinfo::System::new();
-    sys.refresh_processes();
-
-    for (pid, process) in sys.processes() {
-        if process.name().contains("systembridgebackend") {
-            println!("Killing process: {}", pid);
-            let _ = process.kill();
-        }
-    }
-
-    Ok(())
-}
 
 fn page_title_map() -> Vec<(&'static str, &'static str)> {
     vec![
@@ -389,75 +40,6 @@ fn page_title_map() -> Vec<(&'static str, &'static str)> {
         ("settings", "Settings"),
         ("notification", "Notification"),
     ]
-}
-
-fn get_config_path() -> String {
-    let path = format!(
-        "{}/timmo001/systembridge",
-        std::env::var("LOCALAPPDATA").unwrap()
-    );
-
-    if !std::path::Path::new(&path).exists() {
-        std::fs::create_dir_all(&path).unwrap();
-    }
-
-    path
-}
-
-fn create_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let config_path = get_config_path();
-
-    // Create a uuid v4 token
-    let token = uuid::Uuid::new_v4().to_string();
-
-    // Create settings from {config_path}\settings.json
-    let settings = Settings {
-        api: SettingsAPI {
-            token: token.to_string(),
-            port: 9170,
-        },
-        autostart: false,
-        keyboard_hotkeys: vec![],
-        log_level: "INFO".to_string(),
-        media: SettingsMedia {
-            directories: vec![],
-        },
-    };
-
-    // Create settings string
-    let settings_string = serde_json::to_string(&settings).unwrap();
-
-    println!("Creating settings file: {}", settings_string);
-
-    // Write settings to {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
-    std::fs::write(settings_path, settings_string).unwrap();
-
-    settings
-}
-
-#[tauri::command]
-fn get_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let config_path = get_config_path();
-
-    // Read settings from {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
-    if !std::path::Path::new(&settings_path).exists() {
-        return create_settings();
-    }
-
-    let settings = std::fs::read_to_string(settings_path);
-    if settings.is_err() {
-        return create_settings();
-    }
-    let settings = serde_json::from_str(&settings.unwrap());
-    if settings.is_err() {
-        return create_settings();
-    }
-
-    settings.unwrap()
 }
 
 #[tauri::command]
@@ -469,7 +51,7 @@ fn create_window(
 ) {
     println!("Creating window: {}", page);
     // Get settings
-    let settings: Settings = get_settings();
+    let settings: settings::Settings = settings::get_settings();
 
     let title = format!(
         "{} | System Bridge",
@@ -559,7 +141,7 @@ fn close_window(app_handle: AppHandle, label: String) {
 
 #[tokio::main]
 async fn main() {
-    setup_app().await.unwrap();
+    setup_backend().await.unwrap();
 
     // Create the main window
     tauri::Builder::default()
@@ -722,7 +304,7 @@ async fn main() {
                         println!("Waiting for 60 seconds before checking the backend server again");
                         interval.tick().await;
 
-                        setup_app().await.unwrap();
+                        setup_backend().await.unwrap();
                     }
                 });
             });
