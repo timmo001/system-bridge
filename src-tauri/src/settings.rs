@@ -1,3 +1,4 @@
+use platform_dirs::AppDirs;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,10 +34,12 @@ pub struct SettingsMediaDirectories {
 }
 
 pub fn get_config_path() -> String {
-    let path = format!(
-        "{}/timmo001/systembridge",
-        std::env::var("LOCALAPPDATA").unwrap()
-    );
+    // Get config path from {localappdata}\timmo001\systembridge
+    let app_dirs = AppDirs::new(Some("timmo001"), true).unwrap();
+    let data_path = app_dirs.data_dir.to_str().unwrap().to_string();
+    println!("Data path: {}", data_path);
+
+    let path = format!("{}/systembridge", data_path);
 
     if !std::path::Path::new(&path).exists() {
         std::fs::create_dir_all(&path).unwrap();
@@ -46,7 +49,7 @@ pub fn get_config_path() -> String {
 }
 
 fn create_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
+    // Get config path from {localappdata}\timmo001\systembridge
     let config_path = get_config_path();
 
     // Create a uuid v4 token
