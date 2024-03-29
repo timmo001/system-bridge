@@ -81,6 +81,7 @@ fn create_window(
             WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
                 .always_on_top(true)
                 .decorations(false)
+                .focused(false)
                 .inner_size(WINDOW_NOTIFICATION_WIDTH, height as f64)
                 .resizable(false)
                 .skip_taskbar(true)
@@ -122,6 +123,7 @@ fn create_window(
         }
 
         WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::External(url))
+            .focused(true)
             .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
             .title(title)
             .build()
