@@ -29,6 +29,8 @@ jobs:
       - name: ↘️ Get version from systembridgebackend package
         id: get-version
         run: |
+          cargo add cargo-edit
+
           # Get version from systembridgebackend package using requirements_linux.txt
           version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
           echo "Version: $version"
@@ -54,7 +56,6 @@ jobs:
 
           # Update version in src-tauri/Cargo.toml
           cd src-tauri
-          cargo add cargo-edit
           cargo set-version ${{ steps.get-version.outputs.version }}
       - name: ⤵️ Pull latest changes from GitHub
         run: |
