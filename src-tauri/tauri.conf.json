@@ -19,7 +19,6 @@
   "bundle": {
     "active": true,
     "category": "Utility",
-    "externalBin": [],
     "license": "Apache-2.0",
     "licenseFile": "../LICENSE",
     "resources": [
