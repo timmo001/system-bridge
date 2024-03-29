@@ -74,7 +74,7 @@ Specifically for windows, adds sensors to get windows system information.
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Python 3.12](https://www.python.org/downloads/)
 - [Node.js](https://nodejs.org/en/download/)
-- [Yarn](https://yarnpkg.com/getting-started/install)
+- [Yarn](https://classic.yarnpkg.com/en/docs/install)
 
 #### Windows
 
