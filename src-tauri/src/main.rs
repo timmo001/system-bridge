@@ -99,8 +99,8 @@ fn create_window(
         let window_height = size.height as f64;
         println!("Display size: {}, {}", window_width, window_height);
 
-        let window_x = (window_width - (WINDOW_NOTIFICATION_WIDTH * 1.5) - 28.0) as f64;
-        let window_y = (window_height - (height * 1.5) - 100.0) as f64;
+        let window_x = 28.0 as f64;
+        let window_y = 28.0 as f64;
         println!("Window position: {}, {}", window_x, window_y);
 
         window
