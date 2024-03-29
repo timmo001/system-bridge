@@ -47,7 +47,7 @@ fn create_window(
     app_handle: AppHandle,
     page: String,
     query_additional: Option<String>,
-    height: Option<i32>,
+    height: Option<f64>,
 ) {
     println!("Creating window: {}", page);
     // Get settings
@@ -75,7 +75,7 @@ fn create_window(
     .unwrap();
 
     if page == "notification" {
-        let height = height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as i32);
+        let height = height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as f64);
 
         let window =
             WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
@@ -97,8 +97,8 @@ fn create_window(
         let size = monitor.size();
         println!("Display size: {}, {}", size.width, size.height);
 
-        let window_x = (size.width - ((WINDOW_NOTIFICATION_WIDTH as u32) * 2) - 128) as f64;
-        let window_y = (size.height - ((height as u32) * 2) - 192) as f64;
+        let window_x = (size.width - (WINDOW_NOTIFICATION_WIDTH) - 28) as f64;
+        let window_y = (size.height - (height) - 28) as f64;
         println!("Window position: {}, {}", window_x, window_y);
 
         window

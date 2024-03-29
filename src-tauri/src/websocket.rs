@@ -137,19 +137,19 @@ pub async fn setup_websocket_client(
                         continue;
                     }
                     let notification: Notification = notification_result.unwrap();
-                    let timeout = notification.timeout.unwrap_or(5.0) as u64;
+                    let timeout = notification.timeout.unwrap_or(5.0) as f32;
 
                     // Calculate the window height
-                    let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
-                    let title_lines: i32 =
-                        1 + (notification.title.len() as f64 / 52.0).round() as i32;
+                    let mut height: f64 = WINDOW_NOTIFICATION_HEIGHT as f64;
+                    let title_lines: f64 =
+                        1 + (notification.title.len() as f64 / 52.0).round() as f64;
                     println!("Title Lines: {}", title_lines);
                     if title_lines > 1 {
                         height += 64 * title_lines;
                     }
                     if let Some(message) = &notification.message {
                         height += 24;
-                        let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
+                        let message_lines: f64 = 1 + (message.len() as f64 / 62.0).round() as f64;
                         println!("Message Lines: {}", message_lines);
                         if message_lines > 1 {
                             height += 20 * message_lines;
