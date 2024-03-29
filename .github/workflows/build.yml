@@ -25,11 +25,7 @@ jobs:
       matrix:
         include:
           - platform: ubuntu-latest
-            rust-targets: x86_64-unknown-linux-gnu
-            tauri-target: x86_64-unknown-linux-gnu
           - platform: windows-latest
-            rust-targets: x86_64-pc-windows-msvc
-            tauri-target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -38,8 +34,6 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.rust-targets }}
       - name: Rust cache
         if: matrix.platform == 'ubuntu-latest'
         uses: swatinem/rust-cache@v2.7.3
@@ -157,7 +151,6 @@ jobs:
       - name: Build the app
         uses: tauri-apps/tauri-action@v0.5.1
         with:
-          args: --target ${{ matrix.tauri-target }}
           updaterJsonPreferNsis: true
       - name: Publish artifacts
         uses: actions/upload-artifact@v4.3.1
