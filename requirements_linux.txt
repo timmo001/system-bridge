@@ -1,4 +1,4 @@
 systembridgebackend==4.0.5.dev0
 systembridgecli==4.0.1
-systembridgefrontend==4.0.1
+systembridgefrontend==4.0.2
 systembridgeshared==4.0.2
