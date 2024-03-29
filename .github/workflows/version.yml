@@ -34,13 +34,8 @@ jobs:
       - name: ✏ Set Version Files
         run: |
           echo "Version: ${{ steps.get-version.outputs.version }}"
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
-          sudo add-apt-repository ppa:rmescandon/yq
           sudo apt update
-          sudo apt install -y yq jq
-
-          # Update version in nfpm.yml
-          yq eval '.version = "${{ steps.get-version.outputs.version }}"' nfpm.yml -i
+          sudo apt install -y jq
 
           # Update version in package.json
           jq --arg version ${{ steps.get-version.outputs.version }} '.version = $version' package.json > package.json.tmp && \
@@ -52,7 +47,6 @@ jobs:
 
           # Update version in src-tauri/Cargo.toml
           sed -i '0,/version/s/^version = "\([0-9.]*\)"$/version = "${{ steps.get-version.outputs.version }}"/' src-tauri/Cargo.toml
-
       - name: ⤵️ Pull latest changes from GitHub
         run: |
           git pull --ff
