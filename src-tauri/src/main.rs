@@ -8,7 +8,6 @@ mod websocket;
 
 use std::thread;
 use std::time::Duration;
-use tauri::PhysicalPosition;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -103,6 +102,10 @@ fn create_window(
                     }
                 })
                 .build();
+
+        if window_result.is_err() {
+            println!("Failed to create window: {:?}", window_result.err());
+        }
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
         if webview_window_result.is_some() {
@@ -120,9 +123,10 @@ fn create_window(
                 .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
                 .title(title)
                 .build();
-    }
-    if window_result.is_err() {
-        println!("Failed to create window: {:?}", window_result.err());
+
+        if window_result.is_err() {
+            println!("Failed to create window: {:?}", window_result.err());
+        }
     }
 }
 
