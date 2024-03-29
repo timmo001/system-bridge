@@ -78,7 +78,6 @@ Specifically for windows, adds sensors to get windows system information.
 
 #### Windows
 
-
 ```powershell
 .\setup.ps1
 ```
@@ -102,7 +101,6 @@ yarn tauri build
 yarn install
 yarn tauri dev
 ```
-
 
 ## Module Development
 
