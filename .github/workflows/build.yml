@@ -142,9 +142,20 @@ jobs:
               cli.py
       - name: Install frontend dependencies
         run: yarn install
+      - name: Set args (linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          # Set TAURI_ARGS for linux
+          echo "TAURI_ARGS=-v" >> $GITHUB_ENV
+      - name: Set args (windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          # Set TAURI_ARGS for windows
+          echo "TAURI_ARGS=-v -t x86_64-pc-windows-msvc" >> $GITHUB_ENV
       - name: Build the app
         uses: tauri-apps/tauri-action@v0.5.1
         with:
+          args: ${{ env.TAURI_ARGS }}
           updaterJsonPreferNsis: true
       - name: Publish artifacts
         uses: actions/upload-artifact@v4.3.1
