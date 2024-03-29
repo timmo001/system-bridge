@@ -24,6 +24,8 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PUSH_TOKEN }}
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
       - name: ↘️ Get version from systembridgebackend package
         id: get-version
         run: |
@@ -31,14 +33,29 @@ jobs:
           version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
           echo "Version: $version"
           echo "::set-output name=version::$version"
-      - name: ✏ Set Version File
+      - name: ✏ Set Version Files
         run: |
           echo "Version: ${{ steps.get-version.outputs.version }}"
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
           sudo add-apt-repository ppa:rmescandon/yq
           sudo apt update
-          sudo apt install yq
+          sudo apt install -y yq jq
+
+          # Update version in nfpm.yml
           yq eval '.version = "${{ steps.get-version.outputs.version }}"' nfpm.yml -i
+
+          # Update version in package.json
+          jq --arg version ${{ steps.get-version.outputs.version }} '.version = $version' package.json > package.json.tmp && \
+            mv package.json.tmp package.json
+
+          # Update version in src-tauri/tauri.conf.json
+          jq --arg version ${{ steps.get-version.outputs.version }} '.version = $version' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && \
+            mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
+
+          # Update version in src-tauri/Cargo.toml
+          cd src-tauri
+          cargo add cargo-edit
+          cargo set-version ${{ steps.get-version.outputs.version }}
       - name: ⤵️ Pull latest changes from GitHub
         run: |
           git pull --ff
