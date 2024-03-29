@@ -167,26 +167,6 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
     println!("Sending request: {}", request_string);
     client.send(Message::text(request_string)).await?;
 
-    let notification = Notification {
-        title: "Hello".to_string(),
-        message: Some("World".to_string()),
-        icon: None,
-        image: None,
-        actions: None,
-        timeout: None,
-        audio: None,
-    };
-
-    request.id = uuid::Uuid::new_v4().to_string();
-    request.event = "NOTIFICATION".to_string();
-
-    let mut request_json = json!(request);
-    request_json["data"] = json!(notification);
-
-    let request_string = serde_json::to_string(&request_json).unwrap();
-    println!("Sending request: {}", request_string);
-    client.send(Message::text(request_string)).await?;
-
     while let Some(item) = client.next().await {
         // Read the message
         let message = item.unwrap();
@@ -230,7 +210,56 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
                     let notification: Notification = notification_result.unwrap();
                     let timeout = notification.timeout.unwrap_or(5.0) as u64;
 
-                    let query_string_result = serde_urlencoded::to_string(notification);
+                    // Calculate the window height
+                    let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
+                    let title_lines: i32 =
+                        1 + (notification.title.len() as f64 / 52.0).round() as i32;
+                    println!("Title Lines: {}", title_lines);
+                    if title_lines > 1 {
+                        height += 64 * title_lines;
+                    }
+                    if let Some(message) = &notification.message {
+                        height += 24;
+                        let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
+                        println!("Message Lines: {}", message_lines);
+                        if message_lines > 1 {
+                            height += 20 * message_lines;
+                        }
+                    }
+                    if notification.image.is_some() {
+                        height += 280;
+                    }
+                    if let Some(actions) = &notification.actions {
+                        if !actions.is_empty() {
+                            height += 72;
+                        }
+                    }
+                    println!("Window Height: {}", height);
+
+                    let actions_string = if notification.actions.is_some() {
+                        serde_json::to_string(notification.actions.as_ref().unwrap()).unwrap()
+                    } else {
+                        "".to_string()
+                    };
+
+                    let audio_string = if notification.audio.is_some() {
+                        serde_json::to_string(notification.audio.as_ref().unwrap()).unwrap()
+                    } else {
+                        "".to_string()
+                    };
+
+                    let notification_json = json!({
+                        "title": notification.title,
+                        "message": notification.message.unwrap_or_else(|| String::from("") ),
+                        "icon": notification.icon.unwrap_or_else(|| String::from("") ),
+                        "image": notification.image.unwrap_or_else(|| String::from("") ),
+                        "actions": actions_string,
+                        "timeout": timeout.to_string(),
+                        "audio": audio_string,
+                    });
+                    println!("Notification JSON: {}", notification_json.to_string());
+
+                    let query_string_result = serde_urlencoded::to_string(notification_json);
                     if query_string_result.is_err() {
                         println!(
                             "Failed to serialize notification to query string: {}",
@@ -247,6 +276,7 @@ async fn setup_websocket_client(app_handle: AppHandle) -> Result<(), Box<dyn std
                         app_handle_clone_1,
                         "notification".to_string(),
                         Some(query_string),
+                        Some(height),
                     );
 
                     let _handle = thread::spawn(move || {
@@ -431,7 +461,12 @@ fn get_settings() -> Settings {
 }
 
 #[tauri::command]
-fn create_window(app_handle: AppHandle, page: String, query_additional: Option<String>) {
+fn create_window(
+    app_handle: AppHandle,
+    page: String,
+    query_additional: Option<String>,
+    height: Option<i32>,
+) {
     println!("Creating window: {}", page);
     // Get settings
     let settings: Settings = get_settings();
@@ -458,35 +493,7 @@ fn create_window(app_handle: AppHandle, page: String, query_additional: Option<S
     .unwrap();
 
     if page == "notification" {
-        let query_additional = query_additional.clone().unwrap().clone();
-
-        // Deserialize the notification
-        let notification: Notification = serde_urlencoded::from_str(&query_additional).unwrap();
-
-        // Calculate the window height
-        let mut height: i32 = WINDOW_NOTIFICATION_HEIGHT as i32;
-        let title_lines: i32 = 1 + (notification.title.len() as f64 / 52.0).round() as i32;
-        println!("Title Lines: {}", title_lines);
-        if title_lines > 1 {
-            height += 64 * title_lines;
-        }
-        if let Some(message) = &notification.message {
-            height += 24;
-            let message_lines: i32 = 1 + (message.len() as f64 / 62.0).round() as i32;
-            println!("Message Lines: {}", message_lines);
-            if message_lines > 1 {
-                height += 20 * message_lines;
-            }
-        }
-        if notification.image.is_some() {
-            height += 280;
-        }
-        if let Some(actions) = &notification.actions {
-            if !actions.is_empty() {
-                height += 72;
-            }
-        }
-        println!("Window Height: {}", height);
+        let height = height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as i32);
 
         let window =
             WebviewWindowBuilder::new(&app_handle, "notification", WebviewUrl::External(url))
@@ -508,8 +515,8 @@ fn create_window(app_handle: AppHandle, page: String, query_additional: Option<S
         let size = monitor.size();
         println!("Display size: {}, {}", size.width, size.height);
 
-        let window_x = (size.width - ((WINDOW_NOTIFICATION_WIDTH as u32) * 2) - 112) as f64;
-        let window_y = (size.height - ((height as u32) * 2) - 132) as f64;
+        let window_x = (size.width - ((WINDOW_NOTIFICATION_WIDTH as u32) * 2) - 128) as f64;
+        let window_y = (size.height - ((height as u32) * 2) - 192) as f64;
         println!("Window position: {}, {}", window_x, window_y);
 
         window
@@ -623,16 +630,16 @@ async fn main() {
                 ClickType::Double => {
                     let app_handle = tray.app_handle();
 
-                    create_window(app_handle.clone(), "data".to_string(), None);
+                    create_window(app_handle.clone(), "data".to_string(), None, None);
                 }
                 _ => (),
             });
             tray.on_menu_event(move |app_handle, event| match event.id().as_ref() {
                 "show_settings" => {
-                    create_window(app_handle.clone(), "settings".to_string(), None);
+                    create_window(app_handle.clone(), "settings".to_string(), None, None);
                 }
                 "show_data" => {
-                    create_window(app_handle.clone(), "data".to_string(), None);
+                    create_window(app_handle.clone(), "data".to_string(), None, None);
                 }
                 "check_for_updates" => {
                     app_handle
