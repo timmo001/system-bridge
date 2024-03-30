@@ -71,11 +71,13 @@ jobs:
             librsvg2-dev
 
           uv venv
+          source .venv/bin/activate
           uv pip install -r requirements_linux.txt
       - name: Install dependencies (windows only)
         if: matrix.platform == 'windows-latest'
         run: |
           uv venv
+          source .venv/bin/activate
           uv pip install -r requirements_windows.txt
       - name: 📦 Create executable (linux)
         if: matrix.platform == 'ubuntu-latest'
