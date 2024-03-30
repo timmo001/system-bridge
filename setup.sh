@@ -1,4 +1,5 @@
 sudo apt update
+
 sudo apt install \
   python3.12 \
   python3.12-dev \
@@ -10,7 +11,6 @@ alias python3=/usr/bin/python3.12
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-sudo apt update
 sudo apt install \
   libwebkit2gtk-4.1-dev \
   build-essential \
@@ -22,6 +22,7 @@ sudo apt install \
   librsvg2-dev
 
 uv venv
+
 source .venv/bin/activate
 
 uv pip install --upgrade setuptools wheel pyinstaller
