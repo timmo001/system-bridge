@@ -6,9 +6,6 @@ sudo apt install \
   python3.12-venv \
   python3.12-distutils
 
-alias python=/usr/bin/python3.12
-alias python3=/usr/bin/python3.12
-
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 sudo apt install \
@@ -21,7 +18,7 @@ sudo apt install \
   libayatana-appindicator3-dev \
   librsvg2-dev
 
-uv venv
+uv venv --python python3.12
 
 source .venv/bin/activate
 
