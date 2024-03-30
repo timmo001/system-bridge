@@ -64,9 +64,7 @@ pub struct Response {
     module: Option<String>,
 }
 
-pub async fn setup_websocket_client(
-    app_handle: AppHandle,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn setup_websocket_client(app_handle: AppHandle) {
     // Get settings
     let settings: Settings = get_settings();
 
@@ -77,7 +75,16 @@ pub async fn setup_websocket_client(
     );
     let ws_uri = http::uri::Uri::from_str(ws_url.as_str()).unwrap();
 
-    let (mut client, _) = ClientBuilder::from_uri(ws_uri).connect().await?;
+    let client_builder_result = ClientBuilder::from_uri(ws_uri).connect().await;
+    if client_builder_result.is_err() {
+        println!(
+            "Failed to connect to WebSocket server: {}",
+            client_builder_result.unwrap_err()
+        );
+        return;
+    }
+
+    let (mut client, _) = client_builder_result.unwrap();
 
     let mut request = Request {
         id: uuid::Uuid::new_v4().to_string(),
@@ -94,7 +101,7 @@ pub async fn setup_websocket_client(
 
     let request_string = serde_json::to_string(&request_json).unwrap();
     println!("Sending request: {}", request_string);
-    client.send(Message::text(request_string)).await?;
+    client.send(Message::text(request_string)).await.unwrap();
 
     while let Some(item) = client.next().await {
         // Read the message
@@ -224,6 +231,4 @@ pub async fn setup_websocket_client(
             }
         }
     }
-
-    Ok(())
 }

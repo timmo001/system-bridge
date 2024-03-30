@@ -1,16 +1,30 @@
 sudo apt update
 
-sudo apt install -y \
+sudo apt install \
+  python3.12 \
+  python3.12-dev \
+  python3.12-venv \
+  python3.12-distutils
+
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+sudo apt install \
+  libwebkit2gtk-4.1-dev \
+  build-essential \
+  curl \
+  wget \
+  file \
+  libssl-dev \
   libayatana-appindicator3-dev \
-  libgtk-3-dev \
-  libjavascriptcoregtk-4.1-dev \
-  librsvg2-dev \  
-  libsoup-3.0-dev \
-  libwebkit2gtk-4.1-dev
+  librsvg2-dev
 
-python -m pip install --upgrade setuptools wheel pyinstaller
+uv venv --python python3.12
 
-python -m pip install -r requirements_linux.txt
+source .venv/bin/activate
+
+uv pip install --upgrade setuptools wheel pyinstaller
+
+uv pip install -r requirements_linux.txt
 
 wget \
   -O backend.py \
