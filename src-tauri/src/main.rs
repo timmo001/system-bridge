@@ -317,7 +317,7 @@ async fn main() {
             let _websocket_handle = thread::spawn(|| {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
-                    setup_websocket_client(app_handle_clone).await.unwrap();
+                    setup_websocket_client(app_handle_clone).await;
                 });
             });
 
