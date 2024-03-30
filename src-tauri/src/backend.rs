@@ -102,9 +102,11 @@ pub fn stop_backend() -> Result<(), Box<dyn Error>> {
     sys.refresh_processes();
 
     for (pid, process) in sys.processes() {
-        if process.name().contains("systembridgebackend") {
+        if process.name().contains("systembridgebac")
+            || process.name().contains("systembridgebackend")
+        {
             println!("Killing process: {}", pid);
-            let _ = process.kill();
+            process.kill();
         }
     }
 
