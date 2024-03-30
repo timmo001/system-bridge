@@ -46,9 +46,9 @@ jobs:
           cache: "pip"
           check-latest: true
           python-version: "3.12"
-      - name: 🏗 Install setuptools, wheel, pyinstaller, uv
+      - name: 🏗 Install setuptools, wheel, pyinstaller
         run: |
-          pip install --upgrade setuptools wheel pyinstaller uv
+          pip install --upgrade setuptools wheel pyinstaller
       - name: Install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
@@ -63,14 +63,12 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev
 
-          uv venv
-          source .venv/bin/activate
-          uv pip install -r requirements_linux.txt
+          pip install -r requirements_linux.txt
       - name: Install dependencies (windows only)
         if: matrix.platform == 'windows-latest'
         run: |
-          uv venv
-          uv pip install -r requirements_windows.txt
+          venv
+          pip install -r requirements_windows.txt
       - name: 📦 Create executable (linux)
         if: matrix.platform == 'ubuntu-latest'
         run: >
