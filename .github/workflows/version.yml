@@ -12,12 +12,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   update-version:
     name: ✏️ Update Version
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4.1.2
@@ -59,9 +63,10 @@ jobs:
             Update version to ${{ steps.get-version.outputs.version }}
           push_options: "--force"
       - name: 🖊️ Create draft release for ${{ steps.get-version.outputs.version }}
-        uses: ncipollo/release-action@v1.14.0
+        id: release_drafter
+        uses: release-drafter/release-drafter@v6.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          draft: true
-          generateReleaseNotes: true
           name: ${{ steps.get-version.outputs.version }}
           tag: ${{ steps.get-version.outputs.version }}
