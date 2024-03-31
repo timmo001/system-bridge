@@ -103,7 +103,6 @@ jobs:
             --clean \
             --noconfirm \
             --onedir \
-            --windowed \
             --icon "resources/system-bridge.png" \
             --name "systembridgecli" \
             --collect-all "systembridgeshared" \
@@ -140,7 +139,6 @@ jobs:
               --clean `
               --noconfirm `
               --onedir `
-              --windowed `
               --icon "resources/system-bridge.ico" `
               --name "systembridgecli" `
               --collect-all "systembridgeshared" `

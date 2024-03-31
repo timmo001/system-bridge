@@ -30,7 +30,6 @@ pyinstaller `
   --clean `
   --noconfirm `
   --onedir `
-  --windowed `
   --icon "resources/system-bridge.ico" `
   --name "systembridgecli" `
   --collect-all "systembridgeshared" `
