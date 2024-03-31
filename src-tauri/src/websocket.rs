@@ -11,9 +11,9 @@ use tokio::runtime::Runtime;
 use tokio_websockets::{ClientBuilder, Message};
 
 use crate::{
-    close_window, create_window,
+    gui::{close_window, create_window, WINDOW_NOTIFICATION_HEIGHT},
     settings::{get_settings, Settings},
-    BACKEND_HOST, WINDOW_NOTIFICATION_HEIGHT,
+    BACKEND_HOST,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
