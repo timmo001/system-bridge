@@ -1,5 +1,4 @@
 use std::thread;
-use std::time::Duration;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     tray::ClickType,
@@ -9,11 +8,10 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
 use tokio::runtime::Runtime;
-use tokio::time::interval;
 
 use crate::{
     autostart::setup_autostart,
-    backend::{setup_backend, stop_backend},
+    backend::stop_backend,
     settings::{get_config_path, get_settings, Settings},
     websocket::setup_websocket_client,
     BACKEND_HOST,
@@ -283,24 +281,6 @@ pub async fn setup_gui() {
             });
 
             let app_handle_clone = app.handle().clone();
-            let _handle = thread::spawn(move || {
-                let rt = Runtime::new().unwrap();
-                rt.block_on(async {
-                    // Setup the backend server
-                    setup_backend().await.unwrap();
-
-                    // Check backend server is running every 60 seconds
-                    let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
-                    loop {
-                        println!("Waiting for 60 seconds before checking the backend server again");
-                        interval.tick().await;
-
-                        // Setup the backend server
-                        setup_backend().await.unwrap();
-                    }
-                });
-            });
-
             let _websocket_handle = thread::spawn(|| {
                 let rt = Runtime::new().unwrap();
                 rt.block_on(async {
