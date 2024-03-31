@@ -12,9 +12,9 @@ use tokio::runtime::Runtime;
 use crate::{
     autostart::setup_autostart,
     backend::stop_backend,
+    backend::BACKEND_HOST,
     settings::{get_config_path, get_settings, Settings},
     websocket::setup_websocket_client,
-    BACKEND_HOST,
 };
 
 const WINDOW_WIDTH: f64 = 1280.0;

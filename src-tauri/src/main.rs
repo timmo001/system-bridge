@@ -1,6 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-mod api;
 mod autostart;
 mod backend;
 mod gui;
@@ -13,8 +12,6 @@ use tokio::runtime::Runtime;
 use tokio::time::interval;
 
 use crate::{backend::setup_backend, gui::setup_gui};
-
-pub const BACKEND_HOST: &str = "127.0.0.1";
 
 #[tokio::main]
 async fn main() {
@@ -45,6 +42,7 @@ async fn main() {
             rt.block_on(async {
                 // Setup the backend server
                 setup_backend().await.unwrap();
+                // println!("Version: {}", api_response.version);
 
                 // Check backend server is running every 60 seconds
                 let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));

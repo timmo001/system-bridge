@@ -3,10 +3,9 @@ use std::process::Command;
 use std::time::Duration;
 use std::{error::Error, path::Path};
 
-use crate::{
-    settings::{get_settings, Settings},
-    BACKEND_HOST,
-};
+use crate::settings::{get_settings, Settings};
+
+pub const BACKEND_HOST: &str = "127.0.0.1";
 
 pub async fn setup_backend() -> Result<(), Box<dyn std::error::Error>> {
     // Get settings
