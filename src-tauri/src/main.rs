@@ -42,7 +42,6 @@ async fn main() {
             rt.block_on(async {
                 // Setup the backend server
                 setup_backend().await.unwrap();
-                // println!("Version: {}", api_response.version);
 
                 // Check backend server is running every 60 seconds
                 let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
