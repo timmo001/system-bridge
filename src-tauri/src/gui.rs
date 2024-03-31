@@ -21,6 +21,8 @@ const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
 const WINDOW_NOTIFICATION_WIDTH: f64 = 420.0;
 pub const WINDOW_NOTIFICATION_HEIGHT: f64 = 48.0;
+const WINDOW_NOTIFICATION_X: f64 = 28.0;
+const WINDOW_NOTIFICATION_Y: f64 = 28.0;
 
 fn page_title_map() -> Vec<(&'static str, &'static str)> {
     vec![
@@ -80,7 +82,7 @@ pub fn create_window(
                     WINDOW_NOTIFICATION_WIDTH,
                     height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as f64),
                 )
-                .position(28.0, 28.0)
+                .position(WINDOW_NOTIFICATION_X, WINDOW_NOTIFICATION_Y)
                 .resizable(false)
                 .skip_taskbar(true)
                 .title(title)
