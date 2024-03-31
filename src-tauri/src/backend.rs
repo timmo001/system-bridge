@@ -1,9 +1,11 @@
 use reqwest::Client;
-use std::process::Command;
+use std::error::Error;
 use std::time::Duration;
-use std::{error::Error, path::Path};
 
-use crate::settings::{get_settings, Settings};
+use crate::{
+    resources::start_application,
+    settings::{get_settings, Settings},
+};
 
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
@@ -43,38 +45,11 @@ pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
 }
 
 async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
-    // If package installed and linux, we need to use /usr/lib/system-bridge/_up_/dist/systembridgebackend/systembridgebackend
-    if cfg!(target_os = "linux")
-        && std::path::Path::new(
-            "/usr/lib/system-bridge/_up_/dist/systembridgebackend/systembridgebackend",
-        )
-        .exists()
-    {
-        let backend_path =
-            Path::new("/usr/lib/system-bridge/_up_/dist/systembridgebackend/systembridgebackend");
-
-        let backend_path_str = backend_path.to_str().unwrap();
-        println!("Starting backend server from lib: {}", backend_path_str);
-        let process = Command::new(backend_path_str).spawn();
-        if process.is_err() {
-            return Err("Failed to start the backend server".into());
-        }
-    } else {
-        let exe = std::env::current_exe()?;
-        let dir = exe.parent().expect("Executable must be in some directory");
-        let backend_dir: String = format!(
-            "{}/_up_/dist/systembridgebackend/systembridgebackend",
-            dir.to_str().unwrap()
-        );
-        let backend_path = Path::new(&backend_dir);
-
-        let backend_path_str = backend_path.to_str().unwrap();
-        println!("Starting backend server: {}", backend_path_str);
-        let process = Command::new(backend_path_str).spawn();
-        if process.is_err() {
-            return Err("Failed to start the backend server".into());
-        }
-    }
+    start_application(
+        "_up_/dist/systembridgebackend/systembridgebackend".to_string(),
+        None,
+        true,
+    )?;
 
     println!("Backend server started");
 
