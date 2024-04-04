@@ -10,6 +10,8 @@ use crate::{
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
 pub async fn setup_backend() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Setting up backend server..");
+
     // Get settings
     let settings: Settings = get_settings();
 
@@ -19,7 +21,7 @@ pub async fn setup_backend() -> Result<(), Box<dyn std::error::Error>> {
     let backend_active = check_backend(base_url.clone()).await;
     if !backend_active.is_ok() {
         // Start the backend server
-        let backend_start = start_backend(base_url.clone()).await;
+        let backend_start = start_backend().await;
         if !backend_start.is_ok() {
             println!("Failed to start the backend server");
             std::process::exit(1);
@@ -44,7 +46,7 @@ pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     }
 }
 
-async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
+async fn start_backend() -> Result<(), Box<dyn Error>> {
     start_application(
         "_up_/dist/systembridgebackend/systembridgebackend".to_string(),
         None,
@@ -52,17 +54,6 @@ async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     )?;
 
     println!("Backend server started");
-
-    // Wait for the backend server to start
-    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-
-    // Check if the backend server is running
-    let backend_active = check_backend(base_url.clone()).await;
-    if !backend_active.is_ok() {
-        return Err("Failed to start the backend server".into());
-    }
-
-    println!("Backend server is running");
 
     Ok(())
 }

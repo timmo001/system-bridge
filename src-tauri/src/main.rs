@@ -57,17 +57,14 @@ async fn main() {
         let _handle = thread::spawn(move || {
             let rt = Runtime::new().unwrap();
             rt.block_on(async {
-                // Setup the backend server
-                setup_backend().await.unwrap();
-
                 // Check backend server is running every 60 seconds
                 let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
                 loop {
-                    println!("Waiting for 60 seconds before checking the backend server again");
-                    interval.tick().await;
-
                     // Setup the backend server
                     setup_backend().await.unwrap();
+
+                    println!("Waiting for 60 seconds before checking the backend server again");
+                    interval.tick().await;
                 }
             });
         });
