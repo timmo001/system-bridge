@@ -54,7 +54,7 @@ async fn start_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     println!("Backend server started");
 
     // Wait for the backend server to start
-    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
 
     // Check if the backend server is running
     let backend_active = check_backend(base_url.clone()).await;
