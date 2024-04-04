@@ -38,9 +38,10 @@ pyinstaller \
   --icon "resources/system-bridge.png" \
   --name "systembridgebackend" \
   --collect-all "plyer" \
-  --collect-all "systembridgeshared" \
   --collect-all "systembridgebackend" \
   --collect-all "systembridgefrontend" \
+  --collect-all "systembridgeshared" \
+  --collect-all "typer" \
   backend.py
 
 wget \
@@ -53,6 +54,7 @@ pyinstaller \
   --onedir \
   --icon "resources/system-bridge.png" \
   --name "systembridgecli" \
-  --collect-all "systembridgeshared" \
   --collect-all "systembridgecli" \
+  --collect-all "systembridgeshared" \
+  --collect-all "typer" \
   cli.py

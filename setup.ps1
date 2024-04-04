@@ -15,11 +15,12 @@ pyinstaller `
   --name "systembridgebackend" `
   --collect-all "plyer" `
   --collect-all "pywin32" `
-  --collect-all "winsdk" `
-  --collect-all "systembridgeshared" `
   --collect-all "systembridgebackend" `
   --collect-all "systembridgefrontend" `
+  --collect-all "systembridgeshared" `
   --collect-all "systembridgewindowssensors" `
+  --collect-all "typer" `
+  --collect-all "winsdk" `
   backend.py
 
 Invoke-WebRequest `
@@ -32,6 +33,7 @@ pyinstaller `
   --onedir `
   --icon "resources/system-bridge.ico" `
   --name "systembridgecli" `
-  --collect-all "systembridgeshared" `
   --collect-all "systembridgecli" `
+  --collect-all "systembridgeshared" `
+  --collect-all "typer" `
   cli.py
