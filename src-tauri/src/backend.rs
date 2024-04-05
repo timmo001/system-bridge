@@ -1,4 +1,4 @@
-use log::info;
+use log::{info, warn};
 use reqwest::Client;
 use std::error::Error;
 use std::time::Duration;
@@ -19,6 +19,7 @@ pub async fn keep_backend_alive() {
     // Check if the backend server is running
     let backend_active = check_backend(base_url.clone()).await;
     if backend_active.is_err() {
+        warn!("Backend server is not running. Starting it..");
         // Start the backend server
         let backend_start = start_backend().await;
         if backend_start.is_err() {
