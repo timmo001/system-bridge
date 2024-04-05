@@ -1,7 +1,5 @@
 use log::{info, warn};
-use reqwest::Client;
 use std::error::Error;
-use std::time::Duration;
 
 use crate::{
     resources::start_application,
@@ -19,8 +17,12 @@ pub async fn keep_backend_alive() {
     // Check if the backend server is running
     let backend_active = check_backend(base_url.clone()).await;
     if backend_active.is_err() {
-        warn!("Backend server is not running. Starting it..");
+        // Stop the backend server if running
+        info!("Stopping any lingering backend processes..");
+        stop_backend().unwrap();
+
         // Start the backend server
+        warn!("Backend server is not running. Starting it..");
         let backend_start = start_backend().await;
         if backend_start.is_err() {
             info!("Failed to start the backend server");
@@ -33,13 +35,16 @@ pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
     info!("Checking backend server: {}/", base_url);
 
     // Check if the backend server is running
-    let client = Client::builder().timeout(Duration::from_secs(5)).build()?;
-    let response = client.get(format!("{}/", base_url)).send().await?;
+    let response = reqwest::Client::new()
+        .get(format!("{}/", base_url))
+        .send()
+        .await?;
 
     if response.status().is_success() {
         info!("Backend server is already running");
         Ok(())
     } else {
+        info!("3");
         Err(format!("Backend server is not running").into())
     }
 }
@@ -60,18 +65,16 @@ async fn start_backend() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn stop_backend() -> Result<(), Box<dyn Error>> {
-    info!("Stopping backend server");
-
     // Find any running backend server processes
     sysinfo::set_open_files_limit(0);
     let mut sys = sysinfo::System::new();
     sys.refresh_processes();
 
     for (pid, process) in sys.processes() {
-        if process.name().contains("systembridgebac")
-            || process.name().contains("systembridgebackend")
+        let process_name = process.name();
+        if process_name.contains("systembridgebac") || process_name.contains("systembridgebackend")
         {
-            info!("Killing process: {}", pid);
+            info!("Killing process: {} ({})", process_name, pid);
             process.kill();
         }
     }

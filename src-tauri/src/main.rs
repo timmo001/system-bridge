@@ -31,6 +31,7 @@ async fn main() {
     ctrlc::set_handler(move || {
         r.store(false, Ordering::SeqCst);
 
+        info!("Stopping backend server if running..");
         let stop_result = stop_backend();
         if stop_result.is_err() {
             log::error!("Failed to stop the backend server");
