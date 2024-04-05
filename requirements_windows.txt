@@ -3,5 +3,5 @@ systembridgebackend==4.1.6
 systembridgecli==4.0.3
 systembridgefrontend==4.0.2
 systembridgewindowssensors==4.0.1
-typer==0.12.0
+typer>=0.12.0
 winsdk==1.0.0b10
