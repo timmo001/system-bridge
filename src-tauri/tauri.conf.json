@@ -1,6 +1,6 @@
 {
   "productName": "System Bridge",
-  "version": "4.1.7",
+  "version": "4.1.8",
   "identifier": "dev.timmo.systembridge",
   "app": {
     "withGlobalTauri": true,
