@@ -5,17 +5,24 @@ mod backend;
 mod gui;
 mod resources;
 mod settings;
+mod shared;
 mod websocket;
 
+use fern::colors::{Color, ColoredLevelConfig};
+use log::{info, LevelFilter};
 use std::thread;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 use tokio::time::interval;
 
-use crate::{backend::setup_backend, gui::setup_gui, resources::start_application};
+use crate::{
+    backend::setup_backend, gui::setup_gui, resources::start_application, shared::get_data_path,
+};
 
 #[tokio::main]
 async fn main() {
+    setup_logger().unwrap();
+
     let args: Vec<String> = std::env::args().collect();
 
     // Parse the arguments
@@ -46,12 +53,12 @@ async fn main() {
     }
 
     if no_backend && no_gui {
-        println!("Both backend and GUI are disabled. Nothing to do");
+        info!("Both backend and GUI are disabled. Nothing to do");
         std::process::exit(0);
     }
 
     if no_backend {
-        println!("Backend is disabled");
+        info!("Backend is disabled");
     } else {
         // Setup the backend server
         let _handle = thread::spawn(move || {
@@ -63,7 +70,7 @@ async fn main() {
                     // Setup the backend server
                     setup_backend().await;
 
-                    println!("Waiting for 60 seconds before checking the backend server again");
+                    info!("Waiting for 60 seconds before checking the backend server again");
                     interval.tick().await;
                 }
             });
@@ -71,7 +78,7 @@ async fn main() {
     }
 
     if no_gui {
-        println!("GUI is disabled");
+        info!("GUI is disabled");
 
         // Wait forever
         loop {
@@ -81,4 +88,58 @@ async fn main() {
         // Setup the GUI
         setup_gui().await;
     }
+}
+fn setup_logger() -> Result<(), fern::InitError> {
+    let log_path = format!("{}/systembridge.log", get_data_path());
+
+    let colors = ColoredLevelConfig::new()
+        .trace(Color::BrightBlack)
+        .debug(Color::Cyan)
+        .info(Color::Green)
+        .warn(Color::Yellow)
+        .error(Color::Red);
+
+    let stdout_config = fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{} {} [{}] {}",
+                humantime::format_rfc3339(std::time::SystemTime::now()),
+                colors.color(record.level()),
+                record.target(),
+                message
+            ))
+        })
+        .chain(std::io::stdout());
+
+    let file_config = fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{} {} [{}] {}",
+                humantime::format_rfc3339(std::time::SystemTime::now()),
+                record.level(),
+                record.target(),
+                message
+            ))
+        })
+        .chain(fern::log_file(log_path.clone())?);
+
+    // Create a new logger
+    // Configure logger at runtime
+    fern::Dispatch::new()
+        // Add blanket level filter -
+        .level(LevelFilter::Debug)
+        // - and per-module overrides
+        .level_for("hyper", log::LevelFilter::Info)
+        // Output to stdout, files, and other Dispatch configurations
+        .chain(stdout_config)
+        .chain(file_config)
+        // Apply globally
+        .apply()?;
+
+    info!("--------------------------------------------------------------------------------");
+    info!("System Bridge {}", env!("CARGO_PKG_VERSION"));
+    info!("--------------------------------------------------------------------------------");
+    info!("Log is available at {}", log_path.clone());
+
+    Ok(())
 }

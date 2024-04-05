@@ -1,3 +1,4 @@
+use log::info;
 use std::thread;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
@@ -11,9 +12,9 @@ use tokio::runtime::Runtime;
 
 use crate::{
     autostart::setup_autostart,
-    backend::stop_backend,
-    backend::BACKEND_HOST,
-    settings::{get_config_path, get_settings, Settings},
+    backend::{stop_backend, BACKEND_HOST},
+    settings::{get_settings, Settings},
+    shared::get_data_path,
     websocket::setup_websocket_client,
 };
 
@@ -39,7 +40,7 @@ pub fn create_window(
     query_additional: Option<String>,
     height: Option<f64>,
 ) {
-    println!("Creating window: {}", page);
+    info!("Creating window: {}", page);
     // Get settings
     let settings: Settings = get_settings();
 
@@ -95,7 +96,7 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            println!("Failed to create window: {:?}", window_result.err());
+            info!("Failed to create window: {:?}", window_result.err());
         }
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
@@ -116,14 +117,14 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            println!("Failed to create window: {:?}", window_result.err());
+            info!("Failed to create window: {:?}", window_result.err());
         }
     }
 }
 
 #[tauri::command]
 pub fn close_window(app_handle: AppHandle, label: String) {
-    println!("Closing window: {}", label);
+    info!("Closing window: {}", label);
 
     let webview_window_result = app_handle.get_webview_window(label.as_str());
     if webview_window_result.is_some() {
@@ -263,10 +264,10 @@ pub async fn setup_gui() {
                         .unwrap();
                 }
                 "open_logs_backend" => {
-                    let config_path = get_config_path();
+                    let config_path = get_data_path();
                     let backend_log_path = format!("{}/system-bridge-backend.log", config_path);
                     if !std::path::Path::new(&backend_log_path).exists() {
-                        println!("Backend log file not found at: {}", backend_log_path);
+                        info!("Backend log file not found at: {}", backend_log_path);
                         return;
                     }
                     app_handle.shell().open(backend_log_path, None).unwrap();
@@ -274,9 +275,9 @@ pub async fn setup_gui() {
                 "exit" => {
                     let stop_result = stop_backend();
                     if stop_result.is_err() {
-                        println!("Failed to stop the backend server");
+                        info!("Failed to stop the backend server");
                     }
-                    println!("Exiting application");
+                    info!("Exiting application");
                     std::process::exit(0);
                 }
                 _ => (),
@@ -296,7 +297,7 @@ pub async fn setup_gui() {
         .expect("error while building tauri application")
         .run(|_app_handle, event| match event {
             tauri::RunEvent::ExitRequested { api, .. } => {
-                println!("Exit requested");
+                info!("Exit requested");
                 api.prevent_exit();
             }
             _ => {}

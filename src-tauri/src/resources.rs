@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::process::Command;
 
+use log::info;
+
 fn start_app(path: String, args: Option<Vec<String>>) -> Result<(), Box<dyn Error>> {
     if !path.contains("systembridgecli") {
-        println!("Starting application: {}", path);
+        info!("Starting application: {}", path);
     }
 
     let mut command = Command::new(path);
@@ -21,8 +23,8 @@ fn start_app(path: String, args: Option<Vec<String>>) -> Result<(), Box<dyn Erro
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
-    println!("[systembridgebackend] stdout: {}", stdout);
-    println!("[systembridgebackend] stderr: {}", stderr);
+    info!("[systembridgebackend] stdout: {}", stdout);
+    info!("[systembridgebackend] stderr: {}", stderr);
 
     Ok(())
 }

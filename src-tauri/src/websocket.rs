@@ -1,4 +1,5 @@
 use futures_util::{SinkExt, StreamExt};
+use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
@@ -77,7 +78,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
 
     let client_builder_result = ClientBuilder::from_uri(ws_uri).connect().await;
     if client_builder_result.is_err() {
-        println!(
+        info!(
             "Failed to connect to WebSocket server: {}",
             client_builder_result.unwrap_err()
         );
@@ -100,7 +101,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
     });
 
     let request_string = serde_json::to_string(&request_json).unwrap();
-    println!("Sending request: {}", request_string);
+    info!("Sending request: {}", request_string);
     client.send(Message::text(request_string)).await.unwrap();
 
     while let Some(item) = client.next().await {
@@ -113,12 +114,12 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
 
         if message.is_text() {
             let message_string = message.as_text().unwrap();
-            println!("Received message: {}", message_string);
+            info!("Received message: {}", message_string);
 
             // Deserialize the message
             let response_result = serde_json::from_str(&message_string);
             if response_result.is_err() {
-                println!(
+                info!(
                     "Failed to deserialize message: {}",
                     response_result.unwrap_err()
                 );
@@ -129,15 +130,15 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
             // Handle the message
             match response.r#type.as_str() {
                 "DATA_UPDATE" => {
-                    println!("Received data update: {:?}", response.data);
+                    info!("Received data update: {:?}", response.data);
                     // TODO: Handle data update
                 }
                 "NOTIFICATION" => {
-                    println!("Received notification: {:?}", response.data);
+                    info!("Received notification: {:?}", response.data);
 
                     let notification_result = serde_json::from_value(response.data);
                     if notification_result.is_err() {
-                        println!(
+                        info!(
                             "Failed to deserialize notification: {}",
                             notification_result.unwrap_err()
                         );
@@ -150,14 +151,14 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
                     let mut height: f64 = WINDOW_NOTIFICATION_HEIGHT as f64;
                     let title_lines: f64 =
                         1.0 + (notification.title.len() as f64 / 52.0).round() as f64;
-                    println!("Title Lines: {}", title_lines);
+                    info!("Title Lines: {}", title_lines);
                     if title_lines > 1.0 {
                         height += 64.0 * title_lines;
                     }
                     if let Some(message) = &notification.message {
                         height += 24.0;
                         let message_lines: f64 = 1.0 + (message.len() as f64 / 62.0).round() as f64;
-                        println!("Message Lines: {}", message_lines);
+                        info!("Message Lines: {}", message_lines);
                         if message_lines > 1.0 {
                             height += 20.0 * message_lines;
                         }
@@ -170,7 +171,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
                             height += 72.0;
                         }
                     }
-                    println!("Window Height: {}", height);
+                    info!("Window Height: {}", height);
 
                     let actions_string = if notification.actions.is_some() {
                         serde_json::to_string(notification.actions.as_ref().unwrap()).unwrap()
@@ -193,18 +194,18 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
                         "timeout": timeout.to_string(),
                         "audio": audio_string,
                     });
-                    println!("Notification JSON: {}", notification_json.to_string());
+                    info!("Notification JSON: {}", notification_json.to_string());
 
                     let query_string_result = serde_urlencoded::to_string(notification_json);
                     if query_string_result.is_err() {
-                        println!(
+                        info!(
                             "Failed to serialize notification to query string: {}",
                             query_string_result.unwrap_err()
                         );
                         continue;
                     }
                     let query_string = format!("&{}", query_string_result.unwrap());
-                    println!("Query string: {}", query_string);
+                    info!("Query string: {}", query_string);
 
                     let app_handle_clone_1 = app_handle.clone();
                     let app_handle_clone_2 = app_handle.clone();
@@ -218,7 +219,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
                     let _handle = thread::spawn(move || {
                         let rt = Runtime::new().unwrap();
                         rt.block_on(async {
-                            println!("Waiting for {} seconds to close the notification", timeout);
+                            info!("Waiting for {} seconds to close the notification", timeout);
                             thread::sleep(Duration::from_secs(timeout));
 
                             close_window(app_handle_clone_2, "notification".to_string());
@@ -226,7 +227,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
                     });
                 }
                 _ => {
-                    println!("Received event: {}", response.r#type);
+                    info!("Received event: {}", response.r#type);
                 }
             }
         }

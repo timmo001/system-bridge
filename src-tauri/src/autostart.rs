@@ -1,4 +1,5 @@
 use std::error::Error;
+use log::info;
 use tauri::App;
 use tauri_plugin_autostart::ManagerExt;
 
@@ -8,7 +9,7 @@ pub fn setup_autostart(app: &mut App) -> Result<(), Box<dyn Error>> {
     // Get settings
     let settings: Settings = get_settings();
 
-    println!("Autostart: {}", settings.autostart);
+    info!("Autostart: {}", settings.autostart);
 
     // Get the autostart manager
     let autostart_manager: tauri::State<'_, tauri_plugin_autostart::AutoLaunchManager> =
