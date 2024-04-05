@@ -102,7 +102,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
     let stdout_config = fern::Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
-                "{} {} [{}] {}",
+                "[{} {} {}] {}",
                 humantime::format_rfc3339(std::time::SystemTime::now()),
                 colors.color(record.level()),
                 record.target(),
@@ -114,7 +114,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
     let file_config = fern::Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
-                "{} {} [{}] {}",
+                "[{} {} {}] {}",
                 humantime::format_rfc3339(std::time::SystemTime::now()),
                 record.level(),
                 record.target(),
