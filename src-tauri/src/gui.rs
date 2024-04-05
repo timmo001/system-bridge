@@ -275,7 +275,7 @@ pub async fn setup_gui() {
                 "exit" => {
                     let stop_result = stop_backend();
                     if stop_result.is_err() {
-                        error!("Failed to stop the backend server");
+                        log::error!("Failed to stop the backend server");
                     }
                     info!("Exiting application");
                     std::process::exit(0);
