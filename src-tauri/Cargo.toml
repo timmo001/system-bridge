@@ -1,7 +1,7 @@
 [package]
 name = "systembridge"
 version = "4.1.8"
-description = "A bridge for your systems"
+description = "System Bridge"
 authors = ["timmo001"]
 edition = "2021"
 
