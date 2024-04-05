@@ -1,6 +1,6 @@
 [package]
 name = "systembridge"
-version = "4.1.6"
+version = "4.1.7"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
