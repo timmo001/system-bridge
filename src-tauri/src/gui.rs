@@ -8,7 +8,7 @@ use tauri::{
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-use tokio::{runtime::Runtime, sync::broadcast::error};
+use tokio::runtime::Runtime;
 
 use crate::{
     autostart::setup_autostart,
