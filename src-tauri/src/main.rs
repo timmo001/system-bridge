@@ -9,7 +9,7 @@ mod shared;
 mod websocket;
 
 use fern::colors::{Color, ColoredLevelConfig};
-use log::{info, LevelFilter};
+use log::{debug, info, LevelFilter};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -93,9 +93,11 @@ async fn run() {
                 // Keep the backend server alive
                 keep_backend_alive().await;
                 // Check backend server is running every 60 seconds
-                let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
+                let mut interval: tokio::time::Interval = interval(Duration::from_secs(30));
                 loop {
                     info!("Waiting for 60 seconds before checking the backend server again");
+                    interval.tick().await;
+                    debug!("30 seconds passed");
                     interval.tick().await;
 
                     // Keep the backend server alive
