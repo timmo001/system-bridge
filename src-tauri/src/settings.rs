@@ -1,5 +1,7 @@
-use platform_dirs::AppDirs;
+use log::info;
 use serde::{Deserialize, Serialize};
+
+use crate::shared::get_data_path;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Settings {
@@ -33,25 +35,7 @@ pub struct SettingsMediaDirectories {
     pub path: String,
 }
 
-pub fn get_config_path() -> String {
-    // Get config path from {localappdata}\timmo001\systembridge
-    let app_dirs = AppDirs::new(Some("timmo001"), true).unwrap();
-    let data_path = app_dirs.data_dir.to_str().unwrap().to_string();
-    println!("Data path: {}", data_path);
-
-    let path = format!("{}/systembridge", data_path);
-
-    if !std::path::Path::new(&path).exists() {
-        std::fs::create_dir_all(&path).unwrap();
-    }
-
-    path
-}
-
 fn create_settings() -> Settings {
-    // Get config path from {localappdata}\timmo001\systembridge
-    let config_path = get_config_path();
-
     // Create a uuid v4 token
     let token = uuid::Uuid::new_v4().to_string();
 
@@ -72,10 +56,10 @@ fn create_settings() -> Settings {
     // Create settings string
     let settings_string = serde_json::to_string(&settings).unwrap();
 
-    println!("Creating settings file: {}", settings_string);
+    info!("Creating settings file: {}", settings_string);
 
     // Write settings to {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
+    let settings_path = format!("{}/settings.json", get_data_path());
     std::fs::write(settings_path, settings_string).unwrap();
 
     settings
@@ -83,11 +67,8 @@ fn create_settings() -> Settings {
 
 #[tauri::command]
 pub fn get_settings() -> Settings {
-    // Get install directory from &localappdata%\timmo001\systembridge
-    let config_path = get_config_path();
-
     // Read settings from {config_path}\settings.json
-    let settings_path = format!("{}/settings.json", config_path);
+    let settings_path = format!("{}/settings.json", get_data_path());
     if !std::path::Path::new(&settings_path).exists() {
         return create_settings();
     }

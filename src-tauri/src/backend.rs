@@ -1,3 +1,4 @@
+use log::info;
 use reqwest::Client;
 use std::error::Error;
 use std::time::Duration;
@@ -10,7 +11,7 @@ use crate::{
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
 pub async fn setup_backend() {
-    println!("Setting up backend server..");
+    info!("Setting up backend server..");
 
     // Get settings
     let settings: Settings = get_settings();
@@ -23,21 +24,21 @@ pub async fn setup_backend() {
         // Start the backend server
         let backend_start = start_backend().await;
         if !backend_start.is_ok() {
-            println!("Failed to start the backend server");
+            info!("Failed to start the backend server");
             std::process::exit(1);
         }
     }
 }
 
 pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
-    println!("Checking backend server: {}/", base_url);
+    info!("Checking backend server: {}/", base_url);
 
     // Check if the backend server is running
     let client = Client::builder().timeout(Duration::from_secs(5)).build()?;
     let response = client.get(format!("{}/", base_url)).send().await?;
 
     if response.status().is_success() {
-        println!("Backend server is already running");
+        info!("Backend server is already running");
         Ok(())
     } else {
         Err(format!("Backend server is not running").into())
@@ -54,13 +55,13 @@ async fn start_backend() -> Result<(), Box<dyn Error>> {
         return Err("Failed to start the backend server".into());
     }
 
-    println!("Backend server started. Waiting for it to be ready..");
+    info!("Backend server started. Waiting for it to be ready..");
 
     Ok(())
 }
 
 pub fn stop_backend() -> Result<(), Box<dyn Error>> {
-    println!("Stopping backend server");
+    info!("Stopping backend server");
 
     // Find any running backend server processes
     sysinfo::set_open_files_limit(0);
@@ -71,7 +72,7 @@ pub fn stop_backend() -> Result<(), Box<dyn Error>> {
         if process.name().contains("systembridgebac")
             || process.name().contains("systembridgebackend")
         {
-            println!("Killing process: {}", pid);
+            info!("Killing process: {}", pid);
             process.kill();
         }
     }
