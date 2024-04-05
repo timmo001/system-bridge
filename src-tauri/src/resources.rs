@@ -1,10 +1,36 @@
 use std::error::Error;
 use std::process::Command;
 
+fn start_app(path: String, args: Option<Vec<String>>) -> Result<(), Box<dyn Error>> {
+    if !path.contains("systembridgecli") {
+        println!("Starting application: {}", path);
+    }
+
+    let mut command = Command::new(path);
+    if let Some(args) = args {
+        command.args(args);
+    }
+
+    let output = command.output().unwrap();
+
+    if !output.status.success() {
+        return Err("Failed to start the application".into());
+    }
+
+    // Convert the output bytes to a String
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    println!("[systembridgebackend] stdout: {}", stdout);
+    println!("[systembridgebackend] stderr: {}", stderr);
+
+    Ok(())
+}
+
 pub fn start_application(
     path: String,
     args: Option<Vec<String>>,
-    spawn: bool,
+    new_thread: bool,
 ) -> Result<(), Box<dyn Error>> {
     // If package installed and linux, we need to use /usr/lib/system-bridge/{path}
     let linux_path = format!("/usr/lib/system-bridge/{}", path);
@@ -19,35 +45,12 @@ pub fn start_application(
             format!("{}/{}", dir_str, path)
         };
 
-    if spawn {
-        println!("Spawning application: {}", application_path_string);
-        let mut command = Command::new(application_path_string);
-
-        let process = if let Some(args) = args {
-            println!("  with args: {:?}", args);
-            command.args(args).spawn()
-        } else {
-            command.spawn()
-        };
-
-        if process.is_err() {
-            return Err("Failed to spawn the application".into());
-        }
+    if new_thread {
+        std::thread::spawn(move || {
+            start_app(application_path_string, args).unwrap();
+        });
     } else {
-        if !application_path_string.contains("systembridgecli") {
-            println!("Starting application: {}", application_path_string);
-        }
-        let mut command = Command::new(application_path_string);
-
-        let process = if let Some(args) = args {
-            command.args(args).status()
-        } else {
-            command.status()
-        };
-
-        if process.is_err() {
-            return Err("Failed to start the application".into());
-        }
+        start_app(application_path_string, args)?;
     }
 
     Ok(())

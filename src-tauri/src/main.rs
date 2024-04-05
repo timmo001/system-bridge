@@ -61,7 +61,7 @@ async fn main() {
                 let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
                 loop {
                     // Setup the backend server
-                    setup_backend().await.unwrap();
+                    setup_backend().await;
 
                     println!("Waiting for 60 seconds before checking the backend server again");
                     interval.tick().await;
