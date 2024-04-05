@@ -96,7 +96,7 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            error!("Failed to create window: {:?}", window_result.err());
+            log::error!("Failed to create window: {:?}", window_result.err());
         }
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
@@ -117,7 +117,7 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            error!("Failed to create window: {:?}", window_result.err());
+            log::error!("Failed to create window: {:?}", window_result.err());
         }
     }
 }
