@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::process::Command;
 
-use log::{error, info};
+use log::{error, info, warn};
 
 fn start_app(path: String, args: Option<Vec<String>>) -> Result<(), Box<dyn Error>> {
     if !path.contains("systembridgecli") {
@@ -51,13 +51,13 @@ pub fn start_application(
         std::thread::spawn(move || {
             let result = start_app(application_path_string, args);
             if result.is_err() {
-                error!("Failed to start the application");
+                warn!("Application closed:", path);
             }
         });
     } else {
         let result = start_app(application_path_string, args);
         if result.is_err() {
-            return Err("Failed to start the application".into());
+            return Err(format!("Failed to start the application: {}", path).into());
         }
     }
 
