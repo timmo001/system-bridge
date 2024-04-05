@@ -10,17 +10,41 @@ mod websocket;
 
 use fern::colors::{Color, ColoredLevelConfig};
 use log::{info, LevelFilter};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 use tokio::time::interval;
 
 use crate::{
-    backend::setup_backend, gui::setup_gui, resources::start_application, shared::get_data_path,
+    backend::{setup_backend, stop_backend},
+    gui::setup_gui,
+    resources::start_application,
+    shared::get_data_path,
 };
 
 #[tokio::main]
 async fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+
+        let stop_result = stop_backend();
+        if stop_result.is_err() {
+            log::error!("Failed to stop the backend server");
+        }
+        info!("Exiting application");
+        std::process::exit(0);
+    })
+    .unwrap();
+    while running.load(Ordering::SeqCst) {
+        run().await;
+    }
+}
+
+async fn run() {
     setup_logger().unwrap();
 
     let args: Vec<String> = std::env::args().collect();
@@ -89,6 +113,7 @@ async fn main() {
         setup_gui().await;
     }
 }
+
 fn setup_logger() -> Result<(), fern::InitError> {
     let log_path = format!("{}/systembridge.log", get_data_path());
 
