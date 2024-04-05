@@ -49,10 +49,16 @@ pub fn start_application(
 
     if new_thread {
         std::thread::spawn(move || {
-            start_app(application_path_string, args).unwrap();
+            let result = start_app(application_path_string, args);
+            if result.is_err() {
+                error!("Failed to start the application");
+            }
         });
     } else {
-        start_app(application_path_string, args)?;
+        let result = start_app(application_path_string, args);
+        if result.is_err() {
+            return Err("Failed to start the application".into());
+        }
     }
 
     Ok(())

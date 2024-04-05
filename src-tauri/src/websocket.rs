@@ -78,7 +78,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
 
     let client_builder_result = ClientBuilder::from_uri(ws_uri).connect().await;
     if client_builder_result.is_err() {
-        info!(
+        error!(
             "Failed to connect to WebSocket server: {}",
             client_builder_result.unwrap_err()
         );
@@ -119,7 +119,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
             // Deserialize the message
             let response_result = serde_json::from_str(&message_string);
             if response_result.is_err() {
-                info!(
+                error!(
                     "Failed to deserialize message: {}",
                     response_result.unwrap_err()
                 );
@@ -138,7 +138,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
 
                     let notification_result = serde_json::from_value(response.data);
                     if notification_result.is_err() {
-                        info!(
+                        error!(
                             "Failed to deserialize notification: {}",
                             notification_result.unwrap_err()
                         );
@@ -198,7 +198,7 @@ pub async fn setup_websocket_client(app_handle: AppHandle) {
 
                     let query_string_result = serde_urlencoded::to_string(notification_json);
                     if query_string_result.is_err() {
-                        info!(
+                        error!(
                             "Failed to serialize notification to query string: {}",
                             query_string_result.unwrap_err()
                         );

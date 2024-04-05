@@ -8,7 +8,7 @@ use tauri::{
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
-use tokio::runtime::Runtime;
+use tokio::{runtime::Runtime, sync::broadcast::error};
 
 use crate::{
     autostart::setup_autostart,
@@ -96,7 +96,7 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            info!("Failed to create window: {:?}", window_result.err());
+            error!("Failed to create window: {:?}", window_result.err());
         }
     } else {
         let webview_window_result = app_handle.get_webview_window("main");
@@ -117,7 +117,7 @@ pub fn create_window(
                 .build();
 
         if window_result.is_err() {
-            info!("Failed to create window: {:?}", window_result.err());
+            error!("Failed to create window: {:?}", window_result.err());
         }
     }
 }
@@ -275,7 +275,7 @@ pub async fn setup_gui() {
                 "exit" => {
                     let stop_result = stop_backend();
                     if stop_result.is_err() {
-                        info!("Failed to stop the backend server");
+                        error!("Failed to stop the backend server");
                     }
                     info!("Exiting application");
                     std::process::exit(0);
