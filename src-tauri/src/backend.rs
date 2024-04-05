@@ -9,7 +9,7 @@ use crate::{
 
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
-pub async fn setup_backend() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn setup_backend() {
     println!("Setting up backend server..");
 
     // Get settings
@@ -27,8 +27,6 @@ pub async fn setup_backend() -> Result<(), Box<dyn std::error::Error>> {
             std::process::exit(1);
         }
     }
-
-    Ok(())
 }
 
 pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
@@ -47,13 +45,16 @@ pub async fn check_backend(base_url: String) -> Result<(), Box<dyn Error>> {
 }
 
 async fn start_backend() -> Result<(), Box<dyn Error>> {
-    start_application(
+    let result = start_application(
         "_up_/dist/systembridgebackend/systembridgebackend".to_string(),
         None,
         true,
-    )?;
+    );
+    if result.is_err() {
+        return Err("Failed to start the backend server".into());
+    }
 
-    println!("Backend server started");
+    println!("Backend server started. Waiting for it to be ready..");
 
     Ok(())
 }
