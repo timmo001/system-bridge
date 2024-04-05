@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::process::Command;
 
-use log::{error, info, warn};
+use log::{info, warn};
 
 fn start_app(path: String, args: Option<Vec<String>>) -> Result<(), Box<dyn Error>> {
     if !path.contains("systembridgecli") {
