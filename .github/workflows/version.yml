@@ -28,29 +28,27 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PUSH_TOKEN }}
-      - name: ↘️ Get version from systembridgebackend package
-        id: get-version
-        run: |
-          # Get version from systembridgebackend package using requirements_linux.txt
-          version=$(grep systembridgebackend requirements_linux.txt | cut -d'=' -f3)
-          echo "Version: $version"
-          echo "::set-output name=version::$version"
+      - name: 🖊️ Create draft release
+        id: release-drafter
+        uses: release-drafter/release-drafter@v6.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: ✏ Set Version Files
         run: |
-          echo "Version: ${{ steps.get-version.outputs.version }}"
+          echo "Version: ${{ steps.release-drafter.outputs.tag_name }}"
           sudo apt update
           sudo apt install -y jq
 
           # Update version in package.json
-          jq --arg version ${{ steps.get-version.outputs.version }} '.version = $version' package.json > package.json.tmp && \
+          jq --arg version ${{ steps.release-drafter.outputs.tag_name }} '.version = $version' package.json > package.json.tmp && \
             mv package.json.tmp package.json
 
           # Update version in src-tauri/tauri.conf.json
-          jq --arg version ${{ steps.get-version.outputs.version }} '.version = $version' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && \
+          jq --arg version ${{ steps.release-drafter.outputs.tag_name }} '.version = $version' src-tauri/tauri.conf.json > src-tauri/tauri.conf.json.tmp && \
             mv src-tauri/tauri.conf.json.tmp src-tauri/tauri.conf.json
 
           # Update version in src-tauri/Cargo.toml
-          sed -i '0,/version/s/^version = "\([0-9.]*\)"$/version = "${{ steps.get-version.outputs.version }}"/' src-tauri/Cargo.toml
+          sed -i '0,/version/s/^version = "\([0-9.]*\)"$/version = "${{ steps.release-drafter.outputs.tag_name }}"/' src-tauri/Cargo.toml
       - name: ⤵️ Pull latest changes from GitHub
         run: |
           git pull --ff
@@ -60,13 +58,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}
         with:
           commit_message: |
-            Update version to ${{ steps.get-version.outputs.version }}
+            Update version to ${{ steps.release-drafter.outputs.tag_name }}
           push_options: "--force"
-      - name: 🖊️ Create draft release for ${{ steps.get-version.outputs.version }}
-        id: release_drafter
-        uses: release-drafter/release-drafter@v6.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: ${{ steps.get-version.outputs.version }}
-          tag: ${{ steps.get-version.outputs.version }}
