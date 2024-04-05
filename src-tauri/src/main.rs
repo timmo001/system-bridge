@@ -179,7 +179,11 @@ fn setup_logger() -> Result<(), fern::InitError> {
         .apply()?;
 
     info!("--------------------------------------------------------------------------------");
-    info!("System Bridge {}", env!("CARGO_PKG_VERSION"));
+    info!(
+        "{} {}",
+        env!("CARGO_PKG_DESCRIPTION"),
+        env!("CARGO_PKG_VERSION")
+    );
     info!("--------------------------------------------------------------------------------");
     info!("Log is available at {}", log_path.clone());
 
