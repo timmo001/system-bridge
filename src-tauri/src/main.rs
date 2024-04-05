@@ -180,7 +180,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
 
     info!("--------------------------------------------------------------------------------");
     info!(
-        "{} {}",
+        "{} ({})",
         env!("CARGO_PKG_DESCRIPTION"),
         env!("CARGO_PKG_VERSION")
     );
