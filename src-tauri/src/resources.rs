@@ -51,7 +51,7 @@ pub fn start_application(
         std::thread::spawn(move || {
             let result = start_app(application_path_string, args);
             if result.is_err() {
-                warn!("Application closed:", path);
+                warn!("Application closed: {}", path);
             }
         });
     } else {
