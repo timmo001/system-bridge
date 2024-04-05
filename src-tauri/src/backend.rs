@@ -10,9 +10,7 @@ use crate::{
 
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
-pub async fn setup_backend() {
-    info!("Setting up backend server..");
-
+pub async fn keep_backend_alive() {
     // Get settings
     let settings: Settings = get_settings();
 
@@ -20,10 +18,10 @@ pub async fn setup_backend() {
 
     // Check if the backend server is running
     let backend_active = check_backend(base_url.clone()).await;
-    if !backend_active.is_ok() {
+    if backend_active.is_err() {
         // Start the backend server
         let backend_start = start_backend().await;
-        if !backend_start.is_ok() {
+        if backend_start.is_err() {
             info!("Failed to start the backend server");
             std::process::exit(1);
         }
