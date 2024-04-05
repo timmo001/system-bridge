@@ -89,7 +89,6 @@ async fn main() {
         setup_gui().await;
     }
 }
-
 fn setup_logger() -> Result<(), fern::InitError> {
     let log_path = format!("{}/systembridge.log", get_data_path());
 
@@ -100,10 +99,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
         .warn(Color::Yellow)
         .error(Color::Red);
 
-    // Create a new logger
-    // Configure logger at runtime
-    fern::Dispatch::new()
-        // Perform allocation-free log formatting
+    let stdout_config = fern::Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
                 "{} {} [{}] {}",
@@ -113,13 +109,30 @@ fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
+        .chain(std::io::stdout());
+
+    let file_config = fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{} {} [{}] {}",
+                humantime::format_rfc3339(std::time::SystemTime::now()),
+                record.level(),
+                record.target(),
+                message
+            ))
+        })
+        .chain(fern::log_file(log_path.clone())?);
+
+    // Create a new logger
+    // Configure logger at runtime
+    fern::Dispatch::new()
         // Add blanket level filter -
         .level(LevelFilter::Debug)
         // - and per-module overrides
         .level_for("hyper", log::LevelFilter::Info)
         // Output to stdout, files, and other Dispatch configurations
-        .chain(std::io::stdout())
-        .chain(fern::log_file(log_path.clone())?)
+        .chain(stdout_config)
+        .chain(file_config)
         // Apply globally
         .apply()?;
 
