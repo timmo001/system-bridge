@@ -133,10 +133,14 @@ fn setup_logger() -> Result<(), fern::InitError> {
     let stdout_config = fern::Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
-                "[{} {} {} {}] {}",
+                "{} {} ({}) [{}] {}",
                 humantime::format_rfc3339(std::time::SystemTime::now()),
                 colors.color(record.level()),
-                std::thread::current().name().unwrap_or("unnamed"),
+                std::thread::current().name().unwrap_or(
+                    &format!("{:?}", std::thread::current().id())
+                        .replace("ThreadId(", "")
+                        .replace(")", "")
+                ),
                 record.target(),
                 message
             ))
@@ -149,7 +153,11 @@ fn setup_logger() -> Result<(), fern::InitError> {
                 "[{} {} {} {}] {}",
                 humantime::format_rfc3339(std::time::SystemTime::now()),
                 record.level(),
-                std::thread::current().name().unwrap_or("unnamed"),
+                std::thread::current().name().unwrap_or(
+                    &format!("{:?}", std::thread::current().id())
+                        .replace("ThreadId(", "")
+                        .replace(")", "")
+                ),
                 record.target(),
                 message
             ))
