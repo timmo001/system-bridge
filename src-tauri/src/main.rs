@@ -93,12 +93,12 @@ async fn run() {
                 // Keep the backend server alive
                 keep_backend_alive().await;
                 // Check backend server is running every 60 seconds
-                let mut interval: tokio::time::Interval = interval(Duration::from_secs(30));
+                let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
+                interval.tick().await;
                 loop {
                     info!("Waiting for 60 seconds before checking the backend server again");
                     interval.tick().await;
-                    debug!("30 seconds passed");
-                    interval.tick().await;
+                    debug!("Checking backend server..");
 
                     // Keep the backend server alive
                     keep_backend_alive().await;
