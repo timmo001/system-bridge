@@ -1,11 +1,11 @@
-use log::info;
+use log::debug;
 use platform_dirs::AppDirs;
 
 pub fn get_data_path() -> String {
     // Get data path from {localappdata}\timmo001\systembridge
     let app_dirs = AppDirs::new(Some("timmo001"), true).unwrap();
     let data_path = app_dirs.data_dir.to_str().unwrap().to_string();
-    info!("Data path: {}", data_path);
+    debug!("Data path: {}", data_path);
 
     let path = format!("{}/systembridge", data_path);
 
