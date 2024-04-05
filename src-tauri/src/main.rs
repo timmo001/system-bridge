@@ -18,7 +18,7 @@ use tokio::runtime::Runtime;
 use tokio::time::interval;
 
 use crate::{
-    backend::{setup_backend, stop_backend},
+    backend::{keep_backend_alive, stop_backend},
     gui::setup_gui,
     resources::start_application,
     shared::get_data_path,
@@ -85,17 +85,21 @@ async fn run() {
         info!("Backend is disabled");
     } else {
         // Setup the backend server
+        info!("Setting up backend server..");
+
         let _handle = thread::spawn(move || {
             let rt = Runtime::new().unwrap();
             rt.block_on(async {
+                // Keep the backend server alive
+                keep_backend_alive().await;
                 // Check backend server is running every 60 seconds
                 let mut interval: tokio::time::Interval = interval(Duration::from_secs(60));
                 loop {
-                    // Setup the backend server
-                    setup_backend().await;
-
                     info!("Waiting for 60 seconds before checking the backend server again");
                     interval.tick().await;
+
+                    // Keep the backend server alive
+                    keep_backend_alive().await;
                 }
             });
         });

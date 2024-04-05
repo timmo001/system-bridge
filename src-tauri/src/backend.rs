@@ -10,9 +10,7 @@ use crate::{
 
 pub const BACKEND_HOST: &str = "127.0.0.1";
 
-pub async fn setup_backend() {
-    info!("Setting up backend server..");
-
+pub async fn keep_backend_alive() {
     // Get settings
     let settings: Settings = get_settings();
 
