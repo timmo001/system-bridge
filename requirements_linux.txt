@@ -1,4 +1,4 @@
-systembridgebackend==4.2.0
+systembridgebackend==4.2.1
 systembridgecli==4.0.3
 systembridgefrontend==4.0.2
 typer>=0.12.0
