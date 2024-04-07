@@ -166,6 +166,8 @@ pub async fn setup_gui() {
                     .build(app)?;
             let copy_token =
                 MenuItemBuilder::with_id("copy_token", "Copy token to clipboard").build(app)?;
+            let open_logs =
+                MenuItemBuilder::with_id("open_logs", "View logs").build(app)?;
             let open_logs_backend =
                 MenuItemBuilder::with_id("open_logs_backend", "View backend logs").build(app)?;
             let help = SubmenuBuilder::new(app, "Help")
@@ -177,6 +179,7 @@ pub async fn setup_gui() {
                     &separator,
                     &copy_token,
                     &separator,
+                    &open_logs,
                     &open_logs_backend,
                 ])
                 .build()?;
@@ -263,9 +266,16 @@ pub async fn setup_gui() {
                         })
                         .unwrap();
                 }
+                "open_logs" => {
+                    let log_path = format!("{}/systembridge.log", get_data_path());
+                    if !std::path::Path::new(&log_path).exists() {
+                        info!("Log file not found at: {}", log_path);
+                        return;
+                    }
+                    app_handle.shell().open(log_path, None).unwrap();
+                }
                 "open_logs_backend" => {
-                    let config_path = get_data_path();
-                    let backend_log_path = format!("{}/system-bridge-backend.log", config_path);
+                    let backend_log_path = format!("{}/systembridgebackend.log", get_data_path());
                     if !std::path::Path::new(&backend_log_path).exists() {
                         info!("Backend log file not found at: {}", backend_log_path);
                         return;
