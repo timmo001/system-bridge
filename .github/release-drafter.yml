@@ -30,6 +30,27 @@ categories:
     labels:
       - "dependencies"
 
+version-resolver:
+  major:
+    labels:
+      - "major"
+      - "breaking-change"
+  minor:
+    labels:
+      - "minor"
+      - "new-feature"
+  patch:
+    labels:
+      - "bugfix"
+      - "chore"
+      - "ci"
+      - "dependencies"
+      - "documentation"
+      - "enhancement"
+      - "performance"
+      - "refactor"
+  default: patch
+
 template: |
   ## What’s changed
 
