@@ -48,6 +48,11 @@ async fn main() {
 async fn run() {
     setup_logger().unwrap();
 
+    // Write current version to a file for later use from the backend
+    let version = env!("CARGO_PKG_VERSION");
+    let version_file = format!("{}/systembridge-version.txt", get_data_path());
+    std::fs::write(version_file, version).unwrap();
+
     let args: Vec<String> = std::env::args().collect();
 
     // Parse the arguments
