@@ -3435,7 +3435,7 @@ dependencies = [
 
 [[package]]
 name = "systembridge"
-version = "4.2.0"
+version = "4.1.8"
 dependencies = [
  "ctrlc",
  "fastrand",
