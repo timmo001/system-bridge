@@ -30,7 +30,7 @@ tauri-plugin-autostart = "2.0.0-beta.4"
 tauri-plugin-clipboard-manager = "2.0.0-beta.2"
 tauri-plugin-shell = "2.0.0-beta"
 tokio = { version = "1.37.0", features = ["full"] }
-tokio-websockets = { version = "0.7.0", features = [
+tokio-websockets = { version = "0.8.2", features = [
   "client",
   "fastrand",
   "ring",
