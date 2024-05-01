@@ -187,11 +187,6 @@
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.0-beta.11.tgz#7ec6f6f007da4e55315270619448ce39fd11b4e3"
   integrity sha512-wJRY+fBUm3KpqZDHMIz5HRv+1vlnvRJ/dFxiyY3NlINTx2qXqDou5qWYcP1CuZXsd39InWVPV3FAZvno/kGCkA==
 
-"@tauri-apps/api@2.0.0-beta.6":
-  version "2.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.0-beta.6.tgz#7ff0092b868db3627ccfe78b2648bdc67a9ca3e9"
-  integrity sha512-ay3kAXYQoqC3rX4Vr3y6uGwrBhRPM7UQqZ9wr1VYzN6lkcMIcu7+UBvytmcfXDlVctqFoMQJafn6+dK/Oqh8+Q==
-
 "@tauri-apps/cli-darwin-arm64@2.0.0-beta.15":
   version "2.0.0-beta.15"
   resolved "https://registry.yarnpkg.com/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.0.0-beta.15.tgz#aea296ed167e05000ee8c7897b9681fa0f0516f1"
@@ -265,12 +260,12 @@
   dependencies:
     "@tauri-apps/api" "2.0.0-beta.11"
 
-"@tauri-apps/plugin-clipboard-manager@2.1.0-beta.0":
-  version "2.1.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-clipboard-manager/-/plugin-clipboard-manager-2.1.0-beta.0.tgz#8f91427bb8e5166f42c303a231ed804651c391fa"
-  integrity sha512-ySIo5NG58a7r9FheG3BO2tfNGoBHQD8J1bY8z8UpafkzgsVnEdlELBMrnx9FKlcM+y5Bbshnf+AJEOjp73/9nA==
+"@tauri-apps/plugin-clipboard-manager@2.1.0-beta.1":
+  version "2.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-clipboard-manager/-/plugin-clipboard-manager-2.1.0-beta.1.tgz#7ba01981cdb7858c8a4b600d8d5da7f181e1c88e"
+  integrity sha512-nipr29/eQVlgNw6A1futwsFwWeeS0tBbq1Pww7yb+IZDKfhIFXYJ1NmrEcVGQ6vYz4KPIu+llR6D9pjKl/vSvA==
   dependencies:
-    "@tauri-apps/api" "2.0.0-beta.6"
+    "@tauri-apps/api" "2.0.0-beta.11"
 
 "@tauri-apps/plugin-shell@>=2.0.0-beta.3":
   version "2.0.0-beta.3"
