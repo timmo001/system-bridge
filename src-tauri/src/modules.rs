@@ -85,10 +85,18 @@ pub struct ModulesData {
     system: Value,
 }
 
+pub fn get_modules_data_path(module: &Module) -> String {
+    format!("{}/modules/{}.json", get_data_path(), module)
+}
+
+pub fn setup_modules_data() {
+    std::fs::create_dir_all(format!("{}/modules", get_data_path())).unwrap();
+}
+
 pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     match module {
         _ => Ok(serde_json::from_str(
-            &std::fs::read_to_string(format!("{}/{}.json", get_data_path(), module)).unwrap(),
+            &std::fs::read_to_string(get_modules_data_path(module)).unwrap(),
         )
         .unwrap()),
     }
@@ -113,8 +121,7 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
         }
 
         // Save module data to file
-        let path = format!("{}/{}.json", get_data_path(), module);
-        std::fs::write(path, data.unwrap().to_string()).unwrap();
+        std::fs::write(get_modules_data_path(module), data.unwrap().to_string()).unwrap();
     }
 
     Ok(())

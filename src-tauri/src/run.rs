@@ -6,7 +6,7 @@ use crate::{
     api::setup_api,
     gui::setup_gui,
     logger::setup_logger,
-    modules::{update_modules, Module},
+    modules::{setup_modules_data, update_modules, Module},
 };
 
 pub async fn run() {
@@ -65,6 +65,8 @@ pub async fn run() {
         thread::Builder::new()
             .name("modules".into())
             .spawn(|| {
+                setup_modules_data();
+
                 let modules = vec![
                     // Module::Battery,
                     // Module::CPU,
