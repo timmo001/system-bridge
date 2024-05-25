@@ -29,7 +29,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.1.4
+        uses: actions/checkout@v4.1.6
         with:
           ref: ${{ github.head_ref }}
       - name: Rust setup
@@ -151,7 +151,7 @@ jobs:
       - name: Install frontend dependencies
         run: yarn install
       - name: Build the app
-        uses: tauri-apps/tauri-action@v0.5.2
+        uses: tauri-apps/tauri-action@v0.5.3
         with:
           updaterJsonPreferNsis: true
       - name: Publish artifacts
