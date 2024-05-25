@@ -1,3 +1,4 @@
+use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::error::Error;
@@ -67,8 +68,32 @@ pub struct RequestModules {
     pub modules: Vec<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ModulesData {
+    battery: Value,
+    cpu: Value,
+    disks: Value,
+    displays: Value,
+    gpus: Value,
+    media: Value,
+    memory: Value,
+    networks: Value,
+    processes: Value,
+    sensors: Value,
+    system: Value,
+}
+
 pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     match module {
         _ => Ok(Value::Null),
     }
+}
+
+pub async fn update_modules(modules: Vec<Module>) -> Result<(), Box<dyn Error>> {
+    for module in modules {
+        let data = get_module_data(&module).await?;
+        info!("{}: {:?}", module, data);
+    }
+
+    Ok(())
 }
