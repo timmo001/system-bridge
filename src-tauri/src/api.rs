@@ -18,12 +18,12 @@ pub struct APIRoot {
     version: &'static str,
 }
 
-#[get("/")]
+#[get("/", format = "json")]
 pub fn root() -> Json<Root> {
     Json(Root { message: "Hello!" })
 }
 
-#[get("/api")]
+#[get("/api", format = "json")]
 pub fn api() -> Json<APIRoot> {
     Json(APIRoot {
         message: "Hello!",
