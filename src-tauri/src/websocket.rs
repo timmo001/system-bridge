@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     event::{EventSubtype, EventType},
+    modules::{get_module_data, Module, RequestModules},
     settings::{get_settings, Settings},
 };
 use log::{debug, info, warn};
@@ -48,12 +49,14 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
             let request: WebsocketRequest = request_result.unwrap();
             info!("Received request: {:?}", request);
 
+            let request_id = request.id.clone();
+
             // Check if the token is valid
             if request.token != settings.api.token {
                 warn!("Invalid token provided: {} - Expected: {}", request.token, settings.api.token);
 
                 yield Message::text(serde_json::to_string(&WebsocketResponse {
-                    id: request.id,
+                    id: request_id.clone(),
                     type_: EventType::Error.to_string(),
                     data: Value::Null,
                     subtype: None,
@@ -72,7 +75,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
 
                     // TODO: Update the application
                     // yield Message::text(serde_json::to_string(&WebsocketResponse {
-                    //     id: request.id,
+                    //     id: request_id.clone(),
                     //     type_: EventType::ApplicationUpdating.to_string(),
                     //     data: Value::Null,
                     //     subtype: None,
@@ -83,14 +86,77 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                 Ok(EventType::ExitApplication) => {
                     info!("ExitApplication event");
 
+                    yield Message::text(serde_json::to_string(&WebsocketResponse {
+                        id: request_id.clone(),
+                        type_: EventType::ExitingApplication.to_string(),
+                        data: Value::Null,
+                        subtype: None,
+                        message: None,
+                        module: None,
+                    }).unwrap());
+
                     info!("Exiting application");
                     std::process::exit(0);
+                }
+                Ok(EventType::GetData)=>{
+                    info!("GetData event: {:?}", request.data);
+
+                    let request_data_result: Result<RequestModules, _> = serde_json::from_value(request.data.clone());
+                    if let Err(e) = request_data_result {
+                        warn!("Invalid data: {:?}", e);
+                        continue;
+                    }
+
+                    let request_data = request_data_result.unwrap();
+                    info!("Request data: {:?}", request_data);
+
+                    for module_str in request_data.modules {
+                        let module_type = Module::from_str(&module_str);
+                        match module_type {
+                            Ok(module) => {
+                                info!("Getting data for module: {:?}", module.to_string());
+
+                                let module_data_result = get_module_data(&module).await;
+
+                                match module_data_result {
+                                    Ok(module_data) => {
+                                        info!("Got data for module: {:?} - {}", module.to_string(), module_data);
+
+                                        // Send data update to the client
+                                        yield Message::text(serde_json::to_string(&WebsocketResponse {
+                                            id: request_id.clone(),
+                                            type_: EventType::DataUpdate.to_string(),
+                                            data: module_data,
+                                            subtype: None,
+                                            message: None,
+                                            module: Some(module.to_string()),
+                                        }).unwrap());
+                                    }
+                                    Err(e) => {
+                                        warn!("Failed to get data for module: {:?} - {:?}", module.to_string(), e);
+
+                                        yield Message::text(serde_json::to_string(&WebsocketResponse {
+                                            id: request_id.clone(),
+                                            type_: EventType::Error.to_string(),
+                                            data: Value::Null,
+                                            subtype: None,
+                                            message: Some("Failed to get data".to_string()),
+                                            module: Some(module.to_string()),
+                                        }).unwrap());
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                warn!("Invalid module: {}", module_str);
+                            }
+                        }
+                    }
                 }
                 Ok(EventType::Unknown) => {
                     warn!("Unknown event: {}", request.event);
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request.id,
+                        id: request_id.clone(),
                         type_: EventType::Error.to_string(),
                         data: Value::Null,
                         subtype: Some(EventSubtype::UnknownEvent.to_string()),
@@ -102,7 +168,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     warn!("Unsupported event: {}", request.event);
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request.id,
+                        id: request_id.clone(),
                         type_: EventType::Error.to_string(),
                         data: Value::Null,
                         subtype: Some(EventSubtype::UnknownEvent.to_string()),

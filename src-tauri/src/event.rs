@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
-use serde::{Deserialize, Serialize};
 
 // Event Types
 pub const TYPE_APPLICATION_UPDATE: &str = "APPLICATION_UPDATE";
@@ -12,6 +12,7 @@ pub const TYPE_DATA_UPDATE: &str = "DATA_UPDATE";
 pub const TYPE_DIRECTORIES: &str = "DIRECTORIES";
 pub const TYPE_ERROR: &str = "ERROR";
 pub const TYPE_EXIT_APPLICATION: &str = "EXIT_APPLICATION";
+pub const TYPE_EXITING_APPLICATION: &str = "EXITING_APPLICATION";
 pub const TYPE_FILE: &str = "FILE";
 pub const TYPE_FILES: &str = "FILES";
 pub const TYPE_GET_DATA: &str = "GET_DATA";
@@ -58,6 +59,7 @@ pub enum EventType {
     Directories,
     Error,
     ExitApplication,
+    ExitingApplication,
     File,
     Files,
     GetData,
@@ -108,6 +110,7 @@ impl FromStr for EventType {
             TYPE_DIRECTORIES => Ok(EventType::Directories),
             TYPE_ERROR => Ok(EventType::Error),
             TYPE_EXIT_APPLICATION => Ok(EventType::ExitApplication),
+            TYPE_EXITING_APPLICATION => Ok(EventType::ExitingApplication),
             TYPE_FILE => Ok(EventType::File),
             TYPE_FILES => Ok(EventType::Files),
             TYPE_GET_DATA => Ok(EventType::GetData),
@@ -162,6 +165,7 @@ impl fmt::Display for EventType {
                 EventType::Directories => TYPE_DIRECTORIES,
                 EventType::Error => TYPE_ERROR,
                 EventType::ExitApplication => TYPE_EXIT_APPLICATION,
+                EventType::ExitingApplication => TYPE_EXITING_APPLICATION,
                 EventType::File => TYPE_FILE,
                 EventType::Files => TYPE_FILES,
                 EventType::GetData => TYPE_GET_DATA,

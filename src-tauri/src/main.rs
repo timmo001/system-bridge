@@ -5,6 +5,7 @@ mod api_routes;
 mod event;
 // mod autostart;
 // mod gui;
+mod modules;
 mod settings;
 mod shared;
 // mod websocket_client;
