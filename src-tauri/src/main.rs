@@ -5,7 +5,7 @@ mod api;
 // mod gui;
 mod settings;
 mod shared;
-mod websocket;
+// mod websocket_client;
 
 use fern::colors::{Color, ColoredLevelConfig};
 use log::{error, info, LevelFilter};
