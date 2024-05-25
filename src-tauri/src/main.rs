@@ -124,7 +124,13 @@ fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .chain(fern::log_file(log_path.clone())?);
+        .chain(
+            std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .append(false)
+                .open(log_path.clone())?,
+        );
 
     // Create a new logger
     // Configure logger at runtime
