@@ -52,6 +52,8 @@ pub async fn update(sys: &System) -> Result<Value, String> {
         .unwrap();
     let fqdn = lookup_addr(&ip).unwrap();
 
+    let uuid_machine = machine_uid::get().unwrap();
+
     Ok(serde_json::to_value(ModuleSystem {
         boot_time: System::boot_time(),
         fqdn: Some(fqdn),
@@ -62,8 +64,8 @@ pub async fn update(sys: &System) -> Result<Value, String> {
         platform: System::name(),
         run_mode: RunMode::Standalone,
         uptime: System::uptime(),
-        users: vec![],        // TODO: Implement
-        uuid: "".to_string(), // TODO: Implement
+        users: vec![], // TODO: Implement
+        uuid: uuid_machine,
         version: env!("CARGO_PKG_VERSION").to_string(),
         camera_usage: None,            // TODO: Implement
         ip_address_6: None,            // TODO: Implement

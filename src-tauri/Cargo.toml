@@ -20,6 +20,7 @@ futures-util = "0.3.30"
 http = "1.1.0"
 humantime = "2.1.0"
 log = "0.4.21"
+machine-uid = "0.5.1"
 platform-dirs = "0.3.0"
 reqwest = "0.12.4"
 rocket = { version = "0.5.1", features = ["json"] }
