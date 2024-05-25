@@ -15,6 +15,8 @@ use fern::colors::{Color, ColoredLevelConfig};
 use log::{error, info, LevelFilter};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::thread;
+use tokio::runtime::Runtime;
 
 use crate::{api::setup_api, shared::get_data_path};
 
@@ -64,14 +66,22 @@ async fn run() {
         std::process::exit(0);
     }
 
-    // Setup the backend server
-    info!("Setting up api server..");
-    let setup_api_result = setup_api().await;
-    if setup_api_result.is_err() {
-        error!("Failed to setup api server: {:?}", setup_api_result.err());
-        info!("Exiting application (API)");
-        std::process::exit(1);
-    }
+    // Create multiple threads to handle the different tasks
+    let mut tasks: Vec<thread::JoinHandle<()>> = vec![];
+
+    tasks.push(thread::spawn(|| {
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async {
+            // Setup the api server
+            info!("Setting up api server..");
+            let setup_api_result = setup_api().await;
+            if setup_api_result.is_err() {
+                error!("Failed to setup api server: {:?}", setup_api_result.err());
+                info!("Exiting application (API)");
+                std::process::exit(1);
+            }
+        });
+    }));
 
     if no_gui {
         info!("GUI is disabled");
@@ -79,6 +89,11 @@ async fn run() {
         // Setup the GUI
         // TODO: Reinstate GUI
         // setup_gui().await;
+    }
+
+    // Wait for all tasks to complete
+    for task in tasks {
+        task.join().unwrap();
     }
 
     // Nothing is running, exit the application
