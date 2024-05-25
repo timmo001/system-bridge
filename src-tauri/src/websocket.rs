@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::{
     event::{EventSubtype, EventType},
     settings::{get_settings, Settings},
@@ -12,7 +14,7 @@ use serde_json::Value;
 pub struct WebsocketRequest {
     id: String,
     token: String,
-    event: EventType,
+    event: String,
     data: Value,
 }
 
@@ -20,9 +22,9 @@ pub struct WebsocketRequest {
 pub struct WebsocketResponse {
     id: String,
     #[serde(rename = "type")]
-    type_: EventType,
+    type_: String,
     data: Value,
-    subtype: Option<EventSubtype>,
+    subtype: Option<String>,
     message: Option<String>,
     module: Option<String>,
 }
@@ -52,7 +54,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
 
                 yield Message::text(serde_json::to_string(&WebsocketResponse {
                     id: request.id,
-                    type_: EventType::Error,
+                    type_: EventType::Error.to_string(),
                     data: Value::Null,
                     subtype: None,
                     message: Some("Invalid token".to_string()),
@@ -63,28 +65,42 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
             }
 
             // Process the request
-            match request.event {
-                EventType::ApplicationUpdate => {
+            let event_type = EventType::from_str(&request.event);
+            match event_type {
+                Ok(EventType::ApplicationUpdate) => {
                     info!("ApplicationUpdate event");
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request.id,
-                        type_: EventType::ApplicationUpdate,
-                        data: Value::Null,
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
+                    // TODO: Update the application
+                    // yield Message::text(serde_json::to_string(&WebsocketResponse {
+                    //     id: request.id,
+                    //     type_: EventType::ApplicationUpdating.to_string(),
+                    //     data: Value::Null,
+                    //     subtype: None,
+                    //     message: None,
+                    //     module: None,
+                    // }).unwrap());
                 }
-                _ => {
+                Ok(EventType::Unknown) => {
                     warn!("Unknown event: {}", request.event);
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
                         id: request.id,
-                        type_: EventType::Error,
+                        type_: EventType::Error.to_string(),
                         data: Value::Null,
-                        subtype: Some(EventSubtype::UnknownEvent),
+                        subtype: Some(EventSubtype::UnknownEvent.to_string()),
                         message: Some("Unknown event".to_string()),
+                        module: None,
+                    }).unwrap());
+                }
+                _ => {
+                    warn!("Unsupported event: {}", request.event);
+
+                    yield Message::text(serde_json::to_string(&WebsocketResponse {
+                        id: request.id,
+                        type_: EventType::Error.to_string(),
+                        data: Value::Null,
+                        subtype: Some(EventSubtype::UnknownEvent.to_string()),
+                        message: Some("Unsupported event".to_string()),
                         module: None,
                     }).unwrap());
                 }

@@ -268,7 +268,7 @@ impl FromStr for EventSubtype {
             SUBTYPE_LISTENER_NOT_REGISTERED => Ok(EventSubtype::ListenerNotRegistered),
             SUBTYPE_MISSING_ACTION => Ok(EventSubtype::MissingAction),
             SUBTYPE_MISSING_BASE => Ok(EventSubtype::MissingBase),
-            SUBTYPE_MISSING_KEY => Ok(EventSubtype::MissingKey),
+            // SUBTYPE_MISSING_KEY => Ok(EventSubtype::MissingKey),
             SUBTYPE_MISSING_MODULES => Ok(EventSubtype::MissingModules),
             SUBTYPE_MISSING_PATH => Ok(EventSubtype::MissingPath),
             SUBTYPE_MISSING_PATH_URL => Ok(EventSubtype::MissingPathUrl),
