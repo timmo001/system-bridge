@@ -2,11 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod api;
 mod api_routes;
+mod event;
 // mod autostart;
 // mod gui;
 mod settings;
 mod shared;
 // mod websocket_client;
+mod websocket;
 
 use fern::colors::{Color, ColoredLevelConfig};
 use log::{error, info, LevelFilter};

@@ -1,23 +1,11 @@
 use crate::{
     api_routes::{api, not_found, root},
     settings::{get_settings, Settings},
+    websocket::websocket,
 };
 use log::info;
-use rocket::{catchers, get, routes};
-use rocket_ws::{Stream, WebSocket};
+use rocket::{catchers, routes};
 use std::error::Error;
-
-#[get("/api/websocket")]
-pub async fn websocket(ws: WebSocket) -> Stream!['static] {
-    Stream! { ws =>
-        for await message in ws {
-
-
-
-            yield message?;
-        }
-    }
-}
 
 pub async fn setup_api() -> Result<(), Box<dyn Error>> {
     // Get settings
