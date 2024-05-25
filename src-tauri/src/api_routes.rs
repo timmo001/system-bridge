@@ -40,6 +40,7 @@ pub fn root() -> Json<APIRoot> {
     Json(APIRoot { message: "Hello!" })
 }
 
+#[allow(dead_code)]
 pub struct Token<'r>(&'r str);
 
 #[derive(Debug)]
