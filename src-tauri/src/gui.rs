@@ -12,7 +12,6 @@ use tauri::{
     AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_shell::ShellExt;
 use tokio::runtime::Runtime;
 
@@ -53,7 +52,7 @@ pub fn create_window(
 
     let url: tauri::Url = format!(
         "http://{}:{}/app/{}.html?apiPort={}&token={}{}",
-        BACKEND_HOST,
+        "127.0.0.1",
         settings.api.port.to_string().clone(),
         page,
         settings.api.port.clone(),
