@@ -119,17 +119,17 @@ pub fn create_window(
     }
 }
 
-#[tauri::command]
-pub fn close_window(app_handle: AppHandle, label: String) {
-    info!("Closing window: {}", label);
+// #[tauri::command]
+// pub fn close_window(app_handle: AppHandle, label: String) {
+//     info!("Closing window: {}", label);
 
-    let webview_window_result = app_handle.get_webview_window(label.as_str());
-    if webview_window_result.is_some() {
-        let window: tauri::WebviewWindow = webview_window_result.unwrap();
-        window.close().unwrap();
-        window.destroy().unwrap();
-    }
-}
+//     let webview_window_result = app_handle.get_webview_window(label.as_str());
+//     if webview_window_result.is_some() {
+//         let window: tauri::WebviewWindow = webview_window_result.unwrap();
+//         window.close().unwrap();
+//         window.destroy().unwrap();
+//     }
+// }
 
 pub async fn setup_gui() {
     // Create the main window
@@ -251,8 +251,8 @@ pub async fn setup_gui() {
                         .unwrap();
                 }
                 "copy_token" => {
-                    // Get settings
-                    let settings: Settings = get_settings();
+                    // // Get settings
+                    // let settings: Settings = get_settings();
 
                     // TODO: Restore clipboard functionality
                     // app_handle

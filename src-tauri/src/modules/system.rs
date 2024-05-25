@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::{System, SystemExt};
+use serde_json::Value;
+use sysinfo::System;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum RunMode {
@@ -17,13 +18,13 @@ pub struct SystemUser {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct System {
+pub struct ModuleSystem {
     boot_time: f64,
-    fqdn: String,
-    hostname: String,
+    fqdn: Option<String>,
+    hostname: Option<String>,
     ip_address_4: String,
     mac_address: String,
-    platform_version: String,
+    platform_version: Option<String>,
     platform: String,
     run_mode: RunMode,
     uptime: f64,
@@ -38,23 +39,20 @@ pub struct System {
     version_newer_available: Option<bool>,
 }
 
-fn update() -> Result<System, Box<dyn std::error::Error>> {
-    let mut sys = System::new_all();
-    sys.refresh_all();
-
-    Ok(System {
-        boot_time: sys.get_boot_time(),
-        fqdn: "".to_string(),
-        hostname: "".to_string(),
+pub async fn update(sys: &System) -> Result<Value, String> {
+    Ok(serde_json::to_value(ModuleSystem {
+        boot_time: 0.0,
+        fqdn: System::name(),
+        hostname: System::host_name(),
         ip_address_4: "".to_string(),
         mac_address: "".to_string(),
-        platform_version: "".to_string(),
+        platform_version: System::os_version(),
         platform: "".to_string(),
         run_mode: RunMode::Standalone,
         uptime: 0.0,
         users: vec![],
         uuid: "".to_string(),
-        version: "".to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
         camera_usage: None,
         ip_address_6: None,
         pending_reboot: None,
@@ -62,4 +60,5 @@ fn update() -> Result<System, Box<dyn std::error::Error>> {
         version_latest: None,
         version_newer_available: None,
     })
+    .unwrap())
 }

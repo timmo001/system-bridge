@@ -1,9 +1,10 @@
-use log::info;
+mod system;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
+use sysinfo::System;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Module {
@@ -89,10 +90,23 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     }
 }
 
-pub async fn update_modules(modules: &Vec<Module>) -> Result<(), Box<dyn Error>> {
+pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
     for module in modules {
-        let data = get_module_data(&module).await?;
-        info!("{}: {:?}", module, data);
+        let data = match module {
+            Module::System => system::update(&sys).await,
+            _ => Err(format!("Invalid module: {}", module)),
+        };
+
+        if data.is_err() {
+            return Err(format!(
+                "Failed to update module: {:?} - {:?}",
+                module,
+                data.err()
+            ));
+        }
     }
 
     Ok(())
