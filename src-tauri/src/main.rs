@@ -8,7 +8,7 @@ mod shared;
 mod websocket;
 
 use fern::colors::{Color, ColoredLevelConfig};
-use log::{info, LevelFilter};
+use log::{error, info, LevelFilter};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -31,12 +31,12 @@ async fn main() {
 }
 
 async fn run() {
-    setup_logger().unwrap();
-
-    // Write current version to a file for later use from the backend
-    let version = env!("CARGO_PKG_VERSION");
-    let version_file = format!("{}/systembridge-version.txt", get_data_path());
-    std::fs::write(version_file, version).unwrap();
+    let setup_logger_result = setup_logger();
+    if setup_logger_result.is_err() {
+        error!("Failed to setup logger: {:?}", setup_logger_result.err());
+        info!("Exiting application");
+        std::process::exit(1);
+    }
 
     let args: Vec<String> = std::env::args().collect();
 
@@ -51,20 +51,22 @@ async fn run() {
         }
     }
 
-    // TODO: Add CLI interface
     if cli {
+        // TODO: Add CLI interface
         info!("CLI interface is not implemented yet..");
 
         // Exit for now
-        return;
+        info!("Exiting application (CLI)");
+        std::process::exit(0);
     }
 
     // Setup the backend server
     info!("Setting up api server..");
-    let successful = setup_api().await;
-    if successful.is_err() {
-        info!("Failed to setup api server..");
-        return;
+    let setup_api_result = setup_api().await;
+    if setup_api_result.is_err() {
+        error!("Failed to setup api server: {:?}", setup_api_result.err());
+        info!("Exiting application (API)");
+        std::process::exit(1);
     }
 
     if no_gui {
@@ -74,6 +76,10 @@ async fn run() {
         // TODO: Reinstate GUI
         // setup_gui().await;
     }
+
+    // Nothing is running, exit the application
+    info!("All tasks are completed, exiting application");
+    std::process::exit(0);
 }
 
 fn setup_logger() -> Result<(), fern::InitError> {
@@ -124,7 +130,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
     // Configure logger at runtime
     fern::Dispatch::new()
         // Add blanket level filter -
-        .level(LevelFilter::Debug)
+        .level(LevelFilter::Info)
         // - and per-module overrides
         .level_for("hyper", log::LevelFilter::Info)
         // Output to stdout, files, and other Dispatch configurations
