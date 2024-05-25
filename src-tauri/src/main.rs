@@ -83,6 +83,43 @@ async fn run() {
         });
     }));
 
+    tasks.push(thread::spawn(|| {
+        let modules = vec![
+            // modules::Module::Battery,
+            // modules::Module::CPU,
+            // modules::Module::Disks,
+            // modules::Module::Displays,
+            // modules::Module::GPUs,
+            // modules::Module::Media,
+            // modules::Module::Memory,
+            // modules::Module::Networks,
+            // modules::Module::Processes,
+            // modules::Module::Sensors,
+            modules::Module::System,
+        ];
+
+        // Run every 30 seconds
+        let interval = std::time::Duration::from_secs(30);
+
+        loop {
+            let rt = Runtime::new().unwrap();
+            rt.block_on(async {
+                // Update modules data
+                info!("Update modules data for: {:?}", modules);
+                let update_modules_result = modules::update_modules(&modules).await;
+                if update_modules_result.is_err() {
+                    error!(
+                        "Failed to update modules data: {:?}",
+                        update_modules_result.err()
+                    );
+                }
+            });
+
+            // Sleep for the interval
+            std::thread::sleep(interval);
+        }
+    }));
+
     if no_gui {
         info!("GUI is disabled");
     } else {

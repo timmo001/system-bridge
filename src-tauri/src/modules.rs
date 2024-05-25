@@ -8,10 +8,10 @@ use std::str::FromStr;
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Module {
     Battery,
-    Cpu,
+    CPU,
     Disks,
     Displays,
-    Gpus,
+    GPUs,
     Media,
     Memory,
     Networks,
@@ -26,10 +26,10 @@ impl FromStr for Module {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "battery" => Ok(Self::Battery),
-            "cpu" => Ok(Self::Cpu),
+            "cpu" => Ok(Self::CPU),
             "disks" => Ok(Self::Disks),
             "displays" => Ok(Self::Displays),
-            "gpus" => Ok(Self::Gpus),
+            "gpus" => Ok(Self::GPUs),
             "media" => Ok(Self::Media),
             "memory" => Ok(Self::Memory),
             "networks" => Ok(Self::Networks),
@@ -48,10 +48,10 @@ impl fmt::Display for Module {
             "{}",
             match self {
                 Self::Battery => "battery",
-                Self::Cpu => "cpu",
+                Self::CPU => "cpu",
                 Self::Disks => "disks",
                 Self::Displays => "displays",
-                Self::Gpus => "gpus",
+                Self::GPUs => "gpus",
                 Self::Media => "media",
                 Self::Memory => "memory",
                 Self::Networks => "networks",
@@ -89,7 +89,7 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     }
 }
 
-pub async fn update_modules(modules: Vec<Module>) -> Result<(), Box<dyn Error>> {
+pub async fn update_modules(modules: &Vec<Module>) -> Result<(), Box<dyn Error>> {
     for module in modules {
         let data = get_module_data(&module).await?;
         info!("{}: {:?}", module, data);
