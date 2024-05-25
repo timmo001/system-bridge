@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "path:default",
     "event:default",
@@ -12,6 +14,7 @@
     "resources:default",
     "menu:default",
     "tray:default",
-    "shell:allow-open"
+    "shell:allow-open",
+    "clipboard-manager:default"
   ]
 }

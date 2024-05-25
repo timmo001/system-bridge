@@ -4,6 +4,7 @@ use tokio::runtime::Runtime;
 
 use crate::{
     api::setup_api,
+    gui::setup_gui,
     logger::setup_logger,
     modules::{update_modules, Module},
 };
@@ -107,8 +108,7 @@ pub async fn run() {
         info!("GUI is disabled");
     } else {
         // Setup the GUI
-        // TODO: Reinstate GUI
-        // setup_gui().await;
+        setup_gui().await;
     }
 
     // Wait for all tasks to complete
