@@ -6,6 +6,7 @@ use rocket::request::Outcome;
 use rocket::request::{FromRequest, Request};
 use rocket::serde::{json::Json, Serialize};
 use rocket::{catch, catchers, get, routes};
+use rocket_ws::{Stream, WebSocket};
 use std::error::Error;
 
 #[derive(Serialize)]
@@ -86,6 +87,15 @@ fn api(_token: Token<'_>) -> Json<APISubRoot> {
     })
 }
 
+#[get("/api/websocket")]
+pub async fn websocket(ws: WebSocket) -> Stream!['static] {
+    Stream! { ws =>
+        for await message in ws {
+            yield message?;
+        }
+    }
+}
+
 pub async fn setup_api() -> Result<(), Box<dyn Error>> {
     // Get settings
     let settings: Settings = get_settings();
@@ -100,7 +110,7 @@ pub async fn setup_api() -> Result<(), Box<dyn Error>> {
     let _rocket = rocket::build()
         .configure(config)
         .register("/", catchers![not_found])
-        .mount("/", routes![root, api])
+        .mount("/", routes![root, api, websocket])
         .launch()
         .await?;
 
