@@ -1,3 +1,4 @@
+use dns_lookup::{lookup_addr, lookup_host};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sysinfo::System;
@@ -19,15 +20,15 @@ pub struct SystemUser {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ModuleSystem {
-    boot_time: f64,
+    boot_time: u64,
     fqdn: Option<String>,
     hostname: Option<String>,
     ip_address_4: String,
     mac_address: String,
     platform_version: Option<String>,
-    platform: String,
+    platform: Option<String>,
     run_mode: RunMode,
-    uptime: f64,
+    uptime: u64,
     users: Vec<SystemUser>,
     uuid: String,
     version: String,
@@ -40,25 +41,36 @@ pub struct ModuleSystem {
 }
 
 pub async fn update(sys: &System) -> Result<Value, String> {
+    let hostname = System::host_name();
+    if hostname.is_none() {
+        return Err("Failed to get hostname".to_string());
+    }
+
+    let ip = lookup_host(&hostname.clone().unwrap())
+        .unwrap()
+        .pop()
+        .unwrap();
+    let fqdn = lookup_addr(&ip).unwrap();
+
     Ok(serde_json::to_value(ModuleSystem {
-        boot_time: 0.0,
-        fqdn: System::name(),
-        hostname: System::host_name(),
-        ip_address_4: "".to_string(),
-        mac_address: "".to_string(),
+        boot_time: System::boot_time(),
+        fqdn: Some(fqdn),
+        hostname: hostname,
+        ip_address_4: ip.to_string(),
+        mac_address: "".to_string(), // TODO: Implement
         platform_version: System::os_version(),
-        platform: "".to_string(),
+        platform: System::name(),
         run_mode: RunMode::Standalone,
-        uptime: 0.0,
-        users: vec![],
-        uuid: "".to_string(),
+        uptime: System::uptime(),
+        users: vec![],        // TODO: Implement
+        uuid: "".to_string(), // TODO: Implement
         version: env!("CARGO_PKG_VERSION").to_string(),
-        camera_usage: None,
-        ip_address_6: None,
-        pending_reboot: None,
-        version_latest_url: None,
-        version_latest: None,
-        version_newer_available: None,
+        camera_usage: None,            // TODO: Implement
+        ip_address_6: None,            // TODO: Implement
+        pending_reboot: None,          // TODO: Implement
+        version_latest_url: None,      // TODO: Implement
+        version_latest: None,          // TODO: Implement
+        version_newer_available: None, // TODO: Implement
     })
     .unwrap())
 }

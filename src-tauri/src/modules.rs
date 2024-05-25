@@ -103,8 +103,11 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
 }
 
 pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
+    sysinfo::set_open_files_limit(0);
+
     let mut sys = System::new_all();
     sys.refresh_all();
+    // sys.refresh_specifics(refreshes);
 
     for module in modules {
         let data = match module {
