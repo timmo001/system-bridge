@@ -40,10 +40,10 @@ pub fn root() -> Json<APIRoot> {
     Json(APIRoot { message: "Hello!" })
 }
 
-struct Token<'r>(&'r str);
+pub struct Token<'r>(&'r str);
 
 #[derive(Debug)]
-enum TokenError {
+pub enum TokenError {
     Missing,
     Invalid,
 }
