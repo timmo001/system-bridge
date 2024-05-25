@@ -140,14 +140,14 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                                             type_: EventType::Error.to_string(),
                                             data: Value::Null,
                                             subtype: None,
-                                            message: Some("Failed to get data".to_string()),
+                                            message: Some(e),
                                             module: Some(module.to_string()),
                                         }).unwrap());
                                     }
                                 }
                             }
-                            Err(_) => {
-                                warn!("Invalid module: {}", module_str);
+                            Err(e) => {
+                                warn!("{}", e);
                             }
                         }
                     }

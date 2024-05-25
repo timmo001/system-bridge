@@ -20,7 +20,7 @@ pub enum Module {
 }
 
 impl FromStr for Module {
-    type Err = ();
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -67,7 +67,7 @@ pub struct RequestModules {
     pub modules: Vec<String>,
 }
 
-pub async fn get_module_data(module: &Module) -> Result<Value, ()> {
+pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     match module {
         _ => Ok(Value::Null),
     }
