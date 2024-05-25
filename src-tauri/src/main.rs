@@ -124,6 +124,7 @@ async fn run() {
                     });
 
                     // Sleep for the interval
+                    info!("Sleeping for {} seconds", interval.as_secs());
                     std::thread::sleep(interval);
                 }
             })
