@@ -1,5 +1,6 @@
 mod system;
 
+use crate::shared::get_data_path;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt;
@@ -86,7 +87,10 @@ pub struct ModulesData {
 
 pub async fn get_module_data(module: &Module) -> Result<Value, String> {
     match module {
-        _ => Ok(Value::Null),
+        _ => Ok(serde_json::from_str(
+            &std::fs::read_to_string(format!("{}/{}.json", get_data_path(), module)).unwrap(),
+        )
+        .unwrap()),
     }
 }
 
@@ -107,6 +111,10 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
                 data.err()
             ));
         }
+
+        // Save module data to file
+        let path = format!("{}/{}.json", get_data_path(), module);
+        std::fs::write(path, data.unwrap().to_string()).unwrap();
     }
 
     Ok(())
