@@ -80,6 +80,12 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     //     module: None,
                     // }).unwrap());
                 }
+                Ok(EventType::ExitApplication) => {
+                    info!("ExitApplication event");
+
+                    info!("Exiting application");
+                    std::process::exit(0);
+                }
                 Ok(EventType::Unknown) => {
                     warn!("Unknown event: {}", request.event);
 
