@@ -69,56 +69,66 @@ async fn run() {
     // Create multiple threads to handle the different tasks
     let mut tasks: Vec<thread::JoinHandle<()>> = vec![];
 
-    tasks.push(thread::spawn(|| {
-        let rt = Runtime::new().unwrap();
-        rt.block_on(async {
-            // Setup the api server
-            info!("Setting up api server..");
-            let setup_api_result = setup_api().await;
-            if setup_api_result.is_err() {
-                error!("Failed to setup api server: {:?}", setup_api_result.err());
-                info!("Exiting application (API)");
-                std::process::exit(1);
-            }
-        });
-    }));
+    tasks.push(
+        thread::Builder::new()
+            .name("api".into())
+            .spawn(|| {
+                let rt = Runtime::new().unwrap();
+                rt.block_on(async {
+                    // Setup the api server
+                    info!("Setting up api server..");
+                    let setup_api_result = setup_api().await;
+                    if setup_api_result.is_err() {
+                        error!("Failed to setup api server: {:?}", setup_api_result.err());
+                        info!("Exiting application (API)");
+                        std::process::exit(1);
+                    }
+                });
+            })
+            .unwrap(),
+    );
 
-    tasks.push(thread::spawn(|| {
-        let modules = vec![
-            // modules::Module::Battery,
-            // modules::Module::CPU,
-            // modules::Module::Disks,
-            // modules::Module::Displays,
-            // modules::Module::GPUs,
-            // modules::Module::Media,
-            // modules::Module::Memory,
-            // modules::Module::Networks,
-            // modules::Module::Processes,
-            // modules::Module::Sensors,
-            modules::Module::System,
-        ];
+    tasks.push(
+        thread::Builder::new()
+            .name("modules".into())
+            .spawn(|| {
+                let modules = vec![
+                    // modules::Module::Battery,
+                    // modules::Module::CPU,
+                    // modules::Module::Disks,
+                    // modules::Module::Displays,
+                    // modules::Module::GPUs,
+                    // modules::Module::Media,
+                    // modules::Module::Memory,
+                    // modules::Module::Networks,
+                    // modules::Module::Processes,
+                    // modules::Module::Sensors,
+                    modules::Module::System,
+                ];
 
-        // Run every 30 seconds
-        let interval = std::time::Duration::from_secs(30);
+                // Run every 30 seconds
+                let interval = std::time::Duration::from_secs(30);
 
-        loop {
-            let rt = Runtime::new().unwrap();
-            rt.block_on(async {
-                // Update modules data
-                info!("Update modules data for: {:?}", modules);
-                let update_modules_result = modules::update_modules(&modules).await;
-                if update_modules_result.is_err() {
-                    error!(
-                        "Failed to update modules data: {:?}",
-                        update_modules_result.err()
-                    );
+                loop {
+                    let rt = Runtime::new().unwrap();
+                    rt.block_on(async {
+                        // Update modules data
+                        info!("Update modules data for: {:?}", modules);
+                        let update_modules_result = modules::update_modules(&modules).await;
+                        if update_modules_result.is_err() {
+                            error!(
+                                "Failed to update modules data: {:?}",
+                                update_modules_result.err()
+                            );
+                        }
+                    });
+
+                    // Sleep for the interval
+                    std::thread::sleep(interval);
                 }
-            });
-
-            // Sleep for the interval
-            std::thread::sleep(interval);
-        }
-    }));
+            })
+            .unwrap(),
+    );
 
     if no_gui {
         info!("GUI is disabled");
