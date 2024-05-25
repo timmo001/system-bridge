@@ -12,7 +12,7 @@ use serde_json::Value;
 pub struct WebsocketRequest {
     id: String,
     token: String,
-    event: String,
+    event: EventType,
     data: Value,
 }
 
@@ -64,6 +64,18 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
 
             // Process the request
             match request.event {
+                EventType::ApplicationUpdate => {
+                    info!("ApplicationUpdate event");
+
+                    yield Message::text(serde_json::to_string(&WebsocketResponse {
+                        id: request.id,
+                        type_: EventType::ApplicationUpdate,
+                        data: Value::Null,
+                        subtype: None,
+                        message: None,
+                        module: None,
+                    }).unwrap());
+                }
                 _ => {
                     warn!("Unknown event: {}", request.event);
 
