@@ -1,4 +1,7 @@
+use std::fmt::Debug;
+
 use dns_lookup::{lookup_addr, lookup_host};
+use mac_address::get_mac_address;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sysinfo::System;
@@ -24,7 +27,7 @@ pub struct ModuleSystem {
     fqdn: Option<String>,
     hostname: Option<String>,
     ip_address_4: String,
-    mac_address: String,
+    mac_address: Option<String>,
     platform_version: Option<String>,
     platform: Option<String>,
     run_mode: RunMode,
@@ -51,6 +54,11 @@ pub async fn update(sys: &System) -> Result<Value, String> {
         .pop()
         .unwrap();
     let fqdn = lookup_addr(&ip).unwrap();
+    let mac_address = get_mac_address().unwrap();
+    let mac_address_string: Option<String> = match mac_address {
+        Some(mac) => Some(mac.to_string()),
+        None => None,
+    };
 
     let uuid_machine = machine_uid::get().unwrap();
 
@@ -59,7 +67,7 @@ pub async fn update(sys: &System) -> Result<Value, String> {
         fqdn: Some(fqdn),
         hostname: hostname,
         ip_address_4: ip.to_string(),
-        mac_address: "".to_string(), // TODO: Implement
+        mac_address: mac_address_string,
         platform_version: System::os_version(),
         platform: System::name(),
         run_mode: RunMode::Standalone,
