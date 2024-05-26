@@ -68,8 +68,8 @@ pub async fn run() {
                 setup_modules_data();
 
                 let modules = vec![
-                    // Module::Battery,
-                    Module::CPU,
+                    Module::Battery,
+                    // Module::CPU,
                     // Module::Disks,
                     // Module::Displays,
                     // Module::GPUs,

@@ -1,3 +1,4 @@
+mod battery;
 mod cpu;
 mod networks;
 mod system;
@@ -7,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt;
 use std::str::FromStr;
-use sysinfo::System;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Module {
@@ -109,6 +109,7 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
 
     for module in modules {
         let data = match module {
+            Module::Battery => battery::update().await,
             Module::CPU => cpu::update().await,
             Module::System => system::update().await,
             _ => Err(format!("Invalid module: {}", module)),

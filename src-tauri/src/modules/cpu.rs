@@ -101,7 +101,7 @@ pub fn get_per_cpu(cpus: &[Cpu]) -> Result<Vec<PerCPU>, String> {
 }
 
 pub async fn update() -> Result<Value, String> {
-    // Refresh the CPU information
+    // Refresh CPU information
     let mut sys =
         System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()));
     // Wait a bit because CPU usage is based on diff.
