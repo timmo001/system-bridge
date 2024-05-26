@@ -111,7 +111,7 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
 
     for module in modules {
         let data = match module {
-            Module::System => system::update(&sys).await,
+            Module::System => system::update().await,
             _ => Err(format!("Invalid module: {}", module)),
         };
 

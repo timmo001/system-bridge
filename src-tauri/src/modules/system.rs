@@ -43,7 +43,7 @@ pub struct ModuleSystem {
     version_newer_available: Option<bool>,
 }
 
-pub async fn update(sys: &System) -> Result<Value, String> {
+pub async fn update() -> Result<Value, String> {
     let hostname = System::host_name();
     if hostname.is_none() {
         return Err("Failed to get hostname".to_string());
