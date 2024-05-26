@@ -57,58 +57,11 @@ pub struct ModuleNetworks {
     networks: Option<Vec<Network>>,
 }
 
-pub fn get_addresses(iface: &get_if_addrs::Interface) -> Vec<NetworkAddress> {
-    let mut addresses = Vec::new();
-
-    for address in iface.ip() {
-        addresses.push(NetworkAddress {
-            address: Some(address.to_string()),
-            family: Some(address.family().to_string()),
-            netmask: address.netmask().map(|netmask| netmask.to_string()),
-            broadcast: address.broadcast().map(|broadcast| broadcast.to_string()),
-            ptp: address.ptp().map(|ptp| ptp.to_string()),
-        });
-    }   
-
-    addresses
-}
-
-pub fn get_stats(iface: &get_if_addrs::Interface) -> Option<NetworkStats> {
-    get_if_addrs()
-        .unwrap()
-        .iter()
-        .find(|&x| x.name == iface.name)
-        .map(|iface| NetworkStats {
-            isup: iface.is_up(),
-            duplex: iface.duplex().map(|duplex| duplex.to_string()),
-            speed: iface.speed(),
-            mtu: iface.mtu(),
-            flags: Some(iface.flags().iter().map(|flag| flag.to_string()).collect()),
-        })
-}
-
-pub fn get_networks() -> Vec<Network> {
-    let mut networks = Vec::new();
-
-    for iface in get_if_addrs().unwrap() {
-        let addresses = get_addresses(&iface);
-        let stats = get_stats(&iface);
-
-        networks.push(Network {
-            name: Some(iface.name.to_string()),
-            addresses: Some(addresses),
-            stats,
-        });
-    }
-
-    networks
-}
-
 pub async fn update() -> Result<Value, String> {
     let module_networks = ModuleNetworks {
         connections: None,
         io: None,
-        networks: Some(get_networks()),
+        networks: None,
     };
 
     Ok(serde_json::to_value(module_networks).unwrap())

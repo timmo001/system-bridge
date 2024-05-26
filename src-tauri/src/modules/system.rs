@@ -27,7 +27,7 @@ pub struct ModuleSystem {
     boot_time: u64,
     fqdn: Option<String>,
     hostname: Option<String>,
-    ip_address_4: String,
+    ip_address_4: Option<String>,
     mac_address: Option<String>,
     platform_version: Option<String>,
     platform: Option<String>,
@@ -45,23 +45,21 @@ pub struct ModuleSystem {
 }
 
 pub async fn update() -> Result<Value, String> {
-    let if_addrs
-
-    let fqdn = lookup_addr(&ip).unwrap();
-    let mac_address = get_mac_address().unwrap();
-    let mac_address_string: Option<String> = match mac_address {
-        Some(mac) => Some(mac.to_string()),
-        None => None,
-    };
+    // let fqdn = lookup_addr(&ip).unwrap();
+    // let mac_address = get_mac_address().unwrap();
+    // let mac_address_string: Option<String> = match mac_address {
+    //     Some(mac) => Some(mac.to_string()),
+    //     None => None,
+    // };
 
     let uuid_machine = machine_uid::get().unwrap();
 
     Ok(serde_json::to_value(ModuleSystem {
         boot_time: System::boot_time(),
-        fqdn: Some(fqdn),
+        fqdn: None,
         hostname: System::host_name(),
-        ip_address_4: ip.to_string(),
-        mac_address: mac_address_string,
+        ip_address_4: None,
+        mac_address: None,
         platform_version: System::os_version(),
         platform: System::name(),
         run_mode: RunMode::Standalone,
