@@ -69,7 +69,7 @@ pub async fn run() {
 
                 let modules = vec![
                     // Module::Battery,
-                    // Module::CPU,
+                    Module::CPU,
                     // Module::Disks,
                     // Module::Displays,
                     // Module::GPUs,
@@ -78,7 +78,7 @@ pub async fn run() {
                     // Module::Networks,
                     // Module::Processes,
                     // Module::Sensors,
-                    Module::System,
+                    // Module::System,
                 ];
 
                 // Run every 30 seconds

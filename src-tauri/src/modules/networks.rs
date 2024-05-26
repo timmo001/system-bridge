@@ -58,11 +58,10 @@ pub struct ModuleNetworks {
 }
 
 pub async fn update() -> Result<Value, String> {
-    let module_networks = ModuleNetworks {
+    Ok(serde_json::to_value(ModuleNetworks {
         connections: None,
         io: None,
         networks: None,
-    };
-
-    Ok(serde_json::to_value(module_networks).unwrap())
+    })
+    .unwrap())
 }

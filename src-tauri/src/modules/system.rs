@@ -60,7 +60,7 @@ pub async fn update() -> Result<Value, String> {
         hostname: System::host_name(),
         ip_address_4: None,
         mac_address: None,
-        platform_version: System::os_version(),
+        platform_version: System::long_os_version(),
         platform: System::name(),
         run_mode: RunMode::Standalone,
         uptime: System::uptime(),
