@@ -19,43 +19,40 @@ pub struct CPUStats {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CPUTimes {
-    user: Option<f64>,
-    system: Option<f64>,
-    idle: Option<f64>,
-    interrupt: Option<f64>,
-    dpc: Option<f64>,
+    user: Option<f32>,
+    system: Option<f32>,
+    idle: Option<f32>,
+    interrupt: Option<f32>,
+    dpc: Option<f32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PerCPU {
     id: i32,
-    frequency: Option<CPUFrequency>,
-    power: Option<f64>,
+    frequency: CPUFrequency,
+    power: Option<f32>,
     times: Option<CPUTimes>,
     times_percent: Option<CPUTimes>,
-    usage: Option<f64>,
-    voltage: Option<f64>,
+    usage: f32,
+    voltage: f32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ModuleCPU {
     count: usize,
-    frequency: Option<CPUFrequency>,
-    load_average: Option<f64>,
-    per_cpu: Option<Vec<PerCPU>>,
-    power: Option<f64>,
+    frequency: CPUFrequency,
+    load_average: f32,
+    per_cpu: Vec<PerCPU>,
+    power: Option<f32>,
     stats: Option<CPUStats>,
-    temperature: Option<f64>,
+    temperature: Option<f32>,
     times: Option<CPUTimes>,
     times_percent: Option<CPUTimes>,
-    usage: Option<f32>,
-    voltage: Option<f64>,
+    usage: f32,
+    voltage: f32,
 }
 
-pub async fn get_cpu_frequency(
-    cpu: &Cpu,
-    existing: Option<CPUFrequency>,
-) -> Result<CPUFrequency, String> {
+pub fn get_frequency(cpu: &Cpu, existing: Option<CPUFrequency>) -> Result<CPUFrequency, String> {
     let current = cpu.frequency();
 
     Ok(match existing {
@@ -83,6 +80,26 @@ pub async fn get_cpu_frequency(
     })
 }
 
+pub fn get_per_cpu(cpus: &[Cpu]) -> Result<Vec<PerCPU>, String> {
+    let mut new: Vec<PerCPU> = Vec::new();
+
+    let mut id = 0;
+    for cpu in cpus {
+        id += 1;
+        new.push(PerCPU {
+            id,
+            frequency: get_frequency(cpu, None).unwrap(),
+            power: None,
+            times: None,
+            times_percent: None,
+            usage: cpu.cpu_usage(),
+            voltage: 0.0,
+        });
+    }
+
+    Ok(new)
+}
+
 pub async fn update() -> Result<Value, String> {
     // Refresh the CPU information
     let mut sys =
@@ -95,23 +112,19 @@ pub async fn update() -> Result<Value, String> {
     let cpu = sys.global_cpu_info();
 
     let cpus = sys.cpus();
-    // for cpu in cpus {
-    //     cpu::get_current_frequency();
-    //     info!("{:?}", cpu);
-    // }
 
     Ok(serde_json::to_value(ModuleCPU {
         count: cpus.len(),
-        frequency: Some(get_cpu_frequency(cpu, None).await.unwrap()),
-        load_average: Some(0.0),
-        per_cpu: None,
-        power: Some(0.0),
+        frequency: get_frequency(cpu, None).unwrap(),
+        load_average: 0.0,
+        per_cpu: get_per_cpu(cpus).unwrap(),
+        power: None,
         stats: None,
-        temperature: Some(0.0),
+        temperature: None,
         times: None,
         times_percent: None,
-        usage: Some(cpu.cpu_usage()),
-        voltage: Some(0.0),
+        usage: cpu.cpu_usage(),
+        voltage: 0.0,
     })
     .unwrap())
 }
