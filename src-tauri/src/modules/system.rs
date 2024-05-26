@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use dns_lookup::{lookup_addr, lookup_host};
+use get_if_addrs::get_if_addrs;
 use mac_address::get_mac_address;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -44,15 +45,8 @@ pub struct ModuleSystem {
 }
 
 pub async fn update() -> Result<Value, String> {
-    let hostname = System::host_name();
-    if hostname.is_none() {
-        return Err("Failed to get hostname".to_string());
-    }
+    let if_addrs
 
-    let ip = lookup_host(&hostname.clone().unwrap())
-        .unwrap()
-        .pop()
-        .unwrap();
     let fqdn = lookup_addr(&ip).unwrap();
     let mac_address = get_mac_address().unwrap();
     let mac_address_string: Option<String> = match mac_address {
@@ -65,7 +59,7 @@ pub async fn update() -> Result<Value, String> {
     Ok(serde_json::to_value(ModuleSystem {
         boot_time: System::boot_time(),
         fqdn: Some(fqdn),
-        hostname: hostname,
+        hostname: System::host_name(),
         ip_address_4: ip.to_string(),
         mac_address: mac_address_string,
         platform_version: System::os_version(),
