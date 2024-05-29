@@ -1,7 +1,5 @@
-use std::fmt::Debug;
-
 use pyo3::prelude::*;
-use pyo3::types::IntoPyDict;
+use pyo3::FromPyObject;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sysinfo::System;
@@ -14,11 +12,30 @@ pub enum RunMode {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SystemUser {
     name: String,
-    active: bool,
+    active: Option<bool>,
     terminal: String,
     host: String,
     started: f64,
     pid: f64,
+}
+
+impl<'source> FromPyObject<'source> for SystemUser {
+    fn extract(ob: &'source PyAny) -> PyResult<Self> {
+        let name = ob.getattr("name")?.extract::<String>()?;
+        let terminal = ob.getattr("terminal")?.extract::<String>()?;
+        let host = ob.getattr("host")?.extract::<String>()?;
+        let started = ob.getattr("started")?.extract::<f64>()?;
+        let pid = ob.getattr("pid")?.extract::<f64>()?;
+
+        Ok(SystemUser {
+            name,
+            active: None,
+            terminal,
+            host,
+            started,
+            pid,
+        })
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,84 +68,78 @@ pub async fn update() -> Result<Value, String> {
     //     None => None,
     // };
 
-    let (fqdn, ip_address_4, ip_address_6, mac_address, pending_reboot) = Python::with_gil(|py| {
-        // Import the module
-        let system_module = PyModule::import_bound(py, "systembridgedata.module.system")
-            .expect("Failed to import systembridgedata.module.system module");
+    let (fqdn, ip_address_4, ip_address_6, mac_address, pending_reboot, users) =
+        Python::with_gil(|py| {
+            // Import the module
+            let system_module = PyModule::import_bound(py, "systembridgedata.module.system")
+                .expect("Failed to import systembridgedata.module.system module");
 
-        // Create an instance of the System class
-        let system_instance = system_module
-            .getattr("System")
-            .expect("Failed to get System class")
-            .call0()
-            .expect("Failed to create System instance");
+            // Create an instance of the System class
+            let system_instance = system_module
+                .getattr("System")
+                .expect("Failed to get System class")
+                .call0()
+                .expect("Failed to create System instance");
 
-        // Call the async get_fqdn method
-        let fqdn = system_instance
-            .getattr("get_fqdn")
-            .expect("Failed to get get_fqdn method")
-            .call0()
-            .expect("Failed to call get_fqdn method")
-            .extract::<String>()
-            .expect("Failed to extract string value from get_fqdn result");
+            // Call the methods
+            let fqdn = system_instance
+                .getattr("get_fqdn")
+                .expect("Failed to get get_fqdn method")
+                .call0()
+                .expect("Failed to call get_fqdn method")
+                .extract::<String>()
+                .expect("Failed to extract string value from get_fqdn result");
 
-        let ip_address_4 = system_instance
-            .getattr("get_ip_address_4")
-            .expect("Failed to get get_ip_address_4 method")
-            .call0()
-            .expect("Failed to call get_ip_address_4 method")
-            .extract::<String>()
-            .expect("Failed to extract string value from get_ip_address_4 result");
+            let ip_address_4 = system_instance
+                .getattr("get_ip_address_4")
+                .expect("Failed to get get_ip_address_4 method")
+                .call0()
+                .expect("Failed to call get_ip_address_4 method")
+                .extract::<String>()
+                .expect("Failed to extract string value from get_ip_address_4 result");
 
-        let ip_address_6 = system_instance
-            .getattr("get_ip_address_6")
-            .expect("Failed to get get_ip_address_6 method")
-            .call0()
-            .expect("Failed to call get_ip_address_6 method")
-            .extract::<String>()
-            .expect("Failed to extract string value from get_ip_address_6 result");
+            let ip_address_6 = system_instance
+                .getattr("get_ip_address_6")
+                .expect("Failed to get get_ip_address_6 method")
+                .call0()
+                .expect("Failed to call get_ip_address_6 method")
+                .extract::<String>()
+                .expect("Failed to extract string value from get_ip_address_6 result");
 
-        let mac_address = system_instance
-            .getattr("get_mac_address")
-            .expect("Failed to get get_mac_address method")
-            .call0()
-            .expect("Failed to call get_mac_address method")
-            .extract::<String>()
-            .expect("Failed to extract string value from get_mac_address result");
+            let mac_address = system_instance
+                .getattr("get_mac_address")
+                .expect("Failed to get get_mac_address method")
+                .call0()
+                .expect("Failed to call get_mac_address method")
+                .extract::<String>()
+                .expect("Failed to extract string value from get_mac_address result");
 
-        let pending_reboot = system_instance
-            .getattr("get_pending_reboot")
-            .expect("Failed to get get_pending_reboot method")
-            .call0()
-            .expect("Failed to call get_pending_reboot method")
-            .extract::<bool>()
-            .expect("Failed to extract boolean value from get_pending_reboot result");
+            let pending_reboot = system_instance
+                .getattr("get_pending_reboot")
+                .expect("Failed to get get_pending_reboot method")
+                .call0()
+                .expect("Failed to call get_pending_reboot method")
+                .extract::<bool>()
+                .expect("Failed to extract boolean value from get_pending_reboot result");
 
-        // let users = system_instance
-        //     .getattr("get_users")
-        //     .expect("Failed to get get_users method")
-        //     .call0()
-        //     .expect("Failed to call get_users method");
+            let users = system_instance
+                .getattr("get_users")
+                .expect("Failed to get get_users method")
+                .call0()
+                .expect("Failed to call get_users method")
+                .extract::<Vec<SystemUser>>()
+                .expect("Failed to extract Vec<SystemUser> value from get_users result");
 
-        // Set output
-        (
-            fqdn,
-            ip_address_4,
-            ip_address_6,
-            mac_address,
-            pending_reboot,
-            // users,
-        )
-    });
-
-    // // Print the result
-    // println!("FQDN: {:?}", fqdn);
-    // println!("IPv4: {:?}", ip_address_4);
-    // println!("IPv6: {:?}", ip_address_6);
-    // println!("MAC: {:?}", mac_address);
-    // println!("Pending Reboot: {:?}", pending_reboot);
-
-    // let py_fqdn = Python::with_gil(f)
+            // Set output
+            (
+                fqdn,
+                ip_address_4,
+                ip_address_6,
+                mac_address,
+                pending_reboot,
+                users,
+            )
+        });
 
     let uuid_machine = machine_uid::get().unwrap();
 
@@ -142,7 +153,7 @@ pub async fn update() -> Result<Value, String> {
         platform: System::name(),
         run_mode: RunMode::Standalone,
         uptime: System::uptime(),
-        users: vec![], // TODO: Implement
+        users,
         uuid: uuid_machine,
         version: env!("CARGO_PKG_VERSION").to_string(),
         camera_usage: None, // TODO: Implement
