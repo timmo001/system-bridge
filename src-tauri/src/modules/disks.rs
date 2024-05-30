@@ -2,7 +2,9 @@ use pyo3::prelude::*;
 use pyo3::FromPyObject;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-#[derive(Debug, Serialize, Deserialize)]
+use std::collections::HashMap;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DiskIOCounters {
     read_count: i64,
     write_count: i64,
@@ -104,13 +106,13 @@ pub async fn update() -> Result<Value, String> {
             .extract::<DiskIOCounters>()
             .expect("Failed to extract string value from get_io_counters result");
 
-        // let io_counters_per_disk = disks_instance
-        //     .getattr("get_io_counters_per_disk")
-        //     .expect("Failed to get get_io_counters_per_disk method")
-        //     .call0()
-        //     .expect("Failed to call get_io_counters_per_disk method")
-        //     .extract::<Vec<DiskIOCounters>>()
-        //     .expect("Failed to extract string value from get_io_counters_per_disk result");
+        let io_counters_per_disk = disks_instance
+            .getattr("get_io_counters_per_disk")
+            .expect("Failed to get get_io_counters_per_disk method")
+            .call0()
+            .expect("Failed to call get_io_counters_per_disk method")
+            .extract::<HashMap<String, DiskIOCounters>>()
+            .expect("Failed to extract string value from get_io_counters_per_disk result");
 
         let partitions = disks_instance
             .getattr("get_partitions")
@@ -128,10 +130,13 @@ pub async fn update() -> Result<Value, String> {
                 .iter()
                 .position(|disk| disk.name == partition.device)
                 .unwrap_or_else(|| {
+                    // Find the disk io counters from the disk name
+                    let disk_io_counters = io_counters_per_disk.get(&partition.device).cloned();
+
                     devices.push(Disk {
                         name: partition.device.clone(),
                         partitions: vec![],
-                        io_counters: None,
+                        io_counters: disk_io_counters,
                     });
                     devices.len() - 1
                 });
