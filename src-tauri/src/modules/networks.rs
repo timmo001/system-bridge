@@ -1,4 +1,3 @@
-use get_if_addrs::get_if_addrs;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -59,9 +58,9 @@ pub struct ModuleNetworks {
 
 pub async fn update() -> Result<Value, String> {
     Ok(serde_json::to_value(ModuleNetworks {
-        connections: None,
-        io: None,
-        networks: None,
+        connections: None, // TODO: Implement
+        io: None, // TODO: Implement
+        networks: None, // TODO: Implement
     })
     .unwrap())
 }

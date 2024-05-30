@@ -1,6 +1,13 @@
 mod battery;
 mod cpu;
+mod disks;
+mod displays;
+mod gpus;
+mod media;
+mod memory;
 mod networks;
+mod processes;
+mod sensors;
 mod system;
 
 use crate::shared::get_data_path;
@@ -111,6 +118,14 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
         let data = match module {
             Module::Battery => battery::update().await,
             Module::CPU => cpu::update().await,
+            Module::Disks => disks::update().await,
+            Module::Displays => displays::update().await,
+            Module::GPUs => gpus::update().await,
+            Module::Media => media::update().await,
+            Module::Memory => memory::update().await,
+            Module::Networks => networks::update().await,
+            Module::Processes => processes::update().await,
+            Module::Sensors => sensors::update().await,
             Module::System => system::update().await,
             _ => Err(format!("Invalid module: {}", module)),
         };
