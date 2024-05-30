@@ -87,7 +87,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_swap method")
             .extract::<MemorySwap>()
-            .expect("Failed to extract string value from get_swap result");
+            .expect("Failed to extract from get_swap result");
 
         let virtual_ = memory_instance
             .getattr("get_virtual")
@@ -95,7 +95,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_virtual method")
             .extract::<MemoryVirtual>()
-            .expect("Failed to extract string value from get_virtual result");
+            .expect("Failed to extract from get_virtual result");
 
         // Set output
         (swap, virtual_)

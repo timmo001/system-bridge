@@ -88,7 +88,7 @@ pub async fn update() -> Result<Value, String> {
                 .call0()
                 .expect("Failed to call get_fqdn method")
                 .extract::<String>()
-                .expect("Failed to extract string value from get_fqdn result");
+                .expect("Failed to extract from get_fqdn result");
 
             let ip_address_4 = system_instance
                 .getattr("get_ip_address_4")
@@ -96,7 +96,7 @@ pub async fn update() -> Result<Value, String> {
                 .call0()
                 .expect("Failed to call get_ip_address_4 method")
                 .extract::<String>()
-                .expect("Failed to extract string value from get_ip_address_4 result");
+                .expect("Failed to extract from get_ip_address_4 result");
 
             let ip_address_6 = system_instance
                 .getattr("get_ip_address_6")
@@ -104,7 +104,7 @@ pub async fn update() -> Result<Value, String> {
                 .call0()
                 .expect("Failed to call get_ip_address_6 method")
                 .extract::<String>()
-                .expect("Failed to extract string value from get_ip_address_6 result");
+                .expect("Failed to extract from get_ip_address_6 result");
 
             let mac_address = system_instance
                 .getattr("get_mac_address")
@@ -112,7 +112,7 @@ pub async fn update() -> Result<Value, String> {
                 .call0()
                 .expect("Failed to call get_mac_address method")
                 .extract::<String>()
-                .expect("Failed to extract string value from get_mac_address result");
+                .expect("Failed to extract from get_mac_address result");
 
             let pending_reboot = system_instance
                 .getattr("get_pending_reboot")

@@ -104,7 +104,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_io_counters method")
             .extract::<DiskIOCounters>()
-            .expect("Failed to extract string value from get_io_counters result");
+            .expect("Failed to extract from get_io_counters result");
 
         let io_counters_per_disk = disks_instance
             .getattr("get_io_counters_per_disk")
@@ -112,7 +112,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_io_counters_per_disk method")
             .extract::<HashMap<String, DiskIOCounters>>()
-            .expect("Failed to extract string value from get_io_counters_per_disk result");
+            .expect("Failed to extract from get_io_counters_per_disk result");
 
         let partitions = disks_instance
             .getattr("get_partitions")
@@ -120,7 +120,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_partitions method")
             .extract::<Vec<DiskPartition>>()
-            .expect("Failed to extract string value from get_partitions result");
+            .expect("Failed to extract from get_partitions result");
 
         let mut devices: Vec<Disk> = vec![];
 

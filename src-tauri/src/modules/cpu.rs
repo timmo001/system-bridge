@@ -168,7 +168,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_load_average method")
             .extract::<f32>()
-            .expect("Failed to extract string value from get_load_average result");
+            .expect("Failed to extract from get_load_average result");
 
         let stats = cpu_instance
             .getattr("get_stats")
@@ -176,7 +176,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_stats method")
             .extract::<CPUStats>()
-            .expect("Failed to extract string value from get_stats result");
+            .expect("Failed to extract from get_stats result");
 
         let times = cpu_instance
             .getattr("get_times")
@@ -184,7 +184,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_times method")
             .extract::<CPUTimes>()
-            .expect("Failed to extract string value from get_times result");
+            .expect("Failed to extract from get_times result");
 
         let times_percent = cpu_instance
             .getattr("get_times_percent")
@@ -192,7 +192,7 @@ pub async fn update() -> Result<Value, String> {
             .call0()
             .expect("Failed to call get_times_percent method")
             .extract::<CPUTimes>()
-            .expect("Failed to extract string value from get_times_percent result");
+            .expect("Failed to extract from get_times_percent result");
 
         // Set output
         (load_average, stats, times, times_percent)
