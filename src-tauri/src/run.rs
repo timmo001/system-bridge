@@ -70,19 +70,22 @@ pub async fn run() {
                 let modules = vec![
                     Module::Battery,
                     Module::CPU,
-                    // Module::Disks,
-                    // Module::Displays,
-                    // Module::GPUs,
-                    // Module::Media,
-                    // Module::Memory,
-                    // Module::Networks,
-                    // Module::Processes,
-                    // Module::Sensors,
+                    Module::Disks,
+                    Module::Displays,
+                    Module::GPUs,
+                    Module::Media,
+                    Module::Memory,
+                    Module::Networks,
+                    Module::Processes,
+                    Module::Sensors,
                     Module::System,
                 ];
 
                 // Run every 30 seconds
                 let interval = std::time::Duration::from_secs(30);
+
+                // Increase the open files limit
+                sysinfo::set_open_files_limit(0);
 
                 loop {
                     let rt = Runtime::new().unwrap();

@@ -112,8 +112,6 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
 }
 
 pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
-    sysinfo::set_open_files_limit(0);
-
     for module in modules {
         let data = match module {
             Module::Battery => battery::update().await,
