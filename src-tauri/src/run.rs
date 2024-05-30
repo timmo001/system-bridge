@@ -90,12 +90,12 @@ pub async fn run() {
                 loop {
                     let rt = Runtime::new().unwrap();
                     rt.block_on(async {
-                        // Update modules data
-                        info!("Update modules data for: {:?}", modules);
+                        // Update module data
+                        info!("Update module data for: {:?}", modules);
                         let update_modules_result = update_modules(&modules).await;
                         if update_modules_result.is_err() {
                             error!(
-                                "Failed to update modules data: {:?}",
+                                "Failed to update module data: {:?}",
                                 update_modules_result.err()
                             );
                         }
