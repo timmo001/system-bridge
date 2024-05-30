@@ -104,13 +104,13 @@ pub async fn update() -> Result<Value, String> {
             .extract::<DiskIOCounters>()
             .expect("Failed to extract string value from get_io_counters result");
 
-        let io_counters_per_disk = disks_instance
-            .getattr("get_io_counters_per_disk")
-            .expect("Failed to get get_io_counters_per_disk method")
-            .call0()
-            .expect("Failed to call get_io_counters_per_disk method")
-            .extract::<Vec<DiskIOCounters>>()
-            .expect("Failed to extract string value from get_io_counters_per_disk result");
+        // let io_counters_per_disk = disks_instance
+        //     .getattr("get_io_counters_per_disk")
+        //     .expect("Failed to get get_io_counters_per_disk method")
+        //     .call0()
+        //     .expect("Failed to call get_io_counters_per_disk method")
+        //     .extract::<Vec<DiskIOCounters>>()
+        //     .expect("Failed to extract string value from get_io_counters_per_disk result");
 
         let partitions = disks_instance
             .getattr("get_partitions")
@@ -124,7 +124,7 @@ pub async fn update() -> Result<Value, String> {
 
         for partition in partitions {
             // Find the disk and add the partition to it, else create a new disk
-            let mut disk_id = devices
+            let disk_id = devices
                 .iter()
                 .position(|disk| disk.name == partition.device)
                 .unwrap_or_else(|| {
