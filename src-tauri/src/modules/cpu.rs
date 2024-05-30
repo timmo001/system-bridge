@@ -13,18 +13,18 @@ pub struct CPUFrequency {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CPUStats {
-    ctx_switches: Option<i32>,
-    interrupts: Option<i32>,
-    soft_interrupts: Option<i32>,
-    syscalls: Option<i32>,
+    ctx_switches: Option<i64>,
+    interrupts: Option<i64>,
+    soft_interrupts: Option<i64>,
+    syscalls: Option<i64>,
 }
 
 impl<'source> FromPyObject<'source> for CPUStats {
     fn extract(ob: &'source PyAny) -> PyResult<Self> {
-        let ctx_switches = ob.getattr("ctx_switches")?.extract::<i32>()?;
-        let interrupts = ob.getattr("interrupts")?.extract::<i32>()?;
-        let soft_interrupts = ob.getattr("soft_interrupts")?.extract::<i32>()?;
-        let syscalls = ob.getattr("syscalls")?.extract::<i32>()?;
+        let ctx_switches = ob.getattr("ctx_switches")?.extract::<i64>()?;
+        let interrupts = ob.getattr("interrupts")?.extract::<i64>()?;
+        let soft_interrupts = ob.getattr("soft_interrupts")?.extract::<i64>()?;
+        let syscalls = ob.getattr("syscalls")?.extract::<i64>()?;
 
         Ok(CPUStats {
             ctx_switches: Some(ctx_switches),

@@ -4,12 +4,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiskIOCounters {
-    read_count: i32,
-    write_count: i32,
-    read_bytes: i32,
-    write_bytes: i32,
-    read_time: i32,
-    write_time: i32,
+    read_count: i64,
+    write_count: i64,
+    read_bytes: i64,
+    write_bytes: i64,
+    read_time: i64,
+    write_time: i64,
 }
 
 impl<'source> FromPyObject<'source> for DiskIOCounters {
@@ -27,9 +27,9 @@ impl<'source> FromPyObject<'source> for DiskIOCounters {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiskUsage {
-    total: i32,
-    used: i32,
-    free: i32,
+    total: i64,
+    used: i64,
+    free: i64,
     percent: f32,
 }
 
@@ -50,8 +50,8 @@ pub struct DiskPartition {
     mount_point: String,
     filesystem_type: String,
     options: String,
-    max_file_size: i32,
-    max_path_length: i32,
+    max_file_size: i64,
+    max_path_length: i64,
     usage: Option<DiskUsage>,
 }
 
