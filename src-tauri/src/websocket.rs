@@ -152,6 +152,11 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                         }
                     }
                 }
+                Ok(EventType::RegisterDataListener) => {
+                    info!("RegisterDataListener event");
+
+                    
+                }
                 Ok(EventType::Unknown) => {
                     warn!("Unknown event: {}", request.event);
 
