@@ -132,10 +132,10 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
             Ok(_) => {
                 // Save module data to file
                 std::fs::write(get_modules_data_path(module), data.unwrap().to_string()).unwrap();
-                info!("Module '{:?}' updated", module);
+                info!("'{:?}' module updated", module);
             }
             Err(e) => {
-                error!("Failed to update module '{:?}': {:?}", module, e);
+                error!("'{:?}' module update failed: {:?}", module, e);
                 continue;
             }
         }
