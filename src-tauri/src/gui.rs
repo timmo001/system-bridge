@@ -8,7 +8,7 @@ use log::info;
 use std::thread;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
-    tray::ClickType,
+    tray::MouseButton,
     AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_autostart::MacosLauncher;
@@ -196,14 +196,6 @@ pub async fn setup_gui() {
             // Setup the tray
             let tray = app.tray_by_id("main").unwrap();
             tray.set_menu(Some(menu))?;
-            tray.on_tray_icon_event(|tray, event| match event.click_type {
-                ClickType::Double => {
-                    let app_handle = tray.app_handle();
-
-                    create_window(app_handle.clone(), "data".to_string(), None, None);
-                }
-                _ => (),
-            });
             tray.on_menu_event(move |app_handle, event| match event.id().as_ref() {
                 "show_settings" => {
                     create_window(app_handle.clone(), "settings".to_string(), None, None);
