@@ -11,6 +11,7 @@ mod sensors;
 mod system;
 
 use crate::shared::get_data_path;
+use log::error;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt;
@@ -125,19 +126,18 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
             Module::Processes => processes::update().await,
             Module::Sensors => sensors::update().await,
             Module::System => system::update().await,
-            _ => Err(format!("Invalid module: {}", module)),
         };
 
-        if data.is_err() {
-            return Err(format!(
-                "Failed to update module: {:?} - {:?}",
-                module,
-                data.err()
-            ));
+        match data {
+            Ok(_) => {
+                // Save module data to file
+                std::fs::write(get_modules_data_path(module), data.unwrap().to_string()).unwrap();
+            }
+            Err(e) => {
+                error!("Failed to update module '{:?}': {:?}", module, e);
+                continue;
+            }
         }
-
-        // Save module data to file
-        std::fs::write(get_modules_data_path(module), data.unwrap().to_string()).unwrap();
     }
 
     Ok(())
