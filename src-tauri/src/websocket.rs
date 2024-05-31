@@ -6,7 +6,7 @@ use crate::{
     settings::{get_settings, Settings},
 };
 use log::{debug, info, warn};
-use rocket::{get, response};
+use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
