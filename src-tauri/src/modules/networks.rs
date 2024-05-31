@@ -176,16 +176,8 @@ pub async fn update() -> Result<Value, String> {
             .expect("Failed to get get_addresses method")
             .call0()
             .expect("Failed to call get_addresses method");
-
-        info!("{:?}", addresses_output);
-
-        let addresses = addresses_output
-            .extract::<HashMap<String, Vec<NetworkAddress>>>()
-            .expect("Failed to extract from get_addresses result");
-
-        // [systembridge::modules::networks] {'Ethernet 2': [NetworkAddress(address='D8-5E-D3-E5-8E-1E', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='192.168.1.127', family=None, netmask='255.255.255.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::db8a:ecfb:c90f:32d4', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection': [NetworkAddress(address='00-FF-BC-F1-E2-EE', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.209.241', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::1062:86a:fd18:81be', family=None, netmask=None, broadcast=None, ptp=None)], 'WiFi 3': [NetworkAddress(address='4C-03-4F-C3-46-28', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.107.31', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::2e61:9c2e:5b40:d2ae', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection* 1': [NetworkAddress(address='4C-03-4F-C3-46-29', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.207.79', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::9574:8449:f97:f666', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection* 10': [NetworkAddress(address='4E-03-4F-C3-46-28', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.62.56', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::83c7:5647:7582:11d5', family=None, netmask=None, broadcast=None, ptp=None)], 'Bluetooth Network Connection 3': [NetworkAddress(address='4C-03-4F-C3-46-2C', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.113.160', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::c84:555c:ce22:1973', family=None, netmask=None, broadcast=None, ptp=None)], 'vEthernet (Default Switch)': [NetworkAddress(address='00-15-5D-59-D1-40', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='172.19.0.1', family=None, netmask='255.255.240.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::5628:6c57:df31:598e', family=None, netmask=None, broadcast=None, ptp=None)], 'Tailscale': [NetworkAddress(address='169.254.83.107', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::d8ff:5060:f230:9168', family=None, netmask=None, broadcast=None, ptp=None)], 'Loopback Pseudo-Interface 1': [NetworkAddress(address='127.0.0.1', family=None, netmask='255.0.0.0', broadcast=None, ptp=None), NetworkAddress(address='::1', family=None, netmask=None, broadcast=None, ptp=None)]}
-        // thread 'modules' panicked at src\modules\networks.rs:184:14:
-        // Failed to extract from get_addresses result: PyErr { type: <class 'TypeError'>, value: TypeError("'NoneType' object cannot be converted to 'PyString'"), traceback: None }
+        // info!("{:?}", addresses_output);
+        let addresses = addresses_output.extract::<HashMap<String, Vec<NetworkAddress>>>();
 
         let connections = networks_instance
             .getattr("get_connections")
@@ -215,38 +207,52 @@ pub async fn update() -> Result<Value, String> {
         (addresses, connections, io_counters, stats)
     });
 
-    let mut networks: Vec<Network> = vec![];
+    // [systembridge::modules::networks] {'Ethernet 2': [NetworkAddress(address='D8-5E-D3-E5-8E-1E', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='192.168.1.127', family=None, netmask='255.255.255.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::db8a:ecfb:c90f:32d4', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection': [NetworkAddress(address='00-FF-BC-F1-E2-EE', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.209.241', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::1062:86a:fd18:81be', family=None, netmask=None, broadcast=None, ptp=None)], 'WiFi 3': [NetworkAddress(address='4C-03-4F-C3-46-28', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.107.31', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::2e61:9c2e:5b40:d2ae', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection* 1': [NetworkAddress(address='4C-03-4F-C3-46-29', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.207.79', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::9574:8449:f97:f666', family=None, netmask=None, broadcast=None, ptp=None)], 'Local Area Connection* 10': [NetworkAddress(address='4E-03-4F-C3-46-28', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.62.56', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::83c7:5647:7582:11d5', family=None, netmask=None, broadcast=None, ptp=None)], 'Bluetooth Network Connection 3': [NetworkAddress(address='4C-03-4F-C3-46-2C', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='169.254.113.160', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::c84:555c:ce22:1973', family=None, netmask=None, broadcast=None, ptp=None)], 'vEthernet (Default Switch)': [NetworkAddress(address='00-15-5D-59-D1-40', family=None, netmask=None, broadcast=None, ptp=None), NetworkAddress(address='172.19.0.1', family=None, netmask='255.255.240.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::5628:6c57:df31:598e', family=None, netmask=None, broadcast=None, ptp=None)], 'Tailscale': [NetworkAddress(address='169.254.83.107', family=None, netmask='255.255.0.0', broadcast=None, ptp=None), NetworkAddress(address='fe80::d8ff:5060:f230:9168', family=None, netmask=None, broadcast=None, ptp=None)], 'Loopback Pseudo-Interface 1': [NetworkAddress(address='127.0.0.1', family=None, netmask='255.0.0.0', broadcast=None, ptp=None), NetworkAddress(address='::1', family=None, netmask=None, broadcast=None, ptp=None)]}
+    // thread 'modules' panicked at src\modules\networks.rs:184:14:
+    // Failed to extract from get_addresses result: PyErr { type: <class 'TypeError'>, value: TypeError("'NoneType' object cannot be converted to 'PyString'"), traceback: None }
 
-    for (name, stat) in stats.iter() {
-        if let Some(addrs) = addresses.get(name) {
-            let network_addresses: Vec<NetworkAddress> = addrs
-                .iter()
-                .map(|address| NetworkAddress {
-                    address: address.address.clone(),
-                    family: address.family.clone(),
-                    netmask: address.netmask.clone(),
-                    broadcast: address.broadcast.clone(),
-                    ptp: address.ptp.clone(),
-                })
-                .collect();
+    let networks: Vec<Network> = match addresses {
+        Ok(addresses) => {
+            let mut networks: Vec<Network> = vec![];
 
-            let network_stats = NetworkStats {
-                isup: stat.isup.clone(),
-                duplex: stat.duplex.clone(),
-                speed: stat.speed.clone(),
-                mtu: stat.mtu.clone(),
-                flags: stat.flags.clone(),
-            };
+            for (name, stat) in stats.iter() {
+                if let Some(addrs) = addresses.get(name) {
+                    let network_addresses: Vec<NetworkAddress> = addrs
+                        .iter()
+                        .map(|address| NetworkAddress {
+                            address: address.address.clone(),
+                            family: address.family.clone(),
+                            netmask: address.netmask.clone(),
+                            broadcast: address.broadcast.clone(),
+                            ptp: address.ptp.clone(),
+                        })
+                        .collect();
 
-            let network = Network {
-                name: name.clone(),
-                addresses: network_addresses,
-                stats: network_stats,
-            };
+                    let network_stats = NetworkStats {
+                        isup: stat.isup.clone(),
+                        duplex: stat.duplex.clone(),
+                        speed: stat.speed.clone(),
+                        mtu: stat.mtu.clone(),
+                        flags: stat.flags.clone(),
+                    };
 
-            networks.push(network);
+                    let network = Network {
+                        name: name.clone(),
+                        addresses: network_addresses,
+                        stats: network_stats,
+                    };
+
+                    networks.push(network);
+                }
+            }
+
+            networks
         }
-    }
+        Err(e) => {
+            info!("Failed to get addresses: {:?}", e);
+            vec![]
+        }
+    };
 
     Ok(serde_json::to_value(ModuleNetworks {
         connections,
