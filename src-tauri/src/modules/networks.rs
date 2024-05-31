@@ -1,4 +1,5 @@
 use log::info;
+use log::warn;
 use pyo3::prelude::*;
 use pyo3::FromPyObject;
 use rocket::serde;
@@ -255,7 +256,7 @@ pub async fn update() -> Result<Value, String> {
             networks
         }
         Err(e) => {
-            info!("Failed to get addresses: {:?}", e);
+            warn!("Failed to get addresses: {:?}", e);
             vec![]
         }
     };
