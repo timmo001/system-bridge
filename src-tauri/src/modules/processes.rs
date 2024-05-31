@@ -51,12 +51,14 @@ pub async fn update() -> Result<Value, String> {
             .expect("Failed to get get_processes method")
             .call0()
             .expect("Failed to call get_processes method")
-            .extract::<Vec<ModuleProcess>>()
-            .expect("Failed to extract from get_processes result");
+            .extract::<Vec<ModuleProcess>>();
 
         // Set output
         processes
     });
 
-    Ok(serde_json::to_value(processes).unwrap())
+    match processes {
+        Ok(processes) => Ok(serde_json::to_value(processes).unwrap()),
+        Err(e) => Err(e.to_string()),
+    }
 }
