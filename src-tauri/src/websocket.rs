@@ -194,6 +194,18 @@ impl RequestProcessor {
                     });
                 }
             }
+            Ok(EventType::GetSettings) => {
+                info!("GetSettings event");
+
+                responses.push(WebsocketResponse {
+                    id: request_id.clone(),
+                    type_: EventType::SettingsResult.to_string(),
+                    data: serde_json::to_value(&self.settings).unwrap(),
+                    subtype: None,
+                    message: None,
+                    module: None,
+                });
+            }
             Ok(EventType::RegisterDataListener) => {
                 info!("RegisterDataListener event");
 
