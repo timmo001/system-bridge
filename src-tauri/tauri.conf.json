@@ -3,13 +3,12 @@
   "version": "0.0.0",
   "identifier": "com.tauri.dev",
   "build": {
-    "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build",
-    "frontendDist": "../dist"
+    "beforeDevCommand": "bun run dev",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../out"
   },
   "app": {
-    "windows": [],
     "security": {
       "csp": null
     },
