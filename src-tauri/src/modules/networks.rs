@@ -200,8 +200,7 @@ pub async fn update() -> Result<Value, String> {
             .expect("Failed to get get_stats method")
             .call0()
             .expect("Failed to call get_stats method")
-            .extract::<HashMap<String, NetworkStats>>()
-            .expect("Failed to extract from get_stats result");
+            .extract::<HashMap<String, NetworkStats>>();
 
         // Set output
         (addresses, connections, io_counters, stats)
@@ -215,34 +214,41 @@ pub async fn update() -> Result<Value, String> {
         Ok(addresses) => {
             let mut networks: Vec<Network> = vec![];
 
-            for (name, stat) in stats.iter() {
-                if let Some(addrs) = addresses.get(name) {
-                    let network_addresses: Vec<NetworkAddress> = addrs
-                        .iter()
-                        .map(|address| NetworkAddress {
-                            address: address.address.clone(),
-                            family: address.family.clone(),
-                            netmask: address.netmask.clone(),
-                            broadcast: address.broadcast.clone(),
-                            ptp: address.ptp.clone(),
-                        })
-                        .collect();
+            match stats {
+                Ok(stats) => {
+                    for (name, stat) in stats.iter() {
+                        if let Some(addrs) = addresses.get(name) {
+                            let network_addresses: Vec<NetworkAddress> = addrs
+                                .iter()
+                                .map(|address| NetworkAddress {
+                                    address: address.address.clone(),
+                                    family: address.family.clone(),
+                                    netmask: address.netmask.clone(),
+                                    broadcast: address.broadcast.clone(),
+                                    ptp: address.ptp.clone(),
+                                })
+                                .collect();
 
-                    let network_stats = NetworkStats {
-                        isup: stat.isup.clone(),
-                        duplex: stat.duplex.clone(),
-                        speed: stat.speed.clone(),
-                        mtu: stat.mtu.clone(),
-                        flags: stat.flags.clone(),
-                    };
+                            let network_stats = NetworkStats {
+                                isup: stat.isup.clone(),
+                                duplex: stat.duplex.clone(),
+                                speed: stat.speed.clone(),
+                                mtu: stat.mtu.clone(),
+                                flags: stat.flags.clone(),
+                            };
 
-                    let network = Network {
-                        name: name.clone(),
-                        addresses: network_addresses,
-                        stats: network_stats,
-                    };
+                            let network = Network {
+                                name: name.clone(),
+                                addresses: network_addresses,
+                                stats: network_stats,
+                            };
 
-                    networks.push(network);
+                            networks.push(network);
+                        }
+                    }
+                }
+                Err(e) => {
+                    info!("Failed to get stats: {:?}", e);
                 }
             }
 
