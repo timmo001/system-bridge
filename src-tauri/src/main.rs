@@ -14,6 +14,7 @@ mod websocket;
 mod websocket_client;
 
 use crate::run::run;
+use ctrlc;
 use log::info;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -22,13 +23,15 @@ use std::sync::Arc;
 async fn main() {
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
+
     ctrlc::set_handler(move || {
         r.store(false, Ordering::SeqCst);
 
-        info!("Exiting application");
+        info!("Ctrl+C received, exiting application");
         std::process::exit(0);
     })
-    .unwrap();
+    .expect("Error setting Ctrl-C handler");
+
     while running.load(Ordering::SeqCst) {
         run().await;
     }
