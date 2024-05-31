@@ -8,7 +8,6 @@ use log::info;
 use std::thread;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
-    tray::MouseButton,
     AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_autostart::MacosLauncher;
@@ -164,8 +163,6 @@ pub async fn setup_gui() {
             let copy_token =
                 MenuItemBuilder::with_id("copy_token", "Copy token to clipboard").build(app)?;
             let open_logs = MenuItemBuilder::with_id("open_logs", "View logs").build(app)?;
-            let open_logs_backend =
-                MenuItemBuilder::with_id("open_logs_backend", "View backend logs").build(app)?;
             let help = SubmenuBuilder::new(app, "Help")
                 .items(&[
                     &open_docs,
@@ -176,7 +173,6 @@ pub async fn setup_gui() {
                     &copy_token,
                     &separator,
                     &open_logs,
-                    &open_logs_backend,
                 ])
                 .build()?;
             let exit = MenuItemBuilder::with_id("exit", "Exit").build(app)?;
@@ -262,14 +258,6 @@ pub async fn setup_gui() {
                         return;
                     }
                     app_handle.shell().open(log_path, None).unwrap();
-                }
-                "open_logs_backend" => {
-                    let backend_log_path = format!("{}/systembridgebackend.log", get_data_path());
-                    if !std::path::Path::new(&backend_log_path).exists() {
-                        info!("Backend log file not found at: {}", backend_log_path);
-                        return;
-                    }
-                    app_handle.shell().open(backend_log_path, None).unwrap();
                 }
                 "exit" => {
                     info!("Exiting application");
