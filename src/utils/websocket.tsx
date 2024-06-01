@@ -6,13 +6,20 @@ import { PlayerStatus } from "@/components/player/utils";
 
 export class WebSocketConnection {
   public onEvent?: (event: Event) => void;
+  public host: string;
   public port: number;
   public websocket: WebSocket | undefined;
 
   private token: string;
 
-  constructor(port: number, token: string, connected?: () => void) {
-    this.port = port || 9170;
+  constructor(
+    host: string,
+    port: number,
+    token: string,
+    connected?: () => void
+  ) {
+    this.host = host;
+    this.port = port;
     this.token = token;
     (async () => {
       this.websocket = await this.connect();
@@ -31,9 +38,7 @@ export class WebSocketConnection {
   }
 
   private async connect(): Promise<WebSocket> {
-    const url = `ws://${window.location.hostname || "localhost"}:${
-      this.port
-    }/api/websocket`;
+    const url = `ws://${this.host}:${this.port}/api/websocket`;
 
     console.log("Connecting to:", url);
     const ws = new WebSocket(url);

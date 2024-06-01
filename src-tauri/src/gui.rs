@@ -41,8 +41,9 @@ pub fn create_window(
     let settings: Settings = get_settings();
 
     let path_str = format!(
-        "{}?apiPort={}&token={}{}",
+        "{}?apiHost={}&apiPort={}&token={}{}",
         page,
+        "127.0.0.1", // "localhost",
         settings.api.port.clone(),
         settings.api.token.clone(),
         query_additional.clone().unwrap_or("".to_string())
