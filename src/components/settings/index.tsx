@@ -1,7 +1,7 @@
 "use client";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   mdiFolderMultipleOutline,
   mdiKeyboardOutline,
@@ -72,7 +72,7 @@ function Settings(): ReactElement {
   const [settings, setSettings] = useSettings();
   const [setup, setSetup] = useState<boolean>(false);
 
-  const query = useRouter().query;
+  const searchParams = useSearchParams();
 
   const eventHandler = useCallback(
     (event: WebSocketResponse) => {
@@ -104,11 +104,16 @@ function Settings(): ReactElement {
   );
 
   useEffect(() => {
-    if (!setup && query && query.token) {
-      setSetup(true);
-      handleSetup(Number(query.apiPort) || 9170, String(query.token));
+    if (!setup && searchParams) {
+      const apiPort = searchParams.get("apiPort");
+      const token = searchParams.get("token");
+
+      if (token) {
+        setSetup(true);
+        handleSetup(Number(apiPort) || 9170, String(token));
+      }
     }
-  }, [setup, handleSetup, query]);
+  }, [setup, handleSetup, searchParams]);
 
   const theme = useTheme();
 
