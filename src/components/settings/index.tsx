@@ -1,7 +1,7 @@
 "use client";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import {
   mdiFolderMultipleOutline,
   mdiKeyboardOutline,
