@@ -3,7 +3,7 @@ import { CircularProgress, Grid, Typography } from "@mui/material";
 import { type CollapsedFieldProps } from "react-json-view";
 import dynamic from "next/dynamic";
 
-import { type Modules } from "types/models";
+import { type Modules } from "@/types/models";
 
 const BrowserReactJsonView = dynamic(() => import("react-json-view"), {
   ssr: false,

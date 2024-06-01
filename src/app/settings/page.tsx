@@ -1,6 +1,6 @@
 import { Container } from "@mui/material";
 
-import Settings from "@/components/settings/Settings";
+import Settings from "@/components/settings";
 
 export default async function PageSettings() {
   return (

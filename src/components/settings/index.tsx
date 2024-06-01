@@ -12,7 +12,7 @@ import {
 import { SettingDirectory, SettingHotkey, type Settings } from "@/types/settings";
 import { type WebSocketResponse } from "@/types/websocket";
 import { useSettings } from "@/components/contexts/settings";
-import { WebSocketConnection } from "@/utils/WebSocket";
+import { WebSocketConnection } from "@/utils/websocket";
 import Section from "@/components/settings/section";
 import Item from "@/components/settings/item";
 

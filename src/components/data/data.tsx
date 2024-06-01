@@ -24,10 +24,10 @@ import {
   Module,
   moduleMap,
   modules,
-} from "types/models";
-import { type WebSocketResponse } from "types/websocket";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import DataItems from "components/Data/DataItems";
+} from "@/types/models";
+import { type WebSocketResponse } from "@/types/websocket";
+import DataItems from "@/components/data/dataItems";
+import { WebSocketConnection } from "@/utils/websocket";
 
 function DataComponent(): ReactElement {
   const [data, setData] = useState<ModuleData>({});

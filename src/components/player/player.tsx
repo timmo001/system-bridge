@@ -10,7 +10,7 @@ import { cloneDeep, isEqual } from "lodash";
 
 // import { WebSocketResponse } from "types/websocket";
 import { PlayerStatus, usePlayer } from "./utils";
-import { usePrevious } from "../../utils/utils";
+import { usePrevious } from "../../utils";
 import { WebSocketConnection } from "components/Common/WebSocket";
 import AudioComponent from "./audio";
 import VideoComponent from "./video";
