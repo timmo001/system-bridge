@@ -206,6 +206,11 @@ impl RequestProcessor {
                     module: None,
                 });
             }
+            Ok(EventType::Open) => {
+                info!("Open event");
+
+                // TODO: Open the application
+            }
             Ok(EventType::RegisterDataListener) => {
                 info!("RegisterDataListener event");
 
