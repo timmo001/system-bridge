@@ -31,20 +31,24 @@ export class WebSocketConnection {
   }
 
   private async connect(): Promise<WebSocket> {
-    const ws = new WebSocket(
-      `ws://${window.location.hostname || "localhost"}:${
-        this.port
-      }/api/websocket`
-    );
+    const url = `ws://${window.location.hostname || "localhost"}:${
+      this.port
+    }/api/websocket`;
+
+    console.log("Connecting to:", url);
+    const ws = new WebSocket(url);
+
     await new Promise<void>((resolve) => {
       ws.onopen = () => resolve();
     });
+
     ws.onmessage = (event) => {
       if (typeof event.data === "string") {
         const json = JSON.parse(event.data);
         if (json && this.onEvent) this.onEvent(json);
       }
     };
+
     return ws;
   }
 
