@@ -1,4 +1,10 @@
-import React, { ChangeEvent, ReactElement, useMemo, useState } from "react";
+"use client";
+import React, {
+  type ChangeEvent,
+  type ReactElement,
+  useMemo,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   Autocomplete,
@@ -25,9 +31,9 @@ import {
   mdiEyeOff,
 } from "@mdi/js";
 
-import { handleCopyToClipboard } from "components/Common/Utils";
-import { SettingDescription, settingsMap } from "components/Settings/Settings";
-import ItemList from "components/Settings/ItemList";
+import { handleCopyToClipboard } from "@/utils";
+import { SettingDescription, settingsMap } from "@/components/settings";
+import ItemList from "@/components/settings/itemList";
 
 function Item({
   keyIn,
@@ -121,7 +127,12 @@ function Item({
             <ListItemSecondaryAction
               sx={{ maxHeight: "100%", width: 420, textAlign: "end" }}
             >
-              <Grid container alignItems="center" justifyContent="flex-end" wrap="nowrap">
+              <Grid
+                container
+                alignItems="center"
+                justifyContent="flex-end"
+                wrap="nowrap"
+              >
                 <Grid item>
                   {typeof value === "boolean" ? (
                     <Switch

@@ -1,3 +1,4 @@
+"use client";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
@@ -9,7 +10,11 @@ import {
   mdiTextBoxOutline,
 } from "@mdi/js";
 
-import { SettingDirectory, SettingHotkey, type Settings } from "@/types/settings";
+import {
+  type SettingDirectory,
+  type SettingHotkey,
+  type Settings,
+} from "@/types/settings";
 import { type WebSocketResponse } from "@/types/websocket";
 import { useSettings } from "@/components/contexts/settings";
 import { WebSocketConnection } from "@/utils/websocket";

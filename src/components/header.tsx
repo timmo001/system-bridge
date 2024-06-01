@@ -1,3 +1,4 @@
+"use client";
 import React, { cloneElement, ReactElement } from "react";
 import {
   AppBar,

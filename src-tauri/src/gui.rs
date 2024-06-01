@@ -5,6 +5,7 @@ use crate::{
     websocket_client::setup_websocket_client,
 };
 use log::info;
+use std::collections::HashMap;
 use std::{path::PathBuf, thread};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
@@ -21,12 +22,12 @@ pub const WINDOW_NOTIFICATION_HEIGHT: f64 = 48.0;
 const WINDOW_NOTIFICATION_X: f64 = 28.0;
 const WINDOW_NOTIFICATION_Y: f64 = 28.0;
 
-fn page_title_map() -> Vec<(&'static str, &'static str)> {
-    vec![
-        ("data", "Data"),
-        ("settings", "Settings"),
-        ("notification", "Notification"),
-    ]
+fn page_title_map() -> HashMap<&'static str, &'static str> {
+    let mut map = HashMap::new();
+    map.insert("data", "Data");
+    map.insert("settings", "Settings");
+    map.insert("notification", "Notification");
+    map
 }
 
 #[tauri::command]
@@ -36,39 +37,76 @@ pub fn create_window(
     query_additional: Option<String>,
     height: Option<f64>,
 ) {
-    info!("Creating window: {}", page);
     // Get settings
     let settings: Settings = get_settings();
 
-    let title = format!(
-        "{} | System Bridge",
-        page_title_map()
-            .iter()
-            .find(|(key, _)| key == &page)
-            .unwrap()
-            .1
+    let path_str = format!(
+        "{}?apiPort={}&token={}{}",
+        page,
+        settings.api.port.clone(),
+        settings.api.token.clone(),
+        query_additional.clone().unwrap_or("".to_string())
     );
 
-    let url = WebviewUrl::App(PathBuf::from(""));
+    let title = format!(
+        "{} | System Bridge",
+        page_title_map().get(&page.as_str()).unwrap_or(&"")
+    );
 
-    let webview_window_result = app_handle.get_webview_window("main");
-    if webview_window_result.is_some() {
-        let window: tauri::WebviewWindow = webview_window_result.unwrap();
-        window.show().unwrap();
-        window.set_title(title.as_str()).unwrap();
-        window.set_focus().unwrap();
-        return;
-    };
+    info!("Creating window: {}", title);
+    info!("Path: {}", path_str);
 
-    let window_result = WebviewWindowBuilder::new(&app_handle, "main", url)
-        .focused(true)
-        .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-        .title(title)
-        .build();
+    let path = WebviewUrl::App(PathBuf::from(path_str));
 
-    if window_result.is_err() {
-        log::error!("Failed to create window: {:?}", window_result.err());
-    };
+    if page == "notification" {
+        let webview_window_result = app_handle.get_webview_window("notification");
+        if webview_window_result.is_some() {
+            let window: tauri::WebviewWindow = webview_window_result.unwrap();
+            window.close().unwrap();
+            window.destroy().unwrap();
+        }
+
+        let window_result = WebviewWindowBuilder::new(&app_handle, "notification", path)
+            .always_on_top(true)
+            .decorations(false)
+            .focused(false)
+            .inner_size(
+                WINDOW_NOTIFICATION_WIDTH,
+                height.unwrap_or(WINDOW_NOTIFICATION_HEIGHT as f64),
+            )
+            .position(WINDOW_NOTIFICATION_X, WINDOW_NOTIFICATION_Y)
+            .resizable(false)
+            .skip_taskbar(true)
+            .title(title)
+            .visible(true)
+            // .on_page_load(move |window, _payload| {
+            //     if window.url().as_str().contains("close.window") {
+            //         window.close().unwrap();
+            //     }
+            // })
+            .build();
+
+        if window_result.is_err() {
+            log::error!("Failed to create window: {:?}", window_result.err());
+        }
+    } else {
+        let webview_window_result = app_handle.get_webview_window("main");
+        if webview_window_result.is_some() {
+            let window: tauri::WebviewWindow = webview_window_result.unwrap();
+            window.close().unwrap();
+            window.destroy().unwrap();
+        }
+
+        let window_result = WebviewWindowBuilder::new(&app_handle, "main", path)
+            .focused(true)
+            .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+            .title(title)
+            .build();
+
+        if window_result.is_err() {
+            log::error!("Failed to create window: {:?}", window_result.err());
+        }
+    }
 }
 
 // #[tauri::command]

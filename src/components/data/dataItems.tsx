@@ -1,13 +1,11 @@
+"use client";
 import { ReactElement } from "react";
 import { CircularProgress, Grid, Typography } from "@mui/material";
-import { type CollapsedFieldProps } from "react-json-view";
-import dynamic from "next/dynamic";
+import BrowserReactJsonView, {
+  type CollapsedFieldProps,
+} from "react-json-view";
 
 import { type Modules } from "@/types/models";
-
-const BrowserReactJsonView = dynamic(() => import("react-json-view"), {
-  ssr: false,
-});
 
 export default function DataItemsComponent({
   title,

@@ -1,9 +1,9 @@
+"use client";
 import {
   Fragment,
   ReactElement,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import { useRouter } from "next/router";

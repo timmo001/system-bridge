@@ -1,3 +1,4 @@
+"use client";
 import React, {
   ReactElement,
   useCallback,
@@ -8,10 +9,9 @@ import React, {
 import { useRouter } from "next/dist/client/router";
 import { cloneDeep, isEqual } from "lodash";
 
-// import { WebSocketResponse } from "types/websocket";
 import { PlayerStatus, usePlayer } from "./utils";
-import { usePrevious } from "../../utils";
-import { WebSocketConnection } from "components/Common/WebSocket";
+import { usePrevious } from "@/utils";
+import { WebSocketConnection } from "@/utils/websocket";
 import AudioComponent from "./audio";
 import VideoComponent from "./video";
 

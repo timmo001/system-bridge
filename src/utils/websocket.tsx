@@ -1,3 +1,4 @@
+"use client";
 import { v4 as uuid } from "uuid";
 
 import { type Settings } from "@/types/settings";

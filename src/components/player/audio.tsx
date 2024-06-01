@@ -1,3 +1,4 @@
+"use client";
 import React, {
   useState,
   useMemo,
@@ -25,7 +26,7 @@ import {
   PlayerStatus,
   useHover,
   usePlayer,
-} from "components/Player/Utils";
+} from "@/components/player/utils";
 
 function AudioComponent() {
   const [playerStatus, setPlayerStatus] = usePlayer();

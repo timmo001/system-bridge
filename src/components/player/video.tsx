@@ -1,3 +1,4 @@
+"use client";
 import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 

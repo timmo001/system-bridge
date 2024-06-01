@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 
 import { MuiProvider } from "@/providers/mui-provider";
 

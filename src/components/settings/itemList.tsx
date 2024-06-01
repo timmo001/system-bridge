@@ -1,3 +1,4 @@
+"use client";
 import { ReactElement, useEffect, useState } from "react";
 import {
   Button,
@@ -21,7 +22,7 @@ import { Icon } from "@mdi/react";
 import { mdiMinusBoxOutline, mdiPlus } from "@mdi/js";
 import _ from "lodash";
 
-import { SettingDescription } from "components/settings";
+import { SettingDescription } from "@/components/settings";
 
 interface NameValueAlias {
   name: string;

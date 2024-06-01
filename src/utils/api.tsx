@@ -1,3 +1,4 @@
+"use client";
 import axios, { AxiosResponse, Method, RawAxiosRequestConfig } from "axios";
 
 export interface APIRequest {
