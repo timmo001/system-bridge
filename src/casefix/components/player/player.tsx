@@ -9,11 +9,11 @@ import { useRouter } from "next/dist/client/router";
 import { cloneDeep, isEqual } from "lodash";
 
 // import { WebSocketResponse } from "types/websocket";
-import { PlayerStatus, usePlayer } from "./Utils";
-import { usePrevious } from "../common/Utils";
+import { PlayerStatus, usePlayer } from "./utils";
+import { usePrevious } from "../../utils/utils";
 import { WebSocketConnection } from "components/Common/WebSocket";
-import AudioComponent from "./Audio";
-import VideoComponent from "./Video";
+import AudioComponent from "./audio";
+import VideoComponent from "./video";
 
 interface PlayerProps {
   playerType: "audio" | "video";

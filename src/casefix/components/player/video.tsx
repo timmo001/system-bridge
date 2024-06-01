@@ -1,7 +1,7 @@
 import React, { ReactElement, useCallback, useEffect, useMemo } from "react";
 import ReactPlayer from "react-player/lazy";
 
-import { PlayerStatus, usePlayer, VideoSource } from "./Utils";
+import { PlayerStatus, usePlayer, VideoSource } from "./utils";
 
 function VideoComponent(): ReactElement {
   const [playerStatus, setPlayerStatus] = usePlayer();

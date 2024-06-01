@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 
-import { type Settings } from "types/settings";
-import { PlayerStatus } from "components/Player/Utils";
+import { type Settings } from "@/types/settings";
+import { PlayerStatus } from "@/components/player/utils";
 
 export class WebSocketConnection {
   public onEvent?: (event: Event) => void;

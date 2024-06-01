@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { Settings } from "types/settings";
+import { Settings } from "@/types/settings";
 
 const SettingsContext = createContext<Settings | undefined>(undefined);
 const SetSettingsContext = createContext<null | React.Dispatch<

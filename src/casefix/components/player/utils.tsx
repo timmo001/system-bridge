@@ -4,7 +4,6 @@ import React, {
   useContext,
   useState,
 } from "react";
-import { Box } from "@mui/material";
 
 export interface Source {
   type: "audio" | "video";

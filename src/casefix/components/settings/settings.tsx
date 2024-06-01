@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import { CircularProgress, Grid, TextField, useTheme } from "@mui/material";
+import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
 import {
   mdiFolderMultipleOutline,
@@ -9,12 +9,12 @@ import {
   mdiTextBoxOutline,
 } from "@mdi/js";
 
-import { SettingDirectory, SettingHotkey, type Settings } from "types/settings";
-import { type WebSocketResponse } from "types/websocket";
-import { useSettings } from "components/Contexts/Settings";
-import { WebSocketConnection } from "components/Common/WebSocket";
-import Section from "components/Settings/Section";
-import Item from "components/Settings/Item";
+import { SettingDirectory, SettingHotkey, type Settings } from "@/types/settings";
+import { type WebSocketResponse } from "@/types/websocket";
+import { useSettings } from "@/components/contexts/settings";
+import { WebSocketConnection } from "@/utils/WebSocket";
+import Section from "@/components/settings/section";
+import Item from "@/components/settings/item";
 
 let ws: WebSocketConnection;
 

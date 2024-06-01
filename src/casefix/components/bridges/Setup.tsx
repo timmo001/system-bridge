@@ -14,7 +14,7 @@ import axios from "axios";
 
 // import { Bridge } from "../../assets/entities/bridge.entity";
 // import { Response } from "../../assets/entities/response.entity";
-import { useSettings } from "../contexts/Settings";
+import { useSettings } from "../contexts/settings";
 import BridgeEdit, { EditBridge } from "./Edit";
 
 const DEFAULT_BRIDGE: Partial</*Bridge*/ any> = {
