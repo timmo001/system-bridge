@@ -167,27 +167,40 @@ impl RequestProcessor {
                     let module = module_type_result.unwrap();
                     info!("Getting data for module: {:?}", module.to_string());
 
-                    let module_data_result = get_module_data(&module).await;
-                    if module_data_result.is_err() {
-                        warn!(
-                            "Failed to get data for module: {:?} - {:?}",
-                            module.to_string(),
-                            module_data_result.clone().err()
-                        );
+                    match get_module_data(&module).await {
+                        Ok(module_data) => {
+                            info!("Got data for module: {:?}", module.to_string());
+
+                            // Send data update to the client
+                            responses.push(WebsocketResponse {
+                                id: request_id.clone(),
+                                type_: EventType::DataUpdate.to_string(),
+                                data: module_data,
+                                subtype: None,
+                                message: None,
+                                module: Some(module.to_string()),
+                            });
+                        }
+                        Err(e) => {
+                            warn!(
+                                "Failed to get data for module: {:?} - {:?}",
+                                module.to_string(),
+                                e
+                            );
+
+                            responses.push(WebsocketResponse {
+                                id: request_id.clone(),
+                                type_: EventType::Error.to_string(),
+                                data: Value::Null,
+                                subtype: None,
+                                message: Some(format!(
+                                    "Failed to get data for module: {:?}",
+                                    module.to_string()
+                                )),
+                                module: Some(module.to_string()),
+                            });
+                        }
                     }
-
-                    let module_data = module_data_result.unwrap();
-                    info!("Got data for module: {:?}", module.to_string());
-
-                    // Send data update to the client
-                    responses.push(WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::DataUpdate.to_string(),
-                        data: module_data,
-                        subtype: None,
-                        message: None,
-                        module: Some(module.to_string()),
-                    });
                 }
             }
             Ok(EventType::GetSettings) => {
