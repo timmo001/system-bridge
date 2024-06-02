@@ -101,6 +101,32 @@ pub fn get_modules_data_path(module: &Module) -> String {
 
 pub fn setup_modules_data() {
     std::fs::create_dir_all(format!("{}/modules", get_data_path())).unwrap();
+
+    for module in vec![
+        Module::Battery,
+        Module::CPU,
+        Module::Disks,
+        Module::Displays,
+        Module::GPUs,
+        Module::Media,
+        Module::Memory,
+        Module::Networks,
+        Module::Processes,
+        Module::Sensors,
+        Module::System,
+    ] {
+        if !std::path::Path::new(&get_modules_data_path(&module)).exists() {
+            let contents = match module {
+                Module::Processes => "[]",
+                _ => "{}",
+            };
+
+            match std::fs::write(get_modules_data_path(&module), contents) {
+                Ok(_) => info!("Created '{}' module data file", module),
+                Err(e) => error!("Failed to create '{}' module data file: {:?}", module, e),
+            }
+        }
+    }
 }
 
 pub async fn get_module_data(module: &Module) -> Result<Value, String> {
