@@ -6,9 +6,10 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useRouter } from "next/dist/client/router";
+import { useSearchParams } from "next/navigation";
 import { cloneDeep, isEqual } from "lodash";
 
+import { type WebSocketResponse } from "@/types/websocket";
 import { PlayerStatus, usePlayer } from "./utils";
 import { usePrevious } from "@/utils";
 import { WebSocketConnection } from "@/utils/websocket";
@@ -19,17 +20,18 @@ interface PlayerProps {
   playerType: "audio" | "video";
 }
 
-let websocket: WebSocketConnection;
+let ws: WebSocketConnection;
+
 function PlayerComponent({ playerType }: PlayerProps): ReactElement {
-  const [webSocketSetup, setWebSocketSetup] = useState<boolean>(false);
+  const [setup, setSetup] = useState<boolean>(false);
   const [playerStatus, setPlayerStatus] = usePlayer();
   const previousPlayerStatus = usePrevious(playerStatus);
 
-  const router = useRouter();
-  const query = router.query as NodeJS.Dict<string>;
+  const searchParams = useSearchParams();
 
   const eventHandler = useCallback(
-    (event: any) => { // WebSocketResponse
+    (event: any) => {
+      // WebSocketResponse
       console.log("Event:", event);
       switch (event.type) {
         case "MEDIA_PAUSE":
@@ -67,33 +69,51 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
     [playerStatus, setPlayerStatus]
   );
 
-  const handleSetupWebSocket = useCallback(
-    (port: number, token: string) => {
+  const handleSetup = useCallback(
+    (host: string, port: number, token: string) => {
       console.log("Setup WebSocketConnection");
-      websocket = new WebSocketConnection(port, token, async () => {
-        console.log("Connected to WebSocket");
+      ws = new WebSocketConnection(host, port, token, async () => {
+        ws.getSettings();
       });
-      websocket.onEvent = eventHandler;
+      ws.onEvent = (e: Event) => eventHandler(e as WebSocketResponse);
     },
     [eventHandler]
   );
 
   useEffect(() => {
-    if (!webSocketSetup && query && query.token) {
-      setWebSocketSetup(true);
-      handleSetupWebSocket(Number(query.apiPort) || 9170, String(query.token));
+    if (!setup && searchParams) {
+      const apiHost = searchParams.get("apiHost");
+      const apiPort = searchParams.get("apiPort");
+      const token = searchParams.get("token");
+
+      console.log({ apiHost, apiPort, token });
+
+      if (apiHost && apiPort && token) {
+        setSetup(true);
+        handleSetup(apiHost, Number(apiPort), token);
+      }
     }
-  }, [webSocketSetup, handleSetupWebSocket, query]);
+  }, [setup, handleSetup, searchParams]);
 
   useEffect(() => {
-    if (!playerStatus && router.isReady) {
-      const volume = Number(query.volume);
+    if (!playerStatus && searchParams) {
+      const autoplay: boolean =
+        searchParams.get("autoplay")?.toLowerCase() === "true";
+      const volumeString = searchParams.get("volume");
+      const volume: number = volumeString ? parseInt(volumeString) : 40;
+      const sourceParams = {
+        url: searchParams.get("url"),
+        album: searchParams.get("album"),
+        artist: searchParams.get("artist"),
+        cover: searchParams.get("cover"),
+        title: searchParams.get("title"),
+      };
       switch (playerType) {
         default:
           break;
         case "audio":
           setPlayerStatus({
-            autoplay: query.autoplay?.toLowerCase() === "true",
+            autoplay,
             muted: false,
             playing: false,
             loaded: false,
@@ -101,11 +121,11 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
             duration: 1,
             source: {
               type: "audio",
-              source: query.url,
-              album: query.album || "Unknown Album",
-              artist: query.artist || "Unknown Aritst",
-              cover: query.cover,
-              title: query.title || "Unknown Title",
+              source: sourceParams.url ?? "",
+              album: sourceParams.album || "Unknown Album",
+              artist: sourceParams.artist || "Unknown Aritst",
+              cover: sourceParams.cover ?? "",
+              title: sourceParams.title || "Unknown Title",
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },
             volume: (volume > 0 ? volume : 40) / 100,
@@ -113,7 +133,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           break;
         case "video":
           setPlayerStatus({
-            autoplay: query.autoplay?.toLowerCase() === "true",
+            autoplay: autoplay,
             muted: false,
             playing: false,
             loaded: false,
@@ -121,7 +141,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
             duration: 1,
             source: {
               type: "video",
-              source: String(query.url),
+              source: sourceParams.url ?? "",
               volumeInitial: (volume > 0 ? volume : 40) / 100,
             },
             volume: (volume > 0 ? volume : 40) / 100,
@@ -129,7 +149,7 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           break;
       }
     }
-  }, [playerStatus, setPlayerStatus, playerType, router, query]);
+  }, [playerStatus, setPlayerStatus, playerType]);
 
   useEffect(() => {
     if (playerStatus) {
@@ -149,13 +169,13 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
           newStatus
         );
         if (!newStatus.loaded) return;
-        if (!websocket) return;
-        if (!websocket.isConnected()) {
-          setWebSocketSetup(false);
+        if (!ws) return;
+        if (!ws.isConnected()) {
+          setSetup(false);
           console.warn("WebSocket not connected");
           return;
         }
-        websocket.sendPlayerStatus(newStatus);
+        ws.sendPlayerStatus(newStatus);
       }
     }
   }, [playerStatus, previousPlayerStatus]);
