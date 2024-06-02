@@ -27,7 +27,7 @@ import {
   modules,
 } from "@/types/models";
 import { type WebSocketResponse } from "@/types/websocket";
-import DataItems from "@/components/data/dataItems";
+import DataItems from "@/components/data/items";
 import { WebSocketConnection } from "@/utils/websocket";
 
 let ws: WebSocketConnection;
