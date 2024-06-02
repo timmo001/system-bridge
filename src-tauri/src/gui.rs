@@ -5,14 +5,13 @@ use crate::{
 };
 use log::info;
 use std::collections::HashMap;
-use std::{path::PathBuf, thread};
+use std::path::PathBuf;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder},
     AppHandle, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_shell::ShellExt;
-use tokio::runtime::Runtime;
 
 const WINDOW_WIDTH: f64 = 1280.0;
 const WINDOW_HEIGHT: f64 = 720.0;
