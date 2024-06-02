@@ -44,7 +44,8 @@
     "@types/react-dom": "18.3.0",
     "@types/uuid": "9.0.8",
     "@vitejs/plugin-react": "4.3.0",
-    "internal-ip": "8.0.0",
+    "internal-ip": "7.0.0",
     "typescript": "5.4.5"
-  }
+  },
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }

@@ -16,13 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <MuiProvider>
-        <body>
-          <SettingsProvider>
+      <body>
+        <SettingsProvider>
+          <MuiProvider>
             <main>{children}</main>
-          </SettingsProvider>
-        </body>
-      </MuiProvider>
+          </MuiProvider>
+        </SettingsProvider>
+      </body>
     </html>
   );
 }
