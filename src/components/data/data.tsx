@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   CircularProgress,
   Grid,
@@ -29,12 +29,14 @@ import { type WebSocketResponse } from "@/types/websocket";
 import DataItems from "@/components/data/dataItems";
 import { WebSocketConnection } from "@/utils/websocket";
 
+let ws: WebSocketConnection;
+
 function DataComponent(): ReactElement {
   const [data, setData] = useState<ModuleData>({});
   const [setup, setSetup] = useState<boolean>(false);
   const [tab, setTab] = useState<number>(0);
 
-  const query = useRouter().query;
+  const searchParams = useSearchParams();
 
   const handleChangeTab = (
     _event: React.ChangeEvent<any>,
@@ -65,11 +67,10 @@ function DataComponent(): ReactElement {
   }, []);
 
   const handleSetup = useCallback(
-    (port: number, token: string) => {
+    (host: string, port: number, token: string) => {
       console.log("Setup WebSocketConnection");
-      const ws = new WebSocketConnection(port, token, async () => {
-        ws.getData(modules);
-        ws.registerDataListener(modules);
+      ws = new WebSocketConnection(host, port, token, async () => {
+        ws.getSettings();
       });
       ws.onEvent = (e: Event) => eventHandler(e as WebSocketResponse);
     },
@@ -77,11 +78,19 @@ function DataComponent(): ReactElement {
   );
 
   useEffect(() => {
-    if (!setup && query && query.token) {
-      setSetup(true);
-      handleSetup(Number(query.apiPort) || 9170, String(query.token));
+    if (!setup && searchParams) {
+      const apiHost = searchParams.get("apiHost");
+      const apiPort = searchParams.get("apiPort");
+      const token = searchParams.get("token");
+
+      console.log({ apiHost, apiPort, token });
+
+      if (apiHost && apiPort && token) {
+        setSetup(true);
+        handleSetup(apiHost, Number(apiPort), token);
+      }
     }
-  }, [setup, handleSetup, query]);
+  }, [setup, handleSetup, searchParams]);
 
   console.log("Data:", data);
 
