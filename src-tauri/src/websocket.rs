@@ -177,11 +177,7 @@ impl RequestProcessor {
                     }
 
                     let module_data = module_data_result.unwrap();
-                    info!(
-                        "Got data for module: {:?} - {}",
-                        module.to_string(),
-                        module_data
-                    );
+                    info!("Got data for module: {:?}", module.to_string());
 
                     // Send data update to the client
                     responses.push(WebsocketResponse {
