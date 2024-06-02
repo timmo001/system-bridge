@@ -11,7 +11,6 @@ mod run;
 mod settings;
 mod shared;
 mod websocket;
-mod websocket_client;
 
 use crate::run::run;
 use ctrlc;
