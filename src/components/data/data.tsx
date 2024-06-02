@@ -2,6 +2,7 @@
 import {
   Fragment,
   ReactElement,
+  Suspense,
   useCallback,
   useEffect,
   useState,
@@ -155,4 +156,12 @@ function DataComponent(): ReactElement {
   );
 }
 
-export default DataComponent;
+function DataComponentContainer(): ReactElement {
+  return (
+    <Suspense>
+      <DataComponent />
+    </Suspense>
+  );
+}
+
+export default DataComponentContainer;

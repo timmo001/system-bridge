@@ -1,5 +1,11 @@
 "use client";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import {
+  ReactElement,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { CircularProgress, Grid, useTheme } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import {
@@ -221,4 +227,12 @@ function Settings(): ReactElement {
   );
 }
 
-export default Settings;
+function SettingsContainer(): ReactElement {
+  return (
+    <Suspense>
+      <Settings />
+    </Suspense>
+  );
+}
+
+export default SettingsContainer;

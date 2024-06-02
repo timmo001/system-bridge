@@ -1,6 +1,7 @@
 "use client";
 import React, {
   ReactElement,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -199,4 +200,15 @@ function PlayerComponent({ playerType }: PlayerProps): ReactElement {
   );
 }
 
-export default PlayerComponent;
+function PlayerComponentContainer(): ReactElement {
+  const searchParams = useSearchParams();
+  const playerType = searchParams.get("type") as "audio" | "video";
+
+  return (
+    <Suspense>
+      <PlayerComponent playerType={playerType} />
+    </Suspense>
+  );
+}
+
+export default PlayerComponentContainer;
