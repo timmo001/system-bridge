@@ -2,7 +2,6 @@ use crate::{
     autostart::setup_autostart,
     settings::{get_settings, Settings},
     shared::get_data_path,
-    websocket_client::setup_websocket_client,
 };
 use log::info;
 use std::collections::HashMap;
@@ -256,14 +255,6 @@ pub async fn setup_gui() {
                     std::process::exit(0);
                 }
                 _ => (),
-            });
-
-            let app_handle_clone = app.handle().clone();
-            let _websocket_handle = thread::spawn(|| {
-                let rt = Runtime::new().unwrap();
-                rt.block_on(async {
-                    setup_websocket_client(app_handle_clone).await;
-                });
             });
 
             Ok(())
