@@ -104,11 +104,17 @@ pub fn setup_modules_data() {
 }
 
 pub async fn get_module_data(module: &Module) -> Result<Value, String> {
-    match module {
-        _ => Ok(serde_json::from_str(
-            &std::fs::read_to_string(get_modules_data_path(module)).unwrap(),
-        )
-        .unwrap()),
+    let data_string = match std::fs::read_to_string(get_modules_data_path(module)) {
+        Ok(data) => data,
+        Err(_) => return Err(format!("No data for '{:?}' module", module)),
+    };
+
+    match serde_json::from_str(&data_string) {
+        Ok(data) => Ok(data),
+        Err(e) => Err(format!(
+            "Failed to parse '{:?}' module data: {:?}",
+            module, e
+        )),
     }
 }
 
