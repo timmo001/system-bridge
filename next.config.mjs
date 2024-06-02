@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
-const isProd = process.env.NODE_ENV === "production";
+// const isProd = process.env.NODE_ENV === "production";
 
-let internalHost = null;
+// let internalHost = null;
 
-if (!isProd) {
-  const { internalIpV4 } = await import("internal-ip");
-  internalHost = await internalIpV4();
-}
+// if (!isProd) {
+//   const { internalIpV4 } = await import("internal-ip");
+//   internalHost = await internalIpV4();
+// }
 
 const nextConfig = {
   // Ensure Next.js uses SSG instead of SSR
@@ -18,7 +18,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // Configure assetPrefix or else the server won't properly resolve your assets.
-  assetPrefix: isProd ? null : `http://${internalHost}:3000`,
+  // assetPrefix: isProd ? null : `http://${internalHost}:3000`,
 };
 
 export default nextConfig;
