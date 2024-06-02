@@ -1,7 +1,7 @@
 {
-  "productName": "system-bridge",
-  "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "productName": "System Bridge",
+  "version": "5.0.0",
+  "identifier": "dev.timmo.systembridge",
   "build": {
     "beforeBuildCommand": "bun run build",
     "beforeDevCommand": "bun run dev",
