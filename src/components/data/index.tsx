@@ -27,8 +27,8 @@ import {
   modules,
 } from "@/types/models";
 import { type WebSocketResponse } from "@/types/websocket";
-import DataItems from "@/components/data/items";
 import { WebSocketConnection } from "@/utils/websocket";
+import DataItems from "@/components/data/items";
 
 let ws: WebSocketConnection;
 
@@ -71,7 +71,8 @@ function DataComponent(): ReactElement {
     (host: string, port: number, token: string) => {
       console.log("Setup WebSocketConnection");
       ws = new WebSocketConnection(host, port, token, async () => {
-        ws.getSettings();
+        ws.getData(modules);
+        ws.registerDataListener(modules);
       });
       ws.onEvent = (e: Event) => eventHandler(e as WebSocketResponse);
     },
