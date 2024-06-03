@@ -151,7 +151,7 @@ jobs:
       - name: Install frontend dependencies
         run: yarn install
       - name: Build the app
-        uses: tauri-apps/tauri-action@v0.5.4
+        uses: tauri-apps/tauri-action@v0.5.5
         with:
           updaterJsonPreferNsis: true
       - name: Publish artifacts
