@@ -24,8 +24,8 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
             // Parse the message
             let request_result = serde_json::from_str(&message);
             if request_result.is_err() {
-                        error!("Failed to parse request: {:?} - {:?}", message, request_result.err());
-                        continue;
+                error!("Failed to parse request: {:?} - {:?}", message, request_result.err());
+                continue;
             }
             let request: WebsocketRequest = request_result.unwrap();
             debug!("Received request: {:?}", request);
@@ -38,12 +38,12 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                 warn!("Invalid token provided: {} - Expected: {}", request.token, required_token);
 
                 yield Message::text(serde_json::to_string(&WebsocketResponse {
-                                id: request_id.clone(),
-                                type_: EventType::Error.to_string(),
-                                data: Value::Null,
-                                subtype: None,
-                                message: Some("Invalid token".to_string()),
-                                module: None,
+                    id: request_id.clone(),
+                    type_: EventType::Error.to_string(),
+                    data: Value::Null,
+                    subtype: None,
+                    message: Some("Invalid token".to_string()),
+                    module: None,
                 }).unwrap());
 
                 continue;
