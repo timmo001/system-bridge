@@ -1,11 +1,16 @@
-use crate::settings::{get_settings, Settings};
-use log::warn;
+use crate::{
+    modules::{get_module_data, Module},
+    settings::{get_settings, Settings},
+};
+use log::{info, warn};
 use rocket::async_trait;
 use rocket::http::Status;
 use rocket::request::Outcome;
 use rocket::request::{FromRequest, Request};
 use rocket::serde::{json::Json, Serialize};
 use rocket::{catch, get};
+use serde_json::Value;
+use std::str::FromStr;
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -84,4 +89,24 @@ pub fn api(_token: Token<'_>) -> Json<APISubRoot> {
         message: "Hello!",
         version: env!("CARGO_PKG_VERSION"),
     })
+}
+
+#[get("/api/data/<module>", format = "json")]
+pub async fn data(_token: Token<'_>, module: &str) -> Json<Value> {
+    let data_module = match Module::from_str(module) {
+        Ok(module) => module,
+        Err(e) => {
+            warn!("Error parsing module: {}", e);
+            return Json(Value::Null);
+        }
+    };
+
+    info!("Getting data for module: {:?}", data_module);
+    match get_module_data(&data_module).await {
+        Ok(data) => Json(data),
+        Err(e) => {
+            warn!("Error getting module data: {}", e);
+            Json(Value::Null)
+        }
+    }
 }
