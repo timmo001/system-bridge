@@ -1,13 +1,10 @@
+use super::server::WebsocketRequest;
+use crate::settings::{get_settings, Settings};
 use futures_util::SinkExt;
 use log::{debug, info};
 use serde_json::json;
 use std::str::FromStr;
 use tokio_websockets::{ClientBuilder, Message};
-
-use crate::{
-    settings::{get_settings, Settings},
-    websocket::WebsocketRequest,
-};
 
 pub struct WebSocketClient {
     pub settings: Settings,
