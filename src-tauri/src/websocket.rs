@@ -215,10 +215,29 @@ impl RequestProcessor {
                     module: None,
                 });
             }
+            Ok(EventType::Open) => {
+                info!("Open event");
+
+                // TODO: Open the application
+            }
+            Ok(EventType::RegisterDataListener) => {
+                info!("RegisterDataListener event");
+
+                // TODO: Register data listener
+                responses.push(WebsocketResponse {
+                    id: request_id.clone(),
+                    type_: EventType::DataListenerRegistered.to_string(),
+                    data: Value::Null,
+                    subtype: None,
+                    message: None,
+                    module: None,
+                });
+            }
             Ok(EventType::UpdateSettings) => {
                 info!("UpdateSettings event: {:?}", request.data);
 
-                let settings_result: Result<Settings, _> = serde_json::from_value(request.data.clone());
+                let settings_result: Result<Settings, _> =
+                    serde_json::from_value(request.data.clone());
                 if let Err(e) = settings_result {
                     warn!("Invalid settings: {:?}", e);
                     return Err(e.to_string());
@@ -243,24 +262,6 @@ impl RequestProcessor {
                     id: request_id.clone(),
                     type_: EventType::SettingsResult.to_string(),
                     data: serde_json::to_value(&self.settings).unwrap(),
-                    subtype: None,
-                    message: None,
-                    module: None,
-                });
-            }
-            Ok(EventType::Open) => {
-                info!("Open event");
-
-                // TODO: Open the application
-            }
-            Ok(EventType::RegisterDataListener) => {
-                info!("RegisterDataListener event");
-
-                // TODO: Register data listener
-                responses.push(WebsocketResponse {
-                    id: request_id.clone(),
-                    type_: EventType::DataListenerRegistered.to_string(),
-                    data: Value::Null,
                     subtype: None,
                     message: None,
                     module: None,
