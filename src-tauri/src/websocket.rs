@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     event::{EventSubtype, EventType},
-    modules::{get_module_data, Module, RequestModules},
+    modules::{get_module_data, Module, ModuleUpdate, RequestModules},
     settings::{get_settings, Settings},
 };
 use log::{debug, info, warn};
@@ -10,25 +10,28 @@ use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Mutex;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WebsocketRequest {
-    id: String,
-    token: String,
-    event: String,
-    data: Value,
+    pub id: String,
+    pub token: String,
+    pub event: String,
+    pub data: Value,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WebsocketResponse {
-    id: String,
+    pub id: String,
     #[serde(rename = "type")]
-    type_: String,
-    data: Value,
-    subtype: Option<String>,
-    message: Option<String>,
-    module: Option<String>,
+    pub type_: String,
+    pub data: Value,
+    pub subtype: Option<String>,
+    pub message: Option<String>,
+    pub module: Option<String>,
 }
+
+static REGISTERED_LISTENERS: Mutex<Vec<String>> = Mutex::new(vec![]);
 
 #[get("/api/websocket")]
 pub async fn websocket(ws: WebSocket) -> Stream!['static] {
@@ -47,7 +50,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     continue;
                 }
                 let request: WebsocketRequest = request_result.unwrap();
-                info!("Received request: {:?}", request);
+                debug!("Received request: {:?}", request);
 
                 let request_id:String = request.id.clone();
 
@@ -215,6 +218,28 @@ impl RequestProcessor {
                     module: None,
                 });
             }
+            Ok(EventType::ModuleUpdated) => {
+                info!("ModuleUpdated event");
+
+                let module_update_result: Result<ModuleUpdate, _> =
+                    serde_json::from_value(request.data.clone());
+                if let Err(e) = module_update_result {
+                    warn!("Invalid module update: {:?}", e);
+                    return Err(e.to_string());
+                }
+
+                let module_update = module_update_result.unwrap();
+                info!("Module update: {:?}", module_update);
+
+                responses.push(WebsocketResponse {
+                    id: request_id.clone(),
+                    type_: EventType::DataUpdate.to_string(),
+                    data: module_update.data,
+                    subtype: None,
+                    message: None,
+                    module: module_update.module.to_string().into(),
+                });
+            }
             Ok(EventType::Open) => {
                 info!("Open event");
 
@@ -223,7 +248,13 @@ impl RequestProcessor {
             Ok(EventType::RegisterDataListener) => {
                 info!("RegisterDataListener event");
 
-                // TODO: Register data listener
+                // Register data listener
+                let listener_id = uuid::Uuid::new_v4().to_string();
+                REGISTERED_LISTENERS
+                    .lock()
+                    .unwrap()
+                    .push(listener_id.clone());
+
                 responses.push(WebsocketResponse {
                     id: request_id.clone(),
                     type_: EventType::DataListenerRegistered.to_string(),

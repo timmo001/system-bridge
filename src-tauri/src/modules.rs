@@ -10,7 +10,10 @@ mod processes;
 mod sensors;
 mod system;
 
-use crate::shared::get_data_path;
+use crate::{
+    event::EventType, shared::get_data_path, websocket::WebsocketRequest,
+    websocket_client::WebSocketClient,
+};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -95,6 +98,12 @@ pub struct ModulesData {
     system: Option<Value>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ModuleUpdate {
+    pub module: String,
+    pub data: Value,
+}
+
 pub fn get_modules_path() -> String {
     format!("{}/modules", get_data_path())
 }
@@ -149,6 +158,8 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
 }
 
 pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
+    let websocket_client = WebSocketClient::new().await;
+
     for module in modules {
         let data = match module {
             Module::Battery => battery::update().await,
@@ -166,13 +177,50 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
 
         match data {
             Ok(_) => {
+                // Check if data is the same as the current data
+                let current_data = get_module_data(module).await.unwrap();
+                if current_data == data.clone().unwrap() {
+                    info!("'{:?}' module data is the same", module);
+                    continue;
+                }
+
                 // Save module data to file
-                std::fs::write(get_modules_data_path(module), data.unwrap().to_string()).unwrap();
-                info!("'{:?}' module updated", module);
+                match std::fs::write(
+                    get_modules_data_path(module),
+                    data.clone().unwrap().to_string(),
+                ) {
+                    Ok(_) => {
+                        info!("'{:?}' module updated", module);
+                    }
+                    Err(e) => {
+                        error!("Failed to save '{:?}' module data: {:?}", module, e);
+                        continue;
+                    }
+                };
+
+                // Send updated module data to the websocket
+                match websocket_client
+                    .send_message(WebsocketRequest {
+                        id: uuid::Uuid::new_v4().to_string(),
+                        token: websocket_client.settings.api.token.clone(),
+                        event: EventType::ModuleUpdated.to_string(),
+                        data: serde_json::to_value(ModuleUpdate {
+                            module: module.to_string(),
+                            data: data.clone().unwrap(),
+                        })
+                        .unwrap(),
+                    })
+                    .await
+                {
+                    Ok(_) => info!("'{:?}' module data sent to websocket", module),
+                    Err(e) => error!(
+                        "'{:?}' module data failed to send to websocket: {:?}",
+                        module, e
+                    ),
+                };
             }
             Err(e) => {
-                error!("'{:?}' module update failed: {:?}", module, e);
-                continue;
+                error!("'{:?}' module update failed: {:?}", module, e)
             }
         }
     }

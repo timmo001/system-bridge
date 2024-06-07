@@ -22,11 +22,12 @@ pub const TYPE_GET_FILES: &str = "GET_FILES";
 pub const TYPE_GET_SETTINGS: &str = "GET_SETTINGS";
 pub const TYPE_KEYBOARD_KEY_PRESSED: &str = "KEYBOARD_KEY_PRESSED";
 pub const TYPE_KEYBOARD_KEYPRESS: &str = "KEYBOARD_KEYPRESS";
-pub const TYPE_KEYBOARD_TEXT: &str = "KEYBOARD_TEXT";
 pub const TYPE_KEYBOARD_TEXT_SENT: &str = "KEYBOARD_TEXT_SENT";
+pub const TYPE_KEYBOARD_TEXT: &str = "KEYBOARD_TEXT";
 pub const TYPE_MEDIA_CONTROL: &str = "MEDIA_CONTROL";
-pub const TYPE_NOTIFICATION: &str = "NOTIFICATION";
+pub const TYPE_MODULE_UPDATED: &str = "MODULE_UPDATED";
 pub const TYPE_NOTIFICATION_SENT: &str = "NOTIFICATION_SENT";
+pub const TYPE_NOTIFICATION: &str = "NOTIFICATION";
 pub const TYPE_OPEN: &str = "OPEN";
 pub const TYPE_OPENED: &str = "OPENED";
 pub const TYPE_POWER_HIBERNATE: &str = "POWER_HIBERNATE";
@@ -42,8 +43,8 @@ pub const TYPE_POWER_SHUTTINGDOWN: &str = "POWER_SHUTTINGDOWN";
 pub const TYPE_POWER_SLEEP: &str = "POWER_SLEEP";
 pub const TYPE_POWER_SLEEPING: &str = "POWER_SLEEPING";
 pub const TYPE_REGISTER_DATA_LISTENER: &str = "REGISTER_DATA_LISTENER";
-pub const TYPE_SETTINGS_UPDATED: &str = "SETTINGS_UPDATED";
 pub const TYPE_SETTINGS_RESULT: &str = "SETTINGS_RESULT";
+pub const TYPE_SETTINGS_UPDATED: &str = "SETTINGS_UPDATED";
 pub const TYPE_UNREGISTER_DATA_LISTENER: &str = "UNREGISTER_DATA_LISTENER";
 pub const TYPE_UPDATE_SETTINGS: &str = "UPDATE_SETTINGS";
 pub const TYPE_UNKNOWN: &str = "UNKNOWN";
@@ -67,11 +68,12 @@ pub enum EventType {
     GetFile,
     GetFiles,
     GetSettings,
-    KeyboardKeyPressed,
     KeyboardKeypress,
+    KeyboardKeyPressed,
     KeyboardText,
     KeyboardTextSent,
     MediaControl,
+    ModuleUpdated,
     Notification,
     NotificationSent,
     Open,
@@ -89,8 +91,8 @@ pub enum EventType {
     PowerSleep,
     PowerSleeping,
     RegisterDataListener,
-    SettingsUpdated,
     SettingsResult,
+    SettingsUpdated,
     UnregisterDataListener,
     UpdateSettings,
     Unknown,
@@ -123,6 +125,7 @@ impl FromStr for EventType {
             TYPE_KEYBOARD_TEXT => Ok(EventType::KeyboardText),
             TYPE_KEYBOARD_TEXT_SENT => Ok(EventType::KeyboardTextSent),
             TYPE_MEDIA_CONTROL => Ok(EventType::MediaControl),
+            TYPE_MODULE_UPDATED => Ok(EventType::ModuleUpdated),
             TYPE_NOTIFICATION => Ok(EventType::Notification),
             TYPE_NOTIFICATION_SENT => Ok(EventType::NotificationSent),
             TYPE_OPEN => Ok(EventType::Open),
@@ -173,11 +176,12 @@ impl fmt::Display for EventType {
                 EventType::GetFile => TYPE_GET_FILE,
                 EventType::GetFiles => TYPE_GET_FILES,
                 EventType::GetSettings => TYPE_GET_SETTINGS,
-                EventType::KeyboardKeyPressed => TYPE_KEYBOARD_KEY_PRESSED,
                 EventType::KeyboardKeypress => TYPE_KEYBOARD_KEYPRESS,
+                EventType::KeyboardKeyPressed => TYPE_KEYBOARD_KEY_PRESSED,
                 EventType::KeyboardText => TYPE_KEYBOARD_TEXT,
                 EventType::KeyboardTextSent => TYPE_KEYBOARD_TEXT_SENT,
                 EventType::MediaControl => TYPE_MEDIA_CONTROL,
+                EventType::ModuleUpdated => TYPE_MODULE_UPDATED,
                 EventType::Notification => TYPE_NOTIFICATION,
                 EventType::NotificationSent => TYPE_NOTIFICATION_SENT,
                 EventType::Open => TYPE_OPEN,
@@ -195,8 +199,8 @@ impl fmt::Display for EventType {
                 EventType::PowerSleep => TYPE_POWER_SLEEP,
                 EventType::PowerSleeping => TYPE_POWER_SLEEPING,
                 EventType::RegisterDataListener => TYPE_REGISTER_DATA_LISTENER,
-                EventType::SettingsUpdated => TYPE_SETTINGS_UPDATED,
                 EventType::SettingsResult => TYPE_SETTINGS_RESULT,
+                EventType::SettingsUpdated => TYPE_SETTINGS_UPDATED,
                 EventType::UnregisterDataListener => TYPE_UNREGISTER_DATA_LISTENER,
                 EventType::UpdateSettings => TYPE_UPDATE_SETTINGS,
                 EventType::Unknown => TYPE_UNKNOWN,
