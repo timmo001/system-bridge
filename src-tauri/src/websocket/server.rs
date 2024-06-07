@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::{
     event::{EventSubtype, EventType},
     modules::{get_module_data, Module, ModuleUpdate, RequestModules},
@@ -10,6 +8,7 @@ use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::str::FromStr;
 use std::sync::Mutex;
 
 #[derive(Debug, Serialize, Deserialize)]

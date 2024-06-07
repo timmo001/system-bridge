@@ -1,10 +1,12 @@
+mod routes;
+
 use crate::{
-    api_routes::{api, not_found, root},
     settings::{get_settings, Settings},
-    websocket::websocket,
+    websocket::server::websocket,
 };
 use log::info;
 use rocket::{catchers, routes};
+use routes::{api, not_found, root};
 use std::error::Error;
 
 pub async fn setup_api() -> Result<(), Box<dyn Error>> {
