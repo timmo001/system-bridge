@@ -28,7 +28,6 @@ export default function DataItemsComponent({
             enableClipboard
             name={null}
             shouldCollapse={(field: CollapsedFieldProps): boolean => {
-              console.log(field);
               return field.name &&
                 field.type === "array" &&
                 Array.isArray(field.src) &&

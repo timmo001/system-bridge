@@ -11,8 +11,9 @@ mod sensors;
 mod system;
 
 use crate::{
-    event::EventType, shared::get_data_path, websocket::client::WebSocketClient,
-    websocket::server::WebsocketRequest,
+    event::EventType,
+    shared::get_data_path,
+    websocket::{client::WebSocketClient, WebsocketRequest},
 };
 use log::{error, info};
 use serde::{Deserialize, Serialize};

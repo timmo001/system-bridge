@@ -1,3 +1,4 @@
+use super::{DataListener, WebsocketRequest, WebsocketResponse};
 use crate::{
     event::{EventSubtype, EventType},
     modules::{get_module_data, Module, ModuleUpdate, RequestModules},
@@ -6,35 +7,9 @@ use crate::{
 use log::{debug, info, warn};
 use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::str::FromStr;
 use std::sync::Mutex;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WebsocketRequest {
-    pub id: String,
-    pub token: String,
-    pub event: String,
-    pub data: Value,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WebsocketResponse {
-    pub id: String,
-    #[serde(rename = "type")]
-    pub type_: String,
-    pub data: Value,
-    pub subtype: Option<String>,
-    pub message: Option<String>,
-    pub module: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DataListener {
-    pub id: String,
-    pub modules: Vec<String>,
-}
 
 static REGISTERED_LISTENERS: Mutex<Vec<DataListener>> = Mutex::new(vec![]);
 
@@ -42,7 +17,7 @@ static REGISTERED_LISTENERS: Mutex<Vec<DataListener>> = Mutex::new(vec![]);
 pub async fn websocket(ws: WebSocket) -> Stream!['static] {
     Stream! { ws =>
         for await msg in ws {
-
+                    // Get the message
                     let message = msg?.to_string();
                     debug!("Received message: {:?}", message);
 
@@ -204,19 +179,20 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     // TODO: Open the application
                 }
                 Ok(EventType::RegisterDataListener) => {
-                    info!("RegisterDataListener event");
+                    let request_data_result: Result<RequestModules, _> =
+                    serde_json::from_value(request.data.clone());
+                    if let Err(e) = request_data_result {
+                        warn!("Invalid data: {:?}", e);
+                        continue;
+                    }
+
+                    let request_data = request_data_result.unwrap();
+                    info!("Register data listener for modules: {:?}", request_data.modules);
 
                     // Register data listener
-                    let listener_id = uuid::Uuid::new_v4().to_string();
                     REGISTERED_LISTENERS.lock().unwrap().push(DataListener {
-                        id: listener_id.clone(),
-                        modules: request
-                            .data
-                            .as_array()
-                            .unwrap()
-                            .iter()
-                            .map(|m| m.as_str().unwrap().to_string())
-                            .collect(),
+                        id: uuid::Uuid::new_v4().to_string(),
+                        modules: request_data.modules,
                     });
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
