@@ -1,7 +1,7 @@
 use fern::colors::{Color, ColoredLevelConfig};
 use log::{info, LevelFilter};
 
-use crate::shared::get_data_path;
+use crate::{settings::get_settings, shared::get_data_path};
 
 pub fn setup_logger() -> Result<(), fern::InitError> {
     let log_path = format!("{}/systembridge.log", get_data_path());
@@ -53,13 +53,24 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 .open(log_path.clone())?,
         );
 
+    let settings = get_settings();
+    let log_level = match settings.log_level.as_str() {
+        "TRACE" => LevelFilter::Trace,
+        "DEBUG" => LevelFilter::Debug,
+        "INFO" => LevelFilter::Info,
+        "WARNING" => LevelFilter::Warn,
+        "ERROR" => LevelFilter::Error,
+        "CRITICAL" => LevelFilter::Off,
+        _ => LevelFilter::Info,
+    };
+
     // Create a new logger
     // Configure logger at runtime
     fern::Dispatch::new()
         // Add blanket level filter -
-        .level(LevelFilter::Info)
+        .level(log_level)
         // - and per-module overrides
-        .level_for("hyper", log::LevelFilter::Info)
+        // .level_for("hyper", log::LevelFilter::Info)
         // Output to stdout, files, and other Dispatch configurations
         .chain(stdout_config)
         .chain(file_config)
