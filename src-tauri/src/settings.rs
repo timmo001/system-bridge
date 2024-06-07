@@ -84,3 +84,10 @@ pub fn get_settings() -> Settings {
 
     settings.unwrap()
 }
+
+pub fn update_settings(settings: Settings) {
+    // Write settings to {config_path}\settings.json
+    let settings_string = serde_json::to_string(&settings).unwrap();
+    let settings_path = format!("{}/settings.json", get_data_path());
+    std::fs::write(settings_path, settings_string).unwrap();
+}

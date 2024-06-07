@@ -215,6 +215,39 @@ impl RequestProcessor {
                     module: None,
                 });
             }
+            Ok(EventType::UpdateSettings) => {
+                info!("UpdateSettings event: {:?}", request.data);
+
+                let settings_result: Result<Settings, _> = serde_json::from_value(request.data.clone());
+                if let Err(e) = settings_result {
+                    warn!("Invalid settings: {:?}", e);
+                    return Err(e.to_string());
+                }
+
+                let settings = settings_result.unwrap();
+                info!("Updating settings: {:?}", settings);
+
+                // Update the settings
+                crate::settings::update_settings(settings);
+
+                responses.push(WebsocketResponse {
+                    id: request_id.clone(),
+                    type_: EventType::SettingsUpdated.to_string(),
+                    data: Value::Null,
+                    subtype: None,
+                    message: None,
+                    module: None,
+                });
+
+                responses.push(WebsocketResponse {
+                    id: request_id.clone(),
+                    type_: EventType::SettingsResult.to_string(),
+                    data: serde_json::to_value(&self.settings).unwrap(),
+                    subtype: None,
+                    message: None,
+                    module: None,
+                });
+            }
             Ok(EventType::Open) => {
                 info!("Open event");
 
