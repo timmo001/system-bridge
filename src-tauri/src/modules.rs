@@ -80,23 +80,29 @@ pub struct RequestModules {
     pub modules: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ModulesData {
-    battery: Value,
-    cpu: Value,
-    disks: Value,
-    displays: Value,
-    gpus: Value,
-    media: Value,
-    memory: Value,
-    networks: Value,
-    processes: Value,
-    sensors: Value,
-    system: Value,
+    battery: Option<Value>,
+    cpu: Option<Value>,
+    disks: Option<Value>,
+    displays: Option<Value>,
+    gpus: Option<Value>,
+    media: Option<Value>,
+    memory: Option<Value>,
+    networks: Option<Value>,
+    processes: Option<Value>,
+    sensors: Option<Value>,
+    system: Option<Value>,
+}
+
+use std::path::Path;
+
+pub fn get_modules_path() -> String {
+    format!("{}/modules", get_data_path())
 }
 
 pub fn get_modules_data_path(module: &Module) -> String {
-    format!("{}/modules/{}.json", get_data_path(), module)
+    format!("{}/{}.json", get_modules_path(), module)
 }
 
 pub fn setup_modules_data() {
