@@ -4,7 +4,7 @@ use crate::{
     modules::{get_module_data, Module, ModuleUpdate, RequestModules},
     settings::{get_settings, update_settings, Settings},
 };
-use log::{debug, info, warn};
+use log::{debug, error, info, warn};
 use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
 use serde_json::Value;
@@ -24,7 +24,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     // Parse the message
                     let request_result = serde_json::from_str(&message);
                     if request_result.is_err() {
-                        warn!("Failed to parse request: {:?}", request_result.err());
+                        error!("Failed to parse request: {:?} - {:?}", message, request_result.err());
                         continue;
                     }
                     let request: WebsocketRequest = request_result.unwrap();
