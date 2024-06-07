@@ -180,8 +180,6 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     }).unwrap());
                 }
                 Ok(EventType::ModuleUpdated) => {
-                    info!("ModuleUpdated event");
-
                     let module_update_result: Result<ModuleUpdate, _> =
                         serde_json::from_value(request.data.clone());
                     if let Err(e) = module_update_result {
@@ -190,7 +188,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     }
 
                     let module_update = module_update_result.unwrap();
-                    info!("Module update: {:?}", module_update.module);
+                    info!("Module update: {:?}", module_update.module.to_string());
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
                         id: request_id.clone(),
