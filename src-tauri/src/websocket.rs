@@ -75,7 +75,6 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                         continue;
                     }
 
-                    // Process the request
             // Process the request
             let event_type = EventType::from_str(&request.event);
 
@@ -191,7 +190,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     }
 
                     let module_update = module_update_result.unwrap();
-                    info!("Module update: {:?}", module_update);
+                    info!("Module update: {:?}", module_update.module);
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
                         id: request_id.clone(),
