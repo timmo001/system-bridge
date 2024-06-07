@@ -48,6 +48,12 @@ impl WebSocketClient {
             Err(e) => return Err(format!("Failed to send message: {:?}", e)),
         };
 
+        // Close the connection
+        match client.close().await {
+            Ok(_) => (),
+            Err(e) => return Err(format!("Failed to close connection: {:?}", e)),
+        };
+
         Ok(())
     }
 }
