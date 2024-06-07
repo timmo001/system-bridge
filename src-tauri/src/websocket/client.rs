@@ -1,5 +1,7 @@
-use super::server::WebsocketRequest;
-use crate::settings::{get_settings, Settings};
+use crate::{
+    settings::{get_settings, Settings},
+    websocket::server::WebsocketRequest,
+};
 use futures_util::SinkExt;
 use log::{debug, info};
 use serde_json::json;
