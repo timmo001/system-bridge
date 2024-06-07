@@ -110,3 +110,29 @@ pub async fn data(_token: Token<'_>, module: &str) -> Json<Value> {
         }
     }
 }
+
+#[get("/api/data/<module>/<key>", format = "json")]
+pub async fn data_key(_token: Token<'_>, module: &str, key: &str) -> Json<Value> {
+    let data_module = match Module::from_str(module) {
+        Ok(module) => module,
+        Err(e) => {
+            warn!("Error parsing module: {}", e);
+            return Json(Value::Null);
+        }
+    };
+
+    info!(
+        "Getting data for module: {:?} with key: {}",
+        data_module, key
+    );
+    match get_module_data(&data_module).await {
+        Ok(data) => {
+            let value = data.get(key).unwrap_or(&Value::Null);
+            Json(value.clone())
+        }
+        Err(e) => {
+            warn!("Error getting module data: {}", e);
+            Json(Value::Null)
+        }
+    }
+}

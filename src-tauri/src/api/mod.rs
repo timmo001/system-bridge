@@ -6,7 +6,7 @@ use crate::{
 };
 use log::info;
 use rocket::{catchers, routes};
-use routes::{api, data, not_found, root};
+use routes::{api, data, data_key, not_found, root};
 use std::error::Error;
 
 pub async fn setup_api() -> Result<(), Box<dyn Error>> {
@@ -23,7 +23,7 @@ pub async fn setup_api() -> Result<(), Box<dyn Error>> {
     let _rocket = rocket::build()
         .configure(config)
         .register("/", catchers![not_found])
-        .mount("/", routes![root, api, data, websocket])
+        .mount("/", routes![root, api, data, data_key, websocket])
         .launch()
         .await?;
 
