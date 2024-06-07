@@ -95,8 +95,6 @@ pub struct ModulesData {
     system: Option<Value>,
 }
 
-use std::path::Path;
-
 pub fn get_modules_path() -> String {
     format!("{}/modules", get_data_path())
 }
