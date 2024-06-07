@@ -1,3 +1,4 @@
+use log::warn;
 use pyo3::prelude::*;
 use pyo3::FromPyObject;
 use serde::{Deserialize, Serialize};
@@ -49,7 +50,7 @@ pub struct ModuleSystem {
     platform: Option<String>,
     run_mode: RunMode,
     uptime: u64,
-    users: Vec<SystemUser>,
+    users: Option<Vec<SystemUser>>,
     uuid: String,
     version: String,
     camera_usage: Option<Vec<String>>,
@@ -75,11 +76,17 @@ pub async fn update() -> Result<Value, String> {
                 .expect("Failed to import systembridgedata.module.system module");
 
             // Create an instance of the System class
-            let system_instance = system_module
+            let system_instance = match system_module
                 .getattr("System")
                 .expect("Failed to get System class")
                 .call0()
-                .expect("Failed to create System instance");
+            {
+                Ok(instance) => instance,
+                Err(e) => {
+                    warn!("Error: {:?}", e);
+                    return (None, None, None, None, None, None);
+                }
+            };
 
             // Call the methods
             let fqdn = system_instance
@@ -132,12 +139,12 @@ pub async fn update() -> Result<Value, String> {
 
             // Set output
             (
-                fqdn,
-                ip_address_4,
-                ip_address_6,
-                mac_address,
-                pending_reboot,
-                users,
+                Some(fqdn),
+                Some(ip_address_4),
+                Some(ip_address_6),
+                Some(mac_address),
+                Some(pending_reboot),
+                Some(users),
             )
         });
 
@@ -145,10 +152,10 @@ pub async fn update() -> Result<Value, String> {
 
     Ok(serde_json::to_value(ModuleSystem {
         boot_time: System::boot_time(),
-        fqdn: Some(fqdn),
+        fqdn,
         hostname: System::host_name(),
-        ip_address_4: Some(ip_address_4),
-        mac_address: Some(mac_address),
+        ip_address_4,
+        mac_address,
         platform_version: System::long_os_version(),
         platform: System::name(),
         run_mode: RunMode::Standalone,
@@ -157,11 +164,11 @@ pub async fn update() -> Result<Value, String> {
         uuid: uuid_machine,
         version: env!("CARGO_PKG_VERSION").to_string(),
         camera_usage: None, // TODO: Implement
-        ip_address_6: Some(ip_address_6),
-        pending_reboot: Some(pending_reboot), // TODO: Implement
-        version_latest_url: None,             // TODO: Implement
-        version_latest: None,                 // TODO: Implement
-        version_newer_available: None,        // TODO: Implement
+        ip_address_6,
+        pending_reboot,
+        version_latest_url: None,      // TODO: Implement
+        version_latest: None,          // TODO: Implement
+        version_newer_available: None, // TODO: Implement
     })
     .unwrap())
 }
