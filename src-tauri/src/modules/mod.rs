@@ -10,16 +10,13 @@ mod processes;
 mod sensors;
 mod system;
 
-use crate::{
-    event::EventType,
-    shared::get_data_path,
-    websocket::{client::WebSocketClient, WebsocketRequest},
-};
+use crate::shared::get_data_path;
 use log::{error, info};
+use notify::{recommended_watcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::fmt;
 use std::str::FromStr;
+use std::{fmt, path::Path};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Module {
@@ -159,8 +156,6 @@ pub async fn get_module_data(module: &Module) -> Result<Value, String> {
 }
 
 pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
-    let websocket_client = WebSocketClient::new().await;
-
     for module in modules {
         let data = match module {
             Module::Battery => battery::update().await,
@@ -198,27 +193,6 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
                         continue;
                     }
                 };
-
-                // Send updated module data to the websocket
-                match websocket_client
-                    .send_message(WebsocketRequest {
-                        id: uuid::Uuid::new_v4().to_string(),
-                        token: websocket_client.settings.api.token.clone(),
-                        event: EventType::ModuleUpdated.to_string(),
-                        data: serde_json::to_value(ModuleUpdate {
-                            module: module.to_string(),
-                            data: data.clone().unwrap(),
-                        })
-                        .unwrap(),
-                    })
-                    .await
-                {
-                    Ok(_) => info!("'{:?}' module data sent to websocket", module),
-                    Err(e) => error!(
-                        "'{:?}' module data failed to send to websocket: {:?}",
-                        module, e
-                    ),
-                };
             }
             Err(e) => {
                 error!("'{:?}' module update failed: {:?}", module, e)
@@ -227,4 +201,32 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+pub fn watch_modules(
+    modules: &Vec<String>,
+    callback_fn: fn(&Module, &Value),
+) -> Result<(), String> {
+    info!("Watching modules: {:?}", modules);
+
+    // Watch for changes in module data files
+    let watcher_result = recommended_watcher(|res| match res {
+        Ok(event) => {
+            info!("event: {:?}", event);
+        }
+        Err(e) => {
+            error!("watch error: {:?}", e);
+        }
+    });
+
+    if watcher_result.is_err() {
+        return Err("Failed to create watcher".to_string());
+    }
+
+    let mut watcher = watcher_result.unwrap();
+
+    match watcher.watch(Path::new(&get_modules_path()), RecursiveMode::NonRecursive) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to watch modules: {:?}", e)),
+    }
 }

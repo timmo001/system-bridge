@@ -1,7 +1,7 @@
-use super::{DataListener, WebsocketRequest, WebsocketResponse};
+use super::{WebsocketRequest, WebsocketResponse};
 use crate::{
     event::{EventSubtype, EventType},
-    modules::{get_module_data, Module, ModuleUpdate, RequestModules},
+    modules::{get_module_data, watch_modules, Module, RequestModules},
     settings::{get_settings, update_settings, Settings},
 };
 use log::{debug, error, info, warn};
@@ -10,8 +10,6 @@ use rocket_ws::{Message, Stream, WebSocket};
 use serde_json::Value;
 use std::str::FromStr;
 use std::sync::Mutex;
-
-static REGISTERED_LISTENERS: Mutex<Vec<DataListener>> = Mutex::new(vec![]);
 
 #[get("/api/websocket")]
 pub async fn websocket(ws: WebSocket) -> Stream!['static] {
@@ -153,26 +151,6 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                         module: None,
                     }).unwrap());
                 }
-                Ok(EventType::ModuleUpdated) => {
-                    let module_update_result: Result<ModuleUpdate, _> =
-                        serde_json::from_value(request.data.clone());
-                    if let Err(e) = module_update_result {
-                        warn!("Invalid module update: {:?}", e);
-                        continue;
-                    }
-
-                    let module_update = module_update_result.unwrap();
-                    info!("Module update: {:?}", module_update.module.to_string());
-
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::DataUpdate.to_string(),
-                        data: module_update.data,
-                        subtype: None,
-                        message: None,
-                        module: module_update.module.to_string().into(),
-                    }).unwrap());
-                }
                 Ok(EventType::Open) => {
                     info!("Open event");
 
@@ -189,10 +167,21 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     let request_data = request_data_result.unwrap();
                     info!("Register data listener for modules: {:?}", request_data.modules);
 
-                    // Register data listener
-                    REGISTERED_LISTENERS.lock().unwrap().push(DataListener {
-                        id: uuid::Uuid::new_v4().to_string(),
-                        modules: request_data.modules,
+                    // Listen for data updates for the requested modules on another thread
+                    tokio::spawn(async move {
+                        watch_modules(&request_data.modules, |module, data| {
+                            // Send data update to the client
+                            info!("Data update for module: {:?} - {:?}", module, data);
+
+                            // yield Message::text(serde_json::to_string(&WebsocketResponse {
+                            //     id: request_id.clone(),
+                            //     type_: EventType::DataUpdate.to_string(),
+                            //     data: data.clone(),
+                            //     subtype: None,
+                            //     message: None,
+                            //     module: Some(module.to_string()),
+                            // }).unwrap());
+                        }).unwrap();
                     });
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {

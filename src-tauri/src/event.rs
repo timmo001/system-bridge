@@ -25,7 +25,6 @@ pub const TYPE_KEYBOARD_KEYPRESS: &str = "KEYBOARD_KEYPRESS";
 pub const TYPE_KEYBOARD_TEXT_SENT: &str = "KEYBOARD_TEXT_SENT";
 pub const TYPE_KEYBOARD_TEXT: &str = "KEYBOARD_TEXT";
 pub const TYPE_MEDIA_CONTROL: &str = "MEDIA_CONTROL";
-pub const TYPE_MODULE_UPDATED: &str = "MODULE_UPDATED";
 pub const TYPE_NOTIFICATION_SENT: &str = "NOTIFICATION_SENT";
 pub const TYPE_NOTIFICATION: &str = "NOTIFICATION";
 pub const TYPE_OPEN: &str = "OPEN";
@@ -73,7 +72,6 @@ pub enum EventType {
     KeyboardText,
     KeyboardTextSent,
     MediaControl,
-    ModuleUpdated,
     Notification,
     NotificationSent,
     Open,
@@ -125,7 +123,6 @@ impl FromStr for EventType {
             TYPE_KEYBOARD_TEXT => Ok(EventType::KeyboardText),
             TYPE_KEYBOARD_TEXT_SENT => Ok(EventType::KeyboardTextSent),
             TYPE_MEDIA_CONTROL => Ok(EventType::MediaControl),
-            TYPE_MODULE_UPDATED => Ok(EventType::ModuleUpdated),
             TYPE_NOTIFICATION => Ok(EventType::Notification),
             TYPE_NOTIFICATION_SENT => Ok(EventType::NotificationSent),
             TYPE_OPEN => Ok(EventType::Open),
@@ -181,7 +178,6 @@ impl fmt::Display for EventType {
                 EventType::KeyboardText => TYPE_KEYBOARD_TEXT,
                 EventType::KeyboardTextSent => TYPE_KEYBOARD_TEXT_SENT,
                 EventType::MediaControl => TYPE_MEDIA_CONTROL,
-                EventType::ModuleUpdated => TYPE_MODULE_UPDATED,
                 EventType::Notification => TYPE_NOTIFICATION,
                 EventType::NotificationSent => TYPE_NOTIFICATION_SENT,
                 EventType::Open => TYPE_OPEN,

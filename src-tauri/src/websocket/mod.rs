@@ -21,9 +21,3 @@ pub struct WebsocketResponse {
     pub message: Option<String>,
     pub module: Option<String>,
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DataListener {
-    pub id: String,
-    pub modules: Vec<String>,
-}
