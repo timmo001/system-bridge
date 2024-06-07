@@ -17,37 +17,37 @@ static REGISTERED_LISTENERS: Mutex<Vec<DataListener>> = Mutex::new(vec![]);
 pub async fn websocket(ws: WebSocket) -> Stream!['static] {
     Stream! { ws =>
         for await msg in ws {
-                    // Get the message
-                    let message = msg?.to_string();
-                    debug!("Received message: {:?}", message);
+            // Get the message
+            let message = msg?.to_string();
+            debug!("Received message: {:?}", message);
 
-                    // Parse the message
-                    let request_result = serde_json::from_str(&message);
-                    if request_result.is_err() {
+            // Parse the message
+            let request_result = serde_json::from_str(&message);
+            if request_result.is_err() {
                         error!("Failed to parse request: {:?} - {:?}", message, request_result.err());
                         continue;
-                    }
-                    let request: WebsocketRequest = request_result.unwrap();
-                    debug!("Received request: {:?}", request);
+            }
+            let request: WebsocketRequest = request_result.unwrap();
+            debug!("Received request: {:?}", request);
 
-                    let request_id:String = request.id.clone();
-                    let required_token = get_settings().api.token;
+            let request_id:String = request.id.clone();
+            let required_token = get_settings().api.token;
 
-                    // Check if the token is valid
-                    if request.token != required_token {
-                        warn!("Invalid token provided: {} - Expected: {}", request.token, required_token);
+            // Check if the token is valid
+            if request.token != required_token {
+                warn!("Invalid token provided: {} - Expected: {}", request.token, required_token);
 
-                        yield Message::text(serde_json::to_string(&WebsocketResponse {
-                            id: request_id.clone(),
-                            type_: EventType::Error.to_string(),
-                            data: Value::Null,
-                            subtype: None,
-                            message: Some("Invalid token".to_string()),
-                            module: None,
-                        }).unwrap());
+                yield Message::text(serde_json::to_string(&WebsocketResponse {
+                                id: request_id.clone(),
+                                type_: EventType::Error.to_string(),
+                                data: Value::Null,
+                                subtype: None,
+                                message: Some("Invalid token".to_string()),
+                                module: None,
+                }).unwrap());
 
-                        continue;
-                    }
+                continue;
+            }
 
             // Process the request
             let event_type = EventType::from_str(&request.event);
