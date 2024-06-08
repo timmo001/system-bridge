@@ -4447,6 +4447,7 @@ dependencies = [
  "mac_address",
  "machine-uid",
  "notify",
+ "once_cell",
  "platform-dirs",
  "pyo3",
  "reqwest",

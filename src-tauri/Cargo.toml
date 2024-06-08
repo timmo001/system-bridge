@@ -25,6 +25,7 @@ log = "0.4.21"
 mac_address = "1.1.7"
 machine-uid = "0.5.1"
 notify = "6.1.1"
+once_cell = "1.19.0"
 platform-dirs = "0.3.0"
 pyo3 = { version = "0.21.2", features = ["auto-initialize"] }
 reqwest = "0.12.4"
