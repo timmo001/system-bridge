@@ -180,7 +180,7 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                                 rt.block_on(async {
                                     watch_modules(&request_data.modules, |module, data| {
                                         // Send data update to the client
-                                        info!("Data update for module: {:?} - {:?}", module, data);
+                                        info!("Data update for module: {:?}", module);
 
                                         // yield Message::text(serde_json::to_string(&WebsocketResponse {
                                         //     id: request_id.clone(),
