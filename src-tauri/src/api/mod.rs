@@ -21,12 +21,12 @@ pub async fn setup_api() -> Result<(), Box<dyn Error>> {
     config.address = std::net::IpAddr::from([0, 0, 0, 0]);
     config.port = settings.api.port as u16;
 
-    let peers_map: PeersMap = Arc::new(Mutex::new(HashMap::new()));
+    let listeners_map: PeersMap = Arc::new(Mutex::new(HashMap::new()));
 
     let _rocket = rocket::build()
         .configure(config)
         .register("/", catchers![not_found])
-        .manage(peers_map)
+        .manage(listeners_map)
         .mount("/", routes![root, api, data, data_key, websocket])
         .launch()
         .await?;

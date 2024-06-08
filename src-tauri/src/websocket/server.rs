@@ -5,89 +5,84 @@ use crate::{
     settings::{get_settings, update_settings, Settings},
 };
 use log::{debug, error, info, warn};
-use rocket::futures::channel::mpsc::{channel, Sender};
+use rocket::futures::channel::mpsc::channel;
 use rocket::futures::{SinkExt, StreamExt};
 use rocket::get;
 use rocket::tokio::select;
 use rocket::tokio::sync::Mutex;
 use rocket::State;
-use rocket_ws::{Channel, Message, WebSocket};
+use rocket_ws::{stream::DuplexStream, Channel, Message, WebSocket};
 use serde_json::Value;
-use std::{collections::HashMap, str::FromStr, sync::Arc, thread};
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
-pub type PeersMap = Arc<Mutex<HashMap<String, Sender<String>>>>;
+pub type PeersMap = Arc<Mutex<HashMap<String, Arc<tokio::sync::Mutex<DuplexStream>>>>>;
 
 #[get("/api/websocket")]
-pub async fn websocket(websocket: WebSocket, peers_map: &State<PeersMap>) -> Channel<'static> {
-    let peers_map = peers_map.inner().clone();
+pub async fn websocket(websocket: WebSocket, listeners_map: &State<PeersMap>) -> Channel<'static> {
+    let listeners_map = listeners_map.inner().clone();
 
-    // // Create multiple threads to handle the different tasks
-    // let mut tasks: Vec<thread::JoinHandle<()>> = vec![];
+    let listeners_map_clone_1 = listeners_map.clone();
+    let listeners_map_clone_2 = listeners_map.clone();
 
-    // fn handle_module_data(module: &Module, data: &Value) {
-    //     // Send data update to the client
-    //     info!("Data update for module: {:?}", module);
+    let handle_module_data = |module: &Module, data: &Value| {
+        let module = module.clone();
+        let data = data.clone();
+        let listeners_map_clone_2 = listeners_map_clone_2.clone();
+        tokio::spawn(async move {
+            info!("Data update for module: {:?}", module);
 
-    //     let request_id = uuid::Uuid::new_v4().to_string();
-    //     let listeners = REGISTERED_LISTENERS.lock().unwrap();
-    //     for (_, ws) in &*listeners {
-    //         let (mut sender, mut receiver) = ws.split();
+            let request_id = uuid::Uuid::new_v4().to_string();
 
-    //         let _ = sender
-    //             .send(Message::text(
-    //                 serde_json::to_string(&WebsocketResponse {
-    //                     id: request_id.clone(),
-    //                     type_: EventType::DataUpdate.to_string(),
-    //                     data: data.clone(),
-    //                     subtype: None,
-    //                     message: None,
-    //                     module: Some(module.to_string()),
-    //                 })
-    //                 .unwrap(),
-    //             ))
-    //             .await;
-    //     }
+            let mut listeners = listeners_map_clone_2.lock().await;
 
-    //     info!("Sent data update for module: {:?}", module);
-    // }
+            for (_, stream) in &mut *listeners {
+                let mut stream = stream.lock().await;
+                let _ = stream.send(Message::text(
+                    serde_json::to_string(&WebsocketResponse {
+                        id: request_id.clone(),
+                        type_: EventType::DataUpdate.to_string(),
+                        data: data.clone(),
+                        subtype: None,
+                        message: None,
+                        module: Some(module.to_string()),
+                    })
+                    .unwrap(),
+                ));
+            }
+        });
+    };
 
-    // // Listen for data updates for the requested modules on another thread
-    // tasks.push(
-    //     thread::Builder::new()
-    //         .name("listener".into())
-    //         .spawn(move || {
-    //             let rt = Runtime::new().unwrap();
-    //             rt.block_on(async {
-    //                 watch_modules(
-    //                     &vec![
-    //                         Module::Battery,
-    //                         Module::CPU,
-    //                         Module::Disks,
-    //                         Module::Displays,
-    //                         Module::GPUs,
-    //                         Module::Media,
-    //                         Module::Memory,
-    //                         Module::Networks,
-    //                         Module::Processes,
-    //                         Module::Sensors,
-    //                         Module::System,
-    //                     ],
-    //                     handle_module_data,
-    //                 )
-    //                 .await
-    //                 .unwrap();
-    //             });
-    //         })
-    //         .unwrap(),
-    // );
+    // Listen for data updates for the requested modules on another thread
+    watch_modules(
+        &vec![
+            Module::Battery,
+            Module::CPU,
+            Module::Disks,
+            Module::Displays,
+            Module::GPUs,
+            Module::Media,
+            Module::Memory,
+            Module::Networks,
+            Module::Processes,
+            Module::Sensors,
+            Module::System,
+        ],
+        handle_module_data,
+    );
 
     websocket.channel(move |mut stream| {
         Box::pin(async move {
             let assigned_id = uuid::Uuid::new_v4().to_string();
             let (tx, mut rx) = channel(1);
-            peers_map.lock().await.insert(assigned_id.clone(), tx);
-            let count = peers_map.lock().await.len();
+
+            let stream = Arc::new(Mutex::new(stream));
+            let stream_clone = Arc::clone(&stream);
+            listeners_map_clone_1.lock().await.insert(assigned_id.clone(), stream_clone);
+
+            let count = listeners_map_clone_1.lock().await.len();
             info!("Connection opened ({} clients)", count);
+
+            let mut stream = stream.lock().await;
 
             loop {
                 select! {
@@ -201,7 +196,7 @@ pub async fn websocket(websocket: WebSocket, peers_map: &State<PeersMap>) -> Cha
                                         let module = module_type_result.unwrap();
                                         info!("Getting data for module: {:?}", module.to_string());
 
-                                        match get_module_data(&module).await {
+                                        match get_module_data(&module) {
                                             Ok(module_data) => {
                                                 info!("Got data for module: {:?}", module.to_string());
 
@@ -278,7 +273,6 @@ pub async fn websocket(websocket: WebSocket, peers_map: &State<PeersMap>) -> Cha
                                     }
 
                                     let request_data = request_data_result.unwrap();
-                                    // let modules = request_data.modules;
                                     info!(
                                         "Register data listener for modules: {:?}",
                                         request_data.modules
@@ -400,8 +394,8 @@ pub async fn websocket(websocket: WebSocket, peers_map: &State<PeersMap>) -> Cha
                 }
             }
 
-            peers_map.lock().await.remove(&assigned_id.clone());
-            let count = peers_map.lock().await.len();
+            listeners_map_clone_1.lock().await.remove(&assigned_id.clone());
+            let count = listeners_map_clone_1.lock().await.len();
             info!("Connection closed ({} clients)", count);
 
             Ok(())

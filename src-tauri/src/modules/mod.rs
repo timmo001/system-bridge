@@ -15,8 +15,7 @@ use log::{debug, error, info};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{fmt, str::FromStr, thread};
-use tokio::runtime::Runtime;
+use std::{fmt, str::FromStr};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Module {
