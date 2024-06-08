@@ -8,11 +8,14 @@ use log::{debug, error, info, warn};
 use rocket::get;
 use rocket_ws::{Message, Stream, WebSocket};
 use serde_json::Value;
-use std::str::FromStr;
-use std::sync::Mutex;
+use std::{str::FromStr, thread};
+use tokio::runtime::Runtime;
 
 #[get("/api/websocket")]
 pub async fn websocket(ws: WebSocket) -> Stream!['static] {
+    // Create multiple threads to handle the different tasks
+    let mut tasks: Vec<thread::JoinHandle<()>> = vec![];
+
     Stream! { ws =>
         for await msg in ws {
             // Get the message
@@ -165,24 +168,33 @@ pub async fn websocket(ws: WebSocket) -> Stream!['static] {
                     }
 
                     let request_data = request_data_result.unwrap();
+                    // let modules = request_data.modules;
                     info!("Register data listener for modules: {:?}", request_data.modules);
 
                     // Listen for data updates for the requested modules on another thread
-                    tokio::spawn(async move {
-                        watch_modules(&request_data.modules, |module, data| {
-                            // Send data update to the client
-                            info!("Data update for module: {:?} - {:?}", module, data);
+                    tasks.push(
+                        thread::Builder::new()
+                            .name(format!("listener_{}", request_id).into())
+                            .spawn(move || {
+                                let rt = Runtime::new().unwrap();
+                                rt.block_on(async {
+                                    watch_modules(&request_data.modules, |module, data| {
+                                        // Send data update to the client
+                                        info!("Data update for module: {:?} - {:?}", module, data);
 
-                            // yield Message::text(serde_json::to_string(&WebsocketResponse {
-                            //     id: request_id.clone(),
-                            //     type_: EventType::DataUpdate.to_string(),
-                            //     data: data.clone(),
-                            //     subtype: None,
-                            //     message: None,
-                            //     module: Some(module.to_string()),
-                            // }).unwrap());
-                        }).unwrap();
-                    });
+                                        // yield Message::text(serde_json::to_string(&WebsocketResponse {
+                                        //     id: request_id.clone(),
+                                        //     type_: EventType::DataUpdate.to_string(),
+                                        //     data: data.clone(),
+                                        //     subtype: None,
+                                        //     message: None,
+                                        //     module: Some(module.to_string()),
+                                        // }).unwrap());
+                                    }).await.unwrap();
+                                });
+                            })
+                            .unwrap(),
+                    );
 
                     yield Message::text(serde_json::to_string(&WebsocketResponse {
                         id: request_id.clone(),

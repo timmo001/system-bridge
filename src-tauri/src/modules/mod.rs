@@ -11,12 +11,12 @@ mod sensors;
 mod system;
 
 use crate::shared::get_data_path;
-use log::{error, info};
-use notify::{recommended_watcher, RecursiveMode, Watcher};
+use log::{debug, error, info};
+use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::fmt;
 use std::str::FromStr;
-use std::{fmt, path::Path};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Module {
@@ -203,30 +203,62 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn watch_modules(
+pub async fn watch_modules(
     modules: &Vec<String>,
     callback_fn: fn(&Module, &Value),
 ) -> Result<(), String> {
-    info!("Watching modules: {:?}", modules);
+    let path = get_modules_path();
+    info!("Watching modules in '{:?}': {:?}", path, modules);
 
     // Watch for changes in module data files
-    let watcher_result = recommended_watcher(|res| match res {
-        Ok(event) => {
-            info!("event: {:?}", event);
-        }
-        Err(e) => {
-            error!("watch error: {:?}", e);
-        }
-    });
+    let (tx, rx) = std::sync::mpsc::channel();
+    let mut watcher = RecommendedWatcher::new(tx, Config::default()).unwrap();
+    watcher
+        .watch(path.as_ref(), RecursiveMode::NonRecursive)
+        .unwrap();
 
-    if watcher_result.is_err() {
-        return Err("Failed to create watcher".to_string());
+    for res in rx {
+        match res {
+            Ok(event) => {
+                debug!("Watcher event: {:?}", event);
+
+                for path in &event.paths {
+                    for module in modules {
+                        // Check if path ends with module filename
+                        if path.ends_with(&format!("{}.json", module)) {
+                            match Module::from_str(module) {
+                                Ok(module) => {
+                                    debug!("Module: {:?}", module);
+
+                                    // Get module data
+                                    let data = match get_module_data(&module).await {
+                                        Ok(data) => data,
+                                        Err(e) => {
+                                            error!(
+                                                "Failed to get updated '{:?}' module data: {:?}",
+                                                module, e
+                                            );
+                                            continue;
+                                        }
+                                    };
+
+                                    // Call callback function
+                                    callback_fn(&module, &data);
+                                }
+                                Err(e) => {
+                                    error!("Invalid module: {:?}", e);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("watch error: {:?}", e);
+            }
+        }
     }
 
-    let mut watcher = watcher_result.unwrap();
-
-    match watcher.watch(Path::new(&get_modules_path()), RecursiveMode::NonRecursive) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to watch modules: {:?}", e)),
-    }
+    Ok(())
 }
