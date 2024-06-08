@@ -22,53 +22,53 @@ pub async fn websocket(websocket: WebSocket, listeners_map: &State<PeersMap>) ->
     let listeners_map = listeners_map.inner().clone();
 
     let listeners_map_clone_1 = listeners_map.clone();
-    let listeners_map_clone_2 = listeners_map.clone();
+    // let listeners_map_clone_2 = listeners_map.clone();
 
-    let handle_module_data = |module: &Module, data: &Value| {
-        let module = module.clone();
-        let data = data.clone();
-        let listeners_map_clone_2 = listeners_map_clone_2.clone();
-        tokio::spawn(async move {
-            info!("Data update for module: {:?}", module);
+    // let handle_module_data = |module: &Module, data: &Value| {
+    //     let module = module.clone();
+    //     let data = data.clone();
+    //     let listeners_map_clone_2 = listeners_map_clone_2.clone();
+    //     tokio::spawn(async move {
+    //         info!("Data update for module: {:?}", module);
 
-            let request_id = uuid::Uuid::new_v4().to_string();
+    //         let request_id = uuid::Uuid::new_v4().to_string();
 
-            let mut listeners = listeners_map_clone_2.lock().await;
+    //         let mut listeners = listeners_map_clone_2.lock().await;
 
-            for (_, stream) in &mut *listeners {
-                let mut stream = stream.lock().await;
-                let _ = stream.send(Message::text(
-                    serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::DataUpdate.to_string(),
-                        data: data.clone(),
-                        subtype: None,
-                        message: None,
-                        module: Some(module.to_string()),
-                    })
-                    .unwrap(),
-                ));
-            }
-        });
-    };
+    //         for (_, stream) in &mut *listeners {
+    //             let mut stream = stream.lock().await;
+    //             let _ = stream.send(Message::text(
+    //                 serde_json::to_string(&WebsocketResponse {
+    //                     id: request_id.clone(),
+    //                     type_: EventType::DataUpdate.to_string(),
+    //                     data: data.clone(),
+    //                     subtype: None,
+    //                     message: None,
+    //                     module: Some(module.to_string()),
+    //                 })
+    //                 .unwrap(),
+    //             ));
+    //         }
+    //     });
+    // };
 
-    // Listen for data updates for the requested modules on another thread
-    watch_modules(
-        &vec![
-            Module::Battery,
-            Module::CPU,
-            Module::Disks,
-            Module::Displays,
-            Module::GPUs,
-            Module::Media,
-            Module::Memory,
-            Module::Networks,
-            Module::Processes,
-            Module::Sensors,
-            Module::System,
-        ],
-        handle_module_data,
-    );
+    // // Listen for data updates for the requested modules on another thread
+    // watch_modules(
+    //     &vec![
+    //         Module::Battery,
+    //         Module::CPU,
+    //         Module::Disks,
+    //         Module::Displays,
+    //         Module::GPUs,
+    //         Module::Media,
+    //         Module::Memory,
+    //         Module::Networks,
+    //         Module::Processes,
+    //         Module::Sensors,
+    //         Module::System,
+    //     ],
+    //     handle_module_data,
+    // );
 
     websocket.channel(move |mut stream| {
         Box::pin(async move {
