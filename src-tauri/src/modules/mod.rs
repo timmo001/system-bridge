@@ -204,7 +204,7 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
 }
 
 pub async fn watch_modules(
-    modules: &Vec<String>,
+    modules: &Vec<Module>,
     callback_fn: fn(&Module, &Value),
 ) -> Result<(), String> {
     let path = get_modules_path();
@@ -226,30 +226,22 @@ pub async fn watch_modules(
                     for module in modules {
                         // Check if path ends with module filename
                         if path.ends_with(&format!("{}.json", module)) {
-                            match Module::from_str(module) {
-                                Ok(module) => {
-                                    debug!("Module: {:?}", module);
+                            debug!("Module: {:?}", module);
 
-                                    // Get module data
-                                    let data = match get_module_data(&module).await {
-                                        Ok(data) => data,
-                                        Err(e) => {
-                                            error!(
-                                                "Failed to get updated '{:?}' module data: {:?}",
-                                                module, e
-                                            );
-                                            continue;
-                                        }
-                                    };
-
-                                    // Call callback function
-                                    callback_fn(&module, &data);
-                                }
+                            // Get module data
+                            let data = match get_module_data(&module).await {
+                                Ok(data) => data,
                                 Err(e) => {
-                                    error!("Invalid module: {:?}", e);
+                                    error!(
+                                        "Failed to get updated '{:?}' module data: {:?}",
+                                        module, e
+                                    );
                                     continue;
                                 }
-                            }
+                            };
+
+                            // Call callback function
+                            callback_fn(&module, &data);
                         }
                     }
                 }

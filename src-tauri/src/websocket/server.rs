@@ -5,265 +5,358 @@ use crate::{
     settings::{get_settings, update_settings, Settings},
 };
 use log::{debug, error, info, warn};
+use rocket::futures::{SinkExt, StreamExt};
 use rocket::get;
-use rocket_ws::{Message, Stream, WebSocket};
+use rocket_ws::{Channel, Message, WebSocket};
 use serde_json::Value;
-use std::{str::FromStr, thread};
+use std::{collections::HashMap, net::SocketAddr, str::FromStr, thread};
 use tokio::runtime::Runtime;
 
 #[get("/api/websocket")]
-pub async fn websocket(ws: WebSocket) -> Stream!['static] {
+pub async fn websocket(websocket: WebSocket) -> Channel<'static> {
+    // Create a list of registered listeners
+    let registered_listeners: HashMap<SocketAddr, WebSocket> = HashMap::new();
+
     // Create multiple threads to handle the different tasks
     let mut tasks: Vec<thread::JoinHandle<()>> = vec![];
 
-    Stream! { ws =>
-        for await msg in ws {
-            // Get the message
-            let message = msg?.to_string();
-            debug!("Received message: {:?}", message);
+    // Listen for data updates for the requested modules on another thread
+    tasks.push(
+        thread::Builder::new()
+            .name("listener".into())
+            .spawn(move || {
+                let rt = Runtime::new().unwrap();
+                rt.block_on(async {
+                    watch_modules(
+                        &vec![
+                            Module::Battery,
+                            Module::CPU,
+                            Module::Disks,
+                            Module::Displays,
+                            Module::GPUs,
+                            Module::Media,
+                            Module::Memory,
+                            Module::Networks,
+                            Module::Processes,
+                            Module::Sensors,
+                            Module::System,
+                        ],
+                        |module, data| {
+                            // Send data update to the client
+                            info!("Data update for module: {:?}", module);
 
-            // Parse the message
-            let request_result = serde_json::from_str(&message);
-            if request_result.is_err() {
-                error!("Failed to parse request: {:?} - {:?}", message, request_result.err());
-                continue;
-            }
-            let request: WebsocketRequest = request_result.unwrap();
-            debug!("Received request: {:?}", request);
+                            // stream.send(Message::text(serde_json::to_string(&WebsocketResponse {
+                            //     id: request_id.clone(),
+                            //     type_: EventType::DataUpdate.to_string(),
+                            //     data: data.clone(),
+                            //     subtype: None,
+                            //     message: None,
+                            //     module: Some(module.to_string()),
+                            // }).unwrap())).await;
+                        },
+                    )
+                    .await
+                    .unwrap();
+                });
+            })
+            .unwrap(),
+    );
 
-            let request_id:String = request.id.clone();
-            let required_token = get_settings().api.token;
+    websocket.channel(move |mut stream| {
+        Box::pin(async move {
+            while let Some(message) = stream.next().await {
+                // Get the message
+                let message = message?.to_string();
+                debug!("Received message: {:?}", message);
 
-            // Check if the token is valid
-            if request.token != required_token {
-                warn!("Invalid token provided: {} - Expected: {}", request.token, required_token);
-
-                yield Message::text(serde_json::to_string(&WebsocketResponse {
-                    id: request_id.clone(),
-                    type_: EventType::Error.to_string(),
-                    data: Value::Null,
-                    subtype: None,
-                    message: Some("Invalid token".to_string()),
-                    module: None,
-                }).unwrap());
-
-                continue;
-            }
-
-            // Process the request
-            let event_type = EventType::from_str(&request.event);
-
-            match event_type {
-                Ok(EventType::ApplicationUpdate) => {
-                    info!("ApplicationUpdate event");
-
-                    // TODO: Update the application
-
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::ApplicationUpdating.to_string(),
-                        data: Value::Null,
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
+                // Parse the message
+                let request_result = serde_json::from_str(&message);
+                if request_result.is_err() {
+                    error!(
+                        "Failed to parse request: {:?} - {:?}",
+                        message,
+                        request_result.err()
+                    );
+                    continue;
                 }
-                Ok(EventType::ExitApplication) => {
-                    info!("ExitApplication event");
+                let request: WebsocketRequest = request_result.unwrap();
+                debug!("Received request: {:?}", request);
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::ExitingApplication.to_string(),
-                        data: Value::Null,
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
+                let request_id: String = request.id.clone();
+                let required_token = get_settings().api.token;
 
-                    info!("Exiting application");
-                    std::process::exit(0);
+                // Check if the token is valid
+                if request.token != required_token {
+                    warn!(
+                        "Invalid token provided: {} - Expected: {}",
+                        request.token, required_token
+                    );
+
+                    let _ = stream
+                        .send(Message::text(
+                            serde_json::to_string(&WebsocketResponse {
+                                id: request_id.clone(),
+                                type_: EventType::Error.to_string(),
+                                data: Value::Null,
+                                subtype: None,
+                                message: Some("Invalid token".to_string()),
+                                module: None,
+                            })
+                            .unwrap(),
+                        ))
+                        .await;
+
+                    continue;
                 }
-                Ok(EventType::GetData) => {
-                    info!("GetData event: {:?}", request.data);
 
-                    let request_data_result: Result<RequestModules, _> =
-                        serde_json::from_value(request.data.clone());
-                    if let Err(e) = request_data_result {
-                        warn!("Invalid data: {:?}", e);
-                        continue;
+                // Process the request
+                let event_type = EventType::from_str(&request.event);
+
+                match event_type {
+                    Ok(EventType::ApplicationUpdate) => {
+                        info!("ApplicationUpdate event");
+
+                        // TODO: Update the application
+
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::ApplicationUpdating.to_string(),
+                                    data: Value::Null,
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
                     }
+                    Ok(EventType::ExitApplication) => {
+                        info!("ExitApplication event");
 
-                    let request_data = request_data_result.unwrap();
-                    info!("Request data: {:?}", request_data);
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::ExitingApplication.to_string(),
+                                    data: Value::Null,
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
 
-                    for module_str in request_data.modules {
-                        let module_type_result = Module::from_str(&module_str);
-                        if module_type_result.is_err() {
-                            warn!("Invalid module: {:?}", module_str);
+                        info!("Exiting application");
+                        std::process::exit(0);
+                    }
+                    Ok(EventType::GetData) => {
+                        info!("GetData event: {:?}", request.data);
+
+                        let request_data_result: Result<RequestModules, _> =
+                            serde_json::from_value(request.data.clone());
+                        if let Err(e) = request_data_result {
+                            warn!("Invalid data: {:?}", e);
                             continue;
                         }
 
-                        let module = module_type_result.unwrap();
-                        info!("Getting data for module: {:?}", module.to_string());
+                        let request_data = request_data_result.unwrap();
+                        info!("Request data: {:?}", request_data);
 
-                        match get_module_data(&module).await {
-                            Ok(module_data) => {
-                                info!("Got data for module: {:?}", module.to_string());
-
-                                // Send data update to the client
-                                yield Message::text(serde_json::to_string(&WebsocketResponse {
-                                    id: request_id.clone(),
-                                    type_: EventType::DataUpdate.to_string(),
-                                    data: module_data,
-                                    subtype: None,
-                                    message: None,
-                                    module: Some(module.to_string()),
-                                }).unwrap());
+                        for module_str in request_data.modules {
+                            let module_type_result = Module::from_str(&module_str);
+                            if module_type_result.is_err() {
+                                warn!("Invalid module: {:?}", module_str);
+                                continue;
                             }
-                            Err(e) => {
-                                warn!(
-                                    "Failed to get data for module: {:?} - {:?}",
-                                    module.to_string(),
-                                    e
-                                );
 
-                                yield Message::text(serde_json::to_string(&WebsocketResponse {
-                                    id: request_id.clone(),
-                                    type_: EventType::Error.to_string(),
-                                    data: Value::Null,
-                                    subtype: None,
-                                    message: Some(format!(
-                                        "Failed to get data for module: {:?}",
-                                        module.to_string()
-                                    )),
-                                    module: Some(module.to_string()),
-                                }).unwrap());
+                            let module = module_type_result.unwrap();
+                            info!("Getting data for module: {:?}", module.to_string());
+
+                            match get_module_data(&module).await {
+                                Ok(module_data) => {
+                                    info!("Got data for module: {:?}", module.to_string());
+
+                                    // Send data update to the client
+                                    let _ = stream
+                                        .send(Message::text(
+                                            serde_json::to_string(&WebsocketResponse {
+                                                id: request_id.clone(),
+                                                type_: EventType::DataUpdate.to_string(),
+                                                data: module_data,
+                                                subtype: None,
+                                                message: None,
+                                                module: Some(module.to_string()),
+                                            })
+                                            .unwrap(),
+                                        ))
+                                        .await;
+                                }
+                                Err(e) => {
+                                    warn!(
+                                        "Failed to get data for module: {:?} - {:?}",
+                                        module.to_string(),
+                                        e
+                                    );
+
+                                    let _ = stream
+                                        .send(Message::text(
+                                            serde_json::to_string(&WebsocketResponse {
+                                                id: request_id.clone(),
+                                                type_: EventType::Error.to_string(),
+                                                data: Value::Null,
+                                                subtype: None,
+                                                message: Some(format!(
+                                                    "Failed to get data for module: {:?}",
+                                                    module.to_string()
+                                                )),
+                                                module: Some(module.to_string()),
+                                            })
+                                            .unwrap(),
+                                        ))
+                                        .await;
+                                }
                             }
                         }
                     }
-                }
-                Ok(EventType::GetSettings) => {
-                    info!("GetSettings event");
+                    Ok(EventType::GetSettings) => {
+                        info!("GetSettings event");
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::SettingsResult.to_string(),
-                        data: serde_json::to_value(get_settings()).unwrap(),
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
-                }
-                Ok(EventType::Open) => {
-                    info!("Open event");
-
-                    // TODO: Open the application
-                }
-                Ok(EventType::RegisterDataListener) => {
-                    let request_data_result: Result<RequestModules, _> =
-                    serde_json::from_value(request.data.clone());
-                    if let Err(e) = request_data_result {
-                        warn!("Invalid data: {:?}", e);
-                        continue;
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::SettingsResult.to_string(),
+                                    data: serde_json::to_value(get_settings()).unwrap(),
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
                     }
+                    Ok(EventType::Open) => {
+                        info!("Open event");
 
-                    let request_data = request_data_result.unwrap();
-                    // let modules = request_data.modules;
-                    info!("Register data listener for modules: {:?}", request_data.modules);
-
-                    // Listen for data updates for the requested modules on another thread
-                    tasks.push(
-                        thread::Builder::new()
-                            .name(format!("listener_{}", request_id).into())
-                            .spawn(move || {
-                                let rt = Runtime::new().unwrap();
-                                rt.block_on(async {
-                                    watch_modules(&request_data.modules, |module, data| {
-                                        // Send data update to the client
-                                        info!("Data update for module: {:?}", module);
-
-                                        // yield Message::text(serde_json::to_string(&WebsocketResponse {
-                                        //     id: request_id.clone(),
-                                        //     type_: EventType::DataUpdate.to_string(),
-                                        //     data: data.clone(),
-                                        //     subtype: None,
-                                        //     message: None,
-                                        //     module: Some(module.to_string()),
-                                        // }).unwrap());
-                                    }).await.unwrap();
-                                });
-                            })
-                            .unwrap(),
-                    );
-
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::DataListenerRegistered.to_string(),
-                        data: Value::Null,
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
-                }
-                Ok(EventType::UpdateSettings) => {
-                    info!("UpdateSettings event: {:?}", request.data);
-
-                    let settings_result: Result<Settings, _> =
-                        serde_json::from_value(request.data.clone());
-                    if let Err(e) = settings_result {
-                        warn!("Invalid settings: {:?}", e);
-                        continue;
+                        // TODO: Open the application
                     }
+                    Ok(EventType::RegisterDataListener) => {
+                        let request_data_result: Result<RequestModules, _> =
+                            serde_json::from_value(request.data.clone());
+                        if let Err(e) = request_data_result {
+                            warn!("Invalid data: {:?}", e);
+                            continue;
+                        }
 
-                    let new_settings = settings_result.unwrap();
-                    info!("Updating settings: {:?}", new_settings);
+                        let request_data = request_data_result.unwrap();
+                        // let modules = request_data.modules;
+                        info!(
+                            "Register data listener for modules: {:?}",
+                            request_data.modules
+                        );
 
-                    // Update the settings
-                    update_settings(&new_settings);
+                        // Register the listener
+                        // registered_listeners.insert(websocket.remote_addr(), websocket.clone());
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::SettingsUpdated.to_string(),
-                        data: Value::Null,
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::DataListenerRegistered.to_string(),
+                                    data: Value::Null,
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
+                    }
+                    Ok(EventType::UpdateSettings) => {
+                        info!("UpdateSettings event: {:?}", request.data);
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::SettingsResult.to_string(),
-                        data: serde_json::to_value(new_settings).unwrap(),
-                        subtype: None,
-                        message: None,
-                        module: None,
-                    }).unwrap());
-                }
-                Ok(EventType::Unknown) => {
-                    warn!("Unknown event: {}", request.event);
+                        let settings_result: Result<Settings, _> =
+                            serde_json::from_value(request.data.clone());
+                        if let Err(e) = settings_result {
+                            warn!("Invalid settings: {:?}", e);
+                            continue;
+                        }
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::Error.to_string(),
-                        data: Value::Null,
-                        subtype: Some(EventSubtype::UnknownEvent.to_string()),
-                        message: Some("Unknown event".to_string()),
-                        module: None,
-                    }).unwrap());
-                }
-                _ => {
-                    warn!("Unsupported event: {}", request.event);
+                        let new_settings = settings_result.unwrap();
+                        info!("Updating settings: {:?}", new_settings);
 
-                    yield Message::text(serde_json::to_string(&WebsocketResponse {
-                        id: request_id.clone(),
-                        type_: EventType::Error.to_string(),
-                        data: Value::Null,
-                        subtype: Some(EventSubtype::UnknownEvent.to_string()),
-                        message: Some("Unsupported event".to_string()),
-                        module: None,
-                    }).unwrap());
-                }
-            }; // End of event type match
-        }; // End of message
-    } // End of Stream
+                        // Update the settings
+                        update_settings(&new_settings);
+
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::SettingsUpdated.to_string(),
+                                    data: Value::Null,
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
+
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::SettingsResult.to_string(),
+                                    data: serde_json::to_value(new_settings).unwrap(),
+                                    subtype: None,
+                                    message: None,
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
+                    }
+                    Ok(EventType::Unknown) => {
+                        warn!("Unknown event: {}", request.event);
+
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::Error.to_string(),
+                                    data: Value::Null,
+                                    subtype: Some(EventSubtype::UnknownEvent.to_string()),
+                                    message: Some("Unknown event".to_string()),
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
+                    }
+                    _ => {
+                        warn!("Unsupported event: {}", request.event);
+
+                        let _ = stream
+                            .send(Message::text(
+                                serde_json::to_string(&WebsocketResponse {
+                                    id: request_id.clone(),
+                                    type_: EventType::Error.to_string(),
+                                    data: Value::Null,
+                                    subtype: Some(EventSubtype::UnknownEvent.to_string()),
+                                    message: Some("Unsupported event".to_string()),
+                                    module: None,
+                                })
+                                .unwrap(),
+                            ))
+                            .await;
+                    }
+                }; // End of event type match
+            } // End of while
+
+            Ok(())
+        })
+    }) // End of ws.channel
 } // End of websocket
