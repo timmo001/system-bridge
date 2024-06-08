@@ -15,10 +15,10 @@ use log::{debug, error, info};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::fmt;
-use std::str::FromStr;
+use std::{fmt, str::FromStr, thread};
+use tokio::runtime::Runtime;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Module {
     Battery,
     CPU,
@@ -140,7 +140,7 @@ pub fn setup_modules_data() {
     }
 }
 
-pub async fn get_module_data(module: &Module) -> Result<Value, String> {
+pub fn get_module_data(module: &Module) -> Result<Value, String> {
     let data_string = match std::fs::read_to_string(get_modules_data_path(module)) {
         Ok(data) => data,
         Err(_) => return Err(format!("No data for '{:?}' module", module)),
@@ -174,7 +174,7 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
         match data {
             Ok(_) => {
                 // Check if data is the same as the current data
-                let current_data = get_module_data(module).await.unwrap();
+                let current_data = get_module_data(module).unwrap();
                 if current_data == data.clone().unwrap() {
                     info!("'{:?}' module data is the same", module);
                     continue;
@@ -203,10 +203,10 @@ pub async fn update_modules(modules: &Vec<Module>) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn watch_modules(
-    modules: &Vec<Module>,
-    callback_fn: fn(&Module, &Value),
-) -> Result<(), String> {
+pub fn watch_modules<F>(modules: &[Module], handle_module_data: F)
+where
+    F: Fn(&Module, &Value),
+{
     let path = get_modules_path();
     info!("Watching modules in '{:?}': {:?}", path, modules);
 
@@ -229,7 +229,7 @@ pub async fn watch_modules(
                             debug!("Module: {:?}", module);
 
                             // Get module data
-                            let data = match get_module_data(&module).await {
+                            let data = match get_module_data(&module) {
                                 Ok(data) => data,
                                 Err(e) => {
                                     error!(
@@ -241,7 +241,7 @@ pub async fn watch_modules(
                             };
 
                             // Call callback function
-                            callback_fn(&module, &data);
+                            handle_module_data(&module, &data);
                         }
                     }
                 }
@@ -251,6 +251,4 @@ pub async fn watch_modules(
             }
         }
     }
-
-    Ok(())
 }

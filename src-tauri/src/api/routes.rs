@@ -102,7 +102,7 @@ pub async fn data(_token: Token<'_>, module: &str) -> Json<Value> {
     };
 
     info!("Getting data for module: {:?}", data_module);
-    match get_module_data(&data_module).await {
+    match get_module_data(&data_module) {
         Ok(data) => Json(data),
         Err(e) => {
             warn!("Error getting module data: {}", e);
@@ -125,7 +125,7 @@ pub async fn data_key(_token: Token<'_>, module: &str, key: &str) -> Json<Value>
         "Getting data for module: {:?} with key: {}",
         data_module, key
     );
-    match get_module_data(&data_module).await {
+    match get_module_data(&data_module) {
         Ok(data) => {
             let value = data.get(key).unwrap_or(&Value::Null);
             Json(value.clone())
