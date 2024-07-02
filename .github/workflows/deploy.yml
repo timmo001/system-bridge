@@ -154,7 +154,7 @@ jobs:
           # Set TAURI_ARGS for windows
           echo "TAURI_ARGS=-v -t x86_64-pc-windows-msvc" >> $env:GITHUB_ENV
       - name: Build the app
-        uses: tauri-apps/tauri-action@v0.5.4
+        uses: tauri-apps/tauri-action@v0.5.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
