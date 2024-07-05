@@ -155,7 +155,7 @@ jobs:
         with:
           updaterJsonPreferNsis: true
       - name: Publish artifacts
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: tauri-app-${{ matrix.platform }}
           path: |
