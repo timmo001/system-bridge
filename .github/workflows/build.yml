@@ -43,7 +43,7 @@ jobs:
       - name: Sync node version and setup cache
         uses: actions/setup-node@v4.0.2
         with:
-          cache: "yarn"
+          # cache: "yarn"
           check-latest: true
           node-version: "lts/*"
       - name: 🏗 Set up Python
