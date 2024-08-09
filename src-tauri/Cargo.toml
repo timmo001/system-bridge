@@ -18,7 +18,7 @@ futures = "0.3.30"
 futures-util = "0.3.30"
 http = "1.1.0"
 humantime = "2.1.0"
-log = "0.4.21"
+log = "0.4.22"
 platform-dirs = "0.3.0"
 reqwest = "0.12.4"
 serde = { version = "1", features = ["derive"] }
