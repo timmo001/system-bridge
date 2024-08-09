@@ -18,6 +18,7 @@
   },
   "bundle": {
     "active": true,
+    "targets": "all",
     "category": "Utility",
     "license": "Apache-2.0",
     "licenseFile": "../LICENSE",
@@ -35,7 +36,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "A bridge for your systems.",
-    "targets": "all"
+    "shortDescription": "A bridge for your systems."
   }
 }
