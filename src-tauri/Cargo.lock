@@ -3778,9 +3778,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-autostart"
-version = "2.0.0-beta.5"
+version = "2.0.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c96bf3c316939431e021b48622f15e0e1126376e43f1c35a29e7d24c5760209"
+checksum = "25958a42daab7aaff4faff15cbaffd5505873a0654e6382c74fca1729a791898"
 dependencies = [
  "auto-launch",
  "log",
