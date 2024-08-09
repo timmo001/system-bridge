@@ -68,7 +68,7 @@ pub fn create_window(
         let webview_window_result = app_handle.get_webview_window("notification");
         if webview_window_result.is_some() {
             let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
-            window.navigate(url);
+            let _ = window.navigate(url);
             window.show().unwrap();
             return;
         }
@@ -88,7 +88,7 @@ pub fn create_window(
                 .title(title)
                 .visible(true)
                 .on_page_load(move |window, _payload| {
-                    if window.url().as_str().contains("close.window") {
+                    if window.url().unwrap().as_str().contains("close.window") {
                         window.close().unwrap();
                     }
                 })
@@ -101,7 +101,7 @@ pub fn create_window(
         let webview_window_result = app_handle.get_webview_window("main");
         if webview_window_result.is_some() {
             let mut window: tauri::WebviewWindow = webview_window_result.unwrap();
-            window.navigate(url);
+            let _ = window.navigate(url);
             window.show().unwrap();
             window.set_title(title.as_str()).unwrap();
             window.set_focus().unwrap();
@@ -250,10 +250,7 @@ pub async fn setup_gui() {
 
                     app_handle
                         .clipboard()
-                        .write(tauri_plugin_clipboard_manager::ClipKind::PlainText {
-                            label: Some("System Bridge Token".to_string()),
-                            text: settings.api.token.clone(),
-                        })
+                        .write_text(settings.api.token.clone())
                         .unwrap();
                 }
                 "open_logs" => {
