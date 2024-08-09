@@ -68,14 +68,20 @@ pub fn stop_backend() -> Result<(), Box<dyn Error>> {
     // Find any running backend server processes
     sysinfo::set_open_files_limit(0);
     let mut sys = sysinfo::System::new();
-    sys.refresh_processes();
+    sys.refresh_processes(sysinfo::ProcessesToUpdate::All);
 
     for (pid, process) in sys.processes() {
-        let process_name = process.name();
-        if process_name.contains("systembridgebac") || process_name.contains("systembridgebackend")
-        {
-            info!("Killing process: {} ({})", process_name, pid);
-            process.kill();
+        let process_name = process.name().to_str();
+        match process_name {
+            None => continue,
+            Some(process_name) => {
+                if process_name.contains("systembridgebac")
+                    || process_name.contains("systembridgebackend")
+                {
+                    info!("Killing process: {} ({})", process_name, pid);
+                    process.kill();
+                }
+            }
         }
     }
 
