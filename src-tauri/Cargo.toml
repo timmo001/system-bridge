@@ -35,4 +35,4 @@ tokio-websockets = { version = "0.9.0", features = [
   "fastrand",
   "ring",
 ] }
-uuid = { version = "1.8.0", features = ["v4"] }
+uuid = { version = "1.10.0", features = ["v4"] }
