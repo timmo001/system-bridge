@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { version = "2.0.0-rc.1", features = [] }
 
 [dependencies]
-ctrlc = "3.4.4"
+ctrlc = "3.4.5"
 fastrand = "2.1.0"
 fern = { version = "0.6.2", features = ["colored"] }
 futures = "0.3.30"
