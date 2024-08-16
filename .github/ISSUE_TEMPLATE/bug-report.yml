@@ -21,6 +21,14 @@ body:
         - Linux
         - Mac OS
         - Windows
+  - type: dropdown
+    validations:
+      required: true
+    attributes:
+      label: How is System Bridge Being Ran?
+      options:
+        - Standalone (executable)
+        - Python
   - type: markdown
     attributes:
       value: |
@@ -37,7 +45,7 @@ body:
   - type: textarea
     attributes:
       label: Anything in the logs or a references that might be useful?
-      description: For example, error message, or stack traces.
+      description: For example, error message, or stack traces. Please include all logs for the relevant application and package. You can access logs via the tray menu -> Help.
       render: txt
   - type: textarea
     attributes:
