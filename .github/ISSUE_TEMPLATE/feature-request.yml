@@ -1,5 +1,7 @@
 name: Request a new feature
 description: Request a new feature or enhancement.
+labels:
+  - new-feature
 body:
   - type: textarea
     validations:
