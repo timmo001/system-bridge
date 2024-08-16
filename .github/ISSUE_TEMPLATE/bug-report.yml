@@ -1,5 +1,7 @@
 name: Report an issue/bug
 description: Report an issue/bug.
+labels:
+  - bug
 body:
   - type: textarea
     validations:
