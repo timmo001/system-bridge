@@ -1,6 +1,6 @@
 [package]
 name = "systembridge"
-version = "4.1.12"
+version = "4.1.13"
 description = "System Bridge"
 authors = ["timmo001"]
 edition = "2021"
