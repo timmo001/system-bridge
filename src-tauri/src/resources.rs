@@ -34,8 +34,8 @@ pub fn start_application(
     args: Option<Vec<String>>,
     new_thread: bool,
 ) -> Result<(), Box<dyn Error>> {
-    // If package installed and linux, we need to use /usr/lib/system-bridge/{path}
-    let linux_path = format!("/usr/lib/system-bridge/{}", path);
+    // If package installed and linux, we need to use /usr/lib/systembridge/{path}
+    let linux_path = format!("/usr/lib/systembridge/{}", path);
     let application_path_string: String =
         if cfg!(target_os = "linux") && std::path::Path::new(&linux_path).exists() {
             linux_path
