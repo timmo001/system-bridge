@@ -16,7 +16,7 @@
     "@tauri-apps/plugin-shell": "2.0.0-rc.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "2.0.0-rc.3",
+    "@tauri-apps/cli": "2.0.0-rc.4",
     "typescript": "5.5.4",
     "vite": "5.4.1"
   }
