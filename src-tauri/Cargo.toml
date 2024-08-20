@@ -28,7 +28,7 @@ sysinfo = "0.31.2"
 tauri = { version = "2.0.0-rc.3", features = ["tray-icon"] }
 tauri-plugin-autostart = "2.0.0-rc.0"
 tauri-plugin-clipboard-manager = "2.1.0-beta.7"
-tauri-plugin-shell = "2.0.0-rc.0"
+tauri-plugin-shell = "2.0.0-rc.2"
 tokio = { version = "1.39.3", features = ["full"] }
 tokio-websockets = { version = "0.9.0", features = [
   "client",
