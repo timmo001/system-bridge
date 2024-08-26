@@ -12,7 +12,7 @@ tauri-build = { version = "2.0.0-rc.6", features = [] }
 
 [dependencies]
 ctrlc = "3.4.5"
-fastrand = "2.1.0"
+fastrand = "2.1.1"
 fern = { version = "0.6.2", features = ["colored"] }
 futures = "0.3.30"
 futures-util = "0.3.30"
