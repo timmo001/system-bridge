@@ -4273,9 +4273,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-websockets"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bf97fe79127ca4fc3a0fa4dc0fb63589fc9e79fbc75aedeae53afae7f38777d"
+checksum = "57f42df506e57c52a0a60b04bf031fca66b7efc00ea64be44320382a63c2d5c0"
 dependencies = [
  "base64 0.22.1",
  "bytes",
