@@ -1794,9 +1794,9 @@ dependencies = [
 
 [[package]]
 name = "infer"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb33622da908807a06f9513c19b3c1ad50fab3e4137d82a78107d502075aa199"
+checksum = "bc150e5ce2330295b8616ce0e3f53250e53af31759a9dbedad1621ba29151847"
 dependencies = [
  "cfb",
 ]
@@ -3235,6 +3235,7 @@ dependencies = [
  "serde",
  "serde_json",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -3864,7 +3865,7 @@ dependencies = [
  "tokio",
  "tray-icon",
  "url",
- "urlpattern",
+ "urlpattern 0.2.0",
  "webkit2gtk",
  "webview2-com",
  "window-vibrancy",
@@ -3873,9 +3874,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-build"
-version = "2.0.0-rc.7"
+version = "2.0.0-rc.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d5ad5fcfaf02cf79aa6727f6c5df38567d8dce172b00b62690c6bc46c08b7ce"
+checksum = "e5bc30f14b3c1548d75dfdf3e40bffe20a53bc4e3381e9bacc21dc765d701d0a"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -4048,9 +4049,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-utils"
-version = "2.0.0-rc.7"
+version = "2.0.0-rc.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d53d9fe87e985b273696ae22ce2b9f099a8f1b44bc8fb127467bda5fcb3e4371"
+checksum = "a271545e4c25b36b922d98cf7e0c1755f64e92355705f656893e352aef0331e3"
 dependencies = [
  "brotli",
  "cargo_metadata",
@@ -4077,7 +4078,8 @@ dependencies = [
  "thiserror",
  "toml 0.8.2",
  "url",
- "urlpattern",
+ "urlpattern 0.3.0",
+ "uuid",
  "walkdir",
 ]
 
@@ -4576,6 +4578,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "urlpattern"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70acd30e3aa1450bc2eece896ce2ad0d178e9c079493819301573dae3c37ba6d"
+dependencies = [
+ "regex",
+ "serde",
+ "unic-ucd-ident",
+ "url",
+]
+
+[[package]]
 name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4588,6 +4602,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81dfa00651efa65069b0b6b651f4aaa31ba9e3c3ce0137aaad053604ee7e0314"
 dependencies = [
  "getrandom 0.2.15",
+ "serde",
 ]
 
 [[package]]
