@@ -268,12 +268,12 @@
     "@tauri-apps/cli-win32-ia32-msvc" "2.0.0"
     "@tauri-apps/cli-win32-x64-msvc" "2.0.0"
 
-"@tauri-apps/plugin-autostart@2.0.0-rc.1":
-  version "2.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-autostart/-/plugin-autostart-2.0.0-rc.1.tgz#52472202ab79c0c32a3985b3a9ff3bcf8ec782c4"
-  integrity sha512-5h801HJf6Z5CtUmJhwv+PBSn2nNAWqsuKmu0hABn/IpP2AElZev4XicMzrnYVevJeIhWgRA8HNpg3s8pbic1Rw==
+"@tauri-apps/plugin-autostart@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-autostart/-/plugin-autostart-2.0.0.tgz#c0f1de75a37bdbf76e75e2d9f0a592c8b2beba63"
+  integrity sha512-NEwOQWVasZ8RczXkMLNJokRDujneuMH/UFA5t84DLkbNZUmiD3G7HZWhgSd1YQ0BFU9h9w+h2B/py3y6bzWg4Q==
   dependencies:
-    "@tauri-apps/api" "^2.0.0-rc.4"
+    "@tauri-apps/api" "^2.0.0"
 
 "@tauri-apps/plugin-clipboard-manager@2.1.0-beta.6":
   version "2.1.0-beta.6"
