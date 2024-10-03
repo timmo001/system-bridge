@@ -197,7 +197,7 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.22.4.tgz#3dd5d53e900df2a40841882c02e56f866c04d202"
   integrity sha512-j8pPKp53/lq9lMXN57S8cFz0MynJk8OWNuUnXct/9KCpKU7DgU3bYMJhwWmcqC0UU29p8Lr0/7KEVcaM6bf47Q==
 
-"@tauri-apps/api@2.0.1", "@tauri-apps/api@^2.0.0-beta.16", "@tauri-apps/api@^2.0.0-rc.4":
+"@tauri-apps/api@2.0.1", "@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.0-beta.16", "@tauri-apps/api@^2.0.0-rc.4":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.1.tgz#dc49d899fb873b96ee1d46a171384625ba5ad404"
   integrity sha512-eoQWT+Tq1qSwQpHV+nw1eNYe5B/nm1PoRjQCRiEOS12I1b+X4PUcREfXVX8dPcBT6GrzWGDtaecY0+1p0Rfqlw==
@@ -268,12 +268,12 @@
     "@tauri-apps/cli-win32-ia32-msvc" "2.0.0"
     "@tauri-apps/cli-win32-x64-msvc" "2.0.0"
 
-"@tauri-apps/plugin-autostart@2.0.0-rc.1":
-  version "2.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-autostart/-/plugin-autostart-2.0.0-rc.1.tgz#52472202ab79c0c32a3985b3a9ff3bcf8ec782c4"
-  integrity sha512-5h801HJf6Z5CtUmJhwv+PBSn2nNAWqsuKmu0hABn/IpP2AElZev4XicMzrnYVevJeIhWgRA8HNpg3s8pbic1Rw==
+"@tauri-apps/plugin-autostart@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-autostart/-/plugin-autostart-2.0.0.tgz#c0f1de75a37bdbf76e75e2d9f0a592c8b2beba63"
+  integrity sha512-NEwOQWVasZ8RczXkMLNJokRDujneuMH/UFA5t84DLkbNZUmiD3G7HZWhgSd1YQ0BFU9h9w+h2B/py3y6bzWg4Q==
   dependencies:
-    "@tauri-apps/api" "^2.0.0-rc.4"
+    "@tauri-apps/api" "^2.0.0"
 
 "@tauri-apps/plugin-clipboard-manager@2.1.0-beta.6":
   version "2.1.0-beta.6"
