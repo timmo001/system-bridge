@@ -15,7 +15,7 @@ ctrlc = "3.4.5"
 fastrand = "2.1.1"
 fern = { version = "0.6.2", features = ["colored"] }
 futures = "0.3.30"
-futures-util = "0.3.30"
+futures-util = "0.3.31"
 http = "1.1.0"
 humantime = "2.1.0"
 log = "0.4.22"
