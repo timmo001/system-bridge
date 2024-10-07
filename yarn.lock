@@ -197,10 +197,10 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.22.4.tgz#3dd5d53e900df2a40841882c02e56f866c04d202"
   integrity sha512-j8pPKp53/lq9lMXN57S8cFz0MynJk8OWNuUnXct/9KCpKU7DgU3bYMJhwWmcqC0UU29p8Lr0/7KEVcaM6bf47Q==
 
-"@tauri-apps/api@2.0.1", "@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.0-beta.16", "@tauri-apps/api@^2.0.0-rc.4":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.1.tgz#dc49d899fb873b96ee1d46a171384625ba5ad404"
-  integrity sha512-eoQWT+Tq1qSwQpHV+nw1eNYe5B/nm1PoRjQCRiEOS12I1b+X4PUcREfXVX8dPcBT6GrzWGDtaecY0+1p0Rfqlw==
+"@tauri-apps/api@2.0.2", "@tauri-apps/api@^2.0.0", "@tauri-apps/api@^2.0.0-beta.16":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.0.2.tgz#266767f4a4641014e86a000e7e02e1a344ced45a"
+  integrity sha512-3wSwmG+1kr6WrgAFKK5ijkNFPp8TT3FLj3YHUb5EwMO+3FxX4uWlfSWkeeBy+Kc1RsKzugtYLuuya+98Flj+3w==
 
 "@tauri-apps/cli-darwin-arm64@2.0.1":
   version "2.0.1"
