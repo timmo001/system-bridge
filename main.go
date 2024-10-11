@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/timmo001/system-bridge/assert"
 	"github.com/timmo001/system-bridge/logger"
-	"github.com/timmo001/system-bridge/server"
+	"github.com/timmo001/system-bridge/modules"
 	"github.com/timmo001/system-bridge/timer"
 	"github.com/timmo001/system-bridge/version"
 )
@@ -16,7 +17,7 @@ func main() {
 	godotenv.Load()
 
 	// Setup logger
-	l := logger.CreateLogger("Main")
+	l := logger.CreateLogger("main")
 
 	// Initial log
 	l.Info(fmt.Sprintf("--- System Bridge %s ---", version.GetVersion()))
@@ -26,10 +27,11 @@ func main() {
 	channelTimer := make(chan bool)
 
 	// Start server
-	go server.Start(channelServer)
+	// go server.Start(channelServer)
 
-	// Start timer
-	t := timer.NewTimer(channelTimer, l)
+	// Setup timer for updating modules
+	t := timer.NewTimer(channelTimer, "modules", updateModules)
+	t.Start(time.Second * 2)
 
 	// Wait for server or timer to stop
 	select {
@@ -40,4 +42,18 @@ func main() {
 	}
 
 	assert.Never("Application stopped unexpectedly")
+}
+
+func updateModules() {
+	l := logger.CreateLogger("modules-updater")
+	l.Info("Updating modules")
+
+	// TODO: Move to struct
+	m := modules.NewModules()
+
+	go func() {
+		// Update modules
+		m.UpdateSystem()
+		l.Infof("System updated: %+v", m.System)
+	}()
 }

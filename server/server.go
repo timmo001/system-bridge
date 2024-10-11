@@ -10,7 +10,7 @@ import (
 
 func Start(channel chan bool) {
 	// Setup logger
-	l := logger.CreateLogger("Server")
+	l := logger.CreateLogger("server")
 
 	// Listen on port 7972 (T9: SYSB)
 	port := 7972

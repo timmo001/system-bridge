@@ -70,7 +70,6 @@ func Assert(truth bool, msg string, data ...any) {
 }
 
 func Nil(item any, msg string, data ...any) {
-	slog.Info("Nil Check", "item", item)
 	if item == nil {
 		return
 	}

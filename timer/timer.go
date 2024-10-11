@@ -2,6 +2,7 @@ package timer
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -9,20 +10,24 @@ import (
 )
 
 type Timer struct {
-	Channel chan bool
-	Logger  *log.Logger
-	Cancel  context.CancelFunc
+	Channel     chan bool
+	Logger      *log.Logger
+	Cancel      context.CancelFunc
+	TickHandler func()
 }
 
-func NewTimer(channel chan bool) *Timer {
-	l := logger.CreateLogger("Timer")
+func NewTimer(channel chan bool, name string, tickHandler func()) *Timer {
+	l := logger.CreateLogger(fmt.Sprintf("timer-%s", name))
 	return &Timer{
-		Channel: channel,
-		Logger:  l,
+		Channel:     channel,
+		Logger:      l,
+		TickHandler: tickHandler,
 	}
 }
 
 func (t *Timer) Start(interval time.Duration) {
+	t.Logger.Info(fmt.Sprintf("Starting timer with interval: %v", interval))
+
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cancel = cancel
 
@@ -45,6 +50,11 @@ func (t *Timer) Start(interval time.Duration) {
 
 func (t *Timer) Tick() {
 	t.Logger.Debug("Timer tick")
+	if t.TickHandler != nil {
+		t.TickHandler()
+	} else {
+		t.Logger.Warn("No tick handler set")
+	}
 }
 
 func (t *Timer) Stop() {
