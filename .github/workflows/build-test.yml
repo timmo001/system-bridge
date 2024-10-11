@@ -1,0 +1,73 @@
+---
+name: "Build & Test"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 🏗️🧪 Build & Test ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "macos-aarch64"
+            platform: macos-latest
+            arch: aarch64
+            arch-go: arm64
+          - name: "macos-x86_64"
+            platform: macos-latest
+            arch: x86_64
+            arch-go: amd64
+          - name: "linux-aarch64"
+            platform: ubuntu-latest
+            arch: aarch64
+            arch-go: arm64
+          - name: "linux-x86_64"
+            platform: ubuntu-latest
+            arch: x86_64
+            arch-go: amd64
+          - name: "windows-aarch64"
+            platform: windows-latest
+            arch: aarch64
+            arch-go: arm64
+          - name: "windows-x86_64"
+            platform: windows-latest
+            arch: x86_64
+            arch-go: amd64
+    runs-on: ${{ matrix.platform }}
+    env:
+      GOARCH: ${{ matrix.arch-go }} # Set the GOARCH environment variable
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up Go
+        uses: actions/setup-go@v5.0.2
+        with:
+          check-latest: true
+          go-version: "stable"
+      - name: Build
+        run: go build -o letmeknow-client-${{ matrix.arch }}${{ matrix.platform == 'windows-latest' && '.exe' || '' }} -v .
+      - name: Test
+        run: go test -v ./...
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            letmeknow-client-${{ matrix.arch }}${{ matrix.platform == 'windows-latest' && '.exe' || '' }}
