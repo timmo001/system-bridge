@@ -8,6 +8,7 @@ import (
 	"github.com/timmo001/system-bridge/assert"
 	"github.com/timmo001/system-bridge/logger"
 	"github.com/timmo001/system-bridge/modules"
+	"github.com/timmo001/system-bridge/server"
 	"github.com/timmo001/system-bridge/timer"
 	"github.com/timmo001/system-bridge/version"
 )
@@ -27,19 +28,19 @@ func main() {
 	channelTimer := make(chan bool)
 
 	// Start server
-	// go server.Start(channelServer)
+	s := server.NewServer(channelServer)
+	go s.Start()
 
-	// Setup timer for updating modules
+	// // Setup timer for updating modules
 	t := timer.NewTimer(channelTimer, "modules", updateModules)
-	// TODO: Increase time
-	t.Start(time.Second * 5)
+	t.Start(time.Second * 30)
 
 	// Wait for server or timer to stop
 	select {
 	case <-channelServer:
-		l.Info("Server stopped")
+		l.Warn("Server stopped")
 	case <-channelTimer:
-		l.Info("Timer stopped")
+		l.Warn("Timer stopped")
 	}
 
 	assert.Never("Application stopped unexpectedly")

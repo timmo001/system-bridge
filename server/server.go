@@ -1,21 +1,36 @@
 package server
 
 import (
+	"context"
 	"fmt"
-	"net"
+	"net/http"
 
+	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/assert"
 	"github.com/timmo001/system-bridge/logger"
+	"github.com/timmo001/system-bridge/websocket"
 )
 
-func Start(channel chan bool) {
-	// Setup logger
+// Listen on port 7972 (T9: SYSB)
+const addr = ":7972"
+
+type Server struct {
+	Channel chan bool
+	Logger  *log.Logger
+	Cancel  context.CancelFunc
+}
+
+func NewServer(channel chan bool) *Server {
 	l := logger.CreateLogger("server")
+	return &Server{
+		Channel: channel,
+		Logger:  l,
+	}
+}
 
-	// Listen on port 7972 (T9: SYSB)
-	port := 7972
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	assert.Nil(err, "Failed to listen on port %d", port)
+func (s *Server) Start() {
+	s.Logger.Info(fmt.Sprintf("Listen at: %s", addr))
 
-	l.Info(fmt.Sprintf("Listening on port %v", lis.Addr()))
+	http.HandleFunc("/websocket", websocket.WebSocket)
+	assert.NoError(http.ListenAndServe(addr, nil), "Server stopped unexpectedly")
 }
