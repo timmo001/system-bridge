@@ -31,7 +31,8 @@ func main() {
 
 	// Setup timer for updating modules
 	t := timer.NewTimer(channelTimer, "modules", updateModules)
-	t.Start(time.Second * 2)
+	// TODO: Increase time
+	t.Start(time.Second * 5)
 
 	// Wait for server or timer to stop
 	select {
