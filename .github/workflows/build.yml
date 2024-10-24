@@ -47,7 +47,7 @@ jobs:
           check-latest: true
           node-version: "lts/*"
       - name: 🏗 Set up Python
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           architecture: "x64"
           cache: "pip"
