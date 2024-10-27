@@ -1,3 +1,6 @@
+> [!TIP]
+> Contributions welcome! Please feel free to contribute to the project
+
 # System Bridge
 
 A bridge for your systems.
