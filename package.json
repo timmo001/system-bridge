@@ -1,7 +1,7 @@
 {
   "name": "systembridge",
   "private": true,
-  "version": "4.1.13",
+  "version": "4.1.14",
   "type": "module",
   "scripts": {
     "dev": "vite",
