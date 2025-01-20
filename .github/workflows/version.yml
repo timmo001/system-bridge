@@ -30,7 +30,7 @@ jobs:
           token: ${{ secrets.PUSH_TOKEN }}
       - name: 🖊️ Create draft release
         id: release-drafter
-        uses: release-drafter/release-drafter@v6.0.0
+        uses: release-drafter/release-drafter@v6.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: ✏ Set Version Files
