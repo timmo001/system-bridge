@@ -1,4 +1,4 @@
-pywin32==308
+pywin32==310
 systembridgebackend==4.2.9
 systembridgecli==4.0.6
 systembridgefrontend==4.0.3
