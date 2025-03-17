@@ -41,7 +41,7 @@ jobs:
           shared-key: shared
           workspaces: "./src-tauri -> target"
       - name: Sync node version and setup cache
-        uses: actions/setup-node@v4.0.3
+        uses: actions/setup-node@v4.3.0
         with:
           # cache: "yarn"
           check-latest: true
