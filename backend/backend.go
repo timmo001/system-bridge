@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
+	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
 )
 
@@ -23,6 +24,9 @@ func New(config *settings.Config) *Backend {
 
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
+
+	// Setup event handlers
+	event_handler.RegisterExitHandler(b.wsServer.eventRouter)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
