@@ -1,0 +1,6 @@
+# Builds
+system-bridge
+system-bridge.*
+
+# Legacy
+.legacy/
