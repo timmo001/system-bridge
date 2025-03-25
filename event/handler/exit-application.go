@@ -18,7 +18,7 @@ func RegisterExitApplicationHandler(router *event.MessageRouter) {
 			ID:      message.ID,
 			Type:    event.ResponseTypeApplicationExiting,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    map[string]any{},
+			Data:    message.Data,
 			Message: "Application is exiting",
 		}
 	})

@@ -13,7 +13,7 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			ID:      message.ID,
 			Type:    event.ResponseTypeGettingData,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    map[string]any{},
+			Data:    message.Data,
 			Message: "Data updated",
 		}
 	})
