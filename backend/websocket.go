@@ -22,20 +22,20 @@ type WebSocketRequest struct {
 }
 
 type WebsocketServer struct {
-	upgrader    websocket.Upgrader
+	EventRouter *event.MessageRouter
 	token       string
-	eventRouter *event.MessageRouter
+	upgrader    websocket.Upgrader
 }
 
 func NewWebsocketServer(settings *settings.Settings) *WebsocketServer {
 	return &WebsocketServer{
+		EventRouter: event.NewMessageRouter(settings),
+		token:       settings.API.Token,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true // Allow all origins for now
 			},
 		},
-		token:       settings.API.Token,
-		eventRouter: event.NewMessageRouter(settings),
 	}
 }
 
@@ -91,7 +91,7 @@ func (ws *WebsocketServer) HandleMessage(conn *websocket.Conn, message []byte) {
 	// Handle different event types
 	log.Info("Received message", "event", msg.Event, "id", msg.ID)
 	// Pass message to event handlers
-	response := ws.eventRouter.HandleMessage(event.Message{
+	response := ws.EventRouter.HandleMessage(event.Message{
 		ID:    msg.ID,
 		Event: event.EventType(msg.Event),
 		Data:  msg.Data,

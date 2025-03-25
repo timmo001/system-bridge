@@ -25,19 +25,19 @@ type MessageHandler func(message Message) MessageResponse
 
 type MessageRouter struct {
 	Settings *settings.Settings
-	handlers map[EventType]MessageHandler
+	Handlers map[EventType]MessageHandler
 }
 
 func NewMessageRouter(settings *settings.Settings) *MessageRouter {
 	return &MessageRouter{
 		Settings: settings,
-		handlers: make(map[EventType]MessageHandler),
+		Handlers: make(map[EventType]MessageHandler),
 	}
 }
 
 func (mr *MessageRouter) RegisterHandler(event EventType, handler MessageHandler) {
 	log.Info("Registering event handler", "event", event)
-	mr.handlers[event] = handler
+	mr.Handlers[event] = handler
 }
 
 func (mr *MessageRouter) RegisterSimpleHandler(event EventType, fn func(Message) MessageResponse) {
@@ -45,7 +45,7 @@ func (mr *MessageRouter) RegisterSimpleHandler(event EventType, fn func(Message)
 }
 
 func (mr *MessageRouter) HandleMessage(message Message) MessageResponse {
-	if handler, ok := mr.handlers[message.Event]; ok {
+	if handler, ok := mr.Handlers[message.Event]; ok {
 		return handler(message)
 	}
 
