@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/spf13/viper v1.20.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
 )

@@ -17,3 +17,9 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 1. Clone this repo
 1. Run `go build`
 1. Run `go install`
+
+## Packages
+
+### [Connector](https://github.com/timmo001/system-bridge-connector)
+
+Allows other applications to connect to the backend. For example, in the [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) integration.

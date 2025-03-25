@@ -39,6 +39,8 @@ func main() {
 
 	log.Debugf("Loaded settings: %v", s)
 
+	log.Infof("Your API token is: %s", s.API.Token)
+
 	cmd := &cli.Command{
 		Name:  "System Bridge",
 		Usage: "A bridge for your systems",
@@ -48,8 +50,9 @@ func main() {
 				Aliases: []string{"b"},
 				Usage:   "Run the backend server",
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					// Run backend server with signal-aware context
-					return backend.Run(cmdCtx)
+					// Create and run backend server with signal-aware context
+					b := backend.New(s)
+					return b.Run(cmdCtx)
 				},
 			},
 		},
