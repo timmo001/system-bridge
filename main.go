@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/charmbracelet/log"
 
@@ -13,6 +15,22 @@ import (
 
 func main() {
 	log.Info("------ System Bridge ------")
+
+	// Create a channel to receive OS signals
+	sigChan := make(chan os.Signal, 1)
+	// Register for SIGINT (Ctrl+C) and SIGTERM
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Create a context that will be canceled on signal
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Handle signals in a goroutine
+	go func() {
+		sig := <-sigChan
+		log.Infof("Received signal: %v", sig)
+		cancel() // Cancel the context
+	}()
 
 	s, err := settings.Load()
 	if err != nil {
@@ -29,14 +47,15 @@ func main() {
 				Name:    "backend",
 				Aliases: []string{"b"},
 				Usage:   "Run the backend server",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return backend.Run()
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					// Run backend server with signal-aware context
+					return backend.Run(cmdCtx)
 				},
 			},
 		},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatalf("error running cmd: %v", err)
 	}
 
