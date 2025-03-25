@@ -8,34 +8,34 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ConfigAPI struct {
+type SettingsAPI struct {
 	Token string `mapstructure:"token"`
 	Port  int    `mapstructure:"port"`
 }
 
-type ConfigHotkey struct {
+type SettingsHotkey struct {
 	Name string `mapstructure:"name"`
 	Key  string `mapstructure:"key"`
 }
 
-type ConfigMediaDirectory struct {
+type SettingsMediaDirectory struct {
 	Name string `mapstructure:"name"`
 	Path string `mapstructure:"path"`
 }
 
-type ConfigMedia struct {
-	Directories []ConfigMediaDirectory `mapstructure:"directories"`
+type SettingsMedia struct {
+	Directories []SettingsMediaDirectory `mapstructure:"directories"`
 }
 
-type Config struct {
-	API       ConfigAPI      `mapstructure:"api"`
-	Autostart bool           `mapstructure:"autostart"`
-	Hotkeys   []ConfigHotkey `mapstructure:"hotkeys"`
-	LogLevel  log.Level      `mapstructure:"log_level"`
-	Media     ConfigMedia    `mapstructure:"media"`
+type Settings struct {
+	API       SettingsAPI      `mapstructure:"api"`
+	Autostart bool             `mapstructure:"autostart"`
+	Hotkeys   []SettingsHotkey `mapstructure:"hotkeys"`
+	LogLevel  log.Level        `mapstructure:"log_level"`
+	Media     SettingsMedia    `mapstructure:"media"`
 }
 
-func Load() (*Config, error) {
+func Load() (*Settings, error) {
 	viper.AutomaticEnv()
 
 	viper.SetConfigName("settings")
@@ -61,9 +61,9 @@ func Load() (*Config, error) {
 	viper.SetDefault("api.token", GenerateToken())
 	viper.SetDefault("api.port", 9170)
 	viper.SetDefault("autostart", false)
-	viper.SetDefault("hotkeys", []ConfigHotkey{})
+	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("log_level", log.InfoLevel)
-	viper.SetDefault("media.directories", []ConfigMediaDirectory{})
+	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
@@ -74,7 +74,7 @@ func Load() (*Config, error) {
 		}
 	}
 
-	var cfg Config
+	var cfg Settings
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
@@ -82,7 +82,7 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
-func (cfg *Config) Save() error {
+func (cfg *Settings) Save() error {
 	viper.Set("api.token", cfg.API.Token)
 	viper.Set("api.port", cfg.API.Port)
 	viper.Set("autostart", cfg.Autostart)

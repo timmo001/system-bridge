@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/settings"
 )
 
 // WebSocketRequest represents the structure of messages sent over the WebSocket
@@ -26,15 +27,15 @@ type WebsocketServer struct {
 	eventRouter *event.MessageRouter
 }
 
-func NewWebsocketServer(token string) *WebsocketServer {
+func NewWebsocketServer(settings *settings.Settings) *WebsocketServer {
 	return &WebsocketServer{
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true // Allow all origins for now
 			},
 		},
-		token:       token,
-		eventRouter: event.NewMessageRouter(),
+		token:       settings.API.Token,
+		eventRouter: event.NewMessageRouter(settings),
 	}
 }
 

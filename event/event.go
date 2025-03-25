@@ -1,6 +1,9 @@
 package event
 
-import "github.com/charmbracelet/log"
+import (
+	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/settings"
+)
 
 // Message is the base type for all events
 type Message struct {
@@ -21,11 +24,13 @@ type MessageResponse struct {
 type MessageHandler func(message Message) MessageResponse
 
 type MessageRouter struct {
+	Settings *settings.Settings
 	handlers map[EventType]MessageHandler
 }
 
-func NewMessageRouter() *MessageRouter {
+func NewMessageRouter(settings *settings.Settings) *MessageRouter {
 	return &MessageRouter{
+		Settings: settings,
 		handlers: make(map[EventType]MessageHandler),
 	}
 }

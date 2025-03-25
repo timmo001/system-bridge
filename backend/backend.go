@@ -11,14 +11,14 @@ import (
 )
 
 type Backend struct {
-	config   *settings.Config
+	settings   *settings.Settings
 	wsServer *WebsocketServer
 }
 
-func New(config *settings.Config) *Backend {
+func New(settings *settings.Settings) *Backend {
 	return &Backend{
-		config:   config,
-		wsServer: NewWebsocketServer(config.API.Token),
+		settings: settings,
+		wsServer: NewWebsocketServer(settings),
 	}
 }
 
@@ -63,7 +63,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", b.config.API.Port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
 		Handler: mux,
 	}
 
