@@ -12,7 +12,7 @@ import (
 )
 
 type Directory struct {
-	Name string `json:"name"`
+	Key string `json:"key"`
 	Path string `json:"path"`
 }
 
@@ -139,27 +139,27 @@ func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
 
 		responseData := GetDirectoriesResponseData{
 			{
-				Name: "Desktop",
+				Key: "desktop",
 				Path: desktopDirectory,
 			},
 			{
-				Name: "Documents",
+				Key: "documents",
 				Path: documentsDirectory,
 			},
 			{
-				Name: "Downloads",
+				Key: "downloads",
 				Path: downloadsDirectory,
 			},
 			{
-				Name: "Music",
+				Key: "music",
 				Path: musicDirectory,
 			},
 			{
-				Name: "Pictures",
+				Key: "pictures",
 				Path: picturesDirectory,
 			},
 			{
-				Name: "Videos",
+				Key: "videos",
 				Path: videosDirectory,
 			},
 		}
@@ -167,7 +167,7 @@ func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
 		// Get user media directories
 		for _, directory := range router.Settings.Media.Directories {
 			responseData = append(responseData, Directory{
-				Name: directory.Name,
+				Key: directory.Name,
 				Path: directory.Path,
 			})
 		}
