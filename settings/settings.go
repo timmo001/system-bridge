@@ -38,24 +38,23 @@ type Config struct {
 func Load() (*Config, error) {
 	viper.AutomaticEnv()
 
-	viper.SetConfigName("config.yml")
+	viper.SetConfigName("settings")
 	viper.SetConfigType("yaml")
 
-	// (Cross platform) default config configDirPath (~/.config/system-bridge or %APPDATA%\system-bridge)
+	// (Cross platform) default config path (~/.config/system-bridge/v5 or %APPDATA%\system-bridge\v5)
 	configDirPath := ""
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		configDirPath = os.Getenv("XDG_CONFIG_HOME") + "/system-bridge"
+		configDirPath = os.Getenv("XDG_CONFIG_HOME") + "/system-bridge/v5"
 	} else if os.Getenv("APPDATA") != "" {
-		configDirPath = os.Getenv("APPDATA") + "/system-bridge"
+		configDirPath = os.Getenv("APPDATA") + "/system-bridge/v5"
 	} else if os.Getenv("HOME") != "" {
-		configDirPath = os.Getenv("HOME") + "/.config/system-bridge"
+		configDirPath = os.Getenv("HOME") + "/.config/system-bridge/v5"
 	} else {
-		return nil, fmt.Errorf("Could not determine config path")
+		return nil, fmt.Errorf("could not determine config path")
 	}
 
 	// Create the config directory if it doesn't exist
 	os.MkdirAll(configDirPath, 0755)
-	// os.WriteFile(configDirPath+"/config.yml", []byte{}, 0644)
 	viper.AddConfigPath(configDirPath)
 
 	// Set default values
@@ -63,12 +62,16 @@ func Load() (*Config, error) {
 	viper.SetDefault("api.port", 9170)
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []ConfigHotkey{})
-	viper.SetDefault("log_level", "info")
+	viper.SetDefault("log_level", log.InfoLevel)
 	viper.SetDefault("media.directories", []ConfigMediaDirectory{})
 
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("error reading config file: %w", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			viper.SafeWriteConfig()
+		} else {
+			return nil, fmt.Errorf("error reading config file: %w", err)
+		}
 	}
 
 	var cfg Config

@@ -34,7 +34,7 @@ func main() {
 
 	s, err := settings.Load()
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("error loading settings: %v", err)
 	}
 
 	log.Debugf("Loaded settings: %v", s)
