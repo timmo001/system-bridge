@@ -8,6 +8,7 @@ const (
 	ResponseTypeApplicationExiting       ResponseType = "APPLICATION_EXITING"
 	ResponseTypeGettingData              ResponseType = "GETTING_DATA"
 	ResponseTypeDirectories              ResponseType = "DIRECTORIES"
+	ResponseTypeDirectory                ResponseType = "DIRECTORY"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"

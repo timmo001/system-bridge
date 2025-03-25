@@ -7,6 +7,7 @@ const (
 	EventExitApplication        EventType = "EXIT_APPLICATION"
 	EventGetData                EventType = "GET_DATA"
 	EventGetDirectories         EventType = "GET_DIRECTORIES"
+	EventGetDirectory           EventType = "GET_DIRECTORY"
 	EventGetFiles               EventType = "GET_FILES"
 	EventGetFile                EventType = "GET_FILE"
 	EventGetSettings            EventType = "GET_SETTINGS"

@@ -32,6 +32,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	event_handler.RegisterGetDirectoriesHandler(b.wsServer.EventRouter)
 	event_handler.RegisterGetFilesHandler(b.wsServer.EventRouter)
 	event_handler.RegisterGetFileHandler(b.wsServer.EventRouter)
+	event_handler.RegisterGetDirectoryHandler(b.wsServer.EventRouter)
 	event_handler.RegisterGetSettingsHandler(b.wsServer.EventRouter)
 	event_handler.RegisterKeyboardKeypressHandler(b.wsServer.EventRouter)
 	event_handler.RegisterKeyboardTextHandler(b.wsServer.EventRouter)
