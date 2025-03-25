@@ -1,5 +1,7 @@
 package event
 
+import "github.com/charmbracelet/log"
+
 // Message is the base type for all events
 type Message struct {
 	ID    string    `json:"id"`
@@ -29,6 +31,7 @@ func NewMessageRouter() *MessageRouter {
 }
 
 func (mr *MessageRouter) RegisterHandler(event EventType, handler MessageHandler) {
+	log.Info("Registering event handler", "event", event)
 	mr.handlers[event] = handler
 }
 
