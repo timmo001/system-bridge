@@ -26,7 +26,27 @@ func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
 
 	// Setup event handlers
+	event_handler.RegisterDataUpdateHandler(b.wsServer.eventRouter)
 	event_handler.RegisterExitApplicationHandler(b.wsServer.eventRouter)
+	event_handler.RegisterGetDataHandler(b.wsServer.eventRouter)
+	event_handler.RegisterGetDirectoriesHandler(b.wsServer.eventRouter)
+	event_handler.RegisterGetFilesHandler(b.wsServer.eventRouter)
+	event_handler.RegisterGetFileHandler(b.wsServer.eventRouter)
+	event_handler.RegisterGetSettingsHandler(b.wsServer.eventRouter)
+	event_handler.RegisterKeyboardKeypressHandler(b.wsServer.eventRouter)
+	event_handler.RegisterKeyboardTextHandler(b.wsServer.eventRouter)
+	event_handler.RegisterMediaControlHandler(b.wsServer.eventRouter)
+	event_handler.RegisterNotificationHandler(b.wsServer.eventRouter)
+	event_handler.RegisterOpenHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerHibernateHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerLockHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerLogoutHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerRestartHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerShutdownHandler(b.wsServer.eventRouter)
+	event_handler.RegisterPowerSleepHandler(b.wsServer.eventRouter)
+	event_handler.RegisterRegisterDataListenerHandler(b.wsServer.eventRouter)
+	event_handler.RegisterUnregisterDataListenerHandler(b.wsServer.eventRouter)
+	event_handler.RegisterUpdateSettingsHandler(b.wsServer.eventRouter)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()

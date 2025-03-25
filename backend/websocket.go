@@ -127,7 +127,7 @@ func (ws *WebsocketServer) HandleError(conn *websocket.Conn, err error) {
 			Event: "unknown",
 			Data:  map[string]string{},
 		},
-		event.ResponseSubtypeUnknown,
+		event.ResponseSubtypeNone,
 		err.Error(),
 	)
 }
