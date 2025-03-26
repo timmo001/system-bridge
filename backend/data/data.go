@@ -109,8 +109,8 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 	v.Set("module", m.Module)
 	v.Set("data", m.Data)
 
-	if err := v.SafeWriteConfig(); err != nil {
-		return fmt.Errorf("error writing config file: %w", err)
+	if err := v.WriteConfig(); err != nil {
+		return fmt.Errorf("error writing data file: %w", err)
 	}
 
 	return nil
