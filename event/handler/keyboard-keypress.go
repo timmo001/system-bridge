@@ -8,7 +8,8 @@ import (
 )
 
 type KeyboardKeypressRequestData struct {
-	Key string `json:"key" mapstructure:"key"`
+	Key       string   `json:"key" mapstructure:"key"`
+	Modifiers []string `json:"modifiers" mapstructure:"modifiers"`
 }
 
 func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
@@ -39,10 +40,31 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 		}
 
 		// Simulate the key press
-		log.Infof("Pressing keyboard key: %s", data.Key)
+		log.Infof("Pressing keyboard key: %s with modifiers: %v", data.Key, data.Modifiers)
 
-		// Use robotgo to simulate the key press
-		err = robotgo.KeyTap(data.Key)
+		// Convert modifiers to robotgo format
+		var modifiers []interface{}
+		for _, mod := range data.Modifiers {
+			switch mod {
+			case "shift":
+				modifiers = append(modifiers, "shift")
+			case "ctrl", "control":
+				modifiers = append(modifiers, "ctrl")
+			case "alt":
+				modifiers = append(modifiers, "alt")
+			case "cmd", "command":
+				modifiers = append(modifiers, "cmd")
+			default:
+				log.Warnf("Unsupported modifier: %s", mod)
+			}
+		}
+
+		if len(modifiers) > 0 {
+			err = robotgo.KeyTap(data.Key, modifiers...)
+		} else {
+			err = robotgo.KeyTap(data.Key)
+		}
+
 		if err != nil {
 			log.Errorf("Failed to press key: %v", err)
 			return event.MessageResponse{
@@ -53,7 +75,7 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 			}
 		}
 
-		log.Debugf("Key pressed: %s", data.Key)
+		log.Debugf("Key pressed: %s with modifiers: %v", data.Key, modifiers)
 
 		return event.MessageResponse{
 			ID:      message.ID,
