@@ -68,6 +68,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		Handler: mux,
 	}
 
+  // TODO: http endpoints (/api healthcheck, get file etc.)
+
 	// Start server in a goroutine
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -76,6 +78,12 @@ func (b *Backend) Run(ctx context.Context) error {
 	}()
 
 	log.Info("Backend server is running on", "address", server.Addr)
+
+  // TODO: MDNS / SSDP / DHCP discovery
+
+	// TODO: Listeners
+
+	// TODO: Get data on timers (different per module)
 
 	// Wait for context cancellation
 	<-ctx.Done()
