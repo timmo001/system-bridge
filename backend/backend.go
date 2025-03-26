@@ -12,7 +12,7 @@ import (
 )
 
 type Backend struct {
-	settings   *settings.Settings
+	settings *settings.Settings
 	wsServer *websocket.WebsocketServer
 }
 
@@ -69,7 +69,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		Handler: mux,
 	}
 
-  // TODO: http endpoints (/api healthcheck, get file etc.)
+	// TODO: http endpoints (/api healthcheck, get file etc.)
 
 	// Start server in a goroutine
 	go func() {
@@ -80,7 +80,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	log.Info("Backend server is running on", "address", server.Addr)
 
-  // TODO: MDNS / SSDP / DHCP discovery
+	// TODO: MDNS / SSDP / DHCP discovery
 
 	// TODO: Listeners
 
