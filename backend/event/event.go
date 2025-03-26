@@ -25,7 +25,7 @@ type MessageResponse struct {
 }
 
 // MessageHandler is the type for all event handlers
-type MessageHandler func(message Message) MessageResponse
+type MessageHandler func(connection string, message Message) MessageResponse
 
 // MessageRouter is the type for all event routers
 type MessageRouter struct {
@@ -50,14 +50,14 @@ func (mr *MessageRouter) RegisterHandler(event EventType, handler MessageHandler
 }
 
 // RegisterSimpleHandler registers a new event handler
-func (mr *MessageRouter) RegisterSimpleHandler(event EventType, fn func(Message) MessageResponse) {
+func (mr *MessageRouter) RegisterSimpleHandler(event EventType, fn func(string, Message) MessageResponse) {
 	mr.RegisterHandler(event, MessageHandler(fn))
 }
 
 // HandleMessage handles a new event
-func (mr *MessageRouter) HandleMessage(message Message) MessageResponse {
+func (mr *MessageRouter) HandleMessage(connection string, message Message) MessageResponse {
 	if handler, ok := mr.Handlers[message.Event]; ok {
-		return handler(message)
+		return handler(connection, message)
 	}
 
 	log.Warn("Method not found", "event", message.Event)

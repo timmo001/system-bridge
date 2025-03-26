@@ -63,7 +63,7 @@ func GetDirectories(router *event.MessageRouter) GetDirectoriesResponseData {
 }
 
 func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetDirectories, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventGetDirectories, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received get directories event: %v", message)
 
 		directories := GetDirectories(router)

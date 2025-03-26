@@ -15,7 +15,7 @@ type KeyboardTextRequestData struct {
 }
 
 func RegisterKeyboardTextHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventKeyboardText, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventKeyboardText, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received keyboard text event: %v", message)
 
 		data := KeyboardTextRequestData{}

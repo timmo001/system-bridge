@@ -52,7 +52,7 @@ func GetFileInfo(basePath, path string) *GetFileResponseData {
 }
 
 func RegisterGetFileHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetFile, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventGetFile, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received get file event: %v", message)
 
 		var data GetFileRequestData

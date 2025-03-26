@@ -9,7 +9,7 @@ import (
 type GetSettingsResponseData = settings.Settings
 
 func RegisterGetSettingsHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetSettings, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventGetSettings, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received get settings event: %v", message)
 
 		settings, err := settings.Load()

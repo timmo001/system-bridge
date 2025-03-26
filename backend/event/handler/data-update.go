@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterDataUpdateHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventDataUpdate, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventDataUpdate, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received data update event: %v", message)
 
 		// TODO: Implement

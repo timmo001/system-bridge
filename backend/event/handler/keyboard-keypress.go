@@ -17,7 +17,7 @@ type KeyboardKeypressRequestData struct {
 }
 
 func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventKeyboardKeypress, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventKeyboardKeypress, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received keyboard keypress event: %v", message)
 
 		data := KeyboardKeypressRequestData{}

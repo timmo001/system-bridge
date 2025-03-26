@@ -67,7 +67,7 @@ func (ws *WebsocketServer) HandleMessage(conn *websocket.Conn, message []byte) {
 	// Handle different event types
 	log.Info("Received message", "event", msg.Event, "id", msg.ID)
 	// Pass message to event handlers
-	response := ws.EventRouter.HandleMessage(event.Message{
+	response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
 		ID:    msg.ID,
 		Event: event.EventType(msg.Event),
 		Data:  msg.Data,

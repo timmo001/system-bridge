@@ -8,7 +8,7 @@ import (
 )
 
 func RegisterExitApplicationHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventExitApplication, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventExitApplication, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received exit event: %v", message)
 
 		log.Info("Exiting backend...")

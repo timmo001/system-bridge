@@ -26,7 +26,7 @@ func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDire
 }
 
 func RegisterGetDirectoryHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetDirectory, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventGetDirectory, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received get directory event: %v", message)
 
 		var data GetDirectoryRequestData

@@ -85,35 +85,35 @@ const (
 )
 
 // RegisterDataListener allows a client to receive module data updates
-func (ws *WebsocketServer) RegisterDataListener(id string, modules []data_module.ModuleName) RegisterResponse {
+func (ws *WebsocketServer) RegisterDataListener(connection string, modules []data_module.ModuleName) RegisterResponse {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	if _, ok := ws.dataListeners[id]; ok {
+	if _, ok := ws.dataListeners[connection]; ok {
 		return RegisterResponseExists
 	}
 
-	log.Infof("Registering data listener for %s", id)
-	ws.dataListeners[id] = modules
+	log.Infof("Registering data listener for %s", connection)
+	ws.dataListeners[connection] = modules
 	return RegisterResponseAdded
 }
 
 // UnregisterDataListener allows a client to stop receiving module data updates
-func (ws *WebsocketServer) UnregisterDataListener(id string) {
+func (ws *WebsocketServer) UnregisterDataListener(connection string) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	log.Infof("Unregistering data listener for %s", id)
-	delete(ws.dataListeners, id)
+	log.Infof("Unregistering data listener for %s", connection)
+	delete(ws.dataListeners, connection)
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(id string, module data_module.Module) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module data_module.Module) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
 	response := event.MessageResponse{
-		ID:      id,
+		ID:      "system",
 		Type:    event.ResponseTypeDataUpdate,
 		Subtype: event.ResponseSubtypeNone,
 		Data:    module.Data,
@@ -123,7 +123,7 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(id string, module data_module.M
 	log.Infof("Broadcasting module update for %s", module.Module)
 
 	for conn := range ws.connections {
-		if _, ok := ws.dataListeners[conn.RemoteAddr().String()]; ok {
+		if _, ok := ws.dataListeners[connection]; ok {
 			if err := conn.WriteJSON(response); err != nil {
 				// If there's an error, remove the connection
 				conn.Close()

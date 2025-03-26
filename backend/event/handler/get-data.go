@@ -15,7 +15,7 @@ type GetDataRequestData struct {
 type GetDataResponseData = any
 
 func RegisterGetDataHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetData, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventGetData, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received get data event: %v", message)
 
 		var data GetDataRequestData
@@ -37,19 +37,18 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 
 			// Register the data listener
-			response := ws.RegisterDataListener(message.ID, data.Modules)
+			response := ws.RegisterDataListener(connection, data.Modules)
 			if response == websocket.RegisterResponseExists {
-				log.Infof("Data listener already exists for %s", message.ID)
+				log.Infof("Data listener already exists for %s", connection)
 			}
 
 			for _, module := range data.Modules {
-				m := router.DataStore.GetModule(module)
-				ws.BroadcastModuleUpdate(message.ID, *m)
+				ws.BroadcastModuleUpdate(connection, *router.DataStore.GetModule(module))
 			}
 
 			// Unregister the data listener if they have not already registered
 			if response == websocket.RegisterResponseAdded {
-				ws.UnregisterDataListener(message.ID)
+				ws.UnregisterDataListener(connection)
 			}
 		}()
 

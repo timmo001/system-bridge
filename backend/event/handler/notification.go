@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterNotificationHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventNotification, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventNotification, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received notification event: %v", message)
 
 		// TODO: Implement

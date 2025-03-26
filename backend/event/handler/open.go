@@ -47,7 +47,7 @@ func OpenWithDefaultBrowser(url string) error {
 }
 
 func RegisterOpenHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventOpen, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventOpen, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received open event: %v", message)
 
 		data := OpenRequestData{}

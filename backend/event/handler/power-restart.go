@@ -27,7 +27,7 @@ func Restart() error {
 }
 
 func RegisterPowerRestartHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerRestart, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventPowerRestart, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received power restart event: %v", message)
 
 		go func() {

@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterMediaControlHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventMediaControl, func(message event.Message) event.MessageResponse {
+	router.RegisterSimpleHandler(event.EventMediaControl, func(connection string, message event.Message) event.MessageResponse {
 		log.Infof("Received media control event: %v", message)
 
 		// TODO: Implement
