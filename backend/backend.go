@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/backend/data"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
@@ -84,7 +86,15 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// TODO: Listeners
 
-	// TODO: Get data on timers (different per module)
+	// Run data update task processor every 30 seconds
+	go func() {
+		for {
+			data.RunUpdateTaskProcessor()
+			log.Info("Data update task processor completed")
+			log.Info("Sleeping for 30 seconds...")
+			time.Sleep(30 * time.Second)
+		}
+	}()
 
 	// Wait for context cancellation
 	<-ctx.Done()
