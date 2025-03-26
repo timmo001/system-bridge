@@ -12,6 +12,9 @@ import (
 
 // UpdateTaskProcessor handles async task processing with rate limiting
 type UpdateTaskProcessor struct {
+	// Data store to update
+	dataStore *DataStore
+
 	// Rate limiter to control CPU usage
 	limiter *rate.Limiter
 
@@ -26,10 +29,11 @@ type UpdateTaskProcessor struct {
 	cancel context.CancelFunc
 }
 
-func NewUpdateTaskProcessor(tasksPerSecond float64, burstLimit int) *UpdateTaskProcessor {
+func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstLimit int) *UpdateTaskProcessor {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &UpdateTaskProcessor{
+		dataStore: dataStore,
 		// Create rate limiter with specified tasks/second and burst limit
 		limiter:   rate.NewLimiter(rate.Limit(tasksPerSecond), burstLimit),
 		taskQueue: make(chan data_module.Module, 20), // Buffer size of 20
@@ -40,7 +44,7 @@ func NewUpdateTaskProcessor(tasksPerSecond float64, burstLimit int) *UpdateTaskP
 
 // Start begins processing tasks
 func (tp *UpdateTaskProcessor) Start(workerCount int) {
-	for i := 0; i < workerCount; i++ {
+	for range workerCount {
 		tp.wg.Add(1)
 		go tp.worker()
 	}
@@ -81,10 +85,13 @@ func (tp *UpdateTaskProcessor) worker() {
 			}
 
 			// Process task
-			_, err = task.UpdateModule()
+			d, err := task.UpdateModule()
 			if err != nil {
 				log.Infof("Task processing error: %v", err)
 			}
+
+			// Update data store
+			tp.dataStore.SetModuleData(task.Module, d)
 
 		case <-tp.ctx.Done():
 			return
@@ -104,9 +111,9 @@ func (t *ExampleTask) Process() error {
 	return nil
 }
 
-func RunUpdateTaskProcessor() {
+func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Create processor with 4 tasks/second, burst of 2
-	processor := NewUpdateTaskProcessor(4, 2)
+	processor := NewUpdateTaskProcessor(dataStore, 4, 2)
 
 	// Start 3 worker goroutines
 	processor.Start(3)

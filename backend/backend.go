@@ -28,6 +28,9 @@ func New(settings *settings.Settings) *Backend {
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
 
+	// Setup data store
+	dataStore := data.NewDataStore()
+
 	// Setup event handlers
 	event_handler.RegisterDataUpdateHandler(b.wsServer.EventRouter)
 	event_handler.RegisterExitApplicationHandler(b.wsServer.EventRouter)
@@ -89,7 +92,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Run data update task processor every 30 seconds
 	go func() {
 		for {
-			data.RunUpdateTaskProcessor()
+			data.RunUpdateTaskProcessor(dataStore)
 			log.Info("Data update task processor completed")
 			log.Info("Sleeping for 30 seconds...")
 			time.Sleep(30 * time.Second)
