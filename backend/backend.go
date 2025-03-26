@@ -21,8 +21,9 @@ type Backend struct {
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 	return &Backend{
-		settings: settings,
-		wsServer: websocket.NewWebsocketServer(settings, dataStore),
+		settings:  settings,
+		dataStore: dataStore,
+		wsServer:  websocket.NewWebsocketServer(settings, dataStore),
 	}
 }
 
