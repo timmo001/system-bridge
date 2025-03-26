@@ -3,6 +3,7 @@ package event
 // ResponseType represents the type of response being sent
 type ResponseType string
 
+// Response types
 const (
 	ResponseTypeError                    ResponseType = "ERROR"
 	ResponseTypeApplicationExiting       ResponseType = "APPLICATION_EXITING"

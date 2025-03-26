@@ -3,6 +3,7 @@ package event
 // EventType represents the type of event being handled
 type EventType string
 
+// Event types
 const (
 	EventExitApplication        EventType = "EXIT_APPLICATION"
 	EventGetData                EventType = "GET_DATA"
