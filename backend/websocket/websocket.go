@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/timmo001/system-bridge/backend"
+	"github.com/timmo001/system-bridge/types"
 )
 
 // WebSocketRequest represents the structure of messages sent over the WebSocket
@@ -23,9 +23,9 @@ type WebsocketServer struct {
 	upgrader websocket.Upgrader
 }
 
-func NewWebsocketServer(b *backend.Backend) *WebsocketServer {
+func NewWebsocketServer(s types.Server) *WebsocketServer {
 	return &WebsocketServer{
-		token: b.Settings.API.Token,
+		token: s.GetSettings().API.Token,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true // Allow all origins for now

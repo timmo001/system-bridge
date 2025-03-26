@@ -1,15 +1,15 @@
 package event_handler
 
 import (
-	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/types"
 )
 
 type MessageHandler struct {
-	router *event.MessageRouter
+	router types.MessageRouter
 }
 
-func NewMessageHandler(router *event.MessageRouter) *MessageHandler {
-	return &MessageHandler{router: router}
+func NewMessageHandler(s types.Server) *MessageHandler {
+	return &MessageHandler{router: s.GetEventMessageRouter()}
 }
 
 func (h *MessageHandler) RegisterMessageHandlers() {

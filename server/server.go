@@ -1,4 +1,4 @@
-package backend
+package server
 
 import (
 	"context"
@@ -12,39 +12,55 @@ import (
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 )
 
-type Backend struct {
+type Server struct {
 	DataStore           *data.DataStore
-	EventMessageRouter  *event.MessageRouter
+	EventMessageRouter  types.MessageRouter
 	EventMessageHandler *event_handler.MessageHandler
 	Settings            *settings.Settings
 	WebsocketServer     *websocket.WebsocketServer
 }
 
-func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
-  eventMessageRouter := event.NewMessageRouter(settings, dataStore)
-	eventMessageHandler := event_handler.NewMessageHandler(eventMessageRouter)
-	websocketServer := websocket.NewWebsocketServer(settings)
+// Ensure Server implements types.Server interface
+var _ types.Server = (*Server)(nil)
 
-	return &Backend{
-		DataStore:           dataStore,
-		EventMessageRouter:  eventMessageRouter,
-		EventMessageHandler: eventMessageHandler,
-		Settings:            settings,
-		WebsocketServer:     websocketServer,
+func New(settings *settings.Settings, dataStore *data.DataStore) *Server {
+	return &Server{
+		DataStore: dataStore,
+		Settings:  settings,
 	}
 }
 
-func (b *Backend) Run(ctx context.Context) error {
-	log.Info("Running backend server...")
+// GetSettings implements types.Server
+func (s *Server) GetSettings() *settings.Settings {
+	return s.Settings
+}
+
+// GetDataStore implements types.Server
+func (s *Server) GetDataStore() *data.DataStore {
+	return s.DataStore
+}
+
+// GetEventMessageRouter implements types.Server
+func (s *Server) GetEventMessageRouter() types.MessageRouter {
+	return s.EventMessageRouter
+}
+
+func (s *Server) Run(ctx context.Context) error {
+	log.Info("Running server...")
+
+	s.EventMessageRouter = event.NewMessageRouter(s)
+	s.EventMessageHandler = event_handler.NewMessageHandler(s)
+	s.WebsocketServer = websocket.NewWebsocketServer(s)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
-		_, err := b.WebsocketServer.HandleConnection(w, r)
+		_, err := s.WebsocketServer.HandleConnection(w, r)
 		if err != nil {
 			log.Error("WebSocket connection error:", err)
 			http.Error(w, "WebSocket connection failed", http.StatusInternalServerError)
@@ -54,7 +70,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", b.Settings.API.Port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", s.Settings.API.Port),
 		Handler: mux,
 	}
 
@@ -67,7 +83,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	log.Info("Backend server is running on", "address", server.Addr)
+	log.Info("Server is running on", "address", server.Addr)
 
 	// TODO: MDNS / SSDP / DHCP discovery
 
@@ -76,7 +92,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Run data update task processor every 30 seconds
 	go func() {
 		for {
-			data.RunUpdateTaskProcessor(b.DataStore)
+			data.RunUpdateTaskProcessor(s.DataStore)
 			log.Info("Data update task processor completed")
 			log.Info("Sleeping for 30 seconds...")
 			time.Sleep(30 * time.Second)
@@ -86,6 +102,6 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Wait for context cancellation
 	<-ctx.Done()
 
-	log.Info("Backend server is shutting down...")
+	log.Info("Server is shutting down...")
 	return server.Shutdown(ctx)
 }
