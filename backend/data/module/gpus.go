@@ -23,7 +23,7 @@ type GPUsData struct {
 	GPUs []GPU `json:"gpus"`
 }
 
-func (t *UpdateTask) UpdateGPUsModule() (GPUsData, error) {
+func (t *Module) UpdateGPUsModule() (GPUsData, error) {
 	log.Info("Getting GPUs data")
 
 	// TODO: Implement

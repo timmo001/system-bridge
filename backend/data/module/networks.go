@@ -57,7 +57,7 @@ type NetworksData struct {
 	Networks    []Network           `json:"networks,omitempty"`
 }
 
-func (t *UpdateTask) UpdateNetworksModule() (NetworksData, error) {
+func (t *Module) UpdateNetworksModule() (NetworksData, error) {
 	log.Info("Getting networks data")
 
 	// TODO: Implement

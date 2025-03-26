@@ -33,7 +33,7 @@ type MemoryData struct {
 	Virtual *MemoryVirtual `json:"virtual,omitempty"`
 }
 
-func (t *UpdateTask) UpdateMemoryModule() (MemoryData, error) {
+func (t *Module) UpdateMemoryModule() (MemoryData, error) {
 	log.Info("Getting memory data")
 
 	// TODO: Implement

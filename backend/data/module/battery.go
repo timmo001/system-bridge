@@ -9,7 +9,7 @@ type BatteryData struct {
 	TimeRemaining float64 `json:"time_remaining" mapstructure:"time_remaining"`
 }
 
-func (t *UpdateTask) UpdateBatteryModule() (BatteryData, error) {
+func (t *Module) UpdateBatteryModule() (BatteryData, error) {
 	log.Info("Getting battery data")
 
 	// TODO: Implement

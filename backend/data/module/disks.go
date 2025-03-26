@@ -44,7 +44,7 @@ type DisksData struct {
 	IOCounters *DiskIOCounters `json:"io_counters,omitempty"`
 }
 
-func (t *UpdateTask) UpdateDisksModule() (DisksData, error) {
+func (t *Module) UpdateDisksModule() (DisksData, error) {
 	log.Info("Getting disks data")
 
 	// TODO: Implement

@@ -5,28 +5,33 @@ import (
 )
 
 // Module represents the type of data module
-type Module string
+type ModuleName string
 
 const (
-	ModuleBattery   Module = "battery"
-	ModuleCPU       Module = "cpu"
-	ModuleDisks     Module = "disks"
-	ModuleDisplays  Module = "displays"
-	ModuleGPUs      Module = "gpus"
-	ModuleMedia     Module = "media"
-	ModuleMemory    Module = "memory"
-	ModuleNetworks  Module = "networks"
-	ModuleProcesses Module = "processes"
-	ModuleSensors   Module = "sensors"
-	ModuleSystem    Module = "system"
+	ModuleBattery   ModuleName = "battery"
+	ModuleCPU       ModuleName = "cpu"
+	ModuleDisks     ModuleName = "disks"
+	ModuleDisplays  ModuleName = "displays"
+	ModuleGPUs      ModuleName = "gpus"
+	ModuleMedia     ModuleName = "media"
+	ModuleMemory    ModuleName = "memory"
+	ModuleNetworks  ModuleName = "networks"
+	ModuleProcesses ModuleName = "processes"
+	ModuleSensors   ModuleName = "sensors"
+	ModuleSystem    ModuleName = "system"
 )
 
-type UpdateTask struct {
-	Module Module
+type Module struct {
+	Module ModuleName
 	Data   any
 }
 
-func (t *UpdateTask) UpdateModule() (any, error) {
+// Process implements data.UpdateTask.
+func (t *Module) Process() error {
+	panic("unimplemented")
+}
+
+func (t *Module) UpdateModule() (any, error) {
 	switch t.Module {
 	case ModuleBattery:
 		return t.UpdateBatteryModule()

@@ -52,7 +52,7 @@ type CPUData struct {
 	Voltage      *float64      `json:"voltage,omitempty"`
 }
 
-func (t *UpdateTask) UpdateCPUModule() (CPUData, error) {
+func (t *Module) UpdateCPUModule() (CPUData, error) {
 	log.Info("Getting CPU data")
 
 	// TODO: Implement

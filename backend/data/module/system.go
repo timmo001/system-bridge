@@ -42,7 +42,7 @@ type SystemData struct {
 	VersionNewerAvailable *bool        `json:"version_newer_available,omitempty"`
 }
 
-func (t *UpdateTask) UpdateSystemModule() (SystemData, error) {
+func (t *Module) UpdateSystemModule() (SystemData, error) {
 	log.Info("Getting system data")
 
 	// TODO: Implement actual system data collection

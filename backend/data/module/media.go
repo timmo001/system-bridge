@@ -28,7 +28,7 @@ type MediaData struct {
 	UpdatedAt            *float64 `json:"updated_at,omitempty"`
 }
 
-func (t *UpdateTask) UpdateMediaModule() (MediaData, error) {
+func (t *Module) UpdateMediaModule() (MediaData, error) {
 	log.Info("Getting media data")
 
 	// TODO: Implement

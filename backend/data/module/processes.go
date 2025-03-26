@@ -20,7 +20,7 @@ type ProcessesData struct {
 	Processes []Process `json:"processes"`
 }
 
-func (t *UpdateTask) UpdateProcessesModule() (ProcessesData, error) {
+func (t *Module) UpdateProcessesModule() (ProcessesData, error) {
 	log.Info("Getting processes data")
 
 	// TODO: Implement

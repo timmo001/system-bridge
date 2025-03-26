@@ -22,7 +22,7 @@ type DisplaysData struct {
 	Displays []Display `json:"displays"`
 }
 
-func (t *UpdateTask) UpdateDisplaysModule() (DisplaysData, error) {
+func (t *Module) UpdateDisplaysModule() (DisplaysData, error) {
 	log.Info("Getting displays data")
 
 	// TODO: Implement

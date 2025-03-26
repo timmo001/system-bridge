@@ -98,7 +98,7 @@ type SensorsData struct {
 	WindowsSensors *SensorsWindows `json:"windows_sensors,omitempty"`
 }
 
-func (t *UpdateTask) UpdateSensorsModule() (SensorsData, error) {
+func (t *Module) UpdateSensorsModule() (SensorsData, error) {
 	log.Info("Getting sensors data")
 
 	// TODO: Implement
