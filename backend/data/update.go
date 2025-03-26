@@ -30,6 +30,10 @@ type UpdateTaskProcessor struct {
 }
 
 func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstLimit int) *UpdateTaskProcessor {
+	if dataStore == nil {
+		log.Fatal("dataStore cannot be nil")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &UpdateTaskProcessor{
@@ -80,35 +84,28 @@ func (tp *UpdateTaskProcessor) worker() {
 			// Wait for rate limiter
 			err := tp.limiter.Wait(tp.ctx)
 			if err != nil {
-				log.Infof("Rate limiter error: %v", err)
+				log.Warnf("Rate limiter error: %v", err)
 				continue
 			}
 
 			// Process task
 			d, err := task.UpdateModule()
 			if err != nil {
-				log.Infof("Task processing error: %v", err)
+				log.Warnf("Task processing error for module %s: %v", task.Module, err)
+				continue
 			}
 
+			log.Debugf("Updating data for module: %s", task.Module)
 			// Update data store
-			tp.DataStore.SetModuleData(task.Module, d)
+			if err := tp.DataStore.SetModuleData(task.Module, d); err != nil {
+				log.Errorf("Failed to set module data for %s: %v", task.Module, err)
+				continue
+			}
 
 		case <-tp.ctx.Done():
 			return
 		}
 	}
-}
-
-// Example usage:
-type ExampleTask struct {
-	ID int
-}
-
-func (t *ExampleTask) Process() error {
-	// Simulate work
-	time.Sleep(100 * time.Millisecond)
-	log.Infof("Processed task %d", t.ID)
-	return nil
 }
 
 func RunUpdateTaskProcessor(dataStore *DataStore) {
