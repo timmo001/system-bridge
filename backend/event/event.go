@@ -16,12 +16,12 @@ type Message struct {
 
 // MessageResponse is the base type for all responses
 type MessageResponse struct {
-	ID      string          `json:"id" mapstructure:"id"`
-	Type    ResponseType    `json:"type" mapstructure:"type"`
-	Subtype ResponseSubtype `json:"subtype" mapstructure:"subtype"`
-	Data    any             `json:"data" mapstructure:"data"`
-	Message string          `json:"message,omitempty" mapstructure:"message,omitempty"`
-	Module  string          `json:"module,omitempty" mapstructure:"module,omitempty"`
+	ID      string                 `json:"id" mapstructure:"id"`
+	Type    ResponseType           `json:"type" mapstructure:"type"`
+	Subtype ResponseSubtype        `json:"subtype" mapstructure:"subtype"`
+	Data    any                    `json:"data" mapstructure:"data"`
+	Message string                 `json:"message,omitempty" mapstructure:"message,omitempty"`
+	Module  data_module.ModuleName `json:"module,omitempty" mapstructure:"module,omitempty"`
 }
 
 // MessageHandler is the type for all event handlers
@@ -60,6 +60,8 @@ func (mr *MessageRouter) HandleMessage(message Message) MessageResponse {
 		return handler(message)
 	}
 
+	log.Warn("Method not found", "event", message.Event)
+
 	return MessageResponse{
 		ID:   message.ID,
 		Type: ResponseTypeError,
@@ -68,9 +70,4 @@ func (mr *MessageRouter) HandleMessage(message Message) MessageResponse {
 		},
 		Message: "Method not found",
 	}
-}
-
-// DataUpdated is a helper function to trigger a data update event
-func (mr *MessageRouter) DataUpdated(module data_module.ModuleName) {
-	// TODO: Send a signal with each registered client connection
 }

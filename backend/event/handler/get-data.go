@@ -5,10 +5,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/backend/websocket"
 )
 
 type GetDataRequestData struct {
-	Module data_module.ModuleName `json:"module" mapstructure:"module"`
+	Modules []data_module.ModuleName `json:"modules" mapstructure:"modules"`
 }
 
 type GetDataResponseData = any
@@ -27,13 +28,30 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 		}
 
-		// go func() {
-		// 	// module := router.DataStore.GetModule(data.Module)
-		// 	// currentConnection := ""
+		go func() {
+			// Get the websocket instance
+			ws := websocket.GetInstance()
+			if ws == nil {
+				log.Error("No websocket instance found")
+				return
+			}
 
-		// 	// Send a signal with the current client connection and the module
+			// Register the data listener
+			response := ws.RegisterDataListener(message.ID, data.Modules)
+			if response == websocket.RegisterResponseExists {
+				log.Infof("Data listener already exists for %s", message.ID)
+			}
 
-		// }()
+			for _, module := range data.Modules {
+				m := router.DataStore.GetModule(module)
+				ws.BroadcastModuleUpdate(message.ID, *m)
+			}
+
+			// Unregister the data listener if they have not already registered
+			if response == websocket.RegisterResponseAdded {
+				ws.UnregisterDataListener(message.ID)
+			}
+		}()
 
 		return event.MessageResponse{
 			ID:      message.ID,
