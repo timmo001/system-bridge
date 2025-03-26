@@ -28,7 +28,7 @@ func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 }
 
 func (b *Backend) Run(ctx context.Context) error {
-	log.Info("Running backend server...")
+	log.Info("Starting backend server...")
 
 	// Setup event handlers
   event_handler.RegisterHandlers(b.wsServer.EventRouter)
