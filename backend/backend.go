@@ -22,8 +22,8 @@ type Backend struct {
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
-	wsServer := websocket.NewWebsocketServer(settings, dataStore)
-	eventRouter := event.NewMessageRouter(settings, dataStore)
+	eventRouter := event. NewMessageRouter(settings, dataStore)
+	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
 
 	return &Backend{
 		settings:    settings,

@@ -32,12 +32,12 @@ type WebsocketServer struct {
 	EventRouter   *event.MessageRouter
 }
 
-func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore) *WebsocketServer {
+func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
 		token:         settings.API.Token,
 		connections:   make(map[*websocket.Conn]bool),
 		dataListeners: make(map[string][]data_module.ModuleName),
-		EventRouter:   event.NewMessageRouter(settings, dataStore),
+		EventRouter:   eventRouter,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true // Allow all origins for now
