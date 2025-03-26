@@ -1,6 +1,8 @@
 package data_module
 
-import "errors"
+import (
+	"fmt"
+)
 
 // Module represents the type of data module
 type Module string
@@ -25,5 +27,30 @@ type UpdateTask struct {
 }
 
 func (t *UpdateTask) UpdateModule() (any, error) {
-	return nil, errors.New("not implemented")
+	switch t.Module {
+	case ModuleBattery:
+		return t.UpdateBatteryModule()
+	case ModuleCPU:
+		return t.UpdateCPUModule()
+	case ModuleDisks:
+		return t.UpdateDisksModule()
+	case ModuleDisplays:
+		return t.UpdateDisplaysModule()
+	case ModuleGPUs:
+		return t.UpdateGPUsModule()
+	case ModuleMedia:
+		return t.UpdateMediaModule()
+	case ModuleMemory:
+		return t.UpdateMemoryModule()
+	case ModuleNetworks:
+		return t.UpdateNetworksModule()
+	case ModuleProcesses:
+		return t.UpdateProcessesModule()
+	case ModuleSensors:
+		return t.UpdateSensorsModule()
+	case ModuleSystem:
+		return t.UpdateSystemModule()
+	default:
+		return nil, fmt.Errorf("module not found: %s", t.Module)
+	}
 }
