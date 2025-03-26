@@ -110,7 +110,14 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 	v.Set("data", m.Data)
 
 	if err := v.WriteConfig(); err != nil {
-		return fmt.Errorf("error writing data file: %w", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found, create it
+			if err := v.SafeWriteConfig(); err != nil {
+				return fmt.Errorf("error writing data file: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error writing data file: %w", err)
+		}
 	}
 
 	return nil

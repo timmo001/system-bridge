@@ -81,7 +81,13 @@ func (cfg *Settings) Save() error {
 	viper.Set("media.directories", cfg.Media.Directories)
 
 	if err := viper.WriteConfig(); err != nil {
-		return fmt.Errorf("error writing config file: %w", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			if err := viper.SafeWriteConfig(); err != nil {
+				return fmt.Errorf("error writing config file: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error writing config file: %w", err)
+		}
 	}
 	return nil
 }
