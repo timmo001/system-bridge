@@ -55,6 +55,17 @@ func main() {
 					return b.Run(cmdCtx)
 				},
 			},
+			{
+				Name:    "client",
+				Aliases: []string{"c", "cli"},
+				Usage:   "Run the client",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					// TODO: Implement
+					// -- Access the data store
+					// -- Access event router
+					return nil
+				},
+			},
 		},
 	}
 
