@@ -16,6 +16,9 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 		return nil, err
 	}
 
+	// Add the connection to our map
+	ws.AddConnection(conn)
+
 	// Start a goroutine to handle messages from this connection
 	go ws.handleMessages(conn)
 
@@ -23,7 +26,10 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 }
 
 func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
-	defer conn.Close()
+	defer func() {
+		ws.RemoveConnection(conn)
+		conn.Close()
+	}()
 
 	for {
 		_, message, err := conn.ReadMessage()
