@@ -12,8 +12,8 @@ import (
 )
 
 type GetDirectoriesResponseDataItem struct {
-	Key  string `json:"key"`
-	Path string `json:"path"`
+	Key  string `json:"key" mapstructure:"key"`
+	Path string `json:"path" mapstructure:"path"`
 }
 
 type GetDirectoriesResponseData = []GetDirectoriesResponseDataItem

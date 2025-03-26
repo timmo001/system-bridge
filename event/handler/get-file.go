@@ -5,26 +5,27 @@ import (
 	"path/filepath"
 
 	"github.com/charmbracelet/log"
+	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
 
 type GetFileRequestData struct {
-	BaseDirectory string `json:"base"`
-	Path          string `json:"path"`
+	BaseDirectory string `json:"base" mapstructure:"base"`
+	Path          string `json:"path" mapstructure:"path"`
 }
 
 type GetFileResponseData struct {
-	Name         string  `json:"name"`
-	Path         string  `json:"path"`
-	FullPath     string  `json:"fullpath"`
-	Size         int     `json:"size"`
-	LastAccessed float64 `json:"last_accessed"`
-	Created      float64 `json:"created"`
-	Modified     float64 `json:"modified"`
-	IsDirectory  bool    `json:"is_directory"`
-	IsFile       bool    `json:"is_file"`
-	IsLink       bool    `json:"is_link"`
-	MimeType     string  `json:"mime_type,omitempty"`
+	Name         string  `json:"name" mapstructure:"name"`
+	Path         string  `json:"path" mapstructure:"path"`
+	FullPath     string  `json:"fullpath" mapstructure:"fullpath"`
+	Size         int     `json:"size" mapstructure:"size"`
+	LastAccessed float64 `json:"last_accessed" mapstructure:"last_accessed"`
+	Created      float64 `json:"created" mapstructure:"created"`
+	Modified     float64 `json:"modified" mapstructure:"modified"`
+	IsDirectory  bool    `json:"is_directory" mapstructure:"is_directory"`
+	IsFile       bool    `json:"is_file" mapstructure:"is_file"`
+	IsLink       bool    `json:"is_link" mapstructure:"is_link"`
+	MimeType     string  `json:"mime_type,omitempty" mapstructure:"mime_type,omitempty"`
 }
 
 func GetFileInfo(basePath, path string) *GetFileResponseData {
@@ -54,7 +55,15 @@ func RegisterGetFileHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFile, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get file event: %v", message)
 
-		data := message.Data.(GetFileRequestData)
+		var data GetFileRequestData
+		if err := mapstructure.Decode(message.Data, &data); err != nil {
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeBadRequest,
+				Message: "Invalid request data format: " + err.Error(),
+			}
+		}
 
 		// Get directory
 		directory := GetDirectory(router, data.BaseDirectory)

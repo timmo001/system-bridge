@@ -2,14 +2,16 @@ package event_handler
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/log"
+	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
 
 type GetFilesRequestData struct {
-	BaseDirectory string `json:"base"`
-	Path          string `json:"path,omitempty"`
+	BaseDirectory string `json:"base" mapstructure:"base"`
+	Path          string `json:"path,omitempty" mapstructure:"path,omitempty"`
 }
 
 type GetFilesResponseData = []GetFileResponseData
@@ -33,11 +35,19 @@ func RegisterGetFilesHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFiles, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get files event: %v", message)
 
-		data := message.Data.(GetFilesRequestData)
+		var data GetFilesRequestData
+		if err := mapstructure.Decode(message.Data, &data); err != nil {
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeBadRequest,
+				Message: "Invalid request data format: " + err.Error(),
+			}
+		}
 
-		// Get directory
-		directory := GetDirectory(router, data.BaseDirectory)
-		if directory == nil {
+		// Get base directory
+		baseDirectory := GetDirectory(router, data.BaseDirectory)
+		if baseDirectory == nil {
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -46,7 +56,12 @@ func RegisterGetFilesHandler(router *event.MessageRouter) {
 		}
 
 		// Get files
-		files := GetFiles(directory.Path)
+		var files []GetFileResponseData
+		if data.Path != "" {
+			files = GetFiles(filepath.Join(baseDirectory.Path, data.Path))
+		} else {
+			files = GetFiles(baseDirectory.Path)
+		}
 
 		return event.MessageResponse{
 			ID:      message.ID,

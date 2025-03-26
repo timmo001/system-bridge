@@ -2,11 +2,12 @@ package event_handler
 
 import (
 	"github.com/charmbracelet/log"
+	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
 
 type GetDirectoryRequestData struct {
-	BaseDirectory string `json:"base"`
+	BaseDirectory string `json:"base" mapstructure:"base"`
 }
 
 func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDirectoriesResponseDataItem {
@@ -28,25 +29,33 @@ func RegisterGetDirectoryHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetDirectory, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get directory event: %v", message)
 
-		data := message.Data.(GetDirectoryRequestData)
+		var data GetDirectoryRequestData
+		if err := mapstructure.Decode(message.Data, &data); err != nil {
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeBadRequest,
+				Message: "Invalid request data format: " + err.Error(),
+			}
+		}
 
 		directory := GetDirectory(router, data.BaseDirectory)
 
 		if directory == nil {
 			return event.MessageResponse{
 				ID:      message.ID,
-        Type:    event.ResponseTypeError,
-        Subtype: event.ResponseSubtypeBadDirectory,
-        Message: "Failed to get directory",
-      }
-    }
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeBadDirectory,
+				Message: "Failed to get directory",
+			}
+		}
 
-    return event.MessageResponse{
-      ID:      message.ID,
-      Type:    event.ResponseTypeDirectory,
-      Subtype: event.ResponseSubtypeNone,
-      Data:    directory,
-    }
+		return event.MessageResponse{
+			ID:      message.ID,
+			Type:    event.ResponseTypeDirectory,
+			Subtype: event.ResponseSubtypeNone,
+			Data:    directory,
+		}
 	})
 }
 
