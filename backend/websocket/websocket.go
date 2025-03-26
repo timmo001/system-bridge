@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
+	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -27,9 +28,9 @@ type WebsocketServer struct {
 	upgrader    websocket.Upgrader
 }
 
-func NewWebsocketServer(settings *settings.Settings) *WebsocketServer {
+func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore) *WebsocketServer {
 	return &WebsocketServer{
-		EventRouter: event.NewMessageRouter(settings),
+		EventRouter: event.NewMessageRouter(settings, dataStore),
 		token:       settings.API.Token,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {

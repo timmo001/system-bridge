@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/settings"
 )
 
@@ -25,12 +26,14 @@ type MessageHandler func(message Message) MessageResponse
 
 type MessageRouter struct {
 	Settings *settings.Settings
+	DataStore *data.DataStore
 	Handlers map[EventType]MessageHandler
 }
 
-func NewMessageRouter(settings *settings.Settings) *MessageRouter {
+func NewMessageRouter(settings *settings.Settings, dataStore *data.DataStore) *MessageRouter {
 	return &MessageRouter{
 		Settings: settings,
+		DataStore: dataStore,
 		Handlers: make(map[EventType]MessageHandler),
 	}
 }

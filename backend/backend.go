@@ -15,25 +15,19 @@ import (
 
 type Backend struct {
 	settings *settings.Settings
+	dataStore *data.DataStore
 	wsServer *websocket.WebsocketServer
 }
 
-func New(settings *settings.Settings) *Backend {
+func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 	return &Backend{
 		settings: settings,
-		wsServer: websocket.NewWebsocketServer(settings),
+		wsServer: websocket.NewWebsocketServer(settings, dataStore),
 	}
 }
 
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
-
-	// Setup data store
-	dataStore, err := data.NewDataStore()
-	if err != nil {
-		log.Error("Failed to create data store:", err)
-		return err
-	}
 
 	// Setup event handlers
 	event_handler.RegisterDataUpdateHandler(b.wsServer.EventRouter)
@@ -96,7 +90,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Run data update task processor every 30 seconds
 	go func() {
 		for {
-			data.RunUpdateTaskProcessor(dataStore)
+			data.RunUpdateTaskProcessor(b.dataStore)
 			log.Info("Data update task processor completed")
 			log.Info("Sleeping for 30 seconds...")
 			time.Sleep(30 * time.Second)
