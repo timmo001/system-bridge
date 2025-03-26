@@ -39,7 +39,6 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 			}
 		}
 
-		// Simulate the key press
 		log.Infof("Pressing keyboard key: %s with modifiers: %v", data.Key, data.Modifiers)
 
 		// Convert modifiers to robotgo format
