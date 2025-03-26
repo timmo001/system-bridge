@@ -6,6 +6,8 @@ import (
 	"github.com/timmo001/system-bridge/settings"
 )
 
+type GetSettingsResponseData = settings.Settings
+
 func RegisterGetSettingsHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetSettings, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get settings event: %v", message)
