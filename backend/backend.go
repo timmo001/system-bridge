@@ -29,7 +29,11 @@ func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
 
 	// Setup data store
-	dataStore := data.NewDataStore()
+	dataStore, err := data.NewDataStore()
+	if err != nil {
+		log.Error("Failed to create data store:", err)
+		return err
+	}
 
 	// Setup event handlers
 	event_handler.RegisterDataUpdateHandler(b.wsServer.EventRouter)
