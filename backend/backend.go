@@ -71,8 +71,6 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// TODO: MDNS / SSDP / DHCP discovery
 
-	// TODO: Listeners
-
 	// Run data update task processor every 30 seconds
 	go func() {
 		for {
