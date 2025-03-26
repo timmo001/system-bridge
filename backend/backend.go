@@ -8,22 +8,28 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/data"
+	"github.com/timmo001/system-bridge/backend/event"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
 )
 
 type Backend struct {
-	settings  *settings.Settings
-	dataStore *data.DataStore
-	wsServer  *websocket.WebsocketServer
+	settings    *settings.Settings
+	dataStore   *data.DataStore
+	eventRouter *event.MessageRouter
+	wsServer    *websocket.WebsocketServer
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
+	eventRouter := event.NewMessageRouter(settings, dataStore)
+	wsServer := websocket.NewWebsocketServer(settings, dataStore)
+
 	return &Backend{
-		settings:  settings,
-		dataStore: dataStore,
-		wsServer:  websocket.NewWebsocketServer(settings, dataStore),
+		settings:    settings,
+		dataStore:   dataStore,
+		eventRouter: eventRouter,
+		wsServer:    wsServer,
 	}
 }
 
@@ -31,7 +37,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Starting backend server...")
 
 	// Setup event handlers
-	event_handler.RegisterHandlers(b.wsServer.EventRouter)
+	event_handler.RegisterHandlers(b.eventRouter)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()

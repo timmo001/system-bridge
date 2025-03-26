@@ -165,7 +165,7 @@ func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) error
 	if d == nil {
 		return fmt.Errorf("DataStore is nil")
 	}
-	
+
 	if module == "" {
 		return fmt.Errorf("module name cannot be empty")
 	}

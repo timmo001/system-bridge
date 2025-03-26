@@ -27,15 +27,19 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 		}
 
-		// TODO: Compat: Also trigger a data update event for the module
-		// router.DataStore.TriggerDataUpdate(data.Module)
+		go func() {
+			module := router.DataStore.GetModule(data.Module)
+
+			// Send a signal with the current client connection and the module
+
+		}()
 
 		return event.MessageResponse{
 			ID:      message.ID,
 			Type:    event.ResponseTypeGettingData,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    router.DataStore.GetModuleData(data.Module),
-			Message: "Data updated",
+			Data:    data,
+			Message: "Getting data",
 		}
 	})
 }
