@@ -14,9 +14,9 @@ import (
 )
 
 type Backend struct {
-	settings *settings.Settings
+	settings  *settings.Settings
 	dataStore *data.DataStore
-	wsServer *websocket.WebsocketServer
+	wsServer  *websocket.WebsocketServer
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
@@ -31,7 +31,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Starting backend server...")
 
 	// Setup event handlers
-  event_handler.RegisterHandlers(b.wsServer.EventRouter)
+	event_handler.RegisterHandlers(b.wsServer.EventRouter)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
