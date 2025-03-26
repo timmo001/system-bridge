@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	event_handler "github.com/timmo001/system-bridge/event/handler"
+	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
+	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
-	"github.com/timmo001/system-bridge/websocket"
 )
 
 type Backend struct {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/backend/event"
 )
 
 func Logout() error {

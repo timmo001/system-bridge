@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/go-vgo/robotgo"
 	"github.com/mitchellh/mapstructure"
-	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/backend/event"
 )
 
 type KeyboardTextRequestData struct {

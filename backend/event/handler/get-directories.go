@@ -4,7 +4,7 @@ import (
 	"runtime"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/backend/event"
 )
 
 type GetDirectoriesResponseDataItem struct {
