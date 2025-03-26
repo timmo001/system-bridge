@@ -27,12 +27,13 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 		}
 
-		go func() {
-			module := router.DataStore.GetModule(data.Module)
+		// go func() {
+		// 	// module := router.DataStore.GetModule(data.Module)
+		// 	// currentConnection := ""
 
-			// Send a signal with the current client connection and the module
+		// 	// Send a signal with the current client connection and the module
 
-		}()
+		// }()
 
 		return event.MessageResponse{
 			ID:      message.ID,
