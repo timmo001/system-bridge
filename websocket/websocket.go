@@ -1,4 +1,4 @@
-package backend
+package websocket
 
 import (
 	"encoding/json"

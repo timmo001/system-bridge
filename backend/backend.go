@@ -8,17 +8,18 @@ import (
 	"github.com/charmbracelet/log"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/websocket"
 )
 
 type Backend struct {
 	settings   *settings.Settings
-	wsServer *WebsocketServer
+	wsServer *websocket.WebsocketServer
 }
 
 func New(settings *settings.Settings) *Backend {
 	return &Backend{
 		settings: settings,
-		wsServer: NewWebsocketServer(settings),
+		wsServer: websocket.NewWebsocketServer(settings),
 	}
 }
 
