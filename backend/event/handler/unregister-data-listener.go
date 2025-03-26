@@ -5,8 +5,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterUnregisterDataListenerHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventUnregisterDataListener, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterUnregisterDataListenerHandler() {
+	h.router.RegisterSimpleHandler(event.EventUnregisterDataListener, func(message event.Message) event.MessageResponse {
 		log.Infof("Received unregister data listener event: %v", message)
 
 		// TODO: Implement

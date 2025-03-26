@@ -14,8 +14,8 @@ type KeyboardTextRequestData struct {
 	Delay int    `json:"delay" mapstructure:"delay"`
 }
 
-func RegisterKeyboardTextHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventKeyboardText, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterKeyboardTextHandler() {
+	h.router.RegisterSimpleHandler(event.EventKeyboardText, func(message event.Message) event.MessageResponse {
 		log.Infof("Received keyboard text event: %v", message)
 
 		data := KeyboardTextRequestData{}

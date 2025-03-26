@@ -5,8 +5,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterMediaControlHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventMediaControl, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterMediaControlHandler() {
+	h.router.RegisterSimpleHandler(event.EventMediaControl, func(message event.Message) event.MessageResponse {
 		log.Infof("Received media control event: %v", message)
 
 		// TODO: Implement

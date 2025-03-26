@@ -7,8 +7,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterExitApplicationHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventExitApplication, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterExitApplicationHandler() {
+	h.router.RegisterSimpleHandler(event.EventExitApplication, func(message event.Message) event.MessageResponse {
 		log.Infof("Received exit event: %v", message)
 
 		log.Info("Exiting backend...")

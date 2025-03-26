@@ -26,8 +26,8 @@ func Logout() error {
 	}
 }
 
-func RegisterPowerLogoutHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerLogout, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterPowerLogoutHandler() {
+	h.router.RegisterSimpleHandler(event.EventPowerLogout, func(message event.Message) event.MessageResponse {
 		log.Infof("Received power logout event: %v", message)
 
 		go func() {

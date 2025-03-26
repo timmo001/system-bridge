@@ -10,9 +10,9 @@ type GetDirectoryRequestData struct {
 	BaseDirectory string `json:"base" mapstructure:"base"`
 }
 
-func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDirectoriesResponseDataItem {
+func (h *MessageHandler) GetDirectory(baseDirectoryKey string) *GetDirectoriesResponseDataItem {
 	// Get directories
-	directories := GetDirectories(router)
+	directories := h.GetDirectories()
 
 	// Find the directory with the key of the base directory
 	var baseDirectory *GetDirectoriesResponseDataItem = nil
@@ -25,8 +25,8 @@ func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDire
 	return baseDirectory
 }
 
-func RegisterGetDirectoryHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetDirectory, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterGetDirectoryHandler() {
+	h.router.RegisterSimpleHandler(event.EventGetDirectory, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get directory event: %v", message)
 
 		var data GetDirectoryRequestData
@@ -39,14 +39,13 @@ func RegisterGetDirectoryHandler(router *event.MessageRouter) {
 			}
 		}
 
-		directory := GetDirectory(router, data.BaseDirectory)
+		directory := h.GetDirectory(data.BaseDirectory)
 
 		if directory == nil {
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeBadDirectory,
-				Message: "Failed to get directory",
 			}
 		}
 

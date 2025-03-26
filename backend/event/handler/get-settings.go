@@ -8,8 +8,8 @@ import (
 
 type GetSettingsResponseData = settings.Settings
 
-func RegisterGetSettingsHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetSettings, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterGetSettingsHandler() {
+	h.router.RegisterSimpleHandler(event.EventGetSettings, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get settings event: %v", message)
 
 		settings, err := settings.Load()

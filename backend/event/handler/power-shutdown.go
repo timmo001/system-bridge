@@ -26,8 +26,8 @@ func Shutdown() error {
 	}
 }
 
-func RegisterPowerShutdownHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerShutdown, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterPowerShutdownHandler() {
+	h.router.RegisterSimpleHandler(event.EventPowerShutdown, func(message event.Message) event.MessageResponse {
 		log.Infof("Received power shutdown event: %v", message)
 
 		go func() {

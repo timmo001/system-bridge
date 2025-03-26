@@ -38,8 +38,9 @@ func Lock() error {
 		return fmt.Errorf("locking not supported on %s", runtime.GOOS)
 	}
 }
-func RegisterPowerLockHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerLock, func(message event.Message) event.MessageResponse {
+
+func (h *MessageHandler) RegisterPowerLockHandler() {
+	h.router.RegisterSimpleHandler(event.EventPowerLock, func(message event.Message) event.MessageResponse {
 		log.Infof("Received power lock event: %v", message)
 
 		go func() {

@@ -11,8 +11,8 @@ type UpdateSettingsRequestData = settings.Settings
 
 type UpdateSettingsResponseData = settings.Settings
 
-func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventUpdateSettings, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterUpdateSettingsHandler() {
+	h.router.RegisterSimpleHandler(event.EventUpdateSettings, func(message event.Message) event.MessageResponse {
 		log.Infof("Received update settings event: %v", message)
 
 		settings, err := settings.Load()

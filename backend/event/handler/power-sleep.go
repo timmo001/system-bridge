@@ -26,8 +26,8 @@ func Sleep() error {
 	}
 }
 
-func RegisterPowerSleepHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerSleep, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterPowerSleepHandler() {
+	h.router.RegisterSimpleHandler(event.EventPowerSleep, func(message event.Message) event.MessageResponse {
 		log.Infof("Received power sleep event: %v", message)
 
 		go func() {

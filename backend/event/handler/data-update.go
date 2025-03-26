@@ -5,8 +5,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterDataUpdateHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventDataUpdate, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterDataUpdateHandler() {
+	h.router.RegisterSimpleHandler(event.EventDataUpdate, func(message event.Message) event.MessageResponse {
 		log.Infof("Received data update event: %v", message)
 
 		// TODO: Implement

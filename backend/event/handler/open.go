@@ -12,8 +12,8 @@ import (
 
 type OpenRequestData struct {
 	// Path or URL, never both
-	Path string `json:"path" mapstructure:"path"`
-	URL  string `json:"url" mapstructure:"url"`
+	Path string `json:"path,omitempty" mapstructure:"path,omitempty"`
+	URL  string `json:"url,omitempty" mapstructure:"url,omitempty"`
 }
 
 func OpenWithDefaultProgram(path string) error {
@@ -28,7 +28,7 @@ func OpenWithDefaultProgram(path string) error {
 		cmd = exec.Command("xdg-open", path)
 	}
 
-	return cmd.Start()
+	return cmd.Run()
 }
 
 func OpenWithDefaultBrowser(url string) error {
@@ -43,11 +43,11 @@ func OpenWithDefaultBrowser(url string) error {
 		cmd = exec.Command("xdg-open", url)
 	}
 
-	return cmd.Start()
+	return cmd.Run()
 }
 
-func RegisterOpenHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventOpen, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterOpenHandler() {
+	h.router.RegisterSimpleHandler(event.EventOpen, func(message event.Message) event.MessageResponse {
 		log.Infof("Received open event: %v", message)
 
 		data := OpenRequestData{}

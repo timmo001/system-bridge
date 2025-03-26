@@ -5,8 +5,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventRegisterDataListener, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterRegisterDataListenerHandler() {
+	h.router.RegisterSimpleHandler(event.EventRegisterDataListener, func(message event.Message) event.MessageResponse {
 		log.Infof("Received register data listener event: %v", message)
 
 		// TODO: Implement

@@ -14,7 +14,7 @@ type GetDirectoriesResponseDataItem struct {
 
 type GetDirectoriesResponseData = []GetDirectoriesResponseDataItem
 
-func GetDirectories(router *event.MessageRouter) GetDirectoriesResponseData {
+func (h *MessageHandler) GetDirectories() GetDirectoriesResponseData {
 	var desktopDirectory, documentsDirectory, downloadsDirectory, musicDirectory, picturesDirectory, videosDirectory string
 
 	switch runtime.GOOS {
@@ -52,7 +52,7 @@ func GetDirectories(router *event.MessageRouter) GetDirectoriesResponseData {
 	}
 
 	// Get user media directories
-	for _, directory := range router.Settings.Media.Directories {
+	for _, directory := range h.router.Settings.Media.Directories {
 		directories = append(directories, GetDirectoriesResponseDataItem{
 			Key:  directory.Name,
 			Path: directory.Path,
@@ -62,11 +62,11 @@ func GetDirectories(router *event.MessageRouter) GetDirectoriesResponseData {
 	return directories
 }
 
-func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetDirectories, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterGetDirectoriesHandler() {
+	h.router.RegisterSimpleHandler(event.EventGetDirectories, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get directories event: %v", message)
 
-		directories := GetDirectories(router)
+		directories := h.GetDirectories()
 
 		return event.MessageResponse{
 			ID:      message.ID,

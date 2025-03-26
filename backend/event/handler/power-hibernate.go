@@ -32,8 +32,8 @@ func Hibernate() error {
 	}
 }
 
-func RegisterPowerHibernateHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventPowerHibernate, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterPowerHibernateHandler() {
+	h.router.RegisterSimpleHandler(event.EventPowerHibernate, func(message event.Message) event.MessageResponse {
 		log.Infof("Received power hibernate event: %v", message)
 
 		go func() {

@@ -31,8 +31,8 @@ func GetFiles(path string) []GetFileResponseData {
 	return responseData
 }
 
-func RegisterGetFilesHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetFiles, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterGetFilesHandler() {
+	h.router.RegisterSimpleHandler(event.EventGetFiles, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get files event: %v", message)
 
 		var data GetFilesRequestData
@@ -46,7 +46,7 @@ func RegisterGetFilesHandler(router *event.MessageRouter) {
 		}
 
 		// Get base directory
-		baseDirectory := GetDirectory(router, data.BaseDirectory)
+		baseDirectory := h.GetDirectory(data.BaseDirectory)
 		if baseDirectory == nil {
 			return event.MessageResponse{
 				ID:      message.ID,

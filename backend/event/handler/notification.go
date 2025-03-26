@@ -5,8 +5,8 @@ import (
 	"github.com/timmo001/system-bridge/backend/event"
 )
 
-func RegisterNotificationHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventNotification, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterNotificationHandler() {
+	h.router.RegisterSimpleHandler(event.EventNotification, func(message event.Message) event.MessageResponse {
 		log.Infof("Received notification event: %v", message)
 
 		// TODO: Implement

@@ -13,8 +13,8 @@ type GetDataRequestData struct {
 
 type GetDataResponseData = any
 
-func RegisterGetDataHandler(router *event.MessageRouter) {
-	router.RegisterSimpleHandler(event.EventGetData, func(message event.Message) event.MessageResponse {
+func (h *MessageHandler) RegisterGetDataHandler() {
+	h.router.RegisterSimpleHandler(event.EventGetData, func(message event.Message) event.MessageResponse {
 		log.Infof("Received get data event: %v", message)
 
 		var data GetDataRequestData
@@ -27,15 +27,22 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 		}
 
-		// TODO: Compat: Also trigger a data update event for the module
-		// router.DataStore.TriggerDataUpdate(data.Module)
+		go func() {
+			h.router.Websocket.SendMessage(message.Conn, event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeDataUpdate,
+				Subtype: event.ResponseSubtypeNone,
+				Data:    h.router.DataStore.GetModuleData(data.Module),
+				Message: "Data updated",
+			})
+		}()
 
 		return event.MessageResponse{
 			ID:      message.ID,
 			Type:    event.ResponseTypeGettingData,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    router.DataStore.GetModuleData(data.Module),
-			Message: "Data updated",
+			Data:    data,
+			Message: "Getting data",
 		}
 	})
 }
