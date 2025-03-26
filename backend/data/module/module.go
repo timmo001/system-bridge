@@ -1,5 +1,7 @@
 package data_module
 
+import "errors"
+
 // Module represents the type of data module
 type Module string
 
@@ -16,3 +18,12 @@ const (
 	ModuleSensors   Module = "sensors"
 	ModuleSystem    Module = "system"
 )
+
+type UpdateTask struct {
+	Module Module
+	Data   any
+}
+
+func (t *UpdateTask) UpdateModule() (any, error) {
+	return nil, errors.New("not implemented")
+}
