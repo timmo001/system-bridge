@@ -8,6 +8,7 @@ import (
 	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/settings"
+	types_event "github.com/timmo001/system-bridge/shared/types/event"
 )
 
 // WebSocketRequest represents the structure of messages sent over the WebSocket
@@ -51,16 +52,16 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 	return conn, nil
 }
 
-func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.MessageResponse) {
+func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message types_event.MessageResponse) {
 	if err := conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)
 	}
 }
 
-func (ws *WebsocketServer) SendError(conn *websocket.Conn, msg WebSocketRequest, subtype event.ResponseSubtype, message string) {
-	response := event.MessageResponse{
+func (ws *WebsocketServer) SendError(conn *websocket.Conn, msg WebSocketRequest, subtype types_event.ResponseSubtype, message string) {
+	response := types_event.MessageResponse{
 		ID:      msg.ID,
-		Type:    event.ResponseTypeError,
+		Type:    types_event.ResponseTypeError,
 		Subtype: subtype,
 		Data:    map[string]string{},
 		Message: message,
@@ -80,7 +81,7 @@ func (ws *WebsocketServer) HandleError(conn *websocket.Conn, err error) {
 			Event: "unknown",
 			Data:  map[string]string{},
 		},
-		event.ResponseSubtypeNone,
+		types_event.ResponseSubtypeNone,
 		err.Error(),
 	)
 }
