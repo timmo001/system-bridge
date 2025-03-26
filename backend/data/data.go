@@ -80,3 +80,29 @@ func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) {
 
 	m.Data = data
 }
+
+func (d *DataStore) GetAllModuleData() map[data_module.ModuleName]any {
+	data := make(map[data_module.ModuleName]any)
+
+	// Collect data from each module using the GetModule method
+	for _, moduleName := range []data_module.ModuleName{
+		data_module.ModuleBattery,
+		data_module.ModuleCPU,
+		data_module.ModuleDisks,
+		data_module.ModuleDisplays,
+		data_module.ModuleGPUs,
+		data_module.ModuleMedia,
+		data_module.ModuleMemory,
+		data_module.ModuleNetworks,
+		data_module.ModuleProcesses,
+		data_module.ModuleSensors,
+		data_module.ModuleSystem,
+	} {
+		module := d.GetModule(moduleName)
+		if module != nil {
+			data[moduleName] = module.Data
+		}
+	}
+
+	return data
+}
