@@ -9,30 +9,30 @@ import (
 )
 
 type SettingsAPI struct {
-	Token string `mapstructure:"token"`
-	Port  int    `mapstructure:"port"`
+	Token string `json:"token" mapstructure:"token"`
+	Port  int    `json:"port" mapstructure:"port"`
 }
 
 type SettingsHotkey struct {
-	Name string `mapstructure:"name"`
-	Key  string `mapstructure:"key"`
+	Name string `json:"name" mapstructure:"name"`
+	Key  string `json:"key" mapstructure:"key"`
 }
 
 type SettingsMediaDirectory struct {
-	Name string `mapstructure:"name"`
-	Path string `mapstructure:"path"`
+	Name string `json:"name" mapstructure:"name"`
+	Path string `json:"path" mapstructure:"path"`
 }
 
 type SettingsMedia struct {
-	Directories []SettingsMediaDirectory `mapstructure:"directories"`
+	Directories []SettingsMediaDirectory `json:"directories" mapstructure:"directories"`
 }
 
 type Settings struct {
-	API       SettingsAPI      `mapstructure:"api"`
-	Autostart bool             `mapstructure:"autostart"`
-	Hotkeys   []SettingsHotkey `mapstructure:"hotkeys"`
-	LogLevel  log.Level        `mapstructure:"log_level"`
-	Media     SettingsMedia    `mapstructure:"media"`
+	API       SettingsAPI      `json:"api" mapstructure:"api"`
+	Autostart bool             `json:"autostart" mapstructure:"autostart"`
+	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
+	LogLevel  log.Level        `json:"log_level" mapstructure:"log_level"`
+	Media     SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
 func Load() (*Settings, error) {

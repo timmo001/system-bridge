@@ -14,11 +14,11 @@ import (
 // Extends event.Message to include a token
 type WebSocketRequest struct {
 	// event.Message fields
-	ID    string `json:"id"`
-	Event string `json:"event"`
-	Data  any    `json:"data"`
+	ID    string `json:"id" mapstructure:"id"`
+	Event string `json:"event" mapstructure:"event"`
+	Data  any    `json:"data" mapstructure:"data"`
 	// WebSocketRequest fields
-	Token string `json:"token"`
+	Token string `json:"token" mapstructure:"token"`
 }
 
 type WebsocketServer struct {
