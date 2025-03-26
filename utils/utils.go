@@ -1,4 +1,4 @@
-package settings
+package utils
 
 import "github.com/google/uuid"
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type SettingsAPI struct {
@@ -58,7 +59,7 @@ func Load() (*Settings, error) {
 	viper.AddConfigPath(configDirPath)
 
 	// Set default values
-	viper.SetDefault("api.token", GenerateToken())
+	viper.SetDefault("api.token", utils.GenerateToken())
 	viper.SetDefault("api.port", 9170)
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
