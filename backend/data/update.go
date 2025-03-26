@@ -13,7 +13,7 @@ import (
 // UpdateTaskProcessor handles async task processing with rate limiting
 type UpdateTaskProcessor struct {
 	// Data store to update
-	dataStore *DataStore
+	DataStore *DataStore
 
 	// Rate limiter to control CPU usage
 	limiter *rate.Limiter
@@ -33,7 +33,7 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &UpdateTaskProcessor{
-		dataStore: dataStore,
+		DataStore: dataStore,
 		// Create rate limiter with specified tasks/second and burst limit
 		limiter:   rate.NewLimiter(rate.Limit(tasksPerSecond), burstLimit),
 		taskQueue: make(chan data_module.Module, 20), // Buffer size of 20
@@ -91,7 +91,7 @@ func (tp *UpdateTaskProcessor) worker() {
 			}
 
 			// Update data store
-			tp.dataStore.SetModuleData(task.Module, d)
+			tp.DataStore.SetModuleData(task.Module, d)
 
 		case <-tp.ctx.Done():
 			return

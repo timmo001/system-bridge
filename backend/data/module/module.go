@@ -22,8 +22,8 @@ const (
 )
 
 type Module struct {
-	Module ModuleName
-	Data   any
+	Module ModuleName `json:"module" mapstructure:"module"`
+	Data   any        `json:"data" mapstructure:"data"`
 }
 
 // Process implements data.UpdateTask.

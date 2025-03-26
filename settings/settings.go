@@ -2,7 +2,6 @@ package settings
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
@@ -42,20 +41,10 @@ func Load() (*Settings, error) {
 	viper.SetConfigName("settings")
 	viper.SetConfigType("yaml")
 
-	// (Cross platform) default config path (~/.config/system-bridge/v5 or %APPDATA%\system-bridge\v5)
-	configDirPath := ""
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		configDirPath = os.Getenv("XDG_CONFIG_HOME") + "/system-bridge/v5"
-	} else if os.Getenv("APPDATA") != "" {
-		configDirPath = os.Getenv("APPDATA") + "/system-bridge/v5"
-	} else if os.Getenv("HOME") != "" {
-		configDirPath = os.Getenv("HOME") + "/.config/system-bridge/v5"
-	} else {
-		return nil, fmt.Errorf("could not determine config path")
+	configDirPath, err := utils.GetConfigPath()
+	if err != nil {
+		return nil, fmt.Errorf("could not get config path: %w", err)
 	}
-
-	// Create the config directory if it doesn't exist
-	os.MkdirAll(configDirPath, 0755)
 	viper.AddConfigPath(configDirPath)
 
 	// Set default values

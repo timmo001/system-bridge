@@ -1,7 +1,12 @@
 package data
 
 import (
+	"fmt"
+	"path/filepath"
+
+	"github.com/spf13/viper"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type DataStore struct {
@@ -18,8 +23,8 @@ type DataStore struct {
 	System    data_module.Module
 }
 
-func NewDataStore() *DataStore {
-	return &DataStore{
+func NewDataStore() (*DataStore, error) {
+	ds := &DataStore{
 		Battery:   data_module.Module{Module: data_module.ModuleBattery},
 		CPU:       data_module.Module{Module: data_module.ModuleCPU},
 		Disks:     data_module.Module{Module: data_module.ModuleDisks},
@@ -32,6 +37,84 @@ func NewDataStore() *DataStore {
 		Sensors:   data_module.Module{Module: data_module.ModuleSensors},
 		System:    data_module.Module{Module: data_module.ModuleSystem},
 	}
+
+	// Load data for all modules
+	for _, module := range []data_module.ModuleName{
+		data_module.ModuleBattery,
+		data_module.ModuleCPU,
+		data_module.ModuleDisks,
+		data_module.ModuleDisplays,
+		data_module.ModuleGPUs,
+		data_module.ModuleMedia,
+		data_module.ModuleMemory,
+		data_module.ModuleNetworks,
+		data_module.ModuleProcesses,
+		data_module.ModuleSensors,
+		data_module.ModuleSystem,
+	} {
+		if err := ds.loadModuleData(ds.GetModule(module)); err != nil {
+			return nil, fmt.Errorf("error loading data for module %s: %w", module, err)
+		}
+	}
+
+	return ds, nil
+}
+
+// loadModuleData loads the module data from a YAML file
+func (d *DataStore) loadModuleData(m *data_module.Module) error {
+	if m == nil {
+		return fmt.Errorf("module is nil")
+	}
+
+	dataPath, err := utils.GetDataPath()
+	if err != nil {
+		return fmt.Errorf("could not get data path: %w", err)
+	}
+
+	v := viper.New()
+	v.SetConfigName(string(m.Module))
+	v.SetConfigType("yaml")
+	v.AddConfigPath(dataPath)
+
+	if err := v.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found, use default values
+			return nil
+		}
+		return fmt.Errorf("error reading config file: %w", err)
+	}
+
+	if err := v.Unmarshal(m); err != nil {
+		return fmt.Errorf("unable to decode into struct: %w", err)
+	}
+
+	return nil
+}
+
+// saveModuleData saves the module data to a YAML file
+func (d *DataStore) saveModuleData(m *data_module.Module) error {
+	if m == nil {
+		return fmt.Errorf("module is nil")
+	}
+
+	dataPath, err := utils.GetDataPath()
+	if err != nil {
+		return fmt.Errorf("could not get data path: %w", err)
+	}
+
+	v := viper.New()
+	v.SetConfigName(string(m.Module))
+	v.SetConfigType("yaml")
+	v.AddConfigPath(dataPath)
+
+	v.Set("module", m.Module)
+	v.Set("data", m.Data)
+
+	if err := v.WriteConfigAs(filepath.Join(dataPath, string(m.Module)+".yaml")); err != nil {
+		return fmt.Errorf("error writing config file: %w", err)
+	}
+
+	return nil
 }
 
 func (d *DataStore) GetModule(module data_module.ModuleName) *data_module.Module {
@@ -72,13 +155,14 @@ func (d *DataStore) GetModuleData(module data_module.ModuleName) any {
 	return m.Data
 }
 
-func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) {
+func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) error {
 	m := d.GetModule(module)
 	if m == nil {
-		return
+		return fmt.Errorf("module %s not found", module)
 	}
 
 	m.Data = data
+	return d.saveModuleData(m)
 }
 
 func (d *DataStore) GetAllModuleData() map[data_module.ModuleName]any {
