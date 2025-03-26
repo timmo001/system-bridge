@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/data"
+	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
 )
 
@@ -25,16 +26,18 @@ type MessageResponse struct {
 type MessageHandler func(message Message) MessageResponse
 
 type MessageRouter struct {
-	Settings *settings.Settings
+	Settings  *settings.Settings
 	DataStore *data.DataStore
-	Handlers map[EventType]MessageHandler
+	Websocket *websocket.WebsocketServer
+	Handlers  map[EventType]MessageHandler
 }
 
-func NewMessageRouter(settings *settings.Settings, dataStore *data.DataStore) *MessageRouter {
+func NewMessageRouter(settings *settings.Settings, dataStore *data.DataStore, websocket *websocket.WebsocketServer) *MessageRouter {
 	return &MessageRouter{
-		Settings: settings,
+		Settings:  settings,
 		DataStore: dataStore,
-		Handlers: make(map[EventType]MessageHandler),
+		Websocket: websocket,
+		Handlers:  make(map[EventType]MessageHandler),
 	}
 }
 

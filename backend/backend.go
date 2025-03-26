@@ -8,51 +8,33 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/data"
+	"github.com/timmo001/system-bridge/backend/event"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
 )
 
 type Backend struct {
-	settings *settings.Settings
-	dataStore *data.DataStore
-	wsServer *websocket.WebsocketServer
+	dataStore           *data.DataStore
+	eventMessageHandler *event_handler.MessageHandler
+	settings            *settings.Settings
+	wsServer            *websocket.WebsocketServer
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
+	wsServer := websocket.NewWebsocketServer(settings, dataStore)
+	eventMessageHandler := event_handler.NewMessageHandler(event.NewMessageRouter(settings, dataStore, wsServer))
+
 	return &Backend{
-		settings:  settings,
-		dataStore: dataStore,
-		wsServer:  websocket.NewWebsocketServer(settings, dataStore),
+		dataStore:           dataStore,
+		eventMessageHandler: eventMessageHandler,
+		settings:            settings,
+		wsServer:            wsServer,
 	}
 }
 
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Running backend server...")
-
-	// Setup event handlers
-	event_handler.RegisterDataUpdateHandler(b.wsServer.EventRouter)
-	event_handler.RegisterExitApplicationHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetDataHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetDirectoriesHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetFilesHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetFileHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetDirectoryHandler(b.wsServer.EventRouter)
-	event_handler.RegisterGetSettingsHandler(b.wsServer.EventRouter)
-	event_handler.RegisterKeyboardKeypressHandler(b.wsServer.EventRouter)
-	event_handler.RegisterKeyboardTextHandler(b.wsServer.EventRouter)
-	event_handler.RegisterMediaControlHandler(b.wsServer.EventRouter)
-	event_handler.RegisterNotificationHandler(b.wsServer.EventRouter)
-	event_handler.RegisterOpenHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerHibernateHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerLockHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerLogoutHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerRestartHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerShutdownHandler(b.wsServer.EventRouter)
-	event_handler.RegisterPowerSleepHandler(b.wsServer.EventRouter)
-	event_handler.RegisterRegisterDataListenerHandler(b.wsServer.EventRouter)
-	event_handler.RegisterUnregisterDataListenerHandler(b.wsServer.EventRouter)
-	event_handler.RegisterUpdateSettingsHandler(b.wsServer.EventRouter)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
