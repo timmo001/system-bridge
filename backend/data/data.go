@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/spf13/viper"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
@@ -60,7 +59,7 @@ func NewDataStore() (*DataStore, error) {
 	return ds, nil
 }
 
-// loadModuleData loads the module data from a YAML file
+// loadModuleData loads the module data from a JSON file
 func (d *DataStore) loadModuleData(m *data_module.Module) error {
 	if m == nil {
 		return fmt.Errorf("module is nil")
@@ -73,7 +72,7 @@ func (d *DataStore) loadModuleData(m *data_module.Module) error {
 
 	v := viper.New()
 	v.SetConfigName(string(m.Module))
-	v.SetConfigType("yaml")
+	v.SetConfigType("json")
 	v.AddConfigPath(dataPath)
 
 	if err := v.ReadInConfig(); err != nil {
@@ -91,7 +90,7 @@ func (d *DataStore) loadModuleData(m *data_module.Module) error {
 	return nil
 }
 
-// saveModuleData saves the module data to a YAML file
+// saveModuleData saves the module data to a JSON file
 func (d *DataStore) saveModuleData(m *data_module.Module) error {
 	if m == nil {
 		return fmt.Errorf("module is nil")
@@ -104,13 +103,13 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 
 	v := viper.New()
 	v.SetConfigName(string(m.Module))
-	v.SetConfigType("yaml")
+	v.SetConfigType("json")
 	v.AddConfigPath(dataPath)
 
 	v.Set("module", m.Module)
 	v.Set("data", m.Data)
 
-	if err := v.WriteConfigAs(filepath.Join(dataPath, string(m.Module)+".yaml")); err != nil {
+	if err := v.SafeWriteConfig(); err != nil {
 		return fmt.Errorf("error writing config file: %w", err)
 	}
 

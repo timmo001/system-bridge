@@ -39,7 +39,7 @@ func Load() (*Settings, error) {
 	viper.AutomaticEnv()
 
 	viper.SetConfigName("settings")
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("json")
 
 	configDirPath, err := utils.GetConfigPath()
 	if err != nil {
