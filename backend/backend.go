@@ -15,21 +15,24 @@ import (
 )
 
 type Backend struct {
-	dataStore           *data.DataStore
-	eventMessageHandler *event_handler.MessageHandler
-	settings            *settings.Settings
-	wsServer            *websocket.WebsocketServer
+	DataStore           *data.DataStore
+	EventMessageRouter  *event.MessageRouter
+	EventMessageHandler *event_handler.MessageHandler
+	Settings            *settings.Settings
+	WebsocketServer     *websocket.WebsocketServer
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
-	wsServer := websocket.NewWebsocketServer(settings, dataStore)
-	eventMessageHandler := event_handler.NewMessageHandler(event.NewMessageRouter(settings, dataStore, wsServer))
+  eventMessageRouter := event.NewMessageRouter(settings, dataStore)
+	eventMessageHandler := event_handler.NewMessageHandler(eventMessageRouter)
+	websocketServer := websocket.NewWebsocketServer(settings)
 
 	return &Backend{
-		dataStore:           dataStore,
-		eventMessageHandler: eventMessageHandler,
-		settings:            settings,
-		wsServer:            wsServer,
+		DataStore:           dataStore,
+		EventMessageRouter:  eventMessageRouter,
+		EventMessageHandler: eventMessageHandler,
+		Settings:            settings,
+		WebsocketServer:     websocketServer,
 	}
 }
 
@@ -41,7 +44,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
-		_, err := b.wsServer.HandleConnection(w, r)
+		_, err := b.WebsocketServer.HandleConnection(w, r)
 		if err != nil {
 			log.Error("WebSocket connection error:", err)
 			http.Error(w, "WebSocket connection failed", http.StatusInternalServerError)
@@ -51,7 +54,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", b.Settings.API.Port),
 		Handler: mux,
 	}
 
@@ -73,7 +76,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Run data update task processor every 30 seconds
 	go func() {
 		for {
-			data.RunUpdateTaskProcessor(b.dataStore)
+			data.RunUpdateTaskProcessor(b.DataStore)
 			log.Info("Data update task processor completed")
 			log.Info("Sleeping for 30 seconds...")
 			time.Sleep(30 * time.Second)

@@ -1,5 +1,7 @@
 package types
 
+import "net/http"
+
 // WebsocketConnection represents an interface for websocket operations
 type WebsocketConnection interface {
 	SendMessage(message interface{}) error
@@ -8,6 +10,6 @@ type WebsocketConnection interface {
 
 // WebsocketServer represents the interface for websocket server operations
 type WebsocketServer interface {
-	HandleConnection(connection WebsocketConnection)
+	HandleConnection(w http.ResponseWriter, r *http.Request) (WebsocketConnection, error)
 	SendMessage(connection WebsocketConnection, message interface{}) error
 }

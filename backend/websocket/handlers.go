@@ -2,11 +2,42 @@ package websocket
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
-	"github.com/timmo001/system-bridge/backend/event"
+	types_event "github.com/timmo001/system-bridge/shared/types/event"
 )
+
+func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	conn, err := ws.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Error("Failed to upgrade connection:", err)
+		return nil, err
+	}
+
+	// Start a goroutine to handle messages from this connection
+	go ws.handleMessages(conn)
+
+	return conn, nil
+}
+
+func (ws *WebsocketServer) HandleClose(conn *websocket.Conn) {
+	conn.Close()
+}
+
+func (ws *WebsocketServer) HandleError(conn *websocket.Conn, err error) {
+	log.Error("WebSocket error:", err)
+	ws.SendError(conn,
+		WebSocketRequest{
+			ID:    "unknown",
+			Event: "unknown",
+			Data:  map[string]string{},
+		},
+		types_event.ResponseSubtypeNone,
+		err.Error(),
+	)
+}
 
 func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 	defer conn.Close()
@@ -47,9 +78,9 @@ func (ws *WebsocketServer) HandleMessage(conn *websocket.Conn, message []byte) {
 	// Handle different event types
 	log.Info("Received message", "event", msg.Event, "id", msg.ID)
 	// Pass message to event handlers
-	response := ws.EventRouter.HandleMessage(event.Message{
+	response := ws.EventRouter.HandleMessage(types_event.Message{
 		ID:    msg.ID,
-		Event: event.EventType(msg.Event),
+		Event: types_event.EventType(msg.Event),
 		Data:  msg.Data,
 	})
 	ws.SendMessage(conn, response)
