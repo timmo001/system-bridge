@@ -1,6 +1,9 @@
 package event_handler
 
 import (
+	"strings"
+	"time"
+
 	"github.com/charmbracelet/log"
 	"github.com/go-vgo/robotgo"
 	"github.com/mitchellh/mapstructure"
@@ -10,6 +13,7 @@ import (
 type KeyboardKeypressRequestData struct {
 	Key       string   `json:"key" mapstructure:"key"`
 	Modifiers []string `json:"modifiers" mapstructure:"modifiers"`
+	Delay     int      `json:"delay" mapstructure:"delay"` // Delay in milliseconds
 }
 
 func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
@@ -39,11 +43,20 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 			}
 		}
 
+		// Use provided delay
+		if data.Delay > 0 {
+			delay := data.Delay
+
+			log.Infof("Waiting for %d milliseconds", delay)
+			time.Sleep(time.Duration(delay) * time.Millisecond)
+		}
+
 		log.Infof("Pressing keyboard key: %s with modifiers: %v", data.Key, data.Modifiers)
 
 		// Convert modifiers to robotgo format
 		var modifiers []interface{}
 		for _, mod := range data.Modifiers {
+			mod = strings.ToLower(mod)
 			switch mod {
 			case "shift":
 				modifiers = append(modifiers, "shift")

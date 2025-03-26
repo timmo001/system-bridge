@@ -1,6 +1,8 @@
 package event_handler
 
 import (
+	"time"
+
 	"github.com/charmbracelet/log"
 	"github.com/go-vgo/robotgo"
 	"github.com/mitchellh/mapstructure"
@@ -8,7 +10,8 @@ import (
 )
 
 type KeyboardTextRequestData struct {
-	Text string `json:"text" mapstructure:"text"`
+	Text  string `json:"text" mapstructure:"text"`
+	Delay int    `json:"delay" mapstructure:"delay"`
 }
 
 func RegisterKeyboardTextHandler(router *event.MessageRouter) {
@@ -36,6 +39,14 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 				Subtype: event.ResponseSubtypeBadRequest,
 				Message: "No text provided for keyboard text event",
 			}
+		}
+
+		// Use provided delay
+		if data.Delay > 0 {
+			delay := data.Delay
+
+			log.Infof("Waiting for %d milliseconds", delay)
+			time.Sleep(time.Duration(delay) * time.Millisecond)
 		}
 
 		log.Infof("Typing text: %s", data.Text)
