@@ -10,6 +10,7 @@ import (
 	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
+	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -22,7 +23,7 @@ type Backend struct {
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
-	eventRouter := event. NewMessageRouter(settings, dataStore)
+	eventRouter := event.NewMessageRouter(settings, dataStore)
 	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
 
 	return &Backend{
@@ -52,13 +53,15 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
+	// Set up API endpoint
+	mux.HandleFunc("/api", api_http.HandleAPI)
+	// TODO: http endpoints (/api healthcheck, get file etc.)
+
 	// Create HTTP server
 	server := &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
 		Handler: mux,
 	}
-
-	// TODO: http endpoints (/api healthcheck, get file etc.)
 
 	// Start server in a goroutine
 	go func() {
