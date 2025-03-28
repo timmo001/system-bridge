@@ -5,6 +5,7 @@ package displays
 
 import (
 	"fmt"
+	"regexp"
 	"syscall"
 	"unsafe"
 
@@ -15,6 +16,7 @@ var (
 	user32               = syscall.NewLazyDLL("user32.dll")
 	enumDisplayMonitors  = user32.NewProc("EnumDisplayMonitors")
 	getMonitorInfo      = user32.NewProc("GetMonitorInfoW")
+	displayPathRegex    = regexp.MustCompile(`^\\\\.\\|^\\\\\?\\`)
 )
 
 type RECT struct {
@@ -49,9 +51,10 @@ func getDisplays() ([]Display, error) {
 		height := info.Monitor.Bottom - info.Monitor.Top
 		isPrimary := (info.Flags & 0x1) != 0 // MONITORINFOF_PRIMARY
 
+		displayName := syscall.UTF16ToString(info.DeviceName[:])
 		display := Display{
-			ID:                   syscall.UTF16ToString(info.DeviceName[:]),
-			Name:                 syscall.UTF16ToString(info.DeviceName[:]),
+			ID:                   displayPathRegex.ReplaceAllString(displayName, ""),
+			Name:                 displayPathRegex.ReplaceAllString(displayName, ""),
 			ResolutionHorizontal: int(width),
 			ResolutionVertical:  int(height),
 			X:                    int(info.Monitor.Left),
