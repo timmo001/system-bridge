@@ -2,6 +2,26 @@
 
 A bridge for your systems.
 
+## System Requirements
+
+### Linux
+
+#### Arch Linux
+
+Install the following packages:
+
+```zsh
+sudo pacman -S inetutils
+```
+
+<!-- ### Debian/Ubuntu
+
+Install the following packages:
+
+```zsh
+sudo apt install
+``` -->
+
 ## Setup
 
 1. Install go
