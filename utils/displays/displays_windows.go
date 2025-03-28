@@ -1,0 +1,77 @@
+//go:build windows
+// +build windows
+
+package displays
+
+import (
+	"fmt"
+	"syscall"
+	"unsafe"
+
+	"github.com/charmbracelet/log"
+)
+
+var (
+	user32               = syscall.NewLazyDLL("user32.dll")
+	enumDisplayMonitors  = user32.NewProc("EnumDisplayMonitors")
+	getMonitorInfo      = user32.NewProc("GetMonitorInfoW")
+)
+
+type RECT struct {
+	Left, Top, Right, Bottom int32
+}
+
+type MONITORINFOEX struct {
+	CbSize    uint32
+	Monitor   RECT
+	WorkArea  RECT
+	Flags     uint32
+	DeviceName [32]uint16
+}
+
+func getDisplays() ([]Display, error) {
+	var displays []Display
+
+	callback := syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
+		var info MONITORINFOEX
+		info.CbSize = uint32(unsafe.Sizeof(info))
+
+		ret, _, _ := getMonitorInfo.Call(
+			uintptr(handle),
+			uintptr(unsafe.Pointer(&info)),
+		)
+
+		if ret == 0 {
+			return 1
+		}
+
+		width := info.Monitor.Right - info.Monitor.Left
+		height := info.Monitor.Bottom - info.Monitor.Top
+		isPrimary := (info.Flags & 0x1) != 0 // MONITORINFOF_PRIMARY
+
+		display := Display{
+			ID:                   syscall.UTF16ToString(info.DeviceName[:]),
+			Name:                 syscall.UTF16ToString(info.DeviceName[:]),
+			ResolutionHorizontal: int(width),
+			ResolutionVertical:  int(height),
+			X:                    int(info.Monitor.Left),
+			Y:                    int(info.Monitor.Top),
+			IsPrimary:            &isPrimary,
+		}
+
+		displays = append(displays, display)
+		return 1
+	})
+
+	ret, _, err := enumDisplayMonitors.Call(0, 0, callback, 0)
+	if ret == 0 {
+		return nil, fmt.Errorf("EnumDisplayMonitors failed: %v", err)
+	}
+
+	if len(displays) == 0 {
+		log.Warn("No displays found")
+		return displays, nil
+	}
+
+	return displays, nil
+}
