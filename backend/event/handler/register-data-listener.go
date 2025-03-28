@@ -3,13 +3,13 @@ package event_handler
 import (
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
-	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/backend/websocket"
+	"github.com/timmo001/system-bridge/types"
 )
 
 type RegisterDataListenerRequestData struct {
-	Modules []data_module.ModuleName `json:"modules" mapstructure:"modules"`
+	Modules []types.ModuleName `json:"modules" mapstructure:"modules"`
 }
 
 func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
