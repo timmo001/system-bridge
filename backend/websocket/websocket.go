@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/backend/data"
+	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
@@ -108,7 +109,7 @@ func (ws *WebsocketServer) UnregisterDataListener(connection string) {
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module types.Module) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module data_module.Module) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
