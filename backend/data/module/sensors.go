@@ -92,9 +92,9 @@ type SensorsWindows struct {
 // SensorsData represents all sensor information
 type SensorsData struct {
 	// TODO: Add fans model
-	Fans interface{} `json:"fans"`
+	Fans any `json:"fans"`
 	// TODO: Add temperatures model
-	Temperatures   interface{}     `json:"temperatures"`
+	Temperatures   any     `json:"temperatures"`
 	WindowsSensors *SensorsWindows `json:"windows_sensors"`
 }
 
