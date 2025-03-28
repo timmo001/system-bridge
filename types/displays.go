@@ -16,6 +16,4 @@ type Display struct {
 }
 
 // DisplaysData represents information about all display devices
-type DisplaysData struct {
-	Displays []Display `json:"displays"`
-}
+type DisplaysData = []Display

@@ -9,9 +9,7 @@ import (
 func (t *Module) UpdateGPUsModule() (types.GPUsData, error) {
 	log.Info("Getting GPUs data")
 
-	var gpusData types.GPUsData
-	// Initialize arrays
-	gpusData.GPUs = make([]types.GPU, 0)
+	var gpusData types.GPUsData = make([]types.GPU, 0)
 
 	gpus, err := gpus.GetGPUs()
 	if err != nil {
@@ -19,6 +17,6 @@ func (t *Module) UpdateGPUsModule() (types.GPUsData, error) {
 		return gpusData, err
 	}
 
-	gpusData.GPUs = gpus
+	gpusData = gpus
 	return gpusData, nil
 }

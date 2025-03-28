@@ -10,7 +10,7 @@ func (t *Module) UpdateDisplaysModule() (types.DisplaysData, error) {
 	log.Info("Getting displays data")
 
 	var displaysData types.DisplaysData
-	displaysData.Displays = make([]types.Display, 0)
+	displaysData = make([]types.Display, 0)
 
 	displays, err := displays.GetDisplays()
 	if err != nil {
@@ -18,6 +18,6 @@ func (t *Module) UpdateDisplaysModule() (types.DisplaysData, error) {
 		return displaysData, err
 	}
 
-	displaysData.Displays = displays
+	displaysData = displays
 	return displaysData, nil
 }

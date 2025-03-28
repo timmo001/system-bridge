@@ -17,6 +17,4 @@ type GPU struct {
 }
 
 // GPUsData represents information about all GPU devices
-type GPUsData struct {
-	GPUs []GPU `json:"gpus"`
-}
+type GPUsData = []GPU

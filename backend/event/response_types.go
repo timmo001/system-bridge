@@ -6,7 +6,7 @@ type ResponseType string
 const (
 	ResponseTypeError                    ResponseType = "ERROR"
 	ResponseTypeApplicationExiting       ResponseType = "APPLICATION_EXITING"
-	ResponseTypeGettingData              ResponseType = "GETTING_DATA"
+	ResponseTypeDataGet                  ResponseType = "DATA_GET"
 	ResponseTypeDirectories              ResponseType = "DIRECTORIES"
 	ResponseTypeDirectory                ResponseType = "DIRECTORY"
 	ResponseTypeFiles                    ResponseType = "FILES"

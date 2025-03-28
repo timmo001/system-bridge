@@ -60,8 +60,10 @@ func getDisplays() ([]types.Display, error) {
 		width := info.Monitor.Right - info.Monitor.Left
 		height := info.Monitor.Bottom - info.Monitor.Top
 		isPrimary := (info.Flags & 0x1) != 0 // MONITORINFOF_PRIMARY
+		pixelClock := 0.0
+		refreshRate := 0.0
 
-		displayName := syscall.UTF16ToString(info.DeviceName[:])
+    displayName := syscall.UTF16ToString(info.DeviceName[:])
 		cleanID := displayPathRegex.ReplaceAllString(displayName, "")
 		display := types.Display{
 			ID:                   cleanID,
@@ -71,6 +73,8 @@ func getDisplays() ([]types.Display, error) {
 			X:                    int(info.Monitor.Left),
 			Y:                    int(info.Monitor.Top),
 			IsPrimary:            &isPrimary,
+			PixelClock:           &pixelClock,
+			RefreshRate:          &refreshRate,
 		}
 
 		displays = append(displays, display)

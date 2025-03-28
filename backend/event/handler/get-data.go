@@ -46,15 +46,15 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 				ws.BroadcastModuleUpdate(connection, *router.DataStore.GetModule(module))
 			}
 
-			// Unregister the data listener if they have not already registered
-			if response == websocket.RegisterResponseAdded {
-				ws.UnregisterDataListener(connection)
-			}
+			// // Unregister the data listener if they have not already registered
+			// if response == websocket.RegisterResponseAdded {
+			// 	ws.UnregisterDataListener(connection)
+			// }
 		}()
 
 		return event.MessageResponse{
 			ID:      message.ID,
-			Type:    event.ResponseTypeGettingData,
+			Type:    event.ResponseTypeDataGet,
 			Subtype: event.ResponseSubtypeNone,
 			Data:    data,
 			Message: "Getting data",
