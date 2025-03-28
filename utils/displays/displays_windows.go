@@ -17,6 +17,7 @@ var (
 	enumDisplayMonitors  = user32.NewProc("EnumDisplayMonitors")
 	getMonitorInfo      = user32.NewProc("GetMonitorInfoW")
 	displayPathRegex    = regexp.MustCompile(`^\\\\.\\|^\\\\\?\\`)
+	displayNameRegex    = regexp.MustCompile(`^DISPLAY(\d+)$`)
 )
 
 type RECT struct {
@@ -29,6 +30,14 @@ type MONITORINFOEX struct {
 	WorkArea  RECT
 	Flags     uint32
 	DeviceName [32]uint16
+}
+
+func formatDisplayName(id string) string {
+	matches := displayNameRegex.FindStringSubmatch(id)
+	if len(matches) == 2 {
+		return fmt.Sprintf("Display %s", matches[1])
+	}
+	return id
 }
 
 func getDisplays() ([]Display, error) {
@@ -52,9 +61,10 @@ func getDisplays() ([]Display, error) {
 		isPrimary := (info.Flags & 0x1) != 0 // MONITORINFOF_PRIMARY
 
 		displayName := syscall.UTF16ToString(info.DeviceName[:])
+		cleanID := displayPathRegex.ReplaceAllString(displayName, "")
 		display := Display{
-			ID:                   displayPathRegex.ReplaceAllString(displayName, ""),
-			Name:                 displayPathRegex.ReplaceAllString(displayName, ""),
+			ID:                   cleanID,
+			Name:                 formatDisplayName(cleanID),
 			ResolutionHorizontal: int(width),
 			ResolutionVertical:  int(height),
 			X:                    int(info.Monitor.Left),
