@@ -102,7 +102,7 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 		}
 
 		// Get per CPU usage percentage
-		if percents, err := cpu.Percent(0, true); err == nil && i < len(percents) {
+		if percents, err := cpu.Percent(4, true); err == nil && i < len(percents) {
 			usage := percents[i]
 			perCpuData.Usage = &usage
 		}
@@ -122,7 +122,7 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 	}
 
 	// Get overall CPU usage percentage
-	if percents, err := cpu.Percent(0, false); err == nil && len(percents) > 0 {
+	if percents, err := cpu.Percent(4, false); err == nil && len(percents) > 0 {
 		usage := percents[0]
 		cpuData.Usage = &usage
 	}
