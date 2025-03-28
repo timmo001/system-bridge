@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# General
+
+- Use the @Web for documentation
+- Make sure all commands used are cross platform and work on all distributions (distros)
+- Test any commands used in exec commands. For example, `hostname -f` should be ran first to check if it is installed.
+- Any commands which are not typically installed on certain distributions, should be added to the documentation.
