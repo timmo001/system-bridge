@@ -314,7 +314,7 @@ func getLinuxFQDN() (string, error) {
 	cmd := exec.Command("hostname", "-f")
 	output, err := cmd.Output()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get FQDN: %v", err)
 	}
 	return strings.TrimSpace(string(output)), nil
 }
