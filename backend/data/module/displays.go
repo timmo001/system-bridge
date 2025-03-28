@@ -10,11 +10,11 @@ type Display struct {
 	ResolutionVertical   int      `json:"resolution_vertical"`
 	X                    int      `json:"x"`
 	Y                    int      `json:"y"`
-	Width                *int     `json:"width,omitempty"`
-	Height               *int     `json:"height,omitempty"`
-	IsPrimary            *bool    `json:"is_primary,omitempty"`
-	PixelClock           *float64 `json:"pixel_clock,omitempty"`
-	RefreshRate          *float64 `json:"refresh_rate,omitempty"`
+	Width                *int     `json:"width"`
+	Height               *int     `json:"height"`
+	IsPrimary            *bool    `json:"is_primary"`
+	PixelClock           *float64 `json:"pixel_clock"`
+	RefreshRate          *float64 `json:"refresh_rate"`
 }
 
 // DisplaysData represents information about all display devices

@@ -4,57 +4,57 @@ import "github.com/charmbracelet/log"
 
 // NetworkAddress represents information about a network address
 type NetworkAddress struct {
-	Address   *string `json:"address,omitempty"`
-	Family    *string `json:"family,omitempty"`
-	Netmask   *string `json:"netmask,omitempty"`
-	Broadcast *string `json:"broadcast,omitempty"`
-	PTP       *string `json:"ptp,omitempty"`
+	Address   *string `json:"address"`
+	Family    *string `json:"family"`
+	Netmask   *string `json:"netmask"`
+	Broadcast *string `json:"broadcast"`
+	PTP       *string `json:"ptp"`
 }
 
 // NetworkStats represents network interface statistics
 type NetworkStats struct {
-	IsUp   *bool    `json:"isup,omitempty"`
-	Duplex *string  `json:"duplex,omitempty"`
-	Speed  *int     `json:"speed,omitempty"`
-	MTU    *int     `json:"mtu,omitempty"`
-	Flags  []string `json:"flags,omitempty"`
+	IsUp   *bool    `json:"isup"`
+	Duplex *string  `json:"duplex"`
+	Speed  *int     `json:"speed"`
+	MTU    *int     `json:"mtu"`
+	Flags  []string `json:"flags"`
 }
 
 // NetworkConnection represents a network connection
 type NetworkConnection struct {
-	FD     *int    `json:"fd,omitempty"`
-	Family *int    `json:"family,omitempty"`
-	Type   *int    `json:"type,omitempty"`
-	LAddr  *string `json:"laddr,omitempty"`
-	RAddr  *string `json:"raddr,omitempty"`
-	Status *string `json:"status,omitempty"`
-	PID    *int    `json:"pid,omitempty"`
+	FD     *int    `json:"fd"`
+	Family *int    `json:"family"`
+	Type   *int    `json:"type"`
+	LAddr  *string `json:"laddr"`
+	RAddr  *string `json:"raddr"`
+	Status *string `json:"status"`
+	PID    *int    `json:"pid"`
 }
 
 // NetworkIO represents network I/O statistics
 type NetworkIO struct {
-	BytesSent   *int64 `json:"bytes_sent,omitempty"`
-	BytesRecv   *int64 `json:"bytes_recv,omitempty"`
-	PacketsSent *int64 `json:"packets_sent,omitempty"`
-	PacketsRecv *int64 `json:"packets_recv,omitempty"`
-	ErrIn       *int64 `json:"errin,omitempty"`
-	ErrOut      *int64 `json:"errout,omitempty"`
-	DropIn      *int64 `json:"dropin,omitempty"`
-	DropOut     *int64 `json:"dropout,omitempty"`
+	BytesSent   *int64 `json:"bytes_sent"`
+	BytesRecv   *int64 `json:"bytes_recv"`
+	PacketsSent *int64 `json:"packets_sent"`
+	PacketsRecv *int64 `json:"packets_recv"`
+	ErrIn       *int64 `json:"errin"`
+	ErrOut      *int64 `json:"errout"`
+	DropIn      *int64 `json:"dropin"`
+	DropOut     *int64 `json:"dropout"`
 }
 
 // Network represents information about a network interface
 type Network struct {
-	Name      *string          `json:"name,omitempty"`
-	Addresses []NetworkAddress `json:"addresses,omitempty"`
-	Stats     *NetworkStats    `json:"stats,omitempty"`
+	Name      *string          `json:"name"`
+	Addresses []NetworkAddress `json:"addresses"`
+	Stats     *NetworkStats    `json:"stats"`
 }
 
 // NetworksData represents information about all network interfaces and connections
 type NetworksData struct {
-	Connections []NetworkConnection `json:"connections,omitempty"`
-	IO          *NetworkIO          `json:"io,omitempty"`
-	Networks    []Network           `json:"networks,omitempty"`
+	Connections []NetworkConnection `json:"connections"`
+	IO          *NetworkIO          `json:"io"`
+	Networks    []Network           `json:"networks"`
 }
 
 func (t *Module) UpdateNetworksModule() (NetworksData, error) {

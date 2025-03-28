@@ -4,33 +4,33 @@ import "github.com/charmbracelet/log"
 
 // MemorySwap represents swap memory information
 type MemorySwap struct {
-	Total   *int64   `json:"total,omitempty"`
-	Used    *int64   `json:"used,omitempty"`
-	Free    *float64 `json:"free,omitempty"`
-	Percent *float64 `json:"percent,omitempty"`
-	Sin     *int64   `json:"sin,omitempty"`
-	Sout    *int64   `json:"sout,omitempty"`
+	Total   *int64   `json:"total"`
+	Used    *int64   `json:"used"`
+	Free    *float64 `json:"free"`
+	Percent *float64 `json:"percent"`
+	Sin     *int64   `json:"sin"`
+	Sout    *int64   `json:"sout"`
 }
 
 // MemoryVirtual represents virtual memory information
 type MemoryVirtual struct {
-	Total     *int64   `json:"total,omitempty"`
-	Available *int64   `json:"available,omitempty"`
-	Percent   *float64 `json:"percent,omitempty"`
-	Used      *int64   `json:"used,omitempty"`
-	Free      *int64   `json:"free,omitempty"`
-	Active    *int64   `json:"active,omitempty"`
-	Inactive  *int64   `json:"inactive,omitempty"`
-	Buffers   *int64   `json:"buffers,omitempty"`
-	Cached    *int64   `json:"cached,omitempty"`
-	Wired     *int64   `json:"wired,omitempty"`
-	Shared    *int64   `json:"shared,omitempty"`
+	Total     *int64   `json:"total"`
+	Available *int64   `json:"available"`
+	Percent   *float64 `json:"percent"`
+	Used      *int64   `json:"used"`
+	Free      *int64   `json:"free"`
+	Active    *int64   `json:"active"`
+	Inactive  *int64   `json:"inactive"`
+	Buffers   *int64   `json:"buffers"`
+	Cached    *int64   `json:"cached"`
+	Wired     *int64   `json:"wired"`
+	Shared    *int64   `json:"shared"`
 }
 
 // MemoryData represents overall memory information
 type MemoryData struct {
-	Swap    *MemorySwap    `json:"swap,omitempty"`
-	Virtual *MemoryVirtual `json:"virtual,omitempty"`
+	Swap    *MemorySwap    `json:"swap"`
+	Virtual *MemoryVirtual `json:"virtual"`
 }
 
 func (t *Module) UpdateMemoryModule() (MemoryData, error) {

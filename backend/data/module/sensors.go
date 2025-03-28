@@ -7,7 +7,7 @@ type SensorsWindowsSensor struct {
 	ID    string      `json:"id"`
 	Name  string      `json:"name"`
 	Type  string      `json:"type"`
-	Value interface{} `json:"value,omitempty"`
+	Value interface{} `json:"value"`
 }
 
 // SensorsWindowsHardware represents Windows hardware sensor information
@@ -61,41 +61,41 @@ type SensorsNVIDIADriver struct {
 type SensorsNVIDIAGPU struct {
 	ID                   int     `json:"id"`
 	Name                 string  `json:"name"`
-	BiosOEMRevision      *int    `json:"bios_oem_revision,omitempty"`
-	BiosRevision         *int    `json:"bios_revision,omitempty"`
-	BiosVersion          *string `json:"bios_version,omitempty"`
-	CurrentFanSpeedLevel *int    `json:"current_fan_speed_level,omitempty"`
-	CurrentFanSpeedRPM   *int    `json:"current_fan_speed_rpm,omitempty"`
-	DriverModel          *int    `json:"driver_model,omitempty"`
-	MemoryAvailable      *int    `json:"memory_available,omitempty"`
-	MemoryCapacity       *int    `json:"memory_capacity,omitempty"`
-	MemoryMaker          *string `json:"memory_maker,omitempty"`
-	Serial               *string `json:"serial,omitempty"`
-	SystemType           *string `json:"system_type,omitempty"`
-	Type                 *string `json:"type,omitempty"`
+	BiosOEMRevision      *int    `json:"bios_oem_revision"`
+	BiosRevision         *int    `json:"bios_revision"`
+	BiosVersion          *string `json:"bios_version"`
+	CurrentFanSpeedLevel *int    `json:"current_fan_speed_level"`
+	CurrentFanSpeedRPM   *int    `json:"current_fan_speed_rpm"`
+	DriverModel          *int    `json:"driver_model"`
+	MemoryAvailable      *int    `json:"memory_available"`
+	MemoryCapacity       *int    `json:"memory_capacity"`
+	MemoryMaker          *string `json:"memory_maker"`
+	Serial               *string `json:"serial"`
+	SystemType           *string `json:"system_type"`
+	Type                 *string `json:"type"`
 }
 
 // SensorsNVIDIA represents all NVIDIA sensor information
 type SensorsNVIDIA struct {
-	Chipset  *SensorsNVIDIAChipset  `json:"chipset,omitempty"`
-	Displays []SensorsNVIDIADisplay `json:"displays,omitempty"`
-	Driver   *SensorsNVIDIADriver   `json:"driver,omitempty"`
-	GPUs     []SensorsNVIDIAGPU     `json:"gpus,omitempty"`
+	Chipset  *SensorsNVIDIAChipset  `json:"chipset"`
+	Displays []SensorsNVIDIADisplay `json:"displays"`
+	Driver   *SensorsNVIDIADriver   `json:"driver"`
+	GPUs     []SensorsNVIDIAGPU     `json:"gpus"`
 }
 
 // SensorsWindows represents Windows sensor information
 type SensorsWindows struct {
-	Hardware []SensorsWindowsHardware `json:"hardware,omitempty"`
-	NVIDIA   *SensorsNVIDIA           `json:"nvidia,omitempty"`
+	Hardware []SensorsWindowsHardware `json:"hardware"`
+	NVIDIA   *SensorsNVIDIA           `json:"nvidia"`
 }
 
 // SensorsData represents all sensor information
 type SensorsData struct {
 	// TODO: Add fans model
-	Fans interface{} `json:"fans,omitempty"`
+	Fans interface{} `json:"fans"`
 	// TODO: Add temperatures model
-	Temperatures   interface{}     `json:"temperatures,omitempty"`
-	WindowsSensors *SensorsWindows `json:"windows_sensors,omitempty"`
+	Temperatures   interface{}     `json:"temperatures"`
+	WindowsSensors *SensorsWindows `json:"windows_sensors"`
 }
 
 func (t *Module) UpdateSensorsModule() (SensorsData, error) {

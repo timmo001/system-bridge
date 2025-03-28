@@ -28,20 +28,20 @@ type DiskPartition struct {
 	Options        string     `json:"options"`
 	MaxFileSize    int64      `json:"max_file_size"`
 	MaxPathLength  int64      `json:"max_path_length"`
-	Usage          *DiskUsage `json:"usage,omitempty"`
+	Usage          *DiskUsage `json:"usage"`
 }
 
 // Disk represents information about a single disk device
 type Disk struct {
 	Name       string          `json:"name"`
 	Partitions []DiskPartition `json:"partitions"`
-	IOCounters *DiskIOCounters `json:"io_counters,omitempty"`
+	IOCounters *DiskIOCounters `json:"io_counters"`
 }
 
 // DisksData represents information about all disk devices
 type DisksData struct {
 	Devices    []Disk          `json:"devices"`
-	IOCounters *DiskIOCounters `json:"io_counters,omitempty"`
+	IOCounters *DiskIOCounters `json:"io_counters"`
 }
 
 func (t *Module) UpdateDisksModule() (DisksData, error) {

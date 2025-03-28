@@ -29,13 +29,13 @@ type SystemData struct {
 	Users                 []system_utils.SystemUser `json:"users" mapstructure:"users"`
 	UUID                  string                    `json:"uuid" mapstructure:"uuid"`
 	Version               string                    `json:"version" mapstructure:"version"`
-	CameraUsage           []string                  `json:"camera_usage,omitempty" mapstructure:"camera_usage,omitempty"`
-	IPAddress6            *string                   `json:"ip_address_6,omitempty" mapstructure:"ip_address_6,omitempty"`
-	PendingReboot         *bool                     `json:"pending_reboot,omitempty" mapstructure:"pending_reboot,omitempty"`
+	CameraUsage           []string                  `json:"camera_usage" mapstructure:"camera_usage"`
+	IPAddress6            *string                   `json:"ip_address_6" mapstructure:"ip_address_6"`
+	PendingReboot         *bool                     `json:"pending_reboot" mapstructure:"pending_reboot"`
 	RunMode               RunMode                   `json:"run_mode" mapstructure:"run_mode"`
-	VersionLatestURL      *string                   `json:"version_latest_url,omitempty" mapstructure:"version_latest_url,omitempty"`
-	VersionLatest         *string                   `json:"version_latest,omitempty" mapstructure:"version_latest,omitempty"`
-	VersionNewerAvailable *bool                     `json:"version_newer_available,omitempty" mapstructure:"version_newer_available,omitempty"`
+	VersionLatestURL      *string                   `json:"version_latest_url" mapstructure:"version_latest_url"`
+	VersionLatest         *string                   `json:"version_latest" mapstructure:"version_latest"`
+	VersionNewerAvailable *bool                     `json:"version_newer_available" mapstructure:"version_newer_available"`
 }
 
 func (t *Module) UpdateSystemModule() (SystemData, error) {

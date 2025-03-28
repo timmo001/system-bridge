@@ -5,14 +5,14 @@ import "github.com/charmbracelet/log"
 // Process represents information about a system process
 type Process struct {
 	ID               float64  `json:"id"`
-	Name             *string  `json:"name,omitempty"`
-	CPUUsage         *float64 `json:"cpu_usage,omitempty"`
-	Created          *float64 `json:"created,omitempty"`
-	MemoryUsage      *float64 `json:"memory_usage,omitempty"`
-	Path             *string  `json:"path,omitempty"`
-	Status           *string  `json:"status,omitempty"`
-	Username         *string  `json:"username,omitempty"`
-	WorkingDirectory *string  `json:"working_directory,omitempty"`
+	Name             *string  `json:"name"`
+	CPUUsage         *float64 `json:"cpu_usage"`
+	Created          *float64 `json:"created"`
+	MemoryUsage      *float64 `json:"memory_usage"`
+	Path             *string  `json:"path"`
+	Status           *string  `json:"status"`
+	Username         *string  `json:"username"`
+	WorkingDirectory *string  `json:"working_directory"`
 }
 
 // ProcessesData represents information about all system processes

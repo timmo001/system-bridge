@@ -6,16 +6,16 @@ import "github.com/charmbracelet/log"
 type GPU struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
-	CoreClock   *float64 `json:"core_clock,omitempty"`
-	CoreLoad    *float64 `json:"core_load,omitempty"`
-	FanSpeed    *float64 `json:"fan_speed,omitempty"`
-	MemoryClock *float64 `json:"memory_clock,omitempty"`
-	MemoryLoad  *float64 `json:"memory_load,omitempty"`
-	MemoryFree  *float64 `json:"memory_free,omitempty"`
-	MemoryUsed  *float64 `json:"memory_used,omitempty"`
-	MemoryTotal *float64 `json:"memory_total,omitempty"`
-	PowerUsage  *float64 `json:"power_usage,omitempty"`
-	Temperature *float64 `json:"temperature,omitempty"`
+	CoreClock   *float64 `json:"core_clock"`
+	CoreLoad    *float64 `json:"core_load"`
+	FanSpeed    *float64 `json:"fan_speed"`
+	MemoryClock *float64 `json:"memory_clock"`
+	MemoryLoad  *float64 `json:"memory_load"`
+	MemoryFree  *float64 `json:"memory_free"`
+	MemoryUsed  *float64 `json:"memory_used"`
+	MemoryTotal *float64 `json:"memory_total"`
+	PowerUsage  *float64 `json:"power_usage"`
+	Temperature *float64 `json:"temperature"`
 }
 
 // GPUsData represents information about all GPU devices
