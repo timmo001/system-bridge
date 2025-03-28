@@ -4,11 +4,9 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-// RunMode represents the system run mode
 type RunMode string
 
 const (
-	// RunModeStandalone represents standalone mode
 	RunModeStandalone RunMode = "standalone"
 )
 
@@ -47,15 +45,46 @@ type SystemData struct {
 func (t *Module) UpdateSystemModule() (SystemData, error) {
 	log.Info("Getting system data")
 
+	bootTime, err := getBootTime()
+	if err != nil {
+		log.Errorf("Failed to get boot time: %v", err)
+		bootTime = 0
+	}
+
+	fqdn, err := getFQDN()
+	if err != nil {
+		log.Errorf("Failed to get FQDN: %v", err)
+		fqdn = "unknown"
+	}
+
+	hostname, err := getHostname()
+	if err != nil {
+		log.Errorf("Failed to get hostname: %v", err)
+		hostname = "unknown"
+	}
+
+	ipAddress4, err := getIPAddress4()
+	if err != nil {
+		log.Errorf("Failed to get IP address: %v", err)
+		ipAddress4 = "unknown"
+	}
+
+	macAddress, err := getMACAddress()
+	if err != nil {
+		log.Errorf("Failed to get MAC address: %v", err)
+		macAddress = "unknown"
+	}
+
 	// TODO: Implement actual system data collection
-	bootTime := float64(0.0)                                                        //  TODO: Get actual boot time
-	fqdn := "example.com"                                                           // TODO: Get actual FQDN
-	hostname := "example"                                                           // TODO: Get actual hostname
-	ipAddress4 := "192.168.1.1"                                                     // TODO: Get actual IP address
-	macAddress := "00:00:00:00:00:00"                                               // TODO: Get actual MAC address
-	platformVersion := "1.0.0"                                                      // TODO: Get actual platform version
-	platform := "Linux"                                                             // TODO: Get actual platform
-	uptime := float64(0.0)                                                          // TODO: Get actual uptime
+	platformVersion := "1.0.0"        // TODO: Get actual platform version
+	platform := "Linux"               // TODO: Get actual platform
+
+	uptime, err := getUptime()
+	if err != nil {
+		log.Errorf("Failed to get uptime: %v", err)
+		uptime = 0
+	}
+
 	users := []SystemUser{}                                                         // TODO: Get actual users
 	uuid := "123e4567-e89b-12d3-a456-426614174000"                                  // TODO: Get actual UUID
 	version := "5.0.0"                                                              // TODO: Get actual version
