@@ -645,8 +645,8 @@ func getLinuxPlatformVersion() (string, error) {
 	cmd := exec.Command("cat", "/etc/os-release")
 	output, err := cmd.Output()
 	if err == nil {
-		lines := strings.Split(string(output), "\n")
-		for _, line := range lines {
+		lines := strings.SplitSeq(string(output), "\n")
+		for line := range lines {
 			if strings.HasPrefix(line, "VERSION=") {
 				// Remove quotes and VERSION= prefix
 				version := strings.Trim(strings.TrimPrefix(line, "VERSION="), "\"")
