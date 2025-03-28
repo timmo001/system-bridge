@@ -1,4 +1,4 @@
-package data_module
+package system
 
 import (
 	"fmt"
@@ -9,6 +9,16 @@ import (
 	"strings"
 	"time"
 )
+
+// SystemUser represents information about a system user
+type SystemUser struct {
+	Name     string  `json:"name" mapstructure:"name"`
+	Active   bool    `json:"active" mapstructure:"active"`
+	Terminal string  `json:"terminal" mapstructure:"terminal"`
+	Host     string  `json:"host" mapstructure:"host"`
+	Started  float64 `json:"started" mapstructure:"started"`
+	PID      float64 `json:"pid" mapstructure:"pid"`
+}
 
 // windowsSystemInfoCache stores the parsed systeminfo output
 var windowsSystemInfoCache struct {
@@ -202,8 +212,8 @@ func getLinuxInfo() (SystemInfo, error) {
 	return SystemInfo{}, fmt.Errorf("could not find boot time in /proc/stat")
 }
 
-// getBootTime returns just the boot time
-func getBootTime() (float64, error) {
+// GetBootTime returns just the boot time
+func GetBootTime() (float64, error) {
 	info, err := getSystemInfo()
 	if err != nil {
 		return 0, err
@@ -211,8 +221,8 @@ func getBootTime() (float64, error) {
 	return info.BootTime, nil
 }
 
-// getUptime returns just the uptime
-func getUptime() (float64, error) {
+// GetUptime returns just the uptime
+func GetUptime() (float64, error) {
 	info, err := getSystemInfo()
 	if err != nil {
 		return 0, err
@@ -220,8 +230,8 @@ func getUptime() (float64, error) {
 	return info.Uptime, nil
 }
 
-// getFQDN returns the fully qualified domain name
-func getFQDN() (string, error) {
+// GetFQDN returns the fully qualified domain name
+func GetFQDN() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsFQDN()
@@ -234,8 +244,8 @@ func getFQDN() (string, error) {
 	}
 }
 
-// getHostname returns the system hostname
-func getHostname() (string, error) {
+// GetHostname returns the system hostname
+func GetHostname() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsHostname()
@@ -352,8 +362,8 @@ func getLinuxHostname() (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-// getIPAddress4 returns the IPv4 address
-func getIPAddress4() (string, error) {
+// GetIPAddress4 returns the IPv4 address
+func GetIPAddress4() (string, error) {
 	var ip string
 	var err error
 
@@ -460,8 +470,8 @@ func getLinuxIPAddress4() (string, error) {
 	return "", fmt.Errorf("could not find IPv4 address")
 }
 
-// getMACAddress returns the MAC address
-func getMACAddress() (string, error) {
+// GetMACAddress returns the MAC address
+func GetMACAddress() (string, error) {
 	var mac string
 	var err error
 
@@ -588,8 +598,8 @@ func getLinuxMACAddress() (string, error) {
 	return "", fmt.Errorf("could not find valid MAC address")
 }
 
-// getPlatformVersion returns the platform version
-func getPlatformVersion() (string, error) {
+// GetPlatformVersion returns the platform version
+func GetPlatformVersion() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsPlatformVersion()
@@ -661,8 +671,8 @@ func getLinuxPlatformVersion() (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-// getUsers returns information about system users
-func getUsers() ([]SystemUser, error) {
+// GetUsers returns information about system users
+func GetUsers() ([]SystemUser, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsUsers()
@@ -818,8 +828,8 @@ func getLinuxUsers() ([]SystemUser, error) {
 	}
 
 	var users []SystemUser
-	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(string(output), "\n")
+	for line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
@@ -871,8 +881,8 @@ func getLinuxUsers() ([]SystemUser, error) {
 	return users, nil
 }
 
-// getUUID returns a unique identifier for the system
-func getUUID() (string, error) {
+// GetUUID returns a unique identifier for the system
+func GetUUID() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsUUID()
