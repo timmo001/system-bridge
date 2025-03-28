@@ -1,3 +1,6 @@
+//go:build !windows
+// +build !windows
+
 package keyboard
 
 import (
@@ -45,5 +48,6 @@ func SendKeypress(data KeypressData) error {
 
 // SendText sends text input
 func SendText(text string) error {
-	return robotgo.TypeStr(text)
+	robotgo.TypeStr(text)
+	return nil
 }
