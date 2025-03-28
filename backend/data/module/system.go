@@ -99,7 +99,12 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 		users = []SystemUser{}
 	}
 
-	uuid := "123e4567-e89b-12d3-a456-426614174000"                                  // TODO: Get actual UUID
+	uuid, err := getUUID()
+	if err != nil {
+		log.Errorf("Failed to get UUID: %v", err)
+		uuid = "123e4567-e89b-12d3-a456-426614174000" // Fallback to a default UUID
+	}
+
 	version := "5.0.0"                                                              // TODO: Get actual version
 	versionLatest := "5.0.0"                                                        // TODO: Get actual version
 	versionLatestURL := "https://github.com/timmo001/system-bridge/releases/latest" // TODO: Get actual URL

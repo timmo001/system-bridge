@@ -833,3 +833,125 @@ func getLinuxUsers() ([]SystemUser, error) {
 
 	return users, nil
 }
+
+// getUUID returns a unique identifier for the system
+func getUUID() (string, error) {
+	switch runtime.GOOS {
+	case "windows":
+		return getWindowsUUID()
+	case "darwin":
+		return getDarwinUUID()
+	case "linux":
+		return getLinuxUUID()
+	default:
+		return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+}
+
+// getWindowsUUID gets the system UUID on Windows using multiple methods
+func getWindowsUUID() (string, error) {
+	// Try PowerShell with CIM first
+	cmd := exec.Command("powershell", "-Command", "(Get-CimInstance -Class Win32_ComputerSystemProduct).UUID")
+	output, err := cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" && uuid != "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF" {
+			return uuid, nil
+		}
+	}
+
+	// Try registry MachineGuid as fallback
+	cmd = exec.Command("powershell", "-Command", "(Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Cryptography' -Name MachineGuid).MachineGuid")
+	output, err = cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" {
+			return uuid, nil
+		}
+	}
+
+	// Try disk serial as last resort
+	cmd = exec.Command("powershell", "-Command", "Get-PhysicalDisk | Select-Object -First 1 -ExpandProperty SerialNumber")
+	output, err = cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" {
+			return uuid, nil
+		}
+	}
+
+	return "", fmt.Errorf("could not find UUID on Windows")
+}
+
+// getDarwinUUID gets the system UUID on macOS using ioreg
+func getDarwinUUID() (string, error) {
+	cmd := exec.Command("ioreg", "-rd1", "-c", "IOPlatformExpertDevice")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "IOPlatformUUID") {
+			parts := strings.Split(line, "\"")
+			if len(parts) >= 3 {
+				return strings.TrimSpace(parts[3]), nil
+			}
+		}
+	}
+
+	// Fallback to hardware UUID
+	cmd = exec.Command("system_profiler", "SPHardwareDataType")
+	output, err = cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	lines = strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "Hardware UUID") {
+			parts := strings.Split(line, ":")
+			if len(parts) >= 2 {
+				return strings.TrimSpace(parts[1]), nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("could not find UUID on macOS")
+}
+
+// getLinuxUUID gets the system UUID on Linux
+func getLinuxUUID() (string, error) {
+	// Try product_uuid from DMI
+	cmd := exec.Command("cat", "/sys/class/dmi/id/product_uuid")
+	output, err := cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" && uuid != "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF" {
+			return uuid, nil
+		}
+	}
+
+	// Try dmidecode (requires root privileges)
+	cmd = exec.Command("sudo", "dmidecode", "-s", "system-uuid")
+	output, err = cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" && uuid != "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF" {
+			return uuid, nil
+		}
+	}
+
+	// Fallback to machine-id
+	cmd = exec.Command("cat", "/etc/machine-id")
+	output, err = cmd.Output()
+	if err == nil {
+		uuid := strings.TrimSpace(string(output))
+		if uuid != "" {
+			return uuid, nil
+		}
+	}
+
+	return "", fmt.Errorf("could not find UUID on Linux")
+}
