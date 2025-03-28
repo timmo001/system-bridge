@@ -3,8 +3,8 @@ package event
 import (
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/data"
-	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 )
 
 // Message is the base type for all events
@@ -21,7 +21,7 @@ type MessageResponse struct {
 	Subtype ResponseSubtype        `json:"subtype" mapstructure:"subtype"`
 	Data    any                    `json:"data" mapstructure:"data"`
 	Message string                 `json:"message,omitempty" mapstructure:"message,omitempty"`
-	Module  data_module.ModuleName `json:"module,omitempty" mapstructure:"module,omitempty"`
+	Module  types.ModuleName       `json:"module,omitempty" mapstructure:"module,omitempty"`
 }
 
 // MessageHandler is the type for all event handlers
