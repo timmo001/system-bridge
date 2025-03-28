@@ -5,6 +5,7 @@ package sensors
 
 import (
 	"encoding/json"
+	"os"
 	"os/exec"
 
 	"github.com/charmbracelet/log"
@@ -13,8 +14,6 @@ import (
 
 // getWindowsSensorsData fetches sensor data available only on Windows platforms
 func getWindowsSensorsData() (*types.SensorsWindows, error) {
-	log.Info("Getting Windows sensors data using LibreHardwareMonitor and NvAPIWrapper")
-
 	var windowsSensors types.SensorsWindows
 	windowsSensors.Hardware = make([]types.SensorsWindowsHardware, 0)
 	windowsSensors.NVIDIA = &types.SensorsNVIDIA{
@@ -22,17 +21,21 @@ func getWindowsSensorsData() (*types.SensorsWindows, error) {
 		GPUs:     make([]types.SensorsNVIDIAGPU, 0),
 	}
 
-	// Run lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe
-	cmd := exec.Command("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe")
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, err
+	// Run lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe if it exists
+	if _, err := os.Stat("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe"); err == nil {
+		log.Info("Getting Windows sensors data using LibreHardwareMonitor and NvAPIWrapper")
+
+		cmd := exec.Command("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe")
+		output, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+
+		log.Debug("Windows sensors data", "data", string(output))
+
+		// Parse the output
+		json.Unmarshal(output, &windowsSensors)
 	}
-
-	log.Debug("Windows sensors data", "data", string(output))
-
-	// Parse the output
-	json.Unmarshal(output, &windowsSensors)
 
 	return &windowsSensors, nil
 }
