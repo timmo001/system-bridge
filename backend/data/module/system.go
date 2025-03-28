@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/version"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -105,10 +106,15 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 		uuid = "123e4567-e89b-12d3-a456-426614174000" // Fallback to a default UUID
 	}
 
-	version := "5.0.0"                                                              // TODO: Get actual version
-	versionLatest := "5.0.0"                                                        // TODO: Get actual version
-	versionLatestURL := "https://github.com/timmo001/system-bridge/releases/latest" // TODO: Get actual URL
-	versionNewerAvailable := false                                                  // TODO: Get actual value
+	// Get version information
+	currentVersion := version.Version
+	latestVersion, err := version.GetLatestVersion()
+	if err != nil {
+		log.Errorf("Failed to get latest version: %v", err)
+		latestVersion = currentVersion
+	}
+
+	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
 	return SystemData{
 		BootTime:              bootTime,
@@ -122,9 +128,9 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 		Users:                 users,
 		UUID:                  uuid,
 		RunMode:               RunModeStandalone, // Always set RunMode to standalone
-		Version:               version,
-		VersionLatest:         &versionLatest,
-		VersionLatestURL:      &versionLatestURL,
+		Version:               currentVersion,
+		VersionLatest:         &latestVersion,
+		VersionLatestURL:      &version.LatestVersionUserURL,
 		VersionNewerAvailable: &versionNewerAvailable,
 	}, nil
 }
