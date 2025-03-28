@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/data/module/system"
 	"github.com/timmo001/system-bridge/types"
-	"github.com/timmo001/system-bridge/utils/system"
 	"github.com/timmo001/system-bridge/version"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -17,7 +16,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	// Initialize arrays
 	var systemData types.SystemData
-	systemData.Users = make([]system.SystemUser, 0)
+	systemData.Users = make([]types.SystemUser, 0)
 	systemData.CameraUsage = make([]string, 0)
 
 	bootTime, err := system.GetBootTime()
@@ -75,7 +74,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	users, err := system.GetUsers()
 	if err != nil {
 		log.Errorf("Failed to get users: %v", err)
-		users = make([]system.SystemUser, 0)
+		users = make([]types.SystemUser, 0)
 	}
 	systemData.Users = users
 
