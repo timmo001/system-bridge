@@ -22,6 +22,9 @@ var windowsIPConfigCache struct {
 	err   error
 }
 
+// MAC address regex pattern: matches 6 groups of 2 hex digits separated by colons or hyphens
+var macAddressPattern = regexp.MustCompile(`^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$`)
+
 // getWindowsSystemInfo returns the raw systeminfo output for Windows
 func getWindowsSystemInfo() ([]string, error) {
 	// Return cached result if available
@@ -311,7 +314,7 @@ func getDarwinFQDN() (string, error) {
 
 // getLinuxFQDN gets the FQDN on Linux using hostname command
 func getLinuxFQDN() (string, error) {
-	cmd := exec.Command("hostname", "-f")
+	cmd := exec.Command("hostname", "--fqdn")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get FQDN: %v", err)
@@ -341,7 +344,7 @@ func getDarwinHostname() (string, error) {
 
 // getLinuxHostname gets the hostname on Linux using hostname command
 func getLinuxHostname() (string, error) {
-	cmd := exec.Command("hostname", "-s")
+	cmd := exec.Command("hostname", "--short")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -477,7 +480,7 @@ func getMACAddress() (string, error) {
 		return "", err
 	}
 
-	// MAC address regex pattern: matches 6 groups of 2 hex digits separated by colons
+	// MAC address regex pattern: matches 6 groups of 2 hex digits separated by colons or hyphens
 	macPattern := `^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$`
 	re := regexp.MustCompile(macPattern)
 	if !re.MatchString(mac) {
@@ -539,16 +542,50 @@ func getLinuxMACAddress() (string, error) {
 	}
 
 	lines := strings.Split(string(output), "\n")
+	var bestMAC string
+	var isPhysicalInterface bool
+
 	for _, line := range lines {
+		// Check if this is an interface definition line
+		if strings.Contains(line, ": ") {
+			isPhysicalInterface = strings.Contains(line, "enp") ||
+				strings.Contains(line, "eth") ||
+				strings.Contains(line, "wlp") ||
+				strings.Contains(line, "wlan")
+			continue
+		}
+
+		// Process MAC address line
 		if strings.Contains(line, "link/ether ") {
 			parts := strings.Fields(line)
-			if len(parts) >= 3 {
-				mac := parts[2]
-				return mac, nil
+			if len(parts) >= 2 {
+				mac := parts[1]
+				// Skip broadcast addresses and null MACs
+				if mac == "brd" || mac == "00:00:00:00:00:00" {
+					continue
+				}
+				// Verify MAC format
+				if !macAddressPattern.MatchString(mac) {
+					continue
+				}
+
+				// Return immediately if this is a physical interface
+				if isPhysicalInterface {
+					return mac, nil
+				}
+
+				// Store the first valid MAC as fallback
+				if bestMAC == "" {
+					bestMAC = mac
+				}
 			}
 		}
 	}
-	return "", fmt.Errorf("could not find MAC address")
+
+	if bestMAC != "" {
+		return bestMAC, nil
+	}
+	return "", fmt.Errorf("could not find valid MAC address")
 }
 
 // getPlatformVersion returns the platform version
