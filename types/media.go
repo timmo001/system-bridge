@@ -24,4 +24,5 @@ type MediaData struct {
 	TrackNumber          *int     `json:"track_number"`
 	Type                 *string  `json:"type"`
 	UpdatedAt            *float64 `json:"updated_at"`
+	Volume               *float64 `json:"volume"`
 }
