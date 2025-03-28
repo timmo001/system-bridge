@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
+	"github.com/timmo001/system-bridge/types"
 	"golang.org/x/time/rate"
 )
 
@@ -116,17 +117,17 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	processor.Start(3)
 
 	for _, task := range []data_module.Module{
-		{Module: data_module.ModuleBattery},
-		{Module: data_module.ModuleCPU},
-		{Module: data_module.ModuleDisks},
-		{Module: data_module.ModuleDisplays},
-		{Module: data_module.ModuleGPUs},
-		{Module: data_module.ModuleMedia},
-		{Module: data_module.ModuleMemory},
-		{Module: data_module.ModuleNetworks},
-		{Module: data_module.ModuleProcesses},
-		{Module: data_module.ModuleSensors},
-		{Module: data_module.ModuleSystem},
+		{Module: types.ModuleBattery},
+		{Module: types.ModuleCPU},
+		{Module: types.ModuleDisks},
+		{Module: types.ModuleDisplays},
+		{Module: types.ModuleGPUs},
+		{Module: types.ModuleMedia},
+		{Module: types.ModuleMemory},
+		{Module: types.ModuleNetworks},
+		{Module: types.ModuleProcesses},
+		{Module: types.ModuleSensors},
+		{Module: types.ModuleSystem},
 	} {
 		processor.AddTask(task)
 	}
