@@ -1,6 +1,11 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 # Project
@@ -12,8 +17,9 @@ alwaysApply: true
 - All parts of the application which are exposed outside via the API (such as HTTP and Websockets) should be protected with a token, defined in [settings.go](mdc:settings/settings.go).
 - Settings are shared between packages and found in [settings.go](mdc:settings/settings.go).
 - The backend and packages it uses and it only are under backend/
-- All data modules are under backend/data/module
-- All data handlers are under backend/event/handler
+- All data modules are under backend/data/module/*
+- All data handlers are under backend/event/handler/*
+  - Data handlers should contain one function to register and get data. Any functions should be placed in a seperate package at backend/event/handler/<module>/*
 - The websocket is at [websocket.go](mdc:backend/websocket/websocket.go). Messages are handled in [messages.go](mdc:backend/websocket/messages.go). Its handlers are found at [handlers.go](mdc:backend/websocket/handlers.go). Accessing the websocket internally can be done from using [instance.go](mdc:backend/websocket/instance.go).
-- HTTP endpoints are found under backend/http
-- All utility functions are under utils/
+- HTTP endpoints are found under backend/http/*
+- All shared utility functions are under utils/*
