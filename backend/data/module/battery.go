@@ -9,8 +9,7 @@ import (
 type BatteryData struct {
 	IsCharging    *bool    `json:"is_charging" mapstructure:"is_charging"`
 	Percentage    *float64 `json:"percentage" mapstructure:"percentage"`
-	// Seconds remaining
-	TimeRemaining *float64 `json:"time_remaining" mapstructure:"time_remaining"`
+	TimeRemaining *float64 `json:"time_remaining" mapstructure:"time_remaining"` // Seconds remaining
 }
 
 func (t *Module) UpdateBatteryModule() (BatteryData, error) {
