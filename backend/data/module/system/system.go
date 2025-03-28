@@ -8,17 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
 
-// SystemUser represents information about a system user
-type SystemUser struct {
-	Name     string  `json:"name" mapstructure:"name"`
-	Active   bool    `json:"active" mapstructure:"active"`
-	Terminal string  `json:"terminal" mapstructure:"terminal"`
-	Host     string  `json:"host" mapstructure:"host"`
-	Started  float64 `json:"started" mapstructure:"started"`
-	PID      float64 `json:"pid" mapstructure:"pid"`
-}
+	"github.com/timmo001/system-bridge/types"
+)
 
 // windowsSystemInfoCache stores the parsed systeminfo output
 var windowsSystemInfoCache struct {
@@ -672,7 +664,7 @@ func getLinuxPlatformVersion() (string, error) {
 }
 
 // GetUsers returns information about system users
-func GetUsers() ([]SystemUser, error) {
+func GetUsers() ([]types.SystemUser, error) {
 	switch runtime.GOOS {
 	case "windows":
 		return getWindowsUsers()
@@ -686,7 +678,7 @@ func GetUsers() ([]SystemUser, error) {
 }
 
 // getWindowsUsers gets user information on Windows
-func getWindowsUsers() ([]SystemUser, error) {
+func getWindowsUsers() ([]types.SystemUser, error) {
 	// Get current username using whoami command
 	cmd := exec.Command("whoami")
 	output, err := cmd.Output()
@@ -745,7 +737,7 @@ func getWindowsUsers() ([]SystemUser, error) {
 	}
 
 	// Create user object for current user
-	user := SystemUser{
+	user := types.SystemUser{
 		Name:     username,
 		Active:   true,
 		Terminal: terminal,
@@ -754,18 +746,18 @@ func getWindowsUsers() ([]SystemUser, error) {
 		PID:      pid,
 	}
 
-	return []SystemUser{user}, nil
+	return []types.SystemUser{user}, nil
 }
 
 // getDarwinUsers gets user information on macOS using who
-func getDarwinUsers() ([]SystemUser, error) {
+func getDarwinUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("who")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
 
-	var users []SystemUser
+	var users []types.SystemUser
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -805,7 +797,7 @@ func getDarwinUsers() ([]SystemUser, error) {
 			continue
 		}
 
-		user := SystemUser{
+		user := types.SystemUser{
 			Name:     username,
 			Active:   true, // If they're in who output, they're active
 			Terminal: terminal,
@@ -820,14 +812,14 @@ func getDarwinUsers() ([]SystemUser, error) {
 }
 
 // getLinuxUsers gets user information on Linux using who
-func getLinuxUsers() ([]SystemUser, error) {
+func getLinuxUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("who")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
 
-	var users []SystemUser
+	var users []types.SystemUser
 	lines := strings.SplitSeq(string(output), "\n")
 	for line := range lines {
 		line = strings.TrimSpace(line)
@@ -867,7 +859,7 @@ func getLinuxUsers() ([]SystemUser, error) {
 			continue
 		}
 
-		user := SystemUser{
+		user := types.SystemUser{
 			Name:     username,
 			Active:   true, // If they're in who output, they're active
 			Terminal: terminal,
