@@ -4,45 +4,18 @@ import (
 	"runtime"
 
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/types"
 	system_utils "github.com/timmo001/system-bridge/utils/system"
 	"github.com/timmo001/system-bridge/version"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-type RunMode string
-
-const (
-	RunModeStandalone RunMode = "standalone"
-)
-
-// SystemData represents system information
-type SystemData struct {
-	BootTime              float64                   `json:"boot_time" mapstructure:"boot_time"`
-	FQDN                  string                    `json:"fqdn" mapstructure:"fqdn"`
-	Hostname              string                    `json:"hostname" mapstructure:"hostname"`
-	IPAddress4            string                    `json:"ip_address_4" mapstructure:"ip_address_4"`
-	MACAddress            string                    `json:"mac_address" mapstructure:"mac_address"`
-	PlatformVersion       string                    `json:"platform_version" mapstructure:"platform_version"`
-	Platform              string                    `json:"platform" mapstructure:"platform"`
-	Uptime                float64                   `json:"uptime" mapstructure:"uptime"`
-	Users                 []system_utils.SystemUser `json:"users" mapstructure:"users"`
-	UUID                  string                    `json:"uuid" mapstructure:"uuid"`
-	Version               string                    `json:"version" mapstructure:"version"`
-	CameraUsage           []string                  `json:"camera_usage" mapstructure:"camera_usage"`
-	IPAddress6            *string                   `json:"ip_address_6" mapstructure:"ip_address_6"`
-	PendingReboot         *bool                     `json:"pending_reboot" mapstructure:"pending_reboot"`
-	RunMode               RunMode                   `json:"run_mode" mapstructure:"run_mode"`
-	VersionLatestURL      *string                   `json:"version_latest_url" mapstructure:"version_latest_url"`
-	VersionLatest         *string                   `json:"version_latest" mapstructure:"version_latest"`
-	VersionNewerAvailable *bool                     `json:"version_newer_available" mapstructure:"version_newer_available"`
-}
-
-func (t *Module) UpdateSystemModule() (SystemData, error) {
+func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	log.Info("Getting system data")
 
 	// Initialize arrays
-	var systemData SystemData
+	var systemData types.SystemData
 	systemData.Users = make([]system_utils.SystemUser, 0)
 	systemData.CameraUsage = make([]string, 0)
 
@@ -122,7 +95,7 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 
 	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
-	systemData.RunMode = RunModeStandalone // Always set RunMode to standalone
+	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 	systemData.Version = currentVersion
 	systemData.VersionLatest = &latestVersion
 	systemData.VersionLatestURL = &version.LatestVersionUserURL

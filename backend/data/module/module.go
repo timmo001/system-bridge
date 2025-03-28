@@ -1,59 +1,46 @@
 package data_module
 
 import (
+	"errors"
 	"fmt"
+
+	"github.com/timmo001/system-bridge/types"
 )
 
-// Module represents the type of data module
-type ModuleName string
-
-const (
-	ModuleBattery   ModuleName = "battery"
-	ModuleCPU       ModuleName = "cpu"
-	ModuleDisks     ModuleName = "disks"
-	ModuleDisplays  ModuleName = "displays"
-	ModuleGPUs      ModuleName = "gpus"
-	ModuleMedia     ModuleName = "media"
-	ModuleMemory    ModuleName = "memory"
-	ModuleNetworks  ModuleName = "networks"
-	ModuleProcesses ModuleName = "processes"
-	ModuleSensors   ModuleName = "sensors"
-	ModuleSystem    ModuleName = "system"
-)
-
+// Module represents the data module implementation
 type Module struct {
-	Module ModuleName `json:"module" mapstructure:"module"`
-	Data   any        `json:"data" mapstructure:"data"`
+	Module types.ModuleName `json:"module" mapstructure:"module"`
+	Data   any              `json:"data" mapstructure:"data"`
 }
 
 // Process implements data.UpdateTask.
 func (t *Module) Process() error {
-	panic("unimplemented")
+	return errors.New("not implemented")
 }
 
 func (t *Module) UpdateModule() (any, error) {
 	switch t.Module {
-	case ModuleBattery:
+	case types.ModuleBattery:
 		return t.UpdateBatteryModule()
-	case ModuleCPU:
+	case types.ModuleCPU:
 		return t.UpdateCPUModule()
-	case ModuleDisks:
+	case types.ModuleDisks:
 		return t.UpdateDisksModule()
-	case ModuleDisplays:
+	case types.ModuleDisplays:
 		return t.UpdateDisplaysModule()
-	case ModuleGPUs:
+	case types.ModuleGPUs:
 		return t.UpdateGPUsModule()
-	case ModuleMedia:
+	case types.ModuleMedia:
 		return t.UpdateMediaModule()
-	case ModuleMemory:
+	case types.ModuleMemory:
 		return t.UpdateMemoryModule()
-	case ModuleNetworks:
+	case types.ModuleNetworks:
 		return t.UpdateNetworksModule()
-	case ModuleProcesses:
+	case types.ModuleProcesses:
 		return t.UpdateProcessesModule()
-	case ModuleSensors:
+	case types.ModuleSensors:
 		return t.UpdateSensorsModule()
-	case ModuleSystem:
+	case types.ModuleSystem:
 		return t.UpdateSystemModule()
 	default:
 		return nil, fmt.Errorf("module not found: %s", t.Module)

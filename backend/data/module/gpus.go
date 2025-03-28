@@ -6,15 +6,10 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-// GPUsData represents information about all GPU devices
-type GPUsData struct {
-	GPUs []types.GPU `json:"gpus"`
-}
-
-func (t *Module) UpdateGPUsModule() (GPUsData, error) {
+func (t *Module) UpdateGPUsModule() (types.GPUsData, error) {
 	log.Info("Getting GPUs data")
 
-	var gpusData GPUsData
+	var gpusData types.GPUsData
 	// Initialize arrays
 	gpusData.GPUs = make([]types.GPU, 0)
 

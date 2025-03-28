@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
@@ -24,32 +25,32 @@ type DataStore struct {
 
 func NewDataStore() (*DataStore, error) {
 	ds := &DataStore{
-		Battery:   data_module.Module{Module: data_module.ModuleBattery},
-		CPU:       data_module.Module{Module: data_module.ModuleCPU},
-		Disks:     data_module.Module{Module: data_module.ModuleDisks},
-		Displays:  data_module.Module{Module: data_module.ModuleDisplays},
-		GPUs:      data_module.Module{Module: data_module.ModuleGPUs},
-		Media:     data_module.Module{Module: data_module.ModuleMedia},
-		Memory:    data_module.Module{Module: data_module.ModuleMemory},
-		Networks:  data_module.Module{Module: data_module.ModuleNetworks},
-		Processes: data_module.Module{Module: data_module.ModuleProcesses},
-		Sensors:   data_module.Module{Module: data_module.ModuleSensors},
-		System:    data_module.Module{Module: data_module.ModuleSystem},
+		Battery:   data_module.Module{Module: types.ModuleBattery},
+		CPU:       data_module.Module{Module: types.ModuleCPU},
+		Disks:     data_module.Module{Module: types.ModuleDisks},
+		Displays:  data_module.Module{Module: types.ModuleDisplays},
+		GPUs:      data_module.Module{Module: types.ModuleGPUs},
+		Media:     data_module.Module{Module: types.ModuleMedia},
+		Memory:    data_module.Module{Module: types.ModuleMemory},
+		Networks:  data_module.Module{Module: types.ModuleNetworks},
+		Processes: data_module.Module{Module: types.ModuleProcesses},
+		Sensors:   data_module.Module{Module: types.ModuleSensors},
+		System:    data_module.Module{Module: types.ModuleSystem},
 	}
 
 	// Load data for all modules
-	for _, module := range []data_module.ModuleName{
-		data_module.ModuleBattery,
-		data_module.ModuleCPU,
-		data_module.ModuleDisks,
-		data_module.ModuleDisplays,
-		data_module.ModuleGPUs,
-		data_module.ModuleMedia,
-		data_module.ModuleMemory,
-		data_module.ModuleNetworks,
-		data_module.ModuleProcesses,
-		data_module.ModuleSensors,
-		data_module.ModuleSystem,
+	for _, module := range []types.ModuleName{
+		types.ModuleBattery,
+		types.ModuleCPU,
+		types.ModuleDisks,
+		types.ModuleDisplays,
+		types.ModuleGPUs,
+		types.ModuleMedia,
+		types.ModuleMemory,
+		types.ModuleNetworks,
+		types.ModuleProcesses,
+		types.ModuleSensors,
+		types.ModuleSystem,
 	} {
 		if err := ds.loadModuleData(ds.GetModule(module)); err != nil {
 			return nil, fmt.Errorf("error loading data for module %s: %w", module, err)
@@ -123,36 +124,36 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 	return nil
 }
 
-func (d *DataStore) GetModule(module data_module.ModuleName) *data_module.Module {
+func (d *DataStore) GetModule(module types.ModuleName) *data_module.Module {
 	switch module {
-	case data_module.ModuleBattery:
+	case types.ModuleBattery:
 		return &d.Battery
-	case data_module.ModuleCPU:
+	case types.ModuleCPU:
 		return &d.CPU
-	case data_module.ModuleDisks:
+	case types.ModuleDisks:
 		return &d.Disks
-	case data_module.ModuleDisplays:
+	case types.ModuleDisplays:
 		return &d.Displays
-	case data_module.ModuleGPUs:
+	case types.ModuleGPUs:
 		return &d.GPUs
-	case data_module.ModuleMedia:
+	case types.ModuleMedia:
 		return &d.Media
-	case data_module.ModuleMemory:
+	case types.ModuleMemory:
 		return &d.Memory
-	case data_module.ModuleNetworks:
+	case types.ModuleNetworks:
 		return &d.Networks
-	case data_module.ModuleProcesses:
+	case types.ModuleProcesses:
 		return &d.Processes
-	case data_module.ModuleSensors:
+	case types.ModuleSensors:
 		return &d.Sensors
-	case data_module.ModuleSystem:
+	case types.ModuleSystem:
 		return &d.System
 	default:
 		return nil
 	}
 }
 
-func (d *DataStore) GetModuleData(module data_module.ModuleName) any {
+func (d *DataStore) GetModuleData(module types.ModuleName) any {
 	m := d.GetModule(module)
 	if m == nil {
 		return nil
@@ -161,7 +162,7 @@ func (d *DataStore) GetModuleData(module data_module.ModuleName) any {
 	return m.Data
 }
 
-func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) error {
+func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 	if d == nil {
 		return fmt.Errorf("DataStore is nil")
 	}
@@ -179,22 +180,22 @@ func (d *DataStore) SetModuleData(module data_module.ModuleName, data any) error
 	return d.saveModuleData(m)
 }
 
-func (d *DataStore) GetAllModuleData() map[data_module.ModuleName]any {
-	data := make(map[data_module.ModuleName]any)
+func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
+	data := make(map[types.ModuleName]any)
 
 	// Collect data from each module using the GetModule method
-	for _, moduleName := range []data_module.ModuleName{
-		data_module.ModuleBattery,
-		data_module.ModuleCPU,
-		data_module.ModuleDisks,
-		data_module.ModuleDisplays,
-		data_module.ModuleGPUs,
-		data_module.ModuleMedia,
-		data_module.ModuleMemory,
-		data_module.ModuleNetworks,
-		data_module.ModuleProcesses,
-		data_module.ModuleSensors,
-		data_module.ModuleSystem,
+	for _, moduleName := range []types.ModuleName{
+		types.ModuleBattery,
+		types.ModuleCPU,
+		types.ModuleDisks,
+		types.ModuleDisplays,
+		types.ModuleGPUs,
+		types.ModuleMedia,
+		types.ModuleMemory,
+		types.ModuleNetworks,
+		types.ModuleProcesses,
+		types.ModuleSensors,
+		types.ModuleSystem,
 	} {
 		module := d.GetModule(moduleName)
 		if module != nil {

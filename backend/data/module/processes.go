@@ -1,31 +1,16 @@
 package data_module
 
-import "github.com/charmbracelet/log"
+import (
+	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/types"
+)
 
-// Process represents information about a system process
-type Process struct {
-	ID               float64  `json:"id"`
-	Name             *string  `json:"name"`
-	CPUUsage         *float64 `json:"cpu_usage"`
-	Created          *float64 `json:"created"`
-	MemoryUsage      *float64 `json:"memory_usage"`
-	Path             *string  `json:"path"`
-	Status           *string  `json:"status"`
-	Username         *string  `json:"username"`
-	WorkingDirectory *string  `json:"working_directory"`
-}
-
-// ProcessesData represents information about all system processes
-type ProcessesData struct {
-	Processes []Process `json:"processes"`
-}
-
-func (t *Module) UpdateProcessesModule() (ProcessesData, error) {
+func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
 	log.Info("Getting processes data")
 
-	var processesData ProcessesData
+	var processesData types.ProcessesData
 	// Initialize arrays
-	processesData.Processes = make([]Process, 0)
+	processesData.Processes = make([]types.Process, 0)
 
 	// TODO: Implement
 	return processesData, nil

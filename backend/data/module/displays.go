@@ -6,15 +6,10 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-// DisplaysData represents information about all display devices
-type DisplaysData struct {
-	Displays []types.Display `json:"displays"`
-}
-
-func (t *Module) UpdateDisplaysModule() (DisplaysData, error) {
+func (t *Module) UpdateDisplaysModule() (types.DisplaysData, error) {
 	log.Info("Getting displays data")
 
-	var displaysData DisplaysData
+	var displaysData types.DisplaysData
 	displaysData.Displays = make([]types.Display, 0)
 
 	displays, err := displays.GetDisplays()
