@@ -11,3 +11,4 @@ alwaysApply: true
 - Test any commands used in exec commands. For example, `hostname --fqdn` should be ran first to check if it is installed and whether it exists. Search the web to make sure the same command is used in other distros on the platform.
 - Use long variants of command flags and variables to be more descriptive.
 - Any commands which are not typically installed on certain distributions, should be added to the documentation.
+- List your sources. Link to the documentation at the end of any messages which use the @Web
