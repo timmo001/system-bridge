@@ -1,22 +1,27 @@
 package data_module
 
-import "github.com/charmbracelet/log"
+import (
+	"strings"
+
+	"github.com/charmbracelet/log"
+	"github.com/shirou/gopsutil/v3/disk"
+)
 
 // DiskIOCounters represents disk I/O statistics
 type DiskIOCounters struct {
-	ReadCount  int64 `json:"read_count"`
-	WriteCount int64 `json:"write_count"`
-	ReadBytes  int64 `json:"read_bytes"`
-	WriteBytes int64 `json:"write_bytes"`
-	ReadTime   int64 `json:"read_time"`
-	WriteTime  int64 `json:"write_time"`
+	ReadCount  uint64 `json:"read_count"`
+	WriteCount uint64 `json:"write_count"`
+	ReadBytes  uint64 `json:"read_bytes"`
+	WriteBytes uint64 `json:"write_bytes"`
+	ReadTime   uint64 `json:"read_time"`
+	WriteTime  uint64 `json:"write_time"`
 }
 
 // DiskUsage represents disk space usage information
 type DiskUsage struct {
-	Total   int64   `json:"total"`
-	Used    int64   `json:"used"`
-	Free    int64   `json:"free"`
+	Total   uint64  `json:"total"`
+	Used    uint64  `json:"used"`
+	Free    uint64  `json:"free"`
 	Percent float64 `json:"percent"`
 }
 
@@ -51,6 +56,90 @@ func (t *Module) UpdateDisksModule() (DisksData, error) {
 	// Initialize arrays
 	disksData.Devices = make([]Disk, 0)
 
-	// TODO: Implement
+	// Get all partitions
+	partitions, err := disk.Partitions(false)
+	if err != nil {
+		log.Errorf("Failed to get disk partitions: %v", err)
+		return disksData, err
+	}
+
+	// Get IO counters for all devices
+	ioCounters, err := disk.IOCounters()
+	if err != nil {
+		log.Errorf("Failed to get disk IO counters: %v", err)
+		// Continue without IO counters
+	} else {
+		// Set total IO counters
+		var totalIO DiskIOCounters
+		for _, counter := range ioCounters {
+			totalIO.ReadCount += counter.ReadCount
+			totalIO.WriteCount += counter.WriteCount
+			totalIO.ReadBytes += counter.ReadBytes
+			totalIO.WriteBytes += counter.WriteBytes
+			totalIO.ReadTime += counter.ReadTime
+			totalIO.WriteTime += counter.WriteTime
+		}
+		disksData.IOCounters = &totalIO
+	}
+
+	// Group partitions by device name
+	deviceMap := make(map[string]*Disk)
+	for _, partition := range partitions {
+		deviceName := partition.Device
+
+		// Get or create device
+		device, exists := deviceMap[deviceName]
+		if !exists {
+			device = &Disk{
+				Name:       deviceName,
+				Partitions: make([]DiskPartition, 0),
+			}
+			deviceMap[deviceName] = device
+		}
+
+		// Get usage statistics
+		usage, err := disk.Usage(partition.Mountpoint)
+		var diskUsage *DiskUsage
+		if err != nil {
+			log.Errorf("Failed to get disk usage for %s: %v", partition.Mountpoint, err)
+		} else {
+			diskUsage = &DiskUsage{
+				Total:   usage.Total,
+				Used:    usage.Used,
+				Free:    usage.Free,
+				Percent: usage.UsedPercent,
+			}
+		}
+
+		// Create partition info
+		diskPartition := DiskPartition{
+			Device:         partition.Device,
+			MountPoint:     partition.Mountpoint,
+			FilesystemType: partition.Fstype,
+			Options:        strings.Join(partition.Opts, ","),
+			Usage:         diskUsage,
+		}
+
+		// Add partition to device
+		device.Partitions = append(device.Partitions, diskPartition)
+
+		// Add IO counters for the device if available
+		if counter, ok := ioCounters[deviceName]; ok {
+			device.IOCounters = &DiskIOCounters{
+				ReadCount:  counter.ReadCount,
+				WriteCount: counter.WriteCount,
+				ReadBytes:  counter.ReadBytes,
+				WriteBytes: counter.WriteBytes,
+				ReadTime:   counter.ReadTime,
+				WriteTime:  counter.WriteTime,
+			}
+		}
+	}
+
+	// Convert map to array
+	for _, device := range deviceMap {
+		disksData.Devices = append(disksData.Devices, *device)
+	}
+
 	return disksData, nil
 }
