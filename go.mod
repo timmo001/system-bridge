@@ -10,7 +10,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.20.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
-	golang.org/x/sys v0.30.0
+	golang.org/x/sys v0.31.0
 	golang.org/x/text v0.22.0
 	golang.org/x/time v0.11.0
 )
@@ -20,6 +20,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.4.2 // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e // indirect
+	github.com/distatus/battery v0.11.0 // indirect
 	github.com/ebitengine/purego v0.8.2 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/gen2brain/shm v0.1.1 // indirect
@@ -61,4 +62,5 @@ require (
 	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f // indirect
 	golang.org/x/image v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	howett.net/plist v1.0.1 // indirect
 )
