@@ -1,7 +1,11 @@
 package data_module
 
 import (
+	"runtime"
+
 	"github.com/charmbracelet/log"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type RunMode string
@@ -75,9 +79,13 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 		macAddress = "unknown"
 	}
 
-	// TODO: Implement actual system data collection
-	platformVersion := "1.0.0"        // TODO: Get actual platform version
-	platform := "Linux"               // TODO: Get actual platform
+	platformVersion, err := getPlatformVersion()
+	if err != nil {
+		log.Errorf("Failed to get platform version: %v", err)
+		platformVersion = "unknown"
+	}
+
+	platform := cases.Title(language.English).String(runtime.GOOS)
 
 	uptime, err := getUptime()
 	if err != nil {
@@ -85,7 +93,12 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 		uptime = 0
 	}
 
-	users := []SystemUser{}                                                         // TODO: Get actual users
+	users, err := getUsers()
+	if err != nil {
+		log.Errorf("Failed to get users: %v", err)
+		users = []SystemUser{}
+	}
+
 	uuid := "123e4567-e89b-12d3-a456-426614174000"                                  // TODO: Get actual UUID
 	version := "5.0.0"                                                              // TODO: Get actual version
 	versionLatest := "5.0.0"                                                        // TODO: Get actual version

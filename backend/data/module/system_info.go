@@ -550,3 +550,286 @@ func getLinuxMACAddress() (string, error) {
 	}
 	return "", fmt.Errorf("could not find MAC address")
 }
+
+// getPlatformVersion returns the platform version
+func getPlatformVersion() (string, error) {
+	switch runtime.GOOS {
+	case "windows":
+		return getWindowsPlatformVersion()
+	case "darwin":
+		return getDarwinPlatformVersion()
+	case "linux":
+		return getLinuxPlatformVersion()
+	default:
+		return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+}
+
+// getWindowsPlatformVersion gets the Windows version using systeminfo
+func getWindowsPlatformVersion() (string, error) {
+	lines, err := getWindowsSystemInfo()
+	if err != nil {
+		return "", err
+	}
+
+	for _, line := range lines {
+		parts := strings.Split(line, ",")
+		if len(parts) >= 3 { // OS Version is at index 2
+			version := strings.Trim(parts[2], "\"")
+			return version, nil
+		}
+	}
+	return "", fmt.Errorf("could not find OS version in systeminfo output")
+}
+
+// getDarwinPlatformVersion gets the macOS version using sw_vers
+func getDarwinPlatformVersion() (string, error) {
+	cmd := exec.Command("sw_vers", "-productVersion")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
+// getLinuxPlatformVersion gets the Linux version using /etc/os-release
+func getLinuxPlatformVersion() (string, error) {
+	// Try /etc/os-release first
+	cmd := exec.Command("cat", "/etc/os-release")
+	output, err := cmd.Output()
+	if err == nil {
+		lines := strings.Split(string(output), "\n")
+		for _, line := range lines {
+			if strings.HasPrefix(line, "VERSION=") {
+				// Remove quotes and VERSION= prefix
+				version := strings.Trim(strings.TrimPrefix(line, "VERSION="), "\"")
+				return version, nil
+			}
+		}
+	}
+
+	// Fallback to lsb_release if available
+	cmd = exec.Command("lsb_release", "-r", "-s")
+	output, err = cmd.Output()
+	if err == nil {
+		return strings.TrimSpace(string(output)), nil
+	}
+
+	// Last resort: try uname -r
+	cmd = exec.Command("uname", "-r")
+	output, err = cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("could not determine Linux version")
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
+// getUsers returns information about system users
+func getUsers() ([]SystemUser, error) {
+	switch runtime.GOOS {
+	case "windows":
+		return getWindowsUsers()
+	case "darwin":
+		return getDarwinUsers()
+	case "linux":
+		return getLinuxUsers()
+	default:
+		return nil, fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	}
+}
+
+// getWindowsUsers gets user information on Windows
+func getWindowsUsers() ([]SystemUser, error) {
+	// Get current username using whoami command
+	cmd := exec.Command("whoami")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse username - whoami returns "domain\username" format
+	fullUsername := strings.TrimSpace(string(output))
+	username := fullUsername
+	if strings.Contains(fullUsername, "\\") {
+		parts := strings.Split(fullUsername, "\\")
+		username = parts[1]
+	}
+
+	// Get hostname
+	hostname, err := getWindowsHostname()
+	if err != nil {
+		return nil, err
+	}
+
+	// Get explorer.exe PID for this user (a more meaningful PID than 0)
+	var pid float64
+	cmd = exec.Command("powershell", "-Command", "Get-Process -Name explorer | Select-Object -First 1 -ExpandProperty Id")
+	pidOutput, err := cmd.Output()
+	if err == nil {
+		if pidInt, err := strconv.ParseFloat(strings.TrimSpace(string(pidOutput)), 64); err == nil {
+			pid = pidInt
+		}
+	}
+
+	// Determine session type (console, rdp, etc.)
+	terminal := "Console" // Default to Console which is most common
+
+	// Try to determine if RDP session by checking logon ID in registry
+	cmd = exec.Command("powershell", "-Command", "Get-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\ClusterSettings' -ErrorAction SilentlyContinue")
+	_, err = cmd.Output()
+	if err == nil {
+		// Terminal Server settings exist, check if RDP is enabled
+		cmd = exec.Command("powershell", "-Command", "(Get-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name 'fDenyTSConnections' -ErrorAction SilentlyContinue).fDenyTSConnections")
+		rdpOutput, err := cmd.Output()
+		if err == nil {
+			value := strings.TrimSpace(string(rdpOutput))
+			if value == "0" {
+				// RDP is enabled, check if current session is RDP
+				cmd = exec.Command("powershell", "-Command", "Get-WmiObject -Class Win32_ComputerSystem | Select-Object -ExpandProperty UserName")
+				userOutput, err := cmd.Output()
+				if err == nil {
+					currentUser := strings.TrimSpace(string(userOutput))
+					if strings.Contains(strings.ToLower(currentUser), "rdp") {
+						terminal = "RDP"
+					}
+				}
+			}
+		}
+	}
+
+	// Create user object for current user
+	user := SystemUser{
+		Name:     username,
+		Active:   true,
+		Terminal: terminal,
+		Host:     hostname,
+		Started:  float64(time.Now().Unix()),
+		PID:      pid,
+	}
+
+	return []SystemUser{user}, nil
+}
+
+// getDarwinUsers gets user information on macOS using who
+func getDarwinUsers() ([]SystemUser, error) {
+	cmd := exec.Command("who")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []SystemUser
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// who output format: username terminal login_time host
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue
+		}
+
+		username := fields[0]
+		terminal := fields[1]
+		host := fields[3]
+
+		// Get process ID for the terminal
+		pidCmd := exec.Command("ps", "-o", "pid=", "-t", terminal)
+		pidOutput, err := pidCmd.Output()
+		if err != nil {
+			continue
+		}
+		pid, err := strconv.ParseFloat(strings.TrimSpace(string(pidOutput)), 64)
+		if err != nil {
+			continue
+		}
+
+		// Get start time
+		startCmd := exec.Command("ps", "-o", "lstart=", "-p", fmt.Sprintf("%.0f", pid))
+		startOutput, err := startCmd.Output()
+		if err != nil {
+			continue
+		}
+		startTime, err := time.Parse("Mon Jan 02 15:04:05 2006", strings.TrimSpace(string(startOutput)))
+		if err != nil {
+			continue
+		}
+
+		user := SystemUser{
+			Name:     username,
+			Active:   true, // If they're in who output, they're active
+			Terminal: terminal,
+			Host:     host,
+			Started:  float64(startTime.Unix()),
+			PID:      pid,
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// getLinuxUsers gets user information on Linux using who
+func getLinuxUsers() ([]SystemUser, error) {
+	cmd := exec.Command("who")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []SystemUser
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// who output format: username terminal login_time host
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue
+		}
+
+		username := fields[0]
+		terminal := fields[1]
+		host := fields[3]
+
+		// Get process ID for the terminal
+		pidCmd := exec.Command("ps", "-o", "pid=", "-t", terminal)
+		pidOutput, err := pidCmd.Output()
+		if err != nil {
+			continue
+		}
+		pid, err := strconv.ParseFloat(strings.TrimSpace(string(pidOutput)), 64)
+		if err != nil {
+			continue
+		}
+
+		// Get start time
+		startCmd := exec.Command("ps", "-o", "lstart=", "-p", fmt.Sprintf("%.0f", pid))
+		startOutput, err := startCmd.Output()
+		if err != nil {
+			continue
+		}
+		startTime, err := time.Parse("Mon Jan 02 15:04:05 2006", strings.TrimSpace(string(startOutput)))
+		if err != nil {
+			continue
+		}
+
+		user := SystemUser{
+			Name:     username,
+			Active:   true, // If they're in who output, they're active
+			Terminal: terminal,
+			Host:     host,
+			Started:  float64(startTime.Unix()),
+			PID:      pid,
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
