@@ -58,31 +58,31 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 	fqdn, err := getFQDN()
 	if err != nil {
 		log.Errorf("Failed to get FQDN: %v", err)
-		fqdn = "unknown"
+		fqdn = ""
 	}
 
 	hostname, err := getHostname()
 	if err != nil {
 		log.Errorf("Failed to get hostname: %v", err)
-		hostname = "unknown"
+		hostname = ""
 	}
 
 	ipAddress4, err := getIPAddress4()
 	if err != nil {
 		log.Errorf("Failed to get IP address: %v", err)
-		ipAddress4 = "unknown"
+		ipAddress4 = ""
 	}
 
 	macAddress, err := getMACAddress()
 	if err != nil {
 		log.Errorf("Failed to get MAC address: %v", err)
-		macAddress = "unknown"
+		macAddress = ""
 	}
 
 	platformVersion, err := getPlatformVersion()
 	if err != nil {
 		log.Errorf("Failed to get platform version: %v", err)
-		platformVersion = "unknown"
+		platformVersion = ""
 	}
 
 	platform := cases.Title(language.English).String(runtime.GOOS)
