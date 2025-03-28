@@ -7,6 +7,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
+// Redefined in types/module.go - Added to avoid compilerInvalidReceiver error
 // Module represents the data module implementation
 type Module struct {
 	Module types.ModuleName `json:"module" mapstructure:"module"`
