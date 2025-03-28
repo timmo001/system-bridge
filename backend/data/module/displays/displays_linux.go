@@ -10,11 +10,12 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/randr"
 	"github.com/jezek/xgb/xproto"
+	"github.com/timmo001/system-bridge/types"
 )
 
-func getDisplays() ([]Display, error) {
-	displays := make([]Display, 0)
-	var primaryDisplay *Display
+func getDisplays() ([]types.Display, error) {
+	displays := make([]types.Display, 0)
+	var primaryDisplay *types.Display
 
 	// Connect to X server
 	X, err := xgb.NewConn()
@@ -92,7 +93,7 @@ func getDisplays() ([]Display, error) {
 		isPrimary := false
 		pixelClock := float64(mode.DotClock) / 1000000.0 // Convert to MHz
 
-		display := Display{
+		display := types.Display{
 			ID:                   fmt.Sprintf("%d", output),
 			Name:                 name,
 			ResolutionHorizontal: int(resolutionWidth),
@@ -116,7 +117,7 @@ func getDisplays() ([]Display, error) {
 
 	// Add primary display at the beginning if found
 	if primaryDisplay != nil {
-		displays = append([]Display{*primaryDisplay}, displays...)
+		displays = append([]types.Display{*primaryDisplay}, displays...)
 	}
 
 	return displays, nil

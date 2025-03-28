@@ -10,6 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/types"
 )
 
 var (
@@ -40,8 +41,8 @@ func formatDisplayName(id string) string {
 	return id
 }
 
-func getDisplays() ([]Display, error) {
-	var displays []Display
+func getDisplays() ([]types.Display, error) {
+	var displays []types.Display
 
 	callback := syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
 		var info MONITORINFOEX
@@ -62,7 +63,7 @@ func getDisplays() ([]Display, error) {
 
 		displayName := syscall.UTF16ToString(info.DeviceName[:])
 		cleanID := displayPathRegex.ReplaceAllString(displayName, "")
-		display := Display{
+		display := types.Display{
 			ID:                   cleanID,
 			Name:                 formatDisplayName(cleanID),
 			ResolutionHorizontal: int(width),
