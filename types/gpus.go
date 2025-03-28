@@ -15,3 +15,8 @@ type GPU struct {
 	PowerUsage  *float64 `json:"power_usage"`
 	Temperature *float64 `json:"temperature"`
 }
+
+// GPUsData represents information about all GPU devices
+type GPUsData struct {
+	GPUs []GPU `json:"gpus"`
+}

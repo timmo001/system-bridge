@@ -14,3 +14,8 @@ type Display struct {
 	PixelClock           *float64 `json:"pixel_clock"`
 	RefreshRate          *float64 `json:"refresh_rate"`
 }
+
+// DisplaysData represents information about all display devices
+type DisplaysData struct {
+	Displays []Display `json:"displays"`
+}
