@@ -1,18 +1,17 @@
 package sensors
 
-import "github.com/timmo001/system-bridge/types"
+import (
+	"github.com/timmo001/system-bridge/types"
+)
 
 func GetSensorsData() (types.SensorsData, error) {
-	var sensorsData types.SensorsData
-	// Initialize arrays
-	sensorsData.WindowsSensors = &types.SensorsWindows{
-		Hardware: make([]types.SensorsWindowsHardware, 0),
-		NVIDIA: &types.SensorsNVIDIA{
-			Displays: make([]types.SensorsNVIDIADisplay, 0),
-			GPUs:     make([]types.SensorsNVIDIAGPU, 0),
-		},
+	data, err := getWindowsSensorsData()
+	if err != nil {
+		return types.SensorsData{}, err
 	}
-
-	// TODO: Implement
-	return sensorsData, nil
+	return types.SensorsData{
+		WindowsSensors: data,
+		Fans: nil,
+		Temperatures: nil,
+	}, nil
 }
