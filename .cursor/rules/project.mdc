@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project
+
+- This project is called System Bridge.
+- It supports Windows, Linux, and MacOS (darwin).
+- The aim of this project is to provide a "bridge" to other applications, such as the home automation platform Home Assistant.
+- All parts of the application which are exposed outside via the API (such as HTTP and Websockets) should be protected with a token, defined in [settings.go](mdc:settings/settings.go).
+- Settings are shared between packages and found in [settings.go](mdc:settings/settings.go).
+- The backend and packages it uses and it only are under backend/
+- All data modules are under backend/data/module
+- All data handlers are under backend/event/handler
+- The websocket is at [websocket.go](mdc:backend/websocket/websocket.go). Messages are handled in [messages.go](mdc:backend/websocket/messages.go). Its handlers are found at [handlers.go](mdc:backend/websocket/handlers.go). Accessing the websocket internally can be done from using [instance.go](mdc:backend/websocket/instance.go).
+- HTTP endpoints are found under backend/http
+- All utility functions are under utils/
