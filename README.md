@@ -11,16 +11,24 @@ A bridge for your systems.
 Install the following packages:
 
 ```zsh
-sudo pacman -S inetutils
+sudo pacman -S inetutils wlr-randr
 ```
 
-<!-- ### Debian/Ubuntu
+#### Debian/Ubuntu (Unverified)
 
 Install the following packages:
 
 ```zsh
-sudo apt install
-``` -->
+sudo apt install inetutils-tools wlr-randr
+```
+
+#### Fedora (Unverified)
+
+Install the following packages:
+
+```zsh
+sudo dnf install inetutils wlr-randr
+```
 
 ## Setup
 
