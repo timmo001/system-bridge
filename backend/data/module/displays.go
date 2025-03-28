@@ -96,16 +96,16 @@ func (t *Module) getDisplaysX11() ([]Display, error) {
 			}
 		}
 
-		// Get crtc info for position
+		// Get crtc info for position and resolution
 		var x, y int16
-		var width, height uint16
+		var resolutionWidth, resolutionHeight uint16
 		if info.Crtc != 0 {
 			crtc, err := randr.GetCrtcInfo(X, info.Crtc, 0).Reply()
 			if err == nil {
 				x = crtc.X
 				y = crtc.Y
-				width = crtc.Width
-				height = crtc.Height
+				resolutionWidth = crtc.Width
+				resolutionHeight = crtc.Height
 			}
 		}
 
@@ -115,17 +115,17 @@ func (t *Module) getDisplaysX11() ([]Display, error) {
 		// Convert name from []byte to string
 		name := string(info.Name)
 
-		// Create display info
-		w := int(width)
-		h := int(height)
+		// Get physical dimensions in millimeters
+		w := int(info.MmWidth)
+		h := int(info.MmHeight)
 		isPrimary := false
 		pixelClock := float64(mode.DotClock) / 1000000.0 // Convert to MHz
 
 		display := Display{
 			ID:                   fmt.Sprintf("%d", output),
 			Name:                 name,
-			ResolutionHorizontal: int(mode.Width),
-			ResolutionVertical:   int(mode.Height),
+			ResolutionHorizontal: int(resolutionWidth),
+			ResolutionVertical:   int(resolutionHeight),
 			X:                    int(x),
 			Y:                    int(y),
 			Width:                &w,
@@ -295,12 +295,12 @@ func (t *Module) UpdateDisplaysModule() (DisplaysData, error) {
 		var displays []Display
 		var err error
 
-		if isWayland() {
-			displays, err = t.getDisplaysWayland()
-			if err != nil {
-				log.Debug("failed to get Wayland display info", "error", err)
-			}
-		}
+		// if isWayland() {
+		// 	displays, err = t.getDisplaysWayland()
+		// 	if err != nil {
+		// 		log.Debug("failed to get Wayland display info", "error", err)
+		// 	}
+		// }
 
 		// If Wayland detection failed or we're on X11, try X11
 		if len(displays) == 0 {
