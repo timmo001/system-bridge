@@ -1,59 +1,17 @@
 package event_handler
 
 import (
-	"runtime"
-
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 )
 
-type GetDirectoriesResponseDataItem struct {
-	Key  string `json:"key" mapstructure:"key"`
-	Path string `json:"path" mapstructure:"path"`
-}
-
-type GetDirectoriesResponseData = []GetDirectoriesResponseDataItem
-
-func GetDirectories(router *event.MessageRouter) GetDirectoriesResponseData {
-	var desktopDirectory, documentsDirectory, downloadsDirectory, musicDirectory, picturesDirectory, videosDirectory string
-
-	switch runtime.GOOS {
-	case "windows":
-		desktopDirectory, documentsDirectory, downloadsDirectory, musicDirectory, picturesDirectory, videosDirectory = GetWindowsDirectories()
-	case "linux", "darwin":
-		desktopDirectory, documentsDirectory, downloadsDirectory, musicDirectory, picturesDirectory, videosDirectory = GetUnixDirectories()
-	}
-
-	directories := GetDirectoriesResponseData{
-		{
-			Key:  "desktop",
-			Path: desktopDirectory,
-		},
-		{
-			Key:  "documents",
-			Path: documentsDirectory,
-		},
-		{
-			Key:  "downloads",
-			Path: downloadsDirectory,
-		},
-		{
-			Key:  "music",
-			Path: musicDirectory,
-		},
-		{
-			Key:  "pictures",
-			Path: picturesDirectory,
-		},
-		{
-			Key:  "videos",
-			Path: videosDirectory,
-		},
-	}
+func GetDirectories(router *event.MessageRouter) []filesystem.DirectoryInfo {
+	directories := filesystem.GetUserDirectories()
 
 	// Get user media directories
 	for _, directory := range router.Settings.Media.Directories {
-		directories = append(directories, GetDirectoriesResponseDataItem{
+		directories = append(directories, filesystem.DirectoryInfo{
 			Key:  directory.Name,
 			Path: directory.Path,
 		})

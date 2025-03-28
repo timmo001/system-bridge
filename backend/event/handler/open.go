@@ -1,49 +1,14 @@
 package event_handler
 
 import (
-	"os"
-	"os/exec"
-	"runtime"
-
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 )
 
 type OpenRequestData struct {
-	// Path or URL, never both
 	Path string `json:"path" mapstructure:"path"`
-	URL  string `json:"url" mapstructure:"url"`
-}
-
-func OpenWithDefaultProgram(path string) error {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", "", path)
-	case "darwin":
-		cmd = exec.Command("open", path)
-	default: // linux and others
-		cmd = exec.Command("xdg-open", path)
-	}
-
-	return cmd.Start()
-}
-
-func OpenWithDefaultBrowser(url string) error {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", "", url)
-	case "darwin":
-		cmd = exec.Command("open", url)
-	default: // linux and others
-		cmd = exec.Command("xdg-open", url)
-	}
-
-	return cmd.Start()
 }
 
 func RegisterOpenHandler(router *event.MessageRouter) {
@@ -62,49 +27,25 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 			}
 		}
 
-		// Validate data
-		if data.URL == "" && data.Path == "" {
-			log.Error("No URL or path provided for open event")
+		// Validate path data
+		if data.Path == "" {
+			log.Error("No path provided for open")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeBadRequest,
-				Message: "No URL or path provided for open event",
+				Message: "No path provided for open",
 			}
 		}
 
-		if data.Path != "" {
-			// Check if file exists
-			if _, err := os.Stat(data.Path); os.IsNotExist(err) {
-				log.Errorf("File does not exist: %v", data.Path)
-				return event.MessageResponse{
-					ID:      message.ID,
-					Type:    event.ResponseTypeError,
-					Subtype: event.ResponseSubtypeBadFile,
-					Message: "File does not exist",
-				}
-			}
-
-			// Open the path using the default program
-			if err := OpenWithDefaultProgram(data.Path); err != nil {
-				log.Errorf("Failed to open file: %v", err)
-				return event.MessageResponse{
-					ID:      message.ID,
-					Type:    event.ResponseTypeError,
-					Subtype: event.ResponseSubtypeNone,
-					Message: "Failed to open file",
-				}
-			}
-		} else if data.URL != "" {
-			// Open the URL using the default browser
-			if err := OpenWithDefaultBrowser(data.URL); err != nil {
-				log.Errorf("Failed to open URL: %v", err)
-				return event.MessageResponse{
-					ID:      message.ID,
-					Type:    event.ResponseTypeError,
-					Subtype: event.ResponseSubtypeNone,
-					Message: "Failed to open URL",
-				}
+		err = filesystem.OpenFile(data.Path)
+		if err != nil {
+			log.Errorf("Failed to open file: %v", err)
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeNone,
+				Message: "Failed to open file",
 			}
 		}
 
@@ -113,7 +54,7 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 			Type:    event.ResponseTypeOpened,
 			Subtype: event.ResponseSubtypeNone,
 			Data:    message.Data,
-			Message: "Opened",
+			Message: "Opened file",
 		}
 	})
 }

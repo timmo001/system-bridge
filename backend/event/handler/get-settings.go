@@ -3,7 +3,7 @@ package event_handler
 import (
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/backend/event"
-	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils/handlers/settings"
 )
 
 type GetSettingsResponseData = settings.Settings
@@ -14,6 +14,7 @@ func RegisterGetSettingsHandler(router *event.MessageRouter) {
 
 		settings, err := settings.Load()
 		if err != nil {
+			log.Errorf("Failed to load settings: %v", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

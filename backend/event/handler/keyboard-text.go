@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/go-vgo/robotgo"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/utils/handlers/keyboard"
 )
 
 type KeyboardTextRequestData struct {
@@ -51,7 +51,16 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 
 		log.Infof("Typing text: %s", data.Text)
 		// Type the text
-		robotgo.TypeStr(data.Text)
+		err = keyboard.SendText(data.Text)
+		if err != nil {
+			log.Errorf("Failed to type text: %v", err)
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeNone,
+				Message: "Failed to type text",
+			}
+		}
 
 		return event.MessageResponse{
 			ID:      message.ID,
