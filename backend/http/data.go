@@ -49,4 +49,3 @@ func GetModuleDataHandler(router *event.MessageRouter) http.HandlerFunc {
 		}
 	}
 }
-
