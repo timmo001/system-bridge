@@ -13,16 +13,17 @@ import (
 // CPUFrequency represents CPU frequency information
 type CPUFrequency struct {
 	Current *float64 `json:"current,omitempty"`
-	Min     *float64 `json:"min,omitempty"`
-	Max     *float64 `json:"max,omitempty"`
+	Min     *float64 `json:"min,omitempty"`     // TODO: Implement minimum frequency detection
+	Max     *float64 `json:"max,omitempty"`     // TODO: Implement maximum frequency detection
 }
 
 // CPUStats represents CPU statistics
 type CPUStats struct {
-	CtxSwitches    *int64 `json:"ctx_switches,omitempty"`
-	Interrupts     *int64 `json:"interrupts,omitempty"`
-	SoftInterrupts *int64 `json:"soft_interrupts,omitempty"`
-	Syscalls       *int64 `json:"syscalls,omitempty"`
+	// TODO: Implement CPU statistics collection
+	CtxSwitches    *int64 `json:"ctx_switches,omitempty"`    // Context switches count
+	Interrupts     *int64 `json:"interrupts,omitempty"`      // Hardware interrupts count
+	SoftInterrupts *int64 `json:"soft_interrupts,omitempty"` // Software interrupts count
+	Syscalls       *int64 `json:"syscalls,omitempty"`        // System calls count
 }
 
 // CPUTimes represents CPU timing information
@@ -31,18 +32,18 @@ type CPUTimes struct {
 	System    *float64 `json:"system,omitempty"`
 	Idle      *float64 `json:"idle,omitempty"`
 	Interrupt *float64 `json:"interrupt,omitempty"`
-	DPC       *float64 `json:"dpc,omitempty"`
+	DPC       *float64 `json:"dpc,omitempty"` // TODO: Implement Deferred Procedure Call time tracking
 }
 
 // PerCPU represents per-CPU information
 type PerCPU struct {
 	ID           int           `json:"id"`
 	Frequency    *CPUFrequency `json:"frequency,omitempty"`
-	Power        *float64      `json:"power,omitempty"`
+	Power        *float64      `json:"power,omitempty"`      // TODO: Implement per-CPU power consumption monitoring
 	Times        *CPUTimes     `json:"times,omitempty"`
-	TimesPercent *CPUTimes     `json:"times_percent,omitempty"`
+	TimesPercent *CPUTimes     `json:"times_percent,omitempty"` // TODO: Implement per-CPU time percentage calculations
 	Usage        *float64      `json:"usage,omitempty"`
-	Voltage      *float64      `json:"voltage,omitempty"`
+	Voltage      *float64      `json:"voltage,omitempty"` // TODO: Implement per-CPU voltage monitoring
 }
 
 // CPUData represents overall CPU information
@@ -51,13 +52,13 @@ type CPUData struct {
 	Frequency    *CPUFrequency `json:"frequency,omitempty"`
 	LoadAverage  *float64      `json:"load_average,omitempty"`
 	PerCPU       []PerCPU      `json:"per_cpu,omitempty"`
-	Power        *float64      `json:"power,omitempty"`
-	Stats        *CPUStats     `json:"stats,omitempty"`
+	Power        *float64      `json:"power,omitempty"`      // TODO: Implement overall CPU power consumption monitoring
+	Stats        *CPUStats     `json:"stats,omitempty"`      // TODO: Implement overall CPU statistics collection
 	Temperature  *float64      `json:"temperature,omitempty"`
 	Times        *CPUTimes     `json:"times,omitempty"`
-	TimesPercent *CPUTimes     `json:"times_percent,omitempty"`
+	TimesPercent *CPUTimes     `json:"times_percent,omitempty"` // TODO: Implement overall CPU time percentage calculations
 	Usage        *float64      `json:"usage,omitempty"`
-	Voltage      *float64      `json:"voltage,omitempty"`
+	Voltage      *float64      `json:"voltage,omitempty"` // TODO: Implement overall CPU voltage monitoring
 }
 
 func (t *Module) UpdateCPUModule() (CPUData, error) {
@@ -77,6 +78,8 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 	if err == nil && len(frequencies) > 0 {
 		freq := CPUFrequency{
 			Current: &frequencies[0].Mhz,
+			// TODO: Add implementation for Min frequency
+			// TODO: Add implementation for Max frequency
 		}
 		cpuData.Frequency = &freq
 	}
@@ -88,6 +91,8 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 			ID: i,
 			Frequency: &CPUFrequency{
 				Current: &cpuInfo.Mhz,
+				// TODO: Add implementation for per-CPU Min frequency
+				// TODO: Add implementation for per-CPU Max frequency
 			},
 		}
 
@@ -98,7 +103,10 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 				System:    &times[i].System,
 				Idle:      &times[i].Idle,
 				Interrupt: &times[i].Irq,
+				// TODO: Add implementation for DPC time
 			}
+
+			// TODO: Add implementation for TimesPercent
 		}
 
 		// Get per CPU usage percentage
@@ -106,6 +114,9 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 			usage := percents[i]
 			perCpuData.Usage = &usage
 		}
+
+		// TODO: Add implementation for per-CPU power consumption
+		// TODO: Add implementation for per-CPU voltage monitoring
 
 		perCPU = append(perCPU, perCpuData)
 	}
@@ -118,7 +129,10 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 			System:    &times[0].System,
 			Idle:      &times[0].Idle,
 			Interrupt: &times[0].Irq,
+			// TODO: Add implementation for overall DPC time
 		}
+
+		// TODO: Add implementation for overall TimesPercent
 	}
 
 	// Get overall CPU usage percentage
@@ -143,6 +157,10 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 			}
 		}
 	}
+
+	// TODO: Add implementation for overall CPU power consumption
+	// TODO: Add implementation for overall CPU voltage monitoring
+	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 
 	return cpuData, nil
 }
