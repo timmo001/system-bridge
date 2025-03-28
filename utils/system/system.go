@@ -641,9 +641,16 @@ func getDarwinPlatformVersion() (string, error) {
 
 // getLinuxPlatformVersion gets the Linux version using /etc/os-release
 func getLinuxPlatformVersion() (string, error) {
-	// Try /etc/os-release first
-	cmd := exec.Command("cat", "/etc/os-release")
+	// Try lsb_release first
+	cmd := exec.Command("lsb_release", "-r", "-s")
 	output, err := cmd.Output()
+	if err == nil {
+		return strings.TrimSpace(string(output)), nil
+	}
+
+	// Fallback to /etc/os-release
+	cmd = exec.Command("cat", "/etc/os-release")
+	output, err = cmd.Output()
 	if err == nil {
 		lines := strings.SplitSeq(string(output), "\n")
 		for line := range lines {
@@ -653,13 +660,6 @@ func getLinuxPlatformVersion() (string, error) {
 				return version, nil
 			}
 		}
-	}
-
-	// Fallback to lsb_release if available
-	cmd = exec.Command("lsb_release", "-r", "-s")
-	output, err = cmd.Output()
-	if err == nil {
-		return strings.TrimSpace(string(output)), nil
 	}
 
 	// Last resort: try uname -r
