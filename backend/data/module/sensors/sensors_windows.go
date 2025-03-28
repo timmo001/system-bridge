@@ -23,8 +23,6 @@ func getWindowsSensorsData() (*types.SensorsWindows, error) {
 
 	// Run lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe if it exists
 	if _, err := os.Stat("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe"); err == nil {
-		log.Info("Getting Windows sensors data using LibreHardwareMonitor and NvAPIWrapper")
-
 		cmd := exec.Command("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe")
 		output, err := cmd.Output()
 		if err != nil {
