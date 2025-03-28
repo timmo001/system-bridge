@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/types"
 )
 
 // GetModuleDataHandler handles requests to get data for a specific module
@@ -23,7 +23,7 @@ func GetModuleDataHandler(router *event.MessageRouter) http.HandlerFunc {
 		}
 
 		// Get module name from URL path
-		module := data_module.ModuleName(r.URL.Path[len("/api/data/"):])
+		module := types.ModuleName(r.URL.Path[len("/api/data/"):])
 
 		// Validate module name
 		if module == "" {

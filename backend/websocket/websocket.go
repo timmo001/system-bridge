@@ -7,9 +7,9 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/backend/data"
-	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 )
 
 // WebSocketRequest represents the structure of messages sent over the WebSocket
@@ -27,7 +27,7 @@ type WebsocketServer struct {
 	token         string
 	upgrader      websocket.Upgrader
 	connections   map[*websocket.Conn]bool
-	dataListeners map[string][]data_module.ModuleName
+	dataListeners map[string][]types.ModuleName
 	mutex         sync.RWMutex
 	EventRouter   *event.MessageRouter
 }
@@ -36,7 +36,7 @@ func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, 
 	ws := &WebsocketServer{
 		token:         settings.API.Token,
 		connections:   make(map[*websocket.Conn]bool),
-		dataListeners: make(map[string][]data_module.ModuleName),
+		dataListeners: make(map[string][]types.ModuleName),
 		EventRouter:   eventRouter,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -85,7 +85,7 @@ const (
 )
 
 // RegisterDataListener allows a client to receive module data updates
-func (ws *WebsocketServer) RegisterDataListener(connection string, modules []data_module.ModuleName) RegisterResponse {
+func (ws *WebsocketServer) RegisterDataListener(connection string, modules []types.ModuleName) RegisterResponse {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -108,7 +108,7 @@ func (ws *WebsocketServer) UnregisterDataListener(connection string) {
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module data_module.Module) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module types.Module) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
