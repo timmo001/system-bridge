@@ -9,6 +9,7 @@ import (
 type BatteryData struct {
 	IsCharging    *bool    `json:"is_charging" mapstructure:"is_charging"`
 	Percentage    *float64 `json:"percentage" mapstructure:"percentage"`
+	// Seconds remaining
 	TimeRemaining *float64 `json:"time_remaining" mapstructure:"time_remaining"`
 }
 
@@ -39,16 +40,16 @@ func (t *Module) UpdateBatteryModule() (BatteryData, error) {
 	// Determine if charging based on state string
 	isCharging := bat.State.String() == "Charging"
 
-	// Calculate time remaining (in hours)
+	// Calculate time remaining (in seconds)
 	// If charging, use time until full, otherwise use time until empty
 	var timeRemaining float64
 	if isCharging {
 		if bat.ChargeRate > 0 {
-			timeRemaining = (bat.Full - bat.Current) / bat.ChargeRate
+			timeRemaining = ((bat.Full - bat.Current) / bat.ChargeRate) * 3600
 		}
 	} else {
 		if bat.ChargeRate > 0 {
-			timeRemaining = bat.Current / bat.ChargeRate
+			timeRemaining = (bat.Current / bat.ChargeRate) * 3600
 		}
 	}
 
