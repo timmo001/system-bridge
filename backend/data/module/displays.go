@@ -25,6 +25,10 @@ type DisplaysData struct {
 func (t *Module) UpdateDisplaysModule() (DisplaysData, error) {
 	log.Info("Getting displays data")
 
+	var displaysData DisplaysData
+	// Initialize arrays
+	displaysData.Displays = make([]Display, 0)
+
 	// TODO: Implement
-	return DisplaysData{}, nil
+	return displaysData, nil
 }

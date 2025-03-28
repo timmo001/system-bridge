@@ -23,6 +23,10 @@ type ProcessesData struct {
 func (t *Module) UpdateProcessesModule() (ProcessesData, error) {
 	log.Info("Getting processes data")
 
+	var processesData ProcessesData
+	// Initialize arrays
+	processesData.Processes = make([]Process, 0)
+
 	// TODO: Implement
-	return ProcessesData{}, nil
+	return processesData, nil
 }

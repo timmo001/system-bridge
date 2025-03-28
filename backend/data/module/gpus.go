@@ -26,6 +26,10 @@ type GPUsData struct {
 func (t *Module) UpdateGPUsModule() (GPUsData, error) {
 	log.Info("Getting GPUs data")
 
+	var gpusData GPUsData
+	// Initialize arrays
+	gpusData.GPUs = make([]GPU, 0)
+
 	// TODO: Implement
-	return GPUsData{}, nil
+	return gpusData, nil
 }

@@ -101,6 +101,16 @@ type SensorsData struct {
 func (t *Module) UpdateSensorsModule() (SensorsData, error) {
 	log.Info("Getting sensors data")
 
+	var sensorsData SensorsData
+	// Initialize arrays
+	sensorsData.WindowsSensors = &SensorsWindows{
+		Hardware: make([]SensorsWindowsHardware, 0),
+		NVIDIA: &SensorsNVIDIA{
+			Displays: make([]SensorsNVIDIADisplay, 0),
+			GPUs:     make([]SensorsNVIDIAGPU, 0),
+		},
+	}
+
 	// TODO: Implement
-	return SensorsData{}, nil
+	return sensorsData, nil
 }

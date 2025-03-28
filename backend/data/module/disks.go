@@ -47,6 +47,10 @@ type DisksData struct {
 func (t *Module) UpdateDisksModule() (DisksData, error) {
 	log.Info("Getting disks data")
 
+	var disksData DisksData
+	// Initialize arrays
+	disksData.Devices = make([]Disk, 0)
+
 	// TODO: Implement
-	return DisksData{}, nil
+	return disksData, nil
 }

@@ -41,61 +41,76 @@ type SystemData struct {
 func (t *Module) UpdateSystemModule() (SystemData, error) {
 	log.Info("Getting system data")
 
+	// Initialize arrays
+	var systemData SystemData
+	systemData.Users = make([]system_utils.SystemUser, 0)
+	systemData.CameraUsage = make([]string, 0)
+
 	bootTime, err := system_utils.GetBootTime()
 	if err != nil {
 		log.Errorf("Failed to get boot time: %v", err)
 		bootTime = 0
 	}
+	systemData.BootTime = bootTime
 
 	fqdn, err := system_utils.GetFQDN()
 	if err != nil {
 		log.Errorf("Failed to get FQDN: %v", err)
 		fqdn = ""
 	}
+	systemData.FQDN = fqdn
 
 	hostname, err := system_utils.GetHostname()
 	if err != nil {
 		log.Errorf("Failed to get hostname: %v", err)
 		hostname = ""
 	}
+	systemData.Hostname = hostname
 
 	ipAddress4, err := system_utils.GetIPAddress4()
 	if err != nil {
 		log.Errorf("Failed to get IP address: %v", err)
 		ipAddress4 = ""
 	}
+	systemData.IPAddress4 = ipAddress4
 
 	macAddress, err := system_utils.GetMACAddress()
 	if err != nil {
 		log.Errorf("Failed to get MAC address: %v", err)
 		macAddress = ""
 	}
+	systemData.MACAddress = macAddress
 
 	platformVersion, err := system_utils.GetPlatformVersion()
 	if err != nil {
 		log.Errorf("Failed to get platform version: %v", err)
 		platformVersion = ""
 	}
+	systemData.PlatformVersion = platformVersion
 
 	platform := cases.Title(language.English).String(runtime.GOOS)
+	systemData.Platform = platform
 
 	uptime, err := system_utils.GetUptime()
 	if err != nil {
 		log.Errorf("Failed to get uptime: %v", err)
 		uptime = 0
 	}
+	systemData.Uptime = uptime
 
 	users, err := system_utils.GetUsers()
 	if err != nil {
 		log.Errorf("Failed to get users: %v", err)
-		users = []system_utils.SystemUser{}
+		users = make([]system_utils.SystemUser, 0)
 	}
+	systemData.Users = users
 
 	uuid, err := system_utils.GetUUID()
 	if err != nil {
 		log.Errorf("Failed to get UUID: %v", err)
 		uuid = "123e4567-e89b-12d3-a456-426614174000" // Fallback to a default UUID
 	}
+	systemData.UUID = uuid
 
 	// Get version information
 	currentVersion := version.Version
@@ -107,21 +122,11 @@ func (t *Module) UpdateSystemModule() (SystemData, error) {
 
 	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
-	return SystemData{
-		BootTime:              bootTime,
-		FQDN:                  fqdn,
-		Hostname:              hostname,
-		IPAddress4:            ipAddress4,
-		MACAddress:            macAddress,
-		PlatformVersion:       platformVersion,
-		Platform:              platform,
-		Uptime:                uptime,
-		Users:                 users,
-		UUID:                  uuid,
-		RunMode:               RunModeStandalone, // Always set RunMode to standalone
-		Version:               currentVersion,
-		VersionLatest:         &latestVersion,
-		VersionLatestURL:      &version.LatestVersionUserURL,
-		VersionNewerAvailable: &versionNewerAvailable,
-	}, nil
+	systemData.RunMode = RunModeStandalone // Always set RunMode to standalone
+	systemData.Version = currentVersion
+	systemData.VersionLatest = &latestVersion
+	systemData.VersionLatestURL = &version.LatestVersionUserURL
+	systemData.VersionNewerAvailable = &versionNewerAvailable
+
+	return systemData, nil
 }

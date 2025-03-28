@@ -65,6 +65,8 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 	log.Info("Getting CPU data")
 
 	var cpuData CPUData
+	// Initialize arrays
+	cpuData.PerCPU = make([]PerCPU, 0)
 
 	// Get CPU count
 	count, err := cpu.Counts(true)
@@ -85,42 +87,44 @@ func (t *Module) UpdateCPUModule() (CPUData, error) {
 	}
 
 	// Get per CPU info
-	perCPU := make([]PerCPU, 0)
-	for i, cpuInfo := range frequencies {
-		perCpuData := PerCPU{
-			ID: i,
-			Frequency: &CPUFrequency{
-				Current: &cpuInfo.Mhz,
-				// TODO: Add implementation for per-CPU Min frequency
-				// TODO: Add implementation for per-CPU Max frequency
-			},
-		}
-
-		// Get per CPU times
-		if times, err := cpu.Times(true); err == nil && i < len(times) {
-			perCpuData.Times = &CPUTimes{
-				User:      &times[i].User,
-				System:    &times[i].System,
-				Idle:      &times[i].Idle,
-				Interrupt: &times[i].Irq,
-				// TODO: Add implementation for DPC time
+	if len(frequencies) > 0 {
+		perCPU := make([]PerCPU, 0, len(frequencies))
+		for i, cpuInfo := range frequencies {
+			perCpuData := PerCPU{
+				ID: i,
+				Frequency: &CPUFrequency{
+					Current: &cpuInfo.Mhz,
+					// TODO: Add implementation for per-CPU Min frequency
+					// TODO: Add implementation for per-CPU Max frequency
+				},
 			}
 
-			// TODO: Add implementation for TimesPercent
+			// Get per CPU times
+			if times, err := cpu.Times(true); err == nil && i < len(times) {
+				perCpuData.Times = &CPUTimes{
+					User:      &times[i].User,
+					System:    &times[i].System,
+					Idle:      &times[i].Idle,
+					Interrupt: &times[i].Irq,
+					// TODO: Add implementation for DPC time
+				}
+
+				// TODO: Add implementation for TimesPercent
+			}
+
+			// Get per CPU usage percentage
+			if percents, err := cpu.Percent(4, true); err == nil && i < len(percents) {
+				usage := percents[i]
+				perCpuData.Usage = &usage
+			}
+
+			// TODO: Add implementation for per-CPU power consumption
+			// TODO: Add implementation for per-CPU voltage monitoring
+
+			perCPU = append(perCPU, perCpuData)
 		}
-
-		// Get per CPU usage percentage
-		if percents, err := cpu.Percent(4, true); err == nil && i < len(percents) {
-			usage := percents[i]
-			perCpuData.Usage = &usage
-		}
-
-		// TODO: Add implementation for per-CPU power consumption
-		// TODO: Add implementation for per-CPU voltage monitoring
-
-		perCPU = append(perCPU, perCpuData)
+		cpuData.PerCPU = perCPU
 	}
-	cpuData.PerCPU = perCPU
 
 	// Get overall CPU times
 	if times, err := cpu.Times(false); err == nil && len(times) > 0 {

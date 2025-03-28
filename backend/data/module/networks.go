@@ -60,6 +60,11 @@ type NetworksData struct {
 func (t *Module) UpdateNetworksModule() (NetworksData, error) {
 	log.Info("Getting networks data")
 
+	var networksData NetworksData
+	// Initialize arrays
+	networksData.Connections = make([]NetworkConnection, 0)
+	networksData.Networks = make([]Network, 0)
+
 	// TODO: Implement
-	return NetworksData{}, nil
+	return networksData, nil
 }
