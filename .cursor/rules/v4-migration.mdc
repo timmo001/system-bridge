@@ -1,7 +1,7 @@
 ---
-description: 
+description: Creating and updating data modules
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 <!-- - TODO: Remove these rules when 5.0.0 is released and no 4.x.x features are needed to be added -->
 # 4.x.x Migration
@@ -21,3 +21,5 @@ All code for System Bridge can be found at @https://github.com/timmo001/system-b
 - The python connector named `systembridgeconnector` is at @https://github.com/timmo001/system-bridge-connector/ this is used in the home assistant implementation
 
 The Home Assistant implementation is found at @https://github.com/home-assistant/core/tree/dev/homeassistant/components/system_bridge/ This uses `systembridgeconnector` for its package. When I ask what the original implementation, use this as the source of truth. For example, if I ask what units did this originally use, find the units/unit system/measurement in the Home Assistant implemtation. When setting up data modules in backend/data/module/ use the units used by home assistant. We want to make sure 5.0.0 is a near replica of 4.x.x and that there are no changes required in the Home Assistant integration.
+
+Make sure to verify the units in the new implementation match the Home Asssistant implementation/integration units of measurement. If they don't, convert them to match.
