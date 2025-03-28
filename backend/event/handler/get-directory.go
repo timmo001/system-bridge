@@ -15,14 +15,17 @@ func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDire
 	directories := GetDirectories(router)
 
 	// Find the directory with the key of the base directory
-	var baseDirectory *GetDirectoriesResponseDataItem = nil
 	for _, directory := range directories {
 		if directory.Key == baseDirectoryKey {
-			baseDirectory = &directory
+			return &GetDirectoriesResponseDataItem{
+				Key:  directory.Key,
+				Name: directory.Key, // Using Key as Name since DirectoryInfo doesn't have a Name field
+				Path: directory.Path,
+			}
 		}
 	}
 
-	return baseDirectory
+	return nil
 }
 
 func RegisterGetDirectoryHandler(router *event.MessageRouter) {
