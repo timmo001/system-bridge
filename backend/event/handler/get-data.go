@@ -43,13 +43,13 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 
 			for _, module := range data.Modules {
-				ws.BroadcastModuleUpdate(connection, *router.DataStore.GetModule(module))
+				ws.BroadcastModuleUpdate(*router.DataStore.GetModule(module), &connection)
 			}
 
-			// // Unregister the data listener if they have not already registered
-			// if response == websocket.RegisterResponseAdded {
-			// 	ws.UnregisterDataListener(connection)
-			// }
+			// Unregister the data listener if they have not already registered
+			if response == websocket.RegisterResponseAdded {
+				ws.UnregisterDataListener(connection)
+			}
 		}()
 
 		return event.MessageResponse{

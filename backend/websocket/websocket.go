@@ -109,7 +109,7 @@ func (ws *WebsocketServer) UnregisterDataListener(connection string) {
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module data_module.Module) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(module data_module.Module, connection *string) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
@@ -124,7 +124,15 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(connection string, module data_
 	log.Infof("Broadcasting module update for %s", module.Module)
 
 	for conn := range ws.connections {
-		if _, ok := ws.dataListeners[connection]; ok {
+		if connection != nil {
+			if _, ok := ws.dataListeners[*connection]; ok {
+				if err := conn.WriteJSON(response); err != nil {
+					// If there's an error, remove the connection
+					conn.Close()
+					delete(ws.connections, conn)
+				}
+			}
+		} else {
 			if err := conn.WriteJSON(response); err != nil {
 				// If there's an error, remove the connection
 				conn.Close()
