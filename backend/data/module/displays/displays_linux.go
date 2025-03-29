@@ -5,6 +5,7 @@ package displays
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/jezek/xgb"
@@ -87,6 +88,8 @@ func getDisplays() ([]types.Display, error) {
 		// Convert name from []byte to string
 		name := string(info.Name)
 
+		id := strings.ReplaceAll(name, " ", "")
+
 		// Get physical dimensions in millimeters
 		w := int(info.MmWidth)
 		h := int(info.MmHeight)
@@ -94,7 +97,7 @@ func getDisplays() ([]types.Display, error) {
 		pixelClock := float64(mode.DotClock) / 1000000.0 // Convert to MHz
 
 		display := types.Display{
-			ID:                   fmt.Sprintf("%d", output),
+			ID:                   id,
 			Name:                 name,
 			ResolutionHorizontal: int(resolutionWidth),
 			ResolutionVertical:   int(resolutionHeight),
