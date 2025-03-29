@@ -85,6 +85,8 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	}
 	systemData.UUID = uuid
 
+	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
+
 	// Get version information
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()
@@ -95,7 +97,6 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
-	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 	systemData.Version = currentVersion
 	systemData.VersionLatest = &latestVersion
 	systemData.VersionLatestURL = &version.LatestVersionUserURL
