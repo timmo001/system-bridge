@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 
+	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/types"
@@ -52,7 +53,8 @@ func NewDataStore() (*DataStore, error) {
 		types.ModuleSensors,
 		types.ModuleSystem,
 	} {
-		if err := ds.loadModuleData(ds.GetModule(module)); err != nil {
+		m := ds.GetModule(module)
+		if err := ds.loadModuleData(&m); err != nil {
 			return nil, fmt.Errorf("error loading data for module %s: %w", module, err)
 		}
 	}
@@ -124,41 +126,38 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 	return nil
 }
 
-func (d *DataStore) GetModule(module types.ModuleName) *data_module.Module {
+func (d *DataStore) GetModule(module types.ModuleName) data_module.Module {
 	switch module {
 	case types.ModuleBattery:
-		return &d.Battery
+		return d.Battery
 	case types.ModuleCPU:
-		return &d.CPU
+		return d.CPU
 	case types.ModuleDisks:
-		return &d.Disks
+		return d.Disks
 	case types.ModuleDisplays:
-		return &d.Displays
+		return d.Displays
 	case types.ModuleGPUs:
-		return &d.GPUs
+		return d.GPUs
 	case types.ModuleMedia:
-		return &d.Media
+		return d.Media
 	case types.ModuleMemory:
-		return &d.Memory
+		return d.Memory
 	case types.ModuleNetworks:
-		return &d.Networks
+		return d.Networks
 	case types.ModuleProcesses:
-		return &d.Processes
+		return d.Processes
 	case types.ModuleSensors:
-		return &d.Sensors
+		return d.Sensors
 	case types.ModuleSystem:
-		return &d.System
+		return d.System
 	default:
-		return nil
+		log.Error("Module not found", "module", module)
+		return data_module.Module{}
 	}
 }
 
 func (d *DataStore) GetModuleData(module types.ModuleName) any {
 	m := d.GetModule(module)
-	if m == nil {
-		return nil
-	}
-
 	return m.Data
 }
 
@@ -172,12 +171,9 @@ func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 	}
 
 	m := d.GetModule(module)
-	if m == nil {
-		return fmt.Errorf("module %s not found", module)
-	}
 
 	m.Data = data
-	return d.saveModuleData(m)
+	return d.saveModuleData(&m)
 }
 
 func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
@@ -198,9 +194,7 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 		types.ModuleSystem,
 	} {
 		module := d.GetModule(moduleName)
-		if module != nil {
-			data[moduleName] = module.Data
-		}
+		data[moduleName] = module.Data
 	}
 
 	return data

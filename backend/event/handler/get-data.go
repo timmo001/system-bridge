@@ -43,7 +43,13 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 			}
 
 			for _, module := range data.Modules {
-				ws.BroadcastModuleUpdate(*router.DataStore.GetModule(module), &connection)
+				m := router.DataStore.GetModule(module)
+				// Convert data_module.Module to types.Module
+				moduleData := types.Module{
+					Module: m.Module,
+					Data:   m.Data,
+				}
+				ws.BroadcastModuleUpdate(moduleData, &connection)
 			}
 
 			// Unregister the data listener if they have not already registered
