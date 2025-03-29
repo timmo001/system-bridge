@@ -128,44 +128,42 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 }
 
 func (d *DataStore) GetModule(module types.ModuleName) data_module.Module {
+	var m data_module.Module
+
 	switch module {
 	case types.ModuleBattery:
-		return d.Battery
+		m = d.Battery
 	case types.ModuleCPU:
-		return d.CPU
+		m = d.CPU
 	case types.ModuleDisks:
-		return d.Disks
+		m = d.Disks
 	case types.ModuleDisplays:
-		return d.Displays
+		m = d.Displays
 	case types.ModuleGPUs:
-		return d.GPUs
+		m = d.GPUs
 	case types.ModuleMedia:
-		return d.Media
+		m = d.Media
 	case types.ModuleMemory:
-		return d.Memory
+		m = d.Memory
 	case types.ModuleNetworks:
-		return d.Networks
+		m = d.Networks
 	case types.ModuleProcesses:
-		return d.Processes
+		m = d.Processes
 	case types.ModuleSensors:
-		return d.Sensors
+		m = d.Sensors
 	case types.ModuleSystem:
-		return d.System
+		m = d.System
 	default:
 		log.Error("Module not found", "module", module)
 		return data_module.Module{}
 	}
-}
 
-func (d *DataStore) GetModuleData(module types.ModuleName) any {
-	m := d.GetModule(module)
-
-  // Refresh data
+	// Refresh data
 	if err := d.loadModuleData(&m); err != nil {
 		log.Error("Error loading module data", "module", module, "error", err)
 	}
 
-	return m.Data
+	return m
 }
 
 func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
@@ -212,7 +210,8 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 		types.ModuleSensors,
 		types.ModuleSystem,
 	} {
-		data[moduleName] = d.GetModuleData(moduleName)
+		m := d.GetModule(moduleName)
+		data[moduleName] = m.Data
 	}
 
 	return data
