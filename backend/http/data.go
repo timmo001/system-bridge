@@ -34,9 +34,12 @@ func GetModuleDataHandler(router *event.MessageRouter) http.HandlerFunc {
 		// Get module data
 		data := router.DataStore.GetModuleData(module)
 		if data == nil {
+			log.Info("GET: /api/data/:module", "module", module, "data", "not found")
 			http.Error(w, "Module not found", http.StatusNotFound)
 			return
 		}
+
+		log.Info("GET: /api/data/:module", "module", module, "data", data)
 
 		// Set response headers
 		w.Header().Set("Content-Type", "application/json")

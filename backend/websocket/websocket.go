@@ -34,7 +34,6 @@ type WebsocketServer struct {
 	EventRouter   *event.MessageRouter
 }
 
-
 func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
 		token:         settings.API.Token,
@@ -152,6 +151,7 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 
 // handleGetDataModule handles module data updates from the event bus
 func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
+	log.Info("WS: event", "type", event.Type, "data", event.Data)
 	if event.Type != bus.EventGetDataModule {
 		return
 	}
@@ -162,11 +162,11 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 		return
 	}
 
-	// Register the data listener
-	response := ws.RegisterDataListener(data.Connection, data.Modules)
-	if response == RegisterResponseExists {
-		log.Infof("Data listener already exists for %s", data.Connection)
-	}
+	// // Register the data listener
+	// response := ws.RegisterDataListener(data.Connection, data.Modules)
+	// if response == RegisterResponseExists {
+	// 	log.Infof("Data listener already exists for %s", data.Connection)
+	// }
 
 	for _, module := range data.Modules {
 		m := ws.EventRouter.DataStore.GetModule(module)
@@ -181,6 +181,7 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 // handleDataModuleUpdate handles module data updates from the event bus
 func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
+	log.Info("WS: event", "type", event.Type)
 	if event.Type != bus.EventDataModuleUpdate {
 		return
 	}

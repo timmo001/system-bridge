@@ -3,6 +3,8 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/charmbracelet/log"
 )
 
 type APIResponse struct {
@@ -22,6 +24,8 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleAPIGet(w http.ResponseWriter, _ *http.Request) {
+	log.Info("GET: /api")
+
 	response := APIResponse{
 		Status:  "success",
 		Message: "API is running",
