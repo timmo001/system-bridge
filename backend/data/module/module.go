@@ -3,6 +3,7 @@ package data_module
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/timmo001/system-bridge/types"
 )
@@ -10,8 +11,9 @@ import (
 // Redefined in types/module.go - Added to avoid compilerInvalidReceiver error
 // Module represents the data module implementation
 type Module struct {
-	Module types.ModuleName `json:"module" mapstructure:"module"`
-	Data   any              `json:"data" mapstructure:"data"`
+	Module  types.ModuleName `json:"module" mapstructure:"module"`
+	Updated time.Time        `json:"updated" mapstructure:"updated"`
+	Data    any              `json:"data" mapstructure:"data"`
 }
 
 // Process implements data.UpdateTask.
@@ -55,11 +57,10 @@ func (m *Module) UpdateModule() (Module, error) {
 	}
 
 	nm := Module{
-		Module: m.Module,
-		Data:   d,
+		Module:  m.Module,
+		Updated: time.Now(),
+		Data:    d,
 	}
-
-	// go update.UpdateModule(nm)
 
 	return nm, nil
 }
