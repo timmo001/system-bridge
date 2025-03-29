@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
-	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
@@ -147,53 +146,4 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 			}
 		}
 	}
-}
-
-// handleGetDataModule handles module data updates from the event bus
-func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
-	log.Info("WS: event", "type", event.Type, "data", event.Data)
-	if event.Type != bus.EventGetDataModule {
-		return
-	}
-
-	var data bus.GetDataRequest
-	if err := mapstructure.Decode(event.Data, &data); err != nil {
-		log.Error("Failed to decode module data", "error", err)
-		return
-	}
-
-	// // Register the data listener
-	// response := ws.RegisterDataListener(data.Connection, data.Modules)
-	// if response == RegisterResponseExists {
-	// 	log.Infof("Data listener already exists for %s", data.Connection)
-	// }
-
-	for _, module := range data.Modules {
-		m := ws.EventRouter.DataStore.GetModule(module)
-		// Convert data_module.Module to types.Module
-		moduleData := types.Module{
-			Module: m.Module,
-			Data:   m.Data,
-		}
-		ws.BroadcastModuleUpdate(moduleData, &data.Connection)
-	}
-}
-
-// handleDataModuleUpdate handles module data updates from the event bus
-func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
-	log.Info("WS: event", "type", event.Type)
-	if event.Type != bus.EventDataModuleUpdate {
-		return
-	}
-
-	var module types.Module
-	if err := mapstructure.Decode(event.Data, &module); err != nil {
-		log.Error("Failed to decode module data", "error", err)
-		return
-	}
-
-	log.Info("Received module data update from event bus", "module", module.Module)
-
-	// Broadcast to connected websocket clients
-	ws.BroadcastModuleUpdate(module, nil)
 }
