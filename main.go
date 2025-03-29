@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/log"
 
 	"github.com/timmo001/system-bridge/backend"
-	"github.com/timmo001/system-bridge/backend/data"
+	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/urfave/cli/v3"
 )

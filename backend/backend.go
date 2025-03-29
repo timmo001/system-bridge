@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/backend/bus"
-	"github.com/timmo001/system-bridge/backend/data"
-	"github.com/timmo001/system-bridge/backend/event"
-	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/websocket"
+	"github.com/timmo001/system-bridge/bus"
+	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/event"
+	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
 )
 

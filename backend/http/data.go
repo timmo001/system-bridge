@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
 

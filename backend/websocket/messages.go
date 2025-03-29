@@ -3,7 +3,7 @@ package websocket
 import (
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
-	"github.com/timmo001/system-bridge/backend/event"
+	"github.com/timmo001/system-bridge/event"
 )
 
 func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, response event.MessageResponse) {
