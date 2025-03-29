@@ -160,7 +160,7 @@ func (d *DataStore) GetModule(module types.ModuleName) data_module.Module {
 func (d *DataStore) GetModuleData(module types.ModuleName) any {
 	m := d.GetModule(module)
 
-	// Refresh data
+  // Refresh data
 	if err := d.loadModuleData(&m); err != nil {
 		log.Error("Error loading module data", "module", module, "error", err)
 	}
