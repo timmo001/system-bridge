@@ -5,19 +5,20 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 )
 
 // GetModuleDataHandler handles requests to get data for a specific module
-func GetModuleDataHandler(router *event.MessageRouter) http.HandlerFunc {
+func GetModuleDataHandler(settings *settings.Settings, dataStore *data.DataStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Check for API token in both X-API-Token and token headers
 		token := r.Header.Get("X-API-Token")
 		if token == "" {
 			token = r.Header.Get("token")
 		}
-		if token != router.Settings.API.Token {
+		if token != settings.API.Token {
 			http.Error(w, "Invalid API token", http.StatusUnauthorized)
 			return
 		}
@@ -32,7 +33,7 @@ func GetModuleDataHandler(router *event.MessageRouter) http.HandlerFunc {
 		}
 
 		// Get module data
-		data := router.DataStore.GetModuleData(module)
+		data := dataStore.GetModuleData(module)
 		if data == nil {
 			log.Info("GET: /api/data/:module", "module", module, "data", "not found")
 			http.Error(w, "Module not found", http.StatusNotFound)

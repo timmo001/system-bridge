@@ -159,6 +159,12 @@ func (d *DataStore) GetModule(module types.ModuleName) data_module.Module {
 
 func (d *DataStore) GetModuleData(module types.ModuleName) any {
 	m := d.GetModule(module)
+
+	// Refresh data
+	if err := d.loadModuleData(&m); err != nil {
+		log.Error("Error loading module data", "module", module, "error", err)
+	}
+
 	return m.Data
 }
 
@@ -206,8 +212,7 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 		types.ModuleSensors,
 		types.ModuleSystem,
 	} {
-		module := d.GetModule(moduleName)
-		data[moduleName] = module.Data
+		data[moduleName] = d.GetModuleData(moduleName)
 	}
 
 	return data

@@ -61,7 +61,10 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Set up API endpoint
 	mux.HandleFunc("/api", api_http.HandleAPI)
 	// Set up module data endpoint
-	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(b.eventRouter))
+	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
+		b.settings,
+		b.dataStore,
+	))
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 
 	// Create HTTP server
