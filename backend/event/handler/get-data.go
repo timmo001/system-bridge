@@ -3,8 +3,8 @@ package event_handler
 import (
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
+	"github.com/timmo001/system-bridge/backend/bus"
 	"github.com/timmo001/system-bridge/backend/event"
-	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -29,33 +29,13 @@ func RegisterGetDataHandler(router *event.MessageRouter) {
 		}
 
 		go func() {
-			// Get the websocket instance
-			ws := websocket.GetInstance()
-			if ws == nil {
-				log.Error("No websocket instance found")
-				return
-			}
-
-			// Register the data listener
-			response := ws.RegisterDataListener(connection, data.Modules)
-			if response == websocket.RegisterResponseExists {
-				log.Infof("Data listener already exists for %s", connection)
-			}
-
-			for _, module := range data.Modules {
-				m := router.DataStore.GetModule(module)
-				// Convert data_module.Module to types.Module
-				moduleData := types.Module{
-					Module: m.Module,
-					Data:   m.Data,
-				}
-				ws.BroadcastModuleUpdate(moduleData, &connection)
-			}
-
-			// Unregister the data listener if they have not already registered
-			if response == websocket.RegisterResponseAdded {
-				ws.UnregisterDataListener(connection)
-			}
+			bus.GetInstance().Publish(bus.Event{
+				Type: bus.EventGetDataModule,
+				Data: bus.GetDataRequest{
+					Connection: connection,
+					Modules:    data.Modules,
+				},
+			})
 		}()
 
 		return event.MessageResponse{

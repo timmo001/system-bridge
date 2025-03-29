@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	eventbus "github.com/timmo001/system-bridge/backend/bus"
+	"github.com/timmo001/system-bridge/backend/bus"
 	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
@@ -25,7 +25,7 @@ type Backend struct {
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 	// Initialize the EventBus
-	_ = eventbus.GetInstance()
+	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
 
 	eventRouter := event.NewMessageRouter(settings, dataStore)
@@ -86,7 +86,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		for {
 			data.RunUpdateTaskProcessor(b.dataStore)
 			log.Info("Data update task processor completed")
-			log.Info("Sleeping for 30 seconds...")
+			log.Info("Waiting for 30 seconds...")
 			time.Sleep(30 * time.Second)
 		}
 	}()
