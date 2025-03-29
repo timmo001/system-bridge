@@ -15,35 +15,51 @@ type Module struct {
 }
 
 // Process implements data.UpdateTask.
-func (t *Module) Process() error {
+func (m *Module) Process() error {
 	return errors.New("not implemented")
 }
 
-func (t *Module) UpdateModule() (any, error) {
-	switch t.Module {
+func (m *Module) updateModule() (any, error) {
+	switch m.Module {
 	case types.ModuleBattery:
-		return t.UpdateBatteryModule()
+		return m.UpdateBatteryModule()
 	case types.ModuleCPU:
-		return t.UpdateCPUModule()
+		return m.UpdateCPUModule()
 	case types.ModuleDisks:
-		return t.UpdateDisksModule()
+		return m.UpdateDisksModule()
 	case types.ModuleDisplays:
-		return t.UpdateDisplaysModule()
+		return m.UpdateDisplaysModule()
 	case types.ModuleGPUs:
-		return t.UpdateGPUsModule()
+		return m.UpdateGPUsModule()
 	case types.ModuleMedia:
-		return t.UpdateMediaModule()
+		return m.UpdateMediaModule()
 	case types.ModuleMemory:
-		return t.UpdateMemoryModule()
+		return m.UpdateMemoryModule()
 	case types.ModuleNetworks:
-		return t.UpdateNetworksModule()
+		return m.UpdateNetworksModule()
 	case types.ModuleProcesses:
-		return t.UpdateProcessesModule()
+		return m.UpdateProcessesModule()
 	case types.ModuleSensors:
-		return t.UpdateSensorsModule()
+		return m.UpdateSensorsModule()
 	case types.ModuleSystem:
-		return t.UpdateSystemModule()
+		return m.UpdateSystemModule()
 	default:
-		return nil, fmt.Errorf("module not found: %s", t.Module)
+		return nil, fmt.Errorf("module not found: %s", m.Module)
 	}
+}
+
+func (m *Module) UpdateModule() (Module, error) {
+	d, err := m.updateModule()
+	if err != nil {
+		return Module{}, err
+	}
+
+	nm := Module{
+		Module: m.Module,
+		Data:   d,
+	}
+
+	// go update.UpdateModule(nm)
+
+	return nm, nil
 }
