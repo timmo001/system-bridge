@@ -38,7 +38,7 @@ func getWindowsSystemInfo() ([]string, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		windowsSystemInfoCache.err = err
-		return nil, err
+		return []string{}, err
 	}
 	windowsSystemInfoCache.lines = strings.Split(string(output), "\r\n")
 	return windowsSystemInfoCache.lines, nil
@@ -55,7 +55,7 @@ func getWindowsIPConfig() ([]string, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		windowsIPConfigCache.err = err
-		return nil, err
+		return []string{}, err
 	}
 	windowsIPConfigCache.lines = strings.Split(string(output), "\r\n")
 	return windowsIPConfigCache.lines, nil
@@ -673,7 +673,7 @@ func GetUsers() ([]types.SystemUser, error) {
 	case "linux":
 		return getLinuxUsers()
 	default:
-		return nil, fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		return []types.SystemUser{}, fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 	}
 }
 
@@ -683,7 +683,7 @@ func getWindowsUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("whoami")
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return []types.SystemUser{}, err
 	}
 
 	// Parse username - whoami returns "domain\username" format
@@ -697,7 +697,7 @@ func getWindowsUsers() ([]types.SystemUser, error) {
 	// Get hostname
 	hostname, err := getWindowsHostname()
 	if err != nil {
-		return nil, err
+		return []types.SystemUser{}, err
 	}
 
 	// Get explorer.exe PID for this user (a more meaningful PID than 0)
@@ -754,7 +754,7 @@ func getDarwinUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("who")
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return []types.SystemUser{}, err
 	}
 
 	var users []types.SystemUser
@@ -816,7 +816,7 @@ func getLinuxUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("who")
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return []types.SystemUser{}, err
 	}
 
 	var users []types.SystemUser

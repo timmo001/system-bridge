@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
@@ -95,11 +96,7 @@ func (d *DataStore) loadModuleData(m *data_module.Module) error {
 }
 
 // saveModuleData saves the module data to a JSON file
-func (d *DataStore) saveModuleData(m *data_module.Module) error {
-	if m == nil {
-		return fmt.Errorf("module is nil")
-	}
-
+func (d *DataStore) saveModuleData(m data_module.Module) error {
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)
@@ -112,6 +109,7 @@ func (d *DataStore) saveModuleData(m *data_module.Module) error {
 
 	v.Set("module", m.Module)
 	v.Set("data", m.Data)
+	v.Set("updated", m.Updated)
 
 	if err := v.WriteConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -181,7 +179,8 @@ func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 	m := d.GetModule(module)
 
 	m.Data = data
-	if err := d.saveModuleData(&m); err != nil {
+	m.Updated = time.Now().Format(time.RFC3339)
+	if err := d.saveModuleData(m); err != nil {
 		return err
 	}
 

@@ -12,8 +12,8 @@ import (
 // Module represents the data module implementation
 type Module struct {
 	Module  types.ModuleName `json:"module" mapstructure:"module"`
-	Updated time.Time        `json:"updated" mapstructure:"updated"`
 	Data    any              `json:"data" mapstructure:"data"`
+	Updated string           `json:"updated" mapstructure:"updated"`
 }
 
 // Process implements data.UpdateTask.
@@ -58,7 +58,7 @@ func (m *Module) UpdateModule() (Module, error) {
 
 	nm := Module{
 		Module:  m.Module,
-		Updated: time.Now(),
+		Updated: time.Now().Format(time.RFC3339),
 		Data:    d,
 	}
 
