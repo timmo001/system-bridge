@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 // ModuleName represents the type of data module
 type ModuleName string
 
@@ -19,6 +21,7 @@ const (
 
 // Module represents a data module
 type Module struct {
-	Module ModuleName `json:"module" mapstructure:"module"`
-	Data   any        `json:"data" mapstructure:"data"`
+	Module  ModuleName `json:"module" mapstructure:"module"`
+	Updated time.Time  `json:"updated" mapstructure:"updated"`
+	Data    any        `json:"data" mapstructure:"data"`
 }
