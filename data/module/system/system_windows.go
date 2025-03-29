@@ -206,7 +206,7 @@ func getUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("whoami")
 	output, err := cmd.Output()
 	if err != nil {
-		return []types.SystemUser{}, err
+		return make([]types.SystemUser, 0), err
 	}
 
 	// Parse username - whoami returns "domain\username" format
@@ -218,9 +218,9 @@ func getUsers() ([]types.SystemUser, error) {
 	}
 
 	// Get hostname
-	hostname, err := getHostname()
+	hostname, err := getWindowsHostname()
 	if err != nil {
-		return []types.SystemUser{}, err
+		return make([]types.SystemUser, 0), err
 	}
 
 	// Get explorer.exe PID for this user (a more meaningful PID than 0)
