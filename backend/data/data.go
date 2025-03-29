@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
+	eventbus "github.com/timmo001/system-bridge/backend/bus"
 	data_module "github.com/timmo001/system-bridge/backend/data/module"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -173,7 +174,20 @@ func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 	m := d.GetModule(module)
 
 	m.Data = data
-	return d.saveModuleData(&m)
+	if err := d.saveModuleData(&m); err != nil {
+		return err
+	}
+
+	// Broadcast the module data update event
+	if eb := eventbus.GetInstance(); eb != nil {
+		eb.Publish(eventbus.Event{
+			Type:   eventbus.EventDataModuleUpdate,
+			Module: module,
+			Data:   data,
+		})
+	}
+
+	return nil
 }
 
 func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {

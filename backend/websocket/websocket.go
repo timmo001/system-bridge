@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
+	eventbus "github.com/timmo001/system-bridge/backend/bus"
 	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	"github.com/timmo001/system-bridge/settings"
@@ -45,6 +46,11 @@ func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, 
 		},
 	}
 	SetInstance(ws)
+
+	// Subscribe to module data updates
+	eb := eventbus.GetInstance()
+	eb.Subscribe(eventbus.EventDataModuleUpdate, "websocket", ws.handleDataModuleUpdate)
+
 	return ws
 }
 
@@ -139,4 +145,21 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 			}
 		}
 	}
+}
+
+// handleDataModuleUpdate handles module data updates from the event bus
+func (ws *WebsocketServer) handleDataModuleUpdate(event eventbus.Event) {
+	if event.Type != eventbus.EventDataModuleUpdate {
+		return
+	}
+
+	module := types.Module{
+		Module: event.Module,
+		Data:   event.Data,
+	}
+
+	log.Info("Received module data update from event bus", "module", module.Module)
+
+	// Broadcast to connected websocket clients
+	ws.BroadcastModuleUpdate(module, nil)
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
+	eventbus "github.com/timmo001/system-bridge/backend/bus"
 	"github.com/timmo001/system-bridge/backend/data"
 	"github.com/timmo001/system-bridge/backend/event"
 	event_handler "github.com/timmo001/system-bridge/backend/event/handler"
@@ -23,6 +24,10 @@ type Backend struct {
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
+	// Initialize the EventBus
+	_ = eventbus.GetInstance()
+	log.Info("EventBus initialized")
+
 	eventRouter := event.NewMessageRouter(settings, dataStore)
 	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
 
