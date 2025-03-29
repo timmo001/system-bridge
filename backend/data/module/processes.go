@@ -9,9 +9,7 @@ import (
 func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
 	log.Info("Getting processes data")
 
-	var processesData types.ProcessesData
-	// Initialize arrays
-	processesData.Processes = make([]types.Process, 0)
+	var processesData types.ProcessesData = make([]types.Process, 0)
 
 	// Get process list
 	processes, err := process.Processes()
@@ -78,7 +76,7 @@ func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
 		}
 
 		// Add process to data
-		processesData.Processes = append(processesData.Processes, proc)
+		processesData = append(processesData, proc)
 	}
 
 	return processesData, nil

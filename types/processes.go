@@ -14,6 +14,4 @@ type Process struct {
 }
 
 // ProcessesData represents information about all system processes
-type ProcessesData struct {
-	Processes []Process `json:"processes"`
-}
+type ProcessesData = []Process
