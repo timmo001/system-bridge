@@ -157,7 +157,7 @@ func getUsers() ([]types.SystemUser, error) {
 	cmd := exec.Command("who")
 	output, err := cmd.Output()
 	if err != nil {
-		return []types.SystemUser{}, err
+		return make([]types.SystemUser, 0), err
 	}
 
 	users := make([]types.SystemUser, 0)

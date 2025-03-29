@@ -7,7 +7,7 @@ import (
 )
 
 func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.MessageResponse) {
-	log.Info("Sending message to connection", "response", message)
+	log.Debug("Sending message to connection", "response", message)
 
 	if err := conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)

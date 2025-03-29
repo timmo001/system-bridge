@@ -200,7 +200,7 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 		module := ws.dataStore.GetModule(module)
 		if module.Data == nil {
 			log.Warn("WS: No data found for module", "module", module)
-			continue
+			log.Warn("Sending empty module update")
 		}
 
 		// Convert data_module.Module to types.Module
