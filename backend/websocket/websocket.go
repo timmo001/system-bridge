@@ -29,6 +29,7 @@ type WebsocketServer struct {
 	connections   map[*websocket.Conn]bool
 	dataListeners map[string][]types.ModuleName
 	mutex         sync.RWMutex
+	dataStore     *data.DataStore
 	EventRouter   *event.MessageRouter
 }
 
@@ -37,6 +38,7 @@ func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, 
 		token:         settings.API.Token,
 		connections:   make(map[*websocket.Conn]bool),
 		dataListeners: make(map[string][]types.ModuleName),
+		dataStore:     dataStore,
 		EventRouter:   eventRouter,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {

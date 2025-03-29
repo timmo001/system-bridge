@@ -28,7 +28,7 @@ func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
 
-	eventRouter := event.NewMessageRouter(settings, dataStore)
+	eventRouter := event.NewMessageRouter(settings)
 	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
 
 	return &Backend{

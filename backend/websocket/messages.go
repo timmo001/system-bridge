@@ -6,15 +6,20 @@ import (
 	"github.com/timmo001/system-bridge/event"
 )
 
-func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, response event.MessageResponse) {
-	if err := conn.WriteJSON(response); err != nil {
+func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.MessageResponse) {
+	log.Info("Sending message to connection", "response", message)
+
+	if err := conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)
+		// If there's an error, remove the connection
+		conn.Close()
+		delete(ws.connections, conn)
 	}
 }
 
-func (ws *WebsocketServer) SendError(conn *websocket.Conn, msg WebSocketRequest, subtype event.ResponseSubtype, message string) {
+func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest, subtype event.ResponseSubtype, message string) {
 	response := event.MessageResponse{
-		ID:      msg.ID,
+		ID:      req.ID,
 		Type:    event.ResponseTypeError,
 		Subtype: subtype,
 		Data:    map[string]string{},

@@ -110,20 +110,6 @@ func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
 	delete(ws.dataListeners, conn.RemoteAddr().String())
 }
 
-// Broadcast sends a message to all connected clients
-func (ws *WebsocketServer) Broadcast(response event.MessageResponse) {
-	ws.mutex.RLock()
-	defer ws.mutex.RUnlock()
-
-	for conn := range ws.connections {
-		if err := conn.WriteJSON(response); err != nil {
-			// If there's an error, remove the connection
-			conn.Close()
-			delete(ws.connections, conn)
-		}
-	}
-}
-
 type RegisterResponse int
 
 const (
@@ -175,18 +161,17 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 
 	for conn := range ws.connections {
 		if connection != nil {
-			if _, ok := ws.dataListeners[*connection]; ok {
-				if err := conn.WriteJSON(response); err != nil {
-					// If there's an error, remove the connection
-					conn.Close()
-					delete(ws.connections, conn)
-				}
-			}
+			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", module.Module)
+			ws.SendMessage(conn, response)
 		} else {
-			if err := conn.WriteJSON(response); err != nil {
-				// If there's an error, remove the connection
-				conn.Close()
-				delete(ws.connections, conn)
+			log.Info("WS: Broadcasting module update to all listeners", "module", module.Module)
+			for _, modules := range ws.dataListeners {
+				for _, m := range modules {
+					if m == module.Module {
+						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", module.Module)
+						ws.SendMessage(conn, response)
+					}
+				}
 			}
 		}
 	}
@@ -199,26 +184,32 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 		return
 	}
 
-	var data bus.GetDataRequest
-	if err := mapstructure.Decode(event.Data, &data); err != nil {
+	log.Info("WS: EventGetDataModule", "eventData", event.Data)
+
+	var moduleRequest bus.GetDataRequest
+	if err := mapstructure.Decode(event.Data, &moduleRequest); err != nil {
 		log.Error("Failed to decode module data", "error", err)
 		return
 	}
 
-	// // Register the data listener
-	// response := ws.RegisterDataListener(data.Connection, data.Modules)
-	// if response == RegisterResponseExists {
-	// 	log.Infof("Data listener already exists for %s", data.Connection)
-	// }
+	log.Info("WS: EventGetDataModule", "data", moduleRequest)
 
-	for _, module := range data.Modules {
-		m := ws.EventRouter.DataStore.GetModule(module)
-		// Convert data_module.Module to types.Module
-		moduleData := types.Module{
-			Module: m.Module,
-			Data:   m.Data,
+	for _, module := range moduleRequest.Modules {
+		log.Info("WS: Broadcasting module update", "module", module)
+
+		module := ws.dataStore.GetModule(module)
+		if module.Data == nil {
+			log.Warn("WS: No data found for module", "module", module)
+			continue
 		}
-		ws.BroadcastModuleUpdate(moduleData, &data.Connection)
+
+		// Convert data_module.Module to types.Module
+		m := types.Module{
+			Module: module.Module,
+			Data:   module.Data,
+		}
+
+		ws.BroadcastModuleUpdate(m, &moduleRequest.Connection)
 	}
 }
 

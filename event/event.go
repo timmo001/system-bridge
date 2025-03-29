@@ -2,7 +2,6 @@ package event
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -16,12 +15,12 @@ type Message struct {
 
 // MessageResponse is the base type for all responses
 type MessageResponse struct {
-	ID      string                 `json:"id" mapstructure:"id"`
-	Type    ResponseType           `json:"type" mapstructure:"type"`
-	Subtype ResponseSubtype        `json:"subtype" mapstructure:"subtype"`
-	Data    any                    `json:"data" mapstructure:"data"`
-	Message string                 `json:"message,omitempty" mapstructure:"message,omitempty"`
-	Module  types.ModuleName       `json:"module,omitempty" mapstructure:"module,omitempty"`
+	ID      string           `json:"id" mapstructure:"id"`
+	Type    ResponseType     `json:"type" mapstructure:"type"`
+	Subtype ResponseSubtype  `json:"subtype" mapstructure:"subtype"`
+	Data    any              `json:"data" mapstructure:"data"`
+	Message string           `json:"message,omitempty" mapstructure:"message,omitempty"`
+	Module  types.ModuleName `json:"module,omitempty" mapstructure:"module,omitempty"`
 }
 
 // MessageHandler is the type for all event handlers
@@ -29,17 +28,15 @@ type MessageHandler func(connection string, message Message) MessageResponse
 
 // MessageRouter is the type for all event routers
 type MessageRouter struct {
-	Settings  *settings.Settings
-	DataStore *data.DataStore
-	Handlers  map[EventType]MessageHandler
+	Settings *settings.Settings
+	Handlers map[EventType]MessageHandler
 }
 
 // NewMessageRouter creates a new MessageRouter
-func NewMessageRouter(settings *settings.Settings, dataStore *data.DataStore) *MessageRouter {
+func NewMessageRouter(settings *settings.Settings) *MessageRouter {
 	return &MessageRouter{
-		Settings:  settings,
-		DataStore: dataStore,
-		Handlers:  make(map[EventType]MessageHandler),
+		Settings: settings,
+		Handlers: make(map[EventType]MessageHandler),
 	}
 }
 

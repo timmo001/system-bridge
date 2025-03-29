@@ -90,7 +90,7 @@ func (tp *UpdateTaskProcessor) worker() {
 			}
 
 			// Process task
-			d, err := task.UpdateModule()
+			m, err := task.UpdateModule()
 			if err != nil {
 				log.Warnf("Task processing error for module %s: %v", task.Module, err)
 				continue
@@ -98,7 +98,7 @@ func (tp *UpdateTaskProcessor) worker() {
 
 			log.Debugf("Updating data for module: %s", task.Module)
 			// Update data store
-			if err := tp.DataStore.SetModuleData(task.Module, d); err != nil {
+			if err := tp.DataStore.SetModuleData(task.Module, m.Data); err != nil {
 				log.Errorf("Failed to set module data for %s: %v", task.Module, err)
 				continue
 			}
