@@ -160,7 +160,7 @@ func getUsers() ([]types.SystemUser, error) {
 		return []types.SystemUser{}, err
 	}
 
-	var users []types.SystemUser
+	users := make([]types.SystemUser, 0)
 	lines := strings.SplitSeq(string(output), "\n")
 	for line := range lines {
 		line = strings.TrimSpace(line)
