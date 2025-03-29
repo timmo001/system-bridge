@@ -5,7 +5,6 @@ import (
 )
 
 func RegisterHandlers(router *event.MessageRouter) {
-	RegisterDataUpdateHandler(router)
 	RegisterExitApplicationHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
