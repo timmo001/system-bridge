@@ -5,8 +5,8 @@ if (-not $version) {
 }
 
 # Rename Windows binary to .exe if needed
-if (Test-Path "system-bridge-windows") {
-    Move-Item -Path "system-bridge-windows" -Destination "system-bridge-windows.exe" -Force
+if (Test-Path "system-bridge") {
+    Move-Item -Path "system-bridge" -Destination "system-bridge.exe" -Force
 }
 
 # Create directory for the installer

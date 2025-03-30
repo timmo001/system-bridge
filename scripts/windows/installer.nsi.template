@@ -16,17 +16,17 @@ InstallDir "$PROGRAMFILES64\System Bridge"
 
 Section "Install"
   SetOutPath "$INSTDIR"
-  File "system-bridge-windows.exe"
+  File "system-bridge.exe"
 
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
-  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge-windows.exe"
+  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge.exe"
   CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 SectionEnd
 
 Section "Uninstall"
-  Delete "$INSTDIR\system-bridge-windows.exe"
+  Delete "$INSTDIR\system-bridge.exe"
   Delete "$INSTDIR\uninstall.exe"
 
   RMDir "$INSTDIR"

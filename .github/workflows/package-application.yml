@@ -28,13 +28,13 @@ jobs:
       - name: Download Linux Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-linux-${{ env.VERSION }}
+          name: system-bridge-${{ env.VERSION }}
           path: ${{ github.workspace }}
 
       - name: Download Windows Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-windows-${{ env.VERSION }}
+          name: system-bridge-${{ env.VERSION }}
           path: ${{ github.workspace }}
 
       - name: Upload Artifacts for Packaging
@@ -42,8 +42,8 @@ jobs:
         with:
           name: system-bridge-binaries-${{ env.VERSION }}
           path: |
-            ${{ github.workspace }}/system-bridge-linux
-            ${{ github.workspace }}/system-bridge-windows.exe
+            ${{ github.workspace }}/system-bridge
+            ${{ github.workspace }}/system-bridge.exe
 
   linux-package:
     name: Package for Linux

@@ -26,11 +26,11 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            artifact_name: system-bridge-linux
+            artifact_name: system-bridge
             binary_ext: ""
           - os: windows-latest
             platform: windows
-            artifact_name: system-bridge-windows
+            artifact_name: system-bridge
             binary_ext: ".exe"
     steps:
       - name: Checkout code

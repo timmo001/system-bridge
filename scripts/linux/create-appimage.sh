@@ -4,7 +4,7 @@ set -e
 
 # Setup directories
 mkdir -p AppDir/usr/bin
-cp system-bridge-linux AppDir/usr/bin/system-bridge
+cp system-bridge AppDir/usr/bin/system-bridge
 
 # Create AppRun script
 cat >AppDir/AppRun <<EOF
