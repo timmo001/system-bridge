@@ -12,6 +12,10 @@ on:
       - synchronize
   workflow_dispatch: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && format('tag-{0}', github.ref_name) || github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
 jobs:
   build:
     name: Build application

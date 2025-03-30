@@ -9,6 +9,10 @@ permissions:
   pull-requests: write
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   dependabot-automerge:
     uses: timmo001/workflows/.github/workflows/dependabot-automerge-any.yml@master
