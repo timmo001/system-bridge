@@ -16,7 +16,10 @@ chmod +x AppDir/AppRun
 # Copy the desktop file
 cp "$(dirname "$0")/system-bridge.desktop" AppDir/
 
-# Copy icon
+# Copy icon to AppDir
+cp resources/system-bridge-circle.png AppDir/system-bridge.png
+
+# Copy icon to icons directory
 mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps/
 cp resources/system-bridge-circle.png AppDir/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
