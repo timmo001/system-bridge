@@ -35,7 +35,7 @@ jobs:
         run: |
           rpmlint scripts/linux/system-bridge.spec
 
-  lint-desktop-file:
+  lint-desktop-entry:
     name: Lint desktop entry
     runs-on: ubuntu-latest
     steps:
