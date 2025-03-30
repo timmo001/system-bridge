@@ -4,33 +4,39 @@
 package notification
 
 import (
-	"fmt"
-	"os/exec"
+	"os"
+	"path/filepath"
+
+	"gopkg.in/toast.v1"
 )
 
 func send(data NotificationData) error {
-	script := `
-[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+	// Create a shortcut in the Windows start menu to enable notifications
+	startMenuPath := os.Getenv("APPDATA") + "\\Microsoft\\Windows\\Start Menu\\Programs"
+	shortcutPath := filepath.Join(startMenuPath, "System Bridge.lnk")
 
-$template = @"
-<toast>
-    <visual>
-        <binding template="ToastGeneric">
-            <text>%s</text>
-            <text>%s</text>
-        </binding>
-    </visual>
-</toast>
-"@
+	notification := toast.Notification{
+		AppID:    "System Bridge",
+		Title:    "System Bridge",
+		Message:  "Hello, world!",
+		// Title:    data.Title,
+		// Message:  data.Message,
+		// Icon:     data.Icon,
+		// Duration: toast.Long,
+		// Actions: []toast.Action{
+		// 	{Type: "system", Label: "Dismiss", Arguments: "dismiss"},
+		// },
+	}
 
-$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-$xml.LoadXml($template -f "%s", "%s")
-$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("System Bridge")
-$notifier.Show($toast)
-`
-	script = fmt.Sprintf(script, data.Title, data.Message, data.Title, data.Message)
-	cmd := exec.Command("powershell", "-Command", script)
-	return cmd.Run()
+	// Create shortcut if it doesn't exist
+	if _, err := os.Stat(shortcutPath); os.IsNotExist(err) {
+		// Create an empty shortcut file
+		f, err := os.Create(shortcutPath)
+		if err != nil {
+			return err
+		}
+		f.Close()
+	}
+
+	return notification.Push()
 }
