@@ -154,6 +154,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder
 
+      - name: Cache Flatpak SDK and builder
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/flatpak
+            ~/.cache/flatpak-builder
+          key: ${{ runner.os }}-flatpak-${{ hashFiles('.scripts/linux/dev.timmo.system-bridge.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-flatpak-
+
       - name: Add Flathub repository and install SDK
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
