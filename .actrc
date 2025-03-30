@@ -4,6 +4,9 @@
 # Environment variables
 --env CGO_ENABLED=1
 
+# Matrix
+--matrix os=ubuntu-latest
+
 # Secrets (using dummy values for local testing)
 --secret ACTIONS_RUNTIME_TOKEN=dummy
 
