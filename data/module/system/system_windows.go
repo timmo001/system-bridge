@@ -218,7 +218,7 @@ func getUsers() ([]types.SystemUser, error) {
 	}
 
 	// Get hostname
-	hostname, err := getWindowsHostname()
+	hostname, err := getHostname()
 	if err != nil {
 		return make([]types.SystemUser, 0), err
 	}
