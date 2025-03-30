@@ -58,7 +58,9 @@ func Load() (*Settings, error) {
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			viper.SafeWriteConfig()
+			if err := viper.SafeWriteConfig(); err != nil {
+				return nil, fmt.Errorf("error writing default config file: %w", err)
+			}
 		} else {
 			return nil, fmt.Errorf("error reading config file: %w", err)
 		}

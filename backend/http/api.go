@@ -29,11 +29,13 @@ func handleAPIGet(w http.ResponseWriter, _ *http.Request) {
 	response := APIResponse{
 		Status:  "success",
 		Message: "API is running",
-		Data: map[string]any{
-			"version": "1.0.0",
-		},
+		Data:    map[string]any{},
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Error("Failed to encode response", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }

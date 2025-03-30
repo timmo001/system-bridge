@@ -22,7 +22,7 @@ var (
 	// HTTP client with caching and rate limiting
 	client = http.NewClient(&http.ClientConfig{
 		DefaultTTL:  5 * time.Minute,
-		MaxRequests: 30,              // Conservative limit for GitHub's unauthenticated API
+		MaxRequests: 30, // Conservative limit for GitHub's unauthenticated API
 		TimeWindow:  time.Hour,
 	})
 )
@@ -73,8 +73,12 @@ func IsNewerVersionAvailable(currentVersion, latestVersion string) bool {
 
 		currentNum := 0
 		latestNum := 0
-		fmt.Sscanf(currentParts[i], "%d", &currentNum)
-		fmt.Sscanf(latestParts[i], "%d", &latestNum)
+		if _, err := fmt.Sscanf(currentParts[i], "%d", &currentNum); err != nil {
+			currentNum = 0
+		}
+		if _, err := fmt.Sscanf(latestParts[i], "%d", &latestNum); err != nil {
+			latestNum = 0
+		}
 
 		if latestNum > currentNum {
 			return true
