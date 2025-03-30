@@ -1,0 +1,11 @@
+# Platform mappings
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+
+# Environment variables
+--env CGO_ENABLED=1
+
+# Secrets (using dummy values for local testing)
+--secret ACTIONS_RUNTIME_TOKEN=dummy
+
+# Other configurations
+--artifact-server-path=/tmp/artifacts
