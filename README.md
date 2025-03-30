@@ -3,11 +3,13 @@
 A bridge for your systems.
 
 > [!NOTE]
-> Contributions welcome! Feel free to submit a PR if you have any changes, fixes or improvements.
+> Contributions welcome! Feel free to submit a PR if you have any changes, fixes or
+> improvements.
 
 ## Features
 
-- Supports Linux and Windows. MacOS is untested but can be compiled and tested by the community.
+- Supports Linux and Windows. MacOS is untested but can be compiled and tested by
+  the community.
 - Access your system information via data modules and the API/WebSocket server.
 - Control your system via the API/WebSocket server.
 - Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
@@ -43,11 +45,13 @@ sudo dnf install inetutils wlr-randr
 ## Installation
 
 <!-- TODO: Add installation instructions. -->
+
 TODO
 
 ## Running
 
 <!-- TODO: Add running instructions. -->
+
 TODO
 
 ## Development Setup
@@ -70,4 +74,6 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 ### [Connector](https://github.com/timmo001/system-bridge-connector)
 
-Allows other applications to connect to the backend. For example, in the [Home Assistant](https://www.home-assistant.io/integrations/system_bridge) integration.
+Allows other applications to connect to the backend. For example, in the
+[Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
+integration.

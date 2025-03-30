@@ -1,3 +1,4 @@
+---
 name: Lint package configs
 
 on:
@@ -15,7 +16,7 @@ on:
       - "scripts/**/*.desktop"
       - "scripts/**/*.template"
       - "scripts/**/*.nsi.template"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   lint-rpm-spec:

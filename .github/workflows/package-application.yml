@@ -1,10 +1,11 @@
+---
 name: Package application
 
 on:
   push:
     tags:
       - v*.*.*
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   download-artifacts:
