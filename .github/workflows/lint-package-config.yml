@@ -124,17 +124,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install namcap
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y namcap
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
 
-      - name: Validate pkgbuild
+      - name: Validate pkgbuild with Arch Linux container
         run: |
-          for pkgbuild in $(find scripts -name "PKGBUILD*"); do
-            echo "Validating $pkgbuild"
-            namcap "$pkgbuild"
-          done
+          docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
+            pacman -Sy --noconfirm namcap
+            cd /workspace
+            for pkgbuild in \$(find .scripts -name \"PKGBUILD*\"); do
+              echo \"Validating \$pkgbuild\"
+              namcap \"\$pkgbuild\"
+            done
+          "
 
   lint-flatpak:
     name: Lint flatpak manifest
