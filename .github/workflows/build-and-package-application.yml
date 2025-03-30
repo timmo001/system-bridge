@@ -75,7 +75,7 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             VERSION="${{ github.ref_name }}"
           else
-            VERSION="0.0.0-dev+$(git describe --always --dirty)"
+            VERSION="0.0.0-dev+${{ github.sha }}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -137,7 +137,7 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             VERSION="${{ github.ref_name }}"
           else
-            VERSION="0.0.0-dev+$(git describe --always --dirty)"
+            VERSION="0.0.0-dev+${{ github.sha }}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -183,7 +183,7 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             VERSION="${{ github.ref_name }}"
           else
-            VERSION=$(git describe --always --dirty)
+            VERSION="0.0.0-dev+${{ github.sha }}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -250,7 +250,7 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             VERSION="${{ github.ref_name }}"
           else
-            VERSION=$(git describe --always --dirty)
+            VERSION="0.0.0-dev+${{ github.sha }}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
