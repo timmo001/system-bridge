@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=System Bridge
+Exec=system-bridge
+Icon=system-bridge
+Type=Application
+Categories=Utility;
