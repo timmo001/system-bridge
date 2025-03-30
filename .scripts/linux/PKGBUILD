@@ -10,29 +10,29 @@ provides=('system-bridge')
 conflicts=('system-bridge')
 
 package() {
-    cd "$srcdir"
+  cd "$srcdir"
 
-    # Create directories
-    install -dm755 "$pkgdir/usr/bin"
-    install -dm755 "$pkgdir/usr/share/applications"
-    install -dm755 "$pkgdir/usr/share/licenses/$pkgname"
-    install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-    install -dm755 "$pkgdir/usr/share/icons/hicolor/16x16/apps"
-    install -dm755 "$pkgdir/usr/share/icons/hicolor/32x32/apps"
-    install -dm755 "$pkgdir/usr/share/icons/hicolor/256x256/apps"
+  # Create directories
+  install -dm755 "$pkgdir/usr/bin"
+  install -dm755 "$pkgdir/usr/share/applications"
+  install -dm755 "$pkgdir/usr/share/licenses/$pkgname"
+  install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
+  install -dm755 "$pkgdir/usr/share/icons/hicolor/16x16/apps"
+  install -dm755 "$pkgdir/usr/share/icons/hicolor/32x32/apps"
+  install -dm755 "$pkgdir/usr/share/icons/hicolor/256x256/apps"
 
-    # Install binary
-    install -Dm755 system-bridge-linux "$pkgdir/usr/bin/system-bridge"
+  # Install binary
+  install -Dm755 system-bridge-linux "$pkgdir/usr/bin/system-bridge"
 
-    # Install desktop file
-    install -Dm644 system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
+  # Install desktop file
+  install -Dm644 system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
 
-    # Install icons
-    install -Dm644 system-bridge-circle.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
-    install -Dm644 system-bridge-circle-16x16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
-    install -Dm644 system-bridge-circle-32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
-    install -Dm644 system-bridge-circle.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
+  # Install icons
+  install -Dm644 system-bridge-circle.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
+  install -Dm644 system-bridge-circle-16x16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
+  install -Dm644 system-bridge-circle-32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
+  install -Dm644 system-bridge-circle.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
 
-    # Install license
-    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  # Install license
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
