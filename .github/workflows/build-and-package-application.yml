@@ -94,7 +94,7 @@ jobs:
           GOARCH: amd64
           CGO_ENABLED: 1
         run: |
-          go build -v -ldflags="-X 'main.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
+          go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
       - name: Build Windows sensors
         if: matrix.platform == 'windows'

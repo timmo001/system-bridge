@@ -11,7 +11,10 @@ import (
 
 var (
 	// Version is the current version of System Bridge
-	Version = "5.0.0"
+	// This is set via ldflags during build:
+	//   For tags: The tag name (e.g. v5.0.0)
+	//   For development: 0.0.0-dev+[commit-sha]
+	Version string
 
 	// LatestVersionURL is the URL to check for the latest version
 	LatestVersionURL = "https://api.github.com/repos/timmo001/system-bridge/releases/latest"
