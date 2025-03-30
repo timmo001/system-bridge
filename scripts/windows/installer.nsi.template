@@ -18,10 +18,10 @@ Section "Install"
   SetOutPath "$INSTDIR"
   File "system-bridge.exe"
 
-  # Create sensors directory structure and copy Windows sensors executable
+  # Create sensors directory structure and copy all sensor files
   CreateDirectory "$INSTDIR\lib\sensors\windows\bin"
   SetOutPath "$INSTDIR\lib\sensors\windows\bin"
-  File /r "$INSTDIR\lib\sensors\windows\bin\*"
+  File /r "lib\sensors\windows\bin\*.*"
 
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
