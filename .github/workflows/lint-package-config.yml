@@ -87,6 +87,14 @@ jobs:
         run: |
           choco install nsis -y
 
+      - name: Create dummy files for validation
+        run: |
+          # Create an empty file to serve as the dummy executable
+          New-Item -ItemType File -Path "system-bridge.exe" -Force
+
+          # Create an empty file for the Windows sensors executable
+          New-Item -ItemType File -Path "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe" -Force
+
       - name: Validate NSIS script
         run: |
           $version = '1.0.0'
