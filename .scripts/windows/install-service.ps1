@@ -33,7 +33,7 @@ Write-Host "Creating System Bridge service..."
 New-Service -Name $ServiceName `
     -DisplayName "System Bridge" `
     -Description "A bridge for your systems." `
-    -BinaryPathName "$ExecutablePath backend" `
+    -BinaryPathName "$ExecutablePath backend --notify" `
     -StartupType Automatic
 
 # Start the service

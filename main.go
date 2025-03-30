@@ -11,6 +11,7 @@ import (
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils"
 	"github.com/urfave/cli/v3"
 )
 
@@ -56,9 +57,24 @@ func main() {
 				Name:    "backend",
 				Aliases: []string{"b"},
 				Usage:   "Run the backend server",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "notify",
+						Usage: "Show a notification when the application starts",
+					},
+				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					// Create and run backend server with signal-aware context
 					b := backend.New(s, dataStore)
+
+					// Show startup notification if requested
+					if cmd.Bool("notify") {
+						err := utils.SendStartupNotification()
+						if err != nil {
+							log.Warnf("Failed to send startup notification: %v", err)
+						}
+					}
+
 					return b.Run(cmdCtx)
 				},
 			},
