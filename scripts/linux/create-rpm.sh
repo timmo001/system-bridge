@@ -29,6 +29,10 @@ sed -e "s/%{_version}/$RPM_VERSION/g" \
     -e "s/%{_release}/$RPM_RELEASE/g" \
     "$(dirname "$0")/system-bridge.spec" >rpmbuild/SPECS/system-bridge.spec
 
+# Create BUILDROOT directory and copy files
+mkdir -p "rpmbuild/BUILDROOT/system-bridge-${RPM_VERSION}-${RPM_RELEASE}.x86_64/usr/share/icons/hicolor/512x512/apps"
+cp -r rpm-structure/* "rpmbuild/BUILDROOT/system-bridge-${RPM_VERSION}-${RPM_RELEASE}.x86_64/"
+
 # Build the RPM package
 rpmbuild --define "_topdir $(pwd)/rpmbuild" \
   --define "_version ${RPM_VERSION}" \
