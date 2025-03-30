@@ -3,8 +3,8 @@
 A bridge for your systems.
 
 > [!NOTE]
-> Contributions welcome! Feel free to submit a PR if you have any changes, fixes or
-> improvements.
+> Contributions welcome!
+> Feel free to submit a PR if you have any changes, fixes or improvements.
 
 ## Features
 
