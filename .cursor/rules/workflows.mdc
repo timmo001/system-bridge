@@ -1,7 +1,7 @@
 ---
 description: 
-globs: .github/**,scripts/**
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 # GitHub Workflows
 
