@@ -1,12 +1,12 @@
 #!/usr/bin/env pwsh
 
-# Exit on error
-$ErrorActionPreference = "Stop"
-
 # Parameters
 param(
     [string]$Version = "0.0.0"
 )
+
+# Exit on error
+$ErrorActionPreference = "Stop"
 
 Write-Host "Building Windows Sensors application..."
 
