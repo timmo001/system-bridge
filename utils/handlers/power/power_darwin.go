@@ -28,7 +28,7 @@ func hibernate() error {
 }
 
 func lock() error {
-	cmd := exec.Command("/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession", "-suspend")
+	cmd := exec.Command("/System/Library/CoreServices/Menu Extras/User.menu/Contents/.resources/CGSession", "-suspend")
 	return cmd.Run()
 }
 

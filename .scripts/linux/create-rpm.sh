@@ -27,7 +27,7 @@ ls -la rpm-structure/usr/share/icons/hicolor/512x512/apps
 
 # Copy files to rpm-structure
 cp system-bridge-linux rpm-structure/usr/bin/system-bridge
-cp resources/system-bridge-circle.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
+cp .resources/system-bridge-circle.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Debug: Check if files were copied
 ls -la rpm-structure/usr/bin/system-bridge

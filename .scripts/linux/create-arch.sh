@@ -6,15 +6,15 @@ cd build/arch
 
 # Copy necessary files
 cp ../../system-bridge-linux .
-cp ../../scripts/linux/system-bridge.desktop .
+cp ../../.scripts/linux/system-bridge.desktop .
 cp ../../LICENSE .
-cp ../../scripts/linux/PKGBUILD .
+cp ../../.scripts/linux/PKGBUILD .
 
 # Copy icons
-cp ../../resources/system-bridge-circle.svg .
-cp ../../resources/system-bridge-circle-16x16.png .
-cp ../../resources/system-bridge-circle-32x32.png .
-cp ../../resources/system-bridge-circle.png .
+cp ../../.resources/system-bridge-circle.svg .
+cp ../../.resources/system-bridge-circle-16x16.png .
+cp ../../.resources/system-bridge-circle-32x32.png .
+cp ../../.resources/system-bridge-circle.png .
 
 # Build package
 makepkg -f

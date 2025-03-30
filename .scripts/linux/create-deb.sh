@@ -17,10 +17,10 @@ mkdir -p deb-structure/usr/share/icons/hicolor/scalable/apps
 cp system-bridge-linux deb-structure/usr/bin/system-bridge
 
 # Copy icons
-cp resources/system-bridge-circle-16x16.png deb-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
-cp resources/system-bridge-circle-32x32.png deb-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
-cp resources/system-bridge-circle.png deb-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
-cp resources/system-bridge-circle.svg deb-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
+cp .resources/system-bridge-circle-16x16.png deb-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
+cp .resources/system-bridge-circle-32x32.png deb-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
+cp .resources/system-bridge-circle.png deb-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
+cp .resources/system-bridge-circle.svg deb-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
 
 # Create control file from template
 sed "s/\$VERSION/$VERSION/g" "$(dirname "$0")/control.template" >deb-structure/DEBIAN/control

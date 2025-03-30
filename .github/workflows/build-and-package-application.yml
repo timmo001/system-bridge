@@ -100,14 +100,14 @@ jobs:
         if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          & "$PWD/scripts/windows/build-sensors.ps1" -Version $env:VERSION
+          & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
       - name: Cache windows sensor builds
         if: matrix.platform == 'windows'
         uses: actions/cache@v4
         with:
           path: lib/sensors/windows/bin
-          key: ${{ runner.os }}-sensor-builds-${{ hashFiles('scripts/windows/build-sensors.ps1') }}-${{ env.VERSION }}
+          key: ${{ runner.os }}-sensor-builds-${{ hashFiles('.scripts/windows/build-sensors.ps1') }}-${{ env.VERSION }}
           restore-keys: |
             ${{ runner.os }}-sensor-builds-
 
@@ -213,28 +213,28 @@ jobs:
 
       - name: Create appimage
         run: |
-          chmod +x scripts/linux/create-appimage.sh
-          ./scripts/linux/create-appimage.sh
+          chmod +x .scripts/linux/create-appimage.sh
+          ./.scripts/linux/create-appimage.sh
 
       - name: Create deb package
         run: |
-          chmod +x scripts/linux/create-deb.sh
-          ./scripts/linux/create-deb.sh
+          chmod +x .scripts/linux/create-deb.sh
+          ./.scripts/linux/create-deb.sh
 
       - name: Create rpm package
         run: |
-          chmod +x scripts/linux/create-rpm.sh
-          ./scripts/linux/create-rpm.sh
+          chmod +x .scripts/linux/create-rpm.sh
+          ./.scripts/linux/create-rpm.sh
 
       - name: Prepare arch linux script
         run: |
-          chmod +x scripts/linux/create-arch.sh
+          chmod +x .scripts/linux/create-arch.sh
 
       - name: Create arch linux package
         uses: vufa/arch-makepkg-action@master
         with:
           packages: "base-devel"
-          scripts: "cd scripts/linux && ./create-arch.sh"
+          scripts: "cd .scripts/linux && ./create-arch.sh"
           before: |
             echo "Server = https://archive.archlinux.org/repos/2024/03/01/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
             sudo pacman -Sy
@@ -246,8 +246,8 @@ jobs:
 
       - name: Create flatpak package
         run: |
-          chmod +x scripts/linux/create-flatpak.sh
-          ./scripts/linux/create-flatpak.sh
+          chmod +x .scripts/linux/create-flatpak.sh
+          ./.scripts/linux/create-flatpak.sh
 
       - name: Upload linux packages
         uses: actions/upload-artifact@v4
@@ -294,7 +294,7 @@ jobs:
 
       - name: Create windows installer
         run: |
-          ./scripts/windows/create-installer.ps1
+          ./.scripts/windows/create-installer.ps1
 
       - name: Upload windows installer
         uses: actions/upload-artifact@v4
