@@ -26,11 +26,11 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            artifact_name: system-bridge
+            artifact_name: system-bridge-linux
             binary_ext: ""
           - os: windows-latest
             platform: windows
-            artifact_name: system-bridge
+            artifact_name: system-bridge-windows
             binary_ext: ".exe"
     steps:
       - name: Checkout code
@@ -66,7 +66,7 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
-      - name: Build for ${{ matrix.platform }}
+      - name: Build
         env:
           GOOS: ${{ matrix.platform }}
           GOARCH: amd64
