@@ -9,7 +9,7 @@ mkdir -p deb-structure/DEBIAN
 mkdir -p deb-structure/usr/bin
 
 # Copy binary
-cp system-bridge deb-structure/usr/bin/system-bridge
+cp system-bridge-linux deb-structure/usr/bin/system-bridge
 
 # Create control file from template
 sed "s/\$VERSION/$VERSION/g" "$(dirname "$0")/control.template" >deb-structure/DEBIAN/control

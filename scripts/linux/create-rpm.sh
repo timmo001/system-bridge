@@ -6,7 +6,7 @@ VERSION=${VERSION:-0.0.0}
 
 # Create directory structure
 mkdir -p rpm-structure/usr/bin
-cp system-bridge rpm-structure/usr/bin/system-bridge
+cp system-bridge-linux rpm-structure/usr/bin/system-bridge
 
 # Create the spec file directory
 mkdir -p rpmbuild/SPECS
