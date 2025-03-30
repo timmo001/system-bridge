@@ -9,7 +9,7 @@ on:
 
 jobs:
   download-artifacts:
-    name: Download Build Artifacts
+    name: Download build artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -46,7 +46,7 @@ jobs:
             ${{ github.workspace }}/system-bridge-windows.exe
 
   linux-package:
-    name: Package for Linux
+    name: Package for linux
     runs-on: ubuntu-latest
     needs:
       - download-artifacts
@@ -110,7 +110,7 @@ jobs:
           retention-days: 7
 
   windows-package:
-    name: Package for Windows
+    name: Package for windows
     runs-on: windows-latest
     needs:
       - download-artifacts

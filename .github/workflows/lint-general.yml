@@ -32,7 +32,7 @@ jobs:
         run: markdownlint .
 
   lint-yaml:
-    name: Lint YAML
+    name: Lint yaml
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

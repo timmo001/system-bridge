@@ -13,7 +13,7 @@ on:
 
 jobs:
   go-lint:
-    name: Go Lint
+    name: Go lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

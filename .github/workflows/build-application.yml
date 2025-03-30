@@ -15,7 +15,7 @@ on:
 
 jobs:
   go-build:
-    name: Build Go Application
+    name: Build go application
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

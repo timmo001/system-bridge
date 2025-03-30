@@ -20,7 +20,7 @@ on:
 
 jobs:
   lint-rpm-spec:
-    name: Lint RPM Spec
+    name: Lint rpm spec
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -36,7 +36,7 @@ jobs:
           rpmlint scripts/linux/system-bridge.spec
 
   lint-desktop-file:
-    name: Lint Desktop Entry
+    name: Lint desktop entry
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -52,7 +52,7 @@ jobs:
           desktop-file-validate scripts/linux/system-bridge.desktop
 
   lint-debian-control:
-    name: Lint Debian Control
+    name: Lint debian control
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -77,7 +77,7 @@ jobs:
           grep -q "^Description:" debian/DEBIAN/control || exit 1
 
   lint-nsis:
-    name: Lint NSIS Script
+    name: Lint nsis script
     runs-on: windows-latest
     steps:
       - name: Checkout code
