@@ -60,6 +60,18 @@ if (-not (Test-Path "system-bridge.exe")) {
     exit 1
 }
 
+# Download and set up EnvVarUpdate.nsh
+Write-Host "Setting up EnvVarUpdate.nsh..."
+$envVarUpdateUrl = "https://raw.githubusercontent.com/NSIS/NSIS/master/Contrib/EnvVarUpdate/EnvVarUpdate.nsh"
+$envVarUpdatePath = "EnvVarUpdate.nsh"
+if (-not (Test-Path $envVarUpdatePath)) {
+    Invoke-WebRequest -Uri $envVarUpdateUrl -OutFile $envVarUpdatePath
+    if (-not (Test-Path $envVarUpdatePath)) {
+        Write-Error "Failed to download EnvVarUpdate.nsh"
+        exit 1
+    }
+}
+
 Write-Host "Building installer with NSIS..."
 # Build the installer
 & makensis installer.nsi

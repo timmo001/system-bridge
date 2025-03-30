@@ -111,6 +111,10 @@ jobs:
           # Create dist directory for NSIS output
           New-Item -ItemType Directory -Path "dist" -Force
 
+          # Download EnvVarUpdate.nsh
+          $envVarUpdateUrl = "https://raw.githubusercontent.com/NSIS/NSIS/master/Contrib/EnvVarUpdate/EnvVarUpdate.nsh"
+          Invoke-WebRequest -Uri $envVarUpdateUrl -OutFile "EnvVarUpdate.nsh"
+
       - name: Validate nsis script
         run: |
           $version = '1.0.0'
