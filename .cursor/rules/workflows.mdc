@@ -7,11 +7,7 @@ alwaysApply: true
 
 ## Local Testing
 
-- Use [act](mdc:https:/github.com/nektos/act) for testing GitHub workflows locally
-- Install act using:
-  - Linux: `sudo curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash`
-  - macOS: `brew install act`
-  - Windows: `choco install act-cli`
+- Use `act` for testing GitHub workflows locally
 
 ## Usage
 
@@ -26,7 +22,6 @@ Any commands which rely on docker should be ran with sudo.
 
 - Create `.env` file for secrets
 - Use `-s GITHUB_TOKEN=your_token` for actions requiring GitHub token
-- Use `-P ubuntu-latest=nektos/act-environments-ubuntu:18.04` for custom runner image
 
 ## Best Practices
 
