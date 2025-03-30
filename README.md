@@ -44,15 +44,73 @@ sudo dnf install inetutils wlr-randr
 
 ## Installation
 
-<!-- TODO: Add installation instructions. -->
+Download the latest release from the [releases page](https://github.com/timmo001/system-bridge/releases).
 
-TODO
+### Linux
+
+Install the package for your distribution's package manager.
+
+### Windows
+
+Run the setup executable to install the application.
 
 ## Running
 
-<!-- TODO: Add running instructions. -->
+1. To run the backend server:
 
-TODO
+   ```bash
+   system-bridge backend
+   ```
+
+### Running as a Service
+
+#### Linux (systemd)
+
+1. Copy the systemd service file to the systemd directory:
+
+   ```bash
+   sudo cp .scripts/linux/system-bridge.service /etc/systemd/system/
+   ```
+
+2. Reload systemd daemon:
+
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+
+3. Enable the service to start on boot:
+
+   ```bash
+   sudo systemctl enable system-bridge
+   ```
+
+4. Start the service:
+
+   ```bash
+   sudo systemctl start system-bridge
+   ```
+
+5. Check the service status:
+
+   ```bash
+   sudo systemctl status system-bridge
+   ```
+
+#### Windows
+
+1. Open PowerShell as Administrator
+2. Navigate to the directory containing the installation scripts
+3. Run the installation script:
+
+   ```powershell
+   .\scripts\windows\install-service.ps1
+   ```
+
+4. To uninstall the service:
+
+   ```powershell
+   .\scripts\windows\uninstall-service.ps1
+   ```
 
 ## Development Setup
 
