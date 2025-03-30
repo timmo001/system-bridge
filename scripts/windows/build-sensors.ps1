@@ -45,15 +45,31 @@ if ($LASTEXITCODE -ne 0) {
     }
 }
 
+# Find the .csproj file
+Write-Host "Finding project file..."
+$projectFile = Get-ChildItem -Path $tempDir -Filter "*.csproj" -Recurse | Select-Object -First 1
+if (-not $projectFile) {
+    Write-Error "No .NET project file found"
+    exit 1
+}
+
 # Build the application
-Write-Host "Building Windows Sensors application..."
-Push-Location $tempDir
+Write-Host "Building Windows Sensors application from $($projectFile.FullName)..."
+Push-Location $projectFile.Directory
 try {
     dotnet restore
     dotnet publish -c Release -r win-x64 --self-contained true /p:Version=$Version /p:PublishSingleFile=true
 
     # Copy the built executable
-    Copy-Item "bin/Release/net8.0/win-x64/publish/SystemBridgeWindowsSensors.exe" "../$binDir/" -Force
+    $publishDir = Join-Path $projectFile.Directory "bin/Release/net$dotnetVersion/win-x64/publish"
+    $exePath = Join-Path $publishDir "SystemBridgeWindowsSensors.exe"
+
+    if (-not (Test-Path $exePath)) {
+        Write-Error "Build output not found at expected path: $exePath"
+        exit 1
+    }
+
+    Copy-Item $exePath "../$binDir/" -Force
 } finally {
     Pop-Location
 }
