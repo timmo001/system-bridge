@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "v*"
   pull_request:
     types:
       - opened
@@ -15,18 +17,23 @@ jobs:
     name: Build Go Application
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
             platform: linux
             artifact_name: system-bridge-linux
+            binary_ext: ""
           - os: windows-latest
             platform: windows
             artifact_name: system-bridge-windows
+            binary_ext: ".exe"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -34,16 +41,33 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(git describe --tags --always --dirty)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Run tests
+        run: go test -v ./...
+
       - name: Build for ${{ matrix.platform }}
         env:
           GOOS: ${{ matrix.platform }}
           GOARCH: amd64
+          CGO_ENABLED: 0
         run: |
-          go build -v -o system-bridge-${{ matrix.platform }}
+          go build -v -ldflags="-X 'main.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: system-bridge-${{ matrix.platform }}
-          retention-days: 1
+          name: ${{ matrix.artifact_name }}-${{ steps.get_version.outputs.version }}
+          path: system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}
+          retention-days: 7

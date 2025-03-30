@@ -3,16 +3,16 @@ name: Lint-Configs
 on:
   push:
     paths:
-      - 'scripts/**/*.spec'
-      - 'scripts/**/*.desktop'
-      - 'scripts/**/*.template'
-      - 'scripts/**/*.nsi.template'
+      - "scripts/**/*.spec"
+      - "scripts/**/*.desktop"
+      - "scripts/**/*.template"
+      - "scripts/**/*.nsi.template"
   pull_request:
     paths:
-      - 'scripts/**/*.spec'
-      - 'scripts/**/*.desktop'
-      - 'scripts/**/*.template'
-      - 'scripts/**/*.nsi.template'
+      - "scripts/**/*.spec"
+      - "scripts/**/*.desktop"
+      - "scripts/**/*.template"
+      - "scripts/**/*.nsi.template"
   workflow_dispatch:
 
 jobs:
