@@ -1,0 +1,35 @@
+---
+description: 
+globs: .github/**,scripts/**
+alwaysApply: false
+---
+# GitHub Workflows
+
+## Local Testing
+
+- Use [act](mdc:https:/github.com/nektos/act) for testing GitHub workflows locally
+- Install act using:
+  - Linux: `sudo curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash`
+  - macOS: `brew install act`
+  - Windows: `choco install act-cli`
+
+## Usage
+
+- Run all workflows: `act`
+- Run specific workflow: `act -W .github/workflows/workflow-name.yml`
+- Run specific job: `act -j job-name`
+- List all workflows: `act -l`
+
+## Environment
+
+- Create `.env` file for secrets
+- Use `-s GITHUB_TOKEN=your_token` for actions requiring GitHub token
+- Use `-P ubuntu-latest=nektos/act-environments-ubuntu:18.04` for custom runner image
+
+## Best Practices
+
+- Test workflows locally before pushing to remote
+- Keep workflow files modular and focused
+- Use reusable actions when possible
+- Document required secrets and environment variables
+- Test both success and failure scenarios
