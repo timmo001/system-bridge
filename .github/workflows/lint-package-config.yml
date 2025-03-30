@@ -156,7 +156,4 @@ jobs:
 
       - name: Validate flatpak manifest
         run: |
-          for manifest in $(find scripts -name "*.flatpak.yml" -o -name "*.flatpak.json"); do
-            echo "Validating $manifest"
-            flatpak-builder --repo=test-repo --force-clean --disable-download app "$manifest" || exit 1
-          done
+          flatpak-builder --repo=test-repo --force-clean --disable-download app ".scripts/linux/dev.timmo.system-bridge.yml" || exit 1
