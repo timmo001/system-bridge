@@ -1,0 +1,38 @@
+pkgname=system-bridge
+pkgver=${VERSION}
+pkgrel=1
+pkgdesc="A bridge between your systems"
+arch=('x86_64')
+url="https://github.com/timmo001/system-bridge"
+license=('Apache-2.0')
+depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11' 'xorg-server' 'libx11-xcb')
+provides=('system-bridge')
+conflicts=('system-bridge')
+
+package() {
+    cd "$srcdir"
+
+    # Create directories
+    install -dm755 "$pkgdir/usr/bin"
+    install -dm755 "$pkgdir/usr/share/applications"
+    install -dm755 "$pkgdir/usr/share/licenses/$pkgname"
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps"
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/16x16/apps"
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/32x32/apps"
+    install -dm755 "$pkgdir/usr/share/icons/hicolor/256x256/apps"
+
+    # Install binary
+    install -Dm755 system-bridge-linux "$pkgdir/usr/bin/system-bridge"
+
+    # Install desktop file
+    install -Dm644 system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
+
+    # Install icons
+    install -Dm644 system-bridge-circle.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
+    install -Dm644 system-bridge-circle-16x16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
+    install -Dm644 system-bridge-circle-32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
+    install -Dm644 system-bridge-circle.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
+
+    # Install license
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

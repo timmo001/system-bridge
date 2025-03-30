@@ -210,6 +210,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y dpkg fakeroot rpm
+          # Install Arch Linux packaging tools
+          git clone https://github.com/pacman-for-all/pacman-for-all.git
+          cd pacman-for-all
+          sudo make install
+          cd ..
+          rm -rf pacman-for-all
 
       - name: Create AppImage
         run: |
@@ -225,6 +231,11 @@ jobs:
         run: |
           chmod +x scripts/linux/create-rpm.sh
           ./scripts/linux/create-rpm.sh
+
+      - name: Create arch linux package
+        run: |
+          chmod +x scripts/linux/create-arch.sh
+          ./scripts/linux/create-arch.sh
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
