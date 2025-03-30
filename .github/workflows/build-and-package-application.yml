@@ -254,7 +254,9 @@ jobs:
 
   create-release:
     name: Create release
-    needs: [linux-package, windows-package]
+    needs:
+      - linux-package
+      - windows-package
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
