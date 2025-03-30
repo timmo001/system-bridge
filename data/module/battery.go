@@ -15,13 +15,21 @@ func (t *Module) UpdateBatteryModule() (types.BatteryData, error) {
 	// This handles both error cases and systems without batteries
 	if err != nil {
 		log.Debug("No battery present or error getting battery info")
-		return types.BatteryData{}, nil
+		return types.BatteryData{
+			IsCharging:    nil,
+			Percentage:    nil,
+			TimeRemaining: nil,
+		}, nil
 	}
 
 	// If no batteries found, return empty data
 	if len(batteries) == 0 {
 		log.Debug("No batteries found")
-		return types.BatteryData{}, nil
+		return types.BatteryData{
+			IsCharging:    nil,
+			Percentage:    nil,
+			TimeRemaining: nil,
+		}, nil
 	}
 
 	// Use the first battery (most systems only have one)
