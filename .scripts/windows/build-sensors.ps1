@@ -78,7 +78,8 @@ try {
         exit 1
     }
 
-    Copy-Item $exePath $binDirAbs -Force
+    # Copy the publish directory to the bin directory
+    Copy-Item $publishDir $binDirAbs -Force
 } finally {
     Pop-Location
 }
