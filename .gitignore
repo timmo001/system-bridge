@@ -2,6 +2,7 @@
 system-bridge
 system-bridge.*
 !system-bridge.desktop
+!system-bridge.service
 !system-bridge.spec
 
 # Legacy
