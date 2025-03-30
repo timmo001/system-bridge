@@ -92,6 +92,9 @@ jobs:
           # Create an empty file to serve as the dummy executable
           New-Item -ItemType File -Path "system-bridge.exe" -Force
 
+          # Create directories for the Windows sensors executable
+          New-Item -ItemType Directory -Path "lib/sensors/windows/bin" -Force
+
           # Create an empty file for the Windows sensors executable
           New-Item -ItemType File -Path "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe" -Force
 
