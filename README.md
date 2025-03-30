@@ -37,7 +37,17 @@ Install the following packages:
 sudo dnf install inetutils wlr-randr
 ```
 
-## Setup
+## Installation
+
+<!-- TODO: Add installation instructions. -->
+TODO
+
+## Running
+
+<!-- TODO: Add running instructions. -->
+TODO
+
+## Development Setup
 
 1. Install go
 1. Set up your go workspace and make sure that your `GOPATH` is set correctly.
