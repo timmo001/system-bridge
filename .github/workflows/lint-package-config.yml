@@ -98,6 +98,9 @@ jobs:
           # Create an empty file for the Windows sensors executable
           New-Item -ItemType File -Path "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe" -Force
 
+          # Create dist directory for NSIS output
+          New-Item -ItemType Directory -Path "dist" -Force
+
       - name: Validate NSIS script
         run: |
           $version = '1.0.0'
