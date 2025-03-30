@@ -22,11 +22,6 @@ func getUserDirectories() []DirectoryInfo {
 		configHome = filepath.Join(homeDir, ".config")
 	}
 
-	dataHome := os.Getenv("XDG_DATA_HOME")
-	if dataHome == "" {
-		dataHome = filepath.Join(homeDir, ".local/share")
-	}
-
 	userDirs := filepath.Join(configHome, "user-dirs.dirs")
 	if _, err := os.Stat(userDirs); err == nil {
 		content, err := os.ReadFile(userDirs)
