@@ -1,0 +1,89 @@
+name: Lint-Configs
+
+on:
+  push:
+    paths:
+      - 'scripts/**/*.spec'
+      - 'scripts/**/*.desktop'
+      - 'scripts/**/*.template'
+      - 'scripts/**/*.nsi.template'
+  pull_request:
+    paths:
+      - 'scripts/**/*.spec'
+      - 'scripts/**/*.desktop'
+      - 'scripts/**/*.template'
+      - 'scripts/**/*.nsi.template'
+  workflow_dispatch:
+
+jobs:
+  lint-rpm-spec:
+    name: Lint RPM Spec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install RPM tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm rpmlint
+
+      - name: Lint RPM Spec
+        run: |
+          rpmlint scripts/linux/system-bridge.spec
+
+  lint-desktop-file:
+    name: Lint Desktop Entry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Desktop Entry validator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils
+
+      - name: Validate desktop file
+        run: |
+          desktop-file-validate scripts/linux/system-bridge.desktop
+
+  lint-debian-control:
+    name: Lint Debian Control
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install lintian
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lintian
+
+      - name: Validate Debian control file
+        run: |
+          # Create a temporary directory structure for lintian
+          mkdir -p debian/DEBIAN
+          VERSION=1.0.0 envsubst < scripts/linux/control.template > debian/DEBIAN/control
+          lintian debian/DEBIAN/control
+
+  lint-nsis:
+    name: Lint NSIS Script
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install NSIS
+        run: |
+          choco install nsis -y
+
+      - name: Validate NSIS script
+        run: |
+          $version = '1.0.0'
+          $content = Get-Content scripts/windows/installer.nsi.template -Raw
+          $content = $content -replace '\$VERSION', $version
+          Set-Content -Path test-installer.nsi -Value $content
+
+          # Check for syntax errors in NSIS script (this is a basic check, it just tries to compile)
+          makensis /V2 test-installer.nsi

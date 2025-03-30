@@ -1,0 +1,8 @@
+Package: system-bridge
+Version: $VERSION
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: System Bridge <maintainer@example.com>
+Description: System Bridge application
+ Bridge between your systems

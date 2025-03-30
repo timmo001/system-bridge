@@ -1,0 +1,120 @@
+name: Package
+
+on:
+  push:
+    tags:
+      - v*.*.*
+  workflow_dispatch:
+
+jobs:
+  linux-package:
+    name: Package for Linux
+    runs-on: ubuntu-latest
+    needs: [download-artifacts]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup executable
+        run: |
+          chmod +x ${{ github.workspace }}/system-bridge-linux
+          mkdir -p ${{ github.workspace }}/dist
+
+      - name: Install AppImage tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+
+      - name: Install packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg fakeroot rpm
+
+      - name: Create AppImage
+        env:
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '0.0.0' }}
+        run: |
+          chmod +x scripts/linux/create-appimage.sh
+          ./scripts/linux/create-appimage.sh
+
+      - name: Create DEB package
+        env:
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '0.0.0' }}
+        run: |
+          chmod +x scripts/linux/create-deb.sh
+          ./scripts/linux/create-deb.sh
+
+      - name: Create RPM package
+        env:
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '0.0.0' }}
+        run: |
+          chmod +x scripts/linux/create-rpm.sh
+          ./scripts/linux/create-rpm.sh
+
+      - name: Upload Linux Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-linux-packages
+          path: dist/*
+          retention-days: 7
+
+  windows-package:
+    name: Package for Windows
+    runs-on: windows-latest
+    needs: [download-artifacts]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Executable Directory
+        run: mkdir -p ${{ github.workspace }}/dist
+
+      - name: Download NSIS
+        run: |
+          mkdir -p nsis
+          Invoke-WebRequest -Uri "https://sourceforge.net/projects/nsis/files/NSIS%203/3.08/nsis-3.08-setup.exe/download" -OutFile "nsis-setup.exe"
+          Start-Process -FilePath "nsis-setup.exe" -ArgumentList "/S", "/D=${{ github.workspace }}\nsis" -Wait
+          $env:PATH += ";${{ github.workspace }}\nsis"
+          echo "${{ github.workspace }}\nsis" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Create Windows Installer
+        env:
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '0.0.0' }}
+        run: |
+          ./scripts/windows/create-installer.ps1
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-windows-installer
+          path: dist/*.exe
+          retention-days: 7
+
+  download-artifacts:
+    name: Download Build Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Linux Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux
+          path: ${{ github.workspace }}
+
+      - name: Download Windows Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-windows
+          path: ${{ github.workspace }}
+
+      - name: Upload Artifacts for Packaging
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-binaries
+          path: |
+            ${{ github.workspace }}/system-bridge-linux
+            ${{ github.workspace }}/system-bridge-windows

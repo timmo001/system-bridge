@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+jobs:
+  go-build:
+    name: Build Go Application
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            artifact_name: system-bridge-linux
+          - os: windows-latest
+            platform: windows
+            artifact_name: system-bridge-windows
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Build for ${{ matrix.platform }}
+        env:
+          GOOS: ${{ matrix.platform }}
+          GOARCH: amd64
+        run: |
+          go build -v -o system-bridge-${{ matrix.platform }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: system-bridge-${{ matrix.platform }}
+          retention-days: 1

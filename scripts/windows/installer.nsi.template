@@ -1,0 +1,37 @@
+!include "MUI2.nsh"
+
+Name "System Bridge"
+OutFile "dist\system-bridge-$VERSION-setup.exe"
+InstallDir "$PROGRAMFILES64\System Bridge"
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!insertmacro MUI_LANGUAGE "English"
+
+Section "Install"
+  SetOutPath "$INSTDIR"
+  File "system-bridge-windows.exe"
+
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+
+  CreateDirectory "$SMPROGRAMS\System Bridge"
+  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge-windows.exe"
+  CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+SectionEnd
+
+Section "Uninstall"
+  Delete "$INSTDIR\system-bridge-windows.exe"
+  Delete "$INSTDIR\uninstall.exe"
+
+  RMDir "$INSTDIR"
+
+  Delete "$SMPROGRAMS\System Bridge\System Bridge.lnk"
+  Delete "$SMPROGRAMS\System Bridge\Uninstall.lnk"
+  RMDir "$SMPROGRAMS\System Bridge"
+SectionEnd
