@@ -154,6 +154,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder
 
+      - name: Add Flathub repository and install SDK
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
+
       - name: Validate flatpak manifest
         run: |
           flatpak-builder --repo=test-repo --force-clean --disable-download app ".scripts/linux/dev.timmo.system-bridge.yml" || exit 1
