@@ -264,6 +264,9 @@ jobs:
       - name: Create flatpak package
         run: |
           chmod +x .scripts/linux/create-flatpak.sh
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
+          sudo flatpak install -y flathub org.freedesktop.Platform//23.08
           sudo ./.scripts/linux/create-flatpak.sh
 
       - name: Upload linux packages
