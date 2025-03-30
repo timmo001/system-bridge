@@ -211,7 +211,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dpkg fakeroot rpm
           # Install Arch Linux packaging tools
-          git clone https://github.com/pacman-for-all/pacman-for-all.git
+          git clone git@github.com:pacman-for-all/pacman-for-all.git
           cd pacman-for-all
           sudo make install
           cd ..
