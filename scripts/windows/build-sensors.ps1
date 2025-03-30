@@ -22,6 +22,10 @@ if (-not (Test-Path $binDir)) {
     New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 }
 
+# Get absolute paths
+$rootDir = $PWD
+$binDirAbs = Join-Path $rootDir $binDir
+
 # Clone the repository
 $repoUrl = "https://github.com/timmo001/system-bridge-windows-sensors.git"
 $tempDir = "temp-sensors"
@@ -69,7 +73,7 @@ try {
         exit 1
     }
 
-    Copy-Item $exePath "../$binDir/" -Force
+    Copy-Item $exePath $binDirAbs -Force
 } finally {
     Pop-Location
 }
