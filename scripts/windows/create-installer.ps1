@@ -4,6 +4,14 @@ if (-not $version) {
     $version = "0.0.0"
 }
 
+# Verify .NET Runtime version
+$dotnetVersion = "8.0"
+Write-Host "Verifying .NET Runtime $dotnetVersion is available..."
+$runtimes = dotnet --list-runtimes
+if ($LASTEXITCODE -ne 0 -or -not ($runtimes -match "Microsoft.NETCore.App $dotnetVersion")) {
+    Write-Warning ".NET $dotnetVersion Runtime not found. The installer will attempt to install it during setup."
+}
+
 # List current directory contents for debugging
 Write-Host "Current directory contents:"
 Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }

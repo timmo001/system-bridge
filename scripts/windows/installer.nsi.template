@@ -6,6 +6,7 @@ InstallDir "$PROGRAMFILES64\System Bridge"
 
 !define MUI_ICON "resources\system-bridge-circle.ico"
 !define MUI_UNICON "resources\system-bridge-circle.ico"
+!define DOT_NET_VERSION "8.0"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
@@ -16,6 +17,25 @@ InstallDir "$PROGRAMFILES64\System Bridge"
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
+
+Section "Prerequisites"
+  # Check for .NET Runtime
+  nsExec::ExecToStack 'dotnet --list-runtimes'
+  Pop $0
+  Pop $1
+  ${If} $1 == ""
+  ${OrIf} $1 == "0"
+    MessageBox MB_YESNO|MB_ICONQUESTION "This application requires .NET ${DOT_NET_VERSION} Runtime. Would you like to install it now?" IDYES install_dotnet IDNO abort_installation
+    abort_installation:
+      Abort "Installation cancelled: .NET Runtime is required."
+    install_dotnet:
+      ExecWait 'winget install Microsoft.DotNet.Runtime.8'
+      ${If} $0 != 0
+        MessageBox MB_OK|MB_ICONSTOP "Failed to install .NET Runtime. Please install it manually from https://dotnet.microsoft.com/download/dotnet/${DOT_NET_VERSION}"
+        Abort "Installation failed: Could not install .NET Runtime."
+      ${EndIf}
+  ${EndIf}
+SectionEnd
 
 Section "Install"
   SetOutPath "$INSTDIR"
