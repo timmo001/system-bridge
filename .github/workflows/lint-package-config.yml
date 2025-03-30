@@ -67,12 +67,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install RPM tools
+      - name: Install rpm tools
         run: |
           sudo apt-get update
           sudo apt-get install -y rpm rpmlint
 
-      - name: Lint RPM Spec
+      - name: Lint rpm spec
         run: |
           rpmlint scripts/linux/system-bridge.spec
 
@@ -83,7 +83,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install NSIS
+      - name: Install nsis
         run: |
           choco install nsis -y
 
@@ -101,7 +101,7 @@ jobs:
           # Create dist directory for NSIS output
           New-Item -ItemType Directory -Path "dist" -Force
 
-      - name: Validate NSIS script
+      - name: Validate nsis script
         run: |
           $version = '1.0.0'
           $content = Get-Content scripts/windows/installer.nsi.template -Raw

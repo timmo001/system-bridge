@@ -22,10 +22,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "go.mod"
           cache: true
+          go-version-file: "go.mod"
 
-      - name: Run golangci-lint
+      - name: Lint application
         uses: golangci/golangci-lint-action@v4
         with:
           version: latest
