@@ -16,6 +16,12 @@ A bridge for your systems.
 
 ## System Requirements
 
+<!-- TODO: Remove when 5.0.0 is released -->
+
+> [!WARNING]
+> The following documentation is for version 5.0.0 and
+> above which is currently in development.
+
 ### Linux
 
 #### Arch Linux
@@ -55,6 +61,12 @@ Install the package for your distribution's package manager.
 Run the setup executable to install the application.
 
 ## Running
+
+<!-- TODO: Remove when 5.0.0 is released -->
+
+> [!WARNING]
+> The following documentation is for version 5.0.0 and
+> above which is currently in development.
 
 1. To run the backend server:
 
