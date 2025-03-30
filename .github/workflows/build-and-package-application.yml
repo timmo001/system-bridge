@@ -236,8 +236,8 @@ jobs:
           packages: "base-devel"
           scripts: "cd scripts/linux && ./create-arch.sh"
           before: |
-            echo "Server = https://archive.archlinux.org/repos/2023/03/01/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
-            pacman -Sy
+            echo "Server = https://archive.archlinux.org/repos/2024/03/01/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
+            sudo pacman -Sy
 
       - name: Move arch package to dist
         run: |
