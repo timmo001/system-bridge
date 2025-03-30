@@ -37,13 +37,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
+      - name: Set up go
         uses: actions/setup-go@v5
         with:
           cache: true
           go-version-file: "go.mod"
 
-      - name: Cache Go build
+      - name: Cache go build
         uses: actions/cache@v4
         with:
           path: |
@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-build-
 
-      - name: Cache Linux dependencies
+      - name: Cache linux dependencies
         if: matrix.platform == 'linux'
         uses: actions/cache@v4
         with:
@@ -102,7 +102,7 @@ jobs:
         run: |
           & "$PWD/scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
-      - name: Cache Windows sensor builds
+      - name: Cache windows sensor builds
         if: matrix.platform == 'windows'
         uses: actions/cache@v4
         with:
@@ -269,7 +269,7 @@ jobs:
           choco install nsis -y
           echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-      - name: Create Windows installer
+      - name: Create windows installer
         run: |
           ./scripts/windows/create-installer.ps1
 
@@ -290,20 +290,20 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download Linux packages
+      - name: Download linux packages
         uses: actions/download-artifact@v4
         with:
           name: system-bridge-linux-packages-${{ github.ref_name }}
           path: dist/linux
 
-      - name: Download Windows installer
+      - name: Download windows installer
         uses: actions/download-artifact@v4
         with:
           name: system-bridge-windows-installer-${{ github.ref_name }}
           path: dist/windows
 
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/linux/*
