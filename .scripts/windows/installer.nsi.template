@@ -4,8 +4,8 @@ Name "System Bridge"
 OutFile "dist\system-bridge-$VERSION-setup.exe"
 InstallDir "$PROGRAMFILES64\System Bridge"
 
-!define MUI_ICON "resources\system-bridge-circle.ico"
-!define MUI_UNICON "resources\system-bridge-circle.ico"
+!define MUI_ICON ".resources\system-bridge-circle.ico"
+!define MUI_UNICON ".resources\system-bridge-circle.ico"
 !define DOT_NET_VERSION "8.0"
 
 !insertmacro MUI_PAGE_WELCOME
