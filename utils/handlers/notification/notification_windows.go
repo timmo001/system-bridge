@@ -15,17 +15,20 @@ func send(data NotificationData) error {
 	startMenuPath := os.Getenv("APPDATA") + "\\Microsoft\\Windows\\Start Menu\\Programs"
 	shortcutPath := filepath.Join(startMenuPath, "System Bridge.lnk")
 
+	duration := toast.Short
+	if data.Duration > 1000 {
+		duration = toast.Long
+	}
+
 	notification := toast.Notification{
 		AppID:    "System Bridge",
-		Title:    "System Bridge",
-		Message:  "Hello, world!",
-		// Title:    data.Title,
-		// Message:  data.Message,
-		// Icon:     data.Icon,
-		// Duration: toast.Long,
-		// Actions: []toast.Action{
-		// 	{Type: "system", Label: "Dismiss", Arguments: "dismiss"},
-		// },
+		Title:    data.Title,
+		Message:  data.Message,
+		Icon:     data.Icon,
+		Duration: duration,
+		Actions: []toast.Action{
+			{Type: "system", Label: "Dismiss", Arguments: "dismiss"},
+		},
 	}
 
 	// Create shortcut if it doesn't exist
