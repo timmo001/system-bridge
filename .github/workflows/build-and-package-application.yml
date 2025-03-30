@@ -121,6 +121,7 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: Download Windows build artifact
+        if: ${{ !env.ACT }}
         uses: actions/download-artifact@v4
         with:
           name: system-bridge-windows-${{ env.VERSION }}
@@ -132,13 +133,14 @@ jobs:
           name: system-bridge-binaries-${{ env.VERSION }}
           path: |
             ${{ github.workspace }}/system-bridge-linux
-            ${{ github.workspace }}/system-bridge-windows.exe
+            ${{ !env.ACT && github.workspace }}/system-bridge-windows.exe
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
   linux-package:
     name: Package for Linux
     runs-on: ubuntu-latest
     needs: prepare-packaging
+    if: ${{ !vars.ACT || vars.ACT_PLATFORM == 'ubuntu-latest' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
