@@ -1,7 +1,7 @@
 # Create NSIS installer script
 $version = $env:VERSION
 if (-not $version) {
-    $version = "0.0.0"
+    $version = "5.0.0"
 }
 
 # Verify .NET Runtime version

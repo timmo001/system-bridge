@@ -13,7 +13,7 @@ var (
 	// Version is the current version of System Bridge
 	// This is set via ldflags during build:
 	//   For tags: The tag name (e.g. v5.0.0)
-	//   For development: 0.0.0-dev+[commit-sha]
+	//   For development: 5.0.0-dev+[commit-sha]
 	Version string
 
 	// LatestVersionURL is the URL to check for the latest version

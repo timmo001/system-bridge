@@ -8,7 +8,7 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
-VERSION=${VERSION:-0.0.0}
+VERSION=${VERSION:-5.0.0}
 
 # Create directory structure
 mkdir -p deb-structure/DEBIAN

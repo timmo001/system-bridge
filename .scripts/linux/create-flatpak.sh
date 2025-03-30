@@ -31,7 +31,7 @@ mkdir -p repo
 flatpak-builder --repo=repo --force-clean "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
-VERSION=${VERSION:-0.0.0}
+VERSION=${VERSION:-5.0.0}
 mkdir -p dist
 flatpak build-bundle repo "dist/system-bridge-${VERSION}.flatpak" dev.timmo.system-bridge
 

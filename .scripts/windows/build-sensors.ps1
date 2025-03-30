@@ -2,7 +2,7 @@
 
 # Parameters
 param(
-    [string]$Version = "0.0.0"
+    [string]$Version = "5.0.0"
 )
 
 # Exit on error
@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 
 # Ensure version is in semantic version format
 if ($Version -notmatch '^\d+\.\d+\.\d+') {
-    $Version = "0.0.0-$Version"
+    $Version = "5.0.0-$Version"
 }
 
 Write-Host "Building Windows Sensors application..."

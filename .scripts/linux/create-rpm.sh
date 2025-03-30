@@ -8,11 +8,11 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
-VERSION=${VERSION:-0.0.0}
+VERSION=${VERSION:-5.0.0}
 
 # Convert version for RPM compatibility
 if [[ $VERSION == *"-dev+"* ]]; then
-  RPM_VERSION="0.0.0"
+  RPM_VERSION="5.0.0"
   # Extract the commit hash and use it in the release
   COMMIT_HASH=${VERSION#*+}
   RPM_RELEASE="0.dev.${COMMIT_HASH}"
