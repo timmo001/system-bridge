@@ -19,22 +19,6 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  lint-rpm-spec:
-    name: Lint rpm spec
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install RPM tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y rpm rpmlint
-
-      - name: Lint RPM Spec
-        run: |
-          rpmlint scripts/linux/system-bridge.spec
-
   lint-desktop-entry:
     name: Lint desktop entry
     runs-on: ubuntu-latest
@@ -75,6 +59,22 @@ jobs:
           grep -q "^Version:" debian/DEBIAN/control || exit 1
           grep -q "^Architecture:" debian/DEBIAN/control || exit 1
           grep -q "^Description:" debian/DEBIAN/control || exit 1
+
+  lint-rpm-spec:
+    name: Lint rpm spec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install RPM tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm rpmlint
+
+      - name: Lint RPM Spec
+        run: |
+          rpmlint scripts/linux/system-bridge.spec
 
   lint-nsis:
     name: Lint nsis script
