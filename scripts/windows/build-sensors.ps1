@@ -61,7 +61,7 @@ try {
     dotnet publish -c Release -r win-x64 --self-contained true /p:Version=$Version /p:PublishSingleFile=true
 
     # Copy the built executable
-    $publishDir = Join-Path $projectFile.Directory "bin/Release/net$dotnetVersion/win-x64/publish"
+    $publishDir = Join-Path $projectFile.Directory "bin/net$dotnetVersion-windows$dotnetVersion/win-x64/publish"
     $exePath = Join-Path $publishDir "SystemBridgeWindowsSensors.exe"
 
     if (-not (Test-Path $exePath)) {
