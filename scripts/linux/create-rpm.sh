@@ -2,6 +2,9 @@
 
 set -e
 
+# Enable debug output
+set -x
+
 VERSION=${VERSION:-0.0.0}
 
 # Convert version for RPM compatibility
@@ -19,9 +22,16 @@ fi
 mkdir -p rpm-structure/usr/bin
 mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
 
+# Debug: Check if directories were created
+ls -la rpm-structure/usr/share/icons/hicolor/512x512/apps
+
 # Copy files to rpm-structure
 cp system-bridge-linux rpm-structure/usr/bin/system-bridge
 cp resources/system-bridge-circle.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
+
+# Debug: Check if files were copied
+ls -la rpm-structure/usr/bin/system-bridge
+ls -la rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Create the spec file directory
 mkdir -p rpmbuild/SPECS
@@ -36,9 +46,16 @@ BUILDROOT_DIR="rpmbuild/BUILDROOT/system-bridge-${RPM_VERSION}-${RPM_RELEASE}.x8
 mkdir -p "${BUILDROOT_DIR}/usr/bin"
 mkdir -p "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps"
 
+# Debug: Check BUILDROOT directories
+ls -la "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps"
+
 # Copy files to BUILDROOT
 cp rpm-structure/usr/bin/system-bridge "${BUILDROOT_DIR}/usr/bin/"
 cp rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps/"
+
+# Debug: Check if files were copied to BUILDROOT
+ls -la "${BUILDROOT_DIR}/usr/bin/system-bridge"
+ls -la "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps/system-bridge.png"
 
 # Build the RPM package
 rpmbuild --define "_topdir $(pwd)/rpmbuild" \
