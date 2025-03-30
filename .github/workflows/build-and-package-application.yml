@@ -40,8 +40,27 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "go.mod"
           cache: true
+          go-version-file: "go.mod"
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.mod', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
+
+      - name: Cache Linux dependencies
+        if: matrix.platform == 'linux'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-cache-
 
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
@@ -82,6 +101,15 @@ jobs:
         shell: pwsh
         run: |
           & "$PWD/scripts/windows/build-sensors.ps1" -Version $env:VERSION
+
+      - name: Cache Windows sensor builds
+        if: matrix.platform == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: lib/sensors/windows/bin
+          key: ${{ runner.os }}-sensor-builds-${{ hashFiles('scripts/windows/build-sensors.ps1') }}-${{ env.VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-sensor-builds-
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
