@@ -209,7 +209,7 @@ jobs:
       - name: Install packaging dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg fakeroot rpm
+          sudo apt-get install -y dpkg fakeroot rpm flatpak flatpak-builder
 
       - name: Create appimage
         run: |
@@ -243,6 +243,11 @@ jobs:
         run: |
           mkdir -p dist
           mv *.pkg.tar.zst dist/ || echo "No Arch package found"
+
+      - name: Create flatpak package
+        run: |
+          chmod +x scripts/linux/create-flatpak.sh
+          ./scripts/linux/create-flatpak.sh
 
       - name: Upload linux packages
         uses: actions/upload-artifact@v4

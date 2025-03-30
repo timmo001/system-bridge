@@ -1,0 +1,31 @@
+app-id: dev.timmo.system-bridge
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: system-bridge
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=host
+  - --talk-name=org.freedesktop.Notifications
+modules:
+  - name: system-bridge
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 system-bridge-linux /app/bin/system-bridge
+      - mkdir -p /app/share/applications
+      - cp scripts/linux/system-bridge.desktop /app/share/applications/dev.timmo.system-bridge.desktop
+      - sed -i 's|Exec=system-bridge|Exec=system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
+      - sed -i 's|Icon=system-bridge|Icon=dev.timmo.system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
+      - mkdir -p /app/share/icons/hicolor/512x512/apps
+      - cp resources/system-bridge-circle.png /app/share/icons/hicolor/512x512/apps/dev.timmo.system-bridge.png
+    sources:
+      - type: file
+        path: system-bridge-linux
+      - type: file
+        path: scripts/linux/system-bridge.desktop
+      - type: file
+        path: resources/system-bridge-circle.png
