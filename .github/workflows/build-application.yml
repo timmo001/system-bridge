@@ -66,7 +66,7 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
-      - name: Build
+      - name: Build application
         env:
           GOOS: ${{ matrix.platform }}
           GOARCH: amd64
@@ -74,9 +74,17 @@ jobs:
         run: |
           go build -v -ldflags="-X 'main.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
+      - name: Build Windows Sensors
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          ./scripts/windows/build-sensors.ps1 -Version ${{ env.VERSION }}
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-${{ steps.get_version.outputs.version }}
-          path: system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}
+          path: |
+            system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}
+            lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe
           retention-days: 7

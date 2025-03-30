@@ -29,6 +29,13 @@ if (-not (Test-Path "dist")) {
     New-Item -ItemType Directory -Path "dist" | Out-Null
 }
 
+# Verify Windows sensors executable exists
+$sensorsExePath = "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe"
+if (-not (Test-Path $sensorsExePath)) {
+    Write-Error "Windows sensors executable not found at: $sensorsExePath"
+    exit 1
+}
+
 # Get the script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
