@@ -2,7 +2,7 @@ app-id: dev.timmo.system-bridge
 runtime: org.freedesktop.Platform
 runtime-version: "23.08"
 sdk: org.freedesktop.Sdk
-command: system-bridge backend
+command: system-bridge-wrapper
 finish-args:
   - --share=network
   - --share=ipc
@@ -16,6 +16,7 @@ modules:
     buildsystem: simple
     build-commands:
       - install -Dm755 system-bridge-linux /app/bin/system-bridge
+      - install -Dm755 system-bridge-wrapper.sh /app/bin/system-bridge-wrapper
       - mkdir -p /app/share/applications
       - cp system-bridge.desktop /app/share/applications/dev.timmo.system-bridge.desktop
       - sed -i 's|Exec=system-bridge|Exec=system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
@@ -25,6 +26,8 @@ modules:
     sources:
       - type: file
         path: ../../system-bridge-linux
+      - type: file
+        path: system-bridge-wrapper.sh
       - type: file
         path: system-bridge.desktop
       - type: file
