@@ -20,6 +20,8 @@ alwaysApply: false
 - Run specific job: `act -j job-name`
 - List all workflows: `act -l`
 
+Any commands which rely on docker should be ran with sudo.
+
 ## Environment
 
 - Create `.env` file for secrets
