@@ -4,42 +4,36 @@
 package notification
 
 import (
-	"os"
-	"path/filepath"
-
-	"gopkg.in/toast.v1"
+	"fmt"
+	"os/exec"
 )
 
 func send(data NotificationData) error {
-	// Create a shortcut in the Windows start menu to enable notifications
-	startMenuPath := os.Getenv("APPDATA") + "\\Microsoft\\Windows\\Start Menu\\Programs"
-	shortcutPath := filepath.Join(startMenuPath, "System Bridge.lnk")
+	// Create the PowerShell script that will show the notification
+	script := fmt.Sprintf(`
+		Add-Type -AssemblyName System.Runtime.WindowsRuntime
+		$null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+		$null = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime]
 
-	duration := toast.Short
-	if data.Duration > 1000 {
-		duration = toast.Long
-	}
+		$templateXml = @"
+<toast>
+    <visual>
+        <binding template="ToastGeneric">
+            <text>%s</text>
+            <text>%s</text>
+        </binding>
+    </visual>
+</toast>
+"@
 
-	notification := toast.Notification{
-		AppID:    "System Bridge",
-		Title:    data.Title,
-		Message:  data.Message,
-		Icon:     data.Icon,
-		Duration: duration,
-		Actions: []toast.Action{
-			{Type: "system", Label: "Dismiss", Arguments: "dismiss"},
-		},
-	}
+		$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+		$xml.LoadXml($templateXml)
+		$toast = New-Object Windows.UI.Notifications.ToastNotification($xml)
+		$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Microsoft.Windows.Shell.RunDialog")
+		$notifier.Show($toast)
+	`, data.Title, data.Message)
 
-	// Create shortcut if it doesn't exist
-	if _, err := os.Stat(shortcutPath); os.IsNotExist(err) {
-		// Create an empty shortcut file
-		f, err := os.Create(shortcutPath)
-		if err != nil {
-			return err
-		}
-		f.Close()
-	}
-
-	return notification.Push()
+	// Execute the PowerShell script
+	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", script)
+	return cmd.Run()
 }
