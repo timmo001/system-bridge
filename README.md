@@ -24,7 +24,7 @@ Install the following packages:
 sudo pacman -S inetutils wlr-randr
 ```
 
-#### Debian/Ubuntu (Unverified)
+#### Debian/Ubuntu (Not verified)
 
 Install the following packages:
 
@@ -32,7 +32,7 @@ Install the following packages:
 sudo apt install inetutils-tools wlr-randr
 ```
 
-#### Fedora (Unverified)
+#### Fedora (Not verified)
 
 Install the following packages:
 
