@@ -9,5 +9,4 @@ system-bridge.*
 
 # Act - Local GitHub Actions Testing
 .act
-.actrc
 .secrets
