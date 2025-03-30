@@ -1,6 +1,6 @@
 Name:           system-bridge
 Version:        %{_version}
-Release:        1%{?dist}
+Release:        %{_release}
 Summary:        System Bridge
 
 License:        Apache-2.0
