@@ -55,8 +55,9 @@ func NewDataStore() (*DataStore, error) {
 		types.ModuleSensors,
 		types.ModuleSystem,
 	} {
-		m := ds.GetModule(module)
-		if err := ds.loadModuleData(&m); err != nil {
+		// Get a pointer to the module and load data
+		modulePtr := ds.GetModule(module)
+		if err := ds.loadModuleData(modulePtr); err != nil {
 			return nil, fmt.Errorf("error loading data for module %s: %w", module, err)
 		}
 	}
@@ -125,41 +126,42 @@ func (d *DataStore) saveModuleData(m data_module.Module) error {
 	return nil
 }
 
-func (d *DataStore) GetModule(module types.ModuleName) data_module.Module {
-	var m data_module.Module
+func (d *DataStore) GetModule(module types.ModuleName) *data_module.Module {
+	var m *data_module.Module
 
 	switch module {
 	case types.ModuleBattery:
-		m = d.Battery
+		m = &d.Battery
 	case types.ModuleCPU:
-		m = d.CPU
+		m = &d.CPU
 	case types.ModuleDisks:
-		m = d.Disks
+		m = &d.Disks
 	case types.ModuleDisplays:
-		m = d.Displays
+		m = &d.Displays
 	case types.ModuleGPUs:
-		m = d.GPUs
+		m = &d.GPUs
 	case types.ModuleMedia:
-		m = d.Media
+		m = &d.Media
 	case types.ModuleMemory:
-		m = d.Memory
+		m = &d.Memory
 	case types.ModuleNetworks:
-		m = d.Networks
+		m = &d.Networks
 	case types.ModuleProcesses:
-		m = d.Processes
+		m = &d.Processes
 	case types.ModuleSensors:
-		m = d.Sensors
+		m = &d.Sensors
 	case types.ModuleSystem:
-		m = d.System
+		m = &d.System
 	default:
 		log.Error("Module not found", "module", module)
-		return data_module.Module{}
+		empty := data_module.Module{}
+		return &empty
 	}
 
 	// If the module data is nil, refresh the data
 	if m.Data == nil {
 		log.Info("Module data is nil, refreshing data", "module", module)
-		if err := d.loadModuleData(&m); err != nil {
+		if err := d.loadModuleData(m); err != nil {
 			log.Error("Error loading module data", "module", module, "error", err)
 		}
 	}
@@ -180,7 +182,7 @@ func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 
 	m.Data = data
 	m.Updated = time.Now().Format(time.RFC3339)
-	if err := d.saveModuleData(m); err != nil {
+	if err := d.saveModuleData(*m); err != nil {
 		return err
 	}
 
@@ -188,7 +190,7 @@ func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
 	if eb := bus.GetInstance(); eb != nil {
 		eb.Publish(bus.Event{
 			Type: bus.EventDataModuleUpdate,
-			Data: m,
+			Data: *m,
 		})
 	}
 
@@ -212,8 +214,8 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 		types.ModuleSensors,
 		types.ModuleSystem,
 	} {
-		m := d.GetModule(moduleName)
-		data[moduleName] = m.Data
+		modulePtr := d.GetModule(moduleName)
+		data[moduleName] = modulePtr.Data
 	}
 
 	return data

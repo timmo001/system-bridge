@@ -194,19 +194,19 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 	log.Info("WS: EventGetDataModule", "data", moduleRequest)
 
-	for _, module := range moduleRequest.Modules {
-		log.Info("WS: Broadcasting module update", "module", module)
+	for _, moduleName := range moduleRequest.Modules {
+		log.Info("WS: Broadcasting module update", "module", moduleName)
 
-		module := ws.dataStore.GetModule(module)
-		if module.Data == nil {
-			log.Warn("WS: No data found for module", "module", module)
+		modulePtr := ws.dataStore.GetModule(moduleName)
+		if modulePtr.Data == nil {
+			log.Warn("WS: No data found for module", "module", modulePtr)
 			log.Warn("Sending empty module update")
 		}
 
 		// Convert data_module.Module to types.Module
 		m := types.Module{
-			Module: module.Module,
-			Data:   module.Data,
+			Module: modulePtr.Module,
+			Data:   modulePtr.Data,
 		}
 
 		ws.BroadcastModuleUpdate(m, &moduleRequest.Connection)
