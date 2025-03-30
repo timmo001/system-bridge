@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=System Bridge
-Exec=system-bridge
+Exec=system-bridge backend
 Icon=system-bridge
 Type=Application
 Categories=Utility;
