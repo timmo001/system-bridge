@@ -175,6 +175,10 @@ jobs:
           touch system-bridge-linux
           chmod +x system-bridge-linux
 
+      - name: Replace pkgver in flatpak manifest with 0.0.0
+        run: |
+          sed -i "s/pkgver=${VERSION}/pkgver=0.0.0/g" .scripts/linux/dev.timmo.system-bridge.yml
+
       - name: Validate flatpak manifest
         run: |
           flatpak-builder --repo=test-repo --force-clean --disable-download app ".scripts/linux/dev.timmo.system-bridge.yml" || exit 1
