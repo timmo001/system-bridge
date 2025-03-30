@@ -1,4 +1,5 @@
 !include "MUI2.nsh"
+!include "EnvVarUpdate.nsh"
 
 Name "System Bridge"
 OutFile "dist\system-bridge-$VERSION-setup.exe"
@@ -46,6 +47,11 @@ Section "Install"
   SetOutPath "$INSTDIR\lib\sensors\windows\bin"
   File /r "lib\sensors\windows\bin\*.*"
 
+  # Add to PATH (append mode)
+  EnVar::SetHKCU
+  EnVar::Update "PATH" "$INSTDIR"
+  EnVar::Update "PATH" "$INSTDIR\lib\sensors\windows\bin"
+
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
@@ -54,6 +60,11 @@ Section "Install"
 SectionEnd
 
 Section "Uninstall"
+  # Remove specific entries from PATH
+  EnVar::SetHKCU
+  EnVar::Update "PATH" "$INSTDIR" "D"
+  EnVar::Update "PATH" "$INSTDIR\lib\sensors\windows\bin" "D"
+
   Delete "$INSTDIR\system-bridge.exe"
   Delete "$INSTDIR\lib\sensors\windows\bin\SystemBridgeWindowsSensors.exe"
   Delete "$INSTDIR\uninstall.exe"
