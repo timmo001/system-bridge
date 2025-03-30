@@ -46,11 +46,11 @@ sudo dnf install inetutils wlr-randr
 
 Download the latest release from the [releases page](https://github.com/timmo001/system-bridge/releases).
 
-### Linux
+### Linux installation
 
 Install the package for your distribution's package manager.
 
-### Windows
+### Windows installation
 
 Run the setup executable to install the application.
 
@@ -96,7 +96,7 @@ Run the setup executable to install the application.
    sudo systemctl status system-bridge
    ```
 
-#### Windows
+#### Windows (service installation)
 
 1. Open PowerShell as Administrator
 2. Navigate to the directory containing the installation scripts
