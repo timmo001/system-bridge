@@ -134,6 +134,7 @@ jobs:
           path: |
             ${{ github.workspace }}/system-bridge-linux
             ${{ !env.ACT && github.workspace }}/system-bridge-windows.exe
+            ${{ !env.ACT && github.workspace }}/lib/sensors/windows/bin
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
   linux-package:
