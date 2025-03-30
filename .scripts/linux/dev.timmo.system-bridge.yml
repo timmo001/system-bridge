@@ -24,7 +24,7 @@ modules:
       - cp ../../.resources/system-bridge-circle.png /app/share/icons/hicolor/512x512/apps/dev.timmo.system-bridge.png
     sources:
       - type: file
-        path: system-bridge-linux
+        path: ../../system-bridge-linux
       - type: file
         path: system-bridge.desktop
       - type: file
