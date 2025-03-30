@@ -78,7 +78,8 @@ jobs:
         if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          & $PWD/scripts/windows/build-sensors.ps1 -Version ${{ env.VERSION }}
+          $scriptPath = Join-Path $PWD "scripts/windows/build-sensors.ps1"
+          . $scriptPath -Version $env:VERSION
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
