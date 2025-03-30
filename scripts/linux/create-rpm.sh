@@ -17,7 +17,9 @@ fi
 
 # Create directory structure
 mkdir -p rpm-structure/usr/bin
+mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
 cp system-bridge-linux rpm-structure/usr/bin/system-bridge
+cp resources/system-bridge-circle.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Create the spec file directory
 mkdir -p rpmbuild/SPECS
