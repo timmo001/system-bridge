@@ -45,7 +45,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev
+          sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev
 
       - name: Get version
         id: get_version
@@ -67,7 +67,7 @@ jobs:
         env:
           GOOS: ${{ matrix.platform }}
           GOARCH: amd64
-          CGO_ENABLED: 0
+          CGO_ENABLED: 1
         run: |
           go build -v -ldflags="-X 'main.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
