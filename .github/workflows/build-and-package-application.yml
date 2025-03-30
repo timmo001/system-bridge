@@ -240,19 +240,31 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
             pacman -Syu --noconfirm
-            pacman -S --noconfirm base-devel
-            cd /build/.scripts/linux
-            ./create-arch.sh
+            pacman -S --noconfirm base-devel sudo
+
+            # Create a build user with sudo access
+            useradd -m builduser
+            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
+
+            # Copy files to a location the build user can access
+            mkdir -p /home/builduser/build
+            cp -r /build/* /home/builduser/build/
+            chown -R builduser:builduser /home/builduser/build
+
+            # Run the build as the non-root user
+            cd /home/builduser/build/.scripts/linux
+            su builduser -c './create-arch.sh'
+
+            # Copy results back to workspace
             mkdir -p /build/dist
-            # Ensure we find the package files regardless of where they're created
-            find /build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
+            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
             ls -la /build/dist/
           "
 
       - name: Create flatpak package
         run: |
           chmod +x .scripts/linux/create-flatpak.sh
-          ./.scripts/linux/create-flatpak.sh
+          sudo ./.scripts/linux/create-flatpak.sh
 
       - name: Upload linux packages
         uses: actions/upload-artifact@v4
