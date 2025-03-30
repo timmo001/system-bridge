@@ -41,6 +41,12 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
+      - name: Install Linux Dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev
+
       - name: Get version
         id: get_version
         shell: bash
