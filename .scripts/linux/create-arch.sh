@@ -1,5 +1,13 @@
 #!/bin/bash
 
+set -e
+
+# Check if binary exists
+if [ ! -f "system-bridge-linux" ]; then
+  echo "system-bridge-linux not found, please build the application first"
+  exit 1
+fi
+
 # Create build directory
 mkdir -p build/arch
 cd build/arch

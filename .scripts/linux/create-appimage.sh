@@ -2,6 +2,12 @@
 
 set -e
 
+# Check if binary exists
+if [ ! -f "system-bridge-linux" ]; then
+  echo "system-bridge-linux not found, please build the application first"
+  exit 1
+fi
+
 # Setup directories
 mkdir -p AppDir/usr/bin
 cp system-bridge-linux AppDir/usr/bin/system-bridge

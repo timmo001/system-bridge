@@ -2,11 +2,17 @@
 
 set -e
 
+# Check if binary exists
+if [ ! -f "system-bridge-linux" ]; then
+  echo "system-bridge-linux not found, please build the application first"
+  exit 1
+fi
+
 # Required tools check
-if ! command -v flatpak-builder &> /dev/null; then
-    echo "flatpak-builder not found, installing..."
-    sudo apt-get update
-    sudo apt-get install -y flatpak flatpak-builder
+if ! command -v flatpak-builder &>/dev/null; then
+  echo "flatpak-builder not found, installing..."
+  sudo apt-get update
+  sudo apt-get install -y flatpak flatpak-builder
 fi
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
