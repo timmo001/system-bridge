@@ -123,7 +123,7 @@ jobs:
           name: ${{ matrix.artifact_name }}-${{ steps.get_version.outputs.version }}
           path: |
             system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}
-            lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe
+            lib/sensors/windows/bin
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
   prepare-packaging:
