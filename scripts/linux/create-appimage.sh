@@ -16,9 +16,9 @@ chmod +x AppDir/AppRun
 # Copy the desktop file
 cp "$(dirname "$0")/system-bridge.desktop" AppDir/
 
-# Create a simple icon
-mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps/
-echo "P1 1 1 1" >AppDir/usr/share/icons/hicolor/256x256/apps/system-bridge.pbm
+# Copy icon
+mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps/
+cp resources/system-bridge-circle.png AppDir/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Build the AppImage
 VERSION=${VERSION:-0.0.0} ./appimagetool AppDir dist/system-bridge-${VERSION}-x86_64.AppImage

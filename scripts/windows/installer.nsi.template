@@ -4,6 +4,9 @@ Name "System Bridge"
 OutFile "dist\system-bridge-$VERSION-setup.exe"
 InstallDir "$PROGRAMFILES64\System Bridge"
 
+!define MUI_ICON "resources\icon.ico"
+!define MUI_UNICON "resources\icon.ico"
+
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -26,8 +29,8 @@ Section "Install"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
-  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge.exe"
-  CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge.exe" "" "$INSTDIR\system-bridge.exe" 0
+  CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 SectionEnd
 
 Section "Uninstall"

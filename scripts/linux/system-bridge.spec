@@ -14,3 +14,4 @@ cp %{_builddir}/usr/bin/system-bridge %{buildroot}/usr/bin/
 
 %files
 /usr/bin/system-bridge
+/usr/share/icons/hicolor/512x512/apps/system-bridge.png

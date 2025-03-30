@@ -4,3 +4,4 @@ Exec=system-bridge
 Icon=system-bridge
 Type=Application
 Categories=Utility;
+Icon=/usr/share/icons/hicolor/512x512/apps/system-bridge.png
