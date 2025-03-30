@@ -2,6 +2,13 @@
 
 A bridge for your systems.
 
+## Features
+
+- Supports Linux and Windows. MacOS is untested but can be compiled and tested by the community.
+- Access your system information via data modules and the API/WebSocket server.
+- Control your system via the API/WebSocket server.
+- Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
+
 ## System Requirements
 
 ### Linux
