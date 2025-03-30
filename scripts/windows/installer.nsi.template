@@ -21,7 +21,7 @@ Section "Install"
   # Create sensors directory structure and copy Windows sensors executable
   CreateDirectory "$INSTDIR\lib\sensors\windows\bin"
   SetOutPath "$INSTDIR\lib\sensors\windows\bin"
-  File /nonfatal /r "lib/sensors/windows/bin/*.*"
+  File /r "lib/sensors/windows/bin/*.*"
 
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
