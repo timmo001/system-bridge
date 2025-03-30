@@ -172,8 +172,8 @@ jobs:
 
       - name: Create dummy binary for validation
         run: |
-          touch .scripts/linux/system-bridge-linux
-          chmod +x .scripts/linux/system-bridge-linux
+          touch system-bridge-linux
+          chmod +x system-bridge-linux
 
       - name: Validate flatpak manifest
         run: |
