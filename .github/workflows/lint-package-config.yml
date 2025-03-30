@@ -1,7 +1,9 @@
-name: Lint-Configs
+name: Lint Package Configs
 
 on:
   push:
+    branches:
+      - master
     paths:
       - "scripts/**/*.spec"
       - "scripts/**/*.desktop"

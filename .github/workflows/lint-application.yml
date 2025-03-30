@@ -1,4 +1,4 @@
-name: Lint
+name: Lint Application
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  golangci:
+  go-lint:
     name: Go Lint
     runs-on: ubuntu-latest
     steps:

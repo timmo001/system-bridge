@@ -47,7 +47,8 @@ jobs:
   linux-package:
     name: Package for Linux
     runs-on: ubuntu-latest
-    needs: [download-artifacts]
+    needs:
+      - download-artifacts
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -110,7 +111,8 @@ jobs:
   windows-package:
     name: Package for Windows
     runs-on: windows-latest
-    needs: [download-artifacts]
+    needs:
+      - download-artifacts
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
