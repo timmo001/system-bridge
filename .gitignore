@@ -4,3 +4,8 @@ system-bridge.*
 
 # Legacy
 .legacy/
+
+# Act - Local GitHub Actions Testing
+.act
+.actrc
+.secrets
