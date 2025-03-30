@@ -1,4 +1,4 @@
-name: Lint Application
+name: Lint application
 
 on:
   push:

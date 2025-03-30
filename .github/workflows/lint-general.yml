@@ -1,4 +1,4 @@
-name: Lint General
+name: Lint general
 
 on:
   push:

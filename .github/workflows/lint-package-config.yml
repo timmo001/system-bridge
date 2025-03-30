@@ -1,4 +1,4 @@
-name: Lint Package Configs
+name: Lint package configs
 
 on:
   push:

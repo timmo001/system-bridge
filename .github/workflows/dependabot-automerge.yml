@@ -1,4 +1,4 @@
-name: "Dependabot - Auto-merge"
+name: Dependabot automerge
 
 # yamllint disable-line rule:truthy
 on:
