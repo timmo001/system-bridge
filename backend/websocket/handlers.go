@@ -31,7 +31,9 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 	defer func() {
 		ws.RemoveConnection(conn)
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			log.Error("Error closing connection:", err)
+		}
 	}()
 
 	for {
@@ -79,7 +81,9 @@ func (ws *WebsocketServer) HandleMessage(conn *websocket.Conn, message []byte) {
 }
 
 func (ws *WebsocketServer) HandleClose(conn *websocket.Conn) {
-	conn.Close()
+	if err := conn.Close(); err != nil {
+		log.Error("Error closing connection:", err)
+	}
 }
 
 func (ws *WebsocketServer) HandleError(conn *websocket.Conn, err error) {

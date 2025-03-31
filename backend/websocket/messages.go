@@ -12,7 +12,9 @@ func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.Messa
 	if err := conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)
 		// If there's an error, remove the connection
-		conn.Close()
+		if closeErr := conn.Close(); closeErr != nil {
+			log.Error("Error closing connection:", closeErr)
+		}
 		delete(ws.connections, conn)
 	}
 }

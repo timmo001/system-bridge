@@ -9,7 +9,7 @@ import (
 func (t *Module) UpdateGPUsModule() (types.GPUsData, error) {
 	log.Info("Getting GPUs data")
 
-	var gpusData types.GPUsData = make([]types.GPU, 0)
+	gpusData := make([]types.GPU, 0)
 
 	gpus, err := gpus.GetGPUs()
 	if err != nil {
