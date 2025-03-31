@@ -12,6 +12,13 @@ if ($LASTEXITCODE -ne 0 -or -not ($runtimes -match "Microsoft.NETCore.App $dotne
     Write-Warning ".NET $dotnetVersion Runtime not found. The installer will attempt to install it during setup."
 }
 
+# Verify Visual C++ Runtime
+Write-Host "Verifying Visual C++ Runtime..."
+$vcRuntimePath = "C:\Windows\System32\vcruntime140.dll"
+if (-not (Test-Path $vcRuntimePath)) {
+    Write-Warning "Visual C++ Runtime not found. The installer will attempt to install it during setup."
+}
+
 # List current directory contents for debugging
 Write-Host "Current directory contents:"
 Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }

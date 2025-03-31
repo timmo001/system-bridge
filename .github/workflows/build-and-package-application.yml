@@ -97,7 +97,13 @@ jobs:
           GOOS: ${{ matrix.platform }}
           GOARCH: amd64
           CGO_ENABLED: 1
+          CC: ${{ matrix.platform == 'windows' && 'gcc' || '' }}
         run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            # Install MinGW for Windows builds
+            sudo apt-get update
+            sudo apt-get install -y mingw-w64
+          fi
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
       - name: Cache windows sensor builds

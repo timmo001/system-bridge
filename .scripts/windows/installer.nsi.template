@@ -35,6 +35,19 @@ Section "Prerequisites"
         Abort "Installation failed: Could not install .NET Runtime."
       ${EndIf}
   ${EndIf}
+
+  # Check for Visual C++ Runtime
+  IfFileExists "$SYSDIR\vcruntime140.dll" vc_runtime_ok
+    MessageBox MB_YESNO|MB_ICONQUESTION "This application requires Visual C++ Runtime. Would you like to install it now?" IDYES install_vc IDNO abort_vc
+    abort_vc:
+      Abort "Installation cancelled: Visual C++ Runtime is required."
+    install_vc:
+      ExecWait 'winget install Microsoft.VCRedist.2015+.x64'
+      ${If} $0 != 0
+        MessageBox MB_OK|MB_ICONSTOP "Failed to install Visual C++ Runtime. Please install it manually from https://aka.ms/vs/17/release/vc_redist.x64.exe"
+        Abort "Installation failed: Could not install Visual C++ Runtime."
+      ${EndIf}
+  vc_runtime_ok:
 SectionEnd
 
 Section "Install"
