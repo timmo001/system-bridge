@@ -135,6 +135,9 @@ jobs:
         run: |
           & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
+          # List all files in lib/sensors/windows/bin
+          Get-ChildItem -Path lib/sensors/windows/bin -Recurse | ForEach-Object { Write-Host $_.FullName }
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
