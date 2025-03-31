@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
-  build:
-    name: Build application
+  build-and-package:
+    name: Build and package
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -70,7 +70,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev
+          sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev dpkg fakeroot rpm flatpak flatpak-builder libfuse2
 
       - name: Cache windows dependencies
         if: matrix.platform == 'windows'
@@ -86,8 +86,7 @@ jobs:
       - name: Install windows dependencies
         if: matrix.platform == 'windows'
         run: |
-          # Install MinGW for Windows builds
-          choco install mingw -y
+          choco install mingw nsis -y
 
       - name: Get version
         id: get_version
@@ -135,222 +134,61 @@ jobs:
         run: |
           & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
-          # List all files in $PWD/lib/sensors/windows/bin
-          Get-ChildItem -Path $PWD/lib/sensors/windows/bin -Recurse | ForEach-Object { Write-Host $_.FullName }
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}-${{ steps.get_version.outputs.version }}
-          path: |
-            system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}
-            lib/sensors/windows/bin
-          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
-
-  prepare-packaging:
-    name: Prepare artifacts for packaging
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get version
-        id: get_version
-        shell: bash
+      # Package for Linux
+      - name: Package for Linux
+        if: matrix.platform == 'linux'
         run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION="5.0.0-dev+${{ github.sha }}"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          mkdir -p dist
+          chmod +x system-bridge-linux
 
-      - name: Download linux build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: system-bridge-linux-${{ env.VERSION }}
-          path: ${{ github.workspace }}
-
-      - name: Download windows build artifact
-        if: ${{ !env.ACT }}
-        uses: actions/download-artifact@v4
-        with:
-          name: system-bridge-windows-${{ env.VERSION }}
-          path: ${{ github.workspace }}
-
-      - name: Upload artifacts for packaging
-        uses: actions/upload-artifact@v4
-        with:
-          name: system-bridge-binaries-${{ env.VERSION }}
-          path: |
-            ${{ github.workspace }}/system-bridge-linux
-            ${{ !env.ACT && github.workspace }}/system-bridge-windows.exe
-            ${{ !env.ACT && github.workspace }}/lib/sensors/windows/bin
-          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
-
-  linux-package:
-    name: Package for linux
-    runs-on: ubuntu-latest
-    needs: prepare-packaging
-    if: ${{ !vars.ACT || vars.ACT_PLATFORM == 'ubuntu-latest' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get version
-        id: get_version
-        shell: bash
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION="5.0.0-dev+${{ github.sha }}"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Download binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: system-bridge-binaries-${{ env.VERSION }}
-          path: ${{ github.workspace }}
-
-      - name: Setup executable
-        run: |
-          chmod +x ${{ github.workspace }}/system-bridge-linux
-          mkdir -p ${{ github.workspace }}/dist
-
-      - name: Install appimage tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libfuse2
+          # Download and setup AppImage tools
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x appimagetool
 
-      - name: Install packaging dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y dpkg fakeroot rpm flatpak flatpak-builder
+          # Create packages in parallel
+          chmod +x .scripts/linux/create-*.sh
+          ./.scripts/linux/create-appimage.sh &
+          ./.scripts/linux/create-deb.sh &
+          ./.scripts/linux/create-rpm.sh &
 
-      - name: Create appimage
-        run: |
-          chmod +x .scripts/linux/create-appimage.sh
-          ./.scripts/linux/create-appimage.sh
-
-      - name: Create deb package
-        run: |
-          chmod +x .scripts/linux/create-deb.sh
-          ./.scripts/linux/create-deb.sh
-
-      - name: Create rpm package
-        run: |
-          chmod +x .scripts/linux/create-rpm.sh
-          ./.scripts/linux/create-rpm.sh
-
-          # Copy to dist
-          cp -r dist/x86_64/* ${{ github.workspace }}/dist
-
-      - name: Create arch linux package
-        run: |
-          chmod +x .scripts/linux/create-arch.sh
-
+          # Create Arch package in Docker
           docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
             pacman -Syu --noconfirm
             pacman -S --noconfirm base-devel sudo
-
-            # Create a build user with sudo access
             useradd -m builduser
             echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
-
-            # Copy files to a location the build user can access
             mkdir -p /home/builduser/build
             cp -r /build/* /home/builduser/build/
             chown -R builduser:builduser /home/builduser/build
-
-            # Run the build as the non-root user
             cd /home/builduser/build/.scripts/linux
             su builduser -c './create-arch.sh'
-
-            # Copy results back to workspace
-            mkdir -p /dist
             find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
-            ls -la /build/dist/
-          "
+          " &
 
-      - name: Create flatpak package
+          # Create Flatpak package
+          sudo ./.scripts/linux/create-flatpak.sh &
+
+          # Wait for all background jobs
+          wait
+
+      # Package for Windows
+      - name: Package for Windows
+        if: matrix.platform == 'windows'
         run: |
-          chmod +x .scripts/linux/create-flatpak.sh
-          sudo ./.scripts/linux/create-flatpak.sh
-
-      - name: Upload linux packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: system-bridge-linux-packages-${{ env.VERSION }}
-          path: dist/*
-          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
-
-  windows-package:
-    name: Package for windows
-    runs-on: windows-latest
-    needs: prepare-packaging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get version
-        id: get_version
-        shell: bash
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION="5.0.0-dev+${{ github.sha }}"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Download binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: system-bridge-binaries-${{ env.VERSION }}
-          path: ${{ github.workspace }}
-
-      - name: Setup executable
-        continue-on-error: true
-        run: |
-          mkdir -p ${{ github.workspace }}/dist
-          rm ${{ github.workspace }}/system-bridge-linux
-          Move-Item ${{ github.workspace }}/system-bridge-windows.exe ${{ github.workspace }}/dist/system-bridge.exe
-
-      - name: Install nsis
-        run: |
-          choco install nsis -y
-          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Append
-
-      - name: Create windows installer
-        run: |
+          mkdir -p dist
+          Move-Item system-bridge-windows.exe dist/system-bridge.exe
           ./.scripts/windows/create-installer.ps1
 
-      - name: Upload windows installer
+      - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: system-bridge-windows-installer-${{ env.VERSION }}
-          path: dist/*.exe
+          name: system-bridge-${{ matrix.platform }}-packages-${{ env.VERSION }}
+          path: dist/*
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
   create-release:
     name: Create release
-    needs:
-      - linux-package
-      - windows-package
+    needs: build-and-package
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
@@ -362,10 +200,10 @@ jobs:
           name: system-bridge-linux-packages-${{ github.ref_name }}
           path: dist/linux
 
-      - name: Download windows installer
+      - name: Download windows packages
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-windows-installer-${{ github.ref_name }}
+          name: system-bridge-windows-packages-${{ github.ref_name }}
           path: dist/windows
 
       - name: Create release
