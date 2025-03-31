@@ -99,8 +99,11 @@ jobs:
 
       - name: Create dummy files for validation
         run: |
+          # Create dist directory for NSIS output
+          New-Item -ItemType Directory -Path "dist" -Force
+
           # Create an empty file to serve as the dummy executable
-          New-Item -ItemType File -Path "system-bridge.exe" -Force
+          New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
 
           # Create directories for the Windows sensors executable
           New-Item -ItemType Directory -Path "lib/sensors/windows/bin" -Force
