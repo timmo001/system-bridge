@@ -189,7 +189,7 @@ jobs:
   create-release:
     name: Create release
     needs: build-and-package
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -212,6 +212,5 @@ jobs:
           files: |
             dist/linux/*
             dist/windows/*
-          draft: true
-          prerelease: false
+          draft: ${{ github.ref_type == 'tag' && 'false' || 'true' }}
           generate_release_notes: true
