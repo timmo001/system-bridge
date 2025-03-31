@@ -320,8 +320,11 @@ jobs:
           name: system-bridge-binaries-${{ env.VERSION }}
           path: ${{ github.workspace }}
 
-      - name: Create executable directory
-        run: mkdir -p ${{ github.workspace }}/dist
+      - name: Setup executable
+        continue-on-error: true
+        run: |
+          mkdir -p ${{ github.workspace }}/dist
+          rm ${{ github.workspace }}/system-bridge-linux
 
       - name: Install nsis
         run: |

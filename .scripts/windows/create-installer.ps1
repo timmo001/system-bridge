@@ -23,20 +23,11 @@ if (-not (Test-Path $vcRuntimePath)) {
 Write-Host "Current directory contents:"
 Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }
 
-# Find the binary (could be named system-bridge or system-bridge.exe)
-$binary = Get-ChildItem -Path $PWD -Filter "system-bridge*" -File | Select-Object -First 1
+# Find the binary
+$binary = Get-ChildItem -Path $PWD -Filter "system-bridge-windows*" -File | Select-Object -First 1
 if (-not $binary) {
     Write-Error "Could not find system-bridge binary"
     exit 1
-}
-
-# Ensure it has .exe extension
-if ($binary.Extension -ne ".exe") {
-    Write-Host "Renaming $($binary.Name) to system-bridge.exe"
-    Move-Item -Path $binary.FullName -Destination "system-bridge.exe" -Force
-} elseif ($binary.Name -ne "system-bridge.exe") {
-    Write-Host "Renaming $($binary.Name) to system-bridge.exe"
-    Move-Item -Path $binary.FullName -Destination "system-bridge.exe" -Force
 }
 
 # Create directory for the installer
