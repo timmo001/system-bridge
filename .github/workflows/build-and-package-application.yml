@@ -232,12 +232,13 @@ jobs:
           chmod +x .scripts/linux/create-rpm.sh
           ./.scripts/linux/create-rpm.sh
 
-      - name: Prepare arch linux script
-        run: |
-          chmod +x .scripts/linux/create-arch.sh
+          # Copy to dist
+          cp -r dist/x86_64/* ${{ github.workspace }}/dist
 
       - name: Create arch linux package
         run: |
+          chmod +x .scripts/linux/create-arch.sh
+
           docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
             pacman -Syu --noconfirm
             pacman -S --noconfirm base-devel sudo
@@ -256,10 +257,14 @@ jobs:
             su builduser -c './create-arch.sh'
 
             # Copy results back to workspace
-            mkdir -p /build/dist
+            mkdir -p /dist
             find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
             ls -la /build/dist/
           "
+
+          # Copy results back to workspace
+          find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} ${{ github.workspace }}/dist/ \;
+          ls -la ${{ github.workspace }}/dist/
 
       - name: Create flatpak package
         run: |
