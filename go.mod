@@ -1,6 +1,7 @@
 module github.com/timmo001/system-bridge
 
 go 1.24.1
+
 require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/distatus/battery v0.11.0
