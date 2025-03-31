@@ -9,7 +9,7 @@ import (
 func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
 	log.Info("Getting processes data")
 
-	var processesData types.ProcessesData = make([]types.Process, 0)
+	processesData := make([]types.Process, 0)
 
 	// Get process list
 	processes, err := process.Processes()

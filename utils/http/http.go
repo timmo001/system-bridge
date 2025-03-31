@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 // CacheEntry represents a cached HTTP response
@@ -82,7 +84,11 @@ func (c *Client) Get(url string) ([]byte, error) {
 		}
 		return nil, fmt.Errorf("failed to fetch URL %s: %v", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
