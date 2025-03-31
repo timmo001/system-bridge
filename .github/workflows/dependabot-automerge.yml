@@ -1,13 +1,17 @@
 ---
-name: "Dependabot - Auto-merge"
+name: Dependabot automerge
 
 # yamllint disable-line rule:truthy
 on:
-  pull_request_target:
+  pull_request_target: {}
 
 permissions:
   pull-requests: write
   contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   dependabot-automerge:

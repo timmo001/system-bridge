@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# GitHub Workflows
+
+## Local Testing
+
+- Use `act` for testing GitHub workflows locally
+
+## Usage
+
+- Run all workflows: `act`
+- Run specific workflow: `act -W .github/workflows/workflow-name.yml`
+- Run specific job: `act -j job-name`
+- List all workflows: `act -l`
+
+Any commands which rely on docker should be ran with sudo.
+
+## Environment
+
+- Create `.env` file for secrets
+- Use `-s GITHUB_TOKEN=your_token` for actions requiring GitHub token
+
+## Best Practices
+
+- Test workflows locally before pushing to remote
+- Keep workflow files modular and focused
+- Use reusable actions when possible
+- Document required secrets and environment variables
+- Test both success and failure scenarios

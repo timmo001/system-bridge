@@ -1,0 +1,217 @@
+name: Build and package application
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && format('tag-{0}', github.ref_name) || github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  build-and-package:
+    name: Build and package
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            artifact_name: system-bridge-linux
+            binary_ext: ""
+          - os: windows-latest
+            platform: windows
+            artifact_name: system-bridge-windows
+            binary_ext: ".exe"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up go
+        uses: actions/setup-go@v5
+        with:
+          cache: true
+          go-version-file: "go.mod"
+
+      - name: Cache go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.mod', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
+
+      - name: Cache linux dependencies
+        if: matrix.platform == 'linux'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-cache-
+
+      - name: Install linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev dpkg fakeroot rpm flatpak flatpak-builder libfuse2
+
+      - name: Cache windows dependencies
+        if: matrix.platform == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\ProgramData\chocolatey\bin
+            C:\ProgramData\chocolatey\lib
+          key: ${{ runner.os }}-choco-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-choco-cache-
+
+      - name: Install windows dependencies
+        if: matrix.platform == 'windows'
+        run: |
+          choco install mingw nsis -y
+
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="5.0.0-dev+${{ github.sha }}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build application
+        env:
+          GOOS: ${{ matrix.platform }}
+          GOARCH: amd64
+          CGO_ENABLED: 1
+          CC: ${{ matrix.platform == 'windows' && 'gcc' || '' }}
+        run: |
+          go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
+
+      - name: Cache windows sensor builds
+        if: matrix.platform == 'windows'
+        id: cache-sensors
+        uses: actions/cache@v4
+        with:
+          path: lib/sensors/windows/bin
+          key: ${{ runner.os }}-sensor-builds-${{ hashFiles('.scripts/windows/build-sensors.ps1', 'lib/sensors/windows/**/*.cs', 'lib/sensors/windows/**/*.csproj') }}-${{ env.VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-sensor-builds-${{ hashFiles('.scripts/windows/build-sensors.ps1', 'lib/sensors/windows/**/*.cs', 'lib/sensors/windows/**/*.csproj') }}-
+            ${{ runner.os }}-sensor-builds-
+
+      - name: Build windows sensors
+        if: matrix.platform == 'windows' && steps.cache-sensors.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
+
+      # Package for Linux
+      - name: Package for Linux
+        if: matrix.platform == 'linux'
+        run: |
+          mkdir -p dist
+          chmod +x system-bridge-linux
+
+          # Download and setup AppImage tools
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+
+          # Create packages in parallel
+          chmod +x .scripts/linux/create-*.sh
+          ./.scripts/linux/create-appimage.sh &
+          ./.scripts/linux/create-deb.sh &
+          ./.scripts/linux/create-rpm.sh &
+
+          # Create Arch package in Docker
+          docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
+            pacman -Syu --noconfirm
+            pacman -S --noconfirm base-devel sudo
+            useradd -m builduser
+            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
+            mkdir -p /home/builduser/build
+            cp -r /build/* /home/builduser/build/
+            chown -R builduser:builduser /home/builduser/build
+            cd /home/builduser/build/.scripts/linux
+            su builduser -c './create-arch.sh'
+            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
+          " &
+
+          # Create Flatpak package
+          sudo ./.scripts/linux/create-flatpak.sh &
+
+          # Wait for all background jobs
+          wait
+
+      # Package for Windows
+      - name: Package for Windows
+        if: matrix.platform == 'windows'
+        run: |
+          mkdir -p dist
+          Move-Item system-bridge-windows.exe dist/system-bridge.exe
+          ./.scripts/windows/create-installer.ps1
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-${{ matrix.platform }}-packages-${{ env.VERSION }}
+          path: dist/*
+          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
+
+  create-release:
+    name: Create release
+    needs: build-and-package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download linux packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-${{ github.ref_name }}
+          path: dist/linux
+
+      - name: Download windows packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-windows-packages-${{ github.ref_name }}
+          path: dist/windows
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/linux/*
+            dist/windows/*
+          draft: true
+          prerelease: false
+          generate_release_notes: true

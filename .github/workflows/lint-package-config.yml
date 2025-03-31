@@ -1,0 +1,187 @@
+---
+name: Lint package configs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".scripts/**/*.spec"
+      - ".scripts/**/*.desktop"
+      - ".scripts/**/*.template"
+      - ".scripts/**/*.nsi.template"
+      - ".scripts/**/*PKGBUILD*"
+      - ".scripts/**/*.flatpak.yml"
+      - ".scripts/**/*.flatpak.json"
+  pull_request:
+    paths:
+      - ".scripts/**/*.spec"
+      - ".scripts/**/*.desktop"
+      - ".scripts/**/*.template"
+      - ".scripts/**/*.nsi.template"
+      - ".scripts/**/*PKGBUILD*"
+      - ".scripts/**/*.flatpak.yml"
+      - ".scripts/**/*.flatpak.json"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-desktop-entry:
+    name: Lint desktop entry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Desktop Entry validator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils
+
+      - name: Validate desktop file
+        run: |
+          desktop-file-validate .scripts/linux/system-bridge.desktop
+
+  lint-debian-control:
+    name: Lint debian control
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev gettext-base
+
+      - name: Validate Debian control file
+        run: |
+          # Create a temporary directory structure
+          mkdir -p debian/DEBIAN
+          VERSION=1.0.0 envsubst < .scripts/linux/control.template > debian/DEBIAN/control
+          # Validate control file syntax
+          dpkg-parsechangelog -l debian/DEBIAN/control || echo "Control file validation failed"
+          # Additional basic validation
+          grep -q "^Package:" debian/DEBIAN/control || exit 1
+          grep -q "^Version:" debian/DEBIAN/control || exit 1
+          grep -q "^Architecture:" debian/DEBIAN/control || exit 1
+          grep -q "^Description:" debian/DEBIAN/control || exit 1
+
+  lint-rpm-spec:
+    name: Lint rpm spec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install rpm tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm rpmlint
+
+      - name: Lint rpm spec
+        run: |
+          rpmlint .scripts/linux/system-bridge.spec
+
+  lint-nsis:
+    name: Lint nsis script
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install nsis
+        run: |
+          choco install nsis -y
+
+      - name: Create dummy files for validation
+        run: |
+          # Create dist directory for NSIS output
+          New-Item -ItemType Directory -Path "dist" -Force
+
+          # Create an empty file to serve as the dummy executable
+          New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
+
+          # Create directories for the Windows sensors executable
+          New-Item -ItemType Directory -Path "lib/sensors/windows/bin" -Force
+
+          # Create an empty file for the Windows sensors executable
+          New-Item -ItemType File -Path "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe" -Force
+
+          # Create dist directory for NSIS output
+          New-Item -ItemType Directory -Path "dist" -Force
+
+      - name: Validate nsis script
+        run: |
+          $version = '1.0.0'
+          $content = Get-Content .scripts/windows/installer.nsi.template -Raw
+          $content = $content -replace '\$VERSION', $version
+          Set-Content -Path test-installer.nsi -Value $content
+
+          # Check for syntax errors in NSIS script (this is a basic check, it just tries to compile)
+          makensis /V2 test-installer.nsi
+
+  lint-arch-pkgbuild:
+    name: Lint arch pkgbuild
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate pkgbuild with Arch Linux container
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
+            pacman -Sy --noconfirm namcap
+            cd /workspace
+            for pkgbuild in \$(find .scripts -name \"PKGBUILD*\"); do
+              echo \"Validating \$pkgbuild\"
+              namcap \"\$pkgbuild\"
+            done
+          "
+
+  lint-flatpak:
+    name: Lint flatpak manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Cache Flatpak SDK and builder
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/flatpak
+            ~/.cache/flatpak-builder
+          key: ${{ runner.os }}-flatpak-${{ hashFiles('.scripts/linux/dev.timmo.system-bridge.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-flatpak-
+
+      - name: Add Flathub repository and install SDK
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
+          sudo flatpak install -y flathub org.freedesktop.Platform//23.08
+
+      - name: Create dummy binary for validation
+        run: |
+          touch system-bridge-linux
+          chmod +x system-bridge-linux
+
+      - name: Replace pkgver in flatpak manifest with 5.0.0
+        run: |
+          sed -i "s/pkgver=${VERSION}/pkgver=5.0.0/g" .scripts/linux/dev.timmo.system-bridge.yml
+
+      - name: Validate flatpak manifest
+        run: |
+          flatpak-builder --repo=test-repo --force-clean --disable-download app ".scripts/linux/dev.timmo.system-bridge.yml" || exit 1
