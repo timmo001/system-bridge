@@ -52,7 +52,7 @@ SectionEnd
 
 Section "Install"
   SetOutPath "$INSTDIR"
-  File "system-bridge.exe"
+  File "dist\system-bridge.exe"
 
   # Create sensors directory structure and copy all sensor files
   CreateDirectory "$INSTDIR\lib\sensors\windows\bin"

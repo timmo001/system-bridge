@@ -23,16 +23,10 @@ if (-not (Test-Path $vcRuntimePath)) {
 Write-Host "Current directory contents:"
 Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }
 
-# Find the binary
-$binary = Get-ChildItem -Path $PWD -Filter "system-bridge-windows*" -File | Select-Object -First 1
-if (-not $binary) {
-    Write-Error "Could not find system-bridge binary"
+# Verify system-bridge.exe exists before building installer
+if (-not (Test-Path "dist\system-bridge.exe")) {
+    Write-Error "system-bridge.exe not found in dist directory"
     exit 1
-}
-
-# Create directory for the installer
-if (-not (Test-Path "dist")) {
-    New-Item -ItemType Directory -Path "dist" | Out-Null
 }
 
 # Verify Windows sensors executable exists

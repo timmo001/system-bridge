@@ -325,6 +325,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/dist
           rm ${{ github.workspace }}/system-bridge-linux
+          Move-Item ${{ github.workspace }}/system-bridge-windows.exe ${{ github.workspace }}/dist/system-bridge.exe
 
       - name: Install nsis
         run: |
