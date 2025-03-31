@@ -11,6 +11,8 @@ on:
       - ".scripts/**/*.template"
       - ".scripts/**/*.nsi.template"
       - ".scripts/**/*PKGBUILD*"
+      - ".scripts/**/*.flatpak.yml"
+      - ".scripts/**/*.flatpak.json"
   pull_request:
     paths:
       - ".scripts/**/*.spec"
@@ -18,6 +20,8 @@ on:
       - ".scripts/**/*.template"
       - ".scripts/**/*.nsi.template"
       - ".scripts/**/*PKGBUILD*"
+      - ".scripts/**/*.flatpak.yml"
+      - ".scripts/**/*.flatpak.json"
   workflow_dispatch: {}
 
 concurrency:
@@ -137,3 +141,44 @@ jobs:
               namcap \"\$pkgbuild\"
             done
           "
+
+  lint-flatpak:
+    name: Lint flatpak manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Cache Flatpak SDK and builder
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/lib/flatpak
+            ~/.cache/flatpak-builder
+          key: ${{ runner.os }}-flatpak-${{ hashFiles('.scripts/linux/dev.timmo.system-bridge.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-flatpak-
+
+      - name: Add Flathub repository and install SDK
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
+          sudo flatpak install -y flathub org.freedesktop.Platform//23.08
+
+      - name: Create dummy binary for validation
+        run: |
+          touch system-bridge-linux
+          chmod +x system-bridge-linux
+
+      - name: Replace pkgver in flatpak manifest with 5.0.0
+        run: |
+          sed -i "s/pkgver=${VERSION}/pkgver=5.0.0/g" .scripts/linux/dev.timmo.system-bridge.yml
+
+      - name: Validate flatpak manifest
+        run: |
+          flatpak-builder --repo=test-repo --force-clean --disable-download app ".scripts/linux/dev.timmo.system-bridge.yml" || exit 1
