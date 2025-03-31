@@ -72,6 +72,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev
 
+      - name: Install windows dependencies
+        if: matrix.platform == 'windows'
+        run: |
+          # Install MinGW for Windows builds
+          choco install mingw -y
+
       - name: Get version
         id: get_version
         shell: bash
@@ -99,11 +105,6 @@ jobs:
           CGO_ENABLED: 1
           CC: ${{ matrix.platform == 'windows' && 'gcc' || '' }}
         run: |
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            # Install MinGW for Windows builds
-            sudo apt-get update
-            sudo apt-get install -y mingw-w64
-          fi
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
       - name: Cache windows sensor builds
