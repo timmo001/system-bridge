@@ -60,32 +60,6 @@ if (-not (Test-Path "system-bridge.exe")) {
     exit 1
 }
 
-# Download and set up EnvVarUpdate.nsh
-Write-Host "Setting up EnvVarUpdate.nsh..."
-$envVarUpdateUrl = "https://nsis.sourceforge.io/mediawiki/images/7/7f/EnvVarUpdate.7z"
-$envVarUpdatePath = "EnvVarUpdate.nsh"
-if (-not (Test-Path $envVarUpdatePath)) {
-    # Download and extract the 7z file
-    $tempFile = "EnvVarUpdate.7z"
-    Invoke-WebRequest -Uri $envVarUpdateUrl -OutFile $tempFile
-    if (Test-Path $tempFile) {
-        # Extract using 7z from the NSIS installation
-        $nsisPath = (Get-Command makensis).Source
-        $nsis7zPath = Join-Path (Split-Path $nsisPath) "7z.exe"
-        if (Test-Path $nsis7zPath) {
-            & $nsis7zPath x $tempFile
-            Remove-Item $tempFile
-        } else {
-            Write-Error "Could not find 7z.exe in NSIS installation"
-            exit 1
-        }
-    }
-    if (-not (Test-Path $envVarUpdatePath)) {
-        Write-Error "Failed to download and extract EnvVarUpdate.nsh"
-        exit 1
-    }
-}
-
 Write-Host "Building installer with NSIS..."
 # Build the installer
 & makensis installer.nsi
