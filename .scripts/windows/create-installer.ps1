@@ -46,12 +46,6 @@ $installerScript = $templateContent -replace '\$VERSION', $version
 # Write the processed script to a file
 Set-Content -Path "installer.nsi" -Value $installerScript
 
-# Verify system-bridge.exe exists before building installer
-if (-not (Test-Path "system-bridge.exe")) {
-    Write-Error "system-bridge.exe not found before building installer"
-    exit 1
-}
-
 Write-Host "Building installer with NSIS..."
 # Build the installer
 & makensis installer.nsi
