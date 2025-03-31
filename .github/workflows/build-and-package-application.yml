@@ -215,7 +215,7 @@ jobs:
       - name: Install packaging dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg fakeroot rpm flatpak flatpak-builder
+          sudo apt-get install -y dpkg fakeroot rpm
 
       - name: Create appimage
         run: |
@@ -260,11 +260,6 @@ jobs:
             find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
             ls -la /build/dist/
           "
-
-      - name: Create flatpak package
-        run: |
-          chmod +x .scripts/linux/create-flatpak.sh
-          sudo ./.scripts/linux/create-flatpak.sh
 
       - name: Upload linux packages
         uses: actions/upload-artifact@v4
