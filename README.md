@@ -78,6 +78,11 @@ Run the setup executable to install the application.
 
 #### Linux (systemd)
 
+> [!WARNING]
+> Not supported with AppImage or Flatpak.
+> You will need to configure the service
+> manually to the correct path.
+
 1. Copy the systemd service file to the systemd directory:
 
    ```bash
