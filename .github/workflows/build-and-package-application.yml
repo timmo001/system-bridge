@@ -72,6 +72,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev
 
+      - name: Cache windows dependencies
+        if: matrix.platform == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\ProgramData\chocolatey\bin
+            C:\ProgramData\chocolatey\lib
+          key: ${{ runner.os }}-choco-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-choco-cache-
+
       - name: Install windows dependencies
         if: matrix.platform == 'windows'
         run: |
