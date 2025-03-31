@@ -262,10 +262,6 @@ jobs:
             ls -la /build/dist/
           "
 
-          # Copy results back to workspace
-          find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} ${{ github.workspace }}/dist/ \;
-          ls -la ${{ github.workspace }}/dist/
-
       - name: Create flatpak package
         run: |
           chmod +x .scripts/linux/create-flatpak.sh
