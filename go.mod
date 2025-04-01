@@ -1,7 +1,6 @@
 module github.com/timmo001/system-bridge
 
 go 1.24.1
-
 require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/distatus/battery v0.11.0
@@ -12,7 +11,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/viper v1.20.1
-	github.com/urfave/cli/v3 v3.1.0
+	github.com/urfave/cli/v3 v3.1.1
 	golang.org/x/text v0.23.0
 	golang.org/x/time v0.11.0
 )
