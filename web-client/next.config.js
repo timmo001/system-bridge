@@ -5,6 +5,14 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  experimental: {
+    reactCompiler: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  reactStrictMode: true,
+};
 
 export default config;
