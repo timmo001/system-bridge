@@ -1,6 +1,6 @@
-import { ButtonLink } from "~/components/ui/button-link";
+"use client";
 
-export default async function DataPage() {
+export default function DataPage() {
   return (
     <>
       <h1 className="text-2xl font-bold">Data</h1>
