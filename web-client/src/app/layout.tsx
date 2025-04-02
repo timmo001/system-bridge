@@ -42,7 +42,7 @@ export default function RootLayout({
               <ThemeToggle />
             </div>
           </header>
-          <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-4 p-4">
+          <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-8 p-8">
             {children}
           </main>
         </ThemeProvider>
