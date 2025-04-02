@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   description: "System Bridge Client",
   icons: [{ rel: "icon", url: "/icon" }],
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
 };
 
