@@ -34,7 +34,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <header className="bg-background fixed top-0 flex w-full items-center justify-center border-b p-4">
+          <header className="bg-background fixed top-0 flex w-full items-center justify-center border-b p-2">
             <div className="container flex justify-between">
               <Link href="/">
                 <h1 className="text-2xl font-bold">System Bridge</h1>
@@ -42,7 +42,7 @@ export default async function RootLayout({
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex min-h-screen flex-col items-center justify-center">
+          <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-4 p-4">
             {children}
           </main>
         </ThemeProvider>

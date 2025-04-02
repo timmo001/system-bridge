@@ -1,3 +1,7 @@
 export default async function HomePage() {
-  return <></>;
+  return (
+    <>
+      <h1>Home</h1>
+    </>
+  );
 }
