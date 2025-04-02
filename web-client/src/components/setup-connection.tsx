@@ -1,6 +1,8 @@
 "use client";
+import { useRouter, usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -27,6 +29,9 @@ const ConnectionSchema = z.object({
 type Connection = z.infer<typeof ConnectionSchema>;
 
 export function SetupConnection() {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const { host, port, ssl, token, setHost, setPort, setSsl, setToken } =
     useSystemBridgeConnectionStore();
 
@@ -45,6 +50,19 @@ export function SetupConnection() {
     setPort(data.port);
     setSsl(data.ssl);
     setToken(data.token);
+
+    const ws = new WebSocket(
+      `${data.ssl ? "wss" : "ws"}://${data.host}:${data.port}/api/websocket`,
+    );
+
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+      toast.success("Connected to System Bridge!");
+
+      if (pathname === "/connection") {
+        router.push("/");
+      }
+    };
   }
 
   return (

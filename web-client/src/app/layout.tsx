@@ -4,11 +4,15 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import { Geist } from "next/font/google";
 
+import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
 import { ThemeToggle } from "~/components/theme-toggle";
 
 export const metadata: Metadata = {
-  title: "System Bridge Client",
+  title: {
+    default: "System Bridge Client",
+    template: "%s | System Bridge Client",
+  },
   description: "System Bridge Client",
   icons: [{ rel: "icon", url: "/icon" }],
   robots: {
@@ -45,6 +49,7 @@ export default function RootLayout({
           <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-8 p-8">
             {children}
           </main>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
