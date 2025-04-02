@@ -20,7 +20,7 @@ export default function ClientLayout({
 
   return (
     <>
-      {!isConnected ? (
+      {!isHydrated ? (
         <div>Loading...</div>
       ) : !host || !port || !token ? (
         <SetupConnection />
