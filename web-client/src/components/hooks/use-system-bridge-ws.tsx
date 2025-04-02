@@ -21,10 +21,12 @@ export function useSystemBridgeWS() {
     );
 
     ws.onopen = () => {
+      console.log("WebSocket connected");
       setIsConnected(true);
     };
 
     ws.onclose = () => {
+      console.log("WebSocket disconnected");
       setIsConnected(false);
     };
 
@@ -42,6 +44,7 @@ export function useSystemBridgeWS() {
 
   const sendMessage = (message: WebSocketMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
+      console.log("Sending message:", message);
       wsRef.current.send(JSON.stringify(message));
     }
   };
