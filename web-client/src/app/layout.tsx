@@ -1,0 +1,52 @@
+import "~/styles/globals.css";
+
+import { type Metadata } from "next";
+import Link from "next/link";
+import { Geist } from "next/font/google";
+
+import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeToggle } from "~/components/theme-toggle";
+
+export const metadata: Metadata = {
+  title: "System Bridge Client",
+  description: "System Bridge Client",
+  icons: [{ rel: "icon", url: "/icon" }],
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+});
+
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={`${geist.variable}`}>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <header className="bg-background fixed top-0 flex w-full items-center justify-center border-b p-4">
+            <div className="container flex justify-between">
+              <Link href="/">
+                <h1 className="text-2xl font-bold">System Bridge</h1>
+              </Link>
+              <ThemeToggle />
+            </div>
+          </header>
+          <main className="flex min-h-screen flex-col items-center justify-center">
+            {children}
+          </main>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
