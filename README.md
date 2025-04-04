@@ -1,10 +1,10 @@
 # System Bridge
 
-A bridge for your systems.
-
 > [!NOTE]
 > This project is currently going through a [rebuild in go](https://github.com/timmo001/system-bridge/issues/3392).
 > If you would like to try the new version, you should use the [development instructions](https://github.com/timmo001/system-bridge?tab=readme-ov-file#development-setup).
+
+A bridge for your systems.
 
 > [!NOTE]
 > Contributions welcome!
