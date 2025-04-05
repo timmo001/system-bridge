@@ -1,6 +1,5 @@
 "use client";
 
-import { SystemBridgeWSProvider } from "~/components/providers/system-bridge-ws-provider";
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 
 export default function WebSocketClientLayout({
@@ -8,9 +7,5 @@ export default function WebSocketClientLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const { isConnected } = useSystemBridgeWS();
 
-  return (
-    <SystemBridgeWSProvider>
-      {!isConnected ? <div>Connecting...</div> : <>{children}</>}
-    </SystemBridgeWSProvider>
-  );
+  return <>{!isConnected ? <div>Connecting...</div> : <>{children}</>}</>;
 }

@@ -30,6 +30,8 @@ export function SystemBridgeWSProvider({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [isRequestingSettings, setIsRequestingSettings] =
+    useState<boolean>(false);
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -45,6 +47,15 @@ export function SystemBridgeWSProvider({
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+
+      if (!settings && !isRequestingSettings) {
+        setIsRequestingSettings(true);
+        sendRequest({
+          id: generateUUID(),
+          event: "GET_SETTINGS",
+          token: token,
+        });
+      }
     };
 
     wsRef.current.onclose = () => {
@@ -64,7 +75,7 @@ export function SystemBridgeWSProvider({
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [host, port, ssl, token]);
+  }, [host, isRequestingSettings, port, settings, ssl, token]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -88,7 +99,10 @@ export function SystemBridgeWSProvider({
     const message = parsedMessage.data;
     switch (message.type) {
       case "SETTINGS_RESULT":
-        setSettings(message.data as Settings);
+        const newSettings = message.data as Settings;
+        console.log("Settings received:", newSettings);
+        setSettings(newSettings);
+        setIsRequestingSettings(false);
         break;
       default:
         console.warn("Unknown message type:", message.type);
@@ -115,18 +129,6 @@ export function SystemBridgeWSProvider({
       connect();
     }, RETRY_DELAY);
   }, [connect, isConnected, retryCount, host, port, token]);
-
-  useEffect(() => {
-    if (!isConnected) return;
-    if (!token) return;
-    if (settings) return;
-
-    sendRequest({
-      id: generateUUID(),
-      event: "GET_SETTINGS",
-      token: token,
-    });
-  }, [isConnected, settings, sendRequest, token]);
 
   return (
     <SystemBridgeWSContext.Provider
