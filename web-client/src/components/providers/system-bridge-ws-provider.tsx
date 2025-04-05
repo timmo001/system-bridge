@@ -19,7 +19,7 @@ export const SystemBridgeWSContext = createContext<
 >(undefined);
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 2000; // 2 seconds
 
 export function SystemBridgeWSProvider({
   children,
@@ -31,8 +31,8 @@ export function SystemBridgeWSProvider({
   const [settings, setSettings] = useState<Settings | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
 
-  const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
     if (!host || !port || !token) return;
@@ -45,14 +45,6 @@ export function SystemBridgeWSProvider({
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
-
-      if (!settings) {
-        sendRequest({
-          id: generateUUID(),
-          event: "GET_SETTINGS",
-          token: token,
-        });
-      }
     };
 
     wsRef.current.onclose = () => {
@@ -69,10 +61,10 @@ export function SystemBridgeWSProvider({
 
     return () => {
       wsRef.current?.close();
+      wsRef.current = null;
+      setIsConnected(false);
     };
-  }, [host, port, settings, ssl, token]);
-
-  useEffect(() => connect(), [connect]);
+  }, [host, port, ssl, token]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -106,22 +98,35 @@ export function SystemBridgeWSProvider({
 
   useEffect(() => {
     if (!host || !port || !token) return;
+    if (isConnected) return;
 
-    if (!isConnected) {
-      console.log("WebSocket is not connected");
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      reconnectTimeoutRef.current = setTimeout(() => {
-        setRetryCount((prev) => prev + 1);
-        console.log(
-          `Attempting to reconnect... (${retryCount + 1}/${MAX_RETRIES})`,
-        );
-        wsRef.current = null;
-        connect();
-      }, RETRY_DELAY);
+    console.log("WebSocket is not connected");
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
     }
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      setRetryCount((prev) => prev + 1);
+      console.log(
+        `Attempting to reconnect... (${retryCount + 1}/${MAX_RETRIES})`,
+      );
+      wsRef.current = null;
+      connect();
+    }, RETRY_DELAY);
   }, [connect, isConnected, retryCount, host, port, token]);
+
+  useEffect(() => {
+    if (!isConnected) return;
+    if (!token) return;
+    if (settings) return;
+
+    sendRequest({
+      id: generateUUID(),
+      event: "GET_SETTINGS",
+      token: token,
+    });
+  }, [isConnected, settings, sendRequest, token]);
 
   return (
     <SystemBridgeWSContext.Provider
