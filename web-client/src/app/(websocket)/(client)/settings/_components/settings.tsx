@@ -29,8 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
+import { useEffect } from "react";
 
 export function Settings() {
+  const { token } = useSystemBridgeConnectionStore();
   const { settings, sendRequest } = useSystemBridgeWS();
 
   const form = useForm<Settings>({
@@ -50,12 +53,18 @@ export function Settings() {
   });
 
   function onSubmit(data: Settings) {
+    if (!token) {
+      console.error("No token found");
+      toast.error("No token found");
+      return;
+    }
+
     try {
       sendRequest({
         id: generateUUID(),
         event: "UPDATE_SETTINGS",
         data,
-        token: data.api.token,
+        token,
       });
       toast.success("Settings updated successfully!");
     } catch (error) {
@@ -64,52 +73,15 @@ export function Settings() {
     }
   }
 
+  useEffect(() => {
+    if (!settings) return;
+
+    form.reset(settings);
+  }, [form, settings]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">API Settings</h2>
-          <FormField
-            disabled
-            control={form.control}
-            name="api.token"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>API Token</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter API token" {...field} />
-                </FormControl>
-                <FormDescription>
-                  The token used to authenticate with the API
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="api.port"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>API Port</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="9170"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormDescription>
-                  The port that the API server runs on
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">General Settings</h2>
           <FormField
@@ -162,6 +134,51 @@ export function Settings() {
             )}
           />
         </div>
+
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">API Settings</h2>
+          <FormField
+            disabled
+            control={form.control}
+            name="api.token"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>API Token</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter API token" {...field} />
+                </FormControl>
+                <FormDescription>
+                  The token used to authenticate with the API
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="api.port"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>API Port</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="9170"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormDescription>
+                  The port that the API server runs on
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* TODO: Media settings */}
 
         <Button type="submit">Save Settings</Button>
       </form>
