@@ -1,17 +1,19 @@
 "use client";
 import { createContext, useEffect, useRef, useState } from "react";
 
+import { generateUUID } from "~/lib/utils";
+import { type Settings } from "~/lib/system-bridge/types-settings";
+import {
+  WebSocketResponseSchema,
+  type WebSocketRequest,
+} from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
-
-type WebSocketMessage = {
-  type: string;
-  payload: unknown;
-};
 
 export const SystemBridgeWSContext = createContext<
   | {
       isConnected: boolean;
-      sendMessage: (message: WebSocketMessage) => void;
+      settings: Settings | null;
+      sendRequest: (request: WebSocketRequest) => void;
     }
   | undefined
 >(undefined);
@@ -21,10 +23,11 @@ export function SystemBridgeWSProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { host, port, ssl } = useSystemBridgeConnectionStore();
+  const { host, port, ssl, token } = useSystemBridgeConnectionStore();
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const wsRef = useRef<WebSocket | null>(null);
+  const [settings, setSettings] = useState<Settings | null>(null);
 
+  const wsRef = useRef<WebSocket | null>(null);
   useEffect(() => {
     if (!host || !port) return;
 
@@ -35,6 +38,8 @@ export function SystemBridgeWSProvider({
     ws.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+
+      getSettings();
     };
 
     ws.onclose = () => {
@@ -42,27 +47,64 @@ export function SystemBridgeWSProvider({
       setIsConnected(false);
     };
 
-    ws.onerror = (error) => {
+    ws.onerror = (error: Event) => {
       console.error("WebSocket error:", error);
       setIsConnected(false);
     };
+
+    ws.onmessage = handleMessage;
+
+    function getSettings() {
+      if (!token) throw new Error("No token found");
+
+      sendRequest({
+        id: generateUUID(),
+        event: "GET_SETTINGS",
+        token: token,
+      });
+    }
 
     wsRef.current = ws;
 
     return () => {
       ws.close();
     };
-  }, [host, port, ssl]);
+  }, [host, port, ssl, token]);
 
-  const sendMessage = (message: WebSocketMessage) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      console.log("Sending message:", message);
-      wsRef.current.send(JSON.stringify(message));
+  function sendRequest(request: WebSocketRequest) {
+    if (!wsRef.current) return;
+    if (wsRef.current.readyState !== WebSocket.OPEN) return;
+    if (!request.token) throw new Error("No token found");
+
+    console.log("Sending request:", request);
+    wsRef.current.send(JSON.stringify(request));
+  }
+
+  function handleMessage({ data }: MessageEvent<string>) {
+    console.log("Received message:", data);
+
+    const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
+
+    if (!parsedMessage.success) {
+      console.error("Invalid message:", parsedMessage.error);
+      return;
     }
-  };
+
+    const message = parsedMessage.data;
+    switch (message.type) {
+      case "SETTINGS_RESULT":
+        setSettings(message.data as Settings);
+        break;
+      default:
+        console.warn("Unknown message type:", message.type);
+        break;
+    }
+  }
 
   return (
-    <SystemBridgeWSContext.Provider value={{ isConnected, sendMessage }}>
+    <SystemBridgeWSContext.Provider
+      value={{ isConnected, settings, sendRequest }}
+    >
       {children}
     </SystemBridgeWSContext.Provider>
   );
