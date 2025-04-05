@@ -6,7 +6,7 @@ import { SetupConnection } from "~/components/setup-connection";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 
-export default function ClientLayout({
+export function ConnectionProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
