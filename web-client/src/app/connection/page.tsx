@@ -1,25 +1,12 @@
-"use client";
-import { useEffect, useState } from "react";
+import { type Metadata } from "next";
 
-import { SetupConnection } from "~/components/setup-connection";
+import { Connection } from "~/app/connection/_components/connection";
+
+export const metadata: Metadata = {
+  title: "Connection",
+  description: "Connection settings for System Bridge",
+};
 
 export default function ConnectionPage() {
-  const [isHydrated, setIsHydrated] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  return (
-    <>
-      {!isHydrated ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <h1 className="text-2xl font-bold">Connection Settings</h1>
-          <SetupConnection />
-        </>
-      )}
-    </>
-  );
+  return <Connection />;
 }
