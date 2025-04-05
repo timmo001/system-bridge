@@ -1,7 +1,6 @@
 import { type Metadata } from "next";
 
-import { ConnectionProvider } from "~/components/provider/connection";
-import { Data } from "~/app/data/_components/data";
+import { Data } from "~/app/(websocket)/(client)/data/_components/data";
 
 export const metadata: Metadata = {
   title: "Data",
@@ -13,9 +12,7 @@ export default function DataPage() {
     <>
       <h1 className="text-2xl font-bold">Data</h1>
 
-      <ConnectionProvider>
-        <Data />
-      </ConnectionProvider>
+      <Data />
     </>
   );
 }

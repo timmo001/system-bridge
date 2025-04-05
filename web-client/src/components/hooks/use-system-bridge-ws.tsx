@@ -1,56 +1,14 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
+import { useContext } from "react";
 
-interface WebSocketMessage {
-  type: string;
-  payload: unknown;
-}
+import { SystemBridgeWSContext } from "~/components/providers/system-bridge-ws-provider";
 
 export function useSystemBridgeWS() {
-  const { host, port, ssl } = useSystemBridgeConnectionStore();
-
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const wsRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    if (!host || !port) return;
-
-    const ws = new WebSocket(
-      `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
+  const context = useContext(SystemBridgeWSContext);
+  if (context === undefined) {
+    throw new Error(
+      "useSystemBridgeWS must be used within a SystemBridgeWSProvider",
     );
-
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-      setIsConnected(true);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-      setIsConnected(false);
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setIsConnected(false);
-    };
-
-    wsRef.current = ws;
-
-    return () => {
-      ws.close();
-    };
-  }, [host, port, ssl]);
-
-  const sendMessage = (message: WebSocketMessage) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      console.log("Sending message:", message);
-      wsRef.current.send(JSON.stringify(message));
-    }
-  };
-
-  return {
-    isConnected,
-    sendMessage,
-  };
+  }
+  return context;
 }
