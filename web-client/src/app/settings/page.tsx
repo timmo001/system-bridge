@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 
 import { ConnectionProvider } from "~/components/provider/connection";
-import { Settings } from "~/app/(client)/settings/_components/settings";
+import { Settings } from "~/app/settings/_components/settings";
 
 export const metadata: Metadata = {
   title: "Settings",

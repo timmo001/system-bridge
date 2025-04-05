@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 
 import { ConnectionProvider } from "~/components/provider/connection";
-import { Data } from "~/app/(client)/data/_components/data";
+import { Data } from "~/app/data/_components/data";
 
 export const metadata: Metadata = {
   title: "Data",
