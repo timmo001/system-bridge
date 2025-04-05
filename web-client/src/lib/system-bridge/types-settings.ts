@@ -33,7 +33,7 @@ export const SettingsSchema = z.object({
   api: SettingsAPISchema,
   autostart: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
-  logLevel: z.string(),
+  logLevel: z.enum(["debug", "info", "warn", "error"]),
   media: SettingsMediaSchema,
 });
 
