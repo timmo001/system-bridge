@@ -106,18 +106,21 @@ export function SetupConnection() {
           control={form.control}
           name="ssl"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>SSL</FormLabel>
+            <FormItem className="flex w-full flex-row items-center justify-center gap-3 rounded-lg">
               <FormControl>
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <FormDescription>
-                Whether to use SSL for the System Bridge server.
-              </FormDescription>
-              <FormMessage />
+              <div className="w-full space-y-0.5">
+                <FormLabel>SSL</FormLabel>
+                <FormDescription>
+                  Whether to use SSL to connect to the System Bridge server.
+                  <br />
+                  On a local network, you should keep this off.
+                </FormDescription>
+              </div>
             </FormItem>
           )}
         />

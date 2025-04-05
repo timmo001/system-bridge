@@ -116,14 +116,14 @@ export function Settings() {
             control={form.control}
             name="autostart"
             render={({ field }) => (
-              <FormItem className="grid w-full grid-cols-6 items-center justify-center gap-3 rounded-lg">
+              <FormItem className="flex w-full flex-row items-center justify-center gap-3 rounded-lg">
                 <FormControl>
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <div className="col-span-5 w-full space-y-0.5">
+                <div className="w-full space-y-0.5">
                   <FormLabel>Autostart</FormLabel>
                   <FormDescription>
                     Start System Bridge automatically on system startup
@@ -137,10 +137,10 @@ export function Settings() {
             control={form.control}
             name="logLevel"
             render={({ field }) => (
-              <FormItem className="grid w-full grid-cols-6 items-center justify-center gap-3 rounded-lg">
+              <FormItem className="flex w-full flex-row items-center justify-center gap-3 rounded-lg">
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-[120px] max-w-[120px] min-w-[120px]">
                       <SelectValue placeholder="Select log level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -151,7 +151,7 @@ export function Settings() {
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <div className="col-span-5 w-full space-y-0.5">
+                <div className="w-full space-y-0.5">
                   <FormLabel>Log Level</FormLabel>
                   <FormDescription>
                     The level of logging to use (error, warn, info, debug)
