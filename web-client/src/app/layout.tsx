@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Geist } from "next/font/google";
 
 import { Toaster } from "~/components/ui/sonner";
-import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeProvider } from "~/components/providers/theme-provider";
 import { ThemeToggle } from "~/components/theme-toggle";
 
 export const metadata: Metadata = {

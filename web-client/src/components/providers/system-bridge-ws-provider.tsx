@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 
 import { generateUUID } from "~/lib/utils";
 import { type Settings } from "~/lib/system-bridge/types-settings";
@@ -18,6 +18,9 @@ export const SystemBridgeWSContext = createContext<
   | undefined
 >(undefined);
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
 export function SystemBridgeWSProvider({
   children,
 }: {
@@ -26,50 +29,50 @@ export function SystemBridgeWSProvider({
   const { host, port, ssl, token } = useSystemBridgeConnectionStore();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [retryCount, setRetryCount] = useState<number>(0);
 
   const wsRef = useRef<WebSocket | null>(null);
-  useEffect(() => {
-    if (!host || !port) return;
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const ws = new WebSocket(
+  const connect = useCallback(() => {
+    if (!host || !port || !token) return;
+    if (wsRef.current) return;
+
+    wsRef.current = new WebSocket(
       `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
     );
 
-    ws.onopen = () => {
+    wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
 
-      getSettings();
+      if (!settings) {
+        sendRequest({
+          id: generateUUID(),
+          event: "GET_SETTINGS",
+          token: token,
+        });
+      }
     };
 
-    ws.onclose = () => {
+    wsRef.current.onclose = () => {
       console.log("WebSocket disconnected");
       setIsConnected(false);
     };
 
-    ws.onerror = (error: Event) => {
+    wsRef.current.onerror = (error: Event) => {
       console.error("WebSocket error:", error);
       setIsConnected(false);
     };
 
-    ws.onmessage = handleMessage;
-
-    function getSettings() {
-      if (!token) throw new Error("No token found");
-
-      sendRequest({
-        id: generateUUID(),
-        event: "GET_SETTINGS",
-        token: token,
-      });
-    }
-
-    wsRef.current = ws;
+    wsRef.current.onmessage = handleMessage;
 
     return () => {
-      ws.close();
+      wsRef.current?.close();
     };
-  }, [host, port, ssl, token]);
+  }, [host, port, settings, ssl, token]);
+
+  useEffect(() => connect(), [connect]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -100,6 +103,25 @@ export function SystemBridgeWSProvider({
         break;
     }
   }
+
+  useEffect(() => {
+    if (!host || !port || !token) return;
+
+    if (!isConnected) {
+      console.log("WebSocket is not connected");
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      reconnectTimeoutRef.current = setTimeout(() => {
+        setRetryCount((prev) => prev + 1);
+        console.log(
+          `Attempting to reconnect... (${retryCount + 1}/${MAX_RETRIES})`,
+        );
+        wsRef.current = null;
+        connect();
+      }, RETRY_DELAY);
+    }
+  }, [connect, isConnected, retryCount, host, port, token]);
 
   return (
     <SystemBridgeWSContext.Provider
