@@ -143,6 +143,14 @@ export function SystemBridgeWSProvider({
         setSettings(newSettings);
         setIsRequestingData(false);
         break;
+      case "DATA_LISTENER_REGISTERED":
+        console.log("Data listener registered");
+        break;
+      case "SETTINGS_UPDATED":
+        console.log("Settings updated:", message.data);
+        const updatedSettings = message.data as Settings;
+        setSettings(updatedSettings);
+        break;
       default:
         console.warn("Unknown message type:", message.type);
         break;
