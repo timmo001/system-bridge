@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, CopyIcon } from "lucide-react";
+import { CopyIcon } from "lucide-react";
 import { toast } from "sonner";
+
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
-type CodeBlockProps = {
+export function CodeBlock({
+  children,
+  className,
+  language,
+}: {
   children: string;
   className?: string;
   language?: string;
-};
-
-export function CodeBlock({ children, className, language }: CodeBlockProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
+}) {
   const copyToClipboard = (e: React.MouseEvent) => {
     e.stopPropagation();
     void navigator.clipboard.writeText(children);
@@ -25,40 +25,22 @@ export function CodeBlock({ children, className, language }: CodeBlockProps) {
         className="flex items-center justify-between border-b px-4 py-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center justify-between gap-2">
           <span className="text-muted-foreground font-mono text-sm">
             {language ?? "plaintext"}
           </span>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 cursor-pointer p-0 opacity-0 transition-opacity group-hover:opacity-100"
+            className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
             onClick={copyToClipboard}
           >
             <CopyIcon className="size-4" />
           </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 cursor-pointer p-0 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? (
-            <ChevronDownIcon className="size-4" />
-          ) : (
-            <ChevronUpIcon className="size-4" />
-          )}
-        </Button>
       </div>
       <div className="relative">
-        <div
-          className={cn(
-            "cursor-pointer overflow-hidden transition-all duration-200",
-            isCollapsed ? "max-h-[200px]" : "",
-          )}
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
+        <div className={cn("overflow-hidden transition-all duration-200")}>
           <pre className="!m-0 !bg-transparent">
             <code
               className={cn(
@@ -70,9 +52,6 @@ export function CodeBlock({ children, className, language }: CodeBlockProps) {
             </code>
           </pre>
         </div>
-        {isCollapsed && (
-          <div className="from-muted/50 pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t to-transparent" />
-        )}
       </div>
     </div>
   );

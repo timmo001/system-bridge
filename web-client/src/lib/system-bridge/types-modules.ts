@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ModuleNameSchema = z.enum([
+export const Modules = [
   "battery",
   "cpu",
   "disks",
@@ -12,6 +12,17 @@ export const ModuleNameSchema = z.enum([
   "processes",
   "sensors",
   "system",
-]);
+] as const;
+
+export const ModuleNameSchema = z.enum(Modules);
 
 export type ModuleName = z.infer<typeof ModuleNameSchema>;
+
+export const ModuleDataSchema = z.record(ModuleNameSchema, z.any());
+
+export type ModuleData = z.infer<typeof ModuleDataSchema>;
+
+export const DefaultModuleData: ModuleData = Modules.reduce((acc, module) => {
+  acc[module] = {};
+  return acc;
+}, {} as ModuleData);
