@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
+	localcpu "github.com/timmo001/system-bridge/data/module/cpu"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -68,7 +69,11 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 				perCpuData.Usage = &usage
 			}
 
-			// TODO: Add implementation for per-CPU power consumption
+			// Get per-CPU power consumption
+			if power, err := localcpu.GetCPUPowerPerCPU(i); err == nil {
+				perCpuData.Power = &power
+			}
+
 			// TODO: Add implementation for per-CPU voltage monitoring
 
 			perCPU = append(perCPU, perCpuData)
@@ -112,7 +117,11 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 		}
 	}
 
-	// TODO: Add implementation for overall CPU power consumption
+	// Get overall CPU power consumption
+	if power, err := localcpu.GetCPUPower(); err == nil {
+		cpuData.Power = &power
+	}
+
 	// TODO: Add implementation for overall CPU voltage monitoring
 	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 
