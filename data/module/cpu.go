@@ -27,27 +27,47 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 	cpuData.Count = &count
 
 	// Get CPU frequency
-	frequencies, err := cpu.Info()
-	if err == nil && len(frequencies) > 0 {
+	min, max, current, err := localcpu.GetCPUFrequency()
+	if err == nil {
 		freq := types.CPUFrequency{
-			Current: &frequencies[0].Mhz,
-			// TODO: Add implementation for Min frequency
-			// TODO: Add implementation for Max frequency
+			Current: &current,
+			Min:     &min,
+			Max:     &max,
 		}
 		cpuData.Frequency = &freq
+	} else {
+		// Fallback to gopsutil if local implementation fails
+		frequencies, err := cpu.Info()
+		if err == nil && len(frequencies) > 0 {
+			freq := types.CPUFrequency{
+				Current: &frequencies[0].Mhz,
+			}
+			cpuData.Frequency = &freq
+		}
 	}
 
 	// Get per CPU info
-	if len(frequencies) > 0 {
+	frequencies, err := cpu.Info()
+	if err == nil && len(frequencies) > 0 {
 		perCPU := make([]types.PerCPU, 0, len(frequencies))
 		for i, cpuInfo := range frequencies {
 			perCpuData := types.PerCPU{
 				ID: i,
-				Frequency: &types.CPUFrequency{
+			}
+
+			// Get per-CPU frequencies
+			min, max, current, err := localcpu.GetCPUFrequencyPerCPU(i)
+			if err == nil {
+				perCpuData.Frequency = &types.CPUFrequency{
+					Current: &current,
+					Min:     &min,
+					Max:     &max,
+				}
+			} else {
+				// Fallback to gopsutil if local implementation fails
+				perCpuData.Frequency = &types.CPUFrequency{
 					Current: &cpuInfo.Mhz,
-					// TODO: Add implementation for per-CPU Min frequency
-					// TODO: Add implementation for per-CPU Max frequency
-				},
+				}
 			}
 
 			// Get per CPU times
