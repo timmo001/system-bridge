@@ -2,11 +2,9 @@ package data_module
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
 	localcpu "github.com/timmo001/system-bridge/data/module/cpu"
 	"github.com/timmo001/system-bridge/types"
@@ -126,15 +124,9 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 		cpuData.LoadAverage = &loadAvg
 	}
 
-	// Get CPU temperature where available
-	if temps, err := host.SensorsTemperatures(); err == nil {
-		for _, temp := range temps {
-			if strings.Contains(strings.ToLower(temp.SensorKey), "cpu") {
-				temperature := temp.Temperature
-				cpuData.Temperature = &temperature
-				break
-			}
-		}
+	// Get CPU temperature
+	if temp, err := localcpu.GetCPUTemperature(); err == nil {
+		cpuData.Temperature = &temp
 	}
 
 	// Get overall CPU power consumption
