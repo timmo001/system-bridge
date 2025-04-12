@@ -92,7 +92,10 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 				perCpuData.Power = &power
 			}
 
-			// TODO: Add implementation for per-CPU voltage monitoring
+			// Get per-CPU voltage
+			if voltage, err := localcpu.GetCPUVoltagePerCPU(i); err == nil {
+				perCpuData.Voltage = &voltage
+			}
 
 			perCPU = append(perCPU, perCpuData)
 		}
@@ -106,7 +109,7 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 			System:    &times[0].System,
 			Idle:      &times[0].Idle,
 			Interrupt: &times[0].Irq,
-			// TODO: Add implementation for overall DPC time
+			// TODO: Add implementation for DPC time
 		}
 
 		// TODO: Add implementation for overall TimesPercent
@@ -134,7 +137,11 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 		cpuData.Power = &power
 	}
 
-	// TODO: Add implementation for overall CPU voltage monitoring
+	// Get overall CPU voltage
+	if voltage, err := localcpu.GetCPUVoltage(); err == nil {
+		cpuData.Voltage = &voltage
+	}
+
 	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 
 	return cpuData, nil
