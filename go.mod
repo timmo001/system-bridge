@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/distatus/battery v0.11.0
-	github.com/go-vgo/robotgo v0.110.6
+	github.com/go-vgo/robotgo v0.110.7
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jezek/xgb v1.1.1
