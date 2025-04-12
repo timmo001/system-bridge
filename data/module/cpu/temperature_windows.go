@@ -9,7 +9,8 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 )
 
-func getCPUTemperature() (float64, error) {
+// GetCPUTemperature returns the CPU temperature in degrees Celsius
+func GetCPUTemperature() (float64, error) {
 	temps, err := host.SensorsTemperatures()
 	if err != nil {
 		return 0, err

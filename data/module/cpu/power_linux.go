@@ -29,8 +29,8 @@ func readRAPLPower() (float64, error) {
 	return energyUj / 1000000.0, nil
 }
 
-// getCPUPower reads CPU power using platform-specific methods
-func getCPUPower() (float64, error) {
+// GetCPUPower reads CPU power using platform-specific methods
+func GetCPUPower() (float64, error) {
 	// Try reading from RAPL first (Intel processors)
 	power, err := readRAPLPower()
 	if err == nil {
@@ -113,6 +113,6 @@ func readRAPLPowerPerCPU(id int) (float64, error) {
 	return 0, fmt.Errorf("unable to determine CPU %d power consumption", id)
 }
 
-func getCPUPowerPerCPU(id int) (float64, error) {
+func GetCPUPowerPerCPU(id int) (float64, error) {
 	return readRAPLPowerPerCPU(id)
 }

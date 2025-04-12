@@ -17,7 +17,7 @@ type win32ProcessorPower struct {
 	PowerConsumption     uint32  // Power consumption in milliwatts
 }
 
-func getCPUPower() (float64, error) {
+func GetCPUPower() (float64, error) {
 	var dst []win32ProcessorPower
 	q := wmi.CreateQuery(&dst, "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='_Total'")
 
@@ -34,7 +34,7 @@ func getCPUPower() (float64, error) {
 	return powerWatts, nil
 }
 
-func getCPUPowerPerCPU(id int) (float64, error) {
+func GetCPUPowerPerCPU(id int) (float64, error) {
 	var dst []win32ProcessorPower
 	q := wmi.CreateQuery(&dst, "SELECT * FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name='" + fmt.Sprint(id) + "'")
 

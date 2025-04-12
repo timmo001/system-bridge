@@ -11,7 +11,7 @@ import (
 )
 
 // getCPUPower reads CPU power using platform-specific methods
-func getCPUPower() (float64, error) {
+func GetCPUPower() (float64, error) {
 	// On macOS, try using powermetrics
 	cmd := exec.Command("powermetrics", "-n", "1", "-i", "1000", "--samplers", "cpu_power")
 	output, err := cmd.Output()
@@ -25,7 +25,7 @@ func getCPUPower() (float64, error) {
 	return 0, fmt.Errorf("unable to determine CPU power consumption")
 }
 
-func getCPUPowerPerCPU(id int) (float64, error) {
+func GetCPUPowerPerCPU(id int) (float64, error) {
 	// On macOS, try using powermetrics with CPU-specific sampling
 	cmd := exec.Command("powermetrics", "-n", "1", "-i", "1000", "--samplers", "cpu_power")
 	output, err := cmd.Output()

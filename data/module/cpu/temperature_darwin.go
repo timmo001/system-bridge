@@ -10,7 +10,8 @@ import (
 	"strconv"
 )
 
-func getCPUTemperature() (float64, error) {
+// GetCPUTemperature returns the CPU temperature in degrees Celsius
+func GetCPUTemperature() (float64, error) {
 	// Use powermetrics to get CPU temperature
 	cmd := exec.Command("powermetrics", "-n", "1", "-i", "1000", "--samplers", "cpu_temp")
 	output, err := cmd.Output()

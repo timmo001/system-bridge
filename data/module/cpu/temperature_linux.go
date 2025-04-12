@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-func getCPUTemperature() (float64, error) {
+// GetCPUTemperature returns the CPU temperature in degrees Celsius
+func GetCPUTemperature() (float64, error) {
 	// Try reading from /sys/class/hwmon/hwmon*/name to find CPU temperature sensors
 	hwmonPaths, err := filepath.Glob("/sys/class/hwmon/hwmon*/name")
 	if err == nil {
