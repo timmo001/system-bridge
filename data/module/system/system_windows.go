@@ -61,6 +61,11 @@ func getSystemInfo() (SystemInfo, error) {
 	}
 
 	var bootTime, uptime float64
+	formats := []string{
+		"2006-01-02 15:04:05",   // 24-hour format
+		"2006-01-02 3:04:05 PM", // 12-hour format with AM/PM
+	}
+
 	for _, line := range lines {
 		parts := strings.Split(line, ",")
 		if len(parts) >= 11 {
@@ -76,9 +81,20 @@ func getSystemInfo() (SystemInfo, error) {
 			// Combine today's date with the boot time
 			fullTimeStr := fmt.Sprintf("%s %s", today, bootTimeStr)
 
-			bootTimeParsed, err := time.Parse("2006-01-02 15:04:05", fullTimeStr)
-			if err != nil {
-				return SystemInfo{}, fmt.Errorf("failed to parse boot time: %v", err)
+			var bootTimeParsed time.Time                                                   
+			var parseError error                                                           
+			parsed := false                                                                
+			for _, format := range formats {                                               
+				if t, err := time.Parse(format, fullTimeStr); err == nil {                   
+					bootTimeParsed = t                                                         
+					parsed = true                                                              
+				} else {                                                                     
+					parseError = err                                                           
+				}                                                                            
+			}                                                                              
+                                                                                    
+			if !parsed {                                                                   
+				return SystemInfo{}, fmt.Errorf("failed to parse boot time: %v", parseError) 
 			}
 
 			// If the boot time is in the future (which can happen if the system was booted yesterday),
