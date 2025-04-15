@@ -12,20 +12,20 @@ type SystemUser struct {
 	Active   bool    `json:"active" mapstructure:"active"`
 	Terminal string  `json:"terminal" mapstructure:"terminal"`
 	Host     string  `json:"host" mapstructure:"host"`
-	Started  float64 `json:"started" mapstructure:"started"`
+	Started  int     `json:"started" mapstructure:"started"`
 	PID      float64 `json:"pid" mapstructure:"pid"`
 }
 
 // SystemData represents system information
 type SystemData struct {
-	BootTime              float64      `json:"boot_time" mapstructure:"boot_time"`
+	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
 	FQDN                  string       `json:"fqdn" mapstructure:"fqdn"`
 	Hostname              string       `json:"hostname" mapstructure:"hostname"`
 	IPAddress4            string       `json:"ip_address_4" mapstructure:"ip_address_4"`
 	MACAddress            string       `json:"mac_address" mapstructure:"mac_address"`
 	PlatformVersion       string       `json:"platform_version" mapstructure:"platform_version"`
 	Platform              string       `json:"platform" mapstructure:"platform"`
-	Uptime                float64      `json:"uptime" mapstructure:"uptime"`
+	Uptime                uint64       `json:"uptime" mapstructure:"uptime"`
 	Users                 []SystemUser `json:"users" mapstructure:"users"`
 	UUID                  string       `json:"uuid" mapstructure:"uuid"`
 	Version               string       `json:"version" mapstructure:"version"`

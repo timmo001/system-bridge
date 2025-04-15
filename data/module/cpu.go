@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/host"
-	"github.com/shirou/gopsutil/v3/load"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/load"
+	"github.com/shirou/gopsutil/v4/sensors"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -102,7 +102,7 @@ func (t *Module) UpdateCPUModule() (types.CPUData, error) {
 	}
 
 	// Get CPU temperature where available
-	if temps, err := host.SensorsTemperatures(); err == nil {
+	if temps, err := sensors.SensorsTemperatures(); err == nil {
 		for _, temp := range temps {
 			if strings.Contains(strings.ToLower(temp.SensorKey), "cpu") {
 				temperature := temp.Temperature

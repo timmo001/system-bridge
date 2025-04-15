@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -76,7 +76,7 @@ func (t *Module) UpdateDisksModule() (types.DisksData, error) {
 			MountPoint:     partition.Mountpoint,
 			FilesystemType: partition.Fstype,
 			Options:        strings.Join(partition.Opts, ","),
-			Usage:         diskUsage,
+			Usage:          diskUsage,
 		}
 
 		// Add partition to device

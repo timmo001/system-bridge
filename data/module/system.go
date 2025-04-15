@@ -1,14 +1,10 @@
 package data_module
 
 import (
-	"runtime"
-
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/data/module/system"
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/version"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 func (t *Module) UpdateSystemModule() (types.SystemData, error) {
@@ -19,71 +15,45 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	systemData.Users = make([]types.SystemUser, 0)
 	systemData.CameraUsage = make([]string, 0)
 
-	bootTime, err := system.GetBootTime()
+	infoStat, err := host.Info()
 	if err != nil {
-		log.Errorf("Failed to get boot time: %v", err)
-		bootTime = 0
+		log.Errorf("Failed to get  system info: %v", err)
 	}
-	systemData.BootTime = bootTime
 
-	fqdn, err := system.GetFQDN()
+	users, err := host.Users()
 	if err != nil {
-		log.Errorf("Failed to get FQDN: %v", err)
-		fqdn = ""
+		log.Errorf("Failed to get  user info: %v", err)
 	}
-	systemData.FQDN = fqdn
 
-	hostname, err := system.GetHostname()
-	if err != nil {
-		log.Errorf("Failed to get hostname: %v", err)
-		hostname = ""
+	systemData.BootTime = infoStat.BootTime
+
+	// TODO: add fqdn
+	systemData.FQDN = ""
+
+	systemData.Hostname = infoStat.Hostname
+
+	// TODO: add ip address
+	systemData.IPAddress4 = ""
+
+	// TODO: add mac address
+	systemData.MACAddress = ""
+
+	systemData.PlatformVersion = infoStat.PlatformVersion
+	systemData.Platform = infoStat.Platform
+	systemData.Uptime = infoStat.Uptime
+
+	for _, userStat := range users {
+		systemData.Users = append(systemData.Users, types.SystemUser{
+			Name:     userStat.User,
+			Terminal: userStat.Terminal,
+			Host:     userStat.Host,
+			Started:  userStat.Started,
+			// TODO: add PID
+			// TODO: add Active
+		})
 	}
-	systemData.Hostname = hostname
 
-	ipAddress4, err := system.GetIPAddress4()
-	if err != nil {
-		log.Errorf("Failed to get IP address: %v", err)
-		ipAddress4 = ""
-	}
-	systemData.IPAddress4 = ipAddress4
-
-	macAddress, err := system.GetMACAddress()
-	if err != nil {
-		log.Errorf("Failed to get MAC address: %v", err)
-		macAddress = ""
-	}
-	systemData.MACAddress = macAddress
-
-	platformVersion, err := system.GetPlatformVersion()
-	if err != nil {
-		log.Errorf("Failed to get platform version: %v", err)
-		platformVersion = ""
-	}
-	systemData.PlatformVersion = platformVersion
-
-	platform := cases.Title(language.English).String(runtime.GOOS)
-	systemData.Platform = platform
-
-	uptime, err := system.GetUptime()
-	if err != nil {
-		log.Errorf("Failed to get uptime: %v", err)
-		uptime = 0
-	}
-	systemData.Uptime = uptime
-
-	users, err := system.GetUsers()
-	if err != nil {
-		log.Errorf("Failed to get users: %v", err)
-		users = make([]types.SystemUser, 0)
-	}
-	systemData.Users = users
-
-	uuid, err := system.GetUUID()
-	if err != nil {
-		log.Errorf("Failed to get UUID: %v", err)
-		uuid = "123e4567-e89b-12d3-a456-426614174000" // Fallback to a default UUID
-	}
-	systemData.UUID = uuid
+	systemData.UUID = infoStat.HostID
 
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 

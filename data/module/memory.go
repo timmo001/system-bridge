@@ -2,7 +2,7 @@ package data_module
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/timmo001/system-bridge/types"
 )
 
