@@ -11,6 +11,7 @@ require (
 	github.com/jezek/xgb v1.1.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/shirou/gopsutil/v3 v3.24.5
+	github.com/shirou/gopsutil/v4 v4.25.2
 	github.com/spf13/viper v1.20.1
 	github.com/urfave/cli/v3 v3.1.1
 	golang.org/x/text v0.24.0
@@ -43,7 +44,6 @@ require (
 	github.com/robotn/xgb v0.10.0 // indirect
 	github.com/robotn/xgbutil v0.10.0 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
-	github.com/shirou/gopsutil/v4 v4.25.2 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
