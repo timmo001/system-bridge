@@ -1,6 +1,9 @@
 package data_module
 
 import (
+	"net"
+	"strings"
+
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/timmo001/system-bridge/types"
@@ -27,10 +30,9 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	systemData.BootTime = infoStat.BootTime
 
-	// TODO: add fqdn
-	systemData.FQDN = ""
-
 	systemData.Hostname = infoStat.Hostname
+
+	systemData.FQDN = getFQDN(systemData.Hostname)
 
 	// TODO: add ip address
 	systemData.IPAddress4 = ""
@@ -73,4 +75,29 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	systemData.VersionNewerAvailable = &versionNewerAvailable
 
 	return systemData, nil
+}
+
+// from https://gist.github.com/golightlyb/0d6a0270b0cff882d373dfc6704c5e34
+func getFQDN(hostname string) string {
+	var err error
+
+	ips, err := net.LookupIP(hostname)
+	if err != nil {
+		return hostname
+	}
+
+	for _, ip := range ips {
+		hosts, err := net.LookupAddr(ip.String())
+		if err != nil {
+			continue
+		}
+
+		for _, host := range hosts {
+			if strings.LastIndexByte(host, '.') != -1 {
+				return strings.TrimSuffix(host, ".")
+			}
+		}
+	}
+
+	return hostname
 }
