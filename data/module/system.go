@@ -85,6 +85,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 func getIPv4Address() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
+		log.Warn("Failed to get IPv4 Address: %v", err)
 		return ""
 	}
 	defer func() {
@@ -100,6 +101,7 @@ func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
 	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
+		log.Warn("Failed to get IPv6 Address: %v", err)
 		return ""
 	}
 	defer func() {
@@ -114,6 +116,7 @@ func getIPv6Address() string {
 func getMACAddress() string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
+		log.Warn("Failed to get MAC Address: %v", err)
 		return ""
 	}
 
@@ -123,6 +126,8 @@ func getMACAddress() string {
 			return iface.HardwareAddr.String()
 		}
 	}
+
+	log.Info("No MAC address found")
 	return ""
 }
 
