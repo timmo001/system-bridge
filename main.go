@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,6 +15,9 @@ import (
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/urfave/cli/v3"
 )
+
+//go:embed web-client/out/*
+var webClientContent embed.FS
 
 func main() {
 	// Create a channel to receive OS signals
@@ -65,7 +69,7 @@ func main() {
 					}
 
 					// Create and run backend server with signal-aware context
-					b := backend.New(s, dataStore)
+					b := backend.New(s, dataStore, &webClientContent)
 
 					// Show startup notification if requested
 					if cmd.Bool("notify") {
