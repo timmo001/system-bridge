@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"errors"
 	"net"
 	"os"
 	"strings"
@@ -66,7 +67,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
-		log.Errorf("Failed to get latest version: %v", err)
+		log.Errorf("", err)
 		latestVersion = currentVersion
 	}
 
@@ -86,7 +87,9 @@ func getIPv4Address() string {
 	if err != nil {
 		return ""
 	}
-	defer conn.Close()
+	defer func() {
+		err = errors.Join(err, conn.Close())
+	}()
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String()
@@ -99,7 +102,9 @@ func getIPv6Address() string {
 	if err != nil {
 		return ""
 	}
-	defer conn.Close()
+	defer func() {
+		err = errors.Join(err, conn.Close())
+	}()
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String()
