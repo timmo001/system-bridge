@@ -6,25 +6,26 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  experimental: {
-    reactCompiler: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  reactStrictMode: true,
-  async rewrites() {
-    return [
-      {
-        source: '/app/settings.html',
-        destination: '/settings',
-      },
-      {
-        source: '/app/data.html',
-        destination: '/data',
-      },
-    ];
-  },
+	experimental: {
+		reactCompiler: true,
+	},
+	eslint: {
+		ignoreDuringBuilds: true,
+	},
+	reactStrictMode: true,
+	output: "export",
+	async rewrites() {
+		return [
+			{
+				source: "/app/settings.html",
+				destination: "/settings",
+			},
+			{
+				source: "/app/data.html",
+				destination: "/data",
+			},
+		];
+	},
 };
 
 export default config;
