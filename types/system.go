@@ -30,7 +30,7 @@ type SystemData struct {
 	UUID                  string       `json:"uuid" mapstructure:"uuid"`
 	Version               string       `json:"version" mapstructure:"version"`
 	CameraUsage           []string     `json:"camera_usage" mapstructure:"camera_usage"`
-	IPAddress6            *string      `json:"ip_address_6" mapstructure:"ip_address_6"`
+	IPAddress6            string       `json:"ip_address_6" mapstructure:"ip_address_6"`
 	PendingReboot         *bool        `json:"pending_reboot" mapstructure:"pending_reboot"`
 	RunMode               RunMode      `json:"run_mode" mapstructure:"run_mode"`
 	VersionLatestURL      *string      `json:"version_latest_url" mapstructure:"version_latest_url"`
