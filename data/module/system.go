@@ -67,7 +67,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
-		log.Errorf("", err)
+		log.Errorf("Failed to get latest version: %v", err)
 		latestVersion = currentVersion
 	}
 
