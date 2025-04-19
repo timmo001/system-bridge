@@ -16,14 +16,22 @@ func getGPUs() ([]types.GPU, error) {
 
 	// Get GPU information using PowerShell
 	cmd := exec.Command("powershell", "-Command", `
+		class GPU {
+			[string]$ID
+			[string]$Name
+			[int]$MemoryTotal
+			}
+
+		$gpus = [System.Collections.Generic.List[GPU]]::new()
 		Get-WmiObject Win32_VideoController | ForEach-Object {
-			$gpu = @{
+			$gpu = New-Object GPU -Property @{
 				ID = $_.DeviceID
 				Name = $_.Name
 				MemoryTotal = [math]::Round($_.AdapterRAM / 1GB, 2)
 			}
-			[PSCustomObject]$gpu
-		} | ConvertTo-Json
+			$gpus.Add($gpu)
+		} 
+		ConvertTo-Json -Compress $gpus
 	`)
 
 	output, err := cmd.Output()
@@ -45,11 +53,10 @@ func getGPUs() ([]types.GPU, error) {
 
 	// Convert to our GPU type
 	for _, info := range gpuInfo {
-		memoryTotal := info.MemoryTotal
 		gpus = append(gpus, types.GPU{
 			ID:          info.ID,
 			Name:        info.Name,
-			MemoryTotal: &memoryTotal,
+			MemoryTotal: &info.MemoryTotal,
 		})
 	}
 
