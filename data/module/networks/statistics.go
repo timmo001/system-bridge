@@ -2,7 +2,7 @@ package networks
 
 import (
 	"github.com/charmbracelet/log"
-	psnet "github.com/shirou/gopsutil/v3/net"
+	psnet "github.com/shirou/gopsutil/v4/net"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -71,3 +71,4 @@ func setDefaultIOStats(networksData *types.NetworksData) {
 
 	networksData.IO = &networkIO
 }
+

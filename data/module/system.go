@@ -1,14 +1,15 @@
 package data_module
 
 import (
-	"runtime"
+	"errors"
+	"net"
+	"os"
+	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/data/module/system"
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/version"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 func (t *Module) UpdateSystemModule() (types.SystemData, error) {
@@ -19,71 +20,46 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	systemData.Users = make([]types.SystemUser, 0)
 	systemData.CameraUsage = make([]string, 0)
 
-	bootTime, err := system.GetBootTime()
+	infoStat, err := host.Info()
 	if err != nil {
-		log.Errorf("Failed to get boot time: %v", err)
-		bootTime = 0
+		log.Errorf("Failed to get system info: %v", err)
 	}
-	systemData.BootTime = bootTime
 
-	fqdn, err := system.GetFQDN()
+	users, err := host.Users()
 	if err != nil {
-		log.Errorf("Failed to get FQDN: %v", err)
-		fqdn = ""
+		log.Warnf("Failed to get user info: %v", err)
 	}
-	systemData.FQDN = fqdn
 
-	hostname, err := system.GetHostname()
+	systemData.BootTime = infoStat.BootTime
+
+	systemData.Hostname = infoStat.Hostname
+
+	systemData.IPAddress4 = getIPv4Address()
+	systemData.IPAddress6 = getIPv6Address()
+	systemData.MACAddress = getMACAddress()
+
+	hostname, err := os.Hostname()
 	if err != nil {
-		log.Errorf("Failed to get hostname: %v", err)
-		hostname = ""
+		hostname = infoStat.Hostname
 	}
-	systemData.Hostname = hostname
+	systemData.FQDN = getFQDN(hostname)
 
-	ipAddress4, err := system.GetIPAddress4()
-	if err != nil {
-		log.Errorf("Failed to get IP address: %v", err)
-		ipAddress4 = ""
+	systemData.PlatformVersion = infoStat.PlatformVersion
+	systemData.Platform = infoStat.Platform
+	systemData.Uptime = infoStat.Uptime
+
+	for _, userStat := range users {
+		systemData.Users = append(systemData.Users, types.SystemUser{
+			Name:     userStat.User,
+			Terminal: userStat.Terminal,
+			Host:     userStat.Host,
+			Started:  userStat.Started,
+			// TODO: add PID
+			// TODO: add Active
+		})
 	}
-	systemData.IPAddress4 = ipAddress4
 
-	macAddress, err := system.GetMACAddress()
-	if err != nil {
-		log.Errorf("Failed to get MAC address: %v", err)
-		macAddress = ""
-	}
-	systemData.MACAddress = macAddress
-
-	platformVersion, err := system.GetPlatformVersion()
-	if err != nil {
-		log.Errorf("Failed to get platform version: %v", err)
-		platformVersion = ""
-	}
-	systemData.PlatformVersion = platformVersion
-
-	platform := cases.Title(language.English).String(runtime.GOOS)
-	systemData.Platform = platform
-
-	uptime, err := system.GetUptime()
-	if err != nil {
-		log.Errorf("Failed to get uptime: %v", err)
-		uptime = 0
-	}
-	systemData.Uptime = uptime
-
-	users, err := system.GetUsers()
-	if err != nil {
-		log.Errorf("Failed to get users: %v", err)
-		users = make([]types.SystemUser, 0)
-	}
-	systemData.Users = users
-
-	uuid, err := system.GetUUID()
-	if err != nil {
-		log.Errorf("Failed to get UUID: %v", err)
-		uuid = "123e4567-e89b-12d3-a456-426614174000" // Fallback to a default UUID
-	}
-	systemData.UUID = uuid
+	systemData.UUID = infoStat.HostID
 
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 
@@ -103,4 +79,79 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 	systemData.VersionNewerAvailable = &versionNewerAvailable
 
 	return systemData, nil
+}
+
+// getIPv4Address gets the primary IPv4 address
+func getIPv4Address() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Warn("Failed to get IPv4 Address: %v", err)
+		return ""
+	}
+	defer func() {
+		err = errors.Join(err, conn.Close())
+	}()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
+}
+
+// getIPv6Address gets the primary IPv6 address
+func getIPv6Address() string {
+	// Try to connect to IPv6 DNS server to get our IPv6 address
+	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
+	if err != nil {
+		log.Warn("Failed to get IPv6 Address: %v", err)
+		return ""
+	}
+	defer func() {
+		err = errors.Join(err, conn.Close())
+	}()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
+}
+
+// getMACAddress gets the MAC address of the primary interface
+func getMACAddress() string {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		log.Warn("Failed to get MAC Address: %v", err)
+		return ""
+	}
+
+	for _, iface := range interfaces {
+		// Skip loopback and interfaces without MAC
+		if iface.Flags&net.FlagLoopback == 0 && len(iface.HardwareAddr) > 0 {
+			return iface.HardwareAddr.String()
+		}
+	}
+
+	log.Info("No MAC address found")
+	return ""
+}
+
+// from https://gist.github.com/golightlyb/0d6a0270b0cff882d373dfc6704c5e34
+func getFQDN(hostname string) string {
+	var err error
+
+	ips, err := net.LookupIP(hostname)
+	if err != nil {
+		return hostname
+	}
+
+	for _, ip := range ips {
+		hosts, err := net.LookupAddr(ip.String())
+		if err != nil {
+			continue
+		}
+
+		for _, host := range hosts {
+			if strings.LastIndexByte(host, '.') != -1 {
+				return strings.TrimSuffix(host, ".")
+			}
+		}
+	}
+
+	return hostname
 }
