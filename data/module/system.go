@@ -27,7 +27,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	users, err := host.Users()
 	if err != nil {
-		log.Errorf("Failed to get user info: %v", err)
+		log.Warnf("Failed to get user info: %v", err)
 	}
 
 	systemData.BootTime = infoStat.BootTime
