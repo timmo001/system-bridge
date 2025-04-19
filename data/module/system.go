@@ -22,12 +22,12 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	infoStat, err := host.Info()
 	if err != nil {
-		log.Errorf("Failed to get  system info: %v", err)
+		log.Errorf("Failed to get system info: %v", err)
 	}
 
 	users, err := host.Users()
 	if err != nil {
-		log.Errorf("Failed to get  user info: %v", err)
+		log.Errorf("Failed to get user info: %v", err)
 	}
 
 	systemData.BootTime = infoStat.BootTime
