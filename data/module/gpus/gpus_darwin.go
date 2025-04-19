@@ -6,8 +6,6 @@ package gpus
 import (
 	"encoding/json"
 	"os/exec"
-	"strconv"
-	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/types"
@@ -27,11 +25,10 @@ func getGPUs() ([]types.GPU, error) {
 	// Parse the JSON output
 	var result struct {
 		SPDisplaysDataType []struct {
-			SPDisplays []struct {
-				SPDisplaysDeviceID string `json:"spdisplays_device-id"`
-				SPDisplaysModel    string `json:"spdisplays_model"`
-				SPDisplaysVRAM     string `json:"spdisplays_vram"`
-			} `json:"SPDisplays"`
+			Name            string `json:"_name"`
+			SPPCICores      string `json:"sppci_cores"`
+			SPPCIModel      string `json:"sppci_model"`
+			SPPCIDeviceType string `json:"sppci_device_type"`
 		} `json:"SPDisplaysDataType"`
 	}
 
@@ -41,39 +38,16 @@ func getGPUs() ([]types.GPU, error) {
 	}
 
 	// Convert to our GPU type
-	for _, displayType := range result.SPDisplaysDataType {
-		for _, display := range displayType.SPDisplays {
-			// Parse VRAM size
-			var memoryTotal float64
-			if strings.Contains(display.SPDisplaysVRAM, "GB") {
-				memoryStr := strings.TrimSpace(strings.Replace(display.SPDisplaysVRAM, "GB", "", 1))
-				memoryTotal, _ = strconv.ParseFloat(memoryStr, 64)
-			}
-
-			gpuList = append(gpuList, types.GPU{
-				ID:          display.SPDisplaysDeviceID,
-				Name:        display.SPDisplaysModel,
-				MemoryTotal: &memoryTotal,
-			})
-		}
-	}
-
-	// Get GPU temperature using powermetrics
-	cmd = exec.Command("sudo", "powermetrics", "--samplers", "gpu_power", "-n", "1", "--json")
-	output, err = cmd.Output()
-	if err == nil {
-		var result struct {
-			GPU []struct {
-				Temperature float64 `json:"temperature"`
-			} `json:"gpu"`
-		}
-
-		if err := json.Unmarshal(output, &result); err == nil && len(result.GPU) > 0 {
-			// Assign temperature to the first GPU
-			if len(gpuList) > 0 {
-				gpuList[0].Temperature = &result.GPU[0].Temperature
-			}
-		}
+	for _, dataType := range result.SPDisplaysDataType {
+		gpuList = append(gpuList, types.GPU{
+			ID:   dataType.Name,
+			Name: dataType.SPPCIModel,
+			// TODO: add speed metrics
+			// TODO: add load metrics
+			// TODO: add memory metrics
+			// TODO: add power metrics
+			// TODO: add temp metrics
+		})
 	}
 
 	return gpuList, nil
