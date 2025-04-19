@@ -13,6 +13,18 @@ const config = {
     ignoreDuringBuilds: true,
   },
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: '/app/settings.html',
+        destination: '/settings',
+      },
+      {
+        source: '/app/data.html',
+        destination: '/data',
+      },
+    ];
+  },
 };
 
 export default config;
