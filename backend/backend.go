@@ -2,7 +2,9 @@ package backend
 
 import (
 	"context"
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"time"
 
@@ -17,13 +19,14 @@ import (
 )
 
 type Backend struct {
-	settings    *settings.Settings
-	dataStore   *data.DataStore
-	eventRouter *event.MessageRouter
-	wsServer    *websocket.WebsocketServer
+	settings         *settings.Settings
+	dataStore        *data.DataStore
+	eventRouter      *event.MessageRouter
+	wsServer         *websocket.WebsocketServer
+	webClientContent *embed.FS
 }
 
-func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
+func New(settings *settings.Settings, dataStore *data.DataStore, webClientContent *embed.FS) *Backend {
 	// Initialize the EventBus
 	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
@@ -32,10 +35,11 @@ func New(settings *settings.Settings, dataStore *data.DataStore) *Backend {
 	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
 
 	return &Backend{
-		settings:    settings,
-		dataStore:   dataStore,
-		eventRouter: eventRouter,
-		wsServer:    wsServer,
+		settings:         settings,
+		dataStore:        dataStore,
+		eventRouter:      eventRouter,
+		wsServer:         wsServer,
+		webClientContent: webClientContent,
 	}
 }
 
@@ -45,8 +49,15 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter)
 
+	// Create a file system that's rooted at the web-client/out directory
+	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
+	if err != nil {
+		log.Fatal("Failed to create sub filesystem:", err)
+	}
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
+
+	mux.Handle("/", http.FileServer(http.FS(subFS)))
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
