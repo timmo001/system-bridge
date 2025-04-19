@@ -195,11 +195,11 @@ jobs:
           name: system-bridge-windows-packages-${{ github.ref_name }}
           path: dist/windows
 
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/linux/*
-            dist/windows/*
-          draft: ${{ github.ref_type == 'tag' && 'false' || 'true' }}
-          generate_release_notes: true
+      # - name: Create release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: |
+      #       dist/linux/*
+      #       dist/windows/*
+      #     draft: ${{ github.ref_type == 'tag' && 'false' || 'true' }}
+      #     generate_release_notes: true
