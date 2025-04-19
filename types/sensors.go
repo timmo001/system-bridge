@@ -87,11 +87,17 @@ type SensorsWindows struct {
 	NVIDIA   *SensorsNVIDIA           `json:"nvidia"`
 }
 
+type Temperature struct {
+	SensorKey   string  `json:"key"`
+	Temperature float64 `json:"temperature"`
+	High        float64 `json:"high"`
+	Critical    float64 `json:"critical"`
+}
+
 // SensorsData represents all sensor information
 type SensorsData struct {
 	// TODO: Add fans model
-	Fans any `json:"fans"`
-	// TODO: Add temperatures model
-	Temperatures   any     `json:"temperatures"`
+	Fans           any             `json:"fans"`
+	Temperatures   []Temperature   `json:"temperatures"`
 	WindowsSensors *SensorsWindows `json:"windows_sensors"`
 }
