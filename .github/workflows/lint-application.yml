@@ -31,6 +31,15 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-cache-
+
       - name: Install dependencies
         run: |
           sudo apt-get update

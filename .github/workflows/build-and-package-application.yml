@@ -68,6 +68,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-cache-
 
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-cache-
+
       - name: Install linux dependencies
         if: matrix.platform == 'linux'
         run: |
