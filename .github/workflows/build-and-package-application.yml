@@ -47,6 +47,8 @@ jobs:
           cache: true
           go-version-file: "go.mod"
 
+      - uses: oven-sh/setup-bun@v2
+
       - name: Cache go build
         uses: actions/cache@v4
         with:
@@ -93,6 +95,9 @@ jobs:
         run: |
           go mod download
           go mod verify
+
+      - name: Build client project
+        run: make build_client
 
       - name: Run tests
         run: go test -v ./...
