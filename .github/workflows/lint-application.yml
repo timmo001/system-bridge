@@ -11,6 +11,9 @@ on:
       - synchronize
   workflow_dispatch: {}
 
+env:
+  STATIC_EXPORT: "true"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -29,10 +32,24 @@ jobs:
           cache: true
           go-version-file: "go.mod"
 
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-cache-
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libx11-dev libxtst-dev
+
+      - name: Build client project
+        run: make build_client
 
       - name: Lint application
         uses: golangci/golangci-lint-action@v7

@@ -12,6 +12,9 @@ on:
       - synchronize
   workflow_dispatch: {}
 
+env:
+  STATIC_EXPORT: "true"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && format('tag-{0}', github.ref_name) || github.ref }}
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
@@ -47,6 +50,8 @@ jobs:
           cache: true
           go-version-file: "go.mod"
 
+      - uses: oven-sh/setup-bun@v2
+
       - name: Cache go build
         uses: actions/cache@v4
         with:
@@ -65,6 +70,15 @@ jobs:
           key: ${{ runner.os }}-apt-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
           restore-keys: |
             ${{ runner.os }}-apt-cache-
+
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-cache-
 
       - name: Install linux dependencies
         if: matrix.platform == 'linux'
@@ -93,6 +107,9 @@ jobs:
         run: |
           go mod download
           go mod verify
+
+      - name: Build client project
+        run: make build_client
 
       - name: Run tests
         run: go test -v ./...
