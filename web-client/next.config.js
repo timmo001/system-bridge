@@ -5,7 +5,7 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {
+const nextConfig = {
 	experimental: {
 		reactCompiler: true,
 	},
@@ -13,8 +13,11 @@ const config = {
 		ignoreDuringBuilds: true,
 	},
 	reactStrictMode: true,
-	output: "export",
-	async rewrites() {
+	output: process.env.STATIC_EXPORT ? "export" : undefined,
+};
+
+if (!process.env.STATIC_EXPORT) {
+	nextConfig.rewrites = async () => {
 		return [
 			{
 				source: "/app/settings.html",
@@ -25,7 +28,7 @@ const config = {
 				destination: "/data",
 			},
 		];
-	},
-};
+	};
+}
 
-export default config;
+export default nextConfig;
