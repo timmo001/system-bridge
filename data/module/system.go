@@ -85,7 +85,7 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 func getIPv4Address() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Warn("Failed to get IPv4 Address: %v", err)
+		log.Warnf("Failed to get IPv4 Address: %v", err)
 		return ""
 	}
 	defer func() {
@@ -101,7 +101,7 @@ func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
 	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
-		log.Warn("Failed to get IPv6 Address: %v", err)
+		log.Warnf("Failed to get IPv6 Address: %v", err)
 		return ""
 	}
 	defer func() {
