@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jezek/xgb v1.1.1
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/shirou/gopsutil/v4 v4.25.3
+	github.com/shirou/gopsutil/v4 v4.25.4
 	github.com/spf13/viper v1.20.1
 	github.com/urfave/cli/v3 v3.3.2
 	golang.org/x/time v0.11.0
