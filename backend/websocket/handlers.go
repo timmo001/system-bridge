@@ -109,7 +109,7 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	// close connection if remote addr tries to connect again
 	if connection, ok := ws.connections[conn.RemoteAddr().String()]; ok {
 		ws.RemoveConnection(connection)
-		connection.Close()
+		_ = connection.Close()
 	}
 
 	ws.connections[conn.RemoteAddr().String()] = conn
@@ -171,7 +171,7 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(meta data.ModuleMeta, addr *str
 	}
 
 	if addr != nil {
-		if conn, ok := ws.connections[*addr]; ok == true {
+		if conn, ok := ws.connections[*addr]; ok {
 			log.Info("WS: Broadcasting module update to connection", "addr", *addr, "module", meta.Module)
 			ws.SendMessage(conn, response)
 		}
