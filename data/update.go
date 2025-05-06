@@ -87,6 +87,8 @@ func (tp *UpdateTaskProcessor) worker() {
 				continue
 			}
 
+			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
+			defer cancel()
 			// Process task
 			data, err := task.Update(ctx)
 			if err != nil {
@@ -117,6 +119,8 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	for _, updater := range dataStore.GetRegisteredModules() {
 		processor.AddTask(updater)
 	}
+
+	// TODO: use channels and wait groups to track task completion. use context.WithTimeout to make sure to finish withing time frame
 
 	// Run for a while then stop
 	time.Sleep(5 * time.Second)
