@@ -46,6 +46,10 @@ func New(settings *settings.Settings, dataStore *data.DataStore, webClientConten
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Starting backend server...")
 
+	// Create a context that can be canceled
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter)
 
@@ -84,30 +88,47 @@ func (b *Backend) Run(ctx context.Context) error {
 		Handler: mux,
 	}
 
+	// Create an error channel to capture server errors
+	errChan := make(chan error, 1)
+
 	// Start server in a goroutine
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Error("Server error:", err)
+			errChan <- err
+			cancel()
 		}
+		log.Info("Backend server is running on", "address", server.Addr)
 	}()
-
-	log.Info("Backend server is running on", "address", server.Addr)
 
 	// TODO: MDNS / SSDP / DHCP discovery
 
-	// Run data update task processor every 30 seconds
+	// Run data update task processor in a separate goroutine
 	go func() {
+		// Run immediately on startup
+		data.RunUpdateTaskProcessor(b.dataStore)
+		log.Info("Initial data update task processor completed")
+
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+
 		for {
-			data.RunUpdateTaskProcessor(b.dataStore)
-			log.Info("Data update task processor completed")
-			log.Info("Waiting for 30 seconds...")
-			time.Sleep(30 * time.Second)
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				data.RunUpdateTaskProcessor(b.dataStore)
+				log.Info("Data update task processor completed")
+			}
 		}
 	}()
 
-	// Wait for context cancellation
-	<-ctx.Done()
+	// Wait for either context cancellation or server error
+	select {
+	case <-ctx.Done():
+		log.Info("Backend server is shutting down...")
+	case err := <-errChan:
+		log.Error("Server error caused shutdown:", "err", err)
+	}
 
-	log.Info("Backend server is shutting down...")
 	return server.Shutdown(ctx)
 }
