@@ -15,7 +15,7 @@ func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.Messa
 		if closeErr := conn.Close(); closeErr != nil {
 			log.Error("Error closing connection:", closeErr)
 		}
-		delete(ws.connections, conn)
+		delete(ws.connections, conn.RemoteAddr().String())
 	}
 }
 
