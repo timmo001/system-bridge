@@ -8,75 +8,73 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
+func getMediaData(media Media) (Media, error) {
 	// On Linux, we'll use playerctl to get media information
 	cmd := exec.Command("playerctl", "metadata", "--format", "json", "--all-players")
 	output, err := cmd.Output()
 	if err == nil {
 		var metadata struct {
-			Title       string  `json:"title"`
-			Artist      string  `json:"artist"`
-			Album       string  `json:"album"`
-			Duration    string  `json:"duration"`
-			Position    string  `json:"position"`
-			Status      string  `json:"status"`
-			PlayerName  string  `json:"playerName"`
-			Volume      float64 `json:"volume"`
-			Shuffle     string  `json:"shuffle"`
-			LoopStatus  string  `json:"loopStatus"`
+			Title      string  `json:"title"`
+			Artist     string  `json:"artist"`
+			Album      string  `json:"album"`
+			Duration   string  `json:"duration"`
+			Position   string  `json:"position"`
+			Status     string  `json:"status"`
+			PlayerName string  `json:"playerName"`
+			Volume     float64 `json:"volume"`
+			Shuffle    string  `json:"shuffle"`
+			LoopStatus string  `json:"loopStatus"`
 		}
 		if err := json.Unmarshal(output, &metadata); err == nil {
-			mediaData.Title = &metadata.Title
-			mediaData.Artist = &metadata.Artist
-			mediaData.AlbumTitle = &metadata.Album
-			mediaData.Status = &metadata.Status
-			mediaData.Type = &metadata.PlayerName
+			media.Title = &metadata.Title
+			media.Artist = &metadata.Artist
+			media.AlbumTitle = &metadata.Album
+			media.Status = &metadata.Status
+			media.Type = &metadata.PlayerName
 
 			// Convert duration and position to float64
 			if duration, err := strconv.ParseFloat(metadata.Duration, 64); err == nil {
-				mediaData.Duration = &duration
+				media.Duration = &duration
 			}
 			if position, err := strconv.ParseFloat(metadata.Position, 64); err == nil {
-				mediaData.Position = &position
+				media.Position = &position
 			}
 
 			// Set control states based on status
 			isPlaying := strings.ToLower(metadata.Status) == "playing"
-			mediaData.IsPlayEnabled = &[]bool{!isPlaying}[0]
-			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
-			mediaData.IsStopEnabled = &[]bool{true}[0]
+			media.IsPlayEnabled = &[]bool{!isPlaying}[0]
+			media.IsPauseEnabled = &[]bool{isPlaying}[0]
+			media.IsStopEnabled = &[]bool{true}[0]
 
 			// Set shuffle and repeat states
 			if metadata.Shuffle != "" {
 				isShuffle := strings.ToLower(metadata.Shuffle) == "on"
-				mediaData.Shuffle = &isShuffle
+				media.Shuffle = &isShuffle
 			}
 			if metadata.LoopStatus != "" {
-				mediaData.Repeat = &metadata.LoopStatus
+				media.Repeat = &metadata.LoopStatus
 			}
 		}
 	}
 
 	// If playerctl fails or no media is playing, check for browser media
-	if mediaData.Title == nil {
+	if media.Title == nil {
 		cmd = exec.Command("xdotool", "search", "--name", "YouTube|Netflix|Spotify|VLC", "getwindowname")
 		output, err = cmd.Output()
 		if err == nil {
 			title := strings.TrimSpace(string(output))
 			if title != "" {
-				mediaData.Title = &title
-				mediaData.Type = &[]string{"browser"}[0]
-				mediaData.Status = &[]string{"playing"}[0]
-				mediaData.IsPlayEnabled = &[]bool{true}[0]
-				mediaData.IsPauseEnabled = &[]bool{true}[0]
-				mediaData.IsStopEnabled = &[]bool{true}[0]
+				media.Title = &title
+				media.Type = &[]string{"browser"}[0]
+				media.Status = &[]string{"playing"}[0]
+				media.IsPlayEnabled = &[]bool{true}[0]
+				media.IsPauseEnabled = &[]bool{true}[0]
+				media.IsStopEnabled = &[]bool{true}[0]
 			}
 		}
 	}
 
-	return mediaData, nil
+	return media, nil
 }

@@ -8,12 +8,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getGPUs() ([]types.GPU, error) {
-	var gpuList []types.GPU
+func getGPUs() ([]GPU, error) {
+	var gpuList []GPU
 
 	// Try to get NVIDIA GPU info first
 	cmd := exec.Command("nvidia-smi", "--query-gpu=gpu_name,memory.total,memory.used,memory.free,utilization.gpu,clocks.current.graphics,clocks.current.memory,power.draw,temperature.gpu", "--format=csv,noheader,nounits")
@@ -33,7 +31,7 @@ func getGPUs() ([]types.GPU, error) {
 				powerUsage, _ := strconv.ParseFloat(strings.TrimSpace(fields[7]), 64)
 				temperature, _ := strconv.ParseFloat(strings.TrimSpace(fields[8]), 64)
 
-				gpuList = append(gpuList, types.GPU{
+				gpuList = append(gpuList, GPU{
 					ID:          fmt.Sprintf("nvidia-%d", len(gpuList)),
 					Name:        name,
 					CoreClock:   &coreClock,
@@ -61,7 +59,7 @@ func getGPUs() ([]types.GPU, error) {
 					parts := strings.Split(line, ":")
 					if len(parts) >= 2 {
 						name := strings.TrimSpace(parts[2])
-						gpuList = append(gpuList, types.GPU{
+						gpuList = append(gpuList, GPU{
 							ID:   fmt.Sprintf("gpu-%d", len(gpuList)),
 							Name: name,
 						})
