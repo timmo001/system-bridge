@@ -59,44 +59,16 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			continue
 		}
 
-		ws.HandleMessage(conn, message)
+		// Handle different event types
+		log.Info("Received message", "event", msg.Event, "id", msg.ID)
+		// Pass message to event handlers
+		response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
+			ID:    msg.ID,
+			Event: event.EventType(msg.Event),
+			Data:  msg.Data,
+		})
+		ws.SendMessage(conn, response)
 	}
-}
-
-func (ws *WebsocketServer) HandleMessage(conn *websocket.Conn, message []byte) {
-	var msg WebSocketRequest
-	if err := json.Unmarshal(message, &msg); err != nil {
-		return
-	}
-
-	// Handle different event types
-	log.Info("Received message", "event", msg.Event, "id", msg.ID)
-	// Pass message to event handlers
-	response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
-		ID:    msg.ID,
-		Event: event.EventType(msg.Event),
-		Data:  msg.Data,
-	})
-	ws.SendMessage(conn, response)
-}
-
-func (ws *WebsocketServer) HandleClose(conn *websocket.Conn) {
-	if err := conn.Close(); err != nil {
-		log.Error("Error closing connection:", err)
-	}
-}
-
-func (ws *WebsocketServer) HandleError(conn *websocket.Conn, err error) {
-	log.Error("WebSocket error:", err)
-	ws.SendError(conn,
-		WebSocketRequest{
-			ID:    "unknown",
-			Event: "unknown",
-			Data:  map[string]string{},
-		},
-		event.ResponseSubtypeNone,
-		err.Error(),
-	)
 }
 
 // AddConnection adds a new WebSocket connection
