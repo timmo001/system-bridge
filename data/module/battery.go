@@ -1,12 +1,22 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/distatus/battery"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateBatteryModule() (types.BatteryData, error) {
+// BatteryData represents battery information
+type BatteryData struct {
+	IsCharging    bool    `json:"is_charging"`
+	Percentage    float64 `json:"percentage"`
+	TimeRemaining float64 `json:"time_remaining"` // Seconds remaining
+}
+
+func (b BatteryData) Name() types.ModuleName { return types.ModuleBattery }
+func (b BatteryData) Update(ctx context.Context) (any, error) {
 	log.Info("Getting battery data")
 
 	// Get all batteries
@@ -15,21 +25,13 @@ func (t *Module) UpdateBatteryModule() (types.BatteryData, error) {
 	// This handles both error cases and systems without batteries
 	if err != nil {
 		log.Debug("No battery present or error getting battery info")
-		return types.BatteryData{
-			IsCharging:    nil,
-			Percentage:    nil,
-			TimeRemaining: nil,
-		}, nil
+		return BatteryData{}, nil
 	}
 
 	// If no batteries found, return empty data
 	if len(batteries) == 0 {
 		log.Debug("No batteries found")
-		return types.BatteryData{
-			IsCharging:    nil,
-			Percentage:    nil,
-			TimeRemaining: nil,
-		}, nil
+		return BatteryData{}, nil
 	}
 
 	// Use the first battery (most systems only have one)
@@ -54,9 +56,9 @@ func (t *Module) UpdateBatteryModule() (types.BatteryData, error) {
 		}
 	}
 
-	return types.BatteryData{
-		IsCharging:    &isCharging,
-		Percentage:    &percentage,
-		TimeRemaining: &timeRemaining,
+	return BatteryData{
+		IsCharging:    isCharging,
+		Percentage:    percentage,
+		TimeRemaining: timeRemaining,
 	}, nil
 }

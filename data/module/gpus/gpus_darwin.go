@@ -8,11 +8,10 @@ import (
 	"os/exec"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getGPUs() ([]types.GPU, error) {
-	var gpuList []types.GPU
+func getGPUs() ([]GPU, error) {
+	var gpuList []GPU
 
 	// Get GPU information using system_profiler
 	cmd := exec.Command("system_profiler", "SPDisplaysDataType", "-json")
@@ -39,7 +38,7 @@ func getGPUs() ([]types.GPU, error) {
 
 	// Convert to our GPU type
 	for _, dataType := range result.SPDisplaysDataType {
-		gpuList = append(gpuList, types.GPU{
+		gpuList = append(gpuList, GPU{
 			ID:   dataType.Name,
 			Name: dataType.SPPCIModel,
 			// TODO: add speed metrics

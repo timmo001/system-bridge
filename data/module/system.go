@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"context"
 	"errors"
 	"net"
 	"os"
@@ -12,13 +13,51 @@ import (
 	"github.com/timmo001/system-bridge/version"
 )
 
-func (t *Module) UpdateSystemModule() (types.SystemData, error) {
+type RunMode string
+
+const (
+	RunModeStandalone RunMode = "standalone"
+)
+
+// SystemUser represents information about a system user
+type SystemUser struct {
+	Name     string  `json:"name" mapstructure:"name"`
+	Active   bool    `json:"active" mapstructure:"active"`
+	Terminal string  `json:"terminal" mapstructure:"terminal"`
+	Host     string  `json:"host" mapstructure:"host"`
+	Started  int     `json:"started" mapstructure:"started"`
+	PID      float64 `json:"pid" mapstructure:"pid"`
+}
+
+// SystemData represents system information
+type SystemData struct {
+	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
+	FQDN                  string       `json:"fqdn" mapstructure:"fqdn"`
+	Hostname              string       `json:"hostname" mapstructure:"hostname"`
+	IPAddress4            string       `json:"ip_address_4" mapstructure:"ip_address_4"`
+	MACAddress            string       `json:"mac_address" mapstructure:"mac_address"`
+	PlatformVersion       string       `json:"platform_version" mapstructure:"platform_version"`
+	Platform              string       `json:"platform" mapstructure:"platform"`
+	Uptime                uint64       `json:"uptime" mapstructure:"uptime"`
+	Users                 []SystemUser `json:"users" mapstructure:"users"`
+	UUID                  string       `json:"uuid" mapstructure:"uuid"`
+	Version               string       `json:"version" mapstructure:"version"`
+	CameraUsage           []string     `json:"camera_usage" mapstructure:"camera_usage"`
+	IPAddress6            string       `json:"ip_address_6" mapstructure:"ip_address_6"`
+	PendingReboot         bool         `json:"pending_reboot" mapstructure:"pending_reboot"`
+	RunMode               RunMode      `json:"run_mode" mapstructure:"run_mode"`
+	VersionLatestURL      string       `json:"version_latest_url" mapstructure:"version_latest_url"`
+	VersionLatest         string       `json:"version_latest" mapstructure:"version_latest"`
+	VersionNewerAvailable bool         `json:"version_newer_available" mapstructure:"version_newer_available"`
+}
+
+func (sd SystemData) Name() types.ModuleName { return types.ModuleSystem }
+func (sd SystemData) Update(ctx context.Context) (any, error) {
 	log.Info("Getting system data")
 
 	// Initialize arrays
-	var systemData types.SystemData
-	systemData.Users = make([]types.SystemUser, 0)
-	systemData.CameraUsage = make([]string, 0)
+	sd.Users = make([]SystemUser, 0)
+	sd.CameraUsage = make([]string, 0)
 
 	infoStat, err := host.Info()
 	if err != nil {
@@ -30,26 +69,26 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 		log.Warnf("Failed to get user info: %v", err)
 	}
 
-	systemData.BootTime = infoStat.BootTime
+	sd.BootTime = infoStat.BootTime
 
-	systemData.Hostname = infoStat.Hostname
+	sd.Hostname = infoStat.Hostname
 
-	systemData.IPAddress4 = getIPv4Address()
-	systemData.IPAddress6 = getIPv6Address()
-	systemData.MACAddress = getMACAddress()
+	sd.IPAddress4 = getIPv4Address()
+	sd.IPAddress6 = getIPv6Address()
+	sd.MACAddress = getMACAddress()
 
 	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = infoStat.Hostname
 	}
-	systemData.FQDN = getFQDN(hostname)
+	sd.FQDN = getFQDN(hostname)
 
-	systemData.PlatformVersion = infoStat.PlatformVersion
-	systemData.Platform = infoStat.Platform
-	systemData.Uptime = infoStat.Uptime
+	sd.PlatformVersion = infoStat.PlatformVersion
+	sd.Platform = infoStat.Platform
+	sd.Uptime = infoStat.Uptime
 
 	for _, userStat := range users {
-		systemData.Users = append(systemData.Users, types.SystemUser{
+		sd.Users = append(sd.Users, SystemUser{
 			Name:     userStat.User,
 			Terminal: userStat.Terminal,
 			Host:     userStat.Host,
@@ -59,9 +98,9 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 		})
 	}
 
-	systemData.UUID = infoStat.HostID
+	sd.UUID = infoStat.HostID
 
-	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
+	sd.RunMode = RunModeStandalone // Always set RunMode to standalone
 
 	// Get version information
 	currentVersion := version.Version
@@ -73,12 +112,12 @@ func (t *Module) UpdateSystemModule() (types.SystemData, error) {
 
 	versionNewerAvailable := version.IsNewerVersionAvailable(currentVersion, latestVersion)
 
-	systemData.Version = currentVersion
-	systemData.VersionLatest = &latestVersion
-	systemData.VersionLatestURL = &version.LatestVersionUserURL
-	systemData.VersionNewerAvailable = &versionNewerAvailable
+	sd.Version = currentVersion
+	sd.VersionLatest = latestVersion
+	sd.VersionLatestURL = version.LatestVersionUserURL
+	sd.VersionNewerAvailable = versionNewerAvailable
 
-	return systemData, nil
+	return sd, nil
 }
 
 // getIPv4Address gets the primary IPv4 address

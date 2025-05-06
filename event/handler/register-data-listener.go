@@ -14,7 +14,7 @@ type RegisterDataListenerRequestData struct {
 
 func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventRegisterDataListener, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received register data listener event: %v", message)
+		log.Info("Received register data listener event", "id", message.ID, "event", message.Event, "data", message.Data)
 
 		var data RegisterDataListenerRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

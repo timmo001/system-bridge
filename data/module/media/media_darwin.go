@@ -7,11 +7,9 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
-
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
+func getMediaData(media Media) (Media, error) {
 	// On macOS, we'll use osascript to get media information
 	cmd := exec.Command("osascript", "-e", `
 		tell application "System Events"
@@ -64,15 +62,15 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			Type   string `json:"type"`
 		}
 		if err := json.Unmarshal(output, &mediaInfo); err == nil && mediaInfo.Title != "" {
-			mediaData.Title = &mediaInfo.Title
-			mediaData.Status = &mediaInfo.Status
-			mediaData.Type = &mediaInfo.Type
+			media.Title = &mediaInfo.Title
+			media.Status = &mediaInfo.Status
+			media.Type = &mediaInfo.Type
 
 			// Set control states based on status
 			isPlaying := strings.ToLower(mediaInfo.Status) == "playing"
-			mediaData.IsPlayEnabled = &[]bool{!isPlaying}[0]
-			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
-			mediaData.IsStopEnabled = &[]bool{true}[0]
+			media.IsPlayEnabled = &[]bool{!isPlaying}[0]
+			media.IsPauseEnabled = &[]bool{isPlaying}[0]
+			media.IsStopEnabled = &[]bool{true}[0]
 
 			// Get additional metadata based on media type
 			switch mediaInfo.Type {
@@ -87,16 +85,16 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 				`)
 				if output, err = cmd.Output(); err == nil {
 					var metadata struct {
-						Artist    string  `json:"artist"`
-						Album     string  `json:"album"`
-						Duration  float64 `json:"duration"`
-						Position  float64 `json:"position"`
+						Artist   string  `json:"artist"`
+						Album    string  `json:"album"`
+						Duration float64 `json:"duration"`
+						Position float64 `json:"position"`
 					}
 					if err := json.Unmarshal(output, &metadata); err == nil {
-						mediaData.Artist = &metadata.Artist
-						mediaData.AlbumTitle = &metadata.Album
-						mediaData.Duration = &metadata.Duration
-						mediaData.Position = &metadata.Position
+						media.Artist = &metadata.Artist
+						media.AlbumTitle = &metadata.Album
+						media.Duration = &metadata.Duration
+						media.Position = &metadata.Position
 					}
 				}
 			case "spotify":
@@ -110,21 +108,21 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 				`)
 				if output, err = cmd.Output(); err == nil {
 					var metadata struct {
-						Artist    string  `json:"artist"`
-						Album     string  `json:"album"`
-						Duration  float64 `json:"duration"`
-						Position  float64 `json:"position"`
+						Artist   string  `json:"artist"`
+						Album    string  `json:"album"`
+						Duration float64 `json:"duration"`
+						Position float64 `json:"position"`
 					}
 					if err := json.Unmarshal(output, &metadata); err == nil {
-						mediaData.Artist = &metadata.Artist
-						mediaData.AlbumTitle = &metadata.Album
-						mediaData.Duration = &metadata.Duration
-						mediaData.Position = &metadata.Position
+						media.Artist = &metadata.Artist
+						media.AlbumTitle = &metadata.Album
+						media.Duration = &metadata.Duration
+						media.Position = &metadata.Position
 					}
 				}
 			}
 		}
 	}
 
-	return mediaData, nil
+	return media, nil
 }

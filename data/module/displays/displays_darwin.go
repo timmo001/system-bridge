@@ -52,12 +52,11 @@ import (
 	"unsafe"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getDisplays() ([]types.Display, error) {
+func getDisplays() ([]Display, error) {
 	const maxDisplays = 16
-	displays := make([]types.Display, 0)
+	displays := make([]Display, 0)
 
 	// Allocate array for display IDs
 	cDisplays := make([]C.CGDirectDisplayID, maxDisplays)
@@ -79,7 +78,7 @@ func getDisplays() ([]types.Display, error) {
 		refreshRate := float64(C.getDisplayRefreshRate(displayID))
 		isPrimary := displayID == mainDisplay
 
-		display := types.Display{
+		display := Display{
 			ID:                   fmt.Sprintf("%d", displayID),
 			Name:                 fmt.Sprintf("Display %d", displayID),
 			ResolutionHorizontal: width,
@@ -91,7 +90,7 @@ func getDisplays() ([]types.Display, error) {
 		}
 
 		if displayID == mainDisplay {
-			displays = append([]types.Display{display}, displays...)
+			displays = append([]Display{display}, displays...)
 		} else {
 			displays = append(displays, display)
 		}

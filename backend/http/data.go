@@ -33,20 +33,20 @@ func GetModuleDataHandler(settings *settings.Settings, dataStore *data.DataStore
 		}
 
 		// Get module data
-		modulePtr := dataStore.GetModule(module)
-		if modulePtr.Data == nil {
+		meta, err := dataStore.GetModule(module)
+		if err != nil {
 			log.Info("GET: /api/data/:module", "module", module, "data", "not found")
 			http.Error(w, "Module not found", http.StatusNotFound)
 			return
 		}
 
-		log.Info("GET: /api/data/:module", "module", module, "data", modulePtr.Data)
+		log.Info("GET: /api/data/:module", "module", module, "data", meta.Data)
 
 		// Set response headers
 		w.Header().Set("Content-Type", "application/json")
 
 		// Write response
-		if err := json.NewEncoder(w).Encode(modulePtr.Data); err != nil {
+		if err := json.NewEncoder(w).Encode(meta.Data); err != nil {
 			log.Errorf("Error encoding response: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return

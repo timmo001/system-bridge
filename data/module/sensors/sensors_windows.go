@@ -9,16 +9,15 @@ import (
 	"os/exec"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/types"
 )
 
-// getWindowsSensorsData fetches sensor data available only on Windows platforms
-func getWindowsSensorsData() (*types.SensorsWindows, error) {
-	var windowsSensors types.SensorsWindows
-	windowsSensors.Hardware = make([]types.SensorsWindowsHardware, 0)
-	windowsSensors.NVIDIA = &types.SensorsNVIDIA{
-		Displays: make([]types.SensorsNVIDIADisplay, 0),
-		GPUs:     make([]types.SensorsNVIDIAGPU, 0),
+// GetWindowsSensorsData fetches sensor data available only on Windows platforms
+func GetWindowsSensorsData() (*SensorsWindows, error) {
+	var windowsSensors SensorsWindows
+	windowsSensors.Hardware = make([]SensorsWindowsHardware, 0)
+	windowsSensors.NVIDIA = &SensorsNVIDIA{
+		Displays: make([]SensorsNVIDIADisplay, 0),
+		GPUs:     make([]SensorsNVIDIAGPU, 0),
 	}
 
 	// Run lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe if it exists

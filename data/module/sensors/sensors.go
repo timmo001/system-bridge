@@ -3,27 +3,112 @@ package sensors
 import (
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v4/sensors"
-	"github.com/timmo001/system-bridge/types"
 )
 
-func GetSensorsData() (types.SensorsData, error) {
-	data, err := getWindowsSensorsData()
-	if err != nil {
-		return types.SensorsData{}, err
-	}
-	temperatures := make([]types.Temperature, 0)
+// SensorsWindowsSensor represents a Windows sensor
+type SensorsWindowsSensor struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value any    `json:"value"`
+}
+
+// SensorsWindowsHardware represents Windows hardware sensor information
+type SensorsWindowsHardware struct {
+	ID          string                   `json:"id"`
+	Name        string                   `json:"name"`
+	Type        string                   `json:"type"`
+	Subhardware []SensorsWindowsHardware `json:"subhardware"`
+	Sensors     []SensorsWindowsSensor   `json:"sensors"`
+}
+
+// SensorsNVIDIAChipset represents NVIDIA chipset information
+type SensorsNVIDIAChipset struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	Flags      string `json:"flags"`
+	VendorID   int    `json:"vendor_id"`
+	VendorName string `json:"vendor_name"`
+}
+
+// SensorsNVIDIADisplay represents NVIDIA display information
+type SensorsNVIDIADisplay struct {
+	ID                   int    `json:"id"`
+	Name                 string `json:"name"`
+	Active               bool   `json:"active"`
+	Available            bool   `json:"available"`
+	Connected            bool   `json:"connected"`
+	Dynamic              bool   `json:"dynamic"`
+	AspectHorizontal     int    `json:"aspect_horizontal"`
+	AspectVertical       int    `json:"aspect_vertical"`
+	BrightnessCurrent    int    `json:"brightness_current"`
+	BrightnessDefault    int    `json:"brightness_default"`
+	BrightnessMax        int    `json:"brightness_max"`
+	BrightnessMin        int    `json:"brightness_min"`
+	ColorDepth           string `json:"color_depth"`
+	ConnectionType       string `json:"connection_type"`
+	PixelClock           int    `json:"pixel_clock"`
+	RefreshRate          int    `json:"refresh_rate"`
+	ResolutionHorizontal int    `json:"resolution_horizontal"`
+	ResolutionVertical   int    `json:"resolution_vertical"`
+}
+
+// SensorsNVIDIADriver represents NVIDIA driver information
+type SensorsNVIDIADriver struct {
+	BranchVersion    string `json:"branch_version"`
+	InterfaceVersion string `json:"interface_version"`
+	Version          int    `json:"version"`
+}
+
+// SensorsNVIDIAGPU represents NVIDIA GPU information
+type SensorsNVIDIAGPU struct {
+	ID                   int     `json:"id"`
+	Name                 string  `json:"name"`
+	BiosOEMRevision      *int    `json:"bios_oem_revision"`
+	BiosRevision         *int    `json:"bios_revision"`
+	BiosVersion          *string `json:"bios_version"`
+	CurrentFanSpeedLevel *int    `json:"current_fan_speed_level"`
+	CurrentFanSpeedRPM   *int    `json:"current_fan_speed_rpm"`
+	DriverModel          *int    `json:"driver_model"`
+	MemoryAvailable      *int    `json:"memory_available"`
+	MemoryCapacity       *int    `json:"memory_capacity"`
+	MemoryMaker          *string `json:"memory_maker"`
+	Serial               *string `json:"serial"`
+	SystemType           *string `json:"system_type"`
+	Type                 *string `json:"type"`
+}
+
+// SensorsNVIDIA represents all NVIDIA sensor information
+type SensorsNVIDIA struct {
+	Chipset  *SensorsNVIDIAChipset  `json:"chipset"`
+	Displays []SensorsNVIDIADisplay `json:"displays"`
+	Driver   *SensorsNVIDIADriver   `json:"driver"`
+	GPUs     []SensorsNVIDIAGPU     `json:"gpus"`
+}
+
+// SensorsWindows represents Windows sensor information
+type SensorsWindows struct {
+	Hardware []SensorsWindowsHardware `json:"hardware"`
+	NVIDIA   *SensorsNVIDIA           `json:"nvidia"`
+}
+
+type Temperature struct {
+	SensorKey   string  `json:"key"`
+	Temperature float64 `json:"temperature"`
+	High        float64 `json:"high"`
+	Critical    float64 `json:"critical"`
+}
+
+func GetTemperatureSensorsData() ([]Temperature, error) {
+	temperatures := make([]Temperature, 0)
 	temperatureStats, err := sensors.SensorsTemperatures()
 	if err != nil {
 		log.Error("failed to get  temperature stats", "error", err)
+		return temperatures, err
 	} else {
 		for _, ts := range temperatureStats {
-			temperatures = append(temperatures, types.Temperature{SensorKey: ts.SensorKey, Temperature: ts.Temperature, High: ts.High, Critical: ts.Critical})
+			temperatures = append(temperatures, Temperature{SensorKey: ts.SensorKey, Temperature: ts.Temperature, High: ts.High, Critical: ts.Critical})
 		}
 	}
-
-	return types.SensorsData{
-		WindowsSensors: data,
-		Fans:           nil,
-		Temperatures:   temperatures,
-	}, nil
+	return temperatures, nil
 }

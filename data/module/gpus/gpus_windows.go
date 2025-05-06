@@ -8,11 +8,10 @@ import (
 	"os/exec"
 
 	"github.com/charmbracelet/log"
-	"github.com/timmo001/system-bridge/types"
 )
 
-func getGPUs() ([]types.GPU, error) {
-	var gpus []types.GPU
+func getGPUs() ([]GPU, error) {
+	var gpus []GPU
 
 	// Get GPU information using PowerShell
 	cmd := exec.Command("powershell", "-Command", `
@@ -53,7 +52,7 @@ func getGPUs() ([]types.GPU, error) {
 
 	// Convert to our GPU type
 	for _, info := range gpuInfo {
-		gpus = append(gpus, types.GPU{
+		gpus = append(gpus, GPU{
 			ID:          info.ID,
 			Name:        info.Name,
 			MemoryTotal: &info.MemoryTotal,

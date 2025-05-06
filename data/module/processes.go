@@ -1,15 +1,35 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
+// Process represents information about a system process
+type Process struct {
+	ID               float64  `json:"id"`
+	Name             *string  `json:"name"`
+	CPUUsage         *float64 `json:"cpu_usage"`
+	Created          *float64 `json:"created"`
+	MemoryUsage      *float64 `json:"memory_usage"`
+	Path             *string  `json:"path"`
+	Status           *string  `json:"status"`
+	Username         *string  `json:"username"`
+	WorkingDirectory *string  `json:"working_directory"`
+}
+
+// ProcessesData represents information about all system processes
+type ProcessesData struct {
+}
+
+func (p ProcessesData) Name() types.ModuleName { return types.ModuleProcesses }
+func (p ProcessesData) Update(ctx context.Context) (any, error) {
 	log.Info("Getting processes data")
 
-	processesData := make([]types.Process, 0)
+	processesData := make([]Process, 0)
 
 	// Get process list
 	processes, err := process.Processes()
@@ -20,7 +40,7 @@ func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
 
 	// Process each process
 	for _, p := range processes {
-		proc := types.Process{
+		proc := Process{
 			ID: float64(p.Pid),
 		}
 
