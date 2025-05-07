@@ -53,6 +53,9 @@ export function SystemBridgeWSProvider({
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
 
       if (!isRequestingData) {
         setIsRequestingData(true);
