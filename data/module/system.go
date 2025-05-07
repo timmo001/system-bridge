@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"context"
 	"errors"
 	"net"
 	"os"
@@ -12,7 +13,10 @@ import (
 	"github.com/timmo001/system-bridge/version"
 )
 
-func (t *Module) UpdateSystemModule() (types.SystemData, error) {
+type SystemModule struct{}
+
+func (sm SystemModule) Name() types.ModuleName { return types.ModuleSystem }
+func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting system data")
 
 	// Initialize arrays

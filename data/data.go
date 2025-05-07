@@ -1,83 +1,141 @@
 package data
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/bus"
-	data_module "github.com/timmo001/system-bridge/data/module"
+	"github.com/timmo001/system-bridge/data/module"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
+type Updater interface {
+	Name() types.ModuleName
+	Update(context.Context) (any, error)
+}
+
+// ModuleMeta represents a data module
+type ModuleMeta struct {
+	Name    types.ModuleName `json:"module" mapstructure:"module"`
+	updater Updater
+	Data    any    `json:"data" mapstructure:"data"`
+	Updated string `json:"updated" mapstructure:"updated"`
+}
+
 type DataStore struct {
-	Battery   data_module.Module
-	CPU       data_module.Module
-	Disks     data_module.Module
-	Displays  data_module.Module
-	GPUs      data_module.Module
-	Media     data_module.Module
-	Memory    data_module.Module
-	Networks  data_module.Module
-	Processes data_module.Module
-	Sensors   data_module.Module
-	System    data_module.Module
+	mu       sync.RWMutex
+	registry map[types.ModuleName]ModuleMeta
 }
 
 func NewDataStore() (*DataStore, error) {
-	ds := &DataStore{
-		Battery:   data_module.Module{Module: types.ModuleBattery},
-		CPU:       data_module.Module{Module: types.ModuleCPU},
-		Disks:     data_module.Module{Module: types.ModuleDisks},
-		Displays:  data_module.Module{Module: types.ModuleDisplays},
-		GPUs:      data_module.Module{Module: types.ModuleGPUs},
-		Media:     data_module.Module{Module: types.ModuleMedia},
-		Memory:    data_module.Module{Module: types.ModuleMemory},
-		Networks:  data_module.Module{Module: types.ModuleNetworks},
-		Processes: data_module.Module{Module: types.ModuleProcesses},
-		Sensors:   data_module.Module{Module: types.ModuleSensors},
-		System:    data_module.Module{Module: types.ModuleSystem},
-	}
+	ds := &DataStore{registry: make(map[types.ModuleName]ModuleMeta, 0)}
 
-	// Load data for all modules
-	for _, module := range []types.ModuleName{
-		types.ModuleBattery,
-		types.ModuleCPU,
-		types.ModuleDisks,
-		types.ModuleDisplays,
-		types.ModuleGPUs,
-		types.ModuleMedia,
-		types.ModuleMemory,
-		types.ModuleNetworks,
-		types.ModuleProcesses,
-		types.ModuleSensors,
-		types.ModuleSystem,
-	} {
-		// Get a pointer to the module and load data
-		modulePtr := ds.GetModule(module)
-		if err := ds.loadModuleData(modulePtr); err != nil {
-			return nil, fmt.Errorf("error loading data for module %s: %w", module, err)
-		}
-	}
+	ds.Register(data_module.BatteryModule{})
+	ds.Register(data_module.CPUModule{})
+	ds.Register(data_module.DiskModule{})
+	ds.Register(data_module.DisplayModule{})
+	ds.Register(data_module.GPUModule{})
+	ds.Register(data_module.MediaModule{})
+	ds.Register(data_module.MemoryModule{})
+	ds.Register(data_module.NetworkModule{})
+	ds.Register(data_module.ProcessModule{})
+	ds.Register(data_module.SensorModule{})
+	ds.Register(data_module.SystemModule{})
 
 	return ds, nil
 }
 
+func (d *DataStore) Register(u Updater) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	log.Info("Registering data module", "module", u.Name())
+
+	d.registry[u.Name()] = ModuleMeta{updater: u, Name: u.Name()}
+}
+
+func (d *DataStore) GetModule(name types.ModuleName) (ModuleMeta, error) {
+
+	meta, ok := d.registry[name]
+	if !ok {
+		return ModuleMeta{}, fmt.Errorf("%s not found in registry", name)
+	}
+
+	// If the module data is nil, refresh the data
+	if meta.Data == nil {
+		log.Info("Module data is nil, refreshing data", "module", meta.Name)
+		if err := d.loadModuleData(&meta); err != nil {
+			log.Error("Error loading module data", "module", meta.Name, "error", err)
+		}
+	}
+
+	return meta, nil
+}
+
+func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	meta, ok := d.registry[name]
+	if !ok {
+		return fmt.Errorf("%s not found in registry", name)
+	}
+
+	meta.Data = data
+	meta.Updated = time.Now().Format(time.RFC3339)
+	if err := d.saveModuleData(meta); err != nil {
+		return err
+	}
+
+	// Broadcast the module data update event
+	if eb := bus.GetInstance(); eb != nil {
+		eb.Publish(bus.Event{
+			Type: bus.EventDataModuleUpdate,
+			Data: meta,
+		})
+	}
+
+	d.registry[name] = meta
+
+	return nil
+}
+
+func (d *DataStore) GetRegisteredModules() []Updater {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	updaters := make([]Updater, 0)
+	for _, meta := range d.registry {
+		updaters = append(updaters, meta.updater)
+	}
+	return updaters
+}
+func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
+	data := make(map[types.ModuleName]any)
+
+	for _, meta := range d.registry {
+		data[meta.updater.Name()] = meta.Data
+	}
+
+	return data
+}
+
 // loadModuleData loads the module data from a JSON file
-func (d *DataStore) loadModuleData(m *data_module.Module) error {
+func (d *DataStore) loadModuleData(m *ModuleMeta) error {
 	if m == nil {
 		return fmt.Errorf("module is nil")
 	}
-
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)
 	}
 
 	v := viper.New()
-	v.SetConfigName(string(m.Module))
+	v.SetConfigName(string(m.Name))
 	v.SetConfigType("json")
 	v.AddConfigPath(dataPath)
 
@@ -97,18 +155,18 @@ func (d *DataStore) loadModuleData(m *data_module.Module) error {
 }
 
 // saveModuleData saves the module data to a JSON file
-func (d *DataStore) saveModuleData(m data_module.Module) error {
+func (d *DataStore) saveModuleData(m ModuleMeta) error {
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)
 	}
 
 	v := viper.New()
-	v.SetConfigName(string(m.Module))
+	v.SetConfigName(string(m.Name))
 	v.SetConfigType("json")
 	v.AddConfigPath(dataPath)
 
-	v.Set("module", m.Module)
+	v.Set("module", m.Name)
 	v.Set("data", m.Data)
 	v.Set("updated", m.Updated)
 
@@ -124,99 +182,4 @@ func (d *DataStore) saveModuleData(m data_module.Module) error {
 	}
 
 	return nil
-}
-
-func (d *DataStore) GetModule(module types.ModuleName) *data_module.Module {
-	var m *data_module.Module
-
-	switch module {
-	case types.ModuleBattery:
-		m = &d.Battery
-	case types.ModuleCPU:
-		m = &d.CPU
-	case types.ModuleDisks:
-		m = &d.Disks
-	case types.ModuleDisplays:
-		m = &d.Displays
-	case types.ModuleGPUs:
-		m = &d.GPUs
-	case types.ModuleMedia:
-		m = &d.Media
-	case types.ModuleMemory:
-		m = &d.Memory
-	case types.ModuleNetworks:
-		m = &d.Networks
-	case types.ModuleProcesses:
-		m = &d.Processes
-	case types.ModuleSensors:
-		m = &d.Sensors
-	case types.ModuleSystem:
-		m = &d.System
-	default:
-		log.Error("Module not found", "module", module)
-		empty := data_module.Module{}
-		return &empty
-	}
-
-	// If the module data is nil, refresh the data
-	if m.Data == nil {
-		log.Info("Module data is nil, refreshing data", "module", module)
-		if err := d.loadModuleData(m); err != nil {
-			log.Error("Error loading module data", "module", module, "error", err)
-		}
-	}
-
-	return m
-}
-
-func (d *DataStore) SetModuleData(module types.ModuleName, data any) error {
-	if d == nil {
-		return fmt.Errorf("DataStore is nil")
-	}
-
-	if module == "" {
-		return fmt.Errorf("module name cannot be empty")
-	}
-
-	m := d.GetModule(module)
-
-	m.Data = data
-	m.Updated = time.Now().Format(time.RFC3339)
-	if err := d.saveModuleData(*m); err != nil {
-		return err
-	}
-
-	// Broadcast the module data update event
-	if eb := bus.GetInstance(); eb != nil {
-		eb.Publish(bus.Event{
-			Type: bus.EventDataModuleUpdate,
-			Data: *m,
-		})
-	}
-
-	return nil
-}
-
-func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
-	data := make(map[types.ModuleName]any)
-
-	// Collect data from each module using the GetModule method
-	for _, moduleName := range []types.ModuleName{
-		types.ModuleBattery,
-		types.ModuleCPU,
-		types.ModuleDisks,
-		types.ModuleDisplays,
-		types.ModuleGPUs,
-		types.ModuleMedia,
-		types.ModuleMemory,
-		types.ModuleNetworks,
-		types.ModuleProcesses,
-		types.ModuleSensors,
-		types.ModuleSystem,
-	} {
-		modulePtr := d.GetModule(moduleName)
-		data[moduleName] = modulePtr.Data
-	}
-
-	return data
 }

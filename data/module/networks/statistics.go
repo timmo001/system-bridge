@@ -7,7 +7,7 @@ import (
 )
 
 // gatherIOStatistics collects network I/O statistics
-func gatherIOStatistics(networksData *types.NetworksData) {
+func GatherIOStatistics(networksData *types.NetworksData) {
 	// Get network I/O stats for all interfaces combined
 	ioTotal, err := psnet.IOCounters(false) // pernic=false for total stats
 	if err != nil {
@@ -71,4 +71,3 @@ func setDefaultIOStats(networksData *types.NetworksData) {
 
 	networksData.IO = &networkIO
 }
-

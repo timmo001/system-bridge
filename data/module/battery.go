@@ -1,12 +1,17 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/distatus/battery"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateBatteryModule() (types.BatteryData, error) {
+type BatteryModule struct{}
+
+func (batteryModule BatteryModule) Name() types.ModuleName { return types.ModuleBattery }
+func (batteryModule BatteryModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting battery data")
 
 	// Get all batteries

@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"context"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -8,7 +9,10 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateDisksModule() (types.DisksData, error) {
+type DiskModule struct{}
+
+func (diskModule DiskModule) Name() types.ModuleName { return types.ModuleDisks }
+func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting disks data")
 
 	var disksData types.DisksData

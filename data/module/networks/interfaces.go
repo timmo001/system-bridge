@@ -8,8 +8,8 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-// gatherInterfaces collects information about network interfaces
-func gatherInterfaces(networksData *types.NetworksData) error {
+// GatherInterfaces collects information about network interfaces
+func GatherInterfaces(networksData *types.NetworksData) error {
 	// Get network interfaces using standard library
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -80,7 +80,7 @@ func gatherInterfaces(networksData *types.NetworksData) error {
 		}
 
 		// Set interface stats
-		isUp := (iface.Flags&net.FlagUp) != 0
+		isUp := (iface.Flags & net.FlagUp) != 0
 		netif.Stats.IsUp = &isUp
 
 		// Set network interface duplex mode (typically unknown without platform-specific code)

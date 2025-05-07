@@ -16,10 +16,3 @@ const (
 	ModuleSensors   ModuleName = "sensors"
 	ModuleSystem    ModuleName = "system"
 )
-
-// Module represents a data module
-type Module struct {
-	Module  ModuleName `json:"module" mapstructure:"module"`
-	Data    any        `json:"data" mapstructure:"data"`
-	Updated string     `json:"updated" mapstructure:"updated"`
-}

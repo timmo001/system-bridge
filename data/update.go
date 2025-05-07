@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	data_module "github.com/timmo001/system-bridge/data/module"
-	"github.com/timmo001/system-bridge/types"
 	"golang.org/x/time/rate"
 )
 
@@ -20,7 +18,7 @@ type UpdateTaskProcessor struct {
 	limiter *rate.Limiter
 
 	// Channel for queuing tasks
-	taskQueue chan data_module.Module
+	taskQueue chan Updater
 
 	// WaitGroup to track running tasks
 	wg sync.WaitGroup
@@ -41,7 +39,7 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 		DataStore: dataStore,
 		// Create rate limiter with specified tasks/second and burst limit
 		limiter:   rate.NewLimiter(rate.Limit(tasksPerSecond), burstLimit),
-		taskQueue: make(chan data_module.Module, 20), // Buffer size of 20
+		taskQueue: make(chan Updater, 20), // Buffer size of 20
 		ctx:       ctx,
 		cancel:    cancel,
 	}
@@ -63,9 +61,9 @@ func (tp *UpdateTaskProcessor) Stop() {
 }
 
 // AddTask queues a new task
-func (tp *UpdateTaskProcessor) AddTask(task data_module.Module) {
+func (tp *UpdateTaskProcessor) AddTask(updater Updater) {
 	select {
-	case tp.taskQueue <- task:
+	case tp.taskQueue <- updater:
 	case <-tp.ctx.Done():
 		log.Info("Task processor is shutting down")
 	}
@@ -89,17 +87,19 @@ func (tp *UpdateTaskProcessor) worker() {
 				continue
 			}
 
+			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
+			defer cancel()
 			// Process task
-			m, err := task.UpdateModule()
+			data, err := task.Update(ctx)
 			if err != nil {
-				log.Warnf("Task processing error for module %s: %v", task.Module, err)
+				log.Warnf("Task processing error for module %s: %v", task.Name(), err)
 				continue
 			}
 
-			log.Debugf("Updating data for module: %s", task.Module)
+			log.Debugf("Updating data for module: %s", task.Name())
 			// Update data store
-			if err := tp.DataStore.SetModuleData(task.Module, m.Data); err != nil {
-				log.Errorf("Failed to set module data for %s: %v", task.Module, err)
+			if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
+				log.Errorf("Failed to set module data for %s: %v", task.Name(), err)
 				continue
 			}
 
@@ -116,21 +116,11 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Start 3 worker goroutines
 	processor.Start(3)
 
-	for _, task := range []data_module.Module{
-		{Module: types.ModuleBattery},
-		{Module: types.ModuleCPU},
-		{Module: types.ModuleDisks},
-		{Module: types.ModuleDisplays},
-		{Module: types.ModuleGPUs},
-		{Module: types.ModuleMedia},
-		{Module: types.ModuleMemory},
-		{Module: types.ModuleNetworks},
-		{Module: types.ModuleProcesses},
-		{Module: types.ModuleSensors},
-		{Module: types.ModuleSystem},
-	} {
-		processor.AddTask(task)
+	for _, updater := range dataStore.GetRegisteredModules() {
+		processor.AddTask(updater)
 	}
+
+	// TODO: use channels and wait groups to track task completion. use context.WithTimeout to make sure to finish withing time frame
 
 	// Run for a while then stop
 	time.Sleep(5 * time.Second)
