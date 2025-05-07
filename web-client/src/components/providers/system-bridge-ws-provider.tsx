@@ -95,7 +95,7 @@ export function SystemBridgeWSProvider({
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [data, host, isRequestingData, port, settings, ssl, token]);
+  }, [host, isRequestingData, port, ssl, token]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
