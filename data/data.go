@@ -1,7 +1,6 @@
 package data
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -14,26 +13,13 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 )
 
-type Updater interface {
-	Name() types.ModuleName
-	Update(context.Context) (any, error)
-}
-
-// ModuleMeta represents a data module
-type ModuleMeta struct {
-	Name    types.ModuleName `json:"module" mapstructure:"module"`
-	updater Updater
-	Data    any    `json:"data" mapstructure:"data"`
-	Updated string `json:"updated" mapstructure:"updated"`
-}
-
 type DataStore struct {
 	mu       sync.RWMutex
-	registry map[types.ModuleName]ModuleMeta
+	registry map[types.ModuleName]types.Module
 }
 
 func NewDataStore() (*DataStore, error) {
-	ds := &DataStore{registry: make(map[types.ModuleName]ModuleMeta, 0)}
+	ds := &DataStore{registry: make(map[types.ModuleName]types.Module, 0)}
 
 	ds.Register(data_module.BatteryModule{})
 	ds.Register(data_module.CPUModule{})
@@ -50,44 +36,44 @@ func NewDataStore() (*DataStore, error) {
 	return ds, nil
 }
 
-func (d *DataStore) Register(u Updater) {
+func (d *DataStore) Register(u types.Updater) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	log.Info("Registering data module", "module", u.Name())
 
-	d.registry[u.Name()] = ModuleMeta{updater: u, Name: u.Name()}
+	d.registry[u.Name()] = types.Module{Updater: u, Name: u.Name()}
 }
 
-func (d *DataStore) GetModule(name types.ModuleName) (ModuleMeta, error) {
+func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
 
-	meta, ok := d.registry[name]
+	module, ok := d.registry[name]
 	if !ok {
-		return ModuleMeta{}, fmt.Errorf("%s not found in registry", name)
+		return types.Module{}, fmt.Errorf("%s not found in registry", name)
 	}
 
 	// If the module data is nil, refresh the data
-	if meta.Data == nil {
-		log.Info("Module data is nil, refreshing data", "module", meta.Name)
-		if err := d.loadModuleData(&meta); err != nil {
-			log.Error("Error loading module data", "module", meta.Name, "error", err)
+	if module.Data == nil {
+		log.Info("Module data is nil, refreshing data", "module", module.Name)
+		if err := d.loadModuleData(&module); err != nil {
+			log.Error("Error loading module data", "module", module.Name, "error", err)
 		}
 	}
 
-	return meta, nil
+	return module, nil
 }
 
 func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	meta, ok := d.registry[name]
+	module, ok := d.registry[name]
 	if !ok {
 		return fmt.Errorf("%s not found in registry", name)
 	}
 
-	meta.Data = data
-	meta.Updated = time.Now().Format(time.RFC3339)
-	if err := d.saveModuleData(meta); err != nil {
+	module.Data = data
+	module.Updated = time.Now().Format(time.RFC3339)
+	if err := d.saveModuleData(module); err != nil {
 		return err
 	}
 
@@ -95,37 +81,38 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	if eb := bus.GetInstance(); eb != nil {
 		eb.Publish(bus.Event{
 			Type: bus.EventDataModuleUpdate,
-			Data: meta,
+			Data: module,
 		})
 	}
 
-	d.registry[name] = meta
+	d.registry[name] = module
 
 	return nil
 }
 
-func (d *DataStore) GetRegisteredModules() []Updater {
+func (d *DataStore) GetRegisteredModules() []types.Updater {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	updaters := make([]Updater, 0)
-	for _, meta := range d.registry {
-		updaters = append(updaters, meta.updater)
+	updaters := make([]types.Updater, 0)
+	for _, module := range d.registry {
+		updaters = append(updaters, module.Updater)
 	}
 	return updaters
 }
+
 func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 	data := make(map[types.ModuleName]any)
 
-	for _, meta := range d.registry {
-		data[meta.updater.Name()] = meta.Data
+	for _, module := range d.registry {
+		data[module.Updater.Name()] = module.Data
 	}
 
 	return data
 }
 
 // loadModuleData loads the module data from a JSON file
-func (d *DataStore) loadModuleData(m *ModuleMeta) error {
+func (d *DataStore) loadModuleData(m *types.Module) error {
 	if m == nil {
 		return fmt.Errorf("module is nil")
 	}
@@ -155,7 +142,7 @@ func (d *DataStore) loadModuleData(m *ModuleMeta) error {
 }
 
 // saveModuleData saves the module data to a JSON file
-func (d *DataStore) saveModuleData(m ModuleMeta) error {
+func (d *DataStore) saveModuleData(m types.Module) error {
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)

@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
-	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -146,7 +145,7 @@ func (ws *WebsocketServer) UnregisterDataListener(connection string) {
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(meta data.ModuleMeta, connection *string) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection *string) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
@@ -154,26 +153,26 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(meta data.ModuleMeta, connectio
 		ID:      "system",
 		Type:    event.ResponseTypeDataUpdate,
 		Subtype: event.ResponseSubtypeNone,
-		Data:    meta.Data,
-		Module:  meta.Name,
+		Data:    module.Data,
+		Module:  module.Name,
 	}
 
-	if meta.Data == nil {
-		log.Warn("Broadcasting module update with no data", "module", meta.Name, "data", meta.Data)
+	if module.Data == nil {
+		log.Warn("Broadcasting module update with no data", "module", module.Name, "data", module.Data)
 	} else {
-		log.Info("Broadcasting module update", "module", meta.Name)
+		log.Info("Broadcasting module update", "module", module.Name)
 	}
 
 	for conn := range ws.connections {
 		if connection != nil {
-			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", meta.Name)
+			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", module.Name)
 			ws.SendMessage(conn, response)
 		} else {
-			log.Info("WS: Broadcasting module update to all listeners", "module", meta.Name)
+			log.Info("WS: Broadcasting module update to all listeners", "module", module.Name)
 			for _, modules := range ws.dataListeners {
 				for _, m := range modules {
-					if m == meta.Name {
-						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", meta.Name)
+					if m == module.Name {
+						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", module.Name)
 						ws.SendMessage(conn, response)
 					}
 				}
@@ -202,18 +201,18 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 	for _, moduleName := range moduleRequest.Modules {
 		log.Info("WS: Broadcasting module update", "module", moduleName)
 
-		meta, err := ws.dataStore.GetModule(moduleName)
+		module, err := ws.dataStore.GetModule(moduleName)
 		if err != nil {
 			log.Warn("Data module not registered", "module", moduleName)
 			continue
 		}
 
-		if meta.Data == nil {
+		if module.Data == nil {
 			log.Warn("WS: No data found for module", "module", moduleName)
 			log.Warn("Sending empty module update")
 		}
 
-		ws.BroadcastModuleUpdate(meta, &moduleRequest.Connection)
+		ws.BroadcastModuleUpdate(module, &moduleRequest.Connection)
 	}
 }
 
@@ -224,14 +223,14 @@ func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
 		return
 	}
 
-	var meta data.ModuleMeta
-	if err := mapstructure.Decode(event.Data, &meta); err != nil {
+	var module types.Module
+	if err := mapstructure.Decode(event.Data, &module); err != nil {
 		log.Error("Failed to decode module data", "error", err)
 		return
 	}
 
-	log.Info("Received module data update from event bus", "module", meta.Name)
+	log.Info("Received module data update from event bus", "module", module.Name)
 
 	// Broadcast to connected websocket clients
-	ws.BroadcastModuleUpdate(meta, nil)
+	ws.BroadcastModuleUpdate(module, nil)
 }

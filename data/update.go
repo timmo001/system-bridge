@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/timmo001/system-bridge/types"
 	"golang.org/x/time/rate"
 )
 
@@ -18,7 +19,7 @@ type UpdateTaskProcessor struct {
 	limiter *rate.Limiter
 
 	// Channel for queuing tasks
-	taskQueue chan Updater
+	taskQueue chan types.Updater
 
 	// WaitGroup to track running tasks
 	wg sync.WaitGroup
@@ -39,7 +40,7 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 		DataStore: dataStore,
 		// Create rate limiter with specified tasks/second and burst limit
 		limiter:   rate.NewLimiter(rate.Limit(tasksPerSecond), burstLimit),
-		taskQueue: make(chan Updater, 20), // Buffer size of 20
+		taskQueue: make(chan types.Updater, 20), // Buffer size of 20
 		ctx:       ctx,
 		cancel:    cancel,
 	}
@@ -61,7 +62,7 @@ func (tp *UpdateTaskProcessor) Stop() {
 }
 
 // AddTask queues a new task
-func (tp *UpdateTaskProcessor) AddTask(updater Updater) {
+func (tp *UpdateTaskProcessor) AddTask(updater types.Updater) {
 	select {
 	case tp.taskQueue <- updater:
 	case <-tp.ctx.Done():
