@@ -28,7 +28,7 @@ func calculateBroadcast(ip net.IP, mask net.IPMask) string {
 	}
 
 	broadcast := net.IP(make([]byte, 4))
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		broadcast[i] = ip.To4()[i] | ^mask[i]
 	}
 	return broadcast.String()
