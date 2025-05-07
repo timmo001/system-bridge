@@ -26,7 +26,7 @@ type WebSocketRequest struct {
 type WebsocketServer struct {
 	token         string
 	upgrader      websocket.Upgrader
-	connections   map[*websocket.Conn]bool
+	connections   map[string]*websocket.Conn
 	dataListeners map[string][]types.ModuleName
 	mutex         sync.RWMutex
 	dataStore     *data.DataStore
@@ -36,7 +36,7 @@ type WebsocketServer struct {
 func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
 		token:         settings.API.Token,
-		connections:   make(map[*websocket.Conn]bool),
+		connections:   make(map[string]*websocket.Conn),
 		dataListeners: make(map[string][]types.ModuleName),
 		dataStore:     dataStore,
 		EventRouter:   eventRouter,
