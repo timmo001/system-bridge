@@ -148,16 +148,14 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 			log.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
 			ws.SendMessage(conn, response)
 		} else {
-			if len(ws.connections) > 0 {
-				for remote_addr, conn := range ws.connections {
-					modules, ok := ws.dataListeners[remote_addr]
+			for remote_addr, conn := range ws.connections {
+				modules, ok := ws.dataListeners[remote_addr]
 
-					if ok && slices.Contains(modules, module.Name) {
-						log.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
-						ws.SendMessage(conn, response)
-					}
-
+				if ok && slices.Contains(modules, module.Name) {
+					log.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+					ws.SendMessage(conn, response)
 				}
+
 			}
 		}
 	}
