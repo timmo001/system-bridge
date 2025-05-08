@@ -1,6 +1,7 @@
 ---
 name: Lint general
 
+# yamllint disable-line rule:truthy
 on:
   push:
     branches:
