@@ -53,6 +53,9 @@ export function SystemBridgeWSProvider({
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
 
       if (!isRequestingData) {
         setIsRequestingData(true);
@@ -95,7 +98,7 @@ export function SystemBridgeWSProvider({
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [data, host, isRequestingData, port, settings, ssl, token]);
+  }, [host, isRequestingData, port, ssl, token]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -169,11 +172,11 @@ export function SystemBridgeWSProvider({
 
     reconnectTimeoutRef.current = setTimeout(() => {
       setRetryCount((prev) => prev + 1);
-      console.log(
-        `Attempting to reconnect... (${retryCount + 1}/${MAX_RETRIES})`,
-      );
-      wsRef.current = null;
-      connect();
+      if (retryCount <= MAX_RETRIES) {
+        console.log( `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`);
+        wsRef.current = null;
+        connect();
+      }
     }, RETRY_DELAY);
   }, [connect, isConnected, retryCount, host, port, token]);
 
