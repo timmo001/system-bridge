@@ -5,4 +5,5 @@ rules:
   line-length:
     ignore: |
       .github/
+      .scripts/
     level: warning
