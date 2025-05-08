@@ -4,6 +4,9 @@ build: build_client
 build_client: clean-web-client
 	cd web-client && bun install && STATIC_EXPORT=true bun run build
 
+install: build
+	go install .
+
 run: build
 	./system-bridge backend
 
