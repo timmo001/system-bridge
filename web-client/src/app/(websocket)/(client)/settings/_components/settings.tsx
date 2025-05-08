@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
-import { useEffect } from "react";
 
 export function Settings() {
   const { token } = useSystemBridgeConnectionStore();
