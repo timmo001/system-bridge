@@ -5,7 +5,7 @@ build_client: clean-web-client
 	cd web-client && bun install && STATIC_EXPORT=true bun run build
 
 run: build
-	./system-bridge
+	./system-bridge backend
 
 clean: clean-web-client
 	rm -f system-bridge
