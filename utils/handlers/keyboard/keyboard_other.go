@@ -17,7 +17,7 @@ func sendKeypress(data KeypressData) error {
 	}
 
 	// Convert modifiers to robotgo format
-	var modifiers []interface{}
+	var modifiers []any
 	for _, mod := range data.Modifiers {
 		mod = strings.ToLower(mod)
 		switch mod {

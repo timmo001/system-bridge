@@ -9,7 +9,7 @@ import (
 )
 
 // gatherConnections collects information about network connections
-func gatherConnections(networksData *types.NetworksData) {
+func GatherConnections(networksData *types.NetworksData) {
 	// Get network connections
 	connections, err := psnet.Connections("all")
 	if err != nil {

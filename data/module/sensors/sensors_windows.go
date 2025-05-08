@@ -12,8 +12,8 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-// getWindowsSensorsData fetches sensor data available only on Windows platforms
-func getWindowsSensorsData() (*types.SensorsWindows, error) {
+// GetWindowsSensorsData fetches sensor data available only on Windows platforms
+func GetWindowsSensorsData() (*types.SensorsWindows, error) {
 	var windowsSensors types.SensorsWindows
 	windowsSensors.Hardware = make([]types.SensorsWindowsHardware, 0)
 	windowsSensors.NVIDIA = &types.SensorsNVIDIA{

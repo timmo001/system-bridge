@@ -7,7 +7,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func getWindowsSensorsData() (*types.SensorsWindows, error) {
+func GetWindowsSensorsData() (*types.SensorsWindows, error) {
 	var sensorsData types.SensorsWindows
 	sensorsData.Hardware = make([]types.SensorsWindowsHardware, 0)
 	sensorsData.NVIDIA = &types.SensorsNVIDIA{

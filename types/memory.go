@@ -2,27 +2,27 @@ package types
 
 // MemorySwap represents swap memory information
 type MemorySwap struct {
-	Total   *int64   `json:"total"`
-	Used    *int64   `json:"used"`
-	Free    *float64 `json:"free"`
+	Total   *uint64  `json:"total"`
+	Used    *uint64  `json:"used"`
+	Free    *uint64  `json:"free"`
 	Percent *float64 `json:"percent"`
-	Sin     *int64   `json:"sin"`
-	Sout    *int64   `json:"sout"`
+	Sin     *uint64  `json:"sin"`
+	Sout    *uint64  `json:"sout"`
 }
 
 // MemoryVirtual represents virtual memory information
 type MemoryVirtual struct {
-	Total     *int64   `json:"total"`
-	Available *int64   `json:"available"`
+	Total     *uint64  `json:"total"`
+	Available *uint64  `json:"available"`
 	Percent   *float64 `json:"percent"`
-	Used      *int64   `json:"used"`
-	Free      *int64   `json:"free"`
-	Active    *int64   `json:"active"`
-	Inactive  *int64   `json:"inactive"`
-	Buffers   *int64   `json:"buffers"`
-	Cached    *int64   `json:"cached"`
-	Wired     *int64   `json:"wired"`
-	Shared    *int64   `json:"shared"`
+	Used      *uint64  `json:"used"`
+	Free      *uint64  `json:"free"`
+	Active    *uint64  `json:"active"`
+	Inactive  *uint64  `json:"inactive"`
+	Buffers   *uint64  `json:"buffers"`
+	Cached    *uint64  `json:"cached"`
+	Wired     *uint64  `json:"wired"`
+	Shared    *uint64  `json:"shared"`
 }
 
 // MemoryData represents overall memory information

@@ -1,12 +1,17 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/data/module/gpus"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateGPUsModule() (types.GPUsData, error) {
+type GPUModule struct{}
+
+func (gm GPUModule) Name() types.ModuleName { return types.ModuleGPUs }
+func (gm GPUModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting GPUs data")
 
 	gpusData := make([]types.GPU, 0)

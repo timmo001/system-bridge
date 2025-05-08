@@ -1,6 +1,7 @@
 package data_module
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -11,7 +12,10 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateCPUModule() (types.CPUData, error) {
+type CPUModule struct{}
+
+func (cpuModule CPUModule) Name() types.ModuleName { return types.ModuleCPU }
+func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting CPU data")
 
 	var cpuData types.CPUData

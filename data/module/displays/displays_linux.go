@@ -14,7 +14,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func getDisplays() ([]types.Display, error) {
+func GetDisplays() ([]types.Display, error) {
 	displays := make([]types.Display, 0)
 	var primaryDisplay *types.Display
 

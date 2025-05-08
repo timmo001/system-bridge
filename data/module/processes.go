@@ -1,12 +1,17 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateProcessesModule() (types.ProcessesData, error) {
+type ProcessModule struct{}
+
+func (pm ProcessModule) Name() types.ModuleName { return types.ModuleProcesses }
+func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting processes data")
 
 	processesData := make([]types.Process, 0)

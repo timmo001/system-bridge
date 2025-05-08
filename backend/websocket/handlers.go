@@ -126,25 +126,25 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 		Type:    event.ResponseTypeDataUpdate,
 		Subtype: event.ResponseSubtypeNone,
 		Data:    module.Data,
-		Module:  module.Module,
+		Module:  module.Name,
 	}
 
 	if module.Data == nil {
-		log.Warn("Broadcasting module update with no data", "module", module.Module, "data", module.Data)
+		log.Warn("Broadcasting module update with no data", "module", module.Name, "data", module.Data)
 	} else {
-		log.Info("Broadcasting module update", "module", module.Module)
+		log.Info("Broadcasting module update", "module", module.Name)
 	}
 
 	for conn := range ws.connections {
 		if connection != nil {
-			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", module.Module)
+			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", module.Name)
 			ws.SendMessage(conn, response)
 		} else {
-			log.Info("WS: Broadcasting module update to all listeners", "module", module.Module)
+			log.Info("WS: Broadcasting module update to all listeners", "module", module.Name)
 			for _, modules := range ws.dataListeners {
 				for _, m := range modules {
-					if m == module.Module {
-						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", module.Module)
+					if m == module.Name {
+						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", module.Name)
 						ws.SendMessage(conn, response)
 					}
 				}
@@ -173,19 +173,18 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 	for _, moduleName := range moduleRequest.Modules {
 		log.Info("WS: Broadcasting module update", "module", moduleName)
 
-		modulePtr := ws.dataStore.GetModule(moduleName)
-		if modulePtr.Data == nil {
-			log.Warn("WS: No data found for module", "module", modulePtr)
+		module, err := ws.dataStore.GetModule(moduleName)
+		if err != nil {
+			log.Warn("Data module not registered", "module", moduleName)
+			continue
+		}
+
+		if module.Data == nil {
+			log.Warn("WS: No data found for module", "module", moduleName)
 			log.Warn("Sending empty module update")
 		}
 
-		// Convert data_module.Module to types.Module
-		m := types.Module{
-			Module: modulePtr.Module,
-			Data:   modulePtr.Data,
-		}
-
-		ws.BroadcastModuleUpdate(m, &moduleRequest.Connection)
+		ws.BroadcastModuleUpdate(module, &moduleRequest.Connection)
 	}
 }
 
@@ -202,7 +201,7 @@ func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
 		return
 	}
 
-	log.Info("Received module data update from event bus", "module", module.Module)
+	log.Info("Received module data update from event bus", "module", module.Name)
 
 	// Broadcast to connected websocket clients
 	ws.BroadcastModuleUpdate(module, nil)

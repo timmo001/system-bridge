@@ -1,5 +1,7 @@
 package types
 
+import "context"
+
 // ModuleName represents the type of data module
 type ModuleName string
 
@@ -17,9 +19,15 @@ const (
 	ModuleSystem    ModuleName = "system"
 )
 
+type Updater interface {
+	Name() ModuleName
+	Update(context.Context) (any, error)
+}
+
 // Module represents a data module
 type Module struct {
-	Module  ModuleName `json:"module" mapstructure:"module"`
-	Data    any        `json:"data" mapstructure:"data"`
-	Updated string     `json:"updated" mapstructure:"updated"`
+	Name    ModuleName `json:"module" mapstructure:"module"`
+	Updater Updater
+	Data    any    `json:"data" mapstructure:"data"`
+	Updated string `json:"updated" mapstructure:"updated"`
 }

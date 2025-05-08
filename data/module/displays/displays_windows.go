@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	user32               = syscall.NewLazyDLL("user32.dll")
-	enumDisplayMonitors  = user32.NewProc("EnumDisplayMonitors")
+	user32              = syscall.NewLazyDLL("user32.dll")
+	enumDisplayMonitors = user32.NewProc("EnumDisplayMonitors")
 	getMonitorInfo      = user32.NewProc("GetMonitorInfoW")
 	displayPathRegex    = regexp.MustCompile(`^\\\\.\\|^\\\\\?\\`)
 	displayNameRegex    = regexp.MustCompile(`^DISPLAY(\d+)$`)
@@ -26,10 +26,10 @@ type RECT struct {
 }
 
 type MONITORINFOEX struct {
-	CbSize    uint32
-	Monitor   RECT
-	WorkArea  RECT
-	Flags     uint32
+	CbSize     uint32
+	Monitor    RECT
+	WorkArea   RECT
+	Flags      uint32
 	DeviceName [32]uint16
 }
 
@@ -41,7 +41,7 @@ func formatDisplayName(id string) string {
 	return id
 }
 
-func getDisplays() ([]types.Display, error) {
+func GetDisplays() ([]types.Display, error) {
 	var displays []types.Display
 
 	callback := syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
@@ -63,13 +63,13 @@ func getDisplays() ([]types.Display, error) {
 		pixelClock := 0.0
 		refreshRate := 0.0
 
-    displayName := syscall.UTF16ToString(info.DeviceName[:])
+		displayName := syscall.UTF16ToString(info.DeviceName[:])
 		cleanID := displayPathRegex.ReplaceAllString(displayName, "")
 		display := types.Display{
 			ID:                   cleanID,
 			Name:                 formatDisplayName(cleanID),
 			ResolutionHorizontal: int(width),
-			ResolutionVertical:  int(height),
+			ResolutionVertical:   int(height),
 			X:                    int(info.Monitor.Left),
 			Y:                    int(info.Monitor.Top),
 			IsPrimary:            &isPrimary,

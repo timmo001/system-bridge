@@ -2,10 +2,10 @@ package types
 
 // SensorsWindowsSensor represents a Windows sensor
 type SensorsWindowsSensor struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Type  string      `json:"type"`
-	Value interface{} `json:"value"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value any    `json:"value"`
 }
 
 // SensorsWindowsHardware represents Windows hardware sensor information

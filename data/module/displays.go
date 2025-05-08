@@ -1,12 +1,17 @@
 package data_module
 
 import (
+	"context"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/data/module/displays"
 	"github.com/timmo001/system-bridge/types"
 )
 
-func (t *Module) UpdateDisplaysModule() (types.DisplaysData, error) {
+type DisplayModule struct{}
+
+func (dm DisplayModule) Name() types.ModuleName { return types.ModuleDisplays }
+func (dm DisplayModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting displays data")
 
 	var displaysData types.DisplaysData
