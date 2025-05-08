@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"net/http"
+	"slices"
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
@@ -75,14 +76,21 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
-	ws.connections[conn] = true
+
+	// close connection if remote addr tries to connect again
+	if connection, ok := ws.connections[conn.RemoteAddr().String()]; ok {
+		ws.RemoveConnection(connection)
+		_ = connection.Close()
+	}
+
+	ws.connections[conn.RemoteAddr().String()] = conn
 }
 
 // RemoveConnection removes a WebSocket connection
 func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
-	delete(ws.connections, conn)
+	delete(ws.connections, conn.RemoteAddr().String())
 	delete(ws.dataListeners, conn.RemoteAddr().String())
 }
 
@@ -94,30 +102,30 @@ const (
 )
 
 // RegisterDataListener allows a client to receive module data updates
-func (ws *WebsocketServer) RegisterDataListener(connection string, modules []types.ModuleName) RegisterResponse {
+func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.ModuleName) RegisterResponse {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	if _, ok := ws.dataListeners[connection]; ok {
+	if _, ok := ws.dataListeners[addr]; ok {
 		return RegisterResponseExists
 	}
 
-	log.Infof("Registering data listener for %s", connection)
-	ws.dataListeners[connection] = modules
+	log.Infof("Registering data listener for %s", addr)
+	ws.dataListeners[addr] = modules
 	return RegisterResponseAdded
 }
 
 // UnregisterDataListener allows a client to stop receiving module data updates
-func (ws *WebsocketServer) UnregisterDataListener(connection string) {
+func (ws *WebsocketServer) UnregisterDataListener(addr string) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	log.Infof("Unregistering data listener for %s", connection)
-	delete(ws.dataListeners, connection)
+	log.Infof("Unregistering data listener for %s", addr)
+	delete(ws.dataListeners, addr)
 }
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
-func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection *string) {
+func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *string) {
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
@@ -135,19 +143,19 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, connection
 		log.Info("Broadcasting module update", "module", module.Name)
 	}
 
-	for conn := range ws.connections {
-		if connection != nil {
-			log.Info("WS: Broadcasting module update to connection", "connection", *connection, "module", module.Name)
+	if addr != nil {
+		if conn, ok := ws.connections[*addr]; ok {
+			log.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
 			ws.SendMessage(conn, response)
 		} else {
-			log.Info("WS: Broadcasting module update to all listeners", "module", module.Name)
-			for _, modules := range ws.dataListeners {
-				for _, m := range modules {
-					if m == module.Name {
-						log.Info("WS: Broadcasting module update to listener", "listener", m, "module", module.Name)
-						ws.SendMessage(conn, response)
-					}
+			for remote_addr, conn := range ws.connections {
+				modules, ok := ws.dataListeners[remote_addr]
+
+				if ok && slices.Contains(modules, module.Name) {
+					log.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+					ws.SendMessage(conn, response)
 				}
+
 			}
 		}
 	}
