@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/hashicorp/mdns"
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
@@ -87,6 +89,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
 		Handler: mux,
 	}
+	defer server.Shutdown(ctx)
 
 	// Create an error channel to capture server errors
 	errChan := make(chan error, 1)
@@ -100,7 +103,28 @@ func (b *Backend) Run(ctx context.Context) error {
 		log.Info("Backend server is running on", "address", server.Addr)
 	}()
 
-	// TODO: MDNS / SSDP / DHCP discovery
+	// TODO: SSDP discovery
+	// TODO: DHCP discovery
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = "systembridge"
+	}
+
+	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", b.settings.API.Port, nil, nil)
+	if err != nil {
+		log.Warn("Could not create mDNS service", "err", err)
+	}
+
+	mdnsServer, err := mdns.NewServer(&mdns.Config{Zone: service, Logger: log.StandardLog()})
+
+	if err != nil {
+		log.Warn("Could not start mDNS Server", "err", err)
+	} else {
+		log.Info("Started mDNS Service", "service", service.Service, "domain", service.Domain, "port", service.Port, "hostname", service.HostName)
+	}
+
+	defer mdnsServer.Shutdown()
 
 	// Run data update task processor in a separate goroutine
 	go func() {
@@ -130,5 +154,5 @@ func (b *Backend) Run(ctx context.Context) error {
 		log.Error("Server error caused shutdown:", "err", err)
 	}
 
-	return server.Shutdown(ctx)
+	return nil
 }
