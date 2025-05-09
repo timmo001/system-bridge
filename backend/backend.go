@@ -89,18 +89,23 @@ func (b *Backend) Run(ctx context.Context) error {
 		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
 		Handler: mux,
 	}
-	defer server.Shutdown(ctx)
+	defer func() {
+		err = server.Shutdown(ctx)
+		if err != nil {
+			log.Error("Failed to Shutdown HTTP server", "err", err)
+		}
+	}()
 
 	// Create an error channel to capture server errors
 	errChan := make(chan error, 1)
 
 	// Start server in a goroutine
 	go func() {
+		log.Info("Backend server is running on", "address", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errChan <- err
 			cancel()
 		}
-		log.Info("Backend server is running on", "address", server.Addr)
 	}()
 
 	// TODO: SSDP discovery
@@ -124,7 +129,12 @@ func (b *Backend) Run(ctx context.Context) error {
 		log.Info("Started mDNS Service", "service", service.Service, "domain", service.Domain, "port", service.Port, "hostname", service.HostName)
 	}
 
-	defer mdnsServer.Shutdown()
+	defer func() {
+		err = mdnsServer.Shutdown()
+		if err != nil {
+			log.Error("Failed to Shutdown mDNS server", "err", err)
+		}
+	}()
 
 	// Run data update task processor in a separate goroutine
 	go func() {
