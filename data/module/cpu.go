@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/shirou/gopsutil/v4/cpu"
@@ -18,19 +19,21 @@ func (cpuModule CPUModule) Name() types.ModuleName { return types.ModuleCPU }
 func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	log.Info("Getting CPU data")
 
+	percentageInterval := 4 * time.Second
+
 	var cpuData types.CPUData
 	// Initialize arrays
 	cpuData.PerCPU = make([]types.PerCPU, 0)
 
 	// Get CPU count
-	count, err := cpu.Counts(true)
+	count, err := cpu.CountsWithContext(ctx, true)
 	if err != nil {
 		return cpuData, fmt.Errorf("error getting CPU count: %v", err)
 	}
 	cpuData.Count = &count
 
 	// Get CPU frequency
-	frequencies, err := cpu.Info()
+	frequencies, err := cpu.InfoWithContext(ctx)
 	if err == nil && len(frequencies) > 0 {
 		freq := types.CPUFrequency{
 			Current: &frequencies[0].Mhz,
@@ -41,44 +44,42 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	}
 
 	// Get per CPU info
-	if len(frequencies) > 0 {
-		perCPU := make([]types.PerCPU, 0, len(frequencies))
-		for i, cpuInfo := range frequencies {
-			perCpuData := types.PerCPU{
-				ID: i,
-				Frequency: &types.CPUFrequency{
-					Current: &cpuInfo.Mhz,
-					// TODO: Add implementation for per-CPU Min frequency
-					// TODO: Add implementation for per-CPU Max frequency
-				},
-			}
-
-			// Get per CPU times
-			if times, err := cpu.Times(true); err == nil && i < len(times) {
-				perCpuData.Times = &types.CPUTimes{
-					User:      &times[i].User,
-					System:    &times[i].System,
-					Idle:      &times[i].Idle,
-					Interrupt: &times[i].Irq,
-					// TODO: Add implementation for DPC time
-				}
-
-				// TODO: Add implementation for TimesPercent
-			}
-
-			// Get per CPU usage percentage
-			if percents, err := cpu.Percent(4, true); err == nil && i < len(percents) {
-				usage := percents[i]
-				perCpuData.Usage = &usage
-			}
-
-			// TODO: Add implementation for per-CPU power consumption
-			// TODO: Add implementation for per-CPU voltage monitoring
-
-			perCPU = append(perCPU, perCpuData)
+	perCPU := make([]types.PerCPU, 0, len(frequencies))
+	for i, cpuInfo := range frequencies {
+		perCpuData := types.PerCPU{
+			ID: i,
+			Frequency: &types.CPUFrequency{
+				Current: &cpuInfo.Mhz,
+				// TODO: Add implementation for per-CPU Min frequency
+				// TODO: Add implementation for per-CPU Max frequency
+			},
 		}
-		cpuData.PerCPU = perCPU
+
+		// Get per CPU times
+		if times, err := cpu.TimesWithContext(ctx, true); err == nil && i < len(times) {
+			perCpuData.Times = &types.CPUTimes{
+				User:      &times[i].User,
+				System:    &times[i].System,
+				Idle:      &times[i].Idle,
+				Interrupt: &times[i].Irq,
+				// TODO: Add implementation for DPC time
+			}
+
+			// TODO: Add implementation for TimesPercent
+		}
+
+		// Get per CPU usage percentage
+		if percents, err := cpu.PercentWithContext(ctx, percentageInterval, true); err == nil && i < len(percents) {
+			usage := percents[i]
+			perCpuData.Usage = &usage
+		}
+
+		// TODO: Add implementation for per-CPU power consumption
+		// TODO: Add implementation for per-CPU voltage monitoring
+
+		perCPU = append(perCPU, perCpuData)
 	}
+	cpuData.PerCPU = perCPU
 
 	// Get overall CPU times
 	if times, err := cpu.Times(false); err == nil && len(times) > 0 {
@@ -94,7 +95,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	}
 
 	// Get overall CPU usage percentage
-	if percents, err := cpu.Percent(4, false); err == nil && len(percents) > 0 {
+	if percents, err := cpu.PercentWithContext(ctx, percentageInterval, false); err == nil && len(percents) > 0 {
 		usage := percents[0]
 		cpuData.Usage = &usage
 	}
