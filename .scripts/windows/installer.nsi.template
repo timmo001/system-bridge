@@ -55,7 +55,7 @@ Section "Install"
   File "dist\system-bridge.exe"
 
   # Copy MUI_ICON to INSTDIR
-  CopyFiles "$MUI_ICON" "$INSTDIR\system-bridge.ico"
+  CopyFiles ".resources\system-bridge-circle.ico" "$INSTDIR\system-bridge.ico"
 
   # Create sensors directory structure and copy all sensor files
   CreateDirectory "$INSTDIR\lib\sensors\windows\bin"
@@ -65,12 +65,13 @@ Section "Install"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
-  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" "-ExecutionPolicy Bypass -WindowStyle Hidden -NoLogo -NonInteractive -File $INSTDIR\system-bridge.exe backend --notify" "$INSTDIR\system-bridge.exe" $INSTDIR\system-bridge.ico 0 SW_SHOWMINIMIZED "" "System Bridge"
+  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge.lnk" "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" "-ExecutionPolicy Bypass -WindowStyle Hidden -NoLogo -NonInteractive -File $INSTDIR\system-bridge.exe backend --notify" "$INSTDIR\system-bridge.ico" 0 SW_SHOWMINIMIZED "" "System Bridge"
   CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall System Bridge.lnk" "$INSTDIR\uninstall.exe" "$INSTDIR\system-bridge.ico" 0 SW_SHOWNORMAL "" "Uninstall System Bridge"
 SectionEnd
 
 Section "Uninstall"
   Delete "$INSTDIR\system-bridge.exe"
+  Delete "$INSTDIR\system-bridge.ico"
   Delete "$INSTDIR\lib\sensors\windows\bin\*.*"
   Delete "$INSTDIR\uninstall.exe"
 

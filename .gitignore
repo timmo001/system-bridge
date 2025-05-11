@@ -12,3 +12,7 @@ system-bridge.*
 # Act - Local GitHub Actions Testing
 .act
 .secrets
+
+# NSIS
+!installer.nsi.template
+installer.nsi
