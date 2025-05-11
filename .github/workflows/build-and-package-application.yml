@@ -123,7 +123,7 @@ jobs:
           CGO_ENABLED: 1
           CC: ${{ matrix.platform == 'windows' && 'gcc' || '' }}
         run: |
-          go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
+          go build -v -ldflags="${{ matrix.platform == 'windows' && '-H windowsgui' || '' }} -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
 
       - name: Cache windows sensor builds
         if: matrix.platform == 'windows'
