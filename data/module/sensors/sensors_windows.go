@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/types"
@@ -24,6 +25,7 @@ func GetWindowsSensorsData() (*types.SensorsWindows, error) {
 	// Run lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe if it exists
 	if _, err := os.Stat("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe"); err == nil {
 		cmd := exec.Command("lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		output, err := cmd.Output()
 		if err != nil {
 			return nil, err
