@@ -62,7 +62,7 @@ Section "Install"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
-  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge Backend.lnk" "$INSTDIR\system-bridge.exe" "backend --notify" "$INSTDIR\system-bridge.exe" 7 1 "" "System Bridge Backend"
+  CreateShortcut "$SMPROGRAMS\System Bridge\System Bridge Backend.lnk" "$INSTDIR\system-bridge.exe" "backend --notify" "$INSTDIR\system-bridge.exe" 7 SW_SHOWMINIMIZED "" "System Bridge Backend"
   CreateShortcut "$SMPROGRAMS\System Bridge\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 SectionEnd
 
