@@ -37,7 +37,7 @@ Section "Prerequisites"
   ${EndIf}
 
   # Check for Visual C++ Runtime
-  IfFileExists "$SYSDIR\vcruntime140.dll" vc_runtime_ok
+  IfFileExists "$SYSDIR\vcruntime140*.dll" vc_runtime_ok
     MessageBox MB_YESNO|MB_ICONQUESTION "This application requires Visual C++ Runtime. Would you like to install it now?" IDYES install_vc IDNO abort_vc
     abort_vc:
       Abort "Installation cancelled: Visual C++ Runtime is required."
