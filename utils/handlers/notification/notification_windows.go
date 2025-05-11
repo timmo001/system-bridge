@@ -4,36 +4,25 @@
 package notification
 
 import (
-	"fmt"
-	"os/exec"
+	"github.com/go-toast/toast"
 )
 
 func send(data NotificationData) error {
-	// Create the PowerShell script that will show the notification
-	script := fmt.Sprintf(`
-		Add-Type -AssemblyName System.Runtime.WindowsRuntime
-		$null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
-		$null = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom, ContentType = WindowsRuntime]
-
-		$templateXml = @"
-<toast>
-    <visual>
-        <binding template="ToastGeneric">
-            <text>%s</text>
-            <text>%s</text>
-        </binding>
-    </visual>
-</toast>
-"@
-
-		$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-		$xml.LoadXml($templateXml)
-		$toast = New-Object Windows.UI.Notifications.ToastNotification($xml)
-		$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Microsoft.Windows.Shell.RunDialog")
-		$notifier.Show($toast)
-	`, data.Title, data.Message)
-
-	// Execute the PowerShell script
-	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", script)
-	return cmd.Run()
+	notification := toast.Notification{
+		AppID:   "System Bridge",
+		Title:   data.Title,
+		Message: data.Message,
+	}
+	if data.Icon != "" {
+		notification.Icon = data.Icon
+	}
+	if data.Duration > 0 {
+		// go-toast supports Duration: toast.Short or toast.Long (not ms), so pick based on threshold
+		if data.Duration >= 7000 {
+			notification.Duration = toast.Long
+		} else {
+			notification.Duration = toast.Short
+		}
+	}
+	return notification.Push()
 }
