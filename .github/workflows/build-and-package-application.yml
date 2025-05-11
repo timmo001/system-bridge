@@ -142,6 +142,11 @@ jobs:
         run: |
           & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
+      - name: Add icon to Windows binary
+        if: matrix.platform == 'windows'
+        run: |
+          windres .resources/system-bridge.rc -O coff -o system-bridge.syso
+
       # Package for Linux
       - name: Package for Linux
         if: matrix.platform == 'linux'

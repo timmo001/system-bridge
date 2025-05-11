@@ -16,3 +16,6 @@ system-bridge.*
 # NSIS
 !installer.nsi.template
 installer.nsi
+
+# Windows icon
+!system-bridge.rc 
