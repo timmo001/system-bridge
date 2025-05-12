@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/distatus/battery v0.11.0
+	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v0.110.7
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
@@ -12,7 +13,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/shirou/gopsutil/v4 v4.25.4
 	github.com/spf13/viper v1.20.1
-	github.com/urfave/cli/v3 v3.3.2
+	github.com/urfave/cli/v3 v3.3.3
 	golang.org/x/time v0.11.0
 )
 
@@ -29,7 +30,6 @@ require (
 	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c // indirect
