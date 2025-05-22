@@ -13,6 +13,9 @@ system-bridge.*
 .act
 .secrets
 
+# OpenCode
+.opencode
+
 # NSIS
 !installer.nsi.template
 installer.nsi
