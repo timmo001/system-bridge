@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/charmbracelet/log"
 	"github.com/getlantern/systray"
+	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -149,10 +151,26 @@ func main() {
 }
 
 func onReady() {
+  s, err := settings.Load()
+  if err != nil {
+    log.Fatalf("error loading settings: %v", err)
+  }
+
 	systray.SetIcon(iconData)
 	systray.SetTitle("System Bridge")
-	systray.SetTooltip("System Bridge is running")
 
+	// Open frontend
+	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
+	go func() {
+		<-mOpenWebClient.ClickedCh
+		// Open the frontend in the default browser
+		browser.OpenURL(fmt.Sprintf("http://0.0.0.0:%d", s.API.Port))
+	}()
+
+	// ---
+	systray.AddSeparator()
+
+	// Quit
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
 	go func() {
 		<-mQuit.ClickedCh
