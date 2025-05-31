@@ -16,7 +16,7 @@ type UpdateSettingsRequestData = settings.Settings
 
 type UpdateSettingsResponseData = settings.Settings
 
-//go:embed .scripts/linux/system-bridge.autostart.desktop
+//go:embed system-bridge.autostart.desktop
 var linuxAutostartDesktopFile []byte
 
 func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
@@ -57,7 +57,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			}
 		}
 
-		if currentSettings.Autostart == false && newSettings.Autostart == true {
+		if !currentSettings.Autostart && newSettings.Autostart {
 			switch runtime.GOOS {
 			case "linux":
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
@@ -95,7 +95,7 @@ WorkingDirectory=` + workingDirectory + `
 			default:
 				log.Warnf("Autostart is not supported on %s", runtime.GOOS)
 			}
-		} else if currentSettings.Autostart == true && newSettings.Autostart == false {
+		} else if currentSettings.Autostart && !newSettings.Autostart {
 			switch runtime.GOOS {
 			case "linux":
 				// Remove autostart desktop file in ~/.config/autostart/system-bridge.desktop
