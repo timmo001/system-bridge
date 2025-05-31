@@ -61,7 +61,16 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 			}
 		} else if data.URL != "" {
 			// Open the URL in the default browser
-			browser.OpenURL(data.URL)
+			err := browser.OpenURL(data.URL)
+			if err != nil {
+				log.Errorf("Failed to open URL: %v", err)
+				return event.MessageResponse{
+					ID:      message.ID,
+					Type:    event.ResponseTypeError,
+					Subtype: event.ResponseSubtypeNone,
+					Message: "Failed to open URL",
+				}
+			}
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeOpened,

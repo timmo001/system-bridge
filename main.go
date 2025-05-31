@@ -180,5 +180,9 @@ func openWebClient(s *settings.Settings) {
 	host := "0.0.0.0"
 	port := s.API.Port
 	apiKey := s.API.Token
-	browser.OpenURL(fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey))
+	url := fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey)
+	err := browser.OpenURL(url)
+	if err != nil {
+		log.Errorf("Failed to open web client URL: %v", err)
+	}
 }
