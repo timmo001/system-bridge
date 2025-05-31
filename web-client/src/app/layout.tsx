@@ -3,10 +3,12 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import Link from "next/link";
 import { Geist } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/providers/theme-provider";
 import { ThemeToggle } from "~/components/theme-toggle";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: {
@@ -47,7 +49,9 @@ export default function RootLayout({
             </div>
           </header>
           <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-8 p-8">
-            {children}
+            <NuqsAdapter>
+              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </NuqsAdapter>
           </main>
           <Toaster />
         </ThemeProvider>

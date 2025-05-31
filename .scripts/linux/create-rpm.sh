@@ -27,7 +27,22 @@ mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
 
 # Copy files to rpm-structure
 cp system-bridge-linux rpm-structure/usr/bin/system-bridge
-cp .resources/system-bridge-circle.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
+
+mkdir -p rpm-structure/usr/share/icons/hicolor/scalable/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/16x16/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/32x32/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/48x48/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/128x128/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/256x256/apps
+mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
+
+cp .resources/system-bridge-dimmed.svg rpm-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
+cp .resources/system-bridge-dimmed-16.png rpm-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-32.png rpm-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-48.png rpm-structure/usr/share/icons/hicolor/48x48/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-128.png rpm-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-256.png rpm-structure/usr/share/icons/hicolor/256x256/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-512.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Create the spec file directory
 mkdir -p rpmbuild/SPECS

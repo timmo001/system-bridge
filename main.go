@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/charmbracelet/log"
+	"github.com/getlantern/systray"
+	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -18,6 +22,12 @@ import (
 
 //go:embed web-client/out/*
 var webClientContent embed.FS
+
+//go:embed .resources/system-bridge-dimmed-512.png
+var trayIconPngData []byte
+
+//go:embed .resources/system-bridge-dimmed.ico
+var trayIconIcoData []byte
 
 func main() {
 	// Create a channel to receive OS signals
@@ -36,6 +46,10 @@ func main() {
 		cancel() // Cancel the context
 	}()
 
+	go func() {
+		systray.Run(onReady, onExit)
+	}()
+
 	cmd := &cli.Command{
 		Name:  "System Bridge",
 		Usage: "A bridge for your systems",
@@ -46,8 +60,8 @@ func main() {
 				Usage:   "Run the backend server",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
-						Name:  "notify",
-						Usage: "Show a notification when the application starts",
+						Name:  "open-web-client",
+						Usage: "Open the web client in the default browser",
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
@@ -72,15 +86,8 @@ func main() {
 					b := backend.New(s, dataStore, &webClientContent)
 
 					// Show startup notification if requested
-					if cmd.Bool("notify") {
-						err := notification.Send(notification.NotificationData{
-							Title:   "System Bridge",
-							Message: "Application has started",
-							Icon:    "system-bridge",
-						})
-						if err != nil {
-							log.Warnf("Failed to send startup notification: %v", err)
-						}
+					if cmd.Bool("open-web-client") {
+						openWebClient(s)
 					}
 
 					return b.Run(cmdCtx)
@@ -137,5 +144,54 @@ func main() {
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatalf("error running cmd: %v", err)
+	}
+}
+
+func onReady() {
+	s, err := settings.Load()
+	if err != nil {
+		log.Fatalf("error loading settings: %v", err)
+	}
+
+	// Set tray icon based on OS
+	if runtime.GOOS == "windows" {
+		systray.SetIcon(trayIconIcoData)
+	} else {
+		systray.SetIcon(trayIconPngData)
+	}
+	systray.SetTitle("System Bridge")
+
+	// Open frontend
+	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
+	go func() {
+		<-mOpenWebClient.ClickedCh
+		openWebClient(s)
+	}()
+
+	// ---
+	systray.AddSeparator()
+
+	// Quit
+	mQuit := systray.AddMenuItem("Quit", "Quit the application")
+	go func() {
+		<-mQuit.ClickedCh
+		log.Info("Quitting...")
+		os.Exit(0)
+	}()
+}
+
+func onExit() {
+	// Perform cleanup if needed
+}
+
+func openWebClient(s *settings.Settings) {
+	// Open the frontend in the default browser
+	host := "0.0.0.0"
+	port := s.API.Port
+	apiKey := s.API.Token
+	url := fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey)
+	err := browser.OpenURL(url)
+	if err != nil {
+		log.Errorf("Failed to open web client URL: %v", err)
 	}
 }

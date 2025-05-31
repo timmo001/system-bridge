@@ -75,7 +75,7 @@ export function SetupConnection() {
             <FormItem>
               <FormLabel>Host</FormLabel>
               <FormControl>
-                <Input placeholder="localhost" {...field} />
+                <Input placeholder="0.0.0.0" {...field} />
               </FormControl>
               <FormDescription>
                 The host of the System Bridge server.

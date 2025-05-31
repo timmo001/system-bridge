@@ -3,9 +3,9 @@
 system-bridge
 system-bridge-*
 system-bridge.*
-!system-bridge.desktop
-!system-bridge.service
-!system-bridge.spec
+!system-bridge*.desktop
+!system-bridge*.service
+!system-bridge*.spec
 
 # Legacy
 .legacy/
@@ -23,6 +23,9 @@ installer.nsi
 
 # Windows icon
 !system-bridge.rc
+
+# Resources
+!.resources/*
 
 # Build
 build/
