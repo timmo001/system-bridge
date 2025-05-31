@@ -22,7 +22,7 @@ import (
 //go:embed web-client/out/*
 var webClientContent embed.FS
 
-//go:embed .resources/system-bridge-circle.png
+//go:embed .resources/system-bridge-dimmed.png
 var iconData []byte
 
 func main() {
