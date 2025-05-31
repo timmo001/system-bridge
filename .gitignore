@@ -1,6 +1,7 @@
 # Builds
 *.exe
 system-bridge
+system-bridge-*
 system-bridge.*
 !system-bridge.desktop
 !system-bridge.service
@@ -21,4 +22,4 @@ system-bridge.*
 installer.nsi
 
 # Windows icon
-!system-bridge.rc 
+!system-bridge.rc

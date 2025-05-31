@@ -1,5 +1,5 @@
 build: build_client
-	go build .
+	go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "system-bridge-linux" .
 
 build_client: clean-web-client
 	cd web-client && bun install && STATIC_EXPORT=true bun run build
