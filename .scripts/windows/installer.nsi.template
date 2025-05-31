@@ -68,7 +68,7 @@ Section "Install"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   CreateDirectory "$SMPROGRAMS\System Bridge"
-  CreateShortcut /NoWorkingDir "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge.exe" "backend --notify" "$INSTDIR\system-bridge.ico" 0 SW_SHOWMINIMIZED "" "System Bridge"
+  CreateShortcut /NoWorkingDir "$SMPROGRAMS\System Bridge\System Bridge.lnk" "$INSTDIR\system-bridge.exe" "backend --open-web-client" "$INSTDIR\system-bridge.ico" 0 SW_SHOWMINIMIZED "" "System Bridge"
   CreateShortcut /NoWorkingDir "$SMPROGRAMS\System Bridge\Uninstall System Bridge.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\system-bridge.ico" 0 SW_SHOWNORMAL "" "Uninstall System Bridge"
 SectionEnd
 

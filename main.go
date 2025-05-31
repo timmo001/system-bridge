@@ -56,8 +56,8 @@ func main() {
 				Usage:   "Run the backend server",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
-						Name:  "notify",
-						Usage: "Show a notification when the application starts",
+						Name:  "open-web-client",
+						Usage: "Open the web client in the default browser",
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
@@ -82,15 +82,8 @@ func main() {
 					b := backend.New(s, dataStore, &webClientContent)
 
 					// Show startup notification if requested
-					if cmd.Bool("notify") {
-						err := notification.Send(notification.NotificationData{
-							Title:   "System Bridge",
-							Message: "Application has started",
-							Icon:    "system-bridge",
-						})
-						if err != nil {
-							log.Warnf("Failed to send startup notification: %v", err)
-						}
+					if cmd.Bool("open-web-client") {
+						openWebClient(s)
 					}
 
 					return b.Run(cmdCtx)
@@ -151,10 +144,10 @@ func main() {
 }
 
 func onReady() {
-  s, err := settings.Load()
-  if err != nil {
-    log.Fatalf("error loading settings: %v", err)
-  }
+	s, err := settings.Load()
+	if err != nil {
+		log.Fatalf("error loading settings: %v", err)
+	}
 
 	systray.SetIcon(iconData)
 	systray.SetTitle("System Bridge")
@@ -163,11 +156,7 @@ func onReady() {
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
 	go func() {
 		<-mOpenWebClient.ClickedCh
-		// Open the frontend in the default browser
-		host := "0.0.0.0"
-		port := s.API.Port
-		apiKey := s.API.Token
-		browser.OpenURL(fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey))
+		openWebClient(s)
 	}()
 
 	// ---
@@ -184,4 +173,12 @@ func onReady() {
 
 func onExit() {
 	// Perform cleanup if needed
+}
+
+func openWebClient(s *settings.Settings) {
+	// Open the frontend in the default browser
+	host := "0.0.0.0"
+	port := s.API.Port
+	apiKey := s.API.Token
+	browser.OpenURL(fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey))
 }
