@@ -22,27 +22,22 @@ export default function WebSocketLayout({
 
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
-  const { host, port, token, setHost, setPort, setToken, setSsl } =
-    useSystemBridgeConnectionStore();
+  const { host, port, token, setAll } = useSystemBridgeConnectionStore();
 
   useEffect(() => {
-    if (hostInput && portInput && apiKeyInput && sslInput) {
-      setHost(hostInput);
-      setPort(portInput);
-      setToken(apiKeyInput);
-      setSsl(sslInput);
+    if (hostInput && portInput && apiKeyInput) {
+      void setAll({
+        host: hostInput,
+        port: portInput,
+        ssl: sslInput,
+        token: apiKeyInput,
+      }).then(() => {
+        setIsHydrated(true);
+      });
+    } else {
+      setIsHydrated(true);
     }
-    setIsHydrated(true);
-  }, [
-    apiKeyInput,
-    hostInput,
-    portInput,
-    setHost,
-    setPort,
-    setSsl,
-    setToken,
-    sslInput,
-  ]);
+  }, [apiKeyInput, hostInput, portInput, setAll, sslInput]);
 
   return (
     <SystemBridgeWSProvider>
