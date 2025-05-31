@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=System Bridge
+Comment=System Bridge
+Exec=system-bridge backend
+Icon=system-bridge
+Type=Application
+Categories=Utility;
+X-GNOME-Autostart-enabled=true
