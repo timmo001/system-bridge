@@ -34,14 +34,14 @@ export ARCH_PKGVER
 echo "ARCH_PKGVER: $ARCH_PKGVER"
 
 # Generate new sha256sums and update PKGBUILD
-makepkg -g > new_sums.txt
+makepkg -g >new_sums.txt
 # Remove the old sha256sums array
 sed -i '/^sha256sums=(/,/^)/d' PKGBUILD
 # Insert the new sha256sums array after the source= line
 awk '
   /source=/ { print; while ((getline line < "new_sums.txt") > 0) print line; next }
   { print }
-' PKGBUILD > PKGBUILD.new && mv PKGBUILD.new PKGBUILD
+' PKGBUILD >PKGBUILD.new && mv PKGBUILD.new PKGBUILD
 rm new_sums.txt
 
 # Build package
