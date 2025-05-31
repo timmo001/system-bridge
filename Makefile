@@ -4,20 +4,20 @@ build: build_client
 build_client: clean-web-client
 	cd web-client && bun install && STATIC_EXPORT=true bun run build
 
-install: build
-	go install .
-
-install_appimage:
+create_appimage:
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
 
-install_arch:
+create_arch:
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 
-install_deb:
+create_deb:
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
 
-install_rpm:
+create_rpm:
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
+
+install: build
+	go install .
 
 run: build
 	./system-bridge backend
