@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/charmbracelet/log"
@@ -23,7 +24,10 @@ import (
 var webClientContent embed.FS
 
 //go:embed .resources/system-bridge-dimmed-512.png
-var iconData []byte
+var trayIconPngData []byte
+
+//go:embed .resources/system-bridge-dimmed.ico
+var trayIconIcoData []byte
 
 func main() {
 	// Create a channel to receive OS signals
@@ -149,7 +153,12 @@ func onReady() {
 		log.Fatalf("error loading settings: %v", err)
 	}
 
-	systray.SetIcon(iconData)
+	// Set tray icon based on OS
+	if runtime.GOOS == "windows" {
+		systray.SetIcon(trayIconIcoData)
+	} else {
+		systray.SetIcon(trayIconPngData)
+	}
 	systray.SetTitle("System Bridge")
 
 	// Open frontend
