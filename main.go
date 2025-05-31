@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/charmbracelet/log"
+	"github.com/getlantern/systray"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -18,6 +19,9 @@ import (
 
 //go:embed web-client/out/*
 var webClientContent embed.FS
+
+//go:embed .resources/system-bridge-circle.png
+var iconData []byte
 
 func main() {
 	// Create a channel to receive OS signals
@@ -34,6 +38,10 @@ func main() {
 		sig := <-sigChan
 		log.Infof("Received signal: %v", sig)
 		cancel() // Cancel the context
+	}()
+
+	go func() {
+		systray.Run(onReady, onExit)
 	}()
 
 	cmd := &cli.Command{
@@ -138,4 +146,20 @@ func main() {
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatalf("error running cmd: %v", err)
 	}
+}
+
+func onReady() {
+	systray.SetIcon(iconData)
+	systray.SetTitle("System Bridge")
+	systray.SetTooltip("System Bridge is running")
+
+	mQuit := systray.AddMenuItem("Quit", "Quit the application")
+	go func() {
+		<-mQuit.ClickedCh
+		systray.Quit()
+	}()
+}
+
+func onExit() {
+	// Perform cleanup if needed
 }
