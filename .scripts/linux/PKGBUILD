@@ -1,11 +1,11 @@
 pkgname=system-bridge
-pkgver=${VERSION}
+pkgver=${ARCH_PKGVER}
 pkgrel=1
 pkgdesc="A bridge between your systems"
 arch=('x86_64')
 url="https://github.com/timmo001/system-bridge"
 license=('Apache-2.0')
-depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11' 'xorg-server' 'libx11-xcb')
+depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 provides=('system-bridge')
 conflicts=('system-bridge')
 
@@ -22,7 +22,7 @@ package() {
   install -dm755 "$pkgdir/usr/share/icons/hicolor/256x256/apps"
 
   # Install binary
-  install -Dm755 system-bridge-linux "$pkgdir/usr/bin/system-bridge"
+  install -Dm755 system-bridge "$pkgdir/usr/bin/system-bridge"
 
   # Install desktop file
   install -Dm644 system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
