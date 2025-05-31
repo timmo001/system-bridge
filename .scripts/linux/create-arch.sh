@@ -30,6 +30,12 @@ export ARCH_PKGVER
 
 echo "ARCH_PKGVER: $ARCH_PKGVER"
 
+# Generate new sha256sums and update PKGBUILD
+makepkg -g | grep sha256sums -A 7 >new_sums.txt
+sed -i '/^sha256sums=(/,/^)/d' PKGBUILD
+sed -i '/^source=/r new_sums.txt' PKGBUILD
+rm new_sums.txt
+
 # Build package
 makepkg -f
 

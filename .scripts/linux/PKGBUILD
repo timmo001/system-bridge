@@ -8,6 +8,7 @@ license=('Apache-2.0')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 provides=('system-bridge')
 conflicts=('system-bridge')
+source=('system-bridge' 'system-bridge.desktop' 'system-bridge-circle.svg' 'system-bridge-circle-16x16.png' 'system-bridge-circle-32x32.png' 'system-bridge-circle.png' 'LICENSE')
 
 package() {
   cd "$srcdir"
