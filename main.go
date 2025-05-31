@@ -22,7 +22,7 @@ import (
 //go:embed web-client/out/*
 var webClientContent embed.FS
 
-//go:embed .resources/system-bridge-dimmed.png
+//go:embed .resources/system-bridge-dimmed-512.png
 var iconData []byte
 
 func main() {
@@ -164,7 +164,10 @@ func onReady() {
 	go func() {
 		<-mOpenWebClient.ClickedCh
 		// Open the frontend in the default browser
-		browser.OpenURL(fmt.Sprintf("http://0.0.0.0:%d", s.API.Port))
+		host := "0.0.0.0"
+		port := s.API.Port
+		apiKey := s.API.Token
+		browser.OpenURL(fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey))
 	}()
 
 	// ---
