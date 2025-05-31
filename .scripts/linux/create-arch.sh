@@ -45,3 +45,9 @@ mv *.pkg.tar.zst ../../dist/
 
 cd ../..
 rm -rf build/arch
+
+# Write the main install file to a text file
+echo "
+# Install the package
+yay -U dist/system-bridge-${ARCH_PKGVER}-1-x86_64.pkg.tar.zst
+"
