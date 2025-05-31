@@ -23,3 +23,6 @@ installer.nsi
 
 # Windows icon
 !system-bridge.rc
+
+# Build
+build/
