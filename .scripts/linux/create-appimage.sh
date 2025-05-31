@@ -25,7 +25,7 @@ cp "$(dirname "$0")/system-bridge.desktop" AppDir/
 # Copy icons to AppDir
 cp .resources/system-bridge-dimmed-512.png AppDir/system-bridge.png
 
-# Copy icons to icons directory
+# Copy icons
 mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps/
 mkdir -p AppDir/usr/share/icons/hicolor/16x16/apps/
 mkdir -p AppDir/usr/share/icons/hicolor/32x32/apps/

@@ -8,6 +8,20 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
+# Check if all icon files exist
+for icon in .resources/system-bridge-dimmed.svg \
+             .resources/system-bridge-dimmed-16.png \
+             .resources/system-bridge-dimmed-32.png \
+             .resources/system-bridge-dimmed-48.png \
+             .resources/system-bridge-dimmed-128.png \
+             .resources/system-bridge-dimmed-256.png \
+             .resources/system-bridge-dimmed-512.png; do
+  if [ ! -f "$icon" ]; then
+    echo "$icon not found, please add all required icon files"
+    exit 1
+  fi
+done
+
 # Required tools check
 if ! command -v flatpak-builder &>/dev/null; then
   echo "flatpak-builder not found, installing..."
