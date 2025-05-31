@@ -17,7 +17,7 @@ type UpdateSettingsRequestData = settings.Settings
 type UpdateSettingsResponseData = settings.Settings
 
 //go:embed .scripts/linux/system-bridge.autostart.desktop
-var autostartDesktopFile []byte
+var linuxAutostartDesktopFile []byte
 
 func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventUpdateSettings, func(connection string, message event.Message) event.MessageResponse {
@@ -61,15 +61,38 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			switch runtime.GOOS {
 			case "linux":
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
-				err = os.WriteFile(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"), autostartDesktopFile, 0644)
+				err = os.WriteFile(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"), linuxAutostartDesktopFile, 0644)
 				if err != nil {
 					log.Errorf("Failed to write autostart desktop file: %v", err)
+				} else {
+					log.Infof("Autostart desktop file written to %s", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+				}
+			case "windows":
+				// Create shortcut in startup folder
+
+				// Get current executable path
+				executablePath := os.Args[0]
+
+				// Get working directory
+				workingDirectory := filepath.Dir(os.Args[0])
+
+				// Get icon path
+				iconPath := filepath.Join(workingDirectory, "system-bridge.ico")
+
+				windowsShortcutData := []byte(`[Shell]
+Command=` + executablePath + `
+Icon=` + iconPath + `
+WorkingDirectory=` + workingDirectory + `
+`)
+
+				shortcutPath := filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk")
+				err = os.WriteFile(shortcutPath, windowsShortcutData, 0644)
+				if err != nil {
+					log.Errorf("Failed to write autostart shortcut: %v", err)
+				} else {
+					log.Infof("Autostart shortcut written to %s", shortcutPath)
 				}
 			default:
-				// case "windows":
-				// 	// TODO: Add to startup folder
-				// case "darwin":
-				// 	// TODO: Add to startup
 				log.Warnf("Autostart is not supported on %s", runtime.GOOS)
 			}
 		} else if currentSettings.Autostart == true && newSettings.Autostart == false {
@@ -79,12 +102,18 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				err = os.Remove(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
 				if err != nil {
 					log.Errorf("Failed to remove autostart desktop file: %v", err)
+				} else {
+					log.Infof("Autostart desktop file removed from %s", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+				}
+			case "windows":
+				// Remove shortcut from startup folder
+				err = os.Remove(filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk"))
+				if err != nil {
+					log.Errorf("Failed to remove autostart shortcut: %v", err)
+				} else {
+					log.Infof("Autostart desktop file removed from %s", filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk"))
 				}
 			default:
-				// case "windows":
-				// 	// TODO: Remove from startup folder
-				// case "darwin":
-				// 	// TODO: Remove from startup
 				log.Warnf("Autostart is not supported on %s", runtime.GOOS)
 			}
 		}
