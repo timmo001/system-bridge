@@ -22,12 +22,24 @@ chmod +x AppDir/AppRun
 # Copy the desktop file
 cp "$(dirname "$0")/system-bridge.desktop" AppDir/
 
-# Copy icon to AppDir
-cp .resources/system-bridge-circle.png AppDir/system-bridge.png
+# Copy icons to AppDir
+cp .resources/system-bridge-dimmed-512.png AppDir/system-bridge.png
 
-# Copy icon to icons directory
+# Copy icons to icons directory
+mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps/
+mkdir -p AppDir/usr/share/icons/hicolor/16x16/apps/
+mkdir -p AppDir/usr/share/icons/hicolor/32x32/apps/
+mkdir -p AppDir/usr/share/icons/hicolor/48x48/apps/
+mkdir -p AppDir/usr/share/icons/hicolor/128x128/apps/
+mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps/
 mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps/
-cp .resources/system-bridge-circle.png AppDir/usr/share/icons/hicolor/512x512/apps/system-bridge.png
+cp .resources/system-bridge-dimmed.svg AppDir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
+cp .resources/system-bridge-dimmed-16.png AppDir/usr/share/icons/hicolor/16x16/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-32.png AppDir/usr/share/icons/hicolor/32x32/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-48.png AppDir/usr/share/icons/hicolor/48x48/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-128.png AppDir/usr/share/icons/hicolor/128x128/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-256.png AppDir/usr/share/icons/hicolor/256x256/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-512.png AppDir/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Build the AppImage
 VERSION=${VERSION:-5.0.0} ./appimagetool AppDir dist/system-bridge-${VERSION}-x86_64.AppImage

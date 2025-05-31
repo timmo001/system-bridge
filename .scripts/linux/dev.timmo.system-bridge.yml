@@ -31,5 +31,5 @@ modules:
       - type: file
         path: system-bridge.desktop
       - type: file
-        path: ../../.resources/system-bridge-circle.png
+        path: ../../.resources/system-bridge-dimmed.png
         dest-filename: icon.png

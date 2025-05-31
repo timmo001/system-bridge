@@ -23,10 +23,21 @@ mkdir -p deb-structure/usr/share/icons/hicolor/scalable/apps
 cp system-bridge-linux deb-structure/usr/bin/system-bridge
 
 # Copy icons
-cp .resources/system-bridge-circle-16x16.png deb-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
-cp .resources/system-bridge-circle-32x32.png deb-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
-cp .resources/system-bridge-circle.png deb-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
-cp .resources/system-bridge-circle.svg deb-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
+mkdir -p deb-structure/usr/share/icons/hicolor/scalable/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/16x16/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/32x32/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/48x48/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/128x128/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/256x256/apps
+mkdir -p deb-structure/usr/share/icons/hicolor/512x512/apps
+
+cp .resources/system-bridge-dimmed.svg deb-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
+cp .resources/system-bridge-dimmed-16.png deb-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-32.png deb-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-48.png deb-structure/usr/share/icons/hicolor/48x48/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-128.png deb-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-256.png deb-structure/usr/share/icons/hicolor/256x256/apps/system-bridge.png
+cp .resources/system-bridge-dimmed-512.png deb-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Create control file from template
 sed "s/\$VERSION/$VERSION/g" "$(dirname "$0")/control.template" >deb-structure/DEBIAN/control

@@ -19,10 +19,13 @@ cp ../../LICENSE .
 cp ../../.scripts/linux/PKGBUILD .
 
 # Copy icons
-cp ../../.resources/system-bridge-circle.svg .
-cp ../../.resources/system-bridge-circle-16x16.png .
-cp ../../.resources/system-bridge-circle-32x32.png .
-cp ../../.resources/system-bridge-circle.png .
+cp ../../.resources/system-bridge-dimmed.svg .
+cp ../../.resources/system-bridge-dimmed-16.png .
+cp ../../.resources/system-bridge-dimmed-32.png .
+cp ../../.resources/system-bridge-dimmed-48.png .
+cp ../../.resources/system-bridge-dimmed-128.png .
+cp ../../.resources/system-bridge-dimmed-256.png .
+cp ../../.resources/system-bridge-dimmed-512.png .
 
 # Sanitize VERSION for Arch pkgver
 ARCH_PKGVER=$(echo "$VERSION" | sed 's/[-+]/./g')

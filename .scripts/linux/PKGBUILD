@@ -8,7 +8,7 @@ license=('Apache-2.0')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 provides=('system-bridge')
 conflicts=('system-bridge')
-source=('system-bridge' 'system-bridge.desktop' 'system-bridge-circle.svg' 'system-bridge-circle-16x16.png' 'system-bridge-circle-32x32.png' 'system-bridge-circle.png' 'LICENSE')
+source=('system-bridge' 'system-bridge.desktop' 'system-bridge-dimmed.svg' 'system-bridge-dimmed-16.png' 'system-bridge-dimmed-32.png' 'system-bridge-dimmed-48.png' 'system-bridge-dimmed-128.png' 'system-bridge-dimmed-256.png' 'system-bridge-dimmed-512.png' 'LICENSE')
 
 package() {
   cd "$srcdir"
@@ -29,10 +29,13 @@ package() {
   install -Dm644 system-bridge.desktop "$pkgdir/usr/share/applications/system-bridge.desktop"
 
   # Install icons
-  install -Dm644 system-bridge-circle.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
-  install -Dm644 system-bridge-circle-16x16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
-  install -Dm644 system-bridge-circle-32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
-  install -Dm644 system-bridge-circle.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
+  install -Dm644 system-bridge-dimmed-16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed-32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed-48.png "$pkgdir/usr/share/icons/hicolor/48x48/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed-128.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed-256.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
+  install -Dm644 system-bridge-dimmed-512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/system-bridge.png"
 
   # Install license
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
