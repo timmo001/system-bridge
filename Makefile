@@ -7,6 +7,18 @@ build_client: clean-web-client
 install: build
 	go install .
 
+install_appimage:
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
+
+install_arch:
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
+
+install_deb:
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
+
+install_rpm:
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
+
 run: build
 	./system-bridge backend
 
