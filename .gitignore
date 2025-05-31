@@ -24,5 +24,8 @@ installer.nsi
 # Windows icon
 !system-bridge.rc
 
+# Resources
+!.resources/*
+
 # Build
 build/
