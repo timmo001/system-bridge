@@ -16,7 +16,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.25.5
 	github.com/spf13/viper v1.20.1
 	github.com/urfave/cli/v3 v3.3.3
-	golang.org/x/time v0.11.0
+	golang.org/x/time v0.12.0
 )
 
 require (
