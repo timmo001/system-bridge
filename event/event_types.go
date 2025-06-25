@@ -23,6 +23,7 @@ const (
 	EventPowerShutdown          EventType = "POWER_SHUTDOWN"
 	EventPowerSleep             EventType = "POWER_SLEEP"
 	EventRegisterDataListener   EventType = "REGISTER_DATA_LISTENER"
+	EventRunCommand             EventType = "RUN_COMMAND"
 	EventUnregisterDataListener EventType = "UNREGISTER_DATA_LISTENER"
 	EventDataUpdate             EventType = "DATA_UPDATE"
 	EventUpdateSettings         EventType = "UPDATE_SETTINGS"
