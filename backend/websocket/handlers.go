@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"sync"
 
 	"github.com/charmbracelet/log"
 	"github.com/gorilla/websocket"
@@ -68,7 +69,18 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			Event: event.EventType(msg.Event),
 			Data:  msg.Data,
 		})
-		ws.SendMessage(conn, response)
+		
+		// Find the connectionInfo for this connection
+		ws.mutex.RLock()
+		addr := conn.RemoteAddr().String()
+		connInfo, ok := ws.connections[addr]
+		ws.mutex.RUnlock()
+		
+		if ok {
+			ws.SendMessage(connInfo, response)
+		} else {
+			log.Error("Connection not found in connections map during message handling", "addr", addr)
+		}
 	}
 }
 
@@ -77,21 +89,27 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
+	addr := conn.RemoteAddr().String()
+	
 	// close connection if remote addr tries to connect again
-	if connection, ok := ws.connections[conn.RemoteAddr().String()]; ok {
-		ws.RemoveConnection(connection)
-		_ = connection.Close()
+	if connInfo, ok := ws.connections[addr]; ok {
+		ws.RemoveConnection(connInfo.conn)
+		_ = connInfo.conn.Close()
 	}
 
-	ws.connections[conn.RemoteAddr().String()] = conn
+	ws.connections[addr] = &connectionInfo{
+		conn:     conn,
+		writeMux: sync.Mutex{},
+	}
 }
 
 // RemoveConnection removes a WebSocket connection
 func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
-	delete(ws.connections, conn.RemoteAddr().String())
-	delete(ws.dataListeners, conn.RemoteAddr().String())
+	addr := conn.RemoteAddr().String()
+	delete(ws.connections, addr)
+	delete(ws.dataListeners, addr)
 }
 
 type RegisterResponse int
@@ -144,16 +162,16 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 	}
 
 	if addr != nil {
-		if conn, ok := ws.connections[*addr]; ok {
+		if connInfo, ok := ws.connections[*addr]; ok {
 			log.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
-			ws.SendMessage(conn, response)
+			ws.SendMessage(connInfo, response)
 		} else {
-			for remote_addr, conn := range ws.connections {
+			for remote_addr, connInfo := range ws.connections {
 				modules, ok := ws.dataListeners[remote_addr]
 
 				if ok && slices.Contains(modules, module.Name) {
 					log.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
-					ws.SendMessage(conn, response)
+					ws.SendMessage(connInfo, response)
 				}
 
 			}
