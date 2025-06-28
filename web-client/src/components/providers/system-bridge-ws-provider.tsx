@@ -158,7 +158,7 @@ export function SystemBridgeWSProvider({
     // Handle request/response matching
     if (message.id && pendingRequests.current.has(message.id)) {
       const { resolve, reject } = pendingRequests.current.get(message.id)!;
-      if (message.type === "ERROR" || ("error" in message && message.error)) {
+      if (message.type === "ERROR") {
         reject(message);
       } else {
         resolve(message);
@@ -227,20 +227,23 @@ export function SystemBridgeWSProvider({
       }
     }, RETRY_DELAY);
 
-    // Snapshot the current pendingRequests for cleanup
-    const pendingRequestsSnapshot = pendingRequests.current;
-    // Cleanup on unmount
+    // Cleanup only on unmount
+    let isMounted = true;
     return () => {
-      wsRef.current?.close();
-      wsRef.current = null;
-      setIsConnected(false);
-      // Reject all pending requests on cleanup
-      pendingRequestsSnapshot.forEach(({ reject }, id) => {
-        reject(
-          new Error("WebSocket provider unmounted before response received"),
-        );
-      });
-      pendingRequestsSnapshot.clear();
+      if (isMounted) {
+        wsRef.current?.close();
+        wsRef.current = null;
+        setIsConnected(false);
+        // Reject all pending requests on cleanup
+        const pendingRequestsSnapshot = pendingRequests.current;
+        pendingRequestsSnapshot.forEach(({ reject }, id) => {
+          reject(
+            new Error("WebSocket provider unmounted before response received"),
+          );
+        });
+        pendingRequestsSnapshot.clear();
+        isMounted = false;
+      }
     };
   }, [connect, isConnected, retryCount, host, port, token]);
 
