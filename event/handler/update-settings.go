@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 
 	"github.com/charmbracelet/log"
@@ -35,7 +36,33 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 
 		newSettings := UpdateSettingsRequestData{}
-		err = mapstructure.Decode(message.Data, &newSettings)
+		// Add decode hook for log.Level
+		dc := &mapstructure.DecoderConfig{
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				func(from, to reflect.Type, data any) (any, error) {
+					if to == reflect.TypeOf(log.Level(0)) && from.Kind() == reflect.String {
+						parsed, err := log.ParseLevel(data.(string))
+						if err != nil {
+							return nil, err
+						}
+						return parsed, nil
+					}
+					return data, nil
+				},
+			),
+			Result: &newSettings,
+		}
+		dec, err := mapstructure.NewDecoder(dc)
+		if err != nil {
+			log.Errorf("Failed to create decoder: %v", err)
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeNone,
+				Message: "Failed to decode update settings event data",
+			}
+		}
+		err = dec.Decode(message.Data)
 		if err != nil {
 			log.Errorf("Failed to decode update settings event data: %v", err)
 			return event.MessageResponse{
@@ -122,7 +149,7 @@ WorkingDirectory=` + workingDirectory + `
 			ID:      message.ID,
 			Type:    event.ResponseTypeSettingsUpdated,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    currentSettings,
+			Data:    settingsToFrontend(currentSettings),
 			Message: "Settings updated",
 		}
 	})
