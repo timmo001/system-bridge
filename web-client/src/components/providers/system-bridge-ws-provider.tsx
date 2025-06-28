@@ -141,18 +141,43 @@ export function SystemBridgeWSProvider({
         setIsRequestingData(false);
         break;
       case "SETTINGS_RESULT":
-        const newSettings = message.data as Settings;
-        console.log("Settings received:", newSettings);
-        setSettings(newSettings);
+        // Merge received settings with defaults to ensure logLevel is always present
+        const receivedSettings = message.data as Partial<Settings>;
+        const mergedSettings: Settings = {
+          api: {
+            token: receivedSettings.api?.token ?? "",
+            port: receivedSettings.api?.port ?? 9170,
+          },
+          autostart: receivedSettings.autostart ?? false,
+          hotkeys: receivedSettings.hotkeys ?? [],
+          logLevel: receivedSettings.logLevel ?? "info",
+          media: {
+            directories: receivedSettings.media?.directories ?? [],
+          },
+        };
+        console.log("Settings received:", mergedSettings);
+        setSettings(mergedSettings);
         setIsRequestingData(false);
         break;
       case "DATA_LISTENER_REGISTERED":
         console.log("Data listener registered");
         break;
       case "SETTINGS_UPDATED":
-        console.log("Settings updated:", message.data);
-        const updatedSettings = message.data as Settings;
-        setSettings(updatedSettings);
+        // Merge updated settings with defaults to ensure logLevel is always present
+        const updatedReceivedSettings = message.data as Partial<Settings>;
+        const updatedMergedSettings: Settings = {
+          api: {
+            token: updatedReceivedSettings.api?.token ?? "",
+            port: updatedReceivedSettings.api?.port ?? 9170,
+          },
+          autostart: updatedReceivedSettings.autostart ?? false,
+          hotkeys: updatedReceivedSettings.hotkeys ?? [],
+          logLevel: updatedReceivedSettings.logLevel ?? "info",
+          media: {
+            directories: updatedReceivedSettings.media?.directories ?? [],
+          },
+        };
+        setSettings(updatedMergedSettings);
         break;
       default:
         console.warn("Unknown message type:", message.type);
@@ -173,7 +198,9 @@ export function SystemBridgeWSProvider({
     reconnectTimeoutRef.current = setTimeout(() => {
       setRetryCount((prev) => prev + 1);
       if (retryCount <= MAX_RETRIES) {
-        console.log( `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`);
+        console.log(
+          `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`,
+        );
         wsRef.current = null;
         connect();
       }
