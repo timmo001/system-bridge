@@ -16,6 +16,7 @@ import (
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 type Backend struct {
@@ -31,8 +32,14 @@ func New(settings *settings.Settings, dataStore *data.DataStore, webClientConten
 	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
 
-	eventRouter := event.NewMessageRouter(settings)
-	wsServer := websocket.NewWebsocketServer(settings, dataStore, eventRouter)
+	// Load token for WebSocket and HTTP auth
+	token, err := utils.LoadToken()
+	if err != nil {
+		log.Fatalf("error loading token: %v", err)
+	}
+
+	eventRouter := event.NewMessageRouter()
+	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
 
 	return &Backend{
 		settings:         settings,
@@ -77,14 +84,16 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api", api_http.HandleAPI)
 	// Set up module data endpoint
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
-		b.settings,
 		b.dataStore,
 	))
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 
+	// Get port from environment variable with default
+	port := utils.GetPort()
+
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", b.settings.API.Port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
 		Handler: mux,
 	}
 

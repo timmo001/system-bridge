@@ -8,7 +8,6 @@ import (
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -39,9 +38,9 @@ type WebsocketServer struct {
 	EventRouter   *event.MessageRouter
 }
 
-func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
+func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
-		token:         settings.API.Token,
+		token:         token,
 		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),
 		dataStore:     dataStore,

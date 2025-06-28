@@ -11,6 +11,7 @@ import {
 import { SetupConnection } from "~/components/setup-connection";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import { SystemBridgeWSProvider } from "~/components/providers/system-bridge-ws-provider";
+import { ConnectionStatus } from "~/components/connection-status";
 
 export default function WebSocketLayout({
   children,
@@ -25,6 +26,12 @@ export default function WebSocketLayout({
   const { host, port, token, setAll } = useSystemBridgeConnectionStore();
 
   useEffect(() => {
+    console.debug("Query params:", {
+      hostInput,
+      portInput,
+      apiKeyInput,
+      sslInput,
+    });
     if (hostInput && portInput && apiKeyInput) {
       void setAll({
         host: hostInput,
@@ -32,6 +39,12 @@ export default function WebSocketLayout({
         ssl: sslInput,
         token: apiKeyInput,
       }).then(() => {
+        console.debug("Set store from query params", {
+          host: hostInput,
+          port: portInput,
+          ssl: sslInput,
+          token: apiKeyInput,
+        });
         setIsHydrated(true);
       });
     } else {
@@ -46,7 +59,10 @@ export default function WebSocketLayout({
       ) : !host || !port || !token ? (
         <SetupConnection />
       ) : (
-        <>{children}</>
+        <>
+          <ConnectionStatus />
+          {children}
+        </>
       )}
     </SystemBridgeWSProvider>
   );

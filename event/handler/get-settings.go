@@ -27,7 +27,7 @@ func RegisterGetSettingsHandler(router *event.MessageRouter) {
 			ID:      message.ID,
 			Type:    event.ResponseTypeSettingsResult,
 			Subtype: event.ResponseSubtypeNone,
-			Data:    settings,
+			Data:    settingsToFrontend(settings),
 			Message: "Got settings",
 		}
 	})

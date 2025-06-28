@@ -57,7 +57,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		// Validate token
 		if msg.Token != ws.token {
 			log.Error("Invalid token received")
-			ws.SendError(conn, msg, "invalid_token", "Invalid token")
+			ws.SendError(conn, msg, "BAD_TOKEN", "Invalid token")
 			continue
 		}
 

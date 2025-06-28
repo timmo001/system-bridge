@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export const SettingsAPISchema = z.object({
-  token: z.string(),
-  port: z.number(),
-});
-
-export type SettingsAPI = z.infer<typeof SettingsAPISchema>;
-
 export const SettingsHotkeySchema = z.object({
   name: z.string(),
   key: z.string(),
@@ -30,7 +23,6 @@ export const SettingsMediaSchema = z.object({
 export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
 
 export const SettingsSchema = z.object({
-  api: SettingsAPISchema,
   autostart: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
   logLevel: z.enum(["debug", "info", "warn", "error"]),
