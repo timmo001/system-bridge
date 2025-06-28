@@ -134,49 +134,6 @@ export function Settings() {
           />
         </div>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">API Settings</h2>
-          <FormField
-            disabled
-            control={form.control}
-            name="api.token"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>API Token</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter API token" {...field} />
-                </FormControl>
-                <FormDescription>
-                  The token used to authenticate with the API
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="api.port"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>API Port</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="9170"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormDescription>
-                  The port that the API server runs on
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         {/* TODO: Media settings */}
 
         <Button disabled={!form.formState.isDirty} type="submit">
