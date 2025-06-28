@@ -94,10 +94,6 @@ export function SystemBridgeWSProvider({
 
         const receivedSettings = message.data as Partial<Settings>;
         const mergedSettings: Settings = {
-          api: {
-            token: receivedSettings.api?.token ?? "",
-            port: receivedSettings.api?.port ?? 9170,
-          },
           autostart: receivedSettings.autostart ?? false,
           hotkeys: receivedSettings.hotkeys ?? [],
           logLevel: receivedSettings.logLevel ?? "info",
@@ -116,16 +112,6 @@ export function SystemBridgeWSProvider({
         setSettings((prevSettings) => {
           const updatedReceivedSettings = message.data as Partial<Settings>;
           const mergedSettings: Settings = {
-            api: {
-              token:
-                updatedReceivedSettings.api?.token ??
-                prevSettings?.api.token ??
-                "",
-              port:
-                updatedReceivedSettings.api?.port ??
-                prevSettings?.api.port ??
-                9170,
-            },
             autostart:
               updatedReceivedSettings.autostart ??
               prevSettings?.autostart ??
