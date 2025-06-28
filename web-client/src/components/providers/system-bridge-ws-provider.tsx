@@ -44,6 +44,95 @@ export function SystemBridgeWSProvider({
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
+  const handleMessage = useCallback(
+    ({ data }: MessageEvent<string>) => {
+      console.log("Received message:", data);
+
+      const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
+
+      if (!parsedMessage.success) {
+        console.error("Invalid message:", parsedMessage.error);
+        return;
+      }
+
+      const message = parsedMessage.data;
+      switch (message.type) {
+        case "DATA_UPDATE":
+          if (!message.module) {
+            console.error("No module found in data update");
+            return;
+          }
+
+          if (!message.data) {
+            console.error("No data found in data update");
+            return;
+          }
+
+          console.log("Data received:", message.data);
+          setData((prev) => ({
+            ...prev,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            [message.module as string]: message.data,
+          }));
+          setIsRequestingData(false);
+          break;
+        case "SETTINGS_RESULT":
+          // Only update settings if no update is pending
+          if (isSettingsUpdatePending) {
+            console.log(
+              "Ignoring SETTINGS_RESULT because a settings update is pending",
+            );
+            setIsRequestingData(false);
+            break;
+          }
+
+          // Merge received settings with defaults to ensure logLevel is always present
+          const receivedSettings = message.data as Partial<Settings>;
+          const mergedSettings: Settings = {
+            api: {
+              token: receivedSettings.api?.token ?? "",
+              port: receivedSettings.api?.port ?? 9170,
+            },
+            autostart: receivedSettings.autostart ?? false,
+            hotkeys: receivedSettings.hotkeys ?? [],
+            logLevel: receivedSettings.logLevel ?? "info",
+            media: {
+              directories: receivedSettings.media?.directories ?? [],
+            },
+          };
+          console.log("Settings received:", mergedSettings);
+          setSettings(mergedSettings);
+          setIsRequestingData(false);
+          break;
+        case "DATA_LISTENER_REGISTERED":
+          console.log("Data listener registered");
+          break;
+        case "SETTINGS_UPDATED":
+          // Merge updated settings with defaults to ensure logLevel is always present
+          const updatedReceivedSettings = message.data as Partial<Settings>;
+          const updatedMergedSettings: Settings = {
+            api: {
+              token: updatedReceivedSettings.api?.token ?? "",
+              port: updatedReceivedSettings.api?.port ?? 9170,
+            },
+            autostart: updatedReceivedSettings.autostart ?? false,
+            hotkeys: updatedReceivedSettings.hotkeys ?? [],
+            logLevel: updatedReceivedSettings.logLevel ?? "info",
+            media: {
+              directories: updatedReceivedSettings.media?.directories ?? [],
+            },
+          };
+          setSettings(updatedMergedSettings);
+          setIsSettingsUpdatePending(false);
+          break;
+        default:
+          console.warn("Unknown message type:", message.type);
+          break;
+      }
+    },
+    [isSettingsUpdatePending],
+  );
+
   const connect = useCallback(() => {
     if (!host || !port || !token) return;
     if (wsRef.current) return;
@@ -100,7 +189,7 @@ export function SystemBridgeWSProvider({
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [handleMessage, host, isRequestingData, port, ssl, token]);
+  }, [host, isRequestingData, port, ssl, token, handleMessage]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -114,92 +203,6 @@ export function SystemBridgeWSProvider({
 
     console.log("Sending request:", request);
     wsRef.current.send(JSON.stringify(request));
-  }
-
-  function handleMessage({ data }: MessageEvent<string>) {
-    console.log("Received message:", data);
-
-    const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
-
-    if (!parsedMessage.success) {
-      console.error("Invalid message:", parsedMessage.error);
-      return;
-    }
-
-    const message = parsedMessage.data;
-    switch (message.type) {
-      case "DATA_UPDATE":
-        if (!message.module) {
-          console.error("No module found in data update");
-          return;
-        }
-
-        if (!message.data) {
-          console.error("No data found in data update");
-          return;
-        }
-
-        console.log("Data received:", message.data);
-        setData((prev) => ({
-          ...prev,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          [message.module as string]: message.data,
-        }));
-        setIsRequestingData(false);
-        break;
-      case "SETTINGS_RESULT":
-        // Only update settings if no update is pending
-        if (isSettingsUpdatePending) {
-          console.log(
-            "Ignoring SETTINGS_RESULT because a settings update is pending",
-          );
-          setIsRequestingData(false);
-          break;
-        }
-
-        // Merge received settings with defaults to ensure logLevel is always present
-        const receivedSettings = message.data as Partial<Settings>;
-        const mergedSettings: Settings = {
-          api: {
-            token: receivedSettings.api?.token ?? "",
-            port: receivedSettings.api?.port ?? 9170,
-          },
-          autostart: receivedSettings.autostart ?? false,
-          hotkeys: receivedSettings.hotkeys ?? [],
-          logLevel: receivedSettings.logLevel ?? "info",
-          media: {
-            directories: receivedSettings.media?.directories ?? [],
-          },
-        };
-        console.log("Settings received:", mergedSettings);
-        setSettings(mergedSettings);
-        setIsRequestingData(false);
-        break;
-      case "DATA_LISTENER_REGISTERED":
-        console.log("Data listener registered");
-        break;
-      case "SETTINGS_UPDATED":
-        // Merge updated settings with defaults to ensure logLevel is always present
-        const updatedReceivedSettings = message.data as Partial<Settings>;
-        const updatedMergedSettings: Settings = {
-          api: {
-            token: updatedReceivedSettings.api?.token ?? "",
-            port: updatedReceivedSettings.api?.port ?? 9170,
-          },
-          autostart: updatedReceivedSettings.autostart ?? false,
-          hotkeys: updatedReceivedSettings.hotkeys ?? [],
-          logLevel: updatedReceivedSettings.logLevel ?? "info",
-          media: {
-            directories: updatedReceivedSettings.media?.directories ?? [],
-          },
-        };
-        setSettings(updatedMergedSettings);
-        setIsSettingsUpdatePending(false);
-        break;
-      default:
-        console.warn("Unknown message type:", message.type);
-        break;
-    }
   }
 
   useEffect(() => {
