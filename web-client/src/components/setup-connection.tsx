@@ -46,22 +46,93 @@ export function SetupConnection() {
   });
 
   function onSubmit(data: Connection) {
-    setHost(data.host);
-    setPort(data.port);
-    setSsl(data.ssl);
-    setToken(data.token);
-
     const ws = new WebSocket(
       `${data.ssl ? "wss" : "ws"}://${data.host}:${data.port}/api/websocket`,
     );
 
+    // Set connection timeout
+    const timeout = setTimeout(() => {
+      ws.close();
+      toast.error(
+        "Connection timeout. Please check your host, port, and network connection.",
+      );
+    }, 10000);
+
     ws.onopen = () => {
       console.log("WebSocket connected");
-      toast.success("Connected to System Bridge!");
+      clearTimeout(timeout);
 
-      if (pathname === "/connection") {
-        router.push("/");
+      // Test token by sending an auth request
+      ws.send(
+        JSON.stringify({
+          id: "test-connection",
+          event: "GET_SETTINGS",
+          token: data.token,
+        }),
+      );
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data as string) as {
+          type?: string;
+          subtype?: string;
+          id?: string;
+        };
+
+        if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
+          toast.error(
+            "Invalid API token. Please check your token and try again.",
+          );
+          ws.close();
+          return;
+        }
+
+        if (
+          message.type === "SETTINGS_RESULT" ||
+          message.id === "test-connection"
+        ) {
+          // Token is valid, save connection settings
+          setHost(data.host);
+          setPort(data.port);
+          setSsl(data.ssl);
+          setToken(data.token);
+
+          toast.success("Connected to System Bridge!");
+          ws.close();
+
+          if (pathname === "/connection") {
+            router.push("/");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to parse message:", error);
+        toast.error("Received invalid response from server.");
       }
+    };
+
+    ws.onclose = (event) => {
+      clearTimeout(timeout);
+      if (event.code === 1006) {
+        toast.error(
+          "Connection failed. Please check your host and port settings.",
+        );
+      } else if (event.code === 1002) {
+        toast.error("Connection failed due to protocol error.");
+      } else if (event.code === 1003) {
+        toast.error("Connection rejected by server. Please check your token.");
+      } else if (event.code !== 1000 && event.code !== 1001) {
+        toast.error(
+          `Connection failed with code ${event.code}: ${event.reason ?? "Unknown reason"}`,
+        );
+      }
+    };
+
+    ws.onerror = () => {
+      clearTimeout(timeout);
+      toast.error(
+        "Connection failed. Please check your host, port, and network connection.",
+      );
     };
   }
 

@@ -11,6 +11,7 @@ import {
 import { SetupConnection } from "~/components/setup-connection";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import { SystemBridgeWSProvider } from "~/components/providers/system-bridge-ws-provider";
+import { ConnectionStatus } from "~/components/connection-status";
 
 export default function WebSocketLayout({
   children,
@@ -58,7 +59,10 @@ export default function WebSocketLayout({
       ) : !host || !port || !token ? (
         <SetupConnection />
       ) : (
-        <>{children}</>
+        <>
+          <ConnectionStatus />
+          {children}
+        </>
       )}
     </SystemBridgeWSProvider>
   );

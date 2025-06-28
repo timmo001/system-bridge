@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { generateUUID } from "~/lib/utils";
 import {
@@ -21,6 +22,7 @@ export const SystemBridgeWSContext = createContext<
       settings: Settings | null;
       sendRequest: (request: WebSocketRequest) => void;
       error: string | null;
+      retryConnection: () => void;
     }
   | undefined
 >(undefined);
@@ -47,18 +49,38 @@ export function SystemBridgeWSProvider({
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousConnectedState = useRef<boolean>(false);
 
   useEffect(() => {
     isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
   }, [isSettingsUpdatePending]);
 
+  // Toast notifications for connection status changes
+  useEffect(() => {
+    if (isConnected && !previousConnectedState.current) {
+      toast.success("Connected to System Bridge");
+    } else if (!isConnected && previousConnectedState.current && error) {
+      toast.error("Disconnected from System Bridge");
+    }
+    previousConnectedState.current = isConnected;
+  }, [isConnected, error]);
+
   const handleMessage = useCallback(({ data }: MessageEvent<string>) => {
     console.log("Received message:", data);
 
-    const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
+    let parsedMessage;
+    try {
+      parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
+    } catch (error) {
+      console.error("Failed to parse WebSocket message:", error);
+      setError("Received invalid message from server");
+      return;
+    }
 
     if (!parsedMessage.success) {
       console.error("Invalid message:", parsedMessage.error);
+      setError("Received invalid message format from server");
       return;
     }
 
@@ -142,8 +164,11 @@ export function SystemBridgeWSProvider({
         if (message.subtype === "BAD_TOKEN") {
           setError("Invalid API token. Please check your connection settings.");
           setIsConnected(false);
+          setRetryCount(MAX_RETRIES + 1); // Stop retrying on auth error
           wsRef.current?.close();
           return;
+        } else {
+          setError(`Server error: ${message.data ?? "Unknown error"}`);
         }
         break;
       default:
@@ -156,14 +181,47 @@ export function SystemBridgeWSProvider({
     if (!host || !port || !token) return;
     if (wsRef.current) return;
 
-    wsRef.current = new WebSocket(
-      `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
-    );
+    // Clear any existing connection timeout
+    if (connectionTimeoutRef.current) {
+      clearTimeout(connectionTimeoutRef.current);
+    }
+
+    // Set connection timeout
+    connectionTimeoutRef.current = setTimeout(() => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
+        wsRef.current.close();
+        setError(
+          "Connection timeout. Please check your host, port, and network connection.",
+        );
+        setIsConnected(false);
+      }
+    }, 10000); // 10 second timeout
+
+    try {
+      wsRef.current = new WebSocket(
+        `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
+      );
+    } catch (error) {
+      console.error("Failed to create WebSocket:", error);
+      setError(
+        "Failed to create connection. Please check your connection settings.",
+      );
+      setIsConnected(false);
+      return;
+    }
 
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
       setError(null);
+      setRetryCount(0); // Reset retry count on successful connection
+
+      // Clear connection timeout
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
+      }
+
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -192,14 +250,48 @@ export function SystemBridgeWSProvider({
       }
     };
 
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
+    wsRef.current.onclose = (event: CloseEvent) => {
+      console.log("WebSocket disconnected", event);
       setIsConnected(false);
+
+      // Clear connection timeout
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
+      }
+
+      // Set specific error messages based on close code
+      if (event.code === 1006) {
+        setError(
+          "Connection closed unexpectedly. Please check your host and port settings.",
+        );
+      } else if (event.code === 1002) {
+        setError("Connection failed due to protocol error.");
+      } else if (event.code === 1003) {
+        setError("Connection rejected by server. Please check your token.");
+      } else if (event.code !== 1000 && event.code !== 1001) {
+        setError(
+          `Connection closed with code ${event.code}: ${event.reason ?? "Unknown reason"}`,
+        );
+      }
     };
 
     wsRef.current.onerror = (error: Event) => {
       console.error("WebSocket error:", error);
       setIsConnected(false);
+
+      // Clear connection timeout
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
+      }
+
+      if (retryCount === 0) {
+        // Only show this error on first attempt to avoid spam
+        setError(
+          "Connection failed. Please check your host, port, and network connection.",
+        );
+      }
     };
 
     wsRef.current.onmessage = handleMessage;
@@ -211,6 +303,10 @@ export function SystemBridgeWSProvider({
       if (settingsUpdateTimeoutRef.current) {
         clearTimeout(settingsUpdateTimeoutRef.current);
         settingsUpdateTimeoutRef.current = null;
+      }
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
       }
     };
   }, [host, isRequestingData, port, ssl, token, handleMessage]);
@@ -248,20 +344,41 @@ export function SystemBridgeWSProvider({
     }
 
     reconnectTimeoutRef.current = setTimeout(() => {
-      setRetryCount((prev) => prev + 1);
-      if (retryCount <= MAX_RETRIES) {
+      if (retryCount < MAX_RETRIES) {
         console.log(
-          `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`,
+          `Attempting to reconnect... (${retryCount + 1}/${MAX_RETRIES})`,
         );
+        setRetryCount((prev) => prev + 1);
         wsRef.current = null;
         connect();
+      } else {
+        setError(
+          `Failed to connect after ${MAX_RETRIES} attempts. Please check your connection settings and try again.`,
+        );
       }
     }, RETRY_DELAY);
   }, [connect, isConnected, retryCount, host, port, token]);
 
+  const retryConnection = useCallback(() => {
+    setError(null);
+    setRetryCount(0);
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    connect();
+  }, [connect]);
+
   return (
     <SystemBridgeWSContext.Provider
-      value={{ data, isConnected, settings, sendRequest, error }}
+      value={{
+        data,
+        isConnected,
+        settings,
+        sendRequest,
+        error,
+        retryConnection,
+      }}
     >
       {children}
     </SystemBridgeWSContext.Provider>
