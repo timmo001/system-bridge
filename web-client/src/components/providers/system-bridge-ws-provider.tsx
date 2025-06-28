@@ -108,21 +108,40 @@ export function SystemBridgeWSProvider({
           console.log("Data listener registered");
           break;
         case "SETTINGS_UPDATED":
-          // Merge updated settings with defaults to ensure logLevel is always present
-          const updatedReceivedSettings = message.data as Partial<Settings>;
-          const updatedMergedSettings: Settings = {
-            api: {
-              token: updatedReceivedSettings.api?.token ?? "",
-              port: updatedReceivedSettings.api?.port ?? 9170,
-            },
-            autostart: updatedReceivedSettings.autostart ?? false,
-            hotkeys: updatedReceivedSettings.hotkeys ?? [],
-            logLevel: updatedReceivedSettings.logLevel ?? "info",
-            media: {
-              directories: updatedReceivedSettings.media?.directories ?? [],
-            },
-          };
-          setSettings(updatedMergedSettings);
+          // Merge updated settings with current settings to preserve existing config
+          setSettings((prevSettings) => {
+            const updatedReceivedSettings = message.data as Partial<Settings>;
+            const mergedSettings: Settings = {
+              api: {
+                token:
+                  updatedReceivedSettings.api?.token ??
+                  prevSettings?.api.token ??
+                  "",
+                port:
+                  updatedReceivedSettings.api?.port ??
+                  prevSettings?.api.port ??
+                  9170,
+              },
+              autostart:
+                updatedReceivedSettings.autostart ??
+                prevSettings?.autostart ??
+                false,
+              hotkeys:
+                updatedReceivedSettings.hotkeys ?? prevSettings?.hotkeys ?? [],
+              logLevel:
+                updatedReceivedSettings.logLevel ??
+                prevSettings?.logLevel ??
+                "info",
+              media: {
+                directories:
+                  updatedReceivedSettings.media?.directories ??
+                  prevSettings?.media.directories ??
+                  [],
+              },
+            };
+            console.log("Settings updated:", mergedSettings);
+            return mergedSettings;
+          });
           setIsSettingsUpdatePending(false);
           break;
         default:
