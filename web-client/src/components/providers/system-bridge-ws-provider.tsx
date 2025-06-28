@@ -207,6 +207,23 @@ export function SystemBridgeWSProvider({
   }
 
   useEffect(() => {
+    // Capture the current pendingRequests map
+    const pendingRequestsSnapshot = pendingRequests.current;
+    return () => {
+      wsRef.current?.close();
+      wsRef.current = null;
+      setIsConnected(false);
+      // Use the captured snapshot
+      pendingRequestsSnapshot.forEach(({ reject }, id) => {
+        reject(
+          new Error("WebSocket provider unmounted before response received"),
+        );
+      });
+      pendingRequestsSnapshot.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     if (!host || !port || !token) return;
     if (isConnected) return;
 
@@ -227,24 +244,8 @@ export function SystemBridgeWSProvider({
       }
     }, RETRY_DELAY);
 
-    // Cleanup only on unmount
-    let isMounted = true;
-    return () => {
-      if (isMounted) {
-        wsRef.current?.close();
-        wsRef.current = null;
-        setIsConnected(false);
-        // Reject all pending requests on cleanup
-        const pendingRequestsSnapshot = pendingRequests.current;
-        pendingRequestsSnapshot.forEach(({ reject }, id) => {
-          reject(
-            new Error("WebSocket provider unmounted before response received"),
-          );
-        });
-        pendingRequestsSnapshot.clear();
-        isMounted = false;
-      }
-    };
+    // No cleanup needed here; handled by unmount effect
+    return undefined;
   }, [connect, isConnected, retryCount, host, port, token]);
 
   return (
