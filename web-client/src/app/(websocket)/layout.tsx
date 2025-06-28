@@ -25,6 +25,12 @@ export default function WebSocketLayout({
   const { host, port, token, setAll } = useSystemBridgeConnectionStore();
 
   useEffect(() => {
+    console.debug("Query params:", {
+      hostInput,
+      portInput,
+      apiKeyInput,
+      sslInput,
+    });
     if (hostInput && portInput && apiKeyInput) {
       void setAll({
         host: hostInput,
@@ -32,6 +38,12 @@ export default function WebSocketLayout({
         ssl: sslInput,
         token: apiKeyInput,
       }).then(() => {
+        console.debug("Set store from query params", {
+          host: hostInput,
+          port: portInput,
+          ssl: sslInput,
+          token: apiKeyInput,
+        });
         setIsHydrated(true);
       });
     } else {
