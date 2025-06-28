@@ -8,10 +8,6 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 )
 
-type SettingsAPI struct {
-	Token string `json:"token" mapstructure:"token"`
-	Port  int    `json:"port" mapstructure:"port"`
-}
 
 type SettingsHotkey struct {
 	Name string `json:"name" mapstructure:"name"`
@@ -28,7 +24,6 @@ type SettingsMedia struct {
 }
 
 type Settings struct {
-	API       SettingsAPI      `json:"api" mapstructure:"api"`
 	Autostart bool             `json:"autostart" mapstructure:"autostart"`
 	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel  log.Level        `json:"logLevel" mapstructure:"logLevel"`
@@ -47,9 +42,7 @@ func Load() (*Settings, error) {
 	}
 	viper.AddConfigPath(configDirPath)
 
-	// Set default values
-	viper.SetDefault("api.token", utils.GenerateToken())
-	viper.SetDefault("api.port", 9170)
+	// Set default values (token and port removed)
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", log.InfoLevel)
@@ -75,8 +68,6 @@ func Load() (*Settings, error) {
 }
 
 func (cfg *Settings) Save() error {
-	viper.Set("api.token", cfg.API.Token)
-	viper.Set("api.port", cfg.API.Port)
 	viper.Set("autostart", cfg.Autostart)
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", cfg.LogLevel)

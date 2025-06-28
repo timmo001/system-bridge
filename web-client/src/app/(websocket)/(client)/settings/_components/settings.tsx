@@ -38,10 +38,6 @@ export function Settings() {
   const form = useForm<Settings>({
     resolver: zodResolver(SettingsSchema),
     defaultValues: settings ?? {
-      api: {
-        token: "",
-        port: 9170,
-      },
       autostart: false,
       hotkeys: [],
       logLevel: "info",

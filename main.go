@@ -16,6 +16,7 @@ import (
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/urfave/cli/v3"
 )
@@ -74,7 +75,12 @@ func main() {
 
 					log.Debugf("Loaded settings: %v", s)
 
-					log.Infof("Your API token is: %s", s.API.Token)
+					token, err := utils.LoadToken()
+					if err != nil {
+						log.Fatalf("error loading token: %v", err)
+					}
+
+					log.Infof("Your API token is: %s", token)
 
 					// Setup data store
 					dataStore, err := data.NewDataStore()
@@ -87,7 +93,7 @@ func main() {
 
 					// Show startup notification if requested
 					if cmd.Bool("open-web-client") {
-						openWebClient(s)
+						openWebClient(token)
 					}
 
 					return b.Run(cmdCtx)
@@ -148,9 +154,9 @@ func main() {
 }
 
 func onReady() {
-	s, err := settings.Load()
+	token, err := utils.LoadToken()
 	if err != nil {
-		log.Fatalf("error loading settings: %v", err)
+		log.Fatalf("error loading token: %v", err)
 	}
 
 	// Set tray icon based on OS
@@ -165,7 +171,7 @@ func onReady() {
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
 	go func() {
 		<-mOpenWebClient.ClickedCh
-		openWebClient(s)
+		openWebClient(token)
 	}()
 
 	// ---
@@ -184,12 +190,11 @@ func onExit() {
 	// Perform cleanup if needed
 }
 
-func openWebClient(s *settings.Settings) {
+func openWebClient(token string) {
 	// Open the frontend in the default browser
 	host := "0.0.0.0"
-	port := s.API.Port
-	apiKey := s.API.Token
-	url := fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, apiKey)
+	port := utils.GetPort()
+	url := fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, token)
 	log.Infof("Opening web client URL: %s", url)
 	err := browser.OpenURL(url)
 	if err != nil {

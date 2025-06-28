@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
 ---
@@ -14,8 +14,8 @@ alwaysApply: true
 - It supports Windows, Linux, and MacOS (darwin).
 - This application is written in @Go
 - The aim of this project is to provide a "bridge" to other applications, such as the home automation platform Home Assistant.
-- All parts of the application which are exposed outside via the API (such as HTTP and Websockets) should be protected with a token, defined in [settings.go](mdc:settings/settings.go).
-- Settings are shared between packages and found in [settings.go](mdc:settings/settings.go).
+- All parts of the application which are exposed outside via the API (such as HTTP and Websockets) should be protected with a token, which is stored in a separate file and managed by utils/token.go.
+- Settings are shared between packages and found in [settings.go](mdc:settings/settings.go). Token and port are handled separately - token is stored in a separate file (utils/token.go) and port is read from SYSTEM_BRIDGE_PORT environment variable (default 9170).
 - The backend and packages it uses and it only are under backend/
 - All data modules are under data/module/*
 - All data handlers are under event/handler/*

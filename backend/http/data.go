@@ -6,19 +6,26 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/data"
-	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // GetModuleDataHandler handles requests to get data for a specific module
-func GetModuleDataHandler(settings *settings.Settings, dataStore *data.DataStore) http.HandlerFunc {
+func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		expectedToken, err := utils.LoadToken()
+		if err != nil {
+			log.Errorf("Failed to load token for authentication: %v", err)
+			http.Error(w, "Authentication error", http.StatusInternalServerError)
+			return
+		}
+
 		// Check for API token in both X-API-Token and token headers
 		token := r.Header.Get("X-API-Token")
 		if token == "" {
 			token = r.Header.Get("token")
 		}
-		if token != settings.API.Token {
+		if token != expectedToken {
 			http.Error(w, "Invalid API token", http.StatusUnauthorized)
 			return
 		}
