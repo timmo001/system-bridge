@@ -41,129 +41,130 @@ export function SystemBridgeWSProvider({
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
   const [isSettingsUpdatePending, setIsSettingsUpdatePending] =
     useState<boolean>(false);
+  const isSettingsUpdatePendingRef = useRef<boolean>(isSettingsUpdatePending);
+  const settingsUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
-  const handleMessage = useCallback(
-    ({ data }: MessageEvent<string>) => {
-      console.log("Received message:", data);
+  useEffect(() => {
+    isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
+  }, [isSettingsUpdatePending]);
 
-      const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
+  const handleMessage = useCallback(({ data }: MessageEvent<string>) => {
+    console.log("Received message:", data);
 
-      if (!parsedMessage.success) {
-        console.error("Invalid message:", parsedMessage.error);
-        return;
-      }
+    const parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(data));
 
-      const message = parsedMessage.data;
-      switch (message.type) {
-        case "DATA_UPDATE":
-          if (!message.module) {
-            console.error("No module found in data update");
-            return;
-          }
+    if (!parsedMessage.success) {
+      console.error("Invalid message:", parsedMessage.error);
+      return;
+    }
 
-          if (!message.data) {
-            console.error("No data found in data update");
-            return;
-          }
+    const message = parsedMessage.data;
+    switch (message.type) {
+      case "DATA_UPDATE":
+        if (!message.module) {
+          console.error("No module found in data update");
+          return;
+        }
 
-          console.log("Data received:", message.data);
-          setData((prev) => ({
-            ...prev,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            [message.module as string]: message.data,
-          }));
+        if (!message.data) {
+          console.error("No data found in data update");
+          return;
+        }
+
+        console.log("Data received:", message.data);
+        setData((prev) => ({
+          ...prev,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          [message.module as string]: message.data,
+        }));
+        setIsRequestingData(false);
+        break;
+      case "SETTINGS_RESULT":
+        if (isSettingsUpdatePendingRef.current) {
+          console.log(
+            "Ignoring SETTINGS_RESULT because a settings update is pending",
+          );
           setIsRequestingData(false);
           break;
-        case "SETTINGS_RESULT":
-          // Only update settings if no update is pending
-          if (isSettingsUpdatePending) {
-            console.log(
-              "Ignoring SETTINGS_RESULT because a settings update is pending",
-            );
-            setIsRequestingData(false);
-            break;
-          }
+        }
 
-          // Merge received settings with defaults to ensure logLevel is always present
-          const receivedSettings = message.data as Partial<Settings>;
+        const receivedSettings = message.data as Partial<Settings>;
+        const mergedSettings: Settings = {
+          api: {
+            token: receivedSettings.api?.token ?? "",
+            port: receivedSettings.api?.port ?? 9170,
+          },
+          autostart: receivedSettings.autostart ?? false,
+          hotkeys: receivedSettings.hotkeys ?? [],
+          logLevel: receivedSettings.logLevel ?? "info",
+          media: {
+            directories: receivedSettings.media?.directories ?? [],
+          },
+        };
+        console.log("Settings received:", mergedSettings);
+        setSettings(mergedSettings);
+        setIsRequestingData(false);
+        break;
+      case "DATA_LISTENER_REGISTERED":
+        console.log("Data listener registered");
+        break;
+      case "SETTINGS_UPDATED":
+        setSettings((prevSettings) => {
+          const updatedReceivedSettings = message.data as Partial<Settings>;
           const mergedSettings: Settings = {
             api: {
-              token: receivedSettings.api?.token ?? "",
-              port: receivedSettings.api?.port ?? 9170,
+              token:
+                updatedReceivedSettings.api?.token ??
+                prevSettings?.api.token ??
+                "",
+              port:
+                updatedReceivedSettings.api?.port ??
+                prevSettings?.api.port ??
+                9170,
             },
-            autostart: receivedSettings.autostart ?? false,
-            hotkeys: receivedSettings.hotkeys ?? [],
-            logLevel: receivedSettings.logLevel ?? "info",
+            autostart:
+              updatedReceivedSettings.autostart ??
+              prevSettings?.autostart ??
+              false,
+            hotkeys:
+              updatedReceivedSettings.hotkeys ?? prevSettings?.hotkeys ?? [],
+            logLevel:
+              updatedReceivedSettings.logLevel ??
+              prevSettings?.logLevel ??
+              "info",
             media: {
-              directories: receivedSettings.media?.directories ?? [],
+              directories:
+                updatedReceivedSettings.media?.directories ??
+                prevSettings?.media.directories ??
+                [],
             },
           };
-          console.log("Settings received:", mergedSettings);
-          setSettings(mergedSettings);
-          setIsRequestingData(false);
-          break;
-        case "DATA_LISTENER_REGISTERED":
-          console.log("Data listener registered");
-          break;
-        case "SETTINGS_UPDATED":
-          // Merge updated settings with current settings to preserve existing config
-          setSettings((prevSettings) => {
-            const updatedReceivedSettings = message.data as Partial<Settings>;
-            const mergedSettings: Settings = {
-              api: {
-                token:
-                  updatedReceivedSettings.api?.token ??
-                  prevSettings?.api.token ??
-                  "",
-                port:
-                  updatedReceivedSettings.api?.port ??
-                  prevSettings?.api.port ??
-                  9170,
-              },
-              autostart:
-                updatedReceivedSettings.autostart ??
-                prevSettings?.autostart ??
-                false,
-              hotkeys:
-                updatedReceivedSettings.hotkeys ?? prevSettings?.hotkeys ?? [],
-              logLevel:
-                updatedReceivedSettings.logLevel ??
-                prevSettings?.logLevel ??
-                "info",
-              media: {
-                directories:
-                  updatedReceivedSettings.media?.directories ??
-                  prevSettings?.media.directories ??
-                  [],
-              },
-            };
-            console.log("Settings updated:", mergedSettings);
-            return mergedSettings;
-          });
-          setIsSettingsUpdatePending(false);
-          break;
-        case "ERROR":
-          if (message.subtype === "BAD_TOKEN") {
-            setError(
-              "Invalid API token. Please check your connection settings.",
-            );
-            setIsConnected(false);
-            wsRef.current?.close();
-            return;
-          }
-          // Optionally handle other error types here
-          break;
-        default:
-          console.warn("Unknown message type:", message.type);
-          break;
-      }
-    },
-    [isSettingsUpdatePending],
-  );
+          console.log("Settings updated:", mergedSettings);
+          return mergedSettings;
+        });
+        setIsSettingsUpdatePending(false);
+        if (settingsUpdateTimeoutRef.current) {
+          clearTimeout(settingsUpdateTimeoutRef.current);
+          settingsUpdateTimeoutRef.current = null;
+        }
+        break;
+      case "ERROR":
+        if (message.subtype === "BAD_TOKEN") {
+          setError("Invalid API token. Please check your connection settings.");
+          setIsConnected(false);
+          wsRef.current?.close();
+          return;
+        }
+        break;
+      default:
+        console.warn("Unknown message type:", message.type);
+        break;
+    }
+  }, []);
 
   const connect = useCallback(() => {
     if (!host || !port || !token) return;
@@ -176,6 +177,7 @@ export function SystemBridgeWSProvider({
     wsRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+      setError(null);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -220,6 +222,10 @@ export function SystemBridgeWSProvider({
       wsRef.current?.close();
       wsRef.current = null;
       setIsConnected(false);
+      if (settingsUpdateTimeoutRef.current) {
+        clearTimeout(settingsUpdateTimeoutRef.current);
+        settingsUpdateTimeoutRef.current = null;
+      }
     };
   }, [host, isRequestingData, port, ssl, token, handleMessage]);
 
@@ -228,9 +234,17 @@ export function SystemBridgeWSProvider({
     if (wsRef.current.readyState !== WebSocket.OPEN) return;
     if (!request.token) throw new Error("No token found");
 
-    // If this is a settings update, set pending flag
     if (request.event === "UPDATE_SETTINGS") {
       setIsSettingsUpdatePending(true);
+      if (settingsUpdateTimeoutRef.current) {
+        clearTimeout(settingsUpdateTimeoutRef.current);
+      }
+      settingsUpdateTimeoutRef.current = setTimeout(() => {
+        setIsSettingsUpdatePending(false);
+        setError(
+          "Settings update timed out. Please try again or check your connection.",
+        );
+      }, 10000);
     }
 
     console.log("Sending request:", request);
