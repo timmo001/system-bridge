@@ -179,7 +179,9 @@ export function Settings() {
 
         {/* TODO: Media settings */}
 
-        <Button type="submit">Save Settings</Button>
+        <Button disabled={!form.formState.isDirty} type="submit">
+          Save Settings
+        </Button>
       </form>
     </Form>
   );
