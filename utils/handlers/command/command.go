@@ -24,15 +24,15 @@ func ExecuteCommand(command string, args []string) (*CommandResult, error) {
 	// Create the command
 	cmd := exec.Command(command, args...)
 
-	// Capture stdout and stderr
-	stdout, err := cmd.Output()
+	// Capture combined stdout and stderr
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// Handle execution error
 		if exitError, ok := err.(*exec.ExitError); ok {
 			return &CommandResult{
 				ExitCode: exitError.ExitCode(),
-				Stdout:   string(stdout),
-				Stderr:   string(exitError.Stderr),
+				Stdout:   string(output),
+				Stderr:   string(output),
 				Error:    fmt.Sprintf("Command failed with exit code %d", exitError.ExitCode()),
 			}, nil
 		}
@@ -41,7 +41,7 @@ func ExecuteCommand(command string, args []string) (*CommandResult, error) {
 
 	return &CommandResult{
 		ExitCode: 0,
-		Stdout:   string(stdout),
+		Stdout:   string(output),
 		Stderr:   "",
 	}, nil
 }

@@ -94,11 +94,23 @@ export function SystemBridgeWSProvider({
     wsRef.current.onclose = () => {
       console.log("WebSocket disconnected");
       setIsConnected(false);
+      // Reject all pending requests on close
+      const pendingRequestsSnapshot = pendingRequests.current;
+      pendingRequestsSnapshot.forEach(({ reject }, id) => {
+        reject(new Error("WebSocket closed before response received"));
+      });
+      pendingRequestsSnapshot.clear();
     };
 
     wsRef.current.onerror = (error: Event) => {
       console.error("WebSocket error:", error);
       setIsConnected(false);
+      // Reject all pending requests on error
+      const pendingRequestsSnapshot = pendingRequests.current;
+      pendingRequestsSnapshot.forEach(({ reject }, id) => {
+        reject(new Error("WebSocket error before response received"));
+      });
+      pendingRequestsSnapshot.clear();
     };
 
     wsRef.current.onmessage = handleMessage;
@@ -107,6 +119,14 @@ export function SystemBridgeWSProvider({
       wsRef.current?.close();
       wsRef.current = null;
       setIsConnected(false);
+      // Reject all pending requests on cleanup
+      const pendingRequestsSnapshot = pendingRequests.current;
+      pendingRequestsSnapshot.forEach(({ reject }, id) => {
+        reject(
+          new Error("WebSocket provider unmounted before response received"),
+        );
+      });
+      pendingRequestsSnapshot.clear();
     };
   }, [host, isRequestingData, port, ssl, token]);
 
@@ -137,8 +157,12 @@ export function SystemBridgeWSProvider({
 
     // Handle request/response matching
     if (message.id && pendingRequests.current.has(message.id)) {
-      const { resolve } = pendingRequests.current.get(message.id)!;
-      resolve(message);
+      const { resolve, reject } = pendingRequests.current.get(message.id)!;
+      if (message.type === "ERROR" || ("error" in message && message.error)) {
+        reject(message);
+      } else {
+        resolve(message);
+      }
       pendingRequests.current.delete(message.id);
     }
 
@@ -202,6 +226,22 @@ export function SystemBridgeWSProvider({
         connect();
       }
     }, RETRY_DELAY);
+
+    // Snapshot the current pendingRequests for cleanup
+    const pendingRequestsSnapshot = pendingRequests.current;
+    // Cleanup on unmount
+    return () => {
+      wsRef.current?.close();
+      wsRef.current = null;
+      setIsConnected(false);
+      // Reject all pending requests on cleanup
+      pendingRequestsSnapshot.forEach(({ reject }, id) => {
+        reject(
+          new Error("WebSocket provider unmounted before response received"),
+        );
+      });
+      pendingRequestsSnapshot.clear();
+    };
   }, [connect, isConnected, retryCount, host, port, token]);
 
   return (
