@@ -5,7 +5,13 @@ import { Play, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "./button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import { generateUUID } from "~/lib/utils";
@@ -53,15 +59,17 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
 
       if (response.type === "COMMAND_EXECUTED") {
         const result = response.data as ExecutionResult;
-        setResults(prev => ({ ...prev, [commandName]: result }));
-        
+        setResults((prev) => ({ ...prev, [commandName]: result }));
+
         if (result.result.exitCode === 0) {
           toast.success(`Command "${commandName}" executed successfully`);
         } else {
-          toast.warning(`Command "${commandName}" completed with exit code ${result.result.exitCode}`);
+          toast.warning(
+            `Command "${commandName}" completed with exit code ${result.result.exitCode}`,
+          );
         }
       } else {
-        toast.error(response.message || "Failed to execute command");
+        toast.error(response.message ?? "Failed to execute command");
       }
     } catch (error) {
       console.error("Command execution error:", error);
@@ -71,7 +79,7 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
     }
   };
 
-  const enabledCommands = commands.filter(cmd => cmd.enabled);
+  const enabledCommands = commands.filter((cmd) => cmd.enabled);
 
   if (enabledCommands.length === 0) {
     return (
@@ -79,7 +87,8 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
         <CardHeader>
           <CardTitle>Command Execution</CardTitle>
           <CardDescription>
-            No enabled commands available. Configure commands in settings to get started.
+            No enabled commands available. Configure commands in settings to get
+            started.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -89,8 +98,8 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Execute Commands</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="mb-2 text-lg font-semibold">Execute Commands</h3>
+        <p className="text-muted-foreground text-sm">
           Run configured commands on your system
         </p>
       </div>
@@ -101,14 +110,14 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">{command.name}</CardTitle>
               <CardDescription className="text-sm">
-                {command.description || "No description available"}
+                {command.description ?? "No description available"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="text-xs text-muted-foreground font-mono bg-muted p-2 rounded">
-                {command.command} {command.args.join(" ")}
+              <div className="text-muted-foreground bg-muted rounded p-2 font-mono text-xs">
+                {command.command} {(command.args ?? []).join(" ")}
               </div>
-              
+
               <Button
                 onClick={() => executeCommand(command.name)}
                 disabled={executing === command.name}
@@ -117,46 +126,47 @@ export function CommandExecutor({ commands }: CommandExecutorProps) {
               >
                 {executing === command.name ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Executing...
                   </>
                 ) : (
                   <>
-                    <Play className="h-4 w-4 mr-2" />
+                    <Play className="mr-2 h-4 w-4" />
                     Execute
                   </>
                 )}
               </Button>
 
-              {results[command.name] && (
+              {results[command.name]?.result && (
                 <div className="space-y-2">
                   <div className="text-xs font-semibold">
-                    Last Result (Exit Code: {results[command.name].result.exitCode})
+                    Last Result (Exit Code:{" "}
+                    {results[command.name]?.result?.exitCode ?? "N/A"})
                   </div>
-                  
-                  {results[command.name].result.stdout && (
+
+                  {results[command.name]?.result?.stdout && (
                     <div className="text-xs">
                       <div className="font-medium text-green-600">stdout:</div>
-                      <pre className="bg-muted p-2 rounded text-xs whitespace-pre-wrap max-h-20 overflow-y-auto">
-                        {results[command.name].result.stdout}
-                      </pre>
-                    </div>
-                  )}
-                  
-                  {results[command.name].result.stderr && (
-                    <div className="text-xs">
-                      <div className="font-medium text-red-600">stderr:</div>
-                      <pre className="bg-muted p-2 rounded text-xs whitespace-pre-wrap max-h-20 overflow-y-auto">
-                        {results[command.name].result.stderr}
+                      <pre className="bg-muted max-h-20 overflow-y-auto rounded p-2 text-xs whitespace-pre-wrap">
+                        {results[command.name]?.result?.stdout}
                       </pre>
                     </div>
                   )}
 
-                  {results[command.name].result.error && (
+                  {results[command.name]?.result?.stderr && (
+                    <div className="text-xs">
+                      <div className="font-medium text-red-600">stderr:</div>
+                      <pre className="bg-muted max-h-20 overflow-y-auto rounded p-2 text-xs whitespace-pre-wrap">
+                        {results[command.name]?.result?.stderr}
+                      </pre>
+                    </div>
+                  )}
+
+                  {results[command.name]?.result?.error && (
                     <div className="text-xs">
                       <div className="font-medium text-red-600">error:</div>
-                      <div className="bg-muted p-2 rounded text-xs">
-                        {results[command.name].result.error}
+                      <div className="bg-muted rounded p-2 text-xs">
+                        {results[command.name]?.result?.error}
                       </div>
                     </div>
                   )}
