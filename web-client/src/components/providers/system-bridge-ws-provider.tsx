@@ -11,6 +11,7 @@ import { type Settings } from "~/lib/system-bridge/types-settings";
 import {
   WebSocketResponseSchema,
   type WebSocketRequest,
+  type WebsocketResponse,
 } from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 
@@ -19,7 +20,7 @@ export const SystemBridgeWSContext = createContext<
       data: ModuleData | null;
       isConnected: boolean;
       settings: Settings | null;
-      sendRequest: (request: WebSocketRequest) => void;
+      sendRequest: (request: WebSocketRequest) => Promise<WebsocketResponse>;
     }
   | undefined
 >(undefined);
@@ -41,6 +42,15 @@ export function SystemBridgeWSProvider({
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const pendingRequests = useRef(
+    new Map<
+      string,
+      {
+        resolve: (value: WebsocketResponse) => void;
+        reject: (reason?: unknown) => void;
+      }
+    >(),
+  );
 
   const connect = useCallback(() => {
     if (!host || !port || !token) return;
@@ -59,20 +69,20 @@ export function SystemBridgeWSProvider({
 
       if (!isRequestingData) {
         setIsRequestingData(true);
-        sendRequest({
+        void sendRequest({
           id: generateUUID(),
           event: "GET_SETTINGS",
           token: token,
         });
 
-        sendRequest({
+        void sendRequest({
           id: generateUUID(),
           event: "GET_DATA",
           data: { modules: Modules },
           token: token,
         });
 
-        sendRequest({
+        void sendRequest({
           id: generateUUID(),
           event: "REGISTER_DATA_LISTENER",
           data: { modules: Modules },
@@ -100,13 +110,17 @@ export function SystemBridgeWSProvider({
     };
   }, [host, isRequestingData, port, ssl, token]);
 
-  function sendRequest(request: WebSocketRequest) {
-    if (!wsRef.current) return;
-    if (wsRef.current.readyState !== WebSocket.OPEN) return;
-    if (!request.token) throw new Error("No token found");
+  function sendRequest(request: WebSocketRequest): Promise<WebsocketResponse> {
+    if (!wsRef.current)
+      return Promise.reject(new Error("WebSocket not connected"));
+    if (wsRef.current.readyState !== WebSocket.OPEN)
+      return Promise.reject(new Error("WebSocket not open"));
+    if (!request.token) return Promise.reject(new Error("No token found"));
 
-    console.log("Sending request:", request);
-    wsRef.current.send(JSON.stringify(request));
+    return new Promise((resolve, reject) => {
+      pendingRequests.current.set(request.id, { resolve, reject });
+      wsRef.current!.send(JSON.stringify(request));
+    });
   }
 
   function handleMessage({ data }: MessageEvent<string>) {
@@ -120,6 +134,14 @@ export function SystemBridgeWSProvider({
     }
 
     const message = parsedMessage.data;
+
+    // Handle request/response matching
+    if (message.id && pendingRequests.current.has(message.id)) {
+      const { resolve } = pendingRequests.current.get(message.id)!;
+      resolve(message);
+      pendingRequests.current.delete(message.id);
+    }
+
     switch (message.type) {
       case "DATA_UPDATE":
         if (!message.module) {
@@ -173,7 +195,9 @@ export function SystemBridgeWSProvider({
     reconnectTimeoutRef.current = setTimeout(() => {
       setRetryCount((prev) => prev + 1);
       if (retryCount <= MAX_RETRIES) {
-        console.log( `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`);
+        console.log(
+          `Attempting to reconnect... (${retryCount}/${MAX_RETRIES})`,
+        );
         wsRef.current = null;
         connect();
       }

@@ -107,4 +107,4 @@ export const WebSocketResponseSchema = z.object({
   module: ModuleNameSchema.optional(),
 });
 
-export type MessageResponse = z.infer<typeof WebSocketResponseSchema>;
+export type WebsocketResponse = z.infer<typeof WebSocketResponseSchema>;
