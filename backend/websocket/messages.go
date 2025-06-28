@@ -19,12 +19,16 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
 			log.Error("Error closing connection:", closeErr)
 		}
-		// Remove from connections map in a new goroutine to avoid deadlock
-		go func(addr string) {
+		// Remove from connections and dataListeners if and only if the pointer matches
+		go func(addr string, failedConn *websocket.Conn) {
 			ws.mutex.Lock()
-			delete(ws.connections, addr)
-			ws.mutex.Unlock()
-		}(connInfo.conn.RemoteAddr().String())
+			defer ws.mutex.Unlock()
+			connInfo, ok := ws.connections[addr]
+			if ok && connInfo.conn == failedConn {
+				delete(ws.connections, addr)
+				delete(ws.dataListeners, addr)
+			}
+		}(connInfo.conn.RemoteAddr().String(), connInfo.conn)
 	}
 }
 
