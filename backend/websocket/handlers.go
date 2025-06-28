@@ -69,13 +69,13 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			Event: event.EventType(msg.Event),
 			Data:  msg.Data,
 		})
-		
+
 		// Find the connectionInfo for this connection
 		ws.mutex.RLock()
 		addr := conn.RemoteAddr().String()
 		connInfo, ok := ws.connections[addr]
 		ws.mutex.RUnlock()
-		
+
 		if ok {
 			ws.SendMessage(connInfo, response)
 		} else {
@@ -90,10 +90,12 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	defer ws.mutex.Unlock()
 
 	addr := conn.RemoteAddr().String()
-	
+
 	// close connection if remote addr tries to connect again
 	if connInfo, ok := ws.connections[addr]; ok {
-		ws.RemoveConnection(connInfo.conn)
+		// Remove the connection directly since we already hold the lock
+		delete(ws.connections, addr)
+		delete(ws.dataListeners, addr)
 		_ = connInfo.conn.Close()
 	}
 

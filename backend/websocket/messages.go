@@ -15,15 +15,16 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 
 	if err := connInfo.conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)
-		// If there's an error, remove the connection
+		// If there's an error, close the connection
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
 			log.Error("Error closing connection:", closeErr)
 		}
-		
-		// Remove from connections map (need to acquire write lock)
-		ws.mutex.Lock()
-		delete(ws.connections, connInfo.conn.RemoteAddr().String())
-		ws.mutex.Unlock()
+		// Remove from connections map in a new goroutine to avoid deadlock
+		go func(addr string) {
+			ws.mutex.Lock()
+			delete(ws.connections, addr)
+			ws.mutex.Unlock()
+		}(connInfo.conn.RemoteAddr().String())
 	}
 }
 
@@ -35,13 +36,13 @@ func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest,
 		Data:    map[string]string{},
 		Message: message,
 	}
-	
+
 	// Find the connectionInfo for this connection
 	ws.mutex.RLock()
 	addr := conn.RemoteAddr().String()
 	connInfo, ok := ws.connections[addr]
 	ws.mutex.RUnlock()
-	
+
 	if ok {
 		ws.SendMessage(connInfo, response)
 	} else {
