@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Play, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "./button";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./card";
+} from "~/components/ui/card";
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import { generateUUID } from "~/lib/utils";

@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useFieldArray, type Control } from "react-hook-form";
 import { Trash2, Plus, Edit2, Save, X } from "lucide-react";
 
-import { Button } from "./button";
-import { Input } from "./input";
-import { Switch } from "./switch";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Switch } from "~/components/ui/switch";
 import {
   type Settings,
   type SettingsCommand,
