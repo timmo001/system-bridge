@@ -24,6 +24,7 @@ func RegisterHandlers(router *event.MessageRouter) {
 	RegisterPowerShutdownHandler(router)
 	RegisterPowerSleepHandler(router)
 	RegisterRegisterDataListenerHandler(router)
+	RegisterRunCommandHandler(router)
 	RegisterUnregisterDataListenerHandler(router)
 	RegisterUpdateSettingsHandler(router)
 }

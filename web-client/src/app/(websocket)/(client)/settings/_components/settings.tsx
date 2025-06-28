@@ -17,6 +17,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
+import { CommandSettings } from "~/components/ui/command-settings";
 import {
   SettingsSchema,
   type Settings,
@@ -43,6 +44,9 @@ export function Settings() {
         port: 9170,
       },
       autostart: false,
+      commands: {
+        commands: [],
+      },
       hotkeys: [],
       logLevel: "info",
       media: {
@@ -80,7 +84,7 @@ export function Settings() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">General Settings</h2>
           <FormField
@@ -175,6 +179,10 @@ export function Settings() {
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="space-y-4">
+          <CommandSettings control={form.control} />
         </div>
 
         {/* TODO: Media settings */}
