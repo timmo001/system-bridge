@@ -162,7 +162,7 @@ export function CommandSettings({ control }: CommandSettingsProps) {
                     <label className="text-sm font-medium">Arguments</label>
                     <Button onClick={handleAddArg} size="sm" variant="outline">
                       <Plus className="mr-1 h-3 w-3" />
-                      Add Arg
+                      Add Argument
                     </Button>
                   </div>
                   <div className="space-y-2">
