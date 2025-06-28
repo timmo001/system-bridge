@@ -38,6 +38,8 @@ export function SystemBridgeWSProvider({
   const [settings, setSettings] = useState<Settings | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
+  const [isSettingsUpdatePending, setIsSettingsUpdatePending] =
+    useState<boolean>(false);
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -98,12 +100,17 @@ export function SystemBridgeWSProvider({
       wsRef.current = null;
       setIsConnected(false);
     };
-  }, [host, isRequestingData, port, ssl, token]);
+  }, [handleMessage, host, isRequestingData, port, ssl, token]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
     if (wsRef.current.readyState !== WebSocket.OPEN) return;
     if (!request.token) throw new Error("No token found");
+
+    // If this is a settings update, set pending flag
+    if (request.event === "UPDATE_SETTINGS") {
+      setIsSettingsUpdatePending(true);
+    }
 
     console.log("Sending request:", request);
     wsRef.current.send(JSON.stringify(request));
@@ -141,6 +148,15 @@ export function SystemBridgeWSProvider({
         setIsRequestingData(false);
         break;
       case "SETTINGS_RESULT":
+        // Only update settings if no update is pending
+        if (isSettingsUpdatePending) {
+          console.log(
+            "Ignoring SETTINGS_RESULT because a settings update is pending",
+          );
+          setIsRequestingData(false);
+          break;
+        }
+
         // Merge received settings with defaults to ensure logLevel is always present
         const receivedSettings = message.data as Partial<Settings>;
         const mergedSettings: Settings = {
@@ -178,6 +194,7 @@ export function SystemBridgeWSProvider({
           },
         };
         setSettings(updatedMergedSettings);
+        setIsSettingsUpdatePending(false);
         break;
       default:
         console.warn("Unknown message type:", message.type);
