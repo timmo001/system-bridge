@@ -23,10 +23,16 @@ type WebSocketRequest struct {
 	Token string `json:"token" mapstructure:"token"`
 }
 
+// connectionInfo holds connection data with write synchronization
+type connectionInfo struct {
+	conn      *websocket.Conn
+	writeMux  sync.Mutex
+}
+
 type WebsocketServer struct {
 	token         string
 	upgrader      websocket.Upgrader
-	connections   map[string]*websocket.Conn
+	connections   map[string]*connectionInfo
 	dataListeners map[string][]types.ModuleName
 	mutex         sync.RWMutex
 	dataStore     *data.DataStore
@@ -36,7 +42,7 @@ type WebsocketServer struct {
 func NewWebsocketServer(settings *settings.Settings, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
 		token:         settings.API.Token,
-		connections:   make(map[string]*websocket.Conn),
+		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),
 		dataStore:     dataStore,
 		EventRouter:   eventRouter,

@@ -6,16 +6,29 @@ import (
 	"github.com/timmo001/system-bridge/event"
 )
 
-func (ws *WebsocketServer) SendMessage(conn *websocket.Conn, message event.MessageResponse) {
+func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.MessageResponse) {
 	log.Debug("Sending message to connection", "response", message)
 
-	if err := conn.WriteJSON(message); err != nil {
+	// Use per-connection mutex to prevent concurrent writes
+	connInfo.writeMux.Lock()
+	defer connInfo.writeMux.Unlock()
+
+	if err := connInfo.conn.WriteJSON(message); err != nil {
 		log.Error("Failed to send response:", err)
-		// If there's an error, remove the connection
-		if closeErr := conn.Close(); closeErr != nil {
+		// If there's an error, close the connection
+		if closeErr := connInfo.conn.Close(); closeErr != nil {
 			log.Error("Error closing connection:", closeErr)
 		}
-		delete(ws.connections, conn.RemoteAddr().String())
+		// Remove from connections and dataListeners if and only if the pointer matches
+		go func(addr string, failedConn *websocket.Conn) {
+			ws.mutex.Lock()
+			defer ws.mutex.Unlock()
+			connInfo, ok := ws.connections[addr]
+			if ok && connInfo.conn == failedConn {
+				delete(ws.connections, addr)
+				delete(ws.dataListeners, addr)
+			}
+		}(connInfo.conn.RemoteAddr().String(), connInfo.conn)
 	}
 }
 
@@ -27,5 +40,16 @@ func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest,
 		Data:    map[string]string{},
 		Message: message,
 	}
-	ws.SendMessage(conn, response)
+
+	// Find the connectionInfo for this connection
+	ws.mutex.RLock()
+	addr := conn.RemoteAddr().String()
+	connInfo, ok := ws.connections[addr]
+	ws.mutex.RUnlock()
+
+	if ok {
+		ws.SendMessage(connInfo, response)
+	} else {
+		log.Error("Connection not found in connections map", "addr", addr)
+	}
 }
