@@ -118,27 +118,27 @@ export function CommandSettings({ control }: CommandSettingsProps) {
                   <div>
                     <label className="text-sm font-medium">Name</label>
                     <Input
-                      value={editingCommand?.name || ""}
+                      value={editingCommand?.name ?? ""}
                       onChange={(e) =>
                         setEditingCommand({
                           ...editingCommand!,
                           name: e.target.value,
                         })
                       }
-                      placeholder="e.g., turn-off-monitors"
+                      placeholder="turn-off-monitors"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Command</label>
                     <Input
-                      value={editingCommand?.command || ""}
+                      value={editingCommand?.command ?? ""}
                       onChange={(e) =>
                         setEditingCommand({
                           ...editingCommand!,
                           command: e.target.value,
                         })
                       }
-                      placeholder="e.g., kscreen-doctor"
+                      placeholder="kscreen-doctor --dpms off"
                     />
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export function CommandSettings({ control }: CommandSettingsProps) {
                 <div>
                   <label className="text-sm font-medium">Description</label>
                   <Input
-                    value={editingCommand?.description || ""}
+                    value={editingCommand?.description ?? ""}
                     onChange={(e) =>
                       setEditingCommand({
                         ...editingCommand!,
@@ -189,7 +189,7 @@ export function CommandSettings({ control }: CommandSettingsProps) {
 
                 <div className="flex items-center gap-2">
                   <Switch
-                    checked={editingCommand?.enabled || false}
+                    checked={editingCommand?.enabled ?? false}
                     onCheckedChange={(checked) =>
                       setEditingCommand({
                         ...editingCommand!,
