@@ -162,9 +162,19 @@ export function SystemBridgeWSProvider({
         break;
       case "ERROR":
         if (message.subtype === "BAD_TOKEN") {
-          setError("Invalid API token. Please check your connection settings.");
+          const errorMessage =
+            "Invalid API token. Please check your connection settings and update your token.";
+          setError(errorMessage);
           setIsConnected(false);
           setRetryCount(MAX_RETRIES + 1); // Stop retrying on auth error
+
+          // Show immediate toast notification for bad token
+          toast.error("Authentication Failed", {
+            description:
+              "Your API token is invalid or has expired. Please update your connection settings.",
+            duration: 8000, // Show longer for important auth errors
+          });
+
           wsRef.current?.close();
           return;
         } else {
@@ -268,7 +278,17 @@ export function SystemBridgeWSProvider({
       } else if (event.code === 1002) {
         setError("Connection failed due to protocol error.");
       } else if (event.code === 1003) {
-        setError("Connection rejected by server. Please check your token.");
+        const tokenErrorMessage =
+          "Invalid API token. Please check your connection settings and update your token.";
+        setError(tokenErrorMessage);
+        setRetryCount(MAX_RETRIES + 1); // Stop retrying on auth error
+
+        // Show toast notification for token error
+        toast.error("Authentication Failed", {
+          description:
+            "Connection rejected by server. Your API token may be invalid or expired.",
+          duration: 8000,
+        });
       } else if (event.code !== 1000 && event.code !== 1001) {
         setError(
           `Connection closed with code ${event.code}: ${event.reason ?? "Unknown reason"}`,
