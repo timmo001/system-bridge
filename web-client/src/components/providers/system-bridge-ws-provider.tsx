@@ -20,6 +20,7 @@ export const SystemBridgeWSContext = createContext<
       isConnected: boolean;
       settings: Settings | null;
       sendRequest: (request: WebSocketRequest) => void;
+      error: string | null;
     }
   | undefined
 >(undefined);
@@ -40,6 +41,7 @@ export function SystemBridgeWSProvider({
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
   const [isSettingsUpdatePending, setIsSettingsUpdatePending] =
     useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -143,6 +145,17 @@ export function SystemBridgeWSProvider({
             return mergedSettings;
           });
           setIsSettingsUpdatePending(false);
+          break;
+        case "ERROR":
+          if (message.subtype === "BAD_TOKEN") {
+            setError(
+              "Invalid API token. Please check your connection settings.",
+            );
+            setIsConnected(false);
+            wsRef.current?.close();
+            return;
+          }
+          // Optionally handle other error types here
           break;
         default:
           console.warn("Unknown message type:", message.type);
@@ -248,7 +261,7 @@ export function SystemBridgeWSProvider({
 
   return (
     <SystemBridgeWSContext.Provider
-      value={{ data, isConnected, settings, sendRequest }}
+      value={{ data, isConnected, settings, sendRequest, error }}
     >
       {children}
     </SystemBridgeWSContext.Provider>
