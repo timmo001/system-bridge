@@ -4,6 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
+import { 
+  Monitor, 
+  Hash, 
+  Shield, 
+  Key, 
+  Wifi,
+  Loader2
+} from "lucide-react";
 
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import {
@@ -20,10 +28,10 @@ import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 
 const ConnectionSchema = z.object({
-  host: z.string().min(1),
-  port: z.coerce.number().min(1),
+  host: z.string().min(1, "Host is required"),
+  port: z.coerce.number().min(1, "Port must be a positive number").max(65535, "Port must be less than 65536"),
   ssl: z.boolean(),
-  token: z.string().min(1),
+  token: z.string().min(1, "API token is required"),
 });
 
 type Connection = z.infer<typeof ConnectionSchema>;
@@ -38,12 +46,14 @@ export function SetupConnection() {
   const form = useForm<Connection>({
     resolver: zodResolver(ConnectionSchema),
     defaultValues: {
-      host,
-      port,
-      ssl,
-      token: token ?? "",
+      host: host || "localhost",
+      port: port || 9170,
+      ssl: ssl || false,
+      token: token || "",
     },
   });
+
+  const isSubmitting = form.formState.isSubmitting;
 
   function onSubmit(data: Connection) {
     const ws = new WebSocket(
@@ -138,60 +148,72 @@ export function SetupConnection() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="host"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Host</FormLabel>
-              <FormControl>
-                <Input placeholder="0.0.0.0" {...field} />
-              </FormControl>
-              <FormDescription>
-                The host of the System Bridge server.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="host"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <Monitor className="h-4 w-4 text-muted-foreground" />
+                  <FormLabel>Host</FormLabel>
+                </div>
+                <FormControl>
+                  <Input placeholder="localhost or 192.168.1.100" {...field} />
+                </FormControl>
+                <FormDescription>
+                  The hostname or IP address of your System Bridge server
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="port"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Port</FormLabel>
-              <FormControl>
-                <Input placeholder="9170" {...field} />
-              </FormControl>
-              <FormDescription>
-                The port of the System Bridge server.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="port"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-muted-foreground" />
+                  <FormLabel>Port</FormLabel>
+                </div>
+                <FormControl>
+                  <Input type="number" placeholder="9170" {...field} />
+                </FormControl>
+                <FormDescription>
+                  The port number (default: 9170)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
           name="ssl"
           render={({ field }) => (
-            <FormItem className="flex w-full flex-row items-center justify-center gap-3 rounded-lg">
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="w-full space-y-0.5">
-                <FormLabel>SSL</FormLabel>
-                <FormDescription>
-                  Whether to use SSL to connect to the System Bridge server.
-                  <br />
-                  On a local network, you should keep this off.
-                </FormDescription>
+            <FormItem>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <FormLabel className="text-base">Enable SSL</FormLabel>
+                  </div>
+                  <FormDescription>
+                    Use secure connection (HTTPS/WSS). Keep disabled for local networks.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -201,19 +223,42 @@ export function SetupConnection() {
           name="token"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Token</FormLabel>
+              <div className="flex items-center gap-2">
+                <Key className="h-4 w-4 text-muted-foreground" />
+                <FormLabel>API Token</FormLabel>
+              </div>
               <FormControl>
-                <Input placeholder="ab12-34cd-ef56-78gh-ij34" {...field} />
+                <Input 
+                  type="password"
+                  placeholder="ab12-34cd-ef56-78gh-ij34" 
+                  {...field} 
+                />
               </FormControl>
               <FormDescription>
-                Your api token. This can be found in the logs or settings file.
+                Your API token from System Bridge logs or settings file
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit">Connect</Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="w-full gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <Wifi className="h-4 w-4" />
+              Connect to System Bridge
+            </>
+          )}
+        </Button>
       </form>
     </Form>
   );
