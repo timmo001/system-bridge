@@ -48,7 +48,7 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 
 // Start begins processing tasks
 func (tp *UpdateTaskProcessor) Start(workerCount int) {
-	for range workerCount {
+	for i := 0; i < workerCount; i++ {
 		tp.wg.Add(1)
 		go tp.worker()
 	}
