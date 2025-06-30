@@ -2,6 +2,7 @@ package event_handler
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -41,7 +42,11 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				func(from, to reflect.Type, data any) (any, error) {
 					if to == reflect.TypeOf(log.Level(0)) && from.Kind() == reflect.String {
-						parsed, err := log.ParseLevel(data.(string))
+						str, ok := data.(string)
+						if !ok {
+							return nil, fmt.Errorf("expected string for log level but got %T", data)
+						}
+						parsed, err := log.ParseLevel(str)
 						if err != nil {
 							return nil, err
 						}
