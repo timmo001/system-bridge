@@ -38,7 +38,27 @@ func (batteryModule BatteryModule) Update(ctx context.Context) (any, error) {
 	}
 
 	// Use the first battery (most systems only have one)
+	// Safe access with bounds checking
+	if len(batteries) < 1 {
+		log.Debug("Battery array is empty after initial check")
+		return types.BatteryData{
+			IsCharging:    nil,
+			Percentage:    nil,
+			TimeRemaining: nil,
+		}, nil
+	}
+	
 	bat := batteries[0]
+
+	// Validate battery data before calculations
+	if bat.Full <= 0 {
+		log.Debug("Battery full capacity is invalid")
+		return types.BatteryData{
+			IsCharging:    nil,
+			Percentage:    nil,
+			TimeRemaining: nil,
+		}, nil
+	}
 
 	// Calculate percentage
 	percentage := (bat.Current / bat.Full) * 100

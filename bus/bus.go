@@ -2,6 +2,7 @@ package bus
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sync"
 
 	"github.com/charmbracelet/log"
@@ -49,6 +50,16 @@ func NewEventBus() *EventBus {
 
 // Subscribe registers a handler for a specific event type
 func (eb *EventBus) Subscribe(eventType EventType, subscriberID string, handler Handler) {
+	if eb == nil {
+		log.Error("EventBus is nil")
+		return
+	}
+	
+	if handler == nil {
+		log.Error("Handler is nil")
+		return
+	}
+	
 	eb.mutex.Lock()
 	defer eb.mutex.Unlock()
 
@@ -62,6 +73,11 @@ func (eb *EventBus) Subscribe(eventType EventType, subscriberID string, handler 
 
 // Unsubscribe removes a handler for a specific event type
 func (eb *EventBus) Unsubscribe(eventType EventType, subscriberID string) {
+	if eb == nil {
+		log.Error("EventBus is nil")
+		return
+	}
+	
 	eb.mutex.Lock()
 	defer eb.mutex.Unlock()
 
@@ -82,12 +98,29 @@ func (eb *EventBus) Unsubscribe(eventType EventType, subscriberID string) {
 
 // Publish sends an event to all subscribers of the given event type
 func (eb *EventBus) Publish(event Event) {
+	if eb == nil {
+		log.Error("EventBus is nil")
+		return
+	}
+	
 	eb.mutex.RLock()
 	defer eb.mutex.RUnlock()
 
 	if handlers, ok := eb.subscribers[event.Type]; ok {
 		for id, handler := range handlers {
+			if handler == nil {
+				log.Warnf("Handler for subscriber '%s' is nil", id)
+				continue
+			}
+			
 			go func(id string, handler Handler) {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Errorf("Event handler panic recovered for subscriber '%s': %v", id, r)
+						log.Errorf("Stack trace: %s", debug.Stack())
+					}
+				}()
+				
 				log.Debug(fmt.Sprintf("Delivering event type '%s' to subscriber '%s'", event.Type, id))
 				handler(event)
 			}(id, handler)

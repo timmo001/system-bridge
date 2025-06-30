@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -21,6 +22,14 @@ type DataStore struct {
 func NewDataStore() (*DataStore, error) {
 	ds := &DataStore{registry: make(map[types.ModuleName]types.Module, 0)}
 
+	// Add panic recovery for module registration
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("DataStore initialization panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+	}()
+
 	ds.Register(data_module.BatteryModule{})
 	ds.Register(data_module.CPUModule{})
 	ds.Register(data_module.DiskModule{})
@@ -37,6 +46,16 @@ func NewDataStore() (*DataStore, error) {
 }
 
 func (d *DataStore) Register(u types.Updater) {
+	if d == nil {
+		log.Error("DataStore is nil")
+		return
+	}
+	
+	if u == nil {
+		log.Error("Updater is nil")
+		return
+	}
+	
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	log.Info("Registering data module", "module", u.Name())
@@ -45,8 +64,14 @@ func (d *DataStore) Register(u types.Updater) {
 }
 
 func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
+	if d == nil {
+		return types.Module{}, fmt.Errorf("datastore is nil")
+	}
 
+	d.mu.RLock()
 	module, ok := d.registry[name]
+	d.mu.RUnlock()
+	
 	if !ok {
 		return types.Module{}, fmt.Errorf("%s not found in registry", name)
 	}
@@ -63,6 +88,10 @@ func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
 }
 
 func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
+	if d == nil {
+		return fmt.Errorf("datastore is nil")
+	}
+	
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -77,13 +106,21 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 		return err
 	}
 
-	// Broadcast the module data update event
-	if eb := bus.GetInstance(); eb != nil {
-		eb.Publish(bus.Event{
-			Type: bus.EventDataModuleUpdate,
-			Data: module,
-		})
-	}
+	// Broadcast the module data update event with panic recovery
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Event broadcast panic recovered: %v", r)
+			}
+		}()
+		
+		if eb := bus.GetInstance(); eb != nil {
+			eb.Publish(bus.Event{
+				Type: bus.EventDataModuleUpdate,
+				Data: module,
+			})
+		}
+	}()
 
 	d.registry[name] = module
 
@@ -91,17 +128,32 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 }
 
 func (d *DataStore) GetRegisteredModules() []types.Updater {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	if d == nil {
+		log.Error("DataStore is nil")
+		return nil
+	}
+	
+	d.mu.RLock()
+	defer d.mu.RUnlock()
 
 	updaters := make([]types.Updater, 0)
 	for _, module := range d.registry {
-		updaters = append(updaters, module.Updater)
+		if module.Updater != nil {
+			updaters = append(updaters, module.Updater)
+		}
 	}
 	return updaters
 }
 
 func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
+	if d == nil {
+		log.Error("DataStore is nil")
+		return nil
+	}
+	
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	
 	data := make(map[types.ModuleName]any)
 
 	for _, module := range d.registry {
@@ -113,6 +165,12 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 
 // loadModuleData loads the module data from a JSON file
 func (d *DataStore) loadModuleData(m *types.Module) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("loadModuleData panic recovered: %v", r)
+		}
+	}()
+	
 	if m == nil {
 		return fmt.Errorf("module is nil")
 	}
@@ -143,6 +201,12 @@ func (d *DataStore) loadModuleData(m *types.Module) error {
 
 // saveModuleData saves the module data to a JSON file
 func (d *DataStore) saveModuleData(m types.Module) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("saveModuleData panic recovered: %v", r)
+		}
+	}()
+	
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)

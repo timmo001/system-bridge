@@ -59,14 +59,20 @@ func GetDisplays() ([]types.Display, error) {
 		}
 
 		// Get current mode info
-		mode := resources.Modes[0]
-		for _, modeID := range info.Modes {
-			for _, m := range resources.Modes {
-				if m.Id == uint32(modeID) {
-					mode = m
-					break
+		var mode randr.ModeInfo
+		if len(resources.Modes) > 0 {
+			mode = resources.Modes[0]
+			for _, modeID := range info.Modes {
+				for _, m := range resources.Modes {
+					if m.Id == uint32(modeID) {
+						mode = m
+						break
+					}
 				}
 			}
+		} else {
+			log.Warn("No display modes available")
+			continue
 		}
 
 		// Get crtc info for position and resolution

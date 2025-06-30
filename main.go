@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/charmbracelet/log"
@@ -31,6 +32,16 @@ var trayIconPngData []byte
 var trayIconIcoData []byte
 
 func main() {
+	// Add global panic recovery
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("Application panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+			// Try to exit gracefully instead of crashing
+			os.Exit(1)
+		}
+	}()
+
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
 	// Register for SIGINT (Ctrl+C) and SIGTERM
@@ -42,12 +53,22 @@ func main() {
 
 	// Handle signals in a goroutine
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Signal handler panic recovered: %v", r)
+			}
+		}()
 		sig := <-sigChan
 		log.Infof("Received signal: %v", sig)
 		cancel() // Cancel the context
 	}()
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Systray panic recovered: %v", r)
+			}
+		}()
 		systray.Run(onReady, onExit)
 	}()
 
@@ -70,14 +91,18 @@ func main() {
 
 					s, err := settings.Load()
 					if err != nil {
-						log.Fatalf("error loading settings: %v", err)
+						log.Errorf("error loading settings: %v", err)
+						// Return error instead of fatal exit
+						return fmt.Errorf("failed to load settings: %w", err)
 					}
 
 					log.Debugf("Loaded settings: %v", s)
 
 					token, err := utils.LoadToken()
 					if err != nil {
-						log.Fatalf("error loading token: %v", err)
+						log.Errorf("error loading token: %v", err)
+						// Return error instead of fatal exit
+						return fmt.Errorf("failed to load token: %w", err)
 					}
 
 					log.Infof("Your API token is: %s", token)
@@ -85,7 +110,9 @@ func main() {
 					// Setup data store
 					dataStore, err := data.NewDataStore()
 					if err != nil {
-						log.Fatalf("Failed to create data store: %v", err)
+						log.Errorf("Failed to create data store: %v", err)
+						// Return error instead of fatal exit
+						return fmt.Errorf("failed to create data store: %w", err)
 					}
 
 					// Create and run backend server with signal-aware context
@@ -132,6 +159,11 @@ func main() {
 							},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							defer func() {
+								if r := recover(); r != nil {
+									log.Errorf("Notification handler panic recovered: %v", r)
+								}
+							}()
 							err := notification.Send(notification.NotificationData{
 								Title:   cmd.String("title"),
 								Message: cmd.String("message"),
@@ -149,14 +181,24 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		log.Fatalf("error running cmd: %v", err)
+		log.Errorf("error running cmd: %v", err)
+		// Return with error code instead of fatal exit
+		os.Exit(1)
 	}
 }
 
 func onReady() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("onReady panic recovered: %v", r)
+		}
+	}()
+	
 	token, err := utils.LoadToken()
 	if err != nil {
-		log.Fatalf("error loading token: %v", err)
+		log.Errorf("error loading token: %v", err)
+		// Don't exit, just continue without token functionality
+		return
 	}
 
 	// Set tray icon based on OS
@@ -170,6 +212,11 @@ func onReady() {
 	// Open frontend
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Open web client handler panic recovered: %v", r)
+			}
+		}()
 		<-mOpenWebClient.ClickedCh
 		openWebClient(token)
 	}()
@@ -180,6 +227,11 @@ func onReady() {
 	// Quit
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Quit handler panic recovered: %v", r)
+			}
+		}()
 		<-mQuit.ClickedCh
 		log.Info("Quitting...")
 		os.Exit(0)
@@ -191,6 +243,12 @@ func onExit() {
 }
 
 func openWebClient(token string) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("openWebClient panic recovered: %v", r)
+		}
+	}()
+	
 	// Open the frontend in the default browser
 	host := "0.0.0.0"
 	port := utils.GetPort()

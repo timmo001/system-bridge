@@ -64,8 +64,11 @@ func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 		// Get process status
 		statusSlice, err := p.Status()
 		if err == nil && len(statusSlice) > 0 {
-			status := statusSlice[0]
-			proc.Status = &status
+			// Safe access with bounds checking
+			if len(statusSlice) >= 1 {
+				status := statusSlice[0]
+				proc.Status = &status
+			}
 		}
 
 		// Get username
