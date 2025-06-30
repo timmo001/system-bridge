@@ -89,7 +89,7 @@ func main() {
 					}
 
 					// Create and run backend server with signal-aware context
-					b := backend.New(s, dataStore, &webClientContent)
+					b := backend.New(s, dataStore, token, &webClientContent)
 
 					// Show startup notification if requested
 					if cmd.Bool("open-web-client") {
@@ -149,7 +149,10 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
+		// Stop systray if it was started – avoids leaving background goroutine active
+		systray.Quit()
 		log.Errorf("error running cmd: %v", err)
+		os.Exit(1)
 	}
 }
 

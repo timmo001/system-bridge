@@ -27,20 +27,10 @@ type Backend struct {
 	webClientContent *embed.FS
 }
 
-func New(settings *settings.Settings, dataStore *data.DataStore, webClientContent *embed.FS) *Backend {
+func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
 	// Initialize the EventBus
 	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
-
-	// Load token for WebSocket and HTTP auth
-	token, err := utils.LoadToken()
-	if err != nil {
-		log.Errorf("error loading token: %v", err)
-		token = utils.GenerateToken()
-		if saveErr := utils.SaveToken(token); saveErr != nil {
-			log.Errorf("failed to persist generated token: %v", saveErr)
-		}
-	}
 
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
