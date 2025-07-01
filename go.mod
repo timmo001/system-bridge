@@ -13,7 +13,7 @@ require (
 	github.com/jezek/xgb v1.1.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	github.com/shirou/gopsutil/v4 v4.25.5
+	github.com/shirou/gopsutil/v4 v4.25.6
 	github.com/spf13/viper v1.20.1
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/time v0.12.0
