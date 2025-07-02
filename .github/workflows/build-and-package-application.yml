@@ -185,8 +185,8 @@ jobs:
             cp -r /build/* /home/builduser/build/
             chown -R builduser:builduser /home/builduser/build
             cd /home/builduser/build/.scripts/linux
-            export VERSION='$VERSION'
-            echo 'Running create-arch.sh with VERSION: $VERSION'
+            export VERSION=\"$VERSION\"
+            echo 'Running create-arch.sh with VERSION: ' $VERSION
             su builduser -c 'export VERSION=\"$VERSION\" && ./create-arch.sh'
             echo 'Arch package creation completed'
             ls -la /home/builduser/build/dist/ || echo 'No dist directory found'
