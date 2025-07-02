@@ -48,6 +48,12 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
+# Ensure VERSION is not ignored
+if [ -f .gitignore ] && grep -qxF 'VERSION' .gitignore; then
+    sed -i '/^VERSION$/d' .gitignore
+    git add .gitignore
+fi
+
 # Configure Git to allow operations on this repository
 git config --global --add safe.directory "$(pwd)"
 
@@ -82,7 +88,7 @@ fi
 
 # Commit and push changes
 echo "Committing changes..."
-git add PKGBUILD .SRCINFO VERSION
+git add -f PKGBUILD .SRCINFO VERSION
 git commit -m "Update to latest master commit
 
 Automated update from GitHub Actions
