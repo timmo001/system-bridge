@@ -40,13 +40,13 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
-# Copy the updated PKGBUILD
+# Copy the updated PKGBUILD and configure for AUR
 echo "Updating PKGBUILD..."
-cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD.aur-git" PKGBUILD
+cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
 
-# Update .SRCINFO
+# Update .SRCINFO with AUR configuration
 echo "Generating .SRCINFO..."
-makepkg --printsrcinfo > .SRCINFO
+AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO
 
 # Check if there are changes
 if git diff --quiet; then
