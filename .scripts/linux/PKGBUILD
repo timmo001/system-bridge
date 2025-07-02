@@ -30,8 +30,13 @@ conflicts=('system-bridge')
 # AUR-specific functions
 pkgver() {
   if [[ "${AUR_BUILD}" == "1" ]]; then
-    cd "$pkgname"
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    if [[ -d "$pkgname" ]]; then
+      cd "$pkgname"
+      printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    else
+      # Fallback for when source dir doesn't exist (e.g., during --printsrcinfo)
+      echo "r0.0.0.0"
+    fi
   fi
 }
 
