@@ -50,15 +50,22 @@ cd aur-repo
 
 # Create a non-root user for makepkg
 useradd -m builduser
+# Ensure builduser can access the working directory and all parent directories
+chmod 755 "$TEMP_DIR"
 chown -R builduser:builduser .
 
 # Copy the updated PKGBUILD and configure for AUR
 echo "Updating PKGBUILD..."
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
 
+# Create a build directory that builduser can access
+export BUILDDIR="/tmp/makepkg-build"
+mkdir -p "$BUILDDIR"
+chown -R builduser:builduser "$BUILDDIR"
+
 # Update .SRCINFO with AUR configuration as builduser
 echo "Generating .SRCINFO..."
-sudo -u builduser bash -c 'AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO'
+sudo -u builduser bash -c "export BUILDDIR='$BUILDDIR' && AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO"
 
 # Check if there are changes
 if git diff --quiet; then
@@ -83,4 +90,5 @@ echo "AUR package updated successfully!"
 # Cleanup
 cd /
 rm -rf "$TEMP_DIR"
+rm -rf "$BUILDDIR"
 rm -f ~/.ssh/aur_rsa
