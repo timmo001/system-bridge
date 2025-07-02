@@ -4,11 +4,21 @@ set -e
 
 echo "Starting Arch package creation..."
 echo "VERSION: $VERSION"
+echo "Working directory: $(pwd)"
+echo "User: $(whoami)"
 
 # Check if VERSION is set
 if [ -z "$VERSION" ]; then
   echo "ERROR: VERSION environment variable not set"
-  exit 1
+  echo "Checking for VERSION_FILE..."
+  if [ -f "../../VERSION_FILE" ]; then
+    VERSION=$(cat ../../VERSION_FILE)
+    echo "Loaded VERSION from file: $VERSION"
+    export VERSION
+  else
+    echo "ERROR: No VERSION_FILE found either"
+    exit 1
+  fi
 fi
 
 # Check if binary exists
@@ -79,8 +89,21 @@ mv *.pkg.tar.zst ../../dist/
 echo "Package moved to dist. Contents of dist:"
 ls -la ../../dist/
 
+# Verify the package was created
+PACKAGE_COUNT=$(find ../../dist -name "*.pkg.tar.zst" | wc -l)
+if [ "$PACKAGE_COUNT" -eq 0 ]; then
+  echo "ERROR: No Arch package (.pkg.tar.zst) found in dist directory!"
+  echo "Something went wrong during package creation."
+  exit 1
+else
+  echo "SUCCESS: Found $PACKAGE_COUNT Arch package(s) in dist directory"
+  find ../../dist -name "*.pkg.tar.zst" -exec ls -la {} \;
+fi
+
 cd ../..
 rm -rf build/arch
+
+echo "Arch package creation completed successfully"
 
 # Write the main install file to a text file
 echo "

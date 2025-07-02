@@ -174,25 +174,8 @@ jobs:
 
           # Create Arch package in Docker
           echo "Starting Arch package creation in Docker..."
-          docker run --rm -v ${{ github.workspace }}:/build -e VERSION="${{ env.VERSION }}" archlinux:latest bash -c "
-            set -e
-            echo 'Starting Arch package creation inside container...'
-            pacman -Syu --noconfirm
-            pacman -S --noconfirm base-devel sudo
-            useradd -m builduser
-            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
-            mkdir -p /home/builduser/build
-            cp -r /build/* /home/builduser/build/
-            chown -R builduser:builduser /home/builduser/build
-            cd /home/builduser/build/.scripts/linux
-            export VERSION=\"$VERSION\"
-            echo 'Running create-arch.sh with VERSION: ' $VERSION
-            su builduser -c 'export VERSION=\"$VERSION\" && ./create-arch.sh'
-            echo 'Arch package creation completed'
-            ls -la /home/builduser/build/dist/ || echo 'No dist directory found'
-            find /home/builduser/build -name '*.pkg.tar.zst' -type f -exec ls -la {} \; -exec cp {} /build/dist/ \; || echo 'No .pkg.tar.zst files found'
-            echo 'Docker container work completed'
-          " &
+          chmod +x .scripts/linux/docker-arch-wrapper.sh
+          docker run --rm -v ${{ github.workspace }}:/build -e VERSION="${{ env.VERSION }}" archlinux:latest /build/.scripts/linux/docker-arch-wrapper.sh &
           ARCH_PID=$!
 
           # Create Flatpak package
