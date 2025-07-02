@@ -48,6 +48,9 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
+# Configure Git to allow operations on this repository
+git config --global --add safe.directory "$(pwd)"
+
 # Create a non-root user for makepkg
 useradd -m builduser
 # Ensure builduser can access the working directory and all parent directories
@@ -67,8 +70,11 @@ chown -R builduser:builduser "$BUILDDIR"
 echo "Generating .SRCINFO..."
 sudo -u builduser bash -c "export BUILDDIR='$BUILDDIR' && AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO"
 
-# Check if there are changes
-if git diff --quiet; then
+# Check if there are changes - use a more robust method
+echo "Checking for changes..."
+if git status --porcelain | grep -q .; then
+    echo "Changes detected, proceeding with commit..."
+else
     echo "No changes detected in PKGBUILD or .SRCINFO"
     exit 0
 fi
