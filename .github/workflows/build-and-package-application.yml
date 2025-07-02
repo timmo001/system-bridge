@@ -161,14 +161,14 @@ jobs:
           # Create packages in parallel
           chmod +x .scripts/linux/create-*.sh
           echo "Starting parallel package creation..."
-          
+
           # Store PIDs for better error handling
           ./.scripts/linux/create-appimage.sh &
           APPIMAGE_PID=$!
-          
+
           ./.scripts/linux/create-deb.sh &
           DEB_PID=$!
-          
+
           ./.scripts/linux/create-rpm.sh &
           RPM_PID=$!
 
@@ -206,7 +206,7 @@ jobs:
           wait $RPM_PID && echo "RPM creation completed" || echo "RPM creation failed"
           wait $ARCH_PID && echo "Arch creation completed" || echo "Arch creation failed"
           wait $FLATPAK_PID && echo "Flatpak creation completed" || echo "Flatpak creation failed"
-          
+
           echo "All package creation jobs finished"
           echo "Contents of dist directory:"
           ls -la dist/
