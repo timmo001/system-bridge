@@ -160,12 +160,23 @@ jobs:
 
           # Create packages in parallel
           chmod +x .scripts/linux/create-*.sh
+          echo "Starting parallel package creation..."
+          
+          # Store PIDs for better error handling
           ./.scripts/linux/create-appimage.sh &
+          APPIMAGE_PID=$!
+          
           ./.scripts/linux/create-deb.sh &
+          DEB_PID=$!
+          
           ./.scripts/linux/create-rpm.sh &
+          RPM_PID=$!
 
           # Create Arch package in Docker
-          docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
+          echo "Starting Arch package creation in Docker..."
+          docker run --rm -v ${{ github.workspace }}:/build -e VERSION="${{ env.VERSION }}" archlinux:latest bash -c "
+            set -e
+            echo 'Starting Arch package creation inside container...'
             pacman -Syu --noconfirm
             pacman -S --noconfirm base-devel sudo
             useradd -m builduser
@@ -174,15 +185,31 @@ jobs:
             cp -r /build/* /home/builduser/build/
             chown -R builduser:builduser /home/builduser/build
             cd /home/builduser/build/.scripts/linux
-            su builduser -c './create-arch.sh'
-            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
+            export VERSION='$VERSION'
+            echo 'Running create-arch.sh with VERSION: $VERSION'
+            su builduser -c 'export VERSION=\"$VERSION\" && ./create-arch.sh'
+            echo 'Arch package creation completed'
+            ls -la /home/builduser/build/dist/ || echo 'No dist directory found'
+            find /home/builduser/build -name '*.pkg.tar.zst' -type f -exec ls -la {} \; -exec cp {} /build/dist/ \; || echo 'No .pkg.tar.zst files found'
+            echo 'Docker container work completed'
           " &
+          ARCH_PID=$!
 
           # Create Flatpak package
           sudo ./.scripts/linux/create-flatpak.sh &
+          FLATPAK_PID=$!
 
-          # Wait for all background jobs
-          wait
+          # Wait for all background jobs and check for failures
+          echo "Waiting for package creation to complete..."
+          wait $APPIMAGE_PID && echo "AppImage creation completed" || echo "AppImage creation failed"
+          wait $DEB_PID && echo "DEB creation completed" || echo "DEB creation failed"
+          wait $RPM_PID && echo "RPM creation completed" || echo "RPM creation failed"
+          wait $ARCH_PID && echo "Arch creation completed" || echo "Arch creation failed"
+          wait $FLATPAK_PID && echo "Flatpak creation completed" || echo "Flatpak creation failed"
+          
+          echo "All package creation jobs finished"
+          echo "Contents of dist directory:"
+          ls -la dist/
 
       # Package for Windows
       - name: Package for Windows

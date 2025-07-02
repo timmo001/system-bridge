@@ -2,11 +2,22 @@
 
 set -e
 
-# Check if binary exists
-if [ ! -f "system-bridge-linux" ]; then
-  echo "system-bridge-linux not found, please build the application first"
+echo "Starting Arch package creation..."
+echo "VERSION: $VERSION"
+
+# Check if VERSION is set
+if [ -z "$VERSION" ]; then
+  echo "ERROR: VERSION environment variable not set"
   exit 1
 fi
+
+# Check if binary exists
+if [ ! -f "system-bridge-linux" ]; then
+  echo "ERROR: system-bridge-linux not found, please build the application first"
+  exit 1
+fi
+
+echo "Binary found: system-bridge-linux"
 
 # Create build directory
 mkdir -p build/arch
@@ -32,9 +43,15 @@ ARCH_PKGVER=$(echo "$VERSION" | sed 's/[-+]/./g')
 export ARCH_PKGVER
 
 echo "ARCH_PKGVER: $ARCH_PKGVER"
+echo "Files in build directory:"
+ls -la
 
+echo "Generating checksums..."
 # Generate new sha256sums and update PKGBUILD
 makepkg -g >new_sums.txt
+echo "Generated checksums:"
+cat new_sums.txt
+
 # Remove the old sha256sums array
 sed -i '/^sha256sums=(/,/^)/d' PKGBUILD
 # Insert the new sha256sums array after the source= line
@@ -44,12 +61,23 @@ awk '
 ' PKGBUILD >PKGBUILD.new && mv PKGBUILD.new PKGBUILD
 rm new_sums.txt
 
+echo "Updated PKGBUILD:"
+head -20 PKGBUILD
+
+echo "Building package with makepkg..."
 # Build package
 makepkg -f
 
+echo "Package build completed. Looking for .pkg.tar.zst files:"
+ls -la *.pkg.tar.zst
+
 # Move package to dist directory
+echo "Creating dist directory and moving package..."
 mkdir -p ../../dist
 mv *.pkg.tar.zst ../../dist/
+
+echo "Package moved to dist. Contents of dist:"
+ls -la ../../dist/
 
 cd ../..
 rm -rf build/arch
