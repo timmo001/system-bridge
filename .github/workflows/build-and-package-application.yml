@@ -106,6 +106,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Write version to file
+        if: matrix.platform == 'linux'
         run: echo "${{ env.VERSION }}" > VERSION
 
       - name: Install dependencies
