@@ -60,6 +60,7 @@ chown -R builduser:builduser .
 # Copy the updated PKGBUILD and configure for AUR
 echo "Updating PKGBUILD..."
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
+cp "$GITHUB_WORKSPACE/VERSION" VERSION
 
 # Create a build directory that builduser can access
 export BUILDDIR="/tmp/makepkg-build"
@@ -81,7 +82,7 @@ fi
 
 # Commit and push changes
 echo "Committing changes..."
-git add PKGBUILD .SRCINFO
+git add PKGBUILD .SRCINFO VERSION
 git commit -m "Update to latest master commit
 
 Automated update from GitHub Actions

@@ -8,8 +8,8 @@ if [[ "${AUR_BUILD}" == "1" ]]; then
   pkgrel=1
   pkgdesc="A bridge between your systems (git version)"
   makedepends=('git' 'go' 'bun-bin')
-  source=("$pkgname::git+https://github.com/timmo001/system-bridge.git")
-  md5sums=('SKIP')
+  source=("$pkgname::git+https://github.com/timmo001/system-bridge.git" "VERSION")
+  md5sums=('SKIP' 'SKIP')
 else
   # Binary package configuration (CI/CD)
   pkgname=system-bridge
@@ -30,9 +30,9 @@ conflicts=('system-bridge')
 # AUR-specific functions
 pkgver() {
   if [[ "${AUR_BUILD}" == "1" ]]; then
-    if [[ -d "$pkgname" ]]; then
-      cd "$pkgname"
-      printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    if [[ -f "$srcdir/VERSION" ]]; then
+      local ver=$(cat "$srcdir/VERSION")
+      echo "${ver//+/_}"
     else
       # Fallback for when source dir doesn't exist (e.g., during --printsrcinfo)
       echo "r0.0.0.0"
