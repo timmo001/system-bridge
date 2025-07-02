@@ -27,16 +27,10 @@ type Backend struct {
 	webClientContent *embed.FS
 }
 
-func New(settings *settings.Settings, dataStore *data.DataStore, webClientContent *embed.FS) *Backend {
+func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
 	// Initialize the EventBus
 	_ = bus.GetInstance()
 	log.Info("EventBus initialized")
-
-	// Load token for WebSocket and HTTP auth
-	token, err := utils.LoadToken()
-	if err != nil {
-		log.Fatalf("error loading token: %v", err)
-	}
 
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
@@ -60,15 +54,16 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter)
 
-	// Create a file system that's rooted at the web-client/out directory
-	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
-	if err != nil {
-		log.Fatal("Failed to create sub filesystem:", err)
-	}
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.FS(subFS)))
+	// Create a file system that's rooted at the web-client/out directory
+	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
+	if err != nil {
+		log.Warnf("Failed to create sub filesystem: %v. Web client will not be served.", err)
+	} else {
+		mux.Handle("/", http.FileServer(http.FS(subFS)))
+	}
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
