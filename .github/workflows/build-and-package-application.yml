@@ -105,6 +105,9 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Write version to file
+        run: echo "${{ env.VERSION }}" > VERSION
+
       - name: Install dependencies
         run: |
           go mod download
