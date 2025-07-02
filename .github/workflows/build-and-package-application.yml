@@ -237,7 +237,7 @@ jobs:
       - name: Report AUR update status
         if: always()
         run: |
-          if [ \${{ job.status }} == 'success' ]; then
+          if [ "${{ job.status }}" == 'success' ]; then
             echo "✅ AUR package updated successfully!"
             echo "Package: https://aur.archlinux.org/packages/system-bridge-git"
           else
