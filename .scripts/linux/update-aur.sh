@@ -48,13 +48,17 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
+# Create a non-root user for makepkg
+useradd -m builduser
+chown -R builduser:builduser .
+
 # Copy the updated PKGBUILD and configure for AUR
 echo "Updating PKGBUILD..."
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
 
-# Update .SRCINFO with AUR configuration
+# Update .SRCINFO with AUR configuration as builduser
 echo "Generating .SRCINFO..."
-AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO
+sudo -u builduser bash -c 'AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO'
 
 # Check if there are changes
 if git diff --quiet; then
