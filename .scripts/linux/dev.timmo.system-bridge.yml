@@ -1,3 +1,4 @@
+---
 app-id: dev.timmo.system-bridge
 runtime: org.freedesktop.Platform
 runtime-version: "23.08"
