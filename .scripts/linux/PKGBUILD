@@ -10,6 +10,7 @@ if [[ "${AUR_BUILD}" == "1" ]]; then
   makedepends=('git' 'go' 'bun-bin')
   source=("$pkgname::git+https://github.com/timmo001/system-bridge.git" "VERSION")
   md5sums=('SKIP' 'SKIP')
+  conflicts=('system-bridge')
 else
   # Binary package configuration (CI/CD)
   pkgname=system-bridge
@@ -17,6 +18,7 @@ else
   pkgrel=1
   pkgdesc="A bridge for your systems"
   source=('system-bridge' 'system-bridge.desktop' 'system-bridge.svg' 'system-bridge-16.png' 'system-bridge-32.png' 'system-bridge-48.png' 'system-bridge-128.png' 'system-bridge-256.png' 'system-bridge-512.png' 'LICENSE')
+  conflicts=('system-bridge-git')
 fi
 
 # Common configuration
@@ -25,7 +27,6 @@ url="https://github.com/timmo001/system-bridge"
 license=('Apache-2.0')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 provides=('system-bridge')
-conflicts=('system-bridge')
 
 # AUR-specific functions
 pkgver() {
