@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -31,7 +32,8 @@ type UpdateTaskProcessor struct {
 
 func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstLimit int) *UpdateTaskProcessor {
 	if dataStore == nil {
-		log.Fatal("dataStore cannot be nil")
+		log.Error("dataStore cannot be nil")
+		return nil
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -48,6 +50,11 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 
 // Start begins processing tasks
 func (tp *UpdateTaskProcessor) Start(workerCount int) {
+	if tp == nil {
+		log.Error("UpdateTaskProcessor is nil")
+		return
+	}
+	
 	for range workerCount {
 		tp.wg.Add(1)
 		go tp.worker()
@@ -56,6 +63,11 @@ func (tp *UpdateTaskProcessor) Start(workerCount int) {
 
 // Stop gracefully shuts down the processor
 func (tp *UpdateTaskProcessor) Stop() {
+	if tp == nil {
+		log.Error("UpdateTaskProcessor is nil")
+		return
+	}
+	
 	tp.cancel()
 	close(tp.taskQueue)
 	tp.wg.Wait()
@@ -63,6 +75,16 @@ func (tp *UpdateTaskProcessor) Stop() {
 
 // AddTask queues a new task
 func (tp *UpdateTaskProcessor) AddTask(updater types.Updater) {
+	if tp == nil {
+		log.Error("UpdateTaskProcessor is nil")
+		return
+	}
+	
+	if updater == nil {
+		log.Error("Updater is nil, skipping task")
+		return
+	}
+	
 	select {
 	case tp.taskQueue <- updater:
 	case <-tp.ctx.Done():
@@ -72,7 +94,13 @@ func (tp *UpdateTaskProcessor) AddTask(updater types.Updater) {
 
 // worker processes tasks from the queue
 func (tp *UpdateTaskProcessor) worker() {
-	defer tp.wg.Done()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("Worker goroutine panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+		tp.wg.Done()
+	}()
 
 	for {
 		select {
@@ -89,20 +117,30 @@ func (tp *UpdateTaskProcessor) worker() {
 			}
 
 			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
-			defer cancel()
-			// Process task
-			data, err := task.Update(ctx)
-			if err != nil {
-				log.Warnf("Task processing error for module %s: %v", task.Name(), err)
-				continue
-			}
+			
+			// Process task with panic recovery
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Errorf("Task processing panic recovered for module %s: %v", task.Name(), r)
+						log.Errorf("Stack trace: %s", debug.Stack())
+					}
+					cancel()
+				}()
+				
+				data, err := task.Update(ctx)
+				if err != nil {
+					log.Warnf("Task processing error for module %s: %v", task.Name(), err)
+					return
+				}
 
-			log.Debugf("Updating data for module: %s", task.Name())
-			// Update data store
-			if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
-				log.Errorf("Failed to set module data for %s: %v", task.Name(), err)
-				continue
-			}
+				log.Debugf("Updating data for module: %s", task.Name())
+				// Update data store
+				if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
+					log.Errorf("Failed to set module data for %s: %v", task.Name(), err)
+					return
+				}
+			}()
 
 		case <-tp.ctx.Done():
 			return
@@ -111,14 +149,35 @@ func (tp *UpdateTaskProcessor) worker() {
 }
 
 func RunUpdateTaskProcessor(dataStore *DataStore) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("RunUpdateTaskProcessor panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+	}()
+	
+	if dataStore == nil {
+		log.Error("DataStore is nil, cannot run update task processor")
+		return
+	}
+	
 	// Create processor with 4 tasks/second, burst of 2
 	processor := NewUpdateTaskProcessor(dataStore, 4, 2)
+	if processor == nil {
+		log.Error("Failed to create update task processor")
+		return
+	}
 
 	// Start 3 worker goroutines
 	processor.Start(3)
 
-	for _, updater := range dataStore.GetRegisteredModules() {
-		processor.AddTask(updater)
+	registeredModules := dataStore.GetRegisteredModules()
+	if len(registeredModules) == 0 {
+		log.Warn("No registered modules found")
+	} else {
+		for _, updater := range registeredModules {
+			processor.AddTask(updater)
+		}
 	}
 
 	// TODO: use channels and wait groups to track task completion. use context.WithTimeout to make sure to finish withing time frame

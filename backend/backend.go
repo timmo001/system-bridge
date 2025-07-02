@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -35,7 +36,9 @@ func New(settings *settings.Settings, dataStore *data.DataStore, webClientConten
 	// Load token for WebSocket and HTTP auth
 	token, err := utils.LoadToken()
 	if err != nil {
-		log.Fatalf("error loading token: %v", err)
+		log.Errorf("error loading token: %v", err)
+		// Return with error instead of fatal exit
+		return nil
 	}
 
 	eventRouter := event.NewMessageRouter()
@@ -51,6 +54,11 @@ func New(settings *settings.Settings, dataStore *data.DataStore, webClientConten
 }
 
 func (b *Backend) Run(ctx context.Context) error {
+	// Check if backend was properly initialized
+	if b == nil {
+		return fmt.Errorf("backend is not properly initialized")
+	}
+	
 	log.Info("Starting backend server...")
 
 	// Create a context that can be canceled
@@ -63,7 +71,8 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a file system that's rooted at the web-client/out directory
 	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
 	if err != nil {
-		log.Fatal("Failed to create sub filesystem:", err)
+		log.Errorf("Failed to create sub filesystem: %v", err)
+		return fmt.Errorf("failed to create sub filesystem: %w", err)
 	}
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
@@ -72,6 +81,20 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("WebSocket handler panic recovered: %v", r)
+				log.Errorf("Stack trace: %s", debug.Stack())
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		
+		if b.wsServer == nil {
+			log.Error("WebSocket server is not initialized")
+			http.Error(w, "WebSocket server unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		
 		_, err := b.wsServer.HandleConnection(w, r)
 		if err != nil {
 			log.Error("WebSocket connection error:", err)
@@ -81,11 +104,36 @@ func (b *Backend) Run(ctx context.Context) error {
 	})
 
 	// Set up API endpoint
-	mux.HandleFunc("/api", api_http.HandleAPI)
+	mux.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("API handler panic recovered: %v", r)
+				log.Errorf("Stack trace: %s", debug.Stack())
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		api_http.HandleAPI(w, r)
+	})
+	
 	// Set up module data endpoint
-	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
-		b.dataStore,
-	))
+	mux.HandleFunc("/api/data/", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Data API handler panic recovered: %v", r)
+				log.Errorf("Stack trace: %s", debug.Stack())
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		
+		if b.dataStore == nil {
+			log.Error("Data store is not initialized")
+			http.Error(w, "Data store unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		
+		handler := api_http.GetModuleDataHandler(b.dataStore)
+		handler(w, r)
+	})
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 
 	// Get port from environment variable with default
@@ -102,17 +150,37 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Start server in a goroutine
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("HTTP server goroutine panic recovered: %v", r)
+				log.Errorf("Stack trace: %s", debug.Stack())
+				errChan <- fmt.Errorf("server panic: %v", r)
+			}
+		}()
+		
+		log.Info("Backend server is running on", "address", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errChan <- err
 			cancel()
 		}
-		log.Info("Backend server is running on", "address", server.Addr)
 	}()
 
 	// TODO: MDNS / SSDP / DHCP discovery
 
 	// Run data update task processor in a separate goroutine
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Data update processor goroutine panic recovered: %v", r)
+				log.Errorf("Stack trace: %s", debug.Stack())
+			}
+		}()
+		
+		if b.dataStore == nil {
+			log.Error("Data store is not initialized, skipping data updates")
+			return
+		}
+		
 		// Run immediately on startup
 		data.RunUpdateTaskProcessor(b.dataStore)
 		log.Info("Initial data update task processor completed")
@@ -125,8 +193,15 @@ func (b *Backend) Run(ctx context.Context) error {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				data.RunUpdateTaskProcessor(b.dataStore)
-				log.Info("Data update task processor completed")
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							log.Errorf("Data update task processor panic recovered: %v", r)
+						}
+					}()
+					data.RunUpdateTaskProcessor(b.dataStore)
+					log.Info("Data update task processor completed")
+				}()
 			}
 		}
 	}()
