@@ -17,14 +17,22 @@ mkdir -p ~/.ssh
 echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur_rsa
 chmod 600 ~/.ssh/aur_rsa
 
-# Add AUR to known hosts
-echo "aur.archlinux.org,95.216.144.15 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLMiLrP8pVi5BFX2i3vepSUnpedeiewE5XptnUnau+ZoeUOPkpoCgZZuYfpaIQfhhJJI5qgnjJmr4hyJbe/zxow=" >> ~/.ssh/known_hosts
+# Add AUR to known hosts dynamically
+echo "Adding AUR host key..."
+if ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null; then
+    echo "Successfully added AUR host key"
+    STRICT_HOST_CHECKING=""
+else
+    echo "Warning: Could not fetch AUR host key via ssh-keyscan, disabling host key verification"
+    STRICT_HOST_CHECKING="StrictHostKeyChecking no"
+fi
 
 # Configure SSH to use the AUR key
 cat << EOF > ~/.ssh/config
 Host aur.archlinux.org
   IdentityFile ~/.ssh/aur_rsa
   User aur
+  ${STRICT_HOST_CHECKING}
 EOF
 
 # Set up git config
