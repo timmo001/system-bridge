@@ -2,7 +2,9 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"runtime/debug"
 	"slices"
 	"sync"
 
@@ -15,6 +17,11 @@ import (
 )
 
 func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	if ws == nil {
+		log.Error("WebsocketServer is nil")
+		return nil, fmt.Errorf("websocket server is not initialized")
+	}
+	
 	conn, err := ws.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Error("Failed to upgrade connection:", err)
@@ -32,11 +39,20 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 
 func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("WebSocket message handler panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
 		ws.RemoveConnection(conn)
 		if err := conn.Close(); err != nil {
 			log.Error("Error closing connection:", err)
 		}
 	}()
+
+	if ws == nil || conn == nil {
+		log.Error("WebsocketServer or connection is nil")
+		return
+	}
 
 	for {
 		_, message, err := conn.ReadMessage()
@@ -63,29 +79,52 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 
 		// Handle different event types
 		log.Info("Received message", "event", msg.Event, "id", msg.ID)
-		// Pass message to event handlers
-		response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
-			ID:    msg.ID,
-			Event: event.EventType(msg.Event),
-			Data:  msg.Data,
-		})
+		
+		// Safely handle message processing
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Errorf("Message processing panic recovered: %v", r)
+					log.Errorf("Stack trace: %s", debug.Stack())
+					ws.SendError(conn, msg, "internal_error", "Internal server error")
+				}
+			}()
+			
+			if ws.EventRouter == nil {
+				log.Error("EventRouter is nil")
+				ws.SendError(conn, msg, "internal_error", "Event router unavailable")
+				return
+			}
+			
+			// Pass message to event handlers
+			response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
+				ID:    msg.ID,
+				Event: event.EventType(msg.Event),
+				Data:  msg.Data,
+			})
 
-		// Find the connectionInfo for this connection
-		ws.mutex.RLock()
-		addr := conn.RemoteAddr().String()
-		connInfo, ok := ws.connections[addr]
-		ws.mutex.RUnlock()
+			// Find the connectionInfo for this connection
+			ws.mutex.RLock()
+			addr := conn.RemoteAddr().String()
+			connInfo, ok := ws.connections[addr]
+			ws.mutex.RUnlock()
 
-		if ok {
-			ws.SendMessage(connInfo, response)
-		} else {
-			log.Error("Connection not found in connections map during message handling", "addr", addr)
-		}
+			if ok {
+				ws.SendMessage(connInfo, response)
+			} else {
+				log.Error("Connection not found in connections map during message handling", "addr", addr)
+			}
+		}()
 	}
 }
 
 // AddConnection adds a new WebSocket connection
 func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
+	if ws == nil || conn == nil {
+		log.Error("WebsocketServer or connection is nil")
+		return
+	}
+	
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -96,7 +135,9 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 		// Remove the connection directly since we already hold the lock
 		delete(ws.connections, addr)
 		delete(ws.dataListeners, addr)
-		_ = connInfo.conn.Close()
+		if connInfo != nil && connInfo.conn != nil {
+			_ = connInfo.conn.Close()
+		}
 	}
 
 	ws.connections[addr] = &connectionInfo{
@@ -107,6 +148,11 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 
 // RemoveConnection removes a WebSocket connection
 func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
+	if ws == nil || conn == nil {
+		log.Error("WebsocketServer or connection is nil")
+		return
+	}
+	
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 	addr := conn.RemoteAddr().String()
@@ -123,6 +169,11 @@ const (
 
 // RegisterDataListener allows a client to receive module data updates
 func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.ModuleName) RegisterResponse {
+	if ws == nil {
+		log.Error("WebsocketServer is nil")
+		return RegisterResponseExists
+	}
+	
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -137,6 +188,11 @@ func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.Mod
 
 // UnregisterDataListener allows a client to stop receiving module data updates
 func (ws *WebsocketServer) UnregisterDataListener(addr string) {
+	if ws == nil {
+		log.Error("WebsocketServer is nil")
+		return
+	}
+	
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -146,6 +202,18 @@ func (ws *WebsocketServer) UnregisterDataListener(addr string) {
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
 func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *string) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("BroadcastModuleUpdate panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+	}()
+	
+	if ws == nil {
+		log.Error("WebsocketServer is nil")
+		return
+	}
+	
 	ws.mutex.RLock()
 	defer ws.mutex.RUnlock()
 
@@ -164,11 +232,15 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 	}
 
 	if addr != nil {
-		if connInfo, ok := ws.connections[*addr]; ok {
+		if connInfo, ok := ws.connections[*addr]; ok && connInfo != nil {
 			log.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
 			ws.SendMessage(connInfo, response)
 		} else {
 			for remote_addr, connInfo := range ws.connections {
+				if connInfo == nil {
+					continue
+				}
+				
 				modules, ok := ws.dataListeners[remote_addr]
 
 				if ok && slices.Contains(modules, module.Name) {
@@ -183,6 +255,13 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 
 // handleGetDataModule handles module data updates from the event bus
 func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("handleGetDataModule panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+	}()
+	
 	log.Info("WS: event", "type", event.Type, "data", event.Data)
 	if event.Type != bus.EventGetDataModule {
 		return
@@ -197,6 +276,11 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 	}
 
 	log.Info("WS: EventGetDataModule", "data", moduleRequest)
+
+	if ws.dataStore == nil {
+		log.Error("Data store is nil")
+		return
+	}
 
 	for _, moduleName := range moduleRequest.Modules {
 		log.Info("WS: Broadcasting module update", "module", moduleName)
@@ -218,6 +302,13 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 // handleDataModuleUpdate handles module data updates from the event bus
 func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("handleDataModuleUpdate panic recovered: %v", r)
+			log.Errorf("Stack trace: %s", debug.Stack())
+		}
+	}()
+	
 	log.Info("WS: event", "type", event.Type)
 	if event.Type != bus.EventDataModuleUpdate {
 		return
