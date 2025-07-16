@@ -66,8 +66,22 @@ if (-not $projectFile) {
 Write-Host "Building Windows Sensors application from $($projectFile.FullName)..."
 Push-Location $projectFile.Directory
 try {
+    # Ensure the project is set to WinExe output type
+    Write-Host "Ensuring project is configured for windowless execution..."
+    $csprojContent = Get-Content $projectFile.FullName -Raw
+    if ($csprojContent -notmatch '<OutputType>WinExe</OutputType>') {
+        Write-Host "Updating project file to set OutputType to WinExe..."
+        # Find the first PropertyGroup and add OutputType if it doesn't exist
+        if ($csprojContent -match '(<PropertyGroup[^>]*>)') {
+            $csprojContent = $csprojContent -replace '(<PropertyGroup[^>]*>)', "`$1`n    <OutputType>WinExe</OutputType>"
+        }
+        Set-Content -Path $projectFile.FullName -Value $csprojContent
+    } else {
+        Write-Host "Project is already configured for windowless execution"
+    }
+    
     dotnet restore
-    dotnet publish -c Release -r win-x64 --self-contained true /p:Version=$Version /p:PublishSingleFile=true
+    dotnet publish -c Release -r win-x64 --self-contained true /p:Version=$Version /p:PublishSingleFile=true /p:OutputType=WinExe
 
     # Copy the built executable
     $publishDir = Join-Path $projectFile.Directory "bin/net$dotnetVersion-windows$dotnetVersion/win-x64/publish"
