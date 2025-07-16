@@ -56,9 +56,7 @@ SectionEnd
 Section "Install"
   SetOutPath "$INSTDIR"
   File "dist\system-bridge.exe"
-
-  # Copy icon to INSTDIR
-  CopyFiles ".resources\system-bridge-dimmed.ico" "$INSTDIR\system-bridge.ico"
+  File /oname=system-bridge.ico ".resources\system-bridge-dimmed.ico"
 
   # Register uninstaller in Windows registry
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "DisplayName" "System Bridge"
