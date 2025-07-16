@@ -60,6 +60,14 @@ Section "Install"
   # Copy icon to INSTDIR
   CopyFiles ".resources\system-bridge-dimmed.ico" "$INSTDIR\system-bridge.ico"
 
+  # Register uninstaller in Windows registry
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "DisplayName" "System Bridge"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "DisplayIcon" "$INSTDIR\system-bridge.ico"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "DisplayVersion" "$VERSION"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "Publisher" "System Bridge"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "InstallLocation" "$INSTDIR"
+
   # Create sensors directory structure and copy all sensor files
   CreateDirectory "$INSTDIR\lib\sensors\windows\bin"
   SetOutPath "$INSTDIR\lib\sensors\windows\bin"
@@ -87,4 +95,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\System Bridge\System Bridge.lnk"
   Delete "$SMPROGRAMS\System Bridge\Uninstall System Bridge.lnk"
   RMDir "$SMPROGRAMS\System Bridge"
+
+  ; Remove uninstaller registry keys
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge"
 SectionEnd
