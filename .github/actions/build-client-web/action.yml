@@ -1,0 +1,12 @@
+---
+name: Build Client (Web)
+description: Build steps for the System Bridge web client
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/setup-client-web
+
+    - name: Build client project
+      run: make build_client
+      shell: bash

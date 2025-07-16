@@ -32,11 +32,10 @@ jobs:
           fetch-depth: 0
 
       - name: Common build steps
-        uses: ./.github/actions/build-common
-        with:
-          platform: linux
-          binary_ext: ""
-          artifact_name: system-bridge-linux
+        uses: ./.github/actions/setup-go
+
+      - name: Build client project
+        uses: ./.github/actions/build-client-web
 
       - name: Install linux dependencies
         run: |
@@ -111,11 +110,10 @@ jobs:
           fetch-depth: 0
 
       - name: Common build steps
-        uses: ./.github/actions/build-common
-        with:
-          platform: windows
-          binary_ext: ".exe"
-          artifact_name: system-bridge-windows
+        uses: ./.github/actions/setup-go
+
+      - name: Build client project
+        uses: ./.github/actions/build-client-web
 
       - name: Install windows dependencies
         run: |

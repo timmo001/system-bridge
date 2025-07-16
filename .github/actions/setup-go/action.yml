@@ -1,0 +1,28 @@
+---
+name: Build Go Steps
+description: Common steps for building System Bridge (Go)
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up go
+      uses: actions/setup-go@v5
+      with:
+        cache: true
+        go-version-file: "go.mod"
+
+    - name: Cache go build
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.mod', '**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-build-
+
+    - name: Install dependencies
+      run: |
+        go mod download
+        go mod verify
+      shell: bash

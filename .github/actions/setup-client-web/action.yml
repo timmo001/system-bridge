@@ -1,0 +1,17 @@
+---
+name: Setup Client (Web)
+description: Setup steps for the System Bridge web client
+
+runs:
+  using: "composite"
+  steps:
+    - uses: oven-sh/setup-bun@v2
+
+    - name: Cache bun
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun/install/cache
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-cache-
