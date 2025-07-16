@@ -8,15 +8,15 @@ echo "==> Setting AUR package variables"
 AUR_PACKAGE_NAME="system-bridge-git"
 AUR_REPO_URL="ssh://aur@aur.archlinux.org/${AUR_PACKAGE_NAME}.git"
 
-echo "==> Checking required environment variables"
 # Check required environment variables
+echo "==> Checking required environment variables"
 if [ -z "$AUR_SSH_PRIVATE_KEY" ]; then
     echo "Error: AUR_SSH_PRIVATE_KEY environment variable is required"
     exit 1
 fi
 
-echo "==> Setting up SSH for AUR"
 # Setup SSH for AUR
+echo "==> Setting up SSH for AUR"
 mkdir -p ~/.ssh
 echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur_rsa
 chmod 600 ~/.ssh/aur_rsa
@@ -71,17 +71,10 @@ echo "==> Ensuring builduser can access working directory"
 chmod 755 "$TEMP_DIR"
 chown -R builduser:builduser .
 
-# Update pkgver in PKGBUILD if VERSION is set
-if [ -n "$VERSION" ]; then
-  echo "==> Updating pkgver in PKGBUILD to $VERSION"
-  sed -i "s/^pkgver=.*/pkgver=${VERSION}/" "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD"
+if [ "$GIT_BUILD" == "1" ]; then
+    echo "==> Copying PKGBUILD.dev to PKGBUILD for AUR -git package"
+    cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD.dev" PKGBUILD
 fi
-echo "==> VERSION is set to $VERSION"
-
-# Copy the updated PKGBUILD and configure for AUR
-echo "==> Copying updated PKGBUILD"
-cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
-echo "==> Copied PKGBUILD"
 
 echo "::group::==> PKGBUILD"
 cat PKGBUILD

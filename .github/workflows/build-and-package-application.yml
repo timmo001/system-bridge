@@ -188,18 +188,23 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Write version to file
-        run: echo "${{ env.VERSION }}" > VERSION
       - name: Update AUR package
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_WORKSPACE: ${{ github.workspace }}
+          VERSION: ${{ env.VERSION }}
         run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            GIT_BUILD="0"
+          else
+            GIT_BUILD="1"
+          fi
+
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            -e AUR_BUILD="1" \
             -e AUR_SSH_PRIVATE_KEY="$AUR_SSH_PRIVATE_KEY" \
+            -e GIT_BUILD="$GIT_BUILD" \
             -e GITHUB_SHA="$GITHUB_SHA" \
             -e GITHUB_WORKSPACE="/workspace" \
             -e VERSION="$VERSION" \
