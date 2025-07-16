@@ -114,6 +114,8 @@ jobs:
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: x64
+          # https://github.com/egor-tensin/setup-mingw/issues/17#issuecomment-1890253793
+          version: 12.2.0
 
       - name: Install NSIS
         run: choco install nsis -y --no-progress --limit-output
