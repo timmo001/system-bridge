@@ -29,6 +29,9 @@ jobs:
       - name: Setup Go
         uses: ./.github/actions/setup-go
 
+      - name: Build web client
+        uses: ./.github/actions/build-client-web
+
       - name: Run tests
         run: go test -v ./...
         shell: bash
