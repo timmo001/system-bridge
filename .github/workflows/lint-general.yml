@@ -28,7 +28,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Lint markdown
-        run: bunx markdownlint .
+        run: bunx markdownlint-cli .
 
   lint-yaml:
     name: Lint yaml
