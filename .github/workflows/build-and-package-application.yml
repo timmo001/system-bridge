@@ -197,11 +197,11 @@ jobs:
             -e GITHUB_WORKSPACE="/workspace" \
             -w /workspace \
             archlinux:latest \
-            bash -c "\
-              pacman -Syu --noconfirm\
-              pacman -S --noconfirm base-devel git openssh\
-              chmod +x .scripts/linux/update-aur.sh\
-              ./.scripts/linux/update-aur.sh\
+            bash -c "
+              pacman -Syu --noconfirm
+              pacman -S --noconfirm base-devel git openssh
+              chmod +x .scripts/linux/update-aur.sh
+              ./.scripts/linux/update-aur.sh
             "
       - name: Report AUR update status
         if: always()
