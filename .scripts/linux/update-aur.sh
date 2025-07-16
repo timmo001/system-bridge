@@ -83,7 +83,7 @@ echo "==> Copying updated PKGBUILD"
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
 echo "==> Copied PKGBUILD"
 
-echo "::group::PKGBUILD"
+echo "::group::==> PKGBUILD"
 cat PKGBUILD
 echo "::endgroup::"
 
@@ -94,25 +94,19 @@ mkdir -p "$BUILDDIR"
 chown -R builduser:builduser "$BUILDDIR"
 
 # Update .SRCINFO with AUR configuration as builduser
-echo "==> Generating .SRCINFO as builduser"
-echo "::group::Generating .SRCINFO"
+echo "::group::==> Generating .SRCINFO as builduser"
 sudo -u builduser env -i HOME="$HOME" BUILDDIR="$BUILDDIR" bash --noprofile --norc -c 'makepkg --printsrcinfo > .SRCINFO'
 echo "::endgroup::"
-echo "==> Generated .SRCINFO"
 
-echo "::group::PKGBUILD"
-cat PKGBUILD
-echo "::endgroup::"
-
-echo "::group::.SRCINFO"
+echo "::group::==> .SRCINFO"
 cat .SRCINFO
 echo "::endgroup::"
 
-echo "::group::Git status"
+echo "::group::==> Git status"
 git status
 echo "::endgroup::"
 
-echo "::group::Git diff"
+echo "::group::==> Git diff"
 git diff
 echo "::endgroup::"
 
