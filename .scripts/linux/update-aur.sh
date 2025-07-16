@@ -68,7 +68,13 @@ chown -R builduser:builduser "$BUILDDIR"
 
 # Update .SRCINFO with AUR configuration as builduser
 echo "Generating .SRCINFO..."
-sudo -u builduser bash -c "export BUILDDIR='$BUILDDIR' && AUR_BUILD=1 makepkg --printsrcinfo > .SRCINFO"
+sudo -u builduser env -i HOME="$HOME" BUILDDIR="$BUILDDIR" bash --noprofile --norc -c 'makepkg --printsrcinfo > .SRCINFO'
+echo "PKGBUILD:"
+cat PKGBUILD
+echo "--------------------------------"
+echo "SRCINFO:"
+cat .SRCINFO
+echo "--------------------------------"
 
 # Check if there are changes - use a more robust method
 echo "Checking for changes..."
