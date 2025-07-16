@@ -48,11 +48,6 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
-# Ensure VERSION is not ignored
-if [ -f .gitignore ] && grep -qxF 'VERSION' .gitignore; then
-    sed -i '/^VERSION$/d' .gitignore
-    git add .gitignore
-fi
 
 # Configure Git to allow operations on this repository
 git config --global --add safe.directory "$(pwd)"
@@ -66,7 +61,6 @@ chown -R builduser:builduser .
 # Copy the updated PKGBUILD and configure for AUR
 echo "Updating PKGBUILD..."
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
-cp "$GITHUB_WORKSPACE/VERSION" VERSION
 
 # Create a build directory that builduser can access
 export BUILDDIR="/tmp/makepkg-build"
@@ -88,7 +82,7 @@ fi
 
 # Commit and push changes
 echo "Committing changes..."
-git add -f PKGBUILD .SRCINFO VERSION
+git add -f PKGBUILD .SRCINFO
 git commit -m "Update to latest master commit
 
 Automated update from GitHub Actions
