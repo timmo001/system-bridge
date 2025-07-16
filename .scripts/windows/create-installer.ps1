@@ -9,8 +9,8 @@ if (-not $VERSION) {
 }
 Write-Host "Version: $VERSION"
 
-if (-not (Test-Path "system-bridge.exe")) {
-    Write-Error "system-bridge.exe not found in root directory"
+if (-not (Test-Path "dist\system-bridge.exe") -and -not (Test-Path "system-bridge.exe")) {
+    Write-Error "Executable not found"
     exit 1
 }
 
