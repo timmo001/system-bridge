@@ -28,7 +28,7 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 		log.Warn("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
 		log.Warn("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
 	} else {
-		log.Info("playerctl output:", "output", string(output))
+		log.Debug("playerctl output:", "output", string(output))
 	}
 
 	if err == nil {
