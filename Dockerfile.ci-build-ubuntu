@@ -13,8 +13,8 @@ RUN apt-get update && \
         flatpak \
         flatpak-builder \
         gcc \
-        libc6-dev \
         libayatana-appindicator3-dev \
+        libc6-dev \
         libfuse2 \
         libssl-dev \
         libx11-dev \
