@@ -22,74 +22,102 @@ concurrency:
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
-  build-and-package:
-    name: Build and package
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-        include:
-          - os: ubuntu-latest
-            platform: linux
-            artifact_name: system-bridge-linux
-            binary_ext: ""
-          - os: windows-latest
-            platform: windows
-            artifact_name: system-bridge-windows
-            binary_ext: ".exe"
+  build-linux:
+    name: Build and package (Linux)
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up go
-        uses: actions/setup-go@v5
+      - name: Common build steps
+        uses: ./.github/actions/build-common
         with:
-          cache: true
-          go-version-file: "go.mod"
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Cache go build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.mod', '**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-build-
-
-      - name: Cache linux dependencies
-        if: matrix.platform == 'linux'
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-cache-${{ hashFiles('.github/workflows/build-and-package-application.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-cache-
-
-      - name: Cache bun
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-cache-
+          platform: linux
+          binary_ext: ""
+          artifact_name: system-bridge-linux
 
       - name: Install linux dependencies
-        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev xorg-dev libx11-xcb-dev dpkg fakeroot rpm flatpak flatpak-builder libfuse2 libayatana-appindicator3-dev
 
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="5.0.0-dev+${{ github.sha }}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Write version to file
+        run: echo "${{ env.VERSION }}" > VERSION
+
+      - name: Build application
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 1
+        run: |
+          go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
+
+      # Package for Linux
+      - name: Package for Linux
+        run: |
+          mkdir -p dist
+          chmod +x system-bridge-linux
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          chmod +x .scripts/linux/create-*.sh
+          ./.scripts/linux/create-appimage.sh &
+          ./.scripts/linux/create-deb.sh &
+          ./.scripts/linux/create-rpm.sh &
+          docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
+            pacman -Syu --noconfirm\
+            pacman -S --noconfirm base-devel sudo\
+            useradd -m builduser\
+            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser\
+            mkdir -p /home/builduser/build\
+            cp -r /build/* /home/builduser/build/\
+            chown -R builduser:builduser /home/builduser/build\
+            cd /home/builduser/build/.scripts/linux\
+            su builduser -c './create-arch.sh'\
+            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
+          " &
+          sudo ./.scripts/linux/create-flatpak.sh &
+          wait
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-linux-packages-${{ env.VERSION }}
+          path: dist/*
+          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+  build-windows:
+    name: Build and package (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Common build steps
+        uses: ./.github/actions/build-common
+        with:
+          platform: windows
+          binary_ext: ".exe"
+          artifact_name: system-bridge-windows
+
       - name: Install windows dependencies
-        if: matrix.platform == 'windows'
         run: |
           choco install mingw nsis -y
 
@@ -105,32 +133,16 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Write version to file
-        if: matrix.platform == 'linux'
-        run: echo "${{ env.VERSION }}" > VERSION
-
-      - name: Install dependencies
-        run: |
-          go mod download
-          go mod verify
-
-      - name: Build client project
-        run: make build_client
-
-      - name: Run tests
-        run: go test -v ./...
-
       - name: Build application
         env:
-          GOOS: ${{ matrix.platform }}
+          GOOS: windows
           GOARCH: amd64
           CGO_ENABLED: 1
-          CC: ${{ matrix.platform == 'windows' && 'gcc' || '' }}
+          CC: gcc
         run: |
-          go build -v -ldflags="${{ matrix.platform == 'windows' && '-H windowsgui' || '' }} -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-${{ matrix.platform }}${{ matrix.binary_ext }}"
+          go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-windows.exe"
 
       - name: Cache windows sensor builds
-        if: matrix.platform == 'windows'
         id: cache-sensors
         uses: actions/cache@v4
         with:
@@ -141,56 +153,16 @@ jobs:
             ${{ runner.os }}-sensor-builds-
 
       - name: Build windows sensors
-        if: matrix.platform == 'windows' && steps.cache-sensors.outputs.cache-hit != 'true'
+        if: steps.cache-sensors.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           & "$PWD/.scripts/windows/build-sensors.ps1" -Version $env:VERSION
 
       - name: Add icon to Windows binary
-        if: matrix.platform == 'windows'
         run: |
           windres .resources/system-bridge.rc -O coff -o system-bridge.syso
 
-      # Package for Linux
-      - name: Package for Linux
-        if: matrix.platform == 'linux'
-        run: |
-          mkdir -p dist
-          chmod +x system-bridge-linux
-
-          # Download and setup AppImage tools
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-          chmod +x appimagetool
-
-          # Create packages in parallel
-          chmod +x .scripts/linux/create-*.sh
-          ./.scripts/linux/create-appimage.sh &
-          ./.scripts/linux/create-deb.sh &
-          ./.scripts/linux/create-rpm.sh &
-
-          # Create Arch package in Docker
-          docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "
-            pacman -Syu --noconfirm
-            pacman -S --noconfirm base-devel sudo
-            useradd -m builduser
-            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
-            mkdir -p /home/builduser/build
-            cp -r /build/* /home/builduser/build/
-            chown -R builduser:builduser /home/builduser/build
-            cd /home/builduser/build/.scripts/linux
-            su builduser -c './create-arch.sh'
-            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;
-          " &
-
-          # Create Flatpak package
-          sudo ./.scripts/linux/create-flatpak.sh &
-
-          # Wait for all background jobs
-          wait
-
-      # Package for Windows
       - name: Package for Windows
-        if: matrix.platform == 'windows'
         run: |
           mkdir -p dist
           Move-Item system-bridge-windows.exe dist/system-bridge.exe
@@ -199,18 +171,19 @@ jobs:
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: system-bridge-${{ matrix.platform }}-packages-${{ env.VERSION }}
+          name: system-bridge-windows-packages-${{ env.VERSION }}
           path: dist/*
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
     outputs:
       version: ${{ steps.get_version.outputs.version }}
+
   update-aur:
     name: Update AUR Package
     runs-on: ubuntu-latest
-    needs: build-and-package
+    needs: build-linux
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     env:
-      VERSION: ${{ needs.build-and-package.outputs.version }}
+      VERSION: ${{ needs.build-linux.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -224,7 +197,6 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
-          # Run the AUR update script in an Arch Linux container
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AUR_SSH_PRIVATE_KEY="$AUR_SSH_PRIVATE_KEY" \
@@ -232,16 +204,12 @@ jobs:
             -e GITHUB_WORKSPACE="/workspace" \
             -w /workspace \
             archlinux:latest \
-            bash -c "
-              # Install required packages
-              pacman -Syu --noconfirm
-              pacman -S --noconfirm base-devel git openssh
-
-              # Make script executable and run it
-              chmod +x .scripts/linux/update-aur.sh
-              ./.scripts/linux/update-aur.sh
+            bash -c "\
+              pacman -Syu --noconfirm\
+              pacman -S --noconfirm base-devel git openssh\
+              chmod +x .scripts/linux/update-aur.sh\
+              ./.scripts/linux/update-aur.sh\
             "
-
       - name: Report AUR update status
         if: always()
         run: |
