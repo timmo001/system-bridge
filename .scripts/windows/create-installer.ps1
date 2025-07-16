@@ -1,8 +1,17 @@
 # Create NSIS installer script
-$version = $env:VERSION
-if (-not $version) {
-    $version = "5.0.0"
+$VERSION = $env:VERSION
+if (-not $VERSION) {
+    $VERSION = "5.0.0-dev+$(git rev-parse --short HEAD)"
 }
+Write-Host "Version: $VERSION"
+
+if (-not (Test-Path "system-bridge.exe")) {
+    Write-Error "system-bridge.exe not found in root directory"
+    exit 1
+}
+
+Write-Host "Copying system-bridge.exe to dist directory"
+Copy-Item system-bridge.exe dist\system-bridge.exe
 
 # Verify .NET Runtime version
 $dotnetVersion = "8.0"
@@ -19,9 +28,9 @@ if (-not (Test-Path $vcRuntimePath)) {
     Write-Warning "Visual C++ Runtime not found. The installer will attempt to install it during setup."
 }
 
-# List current directory contents for debugging
-Write-Host "Current directory contents:"
-Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }
+# # List current directory contents for debugging
+# Write-Host "Current directory contents:"
+# Get-ChildItem -Path $PWD -Recurse | ForEach-Object { Write-Host $_.FullName }
 
 # Verify system-bridge.exe exists before building installer
 if (-not (Test-Path "dist\system-bridge.exe")) {
@@ -48,7 +57,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Read the template and replace version
 $templateContent = Get-Content -Path "$scriptDir\installer.nsi.template" -Raw
-$installerScript = $templateContent -replace '\$VERSION', $version
+$installerScript = $templateContent -replace '\$VERSION', $VERSION
 
 # Write the processed script to a file
 Set-Content -Path "installer.nsi" -Value $installerScript

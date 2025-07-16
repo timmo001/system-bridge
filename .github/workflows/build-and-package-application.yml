@@ -162,10 +162,7 @@ jobs:
           windres .resources/system-bridge.rc -O coff -o system-bridge.syso
 
       - name: Package for Windows
-        run: |
-          mkdir -p dist
-          Move-Item system-bridge-windows.exe dist/system-bridge.exe
-          ./.scripts/windows/create-installer.ps1
+        run: ./.scripts/windows/create-installer.ps1
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
