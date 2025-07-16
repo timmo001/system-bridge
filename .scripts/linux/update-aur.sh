@@ -74,6 +74,18 @@ chown -R builduser:builduser .
 if [ "$GIT_BUILD" == "1" ]; then
     echo "==> Copying PKGBUILD.dev to PKGBUILD for AUR -git package"
     cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD.dev" PKGBUILD
+
+   if [ -d "${srcdir}/${pkgname}/.git" ]; then
+     cd "${srcdir}/${pkgname}"
+   elif [ -d .git ]; then
+     cd .
+   else
+     echo "0"
+     return
+   fi
+   pkgver="r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)"
+   echo "==> Setting pkgver to $pkgver"
+   sed -i "s/pkgver=5.0.0+dev/pkgver=$pkgver/" PKGBUILD
 fi
 
 echo "::group::==> PKGBUILD"
