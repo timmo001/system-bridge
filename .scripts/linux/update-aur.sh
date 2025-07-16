@@ -83,7 +83,7 @@ if [ "$GIT_BUILD" == "1" ]; then
      echo "0"
      return
    fi
-   PKGVER=$("r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)")
+   PKGVER=$(printf "r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)")
    echo "==> Setting pkgver to $PKGVER"
    sed -i "s/pkgver=5.0.0+dev/pkgver=$PKGVER/" PKGBUILD
 fi
