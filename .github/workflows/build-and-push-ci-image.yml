@@ -1,5 +1,5 @@
 ---
-name: Build and push Build CI Ubuntu Docker image
+name: Build and push CI Docker images
 
 # yamllint disable-line rule:truthy
 on:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-and-push:
+    name: Build and push CI Ubuntu image
     runs-on: ubuntu-latest
     permissions:
       contents: read
