@@ -49,13 +49,6 @@ if (-not (Test-Path "dist\system-bridge.exe")) {
     exit 1
 }
 
-# Verify Windows sensors executable exists
-$sensorsExePath = "lib/sensors/windows/bin/SystemBridgeWindowsSensors.exe"
-if (-not (Test-Path $sensorsExePath)) {
-    Write-Error "Windows sensors executable not found at: $sensorsExePath"
-    exit 1
-}
-
 # Verify icon file exists
 $iconPath = ".resources/system-bridge-dimmed.ico"
 if (-not (Test-Path $iconPath)) {

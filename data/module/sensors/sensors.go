@@ -19,3 +19,15 @@ func GetTemperatureSensorsData() ([]types.Temperature, error) {
 	}
 	return temperatures, nil
 }
+
+// Return empty data for compatibility as we have removed the windows sensors module
+func GetWindowsSensorsData() (*types.SensorsWindows, error) {
+	var sensorsData types.SensorsWindows
+	sensorsData.Hardware = make([]types.SensorsWindowsHardware, 0)
+	sensorsData.NVIDIA = &types.SensorsNVIDIA{
+		Displays: make([]types.SensorsNVIDIADisplay, 0),
+		GPUs:     make([]types.SensorsNVIDIAGPU, 0),
+	}
+
+	return &sensorsData, nil
+}
