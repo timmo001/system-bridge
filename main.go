@@ -9,9 +9,8 @@ import (
 	"runtime"
 	"syscall"
 
+	"fyne.io/systray"
 	"github.com/charmbracelet/log"
-	"github.com/gopherlibs/appindicator/appindicator"
-	"github.com/gotk3/gotk3/gtk"
 	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
@@ -31,8 +30,6 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
-var indicator *appindicator.Indicator
-
 func main() {
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
@@ -50,14 +47,8 @@ func main() {
 		cancel() // Cancel the context
 	}()
 
-	// Initialize GTK
-	gtk.Init(nil)
-
-	// Initialize the indicator in a goroutine
-	go func() {
-		setupIndicator()
-		gtk.Main()
-	}()
+	// Run systray in a goroutine
+	go systray.Run(onReady, onExit)
 
 	cmd := &cli.Command{
 		Name:  "System Bridge",
@@ -157,16 +148,13 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		// Stop indicator if it was started
-		if indicator != nil {
-			gtk.MainQuit()
-		}
+		systray.Quit()
 		log.Errorf("error running cmd: %v", err)
 		os.Exit(1)
 	}
 }
 
-func setupIndicator() {
+func onReady() {
 	token, err := utils.LoadToken()
 	if err != nil {
 		log.Errorf("error loading token: %v", err)
@@ -176,87 +164,46 @@ func setupIndicator() {
 		}
 	}
 
-	// Create the indicator
-	indicator = appindicator.NewWithPath(
-		"system-bridge",
-		"system-bridge",
-		appindicator.CategoryApplicationStatus,
-		"",
-	)
-
-	// Set the icon based on OS
+	// Set systray icon based on OS
 	if runtime.GOOS == "windows" {
-		// For Windows, we would need to save the icon data to a temp file
-		// since AppIndicator expects a file path, not raw data
-		iconPath := "/tmp/system-bridge-icon.ico"
-		if err := os.WriteFile(iconPath, trayIconIcoData, 0644); err == nil {
-			indicator.SetIcon(iconPath)
-		}
+		systray.SetIcon(trayIconIcoData)
 	} else {
-		// For Linux, save PNG data to temp file
-		iconPath := "/tmp/system-bridge-icon.png"
-		if err := os.WriteFile(iconPath, trayIconPngData, 0644); err == nil {
-			indicator.SetIcon(iconPath)
+		systray.SetIcon(trayIconPngData)
+	}
+
+	systray.SetTitle("System Bridge")
+	systray.SetTooltip("System Bridge")
+
+	// Create menu items
+	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
+	systray.AddSeparator()
+	mQuit := systray.AddMenuItem("Quit", "Quit the application")
+
+	// Handle menu item clicks
+	go func() {
+		for {
+			select {
+			case <-mOpenWebClient.ClickedCh:
+				openWebClient(token)
+			case <-mQuit.ClickedCh:
+				log.Info("Quitting...")
+				systray.Quit()
+				os.Exit(0)
+			}
 		}
-	}
+	}()
+}
 
-	indicator.SetStatus(appindicator.StatusActive)
-	indicator.SetTitle("System Bridge")
-
-	// Create menu
-	menu, err := gtk.MenuNew()
-	if err != nil {
-		log.Errorf("Failed to create menu: %v", err)
-		return
-	}
-
-	// Open web client menu item
-	openWebClientItem, err := gtk.MenuItemNewWithLabel("Open web client")
-	if err != nil {
-		log.Errorf("Failed to create menu item: %v", err)
-		return
-	}
-	openWebClientItem.Connect("activate", func() {
-		openWebClient(token)
-	})
-	menu.Append(openWebClientItem)
-
-	// Separator
-	separator, err := gtk.SeparatorMenuItemNew()
-	if err != nil {
-		log.Errorf("Failed to create separator: %v", err)
-		return
-	}
-	menu.Append(separator)
-
-	// Quit menu item
-	quitItem, err := gtk.MenuItemNewWithLabel("Quit")
-	if err != nil {
-		log.Errorf("Failed to create quit menu item: %v", err)
-		return
-	}
-	quitItem.Connect("activate", func() {
-		log.Info("Quitting...")
-		gtk.MainQuit()
-		os.Exit(0)
-	})
-	menu.Append(quitItem)
-
-	// Show all menu items
-	menu.ShowAll()
-
-	// Set the menu
-	indicator.SetMenu(menu)
+func onExit() {
+	// Cleanup if needed
+	log.Info("System tray exiting...")
 }
 
 func openWebClient(token string) {
-	// Open the frontend in the default browser
-	host := "0.0.0.0"
 	port := utils.GetPort()
-	url := fmt.Sprintf("http://%s:%d/?host=%s&port=%d&apiKey=%s", host, port, host, port, token)
+	url := fmt.Sprintf("http://0.0.0.0:%d/?host=0.0.0.0&port=%d&apiKey=%s", port, port, token)
 	log.Infof("Opening web client URL: %s", url)
-	err := browser.OpenURL(url)
-	if err != nil {
-		log.Errorf("Failed to open web client URL: %v", err)
+	if err := browser.OpenURL(url); err != nil {
+		log.Errorf("Failed to open web client: %v", err)
 	}
 }

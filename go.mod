@@ -3,14 +3,13 @@ module github.com/timmo001/system-bridge
 go 1.24.1
 
 require (
+	fyne.io/systray v1.11.0
 	github.com/charmbracelet/log v0.4.2
 	github.com/distatus/battery v0.11.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v0.110.8
 	github.com/google/uuid v1.6.0
-	github.com/gopherlibs/appindicator v1.2.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/gotk3/gotk3 v0.6.5-0.20240618185848-ff349ae13f56
 	github.com/jezek/xgb v1.1.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c

@@ -13,7 +13,6 @@ RUN apt-get update && \
         flatpak \
         flatpak-builder \
         gcc \
-        libayatana-appindicator-glib \
         libc6-dev \
         libfuse2 \
         libssl-dev \
