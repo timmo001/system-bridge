@@ -1,4 +1,7 @@
+#!/bin/sh
 # PKGBUILD for release (binary) package
+# This is used for the AUR system-bridge package
+
 pkgname=system-bridge
 pkgver=${ARCH_PKGVER}
 pkgrel=1

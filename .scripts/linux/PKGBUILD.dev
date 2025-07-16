@@ -1,4 +1,7 @@
+#!/bin/sh
 # PKGBUILD for AUR -git (development) package
+# This is used for the AUR system-bridge-git package
+
 pkgname=system-bridge-git
 pkgver=5.0.0-dev  # This will be replaced in the pkgver() function
 pkgrel=1
