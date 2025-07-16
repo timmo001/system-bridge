@@ -16,7 +16,7 @@ arch=('x86_64')
 url="https://github.com/timmo001/system-bridge"
 license=('Apache-2.0')
 keywords=('system-bridge' 'automation' 'home-assistant' 'api' 'websocket')
-depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11' 'libayatana-appindicator-gtk3')
+depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11' 'libayatana-appindicator')
 provides=('system-bridge')
 
 build() {
