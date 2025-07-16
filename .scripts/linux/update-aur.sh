@@ -77,6 +77,7 @@ if [ -n "$VERSION" ]; then
   echo "==> Updating pkgver in PKGBUILD to $VERSION"
   sed -i "s/^pkgver=.*/pkgver=${VERSION}/" "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD"
 fi
+echo "==> VERSION is set to $VERSION"
 
 # Copy the updated PKGBUILD and configure for AUR
 echo "==> Copying updated PKGBUILD"
