@@ -1,0 +1,20 @@
+FROM ubuntu:stable
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential git curl pkg-config libssl-dev \
+        gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev \
+        libxkbcommon-x11-dev xorg-dev libx11-xcb-dev dpkg fakeroot \
+        rpm flatpak flatpak-builder libfuse2 libayatana-appindicator3-dev \
+        wget sudo git ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user for builds
+RUN useradd -ms /bin/bash builduser && \
+    echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
+USER builduser
+WORKDIR /home/builduser
+
+# Entrypoint for CI
+CMD ["bash"]
