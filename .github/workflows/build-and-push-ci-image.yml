@@ -1,5 +1,7 @@
-name: Build and Push CI Docker Image
+---
+name: Build and push Build CI Ubuntu Docker image
 
+# yamllint disable-line rule:truthy
 on:
   schedule:
     - cron: "0 3 * * 0" # Every Sunday at 03:00 UTC
