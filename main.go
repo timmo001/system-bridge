@@ -10,7 +10,8 @@ import (
 	"syscall"
 
 	"github.com/charmbracelet/log"
-	"github.com/getlantern/systray"
+	"github.com/gopherlibs/appindicator/appindicator"
+	"github.com/gotk3/gotk3/gtk"
 	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
@@ -30,6 +31,8 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
+var indicator *appindicator.Indicator
+
 func main() {
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
@@ -47,8 +50,13 @@ func main() {
 		cancel() // Cancel the context
 	}()
 
+	// Initialize GTK
+	gtk.Init(nil)
+
+	// Initialize the indicator in a goroutine
 	go func() {
-		systray.Run(onReady, onExit)
+		setupIndicator()
+		gtk.Main()
 	}()
 
 	cmd := &cli.Command{
@@ -149,14 +157,16 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		// Stop systray if it was started – avoids leaving background goroutine active
-		systray.Quit()
+		// Stop indicator if it was started
+		if indicator != nil {
+			gtk.MainQuit()
+		}
 		log.Errorf("error running cmd: %v", err)
 		os.Exit(1)
 	}
 }
 
-func onReady() {
+func setupIndicator() {
 	token, err := utils.LoadToken()
 	if err != nil {
 		log.Errorf("error loading token: %v", err)
@@ -166,35 +176,77 @@ func onReady() {
 		}
 	}
 
-	// Set tray icon based on OS
+	// Create the indicator
+	indicator = appindicator.NewWithPath(
+		"system-bridge",
+		"system-bridge",
+		appindicator.CategoryApplicationStatus,
+		"",
+	)
+
+	// Set the icon based on OS
 	if runtime.GOOS == "windows" {
-		systray.SetIcon(trayIconIcoData)
+		// For Windows, we would need to save the icon data to a temp file
+		// since AppIndicator expects a file path, not raw data
+		iconPath := "/tmp/system-bridge-icon.ico"
+		if err := os.WriteFile(iconPath, trayIconIcoData, 0644); err == nil {
+			indicator.SetIcon(iconPath)
+		}
 	} else {
-		systray.SetIcon(trayIconPngData)
+		// For Linux, save PNG data to temp file
+		iconPath := "/tmp/system-bridge-icon.png"
+		if err := os.WriteFile(iconPath, trayIconPngData, 0644); err == nil {
+			indicator.SetIcon(iconPath)
+		}
 	}
-	systray.SetTitle("System Bridge")
 
-	// Open frontend
-	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in the default browser")
-	go func() {
-		<-mOpenWebClient.ClickedCh
+	indicator.SetStatus(appindicator.StatusActive)
+	indicator.SetTitle("System Bridge")
+
+	// Create menu
+	menu, err := gtk.MenuNew()
+	if err != nil {
+		log.Errorf("Failed to create menu: %v", err)
+		return
+	}
+
+	// Open web client menu item
+	openWebClientItem, err := gtk.MenuItemNewWithLabel("Open web client")
+	if err != nil {
+		log.Errorf("Failed to create menu item: %v", err)
+		return
+	}
+	openWebClientItem.Connect("activate", func() {
 		openWebClient(token)
-	}()
+	})
+	menu.Append(openWebClientItem)
 
-	// ---
-	systray.AddSeparator()
+	// Separator
+	separator, err := gtk.SeparatorMenuItemNew()
+	if err != nil {
+		log.Errorf("Failed to create separator: %v", err)
+		return
+	}
+	menu.Append(separator)
 
-	// Quit
-	mQuit := systray.AddMenuItem("Quit", "Quit the application")
-	go func() {
-		<-mQuit.ClickedCh
+	// Quit menu item
+	quitItem, err := gtk.MenuItemNewWithLabel("Quit")
+	if err != nil {
+		log.Errorf("Failed to create quit menu item: %v", err)
+		return
+	}
+	quitItem.Connect("activate", func() {
 		log.Info("Quitting...")
+		gtk.MainQuit()
 		os.Exit(0)
-	}()
-}
+	})
+	menu.Append(quitItem)
 
-func onExit() {
-	// Perform cleanup if needed
+	// Show all menu items
+	menu.ShowAll()
+
+	// Set the menu
+	indicator.SetMenu(menu)
 }
 
 func openWebClient(token string) {
