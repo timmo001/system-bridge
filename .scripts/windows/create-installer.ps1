@@ -1,3 +1,7 @@
+param (
+    [switch]$Clean
+)
+
 # Create NSIS installer script
 $VERSION = $env:VERSION
 if (-not $VERSION) {
@@ -10,8 +14,15 @@ if (-not (Test-Path "system-bridge.exe")) {
     exit 1
 }
 
-Write-Host "Copying system-bridge.exe to dist directory"
-Copy-Item system-bridge.exe dist\system-bridge.exe
+if (-not (Test-Path "dist") -or $Clean) {
+    Write-Host "Creating dist directory"
+    New-Item -ItemType Directory -Path "dist"
+}
+
+if (-not (Test-Path "dist\system-bridge.exe") -or $Clean) {
+    Write-Host "Copying system-bridge.exe to dist directory"
+    Copy-Item system-bridge.exe dist\system-bridge.exe
+}
 
 # Verify .NET Runtime version
 $dotnetVersion = "8.0"

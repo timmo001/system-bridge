@@ -36,7 +36,7 @@ create_rpm:
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 
 create_windows_installer:
-	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1
+	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean
 
 install: build
 	go install .
