@@ -24,9 +24,9 @@ concurrency:
 jobs:
   build-linux:
     name: Build and package (Linux)
-    runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

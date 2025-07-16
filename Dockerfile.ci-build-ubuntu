@@ -35,8 +35,6 @@ RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous
 # Create a non-root user for builds
 RUN useradd -ms /bin/bash builduser && \
     echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
-USER builduser
-WORKDIR /home/builduser
 
 # Entrypoint for CI
 CMD ["bash"]
