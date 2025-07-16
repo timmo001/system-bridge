@@ -198,6 +198,7 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
+            -e AUR_BUILD="1" \
             -e AUR_SSH_PRIVATE_KEY="$AUR_SSH_PRIVATE_KEY" \
             -e GITHUB_SHA="$GITHUB_SHA" \
             -e GITHUB_WORKSPACE="/workspace" \
