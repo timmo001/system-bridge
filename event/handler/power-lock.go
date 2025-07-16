@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
-	"syscall"
 	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 func Lock() error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("rundll32.exe", "user32.dll,LockWorkStation")
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+		utils.SetHideWindow(cmd)
 		return cmd.Run()
 	case "linux":
 		// Try Wayland first with loginctl

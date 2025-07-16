@@ -10,7 +10,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
+
+	"github.com/timmo001/system-bridge/utils"
 )
 
 func getUserDirectories() []DirectoryInfo {
@@ -27,7 +28,7 @@ $folders = @{
 $folders | ConvertTo-Json
 `
 	cmd := exec.Command("powershell", "-Command", script)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	utils.SetHideWindow(cmd)
 	output, err := cmd.Output()
 	if err != nil {
 		// Fallback to default paths
@@ -106,6 +107,6 @@ func getFileInfo(path string) (*FileInfo, error) {
 
 func openFile(path string) error {
 	cmd := exec.Command("cmd", "/c", "start", "", path)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	utils.SetHideWindow(cmd)
 	return cmd.Run()
 }

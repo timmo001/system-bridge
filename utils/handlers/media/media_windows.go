@@ -6,7 +6,8 @@ package media
 import (
 	"fmt"
 	"os/exec"
-	"syscall"
+
+	"github.com/timmo001/system-bridge/utils"
 )
 
 func control(action MediaAction) error {
@@ -32,6 +33,6 @@ func control(action MediaAction) error {
 	}
 
 	cmd := exec.Command("powershell", "-Command", script)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	utils.SetHideWindow(cmd)
 	return cmd.Run()
 }
