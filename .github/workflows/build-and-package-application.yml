@@ -110,9 +110,13 @@ jobs:
       - name: Build web client
         uses: ./.github/actions/build-client-web
 
-      - name: Install windows dependencies
-        run: |
-          choco install mingw nsis -y
+      - name: Setup MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+
+      - name: Install NSIS
+        run: choco install nsis -y --no-progress --limit-output
 
       - name: Get version
         id: get_version
