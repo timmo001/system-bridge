@@ -37,7 +37,7 @@ func main() {
 	configDir, err := utils.GetConfigPath()
 	if err == nil {
 		logFilePath := filepath.Join(configDir, "system-bridge.log")
-		logFile, fileErr := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		logFile, fileErr := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if fileErr == nil {
 			log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 		} else {
