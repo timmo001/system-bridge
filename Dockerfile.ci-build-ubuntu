@@ -3,11 +3,28 @@ FROM ubuntu:22.04
 # Install build dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential git curl pkg-config libssl-dev \
-        gcc libc6-dev libx11-dev libxtst-dev libxkbcommon-dev \
-        libxkbcommon-x11-dev xorg-dev libx11-xcb-dev dpkg fakeroot \
-        rpm flatpak flatpak-builder libfuse2 libayatana-appindicator3-dev \
-        wget sudo git ca-certificates && \
+        build-essential \
+        ca-certificates \
+        curl \
+        dpkg \
+        fakeroot \
+        flatpak \
+        flatpak-builder \
+        gcc \
+        libc6-dev \
+        libayatana-appindicator3-dev \
+        libfuse2 \
+        libssl-dev \
+        libx11-dev \
+        libx11-xcb-dev \
+        libxkbcommon-dev \
+        libxkbcommon-x11-dev \
+        libxtst-dev \
+        pkg-config \
+        rpm \
+        sudo \
+        wget \
+        xorg-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install AppImageTool (pin to a specific version for reproducibility)
