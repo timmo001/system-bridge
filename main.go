@@ -70,14 +70,14 @@ func main() {
 
 					s, err := settings.Load()
 					if err != nil {
-						log.Fatalf("error loading settings: %v", err)
+						return fmt.Errorf("error loading settings: %w", err)
 					}
 
 					log.Debugf("Loaded settings: %v", s)
 
 					token, err := utils.LoadToken()
 					if err != nil {
-						log.Fatalf("error loading token: %v", err)
+						return fmt.Errorf("error loading token: %w", err)
 					}
 
 					log.Infof("Your API token is: %s", token)
@@ -85,11 +85,11 @@ func main() {
 					// Setup data store
 					dataStore, err := data.NewDataStore()
 					if err != nil {
-						log.Fatalf("Failed to create data store: %v", err)
+						return fmt.Errorf("failed to create data store: %w", err)
 					}
 
 					// Create and run backend server with signal-aware context
-					b := backend.New(s, dataStore, &webClientContent)
+					b := backend.New(s, dataStore, token, &webClientContent)
 
 					// Show startup notification if requested
 					if cmd.Bool("open-web-client") {
@@ -149,14 +149,21 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		log.Fatalf("error running cmd: %v", err)
+		// Stop systray if it was started – avoids leaving background goroutine active
+		systray.Quit()
+		log.Errorf("error running cmd: %v", err)
+		os.Exit(1)
 	}
 }
 
 func onReady() {
 	token, err := utils.LoadToken()
 	if err != nil {
-		log.Fatalf("error loading token: %v", err)
+		log.Errorf("error loading token: %v", err)
+		token = utils.GenerateToken()
+		if saveErr := utils.SaveToken(token); saveErr != nil {
+			log.Errorf("failed to persist generated token: %v", saveErr)
+		}
 	}
 
 	// Set tray icon based on OS

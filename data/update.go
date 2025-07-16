@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -29,9 +30,9 @@ type UpdateTaskProcessor struct {
 	cancel context.CancelFunc
 }
 
-func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstLimit int) *UpdateTaskProcessor {
+func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstLimit int) (*UpdateTaskProcessor, error) {
 	if dataStore == nil {
-		log.Fatal("dataStore cannot be nil")
+		return nil, fmt.Errorf("dataStore cannot be nil")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -43,12 +44,12 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 		taskQueue: make(chan types.Updater, 20), // Buffer size of 20
 		ctx:       ctx,
 		cancel:    cancel,
-	}
+	}, nil
 }
 
 // Start begins processing tasks
 func (tp *UpdateTaskProcessor) Start(workerCount int) {
-	for range workerCount {
+	for i := 0; i < workerCount; i++ {
 		tp.wg.Add(1)
 		go tp.worker()
 	}
@@ -112,7 +113,11 @@ func (tp *UpdateTaskProcessor) worker() {
 
 func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Create processor with 4 tasks/second, burst of 2
-	processor := NewUpdateTaskProcessor(dataStore, 4, 2)
+	processor, err := NewUpdateTaskProcessor(dataStore, 4, 2)
+	if err != nil {
+		log.Error("Failed to create UpdateTaskProcessor", "error", err)
+		return
+	}
 
 	// Start 3 worker goroutines
 	processor.Start(3)
