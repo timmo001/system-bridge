@@ -11,9 +11,9 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/web-client/.next/cache
-        key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+        key: ${{ runner.os }}-nextjs-${{ hashFiles('web-client/**/bun.lock') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx') }}
         restore-keys: |
-          ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}
+          ${{ runner.os }}-nextjs-${{ hashFiles('web-client/**/bun.lock') }}
 
     - name: Build client project
       run: make build_client
