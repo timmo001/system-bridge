@@ -84,6 +84,10 @@ echo "==> Copying updated PKGBUILD"
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD
 echo "==> Copied PKGBUILD"
 
+echo "::group::PKGBUILD"
+cat PKGBUILD
+echo "::endgroup::"
+
 # Create a build directory that builduser can access
 echo "==> Creating build directory for builduser"
 export BUILDDIR="/tmp/makepkg-build"
