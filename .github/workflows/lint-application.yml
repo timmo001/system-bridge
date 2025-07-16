@@ -33,11 +33,6 @@ jobs:
       - name: Setup client web
         uses: ./.github/actions/setup-client-web
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libx11-dev libxtst-dev libayatana-appindicator3-dev
-
       - name: Build client project
         uses: ./.github/actions/build-client-web
 
