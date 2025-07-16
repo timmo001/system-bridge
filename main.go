@@ -162,7 +162,7 @@ func onReady() {
 		log.Errorf("error loading token: %v", err)
 		token = utils.GenerateToken()
 		if saveErr := utils.SaveToken(token); saveErr != nil {
-			log.Errorf("failed to persist generated token: %v", saveErr)
+			log.Fatalf("failed to persist generated token: %v", saveErr)
 		}
 	}
 
