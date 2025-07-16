@@ -32,6 +32,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.build-ci-ubuntu
+          file: Dockerfile.ci-build-ubuntu
           push: true
-          tags: ghcr.io/${{ github.repository }}/build-ci-ubuntu:latest
+          tags: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
