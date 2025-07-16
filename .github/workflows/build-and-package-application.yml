@@ -67,8 +67,6 @@ jobs:
         run: |
           mkdir -p dist
           chmod +x system-bridge-linux
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-          chmod +x appimagetool
           chmod +x .scripts/linux/create-*.sh
           ./.scripts/linux/create-appimage.sh &
           ./.scripts/linux/create-deb.sh &

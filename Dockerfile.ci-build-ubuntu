@@ -10,6 +10,10 @@ RUN apt-get update && \
         wget sudo git ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install AppImageTool (pin to a specific version for reproducibility)
+RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool \
+    && chmod +x /usr/local/bin/appimagetool
+
 # Create a non-root user for builds
 RUN useradd -ms /bin/bash builduser && \
     echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
