@@ -205,8 +205,10 @@ jobs:
             -w /workspace \
             archlinux:latest \
             bash -c "
+              echo '::group::Install and Update Packages' && \
               pacman -Syu --noconfirm && \
               pacman -S --noconfirm base-devel git openssh && \
+              echo '::endgroup::' && \
               chmod +x .scripts/linux/update-aur.sh && \
               ./.scripts/linux/update-aur.sh
             "
