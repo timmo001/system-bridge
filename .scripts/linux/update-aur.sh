@@ -72,6 +72,12 @@ echo "==> Ensuring builduser can access working directory"
 chmod 755 "$TEMP_DIR"
 chown -R builduser:builduser .
 
+# Update pkgver in PKGBUILD if VERSION is set
+if [ -n "$VERSION" ]; then
+  echo "==> Updating pkgver in PKGBUILD to $VERSION"
+  sed -i "s/^pkgver=.*/pkgver=${VERSION}/" "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD"
+fi
+
 # Copy the updated PKGBUILD and configure for AUR
 echo "==> Copying updated PKGBUILD"
 cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD" PKGBUILD

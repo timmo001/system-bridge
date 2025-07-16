@@ -199,6 +199,7 @@ jobs:
             -e AUR_SSH_PRIVATE_KEY="$AUR_SSH_PRIVATE_KEY" \
             -e GITHUB_SHA="$GITHUB_SHA" \
             -e GITHUB_WORKSPACE="/workspace" \
+            -e VERSION="$VERSION" \
             -w /workspace \
             archlinux:latest \
             bash -c "
