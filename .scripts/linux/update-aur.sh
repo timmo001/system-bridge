@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -x
 
 # Configuration
 AUR_PACKAGE_NAME="system-bridge-git"
@@ -48,12 +48,11 @@ echo "Cloning AUR repository..."
 git clone "$AUR_REPO_URL" aur-repo
 cd aur-repo
 
-
 # Configure Git to allow operations on this repository
 git config --global --add safe.directory "$(pwd)"
 
-# Create a non-root user for makepkg
-useradd -m builduser
+# Create a non-root user for makepkg if it doesn't exist
+id -u builduser &>/dev/null || useradd -m builduser
 # Ensure builduser can access the working directory and all parent directories
 chmod 755 "$TEMP_DIR"
 chown -R builduser:builduser .
