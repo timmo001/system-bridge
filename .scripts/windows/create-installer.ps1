@@ -36,6 +36,13 @@ if (-not (Test-Path $sensorsExePath)) {
     exit 1
 }
 
+# Verify icon file exists
+$iconPath = ".resources/system-bridge-dimmed.ico"
+if (-not (Test-Path $iconPath)) {
+    Write-Error ".resources/system-bridge-dimmed.ico not found. This icon is required for the installer."
+    exit 1
+}
+
 # Get the script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
