@@ -27,6 +27,7 @@ $folders = @{
 $folders | ConvertTo-Json
 `
 	cmd := exec.Command("powershell", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err := cmd.Output()
 	if err != nil {
 		// Fallback to default paths

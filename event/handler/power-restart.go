@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"syscall"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -14,6 +16,7 @@ func Restart() error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("shutdown", "/r")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		return cmd.Run()
 	case "linux":
 		cmd := exec.Command("systemctl", "reboot")

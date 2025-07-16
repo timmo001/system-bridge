@@ -6,6 +6,7 @@ package media
 import (
 	"fmt"
 	"os/exec"
+	"syscall"
 )
 
 func control(action MediaAction) error {
@@ -31,5 +32,6 @@ func control(action MediaAction) error {
 	}
 
 	cmd := exec.Command("powershell", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd.Run()
 }

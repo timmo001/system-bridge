@@ -6,6 +6,7 @@ package gpus
 import (
 	"encoding/json"
 	"os/exec"
+	"syscall"
 
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/types"
@@ -33,7 +34,7 @@ func getGPUs() ([]types.GPU, error) {
 		} 
 		ConvertTo-Json -Compress $gpus
 	`)
-
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err := cmd.Output()
 	if err != nil {
 		log.Error("failed to get GPU info", "error", err)
@@ -69,7 +70,7 @@ func getGPUs() ([]types.GPU, error) {
 			}
 		} | ConvertTo-Json
 	`)
-
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err = cmd.Output()
 	if err == nil {
 		var temps []struct {

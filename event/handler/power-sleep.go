@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"syscall"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -14,6 +16,7 @@ func Sleep() error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("rundll32.exe", "powrprof.dll,SetSuspendState")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		return cmd.Run()
 	case "linux":
 		cmd := exec.Command("systemctl", "suspend")

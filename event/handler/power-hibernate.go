@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"syscall"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -14,6 +16,7 @@ func Hibernate() error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("shutdown", "/h")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		return cmd.Run()
 	case "linux":
 		// Try systemd first

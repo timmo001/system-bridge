@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"syscall"
+
 	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -14,6 +16,7 @@ func Logout() error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("shutdown", "/l")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		return cmd.Run()
 	case "linux":
 		cmd := exec.Command("loginctl", "terminate-user", "current")
