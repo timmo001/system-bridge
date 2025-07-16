@@ -22,6 +22,8 @@ concurrency:
 jobs:
   go-lint:
     name: Go lint
+    container:
+      image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
