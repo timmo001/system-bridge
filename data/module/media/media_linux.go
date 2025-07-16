@@ -14,7 +14,7 @@ import (
 
 func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	// On Linux, we'll use playerctl to get media information
-	cmd := exec.Command("playerctl", "metadata", "--format", "json", "--all-players")
+	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}"}`, "--all-players")
 	output, err := cmd.Output()
 	if err == nil {
 		var metadata struct {
@@ -36,12 +36,14 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			mediaData.Status = &metadata.Status
 			mediaData.Type = &metadata.PlayerName
 
-			// Convert duration and position to float64
+			// Convert duration and position to float64 (duration is in microseconds)
 			if duration, err := strconv.ParseFloat(metadata.Duration, 64); err == nil {
-				mediaData.Duration = &duration
+				dur := duration / 1e6 // convert microseconds to seconds
+				mediaData.Duration = &dur
 			}
 			if position, err := strconv.ParseFloat(metadata.Position, 64); err == nil {
-				mediaData.Position = &position
+				pos := position / 1e6 // convert microseconds to seconds
+				mediaData.Position = &pos
 			}
 
 			// Set control states based on status
