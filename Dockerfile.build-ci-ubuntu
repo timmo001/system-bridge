@@ -1,4 +1,4 @@
-FROM ubuntu:stable
+FROM ubuntu:22.04
 
 # Install build dependencies
 RUN apt-get update && \
