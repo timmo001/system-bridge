@@ -5,6 +5,11 @@ description: Common steps for setting up System Bridge (Go)
 runs:
   using: "composite"
   steps:
+    - name: Clean go module cache
+      run: |
+        rm -rf ~/go/pkg/mod
+      shell: bash
+
     - name: Set up go
       uses: actions/setup-go@v5
       with:
