@@ -24,17 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        run: |
-          sudo npm install -g markdownlint-cli
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Lint markdown
-        run: markdownlint .
+        run: bunx markdownlint .
 
   lint-yaml:
     name: Lint yaml
@@ -43,10 +37,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y yamllint
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Lint YAML
-        run: yamllint .
+        run: bunx yamllint .

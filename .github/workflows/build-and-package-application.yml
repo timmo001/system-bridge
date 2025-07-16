@@ -31,10 +31,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Common build steps
+      - name: Setup Go
         uses: ./.github/actions/setup-go
 
-      - name: Build client project
+      - name: Build web client
         uses: ./.github/actions/build-client-web
 
       - name: Install linux dependencies
@@ -109,10 +109,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Common build steps
+      - name: Setup Go
         uses: ./.github/actions/setup-go
 
-      - name: Build client project
+      - name: Build web client
         uses: ./.github/actions/build-client-web
 
       - name: Install windows dependencies

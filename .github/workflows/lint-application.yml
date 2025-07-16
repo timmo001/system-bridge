@@ -28,21 +28,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          cache: true
-          go-version-file: "go.mod"
+        uses: ./.github/actions/setup-go
 
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Cache bun
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-cache-
+      - name: Setup client web
+        uses: ./.github/actions/setup-client-web
 
       - name: Install dependencies
         run: |

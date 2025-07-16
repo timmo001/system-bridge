@@ -26,7 +26,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Common build steps
+      - name: Setup Go
         uses: ./.github/actions/setup-go
 
       - name: Run tests
