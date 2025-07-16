@@ -219,7 +219,7 @@ func onExit() {
 
 func openWebClient(token string) {
 	port := utils.GetPort()
-	url := fmt.Sprintf("http://0.0.0.0:%d/?host=0.0.0.0&port=%d&apiKey=%s", port, port, token)
+	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
 	log.Infof("Opening web client URL: %s", url)
 	if err := browser.OpenURL(url); err != nil {
 		log.Errorf("Failed to open web client: %v", err)
