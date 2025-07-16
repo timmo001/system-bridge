@@ -4,8 +4,10 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
 
@@ -31,6 +33,22 @@ var trayIconPngData []byte
 var trayIconIcoData []byte
 
 func main() {
+	// Setup file and console logging
+	configDir, err := utils.GetConfigPath()
+	if err == nil {
+		logFilePath := filepath.Join(configDir, "system-bridge.log")
+		logFile, fileErr := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if fileErr == nil {
+			log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+		} else {
+			log.SetOutput(os.Stdout)
+			log.Warnf("Failed to log to file, using only stdout: %v", fileErr)
+		}
+	} else {
+		log.SetOutput(os.Stdout)
+		log.Warnf("Failed to get config path for logging: %v", err)
+	}
+
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
 	// Register for SIGINT (Ctrl+C) and SIGTERM
