@@ -1,0 +1,9 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Build Process
+
+When building the application, always use the [Makefile](mdc:Makefile) and its defined targets. Do not invoke build commands directly; instead, use the appropriate `make` target (e.g., `make build`). This ensures all required steps and dependencies are handled consistently.
