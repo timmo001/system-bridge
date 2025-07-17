@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -44,6 +45,22 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 	}
 }
 
+func spaFileServer(staticFS fs.FS, indexFile string) http.HandlerFunc {
+	fileServer := http.FileServer(http.FS(staticFS))
+	return func(w http.ResponseWriter, r *http.Request) {
+		requestedPath := strings.TrimPrefix(r.URL.Path, "/")
+		if requestedPath == "" {
+			requestedPath = indexFile
+		}
+		_, err := staticFS.Open(requestedPath)
+		if err != nil {
+			// If not found, serve index.html
+			r.URL.Path = "/" + indexFile
+		}
+		fileServer.ServeHTTP(w, r)
+	}
+}
+
 func (b *Backend) Run(ctx context.Context) error {
 	log.Info("Starting backend server...")
 
@@ -62,7 +79,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	if err != nil {
 		log.Warnf("Failed to create sub filesystem: %v. Web client will not be served.", err)
 	} else {
-		mux.Handle("/", http.FileServer(http.FS(subFS)))
+		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
 	}
 
 	// Set up WebSocket endpoint
