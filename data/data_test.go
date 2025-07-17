@@ -122,11 +122,9 @@ func TestDataStore_GetModule(t *testing.T) {
 
 		ds.Register(mockMod)
 
-		// Set module data
-		module := ds.registry["test-module"]
-		// The expected timestamp format is time.RFC3339
-		module.Updated = time.Now().Format(time.RFC3339)
-		ds.registry["test-module"] = module
+		// Set module data using SetModuleData so it is persisted
+		err := ds.SetModuleData("test-module", testData)
+		require.NoError(t, err)
 
 		retrievedModule, err := ds.GetModule("test-module")
 		require.NoError(t, err)
@@ -223,7 +221,7 @@ func TestDataStore_SetModuleData(t *testing.T) {
 		assert.NotEmpty(t, firstUpdate)
 
 		// Wait a bit and set data again
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1100 * time.Millisecond) // Ensure RFC3339 timestamp changes
 
 		err = ds.SetModuleData("test-module", "data2")
 		require.NoError(t, err)
