@@ -124,7 +124,7 @@ func TestDataStore_GetModule(t *testing.T) {
 
 		// Set module data
 		module := ds.registry["test-module"]
-		module.Data = testData
+		// The expected timestamp format is time.RFC3339
 		module.Updated = time.Now().Format(time.RFC3339)
 		ds.registry["test-module"] = module
 

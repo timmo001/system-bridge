@@ -72,7 +72,7 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	}
 
 	module.Data = data
-	module.Updated = time.Now().Format(time.RFC3339Nano)
+	module.Updated = time.Now().Format(time.RFC3339)
 	if err := d.saveModuleData(module); err != nil {
 		return err
 	}
