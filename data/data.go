@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/bus"
-	"github.com/timmo001/system-bridge/data/module"
+	data_module "github.com/timmo001/system-bridge/data/module"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -72,7 +72,7 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	}
 
 	module.Data = data
-	module.Updated = time.Now().Format(time.RFC3339)
+	module.Updated = time.Now().Format(time.RFC3339Nano)
 	if err := d.saveModuleData(module); err != nil {
 		return err
 	}
