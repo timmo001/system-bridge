@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"runtime"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -151,6 +153,9 @@ func TestSaveToken(t *testing.T) {
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
 
 	t.Run("Save token successfully", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Permission bits are not enforced on Windows; skipping test.")
+		}
 		testToken := "test-token-12345"
 
 		err := SaveToken(testToken)

@@ -81,6 +81,9 @@ func TestGetConfigPath(t *testing.T) {
 	})
 
 	t.Run("Get config path with XDG_DATA_HOME", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("XDG_DATA_HOME is not used on Windows; skipping test.")
+		}
 		// This should work on all platforms
 		tempXDG, err := os.MkdirTemp("", "xdg-*")
 		require.NoError(t, err)
@@ -238,6 +241,9 @@ func TestPathIntegration(t *testing.T) {
 
 func TestPathPermissions(t *testing.T) {
 	t.Run("Created directories have correct permissions", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Permission bits are not enforced on Windows; skipping test.")
+		}
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
 		defer os.RemoveAll(tempDir)
