@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -292,7 +293,7 @@ func TestEventBus_ConcurrentOperations(t *testing.T) {
 					mu.Unlock()
 				}
 
-				eb.Subscribe(EventGetDataModule, "subscriber-"+string(rune(id+'0')), handler)
+				eb.Subscribe(EventGetDataModule, "subscriber-"+strconv.Itoa(id), handler)
 			}(i)
 		}
 
@@ -310,7 +311,7 @@ func TestEventBus_ConcurrentOperations(t *testing.T) {
 				mu.Unlock()
 				wg.Done()
 			}
-			eb.Subscribe(EventGetDataModule, "subscriber-"+string(rune(i+'0')), handler)
+			eb.Subscribe(EventGetDataModule, "subscriber-"+strconv.Itoa(i), handler)
 		}
 
 		// Publish events concurrently
@@ -318,7 +319,7 @@ func TestEventBus_ConcurrentOperations(t *testing.T) {
 			go func(eventNum int) {
 				event := Event{
 					Type: EventGetDataModule,
-					Data: "event-" + string(rune(eventNum+'0')),
+					Data: "event-" + strconv.Itoa(eventNum),
 				}
 				eb.Publish(event)
 			}(i)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -318,8 +319,8 @@ func TestDataStore_ConcurrentAccess(t *testing.T) {
 		for i := 0; i < numGoroutines; i++ {
 			go func(id int) {
 				mock := mockUpdater{
-					name: types.ModuleName("module-" + string(rune(id+'0'))),
-					data: "data-" + string(rune(id+'0')),
+					name: types.ModuleName("module-" + strconv.Itoa(id)),
+					data: "data-" + strconv.Itoa(id),
 				}
 				ds.Register(mock)
 				done <- true
