@@ -15,7 +15,12 @@ func TestLoad(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			t.Fatalf("failed to remove temp dir: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -94,7 +99,12 @@ func TestSave(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			t.Fatalf("failed to remove temp dir: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)

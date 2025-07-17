@@ -15,7 +15,12 @@ func TestGetConfigPath(t *testing.T) {
 		// Create a temporary directory instead of trying to create in root
 		tempDir, err := os.MkdirTemp("", "custom-config-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		customPath := filepath.Join(tempDir, "config")
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", customPath)
@@ -35,7 +40,12 @@ func TestGetConfigPath(t *testing.T) {
 			// Test Windows path
 			tempAppData, err := os.MkdirTemp("", "localappdata-*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tempAppData)
+			defer func() {
+				err := os.RemoveAll(tempAppData)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
 
 			t.Setenv("LOCALAPPDATA", tempAppData)
 
@@ -50,7 +60,12 @@ func TestGetConfigPath(t *testing.T) {
 			// Test macOS path
 			tempHome, err := os.MkdirTemp("", "home-*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tempHome)
+			defer func() {
+				err := os.RemoveAll(tempHome)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
 
 			t.Setenv("HOME", tempHome)
 			t.Setenv("XDG_DATA_HOME", "") // Clear XDG to test default macOS behavior
@@ -66,7 +81,12 @@ func TestGetConfigPath(t *testing.T) {
 			// Test Linux/Unix path
 			tempHome, err := os.MkdirTemp("", "home-*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tempHome)
+			defer func() {
+				err := os.RemoveAll(tempHome)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
 
 			t.Setenv("HOME", tempHome)
 			t.Setenv("XDG_DATA_HOME", "") // Clear XDG to test default behavior
@@ -87,7 +107,12 @@ func TestGetConfigPath(t *testing.T) {
 		// This should work on all platforms
 		tempXDG, err := os.MkdirTemp("", "xdg-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempXDG)
+		defer func() {
+			err := os.RemoveAll(tempXDG)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", "")
 		t.Setenv("XDG_DATA_HOME", tempXDG)
@@ -130,7 +155,12 @@ func TestGetConfigPath(t *testing.T) {
 	t.Run("Creates directory if it doesn't exist", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		configDir := filepath.Join(tempDir, "new", "config", "dir")
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", configDir)
@@ -150,7 +180,12 @@ func TestGetDataPath(t *testing.T) {
 	t.Run("Get data path successfully", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
 
@@ -165,7 +200,12 @@ func TestGetDataPath(t *testing.T) {
 	t.Run("Creates data directory if it doesn't exist", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
 
@@ -195,7 +235,12 @@ func TestGetDataPath(t *testing.T) {
 	t.Run("Path cleaning works correctly", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		// Set config path with redundant separators
 		configPath := tempDir + string(filepath.Separator) + string(filepath.Separator)
@@ -215,7 +260,12 @@ func TestPathIntegration(t *testing.T) {
 	t.Run("Config and data paths work together", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
 
@@ -246,7 +296,12 @@ func TestPathPermissions(t *testing.T) {
 		}
 		tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 		require.NoError(t, err)
-		defer os.RemoveAll(tempDir)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
 
 		configDir := filepath.Join(tempDir, "config")
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", configDir)
