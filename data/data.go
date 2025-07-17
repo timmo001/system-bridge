@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/bus"
-	"github.com/timmo001/system-bridge/data/module"
+	data_module "github.com/timmo001/system-bridge/data/module"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
