@@ -14,10 +14,10 @@ import (
 func TestGenerateToken(t *testing.T) {
 	t.Run("Generate valid UUID token", func(t *testing.T) {
 		token := GenerateToken()
-		
+
 		// Check that it's not empty
 		assert.NotEmpty(t, token)
-		
+
 		// Check that it's a valid UUID format
 		_, err := uuid.Parse(token)
 		assert.NoError(t, err)
@@ -26,7 +26,7 @@ func TestGenerateToken(t *testing.T) {
 	t.Run("Generate unique tokens", func(t *testing.T) {
 		token1 := GenerateToken()
 		token2 := GenerateToken()
-		
+
 		// Tokens should be different
 		assert.NotEqual(t, token1, token2)
 	})
@@ -44,7 +44,7 @@ func TestGetTokenFilePath(t *testing.T) {
 
 		tokenPath, err := GetTokenFilePath()
 		require.NoError(t, err)
-		
+
 		expectedPath := filepath.Join(tempDir, "token")
 		assert.Equal(t, expectedPath, tokenPath)
 	})
@@ -73,18 +73,18 @@ func TestLoadToken(t *testing.T) {
 	t.Run("Load token when file doesn't exist", func(t *testing.T) {
 		token, err := LoadToken()
 		require.NoError(t, err)
-		
+
 		// Should generate a new token
 		assert.NotEmpty(t, token)
-		
+
 		// Should be a valid UUID
 		_, err = uuid.Parse(token)
 		assert.NoError(t, err)
-		
+
 		// Token file should now exist
 		tokenPath := filepath.Join(tempDir, "token")
 		assert.FileExists(t, tokenPath)
-		
+
 		// File should contain the token
 		content, err := os.ReadFile(tokenPath)
 		require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestLoadToken(t *testing.T) {
 
 		token, err := LoadToken()
 		require.NoError(t, err)
-		
+
 		assert.Equal(t, existingToken, token)
 	})
 
@@ -112,14 +112,14 @@ func TestLoadToken(t *testing.T) {
 
 		token, err := LoadToken()
 		require.NoError(t, err)
-		
+
 		// Should generate a new token
 		assert.NotEmpty(t, token)
-		
+
 		// Should be a valid UUID
 		_, err = uuid.Parse(token)
 		assert.NoError(t, err)
-		
+
 		// File should now contain the new token
 		content, err := os.ReadFile(tokenPath)
 		require.NoError(t, err)
@@ -136,7 +136,7 @@ func TestLoadToken(t *testing.T) {
 
 		token, err := LoadToken()
 		require.NoError(t, err)
-		
+
 		assert.Equal(t, expectedToken, token)
 	})
 }
@@ -152,19 +152,19 @@ func TestSaveToken(t *testing.T) {
 
 	t.Run("Save token successfully", func(t *testing.T) {
 		testToken := "test-token-12345"
-		
+
 		err := SaveToken(testToken)
 		require.NoError(t, err)
-		
+
 		// Verify file was created
 		tokenPath := filepath.Join(tempDir, "token")
 		assert.FileExists(t, tokenPath)
-		
+
 		// Verify file content
 		content, err := os.ReadFile(tokenPath)
 		require.NoError(t, err)
 		assert.Equal(t, testToken, string(content))
-		
+
 		// Verify file permissions (should be 0600)
 		info, err := os.Stat(tokenPath)
 		require.NoError(t, err)
@@ -175,19 +175,19 @@ func TestSaveToken(t *testing.T) {
 		// Use a nested directory that doesn't exist
 		nestedDir := filepath.Join(tempDir, "nested", "config")
 		t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", nestedDir)
-		
+
 		testToken := "test-token-nested"
-		
+
 		err := SaveToken(testToken)
 		require.NoError(t, err)
-		
+
 		// Verify directory was created
 		assert.DirExists(t, nestedDir)
-		
+
 		// Verify file was created
 		tokenPath := filepath.Join(nestedDir, "token")
 		assert.FileExists(t, tokenPath)
-		
+
 		// Verify file content
 		content, err := os.ReadFile(tokenPath)
 		require.NoError(t, err)
@@ -198,35 +198,35 @@ func TestSaveToken(t *testing.T) {
 func TestGetPort(t *testing.T) {
 	t.Run("Get default port when environment variable not set", func(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "")
-		
+
 		port := GetPort()
 		assert.Equal(t, 9170, port)
 	})
 
 	t.Run("Get port from environment variable", func(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "8080")
-		
+
 		port := GetPort()
 		assert.Equal(t, 8080, port)
 	})
 
 	t.Run("Get default port when environment variable is invalid", func(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "invalid")
-		
+
 		port := GetPort()
 		assert.Equal(t, 9170, port)
 	})
 
 	t.Run("Get default port when environment variable is out of range - too low", func(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "0")
-		
+
 		port := GetPort()
 		assert.Equal(t, 9170, port)
 	})
 
 	t.Run("Get default port when environment variable is out of range - too high", func(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "65536")
-		
+
 		port := GetPort()
 		assert.Equal(t, 9170, port)
 	})
@@ -236,7 +236,7 @@ func TestGetPort(t *testing.T) {
 		t.Setenv("SYSTEM_BRIDGE_PORT", "1")
 		port := GetPort()
 		assert.Equal(t, 1, port)
-		
+
 		// Test maximum valid port
 		t.Setenv("SYSTEM_BRIDGE_PORT", "65535")
 		port = GetPort()

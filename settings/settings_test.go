@@ -27,7 +27,7 @@ func TestLoad(t *testing.T) {
 		settings, err := Load()
 		require.NoError(t, err)
 		assert.NotNil(t, settings)
-		
+
 		// Check default values
 		assert.False(t, settings.Autostart)
 		assert.Empty(t, settings.Hotkeys)
@@ -55,7 +55,7 @@ func TestLoad(t *testing.T) {
 				]
 			}
 		}`
-		
+
 		configPath := filepath.Join(tempDir, "settings.json")
 		err := os.WriteFile(configPath, []byte(configContent), 0644)
 		require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestLoad(t *testing.T) {
 		viper.Reset()
 		settings, err := Load()
 		require.NoError(t, err)
-		
+
 		assert.True(t, settings.Autostart)
 		assert.Equal(t, log.Level(-1), settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
@@ -185,7 +185,7 @@ func TestSettingsStructs(t *testing.T) {
 				},
 			},
 		}
-		
+
 		assert.True(t, settings.Autostart)
 		assert.Equal(t, log.WarnLevel, settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
