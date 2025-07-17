@@ -101,7 +101,11 @@ func TestDataStore_GetModule(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Logf("failed to remove temp dir: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -160,7 +164,11 @@ func TestDataStore_SetModuleData(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Logf("failed to remove temp dir: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -341,7 +349,11 @@ func TestDataStore_ModuleLifecycle(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "system-bridge-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Logf("failed to remove temp dir: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
