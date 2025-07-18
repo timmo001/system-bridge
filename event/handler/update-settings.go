@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -111,7 +112,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 					slog.Info("Autostart desktop file written", "path", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
 				}
 			case "windows":
-				// Create shortcut in startup folder
+				// Create shortcut in startup folder using PowerShell
 				slog.Info("Creating autostart shortcut in startup folder")
 
 				// Get current executable path
@@ -123,18 +124,19 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				// Get icon path
 				iconPath := filepath.Join(workingDirectory, "system-bridge.ico")
 
-				windowsShortcutData := []byte(`[Shell]
-Command=` + executablePath + `
-Icon=` + iconPath + `
-WorkingDirectory=` + workingDirectory + `
-`)
-
+				// Path to the shortcut
 				shortcutPath := filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk")
-				err = os.WriteFile(shortcutPath, windowsShortcutData, 0644)
+
+				// PowerShell script to create the shortcut
+				psScript := fmt.Sprintf(`$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%s'); $Shortcut.TargetPath = '%s'; $Shortcut.WorkingDirectory = '%s'; $Shortcut.IconLocation = '%s'; $Shortcut.Save();`, shortcutPath, executablePath, workingDirectory, iconPath)
+
+				cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psScript)
+				utils.SetHideWindow(cmd)
+				output, err := cmd.CombinedOutput()
 				if err != nil {
-					slog.Error("Failed to write autostart shortcut", "error", err)
+					slog.Error("Failed to create autostart shortcut via PowerShell", "error", err, "output", string(output))
 				} else {
-					slog.Info("Autostart shortcut written", "path", shortcutPath)
+					slog.Info("Autostart shortcut created via PowerShell", "path", shortcutPath)
 				}
 			default:
 				slog.Warn(fmt.Sprintf("Autostart is not supported on %s", runtime.GOOS))
