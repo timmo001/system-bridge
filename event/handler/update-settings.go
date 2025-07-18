@@ -37,6 +37,9 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			}
 		}
 
+		// Keep a copy of the original settings for comparison
+		originalSettings := *currentSettings
+
 		newSettings := UpdateSettingsRequestData{}
 		// Add decode hook for LogLevel
 		dc := &mapstructure.DecoderConfig{
@@ -90,10 +93,10 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			}
 		}
 
-		slog.Info("Settings updated", "current", currentSettings, "new", newSettings)
+		slog.Info("Settings updated", "original", originalSettings, "new", newSettings)
 
-		if !currentSettings.Autostart && newSettings.Autostart {
-			slog.Info("Autostart has changed:", "current", currentSettings.Autostart, "new", newSettings.Autostart)
+		if !originalSettings.Autostart && newSettings.Autostart {
+			slog.Info("Autostart has changed:", "original", originalSettings.Autostart, "new", newSettings.Autostart)
 			switch runtime.GOOS {
 			case "linux":
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
@@ -132,7 +135,7 @@ WorkingDirectory=` + workingDirectory + `
 			default:
 				slog.Warn(fmt.Sprintf("Autostart is not supported on %s", runtime.GOOS))
 			}
-		} else if currentSettings.Autostart && !newSettings.Autostart {
+		} else if originalSettings.Autostart && !newSettings.Autostart {
 			switch runtime.GOOS {
 			case "linux":
 				// Remove autostart desktop file in ~/.config/autostart/system-bridge.desktop
