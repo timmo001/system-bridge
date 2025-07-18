@@ -32,8 +32,11 @@ func RegisterValidateDirectoryHandler(router *event.MessageRouter) {
 
 		valid := false
 		if data.Path != "" {
-			if stat, err := os.Stat(data.Path); err == nil && stat.IsDir() {
-				valid = true
+			cleanPath := filepath.Clean(data.Path)
+			if !strings.Contains(cleanPath, "..") && !strings.HasPrefix(cleanPath, "/") {
+				if stat, err := os.Stat(cleanPath); err == nil && stat.IsDir() {
+					valid = true
+				}
 			}
 		}
 
