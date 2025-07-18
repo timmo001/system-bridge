@@ -18,7 +18,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 			log.Errorf("Failed to load token for authentication: %v", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"}); err != nil {
+				log.Error("Failed to encode response", "error", err)
+			}
 			return
 		}
 

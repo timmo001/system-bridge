@@ -21,7 +21,9 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"}); err != nil {
+			log.Error("Failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -39,7 +41,9 @@ func handleAPIGet(w http.ResponseWriter, _ *http.Request) {
 		log.Error("Failed to encode response", "error", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"}); err != nil {
+			log.Error("Failed to encode response", "error", err)
+		}
 		return
 	}
 }
