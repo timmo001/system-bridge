@@ -149,7 +149,7 @@ jobs:
       - name: Package for Windows
         run: |
           mkdir -p dist
-          Move-Item system-bridge-windows.exe dist/system-bridge.exe
+          Move-Item system-bridge.exe dist/system-bridge.exe
           ./.scripts/windows/create-installer.ps1
 
       - name: Upload packages
