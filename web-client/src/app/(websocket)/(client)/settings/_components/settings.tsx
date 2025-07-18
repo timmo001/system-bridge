@@ -192,7 +192,11 @@ function MediaDirectoryForm({
   async function handleAddDirectory(data: SettingsMediaDirectory) {
     setMediaError(null);
     const isValid = await mediaDirectoryForm.trigger();
-    if (!isValid) return;
+    if (!isValid) {
+      toast.error("Validation failed. Please check the form fields.");
+      setMediaError("Validation failed. Please check the form fields.");
+      return;
+    }
     try {
       const response = await validateDirectoryMutation.mutateAsync(
         mediaDirectoryForm.getValues("path"),
