@@ -38,6 +38,12 @@ export const SystemBridgeWSContext = createContext<
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 
+type PendingResolver<T = unknown> = {
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+  schema: z.ZodSchema<T>;
+};
+
 export function SystemBridgeWSProvider({
   children,
 }: {
@@ -59,16 +65,8 @@ export function SystemBridgeWSProvider({
   const wsRef = useRef<WebSocket | null>(null);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousConnectedState = useRef<boolean>(false);
-  const pendingResolvers = useRef<
-    Record<
-      string,
-      {
-        resolve: <T>(msg: T) => void;
-        reject: (msg: unknown) => void;
-        schema: z.ZodSchema<unknown>;
-      }
-    >
-  >({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pendingResolvers = useRef<Record<string, PendingResolver<any>>>({});
 
   useEffect(() => {
     isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
@@ -390,30 +388,35 @@ export function SystemBridgeWSProvider({
     request: WebSocketRequest,
     schema: z.ZodSchema<T>,
   ): Promise<T> {
-    return new Promise((resolve, reject) => {
-      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        reject(new Error("WebSocket is not connected"));
-        return;
-      }
-      if (!request.id) {
-        reject(new Error("Request must have an id"));
-        return;
-      }
-      console.log("Sending request with response:", request.id);
-      pendingResolvers.current[request.id] = { resolve, reject, schema };
-      try {
-        wsRef.current.send(JSON.stringify(request));
-      } catch (e) {
-        delete pendingResolvers.current[request.id];
-        reject(e instanceof Error ? e : new Error("Unknown error"));
-      }
-      setTimeout(() => {
-        if (pendingResolvers.current[request.id]) {
-          delete pendingResolvers.current[request.id];
-          reject(new Error("WebSocket response timed out"));
+    return new Promise(
+      (
+        resolve: (value: T | PromiseLike<T>) => void,
+        reject: (reason?: unknown) => void,
+      ) => {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          reject(new Error("WebSocket is not connected"));
+          return;
         }
-      }, UPDATE_TIMEOUT);
-    });
+        if (!request.id) {
+          reject(new Error("Request must have an id"));
+          return;
+        }
+        console.log("Sending request with response:", request.id);
+        pendingResolvers.current[request.id] = { resolve, reject, schema };
+        try {
+          wsRef.current.send(JSON.stringify(request));
+        } catch (e) {
+          delete pendingResolvers.current[request.id];
+          reject(e instanceof Error ? e : new Error("Unknown error"));
+        }
+        setTimeout(() => {
+          if (pendingResolvers.current[request.id]) {
+            delete pendingResolvers.current[request.id];
+            reject(new Error("WebSocket response timed out"));
+          }
+        }, UPDATE_TIMEOUT);
+      },
+    );
   }
 
   useEffect(() => {
