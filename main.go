@@ -105,8 +105,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	sentry.CaptureMessage("It works!")
-
 	// Handle signals in a goroutine
 	go func() {
 		sig := <-sigChan
