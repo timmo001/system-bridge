@@ -27,6 +27,7 @@ const (
 	ResponseTypeDataUpdate               ResponseType = "DATA_UPDATE"
 	ResponseTypeSettingsResult           ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated          ResponseType = "SETTINGS_UPDATED"
+	ResponseTypeDirectoryValidated       ResponseType = "DIRECTORY_VALIDATED"
 )
 
 type ResponseSubtype string

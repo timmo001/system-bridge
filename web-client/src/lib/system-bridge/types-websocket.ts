@@ -25,6 +25,7 @@ export const EventTypeSchema = z.enum([
   "UNREGISTER_DATA_LISTENER",
   "DATA_UPDATE",
   "UPDATE_SETTINGS",
+  "VALIDATE_DIRECTORY",
 ]);
 
 export type EventType = z.infer<typeof EventTypeSchema>;
@@ -53,6 +54,7 @@ export const ResponseTypeSchema = z.enum([
   "DATA_UPDATE",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
+  "DIRECTORY_VALIDATED",
 ]);
 
 export type ResponseType = z.infer<typeof ResponseTypeSchema>;
@@ -102,4 +104,12 @@ export const WebSocketResponseSchema = z.object({
   module: ModuleNameSchema.optional(),
 });
 
-export type MessageResponse = z.infer<typeof WebSocketResponseSchema>;
+export type WebsocketResponse = z.infer<typeof WebSocketResponseSchema>;
+
+export const ValidateDirectoryResponseSchema = z.object({
+  valid: z.boolean(),
+});
+
+export type ValidateDirectoryResponse = z.infer<
+  typeof ValidateDirectoryResponseSchema
+>;

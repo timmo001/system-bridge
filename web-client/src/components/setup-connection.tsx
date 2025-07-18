@@ -19,6 +19,8 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 
+const CONNECTION_TIMEOUT = 10000;
+
 const ConnectionSchema = z.object({
   host: z.string().min(1),
   port: z.coerce.number().min(1),
@@ -56,7 +58,7 @@ export function SetupConnection() {
       toast.error(
         "Connection timeout. Please check your host, port, and network connection.",
       );
-    }, 10000);
+    }, CONNECTION_TIMEOUT);
 
     ws.onopen = () => {
       console.log("WebSocket connected");
