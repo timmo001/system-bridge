@@ -8,8 +8,8 @@ export const SettingsHotkeySchema = z.object({
 export type SettingsHotkey = z.infer<typeof SettingsHotkeySchema>;
 
 export const SettingsMediaDirectorySchema = z.object({
-  name: z.string(),
-  path: z.string(),
+  name: z.string().min(1),
+  path: z.string().min(1),
 });
 
 export type SettingsMediaDirectory = z.infer<
