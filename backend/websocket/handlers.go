@@ -148,8 +148,8 @@ func (ws *WebsocketServer) UnregisterDataListener(addr string) {
 
 // BroadcastModuleUpdate sends a module data update to all connected clients
 func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *string) {
-	ws.mutex.RLock()
-	defer ws.mutex.RUnlock()
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
 
 	response := event.MessageResponse{
 		ID:      "system",
