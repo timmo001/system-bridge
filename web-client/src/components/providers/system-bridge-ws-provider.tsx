@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { generateUUID } from "~/lib/utils";
 import {
@@ -21,7 +22,10 @@ export const SystemBridgeWSContext = createContext<
       isConnected: boolean;
       settings: Settings | null;
       sendRequest: (request: WebSocketRequest) => void;
-      sendRequestWithResponse: <T>(request: WebSocketRequest) => Promise<T>;
+      sendRequestWithResponse: <T>(
+        request: WebSocketRequest,
+        schema: z.ZodSchema<T>,
+      ) => Promise<T>;
       error: string | null;
       retryConnection: () => void;
     }
@@ -52,7 +56,19 @@ export function SystemBridgeWSProvider({
   const wsRef = useRef<WebSocket | null>(null);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousConnectedState = useRef<boolean>(false);
-  const pendingResolvers = useRef<Record<string, (msg: any) => void>>({});
+  const pendingResolvers = useRef<
+    Record<
+      string,
+      {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolve: (msg: any) => void;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        reject: (msg: any) => void;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        schema: z.ZodSchema<any>;
+      }
+    >
+  >({});
 
   useEffect(() => {
     isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
@@ -87,111 +103,119 @@ export function SystemBridgeWSProvider({
     }
 
     const message = parsedMessage.data;
-    // --- Handle request/response pattern ---
     if (message.id && pendingResolvers.current[message.id]) {
-      pendingResolvers.current[message.id]?.(message);
+      console.log("Resolved pending request:", message.id);
+      const parsedData = pendingResolvers.current[message.id]
+        ?.schema.safeParse(message.data);
+      if (parsedData?.success) {
+        pendingResolvers.current[message.id]?.resolve(parsedData.data);
+      } else {
+        console.error("Invalid message data:", parsedData?.error);
+        setError("Received invalid message data from server");
+        pendingResolvers.current[message.id]?.reject(parsedData?.error);
+      }
       delete pendingResolvers.current[message.id];
-    }
-    // --- End request/response pattern ---
-    switch (message.type) {
-      case "DATA_UPDATE":
-        if (!message.module) {
-          console.error("No module found in data update");
-          return;
-        }
+    } else {
+      switch (message.type) {
+        case "DATA_UPDATE":
+          if (!message.module) {
+            console.error("No module found in data update");
+            return;
+          }
 
-        if (!message.data) {
-          console.error("No data found in data update");
-          return;
-        }
+          if (!message.data) {
+            console.error("No data found in data update");
+            return;
+          }
 
-        console.log("Data received:", message.data);
-        setData((prev) => ({
-          ...prev,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          [message.module as string]: message.data,
-        }));
-        setIsRequestingData(false);
-        break;
-      case "SETTINGS_RESULT":
-        if (isSettingsUpdatePendingRef.current) {
-          console.log(
-            "Ignoring SETTINGS_RESULT because a settings update is pending",
-          );
+          console.log("Data received:", message.data);
+          setData((prev) => ({
+            ...prev,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            [message.module as string]: message.data,
+          }));
           setIsRequestingData(false);
           break;
-        }
+        case "SETTINGS_RESULT":
+          if (isSettingsUpdatePendingRef.current) {
+            console.log(
+              "Ignoring SETTINGS_RESULT because a settings update is pending",
+            );
+            setIsRequestingData(false);
+            break;
+          }
 
-        const receivedSettings = message.data as Partial<Settings>;
-        const mergedSettings: Settings = {
-          autostart: receivedSettings.autostart ?? false,
-          hotkeys: receivedSettings.hotkeys ?? [],
-          logLevel: receivedSettings.logLevel ?? "info",
-          media: {
-            directories: receivedSettings.media?.directories ?? [],
-          },
-        };
-        console.log("Settings received:", mergedSettings);
-        setSettings(mergedSettings);
-        setIsRequestingData(false);
-        break;
-      case "DATA_LISTENER_REGISTERED":
-        console.log("Data listener registered");
-        break;
-      case "SETTINGS_UPDATED":
-        setSettings((prevSettings) => {
-          const updatedReceivedSettings = message.data as Partial<Settings>;
+          const receivedSettings = message.data as Partial<Settings>;
           const mergedSettings: Settings = {
-            autostart:
-              updatedReceivedSettings.autostart ??
-              prevSettings?.autostart ??
-              false,
-            hotkeys:
-              updatedReceivedSettings.hotkeys ?? prevSettings?.hotkeys ?? [],
-            logLevel:
-              updatedReceivedSettings.logLevel ??
-              prevSettings?.logLevel ??
-              "info",
+            autostart: receivedSettings.autostart ?? false,
+            hotkeys: receivedSettings.hotkeys ?? [],
+            logLevel: receivedSettings.logLevel ?? "info",
             media: {
-              directories:
-                updatedReceivedSettings.media?.directories ??
-                prevSettings?.media.directories ??
-                [],
+              directories: receivedSettings.media?.directories ?? [],
             },
           };
-          console.log("Settings updated:", mergedSettings);
-          return mergedSettings;
-        });
-        setIsSettingsUpdatePending(false);
-        if (settingsUpdateTimeoutRef.current) {
-          clearTimeout(settingsUpdateTimeoutRef.current);
-          settingsUpdateTimeoutRef.current = null;
-        }
-        break;
-      case "ERROR":
-        if (message.subtype === "BAD_TOKEN") {
-          const errorMessage =
-            "Invalid API token. Please check your connection settings and update your token.";
-          setError(errorMessage);
-          setIsConnected(false);
-          setRetryCount(MAX_RETRIES + 1); // Stop retrying on auth error
-
-          // Show immediate toast notification for bad token
-          toast.error("Authentication Failed", {
-            description:
-              "Your API token is invalid or has expired. Please update your connection settings.",
-            duration: 8000, // Show longer for important auth errors
+          console.log("Settings received:", mergedSettings);
+          setSettings(mergedSettings);
+          setIsRequestingData(false);
+          break;
+        case "DATA_LISTENER_REGISTERED":
+          console.log("Data listener registered");
+          break;
+        case "SETTINGS_UPDATED":
+          setSettings((prevSettings) => {
+            const updatedReceivedSettings = message.data as Partial<Settings>;
+            const mergedSettings: Settings = {
+              autostart:
+                updatedReceivedSettings.autostart ??
+                prevSettings?.autostart ??
+                false,
+              hotkeys:
+                updatedReceivedSettings.hotkeys ?? prevSettings?.hotkeys ?? [],
+              logLevel:
+                updatedReceivedSettings.logLevel ??
+                prevSettings?.logLevel ??
+                "info",
+              media: {
+                directories:
+                  updatedReceivedSettings.media?.directories ??
+                  prevSettings?.media.directories ??
+                  [],
+              },
+            };
+            console.log("Settings updated:", mergedSettings);
+            return mergedSettings;
           });
+          setIsSettingsUpdatePending(false);
+          if (settingsUpdateTimeoutRef.current) {
+            clearTimeout(settingsUpdateTimeoutRef.current);
+            settingsUpdateTimeoutRef.current = null;
+          }
+          break;
+        case "ERROR":
+          if (message.subtype === "BAD_TOKEN") {
+            const errorMessage =
+              "Invalid API token. Please check your connection settings and update your token.";
+            setError(errorMessage);
+            setIsConnected(false);
+            setRetryCount(MAX_RETRIES + 1); // Stop retrying on auth error
 
-          wsRef.current?.close();
-          return;
-        } else {
-          setError(`Server error: ${message.data ?? "Unknown error"}`);
-        }
-        break;
-      default:
-        console.warn("Unknown message type:", message.type);
-        break;
+            // Show immediate toast notification for bad token
+            toast.error("Authentication Failed", {
+              description:
+                "Your API token is invalid or has expired. Please update your connection settings.",
+              duration: 8000, // Show longer for important auth errors
+            });
+
+            wsRef.current?.close();
+            return;
+          } else {
+            setError(`Server error: ${message.data ?? "Unknown error"}`);
+          }
+          break;
+        default:
+          console.warn("Unknown message type:", message.type);
+          break;
+      }
     }
   }, []);
 
@@ -337,7 +361,7 @@ export function SystemBridgeWSProvider({
         connectionTimeoutRef.current = null;
       }
     };
-  }, [host, isRequestingData, port, ssl, token, handleMessage]);
+  }, [host, port, token, handleMessage, ssl, isRequestingData, retryCount]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
@@ -361,7 +385,10 @@ export function SystemBridgeWSProvider({
     wsRef.current.send(JSON.stringify(request));
   }
 
-  function sendRequestWithResponse<T>(request: WebSocketRequest): Promise<T> {
+  function sendRequestWithResponse<T>(
+    request: WebSocketRequest,
+    schema: z.ZodSchema<T>,
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
         reject(new Error("WebSocket is not connected"));
@@ -371,7 +398,8 @@ export function SystemBridgeWSProvider({
         reject(new Error("Request must have an id"));
         return;
       }
-      pendingResolvers.current[request.id] = resolve;
+      console.log("Sending request with response:", request.id);
+      pendingResolvers.current[request.id] = { resolve, reject, schema };
       try {
         wsRef.current.send(JSON.stringify(request));
       } catch (e) {

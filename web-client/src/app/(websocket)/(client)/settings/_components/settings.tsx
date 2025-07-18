@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -32,8 +33,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-
-type ValidateDirectoryResponse = { valid?: boolean };
+import {
+  ValidateDirectoryResponseSchema,
+  type ValidateDirectoryResponse,
+} from "~/lib/system-bridge/types-websocket";
 
 export function Settings() {
   const { token } = useSystemBridgeConnectionStore();
@@ -61,14 +64,15 @@ export function Settings() {
           data: { path },
           token: token ?? "",
         },
+        ValidateDirectoryResponseSchema,
       );
       return response;
     },
   });
 
   // Media settings state
-  const [mediaInputValue, setMediaInputValue] = React.useState("");
-  const [mediaError, setMediaError] = React.useState(""); // always a string
+  const [mediaInputValue, setMediaInputValue] = useState("");
+  const [mediaError, setMediaError] = useState(""); // always a string
 
   async function handleAddDirectory(field: {
     value: SettingsMediaDirectory[];
@@ -80,6 +84,7 @@ export function Settings() {
       const response = await validateDirectoryMutation.mutateAsync(
         mediaInputValue.trim(),
       );
+      console.log("Mutation response:", response);
       if (response?.valid) {
         const newDir: SettingsMediaDirectory = {
           path: mediaInputValue.trim(),
@@ -90,7 +95,8 @@ export function Settings() {
       } else {
         setMediaError("Directory does not exist or is not accessible.");
       }
-    } catch (e) {
+    } catch (error) {
+      console.error("Failed to validate directory:", error);
       setMediaError("Failed to validate directory.");
     }
   }
@@ -117,12 +123,15 @@ export function Settings() {
     }
 
     try {
-      await sendRequestWithResponse<Settings>({
-        id: generateUUID(),
-        event: "UPDATE_SETTINGS",
-        data,
-        token: token ?? "",
-      });
+      await sendRequestWithResponse<Settings>(
+        {
+          id: generateUUID(),
+          event: "UPDATE_SETTINGS",
+          data,
+          token: token ?? "",
+        },
+        SettingsSchema,
+      );
       toast.success("Settings updated successfully!");
     } catch (error) {
       toast.error("Failed to update settings");
@@ -230,42 +239,49 @@ export function Settings() {
                         : "Add"}
                     </Button>
                   </div>
+                  <FormDescription>
+                    Add directories to be used for media scanning. Only existing
+                    directories are allowed.
+                  </FormDescription>
+                  <FormMessage />
                   {mediaError && (
                     <FormDescription className="text-red-500">
                       {mediaError}
                     </FormDescription>
                   )}
-                  <ul className="mt-2 list-disc pl-5">
-                    {(field.value ?? []).map((dir: SettingsMediaDirectory) => (
-                      <li key={dir.path} className="flex items-center gap-2">
-                        <span className="break-all">{dir.path}</span>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() =>
-                            handleRemoveDirectory(
-                              field as {
-                                value: SettingsMediaDirectory[];
-                                onChange: (
-                                  val: SettingsMediaDirectory[],
-                                ) => void;
-                              },
-                              dir,
-                            )
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </li>
-                    ))}
+                  <ul className="my-2 list-none space-y-2">
+                    {(field.value ?? []).map(
+                      (dir: SettingsMediaDirectory, index: number) => (
+                        <Fragment key={index}>
+                          <li key={index} className="flex items-center gap-2">
+                            <span className="flex-1 break-all">{dir.path}</span>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() =>
+                                handleRemoveDirectory(
+                                  field as {
+                                    value: SettingsMediaDirectory[];
+                                    onChange: (
+                                      val: SettingsMediaDirectory[],
+                                    ) => void;
+                                  },
+                                  dir,
+                                )
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </li>
+                          {index < (field.value ?? []).length - 1 && (
+                            <li key={index} className="bg-muted h-px w-full" />
+                          )}
+                        </Fragment>
+                      ),
+                    )}
                   </ul>
                 </div>
-                <FormDescription>
-                  Add directories to be used for media scanning. Only existing
-                  directories are allowed.
-                </FormDescription>
-                <FormMessage />
               </FormItem>
             )}
           />

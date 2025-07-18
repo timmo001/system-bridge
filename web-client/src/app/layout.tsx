@@ -1,16 +1,15 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Geist } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { Toaster } from "~/components/ui/sonner";
+import { TanstackQueryProvider } from "~/components/providers/tanstack-query-provider";
 import { ThemeProvider } from "~/components/providers/theme-provider";
 import { ThemeToggle } from "~/components/theme-toggle";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: {
@@ -30,16 +29,13 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-// Create a QueryClient instance at the module level
-const queryClient = new QueryClient();
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <QueryClientProvider client={queryClient}>
+        <TanstackQueryProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -60,9 +56,8 @@ export default function RootLayout({
               </NuqsAdapter>
             </main>
             <Toaster />
-            <ReactQueryDevtools initialIsOpen={false} />
           </ThemeProvider>
-        </QueryClientProvider>
+        </TanstackQueryProvider>
       </body>
     </html>
   );
