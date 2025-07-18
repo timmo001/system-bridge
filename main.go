@@ -74,9 +74,6 @@ func setupLogging() {
 func main() {
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn: "https://36dbe803bb2c5afb18c36b0dba76b3e5@o341827.ingest.us.sentry.io/4509689970884608",
-		// Enable printing of SDK debug messages.
-		// Useful when getting started or trying to figure something out.
-		Debug: true,
 		// Adds request headers and IP for users,
 		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
 		SendDefaultPII: true,
