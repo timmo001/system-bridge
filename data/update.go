@@ -36,6 +36,14 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 		return nil, fmt.Errorf("dataStore cannot be nil")
 	}
 
+	if tasksPerSecond <= 0 {
+		return nil, fmt.Errorf("tasksPerSecond must be positive")
+	}
+
+	if burstLimit <= 0 {
+		return nil, fmt.Errorf("burstLimit must be positive")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &UpdateTaskProcessor{
@@ -50,6 +58,11 @@ func NewUpdateTaskProcessor(dataStore *DataStore, tasksPerSecond float64, burstL
 
 // Start begins processing tasks
 func (tp *UpdateTaskProcessor) Start(workerCount int) {
+	if workerCount <= 0 {
+		slog.Error("Worker count must be positive", "workerCount", workerCount)
+		return
+	}
+
 	for i := 0; i < workerCount; i++ {
 		tp.wg.Add(1)
 		go tp.worker()
@@ -65,6 +78,12 @@ func (tp *UpdateTaskProcessor) Stop() {
 
 // AddTask queues a new task
 func (tp *UpdateTaskProcessor) AddTask(updater types.Updater) {
+	// Validate updater
+	if updater == nil {
+		slog.Error("Cannot add nil updater to task queue")
+		return
+	}
+
 	select {
 	case tp.taskQueue <- updater:
 	case <-tp.ctx.Done():
@@ -83,26 +102,54 @@ func (tp *UpdateTaskProcessor) worker() {
 				return // Channel closed
 			}
 
+			// Validate task
+			if task == nil {
+				slog.Error("Received nil task from queue")
+				continue
+			}
+
 			// Wait for rate limiter
+			if tp.limiter == nil {
+				slog.Error("Rate limiter is nil")
+				continue
+			}
+			
 			err := tp.limiter.Wait(tp.ctx)
 			if err != nil {
-				slog.Warn("Rate limiter error", "error", err)
+				// Safe logging with nil check for task
+				moduleName := "unknown"
+				if task != nil {
+					moduleName = string(task.Name())
+				}
+				slog.Warn("Rate limiter error", "module", moduleName, "error", err)
 				continue
 			}
 
 			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
 			defer cancel()
+			
 			// Process task
 			data, err := task.Update(ctx)
 			if err != nil {
-				slog.Warn("Task processing error for module", "module", task.Name(), "error", err)
+				// Safe logging with nil check for task
+				moduleName := "unknown"
+				if task != nil {
+					moduleName = string(task.Name())
+				}
+				slog.Warn("Task processing error for module", "module", moduleName, "error", err)
 				continue
 			}
 
-			slog.Debug("Updating data for module", "module", task.Name())
+			// Safe logging with nil check for task
+			moduleName := "unknown"
+			if task != nil {
+				moduleName = string(task.Name())
+			}
+			slog.Debug("Updating data for module", "module", moduleName)
+			
 			// Update data store
 			if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
-				slog.Error("Failed to set module data for", "module", task.Name(), "error", err)
+				slog.Error("Failed to set module data for", "module", moduleName, "error", err)
 				continue
 			}
 
@@ -113,6 +160,12 @@ func (tp *UpdateTaskProcessor) worker() {
 }
 
 func RunUpdateTaskProcessor(dataStore *DataStore) {
+	// Validate dataStore
+	if dataStore == nil {
+		slog.Error("Cannot run update task processor with nil dataStore")
+		return
+	}
+
 	// Create processor with 4 tasks/second, burst of 2
 	processor, err := NewUpdateTaskProcessor(dataStore, 4, 2)
 	if err != nil {
@@ -123,8 +176,18 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Start 3 worker goroutines
 	processor.Start(3)
 
-	for _, updater := range dataStore.GetRegisteredModules() {
-		processor.AddTask(updater)
+	// Get registered modules and add tasks
+	modules := dataStore.GetRegisteredModules()
+	if len(modules) == 0 {
+		slog.Warn("No modules registered, skipping task addition")
+	} else {
+		for _, updater := range modules {
+			if updater != nil {
+				processor.AddTask(updater)
+			} else {
+				slog.Warn("Skipping nil updater in RunUpdateTaskProcessor")
+			}
+		}
 	}
 
 	// TODO: use channels and wait groups to track task completion. use context.WithTimeout to make sure to finish withing time frame

@@ -12,8 +12,6 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 }
 
 func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message event.MessageResponse, lockHeld bool) {
-	slog.Debug("Sending message to connection", "response", message)
-
 	// Use per-connection mutex to prevent concurrent writes
 	connInfo.writeMux.Lock()
 	defer connInfo.writeMux.Unlock()

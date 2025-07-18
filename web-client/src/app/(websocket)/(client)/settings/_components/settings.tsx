@@ -49,7 +49,7 @@ export function Settings() {
 
   const form = useForm<Settings>({
     resolver: zodResolver(SettingsSchema),
-    defaultValues: settings ?? {
+    defaultValues: {
       autostart: false,
       hotkeys: [],
       logLevel: "info",
@@ -83,7 +83,8 @@ export function Settings() {
   useEffect(() => {
     if (!settings) return;
 
-    form.reset(settings);
+    console.log("Resetting form with settings:", settings);
+    form.reset(settings, { keepDirty: false });
   }, [form, settings]);
 
   return (
@@ -127,10 +128,10 @@ export function Settings() {
                       <SelectValue placeholder="Select log level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="error">Error</SelectItem>
-                      <SelectItem value="warn">Warn</SelectItem>
-                      <SelectItem value="info">Info</SelectItem>
                       <SelectItem value="debug">Debug</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="warn">Warn</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
