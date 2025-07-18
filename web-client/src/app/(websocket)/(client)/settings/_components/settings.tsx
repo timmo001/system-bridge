@@ -148,7 +148,9 @@ export function Settings() {
 
         <MediaDirectoryForm form={form} onSubmit={onSubmit} />
 
-        <Button disabled={!form.formState.isDirty}>Save Settings</Button>
+        <Button disabled={!form.formState.isDirty} type="submit">
+          Save Settings
+        </Button>
       </form>
     </Form>
   );
