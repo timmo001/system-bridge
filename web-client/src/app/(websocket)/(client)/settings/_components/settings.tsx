@@ -195,7 +195,6 @@ function MediaDirectoryForm({
   async function handleAddDirectory(data: SettingsMediaDirectory) {
     setMediaError(null);
     const isValid = await mediaDirectoryForm.trigger();
-    console.log("Media directory form is valid:", isValid);
     if (!isValid) return;
     try {
       const response = await validateDirectoryMutation.mutateAsync(
@@ -206,10 +205,8 @@ function MediaDirectoryForm({
           ...(parentForm.getValues("media.directories") ?? []),
           data,
         ];
-        console.log("New directories:", newDirectories);
         parentForm.setValue("media.directories", newDirectories);
         const parentIsValid = await parentForm.trigger("media.directories");
-        console.log("Parent form is valid:", parentIsValid);
         if (parentIsValid) {
           toast.success("Directory added successfully");
           await parentForm.handleSubmit(onSubmit)();
@@ -237,7 +234,6 @@ function MediaDirectoryForm({
       ),
     );
     const parentIsValid = await parentForm.trigger("media.directories");
-    console.log("Parent form is valid:", parentIsValid);
     if (parentIsValid) {
       toast.success("Directory removed successfully");
       await parentForm.handleSubmit(onSubmit)();
