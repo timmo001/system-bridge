@@ -45,7 +45,7 @@ import {
 
 export function Settings() {
   const { token } = useSystemBridgeConnectionStore();
-  const { settings, sendRequestWithResponse } = useSystemBridgeWS();
+  const { settings, sendRequest } = useSystemBridgeWS();
 
   const form = useForm<Settings>({
     resolver: zodResolver(SettingsSchema),
@@ -67,16 +67,13 @@ export function Settings() {
     }
 
     try {
-      await sendRequestWithResponse<Settings>(
-        {
-          id: generateUUID(),
-          event: "UPDATE_SETTINGS",
-          data,
-          token: token ?? "",
-        },
-        SettingsSchema,
-      );
-      toast.success("Settings updated successfully!");
+      sendRequest({
+        id: generateUUID(),
+        event: "UPDATE_SETTINGS",
+        data,
+        token: token ?? "",
+      });
+      toast.success("Settings update requested!");
     } catch (error) {
       toast.error("Failed to update settings");
       console.error(error);
