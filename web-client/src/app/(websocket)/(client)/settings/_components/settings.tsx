@@ -52,7 +52,7 @@ export function Settings() {
     defaultValues: {
       autostart: false,
       hotkeys: [],
-      logLevel: "info",
+      logLevel: "INFO",
       media: {
         directories: [],
       },
@@ -128,17 +128,17 @@ export function Settings() {
                       <SelectValue placeholder="Select log level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="debug">Debug</SelectItem>
-                      <SelectItem value="info">Info</SelectItem>
-                      <SelectItem value="warn">Warn</SelectItem>
-                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="DEBUG">Debug</SelectItem>
+                      <SelectItem value="INFO">Info</SelectItem>
+                      <SelectItem value="WARN">Warn</SelectItem>
+                      <SelectItem value="ERROR">Error</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
                 <div className="w-full space-y-0.5">
                   <FormLabel>Log Level</FormLabel>
                   <FormDescription>
-                    The level of logging to use (error, warn, info, debug)
+                    The level of logging to use (ERROR, WARN, INFO, DEBUG)
                   </FormDescription>
                   <FormMessage />
                 </div>

@@ -95,6 +95,9 @@ func setupLogging() {
 
 	ctx := context.Background()
 
+	// Convert LogLevel to slog.Level
+	logLevel := settings.LogLevel.ToSlogLevel()
+
 	// Sentry handler
 	sentryHandler := sentryslog.Option{
 		EventLevel: []slog.Level{slog.LevelError},
@@ -103,7 +106,7 @@ func setupLogging() {
 
 	// Terminal handler (colorized)
 	terminalHandler := console.NewHandler(os.Stdout, &console.HandlerOptions{
-		Level: settings.LogLevel,
+		Level: logLevel,
 	})
 
 	// File handler with rolling logs
@@ -120,7 +123,7 @@ func setupLogging() {
 		Compress:   true,
 	}
 	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
-		Level: settings.LogLevel,
+		Level: logLevel,
 	})
 
 	// Use custom multiHandler

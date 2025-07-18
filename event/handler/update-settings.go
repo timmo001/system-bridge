@@ -38,16 +38,16 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 
 		newSettings := UpdateSettingsRequestData{}
-		// Add decode hook for log.Level
+		// Add decode hook for LogLevel
 		dc := &mapstructure.DecoderConfig{
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				func(from, to reflect.Type, data any) (any, error) {
-					if to == reflect.TypeOf(slog.Level(0)) && from.Kind() == reflect.String {
+					if to == reflect.TypeOf(settingspkg.LogLevel("")) && from.Kind() == reflect.String {
 						str, ok := data.(string)
 						if !ok {
 							return nil, fmt.Errorf("expected string for log level but got %T", data)
 						}
-						parsed, err := settingspkg.ParseSlogLevel(str)
+						parsed, err := settingspkg.ParseLogLevel(str)
 						if err != nil {
 							return nil, err
 						}

@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 		// Check default values
 		assert.False(t, settings.Autostart)
 		assert.Empty(t, settings.Hotkeys)
-		assert.Equal(t, slog.LevelInfo, settings.LogLevel)
+		assert.Equal(t, LogLevelInfo, settings.LogLevel)
 		assert.Empty(t, settings.Media.Directories)
 	})
 
@@ -44,7 +44,7 @@ func TestLoad(t *testing.T) {
 		// Create a config file with custom values
 		configContent := `{
 			"autostart": true,
-			"logLevel": -1,
+			"logLevel": "DEBUG",
 			"hotkeys": [
 				{
 					"name": "test-hotkey",
@@ -71,7 +71,7 @@ func TestLoad(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, settings.Autostart)
-		assert.Equal(t, slog.Level(-1), settings.LogLevel)
+		assert.Equal(t, LogLevelDebug, settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
 		assert.Equal(t, "test-hotkey", settings.Hotkeys[0].Name)
 		assert.Equal(t, "ctrl+shift+t", settings.Hotkeys[0].Key)
@@ -119,7 +119,7 @@ func TestSave(t *testing.T) {
 
 		// Modify settings
 		settings.Autostart = true
-		settings.LogLevel = slog.Level(-1)
+		settings.LogLevel = LogLevelDebug
 		settings.Hotkeys = []SettingsHotkey{
 			{Name: "test", Key: "ctrl+t"},
 		}
@@ -141,7 +141,7 @@ func TestSave(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, loadedSettings.Autostart)
-		assert.Equal(t, slog.Level(-1), loadedSettings.LogLevel)
+		assert.Equal(t, LogLevelDebug, loadedSettings.LogLevel)
 		assert.Len(t, loadedSettings.Hotkeys, 1)
 		assert.Equal(t, "test", loadedSettings.Hotkeys[0].Name)
 		assert.Equal(t, "ctrl+t", loadedSettings.Hotkeys[0].Key)
@@ -185,7 +185,7 @@ func TestSettingsStructs(t *testing.T) {
 	t.Run("Settings struct", func(t *testing.T) {
 		settings := Settings{
 			Autostart: true,
-			LogLevel:  slog.LevelWarn,
+			LogLevel:  LogLevelWarn,
 			Hotkeys: []SettingsHotkey{
 				{Name: "test", Key: "ctrl+t"},
 			},
@@ -197,8 +197,61 @@ func TestSettingsStructs(t *testing.T) {
 		}
 
 		assert.True(t, settings.Autostart)
-		assert.Equal(t, slog.LevelWarn, settings.LogLevel)
+		assert.Equal(t, LogLevelWarn, settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
 		assert.Len(t, settings.Media.Directories, 1)
+	})
+}
+
+func TestLogLevel(t *testing.T) {
+	t.Run("LogLevel constants", func(t *testing.T) {
+		assert.Equal(t, LogLevel("DEBUG"), LogLevelDebug)
+		assert.Equal(t, LogLevel("INFO"), LogLevelInfo)
+		assert.Equal(t, LogLevel("WARN"), LogLevelWarn)
+		assert.Equal(t, LogLevel("ERROR"), LogLevelError)
+	})
+
+	t.Run("ToSlogLevel", func(t *testing.T) {
+		assert.Equal(t, slog.LevelDebug, LogLevelDebug.ToSlogLevel())
+		assert.Equal(t, slog.LevelInfo, LogLevelInfo.ToSlogLevel())
+		assert.Equal(t, slog.LevelWarn, LogLevelWarn.ToSlogLevel())
+		assert.Equal(t, slog.LevelError, LogLevelError.ToSlogLevel())
+		assert.Equal(t, slog.LevelInfo, LogLevel("INVALID").ToSlogLevel())
+	})
+
+	t.Run("FromSlogLevel", func(t *testing.T) {
+		assert.Equal(t, LogLevelDebug, FromSlogLevel(slog.LevelDebug))
+		assert.Equal(t, LogLevelInfo, FromSlogLevel(slog.LevelInfo))
+		assert.Equal(t, LogLevelWarn, FromSlogLevel(slog.LevelWarn))
+		assert.Equal(t, LogLevelError, FromSlogLevel(slog.LevelError))
+		assert.Equal(t, LogLevelInfo, FromSlogLevel(slog.Level(999)))
+	})
+
+	t.Run("ParseLogLevel", func(t *testing.T) {
+		level, err := ParseLogLevel("DEBUG")
+		assert.NoError(t, err)
+		assert.Equal(t, LogLevelDebug, level)
+
+		level, err = ParseLogLevel("INFO")
+		assert.NoError(t, err)
+		assert.Equal(t, LogLevelInfo, level)
+
+		level, err = ParseLogLevel("WARN")
+		assert.NoError(t, err)
+		assert.Equal(t, LogLevelWarn, level)
+
+		level, err = ParseLogLevel("ERROR")
+		assert.NoError(t, err)
+		assert.Equal(t, LogLevelError, level)
+
+		// Test case insensitive
+		level, err = ParseLogLevel("debug")
+		assert.NoError(t, err)
+		assert.Equal(t, LogLevelDebug, level)
+
+		// Test invalid level
+		level, err = ParseLogLevel("INVALID")
+		assert.Error(t, err)
+		assert.Equal(t, LogLevelInfo, level)
 	})
 }

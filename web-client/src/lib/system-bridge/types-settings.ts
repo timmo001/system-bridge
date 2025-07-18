@@ -25,7 +25,7 @@ export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
 export const SettingsSchema = z.object({
   autostart: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
-  logLevel: z.enum(["debug", "info", "warn", "error"]),
+  logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
   media: SettingsMediaSchema,
 });
 
