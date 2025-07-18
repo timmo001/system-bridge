@@ -52,7 +52,7 @@ func (w dualWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
-func setupLogging() {
+func setupLogging() *os.File {
 	configDir, err := utils.GetConfigPath()
 	var logFile *os.File
 	if err == nil {
@@ -75,7 +75,6 @@ func setupLogging() {
 		logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err == nil {
 			log.SetOutput(dualWriter{console: os.Stdout, file: logFile})
-			defer logFile.Close()
 		} else {
 			log.SetOutput(os.Stdout)
 			log.Warnf("Failed to log to file, using only stdout: %v", err)
@@ -84,6 +83,8 @@ func setupLogging() {
 		log.SetOutput(os.Stdout)
 		log.Warnf("Failed to get config path for logging: %v", err)
 	}
+
+	return logFile
 }
 
 func main() {
@@ -121,7 +122,8 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					setupLogging()
+					logFile := setupLogging()
+					defer logFile.Close()
 
 					log.Info("------ System Bridge ------")
 
