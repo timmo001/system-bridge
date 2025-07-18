@@ -10,7 +10,6 @@ import (
 	"log/slog"
 
 	"github.com/getsentry/sentry-go"
-	sentryslog "github.com/getsentry/sentry-go/slog"
 	"github.com/natefinch/lumberjack"
 	console "github.com/phsym/console-slog"
 	"github.com/timmo001/system-bridge/settings"
@@ -62,14 +61,78 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 	return &multiHandler{handlers: newHandlers}
 }
 
+// CaptureFatalError is a helper function to capture fatal errors and exit
+func CaptureFatalError(err error, msg string, args ...any) {
+	// Capture the error in Sentry
+	sentry.CaptureException(err)
+
+	// Log the fatal error
+	slog.Error(msg, append([]any{"err", err}, args...)...)
+
+	// Flush Sentry before exiting
+	sentry.Flush(2 * time.Second)
+
+	// Exit with error code
+	os.Exit(1)
+}
+
+// errorHandler captures error and fatal level logs as Sentry exceptions
+type errorHandler struct {
+	handler slog.Handler
+}
+
+func (h *errorHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return h.handler.Enabled(ctx, level)
+}
+
+func (h *errorHandler) Handle(ctx context.Context, r slog.Record) error {
+	// Capture error and fatal levels as Sentry exceptions
+	if r.Level >= slog.LevelError {
+		// Create a Sentry event from the log record
+		event := &sentry.Event{
+			Level:   sentry.LevelError,
+			Message: r.Message,
+			Tags: map[string]string{
+				"level": r.Level.String(),
+			},
+		}
+
+		// Add attributes as extra data
+		if r.NumAttrs() > 0 {
+			event.Extra = make(map[string]interface{})
+			r.Attrs(func(attr slog.Attr) bool {
+				event.Extra[attr.Key] = attr.Value.Any()
+				return true
+			})
+		}
+
+		// Capture the exception
+		sentry.CaptureEvent(event)
+
+		// For fatal level, also capture as exception with stack trace
+		if r.Level >= slog.LevelError+1 { // Fatal level is typically Error+1
+			sentry.CaptureException(fmt.Errorf("fatal error: %s", r.Message))
+		}
+	}
+
+	// Pass through to the underlying handler
+	return h.handler.Handle(ctx, r)
+}
+
+func (h *errorHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &errorHandler{handler: h.handler.WithAttrs(attrs)}
+}
+
+func (h *errorHandler) WithGroup(name string) slog.Handler {
+	return &errorHandler{handler: h.handler.WithGroup(name)}
+}
+
 func setupLogging() {
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn: "https://481e02051b173aec6b92b71018450191@o341827.ingest.us.sentry.io/4509689982877696",
 		// Adds request headers and IP for users,
 		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
 		SendDefaultPII: true,
-		// Enable logs to be sent to Sentry
-		EnableLogs: true,
 		// Set Sentry release context
 		Release: version.Version,
 		// Add version tag to Sentry events
@@ -93,16 +156,8 @@ func setupLogging() {
 		slog.Error("error loading settings", "err", err)
 	}
 
-	ctx := context.Background()
-
 	// Convert LogLevel to slog.Level
 	logLevel := settings.LogLevel.ToSlogLevel()
-
-	// Sentry handler
-	sentryHandler := sentryslog.Option{
-		EventLevel: []slog.Level{slog.LevelError},
-		LogLevel:   []slog.Level{slog.LevelWarn, slog.LevelInfo, slog.LevelDebug},
-	}.NewSentryHandler(ctx)
 
 	// Terminal handler (colorized)
 	terminalHandler := console.NewHandler(os.Stdout, &console.HandlerOptions{
@@ -126,11 +181,13 @@ func setupLogging() {
 		Level: logLevel,
 	})
 
-	// Use custom multiHandler
+	// Wrap handlers with error capture
+	terminalErrorHandler := &errorHandler{handler: terminalHandler}
+	fileErrorHandler := &errorHandler{handler: fileHandler}
+
 	logger := slog.New(&multiHandler{handlers: []slog.Handler{
-		sentryHandler,
-		terminalHandler,
-		fileHandler,
+		terminalErrorHandler,
+		fileErrorHandler,
 	}})
 	slog.SetDefault(logger)
 }

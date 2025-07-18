@@ -6,13 +6,14 @@ require (
 	fyne.io/systray v1.11.0
 	github.com/distatus/battery v0.11.0
 	github.com/getsentry/sentry-go v0.34.1
-	github.com/getsentry/sentry-go/slog v0.34.1
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v0.110.8
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jezek/xgb v1.1.1
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/phsym/console-slog v0.3.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/shirou/gopsutil/v4 v4.25.6
 	github.com/spf13/viper v1.20.1
@@ -22,6 +23,7 @@ require (
 )
 
 require (
+	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e // indirect
 	github.com/ebitengine/purego v0.8.4 // indirect
@@ -31,12 +33,10 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
-	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/phsym/console-slog v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/robotn/xgb v0.10.0 // indirect
@@ -62,6 +62,8 @@ require (
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	howett.net/plist v1.0.1 // indirect
 )
