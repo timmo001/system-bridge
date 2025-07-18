@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"syscall"
 	"time"
 
@@ -38,18 +37,6 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
-// Only logs containing [ERROR] or [FATAL] will be sent
-type sentryLogWriter struct{}
-
-func (w *sentryLogWriter) Write(p []byte) (n int, err error) {
-	logLine := string(p)
-	if strings.Contains(logLine, "[ERRO]") || strings.Contains(logLine, "[FATA]") ||
-		strings.Contains(logLine, "[ERROR]") || strings.Contains(logLine, "[FATAL]") {
-		sentry.CaptureException(fmt.Errorf("%s", logLine))
-	}
-	return len(p), nil
-}
-
 func setupLogging() {
 	configDir, err := utils.GetConfigPath()
 	if err != nil {
@@ -59,8 +46,7 @@ func setupLogging() {
 	}
 
 	logFilePath := filepath.Join(configDir, "system-bridge.log")
-
-	logger := &lumberjack.Logger{
+	fileLogger := &lumberjack.Logger{
 		Filename:   logFilePath,
 		MaxSize:    10, // megabytes
 		MaxBackups: 3,
@@ -68,8 +54,11 @@ func setupLogging() {
 		Compress:   true,
 	}
 
-	// Write to file (rotated), console, and Sentry
-	log.SetOutput(io.MultiWriter(os.Stdout, logger, &sentryLogWriter{}))
+	ctx := context.Background()
+	sentryLogger := sentry.NewLogger(ctx)
+
+	// Write to console, file, and Sentry
+	log.SetOutput(io.MultiWriter(os.Stdout, fileLogger, sentryLogger))
 }
 
 func main() {
@@ -115,6 +104,8 @@ func main() {
 	// Create a context that will be canceled on signal
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	sentry.CaptureMessage("It works!")
 
 	// Handle signals in a goroutine
 	go func() {
