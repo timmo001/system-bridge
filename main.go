@@ -9,10 +9,13 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
+	"time"
 
 	"fyne.io/systray"
 	"github.com/charmbracelet/log"
+	"github.com/getsentry/sentry-go"
 	"github.com/pkg/browser"
 	"gopkg.in/natefinch/lumberjack.v2"
 
@@ -34,6 +37,17 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
+// Only logs containing [ERROR] or [FATAL] will be sent
+type sentryLogWriter struct{}
+
+func (w *sentryLogWriter) Write(p []byte) (n int, err error) {
+	logLine := string(p)
+	if strings.Contains(logLine, "[ERROR]") || strings.Contains(logLine, "[FATAL]") {
+		sentry.CaptureMessage(logLine)
+	}
+	return len(p), nil
+}
+
 func setupLogging() {
 	configDir, err := utils.GetConfigPath()
 	if err != nil {
@@ -52,11 +66,36 @@ func setupLogging() {
 		Compress:   true,
 	}
 
-	// Write to both file (rotated) and console
-	log.SetOutput(io.MultiWriter(os.Stdout, logger))
+	// Write to file (rotated), console, and Sentry
+	log.SetOutput(io.MultiWriter(os.Stdout, logger, &sentryLogWriter{}))
 }
 
 func main() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn: "https://36dbe803bb2c5afb18c36b0dba76b3e5@o341827.ingest.us.sentry.io/4509689970884608",
+		// Enable printing of SDK debug messages.
+		// Useful when getting started or trying to figure something out.
+		Debug: true,
+		// Adds request headers and IP for users,
+		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
+		SendDefaultPII: true,
+		// Enable logs to be sent to Sentry
+		EnableLogs: true,
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+	// Flush buffered events before the program terminates.
+	// Set the timeout to the maximum duration the program can afford to wait.
+	defer sentry.Flush(2 * time.Second)
+
+	defer func() {
+		if err := recover(); err != nil {
+			sentry.CurrentHub().Recover(err)
+			sentry.Flush(2 * time.Second)
+		}
+	}()
+
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
 	// Register for SIGINT (Ctrl+C) and SIGTERM
@@ -65,6 +104,8 @@ func main() {
 	// Create a context that will be canceled on signal
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	sentry.CaptureMessage("It works!")
 
 	// Handle signals in a goroutine
 	go func() {
