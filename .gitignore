@@ -23,9 +23,6 @@ system-bridge.syso
 !installer.nsi.template
 installer.nsi
 
-# Windows icon
-!system-bridge.rc
-
 # Resources
 !.resources/*
 
