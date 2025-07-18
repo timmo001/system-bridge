@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/browser"
 
+	"github.com/natefinch/lumberjack"
+	console "github.com/phsym/console-slog"
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
@@ -37,13 +40,83 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
+// multiHandler fans out records to multiple slog.Handlers
+// It is not part of slog, so we define it here.
+type multiHandler struct {
+	handlers []slog.Handler
+}
+
+func (m *multiHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	for _, h := range m.handlers {
+		if h.Enabled(ctx, level) {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *multiHandler) Handle(ctx context.Context, r slog.Record) error {
+	var firstErr error
+	for _, h := range m.handlers {
+		if h.Enabled(ctx, r.Level) {
+			err := h.Handle(ctx, r)
+			if err != nil && firstErr == nil {
+				firstErr = err
+			}
+		}
+	}
+	return firstErr
+}
+
+func (m *multiHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	newHandlers := make([]slog.Handler, len(m.handlers))
+	for i, h := range m.handlers {
+		newHandlers[i] = h.WithAttrs(attrs)
+	}
+	return &multiHandler{handlers: newHandlers}
+}
+
+func (m *multiHandler) WithGroup(name string) slog.Handler {
+	newHandlers := make([]slog.Handler, len(m.handlers))
+	for i, h := range m.handlers {
+		newHandlers[i] = h.WithGroup(name)
+	}
+	return &multiHandler{handlers: newHandlers}
+}
+
 func setupLogging() {
 	ctx := context.Background()
-	handler := sentryslog.Option{
-		EventLevel: []slog.Level{slog.LevelError}, // Only Error level will be sent as events
-		LogLevel:   []slog.Level{slog.LevelWarn, slog.LevelInfo, slog.LevelDebug}, // Warn, Info, Debug as logs
+
+	// Sentry handler
+	sentryHandler := sentryslog.Option{
+		EventLevel: []slog.Level{slog.LevelError},
+		LogLevel:   []slog.Level{slog.LevelWarn, slog.LevelInfo, slog.LevelDebug},
 	}.NewSentryHandler(ctx)
-	logger := slog.New(handler)
+
+	// Terminal handler (colorized)
+	terminalHandler := console.NewHandler(os.Stdout, &console.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+
+	// File handler with rolling logs
+	configDir, err := utils.GetConfigPath()
+	if err != nil {
+		panic(fmt.Errorf("failed to get config path: %w", err))
+	}
+	logFile := filepath.Join(configDir, "system-bridge.log")
+	fileLogger := &lumberjack.Logger{
+		Filename:   logFile,
+		MaxSize:    10, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28, // days
+		Compress:   true,
+	}
+	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+
+	// Use custom multiHandler
+	logger := slog.New(&multiHandler{handlers: []slog.Handler{sentryHandler, terminalHandler, fileHandler}})
 	slog.SetDefault(logger)
 }
 
