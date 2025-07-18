@@ -8,6 +8,10 @@ import (
 )
 
 func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.MessageResponse) {
+	ws.SendMessageWithLock(connInfo, message, false)
+}
+
+func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message event.MessageResponse, lockHeld bool) {
 	slog.Debug("Sending message to connection", "response", message)
 
 	// Use per-connection mutex to prevent concurrent writes
@@ -20,16 +24,27 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
 			slog.Error("Error closing connection", "error", closeErr)
 		}
+		
 		// Remove from connections and dataListeners if and only if the pointer matches
-		go func(addr string, failedConn *websocket.Conn) {
-			ws.mutex.Lock()
-			defer ws.mutex.Unlock()
-			connInfo, ok := ws.connections[addr]
-			if ok && connInfo.conn == failedConn {
+		if lockHeld {
+			// If we already hold the lock, do the cleanup synchronously
+			addr := connInfo.conn.RemoteAddr().String()
+			if existingConnInfo, ok := ws.connections[addr]; ok && existingConnInfo.conn == connInfo.conn {
 				delete(ws.connections, addr)
 				delete(ws.dataListeners, addr)
 			}
-		}(connInfo.conn.RemoteAddr().String(), connInfo.conn)
+		} else {
+			// Otherwise, spawn a goroutine to acquire the lock
+			go func(addr string, failedConn *websocket.Conn) {
+				ws.mutex.Lock()
+				defer ws.mutex.Unlock()
+				connInfo, ok := ws.connections[addr]
+				if ok && connInfo.conn == failedConn {
+					delete(ws.connections, addr)
+					delete(ws.dataListeners, addr)
+				}
+			}(connInfo.conn.RemoteAddr().String(), connInfo.conn)
+		}
 	}
 }
 

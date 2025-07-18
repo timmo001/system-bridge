@@ -168,14 +168,14 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 	if addr != nil {
 		if connInfo, ok := ws.connections[*addr]; ok {
 			slog.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
-			ws.SendMessage(connInfo, response)
+			ws.SendMessageWithLock(connInfo, response, true)
 		} else {
 			for remote_addr, connInfo := range ws.connections {
 				modules, ok := ws.dataListeners[remote_addr]
 
 				if ok && slices.Contains(modules, module.Name) {
 					slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
-					ws.SendMessage(connInfo, response)
+					ws.SendMessageWithLock(connInfo, response, true)
 				}
 
 			}
