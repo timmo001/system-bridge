@@ -210,13 +210,7 @@ function MediaDirectoryForm({
         const parentIsValid = await parentForm.trigger("media.directories");
         if (parentIsValid) {
           toast.success("Directory added successfully");
-          const isFormValid = parentIsValid; // Reuse the cached result
-          if (isFormValid) {
-            await onSubmit(parentForm.getValues());
-          } else {
-            toast.error("Failed to add directory");
-            setMediaError("Failed to add directory");
-          }
+          await onSubmit(parentForm.getValues());
         } else {
           toast.error("Failed to add directory");
           setMediaError("Failed to add directory");
