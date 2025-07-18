@@ -91,6 +91,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 
 		if !currentSettings.Autostart && newSettings.Autostart {
+			slog.Info("Autostart has changed:", "current", currentSettings.Autostart, "new", newSettings.Autostart)
 			switch runtime.GOOS {
 			case "linux":
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
