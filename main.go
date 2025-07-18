@@ -19,6 +19,7 @@ import (
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/urfave/cli/v3"
 )
@@ -194,6 +195,7 @@ func onReady() {
 
 	// Create menu items
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
+	mOpenLogs := systray.AddMenuItem("Open logs", "Open the logs in the default editor")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
 
@@ -203,6 +205,8 @@ func onReady() {
 			select {
 			case <-mOpenWebClient.ClickedCh:
 				openWebClient(token)
+			case <-mOpenLogs.ClickedCh:
+				openLogs()
 			case <-mQuit.ClickedCh:
 				log.Info("Quitting...")
 				systray.Quit()
@@ -222,6 +226,31 @@ func openWebClient(token string) {
 	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
 	log.Infof("Opening web client URL: %s", url)
 	if err := browser.OpenURL(url); err != nil {
+		notification.Send(notification.NotificationData{
+			Title:   "Failed to open web client",
+			Message: "Failed to open web client in the default browser",
+			Icon:    "system-bridge",
+		})
 		log.Errorf("Failed to open web client: %v", err)
+	}
+}
+
+func openLogs() {
+	configDir, err := utils.GetConfigPath()
+	if err != nil {
+		log.Errorf("error getting config path: %v", err)
+		return
+	}
+
+	logFilePath := filepath.Join(configDir, "system-bridge.log")
+
+	// Open the log file in the default editor
+	if err := filesystem.OpenFile(logFilePath); err != nil {
+		notification.Send(notification.NotificationData{
+			Title:   "Failed to open logs",
+			Message: "Failed to open logs in the default editor",
+			Icon:    "system-bridge",
+		})
+		log.Errorf("Failed to open logs: %v", err)
 	}
 }

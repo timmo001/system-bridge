@@ -101,6 +101,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				}
 			case "windows":
 				// Create shortcut in startup folder
+				log.Infof("Creating autostart shortcut in startup folder")
 
 				// Get current executable path
 				executablePath := os.Args[0]
