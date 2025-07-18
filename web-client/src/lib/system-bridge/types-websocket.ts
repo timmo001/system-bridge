@@ -107,7 +107,7 @@ export const WebSocketResponseSchema = z.object({
 export type WebsocketResponse = z.infer<typeof WebSocketResponseSchema>;
 
 export const ValidateDirectoryResponseSchema = z.object({
-  valid: z.boolean().optional(),
+  valid: z.boolean(),
 });
 
 export type ValidateDirectoryResponse = z.infer<
