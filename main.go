@@ -43,10 +43,9 @@ type sentryLogWriter struct{}
 
 func (w *sentryLogWriter) Write(p []byte) (n int, err error) {
 	logLine := string(p)
-	if strings.Contains(logLine, "[ERROR]") || strings.Contains(logLine, "[FATAL]") {
+	if strings.Contains(logLine, "[ERRO]") || strings.Contains(logLine, "[FATA]") ||
+		strings.Contains(logLine, "[ERROR]") || strings.Contains(logLine, "[FATAL]") {
 		sentry.CaptureException(fmt.Errorf("%s", logLine))
-	} else {
-		sentry.CaptureMessage(logLine)
 	}
 	return len(p), nil
 }
@@ -75,7 +74,7 @@ func setupLogging() {
 
 func main() {
 	err := sentry.Init(sentry.ClientOptions{
-		Dsn: "https://36dbe803bb2c5afb18c36b0dba76b3e5@o341827.ingest.us.sentry.io/4509689970884608",
+		Dsn: "https://481e02051b173aec6b92b71018450191@o341827.ingest.us.sentry.io/4509689982877696",
 		// Adds request headers and IP for users,
 		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
 		SendDefaultPII: true,
@@ -98,6 +97,8 @@ func main() {
 	// Flush buffered events before the program terminates.
 	// Set the timeout to the maximum duration the program can afford to wait.
 	defer sentry.Flush(2 * time.Second)
+
+	setupLogging()
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -142,8 +143,6 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					setupLogging()
-
 					log.Info("------ System Bridge ------")
 
 					s, err := settings.Load()
