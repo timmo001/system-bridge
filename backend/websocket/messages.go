@@ -15,10 +15,10 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 	defer connInfo.writeMux.Unlock()
 
 	if err := connInfo.conn.WriteJSON(message); err != nil {
-		slog.Error("Failed to send response:", err)
+		slog.Error("Failed to send response", "error", err)
 		// If there's an error, close the connection
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
-			slog.Error("Error closing connection:", closeErr)
+			slog.Error("Error closing connection", "error", closeErr)
 		}
 		// Remove from connections and dataListeners if and only if the pointer matches
 		go func(addr string, failedConn *websocket.Conn) {

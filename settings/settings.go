@@ -3,7 +3,10 @@ package settings
 import (
 	"fmt"
 	"log/slog"
+	"reflect"
+	"strings"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -59,17 +62,42 @@ func Load() (*Settings, error) {
 	}
 
 	var cfg Settings
-	if err := viper.Unmarshal(&cfg); err != nil {
+	// Add decode hook for slog.Level
+	decoderConfig := &mapstructure.DecoderConfig{
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			func(from, to reflect.Type, data any) (any, error) {
+				if to == reflect.TypeOf(slog.Level(0)) {
+					switch v := data.(type) {
+					case string:
+						parsed, err := ParseSlogLevel(v)
+						if err != nil {
+							return slog.LevelInfo, nil // fallback to info
+						}
+						return parsed, nil
+					case int, int8, int16, int32, int64, float64, float32:
+						return slog.Level(reflect.ValueOf(v).Convert(reflect.TypeOf(int64(0))).Int()), nil
+					}
+				}
+				return data, nil
+			},
+		),
+		Result: &cfg,
+		TagName: "mapstructure",
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create decoder: %w", err)
+	}
+	if err := decoder.Decode(viper.AllSettings()); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
-
 	return &cfg, nil
 }
 
 func (cfg *Settings) Save() error {
 	viper.Set("autostart", cfg.Autostart)
 	viper.Set("hotkeys", cfg.Hotkeys)
-	viper.Set("logLevel", cfg.LogLevel)
+	viper.Set("logLevel", int64(cfg.LogLevel))
 	viper.Set("media.directories", cfg.Media.Directories)
 
 	if err := viper.WriteConfig(); err != nil {
@@ -86,7 +114,7 @@ func (cfg *Settings) Save() error {
 
 // Helper to parse slog.Level from string (since slog does not provide ParseLevel)
 func ParseSlogLevel(levelStr string) (slog.Level, error) {
-	switch levelStr {
+	switch strings.ToLower(levelStr) {
 	case "debug":
 		return slog.LevelDebug, nil
 	case "info":

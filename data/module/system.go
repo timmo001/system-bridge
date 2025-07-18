@@ -27,12 +27,12 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	infoStat, err := host.Info()
 	if err != nil {
-		slog.Error("Failed to get system info: %v", err)
+		slog.Error("Failed to get system info", "error", err)
 	}
 
 	users, err := host.Users()
 	if err != nil {
-		slog.Warn("Failed to get user info: %v", err)
+		slog.Warn("Failed to get user info", "error", err)
 	}
 
 	systemData.BootTime = infoStat.BootTime
@@ -72,7 +72,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
-		slog.Error("Failed to get latest version: %v", err)
+		slog.Error("Failed to get latest version", "error", err)
 		latestVersion = currentVersion
 	}
 
@@ -90,7 +90,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 func getIPv4Address() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		slog.Warn("Failed to get IPv4 Address: %v", err)
+		slog.Warn("Failed to get IPv4 Address", "error", err)
 		return ""
 	}
 	defer func() {
@@ -106,7 +106,7 @@ func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
 	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
-		slog.Warn("Failed to get IPv6 Address: %v", err)
+		slog.Warn("Failed to get IPv6 Address", "error", err)
 		return ""
 	}
 	defer func() {
@@ -121,7 +121,7 @@ func getIPv6Address() string {
 func getMACAddress() string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		slog.Warn("Failed to get MAC Address: %v", err)
+		slog.Warn("Failed to get MAC Address", "error", err)
 		return ""
 	}
 

@@ -39,7 +39,7 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 	// Get swap memory stats
 	swapMem, err := mem.SwapMemory()
 	if err != nil {
-		slog.Error("Failed to get swap memory: %v", err)
+		slog.Error("Failed to get swap memory", "error", err)
 	} else {
 		memoryData.Swap = &types.MemorySwap{
 			Total:   &swapMem.Total,

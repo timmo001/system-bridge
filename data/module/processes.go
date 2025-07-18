@@ -20,7 +20,7 @@ func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 	// Get process list
 	processes, err := process.Processes()
 	if err != nil {
-		slog.Error("Failed to get processes: %v", err)
+		slog.Error("Failed to get processes", "error", err)
 		return processesData, err
 	}
 

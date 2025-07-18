@@ -33,7 +33,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 		if token != expectedToken {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
 			return
 		}
 
@@ -44,7 +46,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 		if module == "" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Module name is required"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Module name is required"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
 			return
 		}
 
@@ -54,7 +58,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 			slog.Info("GET: /api/data/:module", "module", module, "data", "not found")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Module not found"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Module not found"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
 			return
 		}
 

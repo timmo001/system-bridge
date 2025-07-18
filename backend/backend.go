@@ -79,7 +79,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a file system that's rooted at the web-client/out directory
 	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
 	if err != nil {
-		slog.Warn(fmt.Sprintf("Failed to create sub filesystem: %v. Web client will not be served.", err))
+		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
 	} else {
 		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
 	}
@@ -88,10 +88,12 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		_, err := b.wsServer.HandleConnection(w, r)
 		if err != nil {
-			slog.Error("WebSocket connection error:", err)
+			slog.Error("WebSocket connection error", "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "WebSocket connection failed"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "WebSocket connection failed"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
 			return
 		}
 	})
@@ -105,7 +107,9 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Not found"})
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Not found"}); err != nil {
+			slog.Error("Failed to encode response", "error", err)
+		}
 	})
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 

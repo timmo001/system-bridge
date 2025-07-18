@@ -31,14 +31,14 @@ func Sleep() error {
 
 func RegisterPowerSleepHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerSleep, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received power sleep event: %v", message)
+		slog.Info("Received power sleep event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Sleep the system
 			if err := Sleep(); err != nil {
-				slog.Error("Failed to sleep system: %v", err)
+				slog.Error("Failed to sleep system", "err", err)
 			}
 		}()
 
