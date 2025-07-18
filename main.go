@@ -25,6 +25,7 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
+	"github.com/timmo001/system-bridge/version"
 	"github.com/urfave/cli/v3"
 )
 
@@ -81,6 +82,16 @@ func main() {
 		SendDefaultPII: true,
 		// Enable logs to be sent to Sentry
 		EnableLogs: true,
+		// Set Sentry release context
+		Release: version.Version,
+		// Add version tag to Sentry events
+		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			if event.Tags == nil {
+				event.Tags = make(map[string]string)
+			}
+			event.Tags["version"] = version.Version
+			return event
+		},
 	})
 	if err != nil {
 		log.Fatalf("sentry.Init: %s", err)
