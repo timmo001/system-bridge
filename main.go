@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"runtime"
 	"syscall"
+	"time"
 
 	"fyne.io/systray"
 	"github.com/charmbracelet/log"
@@ -286,9 +287,22 @@ func openLogs() {
 	}
 
 	logFilePath := filepath.Join(configDir, "system-bridge.log")
+	log.Infof("Opening logs in: %s", logFilePath)
+
+	// Wait for the log file to be unlocked
+	for {
+		_, err := os.Stat(logFilePath)
+		if err != nil {
+			log.Warnf("Log file is locked, waiting for it to be unlocked: %v", err)
+			time.Sleep(100 * time.Millisecond)
+		} else {
+			break
+		}
+	}
 
 	// Open the log file in the default editor
 	if err := filesystem.OpenFile(logFilePath); err != nil {
+		log.Errorf("Failed to open logs: %v", err)
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open logs",
 			Message: "Failed to open logs in the default editor",
@@ -296,6 +310,5 @@ func openLogs() {
 		}); err != nil {
 			log.Errorf("Failed to send notification: %v", err)
 		}
-		log.Errorf("Failed to open logs: %v", err)
 	}
 }
