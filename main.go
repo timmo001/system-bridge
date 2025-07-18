@@ -35,7 +35,7 @@ var trayIconPngData []byte
 var trayIconIcoData []byte
 
 func main() {
-	setupLogging()
+		setupLogging()
 
 	defer func() {
 		if err := recover(); err != nil {

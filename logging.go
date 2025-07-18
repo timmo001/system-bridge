@@ -13,6 +13,7 @@ import (
 	sentryslog "github.com/getsentry/sentry-go/slog"
 	"github.com/natefinch/lumberjack"
 	console "github.com/phsym/console-slog"
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/version"
 )
@@ -87,6 +88,11 @@ func setupLogging() {
 	// Set the timeout to the maximum duration the program can afford to wait.
 	defer sentry.Flush(2 * time.Second)
 
+	settings, err := settings.Load()
+	if err != nil {
+		slog.Error("error loading settings", "err", err)
+	}
+
 	ctx := context.Background()
 
 	// Sentry handler
@@ -97,7 +103,7 @@ func setupLogging() {
 
 	// Terminal handler (colorized)
 	terminalHandler := console.NewHandler(os.Stdout, &console.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: settings.LogLevel,
 	})
 
 	// File handler with rolling logs
@@ -114,7 +120,7 @@ func setupLogging() {
 		Compress:   true,
 	}
 	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: settings.LogLevel,
 	})
 
 	// Use custom multiHandler
