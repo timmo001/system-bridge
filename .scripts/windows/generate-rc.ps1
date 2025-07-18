@@ -43,7 +43,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "System Bridge"
-            VALUE "FileDescription", "System Bridge - The bridge to your system"
+            VALUE "FileDescription", "System Bridge - A bridge for your systems"
             VALUE "FileVersion", "$VERSION"
             VALUE "InternalName", "system-bridge.exe"
             VALUE "LegalCopyright", "Copyright (C) $YEAR Aidan Timson"
