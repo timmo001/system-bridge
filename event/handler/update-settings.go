@@ -12,6 +12,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	settingspkg "github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/settings"
 )
 
@@ -95,7 +96,10 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 
 		slog.Info("Settings updated", "original", originalSettings, "new", newSettings)
 
-		if !originalSettings.Autostart && newSettings.Autostart {
+		// Only handle autostart changes when running from a real binary
+		if !utils.IsRunningFromRealBinary() {
+			slog.Info("Autostart changes ignored - running in development mode")
+		} else if !originalSettings.Autostart && newSettings.Autostart {
 			slog.Info("Autostart has changed:", "original", originalSettings.Autostart, "new", newSettings.Autostart)
 			switch runtime.GOOS {
 			case "linux":
