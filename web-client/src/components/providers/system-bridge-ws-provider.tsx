@@ -360,7 +360,7 @@ export function SystemBridgeWSProvider({
         connectionTimeoutRef.current = null;
       }
     };
-  }, [host, port, ssl, token, retryCount, isRequestingData, handleMessage]);
+  }, [host, port, ssl, token, isRequestingData, handleMessage]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
