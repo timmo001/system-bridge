@@ -156,7 +156,7 @@ export function SystemBridgeWSProvider({
           const mergedSettings: Settings = {
             autostart: receivedSettings.autostart ?? false,
             hotkeys: receivedSettings.hotkeys ?? [],
-            logLevel: receivedSettings.logLevel ?? "info",
+            logLevel: receivedSettings.logLevel ?? "INFO",
             media: {
               directories: receivedSettings.media?.directories ?? [],
             },
