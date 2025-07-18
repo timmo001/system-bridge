@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 
 import { generateUUID } from "~/lib/utils";
 import {
@@ -361,7 +361,7 @@ export function SystemBridgeWSProvider({
         connectionTimeoutRef.current = null;
       }
     };
-  }, [host, port, token, handleMessage, ssl, isRequestingData, retryCount]);
+  }, [host, port, ssl, token, retryCount, isRequestingData, handleMessage]);
 
   function sendRequest(request: WebSocketRequest) {
     if (!wsRef.current) return;
