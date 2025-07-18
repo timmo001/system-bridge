@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"runtime"
 	"syscall"
-	"time"
 
 	"fyne.io/systray"
 	"github.com/charmbracelet/log"
@@ -237,7 +236,8 @@ func onReady() {
 
 	// Create menu items
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
-	mOpenLogs := systray.AddMenuItem("Open logs", "Open the logs in the default editor")
+	systray.AddSeparator()
+	mOpenLogsDirectory := systray.AddMenuItem("Open logs directory", "Open the logs directory")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
 
@@ -246,9 +246,9 @@ func onReady() {
 		for {
 			select {
 			case <-mOpenWebClient.ClickedCh:
-				openWebClient(token)
-			case <-mOpenLogs.ClickedCh:
-				openLogs()
+				go openWebClient(token)
+			case <-mOpenLogsDirectory.ClickedCh:
+				go openLogsDirectory()
 			case <-mQuit.ClickedCh:
 				log.Info("Quitting...")
 				systray.Quit()
@@ -279,33 +279,19 @@ func openWebClient(token string) {
 	}
 }
 
-func openLogs() {
+func openLogsDirectory() {
 	configDir, err := utils.GetConfigPath()
 	if err != nil {
 		log.Errorf("error getting config path: %v", err)
 		return
 	}
 
-	logFilePath := filepath.Join(configDir, "system-bridge.log")
-	log.Infof("Opening logs in: %s", logFilePath)
-
-	// Wait for the log file to be unlocked
-	for {
-		_, err := os.Stat(logFilePath)
-		if err != nil {
-			log.Warnf("Log file is locked, waiting for it to be unlocked: %v", err)
-			time.Sleep(100 * time.Millisecond)
-		} else {
-			break
-		}
-	}
-
 	// Open the log file in the default editor
-	if err := filesystem.OpenFile(logFilePath); err != nil {
-		log.Errorf("Failed to open logs: %v", err)
+	if err := filesystem.OpenFile(configDir); err != nil {
+		log.Errorf("Failed to open logs directory: %v", err)
 		if err := notification.Send(notification.NotificationData{
-			Title:   "Failed to open logs",
-			Message: "Failed to open logs in the default editor",
+			Title:   "Failed to open logs directory",
+			Message: "Failed to open logs directory",
 			Icon:    "system-bridge",
 		}); err != nil {
 			log.Errorf("Failed to send notification: %v", err)
