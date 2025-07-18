@@ -239,12 +239,9 @@ function MediaDirectoryForm({
     const parentIsValid = await parentForm.trigger("media.directories");
     if (parentIsValid) {
       toast.success("Directory removed successfully");
-      const isFormValid = await parentForm.trigger();
-      if (isFormValid) {
-        await onSubmit(parentForm.getValues());
-      } else {
-        toast.error("Failed to submit form due to validation errors");
-      }
+      await onSubmit(parentForm.getValues());
+    } else {
+      toast.error("Failed to submit form due to validation errors");
     }
     mediaDirectoryForm.setFocus("name");
   }
