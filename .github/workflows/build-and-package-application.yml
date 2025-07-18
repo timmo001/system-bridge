@@ -132,8 +132,9 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Add icon to Windows binary
+      - name: Generate resource file
         run: |
+          powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
           windres system-bridge.rc -O coff -o system-bridge.syso
 
       - name: Build application
