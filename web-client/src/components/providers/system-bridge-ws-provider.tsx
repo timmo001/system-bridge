@@ -181,7 +181,7 @@ export function SystemBridgeWSProvider({
               logLevel:
                 updatedReceivedSettings.logLevel ??
                 prevSettings?.logLevel ??
-                "info",
+                "INFO",
               media: {
                 directories:
                   updatedReceivedSettings.media?.directories ??
