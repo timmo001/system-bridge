@@ -16,7 +16,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 		expectedToken, err := utils.LoadToken()
 		if err != nil {
 			log.Errorf("Failed to load token for authentication: %v", err)
-			http.Error(w, "Authentication error", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"})
 			return
 		}
 
@@ -26,7 +28,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 			token = r.Header.Get("token")
 		}
 		if token != expectedToken {
-			http.Error(w, "Invalid API token", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"})
 			return
 		}
 
@@ -35,7 +39,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 
 		// Validate module name
 		if module == "" {
-			http.Error(w, "Module name is required", http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Module name is required"})
 			return
 		}
 
@@ -43,7 +49,9 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 		m, err := dataStore.GetModule(module)
 		if err != nil {
 			log.Info("GET: /api/data/:module", "module", module, "data", "not found")
-			http.Error(w, "Module not found", http.StatusNotFound)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Module not found"})
 			return
 		}
 

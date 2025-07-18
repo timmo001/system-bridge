@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -87,7 +88,9 @@ func (b *Backend) Run(ctx context.Context) error {
 		_, err := b.wsServer.HandleConnection(w, r)
 		if err != nil {
 			log.Error("WebSocket connection error:", err)
-			http.Error(w, "WebSocket connection failed", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "WebSocket connection failed"})
 			return
 		}
 	})
@@ -99,7 +102,9 @@ func (b *Backend) Run(ctx context.Context) error {
 		b.dataStore,
 	))
 	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Not found"})
 	})
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 
