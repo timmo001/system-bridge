@@ -52,6 +52,40 @@ func (w dualWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
+func setupLogging() {
+	configDir, err := utils.GetConfigPath()
+	var logFile *os.File
+	if err == nil {
+		logFilePath := filepath.Join(configDir, "system-bridge.log")
+
+		// Check the log file is writable
+		if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
+			log.Warnf("Log file does not exist, creating: %s", logFilePath)
+			if err := os.WriteFile(logFilePath, []byte{}, 0666); err != nil {
+				log.Warnf("Failed to create log file: %v", err)
+			}
+		} else if err != nil {
+			log.Warnf("Failed to check log file: %v", err)
+		} else {
+			if err := os.Truncate(logFilePath, 0); err != nil {
+				log.Warnf("Failed to truncate log file: %v", err)
+			}
+		}
+
+		logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+		if err == nil {
+			log.SetOutput(dualWriter{console: os.Stdout, file: logFile})
+			defer logFile.Close()
+		} else {
+			log.SetOutput(os.Stdout)
+			log.Warnf("Failed to log to file, using only stdout: %v", err)
+		}
+	} else {
+		log.SetOutput(os.Stdout)
+		log.Warnf("Failed to get config path for logging: %v", err)
+	}
+}
+
 func main() {
 	// Create a channel to receive OS signals
 	sigChan := make(chan os.Signal, 1)
@@ -87,32 +121,7 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					configDir, err := utils.GetConfigPath()
-					var logFile *os.File
-					if err == nil {
-						logFilePath := filepath.Join(configDir, "system-bridge.log")
-						// Check the log file is writable
-						if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-							log.Warnf("Log file does not exist, creating: %s", logFilePath)
-							if err := os.WriteFile(logFilePath, []byte{}, 0666); err != nil {
-								log.Warnf("Failed to create log file: %v", err)
-							}
-						} else if err != nil {
-							log.Warnf("Failed to check log file: %v", err)
-						}
-
-						logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
-						if err == nil {
-							log.SetOutput(dualWriter{console: os.Stdout, file: logFile})
-							defer logFile.Close()
-						} else {
-							log.SetOutput(os.Stdout)
-							log.Warnf("Failed to log to file, using only stdout: %v", err)
-						}
-					} else {
-						log.SetOutput(os.Stdout)
-						log.Warnf("Failed to get config path for logging: %v", err)
-					}
+					setupLogging()
 
 					log.Info("------ System Bridge ------")
 
