@@ -68,6 +68,14 @@ export function SystemBridgeWSProvider({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pendingResolvers = useRef<Record<string, PendingResolver<any>>>({});
 
+  // Helper to clear and reject all pendingResolvers
+  function clearAllPendingResolvers(reason: string) {
+    Object.entries(pendingResolvers.current).forEach(([id, resolver]) => {
+      resolver.reject(new Error(reason));
+      delete pendingResolvers.current[id];
+    });
+  }
+
   useEffect(() => {
     isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
   }, [isSettingsUpdatePending]);
@@ -301,6 +309,9 @@ export function SystemBridgeWSProvider({
         connectionTimeoutRef.current = null;
       }
 
+      // Reject all pending resolvers
+      clearAllPendingResolvers("WebSocket connection closed");
+
       // Set specific error messages based on close code
       if (event.code === 1006) {
         setError(
@@ -336,6 +347,9 @@ export function SystemBridgeWSProvider({
         clearTimeout(connectionTimeoutRef.current);
         connectionTimeoutRef.current = null;
       }
+
+      // Reject all pending resolvers
+      clearAllPendingResolvers("WebSocket connection error");
 
       if (retryCount === 0) {
         // Only show this error on first attempt to avoid spam
@@ -448,6 +462,8 @@ export function SystemBridgeWSProvider({
   const retryConnection = useCallback(() => {
     setError(null);
     setRetryCount(0);
+    // Reject all pending resolvers before retrying
+    clearAllPendingResolvers("WebSocket connection retried");
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
