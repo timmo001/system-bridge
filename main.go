@@ -226,11 +226,13 @@ func openWebClient(token string) {
 	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
 	log.Infof("Opening web client URL: %s", url)
 	if err := browser.OpenURL(url); err != nil {
-		notification.Send(notification.NotificationData{
+		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open web client",
 			Message: "Failed to open web client in the default browser",
 			Icon:    "system-bridge",
-		})
+		}); err != nil {
+			log.Errorf("Failed to send notification: %v", err)
+		}
 		log.Errorf("Failed to open web client: %v", err)
 	}
 }
@@ -246,11 +248,13 @@ func openLogs() {
 
 	// Open the log file in the default editor
 	if err := filesystem.OpenFile(logFilePath); err != nil {
-		notification.Send(notification.NotificationData{
+		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open logs",
 			Message: "Failed to open logs in the default editor",
 			Icon:    "system-bridge",
-		})
+		}); err != nil {
+			log.Errorf("Failed to send notification: %v", err)
+		}
 		log.Errorf("Failed to open logs: %v", err)
 	}
 }
