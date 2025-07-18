@@ -44,6 +44,8 @@ type sentryLogWriter struct{}
 func (w *sentryLogWriter) Write(p []byte) (n int, err error) {
 	logLine := string(p)
 	if strings.Contains(logLine, "[ERROR]") || strings.Contains(logLine, "[FATAL]") {
+		sentry.CaptureException(fmt.Errorf("%s", logLine))
+	} else {
 		sentry.CaptureMessage(logLine)
 	}
 	return len(p), nil
