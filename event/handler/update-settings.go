@@ -90,6 +90,8 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 			}
 		}
 
+		slog.Info("Settings updated", "current", currentSettings, "new", newSettings)
+
 		if !currentSettings.Autostart && newSettings.Autostart {
 			slog.Info("Autostart has changed:", "current", currentSettings.Autostart, "new", newSettings.Autostart)
 			switch runtime.GOOS {
