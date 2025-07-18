@@ -16,5 +16,5 @@ runs:
           ${{ runner.os }}-nextjs-${{ hashFiles('web-client/**/bun.lock') }}
 
     - name: Build client project
-      run: make build_client
+      run: make build_web_client
       shell: bash

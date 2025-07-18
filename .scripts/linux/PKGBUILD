@@ -19,7 +19,7 @@ provides=('system-bridge')
 build() {
   export STATIC_EXPORT=true
   export CGO_ENABLED=1
-  make build_client
+  make build_web_client
   go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${ARCH_PKGVER}'" -o "system-bridge" .
 }
 

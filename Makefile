@@ -25,22 +25,22 @@ else
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
 endif
 
-build_web_client: clean-web-client
+build_web_client: clean_web_client
 	cd web-client && bun install && $(BUN_BUILD)
 
-create_appimage: clean-dist
+create_appimage: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
 
-create_arch: clean-dist
+create_arch: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 
-create_deb: clean-dist
+create_deb: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
 
-create_rpm: clean-dist
+create_rpm: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 
-create_windows_installer: clean-dist
+create_windows_installer: clean_dist
 	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean
 
 install: build
@@ -62,14 +62,14 @@ else
 	-$(RM) system-bridge-linux 2>/dev/null
 endif
 
-clean-dist:
+clean_dist:
 ifeq ($(OS),Windows_NT)
 	-$(RMDIR) dist 2>nul
 else
 	-$(RMDIR) dist 2>/dev/null
 endif
 
-clean-web-client:
+clean_web_client:
 ifeq ($(OS),Windows_NT)
 	-$(RMDIR) web-client\out 2>nul || exit 0
 else
@@ -82,13 +82,15 @@ deps:
 # Show help
 help:
 	@echo "Available targets:"
-	@echo "  build               Build the application"
-	@echo "  build_client        Build the web client"
-	@echo "  create_appimage     Create AppImage package"
-	@echo "  create_arch         Create Arch Linux package"
-	@echo "  create_deb          Create Debian package"
-	@echo "  create_rpm          Create RPM package"
-	@echo "  run                 Build and run the application (development only)"
-	@echo "  clean               Remove build artifacts"
-	@echo "  clean-web-client    Remove web client build artifacts"
-	@echo "  deps                Install dependencies"
+	@echo "  build                    Build the application"
+	@echo "  build_web_client         Build the web client"
+	@echo "  create_appimage          Create AppImage package"
+	@echo "  create_arch              Create Arch Linux package"
+	@echo "  create_deb               Create Debian package"
+	@echo "  create_rpm               Create RPM package"
+	@echo "  create_windows_installer Create Windows installer"
+	@echo "  run                      Build and run the application (development only)"
+	@echo "  clean                    Remove build artifacts"
+	@echo "  clean_dist               Remove dist directory"
+	@echo "  clean_web_client         Remove web client build artifacts"
+	@echo "  deps                     Install dependencies"
