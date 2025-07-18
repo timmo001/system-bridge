@@ -4,6 +4,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import { Geist } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/providers/theme-provider";
@@ -28,33 +30,39 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+// Create a QueryClient instance at the module level
+const queryClient = new QueryClient();
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <header className="bg-background fixed top-0 flex w-full items-center justify-center border-b p-2">
-            <div className="container flex justify-between">
-              <Link href="/">
-                <h1 className="text-2xl font-bold">System Bridge</h1>
-              </Link>
-              <ThemeToggle />
-            </div>
-          </header>
-          <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-8 p-8">
-            <NuqsAdapter>
-              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-            </NuqsAdapter>
-          </main>
-          <Toaster />
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="bg-background fixed top-0 flex w-full items-center justify-center border-b p-2">
+              <div className="container flex justify-between">
+                <Link href="/">
+                  <h1 className="text-2xl font-bold">System Bridge</h1>
+                </Link>
+                <ThemeToggle />
+              </div>
+            </header>
+            <main className="mt-14 flex min-h-screen flex-col items-center justify-start gap-8 p-8">
+              <NuqsAdapter>
+                <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+              </NuqsAdapter>
+            </main>
+            <Toaster />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </ThemeProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

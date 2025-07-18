@@ -21,6 +21,7 @@ export const SystemBridgeWSContext = createContext<
       isConnected: boolean;
       settings: Settings | null;
       sendRequest: (request: WebSocketRequest) => void;
+      sendRequestWithResponse: <T>(request: WebSocketRequest) => Promise<T>;
       error: string | null;
       retryConnection: () => void;
     }
@@ -51,6 +52,7 @@ export function SystemBridgeWSProvider({
   const wsRef = useRef<WebSocket | null>(null);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousConnectedState = useRef<boolean>(false);
+  const pendingResolvers = useRef<Record<string, (msg: any) => void>>({});
 
   useEffect(() => {
     isSettingsUpdatePendingRef.current = isSettingsUpdatePending;
@@ -85,6 +87,12 @@ export function SystemBridgeWSProvider({
     }
 
     const message = parsedMessage.data;
+    // --- Handle request/response pattern ---
+    if (message.id && pendingResolvers.current[message.id]) {
+      pendingResolvers.current[message.id]?.(message);
+      delete pendingResolvers.current[message.id];
+    }
+    // --- End request/response pattern ---
     switch (message.type) {
       case "DATA_UPDATE":
         if (!message.module) {
@@ -353,6 +361,32 @@ export function SystemBridgeWSProvider({
     wsRef.current.send(JSON.stringify(request));
   }
 
+  function sendRequestWithResponse<T>(request: WebSocketRequest): Promise<T> {
+    return new Promise((resolve, reject) => {
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        reject(new Error("WebSocket is not connected"));
+        return;
+      }
+      if (!request.id) {
+        reject(new Error("Request must have an id"));
+        return;
+      }
+      pendingResolvers.current[request.id] = resolve;
+      try {
+        wsRef.current.send(JSON.stringify(request));
+      } catch (e) {
+        delete pendingResolvers.current[request.id];
+        reject(e instanceof Error ? e : new Error("Unknown error"));
+      }
+      setTimeout(() => {
+        if (pendingResolvers.current[request.id]) {
+          delete pendingResolvers.current[request.id];
+          reject(new Error("WebSocket response timed out"));
+        }
+      }, 10000);
+    });
+  }
+
   useEffect(() => {
     if (!host || !port || !token) return;
     if (isConnected) return;
@@ -396,6 +430,7 @@ export function SystemBridgeWSProvider({
         isConnected,
         settings,
         sendRequest,
+        sendRequestWithResponse,
         error,
         retryConnection,
       }}

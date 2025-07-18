@@ -25,6 +25,7 @@ export const EventTypeSchema = z.enum([
   "UNREGISTER_DATA_LISTENER",
   "DATA_UPDATE",
   "UPDATE_SETTINGS",
+  "VALIDATE_DIRECTORY",
 ]);
 
 export type EventType = z.infer<typeof EventTypeSchema>;

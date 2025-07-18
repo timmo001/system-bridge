@@ -26,4 +26,5 @@ func RegisterHandlers(router *event.MessageRouter) {
 	RegisterRegisterDataListenerHandler(router)
 	RegisterUnregisterDataListenerHandler(router)
 	RegisterUpdateSettingsHandler(router)
+	RegisterValidateDirectoryHandler(router)
 }

@@ -1,10 +1,12 @@
 "use client";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
+import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 import {
   Form,
   FormControl,
@@ -20,6 +22,7 @@ import { Switch } from "~/components/ui/switch";
 import {
   SettingsSchema,
   type Settings,
+  type SettingsMediaDirectory,
 } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import {
@@ -29,11 +32,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
+
+type ValidateDirectoryResponse = { valid?: boolean };
 
 export function Settings() {
   const { token } = useSystemBridgeConnectionStore();
-  const { settings, sendRequest } = useSystemBridgeWS();
+  const { settings, sendRequestWithResponse } = useSystemBridgeWS();
 
   const form = useForm<Settings>({
     resolver: zodResolver(SettingsSchema),
@@ -47,7 +51,65 @@ export function Settings() {
     },
   });
 
-  function onSubmit(data: Settings) {
+  const validateDirectoryMutation = useMutation({
+    mutationFn: async (path: string) => {
+      const id = generateUUID();
+      const response = await sendRequestWithResponse<ValidateDirectoryResponse>(
+        {
+          id,
+          event: "VALIDATE_DIRECTORY",
+          data: { path },
+          token: token ?? "",
+        },
+      );
+      return response;
+    },
+  });
+
+  // Media settings state
+  const [mediaInputValue, setMediaInputValue] = React.useState("");
+  const [mediaError, setMediaError] = React.useState(""); // always a string
+
+  async function handleAddDirectory(field: {
+    value: SettingsMediaDirectory[];
+    onChange: (val: SettingsMediaDirectory[]) => void;
+  }) {
+    setMediaError("");
+    if (!mediaInputValue.trim()) return;
+    try {
+      const response = await validateDirectoryMutation.mutateAsync(
+        mediaInputValue.trim(),
+      );
+      if (response?.valid) {
+        const newDir: SettingsMediaDirectory = {
+          path: mediaInputValue.trim(),
+          name: mediaInputValue.trim(),
+        };
+        field.onChange([...(field.value ?? []), newDir]);
+        setMediaInputValue("");
+      } else {
+        setMediaError("Directory does not exist or is not accessible.");
+      }
+    } catch (e) {
+      setMediaError("Failed to validate directory.");
+    }
+  }
+
+  function handleRemoveDirectory(
+    field: {
+      value: SettingsMediaDirectory[];
+      onChange: (val: SettingsMediaDirectory[]) => void;
+    },
+    dir: SettingsMediaDirectory,
+  ) {
+    field.onChange(
+      (field.value ?? []).filter(
+        (d: SettingsMediaDirectory) => d.path !== dir.path,
+      ),
+    );
+  }
+
+  async function onSubmit(data: Settings) {
     if (!token) {
       console.error("No token found");
       toast.error("No token found");
@@ -55,11 +117,11 @@ export function Settings() {
     }
 
     try {
-      sendRequest({
+      await sendRequestWithResponse<Settings>({
         id: generateUUID(),
         event: "UPDATE_SETTINGS",
         data,
-        token,
+        token: token ?? "",
       });
       toast.success("Settings updated successfully!");
     } catch (error) {
@@ -130,7 +192,84 @@ export function Settings() {
           />
         </div>
 
-        {/* TODO: Media settings */}
+        {/* Media settings */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Media Settings</h2>
+          <FormField
+            control={form.control}
+            name="media.directories"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Media Directories</FormLabel>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={mediaInputValue}
+                      onChange={(e) => setMediaInputValue(e.target.value)}
+                      placeholder="Enter directory path"
+                      disabled={validateDirectoryMutation.isPending}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        handleAddDirectory(
+                          field as {
+                            value: SettingsMediaDirectory[];
+                            onChange: (val: SettingsMediaDirectory[]) => void;
+                          },
+                        )
+                      }
+                      disabled={
+                        validateDirectoryMutation.isPending ||
+                        !mediaInputValue.trim()
+                      }
+                      variant="secondary"
+                    >
+                      {validateDirectoryMutation.isPending
+                        ? "Validating..."
+                        : "Add"}
+                    </Button>
+                  </div>
+                  {mediaError && (
+                    <FormDescription className="text-red-500">
+                      {mediaError}
+                    </FormDescription>
+                  )}
+                  <ul className="mt-2 list-disc pl-5">
+                    {(field.value ?? []).map((dir: SettingsMediaDirectory) => (
+                      <li key={dir.path} className="flex items-center gap-2">
+                        <span className="break-all">{dir.path}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          onClick={() =>
+                            handleRemoveDirectory(
+                              field as {
+                                value: SettingsMediaDirectory[];
+                                onChange: (
+                                  val: SettingsMediaDirectory[],
+                                ) => void;
+                              },
+                              dir,
+                            )
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <FormDescription>
+                  Add directories to be used for media scanning. Only existing
+                  directories are allowed.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button disabled={!form.formState.isDirty} type="submit">
           Save Settings
