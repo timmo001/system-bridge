@@ -111,13 +111,23 @@ jobs:
 
       - name: Validate nsis script
         run: |
-          $version = '1.0.0'
-          $content = Get-Content .scripts/windows/installer.nsi.template -Raw
-          $content = $content -replace '\$VERSION', $version
-          Set-Content -Path test-installer.nsi -Value $content
+          $version = '5.0.0-dev+123a4bcd'
+          $templateContent = Get-Content -Path ".scripts/windows/installer.nsi.template" -Raw
+          $YEAR = (Get-Date).Year
+          if ($VERSION -match "^(\d+)\.(\d+)\.(\d+)") {
+              $major = $matches[1]
+              $minor = $matches[2]
+              $patch = $matches[3]
+              $build = 0
+              $DOT_VERSION = "$major.$minor.$patch.$build"
+          } else {
+              $DOT_VERSION = "0.0.0.0"
+          }
+          $installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$YEAR', $YEAR -replace '\$DOT_VERSION', $DOT_VERSION
+          Set-Content -Path "installer.nsi" -Value $installerScript
 
           # Check for syntax errors in NSIS script (this is a basic check, it just tries to compile)
-          makensis /V2 test-installer.nsi
+          makensis /V2 installer.nsi
 
   lint-arch-pkgbuild:
     name: Lint arch pkgbuild
