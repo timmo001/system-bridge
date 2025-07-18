@@ -162,6 +162,11 @@ WorkingDirectory=` + workingDirectory + `
 			}
 		}
 
+		if originalSettings.LogLevel != newSettings.LogLevel {
+			slog.Info("LogLevel has changed:", "original", originalSettings.LogLevel, "new", newSettings.LogLevel)
+			slog.SetLogLoggerLevel(newSettings.LogLevel.ToSlogLevel())
+		}
+
 		return event.MessageResponse{
 			ID:      message.ID,
 			Type:    event.ResponseTypeSettingsUpdated,
