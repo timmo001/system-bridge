@@ -16,6 +16,9 @@ import {
 } from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
 
+const CONNECTION_TIMEOUT = 10000 as const;
+const UPDATE_TIMEOUT = 10000 as const;
+
 export const SystemBridgeWSContext = createContext<
   | {
       data: ModuleData | null;
@@ -105,8 +108,9 @@ export function SystemBridgeWSProvider({
     const message = parsedMessage.data;
     if (message.id && pendingResolvers.current[message.id]) {
       console.log("Resolved pending request:", message.id);
-      const parsedData = pendingResolvers.current[message.id]
-        ?.schema.safeParse(message.data);
+      const parsedData = pendingResolvers.current[message.id]?.schema.safeParse(
+        message.data,
+      );
       if (parsedData?.success) {
         pendingResolvers.current[message.id]?.resolve(parsedData.data);
       } else {
@@ -237,7 +241,7 @@ export function SystemBridgeWSProvider({
         );
         setIsConnected(false);
       }
-    }, 10000); // 10 second timeout
+    }, CONNECTION_TIMEOUT);
 
     try {
       wsRef.current = new WebSocket(
@@ -378,7 +382,7 @@ export function SystemBridgeWSProvider({
         setError(
           "Settings update timed out. Please try again or check your connection.",
         );
-      }, 10000);
+      }, UPDATE_TIMEOUT);
     }
 
     console.log("Sending request:", request);
@@ -411,7 +415,7 @@ export function SystemBridgeWSProvider({
           delete pendingResolvers.current[request.id];
           reject(new Error("WebSocket response timed out"));
         }
-      }, 10000);
+      }, UPDATE_TIMEOUT);
     });
   }
 
