@@ -95,8 +95,6 @@ export const WebSocketRequestSchema = z.object({
 
 export type WebSocketRequest = z.infer<typeof WebSocketRequestSchema>;
 
-// {"id":"ed176435-d9b8-4d89-a80f-678d78641891","type":"DIRECTORY_VALIDATED","subtype":"NONE","data":{"valid":true},"message":"Validated directory"}
-
 export const WebSocketResponseSchema = z.object({
   id: z.string(),
   type: ResponseTypeSchema,
