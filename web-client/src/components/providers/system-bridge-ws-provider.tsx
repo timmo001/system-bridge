@@ -63,12 +63,9 @@ export function SystemBridgeWSProvider({
     Record<
       string,
       {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolve: (msg: any) => void;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        reject: (msg: any) => void;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        schema: z.ZodSchema<any>;
+        resolve: <T>(msg: T) => void;
+        reject: (msg: unknown) => void;
+        schema: z.ZodSchema<unknown>;
       }
     >
   >({});
