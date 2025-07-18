@@ -54,6 +54,8 @@ ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.syso 2>nul
 	-$(RM) system-bridge.exe 2>nul
 	-$(RM) system-bridge-windows.exe 2>nul
+	-$(RM) installer.nsi 2>nul
+	-$(RM) system-bridge.rc 2>nul
 	-$(RM) system-bridge.syso 2>nul
 else
 	-$(RM) system-bridge 2>/dev/null
