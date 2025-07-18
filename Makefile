@@ -4,38 +4,43 @@ ifeq ($(OS),Windows_NT)
 	RM=del /q /f
 	RMDIR=rmdir /s /q
 	OUT=system-bridge.exe
-	CLEAN_WEB_CLIENT=$(RMDIR) web-client\out 2>nul || exit 0
 	BUN_BUILD=set STATIC_EXPORT=true && bun run build
 	EXTRA_LDFLAGS=-H windowsgui
+	GEN_RC=powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
 else
 	EXE=
 	RM=rm -f
 	RMDIR=rm -rf
 	OUT=system-bridge-linux
-	CLEAN_WEB_CLIENT=$(RMDIR) web-client/out 2>/dev/null || true
 	BUN_BUILD=STATIC_EXPORT=true bun run build
 	EXTRA_LDFLAGS=
 endif
 
-build: build_client
+build: clean build_web_client
+ifeq ($(OS),Windows_NT)
+	$(GEN_RC)
+	windres .resources/system-bridge.rc -O coff -o system-bridge.syso
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
+else
+	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
+endif
 
-build_client: clean-web-client
+build_web_client: clean-web-client
 	cd web-client && bun install && $(BUN_BUILD)
 
-create_appimage:
+create_appimage: clean-dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
 
-create_arch:
+create_arch: clean-dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 
-create_deb:
+create_deb: clean-dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
 
-create_rpm:
+create_rpm: clean-dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 
-create_windows_installer:
+create_windows_installer: clean-dist
 	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean
 
 install: build
@@ -44,12 +49,30 @@ install: build
 run: build
 	./$(OUT) backend
 
-clean: clean-web-client
+clean:
+ifeq ($(OS),Windows_NT)
+	-$(RM) system-bridge.syso 2>nul
 	-$(RM) system-bridge.exe 2>nul
+	-$(RM) system-bridge-windows.exe 2>nul
+	-$(RM) system-bridge.syso 2>nul
+else
+	-$(RM) system-bridge 2>/dev/null
 	-$(RM) system-bridge-linux 2>/dev/null
+endif
+
+clean-dist:
+ifeq ($(OS),Windows_NT)
+	-$(RMDIR) dist 2>nul
+else
+	-$(RMDIR) dist 2>/dev/null
+endif
 
 clean-web-client:
-	$(CLEAN_WEB_CLIENT)
+ifeq ($(OS),Windows_NT)
+	-$(RMDIR) web-client\out 2>nul || exit 0
+else
+	-$(RMDIR) web-client/out 2>/dev/null
+endif
 
 deps:
 	go mod tidy

@@ -59,9 +59,19 @@ if (-not (Test-Path $iconPath)) {
 # Get the script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Read the template and replace version
+# Read the template and replace version, year, and DOT_VERSION
 $templateContent = Get-Content -Path "$scriptDir\installer.nsi.template" -Raw
-$installerScript = $templateContent -replace '\$VERSION', $VERSION
+$YEAR = (Get-Date).Year
+if ($VERSION -match "^(\d+)\.(\d+)\.(\d+)") {
+    $major = $matches[1]
+    $minor = $matches[2]
+    $patch = $matches[3]
+    $build = 0
+    $DOT_VERSION = "$major.$minor.$patch.$build"
+} else {
+    $DOT_VERSION = "0.0.0.0"
+}
+$installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$YEAR', $YEAR -replace '\$DOT_VERSION', $DOT_VERSION
 
 # Write the processed script to a file
 Set-Content -Path "installer.nsi" -Value $installerScript

@@ -132,6 +132,10 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Add icon to Windows binary
+        run: |
+          windres .resources/system-bridge.rc -O coff -o system-bridge.syso
+
       - name: Build application
         env:
           GOOS: windows
@@ -139,11 +143,7 @@ jobs:
           CGO_ENABLED: 1
           CC: gcc
         run: |
-          go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-windows.exe"
-
-      - name: Add icon to Windows binary
-        run: |
-          windres .resources/system-bridge.rc -O coff -o system-bridge.syso
+          go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
 
       - name: Package for Windows
         run: |

@@ -8,6 +8,16 @@ InstallDir "$PROGRAMFILES64\System Bridge"
 !define MUI_UNICON ".resources\system-bridge-dimmed.ico"
 !define DOT_NET_VERSION "8.0"
 
+VIProductVersion "$DOT_VERSION"
+VIAddVersionKey "ProductName" "System Bridge"
+VIAddVersionKey "FileDescription" "System Bridge - The bridge to your system"
+VIAddVersionKey "CompanyName" "System Bridge"
+VIAddVersionKey "LegalCopyright" "Copyright (C) $YEAR Aidan Timson"
+VIAddVersionKey "OriginalFilename" "system-bridge-setup.exe"
+VIAddVersionKey "InternalName" "system-bridge-setup.exe"
+VIAddVersionKey "ProductVersion" "$VERSION"
+VIAddVersionKey "FileVersion" "$VERSION"
+
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES

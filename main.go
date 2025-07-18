@@ -8,13 +8,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"syscall"
 
 	"fyne.io/systray"
 	"github.com/charmbracelet/log"
 	"github.com/pkg/browser"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -34,57 +34,26 @@ var trayIconPngData []byte
 //go:embed .resources/system-bridge-dimmed.ico
 var trayIconIcoData []byte
 
-// dualWriter is a writer that writes to both console and file, stripping ANSI color codes for the file
-var ansi = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
-
-type dualWriter struct {
-	console io.Writer
-	file    io.Writer
-}
-
-func (w dualWriter) Write(p []byte) (n int, err error) {
-	n, err = w.console.Write(p)
-	plain := ansi.ReplaceAll(p, []byte(""))
-	_, ferr := w.file.Write(plain)
-	if err == nil {
-		err = ferr
-	}
-	return
-}
-
-func setupLogging() *os.File {
+func setupLogging() {
 	configDir, err := utils.GetConfigPath()
-	var logFile *os.File
-	if err == nil {
-		logFilePath := filepath.Join(configDir, "system-bridge.log")
-
-		// Check the log file is writable
-		if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-			log.Warnf("Log file does not exist, creating: %s", logFilePath)
-			if err := os.WriteFile(logFilePath, []byte{}, 0666); err != nil {
-				log.Warnf("Failed to create log file: %v", err)
-			}
-		} else if err != nil {
-			log.Warnf("Failed to check log file: %v", err)
-		} else {
-			if err := os.Truncate(logFilePath, 0); err != nil {
-				log.Warnf("Failed to truncate log file: %v", err)
-			}
-		}
-
-		logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-		if err == nil {
-			log.SetOutput(dualWriter{console: os.Stdout, file: logFile})
-		} else {
-			log.SetOutput(os.Stdout)
-			log.Warnf("Failed to log to file, using only stdout: %v", err)
-		}
-	} else {
+	if err != nil {
 		log.SetOutput(os.Stdout)
 		log.Warnf("Failed to get config path for logging: %v", err)
+		return
 	}
 
-	return logFile
+	logFilePath := filepath.Join(configDir, "system-bridge.log")
+
+	logger := &lumberjack.Logger{
+		Filename:   logFilePath,
+		MaxSize:    10, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28, // days
+		Compress:   true,
+	}
+
+	// Write to both file (rotated) and console
+	log.SetOutput(io.MultiWriter(os.Stdout, logger))
 }
 
 func main() {
@@ -122,8 +91,7 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					logFile := setupLogging()
-					defer logFile.Close()
+					setupLogging()
 
 					log.Info("------ System Bridge ------")
 
