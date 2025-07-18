@@ -2,6 +2,8 @@ package event_handler
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
