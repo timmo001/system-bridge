@@ -98,6 +98,9 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
 		b.dataStore,
 	))
+	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
 	// TODO: http endpoints (/api healthcheck, get file etc.)
 
 	// Get port from environment variable with default
