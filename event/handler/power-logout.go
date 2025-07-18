@@ -2,11 +2,11 @@ package event_handler
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -30,14 +30,14 @@ func Logout() error {
 
 func RegisterPowerLogoutHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerLogout, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power logout event: %v", message)
+		slog.Info("Received power logout event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Logout the system
 			if err := Logout(); err != nil {
-				log.Errorf("Failed to logout system: %v", err)
+				slog.Error("Failed to logout system", "error", err)
 			}
 		}()
 

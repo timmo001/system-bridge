@@ -1,17 +1,17 @@
 package event_handler
 
 import (
+	"log/slog"
 	"os"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 )
 
 func RegisterExitApplicationHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventExitApplication, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received exit event: %v", message)
+		slog.Info("Received exit event", "message", message)
 
-		log.Info("Exiting backend...")
+		slog.Info("Exiting backend...")
 		defer os.Exit(0)
 
 		return event.MessageResponse{

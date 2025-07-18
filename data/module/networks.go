@@ -3,7 +3,8 @@ package data_module
 import (
 	"context"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/data/module/networks"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -15,7 +16,7 @@ func (nm NetworkModule) Name() types.ModuleName { return types.ModuleNetworks }
 
 // UpdateNetworksModule forwards the call to the networks module
 func (nm NetworkModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting disks data")
+	slog.Info("Getting disks data")
 
 	var networksData types.NetworksData
 	// Initialize arrays
@@ -28,7 +29,7 @@ func (nm NetworkModule) Update(ctx context.Context) (any, error) {
 
 	err := networks.GatherInterfaces(&networksData)
 	if err != nil {
-		log.Error("Error gathering network interfaces", "error", err)
+		slog.Error("Error gathering network interfaces", "error", err)
 	}
 	return networksData, nil
 }

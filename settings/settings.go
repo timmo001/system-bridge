@@ -2,12 +2,11 @@ package settings
 
 import (
 	"fmt"
+	"log/slog"
 
-	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/utils"
 )
-
 
 type SettingsHotkey struct {
 	Name string `json:"name" mapstructure:"name"`
@@ -26,7 +25,7 @@ type SettingsMedia struct {
 type Settings struct {
 	Autostart bool             `json:"autostart" mapstructure:"autostart"`
 	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
-	LogLevel  log.Level        `json:"logLevel" mapstructure:"logLevel"`
+	LogLevel  slog.Level       `json:"logLevel" mapstructure:"logLevel"`
 	Media     SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
@@ -45,7 +44,7 @@ func Load() (*Settings, error) {
 	// Set default values (token and port removed)
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
-	viper.SetDefault("logLevel", log.InfoLevel)
+	viper.SetDefault("logLevel", slog.LevelInfo)
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 
 	// Read the config file
@@ -83,4 +82,20 @@ func (cfg *Settings) Save() error {
 		}
 	}
 	return nil
+}
+
+// Helper to parse slog.Level from string (since slog does not provide ParseLevel)
+func ParseSlogLevel(levelStr string) (slog.Level, error) {
+	switch levelStr {
+	case "debug":
+		return slog.LevelDebug, nil
+	case "info":
+		return slog.LevelInfo, nil
+	case "warn":
+		return slog.LevelWarn, nil
+	case "error":
+		return slog.LevelError, nil
+	default:
+		return slog.LevelInfo, fmt.Errorf("invalid log level: %s", levelStr)
+	}
 }

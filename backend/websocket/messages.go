@@ -1,23 +1,24 @@
 package websocket
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/event"
 )
 
 func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.MessageResponse) {
-	log.Debug("Sending message to connection", "response", message)
+	slog.Debug("Sending message to connection", "response", message)
 
 	// Use per-connection mutex to prevent concurrent writes
 	connInfo.writeMux.Lock()
 	defer connInfo.writeMux.Unlock()
 
 	if err := connInfo.conn.WriteJSON(message); err != nil {
-		log.Error("Failed to send response:", err)
+		slog.Error("Failed to send response:", err)
 		// If there's an error, close the connection
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
-			log.Error("Error closing connection:", closeErr)
+			slog.Error("Error closing connection:", closeErr)
 		}
 		// Remove from connections and dataListeners if and only if the pointer matches
 		go func(addr string, failedConn *websocket.Conn) {
@@ -50,6 +51,6 @@ func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest,
 	if ok {
 		ws.SendMessage(connInfo, response)
 	} else {
-		log.Error("Connection not found in connections map", "addr", addr)
+		slog.Error("Connection not found in connections map", "addr", addr)
 	}
 }

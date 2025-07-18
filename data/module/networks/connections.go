@@ -3,7 +3,8 @@ package networks
 import (
 	"fmt"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	psnet "github.com/shirou/gopsutil/v4/net"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -13,7 +14,7 @@ func GatherConnections(networksData *types.NetworksData) {
 	// Get network connections
 	connections, err := psnet.Connections("all")
 	if err != nil {
-		log.Warn("Error getting network connections", "error", err)
+		slog.Warn("Error getting network connections", "error", err)
 		return
 	}
 

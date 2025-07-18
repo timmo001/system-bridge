@@ -2,11 +2,11 @@ package event_handler
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -36,14 +36,14 @@ func Hibernate() error {
 
 func RegisterPowerHibernateHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerHibernate, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power hibernate event: %v", message)
+		slog.Info("Received power hibernate event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Hibernate the system
 			if err := Hibernate(); err != nil {
-				log.Errorf("Failed to hibernate system: %v", err)
+				slog.Error("Failed to hibernate system", "error", err)
 			}
 		}()
 

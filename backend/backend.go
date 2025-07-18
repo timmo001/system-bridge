@@ -10,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
@@ -32,7 +33,7 @@ type Backend struct {
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
 	// Initialize the EventBus
 	_ = bus.GetInstance()
-	log.Info("EventBus initialized")
+	slog.Info("EventBus initialized")
 
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
@@ -63,7 +64,7 @@ func spaFileServer(staticFS fs.FS, indexFile string) http.HandlerFunc {
 }
 
 func (b *Backend) Run(ctx context.Context) error {
-	log.Info("Starting backend server...")
+	slog.Info("Starting backend server...")
 
 	// Create a context that can be canceled
 	ctx, cancel := context.WithCancel(ctx)
@@ -78,7 +79,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a file system that's rooted at the web-client/out directory
 	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
 	if err != nil {
-		log.Warnf("Failed to create sub filesystem: %v. Web client will not be served.", err)
+		slog.Warn(fmt.Sprintf("Failed to create sub filesystem: %v. Web client will not be served.", err))
 	} else {
 		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
 	}
@@ -87,7 +88,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		_, err := b.wsServer.HandleConnection(w, r)
 		if err != nil {
-			log.Error("WebSocket connection error:", err)
+			slog.Error("WebSocket connection error:", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": "WebSocket connection failed"})
@@ -126,7 +127,7 @@ func (b *Backend) Run(ctx context.Context) error {
 			errChan <- err
 			cancel()
 		}
-		log.Info("Backend server is running on", "address", server.Addr)
+		slog.Info("Backend server is running on", "address", server.Addr)
 	}()
 
 	// TODO: MDNS / SSDP / DHCP discovery
@@ -135,7 +136,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	go func() {
 		// Run immediately on startup
 		data.RunUpdateTaskProcessor(b.dataStore)
-		log.Info("Initial data update task processor completed")
+		slog.Info("Initial data update task processor completed")
 
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
@@ -146,7 +147,7 @@ func (b *Backend) Run(ctx context.Context) error {
 				return
 			case <-ticker.C:
 				data.RunUpdateTaskProcessor(b.dataStore)
-				log.Info("Data update task processor completed")
+				slog.Info("Data update task processor completed")
 			}
 		}
 	}()
@@ -154,9 +155,9 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Wait for either context cancellation or server error
 	select {
 	case <-ctx.Done():
-		log.Info("Backend server is shutting down...")
+		slog.Info("Backend server is shutting down...")
 	case err := <-errChan:
-		log.Error("Server error caused shutdown:", "err", err)
+		slog.Error("Server error caused shutdown:", "err", err)
 	}
 
 	return server.Shutdown(ctx)

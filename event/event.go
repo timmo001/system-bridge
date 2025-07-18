@@ -1,7 +1,8 @@
 package event
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -39,7 +40,7 @@ func NewMessageRouter() *MessageRouter {
 
 // RegisterHandler registers a new event handler
 func (mr *MessageRouter) RegisterHandler(event EventType, handler MessageHandler) {
-	log.Info("Registering event handler", "event", event)
+	slog.Info("Registering event handler", "event", event)
 	mr.Handlers[event] = handler
 }
 
@@ -54,7 +55,7 @@ func (mr *MessageRouter) HandleMessage(connection string, message Message) Messa
 		return handler(connection, message)
 	}
 
-	log.Warn("Method not found", "event", message.Event)
+	slog.Warn("Method not found", "event", message.Event)
 
 	return MessageResponse{
 		ID:   message.ID,

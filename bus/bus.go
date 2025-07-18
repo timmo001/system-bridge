@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -57,7 +58,7 @@ func (eb *EventBus) Subscribe(eventType EventType, subscriberID string, handler 
 	}
 
 	eb.subscribers[eventType][subscriberID] = handler
-	log.Info(fmt.Sprintf("Subscriber '%s' registered for event type '%s'", subscriberID, eventType))
+	slog.Info(fmt.Sprintf("Subscriber '%s' registered for event type '%s'", subscriberID, eventType))
 }
 
 // Unsubscribe removes a handler for a specific event type
@@ -71,7 +72,7 @@ func (eb *EventBus) Unsubscribe(eventType EventType, subscriberID string) {
 
 	if _, ok := eb.subscribers[eventType][subscriberID]; ok {
 		delete(eb.subscribers[eventType], subscriberID)
-		log.Info(fmt.Sprintf("Subscriber '%s' unregistered from event type '%s'", subscriberID, eventType))
+		slog.Info(fmt.Sprintf("Subscriber '%s' unregistered from event type '%s'", subscriberID, eventType))
 	}
 
 	// If no subscribers left for this event type, clean up
@@ -88,7 +89,7 @@ func (eb *EventBus) Publish(event Event) {
 	if handlers, ok := eb.subscribers[event.Type]; ok {
 		for id, handler := range handlers {
 			go func(id string, handler Handler) {
-				log.Debug(fmt.Sprintf("Delivering event type '%s' to subscriber '%s'", event.Type, id))
+				slog.Debug(fmt.Sprintf("Delivering event type '%s' to subscriber '%s'", event.Type, id))
 				handler(event)
 			}(id, handler)
 		}

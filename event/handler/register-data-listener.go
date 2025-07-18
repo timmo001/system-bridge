@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
@@ -14,7 +15,7 @@ type RegisterDataListenerRequestData struct {
 
 func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventRegisterDataListener, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received register data listener event: %v", message)
+		slog.Info("Received register data listener event", "message", message)
 
 		var data RegisterDataListenerRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {
@@ -28,7 +29,7 @@ func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
 
 		ws := websocket.GetInstance()
 		if ws == nil {
-			log.Error("No websocket instance found")
+			slog.Error("No websocket instance found")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

@@ -4,19 +4,19 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
 
+	"log/slog"
+
+	sentryslog "github.com/getsentry/sentry-go/slog"
+
 	"fyne.io/systray"
-	"github.com/charmbracelet/log"
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/browser"
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -38,27 +38,13 @@ var trayIconPngData []byte
 var trayIconIcoData []byte
 
 func setupLogging() {
-	configDir, err := utils.GetConfigPath()
-	if err != nil {
-		log.SetOutput(os.Stdout)
-		log.Warnf("Failed to get config path for logging: %v", err)
-		return
-	}
-
-	logFilePath := filepath.Join(configDir, "system-bridge.log")
-	fileLogger := &lumberjack.Logger{
-		Filename:   logFilePath,
-		MaxSize:    10, // megabytes
-		MaxBackups: 3,
-		MaxAge:     28, // days
-		Compress:   true,
-	}
-
 	ctx := context.Background()
-	sentryLogger := sentry.NewLogger(ctx)
-
-	// Write to console, file, and Sentry
-	log.SetOutput(io.MultiWriter(os.Stdout, fileLogger, sentryLogger))
+	handler := sentryslog.Option{
+		EventLevel: []slog.Level{slog.LevelError}, // Only Error level will be sent as events
+		LogLevel:   []slog.Level{slog.LevelWarn, slog.LevelInfo, slog.LevelDebug}, // Warn, Info, Debug as logs
+	}.NewSentryHandler(ctx)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 }
 
 func main() {
@@ -81,7 +67,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatalf("sentry.Init: %s", err)
+		slog.Error("sentry.Init", "err", err)
 	}
 	// Flush buffered events before the program terminates.
 	// Set the timeout to the maximum duration the program can afford to wait.
@@ -108,7 +94,7 @@ func main() {
 	// Handle signals in a goroutine
 	go func() {
 		sig := <-sigChan
-		log.Infof("Received signal: %v", sig)
+		slog.Info("Received signal", "signal", sig)
 		cancel() // Cancel the context
 	}()
 
@@ -130,21 +116,21 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					log.Info("------ System Bridge ------")
+					slog.Info("------ System Bridge ------")
 
 					s, err := settings.Load()
 					if err != nil {
 						return fmt.Errorf("error loading settings: %w", err)
 					}
 
-					log.Debugf("Loaded settings: %v", s)
+					slog.Debug("Loaded settings", "settings", s)
 
 					token, err := utils.LoadToken()
 					if err != nil {
 						return fmt.Errorf("error loading token: %w", err)
 					}
 
-					log.Infof("Your API token is: %s", token)
+					slog.Info("Your API token is", "token", token)
 
 					// Setup data store
 					dataStore, err := data.NewDataStore()
@@ -202,7 +188,7 @@ func main() {
 								Icon:    cmd.String("icon"),
 							})
 							if err != nil {
-								log.Warnf("Failed to send notification: %v", err)
+								slog.Warn("Failed to send notification", "err", err)
 							}
 							return nil
 						},
@@ -214,7 +200,7 @@ func main() {
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		systray.Quit()
-		log.Errorf("error running cmd: %v", err)
+		slog.Error("error running cmd", "err", err)
 		os.Exit(1)
 	}
 }
@@ -222,10 +208,10 @@ func main() {
 func onReady() {
 	token, err := utils.LoadToken()
 	if err != nil {
-		log.Errorf("error loading token: %v", err)
+		slog.Error("error loading token", "err", err)
 		token = utils.GenerateToken()
 		if saveErr := utils.SaveToken(token); saveErr != nil {
-			log.Fatalf("failed to persist generated token: %v", saveErr)
+			slog.Error("failed to persist generated token", "err", saveErr)
 		}
 	}
 
@@ -255,7 +241,7 @@ func onReady() {
 			case <-mOpenLogsDirectory.ClickedCh:
 				go openLogsDirectory()
 			case <-mQuit.ClickedCh:
-				log.Info("Quitting...")
+				slog.Info("Quitting...")
 				systray.Quit()
 				os.Exit(0)
 			}
@@ -265,41 +251,41 @@ func onReady() {
 
 func onExit() {
 	// Cleanup if needed
-	log.Info("System tray exiting...")
+	slog.Info("System tray exiting...")
 }
 
 func openWebClient(token string) {
 	port := utils.GetPort()
 	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
-	log.Infof("Opening web client URL: %s", url)
+	slog.Info("Opening web client URL", "url", url)
 	if err := browser.OpenURL(url); err != nil {
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open web client",
 			Message: "Failed to open web client in the default browser",
 			Icon:    "system-bridge",
 		}); err != nil {
-			log.Errorf("Failed to send notification: %v", err)
+			slog.Error("Failed to send notification", "err", err)
 		}
-		log.Errorf("Failed to open web client: %v", err)
+		slog.Error("Failed to open web client", "err", err)
 	}
 }
 
 func openLogsDirectory() {
 	configDir, err := utils.GetConfigPath()
 	if err != nil {
-		log.Errorf("error getting config path: %v", err)
+		slog.Error("error getting config path", "err", err)
 		return
 	}
 
 	// Open the log file in the default editor
 	if err := filesystem.OpenFile(configDir); err != nil {
-		log.Errorf("Failed to open logs directory: %v", err)
+		slog.Error("Failed to open logs directory", "err", err)
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open logs directory",
 			Message: "Failed to open logs directory",
 			Icon:    "system-bridge",
 		}); err != nil {
-			log.Errorf("Failed to send notification: %v", err)
+			slog.Error("Failed to send notification", "err", err)
 		}
 	}
 }

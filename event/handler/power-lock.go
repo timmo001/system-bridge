@@ -2,11 +2,11 @@ package event_handler
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -43,14 +43,14 @@ func Lock() error {
 
 func RegisterPowerLockHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerLock, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power lock event: %v", message)
+		slog.Info("Received power lock event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Lock the system
 			if err := Lock(); err != nil {
-				log.Errorf("Failed to lock system: %v", err)
+				slog.Error("Failed to lock system", "error", err)
 			}
 		}()
 

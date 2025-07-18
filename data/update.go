@@ -6,7 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 	"golang.org/x/time/rate"
 )
@@ -67,7 +68,7 @@ func (tp *UpdateTaskProcessor) AddTask(updater types.Updater) {
 	select {
 	case tp.taskQueue <- updater:
 	case <-tp.ctx.Done():
-		log.Info("Task processor is shutting down")
+		slog.Info("Task processor is shutting down")
 	}
 }
 
@@ -85,7 +86,7 @@ func (tp *UpdateTaskProcessor) worker() {
 			// Wait for rate limiter
 			err := tp.limiter.Wait(tp.ctx)
 			if err != nil {
-				log.Warnf("Rate limiter error: %v", err)
+				slog.Warn("Rate limiter error", "error", err)
 				continue
 			}
 
@@ -94,14 +95,14 @@ func (tp *UpdateTaskProcessor) worker() {
 			// Process task
 			data, err := task.Update(ctx)
 			if err != nil {
-				log.Warnf("Task processing error for module %s: %v", task.Name(), err)
+				slog.Warn("Task processing error for module", "module", task.Name(), "error", err)
 				continue
 			}
 
-			log.Debugf("Updating data for module: %s", task.Name())
+			slog.Debug("Updating data for module", "module", task.Name())
 			// Update data store
 			if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
-				log.Errorf("Failed to set module data for %s: %v", task.Name(), err)
+				slog.Error("Failed to set module data for", "module", task.Name(), "error", err)
 				continue
 			}
 
@@ -115,7 +116,7 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Create processor with 4 tasks/second, burst of 2
 	processor, err := NewUpdateTaskProcessor(dataStore, 4, 2)
 	if err != nil {
-		log.Error("Failed to create UpdateTaskProcessor", "error", err)
+		slog.Error("Failed to create UpdateTaskProcessor", "error", err)
 		return
 	}
 

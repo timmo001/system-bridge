@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
 )
 
 type APIResponse struct {
@@ -22,13 +22,13 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"}); err != nil {
-			log.Error("Failed to encode response", "error", err)
+			slog.Error("Failed to encode response", "error", err)
 		}
 	}
 }
 
 func handleAPIGet(w http.ResponseWriter, _ *http.Request) {
-	log.Info("GET: /api")
+	slog.Info("GET: /api")
 
 	response := APIResponse{
 		Status:  "success",
@@ -38,11 +38,11 @@ func handleAPIGet(w http.ResponseWriter, _ *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Error("Failed to encode response", "error", err)
+		slog.Error("Failed to encode response", "error", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"}); err != nil {
-			log.Error("Failed to encode response", "error", err)
+			slog.Error("Failed to encode response", "error", err)
 		}
 		return
 	}

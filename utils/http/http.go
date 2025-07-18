@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
 )
 
 // CacheEntry represents a cached HTTP response
@@ -27,11 +27,11 @@ type RateLimiter struct {
 
 // Client handles HTTP requests with caching and rate limiting
 type Client struct {
-	cache       map[string]*CacheEntry
-	rateLimits  map[string]*RateLimiter
-	cacheMutex  sync.RWMutex
-	client      *http.Client
-	defaultTTL  time.Duration
+	cache      map[string]*CacheEntry
+	rateLimits map[string]*RateLimiter
+	cacheMutex sync.RWMutex
+	client     *http.Client
+	defaultTTL time.Duration
 }
 
 // ClientConfig holds configuration for the HTTP client
@@ -86,7 +86,7 @@ func (c *Client) Get(url string) ([]byte, error) {
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			log.Errorf("Error closing response body: %v", err)
+			slog.Error("Error closing response body", "error", err)
 		}
 	}()
 
@@ -153,9 +153,9 @@ func (c *Client) checkRateLimit(url string) error {
 	if !exists {
 		limiter = &RateLimiter{
 			RequestCount: 0,
-			ResetAt:     time.Now().Add(time.Hour),
-			MaxRequests: 30,  // Conservative default for unauthenticated requests
-			TimeWindow:  time.Hour,
+			ResetAt:      time.Now().Add(time.Hour),
+			MaxRequests:  30, // Conservative default for unauthenticated requests
+			TimeWindow:   time.Hour,
 		}
 		c.rateLimits[url] = limiter
 	}
@@ -190,8 +190,8 @@ func (c *Client) SetRateLimit(url string, maxRequests int, timeWindow time.Durat
 
 	c.rateLimits[url] = &RateLimiter{
 		RequestCount: 0,
-		ResetAt:     time.Now().Add(timeWindow),
-		MaxRequests: maxRequests,
-		TimeWindow:  timeWindow,
+		ResetAt:      time.Now().Add(timeWindow),
+		MaxRequests:  maxRequests,
+		TimeWindow:   timeWindow,
 	}
 }

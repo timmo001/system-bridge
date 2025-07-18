@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/event"
@@ -16,7 +17,7 @@ type GetDataResponseData = any
 
 func RegisterGetDataHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetData, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received get data event: %v", message)
+		slog.Info("Received get data event", "message", message)
 
 		var data GetDataRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

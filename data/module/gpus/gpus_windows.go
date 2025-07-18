@@ -7,7 +7,8 @@ import (
 	"encoding/json"
 	"os/exec"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -37,7 +38,7 @@ func getGPUs() ([]types.GPU, error) {
 	utils.SetHideWindow(cmd)
 	output, err := cmd.Output()
 	if err != nil {
-		log.Error("failed to get GPU info", "error", err)
+		slog.Error("failed to get GPU info", "error", err)
 		return gpus, err
 	}
 
@@ -48,7 +49,7 @@ func getGPUs() ([]types.GPU, error) {
 		MemoryTotal float64 `json:"MemoryTotal"`
 	}
 	if err := json.Unmarshal(output, &gpuInfo); err != nil {
-		log.Error("failed to parse GPU info", "error", err)
+		slog.Error("failed to parse GPU info", "error", err)
 		return gpus, err
 	}
 

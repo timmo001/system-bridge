@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/media"
@@ -13,12 +14,12 @@ type MediaControlRequestData struct {
 
 func RegisterMediaControlHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventMediaControl, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received media control event: %v", message)
+		slog.Info("Received media control event", "message", message)
 
 		data := MediaControlRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
 		if err != nil {
-			log.Errorf("Failed to decode media control event data: %v", err)
+			slog.Error("Failed to decode media control event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -29,7 +30,7 @@ func RegisterMediaControlHandler(router *event.MessageRouter) {
 
 		// Validate action data
 		if data.Action == "" {
-			log.Error("No action provided for media control")
+			slog.Error("No action provided for media control")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -40,7 +41,7 @@ func RegisterMediaControlHandler(router *event.MessageRouter) {
 
 		err = media.Control(media.MediaAction(data.Action))
 		if err != nil {
-			log.Errorf("Failed to control media: %v", err)
+			slog.Error("Failed to control media", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

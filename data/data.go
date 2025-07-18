@@ -5,7 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/bus"
 	data_module "github.com/timmo001/system-bridge/data/module"
@@ -39,7 +40,7 @@ func NewDataStore() (*DataStore, error) {
 func (d *DataStore) Register(u types.Updater) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	log.Info("Registering data module", "module", u.Name())
+	slog.Info("Registering data module", "module", u.Name())
 
 	d.registry[u.Name()] = types.Module{Updater: u, Name: u.Name()}
 }
@@ -53,9 +54,9 @@ func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
 
 	// If the module data is nil, refresh the data
 	if module.Data == nil {
-		log.Info("Module data is nil, refreshing data", "module", module.Name)
+		slog.Info("Module data is nil, refreshing data", "module", module.Name)
 		if err := d.loadModuleData(&module); err != nil {
-			log.Error("Error loading module data", "module", module.Name, "error", err)
+			slog.Error("Error loading module data", "module", module.Name, "error", err)
 		}
 	}
 

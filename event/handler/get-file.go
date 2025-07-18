@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
@@ -13,12 +14,12 @@ type GetFileRequestData struct {
 
 func RegisterGetFileHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFile, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received get file event: %v", message)
+		slog.Info("Received get file event", "message", message)
 
 		data := GetFileRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
 		if err != nil {
-			log.Errorf("Failed to decode get file event data: %v", err)
+			slog.Error("Failed to decode get file event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -29,7 +30,7 @@ func RegisterGetFileHandler(router *event.MessageRouter) {
 
 		// Validate path data
 		if data.Path == "" {
-			log.Error("No path provided for get file")
+			slog.Error("No path provided for get file")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -40,7 +41,7 @@ func RegisterGetFileHandler(router *event.MessageRouter) {
 
 		fileInfo, err := filesystem.GetFileInfo(data.Path)
 		if err != nil {
-			log.Errorf("Failed to get file info: %v", err)
+			slog.Error("Failed to get file info", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

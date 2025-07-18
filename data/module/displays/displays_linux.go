@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/randr"
 	"github.com/jezek/xgb/xproto"
@@ -43,14 +44,14 @@ func GetDisplays() ([]types.Display, error) {
 	// Get primary output
 	primary, err := randr.GetOutputPrimary(X, root).Reply()
 	if err != nil {
-		log.Error("failed to get primary output", "error", err)
+		slog.Error("failed to get primary output", "error", err)
 	}
 
 	// Iterate through outputs
 	for _, output := range resources.Outputs {
 		info, err := randr.GetOutputInfo(X, output, 0).Reply()
 		if err != nil {
-			log.Error("failed to get output info", "error", err)
+			slog.Error("failed to get output info", "error", err)
 			continue
 		}
 

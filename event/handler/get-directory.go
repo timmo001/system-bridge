@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -30,7 +31,7 @@ func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDire
 
 func RegisterGetDirectoryHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetDirectory, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received get directory event: %v", message)
+		slog.Info("Received get directory event", "message", message)
 
 		var data GetDirectoryRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

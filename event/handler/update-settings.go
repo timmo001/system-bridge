@@ -3,14 +3,15 @@ package event_handler
 import (
 	_ "embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 
-	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
+	settingspkg "github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils/handlers/settings"
 )
 
@@ -23,11 +24,11 @@ var linuxAutostartDesktopFile []byte
 
 func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventUpdateSettings, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received update settings event: %v", message)
+		slog.Info("Received update settings event", "message", message)
 
 		currentSettings, err := settings.Load()
 		if err != nil {
-			log.Errorf("Failed to load settings: %v", err)
+			slog.Error("Failed to load settings", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -41,12 +42,12 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		dc := &mapstructure.DecoderConfig{
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				func(from, to reflect.Type, data any) (any, error) {
-					if to == reflect.TypeOf(log.Level(0)) && from.Kind() == reflect.String {
+					if to == reflect.TypeOf(slog.Level(0)) && from.Kind() == reflect.String {
 						str, ok := data.(string)
 						if !ok {
 							return nil, fmt.Errorf("expected string for log level but got %T", data)
 						}
-						parsed, err := log.ParseLevel(str)
+						parsed, err := settingspkg.ParseSlogLevel(str)
 						if err != nil {
 							return nil, err
 						}
@@ -59,7 +60,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 		dec, err := mapstructure.NewDecoder(dc)
 		if err != nil {
-			log.Errorf("Failed to create decoder: %v", err)
+			slog.Error("Failed to create decoder", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -69,7 +70,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 		err = dec.Decode(message.Data)
 		if err != nil {
-			log.Errorf("Failed to decode update settings event data: %v", err)
+			slog.Error("Failed to decode update settings event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -80,7 +81,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 
 		err = settings.Update(currentSettings, &newSettings)
 		if err != nil {
-			log.Errorf("Failed to update settings: %v", err)
+			slog.Error("Failed to update settings", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -95,13 +96,13 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				// Write autostart desktop file in ~/.config/autostart/system-bridge.desktop
 				err = os.WriteFile(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"), linuxAutostartDesktopFile, 0644)
 				if err != nil {
-					log.Errorf("Failed to write autostart desktop file: %v", err)
+					slog.Error("Failed to write autostart desktop file", "error", err)
 				} else {
-					log.Infof("Autostart desktop file written to %s", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+					slog.Info("Autostart desktop file written", "path", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
 				}
 			case "windows":
 				// Create shortcut in startup folder
-				log.Infof("Creating autostart shortcut in startup folder")
+				slog.Info("Creating autostart shortcut in startup folder")
 
 				// Get current executable path
 				executablePath := os.Args[0]
@@ -121,12 +122,12 @@ WorkingDirectory=` + workingDirectory + `
 				shortcutPath := filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk")
 				err = os.WriteFile(shortcutPath, windowsShortcutData, 0644)
 				if err != nil {
-					log.Errorf("Failed to write autostart shortcut: %v", err)
+					slog.Error("Failed to write autostart shortcut", "error", err)
 				} else {
-					log.Infof("Autostart shortcut written to %s", shortcutPath)
+					slog.Info("Autostart shortcut written", "path", shortcutPath)
 				}
 			default:
-				log.Warnf("Autostart is not supported on %s", runtime.GOOS)
+				slog.Warn(fmt.Sprintf("Autostart is not supported on %s", runtime.GOOS))
 			}
 		} else if currentSettings.Autostart && !newSettings.Autostart {
 			switch runtime.GOOS {
@@ -134,20 +135,20 @@ WorkingDirectory=` + workingDirectory + `
 				// Remove autostart desktop file in ~/.config/autostart/system-bridge.desktop
 				err = os.Remove(filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
 				if err != nil {
-					log.Errorf("Failed to remove autostart desktop file: %v", err)
+					slog.Error("Failed to remove autostart desktop file", "error", err)
 				} else {
-					log.Infof("Autostart desktop file removed from %s", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
+					slog.Info("Autostart desktop file removed", "path", filepath.Join(os.Getenv("HOME"), ".config", "autostart", "system-bridge.desktop"))
 				}
 			case "windows":
 				// Remove shortcut from startup folder
 				err = os.Remove(filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk"))
 				if err != nil {
-					log.Errorf("Failed to remove autostart shortcut: %v", err)
+					slog.Error("Failed to remove autostart shortcut", "error", err)
 				} else {
-					log.Infof("Autostart desktop file removed from %s", filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk"))
+					slog.Info("Autostart desktop file removed", "path", filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk"))
 				}
 			default:
-				log.Warnf("Autostart is not supported on %s", runtime.GOOS)
+				slog.Warn(fmt.Sprintf("Autostart is not supported on %s", runtime.GOOS))
 			}
 		}
 

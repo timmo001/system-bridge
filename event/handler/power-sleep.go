@@ -6,7 +6,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -30,14 +31,14 @@ func Sleep() error {
 
 func RegisterPowerSleepHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerSleep, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power sleep event: %v", message)
+		slog.Info("Received power sleep event: %v", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Sleep the system
 			if err := Sleep(); err != nil {
-				log.Errorf("Failed to sleep system: %v", err)
+				slog.Error("Failed to sleep system: %v", err)
 			}
 		}()
 

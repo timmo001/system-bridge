@@ -1,7 +1,8 @@
 package networks
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	psnet "github.com/shirou/gopsutil/v4/net"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -11,7 +12,7 @@ func GatherIOStatistics(networksData *types.NetworksData) {
 	// Get network I/O stats for all interfaces combined
 	ioTotal, err := psnet.IOCounters(false) // pernic=false for total stats
 	if err != nil {
-		log.Warn("Error getting total network I/O counters", "error", err)
+		slog.Warn("Error getting total network I/O counters", "error", err)
 		setDefaultIOStats(networksData)
 		return
 	}

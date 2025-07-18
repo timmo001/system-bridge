@@ -1,7 +1,8 @@
 package sensors
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/shirou/gopsutil/v4/sensors"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -10,7 +11,7 @@ func GetTemperatureSensorsData() ([]types.Temperature, error) {
 	temperatures := make([]types.Temperature, 0)
 	temperatureStats, err := sensors.SensorsTemperatures()
 	if err != nil {
-		log.Error("failed to get  temperature stats", "error", err)
+		slog.Error("failed to get  temperature stats", "error", err)
 		return temperatures, err
 	} else {
 		for _, ts := range temperatureStats {

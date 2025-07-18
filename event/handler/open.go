@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/browser"
 	"github.com/timmo001/system-bridge/event"
@@ -15,12 +16,12 @@ type OpenRequestData struct {
 
 func RegisterOpenHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventOpen, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received open event: %v", message)
+		slog.Info("Received open event", "message", message)
 
 		data := OpenRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
 		if err != nil {
-			log.Errorf("Failed to decode open event data: %v", err)
+			slog.Error("Failed to decode open event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -31,7 +32,7 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 
 		// Validate path data
 		if data.Path == "" && data.URL == "" {
-			log.Error("No path or URL provided for open")
+			slog.Error("No path or URL provided for open")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -43,7 +44,7 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 		if data.Path != "" {
 			err = filesystem.OpenFile(data.Path)
 			if err != nil {
-				log.Errorf("Failed to open file: %v", err)
+				slog.Error("Failed to open file", "error", err)
 				return event.MessageResponse{
 					ID:      message.ID,
 					Type:    event.ResponseTypeError,
@@ -63,7 +64,7 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 			// Open the URL in the default browser
 			err := browser.OpenURL(data.URL)
 			if err != nil {
-				log.Errorf("Failed to open URL: %v", err)
+				slog.Error("Failed to open URL", "error", err)
 				return event.MessageResponse{
 					ID:      message.ID,
 					Type:    event.ResponseTypeError,
@@ -86,6 +87,5 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 			Subtype: event.ResponseSubtypeBadRequest,
 			Message: "No path or URL provided for open",
 		}
-
 	})
 }

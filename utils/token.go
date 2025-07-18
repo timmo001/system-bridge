@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/google/uuid"
 )
 
@@ -38,7 +39,7 @@ func LoadToken() (string, error) {
 		if err := SaveToken(token); err != nil {
 			return "", fmt.Errorf("failed to save new token: %w", err)
 		}
-		log.Info("Generated new API token")
+		slog.Info("Generated new API token")
 		return token, nil
 	}
 
@@ -55,7 +56,7 @@ func LoadToken() (string, error) {
 		if err := SaveToken(token); err != nil {
 			return "", fmt.Errorf("failed to save new token: %w", err)
 		}
-		log.Info("Generated new API token (file was empty)")
+		slog.Info("Generated new API token (file was empty)")
 		return token, nil
 	}
 
@@ -92,12 +93,12 @@ func GetPort() int {
 
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		log.Warnf("Invalid port in SYSTEM_BRIDGE_PORT environment variable: %s, using default 9170", portStr)
+		slog.Warn(fmt.Sprintf("Invalid port in SYSTEM_BRIDGE_PORT environment variable: %s, using default 9170", portStr))
 		return 9170
 	}
 
 	if port < 1 || port > 65535 {
-		log.Warnf("Port %d is out of valid range (1-65535), using default 9170", port)
+		slog.Warn(fmt.Sprintf("Port %d is out of valid range (1-65535), using default 9170", port))
 		return 9170
 	}
 

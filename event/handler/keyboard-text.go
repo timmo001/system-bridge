@@ -1,9 +1,9 @@
 package event_handler
 
 import (
+	"log/slog"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/keyboard"
@@ -16,12 +16,12 @@ type KeyboardTextRequestData struct {
 
 func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventKeyboardText, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received keyboard text event: %v", message)
+		slog.Info("Received keyboard text event", "message", message)
 
 		data := KeyboardTextRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
 		if err != nil {
-			log.Errorf("Failed to decode keyboard text event data: %v", err)
+			slog.Error("Failed to decode keyboard text event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -32,7 +32,7 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 
 		// Validate text data
 		if data.Text == "" {
-			log.Error("No text provided for keyboard text event")
+			slog.Error("No text provided for keyboard text event")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -45,15 +45,15 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 		if data.Delay > 0 {
 			delay := data.Delay
 
-			log.Infof("Waiting for %d milliseconds", delay)
+			slog.Info("Waiting before typing", "delay_ms", delay)
 			time.Sleep(time.Duration(delay) * time.Millisecond)
 		}
 
-		log.Infof("Typing text: %s", data.Text)
+		slog.Info("Typing text", "text", data.Text)
 		// Type the text
 		err = keyboard.SendText(data.Text)
 		if err != nil {
-			log.Errorf("Failed to type text: %v", err)
+			slog.Error("Failed to type text", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

@@ -7,7 +7,8 @@ import (
 	"encoding/json"
 	"os/exec"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -18,7 +19,7 @@ func getGPUs() ([]types.GPU, error) {
 	cmd := exec.Command("system_profiler", "SPDisplaysDataType", "-json")
 	output, err := cmd.Output()
 	if err != nil {
-		log.Error("failed to get GPU info", "error", err)
+		slog.Error("failed to get GPU info", "error", err)
 		return gpuList, err
 	}
 
@@ -33,7 +34,7 @@ func getGPUs() ([]types.GPU, error) {
 	}
 
 	if err := json.Unmarshal(output, &result); err != nil {
-		log.Error("failed to parse GPU info", "error", err)
+		slog.Error("failed to parse GPU info", "error", err)
 		return gpuList, err
 	}
 

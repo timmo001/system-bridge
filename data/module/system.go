@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/version"
@@ -17,7 +18,7 @@ type SystemModule struct{}
 
 func (sm SystemModule) Name() types.ModuleName { return types.ModuleSystem }
 func (sm SystemModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting system data")
+	slog.Info("Getting system data")
 
 	// Initialize arrays
 	var systemData types.SystemData
@@ -26,12 +27,12 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	infoStat, err := host.Info()
 	if err != nil {
-		log.Errorf("Failed to get system info: %v", err)
+		slog.Error("Failed to get system info: %v", err)
 	}
 
 	users, err := host.Users()
 	if err != nil {
-		log.Warnf("Failed to get user info: %v", err)
+		slog.Warn("Failed to get user info: %v", err)
 	}
 
 	systemData.BootTime = infoStat.BootTime
@@ -71,7 +72,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
-		log.Errorf("Failed to get latest version: %v", err)
+		slog.Error("Failed to get latest version: %v", err)
 		latestVersion = currentVersion
 	}
 
@@ -89,7 +90,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 func getIPv4Address() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Warnf("Failed to get IPv4 Address: %v", err)
+		slog.Warn("Failed to get IPv4 Address: %v", err)
 		return ""
 	}
 	defer func() {
@@ -105,7 +106,7 @@ func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
 	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
-		log.Warnf("Failed to get IPv6 Address: %v", err)
+		slog.Warn("Failed to get IPv6 Address: %v", err)
 		return ""
 	}
 	defer func() {
@@ -120,7 +121,7 @@ func getIPv6Address() string {
 func getMACAddress() string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		log.Warn("Failed to get MAC Address: %v", err)
+		slog.Warn("Failed to get MAC Address: %v", err)
 		return ""
 	}
 
@@ -131,7 +132,7 @@ func getMACAddress() string {
 		}
 	}
 
-	log.Info("No MAC address found")
+	slog.Info("No MAC address found")
 	return ""
 }
 

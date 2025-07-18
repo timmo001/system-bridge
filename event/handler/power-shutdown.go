@@ -1,23 +1,23 @@
 package event_handler
 
 import (
+	"log/slog"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/power"
 )
 
 func RegisterPowerShutdownHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerShutdown, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power shutdown event: %v", message)
+		slog.Info("Received power shutdown event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Shutdown the system
 			if err := power.Shutdown(); err != nil {
-				log.Errorf("Failed to shutdown system: %v", err)
+				slog.Error("Failed to shutdown system", "error", err)
 			}
 		}()
 

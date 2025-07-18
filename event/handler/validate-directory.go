@@ -1,11 +1,11 @@
 package event_handler
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -20,7 +20,7 @@ type ValidateDirectoryResponseData struct {
 
 func RegisterValidateDirectoryHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventValidateDirectory, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received validate directory event: %v", message)
+		slog.Info("Received validate directory event", "message", message)
 
 		var data ValidateDirectoryRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

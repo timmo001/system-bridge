@@ -2,11 +2,13 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"slices"
 	"sync"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
@@ -17,7 +19,7 @@ import (
 func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	conn, err := ws.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error("Failed to upgrade connection:", err)
+		slog.Error("Failed to upgrade connection", "error", err)
 		return nil, err
 	}
 
@@ -34,7 +36,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 	defer func() {
 		ws.RemoveConnection(conn)
 		if err := conn.Close(); err != nil {
-			log.Error("Error closing connection:", err)
+			slog.Error("Error closing connection", "error", err)
 		}
 	}()
 
@@ -42,27 +44,27 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Error("WebSocket error:", err)
+				slog.Error("WebSocket error", "error", err)
 			}
 			break
 		}
 
 		var msg WebSocketRequest
 		if err := json.Unmarshal(message, &msg); err != nil {
-			log.Error("Failed to parse message:", err)
+			slog.Error("Failed to parse message", "error", err)
 			ws.SendError(conn, msg, "invalid_message", "Failed to parse message")
 			continue
 		}
 
 		// Validate token
 		if msg.Token != ws.token {
-			log.Error("Invalid token received")
+			slog.Error("Invalid token received")
 			ws.SendError(conn, msg, "BAD_TOKEN", "Invalid token")
 			continue
 		}
 
 		// Handle different event types
-		log.Info("Received message", "event", msg.Event, "id", msg.ID)
+		slog.Info("Received message", "event", msg.Event, "id", msg.ID)
 		// Pass message to event handlers
 		response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
 			ID:    msg.ID,
@@ -79,7 +81,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		if ok {
 			ws.SendMessage(connInfo, response)
 		} else {
-			log.Error("Connection not found in connections map during message handling", "addr", addr)
+			slog.Error("Connection not found in connections map during message handling", "addr", addr)
 		}
 	}
 }
@@ -130,7 +132,7 @@ func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.Mod
 		return RegisterResponseExists
 	}
 
-	log.Infof("Registering data listener for %s", addr)
+	slog.Info(fmt.Sprintf("Registering data listener for %s", addr))
 	ws.dataListeners[addr] = modules
 	return RegisterResponseAdded
 }
@@ -140,7 +142,7 @@ func (ws *WebsocketServer) UnregisterDataListener(addr string) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	log.Infof("Unregistering data listener for %s", addr)
+	slog.Info(fmt.Sprintf("Unregistering data listener for %s", addr))
 	delete(ws.dataListeners, addr)
 }
 
@@ -158,21 +160,21 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 	}
 
 	if module.Data == nil {
-		log.Warn("Broadcasting module update with no data", "module", module.Name, "data", module.Data)
+		slog.Warn("Broadcasting module update with no data", "module", module.Name, "data", module.Data)
 	} else {
-		log.Info("Broadcasting module update", "module", module.Name)
+		slog.Info("Broadcasting module update", "module", module.Name)
 	}
 
 	if addr != nil {
 		if connInfo, ok := ws.connections[*addr]; ok {
-			log.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
+			slog.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
 			ws.SendMessage(connInfo, response)
 		} else {
 			for remote_addr, connInfo := range ws.connections {
 				modules, ok := ws.dataListeners[remote_addr]
 
 				if ok && slices.Contains(modules, module.Name) {
-					log.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+					slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
 					ws.SendMessage(connInfo, response)
 				}
 
@@ -183,33 +185,33 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 
 // handleGetDataModule handles module data updates from the event bus
 func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
-	log.Info("WS: event", "type", event.Type, "data", event.Data)
+	slog.Info("WS: event", "type", event.Type, "data", event.Data)
 	if event.Type != bus.EventGetDataModule {
 		return
 	}
 
-	log.Info("WS: EventGetDataModule", "eventData", event.Data)
+	slog.Info("WS: EventGetDataModule", "eventData", event.Data)
 
 	var moduleRequest bus.GetDataRequest
 	if err := mapstructure.Decode(event.Data, &moduleRequest); err != nil {
-		log.Error("Failed to decode module data", "error", err)
+		slog.Error("Failed to decode module data", "error", err)
 		return
 	}
 
-	log.Info("WS: EventGetDataModule", "data", moduleRequest)
+	slog.Info("WS: EventGetDataModule", "data", moduleRequest)
 
 	for _, moduleName := range moduleRequest.Modules {
-		log.Info("WS: Broadcasting module update", "module", moduleName)
+		slog.Info("WS: Broadcasting module update", "module", moduleName)
 
 		module, err := ws.dataStore.GetModule(moduleName)
 		if err != nil {
-			log.Warn("Data module not registered", "module", moduleName)
+			slog.Warn("Data module not registered", "module", moduleName)
 			continue
 		}
 
 		if module.Data == nil {
-			log.Warn("WS: No data found for module", "module", moduleName)
-			log.Warn("Sending empty module update")
+			slog.Warn("WS: No data found for module", "module", moduleName)
+			slog.Warn("Sending empty module update")
 		}
 
 		ws.BroadcastModuleUpdate(module, &moduleRequest.Connection)
@@ -218,18 +220,18 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 // handleDataModuleUpdate handles module data updates from the event bus
 func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
-	log.Info("WS: event", "type", event.Type)
+	slog.Info("WS: event", "type", event.Type)
 	if event.Type != bus.EventDataModuleUpdate {
 		return
 	}
 
 	var module types.Module
 	if err := mapstructure.Decode(event.Data, &module); err != nil {
-		log.Error("Failed to decode module data", "error", err)
+		slog.Error("Failed to decode module data", "error", err)
 		return
 	}
 
-	log.Info("Received module data update from event bus", "module", module.Name)
+	slog.Info("Received module data update from event bus", "module", module.Name)
 
 	// Broadcast to connected websocket clients
 	ws.BroadcastModuleUpdate(module, nil)

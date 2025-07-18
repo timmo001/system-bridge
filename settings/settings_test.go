@@ -1,11 +1,11 @@
 package settings
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 		// Check default values
 		assert.False(t, settings.Autostart)
 		assert.Empty(t, settings.Hotkeys)
-		assert.Equal(t, log.InfoLevel, settings.LogLevel)
+		assert.Equal(t, slog.LevelInfo, settings.LogLevel)
 		assert.Empty(t, settings.Media.Directories)
 	})
 
@@ -71,7 +71,7 @@ func TestLoad(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, settings.Autostart)
-		assert.Equal(t, log.Level(-1), settings.LogLevel)
+		assert.Equal(t, slog.Level(-1), settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
 		assert.Equal(t, "test-hotkey", settings.Hotkeys[0].Name)
 		assert.Equal(t, "ctrl+shift+t", settings.Hotkeys[0].Key)
@@ -119,7 +119,7 @@ func TestSave(t *testing.T) {
 
 		// Modify settings
 		settings.Autostart = true
-		settings.LogLevel = log.Level(-1)
+		settings.LogLevel = slog.Level(-1)
 		settings.Hotkeys = []SettingsHotkey{
 			{Name: "test", Key: "ctrl+t"},
 		}
@@ -141,7 +141,7 @@ func TestSave(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, loadedSettings.Autostart)
-		assert.Equal(t, log.Level(-1), loadedSettings.LogLevel)
+		assert.Equal(t, slog.Level(-1), loadedSettings.LogLevel)
 		assert.Len(t, loadedSettings.Hotkeys, 1)
 		assert.Equal(t, "test", loadedSettings.Hotkeys[0].Name)
 		assert.Equal(t, "ctrl+t", loadedSettings.Hotkeys[0].Key)
@@ -185,7 +185,7 @@ func TestSettingsStructs(t *testing.T) {
 	t.Run("Settings struct", func(t *testing.T) {
 		settings := Settings{
 			Autostart: true,
-			LogLevel:  log.WarnLevel,
+			LogLevel:  slog.LevelWarn,
 			Hotkeys: []SettingsHotkey{
 				{Name: "test", Key: "ctrl+t"},
 			},
@@ -197,7 +197,7 @@ func TestSettingsStructs(t *testing.T) {
 		}
 
 		assert.True(t, settings.Autostart)
-		assert.Equal(t, log.WarnLevel, settings.LogLevel)
+		assert.Equal(t, slog.LevelWarn, settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
 		assert.Len(t, settings.Media.Directories, 1)
 	})

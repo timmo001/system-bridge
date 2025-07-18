@@ -51,7 +51,8 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -98,7 +99,7 @@ func GetDisplays() ([]types.Display, error) {
 	}
 
 	if len(displays) == 0 {
-		log.Warn("No displays found")
+		slog.Warn("No displays found")
 		return displays, nil
 	}
 

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -28,7 +29,7 @@ func GatherInterfaces(networksData *types.NetworksData) error {
 		// Get interface addresses
 		addrs, err := iface.Addrs()
 		if err != nil {
-			log.Warn("Error getting addresses for interface", "interface", iface.Name, "error", err)
+			slog.Warn("Error getting addresses for interface", "interface", iface.Name, "error", err)
 			continue
 		}
 

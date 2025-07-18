@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
@@ -9,12 +10,12 @@ import (
 
 func RegisterNotificationHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventNotification, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received notification event: %v", message)
+		slog.Info("Received notification event", "message", message)
 
 		data := notification.NotificationData{}
 		err := mapstructure.Decode(message.Data, &data)
 		if err != nil {
-			log.Errorf("Failed to decode notification event data: %v", err)
+			slog.Error("Failed to decode notification event data", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -25,7 +26,7 @@ func RegisterNotificationHandler(router *event.MessageRouter) {
 
 		// Validate notification data
 		if data.Title == "" || data.Message == "" {
-			log.Error("Missing required notification data")
+			slog.Error("Missing required notification data")
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
@@ -36,7 +37,7 @@ func RegisterNotificationHandler(router *event.MessageRouter) {
 
 		err = notification.Send(data)
 		if err != nil {
-			log.Errorf("Failed to send notification: %v", err)
+			slog.Error("Failed to send notification", "error", err)
 			return event.MessageResponse{
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,

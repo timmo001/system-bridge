@@ -1,10 +1,10 @@
 package event_handler
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 
-	"github.com/charmbracelet/log"
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 )
@@ -19,7 +19,7 @@ type GetFilesResponseData = []GetFileResponseData
 func GetFiles(path string) []GetFileResponseData {
 	files, err := os.ReadDir(path)
 	if err != nil {
-		log.Errorf("Failed to read directory: %v", err)
+		slog.Error("Failed to read directory", "error", err)
 		return nil
 	}
 
@@ -33,7 +33,7 @@ func GetFiles(path string) []GetFileResponseData {
 
 func RegisterGetFilesHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFiles, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received get files event: %v", message)
+		slog.Info("Received get files event", "message", message)
 
 		var data GetFilesRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

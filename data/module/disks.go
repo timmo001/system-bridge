@@ -4,7 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -13,7 +14,7 @@ type DiskModule struct{}
 
 func (diskModule DiskModule) Name() types.ModuleName { return types.ModuleDisks }
 func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting disks data")
+	slog.Info("Getting disks data")
 
 	var disksData types.DisksData
 	// Initialize arrays
@@ -22,14 +23,14 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	// Get all partitions
 	partitions, err := disk.Partitions(false)
 	if err != nil {
-		log.Errorf("Failed to get disk partitions: %v", err)
+		slog.Error("Failed to get disk partitions", "error", err)
 		return disksData, err
 	}
 
 	// Get IO counters for all devices
 	ioCounters, err := disk.IOCounters()
 	if err != nil {
-		log.Errorf("Failed to get disk IO counters: %v", err)
+		slog.Error("Failed to get disk IO counters", "error", err)
 		// Continue without IO counters
 	} else {
 		// Set total IO counters
@@ -64,7 +65,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		usage, err := disk.Usage(partition.Mountpoint)
 		var diskUsage *types.DiskUsage
 		if err != nil {
-			log.Errorf("Failed to get disk usage for %s: %v", partition.Mountpoint, err)
+			slog.Error("Failed to get disk usage:", "mountpoint", partition.Mountpoint, "error", err)
 		} else {
 			diskUsage = &types.DiskUsage{
 				Total:   usage.Total,

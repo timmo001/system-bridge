@@ -2,11 +2,11 @@ package event_handler
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -30,14 +30,14 @@ func Restart() error {
 
 func RegisterPowerRestartHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventPowerRestart, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received power restart event: %v", message)
+		slog.Info("Received power restart event", "message", message)
 
 		go func() {
 			time.Sleep(1 * time.Second)
 
 			// Restart the system
 			if err := Restart(); err != nil {
-				log.Errorf("Failed to restart system: %v", err)
+				slog.Error("Failed to restart system", "error", err)
 			}
 		}()
 

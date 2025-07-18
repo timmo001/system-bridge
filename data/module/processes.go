@@ -3,7 +3,8 @@ package data_module
 import (
 	"context"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -12,14 +13,14 @@ type ProcessModule struct{}
 
 func (pm ProcessModule) Name() types.ModuleName { return types.ModuleProcesses }
 func (pm ProcessModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting processes data")
+	slog.Info("Getting processes data")
 
 	processesData := make([]types.Process, 0)
 
 	// Get process list
 	processes, err := process.Processes()
 	if err != nil {
-		log.Errorf("Failed to get processes: %v", err)
+		slog.Error("Failed to get processes: %v", err)
 		return processesData, err
 	}
 

@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/sensors"
@@ -17,7 +18,7 @@ type CPUModule struct{}
 
 func (cpuModule CPUModule) Name() types.ModuleName { return types.ModuleCPU }
 func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting CPU data")
+	slog.Info("Getting CPU data")
 
 	percentageInterval := 4 * time.Second
 

@@ -10,7 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -20,15 +21,15 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		// Debug logging for playerctl errors and environment
-		log.Warn("playerctl error:", "error", err.Error())
+		slog.Warn("playerctl error:", "error", err.Error())
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			log.Warn("playerctl stderr:", "stderr", string(exitErr.Stderr))
+			slog.Warn("playerctl stderr:", "stderr", string(exitErr.Stderr))
 		}
-		log.Warn("ENV: DBUS_SESSION_BUS_ADDRESS=", "address", os.Getenv("DBUS_SESSION_BUS_ADDRESS"))
-		log.Warn("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
-		log.Warn("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
+		slog.Warn("ENV: DBUS_SESSION_BUS_ADDRESS=", "address", os.Getenv("DBUS_SESSION_BUS_ADDRESS"))
+		slog.Warn("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
+		slog.Warn("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
 	} else {
-		log.Debug("playerctl output:", "output", string(output))
+		slog.Debug("playerctl output:", "output", string(output))
 	}
 
 	if err == nil {
@@ -45,7 +46,7 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			LoopStatus  string  `json:"loopStatus"`
 		}
 		if err := json.Unmarshal(output, &metadata); err != nil {
-			log.Warn("JSON unmarshal error:", "error", err.Error(), "raw_output", string(output))
+			slog.Warn("JSON unmarshal error:", "error", err.Error(), "raw_output", string(output))
 		} else {
 			mediaData.Title = &metadata.Title
 			mediaData.Artist = &metadata.Artist

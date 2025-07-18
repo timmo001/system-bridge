@@ -1,7 +1,8 @@
 package event_handler
 
 import (
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
@@ -13,7 +14,7 @@ func GetDirectories(router *event.MessageRouter) []filesystem.DirectoryInfo {
 	// Load settings to get user media directories
 	s, err := settings.Load()
 	if err != nil {
-		log.Errorf("Failed to load settings for media directories: %v", err)
+		slog.Error("Failed to load settings for media directories", "error", err)
 		return directories
 	}
 
@@ -30,7 +31,7 @@ func GetDirectories(router *event.MessageRouter) []filesystem.DirectoryInfo {
 
 func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetDirectories, func(connection string, message event.Message) event.MessageResponse {
-		log.Infof("Received get directories event: %v", message)
+		slog.Info("Received get directories event", "message", message)
 
 		directories := GetDirectories(router)
 

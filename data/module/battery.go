@@ -3,7 +3,8 @@ package data_module
 import (
 	"context"
 
-	"github.com/charmbracelet/log"
+	"log/slog"
+
 	"github.com/distatus/battery"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -12,14 +13,14 @@ type BatteryModule struct{}
 
 func (batteryModule BatteryModule) Name() types.ModuleName { return types.ModuleBattery }
 func (batteryModule BatteryModule) Update(ctx context.Context) (any, error) {
-	log.Info("Getting battery data")
+	slog.Info("Getting battery data")
 
 	// Get all batteries
 	batteries, err := battery.GetAll()
 	// If there's an error getting battery info or no batteries found, return empty data
 	// This handles both error cases and systems without batteries
 	if err != nil {
-		log.Debug("No battery present or error getting battery info")
+		slog.Debug("No battery present or error getting battery info")
 		return types.BatteryData{
 			IsCharging:    nil,
 			Percentage:    nil,
@@ -29,7 +30,7 @@ func (batteryModule BatteryModule) Update(ctx context.Context) (any, error) {
 
 	// If no batteries found, return empty data
 	if len(batteries) == 0 {
-		log.Debug("No batteries found")
+		slog.Debug("No batteries found")
 		return types.BatteryData{
 			IsCharging:    nil,
 			Percentage:    nil,
