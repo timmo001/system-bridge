@@ -6,6 +6,8 @@ system-bridge.*
 !system-bridge*.desktop
 !system-bridge*.service
 !system-bridge*.spec
+system-bridge.rc
+system-bridge.syso
 
 # Legacy
 .legacy/

@@ -58,4 +58,4 @@ BEGIN
     END
 END
 "@
-Set-Content .resources/system-bridge.rc $rcContent 
+Set-Content system-bridge.rc $rcContent 

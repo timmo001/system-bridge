@@ -19,7 +19,7 @@ endif
 build: clean build_web_client
 ifeq ($(OS),Windows_NT)
 	$(GEN_RC)
-	windres .resources/system-bridge.rc -O coff -o system-bridge.syso
+	windres system-bridge.rc -O coff -o system-bridge.syso
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
 else
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .

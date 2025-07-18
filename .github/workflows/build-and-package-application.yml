@@ -134,7 +134,7 @@ jobs:
 
       - name: Add icon to Windows binary
         run: |
-          windres .resources/system-bridge.rc -O coff -o system-bridge.syso
+          windres system-bridge.rc -O coff -o system-bridge.syso
 
       - name: Build application
         env:
