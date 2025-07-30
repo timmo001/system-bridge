@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > This project is currently going through a [rebuild in go](https://github.com/timmo001/system-bridge/issues/3392).
-> If you would like to try the new version, you should use the [development instructions](https://github.com/timmo001/system-bridge?tab=readme-ov-file#development-setup).
+> If you would like to try the new version, you should use the latest build output from the GitHub actions. If you are an Arch Linux user you can use the latest [AUR build](#arch-linux)
 
 A bridge for your systems.
 
@@ -59,6 +59,10 @@ Download the latest release from the [releases page](https://github.com/timmo001
 ### Linux installation
 
 Install the package for your distribution's package manager.
+
+#### Arch Linux
+
+You can install the current master branch of this project with the AUR package [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git). This will build and install the application for you based on the latest master branch which is automatically updated every commit.
 
 ### Windows installation
 
