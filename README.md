@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > This project is currently going through a [rebuild in go](https://github.com/timmo001/system-bridge/issues/3392).
-> If you would like to try the new version, you should use the latest build output from the GitHub actions. If you are an Arch Linux user you can use the latest [AUR build](#arch-linux-1)
+> If you would like to try the new version, you should use the latest build output from the GitHub actions. If you are an Arch Linux user you can use the latest [AUR build](#arch-linux-1).
 
 A bridge for your systems.
 
