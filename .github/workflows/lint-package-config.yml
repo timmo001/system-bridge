@@ -101,9 +101,15 @@ jobs:
       - name: Create dummy files for validation
         run: |
           # Create dist directory for NSIS output
+          New-Item -ItemType Directory -Path "now-playing" -Force
+
+          # Create an empty file to serve as the dummy executable for the now-playing helper
+          New-Item -ItemType File -Path "now-playing/NowPlaying.exe" -Force
+
+          # Create dist directory for NSIS output
           New-Item -ItemType Directory -Path "dist" -Force
 
-          # Create an empty file to serve as the dummy executable
+          # Create an empty file to serve as the dummy executable for the main application
           New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
 
           # Create dist directory for NSIS output
