@@ -10,6 +10,7 @@ import (
 	"log/slog"
 
 	"github.com/shirou/gopsutil/v4/host"
+	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/version"
 )
@@ -35,6 +36,54 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		slog.Warn("Failed to get user info", "error", err)
 	}
 
+	// Build a map of username -> representative PID and activity by scanning processes.
+	// We choose the earliest-started process for each user as the representative PID.
+	type userProcessInfo struct {
+		pid         int32
+		createTime  int64
+		hasProcess  bool
+		displayName string
+	}
+
+	normalizeUsername := func(name string) string {
+		if name == "" {
+			return name
+		}
+		// Strip domain prefixes commonly formatted as DOMAIN\\user or domain/user
+		if idx := strings.LastIndex(name, "\\"); idx != -1 {
+			name = name[idx+1:]
+		}
+		if idx := strings.LastIndex(name, "/"); idx != -1 {
+			name = name[idx+1:]
+		}
+		return strings.ToLower(name)
+	}
+
+	userToProc := make(map[string]userProcessInfo)
+	if procs, perr := process.Processes(); perr != nil {
+		slog.Warn("Failed to enumerate processes for user activity", "error", perr)
+	} else {
+		for _, p := range procs {
+			uname, uerr := p.Username()
+			if uerr != nil || uname == "" {
+				continue
+			}
+			created, cerr := p.CreateTime()
+			if cerr != nil {
+				continue
+			}
+			key := normalizeUsername(uname)
+			info, exists := userToProc[key]
+			if !exists || (created > 0 && (info.createTime == 0 || created < info.createTime)) {
+				userToProc[key] = userProcessInfo{pid: p.Pid, createTime: created, hasProcess: true, displayName: uname}
+			} else if exists {
+				// Mark as having at least one process even if we keep the earliest PID
+				info.hasProcess = true
+				userToProc[key] = info
+			}
+		}
+	}
+
 	systemData.BootTime = infoStat.BootTime
 
 	systemData.Hostname = infoStat.Hostname
@@ -53,15 +102,43 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	systemData.Platform = infoStat.Platform
 	systemData.Uptime = infoStat.Uptime
 
-	for _, userStat := range users {
-		systemData.Users = append(systemData.Users, types.SystemUser{
-			Name:     userStat.User,
-			Terminal: userStat.Terminal,
-			Host:     userStat.Host,
-			Started:  userStat.Started,
-			// TODO: add PID
-			// TODO: add Active
-		})
+	if len(users) > 0 {
+		for _, userStat := range users {
+			usernameKey := normalizeUsername(userStat.User)
+			upi, ok := userToProc[usernameKey]
+			var pidFloat float64
+			var isActive bool
+			if ok {
+				pidFloat = float64(upi.pid)
+				isActive = upi.hasProcess
+			}
+
+			systemData.Users = append(systemData.Users, types.SystemUser{
+				Name:     userStat.User,
+				Active:   isActive,
+				Terminal: userStat.Terminal,
+				Host:     userStat.Host,
+				Started:  userStat.Started,
+				PID:      pidFloat,
+			})
+		}
+	} else {
+		// Fallback for platforms where host.Users() is not implemented
+		for _, upi := range userToProc {
+			started := int(upi.createTime / 1000)
+			name := upi.displayName
+			if name == "" {
+				name = "unknown"
+			}
+			systemData.Users = append(systemData.Users, types.SystemUser{
+				Name:     name,
+				Active:   upi.hasProcess,
+				Terminal: "",
+				Host:     "",
+				Started:  started,
+				PID:      float64(upi.pid),
+			})
+		}
 	}
 
 	systemData.UUID = infoStat.HostID
