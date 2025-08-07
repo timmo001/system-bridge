@@ -26,7 +26,7 @@ function Get-LatestReleaseAssetUrl {
             $list = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repository/releases" -Headers $headers -ErrorAction Stop
             $release = $list | Where-Object { -not $_.draft -and -not $_.prerelease } | Select-Object -First 1
         } catch {
-            throw "Failed to query releases for $Repository: $_"
+            throw "Failed to query releases for ${Repository}: $_"
         }
     }
 
