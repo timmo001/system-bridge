@@ -69,11 +69,11 @@ Section "Install"
   File /oname=system-bridge.ico ".resources\system-bridge-dimmed.ico"
   
   ; Include NowPlaying helper if present
-  IfFileExists ".\\now-playing\\NowPlaying.exe" +3 0
+  IfFileExists ".\\now-playing\\NowPlaying.exe" 0 +3
     SetOutPath "$INSTDIR\now-playing"
     File ".\\now-playing\\*.*"
     Goto np_end
-  IfFileExists ".\\.scripts\\windows\\now-playing\\NowPlaying.exe" +3 0
+  IfFileExists ".\\.scripts\\windows\\now-playing\\NowPlaying.exe" 0 +3
     SetOutPath "$INSTDIR\now-playing"
     File ".\\.scripts\\windows\\now-playing\\*.*"
   np_end:
