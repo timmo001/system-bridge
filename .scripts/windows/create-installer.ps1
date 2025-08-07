@@ -56,6 +56,15 @@ if (-not (Test-Path $iconPath)) {
     exit 1
 }
 
+# Ensure NowPlaying helper exists (download step should have run earlier)
+$nowPlayingDir = ".\now-playing"
+if (-not (Test-Path $nowPlayingDir)) {
+    $nowPlayingDir = ".\.scripts\windows\now-playing"
+}
+if (-not (Test-Path (Join-Path $nowPlayingDir "NowPlaying.exe"))) {
+    Write-Warning "NowPlaying helper not found; installer will be built without it."
+}
+
 # Get the script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 

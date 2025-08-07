@@ -120,6 +120,12 @@ jobs:
       - name: Install NSIS
         run: choco install nsis -y --no-progress --limit-output
 
+      - name: Download NowPlaying helper
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.scripts/windows/download-now-playing.ps1
+
       - name: Get version
         id: get_version
         shell: bash
