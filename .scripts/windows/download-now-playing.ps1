@@ -1,7 +1,3 @@
-param(
-    [string]$Repo = "timmo001/dotnet-now-playing"
-)
-
 $ErrorActionPreference = 'Stop'
 
 function Get-AuthHeaders {
@@ -13,28 +9,25 @@ function Get-AuthHeaders {
 }
 
 function Get-LatestReleaseAssetUrl {
-    param(
-        [string]$Repository
-    )
     $headers = Get-AuthHeaders
     $release = $null
     try {
-        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repository/releases/latest" -Headers $headers -ErrorAction Stop
+        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/timmo001/dotnet-now-playing/releases/latest" -Headers $headers -ErrorAction Stop
     } catch {
         # Fallback for when latest is not available (e.g., private repos without auth or no latest)
         try {
-            $list = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repository/releases" -Headers $headers -ErrorAction Stop
+            $list = Invoke-RestMethod -Uri "https://api.github.com/repos/timmo001/dotnet-now-playing/releases" -Headers $headers -ErrorAction Stop
             $release = $list | Where-Object { -not $_.draft -and -not $_.prerelease } | Select-Object -First 1
         } catch {
-            throw "Failed to query releases for ${Repository}: $_"
+            throw "Failed to query releases for timmo001/dotnet-now-playing: $_"
         }
     }
 
-    if (-not $release) { throw "No release found for $Repository" }
+    if (-not $release) { throw "No release found for timmo001/dotnet-now-playing" }
 
     $asset = $release.assets | Where-Object { $_.name -match '(?i)^nowplaying-.*\.zip$' } | Select-Object -First 1
     if (-not $asset) { $asset = $release.assets | Where-Object { $_.name -match '(?i)\.zip$' } | Select-Object -First 1 }
-    if (-not $asset) { throw "Could not find suitable zip asset in $Repository release $($release.tag_name)" }
+    if (-not $asset) { throw "Could not find suitable zip asset in timmo001/dotnet-now-playing release $($release.tag_name)" }
     return $asset.browser_download_url
 }
 
@@ -48,7 +41,7 @@ function Ensure-NowPlaying {
     }
 
     try {
-        $url = Get-LatestReleaseAssetUrl -Repository $Repo
+        $url = Get-LatestReleaseAssetUrl
         $zipPath = Join-Path $env:TEMP 'nowplaying.zip'
         $headers = Get-AuthHeaders
         Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing -Headers $headers
