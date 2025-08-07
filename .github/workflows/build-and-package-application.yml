@@ -126,7 +126,8 @@ jobs:
       - name: Download NowPlaying helper
         shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
         run: ./.scripts/windows/download-now-playing.ps1
 
       - name: Get version
