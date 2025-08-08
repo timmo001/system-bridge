@@ -12,6 +12,10 @@ Keep a file to log the changes made and what attempt you are on.
 
 Here's the plan, do not leave this plan.
 
+Remember to update and follow the @CPU_CHANGES_LOG.md file.
+
+Follow the rules in @.cursor/rules/*.mdc
+
 ## Steps
 
 for each item and type (these will match):
