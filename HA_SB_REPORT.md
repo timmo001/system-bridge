@@ -69,9 +69,9 @@ Below is a detailed, per-domain assessment.
 
 - GPUs
 
-  - Backend (Linux/NVIDIA via `nvidia-smi`) emits MiB values for memory and MHz/W/°C/% for other metrics.
-  - HA integration adjusted locally to surface GPU memory free/used in GB (converted from MiB) and units set to `GIGABYTES`.
-  - Status: Aligned with docs (GB) via integration change.
+  - Backend (Linux/NVIDIA via `nvidia-smi`) emits memory values in MiB and MHz/W/°C/% for other metrics.
+  - HA integration converts memory MiB → GB for display (`sensor.py` divides by 1024) and sets units to `GIGABYTES`.
+  - Status: Matches integration expectations without modifying HA/connector.
 
 - Networks
 
@@ -119,12 +119,6 @@ Below is a detailed, per-domain assessment.
 
 ### Recommendations
 
-- GPU memory units
-
-  - Align docs with integration’s MB (or change integration to convert MiB→GB and adjust unit to GB).
-
-- Media player platform note
-
-  - Either gate entity creation in HA to Windows only, or update docs to indicate “best-effort” on Linux where media is available.
+- No changes required in Home Assistant or connector. Backend aligns to their models and conversions.
 
 // Optional system flags implemented on Linux (best-effort)

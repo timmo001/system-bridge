@@ -127,44 +127,44 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 		}
 	}
 
-    mediaData.Title = &metadata.Title
-    mediaData.Artist = &metadata.Artist
-    mediaData.AlbumTitle = &metadata.AlbumTitle
-    // Normalize status to HA-expected constants
-    if metadata.Status != "" {
-        s := strings.ToUpper(metadata.Status)
-        switch s {
-        case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
-            // ok
-        default:
-            if strings.EqualFold(metadata.Status, "play") || strings.EqualFold(metadata.Status, "playing") {
-                s = "PLAYING"
-            } else if strings.EqualFold(metadata.Status, "pause") || strings.EqualFold(metadata.Status, "paused") {
-                s = "PAUSED"
-            } else if strings.EqualFold(metadata.Status, "stop") || strings.EqualFold(metadata.Status, "stopped") {
-                s = "STOPPED"
-            } else {
-                s = "STOPPED"
-            }
-        }
-        mediaData.Status = &s
-    }
-    mediaData.Type = &metadata.PlayerName
+	mediaData.Title = &metadata.Title
+	mediaData.Artist = &metadata.Artist
+	mediaData.AlbumTitle = &metadata.AlbumTitle
+	// Normalize status to HA-expected constants
+	if metadata.Status != "" {
+		s := strings.ToUpper(metadata.Status)
+		switch s {
+		case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
+			// ok
+		default:
+			if strings.EqualFold(metadata.Status, "play") || strings.EqualFold(metadata.Status, "playing") {
+				s = "PLAYING"
+			} else if strings.EqualFold(metadata.Status, "pause") || strings.EqualFold(metadata.Status, "paused") {
+				s = "PAUSED"
+			} else if strings.EqualFold(metadata.Status, "stop") || strings.EqualFold(metadata.Status, "stopped") {
+				s = "STOPPED"
+			} else {
+				s = "STOPPED"
+			}
+		}
+		mediaData.Status = &s
+	}
+	mediaData.Type = &metadata.PlayerName
 	mediaData.Duration = &metadata.Duration
 	mediaData.Position = &metadata.Position
 	mediaData.Shuffle = &metadata.Shuffle
 
-    // Map repeat mode to HA-expected constants NONE/TRACK/LIST
-    repeatStatus := "NONE"
-    switch strings.ToLower(metadata.RepeatMode) {
-    case "track", "one":
-        repeatStatus = "TRACK"
-    case "list", "all":
-        repeatStatus = "LIST"
-    default:
-        repeatStatus = "NONE"
-    }
-    mediaData.Repeat = &repeatStatus
+	// Map repeat mode to HA-expected constants NONE/TRACK/LIST
+	repeatStatus := "NONE"
+	switch strings.ToLower(metadata.RepeatMode) {
+	case "track", "one":
+		repeatStatus = "TRACK"
+	case "list", "all":
+		repeatStatus = "LIST"
+	default:
+		repeatStatus = "NONE"
+	}
+	mediaData.Repeat = &repeatStatus
 
 	// Controls
 	isPlaying := strings.EqualFold(metadata.Status, "playing")
