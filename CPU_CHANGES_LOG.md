@@ -23,3 +23,9 @@
   - Change: Linux: read Vcore via hwmon labels/inputs (vcore/vddcr_cpu/svi2_core). macOS: parse powermetrics SMC sampler for CPU Vcore. Windows: returns nil for now (no WMI dep).
   - Files Edited: `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`, `data/module/cpu.go`
   - Status: Committed
+
+- Item: Windows DPC Time Percent
+  - Attempt: 1
+  - Change: Query typeperf for % DPC Time (per-CPU and _Total) and wire to `types.CPUTimes.DPC` best-effort on Windows. Safe no-ops on Linux/macOS.
+  - Files Edited: `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`
+  - Status: Committed (untested on Windows; best-effort with fallbacks)

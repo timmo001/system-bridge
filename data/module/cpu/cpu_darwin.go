@@ -73,3 +73,6 @@ func ReadCPUVcoreVoltage() *float64 {
     }
     return nil
 }
+
+// GetDPCPercentages not supported on macOS; return nil best-effort.
+func GetDPCPercentages(percpu bool) []float64 { return nil }

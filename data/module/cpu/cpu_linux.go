@@ -335,3 +335,6 @@ func readVoltageValue(path string) *float64 {
     }
     return &volts
 }
+
+// GetDPCPercentages not available on Linux; return nil best-effort.
+func GetDPCPercentages(percpu bool) []float64 { return nil }

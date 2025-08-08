@@ -89,13 +89,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 
 		// Get per CPU times
-		if i < len(timesPerCPU) {
+        if i < len(timesPerCPU) {
 			perCpuData.Times = &types.CPUTimes{
 				User:      &timesPerCPU[i].User,
 				System:    &timesPerCPU[i].System,
 				Idle:      &timesPerCPU[i].Idle,
 				Interrupt: &timesPerCPU[i].Irq,
-				// TODO: Add implementation for DPC time
 			}
 
 			// Per-CPU times percent from sampled delta
@@ -107,6 +106,15 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 					Interrupt: perPct[i].Interrupt,
 				}
 			}
+
+		// Windows-only: best-effort DPC percentage per-CPU
+        if dpcs := cm.GetDPCPercentages(true); i < len(dpcs) {
+			if perCpuData.TimesPercent == nil {
+				perCpuData.TimesPercent = &types.CPUTimes{}
+			}
+			d := dpcs[i]
+			perCpuData.TimesPercent.DPC = &d
+		}
 		}
 
 		// Get per CPU usage percentage
@@ -123,13 +131,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	cpuData.PerCPU = perCPU
 
 	// Get overall CPU times
-	if times, err := cpu.Times(false); err == nil && len(times) > 0 {
+    if times, err := cpu.Times(false); err == nil && len(times) > 0 {
 		cpuData.Times = &types.CPUTimes{
 			User:      &times[0].User,
 			System:    &times[0].System,
 			Idle:      &times[0].Idle,
 			Interrupt: &times[0].Irq,
-			// TODO: Add implementation for overall DPC time
 		}
 
 		// Overall times percent from sampled delta
@@ -141,6 +148,15 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 				Interrupt: overallPct[0].Interrupt,
 			}
 			cpuData.TimesPercent = &tp
+		}
+
+		// Windows-only: best-effort overall DPC percentage
+        if dpcs := cm.GetDPCPercentages(false); len(dpcs) > 0 {
+			if cpuData.TimesPercent == nil {
+				cpuData.TimesPercent = &types.CPUTimes{}
+			}
+			d := dpcs[0]
+			cpuData.TimesPercent.DPC = &d
 		}
 	}
 
