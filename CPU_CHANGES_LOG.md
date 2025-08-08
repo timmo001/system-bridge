@@ -83,3 +83,9 @@
   - Change: Add `GetDPCTimeSeconds` to compute absolute DPC time via sampling `% DPC Time` with `typeperf` for per-CPU and overall; wire into `data/module/cpu.go`.
   - Files Edited: `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`, `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`
   - Status: Committed
+
+- Item: Windows CPU Min Frequency (best-effort)
+  - Attempt: 1
+  - Change: Derive per-CPU min MHz from `Win32_Processor.MaxClockSpeed` scaled by current power plan Minimum Processor State percentage from `powercfg`.
+  - Files Edited: `data/module/cpu/cpu_windows.go`
+  - Status: Committed (approximation)

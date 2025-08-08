@@ -8,6 +8,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -51,11 +52,19 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 		}
 	}
 	// Max from MaxClockSpeed; min unknown
+	var max *float64
 	if one.MaxClockSpeed != nil {
-		max := *one.MaxClockSpeed
-		return nil, &max
+		mv := *one.MaxClockSpeed
+		max = &mv
 	}
-	return nil, nil
+	// Best-effort min via power plan minimum processor state percentage
+	if max != nil {
+		if pct := readMinProcessorStatePercent(); pct != nil {
+			v := (*max) * (*pct) / 100.0
+			return &v, max
+		}
+	}
+	return nil, max
 }
 
 func ReadCPUStats() *types.CPUStats {
@@ -353,4 +362,42 @@ func ReadCPUTemperature() *float64 {
 	// Convert from tenths of Kelvin to Celsius
 	c := (*one.CurrentTemperature / 10.0) - 273.15
 	return &c
+}
+
+// readMinProcessorStatePercent queries the current power plan's minimum processor state
+// and returns it as a percentage (0-100) if available.
+func readMinProcessorStatePercent() *float64 {
+	// Query AC value first; fallback to DC. Output contains lines with hex indexes like 0x0000000a (10%).
+	// Call powercfg directly and parse stdout.
+	cmd := exec.Command("powercfg", "/query", "SCHEME_CURRENT", "SUB_PROCESSOR", "PROCTHROTTLEMIN")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil
+	}
+	text := out.String()
+	if text == "" {
+		return nil
+	}
+	// Prefer AC index, then DC index
+	acRe := regexp.MustCompile(`(?i)Current\s+AC\s+Power\s+Setting\s+Index:\s*0x([0-9a-f]+)`)
+	dcRe := regexp.MustCompile(`(?i)Current\s+DC\s+Power\s+Setting\s+Index:\s*0x([0-9a-f]+)`)
+	var hexStr string
+	if m := acRe.FindStringSubmatch(text); len(m) == 2 {
+		hexStr = m[1]
+	} else if m := dcRe.FindStringSubmatch(text); len(m) == 2 {
+		hexStr = m[1]
+	} else {
+		return nil
+	}
+	iv, err := strconv.ParseInt(hexStr, 16, 64)
+	if err != nil {
+		return nil
+	}
+	p := float64(iv)
+	// Sanity bounds
+	if p < 0 || p > 100 {
+		return nil
+	}
+	return &p
 }

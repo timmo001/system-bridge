@@ -4,7 +4,7 @@
 
 Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 
-- [ ] Windows: CPU min frequency (per-CPU); compute overall min from per-CPU
+- [x] Windows: CPU min frequency (per-CPU); compute overall min from per-CPU
 - [x] Windows/macOS: overall CPU power (best-effort platform implementations)
 - [x] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
 - [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
