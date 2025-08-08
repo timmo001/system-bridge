@@ -350,12 +350,9 @@ func ReadCPUTemperature() *float64 {
 		return nil
 	}
 	for _, hm := range hwmons {
-		nameB, _ := os.ReadFile(filepath.Join(hm, "name"))
-		name := strings.ToLower(strings.TrimSpace(string(nameB)))
-		if !strings.Contains(name, "coretemp") && !strings.Contains(name, "k10temp") && !strings.Contains(name, "cpu") && !strings.Contains(name, "zenpower") {
-			// Not a likely CPU sensor provider
-			// still continue to check labels below
-		}
+		// If name doesn't clearly indicate a CPU sensor (e.g. coretemp/k10temp/cpu/zenpower),
+		// we still continue to check labels below as some hwmon entries expose useful labels
+		// without matching these identifiers.
 		// Prefer temp with label "Package id 0" or similar
 		entries, _ := os.ReadDir(hm)
 		var candidate string
