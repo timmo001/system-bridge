@@ -45,3 +45,31 @@ func ComputeCPUPower(sample time.Duration) *float64 {
 	}
 	return &v
 }
+
+// ReadCPUVcoreVoltage attempts to read CPU core voltage (Vcore) on macOS
+// by parsing powermetrics SMC sampler output if available.
+func ReadCPUVcoreVoltage() *float64 {
+    cmd := exec.Command("powermetrics", "-n", "1", "-i", "100", "--samplers", "smc")
+    var out bytes.Buffer
+    cmd.Stdout = &out
+    _ = cmd.Run()
+    s := out.String()
+    if s == "" {
+        return nil
+    }
+    // Prefer explicit CPU Vcore
+    reVcore := regexp.MustCompile(`(?i)CPU\s*Vcore:\s*([0-9]+\.?[0-9]*)\s*V`)
+    if m := reVcore.FindStringSubmatch(s); len(m) == 2 {
+        if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
+            return &v
+        }
+    }
+    // Fallback: first Voltage value in SMC section
+    reAny := regexp.MustCompile(`(?i)voltage[^\n]*?([0-9]+\.?[0-9]*)\s*V`)
+    if m := reAny.FindStringSubmatch(s); len(m) == 2 {
+        if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
+            return &v
+        }
+    }
+    return nil
+}

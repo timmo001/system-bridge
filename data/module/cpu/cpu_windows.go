@@ -26,3 +26,10 @@ func ComputeCPUPower(sample time.Duration) *float64 {
 	// Best-effort: No generic power interface available here; skip
 	return nil
 }
+
+// ReadCPUVcoreVoltage attempts to read CPU core voltage on Windows using WMI.
+// Returns volts if readable, otherwise nil.
+func ReadCPUVcoreVoltage() *float64 {
+    // Best-effort: Windows requires WMI/PDH; not implemented here.
+    return nil
+}

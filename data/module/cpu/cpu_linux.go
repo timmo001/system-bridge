@@ -259,3 +259,79 @@ func computeHwmonEnergy(sample time.Duration) *float64 {
 	watts := deltaJ / dt
 	return &watts
 }
+
+// ReadCPUVcoreVoltage attempts to read CPU core voltage (Vcore) from hwmon.
+// It looks for labels commonly used by AMD/Intel: vcore, vddcr_cpu, svi2_core.
+// Returns volts if available.
+func ReadCPUVcoreVoltage() *float64 {
+    hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+    if err != nil || len(hwmons) == 0 {
+        return nil
+    }
+    // Candidate labels to match (case-insensitive)
+    candidates := []string{"vcore", "vddcr_cpu", "svi2_core", "cpu vcore"}
+    for _, hm := range hwmons {
+        // Try labeled inputs first: inX_label + inX_input
+        entries, _ := os.ReadDir(hm)
+        for _, e := range entries {
+            name := e.Name()
+            if strings.HasPrefix(name, "in") && strings.HasSuffix(name, "_label") {
+                labelPath := filepath.Join(hm, name)
+                b, err := os.ReadFile(labelPath)
+                if err != nil {
+                    continue
+                }
+                label := strings.ToLower(strings.TrimSpace(string(b)))
+                matched := false
+                for _, c := range candidates {
+                    if strings.Contains(label, c) {
+                        matched = true
+                        break
+                    }
+                }
+                if !matched {
+                    continue
+                }
+                // Derive corresponding input path
+                inputPath := strings.TrimSuffix(labelPath, "_label") + "_input"
+                if v := readVoltageValue(inputPath); v != nil {
+                    return v
+                }
+            }
+        }
+        // Fallback: try common in0_input/in1_input without label
+        for _, idx := range []int{0, 1} {
+            p := filepath.Join(hm, fmt.Sprintf("in%d_input", idx))
+            if v := readVoltageValue(p); v != nil {
+                return v
+            }
+        }
+    }
+    return nil
+}
+
+func readVoltageValue(path string) *float64 {
+    b, err := os.ReadFile(path)
+    if err != nil {
+        return nil
+    }
+    s := strings.TrimSpace(string(b))
+    if s == "" {
+        return nil
+    }
+    raw, err := strconv.ParseFloat(s, 64)
+    if err != nil {
+        return nil
+    }
+    // Heuristic: if value is extremely large, assume microvolts; else millivolts
+    var volts float64
+    switch {
+    case raw > 100000: // microvolts
+        volts = raw / 1_000_000.0
+    case raw > 100: // millivolts
+        volts = raw / 1000.0
+    default:
+        volts = raw // already volts
+    }
+    return &volts
+}

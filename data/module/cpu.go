@@ -174,9 +174,14 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	}
 
     // TODO: Add implementation for overall CPU voltage monitoring
-    // CPU statistics (OS-specific best-effort)
+	// CPU statistics (OS-specific best-effort)
     if stats := cm.ReadCPUStats(); stats != nil {
 		cpuData.Stats = stats
+	}
+
+	// Overall CPU voltage (best-effort OS-specific)
+	if v := cm.ReadCPUVcoreVoltage(); v != nil {
+		cpuData.Voltage = v
 	}
 
 	return cpuData, nil

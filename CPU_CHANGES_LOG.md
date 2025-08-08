@@ -17,3 +17,9 @@
   - Change: Add AMD-friendly detection. Try powercap energy_uj for any package domain; fallback to hwmon instantaneous power (microwatts) and hwmon energy sampling.
   - Files Edited: `data/module/cpu/cpu_linux.go`, `data/module/cpu.go`
   - Status: Committed (may still be null on some systems)
+
+- Item: Overall CPU Voltage (Vcore)
+  - Attempt: 1
+  - Change: Linux: read Vcore via hwmon labels/inputs (vcore/vddcr_cpu/svi2_core). macOS: parse powermetrics SMC sampler for CPU Vcore. Windows: returns nil for now (no WMI dep).
+  - Files Edited: `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`, `data/module/cpu.go`
+  - Status: Committed

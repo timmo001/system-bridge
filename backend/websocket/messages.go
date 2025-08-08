@@ -22,7 +22,7 @@ func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message
 		if closeErr := connInfo.conn.Close(); closeErr != nil {
 			slog.Error("Error closing connection", "error", closeErr)
 		}
-		
+
 		// Remove from connections and dataListeners if and only if the pointer matches
 		if lockHeld {
 			// If we already hold the lock, do the cleanup synchronously
