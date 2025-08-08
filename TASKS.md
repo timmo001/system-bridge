@@ -18,7 +18,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [x] `CPUFrequency.Min`: implement minimum frequency detection across OSes
 - [x] `CPUFrequency.Max`: implement maximum frequency detection across OSes
 - [x] `CPUStats`: implement population across OSes
-- [ ] `CPUTimes.DPC`: implement Deferred Procedure Call time tracking (absolute)
+- [x] `CPUTimes.DPC`: implement Deferred Procedure Call time tracking (absolute) (Windows only)
 - [x] `PerCPU.Power`: implement per-CPU power consumption monitoring
 - [x] `PerCPU.TimesPercent`: ensure correctness; remove TODO
 - [ ] `PerCPU.Voltage`: implement per-CPU voltage monitoring
