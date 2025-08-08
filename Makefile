@@ -75,7 +75,14 @@ clean_dist:
 ifeq ($(OS),Windows_NT)
 	-$(RMDIR) dist 2>nul
 else
+	-$(RMDIR) .flatpak-builder 2>/dev/null
+	-$(RMDIR) build 2>/dev/null
 	-$(RMDIR) dist 2>/dev/null
+	-$(RMDIR) rpm-structure 2>/dev/null
+	-$(RMDIR) rpmbuild 2>/dev/null
+	-$(RMDIR) flatpak-build 2>/dev/null
+	-$(RMDIR) repo 2>/dev/null
+	-$(RMDIR) deb-structure 2>/dev/null
 endif
 
 clean_web_client:

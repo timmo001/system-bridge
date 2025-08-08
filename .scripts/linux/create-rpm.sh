@@ -1,10 +1,31 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
+
+# Ensure output dir exists
+mkdir -p dist
+
+# Auto-install rpm tooling on Arch/Debian-based systems if missing (local dev convenience)
+if ! command -v rpmbuild >/dev/null 2>&1; then
+  if command -v pacman >/dev/null 2>&1; then
+    echo "rpmbuild not found. Installing rpm-tools via pacman..."
+    sudo pacman -S --noconfirm rpm-tools
+  elif command -v apt-get >/dev/null 2>&1; then
+    echo "rpmbuild not found. Installing rpm via apt-get..."
+    sudo apt-get update -y && sudo apt-get install -y rpm
+  else
+    echo "rpmbuild not found and automatic installation not supported on this distro." >&2
+    exit 1
+  fi
+fi
 
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
-  echo "system-bridge-linux not found, please build the application first"
+  echo "system-bridge-linux not found, please build the application first (e.g. 'make build')" >&2
   exit 1
 fi
 
@@ -13,7 +34,6 @@ VERSION=${VERSION:-5.0.0}
 # Convert version for RPM compatibility
 if [[ $VERSION == *"-dev+"* ]]; then
   RPM_VERSION="5.0.0"
-  # Extract the commit hash and use it in the release
   COMMIT_HASH=${VERSION#*+}
   RPM_RELEASE="0.dev.${COMMIT_HASH}"
 else
@@ -21,50 +41,47 @@ else
   RPM_RELEASE="1"
 fi
 
-# Create directory structure in rpm-structure
-mkdir -p rpm-structure/usr/bin
-mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
+# Stage files into a temporary builddir that the spec will copy from
+STAGING_DIR="rpm-structure"
+rm -rf "$STAGING_DIR" rpmbuild
+mkdir -p "$STAGING_DIR/usr/bin"
+mkdir -p "$STAGING_DIR/usr/share/applications"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/scalable/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/16x16/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/32x32/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/48x48/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/128x128/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/256x256/apps"
+mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/512x512/apps"
 
-# Copy files to rpm-structure
-cp system-bridge-linux rpm-structure/usr/bin/system-bridge
+install -Dm755 system-bridge-linux "$STAGING_DIR/usr/bin/system-bridge"
+install -Dm644 "$SCRIPT_DIR/system-bridge.desktop" "$STAGING_DIR/usr/share/applications/system-bridge.desktop"
+install -Dm644 .resources/system-bridge-dimmed.svg "$STAGING_DIR/usr/share/icons/hicolor/scalable/apps/system-bridge.svg"
+install -Dm644 .resources/system-bridge-dimmed-16.png "$STAGING_DIR/usr/share/icons/hicolor/16x16/apps/system-bridge.png"
+install -Dm644 .resources/system-bridge-dimmed-32.png "$STAGING_DIR/usr/share/icons/hicolor/32x32/apps/system-bridge.png"
+install -Dm644 .resources/system-bridge-dimmed-48.png "$STAGING_DIR/usr/share/icons/hicolor/48x48/apps/system-bridge.png"
+install -Dm644 .resources/system-bridge-dimmed-128.png "$STAGING_DIR/usr/share/icons/hicolor/128x128/apps/system-bridge.png"
+install -Dm644 .resources/system-bridge-dimmed-256.png "$STAGING_DIR/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
+install -Dm644 .resources/system-bridge-dimmed-512.png "$STAGING_DIR/usr/share/icons/hicolor/512x512/apps/system-bridge.png"
 
-mkdir -p rpm-structure/usr/share/icons/hicolor/scalable/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/16x16/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/32x32/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/48x48/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/128x128/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/256x256/apps
-mkdir -p rpm-structure/usr/share/icons/hicolor/512x512/apps
+# Mirror staged content into the rpmbuild working subdirectory expected by rpmbuild
+BUILD_SUBDIR_NAME="system-bridge-${RPM_VERSION}-build"
+BUILD_SUBDIR_PATH="${STAGING_DIR}/${BUILD_SUBDIR_NAME}"
+mkdir -p "${BUILD_SUBDIR_PATH}"
+# Copy only the staged usr/ tree; rpmbuild will reference %{_builddir}/usr/...
+cp -a "${STAGING_DIR}/usr" "${BUILD_SUBDIR_PATH}/" 2>/dev/null || true
 
-cp .resources/system-bridge-dimmed.svg rpm-structure/usr/share/icons/hicolor/scalable/apps/system-bridge.svg
-cp .resources/system-bridge-dimmed-16.png rpm-structure/usr/share/icons/hicolor/16x16/apps/system-bridge.png
-cp .resources/system-bridge-dimmed-32.png rpm-structure/usr/share/icons/hicolor/32x32/apps/system-bridge.png
-cp .resources/system-bridge-dimmed-48.png rpm-structure/usr/share/icons/hicolor/48x48/apps/system-bridge.png
-cp .resources/system-bridge-dimmed-128.png rpm-structure/usr/share/icons/hicolor/128x128/apps/system-bridge.png
-cp .resources/system-bridge-dimmed-256.png rpm-structure/usr/share/icons/hicolor/256x256/apps/system-bridge.png
-cp .resources/system-bridge-dimmed-512.png rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png
-
-# Create the spec file directory
+# Prepare spec within rpmbuild tree
 mkdir -p rpmbuild/SPECS
-
-# Copy the spec file (with substitutions if needed)
-sed -e "s/%{_version}/$RPM_VERSION/g" \
-  -e "s/%{_release}/$RPM_RELEASE/g" \
-  "$(dirname "$0")/system-bridge.spec" >rpmbuild/SPECS/system-bridge.spec
-
-# Create BUILDROOT directory structure
-BUILDROOT_DIR="rpmbuild/BUILDROOT/system-bridge-${RPM_VERSION}-${RPM_RELEASE}.x86_64"
-mkdir -p "${BUILDROOT_DIR}/usr/bin"
-mkdir -p "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps"
-
-# Copy files to BUILDROOT
-cp rpm-structure/usr/bin/system-bridge "${BUILDROOT_DIR}/usr/bin/"
-cp rpm-structure/usr/share/icons/hicolor/512x512/apps/system-bridge.png "${BUILDROOT_DIR}/usr/share/icons/hicolor/512x512/apps/"
+cp "$SCRIPT_DIR/system-bridge.spec" rpmbuild/SPECS/system-bridge.spec
 
 # Build the RPM package
 rpmbuild --define "_topdir $(pwd)/rpmbuild" \
   --define "_version ${RPM_VERSION}" \
   --define "_release ${RPM_RELEASE}" \
-  --define "_builddir $(pwd)/rpm-structure" \
+  --define "_builddir $(pwd)/${BUILD_SUBDIR_PATH}" \
+  --define "_stagedir $(pwd)/${STAGING_DIR}/usr" \
   --define "_rpmdir $(pwd)/dist" \
   -bb rpmbuild/SPECS/system-bridge.spec
+
+echo "Built RPM(s) to: dist/"

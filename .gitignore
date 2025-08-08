@@ -41,3 +41,7 @@ dist/
 
 # DEB
 deb-structure/
+
+# RPM
+rpm-structure/
+rpmbuild/
