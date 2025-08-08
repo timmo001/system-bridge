@@ -24,8 +24,8 @@ type WebSocketRequest struct {
 
 // connectionInfo holds connection data with write synchronization
 type connectionInfo struct {
-	conn      *websocket.Conn
-	writeMux  sync.Mutex
+	conn     *websocket.Conn
+	writeMux sync.Mutex
 }
 
 type WebsocketServer struct {

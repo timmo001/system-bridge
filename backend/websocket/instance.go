@@ -6,7 +6,7 @@ import (
 
 var (
 	globalInstance *WebsocketServer
-	instanceMutex sync.RWMutex
+	instanceMutex  sync.RWMutex
 )
 
 // GetInstance returns the global WebSocket server instance
