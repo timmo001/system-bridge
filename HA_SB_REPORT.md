@@ -23,8 +23,7 @@ Primary reference: Home Assistant docs for System Bridge [System Bridge Integrat
 #### High-level result
 
 - Most modules align with HA integration expectations for field names, value ranges, and units.
-- Remaining mismatches to address:
-  - GPU memory units (docs say GB; integration surfaces MB)
+- Remaining mismatch to address:
   - Media player doc vs integration (Windows-only in docs vs general availability in integration)
 
 Below is a detailed, per-domain assessment.
@@ -71,14 +70,9 @@ Below is a detailed, per-domain assessment.
 
 - GPUs
 
-  - Backend (Linux/NVIDIA via `nvidia-smi`) emits:
-    - Memory totals/used/free in MiB, clocks in MHz, power in W, temperature in °C, load in %; `data/module/gpus/gpus_linux.go`.
-  - HA “Sensors” shows:
-    - GPU memory free/used in MEGABYTES (decimal), GPU usage %; HA does not convert to GB.
-  - Docs vs integration:
-    - Docs say “GPU Memory Free … in GB”
-    - Integration publishes MB (and underlying MiB)
-  - Status: Units mismatch with docs; either update docs to MB or change integration to convert to GB.
+  - Backend (Linux/NVIDIA via `nvidia-smi`) emits MiB values for memory and MHz/W/°C/% for other metrics.
+  - HA integration adjusted locally to surface GPU memory free/used in GB (converted from MiB) and units set to `GIGABYTES`.
+  - Status: Aligned with docs (GB) via integration change.
 
 - Networks
 
