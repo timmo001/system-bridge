@@ -77,3 +77,9 @@
   - Change: Remove TODO comments for implemented fields: `CPUFrequency.Min/Max`, `CPUData.Power/Stats/TimesPercent/Voltage`, `PerCPU.Power/TimesPercent`, `CPUTimes.DPC` tag.
   - Files Edited: `types/cpu.go`
   - Status: Committed
+
+- Item: Windows DPC Time Absolute
+  - Attempt: 1
+  - Change: Add `GetDPCTimeSeconds` to compute absolute DPC time via sampling `% DPC Time` with `typeperf` for per-CPU and overall; wire into `data/module/cpu.go`.
+  - Files Edited: `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`, `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`
+  - Status: Committed

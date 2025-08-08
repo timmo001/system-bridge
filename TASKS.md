@@ -6,12 +6,12 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 
 - [ ] Windows: CPU min frequency (per-CPU); compute overall min from per-CPU
 - [x] Windows/macOS: overall CPU power (best-effort platform implementations)
-- [ ] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
+- [x] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
 - [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
 - [ ] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore)
 - [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 - [ ] Validate TimesPercent correctness across OSes; remove related TODOs
-- [ ] Types cleanup: remove TODOs once fully implemented across OSes
+- [x] Types cleanup: remove TODOs once fully implemented across OSes
 
 ### Types (`types/cpu.go`) TODO alignment
 
