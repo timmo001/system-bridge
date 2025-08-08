@@ -20,7 +20,9 @@ func (cpuModule CPUModule) Name() types.ModuleName { return types.ModuleCPU }
 func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	slog.Info("Getting CPU data")
 
-	percentageInterval := 4 * time.Second
+	// Use a zero interval to avoid blocking; returns instantaneous usage based on
+	// the most recent CPU times snapshot instead of sleeping to calculate deltas.
+	percentageInterval := 0 * time.Second
 
 	var cpuData types.CPUData
 	// Initialize arrays
@@ -44,6 +46,10 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		cpuData.Frequency = &freq
 	}
 
+	// Pre-fetch per-CPU times and usage slices once to avoid repeated expensive calls
+	timesPerCPU, _ := cpu.TimesWithContext(ctx, true)
+	percentsPerCPU, _ := cpu.PercentWithContext(ctx, percentageInterval, true)
+
 	// Get per CPU info
 	perCPU := make([]types.PerCPU, 0, len(frequencies))
 	for i, cpuInfo := range frequencies {
@@ -57,12 +63,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 
 		// Get per CPU times
-		if times, err := cpu.TimesWithContext(ctx, true); err == nil && i < len(times) {
+		if i < len(timesPerCPU) {
 			perCpuData.Times = &types.CPUTimes{
-				User:      &times[i].User,
-				System:    &times[i].System,
-				Idle:      &times[i].Idle,
-				Interrupt: &times[i].Irq,
+				User:      &timesPerCPU[i].User,
+				System:    &timesPerCPU[i].System,
+				Idle:      &timesPerCPU[i].Idle,
+				Interrupt: &timesPerCPU[i].Irq,
 				// TODO: Add implementation for DPC time
 			}
 
@@ -70,8 +76,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 
 		// Get per CPU usage percentage
-		if percents, err := cpu.PercentWithContext(ctx, percentageInterval, true); err == nil && i < len(percents) {
-			usage := percents[i]
+		if i < len(percentsPerCPU) {
+			usage := percentsPerCPU[i]
 			perCpuData.Usage = &usage
 		}
 
@@ -95,7 +101,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		// TODO: Add implementation for overall TimesPercent
 	}
 
-	// Get overall CPU usage percentage
+	// Get overall CPU usage percentage (non-blocking)
 	if percents, err := cpu.PercentWithContext(ctx, percentageInterval, false); err == nil && len(percents) > 0 {
 		usage := percents[0]
 		cpuData.Usage = &usage
