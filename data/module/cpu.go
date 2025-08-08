@@ -70,6 +70,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	// Pre-fetch per-CPU times and usage slices once to avoid repeated expensive calls
 	timesPerCPU, _ := cpu.TimesWithContext(ctx, true)
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, percentageInterval, true)
+	// Compute per-CPU times percent once (short sampling interval)
+	perPct := computeTimesPercent(true)
 
 	// Get per CPU info
 	perCPU := make([]types.PerCPU, 0, len(frequencies))
@@ -98,7 +100,15 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 				// TODO: Add implementation for DPC time
 			}
 
-			// TODO: Add implementation for TimesPercent
+			// Per-CPU times percent from sampled delta
+			if perPct != nil && i < len(perPct) && perPct[i] != nil {
+				perCpuData.TimesPercent = &types.CPUTimes{
+					User:      perPct[i].User,
+					System:    perPct[i].System,
+					Idle:      perPct[i].Idle,
+					Interrupt: perPct[i].Interrupt,
+				}
+			}
 		}
 
 		// Get per CPU usage percentage
@@ -124,7 +134,16 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			// TODO: Add implementation for overall DPC time
 		}
 
-		// TODO: Add implementation for overall TimesPercent
+		// Overall times percent from sampled delta
+		if overallPct := computeTimesPercent(false); len(overallPct) > 0 && overallPct[0] != nil {
+			tp := types.CPUTimes{
+				User:      overallPct[0].User,
+				System:    overallPct[0].System,
+				Idle:      overallPct[0].Idle,
+				Interrupt: overallPct[0].Interrupt,
+			}
+			cpuData.TimesPercent = &tp
+		}
 	}
 
 	// Get overall CPU usage percentage (non-blocking)
@@ -150,10 +169,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
-
 	// TODO: Add implementation for overall CPU power consumption
 	// TODO: Add implementation for overall CPU voltage monitoring
-	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
+	// CPU statistics (Linux best-effort)
+	if stats := readLinuxCPUStats(); stats != nil {
+		cpuData.Stats = stats
+	}
 
 	return cpuData, nil
 }
@@ -192,4 +213,94 @@ func readLinuxSysfsCPUFreq(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 	minPath := filepath.Join(cpuDir, "cpuinfo_min_freq")
 	maxPath := filepath.Join(cpuDir, "cpuinfo_max_freq")
 	return readMHz(minPath), readMHz(maxPath)
+}
+
+// computeTimesPercent calculates per-state CPU time percentages over a short
+// sampling interval. Returns a slice of CPUTimes pointers when percpu is true,
+// otherwise a single-element slice for overall.
+func computeTimesPercent(percpu bool) []*types.CPUTimes {
+    // Short interval to minimize blocking but still obtain a delta
+    const sample = 200 * time.Millisecond
+    t1, err := cpu.Times(percpu)
+    if err != nil || len(t1) == 0 {
+        return nil
+    }
+    time.Sleep(sample)
+    t2, err := cpu.Times(percpu)
+    if err != nil || len(t2) == 0 || len(t2) != len(t1) {
+        return nil
+    }
+
+    out := make([]*types.CPUTimes, 0, len(t2))
+    for i := range t2 {
+        dUser := t2[i].User - t1[i].User
+        dSystem := t2[i].System - t1[i].System
+        dIdle := t2[i].Idle - t1[i].Idle
+        dIrq := t2[i].Irq - t1[i].Irq
+        // Total delta across all accounted fields (align with gopsutil Total)
+        tot1 := t1[i].User + t1[i].System + t1[i].Idle + t1[i].Nice + t1[i].Iowait + t1[i].Irq + t1[i].Softirq + t1[i].Steal + t1[i].Guest + t1[i].GuestNice
+        tot2 := t2[i].User + t2[i].System + t2[i].Idle + t2[i].Nice + t2[i].Iowait + t2[i].Irq + t2[i].Softirq + t2[i].Steal + t2[i].Guest + t2[i].GuestNice
+        dTot := tot2 - tot1
+        if dTot <= 0 {
+            out = append(out, &types.CPUTimes{})
+            continue
+        }
+        u := (dUser / dTot) * 100
+        s := (dSystem / dTot) * 100
+        id := (dIdle / dTot) * 100
+        irq := (dIrq / dTot) * 100
+        out = append(out, &types.CPUTimes{User: &u, System: &s, Idle: &id, Interrupt: &irq})
+    }
+    return out
+}
+
+// readLinuxCPUStats parses /proc/stat for aggregate CPU stats like interrupts,
+// soft interrupts, context switches, and optionally syscalls if present.
+func readLinuxCPUStats() *types.CPUStats {
+    const procStat = "/proc/stat"
+    b, err := os.ReadFile(procStat)
+    if err != nil || len(b) == 0 {
+        return nil
+    }
+    var (
+        ctxSwitches *int64
+        interrupts *int64
+        softInterrupts *int64
+        syscalls *int64
+    )
+    lines := strings.Split(string(b), "\n")
+    for _, line := range lines {
+        fields := strings.Fields(line)
+        if len(fields) < 2 {
+            continue
+        }
+        switch fields[0] {
+        case "ctxt":
+            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
+                ctxSwitches = &v
+            }
+        case "intr":
+            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
+                interrupts = &v
+            }
+        case "softirq":
+            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
+                softInterrupts = &v
+            }
+        case "syscalls":
+            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
+                syscalls = &v
+            }
+        }
+    }
+    // If none found, return nil to avoid empty struct noise.
+    if ctxSwitches == nil && interrupts == nil && softInterrupts == nil && syscalls == nil {
+        return nil
+    }
+    return &types.CPUStats{
+        CtxSwitches:    ctxSwitches,
+        Interrupts:     interrupts,
+        SoftInterrupts: softInterrupts,
+        Syscalls:       syscalls,
+    }
 }
