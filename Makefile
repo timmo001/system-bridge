@@ -14,6 +14,11 @@ else
 	OUT=system-bridge-linux
 	BUN_BUILD=STATIC_EXPORT=true bun run build
 	EXTRA_LDFLAGS=
+	CREATE_ARCH=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
+	CREATE_APPIMAGE=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
+	CREATE_DEB=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
+	CREATE_FLATPAK=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh
+	CREATE_RPM=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 endif
 
 build: clean build_web_client
@@ -28,34 +33,34 @@ endif
 build_web_client: clean_web_client
 	cd web-client && bun install && $(BUN_BUILD)
 
-create_appimage: clean_dist
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
-
-create_arch: clean_dist
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
-
-create_flatpak: clean_dist
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh
-
-create_deb: clean_dist
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
-
-create_rpm: clean_dist
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
-
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)
 	@echo "create_all_packages is only supported on Linux hosts"
 else
 	@echo "Packaging all Linux formats in parallel..."
 	chmod +x ./.scripts/linux/create-*.sh
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh & \
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh & \
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh & \
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh & \
-	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh & \
+	$(CREATE_APPIMAGE) & \
+	$(CREATE_DEB) & \
+	$(CREATE_RPM) & \
+	$(CREATE_ARCH) & \
+	$(CREATE_FLATPAK) & \
 	wait
 endif
+
+create_appimage: clean_dist
+	$(CREATE_APPIMAGE)
+
+create_arch: clean_dist
+	$(CREATE_ARCH)
+
+create_flatpak: clean_dist
+	$(CREATE_FLATPAK)
+
+create_deb: clean_dist
+	$(CREATE_DEB)
+
+create_rpm: clean_dist
+	$(CREATE_RPM)
 
 create_windows_installer: clean_dist download_windows_now_playing
 	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean
@@ -114,13 +119,13 @@ help:
 	@echo "Available targets:"
 	@echo "  build                    Build the application"
 	@echo "  build_web_client         Build the web client"
+	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  create_appimage          Create AppImage package"
 	@echo "  create_arch              Create Arch Linux package"
 	@echo "  create_flatpak           Create Flatpak package"
 	@echo "  create_deb               Create Debian package"
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
-	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  run                      Build and run the application (development only)"
 	@echo "  test                     Run tests"
 	@echo "  clean                    Remove build artifacts"
