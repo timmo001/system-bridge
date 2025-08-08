@@ -15,8 +15,29 @@ import (
 )
 
 func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
-	// No straightforward per-core min/max on macOS without private APIs
-	return nil, nil
+    // Best-effort via sysctl: hw.cpufrequency_max (Hz) and hw.cpufrequency_min (Hz) if present
+    readSysctlFloat := func(name string) *float64 {
+        cmd := exec.Command("sysctl", "-n", name)
+        var out bytes.Buffer
+        cmd.Stdout = &out
+        if err := cmd.Run(); err != nil {
+            return nil
+        }
+        s := strings.TrimSpace(out.String())
+        if s == "" {
+            return nil
+        }
+        v, err := strconv.ParseFloat(s, 64)
+        if err != nil {
+            return nil
+        }
+        // Convert Hz to MHz
+        mhz := v / 1_000_000.0
+        return &mhz
+    }
+    max := readSysctlFloat("hw.cpufrequency_max")
+    min := readSysctlFloat("hw.cpufrequency_min")
+    return min, max
 }
 
 func ReadCPUStats() *types.CPUStats {
