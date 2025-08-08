@@ -99,6 +99,8 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	systemData.FQDN = getFQDN(hostname)
 
 	systemData.PlatformVersion = infoStat.PlatformVersion
+	// Kernel version for HA "Kernel" sensor (docs expect kernel version)
+	systemData.KernelVersion = infoStat.KernelVersion
 	systemData.Platform = infoStat.Platform
 	systemData.Uptime = infoStat.Uptime
 

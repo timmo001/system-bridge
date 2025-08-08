@@ -21,6 +21,7 @@ type SystemData struct {
 	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
 	FQDN                  string       `json:"fqdn" mapstructure:"fqdn"`
 	Hostname              string       `json:"hostname" mapstructure:"hostname"`
+	KernelVersion         string       `json:"kernel_version" mapstructure:"kernel_version"`
 	IPAddress4            string       `json:"ip_address_4" mapstructure:"ip_address_4"`
 	MACAddress            string       `json:"mac_address" mapstructure:"mac_address"`
 	PlatformVersion       string       `json:"platform_version" mapstructure:"platform_version"`
