@@ -159,10 +159,16 @@ func setupLogging() {
 	// Convert LogLevel to slog.Level
 	logLevel := settings.LogLevel.ToSlogLevel()
 
-	// Terminal handler (colorized)
-	terminalHandler := console.NewHandler(os.Stdout, &console.HandlerOptions{
-		Level: logLevel,
-	})
+    // Determine whether to log to stdout (only for backend command)
+    includeTerminal := shouldLogToStdout()
+
+    // Terminal handler (colorized) - only created if needed
+    var terminalHandler slog.Handler
+    if includeTerminal {
+        terminalHandler = console.NewHandler(os.Stdout, &console.HandlerOptions{
+            Level: logLevel,
+        })
+    }
 
 	// File handler with rolling logs
 	configDir, err := utils.GetConfigPath()
@@ -181,13 +187,39 @@ func setupLogging() {
 		Level: logLevel,
 	})
 
-	// Wrap handlers with error capture
-	terminalErrorHandler := &errorHandler{handler: terminalHandler}
-	fileErrorHandler := &errorHandler{handler: fileHandler}
+    // Wrap handlers with error capture
+    var handlers []slog.Handler
+    if includeTerminal && terminalHandler != nil {
+        handlers = append(handlers, &errorHandler{handler: terminalHandler})
+    }
+    handlers = append(handlers, &errorHandler{handler: fileHandler})
 
-	logger := slog.New(&multiHandler{handlers: []slog.Handler{
-		terminalErrorHandler,
-		fileErrorHandler,
-	}})
+    logger := slog.New(&multiHandler{handlers: handlers})
 	slog.SetDefault(logger)
+}
+
+// shouldLogToStdout returns true when the application should emit logs to stdout.
+// We only log to stdout for the `backend` command to avoid polluting CLI output
+// (e.g. JSON) for `client` commands.
+func shouldLogToStdout() bool {
+    // Expect subcommand in os.Args[1]
+    if len(os.Args) < 2 {
+        // Default to true when no subcommand is provided
+        return true
+    }
+    // Prefer explicit checks for known top-level commands and their aliases
+    for _, arg := range os.Args[1:] {
+        switch arg {
+        case "client", "c", "cli":
+            return false
+        case "backend", "b":
+            return true
+        }
+        // Stop scanning after first non-flag token
+        if len(arg) > 0 && arg[0] != '-' {
+            // If it's an unknown subcommand, default to true to aid debugging
+            return true
+        }
+    }
+    return true
 }
