@@ -294,5 +294,3 @@ func computeTimesPercent(percpu bool) []*types.CPUTimes {
 	return out
 }
 
-// readLinuxCPUStats parses /proc/stat for aggregate CPU stats like interrupts,
-// soft interrupts, context switches, and optionally syscalls if present.
