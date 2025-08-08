@@ -97,3 +97,23 @@ func ReadCPUVcoreVoltage() *float64 {
 
 // GetDPCPercentages not supported on macOS; return nil best-effort.
 func GetDPCPercentages(percpu bool) []float64 { return nil }
+
+// ReadCPUTemperature attempts to read CPU temperature via powermetrics SMC sampler
+func ReadCPUTemperature() *float64 {
+	cmd := exec.Command("powermetrics", "-n", "1", "-i", "100", "--samplers", "smc")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	_ = cmd.Run()
+	s := out.String()
+	if s == "" {
+		return nil
+	}
+	// Example patterns: "CPU die temperature: 65.25 C"
+	re := regexp.MustCompile(`(?i)CPU\s+die\s+temperature:\s*([0-9]+\.?[0-9]*)\s*C`)
+	if m := re.FindStringSubmatch(s); len(m) == 2 {
+		if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
+			return &v
+		}
+	}
+	return nil
+}

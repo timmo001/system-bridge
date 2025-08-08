@@ -65,6 +65,17 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		cpuData.Frequency = &freq
 	}
 
+	// OS-specific best-effort overall CPU power sampling (compute early to optionally distribute per-core)
+	var overallPower *float64
+	var perCorePower *float64
+	if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
+		overallPower = p
+		if cpuData.Count != nil && *cpuData.Count > 0 {
+			v := *p / float64(*cpuData.Count)
+			perCorePower = &v
+		}
+	}
+
 	// Pre-fetch per-CPU times and usage slices once to avoid repeated expensive calls
 	timesPerCPU, _ := cpu.TimesWithContext(ctx, true)
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, percentageInterval, true)
@@ -130,7 +141,11 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			perCpuData.Usage = &usage
 		}
 
-		// TODO: Add implementation for per-CPU power consumption
+		// Best-effort: distribute overall package power equally across cores when available
+		if perCorePower != nil {
+			val := *perCorePower
+			perCpuData.Power = &val
+		}
 		// TODO: Add implementation for per-CPU voltage monitoring
 
 		perCPU = append(perCPU, perCpuData)
@@ -183,17 +198,22 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	if temps, err := sensors.SensorsTemperatures(); err == nil {
 		for _, temp := range temps {
 			if strings.Contains(strings.ToLower(temp.SensorKey), "cpu") {
-				temperature := temp.Temperature
-				cpuData.Temperature = &temperature
+				t := temp.Temperature
+				cpuData.Temperature = &t
 				break
 			}
 		}
 	}
+	// OS-specific fallbacks for temperature
+	if cpuData.Temperature == nil {
+		if t := cm.ReadCPUTemperature(); t != nil {
+			cpuData.Temperature = t
+		}
+	}
 
-	// TODO: Add implementation for overall CPU power consumption
-	// OS-specific best-effort overall CPU power sampling
-	if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
-		cpuData.Power = p
+	// Overall CPU power
+	if overallPower != nil {
+		cpuData.Power = overallPower
 	}
 
 	// TODO: Add implementation for overall CPU voltage monitoring

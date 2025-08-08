@@ -47,3 +47,9 @@
   - Change: Best-effort per-CPU max via PowerShell `Win32_Processor.MaxClockSpeed`; Vcore via `Win32_Processor.CurrentVoltage` (decivolts). Min not available.
   - Files Edited: `data/module/cpu/cpu_windows.go`
   - Status: Committed
+
+- Item: CPU Temperature Fallbacks (Linux/macOS/Windows)
+  - Attempt: 1
+  - Change: Linux: hwmon temp*_input (package/cpu/tctl/tdie) to Celsius; macOS: powermetrics SMC (CPU die temperature); Windows: `MSAcpi_ThermalZoneTemperature` via PowerShell (K/10 to C). Used as fallback when gopsutil sensors does not provide a CPU temp.
+  - Files Edited: `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`, `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`
+  - Status: Committed

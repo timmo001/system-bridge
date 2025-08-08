@@ -158,3 +158,37 @@ func readTypeperfCounter(counter string) (float64, bool) {
 	}
 	return f, true
 }
+
+// ReadCPUTemperature attempts to read CPU temperature via WMIC/PowerShell
+func ReadCPUTemperature() *float64 {
+    // Try MSAcpi_ThermalZoneTemperature (Kelvin*10)
+    cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace root/wmi | Select-Object CurrentTemperature | ConvertTo-Json")
+    var out bytes.Buffer
+    cmd.Stdout = &out
+    if err := cmd.Run(); err != nil {
+        return nil
+    }
+    s := strings.TrimSpace(out.String())
+    if s == "" {
+        return nil
+    }
+    type tz struct{ CurrentTemperature *float64 `json:"CurrentTemperature"` }
+    var one tz
+    var many []tz
+    if strings.HasPrefix(s, "[") {
+        if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
+            return nil
+        }
+        one = many[0]
+    } else {
+        if err := json.Unmarshal([]byte(s), &one); err != nil {
+            return nil
+        }
+    }
+    if one.CurrentTemperature == nil || *one.CurrentTemperature <= 0 {
+        return nil
+    }
+    // Convert from tenths of Kelvin to Celsius
+    c := (*one.CurrentTemperature / 10.0) - 273.15
+    return &c
+}

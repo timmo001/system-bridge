@@ -338,3 +338,51 @@ func readVoltageValue(path string) *float64 {
 
 // GetDPCPercentages not available on Linux; return nil best-effort.
 func GetDPCPercentages(percpu bool) []float64 { return nil }
+
+// ReadCPUTemperature attempts to read CPU temperature on Linux via hwmon
+func ReadCPUTemperature() *float64 {
+    // Search for temp*_input under hwmon devices where name indicates CPU/package
+    hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+    if err != nil || len(hwmons) == 0 {
+        return nil
+    }
+    for _, hm := range hwmons {
+        nameB, _ := os.ReadFile(filepath.Join(hm, "name"))
+        name := strings.ToLower(strings.TrimSpace(string(nameB)))
+        if !strings.Contains(name, "coretemp") && !strings.Contains(name, "k10temp") && !strings.Contains(name, "cpu") && !strings.Contains(name, "zenpower") {
+            // Not a likely CPU sensor provider
+            // still continue to check labels below
+        }
+        // Prefer temp with label "Package id 0" or similar
+        entries, _ := os.ReadDir(hm)
+        var candidate string
+        for _, e := range entries {
+            en := e.Name()
+            if strings.HasPrefix(en, "temp") && strings.HasSuffix(en, "_label") {
+                lbPath := filepath.Join(hm, en)
+                lb, err := os.ReadFile(lbPath)
+                if err != nil {
+                    continue
+                }
+                lbl := strings.ToLower(strings.TrimSpace(string(lb)))
+                if strings.Contains(lbl, "package") || strings.Contains(lbl, "cpu") || strings.Contains(lbl, "tctl") || strings.Contains(lbl, "tdie") {
+                    candidate = strings.TrimSuffix(lbPath, "_label") + "_input"
+                    break
+                }
+            }
+        }
+        if candidate == "" {
+            // Fallback: temp1_input
+            candidate = filepath.Join(hm, "temp1_input")
+        }
+        if b, err := os.ReadFile(candidate); err == nil {
+            s := strings.TrimSpace(string(b))
+            if v, err := strconv.ParseFloat(s, 64); err == nil {
+                // values typically in millidegrees C
+                c := v / 1000.0
+                return &c
+            }
+        }
+    }
+    return nil
+}
