@@ -38,3 +38,6 @@ now-playing/
 flatpak-build/
 repo/
 dist/
+
+# DEB
+deb-structure/

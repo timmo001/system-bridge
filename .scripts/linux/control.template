@@ -2,7 +2,7 @@ Package: system-bridge
 Version: $VERSION
 Section: utils
 Priority: optional
-Architecture: amd64
+Architecture: $ARCH
 Maintainer: Aidan Timson <aidan@timmo.dev>
 Homepage: https://github.com/timmo001/system-bridge
 Description: System Bridge
