@@ -3,8 +3,8 @@ package types
 // CPUFrequency represents CPU frequency information
 type CPUFrequency struct {
 	Current *float64 `json:"current"`
-	Min     *float64 `json:"min"`     // TODO: Implement minimum frequency detection
-	Max     *float64 `json:"max"`     // TODO: Implement maximum frequency detection
+	Min     *float64 `json:"min"` // TODO: Implement minimum frequency detection
+	Max     *float64 `json:"max"` // TODO: Implement maximum frequency detection
 }
 
 // CPUStats represents CPU statistics
@@ -29,7 +29,7 @@ type CPUTimes struct {
 type PerCPU struct {
 	ID           int           `json:"id"`
 	Frequency    *CPUFrequency `json:"frequency"`
-	Power        *float64      `json:"power"`      // TODO: Implement per-CPU power consumption monitoring
+	Power        *float64      `json:"power"` // TODO: Implement per-CPU power consumption monitoring
 	Times        *CPUTimes     `json:"times"`
 	TimesPercent *CPUTimes     `json:"times_percent"` // TODO: Implement per-CPU time percentage calculations
 	Usage        *float64      `json:"usage"`
@@ -42,8 +42,8 @@ type CPUData struct {
 	Frequency    *CPUFrequency `json:"frequency"`
 	LoadAverage  *float64      `json:"load_average"`
 	PerCPU       []PerCPU      `json:"per_cpu"`
-	Power        *float64      `json:"power"`      // TODO: Implement overall CPU power consumption monitoring
-	Stats        *CPUStats     `json:"stats"`      // TODO: Implement overall CPU statistics collection
+	Power        *float64      `json:"power"` // TODO: Implement overall CPU power consumption monitoring
+	Stats        *CPUStats     `json:"stats"` // TODO: Implement overall CPU statistics collection
 	Temperature  *float64      `json:"temperature"`
 	Times        *CPUTimes     `json:"times"`
 	TimesPercent *CPUTimes     `json:"times_percent"` // TODO: Implement overall CPU time percentage calculations

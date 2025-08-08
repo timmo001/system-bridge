@@ -53,3 +53,9 @@
   - Change: Linux: hwmon temp*_input (package/cpu/tctl/tdie) to Celsius; macOS: powermetrics SMC (CPU die temperature); Windows: `MSAcpi_ThermalZoneTemperature` via PowerShell (K/10 to C). Used as fallback when gopsutil sensors does not provide a CPU temp.
   - Files Edited: `data/module/cpu/cpu_linux.go`, `data/module/cpu/cpu_darwin.go`, `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`
   - Status: Committed
+
+- Item: Windows Overall CPU Power
+  - Attempt: 1
+  - Change: Best-effort via Windows Power Meter performance counters using `typeperf` to read `\\Power Meter(*)\\Power` and sum instances.
+  - Files Edited: `data/module/cpu/cpu_windows.go`
+  - Status: Committed (may be unavailable on some systems)

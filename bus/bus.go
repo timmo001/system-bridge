@@ -13,7 +13,7 @@ import (
 type EventType string
 
 const (
-  // EventGetDataModule is the event type for getting data modules
+	// EventGetDataModule is the event type for getting data modules
 	EventGetDataModule EventType = "GET_DATA_MODULE"
 	// EventDataModuleUpdate is the event type for data module updates
 	EventDataModuleUpdate EventType = "DATA_MODULE_UPDATE"
@@ -21,8 +21,8 @@ const (
 
 // Event represents an event in the system
 type Event struct {
-	Type   EventType
-	Data   any
+	Type EventType
+	Data any
 }
 
 // GetDataRequest is the request for getting data modules
@@ -30,7 +30,6 @@ type GetDataRequest struct {
 	Connection string             `json:"connection" mapstructure:"connection"`
 	Modules    []types.ModuleName `json:"modules" mapstructure:"modules"`
 }
-
 
 // Handler is a function that handles events
 type Handler func(event Event)
