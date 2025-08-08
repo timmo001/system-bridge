@@ -70,8 +70,41 @@ func ComputeCPUPower(sample time.Duration) *float64 {
 // ReadCPUVcoreVoltage attempts to read CPU core voltage on Windows using WMI.
 // Returns volts if readable, otherwise nil.
 func ReadCPUVcoreVoltage() *float64 {
-	// Best-effort: Windows requires WMI/PDH; not implemented here.
-	return nil
+    // Best-effort: use WMI via PowerShell to read Win32_Processor.CurrentVoltage (decivolts when bit7=0)
+    cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object CurrentVoltage | ConvertTo-Json")
+    var out bytes.Buffer
+    cmd.Stdout = &out
+    if err := cmd.Run(); err != nil {
+        return nil
+    }
+    s := strings.TrimSpace(out.String())
+    if s == "" {
+        return nil
+    }
+    // Parse object or array
+    type psVolt struct{ CurrentVoltage *float64 `json:"CurrentVoltage"` }
+    var one psVolt
+    var many []psVolt
+    if strings.HasPrefix(s, "[") {
+        if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
+            return nil
+        }
+        one = many[0]
+    } else {
+        if err := json.Unmarshal([]byte(s), &one); err != nil {
+            return nil
+        }
+    }
+    if one.CurrentVoltage == nil {
+        return nil
+    }
+    raw := *one.CurrentVoltage
+    // If bit 7 is set (>=128), actual voltage not reported
+    if raw >= 128 {
+        return nil
+    }
+    v := raw / 10.0
+    return &v
 }
 
 // GetDPCPercentages returns % DPC Time either per-CPU or overall using typeperf.
