@@ -107,6 +107,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download NowPlaying helper
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./.scripts/windows/download-now-playing.ps1
+
       - name: Setup Go
         uses: ./.github/actions/setup-go
 
@@ -122,12 +128,6 @@ jobs:
 
       - name: Install NSIS
         run: choco install nsis -y --no-progress --limit-output
-
-      - name: Download NowPlaying helper
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: ./.scripts/windows/download-now-playing.ps1
 
       - name: Get version
         id: get_version
