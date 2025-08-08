@@ -145,11 +145,6 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 					Idle:      perPct[i].Idle,
 					Interrupt: perPct[i].Interrupt,
 				}
-
-				// Best-effort: set per-CPU voltage equal to overall Vcore when available
-				if vcore != nil {
-					perCpuData.Voltage = vcore
-				}
 			}
 
 			// Windows-only: best-effort DPC percentage per-CPU
@@ -249,7 +244,6 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		cpuData.Power = overallPower
 	}
 
-	// TODO: Add implementation for overall CPU voltage monitoring
 	// CPU statistics (OS-specific best-effort)
 	if stats := cm.ReadCPUStats(); stats != nil {
 		cpuData.Stats = stats

@@ -101,3 +101,15 @@
   - Change: Investigated OS interfaces (Linux hwmon/ACPI, macOS powermetrics SMC, Windows WMI). Reliable per-core voltage telemetry is generally unavailable; keep overall Vcore and avoid propagating misleading per-core values beyond best-effort overall propagation.
   - Files Edited: n/a
   - Status: Not feasible (skipped)
+
+- Item: Remove per-CPU voltage propagation
+  - Attempt: 1
+  - Change: Stop assigning overall Vcore to each per-CPU `voltage` to avoid misleading data.
+  - Files Edited: `data/module/cpu.go`
+  - Status: Committed
+
+- Item: macOS CPU Stats feasibility
+  - Attempt: 1
+  - Change: Documented macOS CPU stats not readily available in a portable way; leaving unimplemented.
+  - Files Edited: `data/module/cpu/cpu_darwin.go`, `CPU_CHANGES_LOG.md`
+  - Status: Skipped (documented)

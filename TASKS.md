@@ -9,7 +9,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [x] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
 - [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
 - [x] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore) — not feasible cross-OS; keep overall Vcore only
-- [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
+- [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls) — macOS not available portably (documented)
 - [x] Validate TimesPercent correctness across OSes; remove related TODOs
 - [x] Types cleanup: remove TODOs once fully implemented across OSes
 
