@@ -83,7 +83,7 @@ jobs:
             su builduser -c './create-arch.sh' && \
             find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
           " &
-          sudo ./.scripts/linux/create-flatpak.sh &
+          VERSION=${{ env.VERSION }} ./.scripts/linux/create-flatpak.sh &
           wait
 
       - name: Upload packages

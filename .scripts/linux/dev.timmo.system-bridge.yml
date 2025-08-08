@@ -20,7 +20,7 @@ modules:
       - install -Dm755 system-bridge-backend.sh /app/bin/system-bridge-backend
       - mkdir -p /app/share/applications
       - cp system-bridge.desktop /app/share/applications/dev.timmo.system-bridge.desktop
-      - sed -i 's|Exec=system-bridge|Exec=system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
+      - sed -i 's|^Exec=.*|Exec=system-bridge-backend|g' /app/share/applications/dev.timmo.system-bridge.desktop
       - sed -i 's|Icon=system-bridge|Icon=dev.timmo.system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
       - mkdir -p /app/share/icons/hicolor/scalable/apps
       - mkdir -p /app/share/icons/hicolor/16x16/apps

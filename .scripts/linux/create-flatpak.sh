@@ -25,29 +25,42 @@ done
 # Required tools check
 if ! command -v flatpak-builder &>/dev/null; then
   echo "flatpak-builder not found, installing..."
-  sudo apt-get update
-  sudo apt-get install -y flatpak flatpak-builder
+  if command -v apt-get &>/dev/null; then
+    apt-get update
+    apt-get install -y flatpak flatpak-builder
+  else
+    echo "Package manager not found for installing flatpak-builder" >&2
+    exit 1
+  fi
 fi
 
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
-sudo flatpak install -y flathub org.freedesktop.Platform//23.08
+flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo || true
+flatpak install -y --user flathub org.freedesktop.Sdk//23.08
+flatpak install -y --user flathub org.freedesktop.Platform//23.08
 
 # Create build directory
 BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
-# Build flatpak package
-flatpak-builder --force-clean "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+# Build flatpak package (disable rofiles fuse for containerized CI)
+flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
-# Create repo
+# Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo
-flatpak-builder --repo=repo --force-clean "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+# Prefer ostree for fine-grained config when available; otherwise fall back to flatpak
+if command -v ostree &>/dev/null; then
+  ostree --repo=repo init --mode=archive || true
+  ostree --repo=repo config set core.min-free-space-percent 0 || true
+  ostree --repo=repo config set core.min-free-space-size 0 || true
+else
+  # This may fail on a fresh repo; ignore and continue, export will create it
+  flatpak build-update-repo --min-free-space-size=0 --min-free-space-percent=0 repo || true
+fi
+flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
 VERSION=${VERSION:-5.0.0}
 mkdir -p dist
 flatpak build-bundle repo "dist/system-bridge-${VERSION}.flatpak" dev.timmo.system-bridge
 
-# Clean up
-rm -f "$(dirname "$0")/dev.timmo.system-bridge.yml"
+# Do not remove manifest; keep repository clean for subsequent runs

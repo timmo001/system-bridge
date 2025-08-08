@@ -34,6 +34,9 @@ create_appimage: clean_dist
 create_arch: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 
+create_flatpak: clean_dist
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh
+
 create_deb: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
 
@@ -92,6 +95,7 @@ help:
 	@echo "  build_web_client         Build the web client"
 	@echo "  create_appimage          Create AppImage package"
 	@echo "  create_arch              Create Arch Linux package"
+	@echo "  create_flatpak           Create Flatpak package"
 	@echo "  create_deb               Create Debian package"
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"

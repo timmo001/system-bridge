@@ -32,3 +32,9 @@ build/
 # External helper (downloaded at build time)
 .scripts/windows/now-playing/
 now-playing/
+
+# Flatpak
+.flatpak-builder/
+flatpak-build/
+repo/
+dist/
