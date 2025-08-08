@@ -35,3 +35,15 @@
   - Change: Propagate overall Vcore to each per-CPU `voltage` field when available (best-effort).
   - Files Edited: `data/module/cpu.go`
   - Status: Committed
+
+- Item: macOS Min/Max Frequency
+  - Attempt: 1
+  - Change: Best-effort via `sysctl` `hw.cpufrequency_min`/`hw.cpufrequency_max` (Hz to MHz).
+  - Files Edited: `data/module/cpu/cpu_darwin.go`
+  - Status: Committed
+
+- Item: Windows Max Frequency and Vcore
+  - Attempt: 1
+  - Change: Best-effort per-CPU max via PowerShell `Win32_Processor.MaxClockSpeed`; Vcore via `Win32_Processor.CurrentVoltage` (decivolts). Min not available.
+  - Files Edited: `data/module/cpu/cpu_windows.go`
+  - Status: Committed
