@@ -56,7 +56,7 @@ if command -v ostree &>/dev/null; then
   ostree --repo=repo config set core.min-free-space-size 0 || true
 else
   # This may fail on a fresh repo; ignore and continue, export will create it
-  flatpak build-update-repo --min-free-space-size=0 --min-free-space-percent=0 repo || true
+  flatpak build-update-repo --min-free-space-size=0MB --min-free-space-percent=0 repo || true
 fi
 flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 

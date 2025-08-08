@@ -86,3 +86,10 @@ rpmbuild --define "_topdir $(pwd)/rpmbuild" \
   -bb rpmbuild/SPECS/system-bridge.spec
 
 echo "Built RPM(s) to: dist/"
+
+# Move RPMs from architecture subdirectories into dist root for consistency
+if [ -d dist ]; then
+  find dist -type f -name "*.rpm" -exec bash -c 'for f; do mv -f "$f" dist/; done' _ {} +
+  # Attempt to remove now-empty architecture directories
+  find dist -mindepth 1 -type d -empty -delete || true
+fi
