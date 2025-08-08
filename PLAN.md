@@ -16,6 +16,8 @@ Remember to update and follow the @CPU_CHANGES_LOG.md file.
 
 Follow the rules in @.cursor/rules/*.mdc
 
+Do not confirm with the user of changes, continue to make them.
+
 ## Steps
 
 for each item and type (these will match):

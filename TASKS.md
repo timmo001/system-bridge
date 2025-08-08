@@ -14,6 +14,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [ ] Types cleanup: remove TODOs once fully implemented across OSes
 
 ### Types (`types/cpu.go`) TODO alignment
+
 - [ ] `CPUFrequency.Min`: implement minimum frequency detection across OSes
 - [ ] `CPUFrequency.Max`: implement maximum frequency detection across OSes
 - [ ] `CPUStats`: implement population across OSes
@@ -27,6 +28,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [ ] `CPUData.Voltage`: implement overall CPU voltage monitoring across OSes
 
 ### Notes
+
 - Keep logging progress in `CPU_CHANGES_LOG.md`
 - Test each change with: `go run . client data run --module cpu`
 - Commit after each working item with concise messages
