@@ -293,4 +293,3 @@ func computeTimesPercent(percpu bool) []*types.CPUTimes {
 	}
 	return out
 }
-

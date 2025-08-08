@@ -1,7 +1,7 @@
 //go:build linux
 // +build linux
 
-package data_module
+package system
 
 import (
 	"os"
@@ -13,9 +13,9 @@ import (
 	"github.com/shirou/gopsutil/v4/process"
 )
 
-// getCameraUsage attempts to detect processes currently using video devices on Linux
+// GetCameraUsage attempts to detect processes currently using video devices on Linux
 // by scanning /proc/*/fd symlinks for /dev/video* files.
-func getCameraUsage() []string {
+func GetCameraUsage() []string {
 	const devPrefix = "/dev/video"
 	pids, err := filepath.Glob("/proc/[0-9]*/fd/*")
 	if err != nil {
@@ -81,9 +81,9 @@ func getCameraUsage() []string {
 	return names
 }
 
-// getPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.
+// GetPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.
 // Returns pointer to bool when known, or nil when unknown.
-func getPendingReboot() *bool {
+func GetPendingReboot() *bool {
 	candidates := []string{
 		"/run/reboot-required",
 		"/var/run/reboot-required",

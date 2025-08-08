@@ -11,6 +11,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/process"
+	"github.com/timmo001/system-bridge/data/module/system"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/version"
 )
@@ -148,12 +149,12 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 
 	// Populate optional fields when available per-OS
-	// Linux: detect camera usage processes and pending reboot
+	// Linux: detect camera usage processes and pending reboot via subpackage helpers
 	if infoStat.OS == "linux" || infoStat.Platform == "linux" || strings.Contains(strings.ToLower(infoStat.Platform), "arch") || strings.Contains(strings.ToLower(infoStat.Platform), "ubuntu") || strings.Contains(strings.ToLower(infoStat.Platform), "debian") {
-		if cu := getCameraUsage(); len(cu) > 0 {
+		if cu := system.GetCameraUsage(); len(cu) > 0 {
 			systemData.CameraUsage = cu
 		}
-		if pr := getPendingReboot(); pr != nil {
+		if pr := system.GetPendingReboot(); pr != nil {
 			systemData.PendingReboot = pr
 		}
 	}
