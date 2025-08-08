@@ -168,8 +168,6 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			val := perCorePowers[i]
 			perCpuData.Power = &val
 		}
-		// TODO: Add implementation for per-CPU voltage monitoring
-
 		perCPU = append(perCPU, perCpuData)
 	}
 	cpuData.PerCPU = perCPU
