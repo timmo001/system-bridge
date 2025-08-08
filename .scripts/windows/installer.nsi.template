@@ -67,6 +67,11 @@ Section "Install"
   SetOutPath "$INSTDIR"
   File "dist\system-bridge.exe"
   File /oname=system-bridge.ico ".resources\system-bridge-dimmed.ico"
+  
+  ; Include NowPlaying helper if present
+  IfFileExists ".\\.scripts\\windows\\now-playing\\NowPlaying.exe" 0 +3
+    SetOutPath "$INSTDIR\now-playing"
+    File ".\\.scripts\\windows\\now-playing\\*.*"
 
   # Register uninstaller in Windows registry
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\System Bridge" "DisplayName" "System Bridge"

@@ -28,3 +28,7 @@ installer.nsi
 
 # Build
 build/
+
+# External helper (downloaded at build time)
+.scripts/windows/now-playing/
+now-playing/

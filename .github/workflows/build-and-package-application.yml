@@ -104,6 +104,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download NowPlaying helper
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: ./.scripts/windows/download-now-playing.ps1
+
       - name: Setup Go
         uses: ./.github/actions/setup-go
 
