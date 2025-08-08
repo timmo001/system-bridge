@@ -47,8 +47,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		// as the maximum of per-CPU maxes.
 		var overallMinMHz *float64
 		var overallMaxMHz *float64
-        for i := range frequencies {
-            minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
+		for i := range frequencies {
+			minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
 			if minMHz != nil {
 				if overallMinMHz == nil || *minMHz < *overallMinMHz {
 					overallMinMHz = minMHz
@@ -70,6 +70,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, percentageInterval, true)
 	// Compute per-CPU times percent once (short sampling interval)
 	perPct := computeTimesPercent(true)
+	// Read overall CPU Vcore voltage once (best-effort, OS-specific)
+	vcore := cm.ReadCPUVcoreVoltage()
 
 	// Get per CPU info
 	perCPU := make([]types.PerCPU, 0, len(frequencies))
@@ -81,15 +83,15 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			},
 		}
 
-        // Best-effort: populate per-CPU min/max frequency via OS-specific implementation
-        minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
+		// Best-effort: populate per-CPU min/max frequency via OS-specific implementation
+		minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
 		if perCpuData.Frequency != nil {
 			perCpuData.Frequency.Min = minMHz
 			perCpuData.Frequency.Max = maxMHz
 		}
 
 		// Get per CPU times
-        if i < len(timesPerCPU) {
+		if i < len(timesPerCPU) {
 			perCpuData.Times = &types.CPUTimes{
 				User:      &timesPerCPU[i].User,
 				System:    &timesPerCPU[i].System,
@@ -105,16 +107,21 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 					Idle:      perPct[i].Idle,
 					Interrupt: perPct[i].Interrupt,
 				}
+
+				// Best-effort: set per-CPU voltage equal to overall Vcore when available
+				if vcore != nil {
+					perCpuData.Voltage = vcore
+				}
 			}
 
-		// Windows-only: best-effort DPC percentage per-CPU
-        if dpcs := cm.GetDPCPercentages(true); i < len(dpcs) {
-			if perCpuData.TimesPercent == nil {
-				perCpuData.TimesPercent = &types.CPUTimes{}
+			// Windows-only: best-effort DPC percentage per-CPU
+			if dpcs := cm.GetDPCPercentages(true); i < len(dpcs) {
+				if perCpuData.TimesPercent == nil {
+					perCpuData.TimesPercent = &types.CPUTimes{}
+				}
+				d := dpcs[i]
+				perCpuData.TimesPercent.DPC = &d
 			}
-			d := dpcs[i]
-			perCpuData.TimesPercent.DPC = &d
-		}
 		}
 
 		// Get per CPU usage percentage
@@ -131,7 +138,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	cpuData.PerCPU = perCPU
 
 	// Get overall CPU times
-    if times, err := cpu.Times(false); err == nil && len(times) > 0 {
+	if times, err := cpu.Times(false); err == nil && len(times) > 0 {
 		cpuData.Times = &types.CPUTimes{
 			User:      &times[0].User,
 			System:    &times[0].System,
@@ -151,7 +158,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 
 		// Windows-only: best-effort overall DPC percentage
-        if dpcs := cm.GetDPCPercentages(false); len(dpcs) > 0 {
+		if dpcs := cm.GetDPCPercentages(false); len(dpcs) > 0 {
 			if cpuData.TimesPercent == nil {
 				cpuData.TimesPercent = &types.CPUTimes{}
 			}
@@ -183,21 +190,21 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
-    // TODO: Add implementation for overall CPU power consumption
-    // OS-specific best-effort overall CPU power sampling
-    if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
+	// TODO: Add implementation for overall CPU power consumption
+	// OS-specific best-effort overall CPU power sampling
+	if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
 		cpuData.Power = p
 	}
 
-    // TODO: Add implementation for overall CPU voltage monitoring
+	// TODO: Add implementation for overall CPU voltage monitoring
 	// CPU statistics (OS-specific best-effort)
-    if stats := cm.ReadCPUStats(); stats != nil {
+	if stats := cm.ReadCPUStats(); stats != nil {
 		cpuData.Stats = stats
 	}
 
 	// Overall CPU voltage (best-effort OS-specific)
-	if v := cm.ReadCPUVcoreVoltage(); v != nil {
-		cpuData.Voltage = v
+	if vcore != nil {
+		cpuData.Voltage = vcore
 	}
 
 	return cpuData, nil

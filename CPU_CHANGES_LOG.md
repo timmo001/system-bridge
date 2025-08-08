@@ -29,3 +29,9 @@
   - Change: Query typeperf for % DPC Time (per-CPU and _Total) and wire to `types.CPUTimes.DPC` best-effort on Windows. Safe no-ops on Linux/macOS.
   - Files Edited: `data/module/cpu/cpu_windows.go`, `data/module/cpu.go`
   - Status: Committed (untested on Windows; best-effort with fallbacks)
+
+- Item: Per-CPU Voltage Propagation
+  - Attempt: 1
+  - Change: Propagate overall Vcore to each per-CPU `voltage` field when available (best-effort).
+  - Files Edited: `data/module/cpu.go`
+  - Status: Committed
