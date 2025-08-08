@@ -22,9 +22,8 @@ Primary reference: Home Assistant docs for System Bridge [System Bridge Integrat
 
 #### High-level result
 
-- Most modules align with HA integration expectations for field names, value ranges, and units.
-- Remaining mismatch to address:
-  - Media player doc vs integration (Windows-only in docs vs general availability in integration)
+- All modules align with HA integration expectations for field names, value ranges, and units.
+  - Note: Media player is supported on Windows and best-effort on Linux via `playerctl` when available. This matches the current integration behavior; we will propose a minor docs update upstream to reflect this.
 
 Below is a detailed, per-domain assessment.
 
@@ -102,10 +101,9 @@ Below is a detailed, per-domain assessment.
 
 - Media player
 
-  - Backend provides media data on Linux via `playerctl` best-effort; `data/module/media/media_linux.go`.
-  - HA creates a media player entity when `.media` present (no platform gating).
-  - Docs state “This is currently only supported devices running System Bridge on Windows.”
-  - Status: Docs vs integration mismatch. Either gate by platform or update docs.
+  - Backend: Windows uses `NowPlaying.exe`; Linux provides best-effort media data via `playerctl` when available; see `data/module/media/media_*.go`.
+  - HA integration: creates a media player entity when `.media` data is present (no platform gating).
+  - Status: Resolved (follow integration). Keep Linux best-effort behavior; propose upstream docs tweak to indicate Linux may be available when `playerctl` is present.
 
 - Notification service and Actions
   - Connector mappings match backend events (`OPEN`, `NOTIFICATION`, `POWER_*`, `GET_*`, `REGISTER_DATA_LISTENER`, `DATA_UPDATE`, etc.).
