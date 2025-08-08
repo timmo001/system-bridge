@@ -1,6 +1,20 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
+
+# Ensure required tools for Arch packaging are installed (makepkg)
+if ! command -v makepkg >/dev/null 2>&1; then
+  echo "makepkg not found, attempting installation..."
+  if command -v pacman >/dev/null 2>&1; then
+    sudo pacman -Syu --noconfirm --needed base-devel
+  elif command -v apt-get >/dev/null 2>&1; then
+    echo "makepkg is Arch-specific. Please run this script on an Arch-based system, or use the CI containerized build." >&2
+    exit 1
+  else
+    echo "Unsupported or unknown package manager. Please run on Arch or install makepkg (pacman base-devel)." >&2
+    exit 1
+  fi
+fi
 
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
@@ -45,7 +59,7 @@ awk '
 rm new_sums.txt
 
 # Build package
-makepkg -f
+makepkg -f --noconfirm
 
 # Move package to dist directory
 mkdir -p ../../dist

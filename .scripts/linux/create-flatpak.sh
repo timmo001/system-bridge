@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
@@ -26,8 +26,10 @@ done
 if ! command -v flatpak-builder &>/dev/null; then
   echo "flatpak-builder not found, installing..."
   if command -v apt-get &>/dev/null; then
-    apt-get update
-    apt-get install -y flatpak flatpak-builder
+    sudo apt-get update -y
+    sudo apt-get install -y flatpak flatpak-builder
+  elif command -v pacman &>/dev/null; then
+    sudo pacman -Syu --noconfirm --needed flatpak flatpak-builder
   else
     echo "Package manager not found for installing flatpak-builder" >&2
     exit 1

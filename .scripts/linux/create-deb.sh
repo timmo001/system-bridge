@@ -9,6 +9,20 @@ cd "$REPO_ROOT"
 # Ensure output directory exists
 mkdir -p dist
 
+# Ensure required tools are installed (dpkg-deb)
+if ! command -v dpkg-deb >/dev/null 2>&1; then
+  echo "dpkg-deb not found, attempting installation..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update -y
+    sudo apt-get install -y dpkg-dev dpkg
+  elif command -v pacman >/dev/null 2>&1; then
+    sudo pacman -Syu --noconfirm --needed dpkg
+  else
+    echo "Unsupported or unknown package manager. Please install 'dpkg-deb' (dpkg) and retry." >&2
+    exit 1
+  fi
+fi
+
 # Clean previous packaging dir if present
 rm -rf deb-structure
 

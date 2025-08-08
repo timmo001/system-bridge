@@ -9,14 +9,15 @@ cd "$REPO_ROOT"
 # Ensure output dir exists
 mkdir -p dist
 
-# Auto-install rpm tooling on Arch/Debian-based systems if missing (local dev convenience)
+# Ensure rpm tooling is installed
 if ! command -v rpmbuild >/dev/null 2>&1; then
-  if command -v pacman >/dev/null 2>&1; then
-    echo "rpmbuild not found. Installing rpm-tools via pacman..."
-    sudo pacman -S --noconfirm rpm-tools
-  elif command -v apt-get >/dev/null 2>&1; then
+  if command -v apt-get >/dev/null 2>&1; then
     echo "rpmbuild not found. Installing rpm via apt-get..."
-    sudo apt-get update -y && sudo apt-get install -y rpm
+    sudo apt-get update -y
+    sudo apt-get install -y rpm
+  elif command -v pacman >/dev/null 2>&1; then
+    echo "rpmbuild not found. Installing rpm-tools via pacman..."
+    sudo pacman -Syu --noconfirm --needed rpm-tools
   else
     echo "rpmbuild not found and automatic installation not supported on this distro." >&2
     exit 1
