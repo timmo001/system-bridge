@@ -45,3 +45,7 @@ deb-structure/
 # RPM
 rpm-structure/
 rpmbuild/
+
+# Package files
+AppDir/
+appimagetool

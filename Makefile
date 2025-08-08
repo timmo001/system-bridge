@@ -43,6 +43,20 @@ create_deb: clean_dist
 create_rpm: clean_dist
 	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 
+create_all_packages: clean_dist build
+ifeq ($(OS),Windows_NT)
+	@echo "create_all_packages is only supported on Linux hosts"
+else
+	@echo "Packaging all Linux formats in parallel..."
+	chmod +x ./.scripts/linux/create-*.sh
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh & \
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh & \
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh & \
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh & \
+	VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh & \
+	wait
+endif
+
 create_windows_installer: clean_dist download_windows_now_playing
 	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean
 
@@ -106,6 +120,7 @@ help:
 	@echo "  create_deb               Create Debian package"
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
+	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  run                      Build and run the application (development only)"
 	@echo "  test                     Run tests"
 	@echo "  clean                    Remove build artifacts"
