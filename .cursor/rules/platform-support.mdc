@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+description: Platform/OS, CPU, and dependency support policy for System Bridge
+---
+
+# Platform and Support Policy
+
+- **Supported operating systems**:
+
+  - **Linux**: Support most distributions; prioritize Arch Linux and Ubuntu/Debian for examples and CI targets.
+  - **Windows**: Support the latest Microsoft-supported Windows. Prioritize commands for the latest Windows release using modern PowerShell/Windows Terminal.
+  - **macOS (Darwin)**: Experimental support only, targeting the latest Apple-supported macOS.
+
+- **CPU architectures**:
+
+  - **Intel / AMD Ryzen / Apple Silicon** only.
+  - **Modern systems only**: No legacy/32-bit targets.
+
+- **Command conventions**:
+
+  - **Windows**: Prefer modern PowerShell commands and current package managers (e.g., `winget`), targeting the latest Windows version.
+  - **Linux**: Provide instructions primarily for Arch (`pacman`) and Debian/Ubuntu (`apt`). When relevant, note general commands applicable across distros.
+  - **macOS**: Use Homebrew for examples where dependencies are required.
+
+- **Documentation for dependencies**:
+
+  - When introducing any external application, library, or system package requirement, add clear install and setup instructions to the dependencies section of [README.md](mdc:README.md).
+  - Include per-OS guidance where applicable:
+    - Arch Linux: `yay` (AUR) or `pacman` (official) commands
+    - Debian/Ubuntu: `apt` commands
+    - Windows: `winget` (prefer) or `choco` if needed
+    - macOS: `brew`
+  - Keep steps minimal, modern, and specific to supported platforms only.
+
+- **Testing expectations**:
+
+  - Ensure changes build and run on **Linux** and **Windows**. macOS is non-blocking but should not be broken.
+  - Avoid platform-specific behavior that regresses other supported platforms.
+
+- **Scope and exclusions**:
+
+  - Do not add code or instructions for unsupported/legacy operating systems or architectures.
+  - Avoid legacy or deprecated command syntaxes; use the most current, widely available equivalents for each platform.
