@@ -49,3 +49,4 @@ rpmbuild/
 # Package files
 AppDir/
 appimagetool
+temp/
