@@ -3,9 +3,6 @@ package data_module
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +11,7 @@ import (
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/sensors"
+	cm "github.com/timmo001/system-bridge/data/module/cpu"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -49,8 +47,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		// as the maximum of per-CPU maxes.
 		var overallMinMHz *float64
 		var overallMaxMHz *float64
-		for i := range frequencies {
-			minMHz, maxMHz := readLinuxSysfsCPUFreq(i)
+        for i := range frequencies {
+            minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
 			if minMHz != nil {
 				if overallMinMHz == nil || *minMHz < *overallMinMHz {
 					overallMinMHz = minMHz
@@ -83,8 +81,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			},
 		}
 
-		// Best-effort: populate per-CPU min/max frequency on Linux via sysfs
-		minMHz, maxMHz := readLinuxSysfsCPUFreq(i)
+        // Best-effort: populate per-CPU min/max frequency via OS-specific implementation
+        minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
 		if perCpuData.Frequency != nil {
 			perCpuData.Frequency.Min = minMHz
 			perCpuData.Frequency.Max = maxMHz
@@ -169,138 +167,59 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
-	// TODO: Add implementation for overall CPU power consumption
-	// TODO: Add implementation for overall CPU voltage monitoring
-	// CPU statistics (Linux best-effort)
-	if stats := readLinuxCPUStats(); stats != nil {
+    // TODO: Add implementation for overall CPU power consumption
+    // OS-specific best-effort overall CPU power sampling
+    if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
+		cpuData.Power = p
+	}
+
+    // TODO: Add implementation for overall CPU voltage monitoring
+    // CPU statistics (OS-specific best-effort)
+    if stats := cm.ReadCPUStats(); stats != nil {
 		cpuData.Stats = stats
 	}
 
 	return cpuData, nil
 }
 
-// readLinuxSysfsCPUFreq attempts to read per-CPU min/max frequencies from Linux sysfs.
-// Returns values in MHz if available; otherwise returns nils. This function is safe to
-// call on non-Linux hosts and will simply return nils.
-func readLinuxSysfsCPUFreq(cpuIndex int) (minMHz *float64, maxMHz *float64) {
-	// Quick OS check by probing for the sysfs directory; avoids importing runtime.
-	base := "/sys/devices/system/cpu"
-	cpuDir := filepath.Join(base, fmt.Sprintf("cpu%d", cpuIndex), "cpufreq")
-	if _, err := os.Stat(cpuDir); err != nil {
-		return nil, nil
-	}
-
-	// Helper to read a single kHz value file and convert to MHz
-	readMHz := func(path string) *float64 {
-		b, err := os.ReadFile(path)
-		if err != nil {
-			return nil
-		}
-		s := strings.TrimSpace(string(b))
-		if s == "" {
-			return nil
-		}
-		// Values are typically integers in kHz
-		// Some kernels may expose floating values; handle generically
-		v, err := strconv.ParseFloat(s, 64)
-		if err != nil {
-			return nil
-		}
-		mhz := v / 1000.0
-		return &mhz
-	}
-
-	minPath := filepath.Join(cpuDir, "cpuinfo_min_freq")
-	maxPath := filepath.Join(cpuDir, "cpuinfo_max_freq")
-	return readMHz(minPath), readMHz(maxPath)
-}
-
 // computeTimesPercent calculates per-state CPU time percentages over a short
 // sampling interval. Returns a slice of CPUTimes pointers when percpu is true,
 // otherwise a single-element slice for overall.
 func computeTimesPercent(percpu bool) []*types.CPUTimes {
-    // Short interval to minimize blocking but still obtain a delta
-    const sample = 200 * time.Millisecond
-    t1, err := cpu.Times(percpu)
-    if err != nil || len(t1) == 0 {
-        return nil
-    }
-    time.Sleep(sample)
-    t2, err := cpu.Times(percpu)
-    if err != nil || len(t2) == 0 || len(t2) != len(t1) {
-        return nil
-    }
+	// Short interval to minimize blocking but still obtain a delta
+	const sample = 200 * time.Millisecond
+	t1, err := cpu.Times(percpu)
+	if err != nil || len(t1) == 0 {
+		return nil
+	}
+	time.Sleep(sample)
+	t2, err := cpu.Times(percpu)
+	if err != nil || len(t2) == 0 || len(t2) != len(t1) {
+		return nil
+	}
 
-    out := make([]*types.CPUTimes, 0, len(t2))
-    for i := range t2 {
-        dUser := t2[i].User - t1[i].User
-        dSystem := t2[i].System - t1[i].System
-        dIdle := t2[i].Idle - t1[i].Idle
-        dIrq := t2[i].Irq - t1[i].Irq
-        // Total delta across all accounted fields (align with gopsutil Total)
-        tot1 := t1[i].User + t1[i].System + t1[i].Idle + t1[i].Nice + t1[i].Iowait + t1[i].Irq + t1[i].Softirq + t1[i].Steal + t1[i].Guest + t1[i].GuestNice
-        tot2 := t2[i].User + t2[i].System + t2[i].Idle + t2[i].Nice + t2[i].Iowait + t2[i].Irq + t2[i].Softirq + t2[i].Steal + t2[i].Guest + t2[i].GuestNice
-        dTot := tot2 - tot1
-        if dTot <= 0 {
-            out = append(out, &types.CPUTimes{})
-            continue
-        }
-        u := (dUser / dTot) * 100
-        s := (dSystem / dTot) * 100
-        id := (dIdle / dTot) * 100
-        irq := (dIrq / dTot) * 100
-        out = append(out, &types.CPUTimes{User: &u, System: &s, Idle: &id, Interrupt: &irq})
-    }
-    return out
+	out := make([]*types.CPUTimes, 0, len(t2))
+	for i := range t2 {
+		dUser := t2[i].User - t1[i].User
+		dSystem := t2[i].System - t1[i].System
+		dIdle := t2[i].Idle - t1[i].Idle
+		dIrq := t2[i].Irq - t1[i].Irq
+		// Total delta across all accounted fields (align with gopsutil Total)
+		tot1 := t1[i].User + t1[i].System + t1[i].Idle + t1[i].Nice + t1[i].Iowait + t1[i].Irq + t1[i].Softirq + t1[i].Steal + t1[i].Guest + t1[i].GuestNice
+		tot2 := t2[i].User + t2[i].System + t2[i].Idle + t2[i].Nice + t2[i].Iowait + t2[i].Irq + t2[i].Softirq + t2[i].Steal + t2[i].Guest + t2[i].GuestNice
+		dTot := tot2 - tot1
+		if dTot <= 0 {
+			out = append(out, &types.CPUTimes{})
+			continue
+		}
+		u := (dUser / dTot) * 100
+		s := (dSystem / dTot) * 100
+		id := (dIdle / dTot) * 100
+		irq := (dIrq / dTot) * 100
+		out = append(out, &types.CPUTimes{User: &u, System: &s, Idle: &id, Interrupt: &irq})
+	}
+	return out
 }
 
 // readLinuxCPUStats parses /proc/stat for aggregate CPU stats like interrupts,
 // soft interrupts, context switches, and optionally syscalls if present.
-func readLinuxCPUStats() *types.CPUStats {
-    const procStat = "/proc/stat"
-    b, err := os.ReadFile(procStat)
-    if err != nil || len(b) == 0 {
-        return nil
-    }
-    var (
-        ctxSwitches *int64
-        interrupts *int64
-        softInterrupts *int64
-        syscalls *int64
-    )
-    lines := strings.Split(string(b), "\n")
-    for _, line := range lines {
-        fields := strings.Fields(line)
-        if len(fields) < 2 {
-            continue
-        }
-        switch fields[0] {
-        case "ctxt":
-            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
-                ctxSwitches = &v
-            }
-        case "intr":
-            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
-                interrupts = &v
-            }
-        case "softirq":
-            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
-                softInterrupts = &v
-            }
-        case "syscalls":
-            if v, err := strconv.ParseInt(fields[1], 10, 64); err == nil {
-                syscalls = &v
-            }
-        }
-    }
-    // If none found, return nil to avoid empty struct noise.
-    if ctxSwitches == nil && interrupts == nil && softInterrupts == nil && syscalls == nil {
-        return nil
-    }
-    return &types.CPUStats{
-        CtxSwitches:    ctxSwitches,
-        Interrupts:     interrupts,
-        SoftInterrupts: softInterrupts,
-        Syscalls:       syscalls,
-    }
-}
