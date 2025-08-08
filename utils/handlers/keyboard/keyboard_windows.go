@@ -4,8 +4,16 @@
 package keyboard
 
 import (
-	"errors"
+	"strings"
 	"time"
+
+	"github.com/go-vgo/robotgo"
+)
+
+// indirection for testability
+var (
+    robotKeyTap = robotgo.KeyTap
+    robotTypeStr func(str string, args ...int) = robotgo.TypeStr
 )
 
 func sendKeypress(data KeypressData) error {
@@ -14,11 +22,30 @@ func sendKeypress(data KeypressData) error {
 		time.Sleep(time.Duration(data.Delay) * time.Millisecond)
 	}
 
-	// TODO: Find implementation
-	return errors.New("keyboard automation not supported on this platform")
+    // Convert modifiers to robotgo format
+    var modifiers []any
+    for _, mod := range data.Modifiers {
+        mod = strings.ToLower(mod)
+        switch mod {
+        case "shift":
+            modifiers = append(modifiers, "shift")
+        case "ctrl", "control":
+            modifiers = append(modifiers, "ctrl")
+        case "alt":
+            modifiers = append(modifiers, "alt")
+        case "cmd", "command":
+            // Keep for parity with non-Windows; Windows will ignore unsupported modifier
+            modifiers = append(modifiers, "cmd")
+        }
+    }
+
+    if len(modifiers) > 0 {
+        return robotKeyTap(data.Key, modifiers...)
+    }
+    return robotKeyTap(data.Key)
 }
 
 func sendText(text string) error {
-	// TODO: Find implementation
-	return errors.New("keyboard automation not supported on this platform")
+    robotTypeStr(text)
+    return nil
 }
