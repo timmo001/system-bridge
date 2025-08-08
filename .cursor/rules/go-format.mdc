@@ -1,0 +1,12 @@
+---
+globs: *.go
+description: Ensure Go files are formatted after any edit
+---
+
+# Go formatting guidelines
+
+- **Requirement**: After any edit to Go code, always run the formatter.
+- **Command**: Prefer `go fmt ./...` from the repository root.
+- **Alternative**: If needed, `gofmt -s -w .` from the repository root.
+
+This keeps the codebase consistently formatted across all Go packages.

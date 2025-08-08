@@ -7,3 +7,16 @@ alwaysApply: true
 # Build Process
 
 When building the application, always use the [Makefile](mdc:Makefile) and its defined targets. Do not invoke build commands directly; instead, use the appropriate `make` target (e.g., `make build`). This ensures all required steps and dependencies are handled consistently.
+
+## Examples
+
+Below are some examples of how to run/test the application.
+
+- Build the application: `make build` (Runs cleanup, builds the frontend (nextjs) and backend (go))
+- Run the application backend: `make run` (runs `go run . backend` internally)
+- Test the application: `make test`
+- Clean the application: `make clean`
+- Clean the application and remove all build artifacts: `make clean_dist` (removes the `dist` directory)
+- Clean the application and remove all build artifacts: `make clean_web_client` (removes the `web-client/out` directory)
+- Install dependencies: `make deps` (runs `go mod tidy` internally)
+- Show help: `make help` (shows all available targets)
