@@ -150,6 +150,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
+
 	// TODO: Add implementation for overall CPU power consumption
 	// TODO: Add implementation for overall CPU voltage monitoring
 	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
