@@ -1,11 +1,50 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
   echo "system-bridge-linux not found, please build the application first"
   exit 1
+fi
+
+# Ensure appimagetool is available; try to install using detected package manager
+APPIMAGETOOL_BIN="appimagetool"
+if ! command -v appimagetool >/dev/null 2>&1; then
+  echo "appimagetool not found, attempting installation..."
+  if command -v pacman >/dev/null 2>&1; then
+    # Arch Linux: try official repo first
+    if sudo pacman -Si appimagetool >/dev/null 2>&1; then
+      sudo pacman -S --noconfirm --needed appimagetool || true
+    fi
+  elif command -v apt-get >/dev/null 2>&1; then
+    # Debian/Ubuntu
+    sudo apt-get update -y || true
+    sudo apt-get install -y appimagetool || true
+  fi
+  # Fallback: download continuous AppImage locally if still not available
+  if ! command -v appimagetool >/dev/null 2>&1; then
+    echo "Falling back to downloading appimagetool AppImage (continuous) locally..."
+    ARCH=$(uname -m)
+    case "$ARCH" in
+      x86_64|amd64)
+        APPIMAGE_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        ;;
+      aarch64|arm64)
+        APPIMAGE_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage"
+        ;;
+      armv7l|armv7)
+        APPIMAGE_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-armhf.AppImage"
+        ;;
+      *)
+        echo "Unsupported architecture for automatic download: $ARCH" >&2
+        exit 1
+        ;;
+    esac
+    curl -fsSL "$APPIMAGE_URL" -o ./appimagetool
+    chmod +x ./appimagetool
+    APPIMAGETOOL_BIN="./appimagetool"
+  fi
 fi
 
 # Setup directories
@@ -42,4 +81,5 @@ cp .resources/system-bridge-dimmed-256.png AppDir/usr/share/icons/hicolor/256x25
 cp .resources/system-bridge-dimmed-512.png AppDir/usr/share/icons/hicolor/512x512/apps/system-bridge.png
 
 # Build the AppImage
-VERSION=${VERSION:-5.0.0} ./appimagetool AppDir dist/system-bridge-${VERSION}-x86_64.AppImage
+mkdir -p dist
+VERSION=${VERSION:-5.0.0} "$APPIMAGETOOL_BIN" AppDir dist/system-bridge-${VERSION}-x86_64.AppImage
