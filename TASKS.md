@@ -8,7 +8,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [x] Windows/macOS: overall CPU power (best-effort platform implementations)
 - [x] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
 - [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
-- [ ] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore)
+- [x] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore) — not feasible cross-OS; keep overall Vcore only
 - [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 - [x] Validate TimesPercent correctness across OSes; remove related TODOs
 - [x] Types cleanup: remove TODOs once fully implemented across OSes
@@ -21,7 +21,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [x] `CPUTimes.DPC`: implement Deferred Procedure Call time tracking (absolute) (Windows only)
 - [x] `PerCPU.Power`: implement per-CPU power consumption monitoring
 - [x] `PerCPU.TimesPercent`: ensure correctness; remove TODO
-- [ ] `PerCPU.Voltage`: implement per-CPU voltage monitoring
+- [x] `PerCPU.Voltage`: implement per-CPU voltage monitoring — not feasible cross-OS; not implementing
 - [x] `CPUData.Power`: implement overall CPU power consumption monitoring across OSes
 - [x] `CPUData.Stats`: implement overall CPU statistics collection
 - [x] `CPUData.TimesPercent`: ensure correctness; remove TODO
