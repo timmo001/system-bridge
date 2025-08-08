@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -19,6 +20,7 @@ import (
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
@@ -60,8 +62,8 @@ func main() {
 		cancel() // Cancel the context
 	}()
 
-	// Run systray in a goroutine
-	go systray.Run(onReady, onExit)
+	// Note: systray is started only for the backend command to avoid
+	// spawning a tray when using CLI-only commands.
 
 	cmd := &cli.Command{
 		Name:  "System Bridge",
@@ -78,6 +80,8 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					// Start the system tray UI
+					go systray.Run(onReady, onExit)
 					slog.Info("------ System Bridge ------")
 
 					s, err := settings.Load()
@@ -153,6 +157,124 @@ func main() {
 								slog.Warn("Failed to send notification", "err", err)
 							}
 							return nil
+						},
+					},
+					{
+						Name:    "data",
+						Aliases: []string{"d"},
+						Usage:   "List and run data modules",
+						Commands: []*cli.Command{
+							{
+								Name:  "list",
+								Usage: "List available data modules",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									dataStore, err := data.NewDataStore()
+									if err != nil {
+										return fmt.Errorf("failed to create data store: %w", err)
+									}
+
+									updaters := dataStore.GetRegisteredModules()
+									modules := make([]string, 0, len(updaters))
+									for _, u := range updaters {
+										if u != nil {
+											modules = append(modules, string(u.Name()))
+										}
+									}
+
+									// Stable output order
+									// No need to import sort explicitly; json.Marshal of slice preserves order
+									for _, name := range modules {
+										fmt.Println(name)
+									}
+									return nil
+								},
+							},
+							{
+								Name:  "run",
+								Usage: "Run a data module and print JSON output",
+								Flags: []cli.Flag{
+									&cli.StringFlag{
+										Name:     "module",
+										Aliases:  []string{"m"},
+										Usage:    "Module name (e.g. cpu, memory). Use --all to run all.",
+										Required: false,
+									},
+									&cli.BoolFlag{
+										Name:  "all",
+										Usage: "Run all modules and print a JSON object",
+										Value: false,
+									},
+									&cli.BoolFlag{
+										Name:  "pretty",
+										Usage: "Pretty-print JSON output",
+										Value: false,
+									},
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									runAll := cmd.Bool("all")
+									moduleName := cmd.String("module")
+									pretty := cmd.Bool("pretty")
+
+									if !runAll && moduleName == "" {
+										return fmt.Errorf("either --module or --all must be provided")
+									}
+
+									dataStore, err := data.NewDataStore()
+									if err != nil {
+										return fmt.Errorf("failed to create data store: %w", err)
+									}
+
+									if runAll {
+										result := make(map[string]any)
+										for _, u := range dataStore.GetRegisteredModules() {
+											if u == nil {
+												continue
+											}
+											d, err := u.Update(cmdCtx)
+											if err != nil {
+												slog.Warn("module update failed", "module", u.Name(), "err", err)
+												continue
+											}
+											result[string(u.Name())] = d
+										}
+										var out []byte
+										if pretty {
+											out, err = json.MarshalIndent(result, "", "  ")
+										} else {
+											out, err = json.Marshal(result)
+										}
+										if err != nil {
+											return fmt.Errorf("failed to marshal result: %w", err)
+										}
+										fmt.Println(string(out))
+										return nil
+									}
+
+									// Single module
+									mod, err := dataStore.GetModule(types.ModuleName(moduleName))
+									if err != nil {
+										return fmt.Errorf("failed to get module %q: %w", moduleName, err)
+									}
+									if mod.Updater == nil {
+										return fmt.Errorf("module %q has no updater registered", moduleName)
+									}
+									d, err := mod.Updater.Update(cmdCtx)
+									if err != nil {
+										return fmt.Errorf("module %q update failed: %w", moduleName, err)
+									}
+									var out []byte
+									if pretty {
+										out, err = json.MarshalIndent(d, "", "  ")
+									} else {
+										out, err = json.Marshal(d)
+									}
+									if err != nil {
+										return fmt.Errorf("failed to marshal output: %w", err)
+									}
+									fmt.Println(string(out))
+									return nil
+								},
+							},
 						},
 					},
 				},

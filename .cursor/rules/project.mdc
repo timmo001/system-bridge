@@ -3,11 +3,7 @@ description:
 globs:
 alwaysApply: true
 ---
----
-description:
-globs:
-alwaysApply: true
----
+
 # Project
 
 - This project is called System Bridge.
@@ -17,9 +13,14 @@ alwaysApply: true
 - All parts of the application which are exposed outside via the API (such as HTTP and Websockets) should be protected with a token, which is stored in a separate file and managed by utils/token.go.
 - Settings are shared between packages and found in [settings.go](mdc:settings/settings.go). Token and port are handled separately - token is stored in a separate file (utils/token.go) and port is read from SYSTEM_BRIDGE_PORT environment variable (default 9170).
 - The backend and packages it uses and it only are under backend/
-- All data modules are under data/module/*
-- All data handlers are under event/handler/*
-  - Data handlers should contain one function to register and get data. Any functions should be placed in a seperate package at event/handler/<module>/*
+- All data modules are under data/module/\*
+- A CLI is available to run data modules locally:
+  - List modules: `system-bridge client data list`, or to run locally: `go run . client data list`
+  - Run one: `system-bridge client data run --module <name> [--pretty]`, or to run locally: `go run . client data run --module <name> [--pretty]`
+  - Run all: `system-bridge client data run --all [--pretty]`, or to run locally: `go run . client data run --all [--pretty]`
+  - When making changes to code under `data/module/*`, test with the CLI before committing.
+- All data handlers are under event/handler/\*
+  - Data handlers should contain one function to register and get data. Any functions should be placed in a seperate package at event/handler/<module>/\*
 - The websocket is at [websocket.go](mdc:backend/websocket/websocket.go). Messages are handled in [messages.go](mdc:backend/websocket/messages.go). Its handlers are found at [handlers.go](mdc:backend/websocket/handlers.go). Accessing the websocket internally can be done from using [instance.go](mdc:backend/websocket/instance.go).
-- HTTP endpoints are found under backend/http/*
-- All shared utility functions are under utils/*
+- HTTP endpoints are found under backend/http/\*
+- All shared utility functions are under utils/\*
