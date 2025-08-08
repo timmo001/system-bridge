@@ -85,6 +85,8 @@ ifeq ($(OS),Windows_NT)
 	-$(RM) installer.nsi 2>nul
 	-$(RM) system-bridge.rc 2>nul
 	-$(RM) system-bridge.syso 2>nul
+	-$(RMDIR) now-playing 2>/dev/null
+	-$(RMDIR) ./.scripts/windows/now-playing 2>/dev/null
 else
 	-$(RM) system-bridge 2>/dev/null
 	-$(RM) system-bridge-linux 2>/dev/null
@@ -95,8 +97,11 @@ ifeq ($(OS),Windows_NT)
 	-$(RMDIR) dist 2>nul
 else
 	-$(RMDIR) .flatpak-builder 2>/dev/null
+	-$(RMDIR) AppDir 2>/dev/null
+	-$(RMDIR) appimagetool 2>/dev/null
 	-$(RMDIR) build 2>/dev/null
 	-$(RMDIR) dist 2>/dev/null
+	-$(RMDIR) dist-agg 2>/dev/null
 	-$(RMDIR) rpm-structure 2>/dev/null
 	-$(RMDIR) rpmbuild 2>/dev/null
 	-$(RMDIR) flatpak-build 2>/dev/null
