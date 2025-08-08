@@ -1,0 +1,14 @@
+---
+description: OS-specific code structure for data modules
+globs:
+alwaysApply: true
+---
+
+# Data module package structure (OS-specific code)
+
+- Place OS-specific implementations under a subpackage in `data/module/<module>/` (e.g., `displays`, `gpus`, `media`, `system`).
+- The top-level file `data/module/<module>.go` should act as a thin facade that imports the subpackage and calls an exported function (e.g., `displays.GetDisplays()`).
+- Do NOT put OS-specific code in the facade package. Use build-tagged files inside the subpackage:
+  - Example: `data/module/system/system_linux.go` with `//go:build linux` and `package system`.
+  - Export helpers/functions from the subpackage (e.g., `GetCameraUsage`, `GetPendingReboot`) and call them from `data/module/system.go`.
+- Follow this pattern consistently across modules (as already done for `displays`, `gpus`, and `media`).
