@@ -147,6 +147,17 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 
+	// Populate optional fields when available per-OS
+	// Linux: detect camera usage processes and pending reboot
+	if infoStat.OS == "linux" || infoStat.Platform == "linux" || strings.Contains(strings.ToLower(infoStat.Platform), "arch") || strings.Contains(strings.ToLower(infoStat.Platform), "ubuntu") || strings.Contains(strings.ToLower(infoStat.Platform), "debian") {
+		if cu := getCameraUsage(); len(cu) > 0 {
+			systemData.CameraUsage = cu
+		}
+		if pr := getPendingReboot(); pr != nil {
+			systemData.PendingReboot = pr
+		}
+	}
+
 	// Get version information
 	currentVersion := version.Version
 	latestVersion, err := version.GetLatestVersion()

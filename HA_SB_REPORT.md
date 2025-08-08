@@ -23,8 +23,7 @@ Primary reference: Home Assistant docs for System Bridge [System Bridge Integrat
 #### High-level result
 
 - Most modules align with HA integration expectations for field names, value ranges, and units.
-- Four mismatches to address:
-  // “Kernel” sensor: IMPLEMENTED backend support (`system.kernel_version`)
+- Remaining mismatches to address:
   - GPU memory units (docs say GB; integration surfaces MB)
   - Media player doc vs integration (Windows-only in docs vs general availability in integration)
 
@@ -104,7 +103,8 @@ Below is a detailed, per-domain assessment.
 - System
 
   - Backend emits: `boot_time`, `platform`, `platform_version`, `kernel_version`, `uptime`, IP/MAC, `version`, `version_latest`, `version_newer_available`; `types/system.go`, `data/module/system.go`.
-  - Status: Backend updated to include `kernel_version` for HA’s “Kernel” sensor expectations.
+  - Optional support (Linux): populate `camera_usage` and `pending_reboot` when detectable.
+  - Status: Backend updated to include `kernel_version` and best-effort optional flags.
 
 - Media player
 
@@ -127,13 +127,6 @@ Below is a detailed, per-domain assessment.
 
 ### Recommendations
 
-// Displays (Linux) unit fixes: IMPLEMENTED
-
-- HA “Kernel” sensor
-
-  - If intent is kernel version (per docs), adjust HA sensor to use kernel version, e.g., extend System Bridge backend to include `kernel_version` (via `host.Info()`) and update HA to read it.
-  - Alternatively, update docs to reflect “Platform.”
-
 - GPU memory units
 
   - Align docs with integration’s MB (or change integration to convert MiB→GB and adjust unit to GB).
@@ -142,5 +135,4 @@ Below is a detailed, per-domain assessment.
 
   - Either gate entity creation in HA to Windows only, or update docs to indicate “best-effort” on Linux where media is available.
 
-- Optional system flags
-  - Consider populating `system.pending_reboot` and `system.camera_usage` on supported platforms to make respective binary sensors more useful.
+// Optional system flags implemented on Linux (best-effort)
