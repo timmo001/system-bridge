@@ -34,16 +34,16 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 
 	if err == nil {
 		var metadata struct {
-			Title       string  `json:"title"`
-			Artist      string  `json:"artist"`
-			Album       string  `json:"album"`
-			Duration    string  `json:"duration"`
-			Position    string  `json:"position"`
-			Status      string  `json:"status"`
-			PlayerName  string  `json:"playerName"`
-			Volume      string  `json:"volume"`
-			Shuffle     string  `json:"shuffle"`
-			LoopStatus  string  `json:"loopStatus"`
+			Title      string `json:"title"`
+			Artist     string `json:"artist"`
+			Album      string `json:"album"`
+			Duration   string `json:"duration"`
+			Position   string `json:"position"`
+			Status     string `json:"status"`
+			PlayerName string `json:"playerName"`
+			Volume     string `json:"volume"`
+			Shuffle    string `json:"shuffle"`
+			LoopStatus string `json:"loopStatus"`
 		}
 		if err := json.Unmarshal(output, &metadata); err != nil {
 			slog.Warn("JSON unmarshal error:", "error", err.Error(), "raw_output", string(output))

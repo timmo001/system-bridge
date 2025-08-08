@@ -66,14 +66,14 @@ func GetDataPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	dataPath := filepath.Join(configPath, "data")
 	dataPath = filepath.Clean(dataPath)
-	
+
 	// Create the data directory if it doesn't exist
 	if err := os.MkdirAll(dataPath, 0755); err != nil {
 		return "", fmt.Errorf("could not create data directory: %w", err)
 	}
 
 	return dataPath, nil
-} 
+}

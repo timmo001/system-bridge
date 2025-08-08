@@ -9,7 +9,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-type MemoryModule struct {}
+type MemoryModule struct{}
 
 func (mm MemoryModule) Name() types.ModuleName { return types.ModuleMemory }
 func (mm MemoryModule) Update(ctx context.Context) (any, error) {

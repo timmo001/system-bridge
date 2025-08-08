@@ -87,10 +87,10 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 				`)
 				if output, err = cmd.Output(); err == nil {
 					var metadata struct {
-						Artist    string  `json:"artist"`
-						Album     string  `json:"album"`
-						Duration  float64 `json:"duration"`
-						Position  float64 `json:"position"`
+						Artist   string  `json:"artist"`
+						Album    string  `json:"album"`
+						Duration float64 `json:"duration"`
+						Position float64 `json:"position"`
 					}
 					if err := json.Unmarshal(output, &metadata); err == nil {
 						mediaData.Artist = &metadata.Artist
@@ -110,10 +110,10 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 				`)
 				if output, err = cmd.Output(); err == nil {
 					var metadata struct {
-						Artist    string  `json:"artist"`
-						Album     string  `json:"album"`
-						Duration  float64 `json:"duration"`
-						Position  float64 `json:"position"`
+						Artist   string  `json:"artist"`
+						Album    string  `json:"album"`
+						Duration float64 `json:"duration"`
+						Position float64 `json:"position"`
 					}
 					if err := json.Unmarshal(output, &metadata); err == nil {
 						mediaData.Artist = &metadata.Artist

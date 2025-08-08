@@ -113,7 +113,7 @@ func (tp *UpdateTaskProcessor) worker() {
 				slog.Error("Rate limiter is nil")
 				continue
 			}
-			
+
 			err := tp.limiter.Wait(tp.ctx)
 			if err != nil {
 				// Safe logging with nil check for task
@@ -127,7 +127,7 @@ func (tp *UpdateTaskProcessor) worker() {
 
 			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
 			defer cancel()
-			
+
 			// Process task
 			data, err := task.Update(ctx)
 			if err != nil {
@@ -146,7 +146,7 @@ func (tp *UpdateTaskProcessor) worker() {
 				moduleName = string(task.Name())
 			}
 			slog.Debug("Updating data for module", "module", moduleName)
-			
+
 			// Update data store
 			if err := tp.DataStore.SetModuleData(task.Name(), data); err != nil {
 				slog.Error("Failed to set module data for", "module", moduleName, "error", err)

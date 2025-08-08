@@ -51,19 +51,19 @@ func NewDataStore() (*DataStore, error) {
 func (d *DataStore) Register(u types.Updater) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	
+
 	// Validate updater
 	if u == nil {
 		slog.Error("Cannot register nil updater")
 		return
 	}
-	
+
 	moduleName := u.Name()
 	if moduleName == "" {
 		slog.Error("Cannot register updater with empty name")
 		return
 	}
-	
+
 	slog.Info("Registering data module", "module", moduleName)
 
 	d.registry[moduleName] = types.Module{Updater: u, Name: moduleName}
@@ -124,7 +124,7 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 			Data:    module.Data,
 			Updated: module.Updated,
 		}
-		
+
 		eb.Publish(bus.Event{
 			Type: bus.EventDataModuleUpdate,
 			Data: safeModule,
@@ -172,11 +172,11 @@ func (d *DataStore) loadModuleData(m *types.Module) error {
 	if m == nil {
 		return fmt.Errorf("module is nil")
 	}
-	
+
 	if m.Name == "" {
 		return fmt.Errorf("module name cannot be empty")
 	}
-	
+
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)
@@ -208,7 +208,7 @@ func (d *DataStore) saveModuleData(m types.Module) error {
 	if m.Name == "" {
 		return fmt.Errorf("module name cannot be empty")
 	}
-	
+
 	dataPath, err := utils.GetDataPath()
 	if err != nil {
 		return fmt.Errorf("could not get data path: %w", err)

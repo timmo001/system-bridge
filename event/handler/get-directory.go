@@ -62,4 +62,3 @@ func RegisterGetDirectoryHandler(router *event.MessageRouter) {
 		}
 	})
 }
-
