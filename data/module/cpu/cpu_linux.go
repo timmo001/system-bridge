@@ -264,125 +264,128 @@ func computeHwmonEnergy(sample time.Duration) *float64 {
 // It looks for labels commonly used by AMD/Intel: vcore, vddcr_cpu, svi2_core.
 // Returns volts if available.
 func ReadCPUVcoreVoltage() *float64 {
-    hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
-    if err != nil || len(hwmons) == 0 {
-        return nil
-    }
-    // Candidate labels to match (case-insensitive)
-    candidates := []string{"vcore", "vddcr_cpu", "svi2_core", "cpu vcore"}
-    for _, hm := range hwmons {
-        // Try labeled inputs first: inX_label + inX_input
-        entries, _ := os.ReadDir(hm)
-        for _, e := range entries {
-            name := e.Name()
-            if strings.HasPrefix(name, "in") && strings.HasSuffix(name, "_label") {
-                labelPath := filepath.Join(hm, name)
-                b, err := os.ReadFile(labelPath)
-                if err != nil {
-                    continue
-                }
-                label := strings.ToLower(strings.TrimSpace(string(b)))
-                matched := false
-                for _, c := range candidates {
-                    if strings.Contains(label, c) {
-                        matched = true
-                        break
-                    }
-                }
-                if !matched {
-                    continue
-                }
-                // Derive corresponding input path
-                inputPath := strings.TrimSuffix(labelPath, "_label") + "_input"
-                if v := readVoltageValue(inputPath); v != nil {
-                    return v
-                }
-            }
-        }
-        // Fallback: try common in0_input/in1_input without label
-        for _, idx := range []int{0, 1} {
-            p := filepath.Join(hm, fmt.Sprintf("in%d_input", idx))
-            if v := readVoltageValue(p); v != nil {
-                return v
-            }
-        }
-    }
-    return nil
+	hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+	if err != nil || len(hwmons) == 0 {
+		return nil
+	}
+	// Candidate labels to match (case-insensitive)
+	candidates := []string{"vcore", "vddcr_cpu", "svi2_core", "cpu vcore"}
+	for _, hm := range hwmons {
+		// Try labeled inputs first: inX_label + inX_input
+		entries, _ := os.ReadDir(hm)
+		for _, e := range entries {
+			name := e.Name()
+			if strings.HasPrefix(name, "in") && strings.HasSuffix(name, "_label") {
+				labelPath := filepath.Join(hm, name)
+				b, err := os.ReadFile(labelPath)
+				if err != nil {
+					continue
+				}
+				label := strings.ToLower(strings.TrimSpace(string(b)))
+				matched := false
+				for _, c := range candidates {
+					if strings.Contains(label, c) {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					continue
+				}
+				// Derive corresponding input path
+				inputPath := strings.TrimSuffix(labelPath, "_label") + "_input"
+				if v := readVoltageValue(inputPath); v != nil {
+					return v
+				}
+			}
+		}
+		// Fallback: try common in0_input/in1_input without label
+		for _, idx := range []int{0, 1} {
+			p := filepath.Join(hm, fmt.Sprintf("in%d_input", idx))
+			if v := readVoltageValue(p); v != nil {
+				return v
+			}
+		}
+	}
+	return nil
 }
 
 func readVoltageValue(path string) *float64 {
-    b, err := os.ReadFile(path)
-    if err != nil {
-        return nil
-    }
-    s := strings.TrimSpace(string(b))
-    if s == "" {
-        return nil
-    }
-    raw, err := strconv.ParseFloat(s, 64)
-    if err != nil {
-        return nil
-    }
-    // Heuristic: if value is extremely large, assume microvolts; else millivolts
-    var volts float64
-    switch {
-    case raw > 100000: // microvolts
-        volts = raw / 1_000_000.0
-    case raw > 100: // millivolts
-        volts = raw / 1000.0
-    default:
-        volts = raw // already volts
-    }
-    return &volts
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	s := strings.TrimSpace(string(b))
+	if s == "" {
+		return nil
+	}
+	raw, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return nil
+	}
+	// Heuristic: if value is extremely large, assume microvolts; else millivolts
+	var volts float64
+	switch {
+	case raw > 100000: // microvolts
+		volts = raw / 1_000_000.0
+	case raw > 100: // millivolts
+		volts = raw / 1000.0
+	default:
+		volts = raw // already volts
+	}
+	return &volts
 }
 
 // GetDPCPercentages not available on Linux; return nil best-effort.
 func GetDPCPercentages(percpu bool) []float64 { return nil }
 
+// GetDPCTimeSeconds not supported on Linux; return nil.
+func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
+
 // ReadCPUTemperature attempts to read CPU temperature on Linux via hwmon
 func ReadCPUTemperature() *float64 {
-    // Search for temp*_input under hwmon devices where name indicates CPU/package
-    hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
-    if err != nil || len(hwmons) == 0 {
-        return nil
-    }
-    for _, hm := range hwmons {
-        nameB, _ := os.ReadFile(filepath.Join(hm, "name"))
-        name := strings.ToLower(strings.TrimSpace(string(nameB)))
-        if !strings.Contains(name, "coretemp") && !strings.Contains(name, "k10temp") && !strings.Contains(name, "cpu") && !strings.Contains(name, "zenpower") {
-            // Not a likely CPU sensor provider
-            // still continue to check labels below
-        }
-        // Prefer temp with label "Package id 0" or similar
-        entries, _ := os.ReadDir(hm)
-        var candidate string
-        for _, e := range entries {
-            en := e.Name()
-            if strings.HasPrefix(en, "temp") && strings.HasSuffix(en, "_label") {
-                lbPath := filepath.Join(hm, en)
-                lb, err := os.ReadFile(lbPath)
-                if err != nil {
-                    continue
-                }
-                lbl := strings.ToLower(strings.TrimSpace(string(lb)))
-                if strings.Contains(lbl, "package") || strings.Contains(lbl, "cpu") || strings.Contains(lbl, "tctl") || strings.Contains(lbl, "tdie") {
-                    candidate = strings.TrimSuffix(lbPath, "_label") + "_input"
-                    break
-                }
-            }
-        }
-        if candidate == "" {
-            // Fallback: temp1_input
-            candidate = filepath.Join(hm, "temp1_input")
-        }
-        if b, err := os.ReadFile(candidate); err == nil {
-            s := strings.TrimSpace(string(b))
-            if v, err := strconv.ParseFloat(s, 64); err == nil {
-                // values typically in millidegrees C
-                c := v / 1000.0
-                return &c
-            }
-        }
-    }
-    return nil
+	// Search for temp*_input under hwmon devices where name indicates CPU/package
+	hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+	if err != nil || len(hwmons) == 0 {
+		return nil
+	}
+	for _, hm := range hwmons {
+		nameB, _ := os.ReadFile(filepath.Join(hm, "name"))
+		name := strings.ToLower(strings.TrimSpace(string(nameB)))
+		if !strings.Contains(name, "coretemp") && !strings.Contains(name, "k10temp") && !strings.Contains(name, "cpu") && !strings.Contains(name, "zenpower") {
+			// Not a likely CPU sensor provider
+			// still continue to check labels below
+		}
+		// Prefer temp with label "Package id 0" or similar
+		entries, _ := os.ReadDir(hm)
+		var candidate string
+		for _, e := range entries {
+			en := e.Name()
+			if strings.HasPrefix(en, "temp") && strings.HasSuffix(en, "_label") {
+				lbPath := filepath.Join(hm, en)
+				lb, err := os.ReadFile(lbPath)
+				if err != nil {
+					continue
+				}
+				lbl := strings.ToLower(strings.TrimSpace(string(lb)))
+				if strings.Contains(lbl, "package") || strings.Contains(lbl, "cpu") || strings.Contains(lbl, "tctl") || strings.Contains(lbl, "tdie") {
+					candidate = strings.TrimSuffix(lbPath, "_label") + "_input"
+					break
+				}
+			}
+		}
+		if candidate == "" {
+			// Fallback: temp1_input
+			candidate = filepath.Join(hm, "temp1_input")
+		}
+		if b, err := os.ReadFile(candidate); err == nil {
+			s := strings.TrimSpace(string(b))
+			if v, err := strconv.ParseFloat(s, 64); err == nil {
+				// values typically in millidegrees C
+				c := v / 1000.0
+				return &c
+			}
+		}
+	}
+	return nil
 }

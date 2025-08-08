@@ -98,6 +98,9 @@ func ReadCPUVcoreVoltage() *float64 {
 // GetDPCPercentages not supported on macOS; return nil best-effort.
 func GetDPCPercentages(percpu bool) []float64 { return nil }
 
+// GetDPCTimeSeconds not supported on macOS; return nil.
+func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
+
 // ReadCPUTemperature attempts to read CPU temperature via powermetrics SMC sampler
 func ReadCPUTemperature() *float64 {
 	cmd := exec.Command("powermetrics", "-n", "1", "-i", "100", "--samplers", "smc")

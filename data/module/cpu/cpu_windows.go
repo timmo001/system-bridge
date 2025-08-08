@@ -5,6 +5,7 @@ package cpu
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"os/exec"
 	"strconv"
@@ -58,53 +59,94 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 }
 
 func ReadCPUStats() *types.CPUStats {
-	// Best-effort: Windows overall stats (ctx switches/interrupts) require PDH/NT queries; omit for now
-	return nil
+	// Best-effort: Use performance counters to obtain per-second rates and
+	// convert to int64 as a best-effort approximation of counts.
+	// Counters may be unavailable on some systems.
+	var (
+		ctxSwitches    *int64
+		interrupts     *int64
+		softInterrupts *int64 // not available on Windows
+		syscalls       *int64
+	)
+	if v, ok := readTypeperfCounter(`\\System\\Context Switches/sec`); ok {
+		iv := int64(v)
+		ctxSwitches = &iv
+	}
+	if v, ok := readTypeperfCounter(`\\Processor(_Total)\\Interrupts/sec`); ok {
+		iv := int64(v)
+		interrupts = &iv
+	}
+	if v, ok := readTypeperfCounter(`\\System\\System Calls/sec`); ok {
+		iv := int64(v)
+		syscalls = &iv
+	}
+	if ctxSwitches == nil && interrupts == nil && syscalls == nil {
+		return nil
+	}
+	return &types.CPUStats{
+		CtxSwitches:    ctxSwitches,
+		Interrupts:     interrupts,
+		SoftInterrupts: softInterrupts,
+		Syscalls:       syscalls,
+	}
 }
 
 func ComputeCPUPower(sample time.Duration) *float64 {
-	// Best-effort: No generic power interface available here; skip
+	// Best-effort: Try Windows "Power Meter" performance counters if present.
+	// This object is available on some systems and exposes instantaneous power in Watts.
+	// We query all instances and sum them to approximate package power.
+	if vals, ok := readTypeperfCounters(`\\Power Meter(*)\\Power`); ok {
+		var total float64
+		for _, v := range vals {
+			total += v
+		}
+		if total > 0 {
+			return &total
+		}
+	}
 	return nil
 }
 
 // ReadCPUVcoreVoltage attempts to read CPU core voltage on Windows using WMI.
 // Returns volts if readable, otherwise nil.
 func ReadCPUVcoreVoltage() *float64 {
-    // Best-effort: use WMI via PowerShell to read Win32_Processor.CurrentVoltage (decivolts when bit7=0)
-    cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object CurrentVoltage | ConvertTo-Json")
-    var out bytes.Buffer
-    cmd.Stdout = &out
-    if err := cmd.Run(); err != nil {
-        return nil
-    }
-    s := strings.TrimSpace(out.String())
-    if s == "" {
-        return nil
-    }
-    // Parse object or array
-    type psVolt struct{ CurrentVoltage *float64 `json:"CurrentVoltage"` }
-    var one psVolt
-    var many []psVolt
-    if strings.HasPrefix(s, "[") {
-        if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
-            return nil
-        }
-        one = many[0]
-    } else {
-        if err := json.Unmarshal([]byte(s), &one); err != nil {
-            return nil
-        }
-    }
-    if one.CurrentVoltage == nil {
-        return nil
-    }
-    raw := *one.CurrentVoltage
-    // If bit 7 is set (>=128), actual voltage not reported
-    if raw >= 128 {
-        return nil
-    }
-    v := raw / 10.0
-    return &v
+	// Best-effort: use WMI via PowerShell to read Win32_Processor.CurrentVoltage (decivolts when bit7=0)
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object CurrentVoltage | ConvertTo-Json")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil
+	}
+	s := strings.TrimSpace(out.String())
+	if s == "" {
+		return nil
+	}
+	// Parse object or array
+	type psVolt struct {
+		CurrentVoltage *float64 `json:"CurrentVoltage"`
+	}
+	var one psVolt
+	var many []psVolt
+	if strings.HasPrefix(s, "[") {
+		if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
+			return nil
+		}
+		one = many[0]
+	} else {
+		if err := json.Unmarshal([]byte(s), &one); err != nil {
+			return nil
+		}
+	}
+	if one.CurrentVoltage == nil {
+		return nil
+	}
+	raw := *one.CurrentVoltage
+	// If bit 7 is set (>=128), actual voltage not reported
+	if raw >= 128 {
+		return nil
+	}
+	v := raw / 10.0
+	return &v
 }
 
 // GetDPCPercentages returns % DPC Time either per-CPU or overall using typeperf.
@@ -128,6 +170,84 @@ func GetDPCPercentages(percpu bool) []float64 {
 		return []float64{v}
 	}
 	return nil
+}
+
+// GetDPCTimeSeconds returns absolute DPC time in seconds for the provided sampling interval.
+// We sample % DPC Time over a short interval and convert: seconds = (percent/100) * intervalSeconds.
+func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 {
+	if sample <= 0 {
+		sample = 200 * time.Millisecond
+	}
+	si := strconv.FormatFloat(sample.Seconds(), 'f', 3, 64)
+	if percpu {
+		cmd := exec.Command("typeperf", `\\Processor(*)\\% DPC Time`, "-sc", "2", "-si", si)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		if err := cmd.Run(); err != nil {
+			return nil
+		}
+		lines := strings.Split(out.String(), "\n")
+		// The last non-empty line contains the second sample
+		last := ""
+		for i := len(lines) - 1; i >= 0; i-- {
+			s := strings.TrimSpace(lines[i])
+			if s != "" {
+				last = s
+				break
+			}
+		}
+		if last == "" {
+			return nil
+		}
+		r := csv.NewReader(strings.NewReader(last))
+		rec, err := r.Read()
+		if err != nil || len(rec) < 2 {
+			return nil
+		}
+		vals := make([]float64, 0, len(rec)-1)
+		for i := 1; i < len(rec); i++ {
+			s := strings.Trim(rec[i], "\" ")
+			if f, err := strconv.ParseFloat(s, 64); err == nil {
+				secs := f / 100.0 * sample.Seconds()
+				vals = append(vals, secs)
+			}
+		}
+		if len(vals) == 0 {
+			return nil
+		}
+		return vals
+	}
+	// Overall _Total
+	cmd := exec.Command("typeperf", `\\Processor(_Total)\\% DPC Time`, "-sc", "2", "-si", si)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil
+	}
+	lines := strings.Split(out.String(), "\n")
+	last := ""
+	for i := len(lines) - 1; i >= 0; i-- {
+		s := strings.TrimSpace(lines[i])
+		if s != "" {
+			last = s
+			break
+		}
+	}
+	if last == "" {
+		return nil
+	}
+	r := csv.NewReader(strings.NewReader(last))
+	rec, err := r.Read()
+	if err != nil || len(rec) < 2 {
+		return nil
+	}
+	s := strings.Trim(rec[len(rec)-1], "\" ")
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return nil
+	}
+	secs := f / 100.0 * sample.Seconds()
+	return []float64{secs}
 }
 
 func readTypeperfCounter(counter string) (float64, bool) {
@@ -159,36 +279,78 @@ func readTypeperfCounter(counter string) (float64, bool) {
 	return f, true
 }
 
+// readTypeperfCounters reads a wildcard counter line like "\\Object(*)\\Counter" and returns
+// all numeric values from the single-sample output.
+func readTypeperfCounters(counter string) ([]float64, bool) {
+	cmd := exec.Command("typeperf", counter, "-sc", "1")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil, false
+	}
+	lines := strings.Split(out.String(), "\n")
+	if len(lines) < 3 {
+		return nil, false
+	}
+	last := strings.TrimSpace(lines[len(lines)-1])
+	if last == "" {
+		last = strings.TrimSpace(lines[len(lines)-2])
+	}
+	// Parse CSV robustly to handle commas/quotes in timestamp
+	r := csv.NewReader(strings.NewReader(last))
+	rec, err := r.Read()
+	if err != nil || len(rec) < 2 {
+		return nil, false
+	}
+	// First column is timestamp; remaining columns are values for each instance
+	vals := make([]float64, 0, len(rec)-1)
+	for i := 1; i < len(rec); i++ {
+		s := strings.Trim(rec[i], "\" ")
+		if s == "" || s == "\"" {
+			continue
+		}
+		if f, err := strconv.ParseFloat(s, 64); err == nil {
+			vals = append(vals, f)
+		}
+	}
+	if len(vals) == 0 {
+		return nil, false
+	}
+	return vals, true
+}
+
 // ReadCPUTemperature attempts to read CPU temperature via WMIC/PowerShell
 func ReadCPUTemperature() *float64 {
-    // Try MSAcpi_ThermalZoneTemperature (Kelvin*10)
-    cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace root/wmi | Select-Object CurrentTemperature | ConvertTo-Json")
-    var out bytes.Buffer
-    cmd.Stdout = &out
-    if err := cmd.Run(); err != nil {
-        return nil
-    }
-    s := strings.TrimSpace(out.String())
-    if s == "" {
-        return nil
-    }
-    type tz struct{ CurrentTemperature *float64 `json:"CurrentTemperature"` }
-    var one tz
-    var many []tz
-    if strings.HasPrefix(s, "[") {
-        if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
-            return nil
-        }
-        one = many[0]
-    } else {
-        if err := json.Unmarshal([]byte(s), &one); err != nil {
-            return nil
-        }
-    }
-    if one.CurrentTemperature == nil || *one.CurrentTemperature <= 0 {
-        return nil
-    }
-    // Convert from tenths of Kelvin to Celsius
-    c := (*one.CurrentTemperature / 10.0) - 273.15
-    return &c
+	// Try MSAcpi_ThermalZoneTemperature (Kelvin*10)
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace root/wmi | Select-Object CurrentTemperature | ConvertTo-Json")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil
+	}
+	s := strings.TrimSpace(out.String())
+	if s == "" {
+		return nil
+	}
+	type tz struct {
+		CurrentTemperature *float64 `json:"CurrentTemperature"`
+	}
+	var one tz
+	var many []tz
+	if strings.HasPrefix(s, "[") {
+		if err := json.Unmarshal([]byte(s), &many); err != nil || len(many) == 0 {
+			return nil
+		}
+		one = many[0]
+	} else {
+		if err := json.Unmarshal([]byte(s), &one); err != nil {
+			return nil
+		}
+	}
+	if one.CurrentTemperature == nil || *one.CurrentTemperature <= 0 {
+		return nil
+	}
+	// Convert from tenths of Kelvin to Celsius
+	c := (*one.CurrentTemperature / 10.0) - 273.15
+	return &c
 }

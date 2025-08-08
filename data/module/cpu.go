@@ -67,13 +67,8 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 
 	// OS-specific best-effort overall CPU power sampling (compute early to optionally distribute per-core)
 	var overallPower *float64
-	var perCorePower *float64
 	if p := cm.ComputeCPUPower(200 * time.Millisecond); p != nil {
 		overallPower = p
-		if cpuData.Count != nil && *cpuData.Count > 0 {
-			v := *p / float64(*cpuData.Count)
-			perCorePower = &v
-		}
 	}
 
 	// Pre-fetch per-CPU times and usage slices once to avoid repeated expensive calls
@@ -81,11 +76,37 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, percentageInterval, true)
 	// Compute per-CPU times percent once (short sampling interval)
 	perPct := computeTimesPercent(true)
+	// Windows-only: absolute DPC time over short sampling interval
+	dpcTimePer := cm.GetDPCTimeSeconds(true, 200*time.Millisecond)
 	// Read overall CPU Vcore voltage once (best-effort, OS-specific)
 	vcore := cm.ReadCPUVcoreVoltage()
 
 	// Get per CPU info
 	perCPU := make([]types.PerCPU, 0, len(frequencies))
+	// Precompute weighted per-core power if overall power available
+	var perCorePowers []float64
+	if overallPower != nil && len(percentsPerCPU) > 0 {
+		var sum float64
+		perCorePowers = make([]float64, len(percentsPerCPU))
+		for i := range percentsPerCPU {
+			u := percentsPerCPU[i]
+			if u < 0 {
+				u = 0
+			}
+			perCorePowers[i] = u
+			sum += u
+		}
+		if sum > 0 {
+			for i := range perCorePowers {
+				perCorePowers[i] = (*overallPower) * (perCorePowers[i] / sum)
+			}
+		} else if cpuData.Count != nil && *cpuData.Count > 0 {
+			// Fallback to equal distribution
+			for i := range perCorePowers {
+				perCorePowers[i] = (*overallPower) / float64(*cpuData.Count)
+			}
+		}
+	}
 	for i, cpuInfo := range frequencies {
 		perCpuData := types.PerCPU{
 			ID: i,
@@ -108,6 +129,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 				System:    &timesPerCPU[i].System,
 				Idle:      &timesPerCPU[i].Idle,
 				Interrupt: &timesPerCPU[i].Irq,
+			}
+
+			// Windows-only: set absolute DPC time seconds when available
+			if i < len(dpcTimePer) && dpcTimePer != nil {
+				val := dpcTimePer[i]
+				perCpuData.Times.DPC = &val
 			}
 
 			// Per-CPU times percent from sampled delta
@@ -141,9 +168,9 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			perCpuData.Usage = &usage
 		}
 
-		// Best-effort: distribute overall package power equally across cores when available
-		if perCorePower != nil {
-			val := *perCorePower
+		// Best-effort: distribute overall package power across cores weighted by usage
+		if i < len(perCorePowers) && overallPower != nil {
+			val := perCorePowers[i]
 			perCpuData.Power = &val
 		}
 		// TODO: Add implementation for per-CPU voltage monitoring
@@ -159,6 +186,12 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			System:    &times[0].System,
 			Idle:      &times[0].Idle,
 			Interrupt: &times[0].Irq,
+		}
+
+		// Windows-only: absolute DPC time seconds overall
+		if dpcs := cm.GetDPCTimeSeconds(false, 200*time.Millisecond); len(dpcs) > 0 {
+			val := dpcs[0]
+			cpuData.Times.DPC = &val
 		}
 
 		// Overall times percent from sampled delta

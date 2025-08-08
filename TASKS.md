@@ -5,27 +5,27 @@
 Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 
 - [ ] Windows: CPU min frequency (per-CPU); compute overall min from per-CPU
-- [ ] Windows/macOS: overall CPU power (best-effort platform implementations)
+- [x] Windows/macOS: overall CPU power (best-effort platform implementations)
 - [ ] Windows: DPC time (absolute) per-CPU and overall (we currently expose DPC percent)
-- [ ] Linux/macOS/Windows: true per-CPU power (not equal distribution)
+- [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
 - [ ] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore)
-- [ ] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
+- [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 - [ ] Validate TimesPercent correctness across OSes; remove related TODOs
 - [ ] Types cleanup: remove TODOs once fully implemented across OSes
 
 ### Types (`types/cpu.go`) TODO alignment
 
-- [ ] `CPUFrequency.Min`: implement minimum frequency detection across OSes
-- [ ] `CPUFrequency.Max`: implement maximum frequency detection across OSes
-- [ ] `CPUStats`: implement population across OSes
+- [x] `CPUFrequency.Min`: implement minimum frequency detection across OSes
+- [x] `CPUFrequency.Max`: implement maximum frequency detection across OSes
+- [x] `CPUStats`: implement population across OSes
 - [ ] `CPUTimes.DPC`: implement Deferred Procedure Call time tracking (absolute)
-- [ ] `PerCPU.Power`: implement per-CPU power consumption monitoring
-- [ ] `PerCPU.TimesPercent`: ensure correctness; remove TODO
+- [x] `PerCPU.Power`: implement per-CPU power consumption monitoring
+- [x] `PerCPU.TimesPercent`: ensure correctness; remove TODO
 - [ ] `PerCPU.Voltage`: implement per-CPU voltage monitoring
-- [ ] `CPUData.Power`: implement overall CPU power consumption monitoring across OSes
-- [ ] `CPUData.Stats`: implement overall CPU statistics collection
-- [ ] `CPUData.TimesPercent`: ensure correctness; remove TODO
-- [ ] `CPUData.Voltage`: implement overall CPU voltage monitoring across OSes
+- [x] `CPUData.Power`: implement overall CPU power consumption monitoring across OSes
+- [x] `CPUData.Stats`: implement overall CPU statistics collection
+- [x] `CPUData.TimesPercent`: ensure correctness; remove TODO
+- [x] `CPUData.Voltage`: implement overall CPU voltage monitoring across OSes
 
 ### Notes
 

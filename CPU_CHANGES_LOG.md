@@ -59,3 +59,21 @@
   - Change: Best-effort via Windows Power Meter performance counters using `typeperf` to read `\\Power Meter(*)\\Power` and sum instances.
   - Files Edited: `data/module/cpu/cpu_windows.go`
   - Status: Committed (may be unavailable on some systems)
+
+- Item: Per-CPU Power Distribution
+  - Attempt: 1
+  - Change: Weight overall package power by per-CPU usage percentages to estimate per-core power; fallback to equal distribution.
+  - Files Edited: `data/module/cpu.go`
+  - Status: Committed
+
+- Item: Windows CPU Stats (best-effort)
+  - Attempt: 1
+  - Change: Populate `CPUStats` using `typeperf` counters: `\\System\\Context Switches/sec`, `\\Processor(_Total)\\Interrupts/sec`, and `\\System\\System Calls/sec` (approximate per-second values as counts).
+  - Files Edited: `data/module/cpu/cpu_windows.go`
+  - Status: Committed (approximation; may be unavailable)
+
+- Item: Types cleanup for CPU
+  - Attempt: 1
+  - Change: Remove TODO comments for implemented fields: `CPUFrequency.Min/Max`, `CPUData.Power/Stats/TimesPercent/Voltage`, `PerCPU.Power/TimesPercent`, `CPUTimes.DPC` tag.
+  - Files Edited: `types/cpu.go`
+  - Status: Committed
