@@ -7,7 +7,6 @@ ifeq ($(OS),Windows_NT)
 	BUN_BUILD=set STATIC_EXPORT=true && bun run build
 	EXTRA_LDFLAGS=-H windowsgui
 	GEN_RC=powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
-	DL_NOW_PLAYING=powershell -ExecutionPolicy Bypass -File ./.scripts/windows/download-now-playing.ps1
 else
 	EXE=
 	RM=rm -f
@@ -19,7 +18,6 @@ endif
 
 build: clean build_web_client
 ifeq ($(OS),Windows_NT)
-	$(DL_NOW_PLAYING);
 	$(GEN_RC)
 	windres system-bridge.rc -O coff -o system-bridge.syso
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
