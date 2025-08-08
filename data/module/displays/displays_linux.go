@@ -83,8 +83,9 @@ func GetDisplays() ([]types.Display, error) {
 			}
 		}
 
-		// Calculate refresh rate
-		refreshRate := float64(mode.DotClock) / (float64(mode.Htotal) * float64(mode.Vtotal))
+		// Calculate refresh rate in Hertz
+		// RandR reports DotClock in kHz, so multiply by 1000 to get Hz
+		refreshRate := (float64(mode.DotClock) * 1000.0) / (float64(mode.Htotal) * float64(mode.Vtotal))
 
 		// Convert name from []byte to string
 		name := string(info.Name)
@@ -95,7 +96,8 @@ func GetDisplays() ([]types.Display, error) {
 		w := int(info.MmWidth)
 		h := int(info.MmHeight)
 		isPrimary := false
-		pixelClock := float64(mode.DotClock) / 1000000.0 // Convert to MHz
+		// Pixel clock in MHz (DotClock is kHz)
+		pixelClock := float64(mode.DotClock) / 1000.0
 
 		display := types.Display{
 			ID:                   id,
