@@ -3,6 +3,9 @@ package data_module
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,9 +43,27 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	if err == nil && len(frequencies) > 0 {
 		freq := types.CPUFrequency{
 			Current: &frequencies[0].Mhz,
-			// TODO: Add implementation for Min frequency
-			// TODO: Add implementation for Max frequency
 		}
+		// Attempt to populate min/max frequency (best-effort, Linux via sysfs)
+		// We determine overall min as the minimum of per-CPU mins and overall max
+		// as the maximum of per-CPU maxes.
+		var overallMinMHz *float64
+		var overallMaxMHz *float64
+		for i := range frequencies {
+			minMHz, maxMHz := readLinuxSysfsCPUFreq(i)
+			if minMHz != nil {
+				if overallMinMHz == nil || *minMHz < *overallMinMHz {
+					overallMinMHz = minMHz
+				}
+			}
+			if maxMHz != nil {
+				if overallMaxMHz == nil || *maxMHz > *overallMaxMHz {
+					overallMaxMHz = maxMHz
+				}
+			}
+		}
+		freq.Min = overallMinMHz
+		freq.Max = overallMaxMHz
 		cpuData.Frequency = &freq
 	}
 
@@ -57,9 +78,14 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			ID: i,
 			Frequency: &types.CPUFrequency{
 				Current: &cpuInfo.Mhz,
-				// TODO: Add implementation for per-CPU Min frequency
-				// TODO: Add implementation for per-CPU Max frequency
 			},
+		}
+
+		// Best-effort: populate per-CPU min/max frequency on Linux via sysfs
+		minMHz, maxMHz := readLinuxSysfsCPUFreq(i)
+		if perCpuData.Frequency != nil {
+			perCpuData.Frequency.Min = minMHz
+			perCpuData.Frequency.Max = maxMHz
 		}
 
 		// Get per CPU times
@@ -129,4 +155,40 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	// TODO: Add implementation for CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
 
 	return cpuData, nil
+}
+
+// readLinuxSysfsCPUFreq attempts to read per-CPU min/max frequencies from Linux sysfs.
+// Returns values in MHz if available; otherwise returns nils. This function is safe to
+// call on non-Linux hosts and will simply return nils.
+func readLinuxSysfsCPUFreq(cpuIndex int) (minMHz *float64, maxMHz *float64) {
+	// Quick OS check by probing for the sysfs directory; avoids importing runtime.
+	base := "/sys/devices/system/cpu"
+	cpuDir := filepath.Join(base, fmt.Sprintf("cpu%d", cpuIndex), "cpufreq")
+	if _, err := os.Stat(cpuDir); err != nil {
+		return nil, nil
+	}
+
+	// Helper to read a single kHz value file and convert to MHz
+	readMHz := func(path string) *float64 {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+		s := strings.TrimSpace(string(b))
+		if s == "" {
+			return nil
+		}
+		// Values are typically integers in kHz
+		// Some kernels may expose floating values; handle generically
+		v, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			return nil
+		}
+		mhz := v / 1000.0
+		return &mhz
+	}
+
+	minPath := filepath.Join(cpuDir, "cpuinfo_min_freq")
+	maxPath := filepath.Join(cpuDir, "cpuinfo_max_freq")
+	return readMHz(minPath), readMHz(maxPath)
 }
