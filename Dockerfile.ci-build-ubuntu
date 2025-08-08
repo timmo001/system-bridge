@@ -9,18 +9,22 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         dpkg \
+        dpkg-dev \
         fakeroot \
         flatpak \
         flatpak-builder \
         gcc \
         libc6-dev \
         libfuse2 \
+        libgtk-3-dev \
+        libayatana-appindicator3-dev \
         libssl-dev \
         libx11-dev \
         libx11-xcb-dev \
         libxkbcommon-dev \
         libxkbcommon-x11-dev \
         libxtst-dev \
+        ostree \
         pkg-config \
         rpm \
         sudo \
