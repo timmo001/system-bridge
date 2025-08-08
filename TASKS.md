@@ -10,7 +10,7 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - [x] Linux/macOS/Windows: true per-CPU power (not equal distribution)
 - [ ] Linux/macOS/Windows: true per-CPU voltage (not propagated overall Vcore)
 - [x] Windows/macOS: CPU statistics (CtxSwitches, Interrupts, SoftInterrupts, Syscalls)
-- [ ] Validate TimesPercent correctness across OSes; remove related TODOs
+- [x] Validate TimesPercent correctness across OSes; remove related TODOs
 - [x] Types cleanup: remove TODOs once fully implemented across OSes
 
 ### Types (`types/cpu.go`) TODO alignment
@@ -32,3 +32,4 @@ Source: [Issue #3475](https://github.com/timmo001/system-bridge/issues/3475)
 - Keep logging progress in `CPU_CHANGES_LOG.md`
 - Test each change with: `go run . client data run --module cpu`
 - Commit after each working item with concise messages
+- Per-CPU voltage: Investigated OS APIs; reliable per-core voltage telemetry is generally unavailable across platforms. Keeping overall Vcore only for now.

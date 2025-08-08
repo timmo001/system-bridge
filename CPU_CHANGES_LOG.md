@@ -89,3 +89,15 @@
   - Change: Derive per-CPU min MHz from `Win32_Processor.MaxClockSpeed` scaled by current power plan Minimum Processor State percentage from `powercfg`.
   - Files Edited: `data/module/cpu/cpu_windows.go`
   - Status: Committed (approximation)
+
+- Item: Validate TimesPercent correctness
+  - Attempt: 1
+  - Change: Implemented sampled delta calculation across OSes using `gopsutil/cpu.Times` with a short interval; wired per-CPU and overall; removed related TODOs in types.
+  - Files Edited: `data/module/cpu.go`, `types/cpu.go`
+  - Status: Committed
+
+- Item: True Per-CPU Voltage (Linux/macOS/Windows)
+  - Attempt: 1
+  - Change: Investigated OS interfaces (Linux hwmon/ACPI, macOS powermetrics SMC, Windows WMI). Reliable per-core voltage telemetry is generally unavailable; keep overall Vcore and avoid propagating misleading per-core values beyond best-effort overall propagation.
+  - Files Edited: n/a
+  - Status: Not feasible (skipped)
