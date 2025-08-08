@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: system-bridge-linux-packages-${{ env.VERSION }}
-          path: dist/*
+          path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
     outputs:
       version: ${{ steps.get_version.outputs.version }}
@@ -162,7 +162,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: system-bridge-windows-packages-${{ env.VERSION }}
-          path: dist/*
+          path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
     outputs:
       version: ${{ steps.get_version.outputs.version }}
