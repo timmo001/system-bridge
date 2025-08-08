@@ -48,30 +48,30 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 		if err := json.Unmarshal(output, &metadata); err != nil {
 			slog.Warn("JSON unmarshal error:", "error", err.Error(), "raw_output", string(output))
 		} else {
-            mediaData.Title = &metadata.Title
-            mediaData.Artist = &metadata.Artist
-            mediaData.AlbumTitle = &metadata.Album
-            // Normalize status to HA-expected constants
-            if metadata.Status != "" {
-                s := strings.ToUpper(metadata.Status)
-                switch s {
-                case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
-                    // ok
-                default:
-                    // best-effort mapping
-                    if strings.EqualFold(metadata.Status, "play") || strings.EqualFold(metadata.Status, "playing") {
-                        s = "PLAYING"
-                    } else if strings.EqualFold(metadata.Status, "pause") || strings.EqualFold(metadata.Status, "paused") {
-                        s = "PAUSED"
-                    } else if strings.EqualFold(metadata.Status, "stop") || strings.EqualFold(metadata.Status, "stopped") {
-                        s = "STOPPED"
-                    } else {
-                        s = "STOPPED"
-                    }
-                }
-                mediaData.Status = &s
-            }
-            mediaData.Type = &metadata.PlayerName
+			mediaData.Title = &metadata.Title
+			mediaData.Artist = &metadata.Artist
+			mediaData.AlbumTitle = &metadata.Album
+			// Normalize status to HA-expected constants
+			if metadata.Status != "" {
+				s := strings.ToUpper(metadata.Status)
+				switch s {
+				case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
+					// ok
+				default:
+					// best-effort mapping
+					if strings.EqualFold(metadata.Status, "play") || strings.EqualFold(metadata.Status, "playing") {
+						s = "PLAYING"
+					} else if strings.EqualFold(metadata.Status, "pause") || strings.EqualFold(metadata.Status, "paused") {
+						s = "PAUSED"
+					} else if strings.EqualFold(metadata.Status, "stop") || strings.EqualFold(metadata.Status, "stopped") {
+						s = "STOPPED"
+					} else {
+						s = "STOPPED"
+					}
+				}
+				mediaData.Status = &s
+			}
+			mediaData.Type = &metadata.PlayerName
 
 			// Convert duration and position to float64 (duration is in microseconds)
 			if duration, err := strconv.ParseFloat(metadata.Duration, 64); err == nil {
@@ -96,25 +96,25 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
 			mediaData.IsStopEnabled = &[]bool{true}[0]
 
-            // Set shuffle and repeat states
+			// Set shuffle and repeat states
 			if metadata.Shuffle != "" {
 				isShuffle := strings.ToLower(metadata.Shuffle) == "on"
 				mediaData.Shuffle = &isShuffle
 			}
 			if metadata.LoopStatus != "" {
-                // Normalize repeat to HA-expected constants: NONE/TRACK/LIST
-                ls := strings.ToUpper(metadata.LoopStatus)
-                switch ls {
-                case "NONE":
-                    // ok
-                case "TRACK", "ONE":
-                    ls = "TRACK"
-                case "LIST", "ALL", "PLAYLIST", "ALBUM":
-                    ls = "LIST"
-                default:
-                    ls = "NONE"
-                }
-                mediaData.Repeat = &ls
+				// Normalize repeat to HA-expected constants: NONE/TRACK/LIST
+				ls := strings.ToUpper(metadata.LoopStatus)
+				switch ls {
+				case "NONE":
+					// ok
+				case "TRACK", "ONE":
+					ls = "TRACK"
+				case "LIST", "ALL", "PLAYLIST", "ALBUM":
+					ls = "LIST"
+				default:
+					ls = "NONE"
+				}
+				mediaData.Repeat = &ls
 			}
 		}
 	}
