@@ -52,6 +52,9 @@ install: build
 run: build
 	./$(OUT) backend
 
+test:
+	go test -v ./...
+
 clean:
 ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.syso 2>nul
@@ -93,6 +96,7 @@ help:
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
 	@echo "  run                      Build and run the application (development only)"
+	@echo "  test                     Run tests"
 	@echo "  clean                    Remove build artifacts"
 	@echo "  clean_dist               Remove dist directory"
 	@echo "  clean_web_client         Remove web client build artifacts"
