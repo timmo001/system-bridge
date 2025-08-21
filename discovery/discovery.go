@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // DiscoveryManager manages all service discovery mechanisms
@@ -43,8 +45,9 @@ func (dm *DiscoveryManager) Start() error {
 
 	slog.Info("Starting service discovery manager...")
 
-	// Start SSDP server
-	dm.ssdpServer = NewSSDPServer(dm.port)
+	// Start SSDP server on configurable SSDP port
+	ssdpPort := utils.GetSSDPPort()
+	dm.ssdpServer = NewSSDPServer(ssdpPort, dm.port)
 	if err := dm.ssdpServer.Start(); err != nil {
 		return fmt.Errorf("failed to start SSDP server: %w", err)
 	}

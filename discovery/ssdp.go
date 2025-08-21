@@ -22,7 +22,8 @@ const (
 
 // SSDPServer represents an SSDP server for service discovery
 type SSDPServer struct {
-	port          int
+	port          int // SSDP server port (1900)
+	backendPort   int // Backend server port for location URLs
 	server        *http.Server
 	multicastConn *net.UDPConn
 	stopChan      chan struct{}
@@ -40,10 +41,11 @@ type SSDPService struct {
 }
 
 // NewSSDPServer creates a new SSDP server
-func NewSSDPServer(port int) *SSDPServer {
+func NewSSDPServer(ssdpPort, backendPort int) *SSDPServer {
 	return &SSDPServer{
-		port:     port,
-		stopChan: make(chan struct{}),
+		port:        ssdpPort,
+		backendPort: backendPort,
+		stopChan:    make(chan struct{}),
 	}
 }
 
@@ -202,7 +204,7 @@ func (s *SSDPServer) createSearchResponse(remoteIP string) string {
 	buf.WriteString(fmt.Sprintf("CACHE-CONTROL: max-age=%d\r\n", SSDPMaxAge))
 	buf.WriteString("DATE: " + time.Now().UTC().Format(http.TimeFormat) + "\r\n")
 	buf.WriteString("EXT: \r\n")
-	buf.WriteString(fmt.Sprintf("LOCATION: http://%s:%d/description.xml\r\n", remoteIP, s.port))
+	buf.WriteString(fmt.Sprintf("LOCATION: http://%s:%d/description.xml\r\n", remoteIP, s.backendPort))
 	buf.WriteString("SERVER: System-Bridge/1.0 UPnP/1.0\r\n")
 	buf.WriteString(fmt.Sprintf("ST: %s\r\n", SSDPSearchTarget))
 	buf.WriteString(fmt.Sprintf("USN: uuid:system-bridge-%s::%s\r\n", hostname, SSDPSearchTarget))
@@ -240,7 +242,7 @@ func (s *SSDPServer) sendAnnouncement() {
 	buf.WriteString("NOTIFY * HTTP/1.1\r\n")
 	buf.WriteString("HOST: 239.255.255.250:1900\r\n")
 	buf.WriteString("CACHE-CONTROL: max-age=1800\r\n")
-	buf.WriteString("LOCATION: http://" + localIP + ":" + strconv.Itoa(s.port) + "/description.xml\r\n")
+	buf.WriteString("LOCATION: http://" + localIP + ":" + strconv.Itoa(s.backendPort) + "/description.xml\r\n")
 	buf.WriteString("NT: " + SSDPSearchTarget + "\r\n")
 	buf.WriteString("NTS: ssdp:alive\r\n")
 	buf.WriteString("SERVER: System-Bridge/1.0 UPnP/1.0\r\n")
@@ -284,7 +286,7 @@ func (s *SSDPServer) handleDescription(w http.ResponseWriter, r *http.Request) {
 				<SCPDURL>/description.xml</SCPDURL>
 			</service>
 		</serviceList>
-		<presentationURL>http://` + localIP + `:` + strconv.Itoa(s.port) + `</presentationURL>
+		<presentationURL>http://` + localIP + `:` + strconv.Itoa(s.backendPort) + `</presentationURL>
 	</device>
 </root>`
 
