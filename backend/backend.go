@@ -12,9 +12,6 @@ import (
 
 	"log/slog"
 
-	"os"
-
-	"github.com/hashicorp/mdns"
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
@@ -162,30 +159,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = "systembridge"
-	}
-
-	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", utils.GetPort(), nil, nil)
-	if err != nil {
-		slog.Warn("Could not create mDNS service", "err", err)
-	}
-
-	mdnsServer, err := mdns.NewServer(&mdns.Config{Zone: service, Logger: nil})
-
-	if err != nil {
-		slog.Warn("Could not start mDNS Server", "err", err)
-	} else {
-		slog.Info("Started mDNS Service", "service", service.Service, "domain", service.Domain, "port", service.Port, "hostname", service.HostName)
-	}
-
-	defer func() {
-		err = mdnsServer.Shutdown()
-		if err != nil {
-			slog.Error("Failed to Shutdown mDNS server", "error", err)
-		}
-	}()
+	// All discovery services (SSDP, DHCP, mDNS) are now managed by the discovery manager
 
 	// Run data update task processor in a separate goroutine
 	go func() {

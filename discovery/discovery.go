@@ -11,6 +11,7 @@ type DiscoveryManager struct {
 	port       int
 	ssdpServer *SSDPServer
 	dhcpDisc   *DHCPDiscovery
+	mdnsDisc   *MDNSDiscovery
 	mu         sync.RWMutex
 	running    bool
 }
@@ -55,6 +56,13 @@ func (dm *DiscoveryManager) Start() error {
 		// Don't return error, continue with other services
 	}
 
+	// Start mDNS discovery
+	dm.mdnsDisc = NewMDNSDiscovery(dm.port)
+	if err := dm.mdnsDisc.Start(); err != nil {
+		slog.Warn("Failed to start mDNS discovery", "err", err)
+		// Don't return error, continue with other services
+	}
+
 	dm.running = true
 	slog.Info("Service discovery manager started successfully")
 	return nil
@@ -80,6 +88,12 @@ func (dm *DiscoveryManager) Stop() error {
 	if dm.dhcpDisc != nil {
 		if err := dm.dhcpDisc.Stop(); err != nil {
 			slog.Error("Failed to stop DHCP discovery", "err", err)
+		}
+	}
+
+	if dm.mdnsDisc != nil {
+		if err := dm.mdnsDisc.Stop(); err != nil {
+			slog.Error("Failed to stop mDNS discovery", "err", err)
 		}
 	}
 
@@ -123,6 +137,28 @@ func (dm *DiscoveryManager) DiscoverServices() ([]ServiceInfo, error) {
 		}
 	}
 
+	// mDNS-based discovery
+	if dm.mdnsDisc != nil {
+		mdnsServices, err := dm.mdnsDisc.DiscoverServices()
+		if err != nil {
+			slog.Warn("mDNS service discovery failed", "err", err)
+		} else {
+			for _, service := range mdnsServices {
+				// Use the first IP if available
+				ip := ""
+				if len(service.IPs) > 0 {
+					ip = service.IPs[0]
+				}
+				services = append(services, ServiceInfo{
+					IP:       ip,
+					Port:     service.Port,
+					Hostname: service.Hostname,
+					Type:     "mdns",
+				})
+			}
+		}
+	}
+
 	// Note: SSDP services are discovered asynchronously via multicast
 	// They would be tracked in a separate registry
 
@@ -142,4 +178,11 @@ func (dm *DiscoveryManager) GetDHCPDiscovery() *DHCPDiscovery {
 	dm.mu.RLock()
 	defer dm.mu.RUnlock()
 	return dm.dhcpDisc
+}
+
+// GetMDNSDiscovery returns the mDNS discovery instance
+func (dm *DiscoveryManager) GetMDNSDiscovery() *MDNSDiscovery {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+	return dm.mdnsDisc
 }
