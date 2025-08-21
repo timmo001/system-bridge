@@ -98,6 +98,8 @@ jobs:
   build-windows:
     name: Build and package (Windows)
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -106,8 +108,7 @@ jobs:
 
       - name: Download NowPlaying helper
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        if: ${{ env.GH_TOKEN != '' }}
         run: ./.scripts/windows/download-now-playing.ps1
 
       - name: Setup Go
