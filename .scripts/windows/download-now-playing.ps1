@@ -10,6 +10,10 @@ if (-not $ghToken) {
     exit 1
 }
 
+try {
+    gh auth status
+}
+
 $outDir = Join-Path (Get-Location) '.scripts/windows/now-playing'
 
 $temp = Join-Path $env:TEMP ("npdl_" + [guid]::NewGuid())
