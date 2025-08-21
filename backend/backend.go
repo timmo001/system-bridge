@@ -13,7 +13,6 @@ import (
 	"log/slog"
 
 	"os"
-	"time"
 
 	"github.com/hashicorp/mdns"
 	api_http "github.com/timmo001/system-bridge/backend/http"
@@ -128,7 +127,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	defer func() {
 		err = server.Shutdown(ctx)
 		if err != nil {
-			log.Error("Failed to Shutdown HTTP server", "err", err)
+			slog.Error("Failed to Shutdown HTTP server", "error", err)
 		}
 	}()
 
@@ -152,12 +151,12 @@ func (b *Backend) Run(ctx context.Context) error {
 		hostname = "systembridge"
 	}
 
-	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", b.settings.API.Port, nil, nil)
+	service, err := mdns.NewMDNSService(hostname, "_system-bridge._tcp", "", "", utils.GetPort(), nil, nil)
 	if err != nil {
 		slog.Warn("Could not create mDNS service", "err", err)
 	}
 
-	mdnsServer, err := mdns.NewServer(&mdns.Config{Zone: service, Logger: slog.Default()})
+	mdnsServer, err := mdns.NewServer(&mdns.Config{Zone: service, Logger: nil})
 
 	if err != nil {
 		slog.Warn("Could not start mDNS Server", "err", err)
@@ -168,7 +167,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	defer func() {
 		err = mdnsServer.Shutdown()
 		if err != nil {
-			log.Error("Failed to Shutdown mDNS server", "err", err)
+			slog.Error("Failed to Shutdown mDNS server", "error", err)
 		}
 	}()
 
