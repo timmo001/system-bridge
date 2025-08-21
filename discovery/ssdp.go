@@ -293,13 +293,17 @@ func (s *SSDPServer) handleDescription(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", SSDPMaxAge))
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(description))
+	if _, err := w.Write([]byte(description)); err != nil {
+		slog.Error("Failed to write SSDP description response", "error", err)
+	}
 }
 
 // handleRoot handles root requests
 func (s *SSDPServer) handleRoot(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("System Bridge SSDP Service"))
+	if _, err := w.Write([]byte("System Bridge SSDP Service")); err != nil {
+		slog.Error("Failed to write SSDP root response", "error", err)
+	}
 }
 
 // parseHeaders parses HTTP headers from a message
@@ -336,7 +340,11 @@ func getLocalIP() (string, error) {
 	if err != nil {
 		return "127.0.0.1", err
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			slog.Error("Failed to close connection", "error", err)
+		}
+	}()
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String(), nil

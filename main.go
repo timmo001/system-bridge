@@ -173,7 +173,11 @@ func main() {
 									if err := discoveryManager.Start(); err != nil {
 										return fmt.Errorf("failed to start discovery manager: %w", err)
 									}
-									defer discoveryManager.Stop()
+									defer func() {
+										if err := discoveryManager.Stop(); err != nil {
+											fmt.Fprintf(os.Stderr, "Error stopping discovery manager: %v\n", err)
+										}
+									}()
 
 									// Wait a moment for services to be discovered
 									time.Sleep(2 * time.Second)

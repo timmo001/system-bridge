@@ -102,9 +102,13 @@ func (m *MDNSDiscovery) DiscoverServices() ([]MDNSService, error) {
 	go func() {
 		defer close(entriesCh)
 		// Look for system-bridge services
-		mdns.Lookup("_system-bridge._tcp", entriesCh)
+		if err := mdns.Lookup("_system-bridge._tcp", entriesCh); err != nil {
+			slog.Error("Failed to lookup system-bridge services", "error", err)
+		}
 		// Also look for general HTTP services that might be system-bridge
-		mdns.Lookup("_http._tcp", entriesCh)
+		if err := mdns.Lookup("_http._tcp", entriesCh); err != nil {
+			slog.Error("Failed to lookup HTTP services", "error", err)
+		}
 	}()
 
 	// Collect results with timeout

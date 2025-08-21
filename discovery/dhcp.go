@@ -59,7 +59,11 @@ func (d *DHCPDiscovery) listenForDHCP() {
 		slog.Error("Failed to create DHCP listener", "err", err)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			slog.Error("Failed to close DHCP listener connection", "error", err)
+		}
+	}()
 
 	buf := make([]byte, 1024)
 
@@ -170,7 +174,11 @@ func (d *DHCPDiscovery) sendDHCPRequests() {
 		slog.Error("Failed to create DHCP sender", "err", err)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			slog.Error("Failed to close DHCP sender connection", "error", err)
+		}
+	}()
 
 	ticker := time.NewTicker(60 * time.Second) // Send DHCP requests every minute
 	defer ticker.Stop()
@@ -294,7 +302,9 @@ func (d *DHCPDiscovery) scanSubnet(ipnet *net.IPNet) []DHCPService {
 		if err != nil {
 			continue
 		}
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			slog.Error("Failed to close connection", "error", err, "address", address)
+		}
 
 		// If connection successful, add to services
 		service := DHCPService{
