@@ -16,6 +16,7 @@ import (
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
@@ -28,6 +29,7 @@ type Backend struct {
 	eventRouter      *event.MessageRouter
 	wsServer         *websocket.WebsocketServer
 	webClientContent *embed.FS
+	discoveryManager *discovery.DiscoveryManager
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
@@ -38,12 +40,16 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
 
+	// Initialize discovery manager
+	discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
+
 	return &Backend{
 		settings:         settings,
 		dataStore:        dataStore,
 		eventRouter:      eventRouter,
 		wsServer:         wsServer,
 		webClientContent: webClientContent,
+		discoveryManager: discoveryManager,
 	}
 }
 
@@ -121,20 +127,39 @@ func (b *Backend) Run(ctx context.Context) error {
 		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
 		Handler: mux,
 	}
+	defer func() {
+		err = server.Shutdown(ctx)
+		if err != nil {
+			slog.Error("Failed to Shutdown HTTP server", "error", err)
+		}
+	}()
 
 	// Create an error channel to capture server errors
 	errChan := make(chan error, 1)
 
 	// Start server in a goroutine
 	go func() {
+		slog.Info("Backend server is running on", "address", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errChan <- err
 			cancel()
 		}
-		slog.Info("Backend server is running on", "address", server.Addr)
 	}()
 
-	// TODO: MDNS / SSDP / DHCP discovery
+	// Start service discovery
+	if err := b.discoveryManager.Start(); err != nil {
+		slog.Warn("Failed to start discovery manager", "err", err)
+	} else {
+		slog.Info("Service discovery started")
+	}
+
+	defer func() {
+		if err := b.discoveryManager.Stop(); err != nil {
+			slog.Error("Failed to stop discovery manager", "err", err)
+		}
+	}()
+
+	// All discovery services (SSDP, DHCP, mDNS) are now managed by the discovery manager
 
 	// Run data update task processor in a separate goroutine
 	go func() {
@@ -164,5 +189,5 @@ func (b *Backend) Run(ctx context.Context) error {
 		slog.Error("Server error caused shutdown:", "err", err)
 	}
 
-	return server.Shutdown(ctx)
+	return nil
 }
