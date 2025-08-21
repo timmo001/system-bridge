@@ -75,17 +75,18 @@ if [ "$GIT_BUILD" == "1" ]; then
     echo "==> Copying PKGBUILD.dev to PKGBUILD for AUR -git package"
     cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD.dev" PKGBUILD
 
-   if [ -d "${srcdir}/${pkgname}/.git" ]; then
-     cd "${srcdir}/${pkgname}"
-   elif [ -d .git ]; then
-     cd .
-   else
-     echo "0"
-     return
-   fi
-   PKGVER=$(printf "r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)")
-   echo "==> Setting pkgver to $PKGVER"
-   sed -i "s/pkgver=5.0.0+dev/pkgver=$PKGVER/" PKGBUILD
+    echo "==> Cloning system-bridge repository to get version information"
+    git clone https://github.com/timmo001/system-bridge.git system-bridge-repo
+    cd system-bridge-repo
+
+    PKGVER=$(printf "r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)")
+    echo "==> Setting pkgver to $PKGVER"
+
+    cd ..
+    sed -i "s/pkgver=5.0.0+dev/pkgver=$PKGVER/" PKGBUILD
+
+    echo "==> Cleaning up system-bridge repository"
+    rm -rf system-bridge-repo
 fi
 
 echo "::group::==> PKGBUILD"
