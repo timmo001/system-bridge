@@ -108,6 +108,8 @@ jobs:
 
       - name: Download NowPlaying helper
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         if: ${{ env.GH_TOKEN != '' }}
         run: ./.scripts/windows/download-now-playing.ps1
 

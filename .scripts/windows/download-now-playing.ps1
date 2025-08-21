@@ -1,5 +1,15 @@
 $ErrorActionPreference = 'Stop'
 
+$ghToken = $env:GH_TOKEN
+if (-not $ghToken -and $env:GITHUB_TOKEN) {
+    $env:GH_TOKEN = $env:GITHUB_TOKEN
+    $ghToken = $env:GH_TOKEN
+}
+if (-not $ghToken) {
+    Write-Error 'GH_TOKEN (or GITHUB_TOKEN) is not set. Set it in the workflow env.'
+    exit 1
+}
+
 $outDir = Join-Path (Get-Location) '.scripts/windows/now-playing'
 
 $temp = Join-Path $env:TEMP ("npdl_" + [guid]::NewGuid())
