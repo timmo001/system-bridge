@@ -12,6 +12,8 @@ if (-not $ghToken) {
 
 try {
     gh auth status
+} catch {
+    Write-Error 'Error calling gh auth status. Please check if the GH_TOKEN is set correctly.'
 }
 
 $outDir = Join-Path (Get-Location) '.scripts/windows/now-playing'
