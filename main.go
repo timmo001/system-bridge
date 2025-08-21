@@ -19,6 +19,7 @@ import (
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
@@ -157,6 +158,44 @@ func main() {
 								slog.Warn("Failed to send notification", "err", err)
 							}
 							return nil
+						},
+					},
+					{
+						Name:    "discovery",
+						Aliases: []string{"disc"},
+						Usage:   "Service discovery commands",
+						Commands: []*cli.Command{
+							{
+								Name:  "list",
+								Usage: "List discovered services",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
+									if err := discoveryManager.Start(); err != nil {
+										return fmt.Errorf("failed to start discovery manager: %w", err)
+									}
+									defer discoveryManager.Stop()
+
+									// Wait a moment for services to be discovered
+									time.Sleep(2 * time.Second)
+
+									services, err := discoveryManager.DiscoverServices()
+									if err != nil {
+										return fmt.Errorf("failed to discover services: %w", err)
+									}
+
+									if len(services) == 0 {
+										fmt.Println("No services discovered")
+										return nil
+									}
+
+									fmt.Printf("Discovered %d services:\n", len(services))
+									for _, service := range services {
+										fmt.Printf("- %s (%s:%d) [%s]\n", service.Hostname, service.IP, service.Port, service.Type)
+									}
+
+									return nil
+								},
+							},
 						},
 					},
 					{

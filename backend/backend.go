@@ -19,6 +19,7 @@ import (
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
@@ -31,6 +32,7 @@ type Backend struct {
 	eventRouter      *event.MessageRouter
 	wsServer         *websocket.WebsocketServer
 	webClientContent *embed.FS
+	discoveryManager *discovery.DiscoveryManager
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
@@ -41,12 +43,16 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
 
+	// Initialize discovery manager
+	discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
+
 	return &Backend{
 		settings:         settings,
 		dataStore:        dataStore,
 		eventRouter:      eventRouter,
 		wsServer:         wsServer,
 		webClientContent: webClientContent,
+		discoveryManager: discoveryManager,
 	}
 }
 
@@ -143,8 +149,18 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// TODO: SSDP discovery
-	// TODO: DHCP discovery
+	// Start service discovery
+	if err := b.discoveryManager.Start(); err != nil {
+		slog.Warn("Failed to start discovery manager", "err", err)
+	} else {
+		slog.Info("Service discovery started")
+	}
+
+	defer func() {
+		if err := b.discoveryManager.Stop(); err != nil {
+			slog.Error("Failed to stop discovery manager", "err", err)
+		}
+	}()
 
 	hostname, err := os.Hostname()
 	if err != nil {
