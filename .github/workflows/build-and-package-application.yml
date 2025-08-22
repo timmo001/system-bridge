@@ -100,7 +100,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: system-bridge-linux-${{ env.VERSION }}
-          path: ${{ github.workspace }}/system-bridge-linux
+          path: .
 
       - name: Package for linux
         run: |
