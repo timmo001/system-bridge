@@ -10,6 +10,7 @@ RUN apt-get update && \
         curl \
         dpkg \
         dpkg-dev \
+        elfutils \
         fakeroot \
         flatpak \
         flatpak-builder \
