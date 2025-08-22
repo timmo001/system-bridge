@@ -45,7 +45,7 @@ BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
 # Build flatpak package
-sudo flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo
@@ -56,11 +56,11 @@ if command -v ostree &>/dev/null; then
   ostree --repo=repo config set core.min-free-space-size 123MB || true
 else
   # This may fail on a fresh repo; ignore and continue, export will create it
-  sudo flatpak build-update-repo --min-free-space-size=123MB --min-free-space-percent=0 repo || true
+  flatpak build-update-repo --min-free-space-size=123MB --min-free-space-percent=0 repo || true
 fi
-sudo flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
 VERSION=${VERSION:-5.0.0}
 mkdir -p dist
-sudo flatpak build-bundle repo "dist/system-bridge-${VERSION}.flatpak" dev.timmo.system-bridge
+flatpak build-bundle repo "dist/system-bridge-${VERSION}.flatpak" dev.timmo.system-bridge
