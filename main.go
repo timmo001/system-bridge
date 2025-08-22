@@ -324,6 +324,14 @@ func main() {
 					},
 				},
 			},
+			{
+				Name:  "version",
+				Usage: "Show the version of the application",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					fmt.Println(version.APIVersion())
+					return nil
+				},
+			},
 		},
 	}
 

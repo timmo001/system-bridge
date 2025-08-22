@@ -114,6 +114,9 @@ endif
 deps:
 	go mod tidy
 
+version: build
+	./$(OUT) version
+
 # Show help
 help:
 	@echo "Available targets:"
@@ -131,3 +134,4 @@ help:
 	@echo "  clean_dist               Remove dist directory"
 	@echo "  clean_web_client         Remove web client build artifacts"
 	@echo "  deps                     Install dependencies"
+	@echo "  version                  Show the version of the application"
