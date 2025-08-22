@@ -22,14 +22,12 @@ modules:
       - cp system-bridge.desktop /app/share/applications/dev.timmo.system-bridge.desktop
       - sed -i 's|^Exec=.*|Exec=system-bridge-backend|g' /app/share/applications/dev.timmo.system-bridge.desktop
       - sed -i 's|Icon=system-bridge|Icon=dev.timmo.system-bridge|g' /app/share/applications/dev.timmo.system-bridge.desktop
-      - mkdir -p /app/share/icons/hicolor/scalable/apps
       - mkdir -p /app/share/icons/hicolor/16x16/apps
       - mkdir -p /app/share/icons/hicolor/32x32/apps
       - mkdir -p /app/share/icons/hicolor/48x48/apps
       - mkdir -p /app/share/icons/hicolor/128x128/apps
       - mkdir -p /app/share/icons/hicolor/256x256/apps
       - mkdir -p /app/share/icons/hicolor/512x512/apps
-      - cp system-bridge.svg /app/share/icons/hicolor/scalable/apps/dev.timmo.system-bridge.svg
       - cp system-bridge-16.png /app/share/icons/hicolor/16x16/apps/dev.timmo.system-bridge.png
       - cp system-bridge-32.png /app/share/icons/hicolor/32x32/apps/dev.timmo.system-bridge.png
       - cp system-bridge-48.png /app/share/icons/hicolor/48x48/apps/dev.timmo.system-bridge.png
@@ -43,9 +41,6 @@ modules:
         path: system-bridge-backend.sh
       - type: file
         path: system-bridge.desktop
-      - type: file
-        path: ../../.resources/system-bridge-dimmed.svg
-        dest-filename: system-bridge.svg
       - type: file
         path: ../../.resources/system-bridge-dimmed-16.png
         dest-filename: system-bridge-16.png
