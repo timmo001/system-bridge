@@ -246,6 +246,7 @@ jobs:
           else
             GIT_BUILD="1"
           fi
+          export GIT_BUILD
           chmod +x .scripts/linux/update-aur.sh
 
           if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
