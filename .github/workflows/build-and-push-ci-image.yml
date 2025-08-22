@@ -9,6 +9,7 @@ on:
     paths:
       - .github/workflows/build-and-push-ci-image.yml
       - Dockerfile.ci-build-arch
+      - Dockerfile.ci-build-ubuntu
   schedule:
     - cron: "0 3 * * 0" # Every Sunday at 03:00 UTC
   workflow_dispatch:
@@ -46,3 +47,5 @@ jobs:
           file: Dockerfile.ci-build-${{ matrix.os }}
           push: true
           tags: ghcr.io/${{ github.repository }}/ci-build-${{ matrix.os }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
