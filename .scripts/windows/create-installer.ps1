@@ -61,8 +61,11 @@ $nowPlayingDir = ".\now-playing"
 if (-not (Test-Path $nowPlayingDir)) {
     $nowPlayingDir = ".\.scripts\windows\now-playing"
 }
-if (-not (Test-Path (Join-Path $nowPlayingDir "NowPlaying.exe"))) {
-    Write-Warning "NowPlaying helper not found; installer will be built without it."
+$includeNowPlaying = $false
+if (Test-Path (Join-Path $nowPlayingDir "NowPlaying.exe")) {
+    $includeNowPlaying = $true
+} else {
+    Write-Host "NowPlaying helper not found; installer will be built without it."
 }
 
 # Get the script directory
@@ -86,5 +89,10 @@ $installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$Y
 Set-Content -Path "installer.nsi" -Value $installerScript
 
 Write-Host "Building installer with NSIS..."
-# Build the installer
-& makensis installer.nsi
+# Build the installer, optionally defining INCLUDE_NOW_PLAYING
+if ($includeNowPlaying) {
+    Write-Host "Including NowPlaying files in installer"
+    & makensis /DINCLUDE_NOW_PLAYING installer.nsi
+} else {
+    & makensis installer.nsi
+}
