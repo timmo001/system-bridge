@@ -23,10 +23,12 @@ concurrency:
 
 jobs:
   build-linux:
-    name: Build and package (Linux)
+    name: Build linux
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -62,8 +64,27 @@ jobs:
         run: |
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
 
-      # Package for Linux
-      - name: Package for Linux
+  package-linux:
+    name: Package linux
+    needs:
+      - build-linux
+    container:
+      image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        packages:
+          - arch
+          - deb
+          - rpm
+          - flatpak
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Package for linux
         run: |
           echo "::group::Setup"
           mkdir -p dist
@@ -71,31 +92,23 @@ jobs:
           chmod +x .scripts/linux/create-*.sh
           echo "::endgroup::"
 
-          echo "::group::Create deb"
-          ./.scripts/linux/create-deb.sh
-          echo "::endgroup::"
-
-          echo "::group::Create rpm"
-          ./.scripts/linux/create-rpm.sh
-          echo "::endgroup::"
-
-          echo "::group::Create flatpak"
-          VERSION=${{ env.VERSION }} ./.scripts/linux/create-flatpak.sh
-          echo "::endgroup::"
-
-          echo "::group::Create arch"
-          docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
-            pacman -Syu --noconfirm && \
-            pacman -S --noconfirm base-devel sudo && \
-            useradd -m builduser && \
-            echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser && \
-            mkdir -p /home/builduser/build && \
-            cp -r /build/* /home/builduser/build/ && \
-            chown -R builduser:builduser /home/builduser/build && \
-            cd /home/builduser/build/.scripts/linux && \
-            su builduser -c './create-arch.sh' && \
-            find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
-          "
+          echo "::group::Create ${matrix.packages}"
+          if [ "${{ matrix.packages }}" == "arch" ]; then
+            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
+              pacman -Syu --noconfirm && \
+              pacman -S --noconfirm base-devel sudo && \
+              useradd -m builduser && \
+              echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser && \
+              mkdir -p /home/builduser/build && \
+              cp -r /build/* /home/builduser/build/ && \
+              chown -R builduser:builduser /home/builduser/build && \
+              cd /home/builduser/build/.scripts/linux && \
+              su builduser -c './create-arch.sh' && \
+              find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
+            "
+          else
+            VERSION=${{ env.VERSION }} ./.scripts/linux/create-${matrix.packages}.sh
+          fi
           echo "::endgroup::"
 
           echo "::group::List dist"
@@ -105,14 +118,12 @@ jobs:
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: system-bridge-linux-packages-${{ env.VERSION }}
+          name: system-bridge-linux-packages-${{ matrix.packages }}-${{ env.VERSION }}
           path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
 
-  build-windows:
-    name: Build and package (Windows)
+  build-package-windows:
+    name: Build and package windows
     runs-on: windows-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -257,30 +268,49 @@ jobs:
     name: Create release
     needs:
       - build-linux
-      - build-windows
+      - package-linux
+      - build-package-windows
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download linux packages
+      - name: Download linux arch packages
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-linux-packages-${{ needs.build-linux.outputs.version }}
-          path: dist/linux
+          name: system-bridge-linux-packages-arch-${{ needs.build-linux.outputs.version }}
+          path: dist/linux/arch
+
+      - name: Download linux deb packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-deb-${{ needs.build-linux.outputs.version }}
+          path: dist/linux/deb
+
+      - name: Download linux rpm packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-rpm-${{ needs.build-linux.outputs.version }}
+          path: dist/linux/rpm
+
+      - name: Download linux flatpak packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-flatpak-${{ needs.build-linux.outputs.version }}
+          path: dist/linux/flatpak
 
       - name: Download windows packages
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-windows-packages-${{ needs.build-windows.outputs.version }}
+          name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/linux/*.deb
-            dist/linux/*.rpm
-            dist/linux/*.flatpak
-            dist/linux/*.pkg.tar.zst
+            dist/linux/arch/*.pkg.tar.zst
+            dist/linux/deb/*.deb
+            dist/linux/rpm/*.rpm
+            dist/linux/flatpak/*.flatpak
             dist/windows/*-setup.exe
