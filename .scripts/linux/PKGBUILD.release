@@ -5,6 +5,7 @@
 
 pkgname=system-bridge
 pkgver=5.0.0
+epoch=2
 pkgrel=1
 pkgdesc="A bridge for your systems"
 makedepends=('git' 'go' 'bun-bin')
