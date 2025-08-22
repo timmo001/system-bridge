@@ -3,6 +3,7 @@ package version
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -92,4 +93,80 @@ func IsNewerVersionAvailable(currentVersion, latestVersion string) bool {
 	}
 
 	return false
+}
+
+// APIVersion returns a PEP 440-compatible version string for external consumers
+// such as Home Assistant. It preserves packaging/versioning inputs while
+// normalizing common development and Arch -git formats:
+//   - v5.0.0 -> 5.0.0
+//   - 5.0.0-dev+<sha> -> 5.0.0.dev0+<sha>
+//   - 5.0.0-beta.8 -> 5.0.0b8
+//   - 5.0.0.beta.8.r12.g<sha> -> 5.0.0b8.dev12+g<sha>
+func APIVersion() string {
+	return normalizeToPEP440(Version)
+}
+
+func normalizeToPEP440(v string) string {
+	s := strings.TrimSpace(v)
+	if s == "" {
+		return s
+	}
+
+	// Strip leading 'v' (e.g. v5.0.0)
+	s = strings.TrimPrefix(s, "v")
+
+	// Capture git hash like .g88b1b13 or -g88b1b13
+	var sha string
+	reGit := regexp.MustCompile(`(?i)(?:^|[.\-])g([0-9a-f]{7,})`)
+	if m := reGit.FindStringSubmatch(s); len(m) == 2 {
+		sha = m[1]
+		s = reGit.ReplaceAllString(s, "")
+	}
+
+	// Normalize separators for parsing
+	s = strings.ReplaceAll(s, "-", ".")
+
+	// Pre-release identifiers
+	reBeta := regexp.MustCompile(`(?i)\.beta\.(\d+)`)
+	s = reBeta.ReplaceAllString(s, "b$1")
+	reAlpha := regexp.MustCompile(`(?i)\.alpha\.(\d+)`)
+	s = reAlpha.ReplaceAllString(s, "a$1")
+	reRC := regexp.MustCompile(`(?i)\.rc\.(\d+)`)
+	s = reRC.ReplaceAllString(s, "rc$1")
+
+	// Convert rN (commit count since tag) to devN
+	reR := regexp.MustCompile(`(?i)(?:^|\.)r(\d+)(?:\.|$)`)
+	if reR.MatchString(s) {
+		// Replace occurrences of .rN. or .rN (end) with .devN.
+		s = reR.ReplaceAllString(s, ".dev$1.")
+		s = strings.TrimSuffix(s, ".")
+	}
+
+	// Handle CI format like 5.0.0-dev+<sha> or 5.0.0.dev+<sha>
+	reDev := regexp.MustCompile(`^(\d+\.\d+\.\d+)[\.-]dev(?:\+([0-9A-Za-z]+))?$`)
+	if reDev.MatchString(s) {
+		m := reDev.FindStringSubmatch(s)
+		base := m[1]
+		if len(m) > 2 && m[2] != "" {
+			s = fmt.Sprintf("%s.dev0+%s", base, m[2])
+		} else {
+			s = base + ".dev0"
+		}
+	}
+
+	// Append local version with +g<sha> if available
+	if sha != "" {
+		if strings.Contains(s, "+") {
+			s = s + ".g" + sha
+		} else {
+			s = s + "+g" + sha
+		}
+	}
+
+	// Collapse duplicate dots and trim
+	for strings.Contains(s, "..") {
+		s = strings.ReplaceAll(s, "..", ".")
+	}
+	s = strings.TrimSuffix(s, ".")
+	return s
 }

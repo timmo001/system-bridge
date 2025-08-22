@@ -160,7 +160,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	}
 
 	// Get version information
-	currentVersion := version.Version
+	currentVersion := version.APIVersion()
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
 		slog.Error("Failed to get latest version", "error", err)
