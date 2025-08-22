@@ -31,7 +31,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/miekg/dns v1.1.55 // indirect
