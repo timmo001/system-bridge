@@ -84,8 +84,20 @@ if [ "$GIT_BUILD" == "1" ]; then
     git clone https://github.com/timmo001/system-bridge.git system-bridge-repo
     cd system-bridge-repo
 
-    PKGVER=$(printf "r%s.g%s" "$(git rev-list --count HEAD 2>/dev/null)" "$(git rev-parse --short=7 HEAD 2>/dev/null)")
-    echo "==> Setting pkgver to $PKGVER"
+    # Determine previous release (including prereleases) and bump patch for prefix
+    LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    LAST_TAG_NO_V=${LAST_TAG#v}
+    BASE_VERSION=${LAST_TAG_NO_V%%-*}
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+    : "${MAJOR:=0}"; : "${MINOR:=0}"; : "${PATCH:=0}"
+    BUMPED_PATCH=$((PATCH + 1))
+    PREFIX_VERSION="${MAJOR}.${MINOR}.${BUMPED_PATCH}"
+
+    REV_COUNT=$(git rev-list --count HEAD 2>/dev/null)
+    SHORT_HASH=$(git rev-parse --short=7 HEAD 2>/dev/null)
+    PKGVER="${PREFIX_VERSION}.r${REV_COUNT}.g${SHORT_HASH}"
+    echo "==> Latest tag: ${LAST_TAG} (base ${BASE_VERSION}) -> prefix ${PREFIX_VERSION}"
+    echo "==> Setting pkgver to ${PKGVER}"
 
     cd ..
     sed -i "s/pkgver=5.0.0+dev/pkgver=$PKGVER/" PKGBUILD
