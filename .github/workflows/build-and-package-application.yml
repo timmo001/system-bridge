@@ -79,10 +79,6 @@ jobs:
           ./.scripts/linux/create-rpm.sh
           echo "::endgroup::"
 
-          echo "::group::Create appimage"
-          ./.scripts/linux/create-appimage.sh
-          echo "::endgroup::"
-
           echo "::group::Create flatpak"
           VERSION=${{ env.VERSION }} ./.scripts/linux/create-flatpak.sh
           echo "::endgroup::"
@@ -285,7 +281,6 @@ jobs:
           files: |
             dist/linux/*.deb
             dist/linux/*.rpm
-            dist/linux/*.AppImage
             dist/linux/*.flatpak
             dist/linux/*.pkg.tar.zst
             dist/windows/*-setup.exe

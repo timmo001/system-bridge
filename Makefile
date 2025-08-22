@@ -15,7 +15,6 @@ else
 	BUN_BUILD=STATIC_EXPORT=true bun run build
 	EXTRA_LDFLAGS=
 	CREATE_ARCH=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
-	CREATE_APPIMAGE=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-appimage.sh
 	CREATE_DEB=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
 	CREATE_FLATPAK=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-flatpak.sh
 	CREATE_RPM=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
@@ -39,16 +38,12 @@ ifeq ($(OS),Windows_NT)
 else
 	@echo "Packaging all Linux formats in parallel..."
 	chmod +x ./.scripts/linux/create-*.sh
-	$(CREATE_APPIMAGE) & \
 	$(CREATE_DEB) & \
 	$(CREATE_RPM) & \
 	$(CREATE_ARCH) & \
 	$(CREATE_FLATPAK) & \
 	wait
 endif
-
-create_appimage: clean_dist
-	$(CREATE_APPIMAGE)
 
 create_arch: clean_dist
 	$(CREATE_ARCH)
@@ -125,7 +120,6 @@ help:
 	@echo "  build                    Build the application"
 	@echo "  build_web_client         Build the web client"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
-	@echo "  create_appimage          Create AppImage package"
 	@echo "  create_arch              Create Arch Linux package"
 	@echo "  create_flatpak           Create Flatpak package"
 	@echo "  create_deb               Create Debian package"
