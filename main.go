@@ -212,6 +212,16 @@ func main() {
 							{
 								Name:  "list",
 								Usage: "List available data modules",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{
+										Name:  "json",
+										Usage: "Output as JSON array",
+									},
+									&cli.BoolFlag{
+										Name:  "table",
+										Usage: "Output as table (default)",
+									},
+								},
 								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 									dataStore, err := data.NewDataStore()
 									if err != nil {
@@ -226,8 +236,16 @@ func main() {
 										}
 									}
 
-									// Stable output order
-									// No need to import sort explicitly; json.Marshal of slice preserves order
+									// Output format selection using --json or --table
+									if cmd.Bool("json") && !cmd.Bool("table") {
+										out, err := json.Marshal(modules)
+										if err != nil {
+											return fmt.Errorf("failed to marshal modules: %w", err)
+										}
+										fmt.Println(string(out))
+										return nil
+									}
+									// Default: table (or if --table specified)
 									for _, name := range modules {
 										fmt.Println(name)
 									}
