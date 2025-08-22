@@ -218,7 +218,11 @@ jobs:
         run: |
           if [ "${{ job.status }}" == 'success' ]; then
             echo "✅ AUR package updated successfully!"
-            echo "Package: https://aur.archlinux.org/packages/system-bridge-git"
+            if [[ "${{ github.ref_type }}" == "tag" ]]; then
+              echo "Package: https://aur.archlinux.org/packages/system-bridge"
+            else
+              echo "Package: https://aur.archlinux.org/packages/system-bridge-git"
+            fi
           else
             echo "❌ Failed to update AUR package"
             echo "Check the logs above for details"
@@ -253,5 +257,3 @@ jobs:
             dist/*
             dist/linux/*
             dist/windows/*
-          draft: false
-          generate_release_notes: true

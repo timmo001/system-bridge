@@ -4,9 +4,14 @@ set -e
 
 echo "==> Starting update-aur.sh script"
 # Configuration
-echo "==> Setting AUR package variables"
-AUR_PACKAGE_NAME="system-bridge-git"
+echo "==> Determining AUR package to update"
+if [ "${GIT_BUILD:-1}" = "1" ]; then
+    AUR_PACKAGE_NAME="system-bridge-git"
+else
+    AUR_PACKAGE_NAME="system-bridge"
+fi
 AUR_REPO_URL="ssh://aur@aur.archlinux.org/${AUR_PACKAGE_NAME}.git"
+echo "AUR package: ${AUR_PACKAGE_NAME}"
 
 # Check required environment variables
 echo "==> Checking required environment variables"
@@ -53,7 +58,7 @@ cd "$TEMP_DIR"
 echo "==> Changed directory to $TEMP_DIR"
 
 # Clone AUR repository
-echo "==> Cloning AUR repository..."
+echo "==> Cloning AUR repository ${AUR_REPO_URL}..."
 git clone "$AUR_REPO_URL" aur-repo
 echo "==> Finished git clone"
 cd aur-repo
@@ -87,6 +92,26 @@ if [ "$GIT_BUILD" == "1" ]; then
 
     echo "==> Cleaning up system-bridge repository"
     rm -rf system-bridge-repo
+else
+    echo "==> Using PKGBUILD.release for AUR stable package"
+    cp "$GITHUB_WORKSPACE/.scripts/linux/PKGBUILD.release" PKGBUILD
+
+    TAGVER="$VERSION"
+    # Convert tag (e.g. v5.0.0 or 5.0.0-rc1) to valid pkgver (strip leading v, replace hyphens with dots)
+    PKGVER=$(echo "$TAGVER" | sed 's/^v//' | sed 's/-/./g')
+    echo "==> Setting pkgver to $PKGVER and tag to $TAGVER"
+    sed -i "s/^pkgver=.*/pkgver=$PKGVER/" PKGBUILD
+    sed -i "s/TAGVER_PLACEHOLDER/$TAGVER/" PKGBUILD
+
+    echo "==> Generating sha256sums for tagged source"
+    sudo -u builduser env -i HOME="$HOME" BUILDDIR="$BUILDDIR" bash --noprofile --norc -c 'makepkg -g > new_sums.txt'
+    # Remove old sha256sums and insert regenerated one after source=
+    sed -i '/^sha256sums=(/,/^)/d' PKGBUILD
+    awk '
+      /source=/ { print; while ((getline line < "new_sums.txt") > 0) print line; next }
+      { print }
+    ' PKGBUILD > PKGBUILD.new && mv PKGBUILD.new PKGBUILD
+    rm -f new_sums.txt
 fi
 
 echo "::group::==> PKGBUILD"
