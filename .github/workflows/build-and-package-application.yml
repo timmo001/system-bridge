@@ -283,7 +283,7 @@ jobs:
 
   update-release:
     name: Update release
-    if: github.ref_type == 'tag'
+    if: github.event_name == 'release'
     needs:
       - build-linux
       - package-linux
@@ -335,6 +335,8 @@ jobs:
   compute-next-prerelease:
     name: Compute next prerelease tag
     runs-on: ubuntu-latest
+    needs:
+      - update-release
     if: github.event_name == 'release'
     outputs:
       next_tag: ${{ steps.compute.outputs.next_tag }}
