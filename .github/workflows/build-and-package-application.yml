@@ -105,7 +105,6 @@ jobs:
       - name: Package for linux
         run: |
           echo "::group::Setup"
-          VERSION=${{ env.VERSION }}
           mkdir -p dist
           chmod +x ./system-bridge-linux
           chmod +x ./.scripts/linux/create-*.sh
