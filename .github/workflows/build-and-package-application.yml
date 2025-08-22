@@ -247,6 +247,12 @@ jobs:
             GIT_BUILD="1"
           fi
           chmod +x .scripts/linux/update-aur.sh
+
+          if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
+            echo "Switching to builduser..."
+            chown -R builduser:builduser "$(pwd)"
+            exec sudo --preserve-env=VERSION -u builduser -H bash ./.scripts/linux/update-aur.sh
+          fi
           echo "::endgroup::"
 
           echo "::group::Update AUR package"
