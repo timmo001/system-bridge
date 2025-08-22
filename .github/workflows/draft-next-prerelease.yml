@@ -1,0 +1,301 @@
+---
+name: Draft next prerelease after release
+
+# yamllint disable-line rule:truthy
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      base_tag:
+        description: "Base tag to compute the next prerelease from (e.g. 5.0.0 or 5.0.0-beta.9)"
+        required: false
+
+env:
+  STATIC_EXPORT: "true"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'release' && format('release-{0}', github.event.release.tag_name) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: false
+
+jobs:
+  compute-next:
+    name: Compute next prerelease tag
+    runs-on: ubuntu-latest
+    outputs:
+      next_tag: ${{ steps.compute.outputs.next_tag }}
+    steps:
+      - name: Compute next prerelease tag
+        id: compute
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREV_TAG="${{ github.event_name == 'release' && github.event.release.tag_name || inputs.base_tag }}"
+          if [[ -z "${PREV_TAG}" ]]; then
+            echo "Base tag not provided and no release context available." >&2
+            exit 1
+          fi
+          echo "Previous tag: ${PREV_TAG}"
+          NEXT_TAG=""
+          if [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            BETA="${BASH_REMATCH[4]}"
+            NEXT_BETA=$((BETA+1))
+            NEXT_TAG="${MAJOR}.${MINOR}.${PATCH}-beta.${NEXT_BETA}"
+          elif [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            NEXT_PATCH=$((PATCH+1))
+            NEXT_TAG="${MAJOR}.${MINOR}.${NEXT_PATCH}-beta.1"
+          else
+            # Fallback: append -beta.1
+            NEXT_TAG="${PREV_TAG}-beta.1"
+          fi
+          echo "Next prerelease tag: ${NEXT_TAG}"
+          echo "next_tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+
+  build-linux:
+    name: Build linux (next prerelease)
+    needs:
+      - compute-next
+    container:
+      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.compute-next.outputs.next_tag }}
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory .
+
+      - name: Setup Go
+        uses: ./.github/actions/setup-go
+
+      - name: Build web client
+        uses: ./.github/actions/build-client-web
+
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          echo "VERSION=${{ env.VERSION }}" >> "$GITHUB_ENV"
+          echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
+
+      - name: Write version to file
+        run: echo "${{ env.VERSION }}" > VERSION
+
+      - name: Build application
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 1
+        run: |
+          go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
+
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-linux-${{ env.VERSION }}
+          path: system-bridge-linux
+
+  package-linux:
+    name: Package ${{ matrix.build.package }} (${{ matrix.build.distro }})
+    needs:
+      - build-linux
+    container:
+      image: ghcr.io/${{ github.repository }}/ci-build-${{ matrix.build.distro }}:latest
+      options: "--privileged --cap-add=SYS_ADMIN --device=/dev/fuse"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - distro: arch
+            package: arch
+          - distro: ubuntu
+            package: deb
+          - distro: ubuntu
+            package: rpm
+          - distro: ubuntu
+            package: flatpak
+    env:
+      VERSION: ${{ needs.build-linux.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download application
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-${{ env.VERSION }}
+          path: .
+
+      - name: Package for linux
+        run: |
+          echo "::group::Setup"
+          mkdir -p dist
+          chmod +x ./system-bridge-linux
+          chmod +x ./.scripts/linux/create-*.sh
+          echo "::endgroup::"
+
+          echo "::group::List files"
+          ls -la
+          echo "::endgroup::"
+
+          echo "::group::List scripts"
+          ls -la ./.scripts/linux/
+          echo "::endgroup::"
+
+          echo "::group::Create ${{ matrix.build.package }} package"
+          ./.scripts/linux/create-${{ matrix.build.package }}.sh
+          echo "::endgroup::"
+
+          echo "::group::List dist"
+          ls -la dist
+          echo "::endgroup::"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-linux-packages-${{ matrix.build.package }}-${{ env.VERSION }}
+          path: dist/**
+          retention-days: 30
+
+  build-package-windows:
+    name: Build and package windows (next prerelease)
+    needs:
+      - compute-next
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      VERSION: ${{ needs.compute-next.outputs.next_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download NowPlaying helper
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        if: ${{ env.GH_TOKEN != '' }}
+        run: ./.scripts/windows/download-now-playing.ps1
+
+      - name: Setup Go
+        uses: ./.github/actions/setup-go
+
+      - name: Build web client
+        uses: ./.github/actions/build-client-web
+
+      - name: Setup MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+          version: 12.2.0
+
+      - name: Install NSIS
+        run: choco install nsis -y --no-progress --limit-output
+
+      - name: Generate resource file
+        run: |
+          powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
+          windres system-bridge.rc -O coff -o system-bridge.syso
+
+      - name: Build application
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: 1
+          CC: gcc
+        run: |
+          go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
+
+      - name: Package for Windows
+        run: |
+          echo "::group::Setup"
+          mkdir -p dist
+          Move-Item system-bridge.exe dist/system-bridge.exe
+          echo "::endgroup::"
+
+          echo "::group::Create installer"
+          ./.scripts/windows/create-installer.ps1
+          echo "::endgroup::"
+
+          echo "::group::List dist"
+          Get-ChildItem dist -Recurse | Format-Table -AutoSize
+          echo "::endgroup::"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-windows-packages-${{ env.VERSION }}
+          path: dist/**
+          retention-days: 30
+
+  create-prerelease:
+    name: Create draft prerelease
+    runs-on: ubuntu-latest
+    needs:
+      - compute-next
+      - package-linux
+      - build-package-windows
+    permissions:
+      contents: write
+    steps:
+      - name: Download linux arch packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-arch-${{ needs.compute-next.outputs.next_tag }}
+          path: dist/linux/arch
+
+      - name: Download linux deb packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-deb-${{ needs.compute-next.outputs.next_tag }}
+          path: dist/linux/deb
+
+      - name: Download linux rpm packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-rpm-${{ needs.compute-next.outputs.next_tag }}
+          path: dist/linux/rpm
+
+      - name: Download linux flatpak packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-flatpak-${{ needs.compute-next.outputs.next_tag }}
+          path: dist/linux/flatpak
+
+      - name: Download windows packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-windows-packages-${{ needs.compute-next.outputs.next_tag }}
+          path: dist/windows
+
+      - name: Create draft prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: true
+          name: ${{ needs.compute-next.outputs.next_tag }}
+          tag_name: ${{ needs.compute-next.outputs.next_tag }}
+          generate_release_notes: true
+          files: |
+            dist/linux/arch/*.pkg.tar.zst
+            dist/linux/deb/*.deb
+            dist/linux/rpm/*.rpm
+            dist/linux/flatpak/*.flatpak
+            dist/windows/*-setup.exe
