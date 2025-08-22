@@ -78,6 +78,7 @@ jobs:
       image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         packages:
           - arch
@@ -209,7 +210,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::List dist"
-          ls -la dist
+          Get-ChildItem dist -Recurse | Format-Table -AutoSize
           echo "::endgroup::"
 
       - name: Upload packages
