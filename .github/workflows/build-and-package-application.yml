@@ -74,20 +74,24 @@ jobs:
           path: system-bridge-linux
 
   package-linux:
-    name: Package linux
+    name: Package linux (${{ matrix.build.distro }}/${{ matrix.build.package }})
     needs:
       - build-linux
     container:
-      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
+      image: ghcr.io/${{ github.repository }}/ci-build-${{ matrix.build.distro }}:latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - arch
-          - deb
-          - rpm
-          - flatpak
+        build:
+          - distro: arch
+            package: arch
+          - distro: ubuntu
+            package: deb
+          - distro: ubuntu
+            package: rpm
+          - distro: ubuntu
+            package: flatpak
     env:
       VERSION: ${{ needs.build-linux.outputs.version }}
     steps:
@@ -118,8 +122,8 @@ jobs:
           ls -la ./.scripts/linux/
           echo "::endgroup::"
 
-          echo "::group::Create ${{ matrix.package }} package"
-          ./.scripts/linux/create-${{ matrix.package }}.sh
+          echo "::group::Create ${{ matrix.build.package }} package"
+          ./.scripts/linux/create-${{ matrix.build.package }}.sh
           echo "::endgroup::"
 
           echo "::group::List dist"
@@ -129,7 +133,7 @@ jobs:
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: system-bridge-linux-packages-${{ matrix.package }}-${{ env.VERSION }}
+          name: system-bridge-linux-packages-${{ matrix.build.package }}-${{ env.VERSION }}
           path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
