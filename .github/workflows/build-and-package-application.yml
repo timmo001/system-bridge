@@ -6,12 +6,13 @@ on:
   push:
     branches:
       - master
-    tags:
-      - "*"
   pull_request:
     types:
       - opened
       - synchronize
+  release:
+    types:
+      - published
   workflow_dispatch: {}
 
 env:
@@ -24,6 +25,7 @@ concurrency:
 jobs:
   build-linux:
     name: Build linux
+    if: github.event_name != 'release'
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
@@ -224,12 +226,12 @@ jobs:
 
   update-aur:
     name: Update AUR Package
+    if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.ref_type == 'tag'
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
     needs:
       - build-linux
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.ref_type == 'tag'
     env:
       VERSION: ${{ needs.build-linux.outputs.version }}
     steps:
@@ -281,11 +283,11 @@ jobs:
 
   update-release:
     name: Update release
+    if: github.ref_type == 'tag'
     needs:
       - build-linux
       - package-linux
       - build-package-windows
-    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -329,3 +331,59 @@ jobs:
             dist/linux/rpm/*.rpm
             dist/linux/flatpak/*.flatpak
             dist/windows/*-setup.exe
+
+  compute-next-prerelease:
+    name: Compute next prerelease tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    outputs:
+      next_tag: ${{ steps.compute.outputs.next_tag }}
+    steps:
+      - name: Compute next prerelease tag
+        id: compute
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREV_TAG="${{ github.event.release.tag_name }}"
+          if [[ -z "${PREV_TAG}" ]]; then
+            echo "Release tag not available in context." >&2
+            exit 1
+          fi
+          echo "Previous tag: ${PREV_TAG}"
+          NEXT_TAG=""
+          if [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            BETA="${BASH_REMATCH[4]}"
+            NEXT_BETA=$((BETA+1))
+            NEXT_TAG="${MAJOR}.${MINOR}.${PATCH}-beta.${NEXT_BETA}"
+          elif [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            NEXT_PATCH=$((PATCH+1))
+            NEXT_TAG="${MAJOR}.${MINOR}.${NEXT_PATCH}-beta.1"
+          else
+            NEXT_TAG="${PREV_TAG}-beta.1"
+          fi
+          echo "Next prerelease tag: ${NEXT_TAG}"
+          echo "next_tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+
+  create-prerelease:
+    name: Create draft prerelease
+    runs-on: ubuntu-latest
+    needs:
+      - compute-next-prerelease
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
+    steps:
+      - name: Create draft prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: true
+          name: ${{ needs.compute-next-prerelease.outputs.next_tag }}
+          tag_name: ${{ needs.compute-next-prerelease.outputs.next_tag }}
+          generate_release_notes: true
