@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+# If running as root in CI container, re-run as non-root build user
+if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
+  echo "Switching to builduser for packaging..."
+  chown -R builduser:builduser "$(pwd)"
+  exec sudo --preserve-env=VERSION -u builduser -H bash "$0" "$@"
+fi
+
 # Ensure required tools for Arch packaging are installed (makepkg)
 if ! command -v makepkg >/dev/null 2>&1; then
   echo "makepkg not found, attempting installation..."
