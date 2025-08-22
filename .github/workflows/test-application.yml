@@ -28,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory ${{ github.workspace }}
+
       - name: Setup Go
         uses: ./.github/actions/setup-go
 

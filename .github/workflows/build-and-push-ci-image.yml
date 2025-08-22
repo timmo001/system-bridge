@@ -24,6 +24,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory ${{ github.workspace }}s
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
