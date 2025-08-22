@@ -20,7 +20,7 @@ jobs:
   test:
     name: Test application
     container:
-      image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

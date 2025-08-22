@@ -25,7 +25,7 @@ jobs:
   build-linux:
     name: Build linux
     container:
-      image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.version }}
@@ -75,7 +75,7 @@ jobs:
     needs:
       - build-linux
     container:
-      image: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -117,11 +117,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Create ${{ matrix.package }} package"
-          if [ "${{ matrix.package }}" == "arch" ]; then
-            docker run --rm -v ./:/build archlinux:latest bash -c "./.scripts/linux/create-arch-container.sh"
-          else
-            ./.scripts/linux/create-${{ matrix.package }}.sh
-          fi
+          ./.scripts/linux/create-${{ matrix.package }}.sh
           echo "::endgroup::"
 
           echo "::group::List dist"
@@ -131,7 +127,7 @@ jobs:
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: system-bridge-linux-packages-${{ matrix.packages }}-${{ env.VERSION }}
+          name: system-bridge-linux-packages-${{ matrix.package }}-${{ env.VERSION }}
           path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
