@@ -32,13 +32,30 @@ fi
 
 VERSION=${VERSION:-5.0.0}
 
+# Strip optional leading 'v' from tags (e.g. v5.0.0 -> 5.0.0)
+if [[ "$VERSION" == v* ]]; then
+  VERSION="${VERSION#v}"
+fi
+
 # Convert version for RPM compatibility
-if [[ $VERSION == *"-dev+"* ]]; then
-  RPM_VERSION="5.0.0"
+# RPM Version tag cannot contain '-'. Pre-release identifiers must go in Release.
+if [[ "$VERSION" == *"-dev+"* ]]; then
+  # e.g. 5.0.0-dev+<sha>
+  BASE_VERSION="${VERSION%%-*}"
   COMMIT_HASH=${VERSION#*+}
+  RPM_VERSION="$BASE_VERSION"
   RPM_RELEASE="0.dev.${COMMIT_HASH}"
+elif [[ "$VERSION" == *"-"* ]]; then
+  # e.g. 5.0.0-beta.7 -> Version: 5.0.0, Release: 0.beta.7
+  BASE_VERSION="${VERSION%%-*}"
+  PRERELEASE="${VERSION#*-}"
+  # Sanitize prerelease for RPM Release (no hyphens). Allow dots.
+  PRERELEASE_SANITIZED="${PRERELEASE//-/\.}"
+  PRERELEASE_SANITIZED="${PRERELEASE_SANITIZED//+/.}"
+  RPM_VERSION="$BASE_VERSION"
+  RPM_RELEASE="0.${PRERELEASE_SANITIZED}"
 else
-  RPM_VERSION=$VERSION
+  RPM_VERSION="$VERSION"
   RPM_RELEASE="1"
 fi
 
