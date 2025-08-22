@@ -79,7 +79,7 @@ jobs:
       - build-linux
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-${{ matrix.build.distro }}:latest
-      options: ${{ matrix.build.package == 'flatpak' && '--privileged --cap-add=SYS_ADMIN --device=/dev/fuse' || '' }}
+      options: "--privileged --cap-add=SYS_ADMIN --device=/dev/fuse"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
