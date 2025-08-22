@@ -25,6 +25,7 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
+	"github.com/timmo001/system-bridge/version"
 	"github.com/urfave/cli/v3"
 )
 
@@ -67,8 +68,9 @@ func main() {
 	// spawning a tray when using CLI-only commands.
 
 	cmd := &cli.Command{
-		Name:  "System Bridge",
-		Usage: "A bridge for your systems",
+		Name:    "System Bridge",
+		Usage:   "A bridge for your systems",
+		Version: version.Version,
 		Commands: []*cli.Command{
 			{
 				Name:    "backend",
