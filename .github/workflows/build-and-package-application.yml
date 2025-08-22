@@ -177,9 +177,18 @@ jobs:
 
       - name: Package for Windows
         run: |
+          echo "::group::Setup"
           mkdir -p dist
           Move-Item system-bridge.exe dist/system-bridge.exe
+          echo "::endgroup::"
+
+          echo "::group::Create installer"
           ./.scripts/windows/create-installer.ps1
+          echo "::endgroup::"
+
+          echo "::group::List dist"
+          ls -la dist
+          echo "::endgroup::"
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
