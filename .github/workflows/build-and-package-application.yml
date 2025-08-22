@@ -97,10 +97,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: system-bridge-linux-${{ env.VERSION }}
-          path: system-bridge-linux
+          path: ${{ github.workspace }}/system-bridge-linux
 
       - name: Package for linux
         run: |
+          echo "::group::List files"
+          ls -la
+          echo "::endgroup::"
+
           echo "::group::Setup"
           VERSION=${{ env.VERSION }}
           mkdir -p dist
