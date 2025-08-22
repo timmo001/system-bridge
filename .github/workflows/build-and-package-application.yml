@@ -223,34 +223,34 @@ jobs:
             echo "Check the logs above for details"
           fi
 
-   create-release:
-     name: Create release
-     needs:
-       - build-linux
-       - build-windows
-     if: github.ref_type == 'tag'
-     runs-on: ubuntu-latest
-     permissions:
-       contents: write
-     steps:
-       - name: Download linux packages
-         uses: actions/download-artifact@v4
-         with:
-           name: system-bridge-linux-packages-${{ needs.build-linux.outputs.version }}
-           path: dist/linux
+  create-release:
+    name: Create release
+    needs:
+      - build-linux
+      - build-windows
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download linux packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-linux-packages-${{ needs.build-linux.outputs.version }}
+          path: dist/linux
 
-       - name: Download windows packages
-         uses: actions/download-artifact@v4
-         with:
-           name: system-bridge-windows-packages-${{ needs.build-windows.outputs.version }}
-           path: dist/windows
+      - name: Download windows packages
+        uses: actions/download-artifact@v4
+        with:
+          name: system-bridge-windows-packages-${{ needs.build-windows.outputs.version }}
+          path: dist/windows
 
-       - name: Create release
-         uses: softprops/action-gh-release@v2
-         with:
-           files: |
-             dist/*
-             dist/linux/*
-             dist/windows/*
-           draft: false
-           generate_release_notes: true
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*
+            dist/linux/*
+            dist/windows/*
+          draft: false
+          generate_release_notes: true
