@@ -107,7 +107,7 @@ jobs:
           chmod +x .scripts/linux/create-*.sh
           echo "::endgroup::"
 
-          echo "::group::Create ${matrix.packages}"
+          echo "::group::Create ${{ matrix.packages }}"
           if [ "${{ matrix.packages }}" == "arch" ]; then
             docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
               pacman -Syu --noconfirm && \
