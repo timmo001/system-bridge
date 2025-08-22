@@ -9,11 +9,11 @@ if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
   exec sudo --preserve-env=VERSION -u builduser -H bash "$0" "$@"
 fi
 
-# Prefer disabling sandbox in constrained CI; fallback if flag unsupported
-if flatpak-builder --help 2>&1 | grep -q -- "--disable-sandbox"; then
+# Force disable sandbox in constrained CI and also pass flag when supported
+export FLATPAK_BUILDER_NOSANDBOX=1
+if flatpak-builder --disable-sandbox --version >/dev/null 2>&1; then
   FB_NO_SANDBOX_FLAG="--disable-sandbox"
 else
-  export FLATPAK_BUILDER_NOSANDBOX=1
   FB_NO_SANDBOX_FLAG=""
 fi
 
