@@ -220,6 +220,8 @@ jobs:
 
   update-aur:
     name: Update AUR Package
+    container:
+      image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest
     needs:
       - build-linux
@@ -238,29 +240,19 @@ jobs:
           GITHUB_WORKSPACE: ${{ github.workspace }}
           VERSION: ${{ env.VERSION }}
         run: |
+          echo "::group::Setup"
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             GIT_BUILD="0"
           else
             GIT_BUILD="1"
           fi
+          chmod +x .scripts/linux/update-aur.sh
+          echo "::endgroup::"
 
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            -e AUR_SSH_PRIVATE_KEY="$AUR_SSH_PRIVATE_KEY" \
-            -e GIT_BUILD="$GIT_BUILD" \
-            -e GITHUB_SHA="$GITHUB_SHA" \
-            -e GITHUB_WORKSPACE="/workspace" \
-            -e VERSION="$VERSION" \
-            -w /workspace \
-            archlinux:latest \
-            bash -c "
-              echo '::group::Install and Update Packages' && \
-              pacman -Syu --noconfirm && \
-              pacman -S --noconfirm base-devel git openssh && \
-              echo '::endgroup::' && \
-              chmod +x .scripts/linux/update-aur.sh && \
-              ./.scripts/linux/update-aur.sh
-            "
+          echo "::group::Update AUR package"
+          ./.scripts/linux/update-aur.sh
+          echo "::endgroup::"
+
       - name: Report AUR update status
         if: always()
         run: |
