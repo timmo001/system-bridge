@@ -251,7 +251,7 @@ jobs:
           if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
             echo "Switching to builduser..."
             chown -R builduser:builduser "$(pwd)"
-            exec sudo --preserve-env=VERSION -u builduser -H bash ./.scripts/linux/update-aur.sh
+            exec sudo --preserve-env=VERSION,AUR_SSH_PRIVATE_KEY,GITHUB_SHA,GITHUB_WORKSPACE,GIT_BUILD -u builduser -H bash ./.scripts/linux/update-aur.sh
           fi
           echo "::endgroup::"
 

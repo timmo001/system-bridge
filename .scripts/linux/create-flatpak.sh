@@ -9,6 +9,14 @@ if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
   exec sudo --preserve-env=VERSION -u builduser -H bash "$0" "$@"
 fi
 
+# Prefer disabling sandbox in constrained CI; fallback if flag unsupported
+if flatpak-builder --help 2>&1 | grep -q -- "--disable-sandbox"; then
+  FB_NO_SANDBOX_FLAG="--disable-sandbox"
+else
+  export FLATPAK_BUILDER_NOSANDBOX=1
+  FB_NO_SANDBOX_FLAG=""
+fi
+
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
   echo "system-bridge-linux not found, please build the application first"
@@ -52,7 +60,7 @@ BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
 # Build flatpak package (disable rofiles fuse for containerized CI)
-flatpak-builder --force-clean --disable-rofiles-fuse --disable-sandbox "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --force-clean --disable-rofiles-fuse ${FB_NO_SANDBOX_FLAG} "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo
@@ -65,7 +73,7 @@ else
   # This may fail on a fresh repo; ignore and continue, export will create it
   flatpak build-update-repo --min-free-space-size=123MB --min-free-space-percent=0 repo || true
 fi
-flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse --disable-sandbox "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse ${FB_NO_SANDBOX_FLAG} "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
 VERSION=${VERSION:-5.0.0}
