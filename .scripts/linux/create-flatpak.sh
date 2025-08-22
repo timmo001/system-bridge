@@ -36,15 +36,15 @@ if ! command -v flatpak-builder &>/dev/null; then
   fi
 fi
 
-sudo flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo || true
-sudo flatpak install -y --user flathub org.freedesktop.Sdk//23.08
-sudo flatpak install -y --user flathub org.freedesktop.Platform//23.08
+sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
+sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
+sudo flatpak install -y flathub org.freedesktop.Platform//23.08
 
 # Create build directory
 BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
-# Build flatpak package (disable rofiles fuse for containerized CI)
+# Build flatpak package
 sudo flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
