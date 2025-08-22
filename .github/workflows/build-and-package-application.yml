@@ -108,16 +108,15 @@ jobs:
           echo "::group::Setup"
           VERSION=${{ env.VERSION }}
           mkdir -p dist
-          chmod +x system-bridge-linux
-          chmod +x .scripts/linux/create-*.sh
+          chmod +x ./system-bridge-linux
+          chmod +x ./.scripts/linux/create-*.sh
           echo "::endgroup::"
 
+          echo "::group::Create ${{ matrix.package }} package"
           if [ "${{ matrix.package }}" == "arch" ]; then
-            echo "::group::Create arch linux package"
-            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "./.scripts/linux/create-arch-container.sh"
+            docker run --rm -v ./:/build archlinux:latest bash -c "./.scripts/linux/create-arch-container.sh"
           else
-            echo "::group::Create ${{ matrix.package }} package"
-            VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.package }}.sh
+            ./.scripts/linux/create-${{ matrix.package }}.sh
           fi
           echo "::endgroup::"
 
