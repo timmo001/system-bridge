@@ -65,12 +65,29 @@ jobs:
       # Package for Linux
       - name: Package for Linux
         run: |
+          echo "::group::Setup"
           mkdir -p dist
           chmod +x system-bridge-linux
           chmod +x .scripts/linux/create-*.sh
-          ./.scripts/linux/create-appimage.sh &
-          ./.scripts/linux/create-deb.sh &
-          ./.scripts/linux/create-rpm.sh &
+          echo "::endgroup::"
+
+          echo "::group::Create deb"
+          ./.scripts/linux/create-deb.sh
+          echo "::endgroup::"
+
+          echo "::group::Create rpm"
+          ./.scripts/linux/create-rpm.sh
+          echo "::endgroup::"
+
+          echo "::group::Create appimage"
+          ./.scripts/linux/create-appimage.sh
+          echo "::endgroup::"
+
+          echo "::group::Create flatpak"
+          VERSION=${{ env.VERSION }} ./.scripts/linux/create-flatpak.sh
+          echo "::endgroup::"
+
+          echo "::group::Create arch"
           docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
             pacman -Syu --noconfirm && \
             pacman -S --noconfirm base-devel sudo && \
@@ -82,9 +99,12 @@ jobs:
             cd /home/builduser/build/.scripts/linux && \
             su builduser -c './create-arch.sh' && \
             find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
-          " &
-          VERSION=${{ env.VERSION }} ./.scripts/linux/create-flatpak.sh &
-          wait
+          "
+          echo "::endgroup::"
+
+          echo "::group::List dist"
+          ls -la dist
+          echo "::endgroup::"
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
