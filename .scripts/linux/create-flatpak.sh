@@ -52,7 +52,7 @@ BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
 # Build flatpak package (disable rofiles fuse for containerized CI)
-flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --force-clean --disable-rofiles-fuse --disable-sandbox "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo
@@ -65,7 +65,7 @@ else
   # This may fail on a fresh repo; ignore and continue, export will create it
   flatpak build-update-repo --min-free-space-size=123MB --min-free-space-percent=0 repo || true
 fi
-flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse --disable-sandbox "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
 VERSION=${VERSION:-5.0.0}
