@@ -254,9 +254,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/**/*.deb
-            dist/**/*.rpm
-            dist/**/*.AppImage
-            dist/**/*.flatpak
-            dist/**/*.pkg.tar.zst
-            dist/**/*-setup.exe
+            dist/linux/*.deb
+            dist/linux/*.rpm
+            dist/linux/*.AppImage
+            dist/linux/*.flatpak
+            dist/linux/*.pkg.tar.zst
+            dist/windows/*-setup.exe
