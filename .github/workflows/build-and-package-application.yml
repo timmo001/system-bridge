@@ -264,8 +264,8 @@ jobs:
             echo "Check the logs above for details"
           fi
 
-  create-release:
-    name: Create release
+  update-release:
+    name: Update release
     needs:
       - build-linux
       - package-linux
@@ -305,7 +305,7 @@ jobs:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
-      - name: Create release
+      - name: Update release
         uses: softprops/action-gh-release@v2
         with:
           files: |
