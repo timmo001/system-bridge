@@ -21,6 +21,8 @@ if ! command -v dpkg-deb >/dev/null 2>&1; then
     echo "Unsupported or unknown package manager. Please install 'dpkg-deb' (dpkg) and retry." >&2
     exit 1
   fi
+else
+  echo "dpkg-deb already installed"
 fi
 
 # Clean previous packaging dir if present
