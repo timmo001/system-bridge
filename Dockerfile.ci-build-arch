@@ -15,10 +15,12 @@ RUN pacman -Syu --noconfirm && \
         fuse2 \
         git \
         gtk3 \
+        libappindicator-gtk3 \
         libx11 \
         libxkbcommon \
         libxkbcommon-x11 \
         libxtst \
+        openssh \
         openssl \
         ostree \
         pkgconf \
@@ -27,8 +29,7 @@ RUN pacman -Syu --noconfirm && \
         unzip \
         wget \
         xorgproto \
-        libappindicator-gtk3 && \
-    pacman -Scc --noconfirm
+    && pacman -Scc --noconfirm
 
 # Install Go (use Arch package for simplicity)
 RUN pacman -S --noconfirm --needed go
