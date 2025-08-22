@@ -114,18 +114,7 @@ jobs:
 
           if [ "${{ matrix.package }}" == "arch" ]; then
             echo "::group::Create arch linux package"
-            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
-              pacman -Syu --noconfirm && \
-              pacman -S --noconfirm base-devel sudo && \
-              useradd -m builduser && \
-              echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser && \
-              mkdir -p /home/builduser/build && \
-              cp -r /build/* /home/builduser/build/ && \
-              chown -R builduser:builduser /home/builduser/build && \
-              cd /home/builduser/build/.scripts/linux && \
-              su builduser -c './create-arch.sh' && \
-              find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
-            "
+            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "./.scripts/linux/setup-container-arch.sh"
           else
             echo "::group::Create ${{ matrix.package }} package"
             VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.package }}.sh
