@@ -80,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        packages:
+        package:
           - arch
           - deb
           - rpm
@@ -112,7 +112,7 @@ jobs:
           chmod +x .scripts/linux/create-*.sh
           echo "::endgroup::"
 
-          if [ "${{ matrix.packages }}" == "arch" ]; then
+          if [ "${{ matrix.package }}" == "arch" ]; then
             echo "::group::Create arch linux package"
             docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
               pacman -Syu --noconfirm && \
@@ -127,8 +127,8 @@ jobs:
               find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
             "
           else
-            echo "::group::Create ${{ matrix.packages }} package"
-            VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.packages }}.sh
+            echo "::group::Create ${{ matrix.package }} package"
+            VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.package }}.sh
           fi
           echo "::endgroup::"
 
