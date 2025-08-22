@@ -64,6 +64,12 @@ jobs:
         run: |
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
 
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-bridge-linux-${{ env.VERSION }}
+          path: system-bridge-linux
+
   package-linux:
     name: Package linux
     needs:
@@ -79,10 +85,11 @@ jobs:
           - rpm
           - flatpak
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Download application
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
+          name: system-bridge-linux-${{ needs.build-linux.outputs.version }}
+          path: system-bridge-linux
 
       - name: Package for linux
         run: |
