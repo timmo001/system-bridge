@@ -114,7 +114,7 @@ jobs:
 
           if [ "${{ matrix.package }}" == "arch" ]; then
             echo "::group::Create arch linux package"
-            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "./.scripts/linux/setup-container-arch.sh"
+            docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "./.scripts/linux/create-arch-container.sh"
           else
             echo "::group::Create ${{ matrix.package }} package"
             VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.package }}.sh
