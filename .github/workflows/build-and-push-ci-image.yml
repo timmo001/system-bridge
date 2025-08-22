@@ -8,14 +8,14 @@ on:
       - master
     paths:
       - .github/workflows/build-and-push-ci-image.yml
-      - Dockerfile.ci-build-ubuntu
+      - Dockerfile.ci-build-arch
   schedule:
     - cron: "0 3 * * 0" # Every Sunday at 03:00 UTC
   workflow_dispatch:
 
 jobs:
   build-and-push:
-    name: Build and push CI Ubuntu image
+    name: Build and push CI Arch image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,6 +38,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.ci-build-ubuntu
+          file: Dockerfile.ci-build-arch
           push: true
-          tags: ghcr.io/${{ github.repository }}/ci-build-ubuntu:latest
+          tags: ghcr.io/${{ github.repository }}/ci-build-arch:latest

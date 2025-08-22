@@ -1,0 +1,55 @@
+FROM archlinux:latest
+
+WORKDIR /workspace
+
+# Install build dependencies
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed \
+        base-devel \
+        ca-certificates \
+        curl \
+        dpkg \
+        fakeroot \
+        flatpak \
+        flatpak-builder \
+        fuse2 \
+        git \
+        gtk3 \
+        libx11 \
+        libxkbcommon \
+        libxkbcommon-x11 \
+        libxtst \
+        openssl \
+        ostree \
+        pkgconf \
+        rpm-tools \
+        sudo \
+        unzip \
+        wget \
+        xorgproto \
+        libappindicator-gtk3 && \
+    pacman -Scc --noconfirm
+
+# Install Go (use Arch package for simplicity)
+RUN pacman -S --noconfirm --needed go
+ENV PATH="/usr/lib/go/bin:/usr/bin:$PATH"
+
+# Copy Go module files and download dependencies
+COPY go.mod go.sum ./
+RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
+    go mod download && go mod verify
+
+# Install Bun (JavaScript runtime)
+RUN curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/bun
+
+# Install AppImageTool
+RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool && \
+    chmod +x /usr/local/bin/appimagetool
+
+# Create a non-root user for builds
+RUN useradd -ms /bin/bash builduser && \
+    echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
+
+# Entrypoint for CI
+CMD ["bash"]
