@@ -95,13 +95,13 @@ jobs:
       - name: Download application
         uses: actions/download-artifact@v4
         with:
-          name: system-bridge-linux-${{ needs.build-linux.outputs.version }}
+          name: system-bridge-linux-${{ env.VERSION }}
           path: system-bridge-linux
 
       - name: Package for linux
         run: |
           echo "::group::Setup"
-          VERSION=${{ needs.build-linux.outputs.version }}
+          VERSION=${{ env.VERSION }}
           mkdir -p dist
           chmod +x system-bridge-linux
           chmod +x .scripts/linux/create-*.sh
