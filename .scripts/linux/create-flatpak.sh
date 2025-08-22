@@ -2,21 +2,6 @@
 
 set -euo pipefail
 
-# If running as root in CI container, re-run as non-root build user
-if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
-  echo "Switching to builduser for packaging..."
-  chown -R builduser:builduser "$(pwd)"
-  exec sudo --preserve-env=VERSION -u builduser -H bash "$0" "$@"
-fi
-
-# Force disable sandbox in constrained CI and also pass flag when supported
-export FLATPAK_BUILDER_NOSANDBOX=1
-if flatpak-builder --disable-sandbox --version >/dev/null 2>&1; then
-  FB_NO_SANDBOX_FLAG="--disable-sandbox"
-else
-  FB_NO_SANDBOX_FLAG=""
-fi
-
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
   echo "system-bridge-linux not found, please build the application first"
@@ -60,7 +45,7 @@ BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
 # Build flatpak package (disable rofiles fuse for containerized CI)
-flatpak-builder --force-clean --disable-rofiles-fuse ${FB_NO_SANDBOX_FLAG} "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo
