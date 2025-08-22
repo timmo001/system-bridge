@@ -108,8 +108,8 @@ jobs:
           chmod +x .scripts/linux/create-*.sh
           echo "::endgroup::"
 
-          echo "::group::Create ${{ matrix.packages }} package"
           if [ "${{ matrix.packages }}" == "arch" ]; then
+            echo "::group::Create arch linux package"
             docker run --rm -v ${{ github.workspace }}:/build archlinux:latest bash -c "\
               pacman -Syu --noconfirm && \
               pacman -S --noconfirm base-devel sudo && \
@@ -123,6 +123,7 @@ jobs:
               find /home/builduser/build -name '*.pkg.tar.zst' -exec cp {} /build/dist/ \;\
             "
           else
+            echo "::group::Create ${{ matrix.packages }} package"
             VERSION=${{ env.VERSION }} ./.scripts/linux/create-${{ matrix.packages }}.sh
           fi
           echo "::endgroup::"
