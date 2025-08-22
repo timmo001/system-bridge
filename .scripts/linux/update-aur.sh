@@ -117,8 +117,21 @@ else
 
     echo "==> Generating sha256sums for tagged source"
     sudo -u builduser env -i HOME="$HOME" BUILDDIR="$BUILDDIR" bash --noprofile --norc -c 'makepkg -g > new_sums.txt'
-    # Remove old sha256sums and insert regenerated one after source=
-    sed -i '/^sha256sums=(/,/^)/d' PKGBUILD
+    # Remove existing sha256sums array safely (supports single-line and multi-line forms)
+    awk '
+      BEGIN { in_sums=0 }
+      /^sha256sums=\(/ {
+        # If closing paren is on the same line, skip this line only
+        if ($0 ~ /\)/) { next }
+        in_sums=1; next
+      }
+      in_sums {
+        if ($0 ~ /\)/) { in_sums=0 }
+        next
+      }
+      { print }
+    ' PKGBUILD > PKGBUILD.new && mv PKGBUILD.new PKGBUILD
+    # Insert regenerated sha256sums immediately after the source= line
     awk '
       /source=/ { print; while ((getline line < "new_sums.txt") > 0) print line; next }
       { print }
