@@ -58,11 +58,9 @@ else
   # This may fail on a fresh repo; ignore and continue, export will create it
   flatpak build-update-repo --min-free-space-size=123MB --min-free-space-percent=0 repo || true
 fi
-flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse ${FB_NO_SANDBOX_FLAG} "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --repo=repo --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
 
 # Create the Flatpak bundle
 VERSION=${VERSION:-5.0.0}
 mkdir -p dist
 flatpak build-bundle repo "dist/system-bridge-${VERSION}.flatpak" dev.timmo.system-bridge
-
-# Do not remove manifest; keep repository clean for subsequent runs
