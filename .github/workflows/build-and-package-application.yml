@@ -101,15 +101,19 @@ jobs:
 
       - name: Package for linux
         run: |
-          echo "::group::List files"
-          ls -la
-          echo "::endgroup::"
-
           echo "::group::Setup"
           VERSION=${{ env.VERSION }}
           mkdir -p dist
           chmod +x ./system-bridge-linux
           chmod +x ./.scripts/linux/create-*.sh
+          echo "::endgroup::"
+
+          echo "::group::List files"
+          ls -la
+          echo "::endgroup::"
+
+          echo "::group::List scripts"
+          ls -la ./.scripts/linux/
           echo "::endgroup::"
 
           echo "::group::Create ${{ matrix.package }} package"
