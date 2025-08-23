@@ -176,7 +176,7 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	// Start 3 worker goroutines
 	processor.Start(3)
 
-	// Get registered modules and add tasks
+	// Get registered modules and add initial tasks
 	modules := dataStore.GetRegisteredModules()
 	if len(modules) == 0 {
 		slog.Warn("No modules registered, skipping task addition")
@@ -190,9 +190,24 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 		}
 	}
 
-	// TODO: use channels and wait groups to track task completion. use context.WithTimeout to make sure to finish withing time frame
+	// Create a ticker to continuously add tasks
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
 
-	// Run for a while then stop
-	time.Sleep(5 * time.Second)
-	processor.Stop()
+	// Run continuously, adding new tasks every 10 seconds
+	for {
+		select {
+		case <-ticker.C:
+			// Add tasks for all registered modules
+			modules := dataStore.GetRegisteredModules()
+			for _, updater := range modules {
+				if updater != nil {
+					processor.AddTask(updater)
+				}
+			}
+		case <-processor.ctx.Done():
+			slog.Info("Update task processor context cancelled, stopping")
+			return
+		}
+	}
 }

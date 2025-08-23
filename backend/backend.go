@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
-	"time"
 
 	"log/slog"
 
@@ -163,22 +162,9 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Run data update task processor in a separate goroutine
 	go func() {
-		// Run immediately on startup
+		// Run continuously - the processor will handle its own lifecycle
 		data.RunUpdateTaskProcessor(b.dataStore)
-		slog.Info("Initial data update task processor completed")
-
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				data.RunUpdateTaskProcessor(b.dataStore)
-				slog.Info("Data update task processor completed")
-			}
-		}
+		slog.Info("Data update task processor completed")
 	}()
 
 	// Wait for either context cancellation or server error

@@ -92,9 +92,11 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	defer ws.mutex.Unlock()
 
 	addr := conn.RemoteAddr().String()
+	slog.Info("WS: Adding new connection", "addr", addr)
 
 	// close connection if remote addr tries to connect again
 	if connInfo, ok := ws.connections[addr]; ok {
+		slog.Info("WS: Replacing existing connection", "addr", addr)
 		// Remove the connection directly since we already hold the lock
 		delete(ws.connections, addr)
 		delete(ws.dataListeners, addr)
@@ -105,6 +107,8 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 		conn:     conn,
 		writeMux: sync.Mutex{},
 	}
+
+	slog.Info("WS: Connection added successfully", "addr", addr, "total_connections", len(ws.connections))
 }
 
 // RemoveConnection removes a WebSocket connection
@@ -112,8 +116,10 @@ func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 	addr := conn.RemoteAddr().String()
+	slog.Info("WS: Removing connection", "addr", addr)
 	delete(ws.connections, addr)
 	delete(ws.dataListeners, addr)
+	slog.Info("WS: Connection removed", "addr", addr, "total_connections", len(ws.connections))
 }
 
 type RegisterResponse int
@@ -129,11 +135,13 @@ func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.Mod
 	defer ws.mutex.Unlock()
 
 	if _, ok := ws.dataListeners[addr]; ok {
+		slog.Info("WS: Data listener already exists", "addr", addr, "modules", modules)
 		return RegisterResponseExists
 	}
 
-	slog.Info(fmt.Sprintf("Registering data listener for %s", addr))
+	slog.Info("WS: Registering data listener", "addr", addr, "modules", modules)
 	ws.dataListeners[addr] = modules
+	slog.Info("WS: Data listener registered successfully", "addr", addr, "total_listeners", len(ws.dataListeners))
 	return RegisterResponseAdded
 }
 
@@ -165,21 +173,34 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 		slog.Info("Broadcasting module update", "module", module.Name)
 	}
 
+	// Debug logging for connections and listeners
+	slog.Debug("WS: Current connections", "count", len(ws.connections))
+	slog.Debug("WS: Current data listeners", "count", len(ws.dataListeners))
+	for remote_addr, modules := range ws.dataListeners {
+		slog.Debug("WS: Data listener", "addr", remote_addr, "modules", modules)
+	}
+
 	if addr != nil {
+		// Send to specific connection
 		if connInfo, ok := ws.connections[*addr]; ok {
 			slog.Debug("WS: Broadcasting module update to connection", "addr", *addr, "module", module.Name)
 			ws.SendMessageWithLock(connInfo, response, true)
 		} else {
-			for remote_addr, connInfo := range ws.connections {
-				modules, ok := ws.dataListeners[remote_addr]
+			slog.Warn("WS: Connection not found for specific address", "addr", *addr)
+		}
+	} else {
+		// Broadcast to all connections that are listening for this module
+		broadcastCount := 0
+		for remote_addr, connInfo := range ws.connections {
+			modules, ok := ws.dataListeners[remote_addr]
 
-				if ok && slices.Contains(modules, module.Name) {
-					slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
-					ws.SendMessageWithLock(connInfo, response, true)
-				}
-
+			if ok && slices.Contains(modules, module.Name) {
+				slog.Info("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+				ws.SendMessageWithLock(connInfo, response, true)
+				broadcastCount++
 			}
 		}
+		slog.Info("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
 	}
 }
 
