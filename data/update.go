@@ -116,11 +116,7 @@ func (tp *UpdateTaskProcessor) worker() {
 
 			err := tp.limiter.Wait(tp.ctx)
 			if err != nil {
-				// Safe logging with nil check for task
-				moduleName := "unknown"
-				if task != nil {
-					moduleName = string(task.Name())
-				}
+				moduleName := string(task.Name())
 				slog.Warn("Rate limiter error", "module", moduleName, "error", err)
 				continue
 			}
@@ -131,20 +127,12 @@ func (tp *UpdateTaskProcessor) worker() {
 			// Process task
 			data, err := task.Update(ctx)
 			if err != nil {
-				// Safe logging with nil check for task
-				moduleName := "unknown"
-				if task != nil {
-					moduleName = string(task.Name())
-				}
+				moduleName := string(task.Name())
 				slog.Warn("Task processing error for module", "module", moduleName, "error", err)
 				continue
 			}
 
-			// Safe logging with nil check for task
-			moduleName := "unknown"
-			if task != nil {
-				moduleName = string(task.Name())
-			}
+			moduleName := string(task.Name())
 			slog.Debug("Updating data for module", "module", moduleName)
 
 			// Update data store
@@ -194,15 +182,35 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	ticker := time.NewTicker(60 * time.Second)
 	defer ticker.Stop()
 
-	// Run continuously, adding new tasks every 60 seconds
+	// Media-specific ticker for 30 second updates
+	mediaTicker := time.NewTicker(30 * time.Second)
+	defer mediaTicker.Stop()
+
+	// Run continuously
 	for {
 		select {
 		case <-ticker.C:
-			// Add tasks for all registered modules
+			// Add tasks for all registered modules, excluding media (handled separately)
 			modules := dataStore.GetRegisteredModules()
 			for _, updater := range modules {
-				if updater != nil {
+				if updater == nil {
+					continue
+				}
+				if updater.Name() == types.ModuleMedia {
+					continue
+				}
+				processor.AddTask(updater)
+			}
+		case <-mediaTicker.C:
+			// Add task for media module every 30 seconds
+			modules := dataStore.GetRegisteredModules()
+			for _, updater := range modules {
+				if updater == nil {
+					continue
+				}
+				if updater.Name() == types.ModuleMedia {
 					processor.AddTask(updater)
+					break
 				}
 			}
 		case <-processor.ctx.Done():
