@@ -29,6 +29,14 @@ else
 	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
 endif
 
+# Build console version for debugging (Windows only)
+build_console: clean build_web_client
+ifeq ($(OS),Windows_NT)
+	go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "system-bridge-console.exe" .
+else
+	@echo "Console build is only supported on Windows"
+endif
+
 build_web_client: clean_web_client
 	cd web-client && bun install && $(BUN_BUILD)
 
@@ -69,6 +77,30 @@ install: build
 run: build
 	./$(OUT) backend
 
+# Run console version for debugging (Windows only)
+run_console: build_console
+ifeq ($(OS),Windows_NT)
+	./system-bridge-console.exe backend
+else
+	@echo "Console run is only supported on Windows"
+endif
+
+# List running System Bridge processes (Windows only)
+list_processes:
+ifeq ($(OS),Windows_NT)
+	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/list-processes.ps1
+else
+	@echo "Process management is only supported on Windows"
+endif
+
+# Stop all running System Bridge processes (Windows only)
+stop_processes:
+ifeq ($(OS),Windows_NT)
+	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/stop-processes.ps1
+else
+	@echo "Process management is only supported on Windows"
+endif
+
 test:
 	go test -v ./...
 
@@ -76,6 +108,7 @@ clean:
 ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.syso 2>nul
 	-$(RM) system-bridge.exe 2>nul
+	-$(RM) system-bridge-console.exe 2>nul
 	-$(RM) system-bridge-windows.exe 2>nul
 	-$(RM) installer.nsi 2>nul
 	-$(RM) system-bridge.rc 2>nul
@@ -121,6 +154,7 @@ version: build
 help:
 	@echo "Available targets:"
 	@echo "  build                    Build the application"
+	@echo "  build_console            Build console version for debugging (Windows only)"
 	@echo "  build_web_client         Build the web client"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  create_arch              Create Arch Linux package"
@@ -129,6 +163,9 @@ help:
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
 	@echo "  run                      Build and run the application (development only)"
+	@echo "  run_console              Build and run console version for debugging (Windows only)"
+	@echo "  list_processes           List running System Bridge processes (Windows only)"
+	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"
 	@echo "  test                     Run tests"
 	@echo "  clean                    Remove build artifacts"
 	@echo "  clean_dist               Remove dist directory"
