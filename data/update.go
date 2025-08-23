@@ -182,9 +182,38 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	ticker := time.NewTicker(60 * time.Second)
 	defer ticker.Stop()
 
-	// Media-specific ticker for 30 second updates
-	mediaTicker := time.NewTicker(30 * time.Second)
+	// Determine initial media interval based on current status
+	isPlaying := func() bool {
+		mod, err := dataStore.GetModule(types.ModuleMedia)
+		if err != nil {
+			return false
+		}
+		switch v := mod.Data.(type) {
+		case types.MediaData:
+			if v.Status == nil {
+				return false
+			}
+			return *v.Status == "PLAYING"
+		case map[string]any:
+			if s, ok := v["status"].(string); ok {
+				return s == "PLAYING" || s == "Playing" || s == "playing"
+			}
+		}
+		return false
+	}
+
+	mediaPlaying := isPlaying()
+	mediaInterval := 30 * time.Second
+	if mediaPlaying {
+		mediaInterval = 10 * time.Second
+	}
+
+	// Media-specific ticker for updates (30s idle, 10s when playing)
+	mediaTicker := time.NewTicker(mediaInterval)
 	defer mediaTicker.Stop()
+
+	// Start platform-specific listeners (e.g., playerctl on Linux) to trigger updates
+	StartPlayerctlListener(dataStore)
 
 	// Run continuously
 	for {
@@ -200,6 +229,20 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 					continue
 				}
 				processor.AddTask(updater)
+			}
+
+			// Adjust media ticker based on current playing state
+			curPlaying := isPlaying()
+			if curPlaying != mediaPlaying {
+				mediaPlaying = curPlaying
+				mediaTicker.Stop()
+				if mediaPlaying {
+					mediaInterval = 10 * time.Second
+				} else {
+					mediaInterval = 30 * time.Second
+				}
+				mediaTicker = time.NewTicker(mediaInterval)
+				slog.Info("Adjusted media update interval", "playing", mediaPlaying, "interval", mediaInterval)
 			}
 		case <-mediaTicker.C:
 			// Add task for media module every 30 seconds
