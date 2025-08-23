@@ -1,4 +1,7 @@
 !include "MUI2.nsh"
+!include "TextFunc.nsh"
+!include "StrFunc.nsh"
+${StrStrAdv}
 
 Name "System Bridge"
 OutFile "dist\system-bridge-$VERSION-setup.exe"
@@ -29,21 +32,91 @@ VIAddVersionKey "FileVersion" "$VERSION"
 !insertmacro MUI_LANGUAGE "English"
 
 Section "Prerequisites"
-  # Check for .NET Runtime
+  # Check for .NET 8.0 Runtime specifically
+  DetailPrint "Checking for .NET 8.0 Runtime..."
   nsExec::ExecToStack 'dotnet --list-runtimes'
   Pop $0
   Pop $1
-  ${If} $1 == ""
-  ${OrIf} $1 == "0"
-    MessageBox MB_YESNO|MB_ICONQUESTION "This application requires .NET ${DOT_NET_VERSION} Runtime. Would you like to install it now?" IDYES install_dotnet IDNO abort_installation
+
+  # Check if .NET 8.0 is installed
+  StrCpy $R0 "0"  # Flag to indicate if .NET 8.0 is found
+  ${If} $0 == "0"
+    # Parse the output to find .NET 8.0
+    ${StrStrAdv} $2 $1 "Microsoft.NETCore.App 8." ">" "<" "0" "0" "0"
+    ${If} $2 != ""
+      StrCpy $R0 "1"  # .NET 8.0 found
+      DetailPrint ".NET 8.0 Runtime found"
+    ${EndIf}
+  ${EndIf}
+
+  ${If} $R0 == "0"
+    DetailPrint ".NET 8.0 Runtime not found"
+    MessageBox MB_YESNO|MB_ICONQUESTION "This application requires .NET 8.0 Runtime. Would you like to install it now?" IDYES install_dotnet IDNO abort_installation
+
     abort_installation:
-      Abort "Installation cancelled: .NET Runtime is required."
+      Abort "Installation cancelled: .NET 8.0 Runtime is required."
+
     install_dotnet:
-      ExecWait 'winget install Microsoft.DotNet.Runtime.8'
-      ${If} $0 != 0
-        MessageBox MB_OK|MB_ICONSTOP "Failed to install .NET Runtime. Please install it manually from https://dotnet.microsoft.com/download/dotnet/${DOT_NET_VERSION}"
-        Abort "Installation failed: Could not install .NET Runtime."
+      DetailPrint "Installing .NET 8.0 Runtime..."
+
+      # Try winget first (most reliable)
+      nsExec::ExecToStack 'winget --version'
+      Pop $3
+      ${If} $3 == "0"
+        DetailPrint "Using winget to install .NET 8.0..."
+        ExecWait 'winget install Microsoft.DotNet.Runtime.8 --accept-source-agreements --accept-package-agreements'
+        Pop $4
+        ${If} $4 == "0"
+          DetailPrint ".NET 8.0 installed successfully via winget"
+          Goto dotnet_install_success
+        ${Else}
+          DetailPrint "winget installation failed, trying direct download..."
+        ${EndIf}
+      ${Else}
+        DetailPrint "winget not available, trying direct download..."
       ${EndIf}
+
+      # Fallback: Download and install .NET 8.0 directly using PowerShell
+      DetailPrint "Downloading .NET 8.0 Runtime installer..."
+      nsExec::ExecToStack 'powershell -Command "try { Invoke-WebRequest -Uri \"https://aka.ms/dotnet/8.0/dotnet-runtime-win-x64.exe\" -OutFile \"$env:TEMP\dotnet-runtime-8.0.0-win-x64.exe\"; Write-Host \"success\" } catch { Write-Host \"failed\" }"'
+      Pop $5
+      Pop $6
+      ${If} $5 == "0"
+        ${AndIf} $6 == "success"
+          DetailPrint "Installing .NET 8.0 Runtime..."
+          ExecWait '"$TEMP\dotnet-runtime-8.0.0-win-x64.exe" /install /quiet /norestart'
+          Pop $7
+          ${If} $7 == "0"
+            DetailPrint ".NET 8.0 installed successfully"
+            Delete "$TEMP\dotnet-runtime-8.0.0-win-x64.exe"
+            Goto dotnet_install_success
+          ${Else}
+            Delete "$TEMP\dotnet-runtime-8.0.0-win-x64.exe"
+            Goto dotnet_install_failed
+          ${EndIf}
+        ${Else}
+          DetailPrint "Failed to download .NET 8.0 Runtime installer"
+          Goto dotnet_install_failed
+        ${EndIf}
+      ${Else}
+        DetailPrint "PowerShell download failed"
+        Goto dotnet_install_failed
+      ${EndIf}
+
+      dotnet_install_failed:
+        MessageBox MB_OK|MB_ICONSTOP "Failed to install .NET 8.0 Runtime automatically.$\n$\nPlease install it manually from:$\nhttps://dotnet.microsoft.com/download/dotnet/8.0$\n$\nChoose the '.NET Runtime 8.0.x' installer for your system."
+        Abort "Installation failed: Could not install .NET 8.0 Runtime."
+
+      dotnet_install_success:
+        # Verify installation
+        nsExec::ExecToStack 'dotnet --list-runtimes'
+        Pop $7
+        Pop $8
+        ${StrStrAdv} $9 $8 "Microsoft.NETCore.App 8." ">" "<" "0" "0" "0"
+        ${If} $9 == ""
+          MessageBox MB_OK|MB_ICONSTOP "Failed to verify .NET 8.0 Runtime installation. Please restart your computer and try installing System Bridge again."
+          Abort "Installation failed: Could not verify .NET 8.0 Runtime installation."
+        ${EndIf}
   ${EndIf}
 
   # Check for Visual C++ Runtime
