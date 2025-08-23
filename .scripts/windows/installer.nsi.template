@@ -64,8 +64,7 @@ Section "Prerequisites"
       Pop $3
       ${If} $3 == "0"
         DetailPrint "Using winget to install .NET 8.0..."
-        ExecWait 'winget install Microsoft.DotNet.Runtime.8 --accept-source-agreements --accept-package-agreements'
-        Pop $4
+        ExecWait 'winget install Microsoft.DotNet.Runtime.8 --accept-source-agreements --accept-package-agreements' $4
         ${If} $4 == "0"
           DetailPrint ".NET 8.0 installed successfully via winget"
           Goto dotnet_install_success
@@ -78,14 +77,13 @@ Section "Prerequisites"
 
       # Fallback: Download and install .NET 8.0 directly using PowerShell
       DetailPrint "Downloading .NET 8.0 Runtime installer..."
-      nsExec::ExecToStack 'powershell -Command "try { Invoke-WebRequest -Uri \"https://aka.ms/dotnet/8.0/dotnet-runtime-win-x64.exe\" -OutFile \"$env:TEMP\dotnet-runtime-8.0.0-win-x64.exe\"; Write-Host \"success\" } catch { Write-Host \"failed\" }"'
+      nsExec::ExecToStack 'powershell -Command "try { Invoke-WebRequest -Uri \"https://aka.ms/dotnet/8.0/dotnet-runtime-win-x64.exe\" -OutFile \"$$env:TEMP\dotnet-runtime-8.0.0-win-x64.exe\"; Write-Host \"success\" } catch { Write-Host \"failed\" }"'
       Pop $5
       Pop $6
       ${If} $5 == "0"
-        ${AndIf} $6 == "success"
+        ${If} $6 == "success"
           DetailPrint "Installing .NET 8.0 Runtime..."
-          ExecWait '"$TEMP\dotnet-runtime-8.0.0-win-x64.exe" /install /quiet /norestart'
-          Pop $7
+          ExecWait '"$TEMP\dotnet-runtime-8.0.0-win-x64.exe" /install /quiet /norestart' $7
           ${If} $7 == "0"
             DetailPrint ".NET 8.0 installed successfully"
             Delete "$TEMP\dotnet-runtime-8.0.0-win-x64.exe"
@@ -125,8 +123,8 @@ Section "Prerequisites"
     abort_vc:
       Abort "Installation cancelled: Visual C++ Runtime is required."
     install_vc:
-      ExecWait 'winget install Microsoft.VCRedist.2015+.x64'
-      ${If} $0 != 0
+      ExecWait 'winget install Microsoft.VCRedist.2015+.x64' $8
+      ${If} $8 != 0
         MessageBox MB_OK|MB_ICONSTOP "Failed to install Visual C++ Runtime. Please install it manually from https://aka.ms/vs/17/release/vc_redist.x64.exe"
         Abort "Installation failed: Could not install Visual C++ Runtime."
       ${EndIf}
