@@ -5,21 +5,21 @@ type MediaAction string
 
 const (
 	// MediaActionPlay represents the play action
-	MediaActionPlay MediaAction = "play"
+	MediaActionPlay MediaAction = "PLAY"
 	// MediaActionPause represents the pause action
-	MediaActionPause MediaAction = "pause"
+	MediaActionPause MediaAction = "PAUSE"
 	// MediaActionNext represents the next track action
-	MediaActionNext MediaAction = "next"
+	MediaActionNext MediaAction = "NEXT"
 	// MediaActionPrevious represents the previous track action
-	MediaActionPrevious MediaAction = "previous"
+	MediaActionPrevious MediaAction = "PREVIOUS"
 	// MediaActionStop represents the stop action
-	MediaActionStop MediaAction = "stop"
+	MediaActionStop MediaAction = "STOP"
 	// MediaActionVolumeUp represents the volume up action
-	MediaActionVolumeUp MediaAction = "volume_up"
+	MediaActionVolumeUp MediaAction = "VOLUME_UP"
 	// MediaActionVolumeDown represents the volume down action
-	MediaActionVolumeDown MediaAction = "volume_down"
+	MediaActionVolumeDown MediaAction = "VOLUME_DOWN"
 	// MediaActionMute represents the mute action
-	MediaActionMute MediaAction = "mute"
+	MediaActionMute MediaAction = "MUTE"
 )
 
 // Control sends a media control command
