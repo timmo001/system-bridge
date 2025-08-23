@@ -77,7 +77,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	defer cancel()
 
 	// Setup event handlers
-	event_handler.RegisterHandlers(b.eventRouter)
+	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()

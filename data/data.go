@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -233,6 +234,62 @@ func (d *DataStore) saveModuleData(m types.Module) error {
 			return fmt.Errorf("error writing data file: %w", err)
 		}
 	}
+
+	return nil
+}
+
+// TriggerModuleUpdate triggers an update for a specific module and broadcasts the update
+func (d *DataStore) TriggerModuleUpdate(name types.ModuleName) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	// Validate module name
+	if name == "" {
+		return fmt.Errorf("module name cannot be empty")
+	}
+
+	module, ok := d.registry[name]
+	if !ok {
+		return fmt.Errorf("%s not found in registry", name)
+	}
+
+	// Validate module updater
+	if module.Updater == nil {
+		return fmt.Errorf("module updater is nil for %s", name)
+	}
+
+	// Update the module data
+	ctx := context.Background()
+	data, err := module.Updater.Update(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to update module %s: %w", name, err)
+	}
+
+	// Set the updated data
+	module.Data = data
+	module.Updated = time.Now().Format(time.RFC3339)
+
+	// Save the module data
+	if err := d.saveModuleData(module); err != nil {
+		return err
+	}
+
+	// Broadcast the module data update event
+	if eb := bus.GetInstance(); eb != nil {
+		// Create a safe copy of the module for broadcasting
+		safeModule := types.Module{
+			Name:    module.Name,
+			Data:    module.Data,
+			Updated: module.Updated,
+		}
+
+		eb.Publish(bus.Event{
+			Type: bus.EventDataModuleUpdate,
+			Data: safeModule,
+		})
+	}
+
+	d.registry[name] = module
 
 	return nil
 }

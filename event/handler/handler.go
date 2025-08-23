@@ -1,10 +1,11 @@
 package event_handler
 
 import (
+	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 )
 
-func RegisterHandlers(router *event.MessageRouter) {
+func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterExitApplicationHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
@@ -14,7 +15,7 @@ func RegisterHandlers(router *event.MessageRouter) {
 	RegisterGetSettingsHandler(router)
 	RegisterKeyboardKeypressHandler(router)
 	RegisterKeyboardTextHandler(router)
-	RegisterMediaControlHandler(router)
+	RegisterMediaControlHandler(router, dataStore)
 	RegisterNotificationHandler(router)
 	RegisterOpenHandler(router)
 	RegisterPowerHibernateHandler(router)

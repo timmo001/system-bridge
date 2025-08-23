@@ -399,3 +399,42 @@ func TestDataStore_ModuleLifecycle(t *testing.T) {
 		assert.Equal(t, updatedData, allData["lifecycle-test"])
 	})
 }
+
+func TestDataStore_TriggerModuleUpdate(t *testing.T) {
+	t.Run("Trigger module update successfully", func(t *testing.T) {
+		ds := &DataStore{registry: make(map[types.ModuleName]types.Module)}
+
+		mockMod := mockUpdater{
+			name: types.ModuleMedia,
+			data: map[string]string{"status": "playing", "title": "Test Song"},
+		}
+
+		ds.Register(mockMod)
+
+		// Trigger the update
+		err := ds.TriggerModuleUpdate(types.ModuleMedia)
+		require.NoError(t, err)
+
+		// Verify the module data was updated
+		module, exists := ds.registry[types.ModuleMedia]
+		assert.True(t, exists)
+		assert.Equal(t, mockMod.data, module.Data)
+		assert.NotEmpty(t, module.Updated)
+	})
+
+	t.Run("Trigger module update for non-existent module", func(t *testing.T) {
+		ds := &DataStore{registry: make(map[types.ModuleName]types.Module)}
+
+		err := ds.TriggerModuleUpdate("non-existent-module")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not found in registry")
+	})
+
+	t.Run("Trigger module update with empty module name", func(t *testing.T) {
+		ds := &DataStore{registry: make(map[types.ModuleName]types.Module)}
+
+		err := ds.TriggerModuleUpdate("")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "module name cannot be empty")
+	})
+}
