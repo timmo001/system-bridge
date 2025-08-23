@@ -10,17 +10,17 @@ func control(action MediaAction) error {
 
 	switch action {
 	case MediaActionPlay, MediaActionPause:
-		cmd = exec.Command("pavucontrol")
+		cmd = exec.Command("playerctl", "play-pause")
 	case MediaActionNext:
-		cmd = exec.Command("pavucontrol", "--next")
+		cmd = exec.Command("playerctl", "next")
 	case MediaActionPrevious:
-		cmd = exec.Command("pavucontrol", "--prev")
+		cmd = exec.Command("playerctl", "previous")
 	case MediaActionVolumeUp:
-		cmd = exec.Command("pavucontrol", "--volume-up")
+		cmd = exec.Command("playerctl", "volume-up")
 	case MediaActionVolumeDown:
-		cmd = exec.Command("pavucontrol", "--volume-down")
+		cmd = exec.Command("playerctl", "volume-down")
 	case MediaActionMute:
-		cmd = exec.Command("pavucontrol", "--mute")
+		cmd = exec.Command("playerctl", "mute")
 	default:
 		return fmt.Errorf("unsupported media action: %s", action)
 	}
