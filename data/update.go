@@ -191,10 +191,10 @@ func RunUpdateTaskProcessor(dataStore *DataStore) {
 	}
 
 	// Create a ticker to continuously add tasks
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(60 * time.Second)
 	defer ticker.Stop()
 
-	// Run continuously, adding new tasks every 10 seconds
+	// Run continuously, adding new tasks every 60 seconds
 	for {
 		select {
 		case <-ticker.C:
