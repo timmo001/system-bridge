@@ -331,8 +331,8 @@ jobs:
             dist/linux/flatpak/*.flatpak
             dist/windows/*-setup.exe
 
-  compute-next-prerelease:
-    name: Compute next prerelease tag
+  compute-next-patch:
+    name: Compute next patch tag
     runs-on: ubuntu-latest
     needs:
       - update-release
@@ -340,7 +340,7 @@ jobs:
     outputs:
       next_tag: ${{ steps.compute.outputs.next_tag }}
     steps:
-      - name: Compute next prerelease tag
+      - name: Compute next patch tag
         id: compute
         shell: bash
         run: |
@@ -356,26 +356,33 @@ jobs:
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
-            BETA="${BASH_REMATCH[4]}"
-            NEXT_BETA=$((BETA+1))
-            NEXT_TAG="${MAJOR}.${MINOR}.${PATCH}-beta.${NEXT_BETA}"
+            NEXT_TAG="${MAJOR}.${MINOR}.${PATCH}"
           elif [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             NEXT_PATCH=$((PATCH+1))
-            NEXT_TAG="${MAJOR}.${MINOR}.${NEXT_PATCH}-beta.1"
+            NEXT_TAG="${MAJOR}.${MINOR}.${NEXT_PATCH}"
           else
-            NEXT_TAG="${PREV_TAG}-beta.1"
+            # Fallback: strip common prerelease suffix and try to bump patch
+            CLEAN_TAG="${PREV_TAG%%-*}"
+            if [[ "${CLEAN_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+              MAJOR="${BASH_REMATCH[1]}"
+              MINOR="${BASH_REMATCH[2]}"
+              PATCH="${BASH_REMATCH[3]}"
+              NEXT_TAG="${MAJOR}.${MINOR}.$((PATCH+1))"
+            else
+              NEXT_TAG="${PREV_TAG}"
+            fi
           fi
-          echo "Next prerelease tag: ${NEXT_TAG}"
+          echo "Next patch tag: ${NEXT_TAG}"
           echo "next_tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
 
   create-prerelease:
-    name: Create draft prerelease
+    name: Create draft release
     runs-on: ubuntu-latest
     needs:
-      - compute-next-prerelease
+      - compute-next-patch
     if: github.event_name == 'release'
     permissions:
       contents: write
@@ -384,7 +391,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          prerelease: true
-          name: ${{ needs.compute-next-prerelease.outputs.next_tag }}
-          tag_name: ${{ needs.compute-next-prerelease.outputs.next_tag }}
+          prerelease: false
+          make_latest: true
+          name: ${{ needs.compute-next-patch.outputs.next_tag }}
+          tag_name: ${{ needs.compute-next-patch.outputs.next_tag }}
           generate_release_notes: true
