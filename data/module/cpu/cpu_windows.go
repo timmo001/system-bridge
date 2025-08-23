@@ -15,6 +15,7 @@ import (
 
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // Best-effort via Windows PDH counters could be used; for now attempt to query GetSystemTimes deltas
@@ -28,6 +29,7 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 		CurrentClockSpeed *float64 `json:"CurrentClockSpeed"`
 	}
 	cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object MaxClockSpeed,CurrentClockSpeed | ConvertTo-Json")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -121,6 +123,7 @@ func ComputeCPUPower(sample time.Duration) *float64 {
 func ReadCPUVcoreVoltage() *float64 {
 	// Best-effort: use WMI via PowerShell to read Win32_Processor.CurrentVoltage (decivolts when bit7=0)
 	cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object CurrentVoltage | ConvertTo-Json")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -190,6 +193,7 @@ func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 {
 	si := strconv.FormatFloat(sample.Seconds(), 'f', 3, 64)
 	if percpu {
 		cmd := exec.Command("typeperf", `\\Processor(*)\\% DPC Time`, "-sc", "2", "-si", si)
+		utils.SetHideWindow(cmd)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		if err := cmd.Run(); err != nil {
@@ -228,6 +232,7 @@ func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 {
 	}
 	// Overall _Total
 	cmd := exec.Command("typeperf", `\\Processor(_Total)\\% DPC Time`, "-sc", "2", "-si", si)
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -261,6 +266,7 @@ func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 {
 
 func readTypeperfCounter(counter string) (float64, bool) {
 	cmd := exec.Command("typeperf", counter, "-sc", "1")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -292,6 +298,7 @@ func readTypeperfCounter(counter string) (float64, bool) {
 // all numeric values from the single-sample output.
 func readTypeperfCounters(counter string) ([]float64, bool) {
 	cmd := exec.Command("typeperf", counter, "-sc", "1")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -332,6 +339,7 @@ func readTypeperfCounters(counter string) ([]float64, bool) {
 func ReadCPUTemperature() *float64 {
 	// Try MSAcpi_ThermalZoneTemperature (Kelvin*10)
 	cmd := exec.Command("powershell", "-NoProfile", "-Command", "Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace root/wmi | Select-Object CurrentTemperature | ConvertTo-Json")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -370,6 +378,7 @@ func readMinProcessorStatePercent() *float64 {
 	// Query AC value first; fallback to DC. Output contains lines with hex indexes like 0x0000000a (10%).
 	// Call powercfg directly and parse stdout.
 	cmd := exec.Command("powercfg", "/query", "SCHEME_CURRENT", "SUB_PROCESSOR", "PROCTHROTTLEMIN")
+	utils.SetHideWindow(cmd)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
