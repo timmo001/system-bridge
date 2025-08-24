@@ -1,7 +1,8 @@
 # System Bridge
 
 > [!IMPORTANT]
-> Any version 4 users will need to remove any integrations, and uninstall the old application before installing v5 to avoid conflicts. Your token and settings will not carry over to the new version.
+> Any version 4 users will need to remove any integrations, and uninstall the old application before
+> installing v5 to avoid conflicts. Your token and settings will not carry over to the new version.
 
 A bridge for your systems.
 
@@ -40,7 +41,8 @@ Run the setup executable to install the application.
 
 ## Running
 
-1. To run the backend server use the desktop shortcut which will launch the application for you. If you are a linux user, you can also launch the app via the terminal:
+1. To run the backend server use the desktop shortcut which will launch the application for you.
+    If you are a linux user, you can also launch the app via the terminal:
 
    ```bash
    system-bridge backend
