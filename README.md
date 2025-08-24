@@ -1,11 +1,7 @@
 # System Bridge
 
 > [!NOTE]
-> This project is currently going through a
-> [rebuild in go](https://github.com/timmo001/system-bridge/issues/3392).
-> If you would like to try the new version, you should use the latest build
-> output from the GitHub actions. If you are an Arch Linux user you can use the
-> latest [AUR build](#arch-linux-aur).
+> Any version 4 users will need to remove any integrations, and uninstall the old application before installing v5 to avoid conflicts. Your token and settings will not carry over to the new version.
 
 A bridge for your systems.
 
@@ -21,40 +17,6 @@ A bridge for your systems.
 - Control your system via the API/WebSocket server.
 - Integrated with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)
 
-## System Requirements
-
-<!-- TODO: Remove when 5.0.0 is released -->
-
-> [!WARNING]
-> The following documentation is for version 5.0.0 and
-> above which is currently in development.
-
-### Linux
-
-#### Arch Linux (requirements)
-
-Install the following packages:
-
-```zsh
-sudo pacman -S inetutils wlr-randr
-```
-
-#### Debian/Ubuntu (Not verified)
-
-Install the following packages:
-
-```zsh
-sudo apt install inetutils-tools wlr-randr
-```
-
-#### Fedora (Not verified)
-
-Install the following packages:
-
-```zsh
-sudo dnf install inetutils wlr-randr
-```
-
 ## Installation
 
 Download the latest release from the [releases page](https://github.com/timmo001/system-bridge/releases).
@@ -65,7 +27,9 @@ Install the package for your distribution's package manager.
 
 #### Arch Linux (AUR)
 
-You can install the current master branch of this project with the AUR package
+You can install the latest version with the aur package [system-bridge](https://aur.archlinux.org/packages/system-bridge).
+
+You can also install the current master branch of this project with the AUR package
 [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git).
 This will build and install the application for you based on the latest master
 branch which is automatically updated every commit.
@@ -76,13 +40,7 @@ Run the setup executable to install the application.
 
 ## Running
 
-<!-- TODO: Remove when 5.0.0 is released -->
-
-> [!WARNING]
-> The following documentation is for version 5.0.0 and
-> above which is currently in development.
-
-1. To run the backend server:
+1. To run the backend server use the desktop shortcut which will launch the application for you. If you are a linux user, you can also launch the app via the terminal:
 
    ```bash
    system-bridge backend
@@ -156,8 +114,7 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 ## Build and Install
 
 1. Clone this repo
-1. Run `go build`
-1. Run `go install`
+1. Run `make build`
 
 ## Packages
 
