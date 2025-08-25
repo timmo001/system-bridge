@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions (Discussions)
+    url: https://github.com/timmo001/system-bridge/discussions/new?category=q-a
+    about: Ask questions and get help in Discussions (Q&A).
+  - name: Feature requests (Discussions)
+    url: https://github.com/timmo001/system-bridge/discussions/new
+    about: Suggest ideas and request features in Discussions.
+  - name: General discussion
+    url: https://github.com/timmo001/system-bridge/discussions
+    about: For other topics, please use Discussions.
