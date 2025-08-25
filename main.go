@@ -130,6 +130,19 @@ func main() {
 				// },
 				Commands: []*cli.Command{
 					{
+						Name:    "token",
+						Aliases: []string{"t"},
+						Usage:   "Print the API token",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							token, err := utils.LoadToken()
+							if err != nil {
+								return fmt.Errorf("error loading token: %w", err)
+							}
+							fmt.Println(token)
+							return nil
+						},
+					},
+					{
 						Name:    "notification",
 						Aliases: []string{"notify", "n"},
 						Usage:   "Send a notification",
