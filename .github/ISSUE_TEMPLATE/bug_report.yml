@@ -49,7 +49,7 @@ body:
       options:
         - "Linux"
         - "Windows"
-        - "macOS"
+        - "Mac OS"
     validations:
       required: true
   - type: input
