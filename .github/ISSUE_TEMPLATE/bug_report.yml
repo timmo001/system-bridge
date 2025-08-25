@@ -97,7 +97,7 @@ body:
     id: logs
     attributes:
       label: "Relevant logs/output"
-      description: "Paste logs or console output. Redact sensitive info."
+      description: "Paste logs or console output. Redact sensitive info. Can be accessed via the tray icon and opening the logs directory."
       render: bash
       placeholder: |
         # On Linux/macOS (if run from terminal)
