@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -36,25 +37,66 @@ type Client struct {
 
 // ClientConfig holds configuration for the HTTP client
 type ClientConfig struct {
-	DefaultTTL  time.Duration
-	MaxRequests int
-	TimeWindow  time.Duration
+	DefaultTTL            time.Duration
+	MaxRequests           int
+	TimeWindow            time.Duration
+	RequestTimeout        time.Duration
+	DialTimeout           time.Duration
+	TLSHandshakeTimeout   time.Duration
+	ResponseHeaderTimeout time.Duration
+	IdleConnTimeout       time.Duration
 }
 
 // NewClient creates a new HTTP client with caching and rate limiting
 func NewClient(config *ClientConfig) *Client {
 	if config == nil {
 		config = &ClientConfig{
-			DefaultTTL:  5 * time.Minute, // Default cache TTL
-			MaxRequests: 30,              // Conservative default for unauthenticated requests
-			TimeWindow:  time.Hour,       // Default time window
+			DefaultTTL:            5 * time.Minute, // Default cache TTL
+			MaxRequests:           30,              // Conservative default for unauthenticated requests
+			TimeWindow:            time.Hour,       // Default time window
+			RequestTimeout:        2 * time.Second,
+			DialTimeout:           1 * time.Second,
+			TLSHandshakeTimeout:   1 * time.Second,
+			ResponseHeaderTimeout: 2 * time.Second,
+			IdleConnTimeout:       30 * time.Second,
 		}
+	}
+
+	// Apply sane defaults if fields are zero
+	if config.RequestTimeout == 0 {
+		config.RequestTimeout = 2 * time.Second
+	}
+	if config.DialTimeout == 0 {
+		config.DialTimeout = 1 * time.Second
+	}
+	if config.TLSHandshakeTimeout == 0 {
+		config.TLSHandshakeTimeout = 1 * time.Second
+	}
+	if config.ResponseHeaderTimeout == 0 {
+		config.ResponseHeaderTimeout = 2 * time.Second
+	}
+	if config.IdleConnTimeout == 0 {
+		config.IdleConnTimeout = 30 * time.Second
+	}
+
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   config.DialTimeout,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       config.IdleConnTimeout,
+		TLSHandshakeTimeout:   config.TLSHandshakeTimeout,
+		ExpectContinueTimeout: 1 * time.Second,
+		ResponseHeaderTimeout: config.ResponseHeaderTimeout,
 	}
 
 	return &Client{
 		cache:      make(map[string]*CacheEntry),
 		rateLimits: make(map[string]*RateLimiter),
-		client:     &http.Client{},
+		client:     &http.Client{Timeout: config.RequestTimeout, Transport: transport},
 		defaultTTL: config.DefaultTTL,
 	}
 }

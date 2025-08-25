@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"log/slog"
 
@@ -61,29 +62,6 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	}
 
 	userToProc := make(map[string]userProcessInfo)
-	if procs, perr := process.Processes(); perr != nil {
-		slog.Warn("Failed to enumerate processes for user activity", "error", perr)
-	} else {
-		for _, p := range procs {
-			uname, uerr := p.Username()
-			if uerr != nil || uname == "" {
-				continue
-			}
-			created, cerr := p.CreateTime()
-			if cerr != nil {
-				continue
-			}
-			key := normalizeUsername(uname)
-			info, exists := userToProc[key]
-			if !exists || (created > 0 && (info.createTime == 0 || created < info.createTime)) {
-				userToProc[key] = userProcessInfo{pid: p.Pid, createTime: created, hasProcess: true, displayName: uname}
-			} else if exists {
-				// Mark as having at least one process even if we keep the earliest PID
-				info.hasProcess = true
-				userToProc[key] = info
-			}
-		}
-	}
 
 	systemData.BootTime = infoStat.BootTime
 
@@ -106,6 +84,36 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	systemData.Uptime = infoStat.Uptime
 
 	if len(users) > 0 {
+		// Only scan processes for users we actually have from host.Users()
+		usernameSet := make(map[string]struct{}, len(users))
+		for _, u := range users {
+			usernameSet[normalizeUsername(u.User)] = struct{}{}
+		}
+		if procs, perr := process.Processes(); perr != nil {
+			slog.Warn("Failed to enumerate processes for user activity", "error", perr)
+		} else {
+			for _, p := range procs {
+				uname, uerr := p.Username()
+				if uerr != nil || uname == "" {
+					continue
+				}
+				key := normalizeUsername(uname)
+				if _, needed := usernameSet[key]; !needed {
+					continue
+				}
+				created, cerr := p.CreateTime()
+				if cerr != nil {
+					continue
+				}
+				info, exists := userToProc[key]
+				if !exists || (created > 0 && (info.createTime == 0 || created < info.createTime)) {
+					userToProc[key] = userProcessInfo{pid: p.Pid, createTime: created, hasProcess: true, displayName: uname}
+				} else if exists {
+					info.hasProcess = true
+					userToProc[key] = info
+				}
+			}
+		}
 		for _, userStat := range users {
 			usernameKey := normalizeUsername(userStat.User)
 			upi, ok := userToProc[usernameKey]
@@ -126,6 +134,29 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 			})
 		}
 	} else {
+		// Fallback: no users from host.Users(), scan all processes
+		if procs, perr := process.Processes(); perr != nil {
+			slog.Warn("Failed to enumerate processes for user activity", "error", perr)
+		} else {
+			for _, p := range procs {
+				uname, uerr := p.Username()
+				if uerr != nil || uname == "" {
+					continue
+				}
+				created, cerr := p.CreateTime()
+				if cerr != nil {
+					continue
+				}
+				key := normalizeUsername(uname)
+				info, exists := userToProc[key]
+				if !exists || (created > 0 && (info.createTime == 0 || created < info.createTime)) {
+					userToProc[key] = userProcessInfo{pid: p.Pid, createTime: created, hasProcess: true, displayName: uname}
+				} else if exists {
+					info.hasProcess = true
+					userToProc[key] = info
+				}
+			}
+		}
 		// Fallback for platforms where host.Users() is not implemented
 		for _, upi := range userToProc {
 			started := int(upi.createTime / 1000)
@@ -179,7 +210,10 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 // getIPv4Address gets the primary IPv4 address
 func getIPv4Address() string {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	d := net.Dialer{Timeout: 1 * time.Second}
+	conn, err := d.DialContext(ctx, "udp", "8.8.8.8:80")
 	if err != nil {
 		slog.Warn("Failed to get IPv4 Address", "error", err)
 		return ""
@@ -195,7 +229,10 @@ func getIPv4Address() string {
 // getIPv6Address gets the primary IPv6 address
 func getIPv6Address() string {
 	// Try to connect to IPv6 DNS server to get our IPv6 address
-	conn, err := net.Dial("udp6", "[2001:4860:4860::8888]:80")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	d := net.Dialer{Timeout: 1 * time.Second}
+	conn, err := d.DialContext(ctx, "udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
 		slog.Warn("Failed to get IPv6 Address", "error", err)
 		return ""
@@ -229,15 +266,16 @@ func getMACAddress() string {
 
 // from https://gist.github.com/golightlyb/0d6a0270b0cff882d373dfc6704c5e34
 func getFQDN(hostname string) string {
-	var err error
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 
-	ips, err := net.LookupIP(hostname)
+	ips, err := net.DefaultResolver.LookupIPAddr(ctx, hostname)
 	if err != nil {
 		return hostname
 	}
 
 	for _, ip := range ips {
-		hosts, err := net.LookupAddr(ip.String())
+		hosts, err := net.DefaultResolver.LookupAddr(ctx, ip.IP.String())
 		if err != nil {
 			continue
 		}
