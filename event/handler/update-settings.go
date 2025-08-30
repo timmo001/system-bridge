@@ -128,7 +128,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				shortcutPath := filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "system-bridge.lnk")
 
 				// PowerShell script to create the shortcut
-				psScript := fmt.Sprintf(`$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%s'); $Shortcut.TargetPath = '%s'; $Shortcut.WorkingDirectory = '%s'; $Shortcut.IconLocation = '%s'; $Shortcut.Save();`, shortcutPath, executablePath, workingDirectory, iconPath)
+				psScript := fmt.Sprintf(`$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%s'); $Shortcut.TargetPath = '%s'; $Shortcut.Arguments = 'backend'; $Shortcut.WorkingDirectory = '%s'; $Shortcut.IconLocation = '%s'; $Shortcut.Save();`, shortcutPath, executablePath, workingDirectory, iconPath)
 
 				cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psScript)
 				utils.SetHideWindow(cmd)
