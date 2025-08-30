@@ -4,15 +4,15 @@
 package media
 
 import (
-	"encoding/json"
-	"os"
-	"os/exec"
-	"strconv"
-	"strings"
+    "encoding/json"
+    "os"
+    "os/exec"
+    "strconv"
+    "strings"
 
-	"log/slog"
+    "log/slog"
 
-	"github.com/timmo001/system-bridge/types"
+    "github.com/timmo001/system-bridge/types"
 )
 
 func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
@@ -32,92 +32,150 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 		slog.Debug("playerctl output:", "output", string(output))
 	}
 
-	if err == nil {
-		var metadata struct {
-			Title      string `json:"title"`
-			Artist     string `json:"artist"`
-			Album      string `json:"album"`
-			Duration   string `json:"duration"`
-			Position   string `json:"position"`
-			Status     string `json:"status"`
-			PlayerName string `json:"playerName"`
-			Volume     string `json:"volume"`
-			Shuffle    string `json:"shuffle"`
-			LoopStatus string `json:"loopStatus"`
-		}
-		if err := json.Unmarshal(output, &metadata); err != nil {
-			slog.Warn("JSON unmarshal error:", "error", err.Error(), "raw_output", string(output))
-		} else {
-			mediaData.Title = &metadata.Title
-			mediaData.Artist = &metadata.Artist
-			mediaData.AlbumTitle = &metadata.Album
-			// Normalize status to HA-expected constants
-			if metadata.Status != "" {
-				s := strings.ToUpper(metadata.Status)
-				switch s {
-				case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
-					// ok
-				default:
-					// best-effort mapping
-					if strings.EqualFold(metadata.Status, "play") || strings.EqualFold(metadata.Status, "playing") {
-						s = "PLAYING"
-					} else if strings.EqualFold(metadata.Status, "pause") || strings.EqualFold(metadata.Status, "paused") {
-						s = "PAUSED"
-					} else if strings.EqualFold(metadata.Status, "stop") || strings.EqualFold(metadata.Status, "stopped") {
-						s = "STOPPED"
-					} else {
-						s = "STOPPED"
-					}
-				}
-				mediaData.Status = &s
-			}
-			mediaData.Type = &metadata.PlayerName
+    if err == nil {
+        // playerctl --all-players may emit multiple JSON objects separated by newlines.
+        // Parse one or many lines and select the most relevant (prefer Playing, then Paused, else first).
+        type playerMetadata struct {
+            Title      string `json:"title"`
+            Artist     string `json:"artist"`
+            Album      string `json:"album"`
+            Duration   string `json:"duration"`
+            Position   string `json:"position"`
+            Status     string `json:"status"`
+            PlayerName string `json:"playerName"`
+            Volume     string `json:"volume"`
+            Shuffle    string `json:"shuffle"`
+            LoopStatus string `json:"loopStatus"`
+        }
 
-			// Convert duration and position to float64 (duration is in microseconds)
-			if duration, err := strconv.ParseFloat(metadata.Duration, 64); err == nil {
-				dur := duration / 1e6 // convert microseconds to seconds
-				mediaData.Duration = &dur
-			}
-			if position, err := strconv.ParseFloat(metadata.Position, 64); err == nil {
-				pos := position / 1e6 // convert microseconds to seconds
-				mediaData.Position = &pos
-			}
+        parseSingle := func(b []byte) (*playerMetadata, error) {
+            var m playerMetadata
+            if err := json.Unmarshal(b, &m); err != nil {
+                return nil, err
+            }
+            return &m, nil
+        }
 
-			// Parse volume string to float64 if not empty
-			if metadata.Volume != "" {
-				if vol, err := strconv.ParseFloat(metadata.Volume, 64); err == nil {
-					mediaData.Volume = &vol
-				}
-			}
+        // Try single JSON first
+        chosen, singleErr := parseSingle(output)
+        if singleErr != nil {
+            // Fall back to multi-line parsing
+            lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+            var candidates []playerMetadata
+            for _, line := range lines {
+                line = strings.TrimSpace(line)
+                if line == "" {
+                    continue
+                }
+                if m, err := parseSingle([]byte(line)); err == nil {
+                    candidates = append(candidates, *m)
+                }
+            }
 
-			// Set control states based on status
-			isPlaying := strings.ToLower(metadata.Status) == "playing"
-			mediaData.IsPlayEnabled = &[]bool{!isPlaying}[0]
-			mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
-			mediaData.IsStopEnabled = &[]bool{true}[0]
+            if len(candidates) == 0 {
+                // Keep previous warning behavior with raw output to aid debugging
+                slog.Warn("JSON unmarshal error:", "error", singleErr.Error(), "raw_output", string(output))
+                return mediaData, nil
+            }
 
-			// Set shuffle and repeat states
-			if metadata.Shuffle != "" {
-				isShuffle := strings.ToLower(metadata.Shuffle) == "on"
-				mediaData.Shuffle = &isShuffle
-			}
-			if metadata.LoopStatus != "" {
-				// Normalize repeat to HA-expected constants: NONE/TRACK/LIST
-				ls := strings.ToUpper(metadata.LoopStatus)
-				switch ls {
-				case "NONE":
-					// ok
-				case "TRACK", "ONE":
-					ls = "TRACK"
-				case "LIST", "ALL", "PLAYLIST", "ALBUM":
-					ls = "LIST"
-				default:
-					ls = "NONE"
-				}
-				mediaData.Repeat = &ls
-			}
-		}
-	}
+            // Select preferred candidate
+            var selected *playerMetadata
+            // Prefer Playing
+            for i := range candidates {
+                if strings.EqualFold(candidates[i].Status, "playing") {
+                    selected = &candidates[i]
+                    break
+                }
+            }
+            // Then Paused
+            if selected == nil {
+                for i := range candidates {
+                    if strings.EqualFold(candidates[i].Status, "paused") {
+                        selected = &candidates[i]
+                        break
+                    }
+                }
+            }
+            // Else first
+            if selected == nil {
+                selected = &candidates[0]
+            }
+            chosen = selected
+        }
+
+        // Apply chosen metadata to mediaData
+        if chosen != nil {
+            mediaData.Title = &chosen.Title
+            mediaData.Artist = &chosen.Artist
+            mediaData.AlbumTitle = &chosen.Album
+
+            // Normalize status to HA-expected constants
+            if chosen.Status != "" {
+                s := strings.ToUpper(chosen.Status)
+                switch s {
+                case "PLAYING", "PAUSED", "STOPPED", "CHANGING":
+                    // ok
+                default:
+                    // best-effort mapping
+                    if strings.EqualFold(chosen.Status, "play") || strings.EqualFold(chosen.Status, "playing") {
+                        s = "PLAYING"
+                    } else if strings.EqualFold(chosen.Status, "pause") || strings.EqualFold(chosen.Status, "paused") {
+                        s = "PAUSED"
+                    } else if strings.EqualFold(chosen.Status, "stop") || strings.EqualFold(chosen.Status, "stopped") {
+                        s = "STOPPED"
+                    } else {
+                        s = "STOPPED"
+                    }
+                }
+                mediaData.Status = &s
+            }
+            mediaData.Type = &chosen.PlayerName
+
+            // Convert duration and position to float64 (duration is in microseconds)
+            if duration, err := strconv.ParseFloat(chosen.Duration, 64); err == nil {
+                dur := duration / 1e6 // convert microseconds to seconds
+                mediaData.Duration = &dur
+            }
+            if position, err := strconv.ParseFloat(chosen.Position, 64); err == nil {
+                pos := position / 1e6 // convert microseconds to seconds
+                mediaData.Position = &pos
+            }
+
+            // Parse volume string to float64 if not empty
+            if chosen.Volume != "" {
+                if vol, err := strconv.ParseFloat(chosen.Volume, 64); err == nil {
+                    mediaData.Volume = &vol
+                }
+            }
+
+            // Set control states based on status
+            isPlaying := strings.ToLower(chosen.Status) == "playing"
+            mediaData.IsPlayEnabled = &[]bool{!isPlaying}[0]
+            mediaData.IsPauseEnabled = &[]bool{isPlaying}[0]
+            mediaData.IsStopEnabled = &[]bool{true}[0]
+
+            // Set shuffle and repeat states
+            if chosen.Shuffle != "" {
+                isShuffle := strings.ToLower(chosen.Shuffle) == "on"
+                mediaData.Shuffle = &isShuffle
+            }
+            if chosen.LoopStatus != "" {
+                // Normalize repeat to HA-expected constants: NONE/TRACK/LIST
+                ls := strings.ToUpper(chosen.LoopStatus)
+                switch ls {
+                case "NONE":
+                    // ok
+                case "TRACK", "ONE":
+                    ls = "TRACK"
+                case "LIST", "ALL", "PLAYLIST", "ALBUM":
+                    ls = "LIST"
+                default:
+                    ls = "NONE"
+                }
+                mediaData.Repeat = &ls
+            }
+        }
+    }
 
 	// If playerctl fails or no media is playing, check for browser media
 	if mediaData.Title == nil {
