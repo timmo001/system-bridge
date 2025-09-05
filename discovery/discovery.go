@@ -12,7 +12,6 @@ import (
 type DiscoveryManager struct {
 	port       int
 	ssdpServer *SSDPServer
-	dhcpDisc   *DHCPDiscovery
 	mdnsDisc   *MDNSDiscovery
 	mu         sync.RWMutex
 	running    bool
@@ -23,7 +22,7 @@ type ServiceInfo struct {
 	IP       string
 	Port     int
 	Hostname string
-	Type     string // "ssdp", "dhcp", "mdns"
+	Type     string // "ssdp", "mdns"
 	Location string // For SSDP
 }
 
@@ -50,13 +49,6 @@ func (dm *DiscoveryManager) Start() error {
 	dm.ssdpServer = NewSSDPServer(ssdpPort, dm.port)
 	if err := dm.ssdpServer.Start(); err != nil {
 		return fmt.Errorf("failed to start SSDP server: %w", err)
-	}
-
-	// Start DHCP discovery
-	dm.dhcpDisc = NewDHCPDiscovery(dm.port)
-	if err := dm.dhcpDisc.Start(); err != nil {
-		slog.Warn("Failed to start DHCP discovery", "err", err)
-		// Don't return error, continue with other services
 	}
 
 	// Start mDNS discovery
@@ -88,12 +80,6 @@ func (dm *DiscoveryManager) Stop() error {
 		}
 	}
 
-	if dm.dhcpDisc != nil {
-		if err := dm.dhcpDisc.Stop(); err != nil {
-			slog.Error("Failed to stop DHCP discovery", "err", err)
-		}
-	}
-
 	if dm.mdnsDisc != nil {
 		if err := dm.mdnsDisc.Stop(); err != nil {
 			slog.Error("Failed to stop mDNS discovery", "err", err)
@@ -122,23 +108,6 @@ func (dm *DiscoveryManager) DiscoverServices() ([]ServiceInfo, error) {
 	}
 
 	var services []ServiceInfo
-
-	// DHCP-based discovery
-	if dm.dhcpDisc != nil {
-		dhcpServices, err := dm.dhcpDisc.DiscoverServices()
-		if err != nil {
-			slog.Warn("DHCP service discovery failed", "err", err)
-		} else {
-			for _, service := range dhcpServices {
-				services = append(services, ServiceInfo{
-					IP:       service.IP,
-					Port:     service.Port,
-					Hostname: service.Hostname,
-					Type:     "dhcp",
-				})
-			}
-		}
-	}
 
 	// mDNS-based discovery
 	if dm.mdnsDisc != nil {
@@ -174,13 +143,6 @@ func (dm *DiscoveryManager) GetSSDPService() *SSDPServer {
 	dm.mu.RLock()
 	defer dm.mu.RUnlock()
 	return dm.ssdpServer
-}
-
-// GetDHCPDiscovery returns the DHCP discovery instance
-func (dm *DiscoveryManager) GetDHCPDiscovery() *DHCPDiscovery {
-	dm.mu.RLock()
-	defer dm.mu.RUnlock()
-	return dm.dhcpDisc
 }
 
 // GetMDNSDiscovery returns the mDNS discovery instance

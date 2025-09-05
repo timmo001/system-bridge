@@ -158,7 +158,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	}()
 
-	// All discovery services (SSDP, DHCP, mDNS) are now managed by the discovery manager
+	// All discovery services (SSDP, mDNS) are now managed by the discovery manager
 
 	// Run data update task processor in a separate goroutine
 	go func() {
