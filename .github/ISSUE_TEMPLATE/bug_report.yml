@@ -27,7 +27,7 @@ body:
       label: "Installation method"
       options:
         - "Windows installer"
-        - "Arch Linux package (make install_arch)"
+        - "Arch Linux package (AUR)"
         - "Debian/Ubuntu package (.deb)"
         - "Flatpak"
         - "Built from source (make build)"
