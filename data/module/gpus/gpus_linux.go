@@ -13,7 +13,7 @@ import (
 )
 
 func getGPUs() ([]types.GPU, error) {
-	var gpuList []types.GPU
+	gpuList := make([]types.GPU, 0)
 
 	// Try to get NVIDIA GPU info first
 	cmd := exec.Command("nvidia-smi", "--query-gpu=gpu_name,memory.total,memory.used,memory.free,utilization.gpu,clocks.current.graphics,clocks.current.memory,power.draw,temperature.gpu", "--format=csv,noheader,nounits")
