@@ -10,3 +10,7 @@ func GetCameraUsage() []string {
 func GetPendingReboot() *bool {
 	return nil
 }
+
+func GetPSUPowerUsage() *float64 {
+	return nil
+}

@@ -6,6 +6,7 @@ package system
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"log/slog"
@@ -94,5 +95,69 @@ func GetPendingReboot() *bool {
 			return &v
 		}
 	}
+	return nil
+}
+
+// GetPSUPowerUsage attempts to read PSU power usage from hwmon interfaces on Linux.
+// This function specifically looks for Corsair PSU sensors via the corsair_psu driver.
+// Returns power usage in watts, or nil if not available.
+func GetPSUPowerUsage() *float64 {
+	// Look for hwmon directories that might contain PSU power sensors
+	hwmonDirs, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+	if err != nil {
+		slog.Debug("Failed to glob hwmon directories", "error", err)
+		return nil
+	}
+
+	for _, hwmonDir := range hwmonDirs {
+		// Check if this is a Corsair PSU by looking at the name file
+		nameFile := filepath.Join(hwmonDir, "name")
+		nameData, err := os.ReadFile(nameFile)
+		if err != nil {
+			continue
+		}
+		name := strings.TrimSpace(string(nameData))
+
+		// Look for corsair_psu driver or similar PSU-related names
+		if strings.Contains(strings.ToLower(name), "corsair") ||
+			strings.Contains(strings.ToLower(name), "psu") ||
+			strings.Contains(strings.ToLower(name), "rmi") {
+
+			// Try to read power1_input (total power consumption)
+			powerFile := filepath.Join(hwmonDir, "power1_input")
+			if powerData, err := os.ReadFile(powerFile); err == nil {
+				valueStr := strings.TrimSpace(string(powerData))
+				if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
+					// Convert from microwatts to watts
+					powerWatts := value / 1_000_000
+					slog.Info("Found PSU power usage", "hwmon", hwmonDir, "name", name, "power_watts", powerWatts)
+					return &powerWatts
+				}
+			}
+		}
+	}
+
+	// Fallback: try to find any power1_input file in hwmon directories
+	// This covers cases where the PSU might not be properly identified by name
+	for _, hwmonDir := range hwmonDirs {
+		powerFile := filepath.Join(hwmonDir, "power1_input")
+		if powerData, err := os.ReadFile(powerFile); err == nil {
+			// Check if there's a corresponding power1_label to see if it's PSU-related
+			labelFile := filepath.Join(hwmonDir, "power1_label")
+			if labelData, err := os.ReadFile(labelFile); err == nil {
+				label := strings.ToLower(strings.TrimSpace(string(labelData)))
+				if strings.Contains(label, "psu") || strings.Contains(label, "power") {
+					valueStr := strings.TrimSpace(string(powerData))
+					if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
+						powerWatts := value / 1_000_000
+						slog.Debug("Found PSU power usage via label", "hwmon", hwmonDir, "label", label, "power_watts", powerWatts)
+						return &powerWatts
+					}
+				}
+			}
+		}
+	}
+
+	slog.Debug("No PSU power usage sensors found")
 	return nil
 }
