@@ -26,6 +26,7 @@ type SystemData struct {
 	MACAddress            string       `json:"mac_address" mapstructure:"mac_address"`
 	PlatformVersion       string       `json:"platform_version" mapstructure:"platform_version"`
 	Platform              string       `json:"platform" mapstructure:"platform"`
+	PowerUsage            *float64     `json:"power_usage" mapstructure:"power_usage"`
 	Uptime                uint64       `json:"uptime" mapstructure:"uptime"`
 	Users                 []SystemUser `json:"users" mapstructure:"users"`
 	UUID                  string       `json:"uuid" mapstructure:"uuid"`
