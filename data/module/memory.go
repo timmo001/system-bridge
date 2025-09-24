@@ -2,10 +2,15 @@ package data_module
 
 import (
 	"context"
+	"runtime"
+	"strings"
+	"time"
 
 	"log/slog"
 
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/mem"
+	"github.com/timmo001/system-bridge/data/module/memory"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -48,6 +53,20 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 			Percent: &swapMem.UsedPercent,
 			Sin:     &swapMem.Sin,
 			Sout:    &swapMem.Sout,
+		}
+	}
+
+	// Get memory power consumption (Linux only)
+	if runtime.GOOS == "linux" {
+		infoStat, err := host.Info()
+		if err == nil && (infoStat.OS == "linux" || infoStat.Platform == "linux" || 
+			strings.Contains(strings.ToLower(infoStat.Platform), "arch") || 
+			strings.Contains(strings.ToLower(infoStat.Platform), "ubuntu") || 
+			strings.Contains(strings.ToLower(infoStat.Platform), "debian")) {
+			
+			if power := memory.GetMemoryPower(200 * time.Millisecond); power != nil {
+				memoryData.Power = power
+			}
 		}
 	}
 

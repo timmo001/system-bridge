@@ -34,6 +34,17 @@ type Disk struct {
 	Name       string          `json:"name"`
 	Partitions []DiskPartition `json:"partitions"`
 	IOCounters *DiskIOCounters `json:"io_counters"`
+	Power      *DiskPower      `json:"power"`
+}
+
+// DiskPower represents storage device power consumption information
+type DiskPower struct {
+	Active     *float64 `json:"active"`      // Active power consumption in watts
+	Idle       *float64 `json:"idle"`        // Idle power consumption in watts
+	Standby    *float64 `json:"standby"`     // Standby power consumption in watts
+	Sleep      *float64 `json:"sleep"`       // Sleep power consumption in watts
+	Total      *float64 `json:"total"`       // Total power consumption in watts
+	PowerState string   `json:"power_state"` // Current power state (active/idle/standby/sleep)
 }
 
 // DisksData represents information about all disk devices
