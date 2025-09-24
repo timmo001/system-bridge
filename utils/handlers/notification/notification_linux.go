@@ -14,10 +14,6 @@ func send(data NotificationData) error {
 		"--urgency=normal",
 	}
 
-	if data.Title != "" {
-		args = append(args, "--title="+data.Title)
-	}
-
 	if data.Icon != "" {
 		args = append(args, "--icon="+data.Icon)
 	}
@@ -26,8 +22,15 @@ func send(data NotificationData) error {
 		args = append(args, "--expire-time="+strconv.Itoa(data.Duration))
 	}
 
+	
+	if data.Title != "" {
+		args = append(args, data.Title)
+	} else {
+		args = append(args, "Notification")
+	}
+		
 	args = append(args, data.Message)
-
+	
 	cmd := exec.Command("notify-send", args...)
 	return cmd.Run()
 }
