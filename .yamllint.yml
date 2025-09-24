@@ -1,9 +1,16 @@
 ---
 extends: default
 
+ignore: |
+  web-client/node_modules/
+  temp/
+
 rules:
   line-length:
     ignore: |
       .github/
       .scripts/
     level: warning
+  truthy:
+    ignore: |
+      .github/workflows/

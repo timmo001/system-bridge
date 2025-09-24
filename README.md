@@ -21,7 +21,7 @@ A bridge for your systems.
 
 ## Installation
 
-See [here](https://system-bridge.timmo.dev/docs/install).
+See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
 ## Development Setup
 
