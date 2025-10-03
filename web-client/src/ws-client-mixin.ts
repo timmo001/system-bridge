@@ -107,13 +107,15 @@ export declare class WSClientMixinClass extends LitElement {
   ws?: WebSocket | null;
   wsUrl: string;
   wsToken: string;
-  isConnected: boolean;
+  get isConnected(): boolean;
   private _pending: Map<string, (resp: WSMessageResponse) => void>;
   private _dataListeners: Set<DataUpdateListener>;
   private _reconnectTimer?: number;
 
   /** Establishes the websocket connection (idempotent per token). */
   connect(): void;
+  /** Sets the websocket URL for connections. */
+  setWebSocketUrl(url: string): void;
   /** Closes the websocket and clears pending requests/listeners. */
   disconnect(): void;
   /**
@@ -153,7 +155,11 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
       location.host +
       "/api/websocket";
     wsToken = "";
-    isConnected = false;
+    private _isConnected = false;
+
+    get isConnected(): boolean {
+      return this._isConnected;
+    }
     private _pending: Map<string, (resp: WSMessageResponse) => void> = new Map();
     private _dataListeners: Set<DataUpdateListener> = new Set();
     private _reconnectTimer?: number;
@@ -171,6 +177,13 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
     }
 
     /**
+     * Sets the websocket URL for future connections.
+     */
+    setWebSocketUrl(url: string) {
+      this.wsUrl = url;
+    }
+
+    /**
      * Opens a websocket connection to the backend and sets up listeners.
      * If already connected, the existing connection is replaced.
      */
@@ -183,7 +196,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
         this.ws = socket;
 
         socket.onopen = () => {
-          this.isConnected = true;
+          this._isConnected = true;
           this.requestUpdate?.();
         };
 
@@ -217,7 +230,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
         };
 
         socket.onclose = () => {
-          this.isConnected = false;
+          this._isConnected = false;
           this.requestUpdate?.();
           // lightweight reconnect
           if (this._reconnectTimer == null) {
@@ -252,7 +265,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
         }
         this.ws = null;
       }
-      this.isConnected = false;
+      this._isConnected = false;
       this._pending.clear();
     }
 

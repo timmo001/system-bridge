@@ -1,33 +1,24 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { WSClientMixin } from "./ws-client-mixin";
+import "./sb-client-main";
+import "./sb-connection-form";
 
 /**
  * System Bridge web client element.
  *
- * - Wraps the websocket client mixin to communicate with the backend.
- * - Provide an auth `token` attribute (mapped to `wsToken`). When set, the
- *   component auto-connects on first update, and displays connection status.
- * - Consumers can also call the mixin APIs directly (e.g. `connect`, `send`,
- *   `registerDataListener`, `getData`).
+ * - A wrapper component that renders the main client element.
+ * - Passes through the `token` attribute to the underlying sb-client-main element.
  */
 @customElement("sb-client")
-export class SBClient extends WSClientMixin(LitElement) {
-  /** Auth token used for websocket requests. Set via `token` attribute. */
-  @property({ type: String, attribute: "token" }) wsToken = "";
-
-  firstUpdated() {
-    if (this.wsToken) {
-      this.connect();
-    }
-  }
+export class SBClient extends LitElement {
+  /** Auth token passed to the main client element. */
+  @property({ type: String, attribute: "token" }) token = "";
 
   render() {
     return html`
-      <div>
-        <h1>System Bridge Client</h1>
-        <p>WebSocket: ${this.isConnected ? "connected" : "disconnected"}</p>
-      </div>
+      <sb-client-main token="${this.token}">
+        <slot></slot>
+      </sb-client-main>
     `;
   }
 
