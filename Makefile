@@ -41,7 +41,7 @@ build_web_client: clean_web_client
 	cd web-client && bun install && $(BUN_BUILD) && bun run verify-build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
-	@timeout /t 2 /nobreak >nul 2>&1
+	@powershell -Command "Start-Sleep -Seconds 2"
 	@echo "Verifying CSS files are accessible..."
 	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\css\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
 	@echo ✓ CSS files verified before Go build
