@@ -125,6 +125,8 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
+	// Set up media file data endpoint (4.x.x compatibility)
+	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
 	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
