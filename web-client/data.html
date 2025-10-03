@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data | System Bridge</title>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/sb-client.ts"></script>
+  </head>
+  <body>
+    <sb-client>
+      <div class="data-page">
+        <div class="page-header">
+          <h1>System Data</h1>
+          <p>Real-time system information and metrics</p>
+        </div>
+        
+        <div class="data-grid">
+          <div class="data-card">
+            <h3>System Information</h3>
+            <div class="data-content" id="system-info">
+              <p>Loading system information...</p>
+            </div>
+          </div>
+          
+          <div class="data-card">
+            <h3>CPU Usage</h3>
+            <div class="data-content" id="cpu-usage">
+              <p>Loading CPU data...</p>
+            </div>
+          </div>
+          
+          <div class="data-card">
+            <h3>Memory Usage</h3>
+            <div class="data-content" id="memory-usage">
+              <p>Loading memory data...</p>
+            </div>
+          </div>
+          
+          <div class="data-card">
+            <h3>Disk Usage</h3>
+            <div class="data-content" id="disk-usage">
+              <p>Loading disk data...</p>
+            </div>
+          </div>
+          
+          <div class="data-card">
+            <h3>Network Interfaces</h3>
+            <div class="data-content" id="network-interfaces">
+              <p>Loading network data...</p>
+            </div>
+          </div>
+          
+          <div class="data-card">
+            <h3>Running Processes</h3>
+            <div class="data-content" id="processes">
+              <p>Loading process data...</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="navigation-footer">
+          <a href="/" class="nav-link">← Back to Home</a>
+          <a href="/settings" class="nav-link">Settings →</a>
+        </div>
+      </div>
+    </sb-client>
+    
+    <style>
+      .data-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      
+      .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      
+      .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+      }
+      
+      .page-header p {
+        font-size: 1.125rem;
+        color: #6b7280;
+      }
+      
+      .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      
+      .data-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+      
+      .data-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+      }
+      
+      .data-content {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #374151;
+      }
+      
+      .data-content pre {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        overflow-x: auto;
+        margin: 0;
+      }
+      
+      .navigation-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background-color: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      
+      .nav-link:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+      }
+      
+      @media (max-width: 640px) {
+        .data-page {
+          padding: 1rem;
+        }
+        
+        .data-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .navigation-footer {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+    </style>
+    
+    <script>
+      // Data fetching and display logic
+      document.addEventListener('DOMContentLoaded', () => {
+        const client = document.querySelector('sb-client-main');
+        if (!client) return;
+        
+        // Wait for connection
+        const checkConnection = () => {
+          if (client.isConnected) {
+            loadData();
+          } else {
+            setTimeout(checkConnection, 1000);
+          }
+        };
+        
+        const loadData = async () => {
+          try {
+            // Request system data
+            const systemData = await client.send('DATA_REQUEST', { modules: ['system'] });
+            displaySystemInfo(systemData.data);
+            
+            // Request CPU data
+            const cpuData = await client.send('DATA_REQUEST', { modules: ['cpu'] });
+            displayCpuUsage(cpuData.data);
+            
+            // Request memory data
+            const memoryData = await client.send('DATA_REQUEST', { modules: ['memory'] });
+            displayMemoryUsage(memoryData.data);
+            
+            // Request disk data
+            const diskData = await client.send('DATA_REQUEST', { modules: ['disks'] });
+            displayDiskUsage(diskData.data);
+            
+            // Request network data
+            const networkData = await client.send('DATA_REQUEST', { modules: ['network'] });
+            displayNetworkInterfaces(networkData.data);
+            
+            // Request process data
+            const processData = await client.send('DATA_REQUEST', { modules: ['processes'] });
+            displayProcesses(processData.data);
+            
+          } catch (error) {
+            console.error('Error loading data:', error);
+            document.querySelectorAll('.data-content').forEach(el => {
+              el.innerHTML = '<p style="color: #ef4444;">Error loading data. Please check your connection.</p>';
+            });
+          }
+        };
+        
+        const displaySystemInfo = (data) => {
+          const container = document.getElementById('system-info');
+          if (data && data.system) {
+            container.innerHTML = `<pre>${JSON.stringify(data.system, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No system data available</p>';
+          }
+        };
+        
+        const displayCpuUsage = (data) => {
+          const container = document.getElementById('cpu-usage');
+          if (data && data.cpu) {
+            container.innerHTML = `<pre>${JSON.stringify(data.cpu, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No CPU data available</p>';
+          }
+        };
+        
+        const displayMemoryUsage = (data) => {
+          const container = document.getElementById('memory-usage');
+          if (data && data.memory) {
+            container.innerHTML = `<pre>${JSON.stringify(data.memory, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No memory data available</p>';
+          }
+        };
+        
+        const displayDiskUsage = (data) => {
+          const container = document.getElementById('disk-usage');
+          if (data && data.disks) {
+            container.innerHTML = `<pre>${JSON.stringify(data.disks, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No disk data available</p>';
+          }
+        };
+        
+        const displayNetworkInterfaces = (data) => {
+          const container = document.getElementById('network-interfaces');
+          if (data && data.network) {
+            container.innerHTML = `<pre>${JSON.stringify(data.network, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No network data available</p>';
+          }
+        };
+        
+        const displayProcesses = (data) => {
+          const container = document.getElementById('processes');
+          if (data && data.processes) {
+            container.innerHTML = `<pre>${JSON.stringify(data.processes, null, 2)}</pre>`;
+          } else {
+            container.innerHTML = '<p>No process data available</p>';
+          }
+        };
+        
+        checkConnection();
+      });
+    </script>
+  </body>
+</html>
