@@ -48,11 +48,6 @@ func GetLatestVersion() (string, error) {
 	// Remove 'v' prefix if present
 	version := strings.TrimPrefix(release.TagName, "v")
 
-	// TODO: Remove this check once version 5.0.0 is officially released
-	// Always ensure we don't return a version lower than 5.0.0
-	if !IsNewerVersionAvailable("5.0.0", version) {
-		return "5.0.0", nil
-	}
 	return version, nil
 }
 
