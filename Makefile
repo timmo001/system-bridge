@@ -38,7 +38,15 @@ else
 endif
 
 build_web_client: clean_web_client
-	cd web-client && bun install && $(BUN_BUILD)
+	cd web-client && bun install && bun run build:static && bun run verify-build
+	@echo "Waiting for file system to sync..."
+	@sync
+	@echo "Verifying CSS files are accessible..."
+	@if ! ls web-client/out/_next/static/css/*.css 1> /dev/null 2>&1; then \
+		echo "✗ CSS files not found after build"; \
+		exit 1; \
+	fi
+	@echo "✓ CSS files verified before Go build"
 
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)
