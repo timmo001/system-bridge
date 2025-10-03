@@ -2,7 +2,7 @@
 //
 // Protocol reference:
 // - WS endpoint: /api/websocket
-// - Outgoing request: { id, event, data, token }
+// - Outgoing request: { id, event, data, apiKey }
 // - Incoming response: { id, type, subtype, data, message?, module? }
 
 import { LitElement } from "lit";
@@ -42,7 +42,7 @@ type ResponseType =
 type ResponseSubtype =
   | "NONE"
   | "BAD_REQUEST"
-  | "BAD_TOKEN"
+  | "BAD_API_KEY"
   | "BAD_JSON"
   | "BAD_DIRECTORY"
   | "BAD_FILE"
@@ -59,7 +59,7 @@ type ResponseSubtype =
   | "MISSING_SETTING"
   | "MISSING_TEXT"
   | "MISSING_TITLE"
-  | "MISSING_TOKEN"
+  | "MISSING_API_KEY"
   | "MISSING_VALUE"
   | "UNKNOWN_EVENT";
 
@@ -86,7 +86,7 @@ export interface WSRequest<Data = unknown> {
   id: string;
   event: string;
   data?: Data;
-  token: string;
+  apiKey: string;
 }
 
 /**
@@ -106,7 +106,7 @@ type Ctor<T> = new (...args: any[]) => T;
 export declare class WSClientMixinClass extends LitElement {
   ws?: WebSocket | null;
   wsUrl: string;
-  wsToken: string;
+  wsApiKey: string;
   get isConnected(): boolean;
   private _pending: Map<string, (resp: WSMessageResponse) => void>;
   private _dataListeners: Set<DataUpdateListener>;
@@ -136,11 +136,11 @@ export declare class WSClientMixinClass extends LitElement {
  * Mixin that adds a System Bridge websocket client to a Lit element.
  *
  * Lifecycle:
- * - On `connectedCallback` it auto-connects if `wsToken` is set.
+ * - On `connectedCallback` it auto-connects if `wsApiKey` is set.
  * - Auto-reconnect is attempted after unexpected closure.
  *
  * Public API:
- * - `wsToken`: set the auth token, then call `connect()`
+ * - `wsApiKey`: set the auth API key, then call `connect()`
  * - `send(event, data)`: send a request and await a response
  * - `registerDataListener(modules)`: subscribe to module updates
  * - `unregisterDataListener()`: unsubscribe
@@ -154,7 +154,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
       (location.protocol === "https:" ? "wss://" : "ws://") +
       location.host +
       "/api/websocket";
-    wsToken = "";
+    wsApiKey = "";
     private _isConnected = false;
 
     get isConnected(): boolean {
@@ -167,7 +167,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
     /** @inheritdoc */
     connectedCallback() {
       super.connectedCallback();
-      if (this.wsToken) this.connect();
+      if (this.wsApiKey) this.connect();
     }
 
     /** @inheritdoc */
@@ -189,7 +189,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
      */
     connect() {
       this.disconnect();
-      if (!this.wsToken) return;
+      if (!this.wsApiKey) return;
 
       try {
         const socket = new WebSocket(this.wsUrl);
@@ -236,7 +236,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
           if (this._reconnectTimer == null) {
             this._reconnectTimer = window.setTimeout(() => {
               this._reconnectTimer = undefined;
-              if (this.wsToken) this.connect();
+              if (this.wsApiKey) this.connect();
             }, 1500);
           }
         };
@@ -285,7 +285,7 @@ export const WSClientMixin = <TBase extends Ctor<LitElement>>(Base: TBase) => {
         }
 
         const id = this._nextId();
-        const payload: WSRequest<Data> = { id, event, data, token: this.wsToken };
+        const payload: WSRequest<Data> = { id, event, data, apiKey: this.wsApiKey };
         this._pending.set(id, resolve);
         try {
           this.ws.send(JSON.stringify(payload));

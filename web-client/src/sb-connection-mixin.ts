@@ -10,8 +10,8 @@ export interface ConnectionSettings {
   port: number;
   /** Use SSL/TLS (default: false) */
   ssl: boolean;
-  /** Authentication token */
-  token: string;
+  /** Authentication API key */
+  apiKey: string;
 }
 
 /**
@@ -29,7 +29,7 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
       host: "localhost",
       port: 9170,
       ssl: false,
-      token: ""
+      apiKey: ""
     };
 
     /** Whether connection settings are valid */
@@ -59,11 +59,60 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
       .connection-status {
         font-weight: 500;
         color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .connection-status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #9ca3af;
+      }
+
+      .connection-status-indicator.valid {
+        background-color: #10b981;
+      }
+
+      .connection-status-indicator.invalid {
+        background-color: #ef4444;
       }
 
       .connection-details {
         font-size: 0.875rem;
         color: #6b7280;
+      }
+
+      .connection-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .connection-detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .connection-detail-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .connection-detail-value {
+        font-size: 0.875rem;
+        color: #374151;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background-color: #f3f4f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #e5e7eb;
       }
 
       .connection-actions {
@@ -109,17 +158,69 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
     `;
 
     /**
-     * Initialize connection settings from query parameters or defaults.
+     * Save connection settings to session storage.
+     */
+    private saveConnectionSettingsToSession() {
+      try {
+        sessionStorage.setItem('system-bridge-connection', JSON.stringify(this.connectionSettings));
+      } catch (error) {
+        console.warn('Failed to save connection settings to session storage:', error);
+      }
+    }
+
+    /**
+     * Load connection settings from session storage.
+     */
+    private loadConnectionSettingsFromSession(): ConnectionSettings | null {
+      try {
+        const stored = sessionStorage.getItem('system-bridge-connection');
+        if (stored) {
+          return JSON.parse(stored) as ConnectionSettings;
+        }
+      } catch (error) {
+        console.warn('Failed to load connection settings from session storage:', error);
+      }
+      return null;
+    }
+
+    /**
+     * Initialize connection settings from query parameters, session storage, or defaults.
      */
     initializeConnectionSettings() {
       const urlParams = new URLSearchParams(window.location.search);
       
-      this.connectionSettings = {
-        host: urlParams.get("host") || "localhost",
-        port: parseInt(urlParams.get("port") || "9170", 10),
-        ssl: urlParams.get("ssl") === "true",
-        token: urlParams.get("token") || ""
-      };
+      // First try URL parameters
+      const urlSettings: Partial<ConnectionSettings> = {};
+      if (urlParams.get("host")) urlSettings.host = urlParams.get("host")!;
+      if (urlParams.get("port")) urlSettings.port = parseInt(urlParams.get("port")!, 10);
+      if (urlParams.get("ssl")) urlSettings.ssl = urlParams.get("ssl") === "true";
+      if (urlParams.get("apiKey")) urlSettings.apiKey = urlParams.get("apiKey")!;
+
+      // If URL has any parameters, use them and save to session storage
+      if (Object.keys(urlSettings).length > 0) {
+        this.connectionSettings = {
+          host: "localhost",
+          port: 9170,
+          ssl: false,
+          apiKey: "",
+          ...urlSettings
+        };
+        this.saveConnectionSettingsToSession();
+      } else {
+        // No URL parameters, try to load from session storage
+        const sessionSettings = this.loadConnectionSettingsFromSession();
+        if (sessionSettings) {
+          this.connectionSettings = sessionSettings;
+        } else {
+          // Fall back to defaults
+          this.connectionSettings = {
+            host: "localhost",
+            port: 9170,
+            ssl: false,
+            apiKey: ""
+          };
+        }
+      }
 
       this.validateConnectionSettings();
     }
@@ -132,7 +233,7 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
         this.connectionSettings.host &&
         this.connectionSettings.port > 0 &&
         this.connectionSettings.port <= 65535 &&
-        this.connectionSettings.token
+        this.connectionSettings.apiKey
       );
     }
 
@@ -142,6 +243,7 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
     updateConnectionSettings(settings: Partial<ConnectionSettings>) {
       this.connectionSettings = { ...this.connectionSettings, ...settings };
       this.validateConnectionSettings();
+      this.saveConnectionSettingsToSession();
       this.requestUpdate();
     }
 
@@ -185,9 +287,10 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
         host: "localhost",
         port: 9170,
         ssl: false,
-        token: ""
+        apiKey: ""
       };
       this.validateConnectionSettings();
+      this.saveConnectionSettingsToSession();
       this.requestUpdate();
     }
 
@@ -202,17 +305,56 @@ export function SBConnectionMixin<T extends Constructor<LitElement>>(superClass:
     }
 
     /**
+     * Get detailed connection information for display.
+     */
+    getConnectionDetails(): { label: string; value: string; type: string }[] {
+      return [
+        {
+          label: "Host",
+          value: this.connectionSettings.host,
+          type: "text"
+        },
+        {
+          label: "Port", 
+          value: this.connectionSettings.port.toString(),
+          type: "number"
+        },
+        {
+          label: "Protocol",
+          value: this.connectionSettings.ssl ? "WSS (Secure)" : "WS (Unsecure)",
+          type: "text"
+        },
+        {
+          label: "API Key",
+          value: this.connectionSettings.apiKey ? "••••••••" : "Not set",
+          type: "password"
+        }
+      ];
+    }
+
+    /**
      * Render connection header with status and controls.
      */
     renderConnectionHeader() {
+      const details = this.getConnectionDetails();
+      
       return html`
         <div class="connection-header">
           <div class="connection-info">
             <div class="connection-status">
+              <div class="connection-status-indicator ${this.isConnectionValid ? 'valid' : 'invalid'}"></div>
               ${this.isConnectionValid ? "Ready to connect" : "Configuration needed"}
             </div>
             <div class="connection-details">
               ${this.getConnectionStatusText()}
+            </div>
+            <div class="connection-details-grid">
+              ${details.map(detail => html`
+                <div class="connection-detail-item">
+                  <div class="connection-detail-label">${detail.label}</div>
+                  <div class="connection-detail-value">${detail.value}</div>
+                </div>
+              `)}
             </div>
           </div>
           <div class="connection-actions">

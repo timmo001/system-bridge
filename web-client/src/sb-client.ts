@@ -7,16 +7,16 @@ import "./sb-connection-form";
  * System Bridge web client element.
  *
  * - A wrapper component that renders the main client element.
- * - Passes through the `token` attribute to the underlying sb-client-main element.
+ * - Passes through the `apiKey` attribute to the underlying sb-client-main element.
  */
 @customElement("sb-client")
 export class SBClient extends LitElement {
-  /** Auth token passed to the main client element. */
-  @property({ type: String, attribute: "token" }) token = "";
+  /** Auth API key passed to the main client element. */
+  @property({ type: String, attribute: "apiKey" }) apiKey = "";
 
   render() {
     return html`
-      <sb-client-main token="${this.token}">
+      <sb-client-main apiKey="${this.apiKey}">
         <slot></slot>
       </sb-client-main>
     `;

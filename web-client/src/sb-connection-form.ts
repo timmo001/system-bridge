@@ -5,7 +5,7 @@ import type { ConnectionSettings } from "./sb-connection-mixin";
 /**
  * Connection form component for System Bridge settings.
  * 
- * - Provides a form UI for configuring host, port, SSL, and token
+ * - Provides a form UI for configuring host, port, SSL, and API key
  * - Emits events when settings change or form is submitted
  * - Validates input and shows error states
  */
@@ -16,7 +16,7 @@ export class SBConnectionForm extends LitElement {
     host: "localhost",
     port: 9170,
     ssl: false,
-    token: ""
+    apiKey: ""
   };
 
   /** Whether the form is in a valid state */
@@ -157,7 +157,7 @@ export class SBConnectionForm extends LitElement {
       this.settings.host &&
       this.settings.port > 0 &&
       this.settings.port <= 65535 &&
-      this.settings.token
+      this.settings.apiKey
     );
   }
 
@@ -259,17 +259,17 @@ export class SBConnectionForm extends LitElement {
         </div>
 
         <div class="form-group">
-          <label for="token">Token</label>
+          <label for="apiKey">API Key</label>
           <input
             type="password"
-            id="token"
-            name="token"
-            .value="${this.settings.token}"
+            id="apiKey"
+            name="apiKey"
+            .value="${this.settings.apiKey}"
             @input="${this.handleInput}"
-            placeholder="Enter authentication token"
+            placeholder="Enter authentication API key"
             required
           />
-          ${this.showErrors && !this.settings.token ? html`<div class="error">Token is required</div>` : ""}
+          ${this.showErrors && !this.settings.apiKey ? html`<div class="error">API Key is required</div>` : ""}
         </div>
 
         <div class="button-group">

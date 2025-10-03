@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connection Details Test | System Bridge</title>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/sb-client.ts"></script>
+    <style>
+      .test-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--background-color, #ffffff);
+        color: var(--color, #213547);
+        min-height: 100vh;
+      }
+      
+      .test-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        background-color: #f9fafb;
+      }
+      
+      .test-section h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: #374151;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      
+      .test-section p {
+        margin-bottom: 1rem;
+        color: #6b7280;
+        line-height: 1.6;
+      }
+      
+      .test-section ul, .test-section ol {
+        margin: 1rem 0;
+        padding-left: 1.5rem;
+        color: #374151;
+      }
+      
+      .test-section li {
+        margin-bottom: 0.5rem;
+        line-height: 1.6;
+      }
+      
+      .test-section code {
+        background-color: #f3f4f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+        color: #1f2937;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .test-section hr {
+        border: none;
+        height: 1px;
+        background-color: #e5e7eb;
+        margin: 2rem 0;
+      }
+      
+      .client-wrapper {
+        margin: 1rem 0;
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        background-color: white;
+      }
+      
+      .clear-button {
+        margin: 1rem 0;
+        padding: 0.75rem 1.5rem;
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+      }
+      
+      .clear-button:hover {
+        background-color: #b91c1c;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .test-container {
+          background-color: #1f2937;
+          color: #f9fafb;
+        }
+        
+        .test-section {
+          background-color: #374151;
+          border-color: #4b5563;
+        }
+        
+        .test-section h2 {
+          color: #f9fafb;
+        }
+        
+        .test-section p {
+          color: #d1d5db;
+        }
+        
+        .test-section ul, .test-section ol {
+          color: #f9fafb;
+        }
+        
+        .test-section code {
+          background-color: #4b5563;
+          color: #f9fafb;
+          border-color: #6b7280;
+        }
+        
+        .client-wrapper {
+          background-color: #1f2937;
+          border-color: #4b5563;
+        }
+        
+        #system-data-results {
+          background-color: #374151;
+          border-color: #4b5563;
+        }
+        
+        #system-data-results h3 {
+          color: #f9fafb;
+        }
+        
+        #system-data-output {
+          color: #f9fafb;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1 style="text-align: center; margin-bottom: 2rem; color: #1f2937;">System Bridge Connection Details Test</h1>
+      
+      <div class="test-section">
+        <h2>Test 1: Default Settings (No API Key)</h2>
+        <p>This test shows the default connection settings without any API key configured.</p>
+        <div class="client-wrapper">
+          <sb-client></sb-client>
+        </div>
+      </div>
+      
+      <div class="test-section">
+        <h2>Test 2: With API Key via Attribute</h2>
+        <p>This test shows connection settings with an API key passed via the apiKey attribute.</p>
+        <div class="client-wrapper">
+          <sb-client apiKey="test-api-key-123"></sb-client>
+        </div>
+      </div>
+      
+      <div class="test-section">
+        <h2>Test 3: With URL Parameters</h2>
+        <p>Try these URLs to test different connection scenarios:</p>
+        <ul>
+          <li><code>?host=192.168.1.100&port=8080&ssl=true&apiKey=my-api-key</code></li>
+          <li><code>?host=example.com&port=443&ssl=true&apiKey=secure-api-key</code></li>
+          <li><code>?host=localhost&port=9170&ssl=false&apiKey=local-api-key</code></li>
+        </ul>
+      </div>
+      
+      <div class="test-section">
+        <h2>Test 4: Session Storage Persistence</h2>
+        <p>This test demonstrates session storage functionality:</p>
+        <ol>
+          <li>Configure connection settings using the "Configure" button above</li>
+          <li>Refresh this page - your settings should persist</li>
+          <li>Open browser DevTools → Application → Session Storage</li>
+          <li>Look for the "system-bridge-connection" key</li>
+          <li>Use the "Clear Session Storage" button below to reset</li>
+        </ol>
+        <button class="clear-button" onclick="clearSessionStorage()">
+          Clear Session Storage
+        </button>
+      </div>
+      
+      <div class="test-section">
+        <h2>Test 5: System Data Module</h2>
+        <p>This test calls the System data module and displays the minified results:</p>
+        <div class="client-wrapper">
+          <sb-client id="system-test-client"></sb-client>
+        </div>
+        <div id="system-data-results" style="margin-top: 1rem; padding: 1rem; background-color: #f3f4f6; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+          <h3 style="margin-top: 0; color: #374151;">System Data Results:</h3>
+          <pre id="system-data-output" style="margin: 0; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 0.75rem; color: #1f2937; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto;"></pre>
+        </div>
+        <button class="clear-button" onclick="testSystemData()" style="background-color: #3b82f6; margin-top: 1rem;">
+          Test System Data Module
+        </button>
+      </div>
+    </div>
+    
+    <script>
+      // Add some test data to demonstrate the connection details
+      console.log('System Bridge Connection Details Test Page Loaded');
+      
+      // Test session storage functionality
+      console.log('Session Storage Test:');
+      console.log('1. Configure connection settings in the form below');
+      console.log('2. Refresh the page - settings should persist');
+      console.log('3. Check browser DevTools > Application > Session Storage');
+      console.log('4. Look for "system-bridge-connection" key');
+      
+      // Function to clear session storage for testing
+      function clearSessionStorage() {
+        sessionStorage.removeItem('system-bridge-connection');
+        console.log('Session storage cleared. Refresh page to see default settings.');
+        alert('Session storage cleared. Refresh the page to see default settings.');
+      }
+      
+      // Function to test SYSTEM data module
+      async function testSystemData() {
+        const client = document.getElementById('system-test-client');
+        const output = document.getElementById('system-data-output');
+        
+        if (!client || !output) {
+          console.error('Required elements not found');
+          return;
+        }
+        
+        try {
+          output.textContent = 'Testing SYSTEM data module...';
+          
+          // Get the underlying sb-client-main element
+          const mainClient = client.shadowRoot?.querySelector('sb-client-main');
+          if (!mainClient) {
+            throw new Error('Main client element not found');
+          }
+          
+          // Check if connected
+          if (!mainClient.isConnected) {
+            output.textContent = 'Error: Not connected to System Bridge. Please configure connection settings and connect first.';
+            return;
+          }
+          
+          // Call the SYSTEM data module
+          console.log('Calling SYSTEM data module...');
+          const systemData = await mainClient.getData(['system']);
+          
+          // Display minified results
+          const minifiedData = JSON.stringify(systemData, null, 2);
+          output.textContent = `SYSTEM Data Module Results:\n\n${minifiedData}`;
+          
+          console.log('SYSTEM data received:', systemData);
+          
+        } catch (error) {
+          console.error('Error testing SYSTEM data module:', error);
+          output.textContent = `Error: ${error.message}`;
+        }
+      }
+      
+      // Auto-test when page loads (after a short delay to allow components to initialize)
+      setTimeout(() => {
+        console.log('Auto-testing SYSTEM data module in 2 seconds...');
+        setTimeout(testSystemData, 2000);
+      }, 1000);
+    </script>
+  </body>
+</html>
