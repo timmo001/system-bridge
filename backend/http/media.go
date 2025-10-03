@@ -77,8 +77,9 @@ func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Security: Clean and validate path to prevent directory traversal
 	cleanPath := filepath.Clean(fullPath)
-	if !strings.HasPrefix(cleanPath, basePath) {
-		slog.Error("Path traversal attempt detected", "requested_path", fullPath, "base_path", basePath)
+	relPath, err := filepath.Rel(basePath, cleanPath)
+	if err != nil || strings.HasPrefix(relPath, "..") {
+		slog.Error("Path traversal attempt detected", "requested_path", fullPath, "base_path", basePath, "rel_path", relPath)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Access denied"}); err != nil {
