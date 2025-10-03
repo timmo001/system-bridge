@@ -111,6 +111,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
 		b.dataStore,
 	))
+
 	// Set up health check endpoint
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -125,18 +126,17 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	// Set up media file data endpoint (4.x.x compatibility)
-	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
-	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
+  mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Not found"}); err != nil {
 			slog.Error("Failed to encode response", "error", err)
 		}
 	})
-	// TODO: http endpoints (get file etc.)
 
-	// Get port from environment variable with default
+  mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+
+  // Get port from environment variable with default
 	port := utils.GetPort()
 
 	// Create HTTP server
