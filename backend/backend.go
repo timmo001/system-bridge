@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
+	"time"
 
 	"log/slog"
 
@@ -20,6 +21,7 @@ import (
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/version"
 )
 
 type Backend struct {
@@ -109,6 +111,20 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
 		b.dataStore,
 	))
+	// Set up health check endpoint
+	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		healthResponse := map[string]interface{}{
+			"status":    "healthy",
+			"timestamp": time.Now().Format(time.RFC3339),
+			"version":   version.Version,
+		}
+		if err := json.NewEncoder(w).Encode(healthResponse); err != nil {
+			slog.Error("Failed to encode health response", "error", err)
+		}
+	})
+
 	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -116,7 +132,7 @@ func (b *Backend) Run(ctx context.Context) error {
 			slog.Error("Failed to encode response", "error", err)
 		}
 	})
-	// TODO: http endpoints (/api healthcheck, get file etc.)
+	// TODO: http endpoints (get file etc.)
 
 	// Get port from environment variable with default
 	port := utils.GetPort()
