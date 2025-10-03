@@ -42,11 +42,8 @@ build_web_client: clean_web_client
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@timeout /t 2 /nobreak >nul 2>&1
-	@echo "Verifying CSS files are accessible..."
-	@if not exist "web-client\out\_next\static\css\*.css" ( \
-		echo ✗ CSS files not found after build & \
-		exit /b 1 \
-	)
+ 	@echo "Verifying CSS files are accessible..."
+ 	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\css\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
 	@echo ✓ CSS files verified before Go build
 else
 	@echo "Waiting for file system to sync..."
