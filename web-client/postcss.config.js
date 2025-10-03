@@ -1,5 +1,8 @@
 export default {
   plugins: {
-    "@tailwindcss/postcss": {},
+    "@tailwindcss/postcss": {
+      // Ensure CSS is generated for static export
+      optimize: true,
+    },
   },
 };
