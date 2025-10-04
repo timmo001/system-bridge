@@ -24,13 +24,6 @@ if (-not (Test-Path "dist\system-bridge.exe") -or $Clean) {
     Copy-Item system-bridge.exe dist\system-bridge.exe
 }
 
-# Verify .NET Runtime version
-$dotnetVersion = "8.0"
-Write-Host "Verifying .NET Runtime $dotnetVersion is available..."
-$runtimes = dotnet --list-runtimes
-if ($LASTEXITCODE -ne 0 -or -not ($runtimes -match "Microsoft.NETCore.App $dotnetVersion")) {
-    Write-Warning ".NET $dotnetVersion Runtime not found. The installer will attempt to install it during setup."
-}
 
 # Verify Visual C++ Runtime
 Write-Host "Verifying Visual C++ Runtime..."
