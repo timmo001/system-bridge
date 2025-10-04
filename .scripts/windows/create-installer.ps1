@@ -82,10 +82,33 @@ $installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$Y
 Set-Content -Path "installer.nsi" -Value $installerScript
 
 Write-Host "Building installer with NSIS..."
+# Find makensis executable
+$makensisPath = Get-Command makensis -ErrorAction SilentlyContinue
+if (-not $makensisPath) {
+    # Try common installation paths
+    $possiblePaths = @(
+        "${env:ProgramFiles(x86)}\NSIS\makensis.exe",
+        "${env:ProgramFiles}\NSIS\makensis.exe",
+        "$env:ChocolateyInstall\lib\nsis\tools\makensis.exe",
+        "C:\ProgramData\chocolatey\lib\nsis\tools\makensis.exe"
+    )
+    foreach ($path in $possiblePaths) {
+        if (Test-Path $path) {
+            $makensisPath = $path
+            break
+        }
+    }
+}
+
+if (-not $makensisPath) {
+    Write-Error "makensis not found. Please ensure NSIS is installed correctly."
+    exit 1
+}
+
 # Build the installer, optionally defining INCLUDE_NOW_PLAYING
 if ($includeNowPlaying) {
     Write-Host "Including NowPlaying files in installer"
-    & makensis /DINCLUDE_NOW_PLAYING installer.nsi
+    & $makensisPath /DINCLUDE_NOW_PLAYING installer.nsi
 } else {
-    & makensis installer.nsi
+    & $makensisPath installer.nsi
 }

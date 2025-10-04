@@ -171,13 +171,7 @@ jobs:
           version: 12.2.0
 
       - name: Install NSIS
-        run: |
-          choco install nsis -y --no-progress --limit-output
-          # Refresh PATH for the current session
-          $nsisPath = "${env:ProgramFiles(x86)}\NSIS"
-          if (Test-Path $nsisPath) {
-            $env:PATH = "$nsisPath;$env:PATH"
-          }
+        run: choco install nsis -y --no-progress --limit-output
 
       - name: Get version
         id: get_version
