@@ -1,0 +1,15 @@
+[Unit]
+Description=System Bridge
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/system-bridge backend
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=system-bridge
+
+[Install]
+WantedBy=multi-user.target
