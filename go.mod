@@ -5,7 +5,7 @@ go 1.24.6
 require (
 	fyne.io/systray v1.11.0
 	github.com/distatus/battery v0.11.0
-	github.com/getsentry/sentry-go v0.36.1
+	github.com/getsentry/sentry-go v0.36.2
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v0.110.8
 	github.com/google/uuid v1.6.0
