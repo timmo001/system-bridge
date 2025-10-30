@@ -46,9 +46,11 @@ ENV PATH="/usr/local/go/bin:$PATH"
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# Install Bun (JavaScript runtime)
-RUN curl -fsSL https://bun.sh/install | bash \
-    && mv /root/.bun/bin/bun /usr/local/bin/bun
+# Install Node.js and enable corepack for pnpm
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs && \
+    corepack enable && \
+    corepack prepare pnpm@latest --activate
 
 # Install AppImageTool (pin to a specific version for reproducibility)
 RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool \
