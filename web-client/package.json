@@ -6,7 +6,7 @@
   "scripts": {
     "build": "SKIP_LINT=true next build",
     "build:static": "STATIC_EXPORT=true SKIP_LINT=true next build",
-    "verify-build": "bun run scripts/verify-build.ts",
+    "verify-build": "tsx scripts/verify-build.ts",
     "check": "eslint . && tsc --noEmit",
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
@@ -61,6 +61,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "^4.1.5",
+    "tsx": "^4.20.6",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.0"
   },
@@ -70,5 +71,6 @@
   "overrides": {
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2"
-  }
+  },
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
 }

@@ -5,13 +5,13 @@ description: Setup steps for the System Bridge web client
 runs:
   using: "composite"
   steps:
-    - uses: oven-sh/setup-bun@v2
+    - uses: pnpm/action-setup@v4
 
-    - name: Cache bun
+    - name: Cache pnpm
       uses: actions/cache@v4
       with:
         path: |
-          ~/.bun/install/cache
-        key: ${{ runner.os }}-bun-v2-${{ hashFiles('web-client/**/bun.lock') }}
+          ~/.pnpm-store
+        key: ${{ runner.os }}-pnpm-v1-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-bun-v2-
+          ${{ runner.os }}-pnpm-v1-
