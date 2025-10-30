@@ -6,12 +6,7 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
-	experimental: {
-		reactCompiler: true,
-	},
-	eslint: {
-		ignoreDuringBuilds: true,
-	},
+	reactCompiler: true,
 	reactStrictMode: true,
 	output: process.env.STATIC_EXPORT ? "export" : undefined,
 };
