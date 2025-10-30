@@ -5,18 +5,7 @@ description: Setup steps for the System Bridge web client
 runs:
   using: "composite"
   steps:
-    - name: Check if Bun is already installed
-      id: check_bun
-      shell: bash
-      run: |
-        if command -v bun &> /dev/null; then
-          echo "skip=true" >> $GITHUB_OUTPUT
-        else
-          echo "skip=false" >> $GITHUB_OUTPUT
-        fi
-
     - uses: oven-sh/setup-bun@v2
-      if: steps.check_bun.outputs.skip != 'true'
 
     - name: Cache bun
       uses: actions/cache@v4
