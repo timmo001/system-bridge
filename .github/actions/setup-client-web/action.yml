@@ -6,6 +6,8 @@ runs:
   using: "composite"
   steps:
     - uses: pnpm/action-setup@v4
+      with:
+        package_json_file: web-client/package.json
 
     - name: Cache pnpm
       uses: actions/cache@v4
