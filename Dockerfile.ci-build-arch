@@ -41,7 +41,8 @@ RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
     go mod download && go mod verify
 
 # Install Node.js and enable corepack for pnpm
-RUN pacman -S --noconfirm --needed nodejs npm && \
+RUN pacman -Sy --noconfirm && \
+    pacman -S --noconfirm --needed nodejs npm && \
     corepack enable && \
     corepack prepare pnpm@latest --activate
 
