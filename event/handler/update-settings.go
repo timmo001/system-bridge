@@ -15,6 +15,7 @@ import (
 	settingspkg "github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/settings"
+	"github.com/timmo001/system-bridge/utils/logging"
 )
 
 type UpdateSettingsRequestData = settings.Settings
@@ -166,7 +167,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 
 		if originalSettings.LogLevel != newSettings.LogLevel {
 			slog.Info("LogLevel has changed:", "original", originalSettings.LogLevel, "new", newSettings.LogLevel)
-			slog.SetLogLoggerLevel(newSettings.LogLevel.ToSlogLevel())
+			logging.SetLogLevel(newSettings.LogLevel.ToSlogLevel())
 		}
 
 		return event.MessageResponse{

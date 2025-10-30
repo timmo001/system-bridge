@@ -14,6 +14,7 @@ import (
 	console "github.com/phsym/console-slog"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/logging"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -156,8 +157,8 @@ func setupLogging() {
 		slog.Error("error loading settings", "err", err)
 	}
 
-	// Convert LogLevel to slog.Level
-	logLevel := settings.LogLevel.ToSlogLevel()
+	// Initialize the dynamic log level from settings
+	logging.LogLevel.Set(settings.LogLevel.ToSlogLevel())
 
 	// Determine whether to log to stdout (only for backend command)
 	includeTerminal := shouldLogToStdout()
@@ -166,7 +167,7 @@ func setupLogging() {
 	var terminalHandler slog.Handler
 	if includeTerminal {
 		terminalHandler = console.NewHandler(os.Stdout, &console.HandlerOptions{
-			Level: logLevel,
+			Level: logging.LogLevel,
 		})
 	}
 
@@ -184,7 +185,7 @@ func setupLogging() {
 		Compress:   true,
 	}
 	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
-		Level: logLevel,
+		Level: logging.LogLevel,
 	})
 
 	// Wrap handlers with error capture
