@@ -6,23 +6,40 @@ import { join } from 'node:path';
 
 async function verifyBuild(): Promise<void> {
   const outDir = join(process.cwd(), 'out');
-  const cssDir = join(outDir, '_next', 'static', 'css');
-  
+  // Next.js 16 moved CSS files to chunks directory
+  const staticDir = join(outDir, '_next', 'static');
+
   try {
     // Check if out directory exists
     await stat(outDir);
     console.log('✓ Output directory exists');
-    
-    // Check if CSS directory exists
-    await stat(cssDir);
-    console.log('✓ CSS directory exists');
-    
-    // Check for CSS files
-    const cssFiles = await readdir(cssDir);
-    const cssFileCount = cssFiles.filter(file => file.endsWith('.css')).length;
-    
-    if (cssFileCount > 0) {
-      console.log(`✓ Found ${cssFileCount} CSS file(s):`, cssFiles.filter(file => file.endsWith('.css')));
+
+    // Check if static directory exists
+    await stat(staticDir);
+    console.log('✓ Static directory exists');
+
+    // Find CSS files in static directory (recursively check chunks)
+    const chunksDir = join(staticDir, 'chunks');
+    let cssFiles: string[] = [];
+
+    try {
+      await stat(chunksDir);
+      const chunkFiles = await readdir(chunksDir);
+      cssFiles = chunkFiles.filter(file => file.endsWith('.css'));
+    } catch {
+      // Fallback: check old css directory location for backwards compatibility
+      try {
+        const cssDir = join(staticDir, 'css');
+        await stat(cssDir);
+        const oldCssFiles = await readdir(cssDir);
+        cssFiles = oldCssFiles.filter(file => file.endsWith('.css'));
+      } catch {
+        // No CSS files in either location
+      }
+    }
+
+    if (cssFiles.length > 0) {
+      console.log(`✓ Found ${cssFiles.length} CSS file(s):`, cssFiles);
     } else {
       console.log('✗ No CSS files found');
       process.exit(1);
@@ -31,15 +48,16 @@ async function verifyBuild(): Promise<void> {
     // Check HTML files for CSS links
     const htmlFiles = await readdir(outDir);
     const htmlFileCount = htmlFiles.filter(file => file.endsWith('.html')).length;
-    
+
     if (htmlFileCount > 0) {
       console.log(`✓ Found ${htmlFileCount} HTML file(s)`);
-      
+
       // Check if index.html has CSS link
       const indexHtml = join(outDir, 'index.html');
       try {
         const content = readFileSync(indexHtml, 'utf8');
-        if (content.includes('stylesheet') && content.includes('_next/static/css/')) {
+        // Next.js 16 puts CSS in chunks or css directory
+        if (content.includes('stylesheet') && (content.includes('_next/static/chunks/') || content.includes('_next/static/css/'))) {
           console.log('✓ HTML files contain CSS links');
         } else {
           console.log('✗ HTML files missing CSS links');

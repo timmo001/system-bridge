@@ -43,13 +43,13 @@ ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
 	@echo "Verifying CSS files are accessible..."
-	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\css\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
+	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\chunks\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
 	@echo ✓ CSS files verified before Go build
 else
 	@echo "Waiting for file system to sync..."
 	@sync
 	@echo "Verifying CSS files are accessible..."
-	@if ! ls web-client/out/_next/static/css/*.css 1> /dev/null 2>&1; then \
+	@if ! ls web-client/out/_next/static/chunks/*.css 1> /dev/null 2>&1; then \
 		echo "✗ CSS files not found after build"; \
 		exit 1; \
 	fi
