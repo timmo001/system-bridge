@@ -12,6 +12,6 @@ runs:
       with:
         path: |
           ~/.bun/install/cache
-        key: ${{ runner.os }}-bun-${{ hashFiles('web-client/**/bun.lock') }}
+        key: ${{ runner.os }}-bun-v2-${{ hashFiles('web-client/**/bun.lock') }}
         restore-keys: |
-          ${{ runner.os }}-bun-cache-
+          ${{ runner.os }}-bun-v2-
