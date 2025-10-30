@@ -126,7 +126,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-  mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/information", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Not found"}); err != nil {
@@ -134,9 +134,9 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-  mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
 
-  // Get port from environment variable with default
+	// Get port from environment variable with default
 	port := utils.GetPort()
 
 	// Create HTTP server

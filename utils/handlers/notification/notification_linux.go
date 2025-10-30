@@ -22,15 +22,14 @@ func send(data NotificationData) error {
 		args = append(args, "--expire-time="+strconv.Itoa(data.Duration))
 	}
 
-	
 	if data.Title != "" {
 		args = append(args, data.Title)
 	} else {
 		args = append(args, "Notification")
 	}
-		
+
 	args = append(args, data.Message)
-	
+
 	cmd := exec.Command("notify-send", args...)
 	return cmd.Run()
 }
