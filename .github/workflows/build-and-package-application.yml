@@ -69,7 +69,7 @@ jobs:
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
 
       - name: Upload application
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: system-bridge-linux
@@ -133,7 +133,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: system-bridge-linux-packages-${{ matrix.build.package }}-${{ env.VERSION }}
           path: dist/**
@@ -215,7 +215,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: system-bridge-windows-packages-${{ env.VERSION }}
           path: dist/**
