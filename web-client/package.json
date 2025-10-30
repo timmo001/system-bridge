@@ -28,7 +28,6 @@
     "@t3-oss/env-nextjs": "^0.13.4",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
-    "babel-plugin-react-compiler": "^19.1.0-rc.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.548.0",
