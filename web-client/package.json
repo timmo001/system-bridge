@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "SKIP_LINT=true next build",
-    "build:static": "STATIC_EXPORT=true SKIP_LINT=true next build",
+    "build": "cross-env SKIP_LINT=true next build",
+    "build:static": "cross-env STATIC_EXPORT=true SKIP_LINT=true next build",
     "verify-build": "tsx scripts/verify-build.ts",
     "check": "eslint . && tsc --noEmit",
     "dev": "next dev --turbo",
@@ -55,6 +55,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "cross-env": "^10.1.0",
     "eslint": "^9.26.0",
     "eslint-config-next": "16.0.1",
     "postcss": "^8.5.3",
