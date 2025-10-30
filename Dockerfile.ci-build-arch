@@ -40,11 +40,9 @@ COPY go.mod go.sum ./
 RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
     go mod download && go mod verify
 
-# Install Node.js and enable corepack for pnpm
+# Install Node.js and pnpm
 RUN pacman -Sy --noconfirm && \
-    pacman -S --noconfirm --needed nodejs npm && \
-    corepack enable && \
-    corepack prepare pnpm@latest --activate
+    pacman -S --noconfirm --needed nodejs npm pnpm
 
 # Install AppImageTool
 RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool && \
