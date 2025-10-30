@@ -120,6 +120,10 @@ endif
 test:
 	go test -v ./...
 
+lint:
+	go fmt ./...
+	go vet ./...
+
 clean:
 ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.syso 2>nul
@@ -183,6 +187,7 @@ help:
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
 	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"
 	@echo "  test                     Run tests"
+	@echo "  lint                     Run Go linters (fmt, vet)"
 	@echo "  clean                    Remove build artifacts"
 	@echo "  clean_dist               Remove dist directory"
 	@echo "  clean_web_client         Remove web client build artifacts"
