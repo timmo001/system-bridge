@@ -56,7 +56,7 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "cross-env": "^10.1.0",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "eslint-config-next": "16.0.1",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
