@@ -133,8 +133,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1(prettier@3.6.2)
       tailwindcss:
-        specifier: ^4.1.5
-        version: 4.1.16
+        specifier: ^4.1.17
+        version: 4.1.17
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
@@ -2990,9 +2990,6 @@ packages:
 
   tailwind-merge@3.3.1:
     resolution: {integrity: sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g==}
-
-  tailwindcss@4.1.16:
-    resolution: {integrity: sha512-pONL5awpaQX4LN5eiv7moSiSPd/DLDzKVRJz8Q9PgzmAdd1R4307GQS2ZpfiN7ZmekdQrfhZZiSE5jkLR4WNaA==}
 
   tailwindcss@4.1.17:
     resolution: {integrity: sha512-j9Ee2YjuQqYT9bbRTfTZht9W/ytp5H+jJpZKiYdP/bpnXARAuELt9ofP0lPnmHjbga7SNQIxdTAXCmtKVYjN+Q==}
@@ -6375,8 +6372,6 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   tailwind-merge@3.3.1: {}
-
-  tailwindcss@4.1.16: {}
 
   tailwindcss@4.1.17: {}
 
