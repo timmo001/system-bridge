@@ -39,4 +39,4 @@ jobs:
         uses: ./.github/actions/build-client-web
 
       - name: Lint application
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
