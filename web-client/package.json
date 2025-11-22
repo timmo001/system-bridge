@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts",
+    "format:check": "prettier --check \"src/**/*.{ts,css}\"",
+    "format:write": "prettier --write \"src/**/*.{ts,css}\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "lit": "^3.3.1"
