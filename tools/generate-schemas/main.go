@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -31,11 +32,13 @@ type EnumInfo struct {
 }
 
 func main() {
-	typesDir := "types"
-	outputFile := "web-client/src/lib/system-bridge/types-modules-schemas.ts"
+	// Command-line flags for configuration
+	typesDir := flag.String("types-dir", "types", "Directory containing Go type definitions")
+	outputFile := flag.String("output", "web-client/src/lib/system-bridge/types-modules-schemas.ts", "Output file for generated TypeScript schemas")
+	flag.Parse()
 
 	// Parse all Go files in types directory
-	structs, enums, err := parseTypesDirectory(typesDir)
+	structs, enums, err := parseTypesDirectory(*typesDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing types: %v\n", err)
 		os.Exit(1)
@@ -45,12 +48,12 @@ func main() {
 	tsCode := generateZodSchemas(structs, enums)
 
 	// Write to output file
-	if err := os.WriteFile(outputFile, []byte(tsCode), 0644); err != nil {
+	if err := os.WriteFile(*outputFile, []byte(tsCode), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Generated Zod schemas in %s\n", outputFile)
+	fmt.Printf("Generated Zod schemas from %s to %s\n", *typesDir, *outputFile)
 }
 
 func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo, error) {
