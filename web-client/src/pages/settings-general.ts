@@ -139,7 +139,6 @@ export class PageSettingsGeneral extends PageElement {
 
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
-    const error = this.websocket?.error;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

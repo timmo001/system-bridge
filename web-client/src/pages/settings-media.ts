@@ -133,7 +133,7 @@ export class PageSettingsMedia extends PageElement {
                 success: true as const,
                 data: {
                   parse: (d: unknown) => d,
-                  safeParse: () => ({ success: true as const, data: d }),
+                  safeParse: () => ({ success: true as const, data: data }),
                 }.parse(data) as { valid: boolean },
               };
             } catch (error) {
