@@ -1,6 +1,6 @@
-import { provide } from "@lit/context";
+import { ContextProvider } from "@lit/context";
 import { html } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 
 import {
   connectionContext,
@@ -12,10 +12,9 @@ import { ProviderElement } from "~/mixins";
 
 @customElement("connection-provider")
 export class ConnectionProvider extends ProviderElement {
-  @state()
   private _connection: ConnectionSettings;
+  private _provider!: ContextProvider<typeof connectionContext>;
 
-  @provide({ context: connectionContext })
   get connection(): ConnectionSettings {
     return this._connection;
   }
@@ -23,13 +22,20 @@ export class ConnectionProvider extends ProviderElement {
   constructor() {
     super();
     this._connection = loadConnectionSettings();
-    console.log("ConnectionProvider: Loaded connection settings", this._connection);
+    this._provider = new ContextProvider(this, {
+      context: connectionContext,
+    });
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._provider.setValue(this._connection);
   }
 
   updateConnection(settings: Partial<ConnectionSettings>) {
     this._connection = { ...this._connection, ...settings };
     saveConnectionSettings(this._connection);
-    this.requestUpdate();
+    this._provider.setValue(this._connection);
   }
 
   render() {

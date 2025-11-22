@@ -64,7 +64,7 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
     }
 
     return settings;
-  } catch(error) {
+  } catch (error) {
     console.error("Error loading connection settings from URL", error);
     return null;
   }
@@ -86,7 +86,7 @@ export function loadConnectionSettings(): ConnectionSettings {
     if (stored) {
       return JSON.parse(stored) as ConnectionSettings;
     }
-  } catch(error) {
+  } catch (error) {
     console.error("Error loading connection settings from localStorage", error);
   }
 

@@ -1,6 +1,8 @@
 import { consume, provide } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { createElement, icons } from "lucide";
 import { z } from "zod";
 
 import {
@@ -84,6 +86,10 @@ export class PageConnection extends PageElement {
   };
 
   private handleCancel = (): void => {
+    this.navigate("/");
+  };
+
+  private handleNavigateToHome = (): void => {
     this.navigate("/");
   };
 
@@ -225,11 +231,21 @@ export class PageConnection extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-2xl mx-auto space-y-6">
-          <div>
-            <h1 class="text-3xl font-bold mb-2">Connection Settings</h1>
-            <p class="text-muted-foreground">
-              Configure your connection to System Bridge
-            </p>
+          <div class="flex items-center gap-3">
+            <ui-button
+              variant="ghost"
+              size="icon"
+              @click=${this.handleNavigateToHome}
+              aria-label="Back to home"
+            >
+              ${unsafeHTML(createElement(icons.ArrowLeft).outerHTML)}
+            </ui-button>
+            <div>
+              <h1 class="text-3xl font-bold mb-2">Connection Settings</h1>
+              <p class="text-muted-foreground">
+                Configure your connection to System Bridge
+              </p>
+            </div>
           </div>
 
           <form @submit=${this.handleSubmit} class="space-y-6">

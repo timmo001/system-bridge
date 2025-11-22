@@ -1,6 +1,8 @@
 import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { createElement, icons } from "lucide";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
@@ -44,10 +46,7 @@ export class PageData extends PageElement {
   private renderTabTriggers() {
     return Modules.map(
       (module) => html`
-        <ui-tabs-trigger
-          value=${module}
-          ?active=${this.selectedTab === module}
-        >
+        <ui-tabs-trigger value=${module} ?active=${this.selectedTab === module}>
           ${this.capitalizeFirst(module)}
         </ui-tabs-trigger>
       `,
@@ -57,10 +56,7 @@ export class PageData extends PageElement {
   private renderTabContents() {
     return Modules.map(
       (module) => html`
-        <ui-tabs-content
-          value=${module}
-          ?hidden=${this.selectedTab !== module}
-        >
+        <ui-tabs-content value=${module} ?hidden=${this.selectedTab !== module}>
           <div class="mt-4">
             <div class="rounded-lg border bg-card p-4">
               <h2 class="text-xl font-semibold mb-4">
@@ -94,11 +90,21 @@ export class PageData extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-7xl mx-auto space-y-6">
           <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-3xl font-bold mb-2">System Data</h1>
-              <p class="text-muted-foreground">
-                Real-time data from System Bridge modules
-              </p>
+            <div class="flex items-center gap-3">
+              <ui-button
+                variant="ghost"
+                size="icon"
+                @click=${this.handleNavigateToHome}
+                aria-label="Back to home"
+              >
+                ${unsafeHTML(createElement(icons.ArrowLeft).outerHTML)}
+              </ui-button>
+              <div>
+                <h1 class="text-3xl font-bold mb-2">System Data</h1>
+                <p class="text-muted-foreground">
+                  Real-time data from System Bridge modules
+                </p>
+              </div>
             </div>
             <div class="flex items-center gap-2">
               <div
@@ -141,12 +147,6 @@ export class PageData extends PageElement {
                   ${this.renderTabContents()}
                 </ui-tabs>
               `}
-
-          <div class="flex gap-4">
-            <ui-button variant="outline" @click=${this.handleNavigateToHome}>
-              Back to Home
-            </ui-button>
-          </div>
         </div>
       </div>
     `;
