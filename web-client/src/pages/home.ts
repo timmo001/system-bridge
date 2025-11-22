@@ -18,8 +18,11 @@ export class PageHome extends PageElement {
   @state()
   connection?: ConnectionSettings;
 
-  private _websocketConsumer!: ContextConsumer<typeof websocketContext>;
-  private _connectionConsumer!: ContextConsumer<typeof connectionContext>;
+  // Consumers must be stored to keep subscriptions alive
+  // @ts-expect-error - TS6133: Field is used via subscription callback
+  private _websocketConsumer!: ContextConsumer<typeof websocketContext, this>;
+  // @ts-expect-error - TS6133: Field is used via subscription callback
+  private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
 
   constructor() {
     super();

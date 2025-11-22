@@ -1,7 +1,6 @@
 import { html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import type { LucideIcon } from "lucide";
 
 import { UIElement } from "~/mixins";
 
@@ -14,15 +13,15 @@ export class Icon extends UIElement {
   @state()
   private iconHtml = "";
 
-  async connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
-    await this.loadIcon();
+    void this.loadIcon();
   }
 
-  async updated(changedProperties: Map<string, unknown>) {
+  updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has("name")) {
-      await this.loadIcon();
+      void this.loadIcon();
     }
   }
 
@@ -35,9 +34,9 @@ export class Icon extends UIElement {
     try {
       const { createElement, icons } = await import("lucide");
       const iconKey = this.name as keyof typeof icons;
-      const iconData = icons[iconKey] as LucideIcon;
+      const iconData = icons[iconKey];
 
-      if (!iconData) {
+      if (!iconData || typeof iconData !== "object") {
         this.iconHtml = "";
         return;
       }

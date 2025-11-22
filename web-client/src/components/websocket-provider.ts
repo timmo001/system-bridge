@@ -68,7 +68,9 @@ export class WebSocketProvider extends ProviderElement {
   private _settingsUpdateTimeout: number | null = null;
   private _previousConnectedState = false;
   private _pendingResolvers: Record<string, AnyPendingResolver> = {};
-  private _connectionConsumer!: ContextConsumer<typeof connectionContext>;
+  // Consumer must be stored to keep subscription alive
+  // @ts-expect-error - TS6133: Field is used via subscription callback
+  private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
   private _websocketProvider!: ContextProvider<typeof websocketContext>;
 
   constructor() {
@@ -76,7 +78,6 @@ export class WebSocketProvider extends ProviderElement {
     this._connectionConsumer = new ContextConsumer(this, {
       context: connectionContext,
       callback: (value) => {
-        console.log("WebSocketProvider: Context received", value);
         this.connection = value;
         this.handleConnectionChange();
       },
@@ -105,12 +106,8 @@ export class WebSocketProvider extends ProviderElement {
     }
   }
 
-  requestUpdate(
-    name?: PropertyKey,
-    oldValue?: unknown,
-    options?: unknown,
-  ): void {
-    super.requestUpdate(name, oldValue, options);
+  requestUpdate(name?: PropertyKey, oldValue?: unknown): void {
+    super.requestUpdate(name, oldValue);
     this.updateWebSocketContext();
   }
 
@@ -261,22 +258,14 @@ export class WebSocketProvider extends ProviderElement {
   private connect() {
     // Guard against undefined connection (context not yet provided)
     if (!this.connection) {
-      console.log("WebSocketProvider: Connection context not yet provided");
       return;
     }
 
     const { host, port, ssl, token } = this.connection;
-    console.log("WebSocketProvider: Attempting to connect", {
-      host,
-      port,
-      ssl,
-      hasToken: !!token,
-    });
 
     if (!host || !port) {
       const error =
         "Connection settings are incomplete. Please configure host and port.";
-      console.error(error);
       this._error = error;
       this._isConnected = false;
       this.requestUpdate();
@@ -286,7 +275,6 @@ export class WebSocketProvider extends ProviderElement {
     if (!token) {
       const error =
         "API token is required. Please configure your token in connection settings.";
-      console.error(error);
       this._error = error;
       this._isConnected = false;
       this.requestUpdate();
@@ -294,9 +282,6 @@ export class WebSocketProvider extends ProviderElement {
     }
 
     if (this._ws) {
-      console.log(
-        "WebSocketProvider: WebSocket already exists, skipping connect",
-      );
       return;
     }
 
