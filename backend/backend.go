@@ -83,8 +83,8 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
-	// Create a file system that's rooted at the web-client/out directory
-	subFS, err := fs.Sub(b.webClientContent, "web-client/out")
+	// Create a file system that's rooted at the web-client/dist directory
+	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
 	if err != nil {
 		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
 	} else {
