@@ -1,7 +1,7 @@
 import "urlpattern-polyfill";
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
-import { Routes } from "@lit-labs/router";
+import { Router } from "@lit-labs/router";
 import "./styles/globals.css";
 import "./components/theme-provider";
 import "./components/connection-provider";
@@ -9,7 +9,7 @@ import "./components/websocket-provider";
 
 @customElement("app-root")
 export class App extends LitElement {
-  private routes = new Routes(this, [
+  private router = new Router(this, [
     {
       path: "/",
       render: () => html`<page-home></page-home>`,
@@ -53,7 +53,7 @@ export class App extends LitElement {
       <theme-provider>
         <connection-provider>
           <websocket-provider>
-            <main>${this.routes.outlet()}</main>
+            <main>${this.router.outlet()}</main>
           </websocket-provider>
         </connection-provider>
       </theme-provider>
