@@ -55,7 +55,8 @@ export class Icon extends UIElement {
       }
 
       this.iconHtml = element.outerHTML;
-    } catch {
+    } catch (error) {
+      console.error(`Failed to load icon "${this.name}":`, error);
       this.iconHtml = "";
     }
   }
