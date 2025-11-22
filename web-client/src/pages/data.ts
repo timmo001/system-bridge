@@ -85,7 +85,6 @@ export class PageData extends PageElement {
 
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
-    const error = this.websocket?.error;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -101,7 +100,7 @@ export class PageData extends PageElement {
                 <ui-icon name="ArrowLeft"></ui-icon>
               </ui-button>
               <div>
-                <h1 class="text-3xl font-bold mb-2">System Data</h1>
+                <h1 class="text-3xl font-bold mb-2">Data</h1>
                 <p class="text-muted-foreground">
                   Real-time data from System Bridge modules
                 </p>

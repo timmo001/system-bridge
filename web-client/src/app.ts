@@ -36,17 +36,17 @@ export class App extends LitElement {
     },
     {
       path: "/settings",
-      render: () => html`<page-settings></page-settings>`,
+      render: () => html`<page-settings-general></page-settings-general>`,
       enter: async () => {
-        await import("./pages/settings");
+        await import("./pages/settings-general");
         return true;
       },
     },
     {
       path: "/settings/media",
-      render: () => html`<page-media></page-media>`,
+      render: () => html`<page-settings-media></page-settings-media>`,
       enter: async () => {
-        await import("./pages/media");
+        await import("./pages/settings-media");
         return true;
       },
     },

@@ -19,8 +19,8 @@ import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
 
-@customElement("page-settings")
-export class PageSettings extends PageElement {
+@customElement("page-settings-general")
+export class PageSettingsGeneral extends PageElement {
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -88,7 +88,7 @@ export class PageSettings extends PageElement {
 
     // Read current form values to ensure we have the latest data
     const form = e.target as HTMLFormElement;
-    const selectElement = form.querySelector("select") as HTMLSelectElement;
+    const selectElement = form.querySelector("select")!;
     if (selectElement) {
       this.formData = {
         ...this.formData,
@@ -226,6 +226,6 @@ export class PageSettings extends PageElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "page-settings": PageSettings;
+    "page-settings-general": PageSettingsGeneral;
   }
 }

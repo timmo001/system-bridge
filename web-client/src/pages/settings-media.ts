@@ -23,8 +23,8 @@ interface MediaDirectory {
   path: string;
 }
 
-@customElement("page-media")
-export class PageMedia extends PageElement {
+@customElement("page-settings-media")
+export class PageSettingsMedia extends PageElement {
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -349,6 +349,6 @@ export class PageMedia extends PageElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "page-media": PageMedia;
+    "page-settings-media": PageSettingsMedia;
   }
 }
