@@ -41,7 +41,7 @@ generate_schemas:
 	@echo "Generating Zod schemas from Go types..."
 	@go run tools/generate-schemas/main.go
 	@echo "Formatting generated schemas..."
-	@cd web-client && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts || true
+	@cd web-client && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
 
 build_web_client: clean_web_client generate_schemas
 	cd web-client && pnpm install && pnpm build
