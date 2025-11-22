@@ -88,7 +88,8 @@ export class WebSocketProvider extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.connect();
+    // Don't connect here - wait for connection context to be provided
+    // The updated() method will handle the initial connection
   }
 
   disconnectedCallback() {
@@ -241,6 +242,9 @@ export class WebSocketProvider extends LitElement {
   }
 
   private connect() {
+    // Guard against undefined connection (context not yet provided)
+    if (!this.connection) return;
+
     const { host, port, ssl, token } = this.connection;
 
     if (!host || !port || !token) return;
@@ -380,6 +384,9 @@ export class WebSocketProvider extends LitElement {
   }
 
   private scheduleReconnect() {
+    // Guard against undefined connection (context not yet provided)
+    if (!this.connection) return;
+
     const { host, port, token } = this.connection;
 
     if (!host || !port || !token) return;
