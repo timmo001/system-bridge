@@ -130,12 +130,23 @@ else
 	@echo "Process management is only supported on Windows"
 endif
 
-test:
+test: test_go test_web_client
+
+test_go:
 	go test -v ./...
 
-lint:
+test_web_client:
+	cd web-client && pnpm test
+
+lint: lint_go lint_web_client
+
+lint_go:
 	go fmt ./...
 	go vet ./...
+
+lint_web_client:
+	cd web-client && pnpm lint
+	cd web-client && pnpm typecheck
 
 clean:
 ifeq ($(OS),Windows_NT)
