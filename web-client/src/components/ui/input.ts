@@ -1,14 +1,11 @@
-import { LitElement, html, css } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { cn } from "~/lib/utils";
+import { UIElement } from "~/mixins";
 
 @customElement("ui-input")
-export class Input extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
+export class Input extends UIElement {
+  protected displayStyle = "block";
 
   @property() type = "text";
   @property() value = "";

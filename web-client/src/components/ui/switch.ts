@@ -1,15 +1,10 @@
-import { LitElement, html, css } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { cn } from "~/lib/utils";
+import { UIElement } from "~/mixins";
 
 @customElement("ui-switch")
-export class Switch extends LitElement {
-  static styles = css`
-    :host {
-      display: inline-block;
-    }
-  `;
-
+export class Switch extends UIElement {
   @property({ type: Boolean }) checked = false;
   @property({ type: Boolean }) disabled = false;
   @property() name = "";

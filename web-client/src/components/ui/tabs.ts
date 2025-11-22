@@ -1,20 +1,13 @@
-import { LitElement, html, css } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { cn } from "~/lib/utils";
+import { UIElement } from "~/mixins";
 
 @customElement("ui-tabs")
-export class Tabs extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
+export class Tabs extends UIElement {
+  protected displayStyle = "block";
 
   @property() value = "";
-
-  protected createRenderRoot() {
-    return this;
-  }
 
   render() {
     return html`<div class="w-full"><slot></slot></div>`;
@@ -34,16 +27,8 @@ export class Tabs extends LitElement {
 }
 
 @customElement("ui-tabs-list")
-export class TabsList extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
-
-  protected createRenderRoot() {
-    return this;
-  }
+export class TabsList extends UIElement {
+  protected displayStyle = "block";
 
   render() {
     const classes = cn(
@@ -55,19 +40,9 @@ export class TabsList extends LitElement {
 }
 
 @customElement("ui-tabs-trigger")
-export class TabsTrigger extends LitElement {
-  static styles = css`
-    :host {
-      display: inline-block;
-    }
-  `;
-
+export class TabsTrigger extends UIElement {
   @property() value = "";
   @property({ type: Boolean }) active = false;
-
-  protected createRenderRoot() {
-    return this;
-  }
 
   render() {
     const classes = cn(
@@ -102,22 +77,11 @@ export class TabsTrigger extends LitElement {
 }
 
 @customElement("ui-tabs-content")
-export class TabsContent extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-    }
-    :host([hidden]) {
-      display: none;
-    }
-  `;
+export class TabsContent extends UIElement {
+  protected displayStyle = "block";
 
   @property() value = "";
   @property({ type: Boolean, reflect: true }) hidden = false;
-
-  protected createRenderRoot() {
-    return this;
-  }
 
   render() {
     const classes = cn(
