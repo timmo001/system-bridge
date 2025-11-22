@@ -18,6 +18,7 @@ import {
 import { showNotification } from "~/lib/notifications";
 import {
   DefaultModuleData,
+  ModuleNameSchema,
   Modules,
   type ModuleData,
 } from "~/lib/system-bridge/types-modules";
@@ -67,7 +68,7 @@ export class WebSocketProvider extends ProviderElement {
   private _reconnectTimeout: number | null = null;
   private _settingsUpdateTimeout: number | null = null;
   private _previousConnectedState = false;
-  private _pendingResolvers: Record<string, AnyPendingResolver> = {};
+  private _pendingResolvers = new Map<string, AnyPendingResolver>();
   // Consumer must be stored to keep subscription alive
   // @ts-expect-error - TS6133: Field is used via subscription callback
   private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
@@ -132,10 +133,10 @@ export class WebSocketProvider extends ProviderElement {
   }
 
   private clearAllPendingResolvers(reason: string) {
-    Object.values(this._pendingResolvers).forEach((resolver) => {
+    this._pendingResolvers.forEach((resolver) => {
       resolver.reject(new Error(reason));
     });
-    this._pendingResolvers = {};
+    this._pendingResolvers.clear();
   }
 
   private handleMessage(event: MessageEvent<string>) {
@@ -154,8 +155,8 @@ export class WebSocketProvider extends ProviderElement {
 
     const message = parsedMessage.data;
 
-    if (message.id && this._pendingResolvers[message.id]) {
-      const resolver = this._pendingResolvers[message.id];
+    if (message.id && this._pendingResolvers.has(message.id)) {
+      const resolver = this._pendingResolvers.get(message.id);
       if (!resolver) return;
 
       const parsedData = resolver.schema.safeParse(message.data);
@@ -165,11 +166,7 @@ export class WebSocketProvider extends ProviderElement {
         this._error = "Received invalid message data from server";
         resolver.reject(parsedData?.error);
       }
-      this._pendingResolvers = Object.fromEntries(
-        Object.entries(this._pendingResolvers).filter(
-          ([id]) => id !== message.id,
-        ),
-      );
+      this._pendingResolvers.delete(message.id);
       return;
     }
 
@@ -178,10 +175,15 @@ export class WebSocketProvider extends ProviderElement {
         if (!message.module || !message.data) {
           return;
         }
+        const moduleValidation = ModuleNameSchema.safeParse(message.module);
+        if (!moduleValidation.success) {
+          this._error = `Received invalid module name: ${message.module}`;
+          return;
+        }
         this._data = {
           ...this._data,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          [message.module]: message.data,
+          [moduleValidation.data]: message.data,
         };
         this._isRequestingData = false;
         break;
@@ -476,30 +478,22 @@ export class WebSocketProvider extends ProviderElement {
         return;
       }
 
-      this._pendingResolvers[request.id] = {
+      this._pendingResolvers.set(request.id, {
         resolve: resolve as (value: unknown) => void,
         reject,
         schema,
-      };
+      });
 
       try {
         this._ws.send(JSON.stringify(request));
       } catch (e) {
-        this._pendingResolvers = Object.fromEntries(
-          Object.entries(this._pendingResolvers).filter(
-            ([id]) => id !== request.id,
-          ),
-        );
+        this._pendingResolvers.delete(request.id);
         reject(e instanceof Error ? e : new Error("Unknown error"));
       }
 
       setTimeout(() => {
-        if (this._pendingResolvers[request.id]) {
-          this._pendingResolvers = Object.fromEntries(
-            Object.entries(this._pendingResolvers).filter(
-              ([id]) => id !== request.id,
-            ),
-          );
+        if (this._pendingResolvers.has(request.id)) {
+          this._pendingResolvers.delete(request.id);
           reject(new Error("WebSocket response timed out"));
         }
       }, UPDATE_TIMEOUT);

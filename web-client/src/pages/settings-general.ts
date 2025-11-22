@@ -40,6 +40,8 @@ export class PageSettingsGeneral extends PageElement {
   @state()
   private isSubmitting = false;
 
+  private _formElement: HTMLFormElement | null = null;
+
   connectedCallback() {
     super.connectedCallback();
     this.loadSettings();
@@ -47,7 +49,11 @@ export class PageSettingsGeneral extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    // Event listener cleanup is handled automatically since we use querySelector each time
+    // Remove form event listener if it exists
+    if (this._formElement) {
+      this._formElement.removeEventListener("submit", this.handleSubmit);
+      this._formElement = null;
+    }
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -63,6 +69,7 @@ export class PageSettingsGeneral extends PageElement {
     if (form && !form.dataset.handlerAttached) {
       form.dataset.handlerAttached = "true";
       form.addEventListener("submit", this.handleSubmit);
+      this._formElement = form;
     }
   }
 
