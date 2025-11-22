@@ -97,7 +97,7 @@ export function loadConnectionSettings(): ConnectionSettings {
 export function saveConnectionSettings(settings: ConnectionSettings): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch {
-    // Failed to save
+  } catch (error) {
+    console.error("Error saving connection settings to localStorage", error);
   }
 }
