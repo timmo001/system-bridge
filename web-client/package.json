@@ -13,14 +13,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@lit-labs/router": "^0.1.4",
     "@lit/context": "^1.1.6",
     "@lit/task": "^1.0.3",
-    "@vaadin/router": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lit": "^3.3.1",
     "lucide": "^0.554.0",
     "tailwind-merge": "^3.4.0",
+    "urlpattern-polyfill": "^10.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
