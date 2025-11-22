@@ -56,7 +56,7 @@ export class ConnectionStatusCard extends UIElement {
 
     return html`
       <div
-        class="rounded-lg border bg-card p-6 ${isConnected
+        class="rounded-lg border bg-card p-6 mb-6 ${isConnected
           ? "border-primary"
           : "border-destructive"}"
       >
