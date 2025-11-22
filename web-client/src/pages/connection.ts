@@ -1,5 +1,4 @@
-import { consume } from "@lit/context";
-import { provide } from "@lit/context";
+import { consume, provide } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
@@ -220,7 +219,7 @@ export class PageConnection extends PageElement {
       this.isSubmitting = false;
       this.requestUpdate();
     };
-  }
+  };
 
   render() {
     return html`

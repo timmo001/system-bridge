@@ -30,6 +30,7 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
       urlParams.has("host") ||
       urlParams.has("port") ||
       urlParams.has("ssl") ||
+      urlParams.has("apiKey") ||
       urlParams.has("token");
 
     if (!hasAnyParam) {
@@ -53,7 +54,11 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
       settings.ssl = urlParams.get("ssl") === "true";
     }
 
-    if (urlParams.has("token")) {
+    // Support both 'apiKey' (used by backend) and 'token' (for compatibility)
+    if (urlParams.has("apiKey")) {
+      const token = urlParams.get("apiKey")!;
+      settings.token = token || null;
+    } else if (urlParams.has("token")) {
       const token = urlParams.get("token")!;
       settings.token = token || null;
     }

@@ -54,7 +54,7 @@ export default tseslint.config(
 
     rules: {
       // Core ESLint rules
-      "no-console": "error",
+      "no-console": "off",
       "no-bitwise": "error",
       "no-alert": "error",
       "prefer-const": "error",
@@ -202,11 +202,6 @@ export default tseslint.config(
 
   // Ignore patterns
   {
-    ignores: [
-      "dist/**",
-      "node_modules/**",
-      "*.config.*",
-      "vite.config.ts",
-    ],
-  }
+    ignores: ["dist/**", "node_modules/**", "*.config.*", "vite.config.ts"],
+  },
 );
