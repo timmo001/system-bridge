@@ -37,8 +37,8 @@ if ! command -v flatpak-builder &>/dev/null; then
 fi
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
-sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
-sudo flatpak install -y flathub org.freedesktop.Platform//23.08
+sudo flatpak install -y flathub org.freedesktop.Sdk//24.08
+sudo flatpak install -y flathub org.freedesktop.Platform//24.08
 
 # Create build directory
 BUILD_DIR="flatpak-build"
