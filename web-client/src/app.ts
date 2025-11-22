@@ -49,6 +49,14 @@ export class App extends LitElement {
         return true;
       },
     },
+    {
+      path: "/settings/commands",
+      render: () => html`<page-settings-commands></page-settings-commands>`,
+      enter: async () => {
+        await import("./pages/settings-commands");
+        return true;
+      },
+    },
   ]);
 
   protected createRenderRoot() {

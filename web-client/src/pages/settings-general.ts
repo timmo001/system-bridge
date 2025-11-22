@@ -32,6 +32,9 @@ export class PageSettingsGeneral extends PageElement {
     autostart: false,
     hotkeys: [],
     logLevel: "INFO",
+    commands: {
+      allowlist: [],
+    },
     media: {
       directories: [],
     },

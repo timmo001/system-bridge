@@ -23,6 +23,10 @@ export class PageHome extends PageElement {
     this.navigate("/settings/media");
   };
 
+  private handleNavigateToCommands = (): void => {
+    this.navigate("/settings/commands");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -74,6 +78,13 @@ export class PageHome extends PageElement {
                     @click=${this.handleNavigateToMedia}
                   >
                     Media Directories
+                  </ui-button>
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToCommands}
+                  >
+                    Commands
                   </ui-button>
                 </div>
               </div>

@@ -220,6 +220,9 @@ export class WebSocketProvider extends ProviderElement {
           autostart: receivedSettings.autostart ?? false,
           hotkeys: receivedSettings.hotkeys ?? [],
           logLevel: receivedSettings.logLevel ?? "INFO",
+          commands: {
+            allowlist: receivedSettings.commands?.allowlist ?? [],
+          },
           media: {
             directories: receivedSettings.media?.directories ?? [],
           },
@@ -239,6 +242,12 @@ export class WebSocketProvider extends ProviderElement {
           hotkeys: updatedSettings.hotkeys ?? this._settings?.hotkeys ?? [],
           logLevel:
             updatedSettings.logLevel ?? this._settings?.logLevel ?? "INFO",
+          commands: {
+            allowlist:
+              updatedSettings.commands?.allowlist ??
+              this._settings?.commands.allowlist ??
+              [],
+          },
           media: {
             directories:
               updatedSettings.media?.directories ??
