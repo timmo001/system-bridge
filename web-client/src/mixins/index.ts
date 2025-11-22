@@ -6,3 +6,5 @@
  */
 
 export { UIElement } from "./light-dom";
+export { PageElement } from "./page-element";
+export { ProviderElement } from "./provider-element";

@@ -1,4 +1,7 @@
-import { LitElement, html } from "lit";
+import { showSuccess, showError } from "~/lib/notifications";
+import { html } from "lit";
+import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
 import {
@@ -25,7 +28,7 @@ const ConnectionSchema = z.object({
 type ConnectionForm = z.infer<typeof ConnectionSchema>;
 
 @customElement("page-connection")
-export class PageConnection extends LitElement {
+export class PageConnection extends PageElement {
   @consume({ context: connectionContext, subscribe: true })
   @state()
   connection?: ConnectionSettings;
@@ -47,10 +50,6 @@ export class PageConnection extends LitElement {
   @provide({ context: connectionContext })
   get updatedConnection(): ConnectionSettings {
     return this.connection!;
-  }
-
-  protected createRenderRoot() {
-    return this;
   }
 
   connectedCallback() {
@@ -95,7 +94,7 @@ export class PageConnection extends LitElement {
 
     const timeout = setTimeout(() => {
       ws.close();
-      this.showError(
+      showError(
         "Connection timeout. Please check your host, port, and network connection.",
       );
       this.isSubmitting = false;
@@ -124,7 +123,7 @@ export class PageConnection extends LitElement {
         };
 
         if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
-          this.showError(
+          showError(
             "Invalid API token. Please check your token and try again.",
           );
           ws.close();
@@ -154,7 +153,7 @@ export class PageConnection extends LitElement {
             }),
           );
 
-          this.showSuccess("Connected to System Bridge!");
+          showSuccess("Connected to System Bridge!");
           ws.close();
           this.isSubmitting = false;
           this.requestUpdate();
@@ -165,7 +164,7 @@ export class PageConnection extends LitElement {
         }
       } catch (error) {
         console.error("Failed to parse message:", error);
-        this.showError("Received invalid response from server.");
+        showError("Received invalid response from server.");
         this.isSubmitting = false;
         this.requestUpdate();
       }
@@ -174,17 +173,15 @@ export class PageConnection extends LitElement {
     ws.onclose = (event) => {
       clearTimeout(timeout);
       if (event.code === 1006) {
-        this.showError(
+        showError(
           "Connection failed. Please check your host and port settings.",
         );
       } else if (event.code === 1002) {
-        this.showError("Connection failed due to protocol error.");
+        showError("Connection failed due to protocol error.");
       } else if (event.code === 1003) {
-        this.showError(
-          "Connection rejected by server. Please check your token.",
-        );
+        showError("Connection rejected by server. Please check your token.");
       } else if (event.code !== 1000 && event.code !== 1001) {
-        this.showError(
+        showError(
           `Connection failed with code ${event.code}: ${event.reason || "Unknown reason"}`,
         );
       }
@@ -194,22 +191,12 @@ export class PageConnection extends LitElement {
 
     ws.onerror = () => {
       clearTimeout(timeout);
-      this.showError(
+      showError(
         "Connection failed. Please check your host, port, and network connection.",
       );
       this.isSubmitting = false;
       this.requestUpdate();
     };
-  }
-
-  private showSuccess(message: string) {
-    console.log(`[SUCCESS] ${message}`);
-    // TODO: Replace with toast notification
-  }
-
-  private showError(message: string) {
-    console.error(`[ERROR] ${message}`);
-    // TODO: Replace with toast notification
   }
 
   render() {
@@ -324,7 +311,7 @@ export class PageConnection extends LitElement {
                 type="button"
                 variant="outline"
                 ?disabled=${this.isSubmitting}
-                @click=${() => this._navigate("/")}
+                @click=${() => this.navigate("/")}
               >
                 Cancel
               </ui-button>
@@ -335,7 +322,7 @@ export class PageConnection extends LitElement {
     `;
   }
 
-  private _navigate(path: string) {
+  private navigate(path: string) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }

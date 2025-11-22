@@ -1,4 +1,5 @@
-import { LitElement, html } from "lit";
+import { html } from "lit";
+import { ProviderElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
 import {
@@ -9,7 +10,7 @@ import {
 } from "~/contexts/connection";
 
 @customElement("connection-provider")
-export class ConnectionProvider extends LitElement {
+export class ConnectionProvider extends ProviderElement {
   @state()
   private _connection: ConnectionSettings;
 
@@ -21,10 +22,6 @@ export class ConnectionProvider extends LitElement {
   constructor() {
     super();
     this._connection = loadConnectionSettings();
-  }
-
-  protected createRenderRoot() {
-    return this;
   }
 
   updateConnection(settings: Partial<ConnectionSettings>) {

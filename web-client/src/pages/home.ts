@@ -1,4 +1,5 @@
-import { LitElement, html } from "lit";
+import { html } from "lit";
+import { PageElement } from "~/mixins";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
@@ -9,16 +10,12 @@ import {
 import "../components/ui/button";
 
 @customElement("page-home")
-export class PageHome extends LitElement {
+export class PageHome extends PageElement {
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
-
-  protected createRenderRoot() {
-    return this;
-  }
 
   render() {
     return html`
@@ -100,19 +97,19 @@ export class PageHome extends LitElement {
             <div class="flex gap-4">
               <ui-button
                 variant="default"
-                @click=${() => this._navigate("/data")}
+                @click=${() => this.navigate("/data")}
               >
                 View Data
               </ui-button>
               <ui-button
                 variant="secondary"
-                @click=${() => this._navigate("/settings")}
+                @click=${() => this.navigate("/settings")}
               >
                 Settings
               </ui-button>
               <ui-button
                 variant="outline"
-                @click=${() => this._navigate("/connection")}
+                @click=${() => this.navigate("/connection")}
               >
                 Connection
               </ui-button>
@@ -121,11 +118,6 @@ export class PageHome extends LitElement {
         </div>
       </div>
     `;
-  }
-
-  private _navigate(path: string) {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
   }
 }
 

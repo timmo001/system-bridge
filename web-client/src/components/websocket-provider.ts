@@ -1,4 +1,6 @@
-import { LitElement, html } from "lit";
+import { showNotification } from "~/lib/notifications";
+import { html } from "lit";
+import { ProviderElement } from "~/mixins";
 import { customElement, property, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
 import { consume } from "@lit/context";
@@ -36,7 +38,7 @@ type PendingResolver<T = unknown> = {
 type AnyPendingResolver = PendingResolver<any>;
 
 @customElement("websocket-provider")
-export class WebSocketProvider extends LitElement {
+export class WebSocketProvider extends ProviderElement {
   @consume({ context: connectionContext, subscribe: true })
   @property({ attribute: false })
   connection!: ConnectionSettings;
@@ -80,10 +82,6 @@ export class WebSocketProvider extends LitElement {
       sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
       retryConnection: this.retryConnection.bind(this),
     };
-  }
-
-  protected createRenderRoot() {
-    return this;
   }
 
   connectedCallback() {
@@ -221,7 +219,7 @@ export class WebSocketProvider extends LitElement {
             "Invalid API token. Please check your connection settings and update your token.";
           this._isConnected = false;
           this._retryCount = MAX_RETRIES + 1;
-          this.showToast(
+          showNotification(
             "Authentication Failed",
             "Your API token is invalid or has expired.",
             "error",
@@ -293,7 +291,7 @@ export class WebSocketProvider extends LitElement {
       }
 
       if (!this._previousConnectedState) {
-        this.showToast("Connected", "Connected to System Bridge", "success");
+        showNotification("Connected", "Connected to System Bridge", "success");
       }
       this._previousConnectedState = true;
 
@@ -335,7 +333,7 @@ export class WebSocketProvider extends LitElement {
       this.clearAllPendingResolvers("WebSocket connection closed");
 
       if (this._previousConnectedState && this._error) {
-        this.showToast(
+        showNotification(
           "Disconnected",
           "Disconnected from System Bridge",
           "error",
@@ -352,7 +350,7 @@ export class WebSocketProvider extends LitElement {
         this._error =
           "Invalid API token. Please check your connection settings.";
         this._retryCount = MAX_RETRIES + 1;
-        this.showToast("Authentication Failed", "Invalid API token", "error");
+        showNotification("Authentication Failed", "Invalid API token", "error");
       } else if (event.code !== 1000 && event.code !== 1001) {
         this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
       }
@@ -494,12 +492,6 @@ export class WebSocketProvider extends LitElement {
       this._settingsUpdateTimeout = null;
     }
     this.clearAllPendingResolvers("WebSocket provider disconnected");
-  }
-
-  private showToast(title: string, message: string, type: "success" | "error") {
-    // Simple console log for now - will be replaced with actual toast component
-    console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
-    // TODO: Implement toast notifications
   }
 
   render() {

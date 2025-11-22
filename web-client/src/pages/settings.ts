@@ -1,4 +1,7 @@
-import { LitElement, html } from "lit";
+import { showSuccess, showError } from "~/lib/notifications";
+import { html } from "lit";
+import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
@@ -14,7 +17,7 @@ import "../components/ui/label";
 import "../components/ui/switch";
 
 @customElement("page-settings")
-export class PageSettings extends LitElement {
+export class PageSettings extends PageElement {
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -33,10 +36,6 @@ export class PageSettings extends LitElement {
 
   @state()
   private isSubmitting = false;
-
-  protected createRenderRoot() {
-    return this;
-  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -79,24 +78,14 @@ export class PageSettings extends LitElement {
         data: this.formData,
         token: this.connection.token,
       });
-      this.showSuccess("Settings update requested!");
+      showSuccess("Settings update requested!");
     } catch (error) {
-      this.showError("Failed to update settings");
+      showError("Failed to update settings");
       console.error(error);
     } finally {
       this.isSubmitting = false;
       this.requestUpdate();
     }
-  }
-
-  private showSuccess(message: string) {
-    console.log(`[SUCCESS] ${message}`);
-    // TODO: Replace with toast notification
-  }
-
-  private showError(message: string) {
-    console.error(`[ERROR] ${message}`);
-    // TODO: Replace with toast notification
   }
 
   render() {
@@ -127,7 +116,7 @@ export class PageSettings extends LitElement {
                   </p>
                   <ui-button
                     variant="default"
-                    @click=${() => this._navigate("/connection")}
+                    @click=${() => this.navigate("/connection")}
                   >
                     Configure Connection
                   </ui-button>
@@ -229,7 +218,7 @@ export class PageSettings extends LitElement {
                       type="button"
                       variant="outline"
                       ?disabled=${this.isSubmitting}
-                      @click=${() => this._navigate("/")}
+                      @click=${() => this.navigate("/")}
                     >
                       Back to Home
                     </ui-button>
@@ -241,7 +230,7 @@ export class PageSettings extends LitElement {
     `;
   }
 
-  private _navigate(path: string) {
+  private navigate(path: string) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }

@@ -1,4 +1,5 @@
-import { LitElement, html } from "lit";
+import { html } from "lit";
+import { ProviderElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
 import {
@@ -12,7 +13,7 @@ import {
 } from "~/contexts/theme";
 
 @customElement("theme-provider")
-export class ThemeProvider extends LitElement {
+export class ThemeProvider extends ProviderElement {
   @state()
   private _theme: Theme = "system";
 
@@ -22,10 +23,6 @@ export class ThemeProvider extends LitElement {
       theme: this._theme,
       setTheme: this.setTheme.bind(this),
     };
-  }
-
-  protected createRenderRoot() {
-    return this;
   }
 
   connectedCallback() {
