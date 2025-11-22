@@ -255,16 +255,16 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 	for _, name := range enumNames {
 		enum := enums[name]
 		if len(enum.Values) > 0 {
-			buf.WriteString(fmt.Sprintf("// %s enum\n", name))
-			buf.WriteString(fmt.Sprintf("export const %sSchema = z.enum([", name))
+			fmt.Fprintf(&buf, "// %s enum\n", name)
+			fmt.Fprintf(&buf, "export const %sSchema = z.enum([", name)
 			for i, value := range enum.Values {
 				if i > 0 {
 					buf.WriteString(", ")
 				}
-				buf.WriteString(fmt.Sprintf(`"%s"`, value))
+				fmt.Fprintf(&buf, `"%s"`, value)
 			}
 			buf.WriteString("]);\n")
-			buf.WriteString(fmt.Sprintf("export type %s = z.infer<typeof %sSchema>;\n\n", name, name))
+			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n\n", name, name)
 		}
 	}
 
@@ -273,7 +273,7 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 		structInfo := structs[name]
 		comment := getStructComment(name)
 
-		buf.WriteString(fmt.Sprintf("// %s\n", comment))
+		fmt.Fprintf(&buf, "// %s\n", comment)
 
 		// Check if this struct has recursive dependencies
 		if hasRecursiveDependency(name, structInfo, structs) {
@@ -311,7 +311,7 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 	for _, moduleName := range moduleNames {
 		dataType := moduleDataTypes[moduleName]
 		if _, exists := structs[dataType]; exists {
-			buf.WriteString(fmt.Sprintf("  %s: %sSchema,\n", moduleName, dataType))
+			fmt.Fprintf(&buf, "  %s: %sSchema,\n", moduleName, dataType)
 		}
 	}
 
@@ -396,7 +396,7 @@ func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	}
 
 	buf.WriteString("});\n\n")
-	buf.WriteString(fmt.Sprintf("export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name))
+	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
 }
 
 func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo) {
@@ -404,16 +404,16 @@ func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[st
 	if len(structInfo.Fields) == 1 && structInfo.Fields[0].Name == "__array_element__" {
 		elemType := structInfo.Fields[0].Type
 		elemSchema := elemType + "Schema"
-		buf.WriteString(fmt.Sprintf("export const %sSchema = z.array(%s);\n\n", structInfo.Name, elemSchema))
-		buf.WriteString(fmt.Sprintf("export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name))
+		fmt.Fprintf(buf, "export const %sSchema = z.array(%s);\n\n", structInfo.Name, elemSchema)
+		fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("export const %sSchema = z.object({\n", structInfo.Name))
+	fmt.Fprintf(buf, "export const %sSchema = z.object({\n", structInfo.Name)
 
 	for i, field := range structInfo.Fields {
 		zodSchema := mapGoTypeToZodSchema(field, "")
-		buf.WriteString(fmt.Sprintf("  %s: %s", field.JSONName, zodSchema))
+		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
 		} else {
@@ -422,7 +422,7 @@ func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[st
 	}
 
 	buf.WriteString("});\n\n")
-	buf.WriteString(fmt.Sprintf("export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name))
+	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
 }
 
 func mapGoTypeToZodWithRecursive(field FieldInfo, parentStruct string) string {
