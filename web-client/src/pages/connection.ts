@@ -8,6 +8,7 @@ import {
   type ConnectionSettings,
   saveConnectionSettings,
 } from "~/contexts/connection";
+import { CONNECTION_TIMEOUT } from "~/contexts/websocket";
 import { showError, showSuccess } from "~/lib/notifications";
 import { PageElement } from "~/mixins";
 
@@ -16,8 +17,6 @@ import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
-
-const CONNECTION_TIMEOUT = 10000;
 
 const ConnectionSchema = z.object({
   host: z.string().min(1, "Host is required"),
@@ -190,7 +189,8 @@ export class PageConnection extends PageElement {
             window.location.reload();
           }, 1000);
         }
-      } catch {
+      } catch (error) {
+        console.error("Failed to parse connection test response:", error);
         showError("Received invalid response from server.");
         this.isSubmitting = false;
         this.requestUpdate();

@@ -144,7 +144,8 @@ export class WebSocketProvider extends ProviderElement {
     let parsedMessage;
     try {
       parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
-    } catch {
+    } catch (error) {
+      console.error("Failed to parse WebSocket message:", error, "Data:", event.data);
       this._error = "Received invalid message from server";
       return;
     }
@@ -303,8 +304,11 @@ export class WebSocketProvider extends ProviderElement {
     }
 
     this._connectionTimeout = window.setTimeout(() => {
-      if (this._ws && this._ws.readyState === WebSocket.CONNECTING) {
-        this._ws.close();
+      // Fix race condition: Store WebSocket reference and state before check
+      const ws = this._ws;
+      const currentState = ws?.readyState;
+      if (ws && currentState === WebSocket.CONNECTING) {
+        ws.close();
         this._error =
           "Connection timeout. Please check your host, port, and network connection.";
         this._isConnected = false;
@@ -316,7 +320,8 @@ export class WebSocketProvider extends ProviderElement {
       this._ws = new WebSocket(
         `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
       );
-    } catch {
+    } catch (error) {
+      console.error("Failed to create WebSocket connection:", error);
       this._error =
         "Failed to create connection. Please check your connection settings.";
       this._isConnected = false;
