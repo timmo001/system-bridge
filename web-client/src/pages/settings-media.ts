@@ -146,15 +146,17 @@ export class PageSettingsMedia extends PageElement {
       if (response.valid) {
         this.mediaDirectories = [
           ...this.mediaDirectories,
-          { name: this.newDirectoryName.trim(), path: this.newDirectoryPath.trim() },
+          {
+            name: this.newDirectoryName.trim(),
+            path: this.newDirectoryPath.trim(),
+          },
         ];
         await this.saveSettings();
         this.newDirectoryName = "";
         this.newDirectoryPath = "";
         showSuccess("Directory added successfully");
       } else {
-        this.validationError =
-          "Directory does not exist or is not accessible.";
+        this.validationError = "Directory does not exist or is not accessible.";
       }
     } catch (error) {
       console.error("Failed to validate directory:", error);
@@ -165,7 +167,9 @@ export class PageSettingsMedia extends PageElement {
     }
   };
 
-  private handleRemoveDirectory = async (directory: MediaDirectory): Promise<void> => {
+  private handleRemoveDirectory = async (
+    directory: MediaDirectory,
+  ): Promise<void> => {
     this.mediaDirectories = this.mediaDirectories.filter(
       (d) => d.path !== directory.path,
     );

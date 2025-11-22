@@ -37,7 +37,13 @@ else
 	@echo "Console build is only supported on Windows"
 endif
 
-build_web_client: clean_web_client
+generate_schemas:
+	@echo "Generating Zod schemas from Go types..."
+	@go run tools/generate-schemas/main.go
+	@echo "Formatting generated schemas..."
+	@cd web-client && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts || true
+
+build_web_client: clean_web_client generate_schemas
 	cd web-client && pnpm install && pnpm build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
@@ -183,6 +189,7 @@ help:
 	@echo "  build                    Build the application"
 	@echo "  build_console            Build console version for debugging (Windows only)"
 	@echo "  build_web_client         Build the web client"
+	@echo "  generate_schemas         Generate Zod schemas from Go types"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  create_arch              Create Arch Linux package"
 	@echo "  create_flatpak           Create Flatpak package"

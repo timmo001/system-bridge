@@ -99,6 +99,23 @@ pnpm typecheck
 
 **Note**: The previous Next.js version has been preserved in `web-client-nextjs/` for reference.
 
+### Schema Generation
+
+The project includes an automatic schema generator that keeps frontend and backend types in sync:
+
+```bash
+# Generate Zod schemas from Go types (runs automatically during build)
+make generate_schemas
+```
+
+**How it works:**
+- Parses Go struct definitions in `types/` directory
+- Generates TypeScript Zod schemas in `web-client/src/lib/system-bridge/types-modules-schemas.ts`
+- Runs automatically before every `make build` or `make build_web_client`
+- See `tools/generate-schemas/README.md` for details
+
+**Important:** Never manually edit `types-modules-schemas.ts` - it's auto-generated. When adding new types to `types/`, run `make generate_schemas` to update the frontend schemas.
+
 ## Architecture
 
 ### Code Structure

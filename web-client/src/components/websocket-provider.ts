@@ -186,7 +186,10 @@ export class WebSocketProvider extends ProviderElement {
         const dataValidation = moduleSchema.safeParse(message.data);
         if (!dataValidation.success) {
           this._error = `Received invalid data for module ${moduleName}`;
-          console.error(`Module ${moduleName} validation error:`, dataValidation.error);
+          console.error(
+            `Module ${moduleName} validation error:`,
+            dataValidation.error,
+          );
           return;
         }
         this._data = {

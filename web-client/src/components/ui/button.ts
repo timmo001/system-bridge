@@ -111,7 +111,9 @@ export class Button extends UIElement {
       const form = this.closest("form");
       if (form) {
         // Trigger form submission
-        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
         return;
       }
     }
