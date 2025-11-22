@@ -53,11 +53,14 @@ export class Button extends UIElement {
 
     // Add click handler to host
     this.addEventListener("click", this._handleClick);
+    // Add keyboard handler for accessibility
+    this.addEventListener("keydown", this._handleKeydown);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener("click", this._handleClick);
+    this.removeEventListener("keydown", this._handleKeydown);
   }
 
   updated(changedProperties: Map<string, unknown>) {
@@ -119,6 +122,15 @@ export class Button extends UIElement {
         composed: true,
       }),
     );
+  };
+
+  private _handleKeydown = (e: KeyboardEvent) => {
+    // Activate button on Enter or Space key
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      // Trigger a click event to reuse the existing click handler logic
+      this.click();
+    }
   };
 }
 
