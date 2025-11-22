@@ -207,7 +207,8 @@ export class PageSettingsMedia extends PageElement {
         data: updatedSettings,
         token: this.connection.token,
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to update media settings:", error);
       showError("Failed to update settings");
     } finally {
       this.isSubmitting = false;

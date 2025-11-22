@@ -114,7 +114,8 @@ export class PageSettingsGeneral extends PageElement {
         token: this.connection.token,
       });
       showSuccess("Settings update requested!");
-    } catch {
+    } catch (error) {
+      console.error("Failed to update general settings:", error);
       showError("Failed to update settings");
     } finally {
       this.isSubmitting = false;
