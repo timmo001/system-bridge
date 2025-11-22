@@ -38,5 +38,5 @@ jobs:
         uses: ./.github/actions/build-client-web
 
       - name: Run tests
-        run: go test -v ./...
+        run: make test
         shell: bash
