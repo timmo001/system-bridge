@@ -47,9 +47,24 @@ export class PageSettings extends PageElement {
     this.loadSettings();
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Event listener cleanup is handled automatically since we use querySelector each time
+  }
+
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
+    }
+    // Attach submit handler after render (light DOM workaround)
+    this.attachFormHandler();
+  }
+
+  private attachFormHandler() {
+    const form = this.querySelector("form");
+    if (form && !form.dataset.handlerAttached) {
+      form.dataset.handlerAttached = "true";
+      form.addEventListener("submit", this.handleSubmit);
     }
   }
 
@@ -163,7 +178,7 @@ export class PageSettings extends PageElement {
                 ></ui-connection-required>
               `
             : html`
-                <form @submit=${this.handleSubmit} class="space-y-8">
+                <form class="space-y-8">
                   <div class="rounded-lg border bg-card p-6 space-y-6">
                     <h2 class="text-xl font-semibold">General Settings</h2>
 
