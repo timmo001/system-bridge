@@ -167,17 +167,19 @@ export class PageSettingsMedia extends PageElement {
     }
   };
 
-  private handleRemoveDirectory = async (
-    directory: MediaDirectory,
-  ): Promise<void> => {
+  private handleRemoveDirectory = (e: Event): void => {
+    const button = e.currentTarget as HTMLElement;
+    const path = button.getAttribute("data-path");
+    if (!path) return;
+
     this.mediaDirectories = this.mediaDirectories.filter(
-      (d) => d.path !== directory.path,
+      (d) => d.path !== path,
     );
-    await this.saveSettings();
+    this.saveSettings();
     showSuccess("Directory removed successfully");
   };
 
-  private async saveSettings(): Promise<void> {
+  private saveSettings(): void {
     if (!this.connection?.token) {
       showError("No token found");
       return;
@@ -213,6 +215,28 @@ export class PageSettingsMedia extends PageElement {
     }
   }
 
+  private renderDirectoryItem(dir: MediaDirectory) {
+    return html`
+      <div class="flex items-center gap-4 p-3 rounded-md border">
+        <div class="flex-1 space-y-1">
+          <div class="font-medium">${dir.name}</div>
+          <div class="text-sm text-muted-foreground break-all">
+            ${dir.path}
+          </div>
+        </div>
+        <ui-button
+          variant="destructive"
+          size="sm"
+          @click=${this.handleRemoveDirectory}
+          .removeDir=${dir}
+          ?disabled=${this.isSubmitting}
+        >
+          <ui-icon name="Trash2"></ui-icon>
+        </ui-button>
+      </div>
+    `;
+  }
+
   private renderDirectoryList() {
     if (this.mediaDirectories.length === 0) {
       return html`
@@ -224,30 +248,11 @@ export class PageSettingsMedia extends PageElement {
       `;
     }
 
-    return html`
-      <div class="space-y-2">
-        ${this.mediaDirectories.map(
-          (dir) => html`
-            <div class="flex items-center gap-4 p-3 rounded-md border">
-              <div class="flex-1 space-y-1">
-                <div class="font-medium">${dir.name}</div>
-                <div class="text-sm text-muted-foreground break-all">
-                  ${dir.path}
-                </div>
-              </div>
-              <ui-button
-                variant="destructive"
-                size="sm"
-                @click=${() => this.handleRemoveDirectory(dir)}
-                ?disabled=${this.isSubmitting}
-              >
-                <ui-icon name="Trash2"></ui-icon>
-              </ui-button>
-            </div>
-          `,
-        )}
-      </div>
-    `;
+    const directoryItems = this.mediaDirectories.map((dir) =>
+      this.renderDirectoryItem(dir),
+    );
+
+    return html` <div class="space-y-2">${directoryItems}</div> `;
   }
 
   render() {
