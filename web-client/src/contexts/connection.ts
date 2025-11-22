@@ -14,7 +14,8 @@ export const defaultConnectionSettings: ConnectionSettings = {
   token: null,
 };
 
-export const connectionContext = createContext<ConnectionSettings>("connection");
+export const connectionContext =
+  createContext<ConnectionSettings>("connection");
 
 const STORAGE_KEY = "system-bridge-connection";
 

@@ -11,7 +11,10 @@ import {
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
-import { connectionContext, type ConnectionSettings } from "~/contexts/connection";
+import {
+  connectionContext,
+  type ConnectionSettings,
+} from "~/contexts/connection";
 import { generateUUID } from "~/lib/utils";
 import {
   DefaultModuleData,
@@ -29,6 +32,8 @@ type PendingResolver<T = unknown> = {
   reject: (reason?: unknown) => void;
   schema: z.ZodSchema<T>;
 };
+
+type AnyPendingResolver = PendingResolver<any>;
 
 @customElement("websocket-provider")
 export class WebSocketProvider extends LitElement {
@@ -62,7 +67,7 @@ export class WebSocketProvider extends LitElement {
   private _reconnectTimeout: number | null = null;
   private _settingsUpdateTimeout: number | null = null;
   private _previousConnectedState = false;
-  private _pendingResolvers: Record<string, PendingResolver> = {};
+  private _pendingResolvers: Record<string, AnyPendingResolver> = {};
 
   @provide({ context: websocketContext })
   get websocketState(): WebSocketState {
@@ -136,6 +141,8 @@ export class WebSocketProvider extends LitElement {
 
     if (message.id && this._pendingResolvers[message.id]) {
       const resolver = this._pendingResolvers[message.id];
+      if (!resolver) return;
+
       const parsedData = resolver.schema.safeParse(message.data);
       if (parsedData?.success) {
         resolver.resolve(parsedData.data);
@@ -187,9 +194,11 @@ export class WebSocketProvider extends LitElement {
       case "SETTINGS_UPDATED":
         const updatedSettings = message.data as Partial<Settings>;
         this._settings = {
-          autostart: updatedSettings.autostart ?? this._settings?.autostart ?? false,
+          autostart:
+            updatedSettings.autostart ?? this._settings?.autostart ?? false,
           hotkeys: updatedSettings.hotkeys ?? this._settings?.hotkeys ?? [],
-          logLevel: updatedSettings.logLevel ?? this._settings?.logLevel ?? "INFO",
+          logLevel:
+            updatedSettings.logLevel ?? this._settings?.logLevel ?? "INFO",
           media: {
             directories:
               updatedSettings.media?.directories ??
@@ -252,10 +261,13 @@ export class WebSocketProvider extends LitElement {
     }, CONNECTION_TIMEOUT);
 
     try {
-      this._ws = new WebSocket(`${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`);
+      this._ws = new WebSocket(
+        `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
+      );
     } catch (error) {
       console.error("Failed to create WebSocket:", error);
-      this._error = "Failed to create connection. Please check your connection settings.";
+      this._error =
+        "Failed to create connection. Please check your connection settings.";
       this._isConnected = false;
       this.requestUpdate();
       return;
@@ -319,7 +331,11 @@ export class WebSocketProvider extends LitElement {
       this.clearAllPendingResolvers("WebSocket connection closed");
 
       if (this._previousConnectedState && this._error) {
-        this.showToast("Disconnected", "Disconnected from System Bridge", "error");
+        this.showToast(
+          "Disconnected",
+          "Disconnected from System Bridge",
+          "error",
+        );
       }
       this._previousConnectedState = false;
 
@@ -329,7 +345,8 @@ export class WebSocketProvider extends LitElement {
       } else if (event.code === 1002) {
         this._error = "Connection failed due to protocol error.";
       } else if (event.code === 1003) {
-        this._error = "Invalid API token. Please check your connection settings.";
+        this._error =
+          "Invalid API token. Please check your connection settings.";
         this._retryCount = MAX_RETRIES + 1;
         this.showToast("Authentication Failed", "Invalid API token", "error");
       } else if (event.code !== 1000 && event.code !== 1001) {
@@ -374,7 +391,9 @@ export class WebSocketProvider extends LitElement {
 
     this._reconnectTimeout = window.setTimeout(() => {
       if (this._retryCount < MAX_RETRIES) {
-        console.log(`Attempting to reconnect... (${this._retryCount + 1}/${MAX_RETRIES})`);
+        console.log(
+          `Attempting to reconnect... (${this._retryCount + 1}/${MAX_RETRIES})`,
+        );
         this._retryCount++;
         this._ws = null;
         this.connect();
@@ -410,7 +429,7 @@ export class WebSocketProvider extends LitElement {
     request: WebSocketRequest,
     schema: z.ZodSchema<T>,
   ): Promise<T> {
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
         reject(new Error("WebSocket is not connected"));
         return;
