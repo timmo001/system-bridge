@@ -98,6 +98,7 @@ export class WebSocketProvider extends ProviderElement {
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has("connection")) {
+      console.log("WebSocketProvider: Connection changed", this.connection);
       this.handleConnectionChange();
     }
   }
@@ -236,9 +237,13 @@ export class WebSocketProvider extends ProviderElement {
 
   private connect() {
     // Guard against undefined connection (context not yet provided)
-    if (!this.connection) return;
+    if (!this.connection) {
+      console.log("WebSocketProvider: Connection context not yet provided");
+      return;
+    }
 
     const { host, port, ssl, token } = this.connection;
+    console.log("WebSocketProvider: Attempting to connect", { host, port, ssl, hasToken: !!token });
 
     if (!host || !port) {
       const error = "Connection settings are incomplete. Please configure host and port.";
@@ -258,7 +263,10 @@ export class WebSocketProvider extends ProviderElement {
       return;
     }
 
-    if (this._ws) return;
+    if (this._ws) {
+      console.log("WebSocketProvider: WebSocket already exists, skipping connect");
+      return;
+    }
 
     if (this._connectionTimeout) {
       clearTimeout(this._connectionTimeout);

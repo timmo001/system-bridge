@@ -23,6 +23,7 @@ export class ConnectionProvider extends ProviderElement {
   constructor() {
     super();
     this._connection = loadConnectionSettings();
+    console.log("ConnectionProvider: Loaded connection settings", this._connection);
   }
 
   updateConnection(settings: Partial<ConnectionSettings>) {
