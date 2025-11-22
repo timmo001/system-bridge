@@ -74,6 +74,18 @@ type SettingsHotkey struct {
 	Key  string `json:"key" mapstructure:"key"`
 }
 
+type SettingsCommandDefinition struct {
+	ID         string   `json:"id" mapstructure:"id"`
+	Name       string   `json:"name" mapstructure:"name"`
+	Command    string   `json:"command" mapstructure:"command"`
+	WorkingDir string   `json:"workingDir" mapstructure:"workingDir"`
+	Arguments  []string `json:"arguments" mapstructure:"arguments"`
+}
+
+type SettingsCommands struct {
+	Allowlist []SettingsCommandDefinition `json:"allowlist" mapstructure:"allowlist"`
+}
+
 type SettingsMediaDirectory struct {
 	Name string `json:"name" mapstructure:"name"`
 	Path string `json:"path" mapstructure:"path"`
@@ -87,6 +99,7 @@ type Settings struct {
 	Autostart bool             `json:"autostart" mapstructure:"autostart"`
 	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel  LogLevel         `json:"logLevel" mapstructure:"logLevel"`
+	Commands  SettingsCommands `json:"commands" mapstructure:"commands"`
 	Media     SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
@@ -107,6 +120,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelInfo)
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
+	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
 
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
@@ -155,6 +169,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("media.directories", cfg.Media.Directories)
+	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
 
 	if err := viper.WriteConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
