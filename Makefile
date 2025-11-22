@@ -38,22 +38,22 @@ else
 endif
 
 build_web_client: clean_web_client
-	cd web-client && pnpm install && $(BUN_BUILD) && pnpm run verify-build
+	cd web-client && pnpm install && pnpm build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
-	@echo "Verifying CSS files are accessible..."
-	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\chunks\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
-	@echo ✓ CSS files verified before Go build
+	@echo "Verifying build files are accessible..."
+	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host '✗ Build files not found after build'; exit 1 }"
+	@echo ✓ Build files verified before Go build
 else
 	@echo "Waiting for file system to sync..."
 	@sync
-	@echo "Verifying CSS files are accessible..."
-	@if ! ls web-client/out/_next/static/chunks/*.css 1> /dev/null 2>&1; then \
-		echo "✗ CSS files not found after build"; \
+	@echo "Verifying build files are accessible..."
+	@if ! ls web-client/dist/index.html 1> /dev/null 2>&1; then \
+		echo "✗ Build files not found after build"; \
 		exit 1; \
 	fi
-	@echo "✓ CSS files verified before Go build"
+	@echo "✓ Build files verified before Go build"
 endif
 
 create_all_packages: clean_dist build
@@ -159,9 +159,9 @@ endif
 
 clean_web_client:
 ifeq ($(OS),Windows_NT)
-	-$(RMDIR) web-client\out 2>nul || exit 0
+	-$(RMDIR) web-client\dist 2>nul || exit 0
 else
-	-$(RMDIR) web-client/out 2>/dev/null
+	-$(RMDIR) web-client/dist 2>/dev/null
 endif
 
 deps:
