@@ -220,9 +220,7 @@ export class PageSettingsMedia extends PageElement {
       <div class="flex items-center gap-4 p-3 rounded-md border">
         <div class="flex-1 space-y-1">
           <div class="font-medium">${dir.name}</div>
-          <div class="text-sm text-muted-foreground break-all">
-            ${dir.path}
-          </div>
+          <div class="text-sm text-muted-foreground break-all">${dir.path}</div>
         </div>
         <ui-button
           variant="destructive"

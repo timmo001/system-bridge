@@ -319,45 +319,45 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 
 func getStructComment(name string) string {
 	comments := map[string]string{
-		"BatteryData":                  "Battery Module",
-		"CPUData":                      "CPU Module",
-		"DisksData":                    "Disks Module",
-		"DisplaysData":                 "Displays Module",
-		"GPUsData":                     "GPUs Module",
-		"MediaData":                    "Media Module",
-		"MemoryData":                   "Memory Module",
-		"NetworksData":                 "Networks Module",
-		"ProcessesData":                "Processes Module",
-		"SensorsData":                  "Sensors Module",
-		"SystemData":                   "System Module",
-		"CPUFrequency":                 "CPU Frequency",
-		"CPUStats":                     "CPU Stats",
-		"CPUTimes":                     "CPU Times",
-		"PerCPU":                       "Per-CPU Data",
-		"DiskIOCounters":               "Disk IO Counters",
-		"DiskUsage":                    "Disk Usage",
-		"DiskPartition":                "Disk Partition",
-		"Disk":                         "Disk",
-		"Display":                      "Display",
-		"GPU":                          "GPU",
-		"MemorySwap":                   "Memory Swap",
-		"MemoryVirtual":                "Memory Virtual",
-		"NetworkAddress":               "Network Address",
-		"NetworkStats":                 "Network Stats",
-		"NetworkConnection":            "Network Connection",
-		"NetworkIO":                    "Network IO",
-		"Network":                      "Network",
-		"Process":                      "Process",
-		"SensorsWindowsSensor":         "Windows Sensor",
-		"SensorsWindowsHardware":       "Windows Hardware",
-		"SensorsNVIDIAChipset":         "NVIDIA Chipset",
-		"SensorsNVIDIADisplay":         "NVIDIA Display",
-		"SensorsNVIDIADriver":          "NVIDIA Driver",
-		"SensorsNVIDIAGPU":             "NVIDIA GPU",
-		"SensorsNVIDIA":                "NVIDIA Sensors",
-		"SensorsWindows":               "Windows Sensors",
-		"Temperature":                  "Temperature Sensor",
-		"SystemUser":                   "System User",
+		"BatteryData":            "Battery Module",
+		"CPUData":                "CPU Module",
+		"DisksData":              "Disks Module",
+		"DisplaysData":           "Displays Module",
+		"GPUsData":               "GPUs Module",
+		"MediaData":              "Media Module",
+		"MemoryData":             "Memory Module",
+		"NetworksData":           "Networks Module",
+		"ProcessesData":          "Processes Module",
+		"SensorsData":            "Sensors Module",
+		"SystemData":             "System Module",
+		"CPUFrequency":           "CPU Frequency",
+		"CPUStats":               "CPU Stats",
+		"CPUTimes":               "CPU Times",
+		"PerCPU":                 "Per-CPU Data",
+		"DiskIOCounters":         "Disk IO Counters",
+		"DiskUsage":              "Disk Usage",
+		"DiskPartition":          "Disk Partition",
+		"Disk":                   "Disk",
+		"Display":                "Display",
+		"GPU":                    "GPU",
+		"MemorySwap":             "Memory Swap",
+		"MemoryVirtual":          "Memory Virtual",
+		"NetworkAddress":         "Network Address",
+		"NetworkStats":           "Network Stats",
+		"NetworkConnection":      "Network Connection",
+		"NetworkIO":              "Network IO",
+		"Network":                "Network",
+		"Process":                "Process",
+		"SensorsWindowsSensor":   "Windows Sensor",
+		"SensorsWindowsHardware": "Windows Hardware",
+		"SensorsNVIDIAChipset":   "NVIDIA Chipset",
+		"SensorsNVIDIADisplay":   "NVIDIA Display",
+		"SensorsNVIDIADriver":    "NVIDIA Driver",
+		"SensorsNVIDIAGPU":       "NVIDIA GPU",
+		"SensorsNVIDIA":          "NVIDIA Sensors",
+		"SensorsWindows":         "Windows Sensors",
+		"Temperature":            "Temperature Sensor",
+		"SystemUser":             "System User",
 	}
 
 	if comment, exists := comments[name]; exists {
@@ -373,18 +373,18 @@ func hasRecursiveDependency(name string, structInfo StructInfo, structs map[stri
 
 func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	// For SensorsWindowsHardware with recursive structure
-	buf.WriteString(fmt.Sprintf("export const %sSchema: z.ZodType<{\n", structInfo.Name))
+	fmt.Fprintf(buf, "export const %sSchema: z.ZodType<{\n", structInfo.Name)
 
 	for _, field := range structInfo.Fields {
 		zodType := mapGoTypeToZodWithRecursive(field, structInfo.Name)
-		buf.WriteString(fmt.Sprintf("  %s: %s;\n", field.JSONName, zodType))
+		fmt.Fprintf(buf, "  %s: %s;\n", field.JSONName, zodType)
 	}
 
 	buf.WriteString("}> = z.object({\n")
 
 	for i, field := range structInfo.Fields {
 		zodSchema := mapGoTypeToZodSchema(field, structInfo.Name)
-		buf.WriteString(fmt.Sprintf("  %s: %s", field.JSONName, zodSchema))
+		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
 		} else {
@@ -425,11 +425,12 @@ func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[st
 func mapGoTypeToZodWithRecursive(field FieldInfo, parentStruct string) string {
 	var zodType string
 
-	if field.Type == parentStruct {
+	switch field.Type {
+	case parentStruct:
 		zodType = "unknown[]"
-	} else if field.Type == "SensorsWindowsSensor" {
+	case "SensorsWindowsSensor":
 		zodType = "{\n    id: string;\n    name: string;\n    type: string;\n    value: unknown;\n  }[]"
-	} else {
+	default:
 		zodType = mapGoTypeToZod(field)
 	}
 
@@ -460,16 +461,16 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 	default:
 		// Check if it's a defined struct
 		if strings.HasSuffix(field.Type, "Data") ||
-		   strings.HasPrefix(field.Type, "CPU") ||
-		   strings.HasPrefix(field.Type, "Disk") ||
-		   strings.HasPrefix(field.Type, "Display") ||
-		   strings.HasPrefix(field.Type, "GPU") ||
-		   strings.HasPrefix(field.Type, "Memory") ||
-		   strings.HasPrefix(field.Type, "Network") ||
-		   strings.HasPrefix(field.Type, "Process") ||
-		   strings.HasPrefix(field.Type, "Sensors") ||
-		   strings.HasPrefix(field.Type, "System") ||
-		   strings.HasPrefix(field.Type, "Temperature") {
+			strings.HasPrefix(field.Type, "CPU") ||
+			strings.HasPrefix(field.Type, "Disk") ||
+			strings.HasPrefix(field.Type, "Display") ||
+			strings.HasPrefix(field.Type, "GPU") ||
+			strings.HasPrefix(field.Type, "Memory") ||
+			strings.HasPrefix(field.Type, "Network") ||
+			strings.HasPrefix(field.Type, "Process") ||
+			strings.HasPrefix(field.Type, "Sensors") ||
+			strings.HasPrefix(field.Type, "System") ||
+			strings.HasPrefix(field.Type, "Temperature") {
 			baseSchema = field.Type + "Schema"
 		} else {
 			baseSchema = "z.unknown()"
