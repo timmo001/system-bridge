@@ -37,23 +37,29 @@ else
 	@echo "Console build is only supported on Windows"
 endif
 
-build_web_client: clean_web_client
-	cd web-client && pnpm install && $(BUN_BUILD) && pnpm run verify-build
+generate_schemas:
+	@echo "Generating Zod schemas from Go types..."
+	@go run tools/generate-schemas/main.go
+	@echo "Formatting generated schemas..."
+	@cd web-client && pnpm install && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
+
+build_web_client: clean_web_client generate_schemas
+	cd web-client && pnpm build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
-	@echo "Verifying CSS files are accessible..."
-	@powershell -Command "if (!(Test-Path 'web-client\out\_next\static\chunks\*.css')) { Write-Host '✗ CSS files not found after build'; exit 1 }"
-	@echo ✓ CSS files verified before Go build
+	@echo "Verifying build files are accessible..."
+	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host '✗ Build files not found after build'; exit 1 }"
+	@echo ✓ Build files verified before Go build
 else
 	@echo "Waiting for file system to sync..."
 	@sync
-	@echo "Verifying CSS files are accessible..."
-	@if ! ls web-client/out/_next/static/chunks/*.css 1> /dev/null 2>&1; then \
-		echo "✗ CSS files not found after build"; \
+	@echo "Verifying build files are accessible..."
+	@if ! ls web-client/dist/index.html 1> /dev/null 2>&1; then \
+		echo "✗ Build files not found after build"; \
 		exit 1; \
 	fi
-	@echo "✓ CSS files verified before Go build"
+	@echo "✓ Build files verified before Go build"
 endif
 
 create_all_packages: clean_dist build
@@ -91,6 +97,13 @@ install: build
 	go install .
 
 run: build
+	@echo "Starting web client and backend in parallel..."
+	cd web-client && pnpm exec concurrently -n "web,backend" -c "blue,green" "pnpm dev" "../$(OUT) backend"
+
+run-web-client:
+	cd web-client && pnpm dev
+
+run-backend: build
 	./$(OUT) backend
 
 # Run console version for debugging (Windows only)
@@ -117,12 +130,20 @@ else
 	@echo "Process management is only supported on Windows"
 endif
 
-test:
+test: test_go
+
+test_go:
 	go test -v ./...
 
-lint:
+lint: lint_go lint_web_client
+
+lint_go:
 	go fmt ./...
 	go vet ./...
+
+lint_web_client:
+	cd web-client && pnpm lint
+	cd web-client && pnpm typecheck
 
 clean:
 ifeq ($(OS),Windows_NT)
@@ -159,9 +180,9 @@ endif
 
 clean_web_client:
 ifeq ($(OS),Windows_NT)
-	-$(RMDIR) web-client\out 2>nul || exit 0
+	-$(RMDIR) web-client\dist 2>nul || exit 0
 else
-	-$(RMDIR) web-client/out 2>/dev/null
+	-$(RMDIR) web-client/dist 2>/dev/null
 endif
 
 deps:
@@ -176,6 +197,7 @@ help:
 	@echo "  build                    Build the application"
 	@echo "  build_console            Build console version for debugging (Windows only)"
 	@echo "  build_web_client         Build the web client"
+	@echo "  generate_schemas         Generate Zod schemas from Go types"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
 	@echo "  create_arch              Create Arch Linux package"
 	@echo "  create_flatpak           Create Flatpak package"
@@ -183,6 +205,8 @@ help:
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
 	@echo "  run                      Build and run the application (development only)"
+	@echo "  run-web-client           Run the web client dev server (Vite)"
+	@echo "  run-backend              Build and run the backend server"
 	@echo "  run_console              Build and run console version for debugging (Windows only)"
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
 	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"

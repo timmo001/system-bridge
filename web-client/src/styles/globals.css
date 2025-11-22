@@ -1,13 +1,6 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
-@theme {
-  --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -124,5 +117,20 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Custom element base styles */
+  ui-button {
+    display: inline-flex;
+  }
+  ui-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  ui-input,
+  ui-tabs,
+  ui-tabs-list,
+  ui-tabs-content {
+    display: block;
   }
 }

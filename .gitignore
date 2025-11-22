@@ -9,12 +9,17 @@ system-bridge.*
 system-bridge.rc
 system-bridge.syso
 
+!system-bridge/
+
 # Legacy
 .legacy/
 
 # Act - Local GitHub Actions Testing
 .act
 .secrets
+
+# Claude
+.claude
 
 # OpenCode
 .opencode
