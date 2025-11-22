@@ -10,8 +10,14 @@ export class Tabs extends UIElement {
 
   @property() value = "";
 
+  connectedCallback() {
+    super.connectedCallback();
+    this.className = "w-full block";
+  }
+
   render() {
-    return html`<div class="w-full"><slot></slot></div>`;
+    // In Light DOM, content displays naturally
+    return html``;
   }
 
   handleTabChange(newValue: string) {
@@ -31,12 +37,18 @@ export class Tabs extends UIElement {
 export class TabsList extends UIElement {
   protected displayStyle = "block";
 
-  render() {
+  connectedCallback() {
+    super.connectedCallback();
     const classes = cn(
       "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
     );
+    this.className = classes;
+    this.setAttribute("role", "tablist");
+  }
 
-    return html`<div class=${classes} role="tablist"><slot></slot></div>`;
+  render() {
+    // In Light DOM, content displays naturally
+    return html``;
   }
 }
 
@@ -45,7 +57,27 @@ export class TabsTrigger extends UIElement {
   @property() value = "";
   @property({ type: Boolean }) active = false;
 
-  render() {
+  connectedCallback() {
+    super.connectedCallback();
+    this.updateStyles();
+    this.setAttribute("role", "tab");
+    this.tabIndex = 0;
+    this.addEventListener("click", this._handleClick);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("click", this._handleClick);
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+    if (changedProperties.has("active")) {
+      this.updateStyles();
+    }
+  }
+
+  private updateStyles() {
     const classes = cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -55,26 +87,21 @@ export class TabsTrigger extends UIElement {
         ? "bg-background text-foreground shadow"
         : "hover:bg-background/50 hover:text-foreground",
     );
-
-    return html`
-      <button
-        type="button"
-        role="tab"
-        aria-selected=${this.active}
-        class=${classes}
-        @click=${this._handleClick}
-      >
-        <slot></slot>
-      </button>
-    `;
+    this.className = classes;
+    this.setAttribute("aria-selected", String(this.active));
   }
 
-  private _handleClick() {
-    const tabs = this.closest("ui-tabs")!;
+  render() {
+    // In Light DOM, content displays naturally
+    return html``;
+  }
+
+  private _handleClick = () => {
+    const tabs = this.closest("ui-tabs") as Tabs;
     if (tabs) {
       tabs.handleTabChange(this.value);
     }
-  }
+  };
 }
 
 @customElement("ui-tabs-content")
@@ -84,12 +111,18 @@ export class TabsContent extends UIElement {
   @property() value = "";
   @property({ type: Boolean, reflect: true }) hidden = false;
 
-  render() {
+  connectedCallback() {
+    super.connectedCallback();
     const classes = cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     );
+    this.className = classes;
+    this.setAttribute("role", "tabpanel");
+  }
 
-    return html`<div class=${classes} role="tabpanel"><slot></slot></div>`;
+  render() {
+    // In Light DOM, content displays naturally
+    return html``;
   }
 }
 

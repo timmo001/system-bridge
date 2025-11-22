@@ -32,7 +32,8 @@ export class ConnectionProvider extends ProviderElement {
   }
 
   render() {
-    return html`<slot></slot>`;
+    // In Light DOM, content passes through naturally
+    return html``;
   }
 }
 

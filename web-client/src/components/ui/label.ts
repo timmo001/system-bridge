@@ -6,12 +6,18 @@ import { UIElement } from "~/mixins";
 
 @customElement("ui-label")
 export class Label extends UIElement {
-  render() {
+  connectedCallback() {
+    super.connectedCallback();
+    // Apply label classes directly to host element
     const classes = cn(
       "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
     );
+    this.className = classes;
+  }
 
-    return html` <label class=${classes}><slot></slot></label> `;
+  render() {
+    // In Light DOM, content displays naturally without slot
+    return html``;
   }
 }
 

@@ -2,7 +2,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins";
 
 const buttonVariants = cva(
@@ -44,25 +43,59 @@ export class Button extends UIElement {
   @property({ type: Boolean }) disabled = false;
   @property() type: "button" | "submit" | "reset" = "button";
 
-  render() {
-    const classes = cn(
-      buttonVariants({ variant: this.variant, size: this.size }),
-      this.disabled && "opacity-50 pointer-events-none",
-    );
+  connectedCallback() {
+    super.connectedCallback();
+    // Apply button classes directly to host element
+    this.updateStyles();
+    // Make host element a button for accessibility
+    this.setAttribute("role", "button");
+    this.tabIndex = 0;
 
-    return html`
-      <button
-        type=${this.type}
-        class=${classes}
-        ?disabled=${this.disabled}
-        @click=${this._handleClick}
-      >
-        <slot></slot>
-      </button>
-    `;
+    // Add click handler to host
+    this.addEventListener("click", this._handleClick);
   }
 
-  private _handleClick(e: MouseEvent) {
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("click", this._handleClick);
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+    if (
+      changedProperties.has("variant") ||
+      changedProperties.has("size") ||
+      changedProperties.has("disabled")
+    ) {
+      this.updateStyles();
+    }
+  }
+
+  private updateStyles() {
+    const classes = buttonVariants({
+      variant: this.variant,
+      size: this.size,
+    });
+    this.className = classes;
+
+    if (this.disabled) {
+      this.setAttribute("aria-disabled", "true");
+      this.style.pointerEvents = "none";
+      this.style.opacity = "0.5";
+    } else {
+      this.removeAttribute("aria-disabled");
+      this.style.pointerEvents = "";
+      this.style.opacity = "";
+    }
+  }
+
+  render() {
+    // In Light DOM, we don't need to render anything -
+    // the child content will display naturally as direct children
+    return html``;
+  }
+
+  private _handleClick = (e: MouseEvent) => {
     if (this.disabled) {
       e.preventDefault();
       e.stopPropagation();
@@ -74,7 +107,7 @@ export class Button extends UIElement {
         composed: true,
       }),
     );
-  }
+  };
 }
 
 declare global {
