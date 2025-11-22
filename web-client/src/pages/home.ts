@@ -26,9 +26,7 @@ export class PageHome extends LitElement {
         <div class="max-w-4xl mx-auto space-y-8">
           <div class="space-y-2">
             <h1 class="text-4xl font-bold">System Bridge</h1>
-            <p class="text-muted-foreground">
-              Bridge your system to Home Assistant and other applications
-            </p>
+            <p class="text-muted-foreground">A bridge for your systems</p>
           </div>
 
           <div class="space-y-4">
