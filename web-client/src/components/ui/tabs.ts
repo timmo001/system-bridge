@@ -97,7 +97,7 @@ export class TabsTrigger extends UIElement {
   }
 
   private _handleClick = () => {
-    const tabs = this.closest("ui-tabs") as Tabs;
+    const tabs = this.closest("ui-tabs")!;
     if (tabs) {
       tabs.handleTabChange(this.value);
     }
