@@ -2,6 +2,17 @@
 
 This file provides guidance to AI coding assistants (LLMs, code agents) when working with code in this repository.
 
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Build and Development Commands](#build-and-development-commands)
+- [Architecture](#architecture)
+- [Code Style and Conventions](#code-style-and-conventions)
+- [Best Practices](#best-practices)
+- [Platform Support](#platform-support)
+- [Testing](#testing)
+- [Package Creation](#package-creation)
+
 ## Project Overview
 
 System Bridge is a cross-platform application (Linux, Windows, macOS/darwin) that provides a "bridge" to other applications like Home Assistant. It exposes system information and control capabilities via HTTP/WebSocket APIs, all protected by token authentication.
