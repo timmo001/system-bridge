@@ -239,9 +239,9 @@ export class PageSettingsCommands extends PageElement {
                 <ui-icon name="ArrowLeft"></ui-icon>
               </ui-button>
               <div>
-                <h1 class="text-3xl font-bold mb-2">Custom Commands</h1>
+                <h1 class="text-3xl font-bold mb-2">Commands</h1>
                 <p class="text-muted-foreground">
-                  Manage custom commands that can be executed remotely
+                  Manage commands that can be executed remotely
                 </p>
               </div>
             </div>
@@ -251,7 +251,7 @@ export class PageSettingsCommands extends PageElement {
           ${!isConnected
             ? html`
                 <ui-connection-required
-                  message="Please connect to System Bridge to manage custom commands."
+                  message="Please connect to System Bridge to manage commands."
                   @configure-connection=${this.handleNavigateToConnection}
                 ></ui-connection-required>
               `
@@ -260,8 +260,7 @@ export class PageSettingsCommands extends PageElement {
                   <div class="rounded-lg border bg-card p-6 space-y-4">
                     <h2 class="text-xl font-semibold">Add Command</h2>
                     <p class="text-sm text-muted-foreground">
-                      Add custom commands that can be executed remotely via the
-                      API.
+                      Add commands that can be executed remotely via the API.
                     </p>
 
                     <div class="space-y-3">
