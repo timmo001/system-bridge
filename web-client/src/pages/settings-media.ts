@@ -151,7 +151,7 @@ export class PageSettingsMedia extends PageElement {
             path: this.newDirectoryPath.trim(),
           },
         ];
-        await this.saveSettings();
+        this.saveSettings();
         this.newDirectoryName = "";
         this.newDirectoryPath = "";
         showSuccess("Directory added successfully");
@@ -227,8 +227,8 @@ export class PageSettingsMedia extends PageElement {
         <ui-button
           variant="destructive"
           size="sm"
+          data-path=${dir.path}
           @click=${this.handleRemoveDirectory}
-          .removeDir=${dir}
           ?disabled=${this.isSubmitting}
         >
           <ui-icon name="Trash2"></ui-icon>
