@@ -22,7 +22,6 @@
     "lit": "^3.3.1",
     "lucide": "^0.554.0",
     "tailwind-merge": "^3.4.0",
-    "urlpattern-polyfill": "^10.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
