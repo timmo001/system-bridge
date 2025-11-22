@@ -642,6 +642,120 @@ pnpm format:check
 pnpm format:write
 ```
 
+### Interactive Testing with Chrome DevTools
+
+For testing web client changes and WebSocket communication, use the chrome-devtools MCP server for interactive browser testing:
+
+#### Setup
+
+1. **Start the development environment:**
+```bash
+make run  # Starts both backend (port 9170) and web client (port 5173)
+```
+
+2. **Access via browser:**
+   - Open http://localhost:5173 in Chrome
+   - The chrome-devtools MCP tools are available for automation
+
+#### Testing Workflow
+
+**Test UI components and interactions:**
+```bash
+# Take snapshots to see current page state
+mcp__chrome-devtools__take_snapshot
+
+# Click elements (use uid from snapshot)
+mcp__chrome-devtools__click uid="element_uid"
+
+# Fill forms
+mcp__chrome-devtools__fill uid="input_uid" value="test value"
+
+# Navigate
+mcp__chrome-devtools__navigate_page type="url" url="http://localhost:5173/data"
+
+# Check console for errors
+mcp__chrome-devtools__list_console_messages
+```
+
+**Test data validation and WebSocket communication:**
+```bash
+# 1. Navigate to data page
+# 2. Click through module tabs (Battery, CPU, Disks, etc.)
+# 3. Check console for Zod validation errors
+# 4. Verify data displays correctly
+```
+
+#### Common Testing Scenarios
+
+**Testing schema changes:**
+1. Modify Go struct in `types/` directory
+2. Run `make generate_schemas` to update Zod schemas
+3. Start dev environment with `make run`
+4. Navigate to relevant page in browser
+5. Use chrome-devtools to verify:
+   - No console errors
+   - Data validates correctly
+   - UI displays new fields
+
+**Testing WebSocket events:**
+1. Connect to backend via web client
+2. Monitor console messages for WebSocket events
+3. Verify data updates in real-time
+4. Check for validation errors in Zod schemas
+
+**Testing accessibility:**
+```bash
+# Test keyboard navigation
+mcp__chrome-devtools__press_key key="Tab"
+mcp__chrome-devtools__press_key key="Enter"
+mcp__chrome-devtools__press_key key=" "  # Space
+
+# Verify ARIA attributes in snapshots
+mcp__chrome-devtools__take_snapshot verbose=true
+```
+
+**Testing error states:**
+1. Stop backend: Kill the `make run` process
+2. Observe connection error handling in UI
+3. Restart backend and verify reconnection
+
+#### Best Practices
+
+- **Always check console**: Run `list_console_messages` to catch errors
+- **Test all modules**: Systematically test each data module tab
+- **Verify validation**: Ensure Zod schemas validate without errors
+- **Test keyboard accessibility**: All interactive elements should work with keyboard
+- **Check network requests**: Monitor WebSocket messages for correct data flow
+
+#### Debugging Tips
+
+**Console errors:**
+```bash
+# List all console messages with types
+mcp__chrome-devtools__list_console_messages includePreservedMessages=true
+
+# Get detailed error message
+mcp__chrome-devtools__get_console_message msgid=<id>
+```
+
+**Network issues:**
+```bash
+# List network requests
+mcp__chrome-devtools__list_network_requests
+
+# Get specific request details
+mcp__chrome-devtools__get_network_request reqid=<id>
+```
+
+**Visual debugging:**
+```bash
+# Take screenshots
+mcp__chrome-devtools__take_screenshot
+
+# Take full page screenshot
+mcp__chrome-devtools__take_screenshot fullPage=true
+```
+
 ### Writing Tests
 
 #### Go Test Structure
