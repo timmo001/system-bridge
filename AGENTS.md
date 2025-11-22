@@ -549,11 +549,18 @@ if cpuData.Temperature == nil {
 
 ### Testing Philosophy
 
+**Go Tests:**
 - Test public APIs and critical paths
 - Use table-driven tests for multiple scenarios
 - Mock external dependencies (filesystem, network, system calls)
 - Test error conditions, not just happy paths
 - Keep tests fast; avoid sleeps and long timeouts
+
+**Web Client:**
+- No automated unit tests (removed Playwright/web-test-runner)
+- Code quality enforced through ESLint, TypeScript, and Prettier
+- Functional testing done manually using Chrome DevTools MCP server
+- Focus on interactive testing for UI components and WebSocket communication
 
 ```go
 // Good: Table-driven test
@@ -621,7 +628,9 @@ go test -run TestCPUModule ./data/module/
 go test -race ./...
 ```
 
-#### Web Client Tests
+#### Web Client Code Quality
+
+The web client does not have automated unit tests. Code quality is maintained through linting, type checking, and formatting:
 
 ```bash
 cd web-client
@@ -641,6 +650,26 @@ pnpm format:check
 # Format automatically
 pnpm format:write
 ```
+
+#### Running All Linters (GitHub Workflow)
+
+To run all linters used in the GitHub workflows:
+
+```bash
+# Application linting (Go + web client)
+make lint
+
+# Web client formatting
+cd web-client && pnpm format:check
+
+# Markdown linting (ignoring node_modules)
+bunx markdownlint-cli . --ignore node_modules --ignore web-client/node_modules
+
+# YAML linting (project files only)
+uv tool run yamllint .github/ .scripts/
+```
+
+**Note:** For functional testing of web client components and WebSocket communication, use the Chrome DevTools MCP server for interactive browser testing (see below).
 
 ### Interactive Testing with Chrome DevTools
 
@@ -932,8 +961,16 @@ make clean && make build      # Clean rebuild
 
 # Testing
 make test                     # Run Go tests
-cd web-client && pnpm typecheck  # Type check frontend
+cd web-client && pnpm lint    # Lint web client
+cd web-client && pnpm typecheck  # Type check web client
+cd web-client && pnpm format:check  # Check web client formatting
 go run . client data run --module cpu --pretty  # Test a data module
+
+# Linting
+make lint                     # Lint Go and web client
+cd web-client && pnpm format:check  # Check formatting
+bunx markdownlint-cli . --ignore node_modules  # Lint markdown
+uv tool run yamllint .github/ .scripts/  # Lint YAML
 
 # Development
 go fmt ./...                  # Format Go code
