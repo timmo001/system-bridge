@@ -1,7 +1,6 @@
 import { showSuccess, showError } from "~/lib/notifications";
 import { html } from "lit";
 import { PageElement } from "~/mixins";
-import { PageElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
@@ -228,11 +227,6 @@ export class PageSettings extends PageElement {
         </div>
       </div>
     `;
-  }
-
-  private navigate(path: string) {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
   }
 }
 
