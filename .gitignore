@@ -16,6 +16,9 @@ system-bridge.syso
 .act
 .secrets
 
+# Claude
+.claude
+
 # OpenCode
 .opencode
 
