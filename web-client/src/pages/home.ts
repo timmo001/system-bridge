@@ -95,7 +95,16 @@ export class PageHome extends PageElement {
                 `
               : ""}
 
-            <div class="flex gap-4">
+            <div class="flex gap-4 justify-center">
+              <ui-button
+                variant="outline"
+                @click=${() => this.navigate("/connection")}
+              >
+                Setup Connection
+              </ui-button>
+            </div>
+
+            <div class="flex gap-4 justify-center">
               <ui-button
                 variant="default"
                 @click=${() => this.navigate("/data")}
@@ -103,16 +112,10 @@ export class PageHome extends PageElement {
                 View Data
               </ui-button>
               <ui-button
-                variant="secondary"
+                variant="default"
                 @click=${() => this.navigate("/settings")}
               >
-                Settings
-              </ui-button>
-              <ui-button
-                variant="outline"
-                @click=${() => this.navigate("/connection")}
-              >
-                Connection
+                Manage Settings
               </ui-button>
             </div>
           </div>
