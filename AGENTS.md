@@ -394,12 +394,6 @@ this.addEventListener("keydown", (e) => {
 });
 ```
 
-#### No Console Logs
-
-- `console.log`, `console.warn`, etc. are **ESLint errors**
-- Use proper debugging techniques or remove debug code before committing
-- For user-facing messages, use the notifications system
-
 ### General Conventions
 
 #### File Naming
@@ -772,7 +766,6 @@ pnpm lint:fix
 # 1. Import order (must follow prescribed groups)
 # 2. Naming conventions (camelCase, PascalCase, etc.)
 # 3. No 'any' types (always provide explicit types)
-# 4. No console.log (use proper logging/remove debug code)
 ```
 
 ### OS-Specific Issues
