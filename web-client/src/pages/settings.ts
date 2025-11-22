@@ -187,7 +187,7 @@ export class PageSettings extends PageElement {
                         class="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         ?disabled=${this.isSubmitting}
                         .value=${this.formData.logLevel}
-                        @blur=${this.handleLogLevelChange}
+                        @change=${this.handleLogLevelChange}
                       >
                         <option value="DEBUG">Debug</option>
                         <option value="INFO">Info</option>

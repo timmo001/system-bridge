@@ -102,6 +102,17 @@ export class Button extends UIElement {
       e.stopPropagation();
       return;
     }
+
+    // Handle form submission for submit buttons
+    if (this.type === "submit") {
+      const form = this.closest("form");
+      if (form) {
+        // Trigger form submission
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        return;
+      }
+    }
+
     this.dispatchEvent(
       new CustomEvent("button-click", {
         bubbles: true,
