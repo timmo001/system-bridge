@@ -181,8 +181,8 @@ jobs:
       - name: Add Flathub repository and install SDK
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Sdk//23.08
-          sudo flatpak install -y flathub org.freedesktop.Platform//23.08
+          sudo flatpak install -y flathub org.freedesktop.Sdk//24.08
+          sudo flatpak install -y flathub org.freedesktop.Platform//24.08
 
       - name: Create dummy binary for validation
         run: |
