@@ -131,6 +131,39 @@ export class PageSettingsCommands extends PageElement {
     showSuccess("Command removed successfully");
   };
 
+  private handleExecuteCommand = (e: Event): void => {
+    const button = e.currentTarget as HTMLElement;
+    const id = button.getAttribute("data-id");
+    if (!id) return;
+
+    if (!this.connection?.token) {
+      showError("No token found");
+      return;
+    }
+
+    if (!this.websocket?.sendRequest) {
+      showError("WebSocket not available");
+      return;
+    }
+
+    const command = this.commands.find((cmd) => cmd.id === id);
+    if (!command) {
+      showError("Command not found");
+      return;
+    }
+
+    this.websocket.sendRequest({
+      id: generateUUID(),
+      event: "COMMAND_EXECUTE",
+      data: {
+        commandID: id,
+      },
+      token: this.connection.token,
+    });
+
+    showSuccess(`Executing command: ${command.name}`);
+  };
+
   private saveSettings(): void {
     if (!this.connection?.token) {
       showError("No token found");
@@ -169,37 +202,111 @@ export class PageSettingsCommands extends PageElement {
   }
 
   private renderCommandItem(cmd: SettingsCommandDefinition) {
+    const executionState = this.websocket?.commandExecutions.get(cmd.id);
+    const isExecuting = executionState?.isExecuting ?? false;
+    const result = executionState?.result as
+      | {
+          exitCode: number;
+          stdout: string;
+          stderr: string;
+          error?: string;
+        }
+      | null
+      | undefined;
+
     return html`
-      <div class="flex items-center gap-4 p-3 rounded-md border">
-        <div class="flex-1 space-y-1">
-          <div class="font-medium">${cmd.name}</div>
-          <div class="text-sm text-muted-foreground break-all">
-            ${cmd.command}
+      <div class="flex flex-col gap-3 p-4 rounded-md border">
+        <div class="flex items-center gap-4">
+          <div class="flex-1 space-y-1">
+            <div class="font-medium">${cmd.name}</div>
+            <div class="text-sm text-muted-foreground break-all">
+              ${cmd.command}
+            </div>
+            ${cmd.workingDir
+              ? html`
+                  <div class="text-xs text-muted-foreground">
+                    Working Dir: ${cmd.workingDir}
+                  </div>
+                `
+              : ""}
+            ${cmd.arguments.length > 0
+              ? html`
+                  <div class="text-xs text-muted-foreground">
+                    Arguments: ${cmd.arguments.join(", ")}
+                  </div>
+                `
+              : ""}
           </div>
-          ${cmd.workingDir
-            ? html`
-                <div class="text-xs text-muted-foreground">
-                  Working Dir: ${cmd.workingDir}
-                </div>
-              `
-            : ""}
-          ${cmd.arguments.length > 0
-            ? html`
-                <div class="text-xs text-muted-foreground">
-                  Arguments: ${cmd.arguments.join(", ")}
-                </div>
-              `
-            : ""}
+          <div class="flex gap-2">
+            <ui-button
+              variant="default"
+              size="sm"
+              data-id=${cmd.id}
+              @click=${this.handleExecuteCommand}
+              ?disabled=${isExecuting || this.isSubmitting}
+              title="Execute command"
+            >
+              <ui-icon name=${isExecuting ? "Loader2" : "Play"}></ui-icon>
+            </ui-button>
+            <ui-button
+              variant="destructive"
+              size="sm"
+              data-id=${cmd.id}
+              @click=${this.handleRemoveCommand}
+              ?disabled=${this.isSubmitting}
+              title="Remove command"
+            >
+              <ui-icon name="Trash2"></ui-icon>
+            </ui-button>
+          </div>
         </div>
-        <ui-button
-          variant="destructive"
-          size="sm"
-          data-id=${cmd.id}
-          @click=${this.handleRemoveCommand}
-          ?disabled=${this.isSubmitting}
-        >
-          <ui-icon name="Trash2"></ui-icon>
-        </ui-button>
+        ${result
+          ? html`
+              <div
+                class="p-3 rounded-md border ${result.exitCode === 0
+                  ? "bg-green-950/30 border-green-800"
+                  : "bg-red-950/30 border-red-800"} space-y-2"
+              >
+                <div class="flex items-center gap-2 text-sm font-medium">
+                  <ui-icon
+                    name=${result.exitCode === 0 ? "CheckCircle2" : "XCircle"}
+                  ></ui-icon>
+                  <span
+                    >Exit Code: ${result.exitCode}
+                    ${result.error ? `(${result.error})` : ""}</span
+                  >
+                </div>
+                ${result.stdout
+                  ? html`
+                      <div class="space-y-1">
+                        <div class="text-xs font-medium text-muted-foreground">
+                          Output:
+                        </div>
+                        <pre
+                          class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                        >
+${result.stdout}</pre
+                        >
+                      </div>
+                    `
+                  : ""}
+                ${result.stderr
+                  ? html`
+                      <div class="space-y-1">
+                        <div class="text-xs font-medium text-red-400">
+                          Error Output:
+                        </div>
+                        <pre
+                          class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                        >
+${result.stderr}</pre
+                        >
+                      </div>
+                    `
+                  : ""}
+              </div>
+            `
+          : ""}
       </div>
     `;
   }

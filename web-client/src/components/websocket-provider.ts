@@ -65,6 +65,21 @@ export class WebSocketProvider extends ProviderElement {
   @state()
   private _isSettingsUpdatePending = false;
 
+  @state()
+  private _commandExecutions = new Map<
+    string,
+    {
+      isExecuting: boolean;
+      result: {
+        commandID: string;
+        exitCode: number;
+        stdout: string;
+        stderr: string;
+        error?: string;
+      } | null;
+    }
+  >();
+
   private _ws: WebSocket | null = null;
   private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
@@ -97,6 +112,7 @@ export class WebSocketProvider extends ProviderElement {
       isConnected: this._isConnected,
       settings: this._settings,
       error: this._error,
+      commandExecutions: this._commandExecutions,
       sendRequest: this.sendRequest.bind(this),
       sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
       retryConnection: this.retryConnection.bind(this),
@@ -259,6 +275,36 @@ export class WebSocketProvider extends ProviderElement {
         if (this._settingsUpdateTimeout) {
           clearTimeout(this._settingsUpdateTimeout);
           this._settingsUpdateTimeout = null;
+        }
+        break;
+      }
+
+      case "COMMAND_EXECUTING": {
+        const commandData = message.data as { commandID: string };
+        if (commandData?.commandID) {
+          this._commandExecutions.set(commandData.commandID, {
+            isExecuting: true,
+            result: null,
+          });
+          this.requestUpdate();
+        }
+        break;
+      }
+
+      case "COMMAND_COMPLETED": {
+        const result = message.data as {
+          commandID: string;
+          exitCode: number;
+          stdout: string;
+          stderr: string;
+          error?: string;
+        };
+        if (result?.commandID) {
+          this._commandExecutions.set(result.commandID, {
+            isExecuting: false,
+            result,
+          });
+          this.requestUpdate();
         }
         break;
       }
