@@ -5,11 +5,34 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
+)
+
+const (
+	// MaxOutputSize is the maximum size of stdout/stderr output (1MB)
+	MaxOutputSize = 1 * 1024 * 1024
+	// DefaultCommandTimeout is the default timeout for command execution (5 minutes)
+	DefaultCommandTimeout = 5 * time.Minute
+	// MaxLogOutputLength is the maximum length for log output truncation
+	MaxLogOutputLength = 200
+)
+
+var (
+	// ErrCommandNotFound is returned when a command is not found in the allowlist
+	ErrCommandNotFound = errors.New("command not found in allowlist")
+	// ErrCommandEmpty is returned when a command has no command defined
+	ErrCommandEmpty = errors.New("command has no command defined")
+	// ErrCommandPathInvalid is returned when a command path is invalid
+	ErrCommandPathInvalid = errors.New("command path is invalid")
+	// ErrWorkingDirInvalid is returned when a working directory is invalid
+	ErrWorkingDirInvalid = errors.New("working directory is invalid")
 )
 
 // ExecuteRequest contains the data for a command execution request
@@ -28,7 +51,7 @@ type ExecuteResult struct {
 	Error     string `json:"error,omitempty" mapstructure:"error,omitempty"`
 }
 
-// ValidateCommand validates that the command exists in the allowlist
+// ValidateCommand validates that the command exists in the allowlist and has valid paths
 func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.SettingsCommandDefinition, error) {
 	if commandID == "" {
 		return nil, errors.New("command ID is required")
@@ -40,13 +63,51 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 		if command.ID == commandID {
 			// Validate required fields
 			if command.Command == "" {
-				return nil, fmt.Errorf("command %s has no command defined", commandID)
+				return nil, fmt.Errorf("%w: %s", ErrCommandEmpty, commandID)
 			}
+
+			// Validate command path is absolute
+			if !filepath.IsAbs(command.Command) {
+				return nil, fmt.Errorf("%w: command %s must use absolute path", ErrCommandPathInvalid, commandID)
+			}
+
+			// Validate command file exists
+			if _, err := os.Stat(command.Command); err != nil {
+				if os.IsNotExist(err) {
+					return nil, fmt.Errorf("%w: command %s not found at path: %s", ErrCommandPathInvalid, commandID, command.Command)
+				}
+				return nil, fmt.Errorf("%w: command %s path error: %w", ErrCommandPathInvalid, commandID, err)
+			}
+
+			// Validate working directory if specified
+			if command.WorkingDir != "" {
+				if !filepath.IsAbs(command.WorkingDir) {
+					return nil, fmt.Errorf("%w: working directory for command %s must be absolute path", ErrWorkingDirInvalid, commandID)
+				}
+				info, err := os.Stat(command.WorkingDir)
+				if err != nil {
+					if os.IsNotExist(err) {
+						return nil, fmt.Errorf("%w: working directory for command %s does not exist: %s", ErrWorkingDirInvalid, commandID, command.WorkingDir)
+					}
+					return nil, fmt.Errorf("%w: working directory for command %s: %w", ErrWorkingDirInvalid, commandID, err)
+				}
+				if !info.IsDir() {
+					return nil, fmt.Errorf("%w: working directory for command %s is not a directory: %s", ErrWorkingDirInvalid, commandID, command.WorkingDir)
+				}
+			}
+
+			// Validate arguments don't contain shell metacharacters
+			for _, arg := range command.Arguments {
+				if strings.ContainsAny(arg, ";|&$\n\r") {
+					return nil, fmt.Errorf("argument for command %s contains forbidden characters (shell metacharacters not allowed)", commandID)
+				}
+			}
+
 			return command, nil
 		}
 	}
 
-	return nil, fmt.Errorf("command %s not found in allowlist", commandID)
+	return nil, fmt.Errorf("%w: %s", ErrCommandNotFound, commandID)
 }
 
 // Execute validates and executes a command asynchronously
@@ -72,8 +133,12 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 
 // executeAsync runs the command and sends the result via WebSocket
 func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefinition) {
-	// Execute the command (OS-specific implementation)
-	result := execute(commandDef)
+	// Create a context with timeout for command execution
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultCommandTimeout)
+	defer cancel()
+
+	// Execute the command with context
+	result := execute(ctx, commandDef)
 	result.CommandID = commandDef.ID
 
 	// Get WebSocket instance to send callback
@@ -125,13 +190,12 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 		// Truncate output for logging if too long
 		stdout := result.Stdout
 		stderr := result.Stderr
-		maxLogLength := 200
 
-		if len(stdout) > maxLogLength {
-			stdout = stdout[:maxLogLength] + "... (truncated)"
+		if len(stdout) > MaxLogOutputLength {
+			stdout = stdout[:MaxLogOutputLength] + "... (truncated)"
 		}
-		if len(stderr) > maxLogLength {
-			stderr = stderr[:maxLogLength] + "... (truncated)"
+		if len(stderr) > MaxLogOutputLength {
+			stderr = stderr[:MaxLogOutputLength] + "... (truncated)"
 		}
 
 		slog.Log(

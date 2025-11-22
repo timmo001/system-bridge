@@ -161,7 +161,38 @@ func Load() (*Settings, error) {
 	if err := decoder.Decode(viper.AllSettings()); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
+
+	// Validate settings after loading
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("settings validation failed: %w", err)
+	}
+
 	return &cfg, nil
+}
+
+// Validate validates the settings structure
+func (cfg *Settings) Validate() error {
+	// Check for duplicate command IDs
+	seenIDs := make(map[string]bool)
+	for i, cmd := range cfg.Commands.Allowlist {
+		if cmd.ID == "" {
+			return fmt.Errorf("command at index %d has empty ID", i)
+		}
+		if seenIDs[cmd.ID] {
+			return fmt.Errorf("duplicate command ID: %s", cmd.ID)
+		}
+		seenIDs[cmd.ID] = true
+
+		// Validate command fields
+		if cmd.Name == "" {
+			return fmt.Errorf("command %s has empty name", cmd.ID)
+		}
+		if cmd.Command == "" {
+			return fmt.Errorf("command %s has empty command", cmd.ID)
+		}
+	}
+
+	return nil
 }
 
 func (cfg *Settings) Save() error {

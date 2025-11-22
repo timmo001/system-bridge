@@ -34,7 +34,6 @@ export type EventType = z.infer<typeof EventTypeSchema>;
 export const ResponseTypeSchema = z.enum([
   "ERROR",
   "APPLICATION_EXITING",
-  "COMMAND_EXECUTED",
   "COMMAND_EXECUTING",
   "COMMAND_COMPLETED",
   "DATA_GET",

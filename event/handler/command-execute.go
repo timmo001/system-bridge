@@ -1,6 +1,7 @@
 package event_handler
 
 import (
+	"errors"
 	"log/slog"
 
 	"github.com/mitchellh/mapstructure"
@@ -63,9 +64,9 @@ func RegisterCommandExecuteHandler(router *event.MessageRouter) {
 		if err != nil {
 			slog.Error("Failed to execute command", "error", err, "commandID", requestData.CommandID)
 
-			// Check if it's a validation error (command not found)
+			// Check error type using typed errors
 			subtype := event.ResponseSubtypeNone
-			if err.Error() == "command "+requestData.CommandID+" not found in allowlist" {
+			if errors.Is(err, command.ErrCommandNotFound) {
 				subtype = event.ResponseSubtypeCommandNotFound
 			}
 
