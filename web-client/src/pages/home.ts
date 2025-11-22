@@ -18,6 +18,18 @@ export class PageHome extends PageElement {
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
 
+  private handleNavigateToConnection = (): void => {
+    this.navigate("/connection");
+  };
+
+  private handleNavigateToData = (): void => {
+    this.navigate("/data");
+  };
+
+  private handleNavigateToSettings = (): void => {
+    this.navigate("/settings");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -98,7 +110,7 @@ export class PageHome extends PageElement {
             <div class="flex gap-4 justify-center">
               <ui-button
                 variant="outline"
-                @click=${() => this.navigate("/connection")}
+                @click=${this.handleNavigateToConnection}
               >
                 Setup Connection
               </ui-button>
@@ -107,13 +119,13 @@ export class PageHome extends PageElement {
             <div class="flex gap-4 justify-center">
               <ui-button
                 variant="default"
-                @click=${() => this.navigate("/data")}
+                @click=${this.handleNavigateToData}
               >
                 View Data
               </ui-button>
               <ui-button
                 variant="default"
-                @click=${() => this.navigate("/settings")}
+                @click=${this.handleNavigateToSettings}
               >
                 Manage Settings
               </ui-button>

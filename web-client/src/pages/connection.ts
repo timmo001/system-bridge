@@ -65,13 +65,37 @@ export class PageConnection extends PageElement {
     }
   }
 
+  private handleHostInput = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    this.formData = { ...this.formData, host: input.value };
+  };
+
+  private handlePortInput = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    this.formData = { ...this.formData, port: parseInt(input.value, 10) };
+  };
+
+  private handleSslChange = (e: CustomEvent<{ checked: boolean }>): void => {
+    this.formData = { ...this.formData, ssl: e.detail.checked };
+  };
+
+  private handleTokenInput = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    this.formData = { ...this.formData, token: input.value };
+  };
+
+  private handleCancel = (): void => {
+    this.navigate("/");
+  };
+
   private validateForm(): boolean {
     const result = ConnectionSchema.safeParse(this.formData);
     if (!result.success) {
       this.errors = {};
-      result.error.issues.forEach((err: any) => {
-        if (err.path[0]) {
-          this.errors[err.path[0] as keyof ConnectionForm] = err.message;
+      result.error.issues.forEach((err) => {
+        const pathKey = err.path[0];
+        if (pathKey && typeof pathKey === "string") {
+          this.errors[pathKey as keyof ConnectionForm] = err.message;
         }
       });
       this.requestUpdate();
@@ -82,7 +106,7 @@ export class PageConnection extends PageElement {
     return true;
   }
 
-  private async handleSubmit(e: Event) {
+  private handleSubmit = (e: Event): void => {
     e.preventDefault();
     if (!this.validateForm()) return;
 
@@ -103,7 +127,6 @@ export class PageConnection extends PageElement {
     }, CONNECTION_TIMEOUT);
 
     ws.onopen = () => {
-      console.log("WebSocket connected for testing");
       clearTimeout(timeout);
 
       ws.send(
@@ -117,7 +140,7 @@ export class PageConnection extends PageElement {
 
     ws.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data) as {
+        const message = JSON.parse(String(event.data)) as {
           type?: string;
           subtype?: string;
           id?: string;
@@ -163,8 +186,7 @@ export class PageConnection extends PageElement {
             window.location.reload();
           }, 1000);
         }
-      } catch (error) {
-        console.error("Failed to parse message:", error);
+      } catch {
         showError("Received invalid response from server.");
         this.isSubmitting = false;
         this.requestUpdate();
@@ -220,10 +242,7 @@ export class PageConnection extends PageElement {
                 .value=${this.formData.host}
                 placeholder="0.0.0.0"
                 ?disabled=${this.isSubmitting}
-                @input=${(e: CustomEvent) => {
-                  this.formData.host = (e.target as any).value;
-                  this.requestUpdate();
-                }}
+                @input=${this.handleHostInput}
               ></ui-input>
               ${this.errors.host
                 ? html`<p class="text-sm text-destructive">
@@ -243,10 +262,7 @@ export class PageConnection extends PageElement {
                 .value=${String(this.formData.port)}
                 placeholder="9170"
                 ?disabled=${this.isSubmitting}
-                @input=${(e: CustomEvent) => {
-                  this.formData.port = parseInt((e.target as any).value, 10);
-                  this.requestUpdate();
-                }}
+                @input=${this.handlePortInput}
               ></ui-input>
               ${this.errors.port
                 ? html`<p class="text-sm text-destructive">
@@ -268,10 +284,7 @@ export class PageConnection extends PageElement {
               <ui-switch
                 .checked=${this.formData.ssl}
                 ?disabled=${this.isSubmitting}
-                @switch-change=${(e: CustomEvent) => {
-                  this.formData.ssl = e.detail.checked;
-                  this.requestUpdate();
-                }}
+                @switch-change=${this.handleSslChange}
               ></ui-switch>
             </div>
 
@@ -283,10 +296,7 @@ export class PageConnection extends PageElement {
                 .value=${this.formData.token}
                 placeholder="Your API token"
                 ?disabled=${this.isSubmitting}
-                @input=${(e: CustomEvent) => {
-                  this.formData.token = (e.target as any).value;
-                  this.requestUpdate();
-                }}
+                @input=${this.handleTokenInput}
               ></ui-input>
               ${this.errors.token
                 ? html`<p class="text-sm text-destructive">
@@ -312,7 +322,7 @@ export class PageConnection extends PageElement {
                 type="button"
                 variant="outline"
                 ?disabled=${this.isSubmitting}
-                @click=${() => this.navigate("/")}
+                @click=${this.handleCancel}
               >
                 Cancel
               </ui-button>

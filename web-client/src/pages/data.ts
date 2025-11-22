@@ -25,17 +25,69 @@ export class PageData extends PageElement {
     }
   }
 
-  private handleTabChange(e: CustomEvent) {
+  private handleTabChange = (e: CustomEvent<{ value: string }>): void => {
     this.selectedTab = e.detail.value as ModuleName;
-  }
+  };
+
+  private handleNavigateToConnection = (): void => {
+    this.navigate("/connection");
+  };
+
+  private handleNavigateToHome = (): void => {
+    this.navigate("/");
+  };
 
   private capitalizeFirst(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  private renderTabTriggers() {
+    return Modules.map(
+      (module) => html`
+        <ui-tabs-trigger
+          value=${module}
+          ?active=${this.selectedTab === module}
+        >
+          ${this.capitalizeFirst(module)}
+        </ui-tabs-trigger>
+      `,
+    );
+  }
+
+  private renderTabContents() {
+    return Modules.map(
+      (module) => html`
+        <ui-tabs-content
+          value=${module}
+          ?hidden=${this.selectedTab !== module}
+        >
+          <div class="mt-4">
+            <div class="rounded-lg border bg-card p-4">
+              <h2 class="text-xl font-semibold mb-4">
+                ${this.capitalizeFirst(module)} Data
+              </h2>
+              ${this.websocket?.data?.[module]
+                ? html`
+                    <ui-code-block
+                      .data=${this.websocket.data[module]}
+                    ></ui-code-block>
+                  `
+                : html`
+                    <div
+                      class="text-sm text-muted-foreground italic p-4 text-center"
+                    >
+                      No data available for ${module}
+                    </div>
+                  `}
+            </div>
+          </div>
+        </ui-tabs-content>
+      `,
+    );
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
-    const data = this.websocket?.data;
     const error = this.websocket?.error;
 
     return html`
@@ -73,7 +125,7 @@ export class PageData extends PageElement {
                   </p>
                   <ui-button
                     variant="default"
-                    @click=${() => this.navigate("/connection")}
+                    @click=${this.handleNavigateToConnection}
                   >
                     Configure Connection
                   </ui-button>
@@ -84,53 +136,14 @@ export class PageData extends PageElement {
                   .value=${this.selectedTab}
                   @tab-change=${this.handleTabChange}
                 >
-                  <ui-tabs-list>
-                    ${Modules.map(
-                      (module) => html`
-                        <ui-tabs-trigger
-                          value=${module}
-                          ?active=${this.selectedTab === module}
-                        >
-                          ${this.capitalizeFirst(module)}
-                        </ui-tabs-trigger>
-                      `,
-                    )}
-                  </ui-tabs-list>
+                  <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
 
-                  ${Modules.map(
-                    (module) => html`
-                      <ui-tabs-content
-                        value=${module}
-                        ?hidden=${this.selectedTab !== module}
-                      >
-                        <div class="mt-4">
-                          <div class="rounded-lg border bg-card p-4">
-                            <h2 class="text-xl font-semibold mb-4">
-                              ${this.capitalizeFirst(module)} Data
-                            </h2>
-                            ${data?.[module]
-                              ? html`
-                                  <ui-code-block
-                                    .data=${data[module]}
-                                  ></ui-code-block>
-                                `
-                              : html`
-                                  <div
-                                    class="text-sm text-muted-foreground italic p-4 text-center"
-                                  >
-                                    No data available for ${module}
-                                  </div>
-                                `}
-                          </div>
-                        </div>
-                      </ui-tabs-content>
-                    `,
-                  )}
+                  ${this.renderTabContents()}
                 </ui-tabs>
               `}
 
           <div class="flex gap-4">
-            <ui-button variant="outline" @click=${() => this.navigate("/")}>
+            <ui-button variant="outline" @click=${this.handleNavigateToHome}>
               Back to Home
             </ui-button>
           </div>

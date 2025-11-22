@@ -33,10 +33,10 @@ import { ProviderElement } from "~/mixins";
 interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
-  schema: z.ZodSchema<T>;
+  schema: z.ZodType<T>;
 }
 
-type AnyPendingResolver = PendingResolver<any>;
+type AnyPendingResolver = PendingResolver;
 
 @customElement("websocket-provider")
 export class WebSocketProvider extends ProviderElement {
@@ -113,26 +113,22 @@ export class WebSocketProvider extends ProviderElement {
   }
 
   private clearAllPendingResolvers(reason: string) {
-    Object.entries(this._pendingResolvers).forEach(([id, resolver]) => {
+    Object.values(this._pendingResolvers).forEach((resolver) => {
       resolver.reject(new Error(reason));
-      delete this._pendingResolvers[id];
     });
+    this._pendingResolvers = {};
   }
 
   private handleMessage(event: MessageEvent<string>) {
-    console.log("Received message:", event.data);
-
     let parsedMessage;
     try {
       parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
-    } catch (error) {
-      console.error("Failed to parse WebSocket message:", error);
+    } catch {
       this._error = "Received invalid message from server";
       return;
     }
 
     if (!parsedMessage.success) {
-      console.error("Invalid message:", parsedMessage.error);
       this._error = "Received invalid message format from server";
       return;
     }
@@ -147,31 +143,31 @@ export class WebSocketProvider extends ProviderElement {
       if (parsedData?.success) {
         resolver.resolve(parsedData.data);
       } else {
-        console.error("Invalid message data:", parsedData?.error);
         this._error = "Received invalid message data from server";
         resolver.reject(parsedData?.error);
       }
-      delete this._pendingResolvers[message.id];
+      this._pendingResolvers = Object.fromEntries(
+        Object.entries(this._pendingResolvers).filter(([id]) => id !== message.id),
+      );
       return;
     }
 
     switch (message.type) {
-      case "DATA_UPDATE":
+      case "DATA_UPDATE": {
         if (!message.module || !message.data) {
-          console.error("Invalid data update");
           return;
         }
-        console.log("Data received:", message.data);
         this._data = {
           ...this._data,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           [message.module]: message.data,
         };
         this._isRequestingData = false;
         break;
+      }
 
-      case "SETTINGS_RESULT":
+      case "SETTINGS_RESULT": {
         if (this._isSettingsUpdatePending) {
-          console.log("Ignoring SETTINGS_RESULT during update");
           break;
         }
         const receivedSettings = message.data as Partial<Settings>;
@@ -183,15 +179,14 @@ export class WebSocketProvider extends ProviderElement {
             directories: receivedSettings.media?.directories ?? [],
           },
         };
-        console.log("Settings received:", this._settings);
         this._isRequestingData = false;
         break;
+      }
 
       case "DATA_LISTENER_REGISTERED":
-        console.log("Data listener registered");
         break;
 
-      case "SETTINGS_UPDATED":
+      case "SETTINGS_UPDATED": {
         const updatedSettings = message.data as Partial<Settings>;
         this._settings = {
           autostart:
@@ -206,13 +201,13 @@ export class WebSocketProvider extends ProviderElement {
               [],
           },
         };
-        console.log("Settings updated:", this._settings);
         this._isSettingsUpdatePending = false;
         if (this._settingsUpdateTimeout) {
           clearTimeout(this._settingsUpdateTimeout);
           this._settingsUpdateTimeout = null;
         }
         break;
+      }
 
       case "ERROR":
         if (message.subtype === "BAD_TOKEN") {
@@ -233,7 +228,6 @@ export class WebSocketProvider extends ProviderElement {
         break;
 
       default:
-        console.warn("Unknown message type:", message.type);
         break;
     }
 
@@ -267,8 +261,7 @@ export class WebSocketProvider extends ProviderElement {
       this._ws = new WebSocket(
         `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
       );
-    } catch (error) {
-      console.error("Failed to create WebSocket:", error);
+    } catch {
       this._error =
         "Failed to create connection. Please check your connection settings.";
       this._isConnected = false;
@@ -277,7 +270,6 @@ export class WebSocketProvider extends ProviderElement {
     }
 
     this._ws.onopen = () => {
-      console.log("WebSocket connected");
       this._isConnected = true;
       this._error = null;
       this._retryCount = 0;
@@ -323,7 +315,6 @@ export class WebSocketProvider extends ProviderElement {
     };
 
     this._ws.onclose = (event: CloseEvent) => {
-      console.log("WebSocket disconnected", event);
       this._isConnected = false;
 
       if (this._connectionTimeout) {
@@ -360,8 +351,7 @@ export class WebSocketProvider extends ProviderElement {
       this.scheduleReconnect();
     };
 
-    this._ws.onerror = (error: Event) => {
-      console.error("WebSocket error:", error);
+    this._ws.onerror = () => {
       this._isConnected = false;
 
       if (this._connectionTimeout) {
@@ -397,9 +387,6 @@ export class WebSocketProvider extends ProviderElement {
 
     this._reconnectTimeout = window.setTimeout(() => {
       if (this._retryCount < MAX_RETRIES) {
-        console.log(
-          `Attempting to reconnect... (${this._retryCount + 1}/${MAX_RETRIES})`,
-        );
         this._retryCount++;
         this._ws = null;
         this.connect();
@@ -427,13 +414,12 @@ export class WebSocketProvider extends ProviderElement {
       }, UPDATE_TIMEOUT);
     }
 
-    console.log("Sending request:", request);
     this._ws.send(JSON.stringify(request));
   }
 
   sendRequestWithResponse<T>(
     request: WebSocketRequest,
-    schema: z.ZodSchema<T>,
+    schema: z.ZodType<T>,
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
@@ -445,19 +431,26 @@ export class WebSocketProvider extends ProviderElement {
         return;
       }
 
-      console.log("Sending request with response:", request.id);
       this._pendingResolvers[request.id] = { resolve, reject, schema };
 
       try {
         this._ws.send(JSON.stringify(request));
       } catch (e) {
-        delete this._pendingResolvers[request.id];
+        this._pendingResolvers = Object.fromEntries(
+          Object.entries(this._pendingResolvers).filter(
+            ([id]) => id !== request.id,
+          ),
+        );
         reject(e instanceof Error ? e : new Error("Unknown error"));
       }
 
       setTimeout(() => {
         if (this._pendingResolvers[request.id]) {
-          delete this._pendingResolvers[request.id];
+          this._pendingResolvers = Object.fromEntries(
+            Object.entries(this._pendingResolvers).filter(
+              ([id]) => id !== request.id,
+            ),
+          );
           reject(new Error("WebSocket response timed out"));
         }
       }, UPDATE_TIMEOUT);

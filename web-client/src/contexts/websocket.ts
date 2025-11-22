@@ -13,7 +13,7 @@ export interface WebSocketState {
   sendRequest: (request: WebSocketRequest) => void;
   sendRequestWithResponse: <T>(
     request: WebSocketRequest,
-    schema: z.ZodSchema<T>,
+    schema: z.ZodType<T>,
   ) => Promise<T>;
   retryConnection: () => void;
 }

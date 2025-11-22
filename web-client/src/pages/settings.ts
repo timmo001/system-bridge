@@ -37,12 +37,14 @@ export class PageSettings extends PageElement {
   @state()
   private isSubmitting = false;
 
+  private mediaDirectories: { name: string; path: string }[] = [];
+
   connectedCallback() {
     super.connectedCallback();
     this.loadSettings();
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
     }
@@ -51,20 +53,21 @@ export class PageSettings extends PageElement {
   private loadSettings() {
     if (this.websocket?.settings) {
       this.formData = { ...this.websocket.settings };
+      this.mediaDirectories = [...this.formData.media.directories];
       this.requestUpdate();
     }
   }
 
-  private async handleSubmit(e: Event) {
+  private handleSubmit = (e: Event): void => {
     e.preventDefault();
 
     if (!this.connection?.token) {
-      console.error("No token found");
+      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequest) {
-      console.error("WebSocket not available");
+      showError("WebSocket not available");
       return;
     }
 
@@ -79,13 +82,47 @@ export class PageSettings extends PageElement {
         token: this.connection.token,
       });
       showSuccess("Settings update requested!");
-    } catch (error) {
+    } catch {
       showError("Failed to update settings");
-      console.error(error);
     } finally {
       this.isSubmitting = false;
       this.requestUpdate();
     }
+  };
+
+  private handleAutostartChange = (
+    e: CustomEvent<{ checked: boolean }>,
+  ): void => {
+    this.formData = { ...this.formData, autostart: e.detail.checked };
+  };
+
+  private handleLogLevelChange = (e: Event): void => {
+    const select = e.target as HTMLSelectElement;
+    this.formData = {
+      ...this.formData,
+      logLevel: select.value as Settings["logLevel"],
+    };
+  };
+
+  private handleNavigateToConnection = (): void => {
+    this.navigate("/connection");
+  };
+
+  private handleNavigateToHome = (): void => {
+    this.navigate("/");
+  };
+
+  private renderMediaDirectories() {
+    return this.mediaDirectories.map(
+      (dir) => html`
+        <div class="flex items-center gap-4 p-3 rounded-md border">
+          <div class="flex-1">
+            <div class="font-medium">${dir.name}</div>
+            <div class="text-sm text-muted-foreground">${dir.path}</div>
+          </div>
+        </div>
+      `,
+    );
   }
 
   render() {
@@ -116,7 +153,7 @@ export class PageSettings extends PageElement {
                   </p>
                   <ui-button
                     variant="default"
-                    @click=${() => this.navigate("/connection")}
+                    @click=${this.handleNavigateToConnection}
                   >
                     Configure Connection
                   </ui-button>
@@ -137,10 +174,7 @@ export class PageSettings extends PageElement {
                       <ui-switch
                         .checked=${this.formData.autostart}
                         ?disabled=${this.isSubmitting}
-                        @switch-change=${(e: CustomEvent) => {
-                          this.formData.autostart = e.detail.checked;
-                          this.requestUpdate();
-                        }}
+                        @switch-change=${this.handleAutostartChange}
                       ></ui-switch>
                     </div>
 
@@ -150,12 +184,7 @@ export class PageSettings extends PageElement {
                         class="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         ?disabled=${this.isSubmitting}
                         .value=${this.formData.logLevel}
-                        @change=${(e: Event) => {
-                          this.formData.logLevel = (
-                            e.target as HTMLSelectElement
-                          ).value as any;
-                          this.requestUpdate();
-                        }}
+                        @blur=${this.handleLogLevelChange}
                       >
                         <option value="DEBUG">Debug</option>
                         <option value="INFO">Info</option>
@@ -172,29 +201,16 @@ export class PageSettings extends PageElement {
                     <h2 class="text-xl font-semibold">Media Directories</h2>
                     <p class="text-sm text-muted-foreground">
                       Manage media directories for System Bridge. Currently
-                      showing ${this.formData.media.directories.length}
-                      director${this.formData.media.directories.length === 1
+                      showing ${this.mediaDirectories.length}
+                      director${this.mediaDirectories.length === 1
                         ? "y"
                         : "ies"}.
                     </p>
 
-                    ${this.formData.media.directories.length > 0
+                    ${this.mediaDirectories.length > 0
                       ? html`
                           <div class="space-y-2">
-                            ${this.formData.media.directories.map(
-                              (dir) => html`
-                                <div
-                                  class="flex items-center gap-4 p-3 rounded-md border"
-                                >
-                                  <div class="flex-1">
-                                    <div class="font-medium">${dir.name}</div>
-                                    <div class="text-sm text-muted-foreground">
-                                      ${dir.path}
-                                    </div>
-                                  </div>
-                                </div>
-                              `,
-                            )}
+                            ${this.renderMediaDirectories()}
                           </div>
                         `
                       : html`
@@ -218,7 +234,7 @@ export class PageSettings extends PageElement {
                       type="button"
                       variant="outline"
                       ?disabled=${this.isSubmitting}
-                      @click=${() => this.navigate("/")}
+                      @click=${this.handleNavigateToHome}
                     >
                       Back to Home
                     </ui-button>

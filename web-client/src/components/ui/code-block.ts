@@ -46,7 +46,7 @@ export class CodeBlock extends LitElement {
     }
   `;
 
-  @property({ type: Object }) data: any = null;
+  @property({ type: Object }) data: unknown = null;
   @property() language = "json";
 
   protected createRenderRoot() {
@@ -59,7 +59,7 @@ export class CodeBlock extends LitElement {
     return html` <pre><code>${unsafeHTML(formattedCode)}</code></pre> `;
   }
 
-  private formatJSON(data: any): string {
+  private formatJSON(data: unknown): string {
     if (data === null || data === undefined) {
       return '<span class="json-null">null</span>';
     }

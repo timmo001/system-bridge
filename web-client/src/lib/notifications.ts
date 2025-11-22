@@ -13,8 +13,8 @@ export type NotificationType = "success" | "error" | "info" | "warning";
  * @param message - The success message to display
  */
 export function showSuccess(message: string): void {
-  console.log(`[SUCCESS] ${message}`);
   // TODO: Replace with toast notification component
+  void message;
 }
 
 /**
@@ -23,8 +23,8 @@ export function showSuccess(message: string): void {
  * @param message - The error message to display
  */
 export function showError(message: string): void {
-  console.error(`[ERROR] ${message}`);
   // TODO: Replace with toast notification component
+  void message;
 }
 
 /**
@@ -39,6 +39,8 @@ export function showNotification(
   message: string,
   type: NotificationType = "info",
 ): void {
-  console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
   // TODO: Replace with toast notification component
+  void title;
+  void message;
+  void type;
 }

@@ -23,10 +23,10 @@ export function loadConnectionSettings(): ConnectionSettings {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      return JSON.parse(stored) as ConnectionSettings;
     }
-  } catch (error) {
-    console.error("Failed to load connection settings:", error);
+  } catch {
+    // Failed to load, return default
   }
   return defaultConnectionSettings;
 }
@@ -34,7 +34,7 @@ export function loadConnectionSettings(): ConnectionSettings {
 export function saveConnectionSettings(settings: ConnectionSettings): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch (error) {
-    console.error("Failed to save connection settings:", error);
+  } catch {
+    // Failed to save
   }
 }

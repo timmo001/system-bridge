@@ -37,7 +37,7 @@ export class Switch extends UIElement {
     `;
   }
 
-  private _handleClick() {
+  private _handleClick = () => {
     if (this.disabled) return;
     this.checked = !this.checked;
     this.dispatchEvent(
@@ -47,7 +47,7 @@ export class Switch extends UIElement {
         composed: true,
       }),
     );
-  }
+  };
 }
 
 declare global {

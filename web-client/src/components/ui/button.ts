@@ -76,7 +76,8 @@ export class Button extends UIElement {
       variant: this.variant,
       size: this.size,
     });
-    this.className = classes;
+    // eslint-disable-next-line wc/no-self-class
+    this.setAttribute("class", classes);
 
     if (this.disabled) {
       this.setAttribute("aria-disabled", "true");

@@ -12,7 +12,8 @@ export class Tabs extends UIElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.className = "w-full block";
+    // eslint-disable-next-line wc/no-self-class
+    this.setAttribute("class", "w-full block");
   }
 
   render() {
@@ -42,7 +43,8 @@ export class TabsList extends UIElement {
     const classes = cn(
       "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
     );
-    this.className = classes;
+    // eslint-disable-next-line wc/no-self-class
+    this.setAttribute("class", classes);
     this.setAttribute("role", "tablist");
   }
 
@@ -87,7 +89,8 @@ export class TabsTrigger extends UIElement {
         ? "bg-background text-foreground shadow"
         : "hover:bg-background/50 hover:text-foreground",
     );
-    this.className = classes;
+    // eslint-disable-next-line wc/no-self-class
+    this.setAttribute("class", classes);
     this.setAttribute("aria-selected", String(this.active));
   }
 
@@ -116,7 +119,8 @@ export class TabsContent extends UIElement {
     const classes = cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     );
-    this.className = classes;
+    // eslint-disable-next-line wc/no-self-class
+    this.setAttribute("class", classes);
     this.setAttribute("role", "tabpanel");
   }
 

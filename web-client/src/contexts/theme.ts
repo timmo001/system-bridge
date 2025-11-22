@@ -17,8 +17,8 @@ export function loadTheme(): Theme {
     if (stored === "light" || stored === "dark" || stored === "system") {
       return stored;
     }
-  } catch (error) {
-    console.error("Failed to load theme:", error);
+  } catch {
+    // Failed to load, return default
   }
   return "system";
 }
@@ -26,8 +26,8 @@ export function loadTheme(): Theme {
 export function saveTheme(theme: Theme): void {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
-  } catch (error) {
-    console.error("Failed to save theme:", error);
+  } catch {
+    // Failed to save
   }
 }
 

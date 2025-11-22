@@ -39,7 +39,7 @@ export class Input extends UIElement {
     `;
   }
 
-  private _handleInput(e: Event) {
+  private _handleInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
     this.value = input.value;
     this.dispatchEvent(
@@ -49,9 +49,9 @@ export class Input extends UIElement {
         composed: true,
       }),
     );
-  }
+  };
 
-  private _handleChange(e: Event) {
+  private _handleChange = (e: Event) => {
     const input = e.target as HTMLInputElement;
     this.value = input.value;
     this.dispatchEvent(
@@ -61,7 +61,7 @@ export class Input extends UIElement {
         composed: true,
       }),
     );
-  }
+  };
 }
 
 declare global {
