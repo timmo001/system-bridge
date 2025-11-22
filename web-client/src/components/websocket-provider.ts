@@ -145,7 +145,12 @@ export class WebSocketProvider extends ProviderElement {
     try {
       parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
     } catch (error) {
-      console.error("Failed to parse WebSocket message:", error, "Data:", event.data);
+      console.error(
+        "Failed to parse WebSocket message:",
+        error,
+        "Data:",
+        event.data,
+      );
       this._error = "Received invalid message from server";
       return;
     }
