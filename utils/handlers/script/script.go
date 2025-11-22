@@ -1,6 +1,7 @@
 package script
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -134,7 +135,7 @@ func executeAsync(req ExecuteRequest, scriptDef *settings.SettingsScriptDefiniti
 		}
 
 		slog.Log(
-			nil,
+			context.Background(),
 			logLevel,
 			"Script execution completed",
 			"scriptID", result.ScriptID,
