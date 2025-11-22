@@ -431,7 +431,11 @@ export class WebSocketProvider extends ProviderElement {
         return;
       }
 
-      this._pendingResolvers[request.id] = { resolve, reject, schema };
+      this._pendingResolvers[request.id] = {
+        resolve: resolve as (value: unknown) => void,
+        reject,
+        schema,
+      };
 
       try {
         this._ws.send(JSON.stringify(request));
