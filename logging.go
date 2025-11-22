@@ -70,7 +70,9 @@ func CaptureFatalError(err error, msg string, args ...any) {
 	// Log the fatal error
 	slog.Error(msg, append([]any{"err", err}, args...)...)
 
-	// Flush Sentry before exiting
+	// Flush Sentry before exiting (2 second timeout)
+	// Note: main() also has a defer flush, but we need to flush here
+	// because os.Exit bypasses deferred functions
 	sentry.Flush(2 * time.Second)
 
 	// Exit with error code
@@ -131,9 +133,9 @@ func (h *errorHandler) WithGroup(name string) slog.Handler {
 func setupLogging() {
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn: "https://481e02051b173aec6b92b71018450191@o341827.ingest.us.sentry.io/4509689982877696",
-		// Adds request headers and IP for users,
-		// visit: https://docs.sentry.io/platforms/go/data-management/data-collected/ for more info
-		SendDefaultPII: true,
+		// SendDefaultPII is disabled for privacy - only application errors are sent
+		// Enable this if you need request headers and IP addresses for debugging
+		SendDefaultPII: false,
 		// Set Sentry release context
 		Release: version.Version,
 		// Add version tag to Sentry events
@@ -146,11 +148,12 @@ func setupLogging() {
 		},
 	})
 	if err != nil {
-		slog.Error("sentry.Init", "err", err)
+		// Log error but continue - application can run without Sentry
+		slog.Warn("Failed to initialize Sentry error tracking", "err", err)
+		return
 	}
-	// Flush buffered events before the program terminates.
-	// Set the timeout to the maximum duration the program can afford to wait.
-	defer sentry.Flush(2 * time.Second)
+
+	slog.Debug("Sentry initialized successfully", "release", version.Version)
 
 	settings, err := settings.Load()
 	if err != nil {
