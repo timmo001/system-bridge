@@ -1,5 +1,3 @@
-//go:build linux
-
 package command
 
 import (
@@ -9,7 +7,7 @@ import (
 	"github.com/timmo001/system-bridge/settings"
 )
 
-// execute runs the command on Linux
+// execute runs the command
 func execute(commandDef *settings.SettingsCommandDefinition) ExecuteResult {
 	result := ExecuteResult{
 		CommandID: commandDef.ID,
