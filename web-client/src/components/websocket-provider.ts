@@ -240,7 +240,24 @@ export class WebSocketProvider extends ProviderElement {
 
     const { host, port, ssl, token } = this.connection;
 
-    if (!host || !port || !token) return;
+    if (!host || !port) {
+      const error = "Connection settings are incomplete. Please configure host and port.";
+      console.error(error);
+      this._error = error;
+      this._isConnected = false;
+      this.requestUpdate();
+      return;
+    }
+
+    if (!token) {
+      const error = "API token is required. Please configure your token in connection settings.";
+      console.error(error);
+      this._error = error;
+      this._isConnected = false;
+      this.requestUpdate();
+      return;
+    }
+
     if (this._ws) return;
 
     if (this._connectionTimeout) {
@@ -378,7 +395,10 @@ export class WebSocketProvider extends ProviderElement {
 
     const { host, port, token } = this.connection;
 
-    if (!host || !port || !token) return;
+    if (!host || !port || !token) {
+      // Don't attempt reconnect if settings are incomplete
+      return;
+    }
     if (this._isConnected) return;
 
     if (this._reconnectTimeout) {
