@@ -12,6 +12,8 @@ import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
 import "../components/ui/button";
+import "../components/ui/connection-indicator";
+import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
@@ -133,42 +135,32 @@ export class PageSettings extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          <div class="flex items-center gap-3">
-            <ui-button
-              variant="ghost"
-              size="icon"
-              @click=${this.handleNavigateToHome}
-              aria-label="Back to home"
-            >
-              <ui-icon name="ArrowLeft"></ui-icon>
-            </ui-button>
-            <div>
-              <h1 class="text-3xl font-bold mb-2">Settings</h1>
-              <p class="text-muted-foreground">
-                Configure your System Bridge settings
-              </p>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <ui-button
+                variant="ghost"
+                size="icon"
+                @click=${this.handleNavigateToHome}
+                aria-label="Back to home"
+              >
+                <ui-icon name="ArrowLeft"></ui-icon>
+              </ui-button>
+              <div>
+                <h1 class="text-3xl font-bold mb-2">Settings</h1>
+                <p class="text-muted-foreground">
+                  Configure your System Bridge settings
+                </p>
+              </div>
             </div>
+            <ui-connection-indicator></ui-connection-indicator>
           </div>
 
           ${!isConnected
             ? html`
-                <div
-                  class="rounded-lg border border-destructive bg-destructive/10 p-6"
-                >
-                  <h3 class="text-lg font-semibold text-destructive mb-2">
-                    Not Connected
-                  </h3>
-                  <p class="text-sm text-destructive/90 mb-4">
-                    ${error ||
-                    "Please connect to System Bridge to manage settings."}
-                  </p>
-                  <ui-button
-                    variant="default"
-                    @click=${this.handleNavigateToConnection}
-                  >
-                    Configure Connection
-                  </ui-button>
-                </div>
+                <ui-connection-required
+                  message="Please connect to System Bridge to manage settings."
+                  @configure-connection=${this.handleNavigateToConnection}
+                ></ui-connection-required>
               `
             : html`
                 <form @submit=${this.handleSubmit} class="space-y-8">

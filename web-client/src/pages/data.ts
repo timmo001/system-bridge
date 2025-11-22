@@ -7,6 +7,8 @@ import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
 import { PageElement } from "~/mixins";
 import "../components/ui/button";
 import "../components/ui/code-block";
+import "../components/ui/connection-indicator";
+import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/tabs";
 
@@ -105,36 +107,15 @@ export class PageData extends PageElement {
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <div
-                class="h-3 w-3 rounded-full ${isConnected
-                  ? "bg-primary"
-                  : "bg-destructive"}"
-              ></div>
-              <span class="text-sm text-muted-foreground">
-                ${isConnected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
+            <ui-connection-indicator></ui-connection-indicator>
           </div>
 
           ${!isConnected
             ? html`
-                <div
-                  class="rounded-lg border border-destructive bg-destructive/10 p-6"
-                >
-                  <h3 class="text-lg font-semibold text-destructive mb-2">
-                    Not Connected
-                  </h3>
-                  <p class="text-sm text-destructive/90 mb-4">
-                    ${error || "Please connect to System Bridge to view data."}
-                  </p>
-                  <ui-button
-                    variant="default"
-                    @click=${this.handleNavigateToConnection}
-                  >
-                    Configure Connection
-                  </ui-button>
-                </div>
+                <ui-connection-required
+                  message="Please connect to System Bridge to view data."
+                  @configure-connection=${this.handleNavigateToConnection}
+                ></ui-connection-required>
               `
             : html`
                 <ui-tabs
