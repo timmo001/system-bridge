@@ -89,7 +89,7 @@ export type ResponseSubtype = z.infer<typeof ResponseSubtypeSchema>;
 export const WebSocketRequestSchema = z.object({
   id: z.string(),
   event: EventTypeSchema,
-  data: z.any().default({}),
+  data: z.any().optional(),
   token: z.string(),
 });
 

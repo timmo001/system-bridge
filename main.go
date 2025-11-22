@@ -29,7 +29,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-//go:embed all:web-client/out/*
+//go:embed all:web-client/dist/*
 var webClientContent embed.FS
 
 //go:embed .resources/system-bridge-dimmed-512.png
