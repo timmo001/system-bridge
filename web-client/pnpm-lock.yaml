@@ -45,12 +45,21 @@ importers:
       '@open-wc/testing-helpers':
         specifier: ^3.0.1
         version: 3.0.1
+      '@rollup/plugin-alias':
+        specifier: ^6.0.0
+        version: 6.0.0(rollup@4.53.3)
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2))
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
+      '@web/dev-server-esbuild':
+        specifier: ^1.0.4
+        version: 1.0.4
+      '@web/dev-server-rollup':
+        specifier: ^0.6.4
+        version: 0.6.4
       '@web/test-runner':
         specifier: ^0.20.2
         version: 0.20.2
@@ -93,6 +102,9 @@ importers:
       globals:
         specifier: ^15.15.0
         version: 15.15.0
+      playwright:
+        specifier: ^1.56.1
+        version: 1.56.1
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -378,6 +390,9 @@ packages:
   '@lit/task@1.0.3':
     resolution: {integrity: sha512-1gJGJl8WON+2j0y9xfcD+XsS1rvcy3XDgsIhcdUW++yTR8ESjZW6o7dn8M8a4SZM8NnJe6ynS2cKWwsbfLOurg==}
 
+  '@mdn/browser-compat-data@4.2.1':
+    resolution: {integrity: sha512-EWUguj2kd7ldmrF9F+vI5hUOralPd+sdsUnYbRy33vZTuZkduC1shE9TtEMEjAQwyfyMb4ole5KtjF8MsnQOlA==}
+
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
 
@@ -416,6 +431,15 @@ packages:
     resolution: {integrity: sha512-a9Ruw3j3qlnB5a/zHRTkruppynxqaeE4H9WNj5eYGRWqw0ZauZ23f4W2ARf3hghF5doozyD+CRtt7XSYuYRI/Q==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@rollup/plugin-alias@6.0.0':
+    resolution: {integrity: sha512-tPCzJOtS7uuVZd+xPhoy5W4vThe6KWXNmsFCNktaAh5RTqcLiSfT4huPQIXkgJ6YCOjJHvecOAzQxLFhPxKr+g==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      rollup: '>=4.0.0'
+    peerDependenciesMeta:
+      rollup:
+        optional: true
 
   '@rollup/plugin-node-resolve@15.3.1':
     resolution: {integrity: sha512-tgg6b91pAybXHJQMAAwW9VuWBO6Thi+q7BCNARLwSqlmsHz0XYURtGvh/AuwSADXSI4h/2uHbs7s4FzlZDGSGA==}
@@ -940,6 +964,10 @@ packages:
 
   '@web/dev-server-core@0.7.5':
     resolution: {integrity: sha512-Da65zsiN6iZPMRuj4Oa6YPwvsmZmo5gtPWhW2lx3GTUf5CAEapjVpZVlUXnKPL7M7zRuk72jSsIl8lo+XpTCtw==}
+    engines: {node: '>=18.0.0'}
+
+  '@web/dev-server-esbuild@1.0.4':
+    resolution: {integrity: sha512-ia1LxBwwRiQBYhJ7/RtLenHyPjzle3SvTw3jOZaeGv8UGXVPOkQV8fR05caOtW/DPPZaZovNAybzRKVnNiYIZg==}
     engines: {node: '>=18.0.0'}
 
   '@web/dev-server-rollup@0.6.4':
@@ -2882,6 +2910,10 @@ packages:
     resolution: {integrity: sha512-ya4mg/30vm+DOWfBg4YK3j2WD6TWtRkCbasOJr40CseYENzCUby/7rIvXA99JGsQHeNxLbnXdyLLxKSv3tauFw==}
     engines: {node: '>=12.17'}
 
+  ua-parser-js@1.0.41:
+    resolution: {integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==}
+    hasBin: true
+
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
@@ -3261,6 +3293,8 @@ snapshots:
     dependencies:
       '@lit/reactive-element': 2.1.1
 
+  '@mdn/browser-compat-data@4.2.1': {}
+
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
       '@emnapi/core': 1.7.1
@@ -3331,6 +3365,10 @@ snapshots:
       - bare-buffer
       - react-native-b4a
       - supports-color
+
+  '@rollup/plugin-alias@6.0.0(rollup@4.53.3)':
+    optionalDependencies:
+      rollup: 4.53.3
 
   '@rollup/plugin-node-resolve@15.3.1(rollup@4.53.3)':
     dependencies:
@@ -3828,6 +3866,18 @@ snapshots:
       parse5: 6.0.1
       picomatch: 2.3.1
       ws: 7.5.10
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@web/dev-server-esbuild@1.0.4':
+    dependencies:
+      '@mdn/browser-compat-data': 4.2.1
+      '@web/dev-server-core': 0.7.5
+      esbuild: 0.25.12
+      parse5: 6.0.1
+      ua-parser-js: 1.0.41
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -6083,6 +6133,8 @@ snapshots:
   typical@4.0.0: {}
 
   typical@7.3.0: {}
+
+  ua-parser-js@1.0.41: {}
 
   unbox-primitive@1.1.0:
     dependencies:
