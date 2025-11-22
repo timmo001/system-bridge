@@ -11,7 +11,9 @@ import {
 } from "~/lib/system-bridge/types-modules";
 import { type Settings } from "~/lib/system-bridge/types-settings";
 import {
+  ScriptExecuteResultSchema,
   WebSocketResponseSchema,
+  type ScriptExecuteResult,
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -24,6 +26,7 @@ export const SystemBridgeWSContext = createContext<
       data: ModuleData | null;
       isConnected: boolean;
       settings: Settings | null;
+      scriptResults: Record<string, ScriptExecuteResult>;
       sendRequest: (request: WebSocketRequest) => void;
       sendRequestWithResponse: <T>(
         request: WebSocketRequest,
@@ -31,6 +34,7 @@ export const SystemBridgeWSContext = createContext<
       ) => Promise<T>;
       error: string | null;
       retryConnection: () => void;
+      clearScriptResult: (scriptID: string) => void;
     }
   | undefined
 >(undefined);
@@ -53,6 +57,9 @@ export function SystemBridgeWSProvider({
   const [data, setData] = useState<ModuleData>(DefaultModuleData);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [scriptResults, setScriptResults] = useState<
+    Record<string, ScriptExecuteResult>
+  >({});
   const [retryCount, setRetryCount] = useState<number>(0);
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
   const [isSettingsUpdatePending, setIsSettingsUpdatePending] =
@@ -160,6 +167,9 @@ export function SystemBridgeWSProvider({
             media: {
               directories: receivedSettings.media?.directories ?? [],
             },
+            scripts: {
+              allowlist: receivedSettings.scripts?.allowlist ?? [],
+            },
           };
           console.log("Settings received:", mergedSettings);
           setSettings(mergedSettings);
@@ -188,6 +198,12 @@ export function SystemBridgeWSProvider({
                   prevSettings?.media.directories ??
                   [],
               },
+              scripts: {
+                allowlist:
+                  updatedReceivedSettings.scripts?.allowlist ??
+                  prevSettings?.scripts.allowlist ??
+                  [],
+              },
             };
             console.log("Settings updated:", mergedSettings);
             return mergedSettings;
@@ -198,6 +214,32 @@ export function SystemBridgeWSProvider({
             settingsUpdateTimeoutRef.current = null;
           }
           break;
+        case "SCRIPT_COMPLETED": {
+          const parsedResult = ScriptExecuteResultSchema.safeParse(message.data);
+          if (parsedResult.success) {
+            const result = parsedResult.data;
+            console.log("Script execution completed:", result);
+            setScriptResults((prev) => ({
+              ...prev,
+              [result.scriptID]: result,
+            }));
+            // Show toast notification
+            if (result.error) {
+              toast.error(`Script "${result.scriptID}" failed`, {
+                description: result.error,
+              });
+            } else if (result.exitCode !== 0) {
+              toast.warning(
+                `Script "${result.scriptID}" exited with code ${result.exitCode}`,
+              );
+            } else {
+              toast.success(`Script "${result.scriptID}" completed successfully`);
+            }
+          } else {
+            console.error("Invalid script result:", parsedResult.error);
+          }
+          break;
+        }
         case "ERROR":
           if (message.subtype === "BAD_TOKEN") {
             const errorMessage =
@@ -471,16 +513,26 @@ export function SystemBridgeWSProvider({
     connect();
   }, [connect]);
 
+  const clearScriptResult = useCallback((scriptID: string) => {
+    setScriptResults((prev) => {
+      const newResults = { ...prev };
+      delete newResults[scriptID];
+      return newResults;
+    });
+  }, []);
+
   return (
     <SystemBridgeWSContext.Provider
       value={{
         data,
         isConnected,
         settings,
+        scriptResults,
         sendRequest,
         sendRequestWithResponse,
         error,
         retryConnection,
+        clearScriptResult,
       }}
     >
       {children}
