@@ -1,0 +1,354 @@
+import { consume } from "@lit/context";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+
+import {
+  connectionContext,
+  type ConnectionSettings,
+} from "~/contexts/connection";
+import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { showError, showSuccess } from "~/lib/notifications";
+import type { Settings } from "~/lib/system-bridge/types-settings";
+import { generateUUID } from "~/lib/utils";
+import { PageElement } from "~/mixins";
+import "../components/ui/button";
+import "../components/ui/connection-indicator";
+import "../components/ui/connection-required";
+import "../components/ui/icon";
+import "../components/ui/input";
+import "../components/ui/label";
+
+interface MediaDirectory {
+  name: string;
+  path: string;
+}
+
+@customElement("page-media")
+export class PageMedia extends PageElement {
+  @consume({ context: websocketContext, subscribe: true })
+  websocket?: WebSocketState;
+
+  @consume({ context: connectionContext, subscribe: true })
+  connection?: ConnectionSettings;
+
+  @state()
+  private mediaDirectories: MediaDirectory[] = [];
+
+  @state()
+  private newDirectoryName = "";
+
+  @state()
+  private newDirectoryPath = "";
+
+  @state()
+  private isValidating = false;
+
+  @state()
+  private isSubmitting = false;
+
+  @state()
+  private validationError: string | null = null;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.loadSettings();
+  }
+
+  updated(changedProperties: Map<PropertyKey, unknown>) {
+    if (changedProperties.has("websocket")) {
+      this.loadSettings();
+    }
+  }
+
+  private loadSettings() {
+    if (this.websocket?.settings) {
+      this.mediaDirectories = [...this.websocket.settings.media.directories];
+    }
+  }
+
+  private handleNavigateToHome = (): void => {
+    this.navigate("/");
+  };
+
+  private handleNavigateToConnection = (): void => {
+    this.navigate("/connection");
+  };
+
+  private handleNameInput = (e: InputEvent): void => {
+    const input = e.target as HTMLInputElement;
+    this.newDirectoryName = input.value;
+  };
+
+  private handlePathInput = (e: InputEvent): void => {
+    const input = e.target as HTMLInputElement;
+    this.newDirectoryPath = input.value;
+  };
+
+  private handleAddDirectory = async (): Promise<void> => {
+    if (!this.newDirectoryName.trim() || !this.newDirectoryPath.trim()) {
+      showError("Please enter both name and path");
+      return;
+    }
+
+    if (!this.connection?.token) {
+      showError("No token found");
+      return;
+    }
+
+    if (!this.websocket?.sendRequestWithResponse) {
+      showError("WebSocket not available");
+      return;
+    }
+
+    this.validationError = null;
+    this.isValidating = true;
+    this.requestUpdate();
+
+    try {
+      const response = await this.websocket.sendRequestWithResponse<{
+        valid: boolean;
+      }>(
+        {
+          id: generateUUID(),
+          event: "VALIDATE_DIRECTORY",
+          data: { path: this.newDirectoryPath },
+          token: this.connection.token,
+        },
+        // Simple validation schema
+        {
+          parse: (data: unknown) => {
+            if (
+              typeof data === "object" &&
+              data !== null &&
+              "valid" in data &&
+              typeof (data as { valid: unknown }).valid === "boolean"
+            ) {
+              return data as { valid: boolean };
+            }
+            throw new Error("Invalid response");
+          },
+          safeParse: (data: unknown) => {
+            try {
+              return {
+                success: true as const,
+                data: {
+                  parse: (d: unknown) => d,
+                  safeParse: () => ({ success: true as const, data: d }),
+                }.parse(data) as { valid: boolean },
+              };
+            } catch (error) {
+              return { success: false as const, error };
+            }
+          },
+        } as never,
+      );
+
+      if (response.valid) {
+        this.mediaDirectories = [
+          ...this.mediaDirectories,
+          { name: this.newDirectoryName.trim(), path: this.newDirectoryPath.trim() },
+        ];
+        await this.saveSettings();
+        this.newDirectoryName = "";
+        this.newDirectoryPath = "";
+        showSuccess("Directory added successfully");
+      } else {
+        this.validationError =
+          "Directory does not exist or is not accessible.";
+      }
+    } catch (error) {
+      console.error("Failed to validate directory:", error);
+      this.validationError = "Failed to validate directory.";
+    } finally {
+      this.isValidating = false;
+      this.requestUpdate();
+    }
+  };
+
+  private handleRemoveDirectory = async (directory: MediaDirectory): Promise<void> => {
+    this.mediaDirectories = this.mediaDirectories.filter(
+      (d) => d.path !== directory.path,
+    );
+    await this.saveSettings();
+    showSuccess("Directory removed successfully");
+  };
+
+  private async saveSettings(): Promise<void> {
+    if (!this.connection?.token) {
+      showError("No token found");
+      return;
+    }
+
+    if (!this.websocket?.sendRequest || !this.websocket?.settings) {
+      showError("WebSocket not available");
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.requestUpdate();
+
+    try {
+      const updatedSettings: Settings = {
+        ...this.websocket.settings,
+        media: {
+          directories: this.mediaDirectories,
+        },
+      };
+
+      this.websocket.sendRequest({
+        id: generateUUID(),
+        event: "UPDATE_SETTINGS",
+        data: updatedSettings,
+        token: this.connection.token,
+      });
+    } catch {
+      showError("Failed to update settings");
+    } finally {
+      this.isSubmitting = false;
+      this.requestUpdate();
+    }
+  }
+
+  private renderDirectoryList() {
+    if (this.mediaDirectories.length === 0) {
+      return html`
+        <div
+          class="text-sm text-muted-foreground italic p-4 text-center border rounded-md"
+        >
+          No media directories configured
+        </div>
+      `;
+    }
+
+    return html`
+      <div class="space-y-2">
+        ${this.mediaDirectories.map(
+          (dir) => html`
+            <div class="flex items-center gap-4 p-3 rounded-md border">
+              <div class="flex-1 space-y-1">
+                <div class="font-medium">${dir.name}</div>
+                <div class="text-sm text-muted-foreground break-all">
+                  ${dir.path}
+                </div>
+              </div>
+              <ui-button
+                variant="destructive"
+                size="sm"
+                @click=${() => this.handleRemoveDirectory(dir)}
+                ?disabled=${this.isSubmitting}
+              >
+                <ui-icon name="Trash2"></ui-icon>
+              </ui-button>
+            </div>
+          `,
+        )}
+      </div>
+    `;
+  }
+
+  render() {
+    const isConnected = this.websocket?.isConnected ?? false;
+
+    return html`
+      <div class="min-h-screen bg-background text-foreground p-8">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <ui-button
+                variant="ghost"
+                size="icon"
+                @click=${this.handleNavigateToHome}
+                aria-label="Back to home"
+              >
+                <ui-icon name="ArrowLeft"></ui-icon>
+              </ui-button>
+              <div>
+                <h1 class="text-3xl font-bold mb-2">Media Directories</h1>
+                <p class="text-muted-foreground">
+                  Manage directories for media scanning
+                </p>
+              </div>
+            </div>
+            <ui-connection-indicator></ui-connection-indicator>
+          </div>
+
+          ${!isConnected
+            ? html`
+                <ui-connection-required
+                  message="Please connect to System Bridge to manage media directories."
+                  @configure-connection=${this.handleNavigateToConnection}
+                ></ui-connection-required>
+              `
+            : html`
+                <div class="space-y-6">
+                  <div class="rounded-lg border bg-card p-6 space-y-4">
+                    <h2 class="text-xl font-semibold">Add Directory</h2>
+                    <p class="text-sm text-muted-foreground">
+                      Add directories to be used for media scanning. Only
+                      existing directories are allowed.
+                    </p>
+
+                    <div class="flex gap-2">
+                      <div class="flex-1">
+                        <ui-label>Name</ui-label>
+                        <ui-input
+                          placeholder="Enter directory name"
+                          .value=${this.newDirectoryName}
+                          @input=${this.handleNameInput}
+                          ?disabled=${this.isValidating || this.isSubmitting}
+                        ></ui-input>
+                      </div>
+                      <div class="flex-1">
+                        <ui-label>Path</ui-label>
+                        <ui-input
+                          placeholder="Enter directory path"
+                          .value=${this.newDirectoryPath}
+                          @input=${this.handlePathInput}
+                          ?disabled=${this.isValidating || this.isSubmitting}
+                        ></ui-input>
+                      </div>
+                      <div class="self-end">
+                        <ui-button
+                          variant="secondary"
+                          @click=${this.handleAddDirectory}
+                          ?disabled=${this.isValidating ||
+                          this.isSubmitting ||
+                          !this.newDirectoryName.trim() ||
+                          !this.newDirectoryPath.trim()}
+                        >
+                          ${this.isValidating ? "Validating..." : "Add"}
+                        </ui-button>
+                      </div>
+                    </div>
+
+                    ${this.validationError
+                      ? html`
+                          <div class="text-sm text-destructive">
+                            ${this.validationError}
+                          </div>
+                        `
+                      : ""}
+                  </div>
+
+                  <div class="rounded-lg border bg-card p-6 space-y-4">
+                    <h2 class="text-xl font-semibold">
+                      Directories
+                      ${this.mediaDirectories.length > 0
+                        ? `(${this.mediaDirectories.length})`
+                        : ""}
+                    </h2>
+                    ${this.renderDirectoryList()}
+                  </div>
+                </div>
+              `}
+        </div>
+      </div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "page-media": PageMedia;
+  }
+}

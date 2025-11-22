@@ -40,8 +40,6 @@ export class PageSettings extends PageElement {
   @state()
   private isSubmitting = false;
 
-  private mediaDirectories: { name: string; path: string }[] = [];
-
   connectedCallback() {
     super.connectedCallback();
     this.loadSettings();
@@ -71,7 +69,6 @@ export class PageSettings extends PageElement {
   private loadSettings() {
     if (this.websocket?.settings) {
       this.formData = { ...this.websocket.settings };
-      this.mediaDirectories = [...this.formData.media.directories];
       this.requestUpdate();
     }
   }
@@ -87,6 +84,16 @@ export class PageSettings extends PageElement {
     if (!this.websocket?.sendRequest) {
       showError("WebSocket not available");
       return;
+    }
+
+    // Read current form values to ensure we have the latest data
+    const form = e.target as HTMLFormElement;
+    const selectElement = form.querySelector("select") as HTMLSelectElement;
+    if (selectElement) {
+      this.formData = {
+        ...this.formData,
+        logLevel: selectElement.value as Settings["logLevel"],
+      };
     }
 
     this.isSubmitting = true;
@@ -130,19 +137,6 @@ export class PageSettings extends PageElement {
     this.navigate("/");
   };
 
-  private renderMediaDirectories() {
-    return this.mediaDirectories.map(
-      (dir) => html`
-        <div class="flex items-center gap-4 p-3 rounded-md border">
-          <div class="flex-1">
-            <div class="font-medium">${dir.name}</div>
-            <div class="text-sm text-muted-foreground">${dir.path}</div>
-          </div>
-        </div>
-      `,
-    );
-  }
-
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
     const error = this.websocket?.error;
@@ -161,9 +155,9 @@ export class PageSettings extends PageElement {
                 <ui-icon name="ArrowLeft"></ui-icon>
               </ui-button>
               <div>
-                <h1 class="text-3xl font-bold mb-2">Settings</h1>
+                <h1 class="text-3xl font-bold mb-2">General Settings</h1>
                 <p class="text-muted-foreground">
-                  Configure your System Bridge settings
+                  Configure your System Bridge general settings
                 </p>
               </div>
             </div>
@@ -180,8 +174,6 @@ export class PageSettings extends PageElement {
             : html`
                 <form class="space-y-8">
                   <div class="rounded-lg border bg-card p-6 space-y-6">
-                    <h2 class="text-xl font-semibold">General Settings</h2>
-
                     <div class="flex items-center justify-between">
                       <div class="space-y-0.5">
                         <ui-label>Autostart</ui-label>
@@ -202,7 +194,7 @@ export class PageSettings extends PageElement {
                         class="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         ?disabled=${this.isSubmitting}
                         .value=${this.formData.logLevel}
-                        @change=${this.handleLogLevelChange}
+                        @blur=${this.handleLogLevelChange}
                       >
                         <option value="DEBUG">Debug</option>
                         <option value="INFO">Info</option>
@@ -213,31 +205,6 @@ export class PageSettings extends PageElement {
                         Set the logging level for the application
                       </p>
                     </div>
-                  </div>
-
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">Media Directories</h2>
-                    <p class="text-sm text-muted-foreground">
-                      Manage media directories for System Bridge. Currently
-                      showing ${this.mediaDirectories.length}
-                      director${this.mediaDirectories.length === 1
-                        ? "y"
-                        : "ies"}.
-                    </p>
-
-                    ${this.mediaDirectories.length > 0
-                      ? html`
-                          <div class="space-y-2">
-                            ${this.renderMediaDirectories()}
-                          </div>
-                        `
-                      : html`
-                          <div
-                            class="text-sm text-muted-foreground italic p-4 text-center border rounded-md"
-                          >
-                            No media directories configured
-                          </div>
-                        `}
                   </div>
 
                   <div class="flex gap-4">

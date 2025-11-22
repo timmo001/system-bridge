@@ -42,6 +42,14 @@ export class App extends LitElement {
         return true;
       },
     },
+    {
+      path: "/settings/media",
+      render: () => html`<page-media></page-media>`,
+      enter: async () => {
+        await import("./pages/media");
+        return true;
+      },
+    },
   ]);
 
   protected createRenderRoot() {

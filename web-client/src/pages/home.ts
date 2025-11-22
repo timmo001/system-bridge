@@ -19,6 +19,10 @@ export class PageHome extends PageElement {
     this.navigate("/settings");
   };
 
+  private handleNavigateToMedia = (): void => {
+    this.navigate("/settings/media");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -34,16 +38,43 @@ export class PageHome extends PageElement {
               @setup-connection=${this.handleSetupConnection}
             ></ui-connection-status-card>
 
-            <div class="flex gap-4 justify-center">
-              <ui-button variant="default" @click=${this.handleNavigateToData}>
-                View Data
-              </ui-button>
-              <ui-button
-                variant="default"
-                @click=${this.handleNavigateToSettings}
-              >
-                Manage Settings
-              </ui-button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="rounded-lg border bg-card p-6 space-y-4">
+                <h2 class="text-xl font-semibold">Data</h2>
+                <p class="text-sm text-muted-foreground">
+                  View real-time system data from all modules
+                </p>
+                <ui-button
+                  variant="default"
+                  class="w-full"
+                  @click=${this.handleNavigateToData}
+                >
+                  View Data
+                </ui-button>
+              </div>
+
+              <div class="rounded-lg border bg-card p-6 space-y-4">
+                <h2 class="text-xl font-semibold">Settings</h2>
+                <p class="text-sm text-muted-foreground">
+                  Configure System Bridge settings
+                </p>
+                <div class="flex flex-col gap-3">
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToSettings}
+                  >
+                    General Settings
+                  </ui-button>
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToMedia}
+                  >
+                    Media Directories
+                  </ui-button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
