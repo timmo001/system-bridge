@@ -44,13 +44,15 @@ export class PageHome extends PageElement {
                 <p class="text-sm text-muted-foreground">
                   View real-time system data from all modules
                 </p>
-                <ui-button
-                  variant="default"
-                  class="w-full"
-                  @click=${this.handleNavigateToData}
-                >
-                  View Data
-                </ui-button>
+                <div class="flex flex-col gap-3">
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToData}
+                  >
+                    View Data
+                  </ui-button>
+                </div>
               </div>
 
               <div class="rounded-lg border bg-card p-6 space-y-4">
