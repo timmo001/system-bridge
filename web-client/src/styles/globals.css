@@ -118,4 +118,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Custom element base styles */
+  ui-button {
+    display: inline-flex;
+  }
+  ui-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

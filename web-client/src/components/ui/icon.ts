@@ -16,10 +16,6 @@ export class Icon extends UIElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    // Make icon display inline and centered
-    this.style.display = "inline-flex";
-    this.style.alignItems = "center";
-    this.style.justifyContent = "center";
     await this.loadIcon();
   }
 
