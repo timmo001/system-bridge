@@ -62,15 +62,29 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 	err := cmd.Run()
 
 	// Capture output (may be truncated)
+	// Reserve space for truncation message: "\n... (output truncated)" = 26 bytes
+	const truncationMessage = "\n... (output truncated)"
+	const truncationMessageLen = len(truncationMessage)
+
 	result.Stdout = stdoutWriter.String()
 	result.Stderr = stderrWriter.String()
 
-	// Check if output was truncated
+	// Check if output was truncated and ensure final output doesn't exceed MaxOutputSize
 	if stdoutWriter.written >= MaxOutputSize {
-		result.Stdout += "\n... (output truncated)"
+		// Truncate to make room for the truncation message
+		maxContentLen := int64(len(result.Stdout))
+		if maxContentLen > MaxOutputSize-int64(truncationMessageLen) {
+			result.Stdout = result.Stdout[:MaxOutputSize-int64(truncationMessageLen)]
+		}
+		result.Stdout += truncationMessage
 	}
 	if stderrWriter.written >= MaxOutputSize {
-		result.Stderr += "\n... (output truncated)"
+		// Truncate to make room for the truncation message
+		maxContentLen := int64(len(result.Stderr))
+		if maxContentLen > MaxOutputSize-int64(truncationMessageLen) {
+			result.Stderr = result.Stderr[:MaxOutputSize-int64(truncationMessageLen)]
+		}
+		result.Stderr += truncationMessage
 	}
 
 	// Check for context cancellation
