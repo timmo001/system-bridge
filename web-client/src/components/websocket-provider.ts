@@ -80,6 +80,8 @@ export class WebSocketProvider extends ProviderElement {
     }
   >();
 
+  private _commandExecutionCleanupTimeouts = new Map<string, number>();
+
   private _ws: WebSocket | null = null;
   private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
@@ -282,6 +284,16 @@ export class WebSocketProvider extends ProviderElement {
       case "COMMAND_EXECUTING": {
         const commandData = message.data as { commandID: string };
         if (commandData?.commandID) {
+          // Cancel any existing cleanup timeout for this command
+          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
+            commandData.commandID,
+          );
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(commandData.commandID);
+          }
+
+          // Set new execution state
           this._commandExecutions.set(commandData.commandID, {
             isExecuting: true,
             result: null,
@@ -300,11 +312,32 @@ export class WebSocketProvider extends ProviderElement {
           error?: string;
         };
         if (result?.commandID) {
+          // Cancel any existing cleanup timeout for this command
+          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
+            result.commandID,
+          );
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+          }
+
+          // Set completed state
           this._commandExecutions.set(result.commandID, {
             isExecuting: false,
             result,
           });
           this.requestUpdate();
+
+          // Schedule cleanup after 5 minutes to allow users to see results
+          const cleanupTimeout = window.setTimeout(() => {
+            this._commandExecutions.delete(result.commandID);
+            this._commandExecutionCleanupTimeouts.delete(result.commandID);
+            this.requestUpdate();
+          }, 5 * 60 * 1000); // 5 minutes
+
+          this._commandExecutionCleanupTimeouts.set(
+            result.commandID,
+            cleanupTimeout,
+          );
         }
         break;
       }
@@ -611,6 +644,12 @@ export class WebSocketProvider extends ProviderElement {
       clearTimeout(this._settingsUpdateTimeout);
       this._settingsUpdateTimeout = null;
     }
+    // Clean up all command execution timeouts
+    for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
+      clearTimeout(timeoutId);
+    }
+    this._commandExecutionCleanupTimeouts.clear();
+    this._commandExecutions.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
   }
 
