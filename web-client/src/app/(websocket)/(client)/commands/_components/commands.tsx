@@ -64,18 +64,14 @@ export function Commands() {
   return (
     <Form {...form}>
       <form
-        className="flex flex-col items-center gap-8"
+        className="flex w-full flex-col gap-8"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <Tabs defaultValue="execute" className="w-full">
+        <Tabs defaultValue="manage" className="container">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="execute">Execute</TabsTrigger>
             <TabsTrigger value="manage">Manage</TabsTrigger>
+            <TabsTrigger value="execute">Execute</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="execute" className="space-y-4">
-            <CommandExecution />
-          </TabsContent>
 
           <TabsContent value="manage" className="space-y-4">
             <CommandManagement form={form} onSubmit={onSubmit} />
@@ -85,6 +81,10 @@ export function Commands() {
                 Save Settings
               </Button>
             </div>
+          </TabsContent>
+
+          <TabsContent value="execute" className="space-y-4">
+            <CommandExecution />
           </TabsContent>
         </Tabs>
       </form>

@@ -8,7 +8,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 import { useSystemBridgeWS } from "~/components/hooks/use-system-bridge-ws";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -148,6 +149,19 @@ export function Settings() {
         </div>
 
         <MediaDirectoryForm form={form} onSubmit={onSubmit} />
+
+        <div className="space-y-4 w-full">
+          <h2 className="text-lg font-semibold">Commands</h2>
+          <p className="text-muted-foreground text-sm">
+            Manage and execute custom commands with an allowlist-based security model.
+          </p>
+          <Link href="/commands">
+            <Button type="button" variant="secondary" className="w-full">
+              Manage Commands
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
 
         <Button disabled={!form.formState.isDirty} type="submit">
           Save Settings
