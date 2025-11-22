@@ -19,6 +19,9 @@ system-bridge.syso
 # OpenCode
 .opencode
 
+# Claude
+.claude/
+
 # NSIS
 !installer.nsi.template
 installer.nsi
