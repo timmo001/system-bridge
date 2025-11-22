@@ -86,8 +86,8 @@ export function loadConnectionSettings(): ConnectionSettings {
     if (stored) {
       return JSON.parse(stored) as ConnectionSettings;
     }
-  } catch {
-    // Failed to load, return default
+  } catch(error) {
+    console.error("Error loading connection settings from localStorage", error);
   }
 
   // Priority 3: Return defaults
