@@ -1,7 +1,7 @@
 import "urlpattern-polyfill";
+import { Router } from "@lit-labs/router";
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
-import { Router } from "@lit-labs/router";
 import "./styles/globals.css";
 import "./components/theme-provider";
 import "./components/connection-provider";

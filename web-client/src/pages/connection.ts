@@ -1,15 +1,17 @@
-import { showSuccess, showError } from "~/lib/notifications";
+import { consume } from "@lit/context";
+import { provide } from "@lit/context";
 import { html } from "lit";
-import { PageElement } from "~/mixins";
 import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
+
 import {
   connectionContext,
   type ConnectionSettings,
   saveConnectionSettings,
 } from "~/contexts/connection";
-import { consume } from "@lit/context";
-import { provide } from "@lit/context";
+import { showSuccess, showError } from "~/lib/notifications";
+import { PageElement } from "~/mixins";
+
 import "../components/ui/button";
 import "../components/ui/input";
 import "../components/ui/label";

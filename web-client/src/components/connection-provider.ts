@@ -1,13 +1,14 @@
-import { html } from "lit";
-import { ProviderElement } from "~/mixins";
-import { customElement, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+
 import {
   connectionContext,
   type ConnectionSettings,
   loadConnectionSettings,
   saveConnectionSettings,
 } from "~/contexts/connection";
+import { ProviderElement } from "~/mixins";
 
 @customElement("connection-provider")
 export class ConnectionProvider extends ProviderElement {

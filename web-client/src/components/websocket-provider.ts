@@ -1,10 +1,13 @@
-import { showNotification } from "~/lib/notifications";
-import { html } from "lit";
-import { ProviderElement } from "~/mixins";
-import { customElement, property, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
 import { consume } from "@lit/context";
+import { html } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 import type { z } from "zod";
+
+import {
+  connectionContext,
+  type ConnectionSettings,
+} from "~/contexts/connection";
 import {
   websocketContext,
   type WebSocketState,
@@ -13,11 +16,7 @@ import {
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import { generateUUID } from "~/lib/utils";
+import { showNotification } from "~/lib/notifications";
 import {
   DefaultModuleData,
   Modules,
@@ -28,12 +27,14 @@ import {
   WebSocketResponseSchema,
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
+import { generateUUID } from "~/lib/utils";
+import { ProviderElement } from "~/mixins";
 
-type PendingResolver<T = unknown> = {
+interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
   schema: z.ZodSchema<T>;
-};
+}
 
 type AnyPendingResolver = PendingResolver<any>;
 
@@ -300,21 +301,21 @@ export class WebSocketProvider extends ProviderElement {
         this.sendRequest({
           id: generateUUID(),
           event: "GET_SETTINGS",
-          token: token!,
+          token: token,
         });
 
         this.sendRequest({
           id: generateUUID(),
           event: "GET_DATA",
           data: { modules: Modules },
-          token: token!,
+          token: token,
         });
 
         this.sendRequest({
           id: generateUUID(),
           event: "REGISTER_DATA_LISTENER",
           data: { modules: Modules },
-          token: token!,
+          token: token,
         });
       }
 

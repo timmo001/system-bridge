@@ -1,12 +1,13 @@
-import { html } from "lit";
-import { PageElement } from "~/mixins";
-import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { html } from "lit";
+import { customElement } from "lit/decorators.js";
+
 import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
+import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { PageElement } from "~/mixins";
 import "../components/ui/button";
 
 @customElement("page-home")

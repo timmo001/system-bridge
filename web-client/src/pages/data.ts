@@ -1,9 +1,10 @@
-import { html } from "lit";
-import { PageElement } from "~/mixins";
-import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
+import { PageElement } from "~/mixins";
 import "../components/ui/tabs";
 import "../components/ui/code-block";
 import "../components/ui/button";

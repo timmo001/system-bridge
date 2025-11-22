@@ -1,6 +1,7 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins";
 

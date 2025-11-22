@@ -33,7 +33,7 @@ export class UIElement extends LitElement {
   /**
    * Override to set custom display value (default: "inline-block")
    */
-  protected displayStyle: string = "inline-block";
+  protected displayStyle = "inline-block";
 
   /**
    * Disables Shadow DOM by returning the element itself.

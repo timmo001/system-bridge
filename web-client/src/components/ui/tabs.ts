@@ -1,5 +1,6 @@
 import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+
 import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins";
 
@@ -69,7 +70,7 @@ export class TabsTrigger extends UIElement {
   }
 
   private _handleClick() {
-    const tabs = this.closest("ui-tabs") as Tabs;
+    const tabs = this.closest("ui-tabs")!;
     if (tabs) {
       tabs.handleTabChange(this.value);
     }

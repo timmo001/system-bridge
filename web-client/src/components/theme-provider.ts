@@ -1,7 +1,7 @@
-import { html } from "lit";
-import { ProviderElement } from "~/mixins";
-import { customElement, state } from "lit/decorators.js";
 import { provide } from "@lit/context";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+
 import {
   themeContext,
   type ThemeState,
@@ -11,6 +11,7 @@ import {
   getEffectiveTheme,
   applyTheme,
 } from "~/contexts/theme";
+import { ProviderElement } from "~/mixins";
 
 @customElement("theme-provider")
 export class ThemeProvider extends ProviderElement {

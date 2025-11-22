@@ -1,15 +1,16 @@
-import { showSuccess, showError } from "~/lib/notifications";
-import { html } from "lit";
-import { PageElement } from "~/mixins";
-import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+
 import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
+import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { showSuccess, showError } from "~/lib/notifications";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
+import { PageElement } from "~/mixins";
 import "../components/ui/button";
 import "../components/ui/input";
 import "../components/ui/label";
