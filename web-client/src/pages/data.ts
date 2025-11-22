@@ -1,15 +1,14 @@
 import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { createElement, icons } from "lucide";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
 import { PageElement } from "~/mixins";
-import "../components/ui/tabs";
-import "../components/ui/code-block";
 import "../components/ui/button";
+import "../components/ui/code-block";
+import "../components/ui/icon";
+import "../components/ui/tabs";
 
 @customElement("page-data")
 export class PageData extends PageElement {
@@ -97,7 +96,7 @@ export class PageData extends PageElement {
                 @click=${this.handleNavigateToHome}
                 aria-label="Back to home"
               >
-                ${unsafeHTML(createElement(icons.ArrowLeft).outerHTML)}
+                <ui-icon name="ArrowLeft"></ui-icon>
               </ui-button>
               <div>
                 <h1 class="text-3xl font-bold mb-2">System Data</h1>

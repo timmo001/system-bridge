@@ -1,19 +1,18 @@
 import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { createElement, icons } from "lucide";
 
 import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { showSuccess, showError } from "~/lib/notifications";
+import { showError, showSuccess } from "~/lib/notifications";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
 import "../components/ui/button";
+import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
@@ -141,7 +140,7 @@ export class PageSettings extends PageElement {
               @click=${this.handleNavigateToHome}
               aria-label="Back to home"
             >
-              ${unsafeHTML(createElement(icons.ArrowLeft).outerHTML)}
+              <ui-icon name="ArrowLeft"></ui-icon>
             </ui-button>
             <div>
               <h1 class="text-3xl font-bold mb-2">Settings</h1>

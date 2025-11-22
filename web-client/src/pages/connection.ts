@@ -1,8 +1,6 @@
 import { consume, provide } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { createElement, icons } from "lucide";
 import { z } from "zod";
 
 import {
@@ -10,10 +8,11 @@ import {
   type ConnectionSettings,
   saveConnectionSettings,
 } from "~/contexts/connection";
-import { showSuccess, showError } from "~/lib/notifications";
+import { showError, showSuccess } from "~/lib/notifications";
 import { PageElement } from "~/mixins";
 
 import "../components/ui/button";
+import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
@@ -238,7 +237,7 @@ export class PageConnection extends PageElement {
               @click=${this.handleNavigateToHome}
               aria-label="Back to home"
             >
-              ${unsafeHTML(createElement(icons.ArrowLeft).outerHTML)}
+              <ui-icon name="ArrowLeft"></ui-icon>
             </ui-button>
             <div>
               <h1 class="text-3xl font-bold mb-2">Connection Settings</h1>
