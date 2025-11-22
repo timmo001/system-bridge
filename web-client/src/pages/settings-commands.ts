@@ -47,21 +47,63 @@ export class PageSettingsCommands extends PageElement {
   @state()
   private isSubmitting = false;
 
+  @state()
+  private pendingRequestId: string | null = null;
+
+  private submissionTimeout: number | null = null;
+  private previousCommands: SettingsCommandDefinition[] = [];
+
   connectedCallback() {
     super.connectedCallback();
     this.loadSettings();
+    this.previousCommands = [...this.commands];
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.submissionTimeout !== null) {
+      clearTimeout(this.submissionTimeout);
+      this.submissionTimeout = null;
+    }
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
     }
+
+    // Check if settings have been updated after a pending submission
+    if (
+      this.isSubmitting &&
+      this.pendingRequestId !== null &&
+      changedProperties.has("websocket")
+    ) {
+      const currentCommands = this.websocket?.settings?.commands.allowlist ?? [];
+      const previousCommandsStr = JSON.stringify(this.previousCommands);
+      const currentCommandsStr = JSON.stringify(currentCommands);
+
+      // If commands have changed, clear the submitting state
+      if (previousCommandsStr !== currentCommandsStr) {
+        this.clearSubmissionState();
+      }
+    }
   }
 
   private loadSettings() {
     if (this.websocket?.settings) {
       this.commands = [...this.websocket.settings.commands.allowlist];
+      this.previousCommands = [...this.commands];
     }
+  }
+
+  private clearSubmissionState(): void {
+    this.isSubmitting = false;
+    this.pendingRequestId = null;
+    if (this.submissionTimeout !== null) {
+      clearTimeout(this.submissionTimeout);
+      this.submissionTimeout = null;
+    }
+    this.requestUpdate();
   }
 
   private handleNavigateToHome = (): void => {
@@ -175,7 +217,16 @@ export class PageSettingsCommands extends PageElement {
       return;
     }
 
+    // Clear any existing timeout
+    if (this.submissionTimeout !== null) {
+      clearTimeout(this.submissionTimeout);
+      this.submissionTimeout = null;
+    }
+
     this.isSubmitting = true;
+    const requestId = generateUUID();
+    this.pendingRequestId = requestId;
+    this.previousCommands = [...this.commands];
     this.requestUpdate();
 
     try {
@@ -187,17 +238,26 @@ export class PageSettingsCommands extends PageElement {
       };
 
       this.websocket.sendRequest({
-        id: generateUUID(),
+        id: requestId,
         event: "UPDATE_SETTINGS",
         data: updatedSettings,
         token: this.connection.token,
       });
+
+      // Set timeout to clear submitting state after 10 seconds if no response
+      this.submissionTimeout = window.setTimeout(() => {
+        if (this.isSubmitting && this.pendingRequestId === requestId) {
+          console.warn(
+            "Settings update timeout: no response received after 10 seconds",
+          );
+          showError("Settings update timeout - please check your connection");
+          this.clearSubmissionState();
+        }
+      }, 10000);
     } catch (error) {
       console.error("Failed to update command settings:", error);
       showError("Failed to update settings");
-    } finally {
-      this.isSubmitting = false;
-      this.requestUpdate();
+      this.clearSubmissionState();
     }
   }
 
