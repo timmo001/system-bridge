@@ -35,6 +35,7 @@ interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
   schema: z.ZodType<T>;
+  timeoutId: number;
 }
 
 type AnyPendingResolver = PendingResolver;
@@ -135,6 +136,7 @@ export class WebSocketProvider extends ProviderElement {
 
   private clearAllPendingResolvers(reason: string) {
     this._pendingResolvers.forEach((resolver) => {
+      clearTimeout(resolver.timeoutId);
       resolver.reject(new Error(reason));
     });
     this._pendingResolvers.clear();
@@ -165,6 +167,9 @@ export class WebSocketProvider extends ProviderElement {
     if (message.id && this._pendingResolvers.has(message.id)) {
       const resolver = this._pendingResolvers.get(message.id);
       if (!resolver) return;
+
+      // Clear the timeout since we received a response
+      clearTimeout(resolver.timeoutId);
 
       const parsedData = resolver.schema.safeParse(message.data);
       if (parsedData?.success) {
@@ -499,25 +504,27 @@ export class WebSocketProvider extends ProviderElement {
         return;
       }
 
-      this._pendingResolvers.set(request.id, {
-        resolve: resolve as (value: unknown) => void,
-        reject,
-        schema,
-      });
-
-      try {
-        this._ws.send(JSON.stringify(request));
-      } catch (e) {
-        this._pendingResolvers.delete(request.id);
-        reject(e instanceof Error ? e : new Error("Unknown error"));
-      }
-
-      setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
         if (this._pendingResolvers.has(request.id)) {
           this._pendingResolvers.delete(request.id);
           reject(new Error("WebSocket response timed out"));
         }
       }, UPDATE_TIMEOUT);
+
+      this._pendingResolvers.set(request.id, {
+        resolve: resolve as (value: unknown) => void,
+        reject,
+        schema,
+        timeoutId,
+      });
+
+      try {
+        this._ws.send(JSON.stringify(request));
+      } catch (e) {
+        clearTimeout(timeoutId);
+        this._pendingResolvers.delete(request.id);
+        reject(e instanceof Error ? e : new Error("Unknown error"));
+      }
     });
   }
 
