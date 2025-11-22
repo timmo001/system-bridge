@@ -71,6 +71,15 @@ export class PageHome extends PageElement {
               </div>
             </div>
 
+            <div class="flex gap-4 justify-center">
+              <ui-button
+                variant="outline"
+                @click=${this.handleNavigateToConnection}
+              >
+                Setup Connection
+              </ui-button>
+            </div>
+
             ${this.connection
               ? html`
                   <div class="rounded-lg border bg-card p-6">
@@ -108,19 +117,7 @@ export class PageHome extends PageElement {
               : ""}
 
             <div class="flex gap-4 justify-center">
-              <ui-button
-                variant="outline"
-                @click=${this.handleNavigateToConnection}
-              >
-                Setup Connection
-              </ui-button>
-            </div>
-
-            <div class="flex gap-4 justify-center">
-              <ui-button
-                variant="default"
-                @click=${this.handleNavigateToData}
-              >
+              <ui-button variant="default" @click=${this.handleNavigateToData}>
                 View Data
               </ui-button>
               <ui-button
