@@ -22,6 +22,7 @@ import {
   Modules,
   type ModuleData,
 } from "~/lib/system-bridge/types-modules";
+import { ModuleDataSchemas } from "~/lib/system-bridge/types-modules-schemas";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import {
   WebSocketResponseSchema,
@@ -180,10 +181,17 @@ export class WebSocketProvider extends ProviderElement {
           this._error = `Received invalid module name: ${message.module}`;
           return;
         }
+        const moduleName = moduleValidation.data;
+        const moduleSchema = ModuleDataSchemas[moduleName];
+        const dataValidation = moduleSchema.safeParse(message.data);
+        if (!dataValidation.success) {
+          this._error = `Received invalid data for module ${moduleName}`;
+          console.error(`Module ${moduleName} validation error:`, dataValidation.error);
+          return;
+        }
         this._data = {
           ...this._data,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          [moduleValidation.data]: message.data,
+          [moduleName]: dataValidation.data,
         };
         this._isRequestingData = false;
         break;
