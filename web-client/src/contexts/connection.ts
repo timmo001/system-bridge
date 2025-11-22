@@ -64,7 +64,8 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
     }
 
     return settings;
-  } catch {
+  } catch(error) {
+    console.error("Error loading connection settings from URL", error);
     return null;
   }
 }
