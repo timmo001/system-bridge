@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding assistants (LLMs, code agents) when working with code in this repository.
 
 ## Project Overview
 
@@ -8,7 +8,7 @@ System Bridge is a cross-platform application (Linux, Windows, macOS/darwin) tha
 
 The project consists of:
 - **Backend**: Go application serving HTTP/WebSocket APIs and managing system data
-- **Web Client**: Next.js static site embedded in the Go binary
+- **Web Client**: Lit + Vite application embedded in the Go binary
 - **CLI**: Command-line interface for testing data modules and interacting with the system
 
 ## Build and Development Commands
@@ -31,7 +31,7 @@ make deps
 # Clean build artifacts
 make clean
 make clean_dist        # Also removes dist/ directory
-make clean_web_client  # Removes web-client/out/
+make clean_web_client  # Removes web-client/dist/
 
 # Show all available targets
 make help
