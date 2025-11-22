@@ -24,6 +24,7 @@ export const EventTypeSchema = z.enum([
   "REGISTER_DATA_LISTENER",
   "UNREGISTER_DATA_LISTENER",
   "DATA_UPDATE",
+  "COMMAND_EXECUTE",
   "UPDATE_SETTINGS",
   "VALIDATE_DIRECTORY",
 ]);
@@ -52,6 +53,8 @@ export const ResponseTypeSchema = z.enum([
   "DATA_LISTENER_REGISTERED",
   "DATA_LISTENER_UNREGISTERED",
   "DATA_UPDATE",
+  "COMMAND_EXECUTING",
+  "COMMAND_COMPLETED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
   "DIRECTORY_VALIDATED",
@@ -81,6 +84,7 @@ export const ResponseSubtypeSchema = z.enum([
   "MISSING_TITLE",
   "MISSING_TOKEN",
   "MISSING_VALUE",
+  "COMMAND_NOT_FOUND",
   "UNKNOWN_EVENT",
 ]);
 
@@ -113,3 +117,19 @@ export const ValidateDirectoryResponseSchema = z.object({
 export type ValidateDirectoryResponse = z.infer<
   typeof ValidateDirectoryResponseSchema
 >;
+
+export const CommandExecuteRequestSchema = z.object({
+  commandID: z.string(),
+});
+
+export type CommandExecuteRequest = z.infer<typeof CommandExecuteRequestSchema>;
+
+export const CommandExecuteResultSchema = z.object({
+  commandID: z.string(),
+  exitCode: z.number(),
+  stdout: z.string(),
+  stderr: z.string(),
+  error: z.string().optional(),
+});
+
+export type CommandExecuteResult = z.infer<typeof CommandExecuteResultSchema>;

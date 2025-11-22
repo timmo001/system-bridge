@@ -46,6 +46,21 @@ func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message
 	}
 }
 
+func (ws *WebsocketServer) SendMessageToAddress(address string, message event.MessageResponse) bool {
+	// Find the connectionInfo for this address
+	ws.mutex.RLock()
+	connInfo, ok := ws.connections[address]
+	ws.mutex.RUnlock()
+
+	if ok {
+		ws.SendMessage(connInfo, message)
+		return true
+	}
+
+	slog.Error("Connection not found in connections map", "address", address)
+	return false
+}
+
 func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest, subtype event.ResponseSubtype, message string) {
 	response := event.MessageResponse{
 		ID:      req.ID,

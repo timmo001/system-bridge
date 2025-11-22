@@ -11,7 +11,9 @@ import {
 } from "~/lib/system-bridge/types-modules";
 import { type Settings } from "~/lib/system-bridge/types-settings";
 import {
+  CommandExecuteResultSchema,
   WebSocketResponseSchema,
+  type CommandExecuteResult,
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -24,6 +26,7 @@ export const SystemBridgeWSContext = createContext<
       data: ModuleData | null;
       isConnected: boolean;
       settings: Settings | null;
+      commandResults: Record<string, CommandExecuteResult>;
       sendRequest: (request: WebSocketRequest) => void;
       sendRequestWithResponse: <T>(
         request: WebSocketRequest,
@@ -31,6 +34,7 @@ export const SystemBridgeWSContext = createContext<
       ) => Promise<T>;
       error: string | null;
       retryConnection: () => void;
+      clearCommandResult: (commandID: string) => void;
     }
   | undefined
 >(undefined);
@@ -53,6 +57,9 @@ export function SystemBridgeWSProvider({
   const [data, setData] = useState<ModuleData>(DefaultModuleData);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [commandResults, setCommandResults] = useState<
+    Record<string, CommandExecuteResult>
+  >({});
   const [retryCount, setRetryCount] = useState<number>(0);
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
   const [isSettingsUpdatePending, setIsSettingsUpdatePending] =
@@ -157,6 +164,9 @@ export function SystemBridgeWSProvider({
             autostart: receivedSettings.autostart ?? false,
             hotkeys: receivedSettings.hotkeys ?? [],
             logLevel: receivedSettings.logLevel ?? "INFO",
+            commands: {
+              allowlist: receivedSettings.commands?.allowlist ?? [],
+            },
             media: {
               directories: receivedSettings.media?.directories ?? [],
             },
@@ -182,6 +192,12 @@ export function SystemBridgeWSProvider({
                 updatedReceivedSettings.logLevel ??
                 prevSettings?.logLevel ??
                 "INFO",
+              commands: {
+                allowlist:
+                  updatedReceivedSettings.commands?.allowlist ??
+                  prevSettings?.commands.allowlist ??
+                  [],
+              },
               media: {
                 directories:
                   updatedReceivedSettings.media?.directories ??
@@ -198,6 +214,32 @@ export function SystemBridgeWSProvider({
             settingsUpdateTimeoutRef.current = null;
           }
           break;
+        case "COMMAND_COMPLETED": {
+          const parsedResult = CommandExecuteResultSchema.safeParse(message.data);
+          if (parsedResult.success) {
+            const result = parsedResult.data;
+            console.log("Command execution completed:", result);
+            setCommandResults((prev) => ({
+              ...prev,
+              [result.commandID]: result,
+            }));
+            // Show toast notification
+            if (result.error) {
+              toast.error(`Command "${result.commandID}" failed`, {
+                description: result.error,
+              });
+            } else if (result.exitCode !== 0) {
+              toast.warning(
+                `Command "${result.commandID}" exited with code ${result.exitCode}`,
+              );
+            } else {
+              toast.success(`Command "${result.commandID}" completed successfully`);
+            }
+          } else {
+            console.error("Invalid command result:", parsedResult.error);
+          }
+          break;
+        }
         case "ERROR":
           if (message.subtype === "BAD_TOKEN") {
             const errorMessage =
@@ -471,16 +513,26 @@ export function SystemBridgeWSProvider({
     connect();
   }, [connect]);
 
+  const clearCommandResult = useCallback((commandID: string) => {
+    setCommandResults((prev) => {
+      const newResults = { ...prev };
+      delete newResults[commandID];
+      return newResults;
+    });
+  }, []);
+
   return (
     <SystemBridgeWSContext.Provider
       value={{
         data,
         isConnected,
         settings,
+        commandResults,
         sendRequest,
         sendRequestWithResponse,
         error,
         retryConnection,
+        clearCommandResult,
       }}
     >
       {children}
