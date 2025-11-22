@@ -6,8 +6,6 @@ import { UIElement } from "~/mixins";
 
 @customElement("ui-tabs")
 export class Tabs extends UIElement {
-  protected displayStyle = "block";
-
   @property() value = "";
 
   connectedCallback() {
@@ -36,8 +34,6 @@ export class Tabs extends UIElement {
 
 @customElement("ui-tabs-list")
 export class TabsList extends UIElement {
-  protected displayStyle = "block";
-
   connectedCallback() {
     super.connectedCallback();
     const classes = cn(
@@ -109,8 +105,6 @@ export class TabsTrigger extends UIElement {
 
 @customElement("ui-tabs-content")
 export class TabsContent extends UIElement {
-  protected displayStyle = "block";
-
   @property() value = "";
   @property({ type: Boolean, reflect: true }) hidden = false;
 

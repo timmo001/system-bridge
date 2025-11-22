@@ -127,4 +127,10 @@
     align-items: center;
     justify-content: center;
   }
+  ui-input,
+  ui-tabs,
+  ui-tabs-list,
+  ui-tabs-content {
+    display: block;
+  }
 }

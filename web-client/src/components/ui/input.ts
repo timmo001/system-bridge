@@ -6,8 +6,6 @@ import { UIElement } from "~/mixins";
 
 @customElement("ui-input")
 export class Input extends UIElement {
-  protected displayStyle = "block";
-
   @property() type = "text";
   @property() value = "";
   @property() placeholder = "";
