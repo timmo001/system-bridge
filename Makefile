@@ -91,6 +91,13 @@ install: build
 	go install .
 
 run: build
+	@echo "Starting web client and backend in parallel..."
+	cd web-client && pnpm exec concurrently -n "web,backend" -c "blue,green" "pnpm dev" "../$(OUT) backend"
+
+run-web-client:
+	cd web-client && pnpm dev
+
+run-backend: build
 	./$(OUT) backend
 
 # Run console version for debugging (Windows only)
@@ -183,6 +190,8 @@ help:
 	@echo "  create_rpm               Create RPM package"
 	@echo "  create_windows_installer Create Windows installer"
 	@echo "  run                      Build and run the application (development only)"
+	@echo "  run-web-client           Run the web client dev server (Vite)"
+	@echo "  run-backend              Build and run the backend server"
 	@echo "  run_console              Build and run console version for debugging (Windows only)"
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
 	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"
