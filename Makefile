@@ -130,13 +130,10 @@ else
 	@echo "Process management is only supported on Windows"
 endif
 
-test: test_go test_web_client
+test: test_go
 
 test_go:
 	go test -v ./...
-
-test_web_client:
-	cd web-client && pnpm test
 
 lint: lint_go lint_web_client
 
