@@ -23,6 +23,6 @@ func Update(current *Settings, new *Settings) error {
 	current.Hotkeys = new.Hotkeys
 	current.LogLevel = new.LogLevel
 	current.Media = new.Media
-	current.Scripts = new.Scripts
+	current.Commands = new.Commands
 	return current.Save()
 }

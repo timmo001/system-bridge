@@ -11,9 +11,9 @@ import {
 } from "~/lib/system-bridge/types-modules";
 import { type Settings } from "~/lib/system-bridge/types-settings";
 import {
-  ScriptExecuteResultSchema,
+  CommandExecuteResultSchema,
   WebSocketResponseSchema,
-  type ScriptExecuteResult,
+  type CommandExecuteResult,
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
 import { useSystemBridgeConnectionStore } from "~/components/hooks/use-system-bridge-connection";
@@ -26,7 +26,7 @@ export const SystemBridgeWSContext = createContext<
       data: ModuleData | null;
       isConnected: boolean;
       settings: Settings | null;
-      scriptResults: Record<string, ScriptExecuteResult>;
+      commandResults: Record<string, CommandExecuteResult>;
       sendRequest: (request: WebSocketRequest) => void;
       sendRequestWithResponse: <T>(
         request: WebSocketRequest,
@@ -34,7 +34,7 @@ export const SystemBridgeWSContext = createContext<
       ) => Promise<T>;
       error: string | null;
       retryConnection: () => void;
-      clearScriptResult: (scriptID: string) => void;
+      clearCommandResult: (commandID: string) => void;
     }
   | undefined
 >(undefined);
@@ -57,8 +57,8 @@ export function SystemBridgeWSProvider({
   const [data, setData] = useState<ModuleData>(DefaultModuleData);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [scriptResults, setScriptResults] = useState<
-    Record<string, ScriptExecuteResult>
+  const [commandResults, setCommandResults] = useState<
+    Record<string, CommandExecuteResult>
   >({});
   const [retryCount, setRetryCount] = useState<number>(0);
   const [isRequestingData, setIsRequestingData] = useState<boolean>(false);
@@ -164,11 +164,11 @@ export function SystemBridgeWSProvider({
             autostart: receivedSettings.autostart ?? false,
             hotkeys: receivedSettings.hotkeys ?? [],
             logLevel: receivedSettings.logLevel ?? "INFO",
+            commands: {
+              allowlist: receivedSettings.commands?.allowlist ?? [],
+            },
             media: {
               directories: receivedSettings.media?.directories ?? [],
-            },
-            scripts: {
-              allowlist: receivedSettings.scripts?.allowlist ?? [],
             },
           };
           console.log("Settings received:", mergedSettings);
@@ -192,16 +192,16 @@ export function SystemBridgeWSProvider({
                 updatedReceivedSettings.logLevel ??
                 prevSettings?.logLevel ??
                 "INFO",
+              commands: {
+                allowlist:
+                  updatedReceivedSettings.commands?.allowlist ??
+                  prevSettings?.commands.allowlist ??
+                  [],
+              },
               media: {
                 directories:
                   updatedReceivedSettings.media?.directories ??
                   prevSettings?.media.directories ??
-                  [],
-              },
-              scripts: {
-                allowlist:
-                  updatedReceivedSettings.scripts?.allowlist ??
-                  prevSettings?.scripts.allowlist ??
                   [],
               },
             };
@@ -214,29 +214,29 @@ export function SystemBridgeWSProvider({
             settingsUpdateTimeoutRef.current = null;
           }
           break;
-        case "SCRIPT_COMPLETED": {
-          const parsedResult = ScriptExecuteResultSchema.safeParse(message.data);
+        case "COMMAND_COMPLETED": {
+          const parsedResult = CommandExecuteResultSchema.safeParse(message.data);
           if (parsedResult.success) {
             const result = parsedResult.data;
-            console.log("Script execution completed:", result);
-            setScriptResults((prev) => ({
+            console.log("Command execution completed:", result);
+            setCommandResults((prev) => ({
               ...prev,
-              [result.scriptID]: result,
+              [result.commandID]: result,
             }));
             // Show toast notification
             if (result.error) {
-              toast.error(`Script "${result.scriptID}" failed`, {
+              toast.error(`Command "${result.commandID}" failed`, {
                 description: result.error,
               });
             } else if (result.exitCode !== 0) {
               toast.warning(
-                `Script "${result.scriptID}" exited with code ${result.exitCode}`,
+                `Command "${result.commandID}" exited with code ${result.exitCode}`,
               );
             } else {
-              toast.success(`Script "${result.scriptID}" completed successfully`);
+              toast.success(`Command "${result.commandID}" completed successfully`);
             }
           } else {
-            console.error("Invalid script result:", parsedResult.error);
+            console.error("Invalid command result:", parsedResult.error);
           }
           break;
         }
@@ -513,10 +513,10 @@ export function SystemBridgeWSProvider({
     connect();
   }, [connect]);
 
-  const clearScriptResult = useCallback((scriptID: string) => {
-    setScriptResults((prev) => {
+  const clearCommandResult = useCallback((commandID: string) => {
+    setCommandResults((prev) => {
       const newResults = { ...prev };
-      delete newResults[scriptID];
+      delete newResults[commandID];
       return newResults;
     });
   }, []);
@@ -527,12 +527,12 @@ export function SystemBridgeWSProvider({
         data,
         isConnected,
         settings,
-        scriptResults,
+        commandResults,
         sendRequest,
         sendRequestWithResponse,
         error,
         retryConnection,
-        clearScriptResult,
+        clearCommandResult,
       }}
     >
       {children}

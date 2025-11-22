@@ -24,7 +24,7 @@ export const EventTypeSchema = z.enum([
   "REGISTER_DATA_LISTENER",
   "UNREGISTER_DATA_LISTENER",
   "DATA_UPDATE",
-  "SCRIPT_EXECUTE",
+  "COMMAND_EXECUTE",
   "UPDATE_SETTINGS",
   "VALIDATE_DIRECTORY",
 ]);
@@ -53,8 +53,8 @@ export const ResponseTypeSchema = z.enum([
   "DATA_LISTENER_REGISTERED",
   "DATA_LISTENER_UNREGISTERED",
   "DATA_UPDATE",
-  "SCRIPT_EXECUTING",
-  "SCRIPT_COMPLETED",
+  "COMMAND_EXECUTING",
+  "COMMAND_COMPLETED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
   "DIRECTORY_VALIDATED",
@@ -84,7 +84,7 @@ export const ResponseSubtypeSchema = z.enum([
   "MISSING_TITLE",
   "MISSING_TOKEN",
   "MISSING_VALUE",
-  "SCRIPT_NOT_FOUND",
+  "COMMAND_NOT_FOUND",
   "UNKNOWN_EVENT",
 ]);
 
@@ -118,18 +118,18 @@ export type ValidateDirectoryResponse = z.infer<
   typeof ValidateDirectoryResponseSchema
 >;
 
-export const ScriptExecuteRequestSchema = z.object({
-  scriptID: z.string(),
+export const CommandExecuteRequestSchema = z.object({
+  commandID: z.string(),
 });
 
-export type ScriptExecuteRequest = z.infer<typeof ScriptExecuteRequestSchema>;
+export type CommandExecuteRequest = z.infer<typeof CommandExecuteRequestSchema>;
 
-export const ScriptExecuteResultSchema = z.object({
-  scriptID: z.string(),
+export const CommandExecuteResultSchema = z.object({
+  commandID: z.string(),
   exitCode: z.number(),
   stdout: z.string(),
   stderr: z.string(),
   error: z.string().optional(),
 });
 
-export type ScriptExecuteResult = z.infer<typeof ScriptExecuteResultSchema>;
+export type CommandExecuteResult = z.infer<typeof CommandExecuteResultSchema>;

@@ -25,7 +25,7 @@ const (
 	EventRegisterDataListener   EventType = "REGISTER_DATA_LISTENER"
 	EventUnregisterDataListener EventType = "UNREGISTER_DATA_LISTENER"
 	EventDataUpdate             EventType = "DATA_UPDATE"
-	EventScriptExecute          EventType = "SCRIPT_EXECUTE"
+	EventCommandExecute         EventType = "COMMAND_EXECUTE"
 	EventUpdateSettings         EventType = "UPDATE_SETTINGS"
 	EventValidateDirectory      EventType = "VALIDATE_DIRECTORY"
 )

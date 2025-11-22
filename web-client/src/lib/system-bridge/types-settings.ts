@@ -22,7 +22,7 @@ export const SettingsMediaSchema = z.object({
 
 export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
 
-export const SettingsScriptDefinitionSchema = z.object({
+export const SettingsCommandDefinitionSchema = z.object({
   id: z.string().min(1, "ID is required"),
   name: z.string().min(1, "Name is required"),
   command: z.string().min(1, "Command is required"),
@@ -30,22 +30,22 @@ export const SettingsScriptDefinitionSchema = z.object({
   arguments: z.array(z.string()),
 });
 
-export type SettingsScriptDefinition = z.infer<
-  typeof SettingsScriptDefinitionSchema
+export type SettingsCommandDefinition = z.infer<
+  typeof SettingsCommandDefinitionSchema
 >;
 
-export const SettingsScriptsSchema = z.object({
-  allowlist: z.array(SettingsScriptDefinitionSchema),
+export const SettingsCommandsSchema = z.object({
+  allowlist: z.array(SettingsCommandDefinitionSchema),
 });
 
-export type SettingsScripts = z.infer<typeof SettingsScriptsSchema>;
+export type SettingsCommands = z.infer<typeof SettingsCommandsSchema>;
 
 export const SettingsSchema = z.object({
   autostart: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
   logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+  commands: SettingsCommandsSchema,
   media: SettingsMediaSchema,
-  scripts: SettingsScriptsSchema,
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;

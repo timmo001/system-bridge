@@ -19,14 +19,14 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import {
-  SettingsScriptDefinitionSchema,
+  SettingsCommandDefinitionSchema,
   type Settings,
-  type SettingsScriptDefinition,
+  type SettingsCommandDefinition,
 } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
-export function ScriptManagement({
+export function CommandManagement({
   form: parentForm,
   onSubmit,
 }: {
@@ -34,8 +34,8 @@ export function ScriptManagement({
   onSubmit: SubmitHandler<Settings>;
 }) {
   const { token } = useSystemBridgeConnectionStore();
-  const scriptForm = useForm<SettingsScriptDefinition>({
-    resolver: zodResolver(SettingsScriptDefinitionSchema),
+  const commandForm = useForm<SettingsCommandDefinition>({
+    resolver: zodResolver(SettingsCommandDefinitionSchema),
     defaultValues: {
       id: "",
       name: "",
@@ -45,14 +45,14 @@ export function ScriptManagement({
     },
   });
 
-  const [scriptError, setScriptError] = useState<string | null>(null);
+  const [commandError, setCommandError] = useState<string | null>(null);
   const [argumentsInput, setArgumentsInput] = useState<string>("");
 
-  async function handleAddScript(data: SettingsScriptDefinition) {
-    setScriptError(null);
+  async function handleAddCommand(data: SettingsCommandDefinition) {
+    setCommandError(null);
 
     // Generate ID if not provided
-    const scriptData: SettingsScriptDefinition = {
+    const commandData: SettingsCommandDefinition = {
       ...data,
       id: data.id || generateUUID(),
       arguments: argumentsInput
@@ -61,56 +61,56 @@ export function ScriptManagement({
     };
 
     // Validate
-    const isValid = await scriptForm.trigger();
+    const isValid = await commandForm.trigger();
     if (!isValid) {
       toast.error("Validation failed. Please check the form fields.");
-      setScriptError("Validation failed. Please check the form fields.");
+      setCommandError("Validation failed. Please check the form fields.");
       return;
     }
 
     // Check for duplicate IDs
-    const existingScripts = parentForm.getValues("scripts.allowlist") ?? [];
-    if (existingScripts.some((s) => s.id === scriptData.id)) {
-      setScriptError("A script with this ID already exists.");
-      toast.error("A script with this ID already exists.");
+    const existingCommands = parentForm.getValues("commands.allowlist") ?? [];
+    if (existingCommands.some((s) => s.id === commandData.id)) {
+      setCommandError("A command with this ID already exists.");
+      toast.error("A command with this ID already exists.");
       return;
     }
 
     try {
-      const newScripts = [...existingScripts, scriptData];
-      parentForm.setValue("scripts.allowlist", newScripts);
-      const parentIsValid = await parentForm.trigger("scripts.allowlist");
+      const newCommands = [...existingCommands, commandData];
+      parentForm.setValue("commands.allowlist", newCommands);
+      const parentIsValid = await parentForm.trigger("commands.allowlist");
 
       if (parentIsValid) {
-        toast.success("Script added successfully");
+        toast.success("Command added successfully");
         await onSubmit(parentForm.getValues());
-        scriptForm.reset();
+        commandForm.reset();
         setArgumentsInput("");
       } else {
-        toast.error("Failed to add script");
-        setScriptError("Failed to add script");
+        toast.error("Failed to add command");
+        setCommandError("Failed to add command");
       }
     } catch (error) {
-      console.error("Failed to add script:", error);
-      setScriptError("Failed to add script.");
+      console.error("Failed to add command:", error);
+      setCommandError("Failed to add command.");
     }
 
-    scriptForm.setFocus("name");
+    commandForm.setFocus("name");
   }
 
-  async function handleRemoveScript(script: SettingsScriptDefinition) {
-    setScriptError(null);
+  async function handleRemoveCommand(command: SettingsCommandDefinition) {
+    setCommandError(null);
 
     parentForm.setValue(
-      "scripts.allowlist",
-      (parentForm.getValues("scripts.allowlist") ?? []).filter(
-        (s: SettingsScriptDefinition) => s.id !== script.id,
+      "commands.allowlist",
+      (parentForm.getValues("commands.allowlist") ?? []).filter(
+        (s: SettingsCommandDefinition) => s.id !== command.id,
       ),
     );
 
-    const parentIsValid = await parentForm.trigger("scripts.allowlist");
+    const parentIsValid = await parentForm.trigger("commands.allowlist");
     if (parentIsValid) {
-      toast.success("Script removed successfully");
+      toast.success("Command removed successfully");
       await onSubmit(parentForm.getValues());
     } else {
       toast.error("Failed to submit form due to validation errors");
@@ -121,22 +121,22 @@ export function ScriptManagement({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Script Allowlist</CardTitle>
+          <CardTitle>Command Allowlist</CardTitle>
           <CardDescription>
-            Manage scripts that are allowed to be executed. Scripts must be explicitly allowlisted for security.
+            Manage commands that are allowed to be executed. Commands must be explicitly allowlisted for security.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <FormField
             control={parentForm.control}
-            name="scripts.allowlist"
-            render={({ field: scriptsField }) => (
+            name="commands.allowlist"
+            render={({ field: commandsField }) => (
               <FormItem>
-                <Form {...scriptForm}>
+                <Form {...commandForm}>
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <FormField
-                        control={scriptForm.control}
+                        control={commandForm.control}
                         name="id"
                         render={({ field }) => (
                           <FormItem>
@@ -152,7 +152,7 @@ export function ScriptManagement({
                         )}
                       />
                       <FormField
-                        control={scriptForm.control}
+                        control={commandForm.control}
                         name="name"
                         render={({ field }) => (
                           <FormItem>
@@ -160,7 +160,7 @@ export function ScriptManagement({
                             <FormControl>
                               <Input
                                 {...field}
-                                placeholder="Enter script name"
+                                placeholder="Enter command name"
                                 required
                               />
                             </FormControl>
@@ -171,7 +171,7 @@ export function ScriptManagement({
                     </div>
 
                     <FormField
-                      control={scriptForm.control}
+                      control={commandForm.control}
                       name="command"
                       render={({ field }) => (
                         <FormItem>
@@ -184,7 +184,7 @@ export function ScriptManagement({
                             />
                           </FormControl>
                           <FormDescription>
-                            Full path to the script or executable (e.g., /usr/local/bin/backup.sh)
+                            Full path to the command or executable (e.g., /usr/local/bin/backup.sh)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -192,7 +192,7 @@ export function ScriptManagement({
                     />
 
                     <FormField
-                      control={scriptForm.control}
+                      control={commandForm.control}
                       name="workingDir"
                       render={({ field }) => (
                         <FormItem>
@@ -205,7 +205,7 @@ export function ScriptManagement({
                             />
                           </FormControl>
                           <FormDescription>
-                            Directory to execute the script from (e.g., /home/user)
+                            Directory to execute the command from (e.g., /home/user)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -228,55 +228,55 @@ export function ScriptManagement({
                       type="button"
                       variant="secondary"
                       className="w-full"
-                      onClick={() => handleAddScript(scriptForm.getValues())}
+                      onClick={() => handleAddCommand(commandForm.getValues())}
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Script
+                      Add Command
                     </Button>
                   </div>
                 </Form>
 
-                {scriptError && (
+                {commandError && (
                   <FormDescription className="text-red-500">
-                    {scriptError}
+                    {commandError}
                   </FormDescription>
                 )}
 
-                {(scriptsField.value ?? []).length === 0 ? (
+                {(commandsField.value ?? []).length === 0 ? (
                   <div className="text-muted-foreground mt-4 text-center text-sm">
-                    No scripts in allowlist. Add a script above to get started.
+                    No commands in allowlist. Add a command above to get started.
                   </div>
                 ) : (
                   <ul className="mt-4 list-none space-y-2">
-                    {(scriptsField.value ?? []).map(
-                      (script: SettingsScriptDefinition, index: number) => (
-                        <Fragment key={script.id}>
+                    {(commandsField.value ?? []).map(
+                      (command: SettingsCommandDefinition, index: number) => (
+                        <Fragment key={command.id}>
                           <li className="border-muted flex flex-col gap-2 rounded-lg border p-3">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 space-y-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold">{script.name}</span>
+                                  <span className="font-semibold">{command.name}</span>
                                   <code className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
-                                    {script.id}
+                                    {command.id}
                                   </code>
                                 </div>
                                 <div className="text-sm">
                                   <span className="text-muted-foreground">Command:</span>{" "}
                                   <code className="bg-muted rounded px-1 py-0.5 text-xs">
-                                    {script.command}
+                                    {command.command}
                                   </code>
                                 </div>
                                 <div className="text-sm">
                                   <span className="text-muted-foreground">Working Dir:</span>{" "}
                                   <code className="bg-muted rounded px-1 py-0.5 text-xs">
-                                    {script.workingDir}
+                                    {command.workingDir}
                                   </code>
                                 </div>
-                                {script.arguments.length > 0 && (
+                                {command.arguments.length > 0 && (
                                   <div className="text-sm">
                                     <span className="text-muted-foreground">Arguments:</span>{" "}
                                     <code className="bg-muted rounded px-1 py-0.5 text-xs">
-                                      {script.arguments.join(", ")}
+                                      {command.arguments.join(", ")}
                                     </code>
                                   </div>
                                 )}
@@ -285,13 +285,13 @@ export function ScriptManagement({
                                 type="button"
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleRemoveScript(script)}
+                                onClick={() => handleRemoveCommand(command)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </li>
-                          {index < (scriptsField.value ?? []).length - 1 && (
+                          {index < (commandsField.value ?? []).length - 1 && (
                             <li className="bg-muted h-px w-full" />
                           )}
                         </Fragment>

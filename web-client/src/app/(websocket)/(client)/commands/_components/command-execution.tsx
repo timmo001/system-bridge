@@ -15,41 +15,41 @@ import {
 } from "~/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { generateUUID } from "~/lib/utils";
-import type { SettingsScriptDefinition } from "~/lib/system-bridge/types-settings";
+import type { SettingsCommandDefinition } from "~/lib/system-bridge/types-settings";
 
-export function ScriptExecution() {
+export function CommandExecution() {
   const { token } = useSystemBridgeConnectionStore();
-  const { settings, scriptResults, sendRequest, clearScriptResult } = useSystemBridgeWS();
-  const [selectedScriptId, setSelectedScriptId] = useState<string>("");
+  const { settings, commandResults, sendRequest, clearCommandResult } = useSystemBridgeWS();
+  const [selectedCommandId, setSelectedCommandId] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
-  const scripts = settings?.scripts.allowlist ?? [];
-  const selectedScript = scripts.find((s) => s.id === selectedScriptId);
-  const result = selectedScriptId ? scriptResults[selectedScriptId] : null;
+  const commands = settings?.commands.allowlist ?? [];
+  const selectedCommand = commands.find((s) => s.id === selectedCommandId);
+  const result = selectedCommandId ? commandResults[selectedCommandId] : null;
 
   function handleExecute() {
-    if (!selectedScriptId || !token) {
-      toast.error("Please select a script and ensure you're connected");
+    if (!selectedCommandId || !token) {
+      toast.error("Please select a command and ensure you're connected");
       return;
     }
 
     setIsExecuting(true);
     sendRequest({
       id: generateUUID(),
-      event: "SCRIPT_EXECUTE",
-      data: { scriptID: selectedScriptId },
+      event: "COMMAND_EXECUTE",
+      data: { commandID: selectedCommandId },
       token,
     });
 
-    toast.info(`Executing script "${selectedScript?.name}"...`);
+    toast.info(`Executing command "${selectedCommand?.name}"...`);
 
-    // Reset executing state after a short delay (the SCRIPT_EXECUTING response will come back quickly)
+    // Reset executing state after a short delay (the COMMAND_EXECUTING response will come back quickly)
     setTimeout(() => setIsExecuting(false), 1000);
   }
 
   function handleClearResult() {
-    if (selectedScriptId) {
-      clearScriptResult(selectedScriptId);
+    if (selectedCommandId) {
+      clearCommandResult(selectedCommandId);
     }
   }
 
@@ -57,29 +57,29 @@ export function ScriptExecution() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Execute Script</CardTitle>
+          <CardTitle>Execute Command</CardTitle>
           <CardDescription>
-            Select a script from the allowlist and execute it. Results will appear below.
+            Select a command from the allowlist and execute it. Results will appear below.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
-            <Select value={selectedScriptId} onValueChange={setSelectedScriptId}>
+            <Select value={selectedCommandId} onValueChange={setSelectedCommandId}>
               <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select a script to execute" />
+                <SelectValue placeholder="Select a command to execute" />
               </SelectTrigger>
               <SelectContent>
-                {scripts.length === 0 ? (
+                {commands.length === 0 ? (
                   <div className="text-muted-foreground px-2 py-1.5 text-sm">
-                    No scripts available. Add scripts in the Manage tab.
+                    No commands available. Add commands in the Manage tab.
                   </div>
                 ) : (
-                  scripts.map((script: SettingsScriptDefinition) => (
-                    <SelectItem key={script.id} value={script.id}>
+                  commands.map((command: SettingsCommandDefinition) => (
+                    <SelectItem key={command.id} value={command.id}>
                       <div className="flex items-center gap-2">
-                        <span>{script.name}</span>
+                        <span>{command.name}</span>
                         <code className="bg-muted text-muted-foreground rounded px-1 text-xs">
-                          {script.id}
+                          {command.id}
                         </code>
                       </div>
                     </SelectItem>
@@ -89,7 +89,7 @@ export function ScriptExecution() {
             </Select>
             <Button
               onClick={handleExecute}
-              disabled={!selectedScriptId || isExecuting}
+              disabled={!selectedCommandId || isExecuting}
               className="min-w-[120px]"
             >
               {isExecuting ? (
@@ -103,20 +103,20 @@ export function ScriptExecution() {
             </Button>
           </div>
 
-          {selectedScript && (
+          {selectedCommand && (
             <div className="bg-muted space-y-1 rounded-lg p-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Command:</span>{" "}
-                <code className="text-xs">{selectedScript.command}</code>
+                <code className="text-xs">{selectedCommand.command}</code>
               </div>
               <div>
                 <span className="text-muted-foreground">Working Dir:</span>{" "}
-                <code className="text-xs">{selectedScript.workingDir}</code>
+                <code className="text-xs">{selectedCommand.workingDir}</code>
               </div>
-              {selectedScript.arguments.length > 0 && (
+              {selectedCommand.arguments.length > 0 && (
                 <div>
                   <span className="text-muted-foreground">Arguments:</span>{" "}
-                  <code className="text-xs">{selectedScript.arguments.join(" ")}</code>
+                  <code className="text-xs">{selectedCommand.arguments.join(" ")}</code>
                 </div>
               )}
             </div>
@@ -183,10 +183,10 @@ export function ScriptExecution() {
         </Card>
       )}
 
-      {!result && selectedScriptId && (
+      {!result && selectedCommandId && (
         <Card>
           <CardContent className="text-muted-foreground pt-6 text-center">
-            No results yet. Click Execute to run the selected script.
+            No results yet. Click Execute to run the selected command.
           </CardContent>
         </Card>
       )}

@@ -11,10 +11,10 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { SettingsSchema, type Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
-import { ScriptManagement } from "~/app/(websocket)/(client)/scripts/_components/script-management";
-import { ScriptExecution } from "~/app/(websocket)/(client)/scripts/_components/script-execution";
+import { CommandManagement } from "~/app/(websocket)/(client)/commands/_components/command-management";
+import { CommandExecution } from "~/app/(websocket)/(client)/commands/_components/command-execution";
 
-export function Scripts() {
+export function Commands() {
   const { token } = useSystemBridgeConnectionStore();
   const { settings, sendRequest } = useSystemBridgeWS();
 
@@ -24,11 +24,11 @@ export function Scripts() {
       autostart: false,
       hotkeys: [],
       logLevel: "INFO",
+      commands: {
+        allowlist: [],
+      },
       media: {
         directories: [],
-      },
-      scripts: {
-        allowlist: [],
       },
     },
   });
@@ -74,11 +74,11 @@ export function Scripts() {
           </TabsList>
 
           <TabsContent value="execute" className="space-y-4">
-            <ScriptExecution />
+            <CommandExecution />
           </TabsContent>
 
           <TabsContent value="manage" className="space-y-4">
-            <ScriptManagement form={form} onSubmit={onSubmit} />
+            <CommandManagement form={form} onSubmit={onSubmit} />
 
             <div className="flex justify-center">
               <Button disabled={!form.formState.isDirty} type="submit">

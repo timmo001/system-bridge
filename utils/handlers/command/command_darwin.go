@@ -1,6 +1,6 @@
-//go:build windows
+//go:build darwin
 
-package script
+package command
 
 import (
 	"bytes"
@@ -9,19 +9,19 @@ import (
 	"github.com/timmo001/system-bridge/settings"
 )
 
-// execute runs the script on Windows
-func execute(scriptDef *settings.SettingsScriptDefinition) ExecuteResult {
+// execute runs the command on macOS
+func execute(commandDef *settings.SettingsCommandDefinition) ExecuteResult {
 	result := ExecuteResult{
-		ScriptID: scriptDef.ID,
-		ExitCode: -1,
+		CommandID: commandDef.ID,
+		ExitCode:  -1,
 	}
 
 	// Create command with arguments
-	cmd := exec.Command(scriptDef.Command, scriptDef.Arguments...)
+	cmd := exec.Command(commandDef.Command, commandDef.Arguments...)
 
 	// Set working directory if specified
-	if scriptDef.WorkingDir != "" {
-		cmd.Dir = scriptDef.WorkingDir
+	if commandDef.WorkingDir != "" {
+		cmd.Dir = commandDef.WorkingDir
 	}
 
 	// Capture stdout and stderr
