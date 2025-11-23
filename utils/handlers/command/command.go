@@ -118,6 +118,12 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 
 	// Verify connection still exists before spawning goroutine
 	// This prevents orphaned command execution when connection closes between validation and execution
+	// NOTE: TOCTOU race condition exists - the connection could close after this check but before
+	// or during executeAsync. This is acceptable because:
+	// 1. Commands execute atomically once started
+	// 2. Failure to send results is detected and logged in executeAsync (SendMessageToAddress returns false)
+	// 3. No security vulnerability - just a logged failure to send results back
+	// 4. executeAsync performs an additional early-exit check to fail fast if connection is already gone
 	ws := websocket.GetInstance()
 	if ws == nil {
 		return errors.New("WebSocket instance not available")
@@ -146,12 +152,32 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 	// Ensure cleanup on completion
 	defer cancel()
 
+	// Early check: verify connection still exists before executing command
+	// This provides fail-fast behavior to avoid executing commands when the connection is already gone
+	// Note: This still has a TOCTOU race (connection could close after this check), but it catches
+	// the common case of connections closed before the goroutine starts
+	ws := websocket.GetInstance()
+	if ws == nil {
+		slog.Error("WebSocket instance not available for command execution")
+		return
+	}
+	if !ws.ConnectionExists(req.Connection) {
+		slog.Info(
+			"Skipping command execution - connection closed before execution started",
+			"commandID", commandDef.ID,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
+		)
+		return
+	}
+
 	// Execute the command with context
 	result := execute(ctx, commandDef)
 	result.CommandID = commandDef.ID
 
-	// Get WebSocket instance to send callback
-	ws := websocket.GetInstance()
+	// Get WebSocket instance again to send callback
+	// (re-getting instance is safe even though we got it above)
+	ws = websocket.GetInstance()
 	if ws == nil {
 		slog.Error("WebSocket instance not available for command callback")
 		return
