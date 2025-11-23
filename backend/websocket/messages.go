@@ -16,6 +16,12 @@ func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message
 	connInfo.writeMux.Lock()
 	defer connInfo.writeMux.Unlock()
 
+	// Handle test connections with nil conn (used in unit tests)
+	if connInfo.conn == nil {
+		slog.Debug("Skipping message send to test connection", "message_id", message.ID)
+		return
+	}
+
 	if err := connInfo.conn.WriteJSON(message); err != nil {
 		slog.Error("Failed to send response", "error", err)
 		// If there's an error, close the connection

@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/timmo001/system-bridge/backend/websocket"
+	"github.com/timmo001/system-bridge/bus"
+	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -49,6 +52,9 @@ exit 0
 	// Save test settings
 	err = testSettings.Save()
 	require.NoError(t, err)
+
+	// Set up a minimal WebSocket server for command execution tests
+	setupTestWebSocket(t)
 
 	t.Run("Execute valid command", func(t *testing.T) {
 		router := event.NewMessageRouter()
@@ -182,6 +188,9 @@ exit 0
 		err = testSettings.Save()
 		require.NoError(t, err)
 
+		// Set up a minimal WebSocket server for command execution tests
+		setupTestWebSocket(t)
+
 		// Create router and register handler
 		router := event.NewMessageRouter()
 		RegisterCommandExecuteHandler(router)
@@ -221,5 +230,34 @@ func TestCommandEventTypes(t *testing.T) {
 
 	t.Run("Command response subtype constant", func(t *testing.T) {
 		assert.Equal(t, event.ResponseSubtype("COMMAND_NOT_FOUND"), event.ResponseSubtypeCommandNotFound)
+	})
+}
+
+// setupTestWebSocket creates a minimal WebSocket server instance for testing
+func setupTestWebSocket(t *testing.T) {
+	// Create a minimal data store
+	dataStore, err := data.NewDataStore()
+	require.NoError(t, err)
+
+	// Create an event bus instance
+	_ = bus.NewEventBus()
+
+	// Create a minimal event router
+	router := event.NewMessageRouter()
+
+	// Create a WebSocket server instance (this will set it as the global instance)
+	ws := websocket.NewWebsocketServer("test-token", dataStore, router)
+
+	// Register test connections so ConnectionExists checks pass
+	// We need to add fake connections for the test connection IDs used in tests
+	ws.AddTestConnection("test-conn-1")
+	ws.AddTestConnection("test-conn-2")
+	ws.AddTestConnection("test-conn-3")
+	ws.AddTestConnection("test-conn-4")
+	ws.AddTestConnection("workflow-conn")
+
+	// Clean up after test
+	t.Cleanup(func() {
+		websocket.SetInstance(nil)
 	})
 }

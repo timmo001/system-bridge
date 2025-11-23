@@ -60,3 +60,14 @@ func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *ev
 
 	return ws
 }
+
+// AddTestConnection registers a test connection for unit testing purposes
+func (ws *WebsocketServer) AddTestConnection(address string) {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
+	// Add a connectionInfo with nil conn - we only need it to pass ConnectionExists checks
+	// The nil conn will be handled gracefully in SendMessage for testing
+	ws.connections[address] = &connectionInfo{
+		conn: nil,
+	}
+}
