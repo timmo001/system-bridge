@@ -7,7 +7,6 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { showError, showSuccess } from "~/lib/notifications";
 import type {
   Settings,
   SettingsCommandDefinition,
@@ -137,7 +136,6 @@ export class PageSettingsCommands extends PageElement {
 
   private handleAddCommand = (): void => {
     if (!this.newCommandName.trim() || !this.newCommandCommand.trim()) {
-      showError("Please enter both name and command");
       return;
     }
 
@@ -161,7 +159,6 @@ export class PageSettingsCommands extends PageElement {
     this.newCommandCommand = "";
     this.newCommandWorkingDir = "";
     this.newCommandArguments = "";
-    showSuccess("Command added successfully");
   };
 
   private handleRemoveCommand = (e: Event): void => {
@@ -171,7 +168,6 @@ export class PageSettingsCommands extends PageElement {
 
     this.commands = this.commands.filter((cmd) => cmd.id !== id);
     this.saveSettings();
-    showSuccess("Command removed successfully");
   };
 
   private handleExecuteCommand = (e: Event): void => {
@@ -179,19 +175,12 @@ export class PageSettingsCommands extends PageElement {
     const id = button.getAttribute("data-id");
     if (!id) return;
 
-    if (!this.connection?.token) {
-      showError("No token found");
-      return;
-    }
-
-    if (!this.websocket?.sendCommandExecute) {
-      showError("WebSocket not available");
+    if (!this.connection?.token || !this.websocket?.sendCommandExecute) {
       return;
     }
 
     const command = this.commands.find((cmd) => cmd.id === id);
     if (!command) {
-      showError("Command not found");
       return;
     }
 
@@ -204,12 +193,10 @@ export class PageSettingsCommands extends PageElement {
 
   private saveSettings(): void {
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequest || !this.websocket?.settings) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -246,13 +233,11 @@ export class PageSettingsCommands extends PageElement {
           console.warn(
             "Settings update timeout: no response received after 10 seconds",
           );
-          showError("Settings update timeout - please check your connection");
           this.clearSubmissionState();
         }
       }, 10000);
     } catch (error) {
       console.error("Failed to update command settings:", error);
-      showError("Failed to update settings");
       this.clearSubmissionState();
     }
   }

@@ -15,7 +15,6 @@ import {
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
-import { showNotification } from "~/lib/notifications";
 import {
   DefaultModuleData,
   ModuleNameSchema,
@@ -353,11 +352,6 @@ export class WebSocketProvider extends ProviderElement {
             "Invalid API token. Please check your connection settings and update your token.";
           this._isConnected = false;
           this._retryCount = MAX_RETRIES + 1;
-          showNotification(
-            "Authentication Failed",
-            "Your API token is invalid or has expired.",
-            "error",
-          );
           this._ws?.close();
           return;
         } else {
@@ -498,7 +492,6 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       if (!this._previousConnectedState) {
-        showNotification("Connected", "Connected to System Bridge", "success");
       }
       this._previousConnectedState = true;
 
@@ -538,13 +531,6 @@ export class WebSocketProvider extends ProviderElement {
 
       this.clearAllPendingResolvers("WebSocket connection closed");
 
-      if (this._previousConnectedState && this._error) {
-        showNotification(
-          "Disconnected",
-          "Disconnected from System Bridge",
-          "error",
-        );
-      }
       this._previousConnectedState = false;
 
       if (event.code === 1006) {
@@ -556,7 +542,6 @@ export class WebSocketProvider extends ProviderElement {
         this._error =
           "Invalid API token. Please check your connection settings.";
         this._retryCount = MAX_RETRIES + 1;
-        showNotification("Authentication Failed", "Invalid API token", "error");
       } else if (event.code !== 1000 && event.code !== 1001) {
         this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
       }

@@ -9,7 +9,6 @@ import {
   saveConnectionSettings,
 } from "~/contexts/connection";
 import { CONNECTION_TIMEOUT } from "~/contexts/websocket";
-import { showError, showSuccess } from "~/lib/notifications";
 import { PageElement } from "~/mixins";
 
 import "../components/ui/button";
@@ -122,9 +121,6 @@ export class PageConnection extends PageElement {
 
     const timeout = setTimeout(() => {
       ws.close();
-      showError(
-        "Connection timeout. Please check your host, port, and network connection.",
-      );
       this.isSubmitting = false;
       this.requestUpdate();
     }, CONNECTION_TIMEOUT);
@@ -150,9 +146,6 @@ export class PageConnection extends PageElement {
         };
 
         if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
-          showError(
-            "Invalid API token. Please check your token and try again.",
-          );
           ws.close();
           this.isSubmitting = false;
           this.requestUpdate();
@@ -180,7 +173,6 @@ export class PageConnection extends PageElement {
             }),
           );
 
-          showSuccess("Connected to System Bridge!");
           ws.close();
           this.isSubmitting = false;
           this.requestUpdate();
@@ -191,7 +183,7 @@ export class PageConnection extends PageElement {
         }
       } catch (error) {
         console.error("Failed to parse connection test response:", error);
-        showError("Received invalid response from server.");
+
         this.isSubmitting = false;
         this.requestUpdate();
       }
@@ -200,17 +192,9 @@ export class PageConnection extends PageElement {
     ws.onclose = (event) => {
       clearTimeout(timeout);
       if (event.code === 1006) {
-        showError(
-          "Connection failed. Please check your host and port settings.",
-        );
       } else if (event.code === 1002) {
-        showError("Connection failed due to protocol error.");
       } else if (event.code === 1003) {
-        showError("Connection rejected by server. Please check your token.");
       } else if (event.code !== 1000 && event.code !== 1001) {
-        showError(
-          `Connection failed with code ${event.code}: ${event.reason || "Unknown reason"}`,
-        );
       }
       this.isSubmitting = false;
       this.requestUpdate();
@@ -218,9 +202,7 @@ export class PageConnection extends PageElement {
 
     ws.onerror = () => {
       clearTimeout(timeout);
-      showError(
-        "Connection failed. Please check your host, port, and network connection.",
-      );
+
       this.isSubmitting = false;
       this.requestUpdate();
     };

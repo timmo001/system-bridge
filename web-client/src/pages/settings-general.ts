@@ -7,7 +7,6 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { showError, showSuccess } from "~/lib/notifications";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
@@ -87,12 +86,10 @@ export class PageSettingsGeneral extends PageElement {
     e.preventDefault();
 
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequest) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -116,10 +113,8 @@ export class PageSettingsGeneral extends PageElement {
         data: this.formData,
         token: this.connection.token,
       });
-      showSuccess("Settings update requested!");
     } catch (error) {
       console.error("Failed to update general settings:", error);
-      showError("Failed to update settings");
     } finally {
       this.isSubmitting = false;
       this.requestUpdate();

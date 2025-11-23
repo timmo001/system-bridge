@@ -7,7 +7,6 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { showError, showSuccess } from "~/lib/notifications";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
@@ -86,17 +85,14 @@ export class PageSettingsMedia extends PageElement {
 
   private handleAddDirectory = async (): Promise<void> => {
     if (!this.newDirectoryName.trim() || !this.newDirectoryPath.trim()) {
-      showError("Please enter both name and path");
       return;
     }
 
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequestWithResponse) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -154,7 +150,6 @@ export class PageSettingsMedia extends PageElement {
         this.saveSettings();
         this.newDirectoryName = "";
         this.newDirectoryPath = "";
-        showSuccess("Directory added successfully");
       } else {
         this.validationError = "Directory does not exist or is not accessible.";
       }
@@ -176,17 +171,14 @@ export class PageSettingsMedia extends PageElement {
       (d) => d.path !== path,
     );
     this.saveSettings();
-    showSuccess("Directory removed successfully");
   };
 
   private saveSettings(): void {
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequest || !this.websocket?.settings) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -209,7 +201,6 @@ export class PageSettingsMedia extends PageElement {
       });
     } catch (error) {
       console.error("Failed to update media settings:", error);
-      showError("Failed to update settings");
     } finally {
       this.isSubmitting = false;
       this.requestUpdate();
