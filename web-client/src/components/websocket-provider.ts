@@ -501,8 +501,6 @@ export class WebSocketProvider extends ProviderElement {
         clearTimeout(this._reconnectTimeout);
       }
 
-      if (!this._previousConnectedState) {
-      }
       this._previousConnectedState = true;
 
       if (!this._isRequestingData) {
