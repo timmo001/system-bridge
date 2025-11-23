@@ -166,7 +166,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    true,
 			},
 			parent:   "",
-			expected: "z.string().nullable()",
+			expected: "z.string().nullish()",
 		},
 		{
 			name: "array of numbers",
@@ -374,7 +374,7 @@ func TestGenerateZodSchemas(t *testing.T) {
 		`"value2"`,
 		"TestDataSchema = z.object({",
 		"name: z.string()",
-		"count: z.number().nullable()",
+		"count: z.number().nullish()",
 		"export type TestData",
 		"export type TestEnum",
 	}

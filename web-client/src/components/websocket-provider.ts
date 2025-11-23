@@ -86,6 +86,7 @@ export class WebSocketProvider extends ProviderElement {
   private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
   private _settingsUpdateTimeout: number | null = null;
+  // @ts-expect-error - TS6133: Reserved for future state change detection
   private _previousConnectedState = false;
   private _pendingResolvers = new Map<string, AnyPendingResolver>();
   // Consumer must be stored to keep subscription alive
