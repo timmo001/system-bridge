@@ -162,25 +162,15 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 	// Create a context with timeout for command execution
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultCommandTimeout)
 
-	// Register cancel function with WebSocket server for cleanup on connection close
-	ws := websocket.GetInstance()
-	if ws != nil {
-		ws.RegisterConnectionCleanup(req.Connection, cancel)
-	}
-
 	// Ensure cleanup on completion
-	// Note: The cleanup function will also be called when the connection closes,
-	// but calling cancel multiple times is safe (idempotent)
 	defer cancel()
 
 	// Execute the command with context
 	result := execute(ctx, commandDef)
 	result.CommandID = commandDef.ID
 
-	// Get WebSocket instance to send callback (reuse if already obtained)
-	if ws == nil {
-		ws = websocket.GetInstance()
-	}
+	// Get WebSocket instance to send callback
+	ws := websocket.GetInstance()
 	if ws == nil {
 		slog.Error("WebSocket instance not available for command callback")
 		return
