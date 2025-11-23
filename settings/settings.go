@@ -198,8 +198,8 @@ func (cfg *Settings) Validate() error {
 	for _, dir := range cfg.Media.Directories {
 		cleanPath := filepath.Clean(dir.Path)
 		if !strings.Contains(cleanPath, "..") {
-			if stat, err := os.Stat(cleanPath); err == nil && stat.IsDir() {
-				return fmt.Errorf("media directory %s does not exist", dir.Path)
+			if stat, err := os.Stat(cleanPath); err != nil || !stat.IsDir() {
+				return fmt.Errorf("media directory %s does not exist or is not a directory", dir.Path)
 			}
 		}
 	}
