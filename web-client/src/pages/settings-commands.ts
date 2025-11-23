@@ -186,8 +186,12 @@ export class PageSettingsCommands extends PageElement {
       arguments: args,
     };
 
-    this.commands = [...this.commands, newCommand];
-    this.saveSettings();
+    // Don't optimistically add - wait for backend confirmation
+    // Just save with the new command included
+    const updatedCommands = [...this.commands, newCommand];
+    this.saveSettingsWithCommands(updatedCommands);
+
+    // Clear form only after saving starts
     this.newCommandName = "";
     this.newCommandCommand = "";
     this.newCommandWorkingDir = "";
@@ -199,8 +203,9 @@ export class PageSettingsCommands extends PageElement {
     const id = button.getAttribute("data-id");
     if (!id) return;
 
-    this.commands = this.commands.filter((cmd) => cmd.id !== id);
-    this.saveSettings();
+    // Don't optimistically remove - wait for backend confirmation
+    const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
+    this.saveSettingsWithCommands(updatedCommands);
   };
 
   private handleExecuteCommand = (e: Event): void => {
@@ -224,7 +229,9 @@ export class PageSettingsCommands extends PageElement {
     );
   };
 
-  private saveSettings(): void {
+  private saveSettingsWithCommands(
+    commands: SettingsCommandDefinition[],
+  ): void {
     if (!this.connection?.token) {
       return;
     }
@@ -249,7 +256,7 @@ export class PageSettingsCommands extends PageElement {
       const updatedSettings: Settings = {
         ...this.websocket.settings,
         commands: {
-          allowlist: this.commands,
+          allowlist: commands,
         },
       };
 
@@ -260,19 +267,23 @@ export class PageSettingsCommands extends PageElement {
         token: this.connection.token,
       });
 
-      // Set timeout to clear submitting state after 10 seconds if no response
+      // Set timeout to clear submitting state after 30 seconds if no response
       this.submissionTimeout = window.setTimeout(() => {
         if (this.isSubmitting && this.pendingRequestId === requestId) {
           console.warn(
-            "Settings update timeout: no response received after 10 seconds",
+            "Settings update timeout: no response received after 30 seconds",
           );
           this.clearSubmissionState();
         }
-      }, 10000);
+      }, 30000);
     } catch (error) {
       console.error("Failed to update command settings:", error);
       this.clearSubmissionState();
     }
+  }
+
+  private saveSettings(): void {
+    this.saveSettingsWithCommands(this.commands);
   }
 
   private renderCommandItem(cmd: SettingsCommandDefinition) {
