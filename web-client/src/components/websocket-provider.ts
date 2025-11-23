@@ -162,6 +162,48 @@ export class WebSocketProvider extends ProviderElement {
     this._pendingResolvers.clear();
   }
 
+  private clearExecutingCommandsOnDisconnect() {
+    // Mark all currently executing commands as failed due to connection loss
+    this._commandExecutions.forEach((execution, commandID) => {
+      if (execution.isExecuting) {
+        // Cancel any existing cleanup timeout for this command
+        const existingTimeout =
+          this._commandExecutionCleanupTimeouts.get(commandID);
+        if (existingTimeout !== undefined) {
+          clearTimeout(existingTimeout);
+          this._commandExecutionCleanupTimeouts.delete(commandID);
+        }
+
+        // Set error result for the command
+        this._commandExecutions.set(commandID, {
+          isExecuting: false,
+          result: {
+            commandID,
+            exitCode: 1,
+            stdout: "",
+            stderr: "",
+            error: "Command execution interrupted due to connection loss",
+          },
+        });
+
+        // Schedule cleanup after 5 minutes to allow users to see the error
+        const cleanupTimeout = window.setTimeout(
+          () => {
+            this._commandExecutions.delete(commandID);
+            this._commandExecutionCleanupTimeouts.delete(commandID);
+            this.requestUpdate();
+          },
+          5 * 60 * 1000,
+        ); // 5 minutes
+
+        this._commandExecutionCleanupTimeouts.set(commandID, cleanupTimeout);
+      }
+    });
+
+    // Clear pending command requests since they won't get responses
+    this._pendingCommandRequests.clear();
+  }
+
   private handleMessage(event: MessageEvent<string>) {
     let parsedMessage;
     try {
@@ -541,6 +583,7 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       this.clearAllPendingResolvers("WebSocket connection closed");
+      this.clearExecutingCommandsOnDisconnect();
 
       this._previousConnectedState = false;
 
@@ -570,6 +613,7 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       this.clearAllPendingResolvers("WebSocket connection error");
+      this.clearExecutingCommandsOnDisconnect();
 
       if (this._retryCount === 0) {
         this._error =
