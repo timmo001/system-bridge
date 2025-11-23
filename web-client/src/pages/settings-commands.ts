@@ -83,6 +83,23 @@ export class PageSettingsCommands extends PageElement {
     window.removeEventListener("settings-update-error", this.handleSettingsUpdateError);
   }
 
+  private extractErrorMessage(fullMessage: string): string {
+    // Extract the meaningful part of the error message
+    // Example: "settings validation failed: command at index 0: command c60de62f-9e8f-4d8d-af71-9bd03b64cbf3 must use absolute path"
+    // Should return: "Command must use absolute path"
+
+    // Try to find the part after "command [uuid]"
+    const uuidPattern = /command\s+[a-f0-9-]+\s+(.+)$/i;
+    const match = fullMessage.match(uuidPattern);
+    if (match) {
+      // Capitalize first letter
+      return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+    }
+
+    // Fallback: return the original message
+    return fullMessage;
+  }
+
   private handleSettingsUpdateError = (event: Event): void => {
     const customEvent = event as CustomEvent<{
       requestId: string;
@@ -95,8 +112,8 @@ export class PageSettingsCommands extends PageElement {
       // Reload commands from actual settings (which won't include the invalid command)
       this.loadSettings();
 
-      // Show error message
-      this.errorMessage = customEvent.detail.message;
+      // Show error message with cleaned up text
+      this.errorMessage = this.extractErrorMessage(customEvent.detail.message);
 
       // Clear error after 10 seconds
       if (this.errorTimeout !== null) {
@@ -135,7 +152,8 @@ export class PageSettingsCommands extends PageElement {
   private loadSettings() {
     if (this.websocket?.settings) {
       this.commands = [...this.websocket.settings.commands.allowlist];
-      this.previousCommands = [...this.commands];
+      // Don't update previousCommands here - it should only be updated when initiating a submission
+      // This allows the updated() method to detect when settings have changed successfully
     }
   }
 
@@ -146,6 +164,8 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+    // Update previousCommands to current state after submission completes
+    this.previousCommands = [...this.commands];
     this.requestUpdate();
   }
 

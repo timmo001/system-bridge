@@ -264,12 +264,6 @@ export class WebSocketProvider extends ProviderElement {
 
     const message = parsedMessage.data;
 
-    console.log("Received WebSocket message:", {
-      type: message.type,
-      id: message.id,
-      subtype: message.subtype,
-    });
-
     if (message.id && this._pendingResolvers.has(message.id)) {
       const resolver = this._pendingResolvers.get(message.id);
       if (!resolver) return;
