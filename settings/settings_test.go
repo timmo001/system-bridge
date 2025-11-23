@@ -41,6 +41,16 @@ func TestLoad(t *testing.T) {
 	})
 
 	t.Run("Load existing config file", func(t *testing.T) {
+		// Create a temporary media directory
+		mediaDir, err := os.MkdirTemp("", "media-test-*")
+		require.NoError(t, err)
+		defer func() {
+			err := os.RemoveAll(mediaDir)
+			if err != nil {
+				t.Fatalf("failed to remove media dir: %v", err)
+			}
+		}()
+
 		// Create a config file with custom values
 		configContent := `{
 			"autostart": true,
@@ -55,14 +65,14 @@ func TestLoad(t *testing.T) {
 				"directories": [
 					{
 						"name": "Music",
-						"path": "/home/user/Music"
+						"path": "` + mediaDir + `"
 					}
 				]
 			}
 		}`
 
 		configPath := filepath.Join(tempDir, "settings.json")
-		err := os.WriteFile(configPath, []byte(configContent), 0644)
+		err = os.WriteFile(configPath, []byte(configContent), 0644)
 		require.NoError(t, err)
 
 		// Reset viper and load again
@@ -77,7 +87,7 @@ func TestLoad(t *testing.T) {
 		assert.Equal(t, "ctrl+shift+t", settings.Hotkeys[0].Key)
 		assert.Len(t, settings.Media.Directories, 1)
 		assert.Equal(t, "Music", settings.Media.Directories[0].Name)
-		assert.Equal(t, "/home/user/Music", settings.Media.Directories[0].Path)
+		assert.Equal(t, mediaDir, settings.Media.Directories[0].Path)
 	})
 
 	t.Run("Load with invalid config file", func(t *testing.T) {
@@ -113,6 +123,16 @@ func TestSave(t *testing.T) {
 	viper.Reset()
 
 	t.Run("Save settings successfully", func(t *testing.T) {
+		// Create a temporary media directory
+		mediaDir, err := os.MkdirTemp("", "media-test-*")
+		require.NoError(t, err)
+		defer func() {
+			err := os.RemoveAll(mediaDir)
+			if err != nil {
+				t.Fatalf("failed to remove media dir: %v", err)
+			}
+		}()
+
 		// Load default settings first
 		settings, err := Load()
 		require.NoError(t, err)
@@ -124,7 +144,7 @@ func TestSave(t *testing.T) {
 			{Name: "test", Key: "ctrl+t"},
 		}
 		settings.Media.Directories = []SettingsMediaDirectory{
-			{Name: "Videos", Path: "/home/user/Videos"},
+			{Name: "Videos", Path: mediaDir},
 		}
 
 		// Save settings
@@ -147,10 +167,15 @@ func TestSave(t *testing.T) {
 		assert.Equal(t, "ctrl+t", loadedSettings.Hotkeys[0].Key)
 		assert.Len(t, loadedSettings.Media.Directories, 1)
 		assert.Equal(t, "Videos", loadedSettings.Media.Directories[0].Name)
-		assert.Equal(t, "/home/user/Videos", loadedSettings.Media.Directories[0].Path)
+		assert.Equal(t, mediaDir, loadedSettings.Media.Directories[0].Path)
 	})
 
 	t.Run("Save rejects settings with duplicate command IDs", func(t *testing.T) {
+		// Reset viper and delete config file for clean test state
+		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
+
 		// Load default settings first
 		settings, err := Load()
 		require.NoError(t, err)
@@ -168,6 +193,9 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command ID", func(t *testing.T) {
+		// Reset viper for clean test state
+		viper.Reset()
+
 		// Load default settings first
 		settings, err := Load()
 		require.NoError(t, err)
@@ -184,6 +212,9 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command name", func(t *testing.T) {
+		// Reset viper for clean test state
+		viper.Reset()
+
 		// Load default settings first
 		settings, err := Load()
 		require.NoError(t, err)
@@ -200,6 +231,9 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command", func(t *testing.T) {
+		// Reset viper for clean test state
+		viper.Reset()
+
 		// Load default settings first
 		settings, err := Load()
 		require.NoError(t, err)
