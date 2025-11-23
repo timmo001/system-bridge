@@ -68,6 +68,12 @@ func RegisterCommandExecuteHandler(router *event.MessageRouter) {
 			subtype := event.ResponseSubtypeNone
 			if errors.Is(err, command.ErrCommandNotFound) {
 				subtype = event.ResponseSubtypeCommandNotFound
+			} else if errors.Is(err, command.ErrCommandPathInvalid) {
+				subtype = event.ResponseSubtypeBadPath
+			} else if errors.Is(err, command.ErrWorkingDirInvalid) {
+				subtype = event.ResponseSubtypeBadDirectory
+			} else if errors.Is(err, command.ErrCommandEmpty) {
+				subtype = event.ResponseSubtypeBadRequest
 			}
 
 			return event.MessageResponse{
