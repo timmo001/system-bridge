@@ -43,6 +43,13 @@ func GenerateStableUUID(macAddress, hostname string) string {
 	mac := strings.ToLower(strings.TrimSpace(macAddress))
 	host := strings.ToLower(strings.TrimSpace(hostname))
 
+	// If both MAC and hostname are empty, we can't generate a stable UUID
+	// Fall back to random UUID to avoid all systems getting the same UUID
+	if mac == "" && host == "" {
+		slog.Warn("Cannot generate stable UUID with empty MAC and hostname, using random UUID")
+		return uuid.New().String()
+	}
+
 	// Create a deterministic seed from MAC address and hostname
 	seed := fmt.Sprintf("system-bridge-%s-%s", mac, host)
 
@@ -136,8 +143,8 @@ func SaveUUID(uuidStr string) error {
 		return fmt.Errorf("failed to create UUID directory: %w", err)
 	}
 
-	// Write UUID to file
-	if err := os.WriteFile(uuidPath, []byte(uuidStr), 0644); err != nil {
+	// Write UUID to file with restricted permissions (owner read/write only)
+	if err := os.WriteFile(uuidPath, []byte(uuidStr), 0600); err != nil {
 		return fmt.Errorf("failed to write UUID file: %w", err)
 	}
 
@@ -168,10 +175,10 @@ func GetSystemUUID(biosUUID, macAddress, hostname string) string {
 	// Try to load or generate a stable UUID
 	generatedUUID, err := LoadOrGenerateUUID(macAddress, hostname)
 	if err != nil {
-		slog.Error("Failed to load or generate UUID", "error", err)
-		// Last resort: generate a random UUID (not stable across reboots)
-		fallbackUUID := uuid.New().String()
-		slog.Warn("Using random UUID as last resort", "uuid", fallbackUUID)
+		slog.Error("Failed to load or generate UUID from file", "error", err)
+		// Last resort: generate a stable UUID directly (won't be persisted, but at least it's deterministic)
+		fallbackUUID := GenerateStableUUID(macAddress, hostname)
+		slog.Warn("Using stable UUID without file persistence", "uuid", fallbackUUID)
 		return fallbackUUID
 	}
 

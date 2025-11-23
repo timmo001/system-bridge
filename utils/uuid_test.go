@@ -62,10 +62,21 @@ func TestGenerateStableUUID(t *testing.T) {
 				t.Errorf("GenerateStableUUID generated invalid UUID: %v", err)
 			}
 
-			// Verify it's stable (same inputs produce same output)
-			generatedUUID2 := GenerateStableUUID(tt.macAddress, tt.hostname)
-			if generatedUUID != generatedUUID2 {
-				t.Errorf("GenerateStableUUID not stable: first=%s, second=%s", generatedUUID, generatedUUID2)
+			// For empty MAC and hostname, we use random UUIDs (not stable)
+			// For all other cases, verify stability
+			if tt.macAddress == "" && tt.hostname == "" {
+				// With both empty, it should generate random UUIDs (not stable)
+				generatedUUID2 := GenerateStableUUID(tt.macAddress, tt.hostname)
+				// Just verify both are valid UUIDs, don't check if they're the same
+				if _, err := uuid.Parse(generatedUUID2); err != nil {
+					t.Errorf("GenerateStableUUID generated invalid UUID on second call: %v", err)
+				}
+			} else {
+				// Verify it's stable (same inputs produce same output)
+				generatedUUID2 := GenerateStableUUID(tt.macAddress, tt.hostname)
+				if generatedUUID != generatedUUID2 {
+					t.Errorf("GenerateStableUUID not stable: first=%s, second=%s", generatedUUID, generatedUUID2)
+				}
 			}
 
 			// Verify it's not a default UUID
