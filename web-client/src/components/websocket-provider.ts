@@ -82,6 +82,9 @@ export class WebSocketProvider extends ProviderElement {
   private _commandExecutionCleanupTimeouts = new Map<string, number>();
   private _pendingCommandRequests = new Map<string, string>(); // messageId -> commandId
 
+  // Maximum number of command executions to keep in memory
+  private readonly MAX_COMMAND_EXECUTIONS = 100;
+
   private _ws: WebSocket | null = null;
   private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
@@ -160,6 +163,26 @@ export class WebSocketProvider extends ProviderElement {
       resolver.reject(new Error(reason));
     });
     this._pendingResolvers.clear();
+  }
+
+  private enforceCommandExecutionsLimit() {
+    // Remove oldest completed entries if we exceed the limit
+    if (this._commandExecutions.size >= this.MAX_COMMAND_EXECUTIONS) {
+      // Find oldest completed entry to remove
+      for (const [commandID, execution] of this._commandExecutions) {
+        if (!execution.isExecuting) {
+          // Cancel any cleanup timeout for this command
+          const existingTimeout =
+            this._commandExecutionCleanupTimeouts.get(commandID);
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(commandID);
+          }
+          this._commandExecutions.delete(commandID);
+          break; // Only remove one entry at a time
+        }
+      }
+    }
   }
 
   private clearExecutingCommandsOnDisconnect() {
@@ -342,6 +365,9 @@ export class WebSocketProvider extends ProviderElement {
             this._commandExecutionCleanupTimeouts.delete(commandData.commandID);
           }
 
+          // Enforce size limit before adding new entry
+          this.enforceCommandExecutionsLimit();
+
           // Set new execution state
           this._commandExecutions.set(commandData.commandID, {
             isExecuting: true,
@@ -374,6 +400,9 @@ export class WebSocketProvider extends ProviderElement {
             clearTimeout(existingTimeout);
             this._commandExecutionCleanupTimeouts.delete(result.commandID);
           }
+
+          // Enforce size limit before adding new entry
+          this.enforceCommandExecutionsLimit();
 
           // Set completed state
           this._commandExecutions.set(result.commandID, {
