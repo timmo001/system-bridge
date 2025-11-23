@@ -71,3 +71,11 @@ func (ws *WebsocketServer) AddTestConnection(address string) {
 		conn: nil,
 	}
 }
+
+// RemoveTestConnection removes a test connection by address
+func (ws *WebsocketServer) RemoveTestConnection(address string) {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
+	delete(ws.connections, address)
+	delete(ws.dataListeners, address)
+}

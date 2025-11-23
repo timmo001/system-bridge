@@ -250,14 +250,26 @@ func setupTestWebSocket(t *testing.T) {
 
 	// Register test connections so ConnectionExists checks pass
 	// We need to add fake connections for the test connection IDs used in tests
-	ws.AddTestConnection("test-conn-1")
-	ws.AddTestConnection("test-conn-2")
-	ws.AddTestConnection("test-conn-3")
-	ws.AddTestConnection("test-conn-4")
-	ws.AddTestConnection("workflow-conn")
+	testConnections := []string{
+		"test-conn-1",
+		"test-conn-2",
+		"test-conn-3",
+		"test-conn-4",
+		"workflow-conn",
+	}
+
+	for _, connID := range testConnections {
+		ws.AddTestConnection(connID)
+	}
 
 	// Clean up after test
 	t.Cleanup(func() {
+		if ws := websocket.GetInstance(); ws != nil {
+			// Clean up test connections
+			for _, connID := range testConnections {
+				ws.RemoveTestConnection(connID)
+			}
+		}
 		websocket.SetInstance(nil)
 	})
 }
