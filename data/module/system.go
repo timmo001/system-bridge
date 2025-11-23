@@ -14,6 +14,7 @@ import (
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/data/module/system"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -175,7 +176,8 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
-	systemData.UUID = infoStat.HostID
+	// Get system UUID with fallback for problematic default UUIDs
+	systemData.UUID = utils.GetSystemUUID(infoStat.HostID, systemData.MACAddress, systemData.Hostname)
 
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 
