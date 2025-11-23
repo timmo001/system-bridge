@@ -176,7 +176,7 @@ func (cfg *Settings) Validate() error {
 	seenIDs := make(map[string]bool)
 	for i, cmd := range cfg.Commands.Allowlist {
 		// Validate individual command
-		if err := utils.ValidateCommand(cmd.ID, cmd.Name, cmd.Command); err != nil {
+		if err := utils.ValidateCommand(cmd.ID, cmd.Name, cmd.Command, cmd.WorkingDir, cmd.Arguments); err != nil {
 			return fmt.Errorf("command at index %d: %w", i, err)
 		}
 

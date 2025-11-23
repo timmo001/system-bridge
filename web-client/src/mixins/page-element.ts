@@ -59,6 +59,7 @@ export class PageElement extends UIElement {
 
   /**
    * Updates the document title with the page title in the format "title | System Bridge".
+   * For the home page (title === "System Bridge"), sets the title to just "System Bridge".
    */
   private updateDocumentTitle(): void {
     if (this.title && this.title !== "System Bridge") {

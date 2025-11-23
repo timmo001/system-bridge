@@ -180,10 +180,10 @@ func TestSave(t *testing.T) {
 		settings, err := Load()
 		require.NoError(t, err)
 
-		// Add commands with duplicate IDs
+		// Add commands with duplicate IDs (use absolute path to pass path validation)
 		settings.Commands.Allowlist = []SettingsCommandDefinition{
-			{ID: "cmd1", Name: "Command 1", Command: "echo 1"},
-			{ID: "cmd1", Name: "Command 2", Command: "echo 2"},
+			{ID: "cmd1", Name: "Command 1", Command: "/bin/echo"},
+			{ID: "cmd1", Name: "Command 2", Command: "/bin/echo"},
 		}
 
 		// Attempt to save should fail

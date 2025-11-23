@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strings"
 )
 
@@ -30,8 +32,8 @@ func ValidateMediaDirectory(path string) error {
 	return nil
 }
 
-// ValidateCommand validates a command definition by its fields
-func ValidateCommand(id, name, command string) error {
+// ValidateCommand validates a command definition
+func ValidateCommand(id, name, command, workingDir string, arguments []string) error {
 	if id == "" {
 		return fmt.Errorf("command has empty ID")
 	}
@@ -41,5 +43,72 @@ func ValidateCommand(id, name, command string) error {
 	if command == "" {
 		return fmt.Errorf("command %s has empty command", id)
 	}
+
+	// Validate command path is absolute
+	if !filepath.IsAbs(command) {
+		return fmt.Errorf("command %s must use absolute path", id)
+	}
+
+	// Validate command file exists and is executable
+	fileInfo, err := os.Stat(command)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("command %s not found at path: %s", id, command)
+		}
+		return fmt.Errorf("command %s path error: %w", id, err)
+	}
+
+	// Validate file is regular
+	mode := fileInfo.Mode()
+	if !mode.IsRegular() {
+		return fmt.Errorf("command %s is not a regular file", id)
+	}
+
+	// Check executable permissions - different logic for Unix vs Windows
+	if runtime.GOOS != "windows" {
+		// On Unix-like systems, check executable bit (0111 = owner, group, others execute permissions)
+		if mode&0111 == 0 {
+			return fmt.Errorf("command %s is not executable (missing execute permissions)", id)
+		}
+	} else {
+		// On Windows, executable permission is determined by file extension
+		ext := strings.ToLower(filepath.Ext(command))
+		validExts := []string{".exe", ".bat", ".cmd", ".ps1"}
+		if !slices.Contains(validExts, ext) {
+			return fmt.Errorf("command %s must have executable extension (.exe, .bat, .cmd, .ps1) on Windows", id)
+		}
+	}
+
+	// Validate working directory if specified
+	if workingDir != "" {
+		// Check for '..' in working directory path
+		if strings.Contains(workingDir, "..") {
+			return fmt.Errorf("working directory for command %s contains '..' which is not allowed", id)
+		}
+
+		if !filepath.IsAbs(workingDir) {
+			return fmt.Errorf("working directory for command %s must be absolute path", id)
+		}
+
+		info, err := os.Stat(workingDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("working directory for command %s does not exist: %s", id, workingDir)
+			}
+			return fmt.Errorf("working directory for command %s: %w", id, err)
+		}
+		if !info.IsDir() {
+			return fmt.Errorf("working directory for command %s is not a directory: %s", id, workingDir)
+		}
+	}
+
+	// Validate arguments don't contain shell metacharacters
+	// Check for: ; | & $ \n \r ` < > ( )
+	for _, arg := range arguments {
+		if strings.ContainsAny(arg, ";|&$\n\r`<>()") {
+			return fmt.Errorf("argument for command %s contains forbidden characters (shell metacharacters not allowed)", id)
+		}
+	}
+
 	return nil
 }
