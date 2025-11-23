@@ -285,9 +285,14 @@ export class WebSocketProvider extends ProviderElement {
       case "COMMAND_EXECUTING": {
         const commandData = message.data as { commandID: string };
         if (commandData?.commandID) {
+          // Clean up the pending request tracking
+          if (message.id) {
+            this._pendingCommandRequests.delete(message.id);
+          }
+
           // Cancel any existing cleanup timeout for this command
           const existingTimeout = this._commandExecutionCleanupTimeouts.get(
-            commandData.commandID,
+            commandData.commandID
           );
           if (existingTimeout !== undefined) {
             clearTimeout(existingTimeout);
@@ -313,9 +318,14 @@ export class WebSocketProvider extends ProviderElement {
           error?: string;
         };
         if (result?.commandID) {
+          // Clean up the pending request tracking
+          if (message.id) {
+            this._pendingCommandRequests.delete(message.id);
+          }
+
           // Cancel any existing cleanup timeout for this command
           const existingTimeout = this._commandExecutionCleanupTimeouts.get(
-            result.commandID,
+            result.commandID
           );
           if (existingTimeout !== undefined) {
             clearTimeout(existingTimeout);
@@ -335,12 +345,12 @@ export class WebSocketProvider extends ProviderElement {
               this._commandExecutionCleanupTimeouts.delete(result.commandID);
               this.requestUpdate();
             },
-            5 * 60 * 1000,
+            5 * 60 * 1000
           ); // 5 minutes
 
           this._commandExecutionCleanupTimeouts.set(
             result.commandID,
-            cleanupTimeout,
+            cleanupTimeout
           );
         }
         break;
