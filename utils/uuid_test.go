@@ -110,7 +110,11 @@ func TestSaveAndLoadUUID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("Failed to remove temp directory: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -144,7 +148,11 @@ func TestLoadOrGenerateUUIDWithoutFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("Failed to remove temp directory: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -186,7 +194,11 @@ func TestLoadOrGenerateUUIDWithInvalidStoredUUID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Fatalf("Failed to remove temp directory: %v", err)
+		}
+	}()
 
 	// Set the config directory to our temp directory
 	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
@@ -272,7 +284,11 @@ func TestGetSystemUUID(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create temp directory: %v", err)
 			}
-			defer os.RemoveAll(tempDir)
+			defer func() {
+				if err := os.RemoveAll(tempDir); err != nil {
+					t.Fatalf("Failed to remove temp directory: %v", err)
+				}
+			}()
 
 			// Set the config directory to our temp directory
 			t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", tempDir)
