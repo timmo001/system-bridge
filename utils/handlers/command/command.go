@@ -5,16 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
-	"path/filepath"
-	"runtime"
-	"slices"
 	"strings"
 	"time"
 
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 const (
@@ -68,62 +65,19 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 				return nil, fmt.Errorf("%w: %s", ErrCommandEmpty, commandID)
 			}
 
-			// Validate command path is absolute
-			if !filepath.IsAbs(command.Command) {
-				return nil, fmt.Errorf("%w: command %s must use absolute path", ErrCommandPathInvalid, commandID)
-			}
-
-			// Validate command file exists and is executable (on Unix systems)
-			fileInfo, err := os.Stat(command.Command)
+			// Use centralized validation from utils package
+			// This ensures consistent validation logic and includes path traversal checks
+			err := utils.ValidateCommand(command.ID, command.Name, command.Command, command.WorkingDir, command.Arguments)
 			if err != nil {
-				if os.IsNotExist(err) {
-					return nil, fmt.Errorf("%w: command %s not found at path: %s", ErrCommandPathInvalid, commandID, command.Command)
-				}
-				return nil, fmt.Errorf("%w: command %s path error: %w", ErrCommandPathInvalid, commandID, err)
-			}
-			// Validate file is regular and executable
-			mode := fileInfo.Mode()
-			if !mode.IsRegular() {
-				return nil, fmt.Errorf("%w: command %s is not a regular file", ErrCommandPathInvalid, commandID)
-			}
-
-			// Check executable permissions - different logic for Unix vs Windows
-			if runtime.GOOS != "windows" {
-				// On Unix-like systems, check executable bit (0111 = owner, group, others execute permissions)
-				if mode&0111 == 0 {
-					return nil, fmt.Errorf("%w: command %s is not executable (missing execute permissions)", ErrCommandPathInvalid, commandID)
-				}
-			} else {
-				// On Windows, executable permission is determined by file extension
-				ext := strings.ToLower(filepath.Ext(command.Command))
-				validExts := []string{".exe", ".bat", ".cmd", ".ps1"}
-				if !slices.Contains(validExts, ext) {
-					return nil, fmt.Errorf("%w: command %s must have executable extension (.exe, .bat, .cmd, .ps1) on Windows", ErrCommandPathInvalid, commandID)
-				}
-			}
-
-			// Validate working directory if specified
-			if command.WorkingDir != "" {
-				if !filepath.IsAbs(command.WorkingDir) {
-					return nil, fmt.Errorf("%w: working directory for command %s must be absolute path", ErrWorkingDirInvalid, commandID)
-				}
-				info, err := os.Stat(command.WorkingDir)
-				if err != nil {
-					if os.IsNotExist(err) {
-						return nil, fmt.Errorf("%w: working directory for command %s does not exist: %s", ErrWorkingDirInvalid, commandID, command.WorkingDir)
-					}
-					return nil, fmt.Errorf("%w: working directory for command %s: %w", ErrWorkingDirInvalid, commandID, err)
-				}
-				if !info.IsDir() {
-					return nil, fmt.Errorf("%w: working directory for command %s is not a directory: %s", ErrWorkingDirInvalid, commandID, command.WorkingDir)
-				}
-			}
-
-			// Validate arguments don't contain shell metacharacters
-			// Check for: ; | & $ \n \r ` < > ( )
-			for _, arg := range command.Arguments {
-				if strings.ContainsAny(arg, ";|&$\n\r`<>()") {
-					return nil, fmt.Errorf("argument for command %s contains forbidden characters (shell metacharacters not allowed)", commandID)
+				// Wrap error with appropriate error type based on error message
+				errMsg := err.Error()
+				switch {
+				case strings.Contains(errMsg, "working directory"):
+					return nil, fmt.Errorf("%w: %w", ErrWorkingDirInvalid, err)
+				case strings.Contains(errMsg, "path") || strings.Contains(errMsg, "executable"):
+					return nil, fmt.Errorf("%w: %w", ErrCommandPathInvalid, err)
+				default:
+					return nil, err
 				}
 			}
 
