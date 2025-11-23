@@ -170,7 +170,7 @@ export class WebSocketProvider extends ProviderElement {
         "Failed to parse WebSocket message:",
         error,
         "Data:",
-        event.data,
+        event.data
       );
       this._error = "Received invalid message from server";
       return;
@@ -218,7 +218,7 @@ export class WebSocketProvider extends ProviderElement {
           this._error = `Received invalid data for module ${moduleName}`;
           console.error(
             `Module ${moduleName} validation error:`,
-            dataValidation.error,
+            dataValidation.error
           );
           return;
         }
@@ -405,12 +405,12 @@ export class WebSocketProvider extends ProviderElement {
                   this._commandExecutionCleanupTimeouts.delete(commandId);
                   this.requestUpdate();
                 },
-                5 * 60 * 1000,
+                5 * 60 * 1000
               );
 
               this._commandExecutionCleanupTimeouts.set(
                 commandId,
-                cleanupTimeout,
+                cleanupTimeout
               );
 
               // Clean up the pending request tracking
@@ -476,7 +476,7 @@ export class WebSocketProvider extends ProviderElement {
 
     try {
       this._ws = new WebSocket(
-        `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
+        `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`
       );
     } catch (error) {
       console.error("Failed to create WebSocket connection:", error);
@@ -622,7 +622,7 @@ export class WebSocketProvider extends ProviderElement {
           commandID: commandId,
         },
         token: token,
-      }),
+      })
     );
   }
 
@@ -648,7 +648,7 @@ export class WebSocketProvider extends ProviderElement {
 
   sendRequestWithResponse<T>(
     request: WebSocketRequest,
-    schema: z.ZodType<T>,
+    schema: z.ZodType<T>
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
