@@ -413,8 +413,8 @@ func TestServerContextCancellation(t *testing.T) {
 		SetServerContext(context.Background())
 
 		commandDef := &settings.SettingsCommandDefinition{
-			ID:      "test-sleep",
-			Command: "/bin/sleep",
+			ID:        "test-sleep",
+			Command:   "/bin/sleep",
 			Arguments: []string{"10"},
 		}
 

@@ -112,11 +112,11 @@ func ValidateCommand(id, name, command, workingDir string, arguments []string) e
 		}
 	}
 
-	// Validate arguments don't contain shell metacharacters
-	// Check for: ; | & $ \n \r ` < > ( )
+	// Validate arguments don't contain shell metacharacters to prevent command injection attacks
+	// Forbidden characters: ; | & $ \n \r ` < > ( )
 	for _, arg := range arguments {
 		if strings.ContainsAny(arg, ";|&$\n\r`<>()") {
-			return fmt.Errorf("argument for command %s contains forbidden characters (shell metacharacters not allowed)", id)
+			return fmt.Errorf("argument for command %s contains forbidden characters (these are not allowed: ; | & $ ` < > ( ) newlines)", id)
 		}
 	}
 
