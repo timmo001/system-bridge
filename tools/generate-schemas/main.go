@@ -489,7 +489,7 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 
 	// Handle nullable (pointer) types
 	if field.IsPtr {
-		zodSchema += ".nullable()"
+		zodSchema += ".nullish()"
 	}
 
 	return zodSchema
