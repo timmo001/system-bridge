@@ -410,7 +410,7 @@ func TestExecuteResult(t *testing.T) {
 func TestServerContextCancellation(t *testing.T) {
 	t.Run("Execute function respects context cancellation", func(t *testing.T) {
 		// Clean state
-		SetServerContext(nil)
+		SetServerContext(context.Background())
 
 		commandDef := &settings.SettingsCommandDefinition{
 			ID:      "test-sleep",
@@ -471,7 +471,7 @@ func TestServerContextCancellation(t *testing.T) {
 
 	t.Run("Command killed when server context canceled", func(t *testing.T) {
 		// Clean up any previous server context
-		SetServerContext(nil)
+		SetServerContext(context.Background())
 
 		commandDef := &settings.SettingsCommandDefinition{
 			ID:        "long-running-command",
@@ -483,7 +483,7 @@ func TestServerContextCancellation(t *testing.T) {
 		// Create a server context that we'll cancel
 		serverCtx, serverCancel := context.WithCancel(context.Background())
 		defer serverCancel()
-		defer SetServerContext(nil) // Clean up after test
+		defer SetServerContext(context.Background()) // Clean up after test
 
 		// Set the server context
 		SetServerContext(serverCtx)
@@ -527,7 +527,7 @@ func TestServerContextCancellation(t *testing.T) {
 	})
 
 	t.Run("Command completes normally with server context", func(t *testing.T) {
-		SetServerContext(nil)
+		SetServerContext(context.Background())
 
 		commandDef := &settings.SettingsCommandDefinition{
 			ID:        "quick-command",
@@ -539,7 +539,7 @@ func TestServerContextCancellation(t *testing.T) {
 		// Create a server context
 		serverCtx, serverCancel := context.WithCancel(context.Background())
 		defer serverCancel()
-		defer SetServerContext(nil)
+		defer SetServerContext(context.Background())
 
 		// Set the server context
 		SetServerContext(serverCtx)
@@ -566,8 +566,8 @@ func TestServerContextCancellation(t *testing.T) {
 			Arguments: []string{"test"},
 		}
 
-		// Clear server context by setting it to nil
-		SetServerContext(nil)
+		// Clear server context by setting it to Background
+		SetServerContext(context.Background())
 
 		// getServerContext should return Background context
 		ctx := getServerContext()
@@ -587,12 +587,12 @@ func TestServerContextCancellation(t *testing.T) {
 	})
 
 	t.Run("Multiple commands killed on server shutdown", func(t *testing.T) {
-		SetServerContext(nil)
+		SetServerContext(context.Background())
 
 		// Create a server context
 		serverCtx, serverCancel := context.WithCancel(context.Background())
 		defer serverCancel()
-		defer SetServerContext(nil)
+		defer SetServerContext(context.Background())
 
 		// Set the server context
 		SetServerContext(serverCtx)
