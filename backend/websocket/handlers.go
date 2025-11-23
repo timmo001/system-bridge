@@ -79,6 +79,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		ws.mutex.RUnlock()
 
 		if ok {
+			slog.Info("Sending WebSocket response", "type", response.Type, "id", response.ID, "message", response.Message)
 			ws.SendMessage(connInfo, response)
 		} else {
 			slog.Error("Connection not found in connections map during message handling", "addr", addr)

@@ -79,7 +79,6 @@ export class WebSocketProvider extends ProviderElement {
     }
   >();
 
-  @state()
   private _settingsUpdateError: {
     requestId: string;
     message: string;
@@ -253,11 +252,23 @@ export class WebSocketProvider extends ProviderElement {
     }
 
     if (!parsedMessage.success) {
+      console.error(
+        "WebSocket message validation failed:",
+        parsedMessage.error,
+        "Raw data:",
+        event.data,
+      );
       this._error = "Received invalid message format from server";
       return;
     }
 
     const message = parsedMessage.data;
+
+    console.log("Received WebSocket message:", {
+      type: message.type,
+      id: message.id,
+      subtype: message.subtype,
+    });
 
     if (message.id && this._pendingResolvers.has(message.id)) {
       const resolver = this._pendingResolvers.get(message.id);
@@ -462,6 +473,13 @@ export class WebSocketProvider extends ProviderElement {
               clearTimeout(this._settingsErrorTimeout);
             }
 
+            // Clear the settings update timeout to prevent it from firing
+            this._isSettingsUpdatePending = false;
+            if (this._settingsUpdateTimeout) {
+              clearTimeout(this._settingsUpdateTimeout);
+              this._settingsUpdateTimeout = null;
+            }
+
             // Set the error
             this._settingsUpdateError = {
               requestId: message.id,
@@ -472,11 +490,25 @@ export class WebSocketProvider extends ProviderElement {
             // Clear the pending request
             this._pendingSettingsRequests.delete(message.id);
 
+            // Dispatch a custom event to directly notify consumers
+            // This bypasses the Lit context system for more reliable delivery
+            this.dispatchEvent(
+              new CustomEvent("settings-update-error", {
+                detail: {
+                  requestId: message.id,
+                  message: errorMessage,
+                  timestamp: Date.now(),
+                },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+
             // Clear the error after 10 seconds
             this._settingsErrorTimeout = window.setTimeout(() => {
               this._settingsUpdateError = null;
               this._settingsErrorTimeout = null;
-              this.requestUpdate();
+              this.updateWebSocketContext();
             }, 10000);
 
             this.requestUpdate();

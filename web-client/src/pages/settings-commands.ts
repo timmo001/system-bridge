@@ -63,6 +63,10 @@ export class PageSettingsCommands extends PageElement {
     super.connectedCallback();
     this.loadSettings();
     this.previousCommands = [...this.commands];
+
+    // Listen for settings update errors from the websocket provider on window
+    // (events are dispatched on the provider, not on this component)
+    window.addEventListener("settings-update-error", this.handleSettingsUpdateError);
   }
 
   disconnectedCallback() {
@@ -75,41 +79,43 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.errorTimeout);
       this.errorTimeout = null;
     }
+    // Remove event listener from window
+    window.removeEventListener("settings-update-error", this.handleSettingsUpdateError);
   }
+
+  private handleSettingsUpdateError = (event: Event): void => {
+    const customEvent = event as CustomEvent<{
+      requestId: string;
+      message: string;
+      timestamp: number;
+    }>;
+
+    // Check if this error is for our pending request
+    if (this.isSubmitting && this.pendingRequestId === customEvent.detail.requestId) {
+      // Reload commands from actual settings (which won't include the invalid command)
+      this.loadSettings();
+
+      // Show error message
+      this.errorMessage = customEvent.detail.message;
+
+      // Clear error after 10 seconds
+      if (this.errorTimeout !== null) {
+        clearTimeout(this.errorTimeout);
+      }
+      this.errorTimeout = window.setTimeout(() => {
+        this.errorMessage = null;
+        this.errorTimeout = null;
+        this.requestUpdate();
+      }, 10000);
+
+      // Clear submission state
+      this.clearSubmissionState();
+    }
+  };
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
-
-      // Check for settings update errors
-      if (
-        this.isSubmitting &&
-        this.pendingRequestId !== null &&
-        this.websocket?.settingsUpdateError
-      ) {
-        const error = this.websocket.settingsUpdateError;
-        // Check if the error is for our pending request
-        if (error.requestId === this.pendingRequestId) {
-          // Reload commands from actual settings (which won't include the invalid command)
-          this.loadSettings();
-
-          // Show error message
-          this.errorMessage = error.message;
-
-          // Clear error after 10 seconds
-          if (this.errorTimeout !== null) {
-            clearTimeout(this.errorTimeout);
-          }
-          this.errorTimeout = window.setTimeout(() => {
-            this.errorMessage = null;
-            this.errorTimeout = null;
-            this.requestUpdate();
-          }, 10000);
-
-          // Clear submission state
-          this.clearSubmissionState();
-        }
-      }
 
       // Check if settings have been updated successfully after a pending submission
       if (this.isSubmitting && this.pendingRequestId !== null) {

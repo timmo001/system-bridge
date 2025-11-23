@@ -103,7 +103,7 @@ export const WebSocketResponseSchema = z.object({
   id: z.string(),
   type: ResponseTypeSchema,
   subtype: ResponseSubtypeSchema,
-  data: z.any(),
+  data: z.any().nullish(),
   message: z.string().optional(),
   module: ModuleNameSchema.optional(),
 });
