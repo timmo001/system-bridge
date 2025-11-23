@@ -6,12 +6,19 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+)
+
+var (
+	// serverCtx is the server-level context that gets canceled on shutdown
+	serverCtx   context.Context
+	serverCtxMu sync.RWMutex
 )
 
 const (
@@ -33,6 +40,25 @@ var (
 	// ErrWorkingDirInvalid is returned when a working directory is invalid
 	ErrWorkingDirInvalid = errors.New("working directory is invalid")
 )
+
+// SetServerContext sets the server-level context for command execution.
+// This context will be canceled when the server shuts down, ensuring all
+// running commands are terminated.
+func SetServerContext(ctx context.Context) {
+	serverCtxMu.Lock()
+	defer serverCtxMu.Unlock()
+	serverCtx = ctx
+}
+
+// getServerContext returns the server context, or context.Background() if not set
+func getServerContext() context.Context {
+	serverCtxMu.RLock()
+	defer serverCtxMu.RUnlock()
+	if serverCtx != nil {
+		return serverCtx
+	}
+	return context.Background()
+}
 
 // ExecuteRequest contains the data for a command execution request
 type ExecuteRequest struct {
@@ -147,7 +173,8 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 // executeAsync runs the command and sends the result via WebSocket
 func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefinition) {
 	// Create a context with timeout for command execution
-	ctx, cancel := context.WithTimeout(context.Background(), DefaultCommandTimeout)
+	// Use server context as parent so commands are killed when server shuts down
+	ctx, cancel := context.WithTimeout(getServerContext(), DefaultCommandTimeout)
 
 	// Ensure cleanup on completion
 	defer cancel()

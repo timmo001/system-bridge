@@ -21,6 +21,7 @@ import (
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/handlers/command"
 	"github.com/timmo001/system-bridge/version"
 )
 
@@ -76,6 +77,10 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a context that can be canceled
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	// Set the server context for command execution
+	// This ensures all commands are killed when the server shuts down
+	command.SetServerContext(ctx)
 
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
