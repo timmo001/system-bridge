@@ -78,7 +78,8 @@ export class PageSettingsCommands extends PageElement {
       this.pendingRequestId !== null &&
       changedProperties.has("websocket")
     ) {
-      const currentCommands = this.websocket?.settings?.commands.allowlist ?? [];
+      const currentCommands =
+        this.websocket?.settings?.commands.allowlist ?? [];
       const previousCommandsStr = JSON.stringify(this.previousCommands);
       const currentCommandsStr = JSON.stringify(currentCommands);
 

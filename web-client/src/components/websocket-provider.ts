@@ -328,11 +328,14 @@ export class WebSocketProvider extends ProviderElement {
           this.requestUpdate();
 
           // Schedule cleanup after 5 minutes to allow users to see results
-          const cleanupTimeout = window.setTimeout(() => {
-            this._commandExecutions.delete(result.commandID);
-            this._commandExecutionCleanupTimeouts.delete(result.commandID);
-            this.requestUpdate();
-          }, 5 * 60 * 1000); // 5 minutes
+          const cleanupTimeout = window.setTimeout(
+            () => {
+              this._commandExecutions.delete(result.commandID);
+              this._commandExecutionCleanupTimeouts.delete(result.commandID);
+              this.requestUpdate();
+            },
+            5 * 60 * 1000,
+          ); // 5 minutes
 
           this._commandExecutionCleanupTimeouts.set(
             result.commandID,
