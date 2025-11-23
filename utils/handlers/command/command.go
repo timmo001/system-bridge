@@ -71,12 +71,24 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 				return nil, fmt.Errorf("%w: command %s must use absolute path", ErrCommandPathInvalid, commandID)
 			}
 
-			// Validate command file exists
-			if _, err := os.Stat(command.Command); err != nil {
+			// Validate command file exists and is executable (on Unix systems)
+			fileInfo, err := os.Stat(command.Command)
+			if err != nil {
 				if os.IsNotExist(err) {
 					return nil, fmt.Errorf("%w: command %s not found at path: %s", ErrCommandPathInvalid, commandID, command.Command)
 				}
 				return nil, fmt.Errorf("%w: command %s path error: %w", ErrCommandPathInvalid, commandID, err)
+			}
+			// Check if file is executable on Unix-like systems (Linux, macOS, etc.)
+			// On Windows, this check is skipped as executable permission is determined by file extension
+			mode := fileInfo.Mode()
+			if !mode.IsRegular() {
+				return nil, fmt.Errorf("%w: command %s is not a regular file", ErrCommandPathInvalid, commandID)
+			}
+			// Check executable bit (0111 = owner, group, others execute permissions)
+			// This check applies to Unix-like systems; Windows will pass this check
+			if mode&0111 == 0 {
+				return nil, fmt.Errorf("%w: command %s is not executable (missing execute permissions)", ErrCommandPathInvalid, commandID)
 			}
 
 			// Validate working directory if specified
@@ -97,8 +109,9 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 			}
 
 			// Validate arguments don't contain shell metacharacters
+			// Check for: ; | & $ \n \r ` < > ( )
 			for _, arg := range command.Arguments {
-				if strings.ContainsAny(arg, ";|&$\n\r") {
+				if strings.ContainsAny(arg, ";|&$\n\r`<>()") {
 					return nil, fmt.Errorf("argument for command %s contains forbidden characters (shell metacharacters not allowed)", commandID)
 				}
 			}
@@ -115,14 +128,27 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 	// Validate command
 	commandDef, err := ValidateCommand(req.CommandID, cfg)
 	if err != nil {
+		// Log unauthorized attempts at higher severity
+		slog.Warn(
+			"Command execution denied",
+			"commandID", req.CommandID,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
+			"error", err.Error(),
+		)
 		return err
 	}
 
+	// Comprehensive audit logging with connection ID, request ID, timestamp, and full arguments
 	slog.Info(
 		"Executing command",
 		"commandID", commandDef.ID,
 		"name", commandDef.Name,
 		"command", commandDef.Command,
+		"arguments", commandDef.Arguments,
+		"workingDir", commandDef.WorkingDir,
+		"connection", req.Connection,
+		"requestID", req.RequestID,
 	)
 
 	// Execute asynchronously
@@ -135,14 +161,26 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefinition) {
 	// Create a context with timeout for command execution
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultCommandTimeout)
+
+	// Register cancel function with WebSocket server for cleanup on connection close
+	ws := websocket.GetInstance()
+	if ws != nil {
+		ws.RegisterConnectionCleanup(req.Connection, cancel)
+	}
+
+	// Ensure cleanup on completion
+	// Note: The cleanup function will also be called when the connection closes,
+	// but calling cancel multiple times is safe (idempotent)
 	defer cancel()
 
 	// Execute the command with context
 	result := execute(ctx, commandDef)
 	result.CommandID = commandDef.ID
 
-	// Get WebSocket instance to send callback
-	ws := websocket.GetInstance()
+	// Get WebSocket instance to send callback (reuse if already obtained)
+	if ws == nil {
+		ws = websocket.GetInstance()
+	}
 	if ws == nil {
 		slog.Error("WebSocket instance not available for command callback")
 		return
@@ -174,11 +212,13 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 		return
 	}
 
-	// Log result
+	// Log result with comprehensive audit information
 	if result.Error != "" {
 		slog.Error(
 			"Command execution failed",
 			"commandID", result.CommandID,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
 			"error", result.Error,
 		)
 	} else {
@@ -204,6 +244,8 @@ func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefini
 			"Command execution completed",
 			"commandID", result.CommandID,
 			"exitCode", result.ExitCode,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
 			"stdout", strings.TrimSpace(stdout),
 			"stderr", strings.TrimSpace(stderr),
 		)

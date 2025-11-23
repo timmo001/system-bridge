@@ -488,6 +488,11 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 	}
 
 	// Handle nullable (pointer) types
+	// Use .nullish() instead of .nullable() to match TypeScript behavior:
+	// - .nullish() allows both null and undefined (matches TypeScript's optional/nullable types)
+	// - .nullable() only allows null, which is more restrictive
+	// This change ensures generated Zod schemas correctly validate TypeScript types
+	// where optional fields can be either undefined or explicitly set to null
 	if field.IsPtr {
 		zodSchema += ".nullish()"
 	}

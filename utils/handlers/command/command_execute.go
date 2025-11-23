@@ -44,7 +44,10 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 		ExitCode:  -1,
 	}
 
-	// Create command with context for cancellation and timeout
+	// SECURITY WARNING: exec.CommandContext must NEVER use shell wrappers (e.g., /bin/sh, cmd.exe).
+	// Always pass the executable path directly as the first argument and arguments as separate strings.
+	// Using shell wrappers would allow shell metacharacter injection despite argument validation.
+	// This is safe because exec.CommandContext does NOT invoke a shell - it executes the binary directly.
 	cmd := exec.CommandContext(ctx, commandDef.Command, commandDef.Arguments...)
 
 	// Set working directory if specified
