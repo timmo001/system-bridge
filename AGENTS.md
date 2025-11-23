@@ -52,6 +52,23 @@ make help
 
 After editing any Go code, always run `go fmt ./...` from repository root to maintain consistent formatting.
 
+### Go Linting
+
+Before committing Go code changes, run the linter to catch potential issues:
+
+```bash
+# Run golangci-lint (if installed locally)
+golangci-lint run ./...
+
+# Or run the project's lint target
+make lint
+```
+
+**Important**: The CI pipeline runs golangci-lint automatically. Common issues to watch for:
+- `errcheck`: Unchecked error returns (especially in deferred cleanup)
+- Use proper error handling patterns as shown in existing code
+- All deferred `os.RemoveAll()` calls must check errors in tests
+
 ### CLI Commands for Testing
 
 Test data modules locally before committing:
@@ -968,6 +985,7 @@ go run . client data run --module cpu --pretty  # Test a data module
 
 # Linting
 make lint                     # Lint Go and web client
+golangci-lint run ./...       # Run Go linter (if installed)
 cd web-client && pnpm format:check  # Check formatting
 bunx markdownlint-cli . --ignore node_modules  # Lint markdown
 uv tool run yamllint .github/ .scripts/  # Lint YAML
