@@ -359,7 +359,18 @@ export class WebSocketProvider extends ProviderElement {
           this._ws?.close();
           return;
         } else {
-          this._error = `Server error: ${message.data ?? "Unknown error"}`;
+          const errorMessage = message.message ?? "Unknown error";
+          this._error = `Server error: ${errorMessage}`;
+
+          // Show notification for command execution errors
+          if (
+            message.subtype === "COMMAND_NOT_FOUND" ||
+            message.subtype === "BAD_PATH" ||
+            message.subtype === "BAD_DIRECTORY" ||
+            message.subtype === "BAD_REQUEST"
+          ) {
+            showNotification("Command Error", errorMessage, "error");
+          }
         }
         break;
 
