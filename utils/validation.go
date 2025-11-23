@@ -85,15 +85,13 @@ func ValidateCommand(id, name, command, workingDir string, arguments []string) e
 
 	// Validate working directory if specified
 	if workingDir != "" {
-		// Clean the working directory path to resolve any '..' or '.' components
-		// This prevents path traversal attacks
-		workingDir = filepath.Clean(workingDir)
-
-		// Check for '..' in working directory path
-		// After cleaning, '..' should not appear in a valid absolute path
+		// Check for '..' before cleaning the path (filepath.Clean normalizes and removes '..')
 		if strings.Contains(workingDir, "..") {
 			return fmt.Errorf("working directory for command %s contains '..' which is not allowed", id)
 		}
+
+		// Clean the working directory path to resolve any '.' components
+		workingDir = filepath.Clean(workingDir)
 
 		if !filepath.IsAbs(workingDir) {
 			return fmt.Errorf("working directory for command %s must be absolute path", id)
