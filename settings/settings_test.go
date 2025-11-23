@@ -193,8 +193,10 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command ID", func(t *testing.T) {
-		// Reset viper for clean test state
+		// Reset viper and delete config file for clean test state
 		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
 
 		// Load default settings first
 		settings, err := Load()
@@ -212,8 +214,10 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command name", func(t *testing.T) {
-		// Reset viper for clean test state
+		// Reset viper and delete config file for clean test state
 		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
 
 		// Load default settings first
 		settings, err := Load()
@@ -231,8 +235,10 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("Save rejects settings with empty command", func(t *testing.T) {
-		// Reset viper for clean test state
+		// Reset viper and delete config file for clean test state
 		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
 
 		// Load default settings first
 		settings, err := Load()
