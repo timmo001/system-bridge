@@ -79,8 +79,16 @@ export class WebSocketProvider extends ProviderElement {
     }
   >();
 
+  private _settingsUpdateError: {
+    requestId: string;
+    message: string;
+    timestamp: number;
+  } | null = null;
+
   private _commandExecutionCleanupTimeouts = new Map<string, number>();
   private _pendingCommandRequests = new Map<string, string>(); // messageId -> commandId
+  private _pendingSettingsRequests = new Set<string>(); // Set of UPDATE_SETTINGS request IDs
+  private _settingsErrorTimeout: number | null = null;
 
   // Maximum number of command executions to keep in memory
   private readonly MAX_COMMAND_EXECUTIONS = 100;
@@ -118,6 +126,7 @@ export class WebSocketProvider extends ProviderElement {
       isConnected: this._isConnected,
       settings: this._settings,
       error: this._error,
+      settingsUpdateError: this._settingsUpdateError,
       commandExecutions: this._commandExecutions,
       sendRequest: this.sendRequest.bind(this),
       sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
@@ -243,6 +252,12 @@ export class WebSocketProvider extends ProviderElement {
     }
 
     if (!parsedMessage.success) {
+      console.error(
+        "WebSocket message validation failed:",
+        parsedMessage.error,
+        "Raw data:",
+        event.data,
+      );
       this._error = "Received invalid message format from server";
       return;
     }
@@ -345,6 +360,24 @@ export class WebSocketProvider extends ProviderElement {
           clearTimeout(this._settingsUpdateTimeout);
           this._settingsUpdateTimeout = null;
         }
+        // Clear pending settings request tracking
+        if (this._pendingSettingsRequests.has(message.id)) {
+          this._pendingSettingsRequests.delete(message.id);
+        }
+        // Notify consumers that settings have been updated
+        this.updateWebSocketContext();
+
+        // Also dispatch a custom event for more reliable delivery
+        this.dispatchEvent(
+          new CustomEvent("settings-updated", {
+            detail: {
+              requestId: message.id,
+              timestamp: Date.now(),
+            },
+            bubbles: true,
+            composed: true,
+          }),
+        );
         break;
       }
 
@@ -440,6 +473,54 @@ export class WebSocketProvider extends ProviderElement {
         } else {
           const errorMessage = message.message ?? "Unknown error";
           this._error = `Server error: ${errorMessage}`;
+
+          // Check if this error is for a pending UPDATE_SETTINGS request
+          if (this._pendingSettingsRequests.has(message.id)) {
+            // Clear any existing error timeout
+            if (this._settingsErrorTimeout !== null) {
+              clearTimeout(this._settingsErrorTimeout);
+            }
+
+            // Clear the settings update timeout to prevent it from firing
+            this._isSettingsUpdatePending = false;
+            if (this._settingsUpdateTimeout) {
+              clearTimeout(this._settingsUpdateTimeout);
+              this._settingsUpdateTimeout = null;
+            }
+
+            // Set the error
+            this._settingsUpdateError = {
+              requestId: message.id,
+              message: errorMessage,
+              timestamp: Date.now(),
+            };
+
+            // Clear the pending request
+            this._pendingSettingsRequests.delete(message.id);
+
+            // Dispatch a custom event to directly notify consumers
+            // This bypasses the Lit context system for more reliable delivery
+            this.dispatchEvent(
+              new CustomEvent("settings-update-error", {
+                detail: {
+                  requestId: message.id,
+                  message: errorMessage,
+                  timestamp: Date.now(),
+                },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+
+            // Clear the error after 10 seconds
+            this._settingsErrorTimeout = window.setTimeout(() => {
+              this._settingsUpdateError = null;
+              this._settingsErrorTimeout = null;
+              this.updateWebSocketContext();
+            }, 10000);
+
+            this.requestUpdate();
+          }
 
           // Handle command execution errors
           if (
@@ -711,11 +792,19 @@ export class WebSocketProvider extends ProviderElement {
 
     if (request.event === "UPDATE_SETTINGS") {
       this._isSettingsUpdatePending = true;
+      const requestId = request.id;
+      if (requestId) {
+        this._pendingSettingsRequests.add(requestId);
+      }
       if (this._settingsUpdateTimeout) {
         clearTimeout(this._settingsUpdateTimeout);
       }
       this._settingsUpdateTimeout = window.setTimeout(() => {
         this._isSettingsUpdatePending = false;
+        // Clean up stale pending request to prevent memory leak
+        if (requestId) {
+          this._pendingSettingsRequests.delete(requestId);
+        }
         this._error =
           "Settings update timed out. Please try again or check your connection.";
         this.requestUpdate();
@@ -791,6 +880,10 @@ export class WebSocketProvider extends ProviderElement {
       clearTimeout(this._settingsUpdateTimeout);
       this._settingsUpdateTimeout = null;
     }
+    if (this._settingsErrorTimeout !== null) {
+      clearTimeout(this._settingsErrorTimeout);
+      this._settingsErrorTimeout = null;
+    }
     // Clean up all command execution timeouts
     for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
       clearTimeout(timeoutId);
@@ -798,6 +891,7 @@ export class WebSocketProvider extends ProviderElement {
     this._commandExecutionCleanupTimeouts.clear();
     this._commandExecutions.clear();
     this._pendingCommandRequests.clear();
+    this._pendingSettingsRequests.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
   }
 

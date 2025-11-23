@@ -92,7 +92,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 				ID:      message.ID,
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeNone,
-				Message: "Failed to save settings",
+				Message: err.Error(),
 			}
 		}
 

@@ -52,13 +52,27 @@ export class PageSettingsCommands extends PageElement {
   @state()
   private pendingRequestId: string | null = null;
 
+  @state()
+  private errorMessage: string | null = null;
+
   private submissionTimeout: number | null = null;
   private previousCommands: SettingsCommandDefinition[] = [];
+  private errorTimeout: number | null = null;
 
   connectedCallback() {
     super.connectedCallback();
     this.loadSettings();
     this.previousCommands = [...this.commands];
+
+    // Listen for settings update events on window scope
+    // The websocket-provider dispatches these events with bubbling enabled,
+    // and we use window to reliably catch them regardless of DOM structure.
+    // This bypasses Lit's context system for more immediate event delivery.
+    window.addEventListener(
+      "settings-update-error",
+      this.handleSettingsUpdateError,
+    );
+    window.addEventListener("settings-updated", this.handleSettingsUpdated);
   }
 
   disconnectedCallback() {
@@ -67,27 +81,115 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+    if (this.errorTimeout !== null) {
+      clearTimeout(this.errorTimeout);
+      this.errorTimeout = null;
+    }
+    // Remove event listeners from window
+    window.removeEventListener(
+      "settings-update-error",
+      this.handleSettingsUpdateError,
+    );
+    window.removeEventListener("settings-updated", this.handleSettingsUpdated);
   }
+
+  private extractErrorMessage(fullMessage: string): string {
+    // Extract the meaningful part of the error message
+    // Example: "settings validation failed: command at index 0: command c60de62f-9e8f-4d8d-af71-9bd03b64cbf3 must use absolute path"
+    // Should return: "Command must use absolute path"
+
+    // Try multiple patterns in order of specificity
+    const patterns = [
+      // Pattern for command UUID errors: "command [uuid] error text"
+      /command\s+[a-f0-9-]+\s+(.+)$/i,
+      // Pattern for validation errors: "validation failed: actual error"
+      /validation\s+failed:\s*(.+)$/i,
+      // Pattern for generic "failed to" errors
+      /failed\s+to\s+[^:]+:\s*(.+)$/i,
+      // Pattern for errors after colon
+      /:\s*([^:]+)$/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = pattern.exec(fullMessage);
+      if (match?.[1]) {
+        const extracted = match[1].trim();
+        // Capitalize first letter and return
+        return extracted.charAt(0).toUpperCase() + extracted.slice(1);
+      }
+    }
+
+    // Fallback: return the original message
+    return fullMessage;
+  }
+
+  private handleSettingsUpdateError = (event: Event): void => {
+    const customEvent = event as CustomEvent<{
+      requestId: string;
+      message: string;
+      timestamp: number;
+    }>;
+
+    // Check if this error is for our pending request
+    if (
+      this.isSubmitting &&
+      this.pendingRequestId === customEvent.detail.requestId
+    ) {
+      // Reload commands from actual settings (which won't include the invalid command)
+      this.loadSettings();
+
+      // Show error message with cleaned up text
+      this.errorMessage = this.extractErrorMessage(customEvent.detail.message);
+
+      // Clear error after 10 seconds
+      if (this.errorTimeout !== null) {
+        clearTimeout(this.errorTimeout);
+      }
+      this.errorTimeout = window.setTimeout(() => {
+        this.errorMessage = null;
+        this.errorTimeout = null;
+        this.requestUpdate();
+      }, 10000);
+
+      // Clear submission state
+      this.clearSubmissionState();
+    }
+  };
+
+  private handleSettingsUpdated = (event: Event): void => {
+    const customEvent = event as CustomEvent<{
+      requestId: string;
+      timestamp: number;
+    }>;
+
+    // Check if this update is for our pending request
+    if (
+      this.isSubmitting &&
+      this.pendingRequestId === customEvent.detail.requestId
+    ) {
+      // Load updated settings from websocket context
+      this.loadSettings();
+
+      // Clear submission state
+      this.clearSubmissionState();
+    }
+  };
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
-    }
 
-    // Check if settings have been updated after a pending submission
-    if (
-      this.isSubmitting &&
-      this.pendingRequestId !== null &&
-      changedProperties.has("websocket")
-    ) {
-      const currentCommands =
-        this.websocket?.settings?.commands.allowlist ?? [];
-      const previousCommandsStr = JSON.stringify(this.previousCommands);
-      const currentCommandsStr = JSON.stringify(currentCommands);
+      // Check if settings have been updated successfully after a pending submission
+      if (this.isSubmitting && this.pendingRequestId !== null) {
+        const currentCommands =
+          this.websocket?.settings?.commands.allowlist ?? [];
+        const previousCommandsStr = JSON.stringify(this.previousCommands);
+        const currentCommandsStr = JSON.stringify(currentCommands);
 
-      // If commands have changed, clear the submitting state
-      if (previousCommandsStr !== currentCommandsStr) {
-        this.clearSubmissionState();
+        // If commands have changed, clear the submitting state
+        if (previousCommandsStr !== currentCommandsStr) {
+          this.clearSubmissionState();
+        }
       }
     }
   }
@@ -95,7 +197,8 @@ export class PageSettingsCommands extends PageElement {
   private loadSettings() {
     if (this.websocket?.settings) {
       this.commands = [...this.websocket.settings.commands.allowlist];
-      this.previousCommands = [...this.commands];
+      // Don't update previousCommands here - it should only be updated when initiating a submission
+      // This allows the updated() method to detect when settings have changed successfully
     }
   }
 
@@ -106,6 +209,8 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+    // Update previousCommands to current state after submission completes
+    this.previousCommands = [...this.commands];
     this.requestUpdate();
   }
 
@@ -152,8 +257,12 @@ export class PageSettingsCommands extends PageElement {
       arguments: args,
     };
 
-    this.commands = [...this.commands, newCommand];
-    this.saveSettings();
+    // Don't optimistically add - wait for backend confirmation
+    // Just save with the new command included
+    const updatedCommands = [...this.commands, newCommand];
+    this.saveSettingsWithCommands(updatedCommands);
+
+    // Clear form only after saving starts
     this.newCommandName = "";
     this.newCommandCommand = "";
     this.newCommandWorkingDir = "";
@@ -165,8 +274,9 @@ export class PageSettingsCommands extends PageElement {
     const id = button.getAttribute("data-id");
     if (!id) return;
 
-    this.commands = this.commands.filter((cmd) => cmd.id !== id);
-    this.saveSettings();
+    // Don't optimistically remove - wait for backend confirmation
+    const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
+    this.saveSettingsWithCommands(updatedCommands);
   };
 
   private handleExecuteCommand = (e: Event): void => {
@@ -190,7 +300,9 @@ export class PageSettingsCommands extends PageElement {
     );
   };
 
-  private saveSettings(): void {
+  private saveSettingsWithCommands(
+    commands: SettingsCommandDefinition[],
+  ): void {
     if (!this.connection?.token) {
       return;
     }
@@ -215,7 +327,7 @@ export class PageSettingsCommands extends PageElement {
       const updatedSettings: Settings = {
         ...this.websocket.settings,
         commands: {
-          allowlist: this.commands,
+          allowlist: commands,
         },
       };
 
@@ -226,15 +338,17 @@ export class PageSettingsCommands extends PageElement {
         token: this.connection.token,
       });
 
-      // Set timeout to clear submitting state after 10 seconds if no response
+      // Set timeout to clear submitting state if no response received
+      // Using 30s timeout (increased from 10s) to accommodate slower systems
+      // and prevent premature timeout on settings validation/persistence
       this.submissionTimeout = window.setTimeout(() => {
         if (this.isSubmitting && this.pendingRequestId === requestId) {
           console.warn(
-            "Settings update timeout: no response received after 10 seconds",
+            "Settings update timeout: no response received after 30 seconds",
           );
           this.clearSubmissionState();
         }
-      }, 10000);
+      }, 30000);
     } catch (error) {
       console.error("Failed to update command settings:", error);
       this.clearSubmissionState();
@@ -382,6 +496,23 @@ ${result.stderr}</pre
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
+          ${this.errorMessage
+            ? html`
+                <div
+                  class="rounded-lg border border-red-800 bg-red-950/30 p-4 flex items-start gap-3"
+                >
+                  <ui-icon name="AlertCircle" class="text-red-400"></ui-icon>
+                  <div class="flex-1">
+                    <div class="font-medium text-red-200">
+                      Failed to save command
+                    </div>
+                    <div class="text-sm text-red-300 mt-1">
+                      ${this.errorMessage}
+                    </div>
+                  </div>
+                </div>
+              `
+            : ""}
           ${!isConnected
             ? html`
                 <ui-connection-required

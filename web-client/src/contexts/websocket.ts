@@ -18,11 +18,18 @@ export interface CommandExecutionState {
   result: CommandExecutionResult | null;
 }
 
+export interface SettingsUpdateError {
+  requestId: string;
+  message: string;
+  timestamp: number;
+}
+
 export interface WebSocketState {
   data: ModuleData | null;
   isConnected: boolean;
   settings: Settings | null;
   error: string | null;
+  settingsUpdateError: SettingsUpdateError | null;
   commandExecutions: Map<string, CommandExecutionState>;
   sendRequest: (request: WebSocketRequest) => void;
   sendRequestWithResponse: <T>(

@@ -188,13 +188,10 @@ export class PageConnection extends PageElement {
       }
     };
 
-    ws.onclose = (event) => {
+    // Connection close handler for test connection
+    // No specific error handling needed - this is just a test to verify connectivity
+    ws.onclose = () => {
       clearTimeout(timeout);
-      if (event.code === 1006) {
-      } else if (event.code === 1002) {
-      } else if (event.code === 1003) {
-      } else if (event.code !== 1000 && event.code !== 1001) {
-      }
       this.isSubmitting = false;
       this.requestUpdate();
     };

@@ -93,7 +93,8 @@ export type ResponseSubtype = z.infer<typeof ResponseSubtypeSchema>;
 export const WebSocketRequestSchema = z.object({
   id: z.string(),
   event: EventTypeSchema,
-  data: z.any().optional(),
+  // Request data type varies by event type
+  data: z.unknown().optional(),
   token: z.string(),
 });
 
@@ -103,7 +104,9 @@ export const WebSocketResponseSchema = z.object({
   id: z.string(),
   type: ResponseTypeSchema,
   subtype: ResponseSubtypeSchema,
-  data: z.any(),
+  // Data type varies by response type (module data, settings, command results, etc.)
+  // Runtime validation is performed with specific schemas before use
+  data: z.unknown().nullish(),
   message: z.string().optional(),
   module: ModuleNameSchema.optional(),
 });
