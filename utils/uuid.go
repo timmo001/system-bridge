@@ -76,58 +76,78 @@ func GenerateStableUUID(macAddress, hostname string) string {
 }
 
 // LoadOrGenerateUUID loads a previously generated UUID from file, or generates a new one
+// Uses atomic file creation to prevent race conditions when multiple processes start simultaneously
 func LoadOrGenerateUUID(macAddress, hostname string) (string, error) {
 	uuidPath, err := GetUUIDFilePath()
 	if err != nil {
 		return "", err
 	}
 
-	// Check if UUID file exists
-	if _, err := os.Stat(uuidPath); os.IsNotExist(err) {
-		// Generate new stable UUID and save it
-		generatedUUID := GenerateStableUUID(macAddress, hostname)
-		if err := SaveUUID(generatedUUID); err != nil {
-			slog.Warn("Failed to save generated UUID, using it anyway", "error", err)
-		} else {
-			slog.Info("Generated and saved new stable UUID", "uuid", generatedUUID)
-		}
-		return generatedUUID, nil
+	// Ensure the directory exists
+	dir := filepath.Dir(uuidPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create UUID directory: %w", err)
 	}
 
-	// Read existing UUID
+	// Try to create the file exclusively (atomic operation)
+	// If successful, we're the first process - write our UUID
+	// If it fails with os.ErrExist, another process already created it - read theirs
+	file, err := os.OpenFile(uuidPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if err == nil {
+		// We created the file successfully, write our UUID
+		generatedUUID := GenerateStableUUID(macAddress, hostname)
+		_, writeErr := file.WriteString(generatedUUID)
+		closeErr := file.Close()
+		if writeErr != nil {
+			return "", fmt.Errorf("failed to write UUID to new file: %w", writeErr)
+		}
+		if closeErr != nil {
+			return "", fmt.Errorf("failed to close UUID file: %w", closeErr)
+		}
+		slog.Info("Generated and saved new stable UUID", "uuid", generatedUUID)
+		return generatedUUID, nil
+	} else if !os.IsExist(err) {
+		// Some other error occurred (not "file already exists")
+		return "", fmt.Errorf("failed to create UUID file: %w", err)
+	}
+
+	// File already exists, read it
 	uuidBytes, err := os.ReadFile(uuidPath)
 	if err != nil {
-		// If we can't read it, generate a new one
-		slog.Warn("Failed to read UUID file, generating new one", "error", err)
-		generatedUUID := GenerateStableUUID(macAddress, hostname)
-		if saveErr := SaveUUID(generatedUUID); saveErr != nil {
-			slog.Warn("Failed to save generated UUID", "error", saveErr)
-		}
-		return generatedUUID, nil
+		return "", fmt.Errorf("failed to read existing UUID file: %w", err)
 	}
 
 	storedUUID := strings.TrimSpace(string(uuidBytes))
-	if storedUUID == "" || IsDefaultUUID(storedUUID) {
-		// Stored UUID is invalid, regenerate
-		slog.Info("Stored UUID is invalid or empty, generating new one")
-		generatedUUID := GenerateStableUUID(macAddress, hostname)
-		if saveErr := SaveUUID(generatedUUID); saveErr != nil {
-			slog.Warn("Failed to save generated UUID", "error", saveErr)
-		}
-		return generatedUUID, nil
+
+	// Validate the stored UUID
+	if storedUUID == "" {
+		slog.Warn("Stored UUID is empty, regenerating")
+		return regenerateUUID(uuidPath, macAddress, hostname)
 	}
 
-	// Validate the stored UUID format
+	if IsDefaultUUID(storedUUID) {
+		slog.Warn("Stored UUID is a default value, regenerating", "uuid", storedUUID)
+		return regenerateUUID(uuidPath, macAddress, hostname)
+	}
+
 	if _, err := uuid.Parse(storedUUID); err != nil {
-		slog.Warn("Stored UUID has invalid format, generating new one", "error", err)
-		generatedUUID := GenerateStableUUID(macAddress, hostname)
-		if saveErr := SaveUUID(generatedUUID); saveErr != nil {
-			slog.Warn("Failed to save generated UUID", "error", saveErr)
-		}
-		return generatedUUID, nil
+		slog.Warn("Stored UUID has invalid format, regenerating", "error", err)
+		return regenerateUUID(uuidPath, macAddress, hostname)
 	}
 
 	return storedUUID, nil
+}
+
+// regenerateUUID replaces an invalid UUID file with a new valid one
+func regenerateUUID(uuidPath, macAddress, hostname string) (string, error) {
+	generatedUUID := GenerateStableUUID(macAddress, hostname)
+	if err := os.WriteFile(uuidPath, []byte(generatedUUID), 0600); err != nil {
+		slog.Warn("Failed to save regenerated UUID", "error", err)
+		// Return the generated UUID anyway, even if we couldn't save it
+		return generatedUUID, nil
+	}
+	slog.Info("Regenerated and saved stable UUID", "uuid", generatedUUID)
+	return generatedUUID, nil
 }
 
 // SaveUUID saves the UUID to file
