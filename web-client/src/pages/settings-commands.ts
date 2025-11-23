@@ -64,8 +64,10 @@ export class PageSettingsCommands extends PageElement {
     this.loadSettings();
     this.previousCommands = [...this.commands];
 
-    // Listen for settings update errors from the websocket provider on window
-    // (events are dispatched on the provider, not on this component)
+    // Listen for settings update events on window scope
+    // The websocket-provider dispatches these events with bubbling enabled,
+    // and we use window to reliably catch them regardless of DOM structure.
+    // This bypasses Lit's context system for more immediate event delivery.
     window.addEventListener(
       "settings-update-error",
       this.handleSettingsUpdateError,
@@ -96,12 +98,25 @@ export class PageSettingsCommands extends PageElement {
     // Example: "settings validation failed: command at index 0: command c60de62f-9e8f-4d8d-af71-9bd03b64cbf3 must use absolute path"
     // Should return: "Command must use absolute path"
 
-    // Try to find the part after "command [uuid]"
-    const uuidPattern = /command\s+[a-f0-9-]+\s+(.+)$/i;
-    const match = uuidPattern.exec(fullMessage);
-    if (match?.[1]) {
-      // Capitalize first letter
-      return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+    // Try multiple patterns in order of specificity
+    const patterns = [
+      // Pattern for command UUID errors: "command [uuid] error text"
+      /command\s+[a-f0-9-]+\s+(.+)$/i,
+      // Pattern for validation errors: "validation failed: actual error"
+      /validation\s+failed:\s*(.+)$/i,
+      // Pattern for generic "failed to" errors
+      /failed\s+to\s+[^:]+:\s*(.+)$/i,
+      // Pattern for errors after colon
+      /:\s*([^:]+)$/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = pattern.exec(fullMessage);
+      if (match?.[1]) {
+        const extracted = match[1].trim();
+        // Capitalize first letter and return
+        return extracted.charAt(0).toUpperCase() + extracted.slice(1);
+      }
     }
 
     // Fallback: return the original message
@@ -323,7 +338,9 @@ export class PageSettingsCommands extends PageElement {
         token: this.connection.token,
       });
 
-      // Set timeout to clear submitting state after 30 seconds if no response
+      // Set timeout to clear submitting state if no response received
+      // Using 30s timeout (increased from 10s) to accommodate slower systems
+      // and prevent premature timeout on settings validation/persistence
       this.submissionTimeout = window.setTimeout(() => {
         if (this.isSubmitting && this.pendingRequestId === requestId) {
           console.warn(

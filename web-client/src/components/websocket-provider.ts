@@ -792,14 +792,19 @@ export class WebSocketProvider extends ProviderElement {
 
     if (request.event === "UPDATE_SETTINGS") {
       this._isSettingsUpdatePending = true;
-      if (request.id) {
-        this._pendingSettingsRequests.add(request.id);
+      const requestId = request.id;
+      if (requestId) {
+        this._pendingSettingsRequests.add(requestId);
       }
       if (this._settingsUpdateTimeout) {
         clearTimeout(this._settingsUpdateTimeout);
       }
       this._settingsUpdateTimeout = window.setTimeout(() => {
         this._isSettingsUpdatePending = false;
+        // Clean up stale pending request to prevent memory leak
+        if (requestId) {
+          this._pendingSettingsRequests.delete(requestId);
+        }
         this._error =
           "Settings update timed out. Please try again or check your connection.";
         this.requestUpdate();
