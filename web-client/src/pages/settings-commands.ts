@@ -67,6 +67,7 @@ export class PageSettingsCommands extends PageElement {
     // Listen for settings update errors from the websocket provider on window
     // (events are dispatched on the provider, not on this component)
     window.addEventListener("settings-update-error", this.handleSettingsUpdateError);
+    window.addEventListener("settings-updated", this.handleSettingsUpdated);
   }
 
   disconnectedCallback() {
@@ -79,8 +80,9 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.errorTimeout);
       this.errorTimeout = null;
     }
-    // Remove event listener from window
+    // Remove event listeners from window
     window.removeEventListener("settings-update-error", this.handleSettingsUpdateError);
+    window.removeEventListener("settings-updated", this.handleSettingsUpdated);
   }
 
   private extractErrorMessage(fullMessage: string): string {
@@ -124,6 +126,22 @@ export class PageSettingsCommands extends PageElement {
         this.errorTimeout = null;
         this.requestUpdate();
       }, 10000);
+
+      // Clear submission state
+      this.clearSubmissionState();
+    }
+  };
+
+  private handleSettingsUpdated = (event: Event): void => {
+    const customEvent = event as CustomEvent<{
+      requestId: string;
+      timestamp: number;
+    }>;
+
+    // Check if this update is for our pending request
+    if (this.isSubmitting && this.pendingRequestId === customEvent.detail.requestId) {
+      // Load updated settings from websocket context
+      this.loadSettings();
 
       // Clear submission state
       this.clearSubmissionState();

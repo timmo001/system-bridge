@@ -364,6 +364,20 @@ export class WebSocketProvider extends ProviderElement {
         if (this._pendingSettingsRequests.has(message.id)) {
           this._pendingSettingsRequests.delete(message.id);
         }
+        // Notify consumers that settings have been updated
+        this.updateWebSocketContext();
+
+        // Also dispatch a custom event for more reliable delivery
+        this.dispatchEvent(
+          new CustomEvent("settings-updated", {
+            detail: {
+              requestId: message.id,
+              timestamp: Date.now(),
+            },
+            bubbles: true,
+            composed: true,
+          }),
+        );
         break;
       }
 
