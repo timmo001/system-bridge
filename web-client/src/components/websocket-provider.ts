@@ -330,6 +330,7 @@ export class WebSocketProvider extends ProviderElement {
           );
           if (existingTimeout !== undefined) {
             clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(result.commandID);
           }
 
           // Set completed state
