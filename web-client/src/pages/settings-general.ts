@@ -125,7 +125,7 @@ export class PageSettingsGeneral extends PageElement {
   };
 
   private handleAutostartChange = (
-    e: CustomEvent<{ checked: boolean }>
+    e: CustomEvent<{ checked: boolean }>,
   ): void => {
     this.formData = { ...this.formData, autostart: e.detail.checked };
   };

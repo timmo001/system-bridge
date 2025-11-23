@@ -115,7 +115,7 @@ export class PageConnection extends PageElement {
     this.requestUpdate();
 
     const ws = new WebSocket(
-      `${this.formData.ssl ? "wss" : "ws"}://${this.formData.host}:${this.formData.port}/api/websocket`
+      `${this.formData.ssl ? "wss" : "ws"}://${this.formData.host}:${this.formData.port}/api/websocket`,
     );
 
     const timeout = setTimeout(() => {
@@ -132,7 +132,7 @@ export class PageConnection extends PageElement {
           id: "test-connection",
           event: "GET_SETTINGS",
           token: this.formData.token,
-        })
+        }),
       );
     };
 
@@ -169,7 +169,7 @@ export class PageConnection extends PageElement {
               detail: newSettings,
               bubbles: true,
               composed: true,
-            })
+            }),
           );
 
           ws.close();

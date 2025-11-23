@@ -49,7 +49,7 @@ export class PageData extends PageElement {
         <ui-tabs-trigger value=${module} ?active=${this.selectedTab === module}>
           ${this.capitalizeFirst(module)}
         </ui-tabs-trigger>
-      `
+      `,
     );
   }
 
@@ -78,7 +78,7 @@ export class PageData extends PageElement {
             </div>
           </div>
         </ui-tabs-content>
-      `
+      `,
     );
   }
 

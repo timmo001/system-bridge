@@ -135,7 +135,7 @@ export class PageSettingsMedia extends PageElement {
               return { success: false as const, error };
             }
           },
-        } as never
+        } as never,
       );
 
       if (response.valid) {
@@ -167,7 +167,7 @@ export class PageSettingsMedia extends PageElement {
     if (!path) return;
 
     this.mediaDirectories = this.mediaDirectories.filter(
-      (d) => d.path !== path
+      (d) => d.path !== path,
     );
     this.saveSettings();
   };
@@ -238,7 +238,7 @@ export class PageSettingsMedia extends PageElement {
     }
 
     const directoryItems = this.mediaDirectories.map((dir) =>
-      this.renderDirectoryItem(dir)
+      this.renderDirectoryItem(dir),
     );
 
     return html` <div class="space-y-2">${directoryItems}</div> `;
