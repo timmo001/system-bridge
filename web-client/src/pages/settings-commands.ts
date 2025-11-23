@@ -184,7 +184,7 @@ export class PageSettingsCommands extends PageElement {
       return;
     }
 
-    if (!this.websocket?.sendRequest) {
+    if (!this.websocket?.sendCommandExecute) {
       showError("WebSocket not available");
       return;
     }
@@ -195,16 +195,11 @@ export class PageSettingsCommands extends PageElement {
       return;
     }
 
-    this.websocket.sendRequest({
-      id: generateUUID(),
-      event: "COMMAND_EXECUTE",
-      data: {
-        commandID: id,
-      },
-      token: this.connection.token,
-    });
-
-    showSuccess(`Executing command: ${command.name}`);
+    this.websocket.sendCommandExecute(
+      generateUUID(),
+      id,
+      this.connection.token,
+    );
   };
 
   private saveSettings(): void {

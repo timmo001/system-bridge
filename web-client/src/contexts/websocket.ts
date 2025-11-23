@@ -29,6 +29,11 @@ export interface WebSocketState {
     request: WebSocketRequest,
     schema: z.ZodType<T>,
   ) => Promise<T>;
+  sendCommandExecute: (
+    messageId: string,
+    commandId: string,
+    token: string,
+  ) => void;
   retryConnection: () => void;
 }
 

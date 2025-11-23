@@ -81,6 +81,7 @@ export class WebSocketProvider extends ProviderElement {
   >();
 
   private _commandExecutionCleanupTimeouts = new Map<string, number>();
+  private _pendingCommandRequests = new Map<string, string>(); // messageId -> commandId
 
   private _ws: WebSocket | null = null;
   private _connectionTimeout: number | null = null;
@@ -117,6 +118,7 @@ export class WebSocketProvider extends ProviderElement {
       commandExecutions: this._commandExecutions,
       sendRequest: this.sendRequest.bind(this),
       sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
+      sendCommandExecute: this.sendCommandExecute.bind(this),
       retryConnection: this.retryConnection.bind(this),
     };
   }
@@ -362,14 +364,54 @@ export class WebSocketProvider extends ProviderElement {
           const errorMessage = message.message ?? "Unknown error";
           this._error = `Server error: ${errorMessage}`;
 
-          // Show notification for command execution errors
+          // Handle command execution errors
           if (
             message.subtype === "COMMAND_NOT_FOUND" ||
             message.subtype === "BAD_PATH" ||
             message.subtype === "BAD_DIRECTORY" ||
             message.subtype === "BAD_REQUEST"
           ) {
-            showNotification("Command Error", errorMessage, "error");
+            // Check if this error is for a pending command execution
+            const commandId = this._pendingCommandRequests.get(message.id);
+            if (commandId) {
+              // Cancel any existing cleanup timeout for this command
+              const existingTimeout =
+                this._commandExecutionCleanupTimeouts.get(commandId);
+              if (existingTimeout !== undefined) {
+                clearTimeout(existingTimeout);
+              }
+
+              // Set error result
+              this._commandExecutions.set(commandId, {
+                isExecuting: false,
+                result: {
+                  commandID: commandId,
+                  exitCode: 1,
+                  stdout: "",
+                  stderr: "",
+                  error: errorMessage,
+                },
+              });
+              this.requestUpdate();
+
+              // Schedule cleanup after 5 minutes
+              const cleanupTimeout = window.setTimeout(
+                () => {
+                  this._commandExecutions.delete(commandId);
+                  this._commandExecutionCleanupTimeouts.delete(commandId);
+                  this.requestUpdate();
+                },
+                5 * 60 * 1000,
+              );
+
+              this._commandExecutionCleanupTimeouts.set(
+                commandId,
+                cleanupTimeout,
+              );
+
+              // Clean up the pending request tracking
+              this._pendingCommandRequests.delete(message.id);
+            }
           }
         }
         break;
@@ -572,6 +614,25 @@ export class WebSocketProvider extends ProviderElement {
     }, RETRY_DELAY);
   }
 
+  sendCommandExecute(messageId: string, commandId: string, token: string) {
+    if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return;
+
+    // Track this command execution request
+    this._pendingCommandRequests.set(messageId, commandId);
+
+    // Send the command execute request
+    this._ws.send(
+      JSON.stringify({
+        id: messageId,
+        event: "COMMAND_EXECUTE",
+        data: {
+          commandID: commandId,
+        },
+        token: token,
+      }),
+    );
+  }
+
   sendRequest(request: WebSocketRequest) {
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return;
     if (!request.token) throw new Error("No token found");
@@ -664,6 +725,7 @@ export class WebSocketProvider extends ProviderElement {
     }
     this._commandExecutionCleanupTimeouts.clear();
     this._commandExecutions.clear();
+    this._pendingCommandRequests.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
   }
 
