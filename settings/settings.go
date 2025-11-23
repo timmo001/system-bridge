@@ -3,6 +3,8 @@ package settings
 import (
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -192,15 +194,30 @@ func (cfg *Settings) Validate() error {
 		}
 	}
 
+	// Validate media directories exist
+	for _, dir := range cfg.Media.Directories {
+		cleanPath := filepath.Clean(dir.Path)
+		if !strings.Contains(cleanPath, "..") {
+			if stat, err := os.Stat(cleanPath); err == nil && stat.IsDir() {
+				return fmt.Errorf("media directory %s does not exist", dir.Path)
+			}
+		}
+	}
+
 	return nil
 }
 
 func (cfg *Settings) Save() error {
+	// Validate settings before saving
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("settings validation failed: %w", err)
+	}
+
 	viper.Set("autostart", cfg.Autostart)
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
-	viper.Set("media.directories", cfg.Media.Directories)
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
+	viper.Set("media.directories", cfg.Media.Directories)
 
 	if err := viper.WriteConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

@@ -149,6 +149,71 @@ func TestSave(t *testing.T) {
 		assert.Equal(t, "Videos", loadedSettings.Media.Directories[0].Name)
 		assert.Equal(t, "/home/user/Videos", loadedSettings.Media.Directories[0].Path)
 	})
+
+	t.Run("Save rejects settings with duplicate command IDs", func(t *testing.T) {
+		// Load default settings first
+		settings, err := Load()
+		require.NoError(t, err)
+
+		// Add commands with duplicate IDs
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "Command 1", Command: "echo 1"},
+			{ID: "cmd1", Name: "Command 2", Command: "echo 2"},
+		}
+
+		// Attempt to save should fail
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "duplicate command ID")
+	})
+
+	t.Run("Save rejects settings with empty command ID", func(t *testing.T) {
+		// Load default settings first
+		settings, err := Load()
+		require.NoError(t, err)
+
+		// Add command with empty ID
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "", Name: "Command", Command: "echo test"},
+		}
+
+		// Attempt to save should fail
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty ID")
+	})
+
+	t.Run("Save rejects settings with empty command name", func(t *testing.T) {
+		// Load default settings first
+		settings, err := Load()
+		require.NoError(t, err)
+
+		// Add command with empty name
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "", Command: "echo test"},
+		}
+
+		// Attempt to save should fail
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty name")
+	})
+
+	t.Run("Save rejects settings with empty command", func(t *testing.T) {
+		// Load default settings first
+		settings, err := Load()
+		require.NoError(t, err)
+
+		// Add command with empty command
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "Command 1", Command: ""},
+		}
+
+		// Attempt to save should fail
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty command")
+	})
 }
 
 func TestSettingsStructs(t *testing.T) {
