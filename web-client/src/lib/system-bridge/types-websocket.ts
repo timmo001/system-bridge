@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ModuleNameSchema } from "~/lib/system-bridge/types-modules";
 
 export const EventTypeSchema = z.enum([
+  "COMMAND_EXECUTE",
   "EXIT_APPLICATION",
   "GET_DATA",
   "GET_DIRECTORIES",
@@ -33,6 +34,8 @@ export type EventType = z.infer<typeof EventTypeSchema>;
 export const ResponseTypeSchema = z.enum([
   "ERROR",
   "APPLICATION_EXITING",
+  "COMMAND_EXECUTING",
+  "COMMAND_COMPLETED",
   "DATA_GET",
   "DIRECTORIES",
   "DIRECTORY",
@@ -67,6 +70,7 @@ export const ResponseSubtypeSchema = z.enum([
   "BAD_DIRECTORY",
   "BAD_FILE",
   "BAD_PATH",
+  "COMMAND_NOT_FOUND",
   "INVALID_ACTION",
   "LISTENER_ALREADY_REGISTERED",
   "LISTENER_NOT_REGISTERED",

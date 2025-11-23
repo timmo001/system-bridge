@@ -22,10 +22,29 @@ export const SettingsMediaSchema = z.object({
 
 export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
 
+export const SettingsCommandDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  command: z.string().min(1),
+  workingDir: z.string(),
+  arguments: z.array(z.string()),
+});
+
+export type SettingsCommandDefinition = z.infer<
+  typeof SettingsCommandDefinitionSchema
+>;
+
+export const SettingsCommandsSchema = z.object({
+  allowlist: z.array(SettingsCommandDefinitionSchema),
+});
+
+export type SettingsCommands = z.infer<typeof SettingsCommandsSchema>;
+
 export const SettingsSchema = z.object({
   autostart: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
   logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+  commands: SettingsCommandsSchema,
   media: SettingsMediaSchema,
 });
 

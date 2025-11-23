@@ -15,7 +15,6 @@ import {
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
-import { showNotification } from "~/lib/notifications";
 import {
   DefaultModuleData,
   ModuleNameSchema,
@@ -65,10 +64,32 @@ export class WebSocketProvider extends ProviderElement {
   @state()
   private _isSettingsUpdatePending = false;
 
+  @state()
+  private _commandExecutions = new Map<
+    string,
+    {
+      isExecuting: boolean;
+      result: {
+        commandID: string;
+        exitCode: number;
+        stdout: string;
+        stderr: string;
+        error?: string;
+      } | null;
+    }
+  >();
+
+  private _commandExecutionCleanupTimeouts = new Map<string, number>();
+  private _pendingCommandRequests = new Map<string, string>(); // messageId -> commandId
+
+  // Maximum number of command executions to keep in memory
+  private readonly MAX_COMMAND_EXECUTIONS = 100;
+
   private _ws: WebSocket | null = null;
   private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
   private _settingsUpdateTimeout: number | null = null;
+  // @ts-expect-error - TS6133: Reserved for future state change detection
   private _previousConnectedState = false;
   private _pendingResolvers = new Map<string, AnyPendingResolver>();
   // Consumer must be stored to keep subscription alive
@@ -97,8 +118,10 @@ export class WebSocketProvider extends ProviderElement {
       isConnected: this._isConnected,
       settings: this._settings,
       error: this._error,
+      commandExecutions: this._commandExecutions,
       sendRequest: this.sendRequest.bind(this),
       sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
+      sendCommandExecute: this.sendCommandExecute.bind(this),
       retryConnection: this.retryConnection.bind(this),
     };
   }
@@ -140,6 +163,68 @@ export class WebSocketProvider extends ProviderElement {
       resolver.reject(new Error(reason));
     });
     this._pendingResolvers.clear();
+  }
+
+  private enforceCommandExecutionsLimit() {
+    // Remove oldest completed entries if we exceed the limit
+    if (this._commandExecutions.size >= this.MAX_COMMAND_EXECUTIONS) {
+      // Find oldest completed entry to remove
+      for (const [commandID, execution] of this._commandExecutions) {
+        if (!execution.isExecuting) {
+          // Cancel any cleanup timeout for this command
+          const existingTimeout =
+            this._commandExecutionCleanupTimeouts.get(commandID);
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(commandID);
+          }
+          this._commandExecutions.delete(commandID);
+          break; // Only remove one entry at a time
+        }
+      }
+    }
+  }
+
+  private clearExecutingCommandsOnDisconnect() {
+    // Mark all currently executing commands as failed due to connection loss
+    this._commandExecutions.forEach((execution, commandID) => {
+      if (execution.isExecuting) {
+        // Cancel any existing cleanup timeout for this command
+        const existingTimeout =
+          this._commandExecutionCleanupTimeouts.get(commandID);
+        if (existingTimeout !== undefined) {
+          clearTimeout(existingTimeout);
+          this._commandExecutionCleanupTimeouts.delete(commandID);
+        }
+
+        // Set error result for the command
+        this._commandExecutions.set(commandID, {
+          isExecuting: false,
+          result: {
+            commandID,
+            exitCode: 1,
+            stdout: "",
+            stderr: "",
+            error: "Command execution interrupted due to connection loss",
+          },
+        });
+
+        // Schedule cleanup after 5 minutes to allow users to see the error
+        const cleanupTimeout = window.setTimeout(
+          () => {
+            this._commandExecutions.delete(commandID);
+            this._commandExecutionCleanupTimeouts.delete(commandID);
+            this.requestUpdate();
+          },
+          5 * 60 * 1000,
+        ); // 5 minutes
+
+        this._commandExecutionCleanupTimeouts.set(commandID, cleanupTimeout);
+      }
+    });
+
+    // Clear pending command requests since they won't get responses
+    this._pendingCommandRequests.clear();
   }
 
   private handleMessage(event: MessageEvent<string>) {
@@ -220,6 +305,9 @@ export class WebSocketProvider extends ProviderElement {
           autostart: receivedSettings.autostart ?? false,
           hotkeys: receivedSettings.hotkeys ?? [],
           logLevel: receivedSettings.logLevel ?? "INFO",
+          commands: {
+            allowlist: receivedSettings.commands?.allowlist ?? [],
+          },
           media: {
             directories: receivedSettings.media?.directories ?? [],
           },
@@ -239,6 +327,12 @@ export class WebSocketProvider extends ProviderElement {
           hotkeys: updatedSettings.hotkeys ?? this._settings?.hotkeys ?? [],
           logLevel:
             updatedSettings.logLevel ?? this._settings?.logLevel ?? "INFO",
+          commands: {
+            allowlist:
+              updatedSettings.commands?.allowlist ??
+              this._settings?.commands.allowlist ??
+              [],
+          },
           media: {
             directories:
               updatedSettings.media?.directories ??
@@ -254,21 +348,152 @@ export class WebSocketProvider extends ProviderElement {
         break;
       }
 
+      case "COMMAND_EXECUTING": {
+        const commandData = message.data as { commandID: string };
+        if (commandData?.commandID) {
+          // Clean up the pending request tracking
+          if (message.id) {
+            this._pendingCommandRequests.delete(message.id);
+          }
+
+          // Cancel any existing cleanup timeout for this command
+          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
+            commandData.commandID,
+          );
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(commandData.commandID);
+          }
+
+          // Enforce size limit before adding new entry
+          this.enforceCommandExecutionsLimit();
+
+          // Set new execution state
+          this._commandExecutions.set(commandData.commandID, {
+            isExecuting: true,
+            result: null,
+          });
+          this.requestUpdate();
+        }
+        break;
+      }
+
+      case "COMMAND_COMPLETED": {
+        const result = message.data as {
+          commandID: string;
+          exitCode: number;
+          stdout: string;
+          stderr: string;
+          error?: string;
+        };
+        if (result?.commandID) {
+          // Clean up the pending request tracking
+          if (message.id) {
+            this._pendingCommandRequests.delete(message.id);
+          }
+
+          // Cancel any existing cleanup timeout for this command
+          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
+            result.commandID,
+          );
+          if (existingTimeout !== undefined) {
+            clearTimeout(existingTimeout);
+            this._commandExecutionCleanupTimeouts.delete(result.commandID);
+          }
+
+          // Enforce size limit before adding new entry
+          this.enforceCommandExecutionsLimit();
+
+          // Set completed state
+          this._commandExecutions.set(result.commandID, {
+            isExecuting: false,
+            result,
+          });
+          this.requestUpdate();
+
+          // Schedule cleanup after 5 minutes to allow users to see results
+          const cleanupTimeout = window.setTimeout(
+            () => {
+              this._commandExecutions.delete(result.commandID);
+              this._commandExecutionCleanupTimeouts.delete(result.commandID);
+              this.requestUpdate();
+            },
+            5 * 60 * 1000,
+          ); // 5 minutes
+
+          this._commandExecutionCleanupTimeouts.set(
+            result.commandID,
+            cleanupTimeout,
+          );
+        }
+        break;
+      }
+
       case "ERROR":
         if (message.subtype === "BAD_TOKEN") {
           this._error =
             "Invalid API token. Please check your connection settings and update your token.";
           this._isConnected = false;
           this._retryCount = MAX_RETRIES + 1;
-          showNotification(
-            "Authentication Failed",
-            "Your API token is invalid or has expired.",
-            "error",
-          );
           this._ws?.close();
           return;
         } else {
-          this._error = `Server error: ${message.data ?? "Unknown error"}`;
+          const errorMessage = message.message ?? "Unknown error";
+          this._error = `Server error: ${errorMessage}`;
+
+          // Handle command execution errors
+          if (
+            message.subtype === "COMMAND_NOT_FOUND" ||
+            message.subtype === "BAD_PATH" ||
+            message.subtype === "BAD_DIRECTORY" ||
+            message.subtype === "BAD_REQUEST"
+          ) {
+            // Check if this error is for a pending command execution
+            const commandId = this._pendingCommandRequests.get(message.id);
+            if (commandId) {
+              // Cancel any existing cleanup timeout for this command
+              const existingTimeout =
+                this._commandExecutionCleanupTimeouts.get(commandId);
+              if (existingTimeout !== undefined) {
+                clearTimeout(existingTimeout);
+                this._commandExecutionCleanupTimeouts.delete(commandId);
+              }
+
+              // Enforce size limit before adding new entry
+              this.enforceCommandExecutionsLimit();
+
+              // Set error result
+              this._commandExecutions.set(commandId, {
+                isExecuting: false,
+                result: {
+                  commandID: commandId,
+                  exitCode: 1,
+                  stdout: "",
+                  stderr: "",
+                  error: errorMessage,
+                },
+              });
+              this.requestUpdate();
+
+              // Schedule cleanup after 5 minutes
+              const cleanupTimeout = window.setTimeout(
+                () => {
+                  this._commandExecutions.delete(commandId);
+                  this._commandExecutionCleanupTimeouts.delete(commandId);
+                  this.requestUpdate();
+                },
+                5 * 60 * 1000,
+              );
+
+              this._commandExecutionCleanupTimeouts.set(
+                commandId,
+                cleanupTimeout,
+              );
+
+              // Clean up the pending request tracking
+              this._pendingCommandRequests.delete(message.id);
+            }
+          }
         }
         break;
 
@@ -353,9 +578,6 @@ export class WebSocketProvider extends ProviderElement {
         clearTimeout(this._reconnectTimeout);
       }
 
-      if (!this._previousConnectedState) {
-        showNotification("Connected", "Connected to System Bridge", "success");
-      }
       this._previousConnectedState = true;
 
       if (!this._isRequestingData) {
@@ -393,14 +615,8 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       this.clearAllPendingResolvers("WebSocket connection closed");
+      this.clearExecutingCommandsOnDisconnect();
 
-      if (this._previousConnectedState && this._error) {
-        showNotification(
-          "Disconnected",
-          "Disconnected from System Bridge",
-          "error",
-        );
-      }
       this._previousConnectedState = false;
 
       if (event.code === 1006) {
@@ -412,7 +628,6 @@ export class WebSocketProvider extends ProviderElement {
         this._error =
           "Invalid API token. Please check your connection settings.";
         this._retryCount = MAX_RETRIES + 1;
-        showNotification("Authentication Failed", "Invalid API token", "error");
       } else if (event.code !== 1000 && event.code !== 1001) {
         this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
       }
@@ -430,6 +645,7 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       this.clearAllPendingResolvers("WebSocket connection error");
+      this.clearExecutingCommandsOnDisconnect();
 
       if (this._retryCount === 0) {
         this._error =
@@ -468,6 +684,25 @@ export class WebSocketProvider extends ProviderElement {
         this.requestUpdate();
       }
     }, RETRY_DELAY);
+  }
+
+  sendCommandExecute(messageId: string, commandId: string, token: string) {
+    if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return;
+
+    // Track this command execution request
+    this._pendingCommandRequests.set(messageId, commandId);
+
+    // Send the command execute request
+    this._ws.send(
+      JSON.stringify({
+        id: messageId,
+        event: "COMMAND_EXECUTE",
+        data: {
+          commandID: commandId,
+        },
+        token: token,
+      }),
+    );
   }
 
   sendRequest(request: WebSocketRequest) {
@@ -556,6 +791,13 @@ export class WebSocketProvider extends ProviderElement {
       clearTimeout(this._settingsUpdateTimeout);
       this._settingsUpdateTimeout = null;
     }
+    // Clean up all command execution timeouts
+    for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
+      clearTimeout(timeoutId);
+    }
+    this._commandExecutionCleanupTimeouts.clear();
+    this._commandExecutions.clear();
+    this._pendingCommandRequests.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
   }
 

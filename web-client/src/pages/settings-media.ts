@@ -7,7 +7,6 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { showError, showSuccess } from "~/lib/notifications";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
@@ -25,6 +24,9 @@ interface MediaDirectory {
 
 @customElement("page-settings-media")
 export class PageSettingsMedia extends PageElement {
+  title = "Media Directories";
+  description = "Manage directories for media scanning";
+
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -66,10 +68,6 @@ export class PageSettingsMedia extends PageElement {
     }
   }
 
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
-  };
-
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
   };
@@ -86,17 +84,14 @@ export class PageSettingsMedia extends PageElement {
 
   private handleAddDirectory = async (): Promise<void> => {
     if (!this.newDirectoryName.trim() || !this.newDirectoryPath.trim()) {
-      showError("Please enter both name and path");
       return;
     }
 
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequestWithResponse) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -154,7 +149,6 @@ export class PageSettingsMedia extends PageElement {
         this.saveSettings();
         this.newDirectoryName = "";
         this.newDirectoryPath = "";
-        showSuccess("Directory added successfully");
       } else {
         this.validationError = "Directory does not exist or is not accessible.";
       }
@@ -176,17 +170,14 @@ export class PageSettingsMedia extends PageElement {
       (d) => d.path !== path,
     );
     this.saveSettings();
-    showSuccess("Directory removed successfully");
   };
 
   private saveSettings(): void {
     if (!this.connection?.token) {
-      showError("No token found");
       return;
     }
 
     if (!this.websocket?.sendRequest || !this.websocket?.settings) {
-      showError("WebSocket not available");
       return;
     }
 
@@ -209,7 +200,6 @@ export class PageSettingsMedia extends PageElement {
       });
     } catch (error) {
       console.error("Failed to update media settings:", error);
-      showError("Failed to update settings");
     } finally {
       this.isSubmitting = false;
       this.requestUpdate();
@@ -260,26 +250,7 @@ export class PageSettingsMedia extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <ui-button
-                variant="ghost"
-                size="icon"
-                @click=${this.handleNavigateToHome}
-                aria-label="Back to home"
-              >
-                <ui-icon name="ArrowLeft"></ui-icon>
-              </ui-button>
-              <div>
-                <h1 class="text-3xl font-bold mb-2">Media Directories</h1>
-                <p class="text-muted-foreground">
-                  Manage directories for media scanning
-                </p>
-              </div>
-            </div>
-            <ui-connection-indicator></ui-connection-indicator>
-          </div>
-
+          ${this.renderPageHeader()}
           ${!isConnected
             ? html`
                 <ui-connection-required

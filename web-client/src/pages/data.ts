@@ -14,6 +14,9 @@ import "../components/ui/tabs";
 
 @customElement("page-data")
 export class PageData extends PageElement {
+  title = "Data";
+  description = "Real-time data from System Bridge modules";
+
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -34,10 +37,6 @@ export class PageData extends PageElement {
 
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
-  };
-
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
   };
 
   private capitalizeFirst(str: string): string {
@@ -89,26 +88,7 @@ export class PageData extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-7xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <ui-button
-                variant="ghost"
-                size="icon"
-                @click=${this.handleNavigateToHome}
-                aria-label="Back to home"
-              >
-                <ui-icon name="ArrowLeft"></ui-icon>
-              </ui-button>
-              <div>
-                <h1 class="text-3xl font-bold mb-2">Data</h1>
-                <p class="text-muted-foreground">
-                  Real-time data from System Bridge modules
-                </p>
-              </div>
-            </div>
-            <ui-connection-indicator></ui-connection-indicator>
-          </div>
-
+          ${this.renderPageHeader()}
           ${!isConnected
             ? html`
                 <ui-connection-required

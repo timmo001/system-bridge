@@ -25,6 +25,8 @@ const (
 	ResponseTypeDataListenerRegistered   ResponseType = "DATA_LISTENER_REGISTERED"
 	ResponseTypeDataListenerUnregistered ResponseType = "DATA_LISTENER_UNREGISTERED"
 	ResponseTypeDataUpdate               ResponseType = "DATA_UPDATE"
+	ResponseTypeCommandExecuting         ResponseType = "COMMAND_EXECUTING"
+	ResponseTypeCommandCompleted         ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeSettingsResult           ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated          ResponseType = "SETTINGS_UPDATED"
 	ResponseTypeDirectoryValidated       ResponseType = "DIRECTORY_VALIDATED"
@@ -54,5 +56,6 @@ const (
 	ResponseSubtypeMissingTitle              ResponseSubtype = "MISSING_TITLE"
 	ResponseSubtypeMissingToken              ResponseSubtype = "MISSING_TOKEN"
 	ResponseSubtypeMissingValue              ResponseSubtype = "MISSING_VALUE"
+	ResponseSubtypeCommandNotFound           ResponseSubtype = "COMMAND_NOT_FOUND"
 	ResponseSubtypeUnknownEvent              ResponseSubtype = "UNKNOWN_EVENT"
 )

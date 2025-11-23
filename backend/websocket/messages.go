@@ -16,6 +16,12 @@ func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message
 	connInfo.writeMux.Lock()
 	defer connInfo.writeMux.Unlock()
 
+	// Handle test connections with nil conn (used in unit tests)
+	if connInfo.conn == nil {
+		slog.Debug("Skipping message send to test connection", "message_id", message.ID)
+		return
+	}
+
 	if err := connInfo.conn.WriteJSON(message); err != nil {
 		slog.Error("Failed to send response", "error", err)
 		// If there's an error, close the connection
@@ -44,6 +50,28 @@ func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message
 			}(connInfo.conn.RemoteAddr().String(), connInfo.conn)
 		}
 	}
+}
+
+func (ws *WebsocketServer) SendMessageToAddress(address string, message event.MessageResponse) bool {
+	// Find the connectionInfo for this address
+	ws.mutex.RLock()
+	connInfo, ok := ws.connections[address]
+	ws.mutex.RUnlock()
+
+	if ok {
+		ws.SendMessage(connInfo, message)
+		return true
+	}
+
+	slog.Error("Connection not found in connections map", "address", address)
+	return false
+}
+
+func (ws *WebsocketServer) ConnectionExists(address string) bool {
+	ws.mutex.RLock()
+	_, ok := ws.connections[address]
+	ws.mutex.RUnlock()
+	return ok
 }
 
 func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest, subtype event.ResponseSubtype, message string) {

@@ -74,6 +74,18 @@ type SettingsHotkey struct {
 	Key  string `json:"key" mapstructure:"key"`
 }
 
+type SettingsCommandDefinition struct {
+	ID         string   `json:"id" mapstructure:"id"`
+	Name       string   `json:"name" mapstructure:"name"`
+	Command    string   `json:"command" mapstructure:"command"`
+	WorkingDir string   `json:"workingDir" mapstructure:"workingDir"`
+	Arguments  []string `json:"arguments" mapstructure:"arguments"`
+}
+
+type SettingsCommands struct {
+	Allowlist []SettingsCommandDefinition `json:"allowlist" mapstructure:"allowlist"`
+}
+
 type SettingsMediaDirectory struct {
 	Name string `json:"name" mapstructure:"name"`
 	Path string `json:"path" mapstructure:"path"`
@@ -87,6 +99,7 @@ type Settings struct {
 	Autostart bool             `json:"autostart" mapstructure:"autostart"`
 	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel  LogLevel         `json:"logLevel" mapstructure:"logLevel"`
+	Commands  SettingsCommands `json:"commands" mapstructure:"commands"`
 	Media     SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
@@ -107,6 +120,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelInfo)
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
+	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
 
 	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
@@ -147,13 +161,52 @@ func Load() (*Settings, error) {
 	if err := decoder.Decode(viper.AllSettings()); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
+
+	// Validate settings after loading
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("settings validation failed: %w", err)
+	}
+
 	return &cfg, nil
 }
 
+// Validate validates the settings structure
+func (cfg *Settings) Validate() error {
+	// Check for duplicate command IDs
+	seenIDs := make(map[string]bool)
+	for i, cmd := range cfg.Commands.Allowlist {
+		// Validate individual command
+		if err := utils.ValidateCommand(cmd.ID, cmd.Name, cmd.Command, cmd.WorkingDir, cmd.Arguments); err != nil {
+			return fmt.Errorf("command at index %d: %w", i, err)
+		}
+
+		// Check for duplicates
+		if seenIDs[cmd.ID] {
+			return fmt.Errorf("duplicate command ID: %s", cmd.ID)
+		}
+		seenIDs[cmd.ID] = true
+	}
+
+	// Validate media directories exist
+	for _, dir := range cfg.Media.Directories {
+		if err := utils.ValidateMediaDirectory(dir.Path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (cfg *Settings) Save() error {
+	// Validate settings before saving
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("settings validation failed: %w", err)
+	}
+
 	viper.Set("autostart", cfg.Autostart)
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
+	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
 	viper.Set("media.directories", cfg.Media.Directories)
 
 	if err := viper.WriteConfig(); err != nil {
