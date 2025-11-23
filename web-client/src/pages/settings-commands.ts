@@ -52,8 +52,12 @@ export class PageSettingsCommands extends PageElement {
   @state()
   private pendingRequestId: string | null = null;
 
+  @state()
+  private errorMessage: string | null = null;
+
   private submissionTimeout: number | null = null;
   private previousCommands: SettingsCommandDefinition[] = [];
+  private errorTimeout: number | null = null;
 
   connectedCallback() {
     super.connectedCallback();
@@ -67,27 +71,57 @@ export class PageSettingsCommands extends PageElement {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+    if (this.errorTimeout !== null) {
+      clearTimeout(this.errorTimeout);
+      this.errorTimeout = null;
+    }
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
-    }
 
-    // Check if settings have been updated after a pending submission
-    if (
-      this.isSubmitting &&
-      this.pendingRequestId !== null &&
-      changedProperties.has("websocket")
-    ) {
-      const currentCommands =
-        this.websocket?.settings?.commands.allowlist ?? [];
-      const previousCommandsStr = JSON.stringify(this.previousCommands);
-      const currentCommandsStr = JSON.stringify(currentCommands);
+      // Check for settings update errors
+      if (
+        this.isSubmitting &&
+        this.pendingRequestId !== null &&
+        this.websocket?.settingsUpdateError
+      ) {
+        const error = this.websocket.settingsUpdateError;
+        // Check if the error is for our pending request
+        if (error.requestId === this.pendingRequestId) {
+          // Reload commands from actual settings (which won't include the invalid command)
+          this.loadSettings();
 
-      // If commands have changed, clear the submitting state
-      if (previousCommandsStr !== currentCommandsStr) {
-        this.clearSubmissionState();
+          // Show error message
+          this.errorMessage = error.message;
+
+          // Clear error after 10 seconds
+          if (this.errorTimeout !== null) {
+            clearTimeout(this.errorTimeout);
+          }
+          this.errorTimeout = window.setTimeout(() => {
+            this.errorMessage = null;
+            this.errorTimeout = null;
+            this.requestUpdate();
+          }, 10000);
+
+          // Clear submission state
+          this.clearSubmissionState();
+        }
+      }
+
+      // Check if settings have been updated successfully after a pending submission
+      if (this.isSubmitting && this.pendingRequestId !== null) {
+        const currentCommands =
+          this.websocket?.settings?.commands.allowlist ?? [];
+        const previousCommandsStr = JSON.stringify(this.previousCommands);
+        const currentCommandsStr = JSON.stringify(currentCommands);
+
+        // If commands have changed, clear the submitting state
+        if (previousCommandsStr !== currentCommandsStr) {
+          this.clearSubmissionState();
+        }
       }
     }
   }
@@ -382,6 +416,23 @@ ${result.stderr}</pre
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
+          ${this.errorMessage
+            ? html`
+                <div
+                  class="rounded-lg border border-red-800 bg-red-950/30 p-4 flex items-start gap-3"
+                >
+                  <ui-icon name="AlertCircle" class="text-red-400"></ui-icon>
+                  <div class="flex-1">
+                    <div class="font-medium text-red-200">
+                      Failed to save command
+                    </div>
+                    <div class="text-sm text-red-300 mt-1">
+                      ${this.errorMessage}
+                    </div>
+                  </div>
+                </div>
+              `
+            : ""}
           ${!isConnected
             ? html`
                 <ui-connection-required
