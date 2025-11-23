@@ -63,6 +63,8 @@ export class PageElement extends UIElement {
   private updateDocumentTitle(): void {
     if (this.title && this.title !== "System Bridge") {
       document.title = `${this.title} | System Bridge`;
+    } else {
+      document.title = "System Bridge";
     }
   }
 
