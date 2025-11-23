@@ -115,17 +115,16 @@ func LoadOrGenerateUUID(macAddress, hostname string) (string, error) {
 		return "", fmt.Errorf("failed to create UUID file: %w", err)
 	}
 
-	// File already exists, read it
-	uuidBytes, err := os.ReadFile(uuidPath)
+	// File already exists, read it with retry logic
+	// Another process may have just created it and might still be writing
+	storedUUID, err := readUUIDWithRetry(uuidPath, macAddress, hostname)
 	if err != nil {
-		return "", fmt.Errorf("failed to read existing UUID file: %w", err)
+		return "", err
 	}
-
-	storedUUID := strings.TrimSpace(string(uuidBytes))
 
 	// Validate the stored UUID
 	if storedUUID == "" {
-		slog.Warn("Stored UUID is empty, regenerating")
+		slog.Warn("Stored UUID is empty after retries, regenerating")
 		return regenerateUUID(uuidPath, macAddress, hostname)
 	}
 
@@ -137,6 +136,53 @@ func LoadOrGenerateUUID(macAddress, hostname string) (string, error) {
 	if _, err := uuid.Parse(storedUUID); err != nil {
 		slog.Warn("Stored UUID has invalid format, regenerating", "error", err)
 		return regenerateUUID(uuidPath, macAddress, hostname)
+	}
+
+	return storedUUID, nil
+}
+
+// readUUIDWithRetry reads the UUID file with retry logic and exponential backoff
+// This handles the race condition where another process created the file but hasn't finished writing
+func readUUIDWithRetry(uuidPath, macAddress, hostname string) (string, error) {
+	const maxRetries = 5
+	const baseDelay = 10 * time.Millisecond
+
+	var storedUUID string
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			// Exponential backoff: 10ms, 20ms, 40ms, 80ms, 160ms
+			delay := baseDelay * time.Duration(1<<uint(attempt-1))
+			slog.Debug("Retrying UUID file read", "attempt", attempt+1, "delay", delay)
+			time.Sleep(delay)
+		}
+
+		uuidBytes, err := os.ReadFile(uuidPath)
+		if err != nil {
+			// If the file was deleted between our check and read, that's unusual
+			// but we should handle it by returning an error
+			if os.IsNotExist(err) && attempt == maxRetries-1 {
+				return "", fmt.Errorf("UUID file disappeared during read attempts: %w", err)
+			} else if os.IsNotExist(err) {
+				continue // Retry
+			}
+			return "", fmt.Errorf("failed to read UUID file on attempt %d: %w", attempt+1, err)
+		}
+
+		storedUUID = strings.TrimSpace(string(uuidBytes))
+
+		// If we got a non-empty UUID, we're done
+		if storedUUID != "" {
+			if attempt > 0 {
+				slog.Debug("Successfully read UUID after retry", "attempt", attempt+1)
+			}
+			break
+		}
+
+		// Empty UUID - another process might still be writing
+		if attempt == maxRetries-1 {
+			// Last attempt and still empty - this is a problem
+			slog.Warn("UUID file is empty after all retry attempts", "attempts", maxRetries)
+		}
 	}
 
 	return storedUUID, nil
