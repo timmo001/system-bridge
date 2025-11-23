@@ -287,7 +287,10 @@ export class PageSettingsCommands extends PageElement {
               ?disabled=${isExecuting || this.isSubmitting}
               title="Execute command"
             >
-              <ui-icon name=${isExecuting ? "Loader2" : "Play"}></ui-icon>
+              <ui-icon
+                name=${isExecuting ? "Loader2" : "Play"}
+                className=${isExecuting ? "animate-spin" : ""}
+              ></ui-icon>
             </ui-button>
             <ui-button
               variant="destructive"
@@ -297,7 +300,10 @@ export class PageSettingsCommands extends PageElement {
               ?disabled=${this.isSubmitting}
               title="Remove command"
             >
-              <ui-icon name="Trash2"></ui-icon>
+              <ui-icon
+                name=${this.isSubmitting ? "Loader2" : "Trash2"}
+                className=${this.isSubmitting ? "animate-spin" : ""}
+              ></ui-icon>
             </ui-button>
           </div>
         </div>
@@ -458,6 +464,12 @@ ${result.stderr}</pre
                           !this.newCommandName.trim() ||
                           !this.newCommandCommand.trim()}
                         >
+                          ${this.isSubmitting
+                            ? html`<ui-icon
+                                name="Loader2"
+                                className="animate-spin"
+                              ></ui-icon>`
+                            : ""}
                           Add Command
                         </ui-button>
                       </div>
