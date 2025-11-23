@@ -14,6 +14,10 @@ import (
 
 // List of known problematic default UUIDs that manufacturers fail to update
 // These are common default values in various BIOS/Chipsets
+//
+// To expand this list: If you encounter systems with duplicate UUIDs, add the
+// problematic UUID here with a comment indicating the manufacturer/model.
+// Report new defaults at: https://github.com/timmo001/system-bridge/issues
 var defaultUUIDs = map[string]bool{
 	"03000200-0400-0500-0006-000700080009": true, // Common Bee-Link and other manufacturers
 	"00000000-0000-0000-0000-000000000000": true, // All zeros
@@ -187,9 +191,13 @@ func GetSystemUUID(biosUUID, macAddress, hostname string) string {
 
 	// BIOS UUID is problematic, need to use or generate an alternative
 	if normalizedBiosUUID == "" {
-		slog.Warn("System UUID is empty, generating stable UUID")
+		slog.Warn("System UUID is empty, generating stable UUID based on MAC address and hostname")
 	} else {
-		slog.Warn("System UUID is a known default value, generating stable UUID", "biosUUID", biosUUID)
+		slog.Warn(
+			"System has default BIOS UUID (manufacturer did not customize). Using stable generated UUID instead.",
+			"biosUUID", biosUUID,
+			"recommendation", "Update BIOS settings if possible to set a unique UUID",
+		)
 	}
 
 	// Try to load or generate a stable UUID
