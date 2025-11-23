@@ -35,8 +35,14 @@ func TestValidateMediaDirectory(t *testing.T) {
 		tempFile, err := os.CreateTemp("", "media-file-test-*")
 		require.NoError(t, err)
 		tempFilePath := tempFile.Name()
-		tempFile.Close()
-		defer os.Remove(tempFilePath)
+		err = tempFile.Close()
+		require.NoError(t, err)
+		defer func() {
+			err := os.Remove(tempFilePath)
+			if err != nil {
+				t.Fatalf("failed to remove temp file: %v", err)
+			}
+		}()
 
 		err = ValidateMediaDirectory(tempFilePath)
 		assert.Error(t, err)
