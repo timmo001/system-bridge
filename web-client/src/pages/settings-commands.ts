@@ -66,7 +66,10 @@ export class PageSettingsCommands extends PageElement {
 
     // Listen for settings update errors from the websocket provider on window
     // (events are dispatched on the provider, not on this component)
-    window.addEventListener("settings-update-error", this.handleSettingsUpdateError);
+    window.addEventListener(
+      "settings-update-error",
+      this.handleSettingsUpdateError,
+    );
     window.addEventListener("settings-updated", this.handleSettingsUpdated);
   }
 
@@ -81,7 +84,10 @@ export class PageSettingsCommands extends PageElement {
       this.errorTimeout = null;
     }
     // Remove event listeners from window
-    window.removeEventListener("settings-update-error", this.handleSettingsUpdateError);
+    window.removeEventListener(
+      "settings-update-error",
+      this.handleSettingsUpdateError,
+    );
     window.removeEventListener("settings-updated", this.handleSettingsUpdated);
   }
 
@@ -92,8 +98,8 @@ export class PageSettingsCommands extends PageElement {
 
     // Try to find the part after "command [uuid]"
     const uuidPattern = /command\s+[a-f0-9-]+\s+(.+)$/i;
-    const match = fullMessage.match(uuidPattern);
-    if (match) {
+    const match = uuidPattern.exec(fullMessage);
+    if (match?.[1]) {
       // Capitalize first letter
       return match[1].charAt(0).toUpperCase() + match[1].slice(1);
     }
@@ -110,7 +116,10 @@ export class PageSettingsCommands extends PageElement {
     }>;
 
     // Check if this error is for our pending request
-    if (this.isSubmitting && this.pendingRequestId === customEvent.detail.requestId) {
+    if (
+      this.isSubmitting &&
+      this.pendingRequestId === customEvent.detail.requestId
+    ) {
       // Reload commands from actual settings (which won't include the invalid command)
       this.loadSettings();
 
@@ -139,7 +148,10 @@ export class PageSettingsCommands extends PageElement {
     }>;
 
     // Check if this update is for our pending request
-    if (this.isSubmitting && this.pendingRequestId === customEvent.detail.requestId) {
+    if (
+      this.isSubmitting &&
+      this.pendingRequestId === customEvent.detail.requestId
+    ) {
       // Load updated settings from websocket context
       this.loadSettings();
 
