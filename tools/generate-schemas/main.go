@@ -488,11 +488,13 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 	}
 
 	// Handle nullable (pointer) types
-	// Use .nullish() instead of .nullable() to match TypeScript behavior:
+	// Use .nullish() instead of .nullable() to match Go's pointer semantics and TypeScript behavior:
+	// - In Go, pointer fields (*T) can be nil, representing an "absent" or "not set" value
+	// - In TypeScript/JSON, this maps to either `null` (explicitly absent) or `undefined` (not present)
 	// - .nullish() allows both null and undefined (matches TypeScript's optional/nullable types)
-	// - .nullable() only allows null, which is more restrictive
-	// This change ensures generated Zod schemas correctly validate TypeScript types
-	// where optional fields can be either undefined or explicitly set to null
+	// - .nullable() only allows null, which is more restrictive and doesn't handle undefined
+	// This ensures generated Zod schemas correctly validate TypeScript types where optional fields
+	// can be either undefined (field not present in JSON) or explicitly set to null
 	if field.IsPtr {
 		zodSchema += ".nullish()"
 	}

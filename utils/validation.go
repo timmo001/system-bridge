@@ -84,6 +84,9 @@ func ValidateCommand(id, name, command, workingDir string, arguments []string) e
 	}
 
 	// Validate working directory if specified
+	// NOTE: This validation happens at settings save time. The working directory must also exist
+	// at command execution time. If a directory is deleted between save and execution, the command
+	// will fail at execution time (not here). This is acceptable as it's a runtime environment change.
 	if workingDir != "" {
 		// Check for '..' before cleaning the path (filepath.Clean normalizes and removes '..')
 		if strings.Contains(workingDir, "..") {
