@@ -61,6 +61,13 @@ func (ws *WebsocketServer) SendMessageToAddress(address string, message event.Me
 	return false
 }
 
+func (ws *WebsocketServer) ConnectionExists(address string) bool {
+	ws.mutex.RLock()
+	_, ok := ws.connections[address]
+	ws.mutex.RUnlock()
+	return ok
+}
+
 func (ws *WebsocketServer) SendError(conn *websocket.Conn, req WebSocketRequest, subtype event.ResponseSubtype, message string) {
 	response := event.MessageResponse{
 		ID:      req.ID,

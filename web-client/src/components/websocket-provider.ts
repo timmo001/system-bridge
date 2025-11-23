@@ -385,6 +385,7 @@ export class WebSocketProvider extends ProviderElement {
                 this._commandExecutionCleanupTimeouts.get(commandId);
               if (existingTimeout !== undefined) {
                 clearTimeout(existingTimeout);
+                this._commandExecutionCleanupTimeouts.delete(commandId);
               }
 
               // Set error result

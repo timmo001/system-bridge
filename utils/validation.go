@@ -44,6 +44,10 @@ func ValidateCommand(id, name, command, workingDir string, arguments []string) e
 		return fmt.Errorf("command %s has empty command", id)
 	}
 
+	// Clean the command path to resolve any '..' or '.' components
+	// This prevents path traversal attacks (e.g., /usr/bin/../../../etc/passwd)
+	command = filepath.Clean(command)
+
 	// Validate command path is absolute
 	if !filepath.IsAbs(command) {
 		return fmt.Errorf("command %s must use absolute path", id)
@@ -81,7 +85,12 @@ func ValidateCommand(id, name, command, workingDir string, arguments []string) e
 
 	// Validate working directory if specified
 	if workingDir != "" {
+		// Clean the working directory path to resolve any '..' or '.' components
+		// This prevents path traversal attacks
+		workingDir = filepath.Clean(workingDir)
+
 		// Check for '..' in working directory path
+		// After cleaning, '..' should not appear in a valid absolute path
 		if strings.Contains(workingDir, "..") {
 			return fmt.Errorf("working directory for command %s contains '..' which is not allowed", id)
 		}

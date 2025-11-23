@@ -116,6 +116,22 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 		"requestID", req.RequestID,
 	)
 
+	// Verify connection still exists before spawning goroutine
+	// This prevents orphaned command execution when connection closes between validation and execution
+	ws := websocket.GetInstance()
+	if ws == nil {
+		return errors.New("WebSocket instance not available")
+	}
+	if !ws.ConnectionExists(req.Connection) {
+		slog.Warn(
+			"Command execution aborted - connection no longer exists",
+			"commandID", commandDef.ID,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
+		)
+		return errors.New("connection no longer exists")
+	}
+
 	// Execute asynchronously
 	go executeAsync(req, commandDef)
 
