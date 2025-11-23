@@ -282,10 +282,6 @@ export class PageSettingsCommands extends PageElement {
     }
   }
 
-  private saveSettings(): void {
-    this.saveSettingsWithCommands(this.commands);
-  }
-
   private renderCommandItem(cmd: SettingsCommandDefinition) {
     const executionState = this.websocket?.commandExecutions.get(cmd.id);
     const isExecuting = executionState?.isExecuting ?? false;
