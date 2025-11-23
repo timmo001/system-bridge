@@ -459,6 +459,9 @@ export class WebSocketProvider extends ProviderElement {
                 this._commandExecutionCleanupTimeouts.delete(commandId);
               }
 
+              // Enforce size limit before adding new entry
+              this.enforceCommandExecutionsLimit();
+
               // Set error result
               this._commandExecutions.set(commandId, {
                 isExecuting: false,
