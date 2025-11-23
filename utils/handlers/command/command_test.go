@@ -107,6 +107,7 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:      "relative-command",
+						Name:    "Relative Command",
 						Command: "bin/echo", // Relative path
 					},
 				},
@@ -127,6 +128,7 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:      "missing-command",
+						Name:    "Missing Command",
 						Command: "/nonexistent/path/command",
 					},
 				},
@@ -152,6 +154,7 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:         "bad-working-dir",
+						Name:       "Bad Working Dir",
 						Command:    cmdPath,
 						WorkingDir: "/nonexistent/directory",
 					},
@@ -178,6 +181,7 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:         "relative-working-dir",
+						Name:       "Relative Working Dir",
 						Command:    cmdPath,
 						WorkingDir: "relative/path",
 					},
@@ -193,6 +197,33 @@ func TestValidateCommand(t *testing.T) {
 		assert.Contains(t, err.Error(), "must be absolute path")
 	})
 
+	t.Run("Command with path traversal in working directory", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		cmdPath := filepath.Join(tmpDir, "test-command")
+		err := os.WriteFile(cmdPath, []byte("#!/bin/sh\necho test\n"), 0755)
+		require.NoError(t, err)
+
+		cfg := &settings.Settings{
+			Commands: settings.SettingsCommands{
+				Allowlist: []settings.SettingsCommandDefinition{
+					{
+						ID:         "traversal-working-dir",
+						Name:       "Traversal Working Dir",
+						Command:    cmdPath,
+						WorkingDir: "/tmp/../etc",
+					},
+				},
+			},
+		}
+
+		commandDef, err := ValidateCommand("traversal-working-dir", cfg)
+
+		assert.Error(t, err)
+		assert.Nil(t, commandDef)
+		assert.True(t, errors.Is(err, ErrWorkingDirInvalid))
+		assert.Contains(t, err.Error(), "..")
+	})
+
 	t.Run("Command with shell metacharacters in arguments", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		cmdPath := filepath.Join(tmpDir, "test-command")
@@ -204,6 +235,7 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:        "shell-meta-command",
+						Name:      "Shell Meta Command",
 						Command:   cmdPath,
 						Arguments: []string{"arg1; rm -rf /"},
 					},
@@ -234,14 +266,17 @@ func TestValidateCommand(t *testing.T) {
 				Allowlist: []settings.SettingsCommandDefinition{
 					{
 						ID:      "command1",
+						Name:    "Command 1",
 						Command: cmd1Path,
 					},
 					{
 						ID:      "command2",
+						Name:    "Command 2",
 						Command: cmd2Path,
 					},
 					{
 						ID:      "command3",
+						Name:    "Command 3",
 						Command: cmd3Path,
 					},
 				},
