@@ -172,35 +172,64 @@ func Load() (*Settings, error) {
 	return &cfg, nil
 }
 
+// ValidateMediaDirectory validates a single media directory path
+func ValidateMediaDirectory(path string) error {
+	// Check for '..' before cleaning the path (filepath.Clean normalizes and removes '..')
+	if strings.Contains(path, "..") {
+		return fmt.Errorf("media directory path contains '..' which is not allowed: %s", path)
+	}
+
+	cleanPath := filepath.Clean(path)
+	stat, err := os.Stat(cleanPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("media directory does not exist: %s", path)
+		}
+		return fmt.Errorf("error accessing media directory %s: %w", path, err)
+	}
+
+	if !stat.IsDir() {
+		return fmt.Errorf("media directory path is not a directory: %s", path)
+	}
+
+	return nil
+}
+
+// ValidateCommand validates a single command definition
+func ValidateCommand(cmd SettingsCommandDefinition) error {
+	if cmd.ID == "" {
+		return fmt.Errorf("command has empty ID")
+	}
+	if cmd.Name == "" {
+		return fmt.Errorf("command %s has empty name", cmd.ID)
+	}
+	if cmd.Command == "" {
+		return fmt.Errorf("command %s has empty command", cmd.ID)
+	}
+	return nil
+}
+
 // Validate validates the settings structure
 func (cfg *Settings) Validate() error {
 	// Check for duplicate command IDs
 	seenIDs := make(map[string]bool)
 	for i, cmd := range cfg.Commands.Allowlist {
-		if cmd.ID == "" {
-			return fmt.Errorf("command at index %d has empty ID", i)
+		// Validate individual command
+		if err := ValidateCommand(cmd); err != nil {
+			return fmt.Errorf("command at index %d: %w", i, err)
 		}
+
+		// Check for duplicates
 		if seenIDs[cmd.ID] {
 			return fmt.Errorf("duplicate command ID: %s", cmd.ID)
 		}
 		seenIDs[cmd.ID] = true
-
-		// Validate command fields
-		if cmd.Name == "" {
-			return fmt.Errorf("command %s has empty name", cmd.ID)
-		}
-		if cmd.Command == "" {
-			return fmt.Errorf("command %s has empty command", cmd.ID)
-		}
 	}
 
 	// Validate media directories exist
 	for _, dir := range cfg.Media.Directories {
-		cleanPath := filepath.Clean(dir.Path)
-		if !strings.Contains(cleanPath, "..") {
-			if stat, err := os.Stat(cleanPath); err != nil || !stat.IsDir() {
-				return fmt.Errorf("media directory %s does not exist or is not a directory", dir.Path)
-			}
+		if err := ValidateMediaDirectory(dir.Path); err != nil {
+			return err
 		}
 	}
 

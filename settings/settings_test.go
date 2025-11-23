@@ -308,6 +308,105 @@ func TestSettingsStructs(t *testing.T) {
 	})
 }
 
+func TestValidateMediaDirectory(t *testing.T) {
+	t.Run("Valid directory", func(t *testing.T) {
+		// Create a temporary directory
+		tempDir, err := os.MkdirTemp("", "media-validation-test-*")
+		require.NoError(t, err)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
+
+		err = ValidateMediaDirectory(tempDir)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Non-existent directory", func(t *testing.T) {
+		err := ValidateMediaDirectory("/non/existent/path")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "does not exist")
+	})
+
+	t.Run("Path is a file, not a directory", func(t *testing.T) {
+		// Create a temporary file
+		tempFile, err := os.CreateTemp("", "media-file-test-*")
+		require.NoError(t, err)
+		tempFilePath := tempFile.Name()
+		tempFile.Close()
+		defer os.Remove(tempFilePath)
+
+		err = ValidateMediaDirectory(tempFilePath)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "not a directory")
+	})
+
+	t.Run("Path contains '..'", func(t *testing.T) {
+		err := ValidateMediaDirectory("/some/path/../other/path")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "'..'")
+	})
+}
+
+func TestValidateCommand(t *testing.T) {
+	t.Run("Valid command", func(t *testing.T) {
+		cmd := SettingsCommandDefinition{
+			ID:      "test-cmd",
+			Name:    "Test Command",
+			Command: "echo test",
+		}
+		err := ValidateCommand(cmd)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Empty ID", func(t *testing.T) {
+		cmd := SettingsCommandDefinition{
+			ID:      "",
+			Name:    "Test Command",
+			Command: "echo test",
+		}
+		err := ValidateCommand(cmd)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty ID")
+	})
+
+	t.Run("Empty name", func(t *testing.T) {
+		cmd := SettingsCommandDefinition{
+			ID:      "test-cmd",
+			Name:    "",
+			Command: "echo test",
+		}
+		err := ValidateCommand(cmd)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty name")
+	})
+
+	t.Run("Empty command", func(t *testing.T) {
+		cmd := SettingsCommandDefinition{
+			ID:      "test-cmd",
+			Name:    "Test Command",
+			Command: "",
+		}
+		err := ValidateCommand(cmd)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "empty command")
+	})
+
+	t.Run("Valid command with working directory and arguments", func(t *testing.T) {
+		cmd := SettingsCommandDefinition{
+			ID:         "test-cmd",
+			Name:       "Test Command",
+			Command:    "/usr/bin/echo",
+			WorkingDir: "/tmp",
+			Arguments:  []string{"hello", "world"},
+		}
+		err := ValidateCommand(cmd)
+		assert.NoError(t, err)
+	})
+}
+
 func TestLogLevel(t *testing.T) {
 	t.Run("LogLevel constants", func(t *testing.T) {
 		assert.Equal(t, LogLevel("DEBUG"), LogLevelDebug)
