@@ -20,6 +20,9 @@ import "../components/ui/switch";
 
 @customElement("page-settings-general")
 export class PageSettingsGeneral extends PageElement {
+  title = "General Settings";
+  description = "Configure your System Bridge general settings";
+
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -122,7 +125,7 @@ export class PageSettingsGeneral extends PageElement {
   };
 
   private handleAutostartChange = (
-    e: CustomEvent<{ checked: boolean }>,
+    e: CustomEvent<{ checked: boolean }>
   ): void => {
     this.formData = { ...this.formData, autostart: e.detail.checked };
   };
@@ -139,36 +142,13 @@ export class PageSettingsGeneral extends PageElement {
     this.navigate("/connection");
   };
 
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
-  };
-
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <ui-button
-                variant="ghost"
-                size="icon"
-                @click=${this.handleNavigateToHome}
-                aria-label="Back to home"
-              >
-                <ui-icon name="ArrowLeft"></ui-icon>
-              </ui-button>
-              <div>
-                <h1 class="text-3xl font-bold mb-2">General Settings</h1>
-                <p class="text-muted-foreground">
-                  Configure your System Bridge general settings
-                </p>
-              </div>
-            </div>
-            <ui-connection-indicator></ui-connection-indicator>
-          </div>
-
+          ${this.renderPageHeader()}
           ${!isConnected
             ? html`
                 <ui-connection-required

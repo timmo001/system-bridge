@@ -28,6 +28,9 @@ type ConnectionForm = z.infer<typeof ConnectionSchema>;
 
 @customElement("page-connection")
 export class PageConnection extends PageElement {
+  title = "Connection Settings";
+  description = "Configure your connection to System Bridge";
+
   @consume({ context: connectionContext, subscribe: true })
   @state()
   connection?: ConnectionSettings;
@@ -86,10 +89,6 @@ export class PageConnection extends PageElement {
     this.navigate("/");
   };
 
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
-  };
-
   private validateForm(): boolean {
     const result = ConnectionSchema.safeParse(this.formData);
     if (!result.success) {
@@ -116,7 +115,7 @@ export class PageConnection extends PageElement {
     this.requestUpdate();
 
     const ws = new WebSocket(
-      `${this.formData.ssl ? "wss" : "ws"}://${this.formData.host}:${this.formData.port}/api/websocket`,
+      `${this.formData.ssl ? "wss" : "ws"}://${this.formData.host}:${this.formData.port}/api/websocket`
     );
 
     const timeout = setTimeout(() => {
@@ -133,7 +132,7 @@ export class PageConnection extends PageElement {
           id: "test-connection",
           event: "GET_SETTINGS",
           token: this.formData.token,
-        }),
+        })
       );
     };
 
@@ -170,7 +169,7 @@ export class PageConnection extends PageElement {
               detail: newSettings,
               bubbles: true,
               composed: true,
-            }),
+            })
           );
 
           ws.close();
@@ -212,22 +211,7 @@ export class PageConnection extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-2xl mx-auto space-y-6">
-          <div class="flex items-center gap-3">
-            <ui-button
-              variant="ghost"
-              size="icon"
-              @click=${this.handleNavigateToHome}
-              aria-label="Back to home"
-            >
-              <ui-icon name="ArrowLeft"></ui-icon>
-            </ui-button>
-            <div>
-              <h1 class="text-3xl font-bold mb-2">Connection Settings</h1>
-              <p class="text-muted-foreground">
-                Configure your connection to System Bridge
-              </p>
-            </div>
-          </div>
+          ${this.renderPageHeader({ showConnectionIndicator: false })}
 
           <form @submit=${this.handleSubmit} class="space-y-6">
             <div class="space-y-2">

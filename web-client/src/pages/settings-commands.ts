@@ -22,6 +22,9 @@ import "../components/ui/label";
 
 @customElement("page-settings-commands")
 export class PageSettingsCommands extends PageElement {
+  title = "Commands";
+  description = "Manage commands that can be executed remotely";
+
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -106,10 +109,6 @@ export class PageSettingsCommands extends PageElement {
     this.requestUpdate();
   }
 
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
-  };
-
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
   };
@@ -187,7 +186,7 @@ export class PageSettingsCommands extends PageElement {
     this.websocket.sendCommandExecute(
       generateUUID(),
       id,
-      this.connection.token,
+      this.connection.token
     );
   };
 
@@ -231,7 +230,7 @@ export class PageSettingsCommands extends PageElement {
       this.submissionTimeout = window.setTimeout(() => {
         if (this.isSubmitting && this.pendingRequestId === requestId) {
           console.warn(
-            "Settings update timeout: no response received after 10 seconds",
+            "Settings update timeout: no response received after 10 seconds"
           );
           this.clearSubmissionState();
         }
@@ -370,7 +369,7 @@ ${result.stderr}</pre
     }
 
     const commandItems = this.commands.map((cmd) =>
-      this.renderCommandItem(cmd),
+      this.renderCommandItem(cmd)
     );
 
     return html` <div class="space-y-2">${commandItems}</div> `;
@@ -382,26 +381,7 @@ ${result.stderr}</pre
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <ui-button
-                variant="ghost"
-                size="icon"
-                @click=${this.handleNavigateToHome}
-                aria-label="Back to home"
-              >
-                <ui-icon name="ArrowLeft"></ui-icon>
-              </ui-button>
-              <div>
-                <h1 class="text-3xl font-bold mb-2">Commands</h1>
-                <p class="text-muted-foreground">
-                  Manage commands that can be executed remotely
-                </p>
-              </div>
-            </div>
-            <ui-connection-indicator></ui-connection-indicator>
-          </div>
-
+          ${this.renderPageHeader()}
           ${!isConnected
             ? html`
                 <ui-connection-required

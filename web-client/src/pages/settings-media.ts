@@ -24,6 +24,9 @@ interface MediaDirectory {
 
 @customElement("page-settings-media")
 export class PageSettingsMedia extends PageElement {
+  title = "Media Directories";
+  description = "Manage directories for media scanning";
+
   @consume({ context: websocketContext, subscribe: true })
   websocket?: WebSocketState;
 
@@ -64,10 +67,6 @@ export class PageSettingsMedia extends PageElement {
       this.mediaDirectories = [...this.websocket.settings.media.directories];
     }
   }
-
-  private handleNavigateToHome = (): void => {
-    this.navigate("/");
-  };
 
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
@@ -136,7 +135,7 @@ export class PageSettingsMedia extends PageElement {
               return { success: false as const, error };
             }
           },
-        } as never,
+        } as never
       );
 
       if (response.valid) {
@@ -168,7 +167,7 @@ export class PageSettingsMedia extends PageElement {
     if (!path) return;
 
     this.mediaDirectories = this.mediaDirectories.filter(
-      (d) => d.path !== path,
+      (d) => d.path !== path
     );
     this.saveSettings();
   };
@@ -239,7 +238,7 @@ export class PageSettingsMedia extends PageElement {
     }
 
     const directoryItems = this.mediaDirectories.map((dir) =>
-      this.renderDirectoryItem(dir),
+      this.renderDirectoryItem(dir)
     );
 
     return html` <div class="space-y-2">${directoryItems}</div> `;
@@ -251,26 +250,7 @@ export class PageSettingsMedia extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <ui-button
-                variant="ghost"
-                size="icon"
-                @click=${this.handleNavigateToHome}
-                aria-label="Back to home"
-              >
-                <ui-icon name="ArrowLeft"></ui-icon>
-              </ui-button>
-              <div>
-                <h1 class="text-3xl font-bold mb-2">Media Directories</h1>
-                <p class="text-muted-foreground">
-                  Manage directories for media scanning
-                </p>
-              </div>
-            </div>
-            <ui-connection-indicator></ui-connection-indicator>
-          </div>
-
+          ${this.renderPageHeader()}
           ${!isConnected
             ? html`
                 <ui-connection-required

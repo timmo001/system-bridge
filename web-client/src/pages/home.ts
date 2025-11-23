@@ -7,6 +7,9 @@ import "../components/ui/connection-status-card";
 
 @customElement("page-home")
 export class PageHome extends PageElement {
+  title = "System Bridge";
+  description = "A bridge for your systems";
+
   private handleSetupConnection = (): void => {
     this.navigate("/connection");
   };
@@ -32,8 +35,8 @@ export class PageHome extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-8">
           <div class="space-y-2">
-            <h1 class="text-4xl font-bold">System Bridge</h1>
-            <p class="text-muted-foreground">A bridge for your systems</p>
+            <h1 class="text-4xl font-bold">${this.title}</h1>
+            <p class="text-muted-foreground">${this.description}</p>
           </div>
 
           <div class="space-y-6">
