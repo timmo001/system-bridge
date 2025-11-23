@@ -406,3 +406,236 @@ func TestExecuteResult(t *testing.T) {
 		assert.Equal(t, "execution failed", result.Error)
 	})
 }
+
+func TestServerContextCancellation(t *testing.T) {
+	t.Run("Execute function respects context cancellation", func(t *testing.T) {
+		// Clean state
+		SetServerContext(nil)
+
+		commandDef := &settings.SettingsCommandDefinition{
+			ID:      "test-sleep",
+			Command: "/bin/sleep",
+			Arguments: []string{"10"},
+		}
+
+		// Create context and cancel it quickly
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		resultChan := make(chan ExecuteResult, 1)
+		go func() {
+			result := execute(ctx, commandDef)
+			resultChan <- result
+		}()
+
+		// Wait a bit for command to start
+		time.Sleep(100 * time.Millisecond)
+
+		// Cancel
+		cancel()
+
+		// Should complete quickly
+		select {
+		case result := <-resultChan:
+			// Should be canceled
+			assert.Contains(t, result.Error, "canceled")
+		case <-time.After(2 * time.Second):
+			t.Fatal("execute() did not return after context cancellation")
+		}
+	})
+
+	t.Run("Server context getter returns correct context", func(t *testing.T) {
+		// Test that SetServerContext and getServerContext work correctly
+		testCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		SetServerContext(testCtx)
+		retrieved := getServerContext()
+		assert.NotNil(t, retrieved)
+		assert.Equal(t, testCtx, retrieved)
+
+		// Cancel and verify child contexts are affected
+		childCtx, childCancel := context.WithCancel(retrieved)
+		defer childCancel()
+
+		cancel() // Cancel parent
+
+		// Child should be canceled too
+		select {
+		case <-childCtx.Done():
+			// Expected
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("Child context was not canceled when parent was canceled")
+		}
+	})
+
+	t.Run("Command killed when server context canceled", func(t *testing.T) {
+		// Clean up any previous server context
+		SetServerContext(nil)
+
+		commandDef := &settings.SettingsCommandDefinition{
+			ID:        "long-running-command",
+			Name:      "Long Running Command",
+			Command:   "/bin/sleep",
+			Arguments: []string{"30"},
+		}
+
+		// Create a server context that we'll cancel
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		defer serverCancel()
+		defer SetServerContext(nil) // Clean up after test
+
+		// Set the server context
+		SetServerContext(serverCtx)
+
+		// Start command execution in a goroutine
+		resultChan := make(chan ExecuteResult, 1)
+		startTime := time.Now()
+		go func() {
+			// Create command execution context with timeout longer than our cancel time
+			// This ensures the command is killed by context cancellation, not timeout
+			cmdCtx, cmdCancel := context.WithTimeout(getServerContext(), 10*time.Second)
+			defer cmdCancel()
+			result := execute(cmdCtx, commandDef)
+			resultChan <- result
+		}()
+
+		// Wait a bit for command to start
+		time.Sleep(100 * time.Millisecond)
+
+		// Cancel the server context (simulating backend shutdown)
+		serverCancel()
+
+		// Wait for command to complete
+		var result ExecuteResult
+		select {
+		case result = <-resultChan:
+			// Command completed
+		case <-time.After(2 * time.Second):
+			t.Fatal("Command did not terminate within 2s after context cancellation")
+		}
+
+		duration := time.Since(startTime)
+
+		// Verify the command was canceled, not timed out
+		assert.Equal(t, "long-running-command", result.CommandID)
+		assert.Equal(t, -1, result.ExitCode)
+		assert.Contains(t, result.Error, "canceled")
+		assert.NotContains(t, result.Error, "timeout")
+		// Command should have been killed quickly (well before the 10s timeout)
+		assert.Less(t, duration, 3*time.Second, "Command should be killed by context cancellation, not timeout")
+	})
+
+	t.Run("Command completes normally with server context", func(t *testing.T) {
+		SetServerContext(nil)
+
+		commandDef := &settings.SettingsCommandDefinition{
+			ID:        "quick-command",
+			Name:      "Quick Command",
+			Command:   "/bin/echo",
+			Arguments: []string{"success"},
+		}
+
+		// Create a server context
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		defer serverCancel()
+		defer SetServerContext(nil)
+
+		// Set the server context
+		SetServerContext(serverCtx)
+
+		// Create command execution context
+		cmdCtx, cmdCancel := context.WithTimeout(getServerContext(), 5*time.Second)
+		defer cmdCancel()
+
+		// Execute command
+		result := execute(cmdCtx, commandDef)
+
+		// Verify the command completed successfully
+		assert.Equal(t, "quick-command", result.CommandID)
+		assert.Equal(t, 0, result.ExitCode)
+		assert.Contains(t, result.Stdout, "success")
+		assert.Empty(t, result.Error)
+	})
+
+	t.Run("Fallback to Background context when server context not set", func(t *testing.T) {
+		commandDef := &settings.SettingsCommandDefinition{
+			ID:        "test-command",
+			Name:      "Test Command",
+			Command:   "/bin/echo",
+			Arguments: []string{"test"},
+		}
+
+		// Clear server context by setting it to nil
+		SetServerContext(nil)
+
+		// getServerContext should return Background context
+		ctx := getServerContext()
+		assert.NotNil(t, ctx)
+
+		// Command should still execute with background context
+		cmdCtx, cmdCancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cmdCancel()
+
+		result := execute(cmdCtx, commandDef)
+
+		// Verify the command completed successfully
+		assert.Equal(t, "test-command", result.CommandID)
+		assert.Equal(t, 0, result.ExitCode)
+		assert.Contains(t, result.Stdout, "test")
+		assert.Empty(t, result.Error)
+	})
+
+	t.Run("Multiple commands killed on server shutdown", func(t *testing.T) {
+		SetServerContext(nil)
+
+		// Create a server context
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		defer serverCancel()
+		defer SetServerContext(nil)
+
+		// Set the server context
+		SetServerContext(serverCtx)
+
+		// Start multiple commands
+		numCommands := 3
+		resultChans := make([]chan ExecuteResult, numCommands)
+
+		for i := 0; i < numCommands; i++ {
+			commandDef := &settings.SettingsCommandDefinition{
+				ID:        "sleep-command-" + string(rune('1'+i)),
+				Name:      "Sleep Command " + string(rune('1'+i)),
+				Command:   "/bin/sleep",
+				Arguments: []string{"20"},
+			}
+
+			resultChans[i] = make(chan ExecuteResult, 1)
+			cmdIdx := i
+
+			go func() {
+				cmdCtx, cmdCancel := context.WithTimeout(getServerContext(), 10*time.Second)
+				defer cmdCancel()
+				result := execute(cmdCtx, commandDef)
+				resultChans[cmdIdx] <- result
+			}()
+		}
+
+		// Wait for commands to start
+		time.Sleep(100 * time.Millisecond)
+
+		// Cancel server context (simulate shutdown)
+		serverCancel()
+
+		// Wait for all commands to terminate
+		for i := 0; i < numCommands; i++ {
+			select {
+			case result := <-resultChans[i]:
+				// All commands should be canceled
+				assert.Equal(t, -1, result.ExitCode, "Command %d exit code", i)
+				assert.Contains(t, result.Error, "canceled", "Command %d error", i)
+			case <-time.After(2 * time.Second):
+				t.Fatalf("Command %d did not terminate within expected time", i)
+			}
+		}
+	})
+}
