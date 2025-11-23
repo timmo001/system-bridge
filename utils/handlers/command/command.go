@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strings"
 	"time"
 
@@ -79,16 +81,25 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 				}
 				return nil, fmt.Errorf("%w: command %s path error: %w", ErrCommandPathInvalid, commandID, err)
 			}
-			// Check if file is executable on Unix-like systems (Linux, macOS, etc.)
-			// On Windows, this check is skipped as executable permission is determined by file extension
+			// Validate file is regular and executable
 			mode := fileInfo.Mode()
 			if !mode.IsRegular() {
 				return nil, fmt.Errorf("%w: command %s is not a regular file", ErrCommandPathInvalid, commandID)
 			}
-			// Check executable bit (0111 = owner, group, others execute permissions)
-			// This check applies to Unix-like systems; Windows will pass this check
-			if mode&0111 == 0 {
-				return nil, fmt.Errorf("%w: command %s is not executable (missing execute permissions)", ErrCommandPathInvalid, commandID)
+
+			// Check executable permissions - different logic for Unix vs Windows
+			if runtime.GOOS != "windows" {
+				// On Unix-like systems, check executable bit (0111 = owner, group, others execute permissions)
+				if mode&0111 == 0 {
+					return nil, fmt.Errorf("%w: command %s is not executable (missing execute permissions)", ErrCommandPathInvalid, commandID)
+				}
+			} else {
+				// On Windows, executable permission is determined by file extension
+				ext := strings.ToLower(filepath.Ext(command.Command))
+				validExts := []string{".exe", ".bat", ".cmd", ".ps1"}
+				if !slices.Contains(validExts, ext) {
+					return nil, fmt.Errorf("%w: command %s must have executable extension (.exe, .bat, .cmd, .ps1) on Windows", ErrCommandPathInvalid, commandID)
+				}
 			}
 
 			// Validate working directory if specified
