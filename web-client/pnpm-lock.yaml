@@ -27,8 +27,8 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
       lucide:
-        specifier: ^0.554.0
-        version: 0.554.0
+        specifier: ^0.555.0
+        version: 0.555.0
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -1532,8 +1532,8 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lucide@0.554.0:
-    resolution: {integrity: sha512-heltqxp+r6FbXs5FKMwARbE9aiDLLz9rlAlOU48NYHU4nWi2oVkQIz+Uv7LHZNsFVfgtgLBv7VOjM7QUvT6F3A==}
+  lucide@0.555.0:
+    resolution: {integrity: sha512-R7BkO2/XRpMADcMIRn1UOZOvirxr2Z6s/R82k0EUK71ZXXrlRbvkVwTAIf+9DRApeyH+zNMIGfiUdmrOhoAygQ==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3414,7 +3414,7 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lucide@0.554.0: {}
+  lucide@0.555.0: {}
 
   magic-string@0.30.21:
     dependencies:
