@@ -41,10 +41,10 @@ importers:
         version: 9.39.1
       '@tailwindcss/vite':
         specifier: ^4.1.18
-        version: 4.1.18(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2))
+        version: 4.1.18(vite@7.2.7(@types/node@25.0.0)(jiti@2.6.1)(lightningcss@1.30.2))
       '@types/node':
-        specifier: ^24.10.2
-        version: 24.10.2
+        specifier: ^25.0.0
+        version: 25.0.0
       autoprefixer:
         specifier: ^10.4.22
         version: 10.4.22(postcss@8.5.6)
@@ -98,7 +98,7 @@ importers:
         version: 8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       vite:
         specifier: ^7.2.7
-        version: 7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)
+        version: 7.2.7(@types/node@25.0.0)(jiti@2.6.1)(lightningcss@1.30.2)
 
 packages:
 
@@ -573,8 +573,8 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/node@24.10.2':
-    resolution: {integrity: sha512-WOhQTZ4G8xZ1tjJTvKOpyEVSGgOTvJAfDK3FNFgELyaTpzhdgHVHeqW8V+UJvzF5BT+/B54T/1S2K6gd9c7bbA==}
+  '@types/node@25.0.0':
+    resolution: {integrity: sha512-rl78HwuZlaDIUSeUKkmogkhebA+8K1Hy7tddZuJ3D0xV8pZSfsYGTsliGUol1JPzu9EKnTxPC4L1fiWouStRew==}
 
   '@types/parse5@2.2.34':
     resolution: {integrity: sha512-p3qOvaRsRpFyEmaS36RtLzpdxZZnmxGuT1GMgzkTtTJVFuEw7KFjGK83MFODpJExgX1bEzy9r0NYjMC3IMfi7w==}
@@ -1822,9 +1822,6 @@ packages:
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
-  tailwindcss@4.1.17:
-    resolution: {integrity: sha512-j9Ee2YjuQqYT9bbRTfTZht9W/ytp5H+jJpZKiYdP/bpnXARAuELt9ofP0lPnmHjbga7SNQIxdTAXCmtKVYjN+Q==}
-
   tailwindcss@4.1.18:
     resolution: {integrity: sha512-4+Z+0yiYyEtUVCScyfHCxOYP06L5Ne+JiHhY2IjR2KWMIWhJOYZKLSGZaP5HkZ8+bY0cxfzwDE5uOmzFXyIwxw==}
 
@@ -2317,12 +2314,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.1.18
       '@tailwindcss/oxide-win32-x64-msvc': 4.1.18
 
-  '@tailwindcss/vite@4.1.18(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2))':
+  '@tailwindcss/vite@4.1.18(vite@7.2.7(@types/node@25.0.0)(jiti@2.6.1)(lightningcss@1.30.2))':
     dependencies:
       '@tailwindcss/node': 4.1.18
       '@tailwindcss/oxide': 4.1.18
       tailwindcss: 4.1.18
-      vite: 7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)
+      vite: 7.2.7(@types/node@25.0.0)(jiti@2.6.1)(lightningcss@1.30.2)
 
   '@thepassle/axobject-query@4.0.0':
     dependencies:
@@ -2339,13 +2336,13 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/node@24.10.2':
+  '@types/node@25.0.0':
     dependencies:
       undici-types: 7.16.0
 
   '@types/parse5@2.2.34':
     dependencies:
-      '@types/node': 24.10.2
+      '@types/node': 25.0.0
 
   '@types/trusted-types@2.0.7': {}
 
@@ -3749,8 +3746,6 @@ snapshots:
 
   tailwind-merge@3.4.0: {}
 
-  tailwindcss@4.1.17: {}
-
   tailwindcss@4.1.18: {}
 
   tapable@2.3.0: {}
@@ -3868,7 +3863,7 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2):
+  vite@7.2.7(@types/node@25.0.0)(jiti@2.6.1)(lightningcss@1.30.2):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -3877,7 +3872,7 @@ snapshots:
       rollup: 4.53.3
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.10.2
+      '@types/node': 25.0.0
       fsevents: 2.3.3
       jiti: 2.6.1
       lightningcss: 1.30.2
