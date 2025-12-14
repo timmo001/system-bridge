@@ -55,6 +55,17 @@ func RegisterGetFilesHandler(router *event.MessageRouter) {
 			}
 		}
 
+		// Validate base directory path is not empty
+		if baseDirectory.Path == "" {
+			slog.Error("Base directory path is empty", "base", data.BaseDirectory)
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeBadDirectory,
+				Message: "Base directory path is empty",
+			}
+		}
+
 		// Get files
 		var files []GetFileResponseData
 		if data.Path != "" {
