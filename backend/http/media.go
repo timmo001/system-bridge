@@ -10,7 +10,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 )
 
 // ServeMediaFileDataHandler handles requests to serve media files from predefined base directories
@@ -167,28 +169,65 @@ func getBaseDirectoryPath(base string) (string, error) {
 	var basePath string
 	var err error
 
+	// First check hardcoded standard directories (for backward compatibility)
 	switch base {
 	case "documents":
 		basePath, err = getDocumentsPath()
+		if err == nil {
+			return basePath, nil
+		}
 	case "downloads":
 		basePath, err = getDownloadsPath()
+		if err == nil {
+			return basePath, nil
+		}
 	case "home":
 		basePath, err = getHomePath()
+		if err == nil {
+			return basePath, nil
+		}
 	case "music":
 		basePath, err = getMusicPath()
+		if err == nil {
+			return basePath, nil
+		}
 	case "pictures":
 		basePath, err = getPicturesPath()
+		if err == nil {
+			return basePath, nil
+		}
 	case "videos":
 		basePath, err = getVideosPath()
-	default:
-		return "", fmt.Errorf("invalid base directory: %s", base)
+		if err == nil {
+			return basePath, nil
+		}
 	}
 
-	if err != nil {
-		return "", fmt.Errorf("failed to get %s path: %w", base, err)
+	// If not found in hardcoded list, check user directories (XDG + custom)
+	directories := filesystem.GetUserDirectories()
+	for _, dir := range directories {
+		if dir.Key == base {
+			if dir.Path == "" {
+				return "", fmt.Errorf("directory %s has empty path", base)
+			}
+			return dir.Path, nil
+		}
 	}
 
-	return basePath, nil
+	// Also check custom media directories from settings
+	s, err := settings.Load()
+	if err == nil {
+		for _, directory := range s.Media.Directories {
+			if directory.Name == base {
+				if directory.Path == "" {
+					return "", fmt.Errorf("directory %s has empty path", base)
+				}
+				return directory.Path, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("invalid base directory: %s", base)
 }
 
 // getContentType returns the MIME content type for a file based on its extension
