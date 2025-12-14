@@ -32,7 +32,12 @@ func getUserDirectories() []DirectoryInfo {
 					parts := strings.SplitN(line, "=", 2)
 					if len(parts) == 2 {
 						key := strings.ToLower(strings.TrimPrefix(parts[0], "XDG_"))
-						key = strings.TrimSuffix(key, "_DIR")
+						key = strings.TrimSuffix(key, "_dir")
+						// Normalize XDG key names to match expected convention across platforms
+						// XDG uses "DOWNLOAD_DIR" (singular) but codebase expects "downloads" (plural)
+						if key == "download" {
+							key = "downloads"
+						}
 						path := strings.Trim(parts[1], "\"")
 						path = strings.ReplaceAll(path, "$HOME", homeDir)
 						dirs[key] = path
@@ -40,14 +45,19 @@ func getUserDirectories() []DirectoryInfo {
 				}
 			}
 
-			return []DirectoryInfo{
-				{Key: "desktop", Path: dirs["desktop"]},
-				{Key: "documents", Path: dirs["documents"]},
-				{Key: "downloads", Path: dirs["download"]},
-				{Key: "music", Path: dirs["music"]},
-				{Key: "pictures", Path: dirs["pictures"]},
-				{Key: "videos", Path: dirs["videos"]},
+			// Build DirectoryInfo list from all parsed XDG directories
+			userDirs := make([]DirectoryInfo, 0, len(dirs))
+			for key, path := range dirs {
+				// Only include directories with non-empty paths
+				if path != "" {
+					userDirs = append(userDirs, DirectoryInfo{
+						Key:  key,
+						Path: path,
+					})
+				}
 			}
+
+			return userDirs
 		}
 	}
 
