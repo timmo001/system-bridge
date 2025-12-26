@@ -24,15 +24,15 @@ build: clean build_web_client
 ifeq ($(OS),Windows_NT)
 	$(GEN_RC)
 	windres system-bridge.rc -O coff -o system-bridge.syso
-	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
+	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" . 
 else
-	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "$(OUT)" .
+	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" .
 endif
 
 # Build console version for debugging (Windows only)
 build_console: clean build_web_client
 ifeq ($(OS),Windows_NT)
-	go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=5.0.0-dev+$(shell git rev-parse --short HEAD)'" -o "system-bridge-console.exe" .
+	go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "system-bridge-console.exe" .
 else
 	@echo "Console build is only supported on Windows"
 endif
