@@ -71,6 +71,9 @@ func (d *DataStore) Register(u types.Updater) {
 }
 
 func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	// Validate module name
 	if name == "" {
 		return types.Module{}, fmt.Errorf("module name cannot be empty")
@@ -86,12 +89,14 @@ func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
 		slog.Info("Module data is nil, refreshing data", "module", module.Name)
 		if err := d.loadModuleData(&module); err != nil {
 			slog.Error("Error loading module data", "module", module.Name, "error", err)
+		} else {
+			// Save the updated module back to the registry
+			d.registry[name] = module
 		}
 	}
 
 	return module, nil
 }
-
 func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
