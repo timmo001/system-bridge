@@ -24,9 +24,9 @@ func getGPUs() ([]types.GPU, error) {
 	output, err := cmd. Output()
 	if err == nil {
 		// Parse nvidia-smi output
-		lines := strings. Split(string(output), "\n")
+		lines := strings.Split(string(output), "\n")
 		for _, line := range lines {
-			line = strings. TrimSpace(line)
+			line = strings.TrimSpace(line)
 			if line == "" {
 				continue
 			}
@@ -47,12 +47,12 @@ func getGPUs() ([]types.GPU, error) {
 					Name:        name,
 					CoreClock:   &coreClock,
 					CoreLoad:    &coreLoad,
-					MemoryClock:  &memoryClock,
+					MemoryClock:   &memoryClock,
 					MemoryLoad:  &coreLoad,
 					MemoryFree:  &memoryFree,
 					MemoryUsed:  &memoryUsed,
 					MemoryTotal: &memoryTotal,
-					PowerUsage:  &powerUsage,
+					PowerUsage:   &powerUsage,
 					Temperature: &temperature,
 				})
 			}
@@ -67,7 +67,7 @@ func getGPUs() ([]types.GPU, error) {
 	}
 
 	// Fallback:  Get basic GPU information using PowerShell WMI
-	cmd = exec.Command("powershell", "-Command", `
+	cmd = exec. Command("powershell", "-Command", `
 		class GPU {
 			[string]$ID
 			[string]$Name
@@ -78,7 +78,7 @@ func getGPUs() ([]types.GPU, error) {
 		Get-WmiObject Win32_VideoController | ForEach-Object {
 			$gpu = New-Object GPU -Property @{
 				ID = $_.DeviceID
-				Name = $_. Name
+				Name = $_.Name
 				MemoryTotal = [math]::Round($_.AdapterRAM / 1GB, 2)
 			}
 			$gpus.Add($gpu)
@@ -88,7 +88,7 @@ func getGPUs() ([]types.GPU, error) {
 	utils.SetHideWindow(cmd)
 	output, err = cmd.Output()
 	if err != nil {
-		slog. Error("failed to get GPU info", "error", err)
+		slog.Error("failed to get GPU info", "error", err)
 		return gpus, err
 	}
 
@@ -110,6 +110,29 @@ func getGPUs() ([]types.GPU, error) {
 			Name:        info.Name,
 			MemoryTotal: &info.MemoryTotal,
 		})
+	}
+
+	// Get GPU temperature using OpenHardwareMonitor (fallback for non-NVIDIA or when nvidia-smi unavailable)
+	cmd = exec.Command("powershell", "-Command", `
+		Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace "root/wmi" | ForEach-Object {
+			$temp = ($_.CurrentTemperature - 2732) / 10. 0
+			[PSCustomObject]@{
+				Temperature = $temp
+			}
+		} | ConvertTo-Json
+	`)
+	utils.SetHideWindow(cmd)
+	output, err = cmd.Output()
+	if err == nil {
+		var temps []struct {
+			Temperature float64 `json:"Temperature"`
+		}
+		if err := json.Unmarshal(output, &temps); err == nil && len(temps) > 0 {
+			// Assign temperature to the first GPU if it doesn't already have one
+			if len(gpus) > 0 && gpus[0].Temperature == nil {
+				gpus[0].Temperature = &temps[0].Temperature
+			}
+		}
 	}
 
 	return gpus, nil
