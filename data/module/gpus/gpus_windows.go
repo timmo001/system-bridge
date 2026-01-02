@@ -67,7 +67,7 @@ func getGPUs() ([]types.GPU, error) {
 	}
 
 	// Fallback:  Get basic GPU information using PowerShell WMI
-	cmd = exec. Command("powershell", "-Command", `
+	cmd = exec.Command("powershell", "-Command", `
 		class GPU {
 			[string]$ID
 			[string]$Name
