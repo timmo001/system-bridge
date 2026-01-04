@@ -2,6 +2,7 @@ package data_module
 
 import (
 	"context"
+	"runtime"
 
 	"log/slog"
 
@@ -21,11 +22,17 @@ func (mm MemoryModule) Update(ctx context.Context) (any, error) {
 	if err != nil {
 		slog.Error("Failed to get virtual memory", "error", err)
 	} else {
+		// On Linux, use available memory as free memory
+		freeMemory := virtualMem.Free
+		if runtime.GOOS == "linux" {
+			freeMemory = virtualMem.Available
+		}
+
 		memoryData.Virtual = &types.MemoryVirtual{
 			Total:     &virtualMem.Total,
 			Available: &virtualMem.Available,
 			Used:      &virtualMem.Used,
-			Free:      &virtualMem.Free,
+			Free:      &freeMemory,
 			Active:    &virtualMem.Active,
 			Inactive:  &virtualMem.Inactive,
 			Buffers:   &virtualMem.Buffers,
