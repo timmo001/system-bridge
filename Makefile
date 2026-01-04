@@ -49,17 +49,29 @@ ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
 	@echo "Verifying build files are accessible..."
-	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host '✗ Build files not found after build'; exit 1 }"
-	@echo ✓ Build files verified before Go build
+	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host 'ERROR: web-client\dist\index.html not found'; exit 1 }"
+	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
+	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
+	@echo "✓ Build files verified and ready for embedding"
 else
 	@echo "Waiting for file system to sync..."
 	@sync
 	@echo "Verifying build files are accessible..."
-	@if ! ls web-client/dist/index.html 1> /dev/null 2>&1; then \
-		echo "✗ Build files not found after build"; \
+	@if ! ls web-client/dist/index.html >/dev/null 2>&1; then \
+		echo "ERROR: web-client/dist/index.html not found"; \
 		exit 1; \
 	fi
-	@echo "✓ Build files verified before Go build"
+	@if ! ls web-client/dist/assets/*.css >/dev/null 2>&1; then \
+		echo "ERROR: CSS files not found in web-client/dist/assets/"; \
+		ls -la web-client/dist/assets/ || true; \
+		exit 1; \
+	fi
+	@if ! ls web-client/dist/assets/*.js >/dev/null 2>&1; then \
+		echo "ERROR: JS files not found in web-client/dist/assets/"; \
+		ls -la web-client/dist/assets/ || true; \
+		exit 1; \
+	fi
+	@echo "✓ Build files verified and ready for embedding"
 endif
 
 create_all_packages: clean_dist build
