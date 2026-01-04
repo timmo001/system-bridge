@@ -11,7 +11,7 @@ pkgdesc="A bridge for your systems"
 makedepends=('git' 'go' 'pnpm')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/timmo001/system-bridge/archive/refs/tags/TAGVER_PLACEHOLDER.tar.gz")
 sha256sums=('SKIP')
-conflicts=('system-bridge-git')
+conflicts=('system-bridge-git' 'system-bridge-git-debug')
 
 arch=('x86_64')
 url="https://github.com/timmo001/system-bridge"
