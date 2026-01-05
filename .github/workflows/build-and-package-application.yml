@@ -213,7 +213,7 @@ jobs:
         run: |
           echo "::group::Setup"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Move-Item system-bridge.exe dist/system-bridge.exe
+          Move-Item system-bridge.exe dist/system-bridge.exe -Force
           echo "::endgroup::"
 
           echo "::group::Create installer"
