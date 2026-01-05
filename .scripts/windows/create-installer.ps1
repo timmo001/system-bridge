@@ -42,6 +42,153 @@ if (-not (Test-Path "dist\system-bridge.exe")) {
     exit 1
 }
 
+# Verify CSS inclusion in binary
+Write-Host "Verifying CSS inclusion in binary..."
+function Verify-CSSInclusion {
+    param(
+        [string]$BinaryPath
+    )
+    
+    Write-Host "Checking for embedded web client in $BinaryPath..."
+    
+    # Check if binary contains embedded web client
+    # Use Select-String to search for the embedded content marker
+    $hasEmbeddedContent = Select-String -Path $BinaryPath -Pattern "web-client/dist/index.html" -Quiet
+    if (-not $hasEmbeddedContent) {
+        Write-Error "Binary does not contain embedded web client"
+        return $false
+    }
+    
+    Write-Host "✓ Binary contains embedded web client"
+    
+    # If curl is available, do more thorough verification
+    $curlCommand = Get-Command curl -ErrorAction SilentlyContinue
+    if ($curlCommand) {
+        Write-Host "Starting temporary server to verify embedded content..."
+        $PORT = 9171
+        $oldPort = $env:SYSTEM_BRIDGE_PORT
+        $env:SYSTEM_BRIDGE_PORT = $PORT.ToString()
+        $LOG_FILE = Join-Path $env:TEMP "system-bridge-server.log"
+        
+        try {
+            # Start server in background
+            $serverProcess = Start-Process -FilePath $BinaryPath -ArgumentList "backend" -RedirectStandardOutput $LOG_FILE -RedirectStandardError $LOG_FILE -PassThru
+            
+            # Wait for server to start
+            Write-Host "Waiting for server to start..."
+            $serverStarted = $false
+            for ($i = 1; $i -le 10; $i++) {
+                try {
+                    $response = Invoke-WebRequest -Uri "http://localhost:$PORT/api/health" -TimeoutSec 2 -ErrorAction Stop
+                    if ($response.StatusCode -eq 200) {
+                        Write-Host "✓ Server started successfully"
+                        $serverStarted = $true
+                        break
+                    }
+                } catch {
+                    # Server not ready yet
+                }
+                
+                if ($i -eq 10) {
+                    Write-Error "Server failed to start within 10 seconds"
+                    if (Test-Path $LOG_FILE) {
+                        Get-Content $LOG_FILE | Write-Error
+                    }
+                    Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                    return $false
+                }
+                Start-Sleep -Seconds 1
+            }
+            
+            if ($serverStarted) {
+                # Fetch index page and check for CSS
+                Write-Host "Fetching index page to verify CSS inclusion..."
+                try {
+                    $indexResponse = Invoke-WebRequest -Uri "http://localhost:$PORT/" -TimeoutSec 5 -ErrorAction Stop
+                    $indexContent = $indexResponse.Content
+                    
+                    if ($indexContent -match '\.css') {
+                        Write-Host "✓ Embedded web client contains CSS references"
+                    } else {
+                        Write-Error "No CSS references found in served index page"
+                        Write-Host "Index content (first 500 chars):"
+                        $indexContent.Substring(0, [Math]::Min(500, $indexContent.Length))
+                        Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                        return $false
+                    }
+                    
+                    # Try to extract CSS URL and fetch it
+                    if ($indexContent -match 'href="([^"]*\.css)"') {
+                        $cssUrl = $matches[1]
+                        Write-Host "Fetching CSS file: $cssUrl"
+                        
+                        try {
+                            $cssResponse = Invoke-WebRequest -Uri "http://localhost:$PORT$cssUrl" -TimeoutSec 5 -ErrorAction Stop
+                            $cssContent = $cssResponse.Content
+                            
+                            if ($cssContent -match 'tw-') {
+                                Write-Host "✓ CSS contains Tailwind utility classes"
+                                
+                                # Check CSS size
+                                $cssSize = $cssContent.Length
+                                if ($cssSize -lt 10000) {
+                                    Write-Warning "CSS seems small ($cssSize bytes). Expected at least 10KB for full Tailwind build."
+                                } else {
+                                    Write-Host "✓ CSS file size is reasonable ($cssSize bytes)"
+                                }
+                            } else {
+                                Write-Error "CSS does not contain Tailwind utility classes"
+                                Write-Host "First 200 characters of CSS:"
+                                $cssContent.Substring(0, [Math]::Min(200, $cssContent.Length))
+                                Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                                return $false
+                            }
+                        } catch {
+                            Write-Error "Failed to fetch CSS file: $($_.Exception.Message)"
+                            Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                            return $false
+                        }
+                    } else {
+                        Write-Error "Could not extract CSS URL from index page"
+                        Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                        return $false
+                    }
+                } catch {
+                    Write-Error "Failed to fetch index page: $($_.Exception.Message)"
+                    Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+                    return $false
+                }
+            }
+        } finally {
+            # Clean up server
+            if ($serverProcess) {
+                Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path $LOG_FILE) {
+                Remove-Item $LOG_FILE -ErrorAction SilentlyContinue
+            }
+            # Restore original port
+            if ($oldPort) {
+                $env:SYSTEM_BRIDGE_PORT = $oldPort
+            } else {
+                Remove-Item Env:SYSTEM_BRIDGE_PORT -ErrorAction SilentlyContinue
+            }
+        }
+    } else {
+        Write-Warning "curl not available, basic verification only"
+        Write-Host "✓ Binary contains embedded web client"
+    }
+    
+    Write-Host "✓ Binary verification passed"
+    return $true
+}
+
+# Run CSS verification
+if (-not (Verify-CSSInclusion -BinaryPath "dist\system-bridge.exe")) {
+    Write-Error "CSS verification failed"
+    exit 1
+}
+
 # Verify icon file exists
 $iconPath = ".resources/system-bridge-dimmed.ico"
 if (-not (Test-Path $iconPath)) {
