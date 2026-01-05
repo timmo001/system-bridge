@@ -205,10 +205,9 @@ jobs:
           go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
 
       - name: Verify CSS in Windows binary
-        shell: bash
+        shell: pwsh
         run: |
-          chmod +x ./.scripts/verify-css.sh
-          ./.scripts/verify-css.sh ./system-bridge.exe
+          ./.scripts/windows/create-installer.ps1 -VerifyBinaryOnly
 
       - name: Package for Windows
         run: |
