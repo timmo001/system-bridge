@@ -53,7 +53,7 @@ ifeq ($(OS),Windows_NT)
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
 	@echo "Verifying Tailwind CSS compilation..."
-	@powershell -Command "if (-not (Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw | Select-String -Pattern 'tw-|@layer|--tw-' -Quiet)) { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
+	@powershell -Command "$$css = Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw; $$found = $$false; if ($$css -match '@layer utilities') { Write-Host '  ✓ Found @layer utilities'; $$found = $$true }; if ($$css -match '\.(flex|grid|hidden|block)\{') { Write-Host '  ✓ Found Tailwind utility classes'; $$found = $$true }; if ($$css -match '--tw-') { Write-Host '  ✓ Found Tailwind CSS custom properties'; $$found = $$true }; if (-not $$found) { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
 	@echo "✓ Build files verified and ready for embedding"
 else
 	@echo "Waiting for file system to sync..."
@@ -79,8 +79,22 @@ else
 		echo "ERROR: No CSS file found for Tailwind verification"; \
 		exit 1; \
 	fi; \
-	if ! grep -qE "(tw-|@layer|--tw-)" "$$CSS_FILE" >/dev/null 2>&1; then \
+	TAILWIND_FOUND=0; \
+	if grep -qE "@layer utilities" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found @layer utilities"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if grep -qE "\.(flex|grid|hidden|block)\{" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found Tailwind utility classes"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if grep -qE "--tw-" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found Tailwind CSS custom properties"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if [ "$$TAILWIND_FOUND" -eq 0 ]; then \
 		echo "ERROR: Tailwind CSS compilation failed - no utility classes found"; \
+		echo "Expected @layer utilities, utility classes (.flex, .grid, etc.), or --tw-* properties"; \
 		echo "This may indicate that @tailwindcss/vite plugin did not run properly"; \
 		exit 1; \
 	fi
