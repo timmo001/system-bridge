@@ -45,12 +45,6 @@ generate_schemas:
 
 build_web_client: clean_web_client generate_schemas
 	cd web-client && pnpm build
-	@echo "Verifying Tailwind CSS compilation..."
-	@if ! grep -q "tw-" web-client/dist/assets/*.css >/dev/null 2>&1; then \
-		echo "ERROR: Tailwind CSS compilation failed - no utility classes found"; \
-		echo "This may indicate that @tailwindcss/vite plugin did not run properly"; \
-		exit 1; \
-	fi
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
@@ -58,7 +52,8 @@ ifeq ($(OS),Windows_NT)
 	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host 'ERROR: web-client\dist\index.html not found'; exit 1 }"
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
-	@powershell -Command "if (-not (Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw | Select-String -Pattern 'tw-' -Quiet)) { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
+	@echo "Verifying Tailwind CSS compilation..."
+	@powershell -Command "if (-not (Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw | Select-String -Pattern 'tw-|@layer|--tw-' -Quiet)) { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
 	@echo "✓ Build files verified and ready for embedding"
 else
 	@echo "Waiting for file system to sync..."
@@ -76,6 +71,17 @@ else
 	@if ! ls web-client/dist/assets/*.js >/dev/null 2>&1; then \
 		echo "ERROR: JS files not found in web-client/dist/assets/"; \
 		ls -la web-client/dist/assets/ || true; \
+		exit 1; \
+	fi
+	@echo "Verifying Tailwind CSS compilation..."
+	@CSS_FILE=$$(find web-client/dist/assets -name "*.css" -type f 2>/dev/null | head -1); \
+	if [ -z "$$CSS_FILE" ]; then \
+		echo "ERROR: No CSS file found for Tailwind verification"; \
+		exit 1; \
+	fi; \
+	if ! grep -qE "(tw-|@layer|--tw-)" "$$CSS_FILE" >/dev/null 2>&1; then \
+		echo "ERROR: Tailwind CSS compilation failed - no utility classes found"; \
+		echo "This may indicate that @tailwindcss/vite plugin did not run properly"; \
 		exit 1; \
 	fi
 	@echo "✓ Build files verified and ready for embedding"
