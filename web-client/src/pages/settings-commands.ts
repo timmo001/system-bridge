@@ -300,6 +300,18 @@ export class PageSettingsCommands extends PageElement {
     );
   };
 
+  private handleCopyId = async (e: Event): Promise<void> => {
+    const button = e.currentTarget as HTMLElement;
+    const id = button.getAttribute("data-id");
+    if (!id) return;
+
+    try {
+      await navigator.clipboard.writeText(id);
+    } catch (error) {
+      console.error("Failed to copy ID to clipboard:", error);
+    }
+  };
+
   private saveSettingsWithCommands(
     commands: SettingsCommandDefinition[],
   ): void {
@@ -375,6 +387,19 @@ export class PageSettingsCommands extends PageElement {
             <div class="font-medium">${cmd.name}</div>
             <div class="text-sm text-muted-foreground break-all">
               ${cmd.command}
+            </div>
+            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+              <span><span class="select-none">ID: </span>${cmd.id}</span>
+              <ui-button
+                variant="ghost"
+                size="icon"
+                data-id=${cmd.id}
+                @click=${this.handleCopyId}
+                title="Copy ID"
+                class="h-5 w-5"
+              >
+                <ui-icon name="Copy" size="12"></ui-icon>
+              </ui-button>
             </div>
             ${cmd.workingDir
               ? html`
