@@ -53,7 +53,7 @@ ifeq ($(OS),Windows_NT)
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
 	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
 	@echo "Verifying Tailwind CSS compilation..."
-	@powershell -Command "$$css = Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw; if ($$css -match '@layer utilities') { Write-Host '  [OK] Found @layer utilities' } elseif ($$css -match '--tw-') { Write-Host '  [OK] Found Tailwind CSS custom properties' } elseif ($$css -match '\.(flex|grid|hidden|block)\{') { Write-Host '  [OK] Found Tailwind utility classes' } else { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
+	@powershell -Command "if ((Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw) -match '@layer utilities|--tw-|\.(flex|grid|hidden|block)\{') { Write-Host '  [OK] Found Tailwind CSS patterns' } else { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
 	@echo "[OK] Build files verified and ready for embedding"
 else
 	@echo "Waiting for file system to sync..."
