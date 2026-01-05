@@ -212,7 +212,7 @@ jobs:
       - name: Package for Windows
         run: |
           echo "::group::Setup"
-          mkdir -p dist
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
           Move-Item system-bridge.exe dist/system-bridge.exe
           echo "::endgroup::"
 
