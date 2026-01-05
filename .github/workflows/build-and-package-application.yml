@@ -405,4 +405,4 @@ jobs:
           make_latest: true
           name: ${{ needs.compute-next-patch.outputs.next_tag }}
           tag_name: ${{ needs.compute-next-patch.outputs.next_tag }}
-          generate_release_notes: true
+          generate_release_notes: false
