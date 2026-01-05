@@ -69,10 +69,11 @@ function Verify-CSSInclusion {
         $oldPort = $env:SYSTEM_BRIDGE_PORT
         $env:SYSTEM_BRIDGE_PORT = $PORT.ToString()
         $LOG_FILE = Join-Path $env:TEMP "system-bridge-server.log"
+        $ERROR_LOG_FILE = Join-Path $env:TEMP "system-bridge-server-error.log"
         
         try {
             # Start server in background
-            $serverProcess = Start-Process -FilePath $BinaryPath -ArgumentList "backend" -RedirectStandardOutput $LOG_FILE -RedirectStandardError $LOG_FILE -PassThru
+            $serverProcess = Start-Process -FilePath $BinaryPath -ArgumentList "backend" -RedirectStandardOutput $LOG_FILE -RedirectStandardError $ERROR_LOG_FILE -PassThru
             
             # Wait for server to start
             Write-Host "Waiting for server to start..."
@@ -166,6 +167,9 @@ function Verify-CSSInclusion {
             }
             if (Test-Path $LOG_FILE) {
                 Remove-Item $LOG_FILE -ErrorAction SilentlyContinue
+            }
+            if (Test-Path $ERROR_LOG_FILE) {
+                Remove-Item $ERROR_LOG_FILE -ErrorAction SilentlyContinue
             }
             # Restore original port
             if ($oldPort) {
