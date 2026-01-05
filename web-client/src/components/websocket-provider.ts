@@ -768,7 +768,7 @@ export class WebSocketProvider extends ProviderElement {
   }
 
   sendCommandExecute(messageId: string, commandId: string, token: string) {
-    if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return;
+    if (this._ws?.readyState !== WebSocket.OPEN) return;
 
     // Track this command execution request
     this._pendingCommandRequests.set(messageId, commandId);
@@ -787,7 +787,7 @@ export class WebSocketProvider extends ProviderElement {
   }
 
   sendRequest(request: WebSocketRequest) {
-    if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return;
+    if (this._ws?.readyState !== WebSocket.OPEN) return;
     if (!request.token) throw new Error("No token found");
 
     if (request.event === "UPDATE_SETTINGS") {
@@ -819,7 +819,7 @@ export class WebSocketProvider extends ProviderElement {
     schema: z.ZodType<T>,
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
+      if (this._ws?.readyState !== WebSocket.OPEN) {
         reject(new Error("WebSocket is not connected"));
         return;
       }
