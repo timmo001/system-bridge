@@ -19,6 +19,7 @@
     "@lit/task": "^1.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "effect": "^3.19.14",
     "lit": "^3.3.2",
     "lucide": "^0.562.0",
     "tailwind-merge": "^3.4.0",
