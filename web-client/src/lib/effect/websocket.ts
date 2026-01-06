@@ -98,6 +98,7 @@ export function connect(
     Effect.catchTag("TimeoutException", () =>
       Effect.fail(new TimeoutError("connection")),
     ),
+    Effect.uninterruptible,
   );
 }
 
