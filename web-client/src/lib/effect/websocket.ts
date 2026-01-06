@@ -120,8 +120,8 @@ export function connectWithRetry(
   return connect(settings).pipe(
     Effect.retry(
       Schedule.exponential(baseDelay).pipe(
-        Schedule.compose(Schedule.recurs(maxRetries)),
-        Schedule.tapOutput((duration) =>
+        Schedule.intersect(Schedule.recurs(maxRetries)),
+        Schedule.tapOutput(([duration]: [Duration.Duration, number]) =>
           Effect.log(`Retrying connection in ${Duration.toMillis(duration)}ms`),
         ),
       ),

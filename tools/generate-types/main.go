@@ -213,52 +213,57 @@ func generateSettings() {
 
 `)
 
-	// Generate LogLevel enum first
-	if logLevelValues, ok := enums["LogLevel"]; ok {
-		buf.WriteString("export const SettingsHotkeySchema = Schema.Struct({\n")
-		buf.WriteString("  name: Schema.String,\n")
-		buf.WriteString("  key: Schema.String,\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type SettingsHotkey = typeof SettingsHotkeySchema.Type;\n\n")
-
-		buf.WriteString("export const SettingsMediaDirectorySchema = Schema.Struct({\n")
-		buf.WriteString("  name: Schema.String.pipe(Schema.nonEmptyString()),\n")
-		buf.WriteString("  path: Schema.String.pipe(Schema.nonEmptyString()),\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type SettingsMediaDirectory = typeof SettingsMediaDirectorySchema.Type;\n\n")
-
-		buf.WriteString("export const SettingsMediaSchema = Schema.Struct({\n")
-		buf.WriteString("  directories: Schema.Array(SettingsMediaDirectorySchema),\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type SettingsMedia = typeof SettingsMediaSchema.Type;\n\n")
-
-		buf.WriteString("export const SettingsCommandDefinitionSchema = Schema.Struct({\n")
-		buf.WriteString("  id: Schema.String,\n")
-		buf.WriteString("  name: Schema.String.pipe(Schema.nonEmptyString()),\n")
-		buf.WriteString("  command: Schema.String.pipe(Schema.nonEmptyString()),\n")
-		buf.WriteString("  workingDir: Schema.String,\n")
-		buf.WriteString("  arguments: Schema.Array(Schema.String),\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type SettingsCommandDefinition = typeof SettingsCommandDefinitionSchema.Type;\n\n")
-
-		buf.WriteString("export const SettingsCommandsSchema = Schema.Struct({\n")
-		buf.WriteString("  allowlist: Schema.Array(SettingsCommandDefinitionSchema),\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type SettingsCommands = typeof SettingsCommandsSchema.Type;\n\n")
-
-		buf.WriteString("export const SettingsSchema = Schema.Struct({\n")
-		buf.WriteString("  autostart: Schema.Boolean,\n")
-		buf.WriteString("  hotkeys: Schema.Array(SettingsHotkeySchema),\n")
-		buf.WriteString("  logLevel: Schema.Union(\n")
-		for _, val := range logLevelValues {
-			fmt.Fprintf(&buf, "    Schema.Literal(\"%s\"),\n", val.Value)
-		}
-		buf.WriteString("  ),\n")
-		buf.WriteString("  commands: SettingsCommandsSchema,\n")
-		buf.WriteString("  media: SettingsMediaSchema,\n")
-		buf.WriteString("});\n\n")
-		buf.WriteString("export type Settings = typeof SettingsSchema.Type;\n")
+	// Check for LogLevel enum - required for SettingsSchema
+	logLevelValues, hasLogLevel := enums["LogLevel"]
+	if !hasLogLevel {
+		fmt.Fprintf(os.Stderr, "Error: LogLevel enum not found in settings.go\n")
+		os.Exit(1)
 	}
+
+	// Generate all schemas unconditionally
+	buf.WriteString("export const SettingsHotkeySchema = Schema.Struct({\n")
+	buf.WriteString("  name: Schema.String,\n")
+	buf.WriteString("  key: Schema.String,\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type SettingsHotkey = typeof SettingsHotkeySchema.Type;\n\n")
+
+	buf.WriteString("export const SettingsMediaDirectorySchema = Schema.Struct({\n")
+	buf.WriteString("  name: Schema.String.pipe(Schema.nonEmptyString()),\n")
+	buf.WriteString("  path: Schema.String.pipe(Schema.nonEmptyString()),\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type SettingsMediaDirectory = typeof SettingsMediaDirectorySchema.Type;\n\n")
+
+	buf.WriteString("export const SettingsMediaSchema = Schema.Struct({\n")
+	buf.WriteString("  directories: Schema.Array(SettingsMediaDirectorySchema),\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type SettingsMedia = typeof SettingsMediaSchema.Type;\n\n")
+
+	buf.WriteString("export const SettingsCommandDefinitionSchema = Schema.Struct({\n")
+	buf.WriteString("  id: Schema.String,\n")
+	buf.WriteString("  name: Schema.String.pipe(Schema.nonEmptyString()),\n")
+	buf.WriteString("  command: Schema.String.pipe(Schema.nonEmptyString()),\n")
+	buf.WriteString("  workingDir: Schema.String,\n")
+	buf.WriteString("  arguments: Schema.Array(Schema.String),\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type SettingsCommandDefinition = typeof SettingsCommandDefinitionSchema.Type;\n\n")
+
+	buf.WriteString("export const SettingsCommandsSchema = Schema.Struct({\n")
+	buf.WriteString("  allowlist: Schema.Array(SettingsCommandDefinitionSchema),\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type SettingsCommands = typeof SettingsCommandsSchema.Type;\n\n")
+
+	buf.WriteString("export const SettingsSchema = Schema.Struct({\n")
+	buf.WriteString("  autostart: Schema.Boolean,\n")
+	buf.WriteString("  hotkeys: Schema.Array(SettingsHotkeySchema),\n")
+	buf.WriteString("  logLevel: Schema.Union(\n")
+	for _, val := range logLevelValues {
+		fmt.Fprintf(&buf, "    Schema.Literal(\"%s\"),\n", val.Value)
+	}
+	buf.WriteString("  ),\n")
+	buf.WriteString("  commands: SettingsCommandsSchema,\n")
+	buf.WriteString("  media: SettingsMediaSchema,\n")
+	buf.WriteString("});\n\n")
+	buf.WriteString("export type Settings = typeof SettingsSchema.Type;\n")
 
 	outputFile := "web-client/src/lib/system-bridge/types-settings.ts"
 	if err := os.WriteFile(outputFile, []byte(buf.String()), 0644); err != nil {
