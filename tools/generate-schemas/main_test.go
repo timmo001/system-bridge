@@ -137,7 +137,7 @@ func TestParseFieldType(t *testing.T) {
 	}
 }
 
-func TestMapGoTypeToZodSchema(t *testing.T) {
+func TestMapGoTypeToEffectSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		field    FieldInfo
@@ -154,7 +154,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "",
-			expected: "z.string()",
+			expected: "Schema.String",
 		},
 		{
 			name: "nullable string",
@@ -166,7 +166,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    true,
 			},
 			parent:   "",
-			expected: "z.string().nullish()",
+			expected: "Schema.NullishOr(Schema.String)",
 		},
 		{
 			name: "array of numbers",
@@ -178,7 +178,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "",
-			expected: "z.array(z.number())",
+			expected: "Schema.Array(Schema.Number)",
 		},
 		{
 			name: "boolean",
@@ -190,7 +190,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "",
-			expected: "z.boolean()",
+			expected: "Schema.Boolean",
 		},
 		{
 			name: "nested struct",
@@ -214,7 +214,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "",
-			expected: "z.array(ProcessSchema)",
+			expected: "Schema.Array(ProcessSchema)",
 		},
 		{
 			name: "unknown type",
@@ -226,7 +226,7 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "",
-			expected: "z.unknown()",
+			expected: "Schema.Unknown",
 		},
 		{
 			name: "recursive type",
@@ -238,15 +238,15 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 				IsPtr:    false,
 			},
 			parent:   "SensorsWindowsHardware",
-			expected: "z.array(z.lazy(() => SensorsWindowsHardwareSchema))",
+			expected: "Schema.Array(Schema.suspend((): Schema.Schema<SensorsWindowsHardware> => SensorsWindowsHardwareSchema))",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := mapGoTypeToZodSchema(tt.field, tt.parent)
+			result := mapGoTypeToEffectSchema(tt.field, tt.parent)
 			if result != tt.expected {
-				t.Errorf("mapGoTypeToZodSchema() = %v, want %v", result, tt.expected)
+				t.Errorf("mapGoTypeToEffectSchema() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
@@ -333,7 +333,7 @@ func TestOrderStructsByDependency(t *testing.T) {
 	}
 }
 
-func TestGenerateZodSchemas(t *testing.T) {
+func TestGenerateEffectSchemas(t *testing.T) {
 	structs := map[string]StructInfo{
 		"TestData": {
 			Name: "TestData",
@@ -363,18 +363,18 @@ func TestGenerateZodSchemas(t *testing.T) {
 		},
 	}
 
-	result := generateZodSchemas(structs, enums)
+	result := generateEffectSchemas(structs, enums)
 
 	// Check that the result contains expected elements
 	expectedElements := []string{
-		"import { z } from \"zod\"",
+		"import { Schema } from \"effect\"",
 		"Auto-generated file",
-		"TestEnumSchema = z.enum([",
-		`"value1"`,
-		`"value2"`,
-		"TestDataSchema = z.object({",
-		"name: z.string()",
-		"count: z.number().nullish()",
+		"TestEnumSchema = Schema.Union(",
+		`Schema.Literal("value1")`,
+		`Schema.Literal("value2")`,
+		"TestDataSchema = Schema.Struct({",
+		"name: Schema.String",
+		"count: Schema.NullishOr(Schema.Number)",
 		"export type TestData",
 		"export type TestEnum",
 	}
