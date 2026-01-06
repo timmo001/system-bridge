@@ -19,7 +19,7 @@ import "../components/ui/switch";
 
 const ConnectionSchema = Schema.Struct({
   host: Schema.String.pipe(Schema.nonEmptyString()),
-  port: Schema.NumberFromString.pipe(Schema.greaterThan(0)),
+  port: Schema.Number.pipe(Schema.greaterThan(0)),
   ssl: Schema.Boolean,
   token: Schema.String.pipe(Schema.nonEmptyString()),
 });
@@ -73,7 +73,11 @@ export class PageConnection extends PageElement {
 
   private handlePortInput = (e: Event): void => {
     const input = e.target as HTMLInputElement;
-    this.formData = { ...this.formData, port: parseInt(input.value, 10) };
+    const parsed = parseInt(input.value, 10);
+    this.formData = {
+      ...this.formData,
+      port: Number.isNaN(parsed) ? 0 : parsed,
+    };
   };
 
   private handleSslChange = (e: CustomEvent<{ checked: boolean }>): void => {
@@ -93,12 +97,22 @@ export class PageConnection extends PageElement {
     const result = Schema.decodeUnknownEither(ConnectionSchema)(this.formData);
     if (Either.isLeft(result)) {
       this.errors = {};
-      const issues = result.left.message.split("\n");
+      // Safely extract error message for debugging
+      const errorMessage =
+        typeof result.left === "object" &&
+        result.left !== null &&
+        "message" in result.left &&
+        typeof result.left.message === "string"
+          ? result.left.message
+          : String(result.left);
+      const issues = errorMessage.split("\n");
       // Simple error extraction - Effect Schema errors include field names
       if (this.formData.host === "") {
         this.errors.host = "Host is required";
       }
-      if (!this.formData.port || this.formData.port < 1) {
+      if (Number.isNaN(this.formData.port)) {
+        this.errors.port = "Port must be a valid number";
+      } else if (!this.formData.port || this.formData.port < 1) {
         this.errors.port = "Port must be at least 1";
       }
       if (this.formData.token === "") {
