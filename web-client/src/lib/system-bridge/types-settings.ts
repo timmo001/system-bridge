@@ -1,51 +1,53 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
-export const SettingsHotkeySchema = z.object({
-  name: z.string(),
-  key: z.string(),
+export const SettingsHotkeySchema = Schema.Struct({
+  name: Schema.String,
+  key: Schema.String,
 });
 
-export type SettingsHotkey = z.infer<typeof SettingsHotkeySchema>;
+export type SettingsHotkey = typeof SettingsHotkeySchema.Type;
 
-export const SettingsMediaDirectorySchema = z.object({
-  name: z.string().min(1),
-  path: z.string().min(1),
+export const SettingsMediaDirectorySchema = Schema.Struct({
+  name: Schema.String.pipe(Schema.nonEmptyString()),
+  path: Schema.String.pipe(Schema.nonEmptyString()),
 });
 
-export type SettingsMediaDirectory = z.infer<
-  typeof SettingsMediaDirectorySchema
->;
+export type SettingsMediaDirectory = typeof SettingsMediaDirectorySchema.Type;
 
-export const SettingsMediaSchema = z.object({
-  directories: z.array(SettingsMediaDirectorySchema),
+export const SettingsMediaSchema = Schema.Struct({
+  directories: Schema.Array(SettingsMediaDirectorySchema),
 });
 
-export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
+export type SettingsMedia = typeof SettingsMediaSchema.Type;
 
-export const SettingsCommandDefinitionSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1),
-  command: z.string().min(1),
-  workingDir: z.string(),
-  arguments: z.array(z.string()),
+export const SettingsCommandDefinitionSchema = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String.pipe(Schema.nonEmptyString()),
+  command: Schema.String.pipe(Schema.nonEmptyString()),
+  workingDir: Schema.String,
+  arguments: Schema.Array(Schema.String),
 });
 
-export type SettingsCommandDefinition = z.infer<
-  typeof SettingsCommandDefinitionSchema
->;
+export type SettingsCommandDefinition =
+  typeof SettingsCommandDefinitionSchema.Type;
 
-export const SettingsCommandsSchema = z.object({
-  allowlist: z.array(SettingsCommandDefinitionSchema),
+export const SettingsCommandsSchema = Schema.Struct({
+  allowlist: Schema.Array(SettingsCommandDefinitionSchema),
 });
 
-export type SettingsCommands = z.infer<typeof SettingsCommandsSchema>;
+export type SettingsCommands = typeof SettingsCommandsSchema.Type;
 
-export const SettingsSchema = z.object({
-  autostart: z.boolean(),
-  hotkeys: z.array(SettingsHotkeySchema),
-  logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+export const SettingsSchema = Schema.Struct({
+  autostart: Schema.Boolean,
+  hotkeys: Schema.Array(SettingsHotkeySchema),
+  logLevel: Schema.Union(
+    Schema.Literal("DEBUG"),
+    Schema.Literal("INFO"),
+    Schema.Literal("WARN"),
+    Schema.Literal("ERROR"),
+  ),
   commands: SettingsCommandsSchema,
   media: SettingsMediaSchema,
 });
 
-export type Settings = z.infer<typeof SettingsSchema>;
+export type Settings = typeof SettingsSchema.Type;

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { Schema } from "effect";
 
 export const Modules = [
   "battery",
@@ -14,15 +14,35 @@ export const Modules = [
   "system",
 ] as const;
 
-export const ModuleNameSchema = z.enum(Modules);
+export const ModuleNameSchema = Schema.Union(
+  Schema.Literal("battery"),
+  Schema.Literal("cpu"),
+  Schema.Literal("disks"),
+  Schema.Literal("displays"),
+  Schema.Literal("gpus"),
+  Schema.Literal("media"),
+  Schema.Literal("memory"),
+  Schema.Literal("networks"),
+  Schema.Literal("processes"),
+  Schema.Literal("sensors"),
+  Schema.Literal("system"),
+);
 
-export type ModuleName = z.infer<typeof ModuleNameSchema>;
+export type ModuleName = typeof ModuleNameSchema.Type;
 
-export const ModuleDataSchema = z.record(ModuleNameSchema, z.any());
+// Use a simple record type for ModuleData since we need mutability for the default
+export type ModuleData = Record<ModuleName, unknown>;
 
-export type ModuleData = z.infer<typeof ModuleDataSchema>;
-
-export const DefaultModuleData: ModuleData = Modules.reduce((acc, module) => {
-  acc[module] = {};
-  return acc;
-}, {} as ModuleData);
+export const DefaultModuleData: ModuleData = {
+  battery: {},
+  cpu: {},
+  disks: {},
+  displays: {},
+  gpus: {},
+  media: {},
+  memory: {},
+  networks: {},
+  processes: {},
+  sensors: {},
+  system: {},
+};

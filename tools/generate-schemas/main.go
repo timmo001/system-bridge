@@ -44,8 +44,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Generate TypeScript/Zod schemas
-	tsCode := generateZodSchemas(structs, enums)
+	// Generate TypeScript/Effect Schema schemas
+	tsCode := generateEffectSchemas(structs, enums)
 
 	// Write to output file
 	if err := os.WriteFile(*outputFile, []byte(tsCode), 0644); err != nil {
@@ -53,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Generated Zod schemas from %s to %s\n", *typesDir, *outputFile)
+	fmt.Printf("Generated Effect schemas from %s to %s\n", *typesDir, *outputFile)
 }
 
 func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo, error) {
@@ -232,10 +232,10 @@ func parseFieldType(expr ast.Expr) (string, bool, bool) {
 	}
 }
 
-func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo) string {
+func generateEffectSchemas(structs map[string]StructInfo, enums map[string]EnumInfo) string {
 	var buf bytes.Buffer
 
-	buf.WriteString(`import { z } from "zod";
+	buf.WriteString(`import { Schema } from "effect";
 
 // Auto-generated file. Do not edit manually.
 // Generated from backend types in types/ directory
@@ -256,15 +256,16 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 		enum := enums[name]
 		if len(enum.Values) > 0 {
 			fmt.Fprintf(&buf, "// %s enum\n", name)
-			fmt.Fprintf(&buf, "export const %sSchema = z.enum([", name)
-			for i, value := range enum.Values {
-				if i > 0 {
-					buf.WriteString(", ")
+			if len(enum.Values) == 1 {
+				fmt.Fprintf(&buf, "export const %sSchema = Schema.Literal(\"%s\");\n", name, enum.Values[0])
+			} else {
+				fmt.Fprintf(&buf, "export const %sSchema = Schema.Union(\n", name)
+				for _, value := range enum.Values {
+					fmt.Fprintf(&buf, "  Schema.Literal(\"%s\"),\n", value)
 				}
-				fmt.Fprintf(&buf, `"%s"`, value)
+				buf.WriteString(");\n")
 			}
-			buf.WriteString("]);\n")
-			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n\n", name, name)
+			fmt.Fprintf(&buf, "export type %s = typeof %sSchema.Type;\n\n", name, name)
 		}
 	}
 
@@ -277,9 +278,9 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 
 		// Check if this struct has recursive dependencies
 		if hasRecursiveDependency(name, structInfo, structs) {
-			generateRecursiveSchema(&buf, structInfo)
+			generateRecursiveEffectSchema(&buf, structInfo)
 		} else {
-			generateNormalSchema(&buf, structInfo, enums)
+			generateNormalEffectSchema(&buf, structInfo, enums)
 		}
 	}
 
@@ -374,20 +375,23 @@ func hasRecursiveDependency(name string, structInfo StructInfo, structs map[stri
 	return name == "SensorsWindowsHardware"
 }
 
-func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
+func generateRecursiveEffectSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	// For SensorsWindowsHardware with recursive structure
-	fmt.Fprintf(buf, "export const %sSchema: z.ZodType<{\n", structInfo.Name)
+	// Effect Schema requires explicit type annotation for recursive schemas
+	fmt.Fprintf(buf, "export type %s = {\n", structInfo.Name)
 
 	for _, field := range structInfo.Fields {
-		zodType := mapGoTypeToZodWithRecursive(field, structInfo.Name)
-		fmt.Fprintf(buf, "  %s: %s;\n", field.JSONName, zodType)
+		tsType := mapGoTypeToTypeScript(field, structInfo.Name)
+		fmt.Fprintf(buf, "  readonly %s: %s;\n", field.JSONName, tsType)
 	}
 
-	buf.WriteString("}> = z.object({\n")
+	buf.WriteString("};\n\n")
+
+	fmt.Fprintf(buf, "export const %sSchema: Schema.Schema<%s> = Schema.Struct({\n", structInfo.Name, structInfo.Name)
 
 	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, structInfo.Name)
-		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
+		effectSchema := mapGoTypeToEffectSchema(field, structInfo.Name)
+		fmt.Fprintf(buf, "  %s: %s", field.JSONName, effectSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
 		} else {
@@ -396,24 +400,23 @@ func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	}
 
 	buf.WriteString("});\n\n")
-	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
 }
 
-func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo) {
+func generateNormalEffectSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo) {
 	// Check if this is an array type alias
 	if len(structInfo.Fields) == 1 && structInfo.Fields[0].Name == "__array_element__" {
 		elemType := structInfo.Fields[0].Type
 		elemSchema := elemType + "Schema"
-		fmt.Fprintf(buf, "export const %sSchema = z.array(%s);\n\n", structInfo.Name, elemSchema)
-		fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
+		fmt.Fprintf(buf, "export const %sSchema = Schema.Array(%s);\n\n", structInfo.Name, elemSchema)
+		fmt.Fprintf(buf, "export type %s = typeof %sSchema.Type;\n\n", structInfo.Name, structInfo.Name)
 		return
 	}
 
-	fmt.Fprintf(buf, "export const %sSchema = z.object({\n", structInfo.Name)
+	fmt.Fprintf(buf, "export const %sSchema = Schema.Struct({\n", structInfo.Name)
 
 	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, "")
-		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
+		effectSchema := mapGoTypeToEffectSchema(field, "")
+		fmt.Fprintf(buf, "  %s: %s", field.JSONName, effectSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
 		} else {
@@ -422,45 +425,76 @@ func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[st
 	}
 
 	buf.WriteString("});\n\n")
-	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
+	fmt.Fprintf(buf, "export type %s = typeof %sSchema.Type;\n\n", structInfo.Name, structInfo.Name)
 }
 
-func mapGoTypeToZodWithRecursive(field FieldInfo, parentStruct string) string {
-	var zodType string
+func mapGoTypeToTypeScript(field FieldInfo, parentStruct string) string {
+	var tsType string
 
 	switch field.Type {
 	case parentStruct:
-		zodType = "unknown[]"
+		tsType = "ReadonlyArray<" + parentStruct + ">"
 	case "SensorsWindowsSensor":
-		zodType = "{\n    id: string;\n    name: string;\n    type: string;\n    value: unknown;\n  }[]"
+		tsType = "ReadonlyArray<SensorsWindowsSensor>"
+	case "bool":
+		tsType = "boolean"
+	case "string":
+		tsType = "string"
+	case "int", "int64", "uint64", "float64":
+		tsType = "number"
 	default:
-		zodType = mapGoTypeToZod(field)
+		if strings.HasSuffix(field.Type, "Data") ||
+			strings.HasPrefix(field.Type, "CPU") ||
+			strings.HasPrefix(field.Type, "Disk") ||
+			strings.HasPrefix(field.Type, "Display") ||
+			strings.HasPrefix(field.Type, "GPU") ||
+			strings.HasPrefix(field.Type, "Memory") ||
+			strings.HasPrefix(field.Type, "Network") ||
+			strings.HasPrefix(field.Type, "Process") ||
+			strings.HasPrefix(field.Type, "Sensors") ||
+			strings.HasPrefix(field.Type, "System") ||
+			strings.HasPrefix(field.Type, "Temperature") {
+			tsType = field.Type
+		} else {
+			tsType = "unknown"
+		}
 	}
 
-	return zodType
+	if field.IsArray && tsType != "ReadonlyArray<"+parentStruct+">" && tsType != "ReadonlyArray<SensorsWindowsSensor>" {
+		tsType = "ReadonlyArray<" + tsType + ">"
+	}
+
+	if field.IsPtr {
+		tsType += " | null | undefined"
+	}
+
+	return tsType
 }
 
-func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
-	var zodSchema string
+func mapGoTypeToEffectSchema(field FieldInfo, parentStruct string) string {
+	var effectSchema string
 
 	// Handle recursive reference for SensorsWindowsHardware
 	if parentStruct == "SensorsWindowsHardware" && field.Type == "SensorsWindowsHardware" {
-		zodSchema = "z.array(z.lazy(() => SensorsWindowsHardwareSchema))"
-		return zodSchema
+		effectSchema = "Schema.Array(Schema.suspend((): Schema.Schema<SensorsWindowsHardware> => SensorsWindowsHardwareSchema))"
+		if field.IsPtr {
+			effectSchema = "Schema.NullishOr(" + effectSchema + ")"
+		}
+		return effectSchema
 	}
 
-	// Map Go type to Zod schema
+	// Map Go type to Effect Schema
 	baseSchema := ""
 
 	switch field.Type {
 	case "bool":
-		baseSchema = "z.boolean()"
+		baseSchema = "Schema.Boolean"
 	case "string":
-		baseSchema = "z.string()"
+		baseSchema = "Schema.String"
 	case "int", "int64", "uint64", "float64":
-		baseSchema = "z.number()"
+		baseSchema = "Schema.Number"
 	case "RunMode":
-		baseSchema = "z.enum([\"standalone\"])"
+		baseSchema = "Schema.Literal(\"standalone\")"
 	default:
 		// Check if it's a defined struct
 		if strings.HasSuffix(field.Type, "Data") ||
@@ -476,55 +510,29 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 			strings.HasPrefix(field.Type, "Temperature") {
 			baseSchema = field.Type + "Schema"
 		} else {
-			baseSchema = "z.unknown()"
+			baseSchema = "Schema.Unknown"
 		}
 	}
 
 	// Handle arrays
 	if field.IsArray {
-		zodSchema = fmt.Sprintf("z.array(%s)", baseSchema)
+		effectSchema = fmt.Sprintf("Schema.Array(%s)", baseSchema)
 	} else {
-		zodSchema = baseSchema
+		effectSchema = baseSchema
 	}
 
 	// Handle nullable (pointer) types
-	// Use .nullish() instead of .nullable() to match Go's pointer semantics and TypeScript behavior:
+	// Use Schema.NullishOr to match Go's pointer semantics and TypeScript behavior:
 	// - In Go, pointer fields (*T) can be nil, representing an "absent" or "not set" value
 	// - In TypeScript/JSON, this maps to either `null` (explicitly absent) or `undefined` (not present)
-	// - .nullish() allows both null and undefined (matches TypeScript's optional/nullable types)
-	// - .nullable() only allows null, which is more restrictive and doesn't handle undefined
-	// This ensures generated Zod schemas correctly validate TypeScript types where optional fields
+	// - Schema.NullishOr allows both null and undefined (matches TypeScript's optional/nullable types)
+	// This ensures generated Effect schemas correctly validate TypeScript types where optional fields
 	// can be either undefined (field not present in JSON) or explicitly set to null
 	if field.IsPtr {
-		zodSchema += ".nullish()"
+		effectSchema = "Schema.NullishOr(" + effectSchema + ")"
 	}
 
-	return zodSchema
-}
-
-func mapGoTypeToZod(field FieldInfo) string {
-	var zodType string
-
-	switch field.Type {
-	case "bool":
-		zodType = "boolean"
-	case "string":
-		zodType = "string"
-	case "int", "int64", "uint64", "float64":
-		zodType = "number"
-	default:
-		zodType = "unknown"
-	}
-
-	if field.IsArray {
-		zodType += "[]"
-	}
-
-	if field.IsPtr && !field.IsArray {
-		zodType += " | null"
-	}
-
-	return zodType
+	return effectSchema
 }
 
 func orderStructsByDependency(structs map[string]StructInfo) []string {
