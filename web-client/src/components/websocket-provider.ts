@@ -29,6 +29,9 @@ import {
 import { ModuleDataSchemas } from "~/lib/system-bridge/types-modules-schemas";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import {
+  type CommandExecuteRequestData,
+  type GetDataRequestData,
+  type RegisterDataListenerRequestData,
   WebSocketResponseSchema,
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
@@ -722,19 +725,23 @@ export class WebSocketProvider extends ProviderElement {
       token: token,
     });
 
-    this.sendRequest({
+    const getDataRequest: WebSocketRequest = {
       id: generateUUID(),
       event: "GET_DATA",
-      data: { modules: Modules },
+      data: { modules: Modules } satisfies GetDataRequestData,
       token: token,
-    });
+    };
+    this.sendRequest(getDataRequest);
 
-    this.sendRequest({
+    const registerListenerRequest: WebSocketRequest = {
       id: generateUUID(),
       event: "REGISTER_DATA_LISTENER",
-      data: { modules: Modules },
+      data: {
+        modules: Modules,
+      } satisfies RegisterDataListenerRequestData,
       token: token,
-    });
+    };
+    this.sendRequest(registerListenerRequest);
   }
 
   private scheduleReconnect() {
@@ -772,16 +779,15 @@ export class WebSocketProvider extends ProviderElement {
     this._pendingCommandRequests.set(messageId, commandId);
 
     // Send the command execute request
-    this._ws.send(
-      JSON.stringify({
-        id: messageId,
-        event: "COMMAND_EXECUTE",
-        data: {
-          commandID: commandId,
-        },
-        token: token,
-      }),
-    );
+    const request: WebSocketRequest = {
+      id: messageId,
+      event: "COMMAND_EXECUTE",
+      data: {
+        commandID: commandId,
+      } satisfies CommandExecuteRequestData,
+      token: token,
+    };
+    this._ws.send(JSON.stringify(request));
   }
 
   sendRequest(request: WebSocketRequest) {

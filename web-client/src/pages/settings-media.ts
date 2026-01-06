@@ -8,6 +8,11 @@ import {
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import type { Settings } from "~/lib/system-bridge/types-settings";
+import {
+  ValidateDirectoryResponseSchema,
+  type ValidateDirectoryRequestData,
+  type WebSocketRequest,
+} from "~/lib/system-bridge/types-websocket";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins";
 import "../components/ui/button";
@@ -100,42 +105,18 @@ export class PageSettingsMedia extends PageElement {
     this.requestUpdate();
 
     try {
-      const response = await this.websocket.sendRequestWithResponse<{
-        valid: boolean;
-      }>(
-        {
-          id: generateUUID(),
-          event: "VALIDATE_DIRECTORY",
-          data: { path: this.newDirectoryPath },
-          token: this.connection.token,
-        },
-        // Simple validation schema
-        {
-          parse: (data: unknown) => {
-            if (
-              typeof data === "object" &&
-              data !== null &&
-              "valid" in data &&
-              typeof (data as { valid: unknown }).valid === "boolean"
-            ) {
-              return data as { valid: boolean };
-            }
-            throw new Error("Invalid response");
-          },
-          safeParse: (data: unknown) => {
-            try {
-              return {
-                success: true as const,
-                data: {
-                  parse: (d: unknown) => d,
-                  safeParse: () => ({ success: true as const, data: data }),
-                }.parse(data) as { valid: boolean },
-              };
-            } catch (error) {
-              return { success: false as const, error };
-            }
-          },
-        } as never,
+      const request: WebSocketRequest = {
+        id: generateUUID(),
+        event: "VALIDATE_DIRECTORY",
+        data: {
+          path: this.newDirectoryPath,
+        } satisfies ValidateDirectoryRequestData,
+        token: this.connection.token,
+      };
+
+      const response = await this.websocket.sendRequestWithResponse(
+        request,
+        ValidateDirectoryResponseSchema,
       );
 
       if (response.valid) {

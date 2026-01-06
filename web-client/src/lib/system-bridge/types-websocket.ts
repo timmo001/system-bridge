@@ -116,6 +116,37 @@ export const WebSocketResponseSchema = Schema.Struct({
 
 export type WebsocketResponse = typeof WebSocketResponseSchema.Type;
 
+// Request Data Types
+
+export const GetDataRequestDataSchema = Schema.Struct({
+  modules: Schema.Array(ModuleNameSchema),
+});
+
+export type GetDataRequestData = typeof GetDataRequestDataSchema.Type;
+
+export const RegisterDataListenerRequestDataSchema = Schema.Struct({
+  modules: Schema.Array(ModuleNameSchema),
+});
+
+export type RegisterDataListenerRequestData =
+  typeof RegisterDataListenerRequestDataSchema.Type;
+
+export const CommandExecuteRequestDataSchema = Schema.Struct({
+  commandID: Schema.String,
+});
+
+export type CommandExecuteRequestData =
+  typeof CommandExecuteRequestDataSchema.Type;
+
+export const ValidateDirectoryRequestDataSchema = Schema.Struct({
+  path: Schema.String,
+});
+
+export type ValidateDirectoryRequestData =
+  typeof ValidateDirectoryRequestDataSchema.Type;
+
+// Response Data Types
+
 export const ValidateDirectoryResponseSchema = Schema.Struct({
   valid: Schema.Boolean,
 });

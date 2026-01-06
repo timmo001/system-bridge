@@ -306,33 +306,68 @@ func generateWebSocket() {
 		os.Exit(1)
 	}
 
-	// Parse ValidateDirectoryResponseData from event/handler/validate-directory.go
-	validateFile, err := parser.ParseFile(fset, "event/handler/validate-directory.go", nil, parser.ParseComments)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing validate-directory.go: %v\n", err)
-		os.Exit(1)
+	// Parse request/response data types from event handlers
+	// Only parse types that are actually used in the frontend
+	requestResponseTypes := map[string]string{
+		"event/handler/get-data.go":               "GetDataRequestData",
+		"event/handler/register-data-listener.go": "RegisterDataListenerRequestData",
+		"event/handler/validate-directory.go":     "ValidateDirectoryRequestData,ValidateDirectoryResponseData",
 	}
 
-	var validateResponseStruct StructInfo
-	for _, decl := range validateFile.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok {
+	var parsedStructs = make(map[string]StructInfo)
+
+	// Parse structs from event handler files
+	for filePath, typeNames := range requestResponseTypes {
+		file, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+		if err != nil {
+			// File might not exist or have parse errors, skip
 			continue
 		}
 
-		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec)
-			if !ok {
+		typeList := strings.Split(typeNames, ",")
+		for _, typeName := range typeList {
+			typeName = strings.TrimSpace(typeName)
+			if typeName == "" {
 				continue
 			}
 
-			typeName := typeSpec.Name.Name
-			if typeName == "ValidateDirectoryResponseData" {
-				if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-					validateResponseStruct = parseStruct(structType, typeName)
+			for _, decl := range file.Decls {
+				genDecl, ok := decl.(*ast.GenDecl)
+				if !ok {
+					continue
+				}
+
+				for _, spec := range genDecl.Specs {
+					typeSpec, ok := spec.(*ast.TypeSpec)
+					if !ok {
+						continue
+					}
+
+					if typeSpec.Name.Name == typeName {
+						if structType, ok := typeSpec.Type.(*ast.StructType); ok {
+							parsedStructs[typeName] = parseStructWithImports(structType, typeName, file)
+						}
+					}
 				}
 			}
 		}
+	}
+
+	// Parse CommandExecuteRequestData (inline struct in command-execute.go)
+	// The struct is defined as: var requestData struct { CommandID string `json:"commandID" ...` }
+	// We'll manually create this since it's an inline struct
+	parsedStructs["CommandExecuteRequestData"] = StructInfo{
+		Name: "CommandExecuteRequestData",
+		Fields: []FieldInfo{
+			{
+				Name:     "CommandID",
+				Type:     "string",
+				JSONName: "commandID",
+				IsArray:  false,
+				IsPtr:    false,
+				Optional: false,
+			},
+		},
 	}
 
 	var buf bytes.Buffer
@@ -392,10 +427,60 @@ import { ModuleNameSchema } from "~/lib/system-bridge/types-modules";
 	buf.WriteString("});\n\n")
 	buf.WriteString("export type WebsocketResponse = typeof WebSocketResponseSchema.Type;\n\n")
 
-	// Generate ValidateDirectoryResponseSchema
-	if len(validateResponseStruct.Fields) > 0 {
+	// Generate request data schemas
+	buf.WriteString("// Request Data Types\n\n")
+
+	// GetDataRequestData
+	if structInfo, ok := parsedStructs["GetDataRequestData"]; ok {
+		buf.WriteString("export const GetDataRequestDataSchema = Schema.Struct({\n")
+		for _, field := range structInfo.Fields {
+			effectSchema := mapGoTypeToEffectSchemaForRequest(field)
+			fmt.Fprintf(&buf, "  %s: %s,\n", field.JSONName, effectSchema)
+		}
+		buf.WriteString("});\n\n")
+		buf.WriteString("export type GetDataRequestData = typeof GetDataRequestDataSchema.Type;\n\n")
+	}
+
+	// RegisterDataListenerRequestData
+	if structInfo, ok := parsedStructs["RegisterDataListenerRequestData"]; ok {
+		buf.WriteString("export const RegisterDataListenerRequestDataSchema = Schema.Struct({\n")
+		for _, field := range structInfo.Fields {
+			effectSchema := mapGoTypeToEffectSchemaForRequest(field)
+			fmt.Fprintf(&buf, "  %s: %s,\n", field.JSONName, effectSchema)
+		}
+		buf.WriteString("});\n\n")
+		buf.WriteString("export type RegisterDataListenerRequestData = typeof RegisterDataListenerRequestDataSchema.Type;\n\n")
+	}
+
+	// CommandExecuteRequestData
+	if structInfo, ok := parsedStructs["CommandExecuteRequestData"]; ok {
+		buf.WriteString("export const CommandExecuteRequestDataSchema = Schema.Struct({\n")
+		for _, field := range structInfo.Fields {
+			effectSchema := mapGoTypeToEffectSchemaForRequest(field)
+			fmt.Fprintf(&buf, "  %s: %s,\n", field.JSONName, effectSchema)
+		}
+		buf.WriteString("});\n\n")
+		buf.WriteString("export type CommandExecuteRequestData = typeof CommandExecuteRequestDataSchema.Type;\n\n")
+	}
+
+	// ValidateDirectoryRequestData
+	if structInfo, ok := parsedStructs["ValidateDirectoryRequestData"]; ok {
+		buf.WriteString("export const ValidateDirectoryRequestDataSchema = Schema.Struct({\n")
+		for _, field := range structInfo.Fields {
+			effectSchema := mapGoTypeToEffectSchemaForRequest(field)
+			fmt.Fprintf(&buf, "  %s: %s,\n", field.JSONName, effectSchema)
+		}
+		buf.WriteString("});\n\n")
+		buf.WriteString("export type ValidateDirectoryRequestData = typeof ValidateDirectoryRequestDataSchema.Type;\n\n")
+	}
+
+	// Generate response data schemas
+	buf.WriteString("// Response Data Types\n\n")
+
+	// ValidateDirectoryResponseData
+	if structInfo, ok := parsedStructs["ValidateDirectoryResponseData"]; ok {
 		buf.WriteString("export const ValidateDirectoryResponseSchema = Schema.Struct({\n")
-		for _, field := range validateResponseStruct.Fields {
+		for _, field := range structInfo.Fields {
 			effectSchema := mapGoTypeToEffectSchema(field)
 			fmt.Fprintf(&buf, "  %s: %s,\n", field.JSONName, effectSchema)
 		}
@@ -480,9 +565,33 @@ func parseConstants(filePath, typeName string) ([]ConstInfo, error) {
 }
 
 func parseStruct(structType *ast.StructType, structName string) StructInfo {
+	return parseStructWithImports(structType, structName, nil)
+}
+
+func parseStructWithImports(structType *ast.StructType, structName string, file *ast.File) StructInfo {
 	structInfo := StructInfo{
 		Name:   structName,
 		Fields: []FieldInfo{},
+	}
+
+	// Build import map to resolve type names
+	importMap := make(map[string]string)
+	if file != nil {
+		for _, imp := range file.Imports {
+			importPath := strings.Trim(imp.Path.Value, `"`)
+			// Extract package name from import path (last segment)
+			parts := strings.Split(importPath, "/")
+			pkgName := parts[len(parts)-1]
+
+			if imp.Name != nil {
+				pkgName = imp.Name.Name
+			}
+
+			// Map common imports
+			if strings.Contains(importPath, "system-bridge/types") {
+				importMap["types"] = pkgName
+			}
+		}
 	}
 
 	for _, field := range structType.Fields.List {
@@ -496,7 +605,7 @@ func parseStruct(structType *ast.StructType, structName string) StructInfo {
 			continue
 		}
 
-		fieldType, isArray, isPtr := parseFieldType(field.Type)
+		fieldType, isArray, isPtr := parseFieldTypeWithImports(field.Type, importMap)
 		optional := strings.Contains(field.Tag.Value, "omitempty")
 
 		structInfo.Fields = append(structInfo.Fields, FieldInfo{
@@ -510,6 +619,33 @@ func parseStruct(structType *ast.StructType, structName string) StructInfo {
 	}
 
 	return structInfo
+}
+
+func parseFieldTypeWithImports(expr ast.Expr, importMap map[string]string) (string, bool, bool) {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		// Check if it's a type from an imported package
+		if importMap["types"] != "" && t.Name == "ModuleName" {
+			return "ModuleName", false, false
+		}
+		return t.Name, false, false
+	case *ast.SelectorExpr:
+		// Handle selector expressions like types.ModuleName
+		if ident, ok := t.X.(*ast.Ident); ok {
+			if ident.Name == "types" && t.Sel.Name == "ModuleName" {
+				return "ModuleName", false, false
+			}
+		}
+		return t.Sel.Name, false, false
+	case *ast.StarExpr:
+		baseType, isArray, _ := parseFieldTypeWithImports(t.X, importMap)
+		return baseType, isArray, true
+	case *ast.ArrayType:
+		elemType, _, _ := parseFieldTypeWithImports(t.Elt, importMap)
+		return elemType, true, false
+	default:
+		return "unknown", false, false
+	}
 }
 
 func extractJSONTag(tag *ast.BasicLit) string {
@@ -556,6 +692,8 @@ func mapGoTypeToEffectSchema(field FieldInfo) string {
 		effectSchema = "Schema.String"
 	case "int", "int64", "uint64", "float64":
 		effectSchema = "Schema.Number"
+	case "ModuleName":
+		effectSchema = "ModuleNameSchema"
 	default:
 		effectSchema = "Schema.Unknown"
 	}
@@ -571,6 +709,40 @@ func mapGoTypeToEffectSchema(field FieldInfo) string {
 	}
 
 	// Handle optional
+	if field.Optional {
+		effectSchema = "Schema.optional(" + effectSchema + ")"
+	}
+
+	return effectSchema
+}
+
+func mapGoTypeToEffectSchemaForRequest(field FieldInfo) string {
+	var effectSchema string
+
+	switch field.Type {
+	case "bool":
+		effectSchema = "Schema.Boolean"
+	case "string":
+		effectSchema = "Schema.String"
+	case "int", "int64", "uint64", "float64":
+		effectSchema = "Schema.Number"
+	case "ModuleName":
+		effectSchema = "ModuleNameSchema"
+	default:
+		effectSchema = "Schema.Unknown"
+	}
+
+	// Handle arrays
+	if field.IsArray {
+		effectSchema = fmt.Sprintf("Schema.Array(%s)", effectSchema)
+	}
+
+	// Handle nullable (pointer) types
+	if field.IsPtr {
+		effectSchema = "Schema.NullishOr(" + effectSchema + ")"
+	}
+
+	// Handle optional (for request data, use optional instead of omitempty)
 	if field.Optional {
 		effectSchema = "Schema.optional(" + effectSchema + ")"
 	}
