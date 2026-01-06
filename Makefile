@@ -43,7 +43,13 @@ generate_schemas:
 	@echo "Formatting generated schemas..."
 	@cd web-client && pnpm install && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
 
-build_web_client: clean_web_client generate_schemas
+generate_types:
+	@echo "Generating TypeScript type files from Go types..."
+	@go run tools/generate-types/main.go
+	@echo "Formatting generated type files..."
+	@cd web-client && pnpm install && pnpm format:write src/lib/system-bridge/types-modules.ts src/lib/system-bridge/types-settings.ts src/lib/system-bridge/types-websocket.ts
+
+build_web_client: clean_web_client generate_schemas generate_types
 	cd web-client && pnpm build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."

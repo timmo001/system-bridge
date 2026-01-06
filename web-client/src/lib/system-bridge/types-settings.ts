@@ -1,5 +1,8 @@
 import { Schema } from "effect";
 
+// Auto-generated file. Do not edit manually.
+// Generated from backend types in settings/settings.go
+
 export const SettingsHotkeySchema = Schema.Struct({
   name: Schema.String,
   key: Schema.String,

@@ -1,5 +1,8 @@
 import { Schema } from "effect";
 
+// Auto-generated file. Do not edit manually.
+// Generated from backend types in types/module.go
+
 export const Modules = [
   "battery",
   "cpu",
