@@ -1,4 +1,5 @@
 import { ContextConsumer, ContextProvider } from "@lit/context";
+import { Duration } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { z } from "zod";
@@ -10,11 +11,11 @@ import {
 import {
   websocketContext,
   type WebSocketState,
-  CONNECTION_TIMEOUT,
   UPDATE_TIMEOUT,
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
+import { connectWithRetry, matchError, runPromise } from "~/lib/effect";
 import {
   DefaultModuleData,
   ModuleNameSchema,
@@ -94,7 +95,6 @@ export class WebSocketProvider extends ProviderElement {
   private readonly MAX_COMMAND_EXECUTIONS = 100;
 
   private _ws: WebSocket | null = null;
-  private _connectionTimeout: number | null = null;
   private _reconnectTimeout: number | null = null;
   private _settingsUpdateTimeout: number | null = null;
   // @ts-expect-error - TS6133: Reserved for future state change detection
@@ -591,152 +591,136 @@ export class WebSocketProvider extends ProviderElement {
       return;
     }
 
-    const { host, port, ssl, token } = this.connection;
-
-    if (!host || !port) {
-      const error =
-        "Connection settings are incomplete. Please configure host and port.";
-      this._error = error;
-      this._isConnected = false;
-      this.requestUpdate();
-      return;
-    }
-
-    if (!token) {
-      const error =
-        "API token is required. Please configure your token in connection settings.";
-      this._error = error;
-      this._isConnected = false;
-      this.requestUpdate();
-      return;
-    }
-
     if (this._ws) {
       return;
     }
 
-    if (this._connectionTimeout) {
-      clearTimeout(this._connectionTimeout);
-    }
+    // Use Effect-based connection with retry
+    void this.connectWithEffect();
+  }
 
-    this._connectionTimeout = window.setTimeout(() => {
-      // Fix race condition: Store WebSocket reference and state before check
-      const ws = this._ws;
-      const currentState = ws?.readyState;
-      if (ws && currentState === WebSocket.CONNECTING) {
-        ws.close();
-        this._error =
-          "Connection timeout. Please check your host, port, and network connection.";
-        this._isConnected = false;
-        this.requestUpdate();
-      }
-    }, CONNECTION_TIMEOUT);
+  private async connectWithEffect() {
+    if (!this.connection) return;
 
     try {
-      this._ws = new WebSocket(
-        `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
+      const ws = await runPromise(
+        connectWithRetry(
+          this.connection,
+          MAX_RETRIES,
+          Duration.millis(RETRY_DELAY),
+        ),
       );
-    } catch (error) {
-      console.error("Failed to create WebSocket connection:", error);
-      this._error =
-        "Failed to create connection. Please check your connection settings.";
-      this._isConnected = false;
-      this.requestUpdate();
-      return;
-    }
 
-    this._ws.onopen = () => {
+      this._ws = ws;
       this._isConnected = true;
       this._error = null;
       this._retryCount = 0;
 
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
-
       if (this._reconnectTimeout) {
         clearTimeout(this._reconnectTimeout);
+        this._reconnectTimeout = null;
       }
 
       this._previousConnectedState = true;
 
-      if (!this._isRequestingData) {
-        this._isRequestingData = true;
-        this.sendRequest({
-          id: generateUUID(),
-          event: "GET_SETTINGS",
-          token: token,
-        });
+      // Set up message handlers
+      ws.onmessage = this.handleMessage.bind(this);
+      ws.onclose = this.handleClose.bind(this);
+      ws.onerror = this.handleSocketError.bind(this);
 
-        this.sendRequest({
-          id: generateUUID(),
-          event: "GET_DATA",
-          data: { modules: Modules },
-          token: token,
-        });
-
-        this.sendRequest({
-          id: generateUUID(),
-          event: "REGISTER_DATA_LISTENER",
-          data: { modules: Modules },
-          token: token,
-        });
-      }
+      // Request initial data
+      this.requestInitialData();
 
       this.requestUpdate();
-    };
-
-    this._ws.onclose = (event: CloseEvent) => {
+    } catch (error) {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      matchError(error, {
+        ConnectionError: (e) => {
+          this._error =
+            e.message || "Connection failed. Please check your settings.";
+        },
+        TokenError: (e) => {
+          this._error = e.message || "API token required.";
+          this._retryCount = MAX_RETRIES + 1; // Don't retry token errors
+        },
+        TimeoutError: () => {
+          this._error =
+            "Connection timeout. Please check your host, port, and network connection.";
+        },
+        Unknown: (e) => {
+          this._error = `Connection error: ${String(e)}`;
+        },
+      });
+      /* eslint-enable @typescript-eslint/naming-convention */
       this._isConnected = false;
-
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
-
-      this.clearAllPendingResolvers("WebSocket connection closed");
-      this.clearExecutingCommandsOnDisconnect();
-
-      this._previousConnectedState = false;
-
-      if (event.code === 1006) {
-        this._error =
-          "Connection closed unexpectedly. Please check your host and port settings.";
-      } else if (event.code === 1002) {
-        this._error = "Connection failed due to protocol error.";
-      } else if (event.code === 1003) {
-        this._error =
-          "Invalid API token. Please check your connection settings.";
-        this._retryCount = MAX_RETRIES + 1;
-      } else if (event.code !== 1000 && event.code !== 1001) {
-        this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
-      }
-
       this.requestUpdate();
-      this.scheduleReconnect();
-    };
+    }
+  }
 
-    this._ws.onerror = () => {
-      this._isConnected = false;
+  private handleClose(event: CloseEvent) {
+    this._isConnected = false;
+    this._ws = null;
 
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
+    this.clearAllPendingResolvers("WebSocket connection closed");
+    this.clearExecutingCommandsOnDisconnect();
 
-      this.clearAllPendingResolvers("WebSocket connection error");
-      this.clearExecutingCommandsOnDisconnect();
+    this._previousConnectedState = false;
 
-      if (this._retryCount === 0) {
-        this._error =
-          "Connection failed. Please check your host, port, and network connection.";
-      }
+    if (event.code === 1006) {
+      this._error =
+        "Connection closed unexpectedly. Please check your host and port settings.";
+    } else if (event.code === 1002) {
+      this._error = "Connection failed due to protocol error.";
+    } else if (event.code === 1003) {
+      this._error = "Invalid API token. Please check your connection settings.";
+      this._retryCount = MAX_RETRIES + 1;
+    } else if (event.code !== 1000 && event.code !== 1001) {
+      this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
+    }
 
-      this.requestUpdate();
-    };
+    this.requestUpdate();
+    this.scheduleReconnect();
+  }
 
-    this._ws.onmessage = this.handleMessage.bind(this);
+  private handleSocketError() {
+    this._isConnected = false;
+
+    this.clearAllPendingResolvers("WebSocket connection error");
+    this.clearExecutingCommandsOnDisconnect();
+
+    if (this._retryCount === 0) {
+      this._error =
+        "Connection failed. Please check your host, port, and network connection.";
+    }
+
+    this.requestUpdate();
+  }
+
+  private requestInitialData() {
+    if (!this.connection?.token || this._isRequestingData) return;
+
+    this._isRequestingData = true;
+    const { token } = this.connection;
+
+    this.sendRequest({
+      id: generateUUID(),
+      event: "GET_SETTINGS",
+      token: token,
+    });
+
+    this.sendRequest({
+      id: generateUUID(),
+      event: "GET_DATA",
+      data: { modules: Modules },
+      token: token,
+    });
+
+    this.sendRequest({
+      id: generateUUID(),
+      event: "REGISTER_DATA_LISTENER",
+      data: { modules: Modules },
+      token: token,
+    });
   }
 
   private scheduleReconnect() {
@@ -867,10 +851,6 @@ export class WebSocketProvider extends ProviderElement {
     if (this._ws) {
       this._ws.close();
       this._ws = null;
-    }
-    if (this._connectionTimeout) {
-      clearTimeout(this._connectionTimeout);
-      this._connectionTimeout = null;
     }
     if (this._reconnectTimeout) {
       clearTimeout(this._reconnectTimeout);
