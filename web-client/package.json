@@ -22,8 +22,7 @@
     "effect": "^3.19.14",
     "lit": "^3.3.2",
     "lucide": "^0.562.0",
-    "tailwind-merge": "^3.4.0",
-    "zod": "^4.1.12"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/js": "9.39.2",
