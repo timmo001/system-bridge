@@ -1,5 +1,5 @@
 import { createContext } from "@lit/context";
-import { type z } from "zod";
+import { type Schema } from "effect";
 
 import type { ModuleData } from "~/lib/system-bridge/types-modules";
 import type { Settings } from "~/lib/system-bridge/types-settings";
@@ -34,7 +34,7 @@ export interface WebSocketState {
   sendRequest: (request: WebSocketRequest) => void;
   sendRequestWithResponse: <T>(
     request: WebSocketRequest,
-    schema: z.ZodType<T>,
+    schema: Schema.Schema<T>,
   ) => Promise<T>;
   sendCommandExecute: (
     messageId: string,

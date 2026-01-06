@@ -1,7 +1,7 @@
 import { consume, provide } from "@lit/context";
+import { Either, Schema } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { z } from "zod";
 
 import {
   connectionContext,
@@ -17,14 +17,14 @@ import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
 
-const ConnectionSchema = z.object({
-  host: z.string().min(1, "Host is required"),
-  port: z.coerce.number().min(1, "Port must be at least 1"),
-  ssl: z.boolean(),
-  token: z.string().min(1, "Token is required"),
+const ConnectionSchema = Schema.Struct({
+  host: Schema.String.pipe(Schema.nonEmptyString()),
+  port: Schema.NumberFromString.pipe(Schema.greaterThan(0)),
+  ssl: Schema.Boolean,
+  token: Schema.String.pipe(Schema.nonEmptyString()),
 });
 
-type ConnectionForm = z.infer<typeof ConnectionSchema>;
+type ConnectionForm = typeof ConnectionSchema.Type;
 
 @customElement("page-connection")
 export class PageConnection extends PageElement {
@@ -90,15 +90,22 @@ export class PageConnection extends PageElement {
   };
 
   private validateForm(): boolean {
-    const result = ConnectionSchema.safeParse(this.formData);
-    if (!result.success) {
+    const result = Schema.decodeUnknownEither(ConnectionSchema)(this.formData);
+    if (Either.isLeft(result)) {
       this.errors = {};
-      result.error.issues.forEach((err) => {
-        const pathKey = err.path[0];
-        if (pathKey && typeof pathKey === "string") {
-          this.errors[pathKey as keyof ConnectionForm] = err.message;
-        }
-      });
+      const issues = result.left.message.split("\n");
+      // Simple error extraction - Effect Schema errors include field names
+      if (this.formData.host === "") {
+        this.errors.host = "Host is required";
+      }
+      if (!this.formData.port || this.formData.port < 1) {
+        this.errors.port = "Port must be at least 1";
+      }
+      if (this.formData.token === "") {
+        this.errors.token = "Token is required";
+      }
+      // Log full error for debugging
+      console.debug("Validation errors:", issues);
       this.requestUpdate();
       return false;
     }

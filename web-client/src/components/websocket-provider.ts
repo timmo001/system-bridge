@@ -1,8 +1,7 @@
 import { ContextConsumer, ContextProvider } from "@lit/context";
-import { Duration } from "effect";
+import { Duration, type Schema } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { z } from "zod";
 
 import {
   connectionContext,
@@ -15,7 +14,12 @@ import {
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
-import { connectWithRetry, matchError, runPromise } from "~/lib/effect";
+import {
+  connectWithRetry,
+  matchError,
+  runPromise,
+  safeParse,
+} from "~/lib/effect";
 import {
   DefaultModuleData,
   ModuleNameSchema,
@@ -34,11 +38,13 @@ import { ProviderElement } from "~/mixins";
 interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
-  schema: z.ZodType<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  schema: Schema.Schema<T, any>;
   timeoutId: number;
 }
 
-type AnyPendingResolver = PendingResolver;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPendingResolver = PendingResolver<any>;
 
 @customElement("websocket-provider")
 export class WebSocketProvider extends ProviderElement {
@@ -239,7 +245,10 @@ export class WebSocketProvider extends ProviderElement {
   private handleMessage(event: MessageEvent<string>) {
     let parsedMessage;
     try {
-      parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
+      parsedMessage = safeParse(
+        WebSocketResponseSchema,
+        JSON.parse(event.data),
+      );
     } catch (error) {
       console.error(
         "Failed to parse WebSocket message:",
@@ -271,7 +280,7 @@ export class WebSocketProvider extends ProviderElement {
       // Clear the timeout since we received a response
       clearTimeout(resolver.timeoutId);
 
-      const parsedData = resolver.schema.safeParse(message.data);
+      const parsedData = safeParse(resolver.schema, message.data);
       if (parsedData?.success) {
         resolver.resolve(parsedData.data);
       } else {
@@ -287,14 +296,18 @@ export class WebSocketProvider extends ProviderElement {
         if (!message.module || !message.data) {
           return;
         }
-        const moduleValidation = ModuleNameSchema.safeParse(message.module);
+        const moduleValidation = safeParse(ModuleNameSchema, message.module);
         if (!moduleValidation.success) {
           this._error = `Received invalid module name: ${message.module}`;
           return;
         }
         const moduleName = moduleValidation.data;
         const moduleSchema = ModuleDataSchemas[moduleName];
-        const dataValidation = moduleSchema.safeParse(message.data);
+        const dataValidation = safeParse(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          moduleSchema as Schema.Schema<any>,
+          message.data,
+        );
         if (!dataValidation.success) {
           this._error = `Received invalid data for module ${moduleName}`;
           console.error(
@@ -305,6 +318,7 @@ export class WebSocketProvider extends ProviderElement {
         }
         this._data = {
           ...this._data,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           [moduleName]: dataValidation.data,
         };
         this._isRequestingData = false;
@@ -800,7 +814,7 @@ export class WebSocketProvider extends ProviderElement {
 
   sendRequestWithResponse<T>(
     request: WebSocketRequest,
-    schema: z.ZodType<T>,
+    schema: Schema.Schema<T>,
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       if (this._ws?.readyState !== WebSocket.OPEN) {

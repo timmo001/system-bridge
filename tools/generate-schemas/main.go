@@ -378,14 +378,15 @@ func hasRecursiveDependency(name string, structInfo StructInfo, structs map[stri
 func generateRecursiveEffectSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	// For SensorsWindowsHardware with recursive structure
 	// Effect Schema requires explicit type annotation for recursive schemas
-	fmt.Fprintf(buf, "export type %s = {\n", structInfo.Name)
+	// Use interface instead of type per eslint rules
+	fmt.Fprintf(buf, "export interface %s {\n", structInfo.Name)
 
 	for _, field := range structInfo.Fields {
 		tsType := mapGoTypeToTypeScript(field, structInfo.Name)
 		fmt.Fprintf(buf, "  readonly %s: %s;\n", field.JSONName, tsType)
 	}
 
-	buf.WriteString("};\n\n")
+	buf.WriteString("}\n\n")
 
 	fmt.Fprintf(buf, "export const %sSchema: Schema.Schema<%s> = Schema.Struct({\n", structInfo.Name, structInfo.Name)
 
@@ -433,9 +434,9 @@ func mapGoTypeToTypeScript(field FieldInfo, parentStruct string) string {
 
 	switch field.Type {
 	case parentStruct:
-		tsType = "ReadonlyArray<" + parentStruct + ">"
+		tsType = "readonly " + parentStruct + "[]"
 	case "SensorsWindowsSensor":
-		tsType = "ReadonlyArray<SensorsWindowsSensor>"
+		tsType = "readonly SensorsWindowsSensor[]"
 	case "bool":
 		tsType = "boolean"
 	case "string":
@@ -460,8 +461,8 @@ func mapGoTypeToTypeScript(field FieldInfo, parentStruct string) string {
 		}
 	}
 
-	if field.IsArray && tsType != "ReadonlyArray<"+parentStruct+">" && tsType != "ReadonlyArray<SensorsWindowsSensor>" {
-		tsType = "ReadonlyArray<" + tsType + ">"
+	if field.IsArray && !strings.HasPrefix(tsType, "readonly ") {
+		tsType = "readonly " + tsType + "[]"
 	}
 
 	if field.IsPtr {

@@ -8,5 +8,6 @@
  */
 
 export * from "./errors";
+export * from "./message";
 export * from "./runtime";
 export * from "./websocket";
