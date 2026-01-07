@@ -132,8 +132,33 @@ jobs:
           $installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$YEAR', $YEAR -replace '\$DOT_VERSION', $DOT_VERSION
           Set-Content -Path "installer.nsi" -Value $installerScript
 
+          # Find makensis executable (same logic as create-installer.ps1)
+          $makensisCmd = Get-Command makensis -ErrorAction SilentlyContinue
+          if ($makensisCmd) {
+              $makensisPath = $makensisCmd.Source
+          } else {
+              # Try common installation paths
+              $possiblePaths = @(
+                  "${env:ProgramFiles(x86)}\NSIS\makensis.exe",
+                  "${env:ProgramFiles}\NSIS\makensis.exe",
+                  "$env:ChocolateyInstall\lib\nsis\tools\makensis.exe",
+                  "C:\ProgramData\chocolatey\lib\nsis\tools\makensis.exe"
+              )
+              foreach ($path in $possiblePaths) {
+                  if (Test-Path $path) {
+                      $makensisPath = $path
+                      break
+                  }
+              }
+          }
+
+          if (-not $makensisPath) {
+              Write-Error "makensis not found. Please ensure NSIS is installed correctly."
+              exit 1
+          }
+
           # Check for syntax errors in NSIS script (this is a basic check, it just tries to compile)
-          makensis /V2 installer.nsi
+          & $makensisPath /V2 installer.nsi
 
   lint-arch-pkgbuild:
     name: Lint arch pkgbuild

@@ -46,6 +46,28 @@ Section "Prerequisites"
   vc_runtime_ok:
     ; Visual C++ Runtime found, continue
   vc_runtime_end:
+
+  # Check for .NET 8.0 Runtime (required for NowPlaying helper)
+  !ifdef INCLUDE_NOW_PLAYING
+    # Check if .NET 8.0 runtime is installed by trying to query installed runtimes
+    # First check if dotnet command exists and can list runtimes
+    ClearErrors
+    ExecWait 'cmd /c dotnet --list-runtimes 2>nul | findstr /C:"Microsoft.NETCore.App 8.0" >nul 2>&1' $0
+    ${If} $0 != 0
+      # .NET 8.0 runtime not found, prompt for installation
+      MessageBox MB_YESNO|MB_ICONQUESTION "This application requires .NET 8.0 Runtime for the Now Playing feature. Would you like to install it now?" IDYES install_dotnet IDNO abort_dotnet
+      abort_dotnet:
+        MessageBox MB_OK|MB_ICONINFORMATION "Installation will continue, but the Now Playing feature may not work without .NET 8.0 Runtime. You can install it later from https://dotnet.microsoft.com/download/dotnet/8.0"
+        Goto dotnet_end
+      install_dotnet:
+        ExecWait 'winget install Microsoft.DotNet.DesktopRuntime.8 --silent --accept-package-agreements --accept-source-agreements' $1
+        ${If} $1 != 0
+          MessageBox MB_OK|MB_ICONSTOP "Failed to install .NET 8.0 Runtime. Please install it manually from https://dotnet.microsoft.com/download/dotnet/8.0"
+          MessageBox MB_OK|MB_ICONINFORMATION "Installation will continue, but the Now Playing feature may not work without .NET 8.0 Runtime."
+        ${EndIf}
+    ${EndIf}
+    dotnet_end:
+  !endif
 SectionEnd
 
 Section "Install"
