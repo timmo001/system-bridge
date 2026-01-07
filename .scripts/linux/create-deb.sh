@@ -34,6 +34,14 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
+# Verify CSS inclusion in binary
+echo "Verifying CSS inclusion in binary..."
+if [ -f "$SCRIPT_DIR/../verify-css.sh" ]; then
+  bash "$SCRIPT_DIR/../verify-css.sh" "./system-bridge-linux"
+else
+  echo "WARNING: CSS verification script not found, skipping CSS check"
+fi
+
 # Determine version
 VERSION=${VERSION:-5.0.0}
 

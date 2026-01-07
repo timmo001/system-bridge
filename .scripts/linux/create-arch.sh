@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # If running as root in CI container, re-run as non-root build user
 if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
@@ -27,6 +28,14 @@ fi
 if [ ! -f "system-bridge-linux" ]; then
   echo "system-bridge-linux not found, please build the application first"
   exit 1
+fi
+
+# Verify CSS inclusion in binary
+echo "Verifying CSS inclusion in binary..."
+if [ -f "$SCRIPT_DIR/../verify-css.sh" ]; then
+  bash "$SCRIPT_DIR/../verify-css.sh" "./system-bridge-linux"
+else
+  echo "WARNING: CSS verification script not found, skipping CSS check"
 fi
 
 # Create build directory

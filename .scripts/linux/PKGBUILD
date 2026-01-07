@@ -7,7 +7,7 @@ pkgver=${ARCH_PKGVER}
 pkgrel=1
 pkgdesc="A bridge for your systems"
 source=('system-bridge' 'system-bridge.desktop' 'system-bridge.svg' 'system-bridge-16.png' 'system-bridge-32.png' 'system-bridge-48.png' 'system-bridge-128.png' 'system-bridge-256.png' 'system-bridge-512.png' 'LICENSE')
-conflicts=('system-bridge-git')
+conflicts=('system-bridge-git' 'system-bridge-git-debug')
 
 arch=('x86_64')
 url="https://github.com/timmo001/system-bridge"

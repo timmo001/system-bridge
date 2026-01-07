@@ -49,17 +49,56 @@ ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
 	@echo "Verifying build files are accessible..."
-	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host '✗ Build files not found after build'; exit 1 }"
-	@echo ✓ Build files verified before Go build
+	@powershell -Command "if (!(Test-Path 'web-client\dist\index.html')) { Write-Host 'ERROR: web-client\dist\index.html not found'; exit 1 }"
+	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
+	@powershell -Command "if (!(Get-ChildItem 'web-client\dist\assets\*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client\dist\assets\'; Get-ChildItem 'web-client\dist\assets\' -ErrorAction SilentlyContinue; exit 1 }"
+	@echo "Verifying Tailwind CSS compilation..."
+	@powershell -Command "if ((Get-ChildItem 'web-client\dist\assets\*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw) -match '@layer utilities|--tw-|\.(flex|grid|hidden|block)\{') { Write-Host '  [OK] Found Tailwind CSS patterns' } else { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }"
+	@echo "[OK] Build files verified and ready for embedding"
 else
 	@echo "Waiting for file system to sync..."
 	@sync
 	@echo "Verifying build files are accessible..."
-	@if ! ls web-client/dist/index.html 1> /dev/null 2>&1; then \
-		echo "✗ Build files not found after build"; \
+	@if ! ls web-client/dist/index.html >/dev/null 2>&1; then \
+		echo "ERROR: web-client/dist/index.html not found"; \
 		exit 1; \
 	fi
-	@echo "✓ Build files verified before Go build"
+	@if ! ls web-client/dist/assets/*.css >/dev/null 2>&1; then \
+		echo "ERROR: CSS files not found in web-client/dist/assets/"; \
+		ls -la web-client/dist/assets/ || true; \
+		exit 1; \
+	fi
+	@if ! ls web-client/dist/assets/*.js >/dev/null 2>&1; then \
+		echo "ERROR: JS files not found in web-client/dist/assets/"; \
+		ls -la web-client/dist/assets/ || true; \
+		exit 1; \
+	fi
+	@echo "Verifying Tailwind CSS compilation..."
+	@CSS_FILE=$$(find web-client/dist/assets -name "*.css" -type f 2>/dev/null | head -1); \
+	if [ -z "$$CSS_FILE" ]; then \
+		echo "ERROR: No CSS file found for Tailwind verification"; \
+		exit 1; \
+	fi; \
+	TAILWIND_FOUND=0; \
+	if grep -qE "@layer utilities" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found @layer utilities"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if grep -qE "\.(flex|grid|hidden|block)\{" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found Tailwind utility classes"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if grep -qE "--tw-" "$$CSS_FILE" 2>/dev/null; then \
+		echo "  ✓ Found Tailwind CSS custom properties"; \
+		TAILWIND_FOUND=1; \
+	fi; \
+	if [ "$$TAILWIND_FOUND" -eq 0 ]; then \
+		echo "ERROR: Tailwind CSS compilation failed - no utility classes found"; \
+		echo "Expected @layer utilities, utility classes (.flex, .grid, etc.), or --tw-* properties"; \
+		echo "This may indicate that @tailwindcss/vite plugin did not run properly"; \
+		exit 1; \
+	fi
+	@echo "✓ Build files verified and ready for embedding"
 endif
 
 create_all_packages: clean_dist build

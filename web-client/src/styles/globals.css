@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Explicitly configure content sources for Tailwind CSS v4 */
+/* This ensures classes are detected in all build environments */
+@source "../../index.html";
+@source "../**/*.ts";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {

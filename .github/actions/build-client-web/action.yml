@@ -7,13 +7,13 @@ runs:
   steps:
     - uses: ./.github/actions/setup-client-web
 
-    - name: Cache Next.js build cache
+    - name: Cache Vite build cache
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/web-client/.next/cache
-        key: ${{ runner.os }}-nextjs-v2-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx') }}
+        path: ${{ github.workspace }}/web-client/dist
+        key: ${{ runner.os }}-vite-v3-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx', 'web-client/**/*.css', 'web-client/vite.config.ts') }}
         restore-keys: |
-          ${{ runner.os }}-nextjs-v2-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}
+          ${{ runner.os }}-vite-v3-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}
 
     - name: Build client project
       run: make build_web_client

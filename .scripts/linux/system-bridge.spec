@@ -4,7 +4,7 @@ Release:        %{_release}
 Summary:        System Bridge
 
 License:        Apache-2.0
-BuildArch:      x86_64
+ExclusiveArch:  x86_64
 
 %description
 A bridge for your systems.

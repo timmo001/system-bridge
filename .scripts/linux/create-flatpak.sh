@@ -8,6 +8,15 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
+# Verify CSS inclusion in binary
+echo "Verifying CSS inclusion in binary..."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/../verify-css.sh" ]; then
+  bash "$SCRIPT_DIR/../verify-css.sh" "./system-bridge-linux"
+else
+  echo "WARNING: CSS verification script not found, skipping CSS check"
+fi
+
 # Check if all icon files exist
 for icon in .resources/system-bridge-dimmed.svg \
   .resources/system-bridge-dimmed-16.png \
@@ -45,7 +54,7 @@ BUILD_DIR="flatpak-build"
 mkdir -p "$BUILD_DIR"
 
 # Build flatpak package
-flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$(dirname "$0")/dev.timmo.system-bridge.yml"
+flatpak-builder --force-clean --disable-rofiles-fuse "$BUILD_DIR" "$SCRIPT_DIR/dev.timmo.system-bridge.yml"
 
 # Create and configure repo (avoid min-free-space errors in constrained envs)
 mkdir -p repo

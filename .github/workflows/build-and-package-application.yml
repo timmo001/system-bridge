@@ -68,6 +68,11 @@ jobs:
         run: |
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
 
+      - name: Verify CSS in Linux binary
+        run: |
+          chmod +x ./.scripts/verify-css.sh
+          ./.scripts/verify-css.sh ./system-bridge-linux
+
       - name: Upload application
         uses: actions/upload-artifact@v6
         with:
@@ -199,11 +204,16 @@ jobs:
         run: |
           go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
 
+      - name: Verify CSS in Windows binary
+        shell: pwsh
+        run: |
+          ./.scripts/windows/create-installer.ps1 -VerifyBinaryOnly
+
       - name: Package for Windows
         run: |
           echo "::group::Setup"
-          mkdir -p dist
-          Move-Item system-bridge.exe dist/system-bridge.exe
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Move-Item system-bridge.exe dist/system-bridge.exe -Force
           echo "::endgroup::"
 
           echo "::group::Create installer"
@@ -395,4 +405,4 @@ jobs:
           make_latest: true
           name: ${{ needs.compute-next-patch.outputs.next_tag }}
           tag_name: ${{ needs.compute-next-patch.outputs.next_tag }}
-          generate_release_notes: true
+          generate_release_notes: false
