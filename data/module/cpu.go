@@ -107,68 +107,81 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			}
 		}
 	}
-	for i, cpuInfo := range frequencies {
-		perCpuData := types.PerCPU{
-			ID: i,
-			Frequency: &types.CPUFrequency{
-				Current: &cpuInfo.Mhz,
-			},
-		}
-
-		// Best-effort: populate per-CPU min/max frequency via OS-specific implementation
-		minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
-		if perCpuData.Frequency != nil {
-			perCpuData.Frequency.Min = minMHz
-			perCpuData.Frequency.Max = maxMHz
-		}
-
-		// Get per CPU times
-		if i < len(timesPerCPU) {
-			perCpuData.Times = &types.CPUTimes{
-				User:      &timesPerCPU[i].User,
-				System:    &timesPerCPU[i].System,
-				Idle:      &timesPerCPU[i].Idle,
-				Interrupt: &timesPerCPU[i].Irq,
+	// Get per CPU info - loop based on actual CPU count, not frequencies array length
+	if cpuData.Count != nil && *cpuData.Count > 0 {
+		for i := 0; i < *cpuData.Count; i++ {
+			perCpuData := types.PerCPU{
+				ID:  i,
 			}
 
-			// Windows-only: set absolute DPC time seconds when available
-			if i < len(dpcTimePer) && dpcTimePer != nil {
-				val := dpcTimePer[i]
-				perCpuData.Times.DPC = &val
-			}
+			// Get frequency for this CPU
+			// On Windows, cpu.Info() may return only 1 entry for all CPUs
+			if len(frequencies) > 0 {
+				cpuInfo := frequencies[0] // Use first entry as default
+				if i < len(frequencies) {
+					cpuInfo = frequencies[i] // Use specific entry if available
+				}
+				perCpuData.Frequency = &types.CPUFrequency{
+					Current: &cpuInfo.Mhz,
+				}
 
-			// Per-CPU times percent from sampled delta
-			if perPct != nil && i < len(perPct) && perPct[i] != nil {
-				perCpuData.TimesPercent = &types.CPUTimes{
-					User:      perPct[i].User,
-					System:    perPct[i].System,
-					Idle:      perPct[i].Idle,
-					Interrupt: perPct[i].Interrupt,
+				// Best-effort:  populate per-CPU min/max frequency via OS-specific implementation
+				minMHz, maxMHz := cm.GetPerCPUFreqBounds(i)
+				if perCpuData.Frequency != nil {
+					perCpuData.Frequency.Min = minMHz
+					perCpuData.Frequency.Max = maxMHz
 				}
 			}
 
-			// Windows-only: best-effort DPC percentage per-CPU
-			if dpcs := cm.GetDPCPercentages(true); i < len(dpcs) {
-				if perCpuData.TimesPercent == nil {
-					perCpuData.TimesPercent = &types.CPUTimes{}
+			// Get per CPU times
+			if i < len(timesPerCPU) {
+				perCpuData.Times = &types.CPUTimes{
+					User:      &timesPerCPU[i].User,
+					System:    &timesPerCPU[i].System,
+					Idle:      &timesPerCPU[i].Idle,
+					Interrupt: &timesPerCPU[i].Irq,
 				}
-				d := dpcs[i]
-				perCpuData.TimesPercent.DPC = &d
+
+				// Windows-only: set absolute DPC time seconds when available
+				if i < len(dpcTimePer) && dpcTimePer != nil {
+					val := dpcTimePer[i]
+					perCpuData.Times.DPC = &val
+				}
+
+				// Per-CPU times percent from sampled delta
+				if perPct != nil && i < len(perPct) && perPct[i] != nil {
+					perCpuData.TimesPercent = &types.CPUTimes{
+						User:      perPct[i].User,
+						System:    perPct[i].System,
+						Idle:      perPct[i].Idle,
+						Interrupt:  perPct[i].Interrupt,
+					}
+				}
+
+				// Windows-only: best-effort DPC percentage per-CPU
+				if dpcs := cm.GetDPCPercentages(true); i < len(dpcs) {
+					if perCpuData.TimesPercent == nil {
+						perCpuData.TimesPercent = &types.CPUTimes{}
+					}
+					d := dpcs[i]
+					perCpuData.TimesPercent.DPC = &d
+				}
 			}
-		}
 
-		// Get per CPU usage percentage
-		if i < len(percentsPerCPU) {
-			usage := percentsPerCPU[i]
-			perCpuData.Usage = &usage
-		}
+			// Get per CPU usage percentage
+			if i < len(percentsPerCPU) {
+				usage := percentsPerCPU[i]
+				perCpuData.Usage = &usage
+			}
 
-		// Best-effort: distribute overall package power across cores weighted by usage
-		if i < len(perCorePowers) && overallPower != nil {
-			val := perCorePowers[i]
-			perCpuData.Power = &val
+			// Best-effort: distribute overall package power across cores weighted by usage
+			if i < len(perCorePowers) && overallPower != nil {
+				val := perCorePowers[i]
+				perCpuData.Power = &val
+			}
+
+			perCPU = append(perCPU, perCpuData)
 		}
-		perCPU = append(perCPU, perCpuData)
 	}
 	cpuData.PerCPU = perCPU
 
