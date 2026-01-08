@@ -14,7 +14,6 @@ import (
 	"log/slog"
 
 	"fyne.io/systray"
-	"github.com/getsentry/sentry-go"
 	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
@@ -41,13 +40,9 @@ var trayIconIcoData []byte
 func main() {
 	setupLogging()
 
-	// Ensure Sentry events are flushed before program exits
-	defer sentry.Flush(2 * time.Second)
-
 	defer func() {
 		if err := recover(); err != nil {
-			sentry.CurrentHub().Recover(err)
-			sentry.Flush(2 * time.Second)
+			slog.Error("Panic recovered", "error", err)
 		}
 	}()
 
