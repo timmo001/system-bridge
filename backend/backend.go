@@ -91,14 +91,6 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
-	// Create a file system that's rooted at the web-client/dist directory
-	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
-	if err != nil {
-		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
-	} else {
-		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
-	}
-
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		_, err := b.wsServer.HandleConnection(w, r)
@@ -151,6 +143,14 @@ func (b *Backend) Run(ctx context.Context) error {
 	})
 
 	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+
+	// Set up SPA file server (must be last to avoid catching API routes)
+	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
+	if err != nil {
+		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
+	} else {
+		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
+	}
 
 	// Get port from environment variable with default
 	port := utils.GetPort()

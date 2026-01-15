@@ -59,7 +59,9 @@ func (s *MCPServer) handleInitialize(req MCPRequest) MCPResponse {
 	result := InitializeResult{
 		ProtocolVersion: "2024-11-05",
 		Capabilities: ServerCapabilities{
-			Tools: map[string]interface{}{},
+			Tools: map[string]interface{}{
+				"listChanged": false,
+			},
 		},
 		ServerInfo: ServerInfo{
 			Name:    "system-bridge",

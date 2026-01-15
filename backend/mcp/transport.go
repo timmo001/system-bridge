@@ -72,12 +72,24 @@ func (s *MCPServer) handleMessages(conn *websocket.Conn) {
 			break
 		}
 
+		// Log raw message for debugging
+		slog.Debug("MCP raw message received", "message", string(message))
+
 		// Parse request
 		var req MCPRequest
 		if err := json.Unmarshal(message, &req); err != nil {
-			slog.Error("Failed to parse MCP request", "error", err)
+			slog.Error("Failed to parse MCP request", "error", err, "raw_message", string(message))
 			response := NewErrorResponse(nil, ErrorCodeParseError, "Parse error", nil)
 			s.sendResponse(conn, response)
+			continue
+		}
+
+		slog.Debug("MCP request parsed", "method", req.Method, "id", req.ID)
+
+		// Check if this is a notification (no ID means no response expected)
+		if req.ID == nil {
+			slog.Debug("Received notification (no response needed)", "method", req.Method)
+			// For notifications, just log and continue without responding
 			continue
 		}
 

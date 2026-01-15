@@ -23,8 +23,10 @@ claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api
 
 Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
 ```
-cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+cursor://addServer/system-bridge?command=websocat&args=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
+
+> **Note:** Requires `websocat` to be installed. See [Manual Configuration](#cursor-1) for details.
 
 **Claude Code (CLI):**
 
@@ -205,15 +207,10 @@ claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api
 
 Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
 ```
-cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+cursor://addServer/system-bridge?command=websocat&args=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
 
-**Important:** Replace `YOUR_TOKEN_HERE` with your actual System Bridge token before clicking.
-
-Get your token:
-```bash
-system-bridge client token
-```
+> **Note:** Requires `websocat` to be installed. See [Manual Configuration - Cursor](#cursor-1) for installation instructions.
 
 ### Manual Configuration
 
@@ -260,23 +257,36 @@ claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/ap
 
 #### Cursor
 
+**Note:** Cursor does not support WebSocket transport directly, so we use `websocat` as a bridge.
+
+**Step 1: Install websocat**
+
+- **Linux/macOS:** `brew install websocat`
+- **Windows:** Download from [websocat releases](https://github.com/vi/websocat/releases)
+
+**Step 2: Configure Cursor**
+
 Add to your Cursor configuration file:
 
-**Linux/macOS:** `~/.cursor/mcp.json`
-**Windows:** `%APPDATA%\Cursor\mcp.json`
+**Linux/macOS:** `~/.cursor/mcp_settings.json`
+**Windows:** `%APPDATA%\Cursor\User\globalStorage\mcp_settings.json`
 
 ```json
 {
   "mcpServers": {
     "system-bridge": {
-      "transport": "websocket",
-      "url": "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+      "command": "websocat",
+      "args": [
+        "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+      ]
     }
   }
 }
 ```
 
 Replace `YOUR_TOKEN_HERE` with your actual System Bridge token.
+
+**How it works:** `websocat` acts as a bridge between Cursor's stdio transport and System Bridge's WebSocket endpoint.
 
 ### Custom MCP Client
 
