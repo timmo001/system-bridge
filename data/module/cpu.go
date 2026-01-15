@@ -111,7 +111,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	if cpuData.Count != nil && *cpuData.Count > 0 {
 		for i := 0; i < *cpuData.Count; i++ {
 			perCpuData := types.PerCPU{
-				ID:  i,
+				ID: i,
 			}
 
 			// Get frequency for this CPU
@@ -154,7 +154,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 						User:      perPct[i].User,
 						System:    perPct[i].System,
 						Idle:      perPct[i].Idle,
-						Interrupt:  perPct[i].Interrupt,
+						Interrupt: perPct[i].Interrupt,
 					}
 				}
 

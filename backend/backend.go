@@ -13,6 +13,7 @@ import (
 	"log/slog"
 
 	api_http "github.com/timmo001/system-bridge/backend/http"
+	"github.com/timmo001/system-bridge/backend/mcp"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
@@ -32,6 +33,7 @@ type Backend struct {
 	wsServer         *websocket.WebsocketServer
 	webClientContent *embed.FS
 	discoveryManager *discovery.DiscoveryManager
+	token            string
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
@@ -52,6 +54,7 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 		wsServer:         wsServer,
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
+		token:            token,
 	}
 }
 
@@ -88,14 +91,6 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
-	// Create a file system that's rooted at the web-client/dist directory
-	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
-	if err != nil {
-		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
-	} else {
-		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
-	}
-
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
 		_, err := b.wsServer.HandleConnection(w, r)
@@ -107,6 +102,14 @@ func (b *Backend) Run(ctx context.Context) error {
 				slog.Error("Failed to encode response", "error", err)
 			}
 			return
+		}
+	})
+
+	// Set up MCP WebSocket endpoint
+	mcpServer := mcp.NewMCPServer(b.token, b.eventRouter, b.dataStore)
+	mux.HandleFunc("/api/mcp", func(w http.ResponseWriter, r *http.Request) {
+		if err := mcpServer.HandleConnection(w, r); err != nil {
+			slog.Error("MCP connection error", "error", err)
 		}
 	})
 
@@ -140,6 +143,14 @@ func (b *Backend) Run(ctx context.Context) error {
 	})
 
 	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+
+	// Set up SPA file server (must be last to avoid catching API routes)
+	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
+	if err != nil {
+		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
+	} else {
+		mux.HandleFunc("/", spaFileServer(subFS, "index.html"))
+	}
 
 	// Get port from environment variable with default
 	port := utils.GetPort()

@@ -21,7 +21,7 @@ func getGPUs() ([]types.GPU, error) {
 	// Try to get NVIDIA GPU info first using nvidia-smi
 	cmd := exec.Command("nvidia-smi", "--query-gpu=gpu_name,memory.total,memory.used,memory.free,utilization.gpu,clocks.current.graphics,clocks.current.memory,power.draw,temperature.gpu", "--format=csv,noheader,nounits")
 	utils.SetHideWindow(cmd)
-	output, err := cmd. Output()
+	output, err := cmd.Output()
 	if err == nil {
 		// Parse nvidia-smi output
 		lines := strings.Split(string(output), "\n")
@@ -47,12 +47,12 @@ func getGPUs() ([]types.GPU, error) {
 					Name:        name,
 					CoreClock:   &coreClock,
 					CoreLoad:    &coreLoad,
-					MemoryClock:   &memoryClock,
+					MemoryClock: &memoryClock,
 					MemoryLoad:  &coreLoad,
 					MemoryFree:  &memoryFree,
 					MemoryUsed:  &memoryUsed,
 					MemoryTotal: &memoryTotal,
-					PowerUsage:   &powerUsage,
+					PowerUsage:  &powerUsage,
 					Temperature: &temperature,
 				})
 			}
