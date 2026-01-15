@@ -424,7 +424,6 @@ Execute a tool.
 - Verify module names are valid (for `get_data` tool)
 - Ensure media control actions are uppercase (for `media_control` tool)
 
-
 ## Example Usage
 
 ### Using Claude Desktop
@@ -506,7 +505,6 @@ Run MCP tests:
 ```bash
 go test ./backend/mcp/
 ```
-
 
 ## References
 
