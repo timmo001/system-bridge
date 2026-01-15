@@ -14,17 +14,21 @@ system-bridge client token
 
 **Claude Desktop:**
 
-[Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
+Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
+```
+claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+```
 
 **Cursor:**
 
-[Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
-
-> **Note:** Replace `YOUR_TOKEN_HERE` in the URL with your actual token from step 1.
+Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
+```
+cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+```
 
 **Claude Code (CLI):**
 
-Run this command to add the server:
+Run this command (replace `YOUR_TOKEN_HERE` with your token):
 ```bash
 claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
 ```
@@ -188,24 +192,20 @@ Open a file, directory, or URL with the default application.
 
 ## Client Configuration
 
-### Quick Setup (One-Click Install)
+### Quick Setup (Deep Link Install)
 
 #### Claude Desktop
 
-[Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
-
-Or use this deep link:
+Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
 ```
-claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE
+claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
 
 #### Cursor
 
-[Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
-
-Or use this deep link:
+Copy and paste this deep link into your browser (replace `YOUR_TOKEN_HERE` with your token):
 ```
-cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE
+cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
 
 **Important:** Replace `YOUR_TOKEN_HERE` with your actual System Bridge token before clicking.
