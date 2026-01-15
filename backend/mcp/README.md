@@ -40,8 +40,8 @@ claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/ap
 Ask your AI assistant:
 - "Check my CPU usage"
 - "Send me a notification when this is done"
-- "List files in my Downloads folder"
-- "Lock my computer"
+- "Play the current media"
+- "Get information about my disks"
 
 ## Overview
 
@@ -118,79 +118,24 @@ Send a desktop notification.
 }
 ```
 
-### Filesystem
-
-#### `system_bridge_list_directory`
-List contents of a directory.
-
-**Parameters:**
-- `path` (string, required): Directory path
-
-#### `system_bridge_read_file`
-Read contents of a file.
-
-**Parameters:**
-- `path` (string, required): File path
-
-### Command Execution
-
-#### `system_bridge_execute_command`
-Execute a pre-configured command from the allowlist.
-
-**Parameters:**
-- `commandID` (string, required): Command ID from settings allowlist
-
-**Security Note:** Only commands defined in your System Bridge settings allowlist can be executed. This prevents arbitrary command execution.
-
 ### Media Control
 
 #### `system_bridge_media_control`
 Control media playback.
 
 **Parameters:**
-- `action` (string, required): One of `play`, `pause`, `stop`, `next`, `previous`
+- `action` (string, required): Media control action (must be uppercase)
+  - Available actions: `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`
 
-### Keyboard Input
-
-#### `system_bridge_keyboard_press`
-Press a keyboard key.
-
-**Parameters:**
-- `key` (string, required): Key to press (e.g., `enter`, `space`, `ctrl`)
-
-#### `system_bridge_keyboard_text`
-Type text using the keyboard.
-
-**Parameters:**
-- `text` (string, required): Text to type
-
-### Power Management
-
-#### `system_bridge_power_shutdown`
-Shutdown the system.
-
-#### `system_bridge_power_restart`
-Restart the system.
-
-#### `system_bridge_power_sleep`
-Put the system to sleep.
-
-#### `system_bridge_power_hibernate`
-Hibernate the system.
-
-#### `system_bridge_power_lock`
-Lock the system.
-
-#### `system_bridge_power_logout`
-Log out the current user.
-
-### File Operations
-
-#### `system_bridge_open`
-Open a file, directory, or URL with the default application.
-
-**Parameters:**
-- `path` (string, required): Path or URL to open
+**Example:**
+```json
+{
+  "name": "system_bridge_media_control",
+  "arguments": {
+    "action": "PLAY"
+  }
+}
+```
 
 ## Client Configuration
 
@@ -333,7 +278,7 @@ Handshake and capability negotiation.
     },
     "serverInfo": {
       "name": "system-bridge",
-      "version": "5.0.0"
+      "version": "5.0.0"  // Dynamic: reports actual System Bridge version
     }
   }
 }
@@ -405,7 +350,7 @@ Execute a tool.
 ## Security
 
 - **Token Authentication:** All connections must provide a valid API token
-- **Command Allowlist:** Only pre-configured commands can be executed
+- **Read-Only Data Access:** The `get_data` tool provides read-only access to system information
 - **Same Restrictions:** MCP uses the same security model as the regular System Bridge API
 
 ## Troubleshooting
@@ -421,8 +366,9 @@ Execute a tool.
 
 ### Tool Execution Fails
 - Check System Bridge logs for detailed error messages
-- For command execution, verify the command is in your allowlist
 - Ensure required parameters are provided
+- Verify module names are valid (for `get_data` tool)
+- Ensure media control actions are uppercase (for `media_control` tool)
 
 ## Example Usage
 
@@ -432,34 +378,61 @@ Once configured, you can ask Claude to:
 
 - "Check my CPU usage"
 - "Send me a notification when this is done"
-- "List the files in my Downloads folder"
-- "Execute the backup command"
-- "Lock my computer in 5 minutes"
+- "What's my current memory usage?"
+- "Pause the current media playback"
+- "Get information about my battery status"
 
-### Using Python MCP SDK
+### Using Custom MCP Client
+
+Any MCP-compatible client can connect to the WebSocket endpoint. Example using Python:
 
 ```python
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+import asyncio
+import websockets
+import json
 
 async def main():
-    server_params = StdioServerParameters(
-        command="system-bridge",
-        args=["mcp"],
-    )
+    token = "YOUR_TOKEN_HERE"
+    uri = f"ws://localhost:9170/api/mcp?token={token}"
     
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
-            
-            # List available tools
-            tools = await session.list_tools()
-            
-            # Call a tool
-            result = await session.call_tool(
-                "system_bridge_get_data",
-                arguments={"modules": ["cpu"]}
-            )
+    async with websockets.connect(uri) as websocket:
+        # Initialize
+        await websocket.send(json.dumps({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "custom-client", "version": "1.0.0"}
+            }
+        }))
+        response = await websocket.recv()
+        print(f"Initialize: {response}")
+        
+        # List tools
+        await websocket.send(json.dumps({
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list"
+        }))
+        response = await websocket.recv()
+        print(f"Tools: {response}")
+        
+        # Call a tool
+        await websocket.send(json.dumps({
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {
+                "name": "system_bridge_get_data",
+                "arguments": {"modules": ["cpu"]}
+            }
+        }))
+        response = await websocket.recv()
+        print(f"Result: {response}")
+
+asyncio.run(main())
 ```
 
 ## Development
