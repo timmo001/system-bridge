@@ -14,11 +14,11 @@ system-bridge client token
 
 **Claude Desktop:**
 
-[▶ Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
 
 **Cursor:**
 
-[▶ Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
 
 > **Note:** Replace `YOUR_TOKEN_HERE` in the URL with your actual token from step 1.
 
@@ -192,20 +192,20 @@ Open a file, directory, or URL with the default application.
 
 #### Claude Desktop
 
-[▶ Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
 
 Or use this deep link:
 ```
-claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+claude://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE
 ```
 
 #### Cursor
 
-[▶ Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE)
 
 Or use this deep link:
 ```
-cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+cursor://addServer/system-bridge?transport=websocket&url=ws%3A%2F%2Flocalhost%3A9170%2Fapi%2Fmcp%3Ftoken%3DYOUR_TOKEN_HERE
 ```
 
 **Important:** Replace `YOUR_TOKEN_HERE` with your actual System Bridge token before clicking.
