@@ -14,17 +14,17 @@ system-bridge client token
 
 **Claude Desktop:**
 
-[![Add to Claude Desktop](https://img.shields.io/badge/Add%20to-Claude%20Desktop-8A63D2?style=for-the-badge&logo=anthropic)](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[▶ Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
 
 **Cursor:**
 
-[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000000?style=for-the-badge&logo=cursor)](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[▶ Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
 
 > **Note:** Replace `YOUR_TOKEN_HERE` in the URL with your actual token from step 1.
 
 **Claude Code (CLI):**
 
-Use the CLI command to add the server:
+Run this command to add the server:
 ```bash
 claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
 ```
@@ -192,18 +192,18 @@ Open a file, directory, or URL with the default application.
 
 #### Claude Desktop
 
-[![Add to Claude Desktop](https://img.shields.io/badge/Add%20to-Claude%20Desktop-8A63D2?style=for-the-badge&logo=anthropic)](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[▶ Add to Claude Desktop](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
 
-Click the button above or use this deep link:
+Or use this deep link:
 ```
 claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
 
 #### Cursor
 
-[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000000?style=for-the-badge&logo=cursor)](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+[▶ Add to Cursor](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
 
-Click the button above or use this deep link:
+Or use this deep link:
 ```
 cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
 ```
