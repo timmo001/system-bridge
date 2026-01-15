@@ -54,8 +54,8 @@ func GetToolDefinitions() []Tool {
 				"properties": map[string]interface{}{
 					"action": map[string]interface{}{
 						"type":        "string",
-						"description": "Media control action to perform",
-						"enum":        []string{"play", "pause", "stop", "next", "previous"},
+						"description": "Media control action to perform (must be uppercase)",
+						"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"},
 					},
 				},
 				"required": []string{"action"},
