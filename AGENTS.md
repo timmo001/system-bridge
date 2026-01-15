@@ -19,6 +19,7 @@ System Bridge is a cross-platform application (Linux, Windows, macOS/darwin) tha
 
 The project consists of:
 - **Backend**: Go application serving HTTP/WebSocket APIs and managing system data
+- **MCP Server**: Model Context Protocol server for AI assistant integration
 - **Web Client**: Lit + Vite application embedded in the Go binary
 - **CLI**: Command-line interface for testing data modules and interacting with the system
 
@@ -143,7 +144,8 @@ make generate_schemas
 ├── backend/             # HTTP and WebSocket server implementation
 │   ├── backend.go       # Main backend orchestration
 │   ├── http/            # HTTP endpoints
-│   └── websocket/       # WebSocket server and message handlers
+│   ├── websocket/       # WebSocket server and message handlers
+│   └── mcp/             # MCP (Model Context Protocol) server
 ├── data/                # Data collection system
 │   └── module/          # Data modules (cpu, memory, disks, etc.)
 ├── event/               # Event system
@@ -195,7 +197,12 @@ data/module/
    - Message handling: `messages.go`
    - Handler registration: `handlers.go`
    - Internal access: `instance.go`
-3. **Event Handlers** (`event/handler/`):
+3. **MCP Server** (`backend/mcp/`):
+   - Model Context Protocol server for AI assistant integration
+   - Exposes system capabilities as standardized tools
+   - WebSocket transport with token authentication
+   - See `backend/mcp/README.md` for detailed documentation
+4. **Event Handlers** (`event/handler/`):
    - Each handler registers itself and processes specific event types
    - Functions should be in separate packages under `event/handler/<module>/`
 
