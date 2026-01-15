@@ -2,9 +2,44 @@
 
 Model Context Protocol (MCP) server for System Bridge, allowing AI assistants to remotely control and monitor your system through a standardized protocol.
 
+## Quick Start
+
+### 1. Get Your Token
+
+```bash
+system-bridge client token
+```
+
+### 2. Add to Your AI Assistant
+
+**Claude Desktop:**
+
+[![Add to Claude Desktop](https://img.shields.io/badge/Add%20to-Claude%20Desktop-8A63D2?style=for-the-badge&logo=anthropic)](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+
+**Cursor:**
+
+[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000000?style=for-the-badge&logo=cursor)](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+
+> **Note:** Replace `YOUR_TOKEN_HERE` in the URL with your actual token from step 1.
+
+**Claude Code (CLI):**
+
+Use the CLI command to add the server:
+```bash
+claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+```
+
+### 3. Start Using
+
+Ask your AI assistant:
+- "Check my CPU usage"
+- "Send me a notification when this is done"
+- "List files in my Downloads folder"
+- "Lock my computer"
+
 ## Overview
 
-The MCP server exposes System Bridge capabilities as standardized tools that any MCP-compatible client (like Claude Desktop, VS Code extensions, etc.) can use to interact with your system.
+The MCP server exposes System Bridge capabilities as standardized tools that any MCP-compatible client (like Claude Desktop, Cursor, VS Code extensions, etc.) can use to interact with your system.
 
 ## Endpoint
 
@@ -153,12 +188,82 @@ Open a file, directory, or URL with the default application.
 
 ## Client Configuration
 
-### Claude Desktop
+### Quick Setup (One-Click Install)
+
+#### Claude Desktop
+
+[![Add to Claude Desktop](https://img.shields.io/badge/Add%20to-Claude%20Desktop-8A63D2?style=for-the-badge&logo=anthropic)](claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+
+Click the button above or use this deep link:
+```
+claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+```
+
+#### Cursor
+
+[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000000?style=for-the-badge&logo=cursor)](cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE)
+
+Click the button above or use this deep link:
+```
+cursor://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
+```
+
+**Important:** Replace `YOUR_TOKEN_HERE` with your actual System Bridge token before clicking.
+
+Get your token:
+```bash
+system-bridge client token
+```
+
+### Manual Configuration
+
+#### Claude Desktop
 
 Add to your Claude Desktop configuration file:
 
 **Linux/macOS:** `~/.config/claude/mcp.json`
 **Windows:** `%APPDATA%\Claude\mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "system-bridge": {
+      "transport": "websocket",
+      "url": "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+    }
+  }
+}
+```
+
+#### Claude Code (CLI)
+
+Add to your Claude Code configuration file:
+
+**Linux/macOS:** `~/.claude/settings.json`
+**Windows:** `%APPDATA%\Claude\settings.json`
+
+```json
+{
+  "mcpServers": {
+    "system-bridge": {
+      "transport": "websocket",
+      "url": "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+    }
+  }
+}
+```
+
+Or use the CLI command:
+```bash
+claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
+```
+
+#### Cursor
+
+Add to your Cursor configuration file:
+
+**Linux/macOS:** `~/.cursor/mcp.json`
+**Windows:** `%APPDATA%\Cursor\mcp.json`
 
 ```json
 {
