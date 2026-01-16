@@ -4,55 +4,12 @@ Model Context Protocol (MCP) server for System Bridge, allowing AI
 assistants to remotely control and monitor your system through a
 standardized protocol.
 
-## Quick Start
-
-### 1. Get Your Token
-
-```bash
-system-bridge client token
-```
-
-### 2. Add to Your AI Assistant
-
-**Claude Desktop:**
-
-Copy and paste this deep link into your browser (replace
-`YOUR_TOKEN_HERE` with your token):
-
-```text
-claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
-```
-
-**Cursor:**
-
-Copy and paste this deep link into your browser (replace
-`YOUR_TOKEN_HERE` with your token):
-
-```text
-cursor://addServer/system-bridge?command=websocat&args=ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE
-```
-
-> **Note:** Requires `websocat` to be installed. See
-> [Manual Configuration - Cursor](#cursor) for details.
-
-**Claude Code (CLI):**
-
-Run this command (replace `YOUR_TOKEN_HERE` with your token):
-
-```bash
-claude mcp add system-bridge --transport websocket --url "ws://localhost:9170/api/mcp?token=YOUR_TOKEN_HERE"
-```
-
-### 3. Start Using
-
 Ask your AI assistant:
 
 - "Check my CPU usage"
 - "Send me a notification when this is done"
 - "Play the current media"
 - "Get information about my disks"
-
-## Overview
 
 The MCP server exposes System Bridge capabilities as standardized tools
 that any MCP-compatible client (like Claude Desktop, Cursor, VS Code
