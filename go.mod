@@ -18,7 +18,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.25.12
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.6.1
+	github.com/urfave/cli/v3 v3.6.2
 	golang.org/x/time v0.14.0
 )
 
