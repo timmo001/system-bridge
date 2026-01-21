@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/mdns v1.0.6
-	github.com/jezek/xgb v1.2.0
+	github.com/jezek/xgb v1.3.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/phsym/console-slog v0.3.1
