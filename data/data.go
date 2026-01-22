@@ -86,7 +86,7 @@ func (d *DataStore) GetModule(name types.ModuleName) (types.Module, error) {
 
 	// If the module data is nil, refresh the data
 	if module.Data == nil {
-		slog.Info("Module data is nil, refreshing data", "module", module.Name)
+		slog.Debug("Module data is nil, refreshing data", "module", module.Name)
 		if err := d.loadModuleData(&module); err != nil {
 			slog.Error("Error loading module data", "module", module.Name, "error", err)
 		} else {
