@@ -20,7 +20,7 @@ type ValidateDirectoryResponseData struct {
 
 func RegisterValidateDirectoryHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventValidateDirectory, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received validate directory event", "message", message)
+		slog.Debug("Received validate directory event", "message", message)
 
 		var data ValidateDirectoryRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

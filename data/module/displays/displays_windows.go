@@ -87,7 +87,7 @@ func GetDisplays() ([]types.Display, error) {
 	}
 
 	if len(displays) == 0 {
-		slog.Warn("No displays found")
+		slog.Info("No displays found")
 		return displays, nil
 	}
 

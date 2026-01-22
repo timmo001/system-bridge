@@ -16,11 +16,11 @@ func (sm SensorModule) Update(ctx context.Context) (any, error) {
 
 	windowsSensors, err := sensors.GetWindowsSensorsData()
 	if err != nil {
-		slog.Error("Could not fetch Windows sensor data", "err", err)
+		slog.Warn("Could not fetch Windows sensor data", "err", err)
 	}
 	temperatures, err := sensors.GetTemperatureSensorsData()
 	if err != nil {
-		slog.Error("Could not fetch temperature sensor data", "err", err)
+		slog.Warn("Could not fetch temperature sensor data", "err", err)
 	}
 
 	return types.SensorsData{

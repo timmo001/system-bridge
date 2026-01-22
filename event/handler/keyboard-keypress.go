@@ -10,7 +10,7 @@ import (
 
 func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventKeyboardKeypress, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received keyboard keypress event", "message", message)
+		slog.Debug("Received keyboard keypress event", "message", message)
 
 		data := keyboard.KeypressData{}
 		err := mapstructure.Decode(message.Data, &data)
@@ -35,7 +35,7 @@ func RegisterKeyboardKeypressHandler(router *event.MessageRouter) {
 			}
 		}
 
-		slog.Info("Pressing keyboard key", "key", data.Key, "modifiers", data.Modifiers)
+		slog.Debug("Pressing keyboard key", "key", data.Key, "modifiers", data.Modifiers)
 
 		err = keyboard.SendKeypress(data)
 		if err != nil {

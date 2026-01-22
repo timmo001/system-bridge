@@ -14,7 +14,7 @@ import (
 
 // ExecuteTool routes tool calls to appropriate handlers
 func (s *MCPServer) ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (interface{}, error) {
-	slog.Info("Executing MCP tool", "tool", toolName, "arguments", arguments)
+	slog.Debug("Executing MCP tool", "tool", toolName, "arguments", arguments)
 
 	switch toolName {
 	case "system_bridge_get_data":

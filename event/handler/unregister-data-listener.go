@@ -9,7 +9,7 @@ import (
 
 func RegisterUnregisterDataListenerHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventUnregisterDataListener, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received unregister data listener event", "message", message)
+		slog.Debug("Received unregister data listener event", "message", message)
 
 		ws := websocket.GetInstance()
 		if ws == nil {

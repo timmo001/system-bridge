@@ -31,7 +31,7 @@ func GetDirectory(router *event.MessageRouter, baseDirectoryKey string) *GetDire
 
 func RegisterGetDirectoryHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetDirectory, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get directory event", "message", message)
+		slog.Debug("Received get directory event", "message", message)
 
 		var data GetDirectoryRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

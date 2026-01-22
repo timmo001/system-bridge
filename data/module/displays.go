@@ -13,14 +13,14 @@ type DisplayModule struct{}
 
 func (dm DisplayModule) Name() types.ModuleName { return types.ModuleDisplays }
 func (dm DisplayModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting displays data")
+	slog.Debug("Getting displays data")
 
 	var displaysData types.DisplaysData
 	displaysData = make([]types.Display, 0)
 
 	displays, err := displays.GetDisplays()
 	if err != nil {
-		slog.Warn("Displays unavailable; returning default data", "error", err)
+		slog.Info("Displays unavailable", "error", err)
 		return displaysData, nil
 	}
 

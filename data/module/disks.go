@@ -14,7 +14,7 @@ type DiskModule struct{}
 
 func (diskModule DiskModule) Name() types.ModuleName { return types.ModuleDisks }
 func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting disks data")
+	slog.Debug("Getting disks data")
 
 	var disksData types.DisksData
 	// Initialize arrays

@@ -13,7 +13,7 @@ type BatteryModule struct{}
 
 func (batteryModule BatteryModule) Name() types.ModuleName { return types.ModuleBattery }
 func (batteryModule BatteryModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting battery data")
+	slog.Debug("Getting battery data")
 
 	// Get all batteries
 	batteries, err := battery.GetAll()

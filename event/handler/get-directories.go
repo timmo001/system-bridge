@@ -31,7 +31,7 @@ func GetDirectories(router *event.MessageRouter) []filesystem.DirectoryInfo {
 
 func RegisterGetDirectoriesHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetDirectories, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get directories event", "message", message)
+		slog.Debug("Received get directories event", "message", message)
 
 		directories := GetDirectories(router)
 

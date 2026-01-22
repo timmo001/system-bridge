@@ -14,7 +14,7 @@ type GetFileRequestData struct {
 
 func RegisterGetFileHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFile, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get file event", "message", message)
+		slog.Debug("Received get file event", "message", message)
 
 		data := GetFileRequestData{}
 		err := mapstructure.Decode(message.Data, &data)

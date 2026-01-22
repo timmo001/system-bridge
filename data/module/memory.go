@@ -13,7 +13,7 @@ type MemoryModule struct{}
 
 func (mm MemoryModule) Name() types.ModuleName { return types.ModuleMemory }
 func (mm MemoryModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting memory data")
+	slog.Debug("Getting memory data")
 
 	var memoryData types.MemoryData
 	// Get virtual memory stats

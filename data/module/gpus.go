@@ -13,7 +13,7 @@ type GPUModule struct{}
 
 func (gm GPUModule) Name() types.ModuleName { return types.ModuleGPUs }
 func (gm GPUModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting GPUs data")
+	slog.Debug("Getting GPUs data")
 
 	gpusData := make([]types.GPU, 0)
 
