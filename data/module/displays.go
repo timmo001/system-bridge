@@ -20,7 +20,7 @@ func (dm DisplayModule) Update(ctx context.Context) (any, error) {
 
 	displays, err := displays.GetDisplays()
 	if err != nil {
-		slog.Warn("Displays unavailable; returning default data", "error", err)
+		slog.Info("Displays unavailable", "error", err)
 		return displaysData, nil
 	}
 

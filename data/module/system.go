@@ -199,7 +199,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	currentVersion := version.APIVersion()
 	latestVersion, err := version.GetLatestVersion()
 	if err != nil {
-		slog.Error("Failed to get latest version", "error", err)
+		slog.Warn("Failed to get latest version", "error", err)
 		latestVersion = currentVersion
 	}
 
@@ -220,7 +220,7 @@ func getIPv4Address() string {
 	d := net.Dialer{Timeout: 1 * time.Second}
 	conn, err := d.DialContext(ctx, "udp", "8.8.8.8:80")
 	if err != nil {
-		slog.Warn("Failed to get IPv4 Address", "error", err)
+		slog.Info("IPv4 address unavailable", "error", err)
 		return ""
 	}
 	defer func() {
@@ -239,7 +239,7 @@ func getIPv6Address() string {
 	d := net.Dialer{Timeout: 1 * time.Second}
 	conn, err := d.DialContext(ctx, "udp6", "[2001:4860:4860::8888]:80")
 	if err != nil {
-		slog.Warn("Failed to get IPv6 Address", "error", err)
+		slog.Info("IPv6 address unavailable", "error", err)
 		return ""
 	}
 	defer func() {
@@ -254,7 +254,7 @@ func getIPv6Address() string {
 func getMACAddress() string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		slog.Warn("Failed to get MAC Address", "error", err)
+		slog.Info("MAC address unavailable", "error", err)
 		return ""
 	}
 
@@ -265,7 +265,7 @@ func getMACAddress() string {
 		}
 	}
 
-	slog.Info("No MAC address found")
+	slog.Debug("No MAC address found")
 	return ""
 }
 

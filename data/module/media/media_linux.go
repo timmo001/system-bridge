@@ -19,14 +19,14 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}"}`, "--all-players")
 	output, err := cmd.Output()
 	if err != nil {
-		// Debug logging for playerctl errors and environment
-		slog.Warn("playerctl error:", "error", err.Error())
+		// Info logging for playerctl errors (expected when no media player running)
+		slog.Info("playerctl unavailable or no players", "error", err.Error())
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			slog.Warn("playerctl stderr:", "stderr", string(exitErr.Stderr))
+			slog.Debug("playerctl stderr:", "stderr", string(exitErr.Stderr))
 		}
-		slog.Warn("ENV: DBUS_SESSION_BUS_ADDRESS=", "address", os.Getenv("DBUS_SESSION_BUS_ADDRESS"))
-		slog.Warn("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
-		slog.Warn("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
+		slog.Debug("ENV: DBUS_SESSION_BUS_ADDRESS=", "address", os.Getenv("DBUS_SESSION_BUS_ADDRESS"))
+		slog.Debug("ENV: XDG_RUNTIME_DIR=", "dir", os.Getenv("XDG_RUNTIME_DIR"))
+		slog.Debug("ENV: DISPLAY=", "display", os.Getenv("DISPLAY"))
 	} else {
 		slog.Debug("playerctl output:", "output", string(output))
 	}

@@ -22,11 +22,11 @@ func StartPlayerctlListener(dataStore *DataStore) {
 		cmd := exec.Command("playerctl", "-a", "metadata", "--format", "{{status}}", "-F")
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			slog.Warn("playerctl listener stdout pipe failed", "error", err)
+			slog.Info("playerctl listener unavailable", "error", err)
 			return
 		}
 		if err := cmd.Start(); err != nil {
-			slog.Warn("playerctl listener failed to start", "error", err)
+			slog.Info("playerctl listener unavailable", "error", err)
 			return
 		}
 
@@ -39,7 +39,7 @@ func StartPlayerctlListener(dataStore *DataStore) {
 		}
 
 		if err := scanner.Err(); err != nil {
-			slog.Warn("playerctl listener scanner error", "error", err)
+			slog.Info("playerctl listener stopped", "error", err)
 		}
 	}()
 }

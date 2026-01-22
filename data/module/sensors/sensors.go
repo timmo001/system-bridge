@@ -11,7 +11,7 @@ func GetTemperatureSensorsData() ([]types.Temperature, error) {
 	temperatures := make([]types.Temperature, 0)
 	temperatureStats, err := sensors.SensorsTemperatures()
 	if err != nil {
-		slog.Error("failed to get  temperature stats", "error", err)
+		slog.Warn("Failed to get temperature stats", "error", err)
 		return temperatures, err
 	} else {
 		for _, ts := range temperatureStats {
