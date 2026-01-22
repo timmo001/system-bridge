@@ -118,7 +118,7 @@ func Load() (*Settings, error) {
 	// Set default values (token and port removed)
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
-	viper.SetDefault("logLevel", LogLevelInfo)
+	viper.SetDefault("logLevel", LogLevelWarn)
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
 

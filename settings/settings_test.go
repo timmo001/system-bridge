@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 		// Check default values
 		assert.False(t, settings.Autostart)
 		assert.Empty(t, settings.Hotkeys)
-		assert.Equal(t, LogLevelInfo, settings.LogLevel)
+		assert.Equal(t, LogLevelWarn, settings.LogLevel)
 		assert.Empty(t, settings.Media.Directories)
 	})
 
