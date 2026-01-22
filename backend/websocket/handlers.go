@@ -64,7 +64,7 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		}
 
 		// Handle different event types
-		slog.Info("Received message", "event", msg.Event, "id", msg.ID)
+		slog.Debug("Received message", "event", msg.Event, "id", msg.ID)
 		// Pass message to event handlers
 		response := ws.EventRouter.HandleMessage(conn.RemoteAddr().String(), event.Message{
 			ID:    msg.ID,
@@ -93,11 +93,11 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 	defer ws.mutex.Unlock()
 
 	addr := conn.RemoteAddr().String()
-	slog.Info("WS: Adding new connection", "addr", addr)
+	slog.Debug("WS: Adding new connection", "addr", addr)
 
 	// close connection if remote addr tries to connect again
 	if connInfo, ok := ws.connections[addr]; ok {
-		slog.Info("WS: Replacing existing connection", "addr", addr)
+		slog.Debug("WS: Replacing existing connection", "addr", addr)
 		// Remove the connection directly since we already hold the lock
 		delete(ws.connections, addr)
 		delete(ws.dataListeners, addr)
@@ -109,7 +109,7 @@ func (ws *WebsocketServer) AddConnection(conn *websocket.Conn) {
 		writeMux: sync.Mutex{},
 	}
 
-	slog.Info("WS: Connection added successfully", "addr", addr, "total_connections", len(ws.connections))
+	slog.Debug("WS: Connection added successfully", "addr", addr, "total_connections", len(ws.connections))
 }
 
 // RemoveConnection removes a WebSocket connection
@@ -117,10 +117,10 @@ func (ws *WebsocketServer) RemoveConnection(conn *websocket.Conn) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 	addr := conn.RemoteAddr().String()
-	slog.Info("WS: Removing connection", "addr", addr)
+	slog.Debug("WS: Removing connection", "addr", addr)
 	delete(ws.connections, addr)
 	delete(ws.dataListeners, addr)
-	slog.Info("WS: Connection removed", "addr", addr, "total_connections", len(ws.connections))
+	slog.Debug("WS: Connection removed", "addr", addr, "total_connections", len(ws.connections))
 }
 
 type RegisterResponse int
@@ -136,13 +136,13 @@ func (ws *WebsocketServer) RegisterDataListener(addr string, modules []types.Mod
 	defer ws.mutex.Unlock()
 
 	if _, ok := ws.dataListeners[addr]; ok {
-		slog.Info("WS: Data listener already exists", "addr", addr, "modules", modules)
+		slog.Debug("WS: Data listener already exists", "addr", addr, "modules", modules)
 		return RegisterResponseExists
 	}
 
-	slog.Info("WS: Registering data listener", "addr", addr, "modules", modules)
+	slog.Debug("WS: Registering data listener", "addr", addr, "modules", modules)
 	ws.dataListeners[addr] = modules
-	slog.Info("WS: Data listener registered successfully", "addr", addr, "total_listeners", len(ws.dataListeners))
+	slog.Debug("WS: Data listener registered successfully", "addr", addr, "total_listeners", len(ws.dataListeners))
 	return RegisterResponseAdded
 }
 
@@ -151,7 +151,7 @@ func (ws *WebsocketServer) UnregisterDataListener(addr string) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
-	slog.Info(fmt.Sprintf("Unregistering data listener for %s", addr))
+	slog.Debug(fmt.Sprintf("Unregistering data listener for %s", addr))
 	delete(ws.dataListeners, addr)
 }
 
@@ -171,7 +171,7 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 	if module.Data == nil {
 		slog.Warn("Broadcasting module update with no data", "module", module.Name, "data", module.Data)
 	} else {
-		slog.Info("Broadcasting module update", "module", module.Name)
+		slog.Debug("Broadcasting module update", "module", module.Name)
 	}
 
 	// Debug logging for connections and listeners
@@ -196,23 +196,23 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 			modules, ok := ws.dataListeners[remote_addr]
 
 			if ok && slices.Contains(modules, module.Name) {
-				slog.Info("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+				slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
 				ws.SendMessageWithLock(connInfo, response, true)
 				broadcastCount++
 			}
 		}
-		slog.Info("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
+		slog.Debug("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
 	}
 }
 
 // handleGetDataModule handles module data updates from the event bus
 func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
-	slog.Info("WS: event", "type", event.Type, "data", event.Data)
+	slog.Debug("WS: event", "type", event.Type, "data", event.Data)
 	if event.Type != bus.EventGetDataModule {
 		return
 	}
 
-	slog.Info("WS: EventGetDataModule", "eventData", event.Data)
+	slog.Debug("WS: EventGetDataModule", "eventData", event.Data)
 
 	var moduleRequest bus.GetDataRequest
 	if err := mapstructure.Decode(event.Data, &moduleRequest); err != nil {
@@ -220,10 +220,10 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 		return
 	}
 
-	slog.Info("WS: EventGetDataModule", "data", moduleRequest)
+	slog.Debug("WS: EventGetDataModule", "data", moduleRequest)
 
 	for _, moduleName := range moduleRequest.Modules {
-		slog.Info("WS: Broadcasting module update", "module", moduleName)
+		slog.Debug("WS: Broadcasting module update", "module", moduleName)
 
 		module, err := ws.dataStore.GetModule(moduleName)
 		if err != nil {
@@ -242,7 +242,7 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 // handleDataModuleUpdate handles module data updates from the event bus
 func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
-	slog.Info("WS: event", "type", event.Type)
+	slog.Debug("WS: event", "type", event.Type)
 	if event.Type != bus.EventDataModuleUpdate {
 		return
 	}
@@ -253,7 +253,7 @@ func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
 		return
 	}
 
-	slog.Info("Received module data update from event bus", "module", module.Name)
+	slog.Debug("Received module data update from event bus", "module", module.Name)
 
 	// Broadcast to connected websocket clients
 	ws.BroadcastModuleUpdate(module, nil)

@@ -29,7 +29,7 @@ func NewMCPServer(token string, eventRouter *event.MessageRouter, dataStore *dat
 
 // HandleRequest processes an MCP JSON-RPC request
 func (s *MCPServer) HandleRequest(ctx context.Context, req MCPRequest) MCPResponse {
-	slog.Info("MCP request received", "method", req.Method, "id", req.ID)
+	slog.Debug("MCP request received", "method", req.Method, "id", req.ID)
 
 	switch req.Method {
 	case "initialize":
