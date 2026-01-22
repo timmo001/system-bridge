@@ -11,7 +11,7 @@ type GetSettingsResponseData = settings.Settings
 
 func RegisterGetSettingsHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetSettings, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get settings event", "message", message)
+		slog.Debug("Received get settings event", "message", message)
 
 		settings, err := settings.Load()
 		if err != nil {

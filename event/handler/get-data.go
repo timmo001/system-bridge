@@ -17,7 +17,7 @@ type GetDataResponseData = any
 
 func RegisterGetDataHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetData, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get data event", "message", message)
+		slog.Debug("Received get data event", "message", message)
 
 		var data GetDataRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

@@ -16,7 +16,7 @@ type MediaControlRequestData struct {
 
 func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.DataStore) {
 	router.RegisterSimpleHandler(event.EventMediaControl, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received media control event", "message", message)
+		slog.Debug("Received media control event", "message", message)
 
 		data := MediaControlRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
@@ -57,7 +57,7 @@ func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.Da
 			if err := dataStore.TriggerModuleUpdate(types.ModuleMedia); err != nil {
 				slog.Warn("Failed to trigger media module update", "error", err)
 			} else {
-				slog.Info("Triggered media module update after media control action", "action", data.Action)
+				slog.Debug("Triggered media module update after media control action", "action", data.Action)
 			}
 		}
 

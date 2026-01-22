@@ -33,7 +33,7 @@ func GetFiles(path string) []GetFileResponseData {
 
 func RegisterGetFilesHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventGetFiles, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received get files event", "message", message)
+		slog.Debug("Received get files event", "message", message)
 
 		var data GetFilesRequestData
 		if err := mapstructure.Decode(message.Data, &data); err != nil {

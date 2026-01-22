@@ -16,7 +16,7 @@ type KeyboardTextRequestData struct {
 
 func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 	router.RegisterSimpleHandler(event.EventKeyboardText, func(connection string, message event.Message) event.MessageResponse {
-		slog.Info("Received keyboard text event", "message", message)
+		slog.Debug("Received keyboard text event", "message", message)
 
 		data := KeyboardTextRequestData{}
 		err := mapstructure.Decode(message.Data, &data)
@@ -45,11 +45,11 @@ func RegisterKeyboardTextHandler(router *event.MessageRouter) {
 		if data.Delay > 0 {
 			delay := data.Delay
 
-			slog.Info("Waiting before typing", "delay_ms", delay)
+			slog.Debug("Waiting before typing", "delay_ms", delay)
 			time.Sleep(time.Duration(delay) * time.Millisecond)
 		}
 
-		slog.Info("Typing text", "text", data.Text)
+		slog.Debug("Typing text", "text", data.Text)
 		// Type the text
 		err = keyboard.SendText(data.Text)
 		if err != nil {
