@@ -19,7 +19,7 @@ type CPUModule struct{}
 
 func (cpuModule CPUModule) Name() types.ModuleName { return types.ModuleCPU }
 func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting CPU data")
+	slog.Debug("Getting CPU data")
 
 	// Use a zero interval to avoid blocking; returns instantaneous usage based on
 	// the most recent CPU times snapshot instead of sleeping to calculate deltas.

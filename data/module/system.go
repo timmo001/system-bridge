@@ -22,7 +22,7 @@ type SystemModule struct{}
 
 func (sm SystemModule) Name() types.ModuleName { return types.ModuleSystem }
 func (sm SystemModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting system data")
+	slog.Debug("Getting system data")
 
 	// Initialize arrays
 	var systemData types.SystemData

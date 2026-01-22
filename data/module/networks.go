@@ -16,7 +16,7 @@ func (nm NetworkModule) Name() types.ModuleName { return types.ModuleNetworks }
 
 // UpdateNetworksModule forwards the call to the networks module
 func (nm NetworkModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting disks data")
+	slog.Debug("Getting networks data")
 
 	var networksData types.NetworksData
 	// Initialize arrays
