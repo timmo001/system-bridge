@@ -58,6 +58,7 @@ export class PageSettingsCommands extends PageElement {
   private submissionTimeout: number | null = null;
   private previousCommands: SettingsCommandDefinition[] = [];
   private errorTimeout: number | null = null;
+  private pendingCommandAction: "add" | "remove" | null = null;
 
   connectedCallback() {
     super.connectedCallback();
@@ -170,8 +171,7 @@ export class PageSettingsCommands extends PageElement {
       // Load updated settings from websocket context
       this.loadSettings();
 
-      // Clear submission state
-      this.clearSubmissionState();
+      this.handleSuccessfulSave();
     }
   };
 
@@ -188,7 +188,7 @@ export class PageSettingsCommands extends PageElement {
 
         // If commands have changed, clear the submitting state
         if (previousCommandsStr !== currentCommandsStr) {
-          this.clearSubmissionState();
+          this.handleSuccessfulSave();
         }
       }
     }
@@ -205,6 +205,7 @@ export class PageSettingsCommands extends PageElement {
   private clearSubmissionState(): void {
     this.isSubmitting = false;
     this.pendingRequestId = null;
+    this.pendingCommandAction = null;
     if (this.submissionTimeout !== null) {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
@@ -260,13 +261,8 @@ export class PageSettingsCommands extends PageElement {
     // Don't optimistically add - wait for backend confirmation
     // Just save with the new command included
     const updatedCommands = [...this.commands, newCommand];
+    this.pendingCommandAction = "add";
     this.saveSettingsWithCommands(updatedCommands);
-
-    // Clear form only after saving starts
-    this.newCommandName = "";
-    this.newCommandCommand = "";
-    this.newCommandWorkingDir = "";
-    this.newCommandArguments = "";
   };
 
   private handleRemoveCommand = (e: Event): void => {
@@ -276,6 +272,7 @@ export class PageSettingsCommands extends PageElement {
 
     // Don't optimistically remove - wait for backend confirmation
     const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
+    this.pendingCommandAction = "remove";
     this.saveSettingsWithCommands(updatedCommands);
   };
 
@@ -365,6 +362,20 @@ export class PageSettingsCommands extends PageElement {
       console.error("Failed to update command settings:", error);
       this.clearSubmissionState();
     }
+  }
+
+  private clearCommandForm(): void {
+    this.newCommandName = "";
+    this.newCommandCommand = "";
+    this.newCommandWorkingDir = "";
+    this.newCommandArguments = "";
+  }
+
+  private handleSuccessfulSave(): void {
+    if (this.pendingCommandAction === "add") {
+      this.clearCommandForm();
+    }
+    this.clearSubmissionState();
   }
 
   private renderCommandItem(cmd: SettingsCommandDefinition) {
