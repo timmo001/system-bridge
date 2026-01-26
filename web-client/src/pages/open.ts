@@ -103,8 +103,12 @@ export class PageOpen extends PageElement {
     this.navigate("/connection");
   };
 
-  private handleTypeChange = (type: OpenType): void => {
-    this.openType = type;
+  private handleTypeChangeUrl = (): void => {
+    this.openType = "url";
+  };
+
+  private handleTypeChangePath = (): void => {
+    this.openType = "path";
   };
 
   private handleUrlInput = (e: InputEvent): void => {
@@ -170,10 +174,10 @@ export class PageOpen extends PageElement {
     }
   }
 
-  private clearForm(): void {
+  private clearForm = (): void => {
     this.urlValue = "";
     this.pathValue = "";
-  }
+  };
 
   private get currentValue(): string {
     return this.openType === "url" ? this.urlValue : this.pathValue;
@@ -246,7 +250,7 @@ export class PageOpen extends PageElement {
                               ? "default"
                               : "outline"}
                             size="sm"
-                            @click=${() => this.handleTypeChange("url")}
+                            @click=${this.handleTypeChangeUrl}
                             ?disabled=${this.isSending}
                           >
                             <ui-icon name="Globe" class="mr-2"></ui-icon>
@@ -257,7 +261,7 @@ export class PageOpen extends PageElement {
                               ? "default"
                               : "outline"}
                             size="sm"
-                            @click=${() => this.handleTypeChange("path")}
+                            @click=${this.handleTypeChangePath}
                             ?disabled=${this.isSending}
                           >
                             <ui-icon name="FolderOpen" class="mr-2"></ui-icon>

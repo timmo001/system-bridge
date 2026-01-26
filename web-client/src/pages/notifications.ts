@@ -195,13 +195,13 @@ export class PageNotifications extends PageElement {
     }
   }
 
-  private clearForm(): void {
+  private clearForm = (): void => {
     this.notificationTitle = "";
     this.notificationMessage = "";
     this.notificationIcon = "";
     this.notificationActionUrl = "";
     this.notificationSound = "";
-  }
+  };
 
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
