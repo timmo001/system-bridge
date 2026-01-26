@@ -50,6 +50,8 @@ export class PageMedia extends PageElement {
   @state()
   private actionResult: ActionResult | null = null;
 
+  private sendTimeout: number | null = null;
+
   connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener(
@@ -64,6 +66,10 @@ export class PageMedia extends PageElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    if (this.sendTimeout !== null) {
+      clearTimeout(this.sendTimeout);
+      this.sendTimeout = null;
+    }
     window.removeEventListener(
       "media-control-success",
       this.handleMediaControlSuccess as EventListener,
@@ -82,8 +88,7 @@ export class PageMedia extends PageElement {
       this.pendingAction
     ) {
       this.showResult(true, `${this.pendingAction} action completed`);
-      this.pendingAction = null;
-      this.pendingRequestId = null;
+      this.clearPendingState();
     }
   };
 
@@ -92,10 +97,18 @@ export class PageMedia extends PageElement {
   ): void => {
     if (this.pendingRequestId === event.detail.requestId) {
       this.showResult(false, event.detail.message || "Action failed");
-      this.pendingAction = null;
-      this.pendingRequestId = null;
+      this.clearPendingState();
     }
   };
+
+  private clearPendingState(): void {
+    this.pendingAction = null;
+    this.pendingRequestId = null;
+    if (this.sendTimeout !== null) {
+      clearTimeout(this.sendTimeout);
+      this.sendTimeout = null;
+    }
+  }
 
   private showResult(success: boolean, message: string): void {
     this.actionResult = {
@@ -118,12 +131,26 @@ export class PageMedia extends PageElement {
     this.pendingAction = action;
     this.pendingRequestId = requestId;
 
-    this.websocket.sendRequest({
-      id: requestId,
-      event: "MEDIA_CONTROL",
-      data: { action },
-      token: this.connection.token,
-    });
+    try {
+      this.websocket.sendRequest({
+        id: requestId,
+        event: "MEDIA_CONTROL",
+        data: { action },
+        token: this.connection.token,
+      });
+
+      // Timeout after 30 seconds
+      this.sendTimeout = window.setTimeout(() => {
+        if (this.pendingAction && this.pendingRequestId === requestId) {
+          this.showResult(false, "Request timed out");
+          this.clearPendingState();
+        }
+      }, 30000);
+    } catch (error) {
+      console.error("Failed to send media action:", error);
+      this.showResult(false, "Failed to send media action");
+      this.clearPendingState();
+    }
   }
 
   private handlePlay = (): void => this.sendMediaAction("PLAY");
