@@ -38,6 +38,10 @@ export class PageHome extends PageElement {
     this.navigate("/open");
   };
 
+  private handleNavigateToMediaControls = (): void => {
+    this.navigate("/media");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -119,6 +123,13 @@ export class PageHome extends PageElement {
                     @click=${this.handleNavigateToOpen}
                   >
                     Open
+                  </ui-button>
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToMediaControls}
+                  >
+                    Media Controls
                   </ui-button>
                 </div>
               </div>
