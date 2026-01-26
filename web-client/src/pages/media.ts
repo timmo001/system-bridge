@@ -472,6 +472,19 @@ export class PageMedia extends PageElement {
 
     const { success, message } = this.actionResult;
 
+    // Provide helpful context for errors
+    const errorHint = !success
+      ? html`<div class="text-xs mt-2 text-red-400/80">
+          <p class="mb-1">Common causes:</p>
+          <ul class="list-disc list-inside space-y-0.5">
+            <li>No media player is active</li>
+            <li>The player does not support this action</li>
+            <li>The action is not supported on this platform</li>
+            <li>Required tools (e.g., playerctl on Linux) are not installed</li>
+          </ul>
+        </div>`
+      : "";
+
     return html`
       <div
         class="rounded-lg border p-4 flex items-start gap-3 ${success
@@ -493,6 +506,7 @@ export class PageMedia extends PageElement {
           >
             ${message}
           </div>
+          ${errorHint}
         </div>
       </div>
     `;
