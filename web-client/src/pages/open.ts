@@ -47,7 +47,6 @@ export class PageOpen extends PageElement {
   @state()
   private pendingRequestId: string | null = null;
 
-  private resultTimeout: number | null = null;
   private sendTimeout: number | null = null;
 
   connectedCallback() {
@@ -64,10 +63,6 @@ export class PageOpen extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.resultTimeout !== null) {
-      clearTimeout(this.resultTimeout);
-      this.resultTimeout = null;
-    }
     if (this.sendTimeout !== null) {
       clearTimeout(this.sendTimeout);
       this.sendTimeout = null;
@@ -164,16 +159,6 @@ export class PageOpen extends PageElement {
 
   private showResult(success: boolean, message: string): void {
     this.lastResult = { success, message };
-
-    if (this.resultTimeout !== null) {
-      clearTimeout(this.resultTimeout);
-    }
-
-    this.resultTimeout = window.setTimeout(() => {
-      this.lastResult = null;
-      this.resultTimeout = null;
-      this.requestUpdate();
-    }, 5000);
   }
 
   private clearSendingState(): void {

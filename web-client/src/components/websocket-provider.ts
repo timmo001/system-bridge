@@ -88,6 +88,7 @@ export class WebSocketProvider extends ProviderElement {
   private _commandExecutionCleanupTimeouts = new Map<string, number>();
   private _pendingCommandRequests = new Map<string, string>(); // messageId -> commandId
   private _pendingSettingsRequests = new Set<string>(); // Set of UPDATE_SETTINGS request IDs
+  private _pendingMediaControlRequests = new Set<string>(); // Set of MEDIA_CONTROL request IDs
   private _settingsErrorTimeout: number | null = null;
 
   // Maximum number of command executions to keep in memory
@@ -411,6 +412,23 @@ export class WebSocketProvider extends ProviderElement {
         break;
       }
 
+      case "MEDIA_CONTROLLED": {
+        // Clean up the pending request tracking
+        if (message.id) {
+          this._pendingMediaControlRequests.delete(message.id);
+        }
+        // Dispatch a custom event to notify consumers that media control succeeded
+        window.dispatchEvent(
+          new CustomEvent("media-control-success", {
+            detail: {
+              requestId: message.id,
+              timestamp: Date.now(),
+            },
+          }),
+        );
+        break;
+      }
+
       case "COMMAND_EXECUTING": {
         const commandData = message.data as { commandID: string };
         if (commandData?.commandID) {
@@ -537,6 +555,21 @@ export class WebSocketProvider extends ProviderElement {
                 },
                 bubbles: true,
                 composed: true,
+              }),
+            );
+          }
+
+          // Check if this error is for a media control request
+          if (this._pendingMediaControlRequests.has(message.id)) {
+            this._pendingMediaControlRequests.delete(message.id);
+            // Dispatch media control error event
+            window.dispatchEvent(
+              new CustomEvent("media-control-error", {
+                detail: {
+                  requestId: message.id,
+                  message: message.message ?? "Failed to control media",
+                  timestamp: Date.now(),
+                },
               }),
             );
           }
@@ -881,6 +914,11 @@ export class WebSocketProvider extends ProviderElement {
       }, UPDATE_TIMEOUT);
     }
 
+    // Track media control requests
+    if (request.event === "MEDIA_CONTROL" && request.id) {
+      this._pendingMediaControlRequests.add(request.id);
+    }
+
     this._ws.send(JSON.stringify(request));
   }
 
@@ -962,6 +1000,7 @@ export class WebSocketProvider extends ProviderElement {
     this._commandExecutions.clear();
     this._pendingCommandRequests.clear();
     this._pendingSettingsRequests.clear();
+    this._pendingMediaControlRequests.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
   }
 
