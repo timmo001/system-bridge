@@ -326,7 +326,15 @@ export class PageNotifications extends PageElement {
                           ?disabled=${this.isSending}
                         ></ui-input>
                       </div>
-                      <div class="flex justify-end pt-2">
+                      <div class="flex justify-end gap-2 pt-2">
+                        <ui-button
+                          variant="outline"
+                          @click=${this.clearForm}
+                          ?disabled=${this.isSending}
+                        >
+                          <ui-icon name="X" class="mr-2"></ui-icon>
+                          Clear
+                        </ui-button>
                         <ui-button
                           variant="default"
                           @click=${this.handleSendNotification}
