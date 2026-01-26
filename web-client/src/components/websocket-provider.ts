@@ -396,6 +396,21 @@ export class WebSocketProvider extends ProviderElement {
         break;
       }
 
+      case "OPENED": {
+        // Dispatch a custom event to notify consumers that the URL/path was opened
+        this.dispatchEvent(
+          new CustomEvent("open-success", {
+            detail: {
+              requestId: message.id,
+              timestamp: Date.now(),
+            },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+        break;
+      }
+
       case "COMMAND_EXECUTING": {
         const commandData = message.data as { commandID: string };
         if (commandData?.commandID) {
@@ -499,6 +514,25 @@ export class WebSocketProvider extends ProviderElement {
                 detail: {
                   requestId: message.id,
                   message: message.message ?? "Failed to send notification",
+                  timestamp: Date.now(),
+                },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+          }
+
+          // Check if this error is for an open request (BAD_PATH or MISSING_PATH_URL)
+          if (
+            message.subtype === "BAD_PATH" ||
+            message.subtype === "MISSING_PATH_URL"
+          ) {
+            // Dispatch open error event
+            this.dispatchEvent(
+              new CustomEvent("open-error", {
+                detail: {
+                  requestId: message.id,
+                  message: message.message ?? "Failed to open",
                   timestamp: Date.now(),
                 },
                 bubbles: true,
