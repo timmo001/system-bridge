@@ -381,6 +381,21 @@ export class WebSocketProvider extends ProviderElement {
         break;
       }
 
+      case "NOTIFICATION_SENT": {
+        // Dispatch a custom event to notify consumers that notification was sent
+        this.dispatchEvent(
+          new CustomEvent("notification-sent", {
+            detail: {
+              requestId: message.id,
+              timestamp: Date.now(),
+            },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+        break;
+      }
+
       case "COMMAND_EXECUTING": {
         const commandData = message.data as { commandID: string };
         if (commandData?.commandID) {
@@ -463,14 +478,35 @@ export class WebSocketProvider extends ProviderElement {
       }
 
       case "ERROR":
-        if (message.subtype === "BAD_TOKEN") {
-          this._error =
-            "Invalid API token. Please check your connection settings and update your token.";
-          this._isConnected = false;
-          this._retryCount = MAX_RETRIES + 1;
-          this._ws?.close();
-          return;
-        } else {
+        {
+          if (message.subtype === "BAD_TOKEN") {
+            this._error =
+              "Invalid API token. Please check your connection settings and update your token.";
+            this._isConnected = false;
+            this._retryCount = MAX_RETRIES + 1;
+            this._ws?.close();
+            return;
+          }
+
+          // Check if this error is for a notification request (MISSING_TITLE or MISSING_MESSAGE)
+          if (
+            message.subtype === "MISSING_TITLE" ||
+            message.subtype === "BAD_REQUEST"
+          ) {
+            // Dispatch notification error event
+            this.dispatchEvent(
+              new CustomEvent("notification-error", {
+                detail: {
+                  requestId: message.id,
+                  message: message.message ?? "Failed to send notification",
+                  timestamp: Date.now(),
+                },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+          }
+
           const errorMessage = message.message ?? "Unknown error";
           this._error = `Server error: ${errorMessage}`;
 

@@ -57,6 +57,14 @@ export class App extends LitElement {
         return true;
       },
     },
+    {
+      path: "/notifications",
+      render: () => html`<page-notifications></page-notifications>`,
+      enter: async () => {
+        await import("./pages/notifications");
+        return true;
+      },
+    },
   ]);
 
   protected createRenderRoot() {
