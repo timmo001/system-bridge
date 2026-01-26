@@ -50,13 +50,13 @@ func newPlatformNotifier(appName string, openURL, openPath func(string) error) (
 
 	// Authenticate with the bus
 	if err = conn.Auth(nil); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("failed to authenticate with session bus: %w", err)
 	}
 
 	// Say hello to the bus
 	if err = conn.Hello(); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("failed to send Hello to session bus: %w", err)
 	}
 
@@ -71,7 +71,7 @@ func newPlatformNotifier(appName string, openURL, openPath func(string) error) (
 
 	// Start listening for action signals
 	if err := n.listenForActions(); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("failed to setup action listener: %w", err)
 	}
 
@@ -213,7 +213,7 @@ func (n *linuxNotifier) notify(data NotificationData) (uint32, error) {
 	)
 
 	if call.Err != nil {
-		return 0, fmt.Errorf("Notify call failed: %w", call.Err)
+		return 0, fmt.Errorf("notify call failed: %w", call.Err)
 	}
 
 	var notifID uint32

@@ -112,10 +112,17 @@ func main() {
 					if err != nil {
 						slog.Warn("Failed to create notifier", "error", err)
 						// Continue without notifier - notifications will fail gracefully
+					} else {
+						// Set as the default notifier so Send() uses it with action callbacks
+						notification.SetDefaultNotifier(appNotifier)
 					}
 					defer func() {
+						// Clear the default notifier before closing
+						notification.SetDefaultNotifier(nil)
 						if appNotifier != nil {
-							appNotifier.Close()
+							if err := appNotifier.Close(); err != nil {
+								slog.Error("Failed to close notifier", "error", err)
+							}
 						}
 					}()
 
@@ -129,8 +136,11 @@ func main() {
 						},
 						Quit: func() {
 							slog.Info("Quitting...")
+							// Cancel context to trigger graceful shutdown
+							// The backend.Run() will return, allowing deferred cleanup to run
 							cancel()
-							os.Exit(0)
+							// Quit the tray to unblock systray.Run()
+							tray.Quit()
 						},
 					})
 

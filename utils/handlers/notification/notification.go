@@ -1,5 +1,33 @@
 package notification
 
+import (
+	"log/slog"
+	"sync"
+)
+
+// defaultNotifier is the package-level notifier used by Send().
+// It can be set via SetDefaultNotifier() to enable action callbacks.
+var (
+	defaultNotifier   *Notifier
+	defaultNotifierMu sync.RWMutex
+)
+
+// SetDefaultNotifier sets the package-level notifier used by Send().
+// This allows the application to configure action callbacks (OpenURL, OpenPath)
+// that will be used for all notifications sent via Send().
+func SetDefaultNotifier(n *Notifier) {
+	defaultNotifierMu.Lock()
+	defer defaultNotifierMu.Unlock()
+	defaultNotifier = n
+}
+
+// GetDefaultNotifier returns the package-level notifier, or nil if not set.
+func GetDefaultNotifier() *Notifier {
+	defaultNotifierMu.RLock()
+	defer defaultNotifierMu.RUnlock()
+	return defaultNotifier
+}
+
 // NotificationData represents the data needed for a notification
 type NotificationData struct {
 	Title      string `json:"title" mapstructure:"title"`
@@ -15,8 +43,6 @@ type NotificationData struct {
 type Notifier struct {
 	appName   string
 	soundFile string
-	openURL   func(string) error
-	openPath  func(string) error
 	platform  platformNotifier
 }
 
@@ -53,8 +79,6 @@ func NewNotifier(opts NotifierOptions) (*Notifier, error) {
 	return &Notifier{
 		appName:   appName,
 		soundFile: opts.SoundFile,
-		openURL:   opts.OpenURL,
-		openPath:  opts.OpenPath,
 		platform:  platform,
 	}, nil
 }
@@ -71,8 +95,7 @@ func (n *Notifier) Send(data NotificationData) (uint32, error) {
 	if soundToPlay != "" {
 		go func() {
 			if err := playSound(soundToPlay); err != nil {
-				// Log error but don't fail the notification
-				_ = err
+				slog.Debug("Failed to play notification sound", "file", soundToPlay, "error", err)
 			}
 		}()
 	}
@@ -88,16 +111,32 @@ func (n *Notifier) Close() error {
 	return nil
 }
 
-// Send is a convenience function for simple notifications without creating a Notifier.
-// It creates a temporary notifier with default settings.
-// For applications that send many notifications, use NewNotifier() instead.
+// Send is a convenience function for sending notifications.
+// If a default notifier has been set via SetDefaultNotifier(), it will be used
+// (enabling action callbacks like OpenURL and OpenPath).
+// Otherwise, a temporary notifier with default settings is created.
 func Send(data NotificationData) error {
-	notifier, err := NewNotifier(NotifierOptions{})
+	// Try to use the default notifier if set
+	defaultNotifierMu.RLock()
+	notifier := defaultNotifier
+	defaultNotifierMu.RUnlock()
+
+	if notifier != nil {
+		_, err := notifier.Send(data)
+		return err
+	}
+
+	// Fall back to creating a temporary notifier
+	tempNotifier, err := NewNotifier(NotifierOptions{})
 	if err != nil {
 		return err
 	}
-	defer notifier.Close()
+	defer func() {
+		if err := tempNotifier.Close(); err != nil {
+			slog.Debug("Failed to close temporary notifier", "error", err)
+		}
+	}()
 
-	_, err = notifier.Send(data)
+	_, err = tempNotifier.Send(data)
 	return err
 }
