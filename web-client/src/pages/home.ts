@@ -34,6 +34,10 @@ export class PageHome extends PageElement {
     this.navigate("/notifications");
   };
 
+  private handleNavigateToOpen = (): void => {
+    this.navigate("/open");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -108,6 +112,13 @@ export class PageHome extends PageElement {
                     @click=${this.handleNavigateToNotifications}
                   >
                     Notifications
+                  </ui-button>
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToOpen}
+                  >
+                    Open
                   </ui-button>
                 </div>
               </div>

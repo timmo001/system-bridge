@@ -65,6 +65,14 @@ export class App extends LitElement {
         return true;
       },
     },
+    {
+      path: "/open",
+      render: () => html`<page-open></page-open>`,
+      enter: async () => {
+        await import("./pages/open");
+        return true;
+      },
+    },
   ]);
 
   protected createRenderRoot() {
