@@ -202,12 +202,27 @@ func main() {
 								Usage: "The icon of the notification",
 								Value: "system-bridge",
 							},
+							&cli.StringFlag{
+								Name:  "sound",
+								Usage: "Path to a sound file to play with the notification (Linux only)",
+							},
+							&cli.StringFlag{
+								Name:  "action-url",
+								Usage: "URL to open when notification is clicked (Linux only)",
+							},
+							&cli.StringFlag{
+								Name:  "action-path",
+								Usage: "File/folder path to open when notification is clicked (Linux only)",
+							},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							err := notification.Send(notification.NotificationData{
-								Title:   cmd.String("title"),
-								Message: cmd.String("message"),
-								Icon:    cmd.String("icon"),
+								Title:      cmd.String("title"),
+								Message:    cmd.String("message"),
+								Icon:       cmd.String("icon"),
+								Sound:      cmd.String("sound"),
+								ActionURL:  cmd.String("action-url"),
+								ActionPath: cmd.String("action-path"),
 							})
 							if err != nil {
 								slog.Warn("Failed to send notification", "err", err)
