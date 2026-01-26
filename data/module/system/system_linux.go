@@ -3,12 +3,11 @@
 package system
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"log/slog"
 
 	"github.com/shirou/gopsutil/v4/process"
 )
@@ -129,7 +128,7 @@ func GetPSUPowerUsage() *float64 {
 				if value, err := strconv.ParseFloat(valueStr, 64); err == nil {
 					// Convert from microwatts to watts
 					powerWatts := value / 1_000_000
-					slog.Info("Found PSU power usage", "hwmon", hwmonDir, "name", name, "power_watts", powerWatts)
+					slog.Debug("Found PSU power usage", "hwmon", hwmonDir, "name", name, "power_watts", powerWatts)
 					return &powerWatts
 				}
 			}
