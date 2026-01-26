@@ -7,19 +7,18 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 
 	"log/slog"
 
-	"fyne.io/systray"
 	"github.com/pkg/browser"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
@@ -31,11 +30,8 @@ import (
 //go:embed all:web-client/dist/*
 var webClientContent embed.FS
 
-//go:embed .resources/system-bridge-dimmed-512.png
-var trayIconPngData []byte
-
-//go:embed .resources/system-bridge-dimmed.ico
-var trayIconIcoData []byte
+// Global notifier for the application
+var appNotifier *notification.Notifier
 
 func main() {
 	setupLogging()
@@ -81,8 +77,6 @@ func main() {
 					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					// Start the system tray UI
-					go systray.Run(onReady, onExit)
 					slog.Info("------ System Bridge ------")
 
 					s, err := settings.Load()
@@ -104,6 +98,44 @@ func main() {
 					if err != nil {
 						return fmt.Errorf("failed to create data store: %w", err)
 					}
+
+					// Initialize the notifier with URL and path opening capability
+					appNotifier, err = notification.NewNotifier(notification.NotifierOptions{
+						AppName: "System Bridge",
+						OpenURL: func(url string) error {
+							return browser.OpenURL(url)
+						},
+						OpenPath: func(path string) error {
+							return filesystem.OpenFile(path)
+						},
+					})
+					if err != nil {
+						slog.Warn("Failed to create notifier", "error", err)
+						// Continue without notifier - notifications will fail gracefully
+					}
+					defer func() {
+						if appNotifier != nil {
+							appNotifier.Close()
+						}
+					}()
+
+					// Set up tray handlers
+					tray.SetHandlers(tray.Handlers{
+						OpenWebClient: func() {
+							openWebClient(token)
+						},
+						OpenLogsDir: func() {
+							openLogsDirectory()
+						},
+						Quit: func() {
+							slog.Info("Quitting...")
+							cancel()
+							os.Exit(0)
+						},
+					})
+
+					// Start the system tray UI
+					go tray.Run()
 
 					// Create and run backend server with signal-aware context
 					b := backend.New(s, dataStore, token, &webClientContent)
@@ -365,59 +397,10 @@ func main() {
 	}
 
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		systray.Quit()
+		tray.Quit()
 		slog.Error("error running cmd", "err", err)
 		os.Exit(1)
 	}
-}
-
-func onReady() {
-	token, err := utils.LoadToken()
-	if err != nil {
-		slog.Error("error loading token", "err", err)
-		token = utils.GenerateToken()
-		if saveErr := utils.SaveToken(token); saveErr != nil {
-			slog.Error("failed to persist generated token", "err", saveErr)
-		}
-	}
-
-	// Set systray icon based on OS
-	if runtime.GOOS == "windows" {
-		systray.SetIcon(trayIconIcoData)
-	} else {
-		systray.SetIcon(trayIconPngData)
-	}
-
-	systray.SetTitle("System Bridge")
-	systray.SetTooltip("System Bridge")
-
-	// Create menu items
-	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
-	systray.AddSeparator()
-	mOpenLogsDirectory := systray.AddMenuItem("Open logs directory", "Open the logs directory")
-	systray.AddSeparator()
-	mQuit := systray.AddMenuItem("Quit", "Quit the application")
-
-	// Handle menu item clicks
-	go func() {
-		for {
-			select {
-			case <-mOpenWebClient.ClickedCh:
-				go openWebClient(token)
-			case <-mOpenLogsDirectory.ClickedCh:
-				go openLogsDirectory()
-			case <-mQuit.ClickedCh:
-				slog.Info("Quitting...")
-				systray.Quit()
-				os.Exit(0)
-			}
-		}
-	}()
-}
-
-func onExit() {
-	// Cleanup if needed
-	slog.Info("System tray exiting...")
 }
 
 func openWebClient(token string) {
