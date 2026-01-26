@@ -2,7 +2,6 @@ package data_module
 
 import (
 	"context"
-
 	"log/slog"
 
 	"github.com/shirou/gopsutil/v4/process"
@@ -13,7 +12,7 @@ type ProcessModule struct{}
 
 func (pm ProcessModule) Name() types.ModuleName { return types.ModuleProcesses }
 func (pm ProcessModule) Update(ctx context.Context) (any, error) {
-	slog.Info("Getting processes data")
+	slog.Debug("Getting processes data")
 
 	processesData := make([]types.Process, 0)
 
