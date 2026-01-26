@@ -50,8 +50,6 @@ export class PageMedia extends PageElement {
   @state()
   private actionResult: ActionResult | null = null;
 
-  private resultTimeout: number | null = null;
-
   connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener(
@@ -74,9 +72,6 @@ export class PageMedia extends PageElement {
       "media-control-error",
       this.handleMediaControlError as EventListener,
     );
-    if (this.resultTimeout) {
-      clearTimeout(this.resultTimeout);
-    }
   }
 
   private handleMediaControlSuccess = (
@@ -103,17 +98,11 @@ export class PageMedia extends PageElement {
   };
 
   private showResult(success: boolean, message: string): void {
-    if (this.resultTimeout) {
-      clearTimeout(this.resultTimeout);
-    }
     this.actionResult = {
       success,
       message,
       timestamp: Date.now(),
     };
-    this.resultTimeout = window.setTimeout(() => {
-      this.actionResult = null;
-    }, 3000);
   }
 
   private handleNavigateToConnection = (): void => {
