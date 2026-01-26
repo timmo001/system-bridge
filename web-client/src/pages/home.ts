@@ -30,6 +30,10 @@ export class PageHome extends PageElement {
     this.navigate("/settings/commands");
   };
 
+  private handleNavigateToNotifications = (): void => {
+    this.navigate("/notifications");
+  };
+
   render() {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
@@ -88,6 +92,22 @@ export class PageHome extends PageElement {
                     @click=${this.handleNavigateToCommands}
                   >
                     Commands
+                  </ui-button>
+                </div>
+              </div>
+
+              <div class="rounded-lg border bg-card p-6 space-y-4">
+                <h2 class="text-xl font-semibold">Actions</h2>
+                <p class="text-sm text-muted-foreground">
+                  Perform actions on this system
+                </p>
+                <div class="flex flex-col gap-3">
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToNotifications}
+                  >
+                    Notifications
                   </ui-button>
                 </div>
               </div>
