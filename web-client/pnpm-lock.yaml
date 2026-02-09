@@ -76,8 +76,8 @@ importers:
         specifier: 4.4.1
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.55.0(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-wc:
-        specifier: 3.0.2
-        version: 3.0.2(eslint@9.39.2(jiti@2.6.1))
+        specifier: 3.1.0
+        version: 3.1.0(eslint@9.39.2(jiti@2.6.1))
       globals:
         specifier: ^17.3.0
         version: 17.3.0
@@ -1118,8 +1118,8 @@ packages:
       '@typescript-eslint/eslint-plugin':
         optional: true
 
-  eslint-plugin-wc@3.0.2:
-    resolution: {integrity: sha512-siwTrxPTw6GU2JmP3faInw8nhi0ZCnKsiSRM3j7EAkZmBTGYdDAToeseLYsvPrc5Urp/vPz+g7Ewh7XcICLxww==}
+  eslint-plugin-wc@3.1.0:
+    resolution: {integrity: sha512-spvXHD2/GTTgYXxFB3xlMThnXGUeNJaiCwWuPGzjDOLXnVGLcQpDt0fyiN6yiLoaLs/yhsj+7G1FpBZKeigCSA==}
     peerDependencies:
       eslint: '>=8.40.0'
 
@@ -3017,7 +3017,7 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.55.0(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
 
-  eslint-plugin-wc@3.0.2(eslint@9.39.2(jiti@2.6.1)):
+  eslint-plugin-wc@3.1.0(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
       eslint: 9.39.2(jiti@2.6.1)
       is-valid-element-name: 1.0.0
