@@ -67,8 +67,8 @@ importers:
         specifier: 2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.55.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-lit:
-        specifier: 2.1.1
-        version: 2.1.1(eslint@9.39.2(jiti@2.6.1))
+        specifier: 2.2.1
+        version: 2.2.1(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-lit-a11y:
         specifier: 5.1.1
         version: 5.1.1(eslint@9.39.2(jiti@2.6.1))
@@ -1103,8 +1103,8 @@ packages:
     peerDependencies:
       eslint: '>= 5'
 
-  eslint-plugin-lit@2.1.1:
-    resolution: {integrity: sha512-qmyAOnnTCdS+vDnNxtCoF0icSKIio4GUv6ZLnaCtTX6G/YezRa6Ag6tOQ+MfV5Elvtw9CIXeliRX4mIBSwrPIA==}
+  eslint-plugin-lit@2.2.1:
+    resolution: {integrity: sha512-mnqqwpWF4PBF/YjlGt9mbHwrWCGMtaqdpnqISv3nGcTl8iStaAt9UGieMY3i8vwKfSSWtkEfBZUcRKFGys6yiw==}
     engines: {node: '>= 18'}
     peerDependencies:
       eslint: '>= 8'
@@ -2999,13 +2999,13 @@ snapshots:
       dom5: 3.0.1
       emoji-regex: 10.6.0
       eslint: 9.39.2(jiti@2.6.1)
-      eslint-plugin-lit: 2.1.1(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-lit: 2.2.1(eslint@9.39.2(jiti@2.6.1))
       eslint-rule-extender: 0.0.1
       language-tags: 1.0.9
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 6.0.1
 
-  eslint-plugin-lit@2.1.1(eslint@9.39.2(jiti@2.6.1)):
+  eslint-plugin-lit@2.2.1(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
       eslint: 9.39.2(jiti@2.6.1)
       parse5: 6.0.1
