@@ -20,7 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lit": "^3.3.2",
-    "lucide": "^0.562.0",
+    "lucide": "^0.574.0",
     "tailwind-merge": "^3.4.1",
     "zod": "^4.1.12"
   },
