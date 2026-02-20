@@ -25,7 +25,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.2",
+    "@eslint/js": "9.39.3",
     "@tailwindcss/vite": "^4.2.0",
     "@types/node": "^25.3.0",
     "autoprefixer": "^10.4.24",
