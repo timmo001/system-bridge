@@ -201,13 +201,13 @@ func (s *SSDPServer) createSearchResponse(remoteIP string) string {
 
 	var buf bytes.Buffer
 	buf.WriteString("HTTP/1.1 200 OK\r\n")
-	buf.WriteString(fmt.Sprintf("CACHE-CONTROL: max-age=%d\r\n", SSDPMaxAge))
+	fmt.Fprintf(&buf, "CACHE-CONTROL: max-age=%d\r\n", SSDPMaxAge)
 	buf.WriteString("DATE: " + time.Now().UTC().Format(http.TimeFormat) + "\r\n")
 	buf.WriteString("EXT: \r\n")
-	buf.WriteString(fmt.Sprintf("LOCATION: http://%s:%d/description.xml\r\n", remoteIP, s.backendPort))
+	fmt.Fprintf(&buf, "LOCATION: http://%s:%d/description.xml\r\n", remoteIP, s.backendPort)
 	buf.WriteString("SERVER: System-Bridge/1.0 UPnP/1.0\r\n")
-	buf.WriteString(fmt.Sprintf("ST: %s\r\n", SSDPSearchTarget))
-	buf.WriteString(fmt.Sprintf("USN: uuid:system-bridge-%s::%s\r\n", hostname, SSDPSearchTarget))
+	fmt.Fprintf(&buf, "ST: %s\r\n", SSDPSearchTarget)
+	fmt.Fprintf(&buf, "USN: uuid:system-bridge-%s::%s\r\n", hostname, SSDPSearchTarget)
 	buf.WriteString("\r\n")
 
 	return buf.String()
