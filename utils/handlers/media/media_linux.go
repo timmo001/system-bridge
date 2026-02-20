@@ -1,3 +1,5 @@
+//go:build linux
+
 package media
 
 import (
@@ -15,12 +17,14 @@ func control(action MediaAction) error {
 		cmd = exec.Command("playerctl", "next")
 	case MediaActionPrevious:
 		cmd = exec.Command("playerctl", "previous")
+	case MediaActionStop:
+		cmd = exec.Command("playerctl", "stop")
 	case MediaActionVolumeUp:
-		cmd = exec.Command("playerctl", "volume-up")
+		cmd = exec.Command("playerctl", "volume", "0.05+")
 	case MediaActionVolumeDown:
-		cmd = exec.Command("playerctl", "volume-down")
+		cmd = exec.Command("playerctl", "volume", "0.05-")
 	case MediaActionMute:
-		cmd = exec.Command("playerctl", "mute")
+		cmd = exec.Command("playerctl", "volume", "0")
 	default:
 		return fmt.Errorf("unsupported media action: %s", action)
 	}
