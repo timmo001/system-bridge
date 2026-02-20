@@ -38,6 +38,8 @@ func StartPlayerctlListener(dataStore *DataStore) {
 			}
 		}
 
+		_ = cmd.Wait()
+
 		if err := scanner.Err(); err != nil {
 			slog.Info("playerctl listener stopped", "error", err)
 		}
