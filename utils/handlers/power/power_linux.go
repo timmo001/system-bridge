@@ -3,6 +3,7 @@
 package power
 
 import (
+	"os"
 	"os/exec"
 )
 
@@ -32,6 +33,10 @@ func lock() error {
 }
 
 func logout() error {
-	cmd := exec.Command("loginctl", "terminate-session", "$XDG_SESSION_ID")
+	sessionID := os.Getenv("XDG_SESSION_ID")
+	if sessionID == "" {
+		sessionID = "self"
+	}
+	cmd := exec.Command("loginctl", "terminate-session", sessionID)
 	return cmd.Run()
 }

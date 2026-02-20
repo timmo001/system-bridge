@@ -32,13 +32,18 @@ func getGPUs() ([]types.GPU, error) {
 				powerUsage, _ := strconv.ParseFloat(strings.TrimSpace(fields[7]), 64)
 				temperature, _ := strconv.ParseFloat(strings.TrimSpace(fields[8]), 64)
 
+				memoryLoad := 0.0
+				if memoryTotal > 0 {
+					memoryLoad = (memoryUsed / memoryTotal) * 100.0
+				}
+
 				gpuList = append(gpuList, types.GPU{
 					ID:          fmt.Sprintf("nvidia-%d", len(gpuList)),
 					Name:        name,
 					CoreClock:   &coreClock,
 					CoreLoad:    &coreLoad,
 					MemoryClock: &memoryClock,
-					MemoryLoad:  &coreLoad, // Use core load as memory load for now
+					MemoryLoad:  &memoryLoad,
 					MemoryFree:  &memoryFree,
 					MemoryUsed:  &memoryUsed,
 					MemoryTotal: &memoryTotal,
@@ -57,13 +62,19 @@ func getGPUs() ([]types.GPU, error) {
 			lines := strings.Split(string(output), "\n")
 			for _, line := range lines {
 				if strings.Contains(line, "VGA compatible controller") {
-					parts := strings.Split(line, ":")
-					if len(parts) >= 2 {
-						name := strings.TrimSpace(parts[2])
-						gpuList = append(gpuList, types.GPU{
-							ID:   fmt.Sprintf("gpu-%d", len(gpuList)),
-							Name: name,
-						})
+					// lspci format: "0000:00:02.0 VGA compatible controller: Intel Corporation..."
+					// Split by ": " to skip past the bus address and class description
+					idx := strings.Index(line, ": ")
+					if idx >= 0 {
+						rest := line[idx+2:]
+						nameIdx := strings.Index(rest, ": ")
+						if nameIdx >= 0 {
+							name := strings.TrimSpace(rest[nameIdx+2:])
+							gpuList = append(gpuList, types.GPU{
+								ID:   fmt.Sprintf("gpu-%d", len(gpuList)),
+								Name: name,
+							})
+						}
 					}
 				}
 			}

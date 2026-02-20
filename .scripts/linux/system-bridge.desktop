@@ -5,4 +5,7 @@ Exec=system-bridge backend --open-web-client
 Icon=system-bridge
 Type=Application
 Categories=Utility;
+Terminal=false
+StartupNotify=false
+Keywords=system;bridge;monitor;
 X-GNOME-Autostart-enabled=true

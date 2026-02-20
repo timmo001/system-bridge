@@ -121,5 +121,5 @@ func getFileInfo(path string) (*FileInfo, error) {
 
 func openFile(path string) error {
 	cmd := exec.Command("xdg-open", path)
-	return cmd.Run()
+	return cmd.Start()
 }

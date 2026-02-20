@@ -58,20 +58,10 @@ func GetDisplays() ([]types.Display, error) {
 			continue
 		}
 
-		// Get current mode info
-		mode := resources.Modes[0]
-		for _, modeID := range info.Modes {
-			for _, m := range resources.Modes {
-				if m.Id == uint32(modeID) {
-					mode = m
-					break
-				}
-			}
-		}
-
-		// Get crtc info for position and resolution
+		// Get crtc info for position, resolution, and active mode
 		var x, y int16
 		var resolutionWidth, resolutionHeight uint16
+		var mode randr.ModeInfo
 		if info.Crtc != 0 {
 			crtc, err := randr.GetCrtcInfo(X, info.Crtc, 0).Reply()
 			if err == nil {
@@ -79,12 +69,20 @@ func GetDisplays() ([]types.Display, error) {
 				y = crtc.Y
 				resolutionWidth = crtc.Width
 				resolutionHeight = crtc.Height
+
+				// Find the CRTC's active mode from resources
+				for _, m := range resources.Modes {
+					if m.Id == uint32(crtc.Mode) {
+						mode = m
+						break
+					}
+				}
 			}
 		}
 
 		// Calculate refresh rate in Hertz
-		// RandR reports DotClock in kHz, so multiply by 1000 to get Hz
-		refreshRate := (float64(mode.DotClock) * 1000.0) / (float64(mode.Htotal) * float64(mode.Vtotal))
+		// RandR reports DotClock in Hz
+		refreshRate := float64(mode.DotClock) / (float64(mode.Htotal) * float64(mode.Vtotal))
 
 		// Convert name from []byte to string
 		name := string(info.Name)
@@ -94,9 +92,9 @@ func GetDisplays() ([]types.Display, error) {
 		// Get physical dimensions in millimeters
 		w := int(info.MmWidth)
 		h := int(info.MmHeight)
-		isPrimary := false
-		// Pixel clock in MHz (DotClock is kHz)
-		pixelClock := float64(mode.DotClock) / 1000.0
+		isPrimary := (output == primary.Output)
+		// Pixel clock in MHz (DotClock is Hz)
+		pixelClock := float64(mode.DotClock) / 1000000.0
 
 		display := types.Display{
 			ID:                   id,
