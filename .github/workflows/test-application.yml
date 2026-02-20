@@ -5,7 +5,7 @@ name: Test application
 on:
   push:
     branches:
-      - master
+      - dev
   pull_request:
     types:
       - opened

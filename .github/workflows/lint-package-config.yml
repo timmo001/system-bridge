@@ -5,7 +5,7 @@ name: Lint package configs
 on:
   push:
     branches:
-      - master
+      - dev
     paths:
       - ".scripts/**/*.spec"
       - ".scripts/**/*.desktop"

@@ -5,7 +5,7 @@ name: Build and package application
 on:
   push:
     branches:
-      - master
+      - dev
   pull_request:
     types:
       - opened
@@ -235,7 +235,7 @@ jobs:
 
   update-aur:
     name: Update AUR Package
-    if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.ref_type == 'tag'
+    if: (github.ref == 'refs/heads/dev' && github.event_name == 'push') || github.ref_type == 'tag'
     container:
       image: ghcr.io/${{ github.repository }}/ci-build-arch:latest
     runs-on: ubuntu-latest

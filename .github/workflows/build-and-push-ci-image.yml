@@ -5,7 +5,7 @@ name: Build and push CI Docker images
 on:
   push:
     branches:
-      - master
+      - dev
     paths:
       - .github/workflows/build-and-push-ci-image.yml
       - Dockerfile.ci-build-arch
