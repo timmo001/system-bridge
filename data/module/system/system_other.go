@@ -6,6 +6,10 @@ func GetCameraUsage() []string {
 	return nil
 }
 
+func GetMicrophoneUsage() []string {
+	return nil
+}
+
 func GetPendingReboot() *bool {
 	return nil
 }

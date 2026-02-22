@@ -28,6 +28,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	var systemData types.SystemData
 	systemData.Users = make([]types.SystemUser, 0)
 	systemData.CameraUsage = make([]string, 0)
+	systemData.MicrophoneUsage = make([]string, 0)
 
 	infoStat, err := host.Info()
 	if err != nil {
@@ -186,6 +187,9 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 	if infoStat.OS == "linux" || infoStat.Platform == "linux" || strings.Contains(strings.ToLower(infoStat.Platform), "arch") || strings.Contains(strings.ToLower(infoStat.Platform), "ubuntu") || strings.Contains(strings.ToLower(infoStat.Platform), "debian") {
 		if cu := system.GetCameraUsage(); len(cu) > 0 {
 			systemData.CameraUsage = cu
+		}
+		if mu := system.GetMicrophoneUsage(); len(mu) > 0 {
+			systemData.MicrophoneUsage = mu
 		}
 		if pr := system.GetPendingReboot(); pr != nil {
 			systemData.PendingReboot = pr

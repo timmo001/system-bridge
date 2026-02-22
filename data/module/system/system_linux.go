@@ -80,6 +80,73 @@ func GetCameraUsage() []string {
 	return names
 }
 
+// GetMicrophoneUsage attempts to detect processes currently using audio capture devices on Linux
+// by reading ALSA capture substream status files under /proc/asound/.
+// A capture device with state "RUNNING" indicates active microphone usage.
+func GetMicrophoneUsage() []string {
+	names := make([]string, 0)
+
+	statusFiles, err := filepath.Glob("/proc/asound/card*/pcm*c/sub*/status")
+	if err != nil {
+		slog.Debug("Microphone usage glob failed", "error", err)
+		return names
+	}
+
+	pidSet := make(map[int32]bool)
+	for _, sf := range statusFiles {
+		data, err := os.ReadFile(sf)
+		if err != nil {
+			slog.Debug("Failed to read ALSA capture status file", "path", sf, "error", err)
+			continue
+		}
+		content := string(data)
+
+		// Check if the capture stream is actively running
+		if !strings.Contains(content, "state: RUNNING") {
+			continue
+		}
+
+		// Extract owner_pid from the status file
+		for _, line := range strings.Split(content, "\n") {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "owner_pid") {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) != 2 {
+					continue
+				}
+				pidStr := strings.TrimSpace(parts[1])
+				pidVal, err := strconv.Atoi(pidStr)
+				if err != nil {
+					slog.Debug("Failed to parse owner_pid from ALSA status", "path", sf, "value", pidStr, "error", err)
+					continue
+				}
+				if pidVal <= 0 {
+					continue
+				}
+				pidSet[int32(pidVal)] = true
+			}
+		}
+	}
+
+	// Resolve process names
+	for pid := range pidSet {
+		p, err := process.NewProcess(pid)
+		if err != nil {
+			slog.Debug("Failed to find process for microphone usage", "pid", pid, "error", err)
+			continue
+		}
+		name, err := p.Name()
+		if err != nil {
+			slog.Debug("Failed to get process name for microphone usage", "pid", pid, "error", err)
+			continue
+		}
+		if name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
 // GetPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.
 // Returns pointer to bool when known, or nil when unknown.
 func GetPendingReboot() *bool {
