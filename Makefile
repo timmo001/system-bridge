@@ -145,6 +145,9 @@ run-web-client:
 run-backend: build
 	./$(OUT) backend
 
+cli: build
+	./$(OUT) cli $(ARGS)
+
 # Run console version for debugging (Windows only)
 run_console: build_console
 ifeq ($(OS),Windows_NT)
@@ -246,6 +249,7 @@ help:
 	@echo "  run                      Build and run the application (development only)"
 	@echo "  run-web-client           Run the web client dev server (Vite)"
 	@echo "  run-backend              Build and run the backend server"
+	@echo "  cli                      Build and run the CLI (pass ARGS= for subcommands)"
 	@echo "  run_console              Build and run console version for debugging (Windows only)"
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
 	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"
