@@ -489,6 +489,7 @@ export const SystemDataSchema = z.object({
   uuid: z.string(),
   version: z.string(),
   camera_usage: z.array(z.string()),
+  microphone_usage: z.array(z.string()),
   ip_address_6: z.string(),
   pending_reboot: z.boolean().nullish(),
   run_mode: z.enum(["standalone"]),
