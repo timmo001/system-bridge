@@ -108,7 +108,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download application
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: .
@@ -302,31 +302,31 @@ jobs:
       contents: write
     steps:
       - name: Download linux arch packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-linux-packages-arch-${{ needs.build-linux.outputs.version }}
           path: dist/linux/arch
 
       - name: Download linux deb packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-linux-packages-deb-${{ needs.build-linux.outputs.version }}
           path: dist/linux/deb
 
       - name: Download linux rpm packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-linux-packages-rpm-${{ needs.build-linux.outputs.version }}
           path: dist/linux/rpm
 
       - name: Download linux flatpak packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-linux-packages-flatpak-${{ needs.build-linux.outputs.version }}
           path: dist/linux/flatpak
 
       - name: Download windows packages
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
