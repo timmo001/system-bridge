@@ -28,7 +28,7 @@
     "@eslint/js": "9.39.3",
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.3.1",
-    "autoprefixer": "^10.4.24",
+    "autoprefixer": "^10.4.27",
     "concurrently": "^9.2.1",
     "eslint": "9.39.2",
     "eslint-config-airbnb-base": "15.0.0",
