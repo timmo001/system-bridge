@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -117,6 +119,10 @@ func openLogFile(now time.Time) (*os.File, error) {
 		return nil, err
 	}
 
+	if err := migrateLegacyLogFile(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to migrate legacy log file: %v\n", err)
+	}
+
 	if err := cleanupOldLogFiles(filepath.Dir(logPath), now, logRetention); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to clean up old log files: %v\n", err)
 	}
@@ -127,6 +133,59 @@ func openLogFile(now time.Time) (*os.File, error) {
 	}
 
 	return file, nil
+}
+
+func migrateLegacyLogFile() error {
+	configPath, err := utils.GetConfigPath()
+	if err != nil {
+		return err
+	}
+
+	legacyLogPath := filepath.Join(configPath, "system-bridge.log")
+	legacyInfo, err := os.Stat(legacyLogPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if legacyInfo.IsDir() {
+		return fmt.Errorf("legacy log path is a directory: %s", legacyLogPath)
+	}
+
+	targetLogPath, err := utils.GetLogFilePath(legacyInfo.ModTime())
+	if err != nil {
+		return err
+	}
+	if filepath.Clean(legacyLogPath) == filepath.Clean(targetLogPath) {
+		return nil
+	}
+
+	return appendFileAndRemoveSource(legacyLogPath, targetLogPath)
+}
+
+func appendFileAndRemoveSource(sourcePath, targetPath string) error {
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	targetFile, err := os.OpenFile(targetPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer targetFile.Close()
+
+	if _, err := io.Copy(targetFile, sourceFile); err != nil {
+		return err
+	}
+
+	if err := os.Remove(sourcePath); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func cleanupOldLogFiles(logDir string, now time.Time, retention time.Duration) error {
