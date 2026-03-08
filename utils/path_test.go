@@ -449,5 +449,15 @@ func TestPathPermissions(t *testing.T) {
 		info, err = os.Stat(dataPath)
 		require.NoError(t, err)
 		assert.Equal(t, os.FileMode(0755), info.Mode().Perm())
+
+		logsDir := filepath.Join(tempDir, "logs")
+		t.Setenv("SYSTEM_BRIDGE_LOG_DIR", logsDir)
+
+		logsPath, err := GetLogsPath()
+		require.NoError(t, err)
+
+		info, err = os.Stat(logsPath)
+		require.NoError(t, err)
+		assert.Equal(t, os.FileMode(0700), info.Mode().Perm())
 	})
 }

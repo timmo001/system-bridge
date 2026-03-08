@@ -172,7 +172,7 @@ func migrateLegacyLogFile() error {
 	return appendFileAndRemoveSource(legacyLogPath, targetLogPath)
 }
 
-func appendFileAndRemoveSource(sourcePath, targetPath string) error {
+func appendFileAndRemoveSource(sourcePath, targetPath string) (err error) {
 	sourceFile, err := os.Open(sourcePath)
 	if err != nil {
 		return err
@@ -183,7 +183,7 @@ func appendFileAndRemoveSource(sourcePath, targetPath string) error {
 		}
 	}()
 
-	targetFile, err := os.OpenFile(targetPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	targetFile, err := os.OpenFile(targetPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, logFilePermissions)
 	if err != nil {
 		return err
 	}
