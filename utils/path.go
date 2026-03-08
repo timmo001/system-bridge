@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const logDirPermissions os.FileMode = 0700
+
 // GetConfigPath returns the path to the config directory
 func GetConfigPath() (string, error) {
 	var configDirPath string
@@ -117,8 +119,11 @@ func GetLogsPath() (string, error) {
 	}
 
 	logsDirPath = filepath.Clean(logsDirPath)
-	if err := os.MkdirAll(logsDirPath, 0755); err != nil {
+	if err := os.MkdirAll(logsDirPath, logDirPermissions); err != nil {
 		return "", fmt.Errorf("could not create logs directory: %w", err)
+	}
+	if err := os.Chmod(logsDirPath, logDirPermissions); err != nil {
+		return "", fmt.Errorf("could not set logs directory permissions: %w", err)
 	}
 
 	return logsDirPath, nil

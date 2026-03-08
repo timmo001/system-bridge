@@ -19,6 +19,7 @@ import (
 )
 
 const logRetention = 7 * 24 * time.Hour
+const logFilePermissions os.FileMode = 0600
 
 // multiHandler fans out records to multiple slog.Handlers
 // It is not part of slog, so we define it here.
@@ -127,8 +128,15 @@ func openLogFile(now time.Time) (*os.File, error) {
 		fmt.Fprintf(os.Stderr, "failed to clean up old log files: %v\n", err)
 	}
 
-	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, logFilePermissions)
 	if err != nil {
+		return nil, err
+	}
+	if err := file.Chmod(logFilePermissions); err != nil {
+		closeErr := file.Close()
+		if closeErr != nil {
+			return nil, errors.Join(err, closeErr)
+		}
 		return nil, err
 	}
 
@@ -169,13 +177,28 @@ func appendFileAndRemoveSource(sourcePath, targetPath string) error {
 	if err != nil {
 		return err
 	}
-	defer sourceFile.Close()
+	defer func() {
+		if closeErr := sourceFile.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	targetFile, err := os.OpenFile(targetPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
-	defer targetFile.Close()
+	if chmodErr := targetFile.Chmod(logFilePermissions); chmodErr != nil {
+		closeErr := targetFile.Close()
+		if closeErr != nil {
+			return errors.Join(chmodErr, closeErr)
+		}
+		return chmodErr
+	}
+	defer func() {
+		if closeErr := targetFile.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	if _, err := io.Copy(targetFile, sourceFile); err != nil {
 		return err
