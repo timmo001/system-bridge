@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -254,6 +255,131 @@ func TestGetDataPath(t *testing.T) {
 		assert.Equal(t, expectedPath, dataPath)
 		assert.DirExists(t, dataPath)
 	})
+}
+
+func TestGetLogsPath(t *testing.T) {
+	t.Run("Get logs path with custom environment variable", func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", "custom-state-*")
+		require.NoError(t, err)
+		defer func() {
+			err := os.RemoveAll(tempDir)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
+
+		stateDir := filepath.Join(tempDir, "state")
+		t.Setenv("SYSTEM_BRIDGE_LOG_DIR", stateDir)
+
+		statePath, err := GetLogsPath()
+		require.NoError(t, err)
+		assert.Equal(t, stateDir, statePath)
+		assert.DirExists(t, statePath)
+	})
+
+	t.Run("Get logs path with platform-specific defaults", func(t *testing.T) {
+		t.Setenv("SYSTEM_BRIDGE_LOG_DIR", "")
+
+		switch runtime.GOOS {
+		case "windows":
+			tempAppData, err := os.MkdirTemp("", "localappdata-*")
+			require.NoError(t, err)
+			defer func() {
+				err := os.RemoveAll(tempAppData)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
+
+			t.Setenv("LOCALAPPDATA", tempAppData)
+
+			statePath, err := GetLogsPath()
+			require.NoError(t, err)
+
+			expectedPath := filepath.Join(tempAppData, "system-bridge", "logs")
+			assert.Equal(t, expectedPath, statePath)
+			assert.DirExists(t, statePath)
+		case "darwin":
+			tempHome, err := os.MkdirTemp("", "home-*")
+			require.NoError(t, err)
+			defer func() {
+				err := os.RemoveAll(tempHome)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
+
+			t.Setenv("HOME", tempHome)
+
+			statePath, err := GetLogsPath()
+			require.NoError(t, err)
+
+			expectedPath := filepath.Join(tempHome, "Library", "Logs", "system-bridge")
+			assert.Equal(t, expectedPath, statePath)
+			assert.DirExists(t, statePath)
+		default:
+			tempHome, err := os.MkdirTemp("", "home-*")
+			require.NoError(t, err)
+			defer func() {
+				err := os.RemoveAll(tempHome)
+				if err != nil {
+					t.Fatalf("failed to remove temp dir: %v", err)
+				}
+			}()
+
+			t.Setenv("HOME", tempHome)
+			t.Setenv("XDG_STATE_HOME", "")
+
+			statePath, err := GetLogsPath()
+			require.NoError(t, err)
+
+			expectedPath := filepath.Join(tempHome, ".local", "state", "system-bridge")
+			assert.Equal(t, expectedPath, statePath)
+			assert.DirExists(t, statePath)
+		}
+	})
+
+	t.Run("Get state path with XDG_STATE_HOME", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("XDG_STATE_HOME is not used on Windows; skipping test.")
+		}
+
+		tempXDG, err := os.MkdirTemp("", "xdg-state-*")
+		require.NoError(t, err)
+		defer func() {
+			err := os.RemoveAll(tempXDG)
+			if err != nil {
+				t.Fatalf("failed to remove temp dir: %v", err)
+			}
+		}()
+
+		t.Setenv("SYSTEM_BRIDGE_LOG_DIR", "")
+		t.Setenv("XDG_STATE_HOME", tempXDG)
+
+		statePath, err := GetLogsPath()
+		require.NoError(t, err)
+
+		expectedPath := filepath.Join(tempXDG, "system-bridge")
+		assert.Equal(t, expectedPath, statePath)
+		assert.DirExists(t, statePath)
+	})
+}
+
+func TestGetLogFilePath(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "system-bridge-state-*")
+	require.NoError(t, err)
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			t.Fatalf("failed to remove temp dir: %v", err)
+		}
+	}()
+
+	t.Setenv("SYSTEM_BRIDGE_LOG_DIR", tempDir)
+
+	logPath, err := GetLogFilePath(time.Date(2026, time.March, 8, 12, 0, 0, 0, time.UTC))
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(tempDir, "2026-03-08.log"), logPath)
 }
 
 func TestPathIntegration(t *testing.T) {

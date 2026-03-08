@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"log/slog"
 
-	"github.com/natefinch/lumberjack"
 	console "github.com/phsym/console-slog"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/logging"
 )
+
+const logRetention = 7 * 24 * time.Hour
 
 // multiHandler fans out records to multiple slog.Handlers
 // It is not part of slog, so we define it here.
@@ -89,20 +92,11 @@ func setupLogging() {
 		})
 	}
 
-	// File handler with rolling logs
-	configDir, err := utils.GetConfigPath()
+	logFile, err := openLogFile(time.Now())
 	if err != nil {
-		panic(fmt.Errorf("failed to get config path: %w", err))
+		panic(fmt.Errorf("failed to open log file: %w", err))
 	}
-	logFile := filepath.Join(configDir, "system-bridge.log")
-	fileLogger := &lumberjack.Logger{
-		Filename:   logFile,
-		MaxSize:    10, // megabytes
-		MaxBackups: 3,
-		MaxAge:     28, // days
-		Compress:   true,
-	}
-	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
+	fileHandler := slog.NewTextHandler(logFile, &slog.HandlerOptions{
 		Level: logging.LogLevel,
 	})
 
@@ -115,6 +109,51 @@ func setupLogging() {
 
 	logger := slog.New(&multiHandler{handlers: handlers})
 	slog.SetDefault(logger)
+}
+
+func openLogFile(now time.Time) (*os.File, error) {
+	logPath, err := utils.GetLogFilePath(now)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cleanupOldLogFiles(filepath.Dir(logPath), now, logRetention); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to clean up old log files: %v\n", err)
+	}
+
+	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func cleanupOldLogFiles(logDir string, now time.Time, retention time.Duration) error {
+	entries, err := os.ReadDir(logDir)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".log") {
+			continue
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		if now.Sub(info.ModTime()) <= retention {
+			continue
+		}
+
+		if err := os.Remove(filepath.Join(logDir, entry.Name())); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // shouldLogToStdout returns true when the application should emit logs to stdout.

@@ -163,5 +163,7 @@ Token:
   macOS:   ~/Library/Application Support/system-bridge/token
 
 Logs:
-  Controlled by logging configuration in settings
+  Linux:   ~/.local/state/system-bridge/YYYY-MM-DD.log
+  Windows: %LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log
+  macOS:   ~/Library/Logs/system-bridge/YYYY-MM-DD.log
 ```
