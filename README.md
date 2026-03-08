@@ -23,6 +23,15 @@ A bridge for your systems.
 
 See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
+## File Locations
+
+- Linux settings/token: `~/.local/share/system-bridge/v5/`
+- Windows settings/token: `%LOCALAPPDATA%\system-bridge\v5\`
+- macOS settings/token: `~/Library/Application Support/system-bridge/v5/`
+- Linux logs: `~/.local/state/system-bridge/YYYY-MM-DD.log`
+- Windows logs: `%LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log`
+- macOS logs: `~/Library/Logs/system-bridge/YYYY-MM-DD.log`
+
 ## Development Setup
 
 1. Install go
