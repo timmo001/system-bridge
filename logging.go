@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"log/slog"
@@ -20,6 +19,7 @@ import (
 
 const logRetention = 7 * 24 * time.Hour
 const logFilePermissions os.FileMode = 0600
+const dailyLogFileLayout = "2006-01-02"
 
 // multiHandler fans out records to multiple slog.Handlers
 // It is not part of slog, so we define it here.
@@ -218,7 +218,7 @@ func cleanupOldLogFiles(logDir string, now time.Time, retention time.Duration) e
 	}
 
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".log") {
+		if entry.IsDir() || !isManagedLogFile(entry.Name()) {
 			continue
 		}
 
@@ -236,6 +236,22 @@ func cleanupOldLogFiles(logDir string, now time.Time, retention time.Duration) e
 	}
 
 	return nil
+}
+
+func isManagedLogFile(name string) bool {
+	const managedLogNameLength = len(dailyLogFileLayout) + len(".log")
+
+	if len(name) != managedLogNameLength || filepath.Ext(name) != ".log" {
+		return false
+	}
+
+	datePart := name[:len(dailyLogFileLayout)]
+	parsed, err := time.Parse(dailyLogFileLayout, datePart)
+	if err != nil {
+		return false
+	}
+
+	return parsed.Format(dailyLogFileLayout) == datePart
 }
 
 // shouldLogToStdout returns true when the application should emit logs to stdout.

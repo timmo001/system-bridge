@@ -18,9 +18,11 @@ func TestCleanupOldLogFiles(t *testing.T) {
 
 	oldLogPath := filepath.Join(logDir, "2026-02-28.log")
 	recentLogPath := filepath.Join(logDir, "2026-03-05.log")
+	unmanagedLogPath := filepath.Join(logDir, "system.log")
+	malformedLogPath := filepath.Join(logDir, "2026-13-40.log")
 	nonLogPath := filepath.Join(logDir, "notes.txt")
 
-	for _, path := range []string{oldLogPath, recentLogPath, nonLogPath} {
+	for _, path := range []string{oldLogPath, recentLogPath, unmanagedLogPath, malformedLogPath, nonLogPath} {
 		file, err := os.Create(path)
 		require.NoError(t, err)
 		require.NoError(t, file.Close())
@@ -28,13 +30,18 @@ func TestCleanupOldLogFiles(t *testing.T) {
 
 	oldTime := now.Add(-(7*24*time.Hour + time.Minute))
 	recentTime := now.Add(-48 * time.Hour)
+	unmanagedTime := now.Add(-(14 * 24 * time.Hour))
 	require.NoError(t, os.Chtimes(oldLogPath, oldTime, oldTime))
 	require.NoError(t, os.Chtimes(recentLogPath, recentTime, recentTime))
+	require.NoError(t, os.Chtimes(unmanagedLogPath, unmanagedTime, unmanagedTime))
+	require.NoError(t, os.Chtimes(malformedLogPath, unmanagedTime, unmanagedTime))
 
 	require.NoError(t, cleanupOldLogFiles(logDir, now, 7*24*time.Hour))
 
 	assert.NoFileExists(t, oldLogPath)
 	assert.FileExists(t, recentLogPath)
+	assert.FileExists(t, unmanagedLogPath)
+	assert.FileExists(t, malformedLogPath)
 	assert.FileExists(t, nonLogPath)
 }
 
