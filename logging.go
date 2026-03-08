@@ -2,18 +2,24 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"log/slog"
 
-	"github.com/natefinch/lumberjack"
 	console "github.com/phsym/console-slog"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/logging"
 )
+
+const logRetention = 7 * 24 * time.Hour
+const logFilePermissions os.FileMode = 0600
+const dailyLogFileLayout = "2006-01-02"
 
 // multiHandler fans out records to multiple slog.Handlers
 // It is not part of slog, so we define it here.
@@ -89,20 +95,11 @@ func setupLogging() {
 		})
 	}
 
-	// File handler with rolling logs
-	configDir, err := utils.GetConfigPath()
+	logFile, err := openLogFile(time.Now())
 	if err != nil {
-		panic(fmt.Errorf("failed to get config path: %w", err))
+		panic(fmt.Errorf("failed to open log file: %w", err))
 	}
-	logFile := filepath.Join(configDir, "system-bridge.log")
-	fileLogger := &lumberjack.Logger{
-		Filename:   logFile,
-		MaxSize:    10, // megabytes
-		MaxBackups: 3,
-		MaxAge:     28, // days
-		Compress:   true,
-	}
-	fileHandler := slog.NewTextHandler(fileLogger, &slog.HandlerOptions{
+	fileHandler := slog.NewTextHandler(logFile, &slog.HandlerOptions{
 		Level: logging.LogLevel,
 	})
 
@@ -115,6 +112,146 @@ func setupLogging() {
 
 	logger := slog.New(&multiHandler{handlers: handlers})
 	slog.SetDefault(logger)
+}
+
+func openLogFile(now time.Time) (*os.File, error) {
+	logPath, err := utils.GetLogFilePath(now)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := migrateLegacyLogFile(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to migrate legacy log file: %v\n", err)
+	}
+
+	if err := cleanupOldLogFiles(filepath.Dir(logPath), now, logRetention); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to clean up old log files: %v\n", err)
+	}
+
+	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, logFilePermissions)
+	if err != nil {
+		return nil, err
+	}
+	if err := file.Chmod(logFilePermissions); err != nil {
+		closeErr := file.Close()
+		if closeErr != nil {
+			return nil, errors.Join(err, closeErr)
+		}
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func migrateLegacyLogFile() error {
+	configPath, err := utils.GetConfigPath()
+	if err != nil {
+		return err
+	}
+
+	legacyLogPath := filepath.Join(configPath, "system-bridge.log")
+	legacyInfo, err := os.Stat(legacyLogPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if legacyInfo.IsDir() {
+		return fmt.Errorf("legacy log path is a directory: %s", legacyLogPath)
+	}
+
+	targetLogPath, err := utils.GetLogFilePath(legacyInfo.ModTime())
+	if err != nil {
+		return err
+	}
+	if filepath.Clean(legacyLogPath) == filepath.Clean(targetLogPath) {
+		return nil
+	}
+
+	return appendFileAndRemoveSource(legacyLogPath, targetLogPath)
+}
+
+func appendFileAndRemoveSource(sourcePath, targetPath string) (err error) {
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := sourceFile.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
+
+	targetFile, err := os.OpenFile(targetPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, logFilePermissions)
+	if err != nil {
+		return err
+	}
+	if chmodErr := targetFile.Chmod(logFilePermissions); chmodErr != nil {
+		closeErr := targetFile.Close()
+		if closeErr != nil {
+			return errors.Join(chmodErr, closeErr)
+		}
+		return chmodErr
+	}
+	defer func() {
+		if closeErr := targetFile.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
+
+	if _, err := io.Copy(targetFile, sourceFile); err != nil {
+		return err
+	}
+
+	if err := os.Remove(sourcePath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func cleanupOldLogFiles(logDir string, now time.Time, retention time.Duration) error {
+	entries, err := os.ReadDir(logDir)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !isManagedLogFile(entry.Name()) {
+			continue
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		if now.Sub(info.ModTime()) <= retention {
+			continue
+		}
+
+		if err := os.Remove(filepath.Join(logDir, entry.Name())); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func isManagedLogFile(name string) bool {
+	const managedLogNameLength = len(dailyLogFileLayout) + len(".log")
+
+	if len(name) != managedLogNameLength || filepath.Ext(name) != ".log" {
+		return false
+	}
+
+	datePart := name[:len(dailyLogFileLayout)]
+	parsed, err := time.Parse(dailyLogFileLayout, datePart)
+	if err != nil {
+		return false
+	}
+
+	return parsed.Format(dailyLogFileLayout) == datePart
 }
 
 // shouldLogToStdout returns true when the application should emit logs to stdout.

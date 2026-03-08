@@ -61,9 +61,9 @@ If authentication fails:
 
 ```bash
 # Check token location (varies by OS)
-# Linux: ~/.config/system-bridge/token
-# Windows: %APPDATA%\system-bridge\token
-# macOS: ~/Library/Application Support/system-bridge/token
+# Linux: ~/.local/share/system-bridge/v5/token
+# Windows: %LOCALAPPDATA%\system-bridge\v5\token
+# macOS: ~/Library/Application Support/system-bridge/v5/token
 
 # Generate new token with the CLI
 system-bridge client token
@@ -152,16 +152,22 @@ netstat -ano | findstr :9170  # Check port usage (Windows)
 ## File Locations Reference
 
 ```
-Configuration & Data:
-  Linux:   ~/.config/system-bridge/
-  Windows: %APPDATA%\system-bridge\
-  macOS:   ~/Library/Application Support/system-bridge/
+Settings, Token, and App Data:
+  Linux:   ~/.local/share/system-bridge/v5/
+  Windows: %LOCALAPPDATA%\system-bridge\v5\
+  macOS:   ~/Library/Application Support/system-bridge/v5/
 
 Token:
-  Linux:   ~/.config/system-bridge/token
-  Windows: %APPDATA%\system-bridge\token
-  macOS:   ~/Library/Application Support/system-bridge/token
+  Linux:   ~/.local/share/system-bridge/v5/token
+  Windows: %LOCALAPPDATA%\system-bridge\v5\token
+  macOS:   ~/Library/Application Support/system-bridge/v5/token
 
 Logs:
-  Controlled by logging configuration in settings
+  Linux:   ~/.local/state/system-bridge/YYYY-MM-DD.log
+  Windows: %LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log
+  macOS:   ~/Library/Logs/system-bridge/YYYY-MM-DD.log
+
+Legacy Logs:
+  Old system-bridge.log files in the v5 app data directory are migrated on next startup.
+  Daily log files older than 7 days are removed on startup.
 ```

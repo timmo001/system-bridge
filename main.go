@@ -445,14 +445,13 @@ func openWebClient(token string) {
 }
 
 func openLogsDirectory() {
-	configDir, err := utils.GetConfigPath()
+	logsDir, err := utils.GetLogsPath()
 	if err != nil {
-		slog.Error("error getting config path", "err", err)
+		slog.Error("error getting logs path", "err", err)
 		return
 	}
 
-	// Open the log file in the default editor
-	if err := filesystem.OpenFile(configDir); err != nil {
+	if err := filesystem.OpenFile(logsDir); err != nil {
 		slog.Error("Failed to open logs directory", "err", err)
 		if err := notification.Send(notification.NotificationData{
 			Title:   "Failed to open logs directory",
