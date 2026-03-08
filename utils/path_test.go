@@ -340,8 +340,8 @@ func TestGetLogsPath(t *testing.T) {
 	})
 
 	t.Run("Get state path with XDG_STATE_HOME", func(t *testing.T) {
-		if runtime.GOOS == "windows" {
-			t.Skip("XDG_STATE_HOME is not used on Windows; skipping test.")
+		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+			t.Skip("XDG_STATE_HOME is not used on Windows or macOS; skipping test.")
 		}
 
 		tempXDG, err := os.MkdirTemp("", "xdg-state-*")
