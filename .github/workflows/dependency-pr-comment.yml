@@ -1,0 +1,88 @@
+---
+name: Comment on dependency PRs
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: Pull request number to inspect
+        required: true
+        type: number
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pull_request_number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comment:
+    name: Comment on dependency-only PRs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Resolve pull request
+        id: pull-request
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pullRequest = context.payload.pull_request ?? (
+              await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: Number("${{ inputs.pull_request_number || 0 }}"),
+              })
+            ).data;
+
+            core.setOutput("number", String(pullRequest.number));
+            core.setOutput("base_sha", pullRequest.base.sha);
+            core.setOutput("head_sha", pullRequest.head.sha);
+            core.setOutput("head_repo_owner", pullRequest.head.repo.owner.login);
+            core.setOutput("head_repo_name", pullRequest.head.repo.name);
+
+      - name: Check out workflow source
+        uses: actions/checkout@v6
+
+      - name: Check out pull request base
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pull-request.outputs.base_sha }}
+          path: .dependency-pr-comment-base
+
+      - name: Create or update dependency comment
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { pathToFileURL } = await import("node:url");
+            const moduleUrl = pathToFileURL(`${process.cwd()}/.github/scripts/dependency-pr-comment.js`).href;
+            const { default: commentOnDependencyPr } = await import(moduleUrl);
+            await commentOnDependencyPr({
+              github,
+              context,
+              core,
+              repositoryRoot: `${process.cwd()}/.dependency-pr-comment-base`,
+              pullRequest: {
+                number: Number("${{ steps.pull-request.outputs.number }}"),
+                base: {
+                  sha: "${{ steps.pull-request.outputs.base_sha }}",
+                },
+                head: {
+                  sha: "${{ steps.pull-request.outputs.head_sha }}",
+                  repo: {
+                    owner: {
+                      login: "${{ steps.pull-request.outputs.head_repo_owner }}",
+                    },
+                    name: "${{ steps.pull-request.outputs.head_repo_name }}",
+                  },
+                },
+              },
+            });
