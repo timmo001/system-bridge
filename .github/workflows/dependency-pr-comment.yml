@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Resolve pull request
         id: pull-request
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const pullRequest = context.payload.pull_request ?? (
@@ -59,7 +59,7 @@ jobs:
           path: .dependency-pr-comment-base
 
       - name: Create or update dependency comment
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { pathToFileURL } = await import("node:url");
