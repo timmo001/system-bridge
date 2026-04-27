@@ -37,7 +37,7 @@
     "eslint-plugin-unused-imports": "4.4.1",
     "eslint-plugin-wc": "3.1.0",
     "globals": "^17.5.0",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.12",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.4",
     "typescript": "~5.9.3",
