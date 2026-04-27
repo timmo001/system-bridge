@@ -4,7 +4,7 @@ import { customElement, state } from "lit/decorators.js";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
-import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/code-block";
 import "../components/ui/connection-indicator";

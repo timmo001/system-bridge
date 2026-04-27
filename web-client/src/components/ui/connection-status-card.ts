@@ -7,7 +7,7 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { UIElement } from "~/mixins";
+import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-status-card")
 export class ConnectionStatusCard extends UIElement {

@@ -9,7 +9,7 @@ import {
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
@@ -116,7 +116,7 @@ export class PageSettingsMedia extends PageElement {
               typeof data === "object" &&
               data !== null &&
               "valid" in data &&
-              typeof (data as { valid: unknown }).valid === "boolean"
+              typeof data.valid === "boolean"
             ) {
               return data as { valid: boolean };
             }

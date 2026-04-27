@@ -9,7 +9,7 @@ import {
   saveConnectionSettings,
 } from "~/contexts/connection";
 import { CONNECTION_TIMEOUT } from "~/contexts/websocket";
-import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins/page-element";
 
 import "../components/ui/button";
 import "../components/ui/icon";

@@ -2,7 +2,7 @@ import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import { cn } from "~/lib/utils";
-import { UIElement } from "~/mixins";
+import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-input")
 export class Input extends UIElement {

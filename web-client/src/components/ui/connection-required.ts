@@ -3,7 +3,7 @@ import { html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { UIElement } from "~/mixins";
+import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-required")
 export class ConnectionRequired extends UIElement {

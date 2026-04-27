@@ -8,7 +8,7 @@ import {
   loadConnectionSettings,
   saveConnectionSettings,
 } from "~/contexts/connection";
-import { ProviderElement } from "~/mixins";
+import { ProviderElement } from "~/mixins/provider-element";
 
 @customElement("connection-provider")
 export class ConnectionProvider extends ProviderElement {

@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 
-import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-status-card";
 

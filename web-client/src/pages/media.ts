@@ -9,7 +9,7 @@ import {
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import type { MediaData } from "~/lib/system-bridge/types-modules-schemas";
 import { formatDuration, generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";

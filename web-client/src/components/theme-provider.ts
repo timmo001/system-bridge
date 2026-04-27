@@ -11,7 +11,7 @@ import {
   getEffectiveTheme,
   applyTheme,
 } from "~/contexts/theme";
-import { ProviderElement } from "~/mixins";
+import { ProviderElement } from "~/mixins/provider-element";
 
 @customElement("theme-provider")
 export class ThemeProvider extends ProviderElement {

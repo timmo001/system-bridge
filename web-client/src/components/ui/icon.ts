@@ -2,7 +2,7 @@ import { html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-import { UIElement } from "~/mixins";
+import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-icon")
 export class Icon extends UIElement {

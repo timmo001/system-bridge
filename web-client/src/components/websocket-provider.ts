@@ -28,7 +28,7 @@ import {
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
 import { generateUUID } from "~/lib/utils";
-import { ProviderElement } from "~/mixins";
+import { ProviderElement } from "~/mixins/provider-element";
 
 interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
