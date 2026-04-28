@@ -29,8 +29,6 @@ const EventTypeSchema = z.enum([
   "VALIDATE_DIRECTORY",
 ]);
 
-export type EventType = z.infer<typeof EventTypeSchema>;
-
 const ResponseTypeSchema = z.enum([
   "ERROR",
   "APPLICATION_EXITING",
@@ -60,8 +58,6 @@ const ResponseTypeSchema = z.enum([
   "DIRECTORY_VALIDATED",
 ]);
 
-export type ResponseType = z.infer<typeof ResponseTypeSchema>;
-
 const ResponseSubtypeSchema = z.enum([
   "NONE",
   "BAD_REQUEST",
@@ -88,8 +84,6 @@ const ResponseSubtypeSchema = z.enum([
   "UNKNOWN_EVENT",
 ]);
 
-export type ResponseSubtype = z.infer<typeof ResponseSubtypeSchema>;
-
 const WebSocketRequestSchema = z.object({
   id: z.string(),
   event: EventTypeSchema,
@@ -110,13 +104,3 @@ export const WebSocketResponseSchema = z.object({
   message: z.string().optional(),
   module: ModuleNameSchema.optional(),
 });
-
-export type WebsocketResponse = z.infer<typeof WebSocketResponseSchema>;
-
-const ValidateDirectoryResponseSchema = z.object({
-  valid: z.boolean(),
-});
-
-export type ValidateDirectoryResponse = z.infer<
-  typeof ValidateDirectoryResponseSchema
->;

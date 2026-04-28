@@ -210,41 +210,7 @@ class PageNotifications extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
-          ${this.lastResult
-            ? html`
-                <div
-                  class="rounded-lg border p-4 flex items-start gap-3 ${this
-                    .lastResult.success
-                    ? "border-green-800 bg-green-950/30"
-                    : "border-red-800 bg-red-950/30"}"
-                >
-                  <ui-icon
-                    name=${this.lastResult.success
-                      ? "CheckCircle2"
-                      : "AlertCircle"}
-                    class="${this.lastResult.success
-                      ? "text-green-400"
-                      : "text-red-400"}"
-                  ></ui-icon>
-                  <div class="flex-1">
-                    <div
-                      class="font-medium ${this.lastResult.success
-                        ? "text-green-200"
-                        : "text-red-200"}"
-                    >
-                      ${this.lastResult.success ? "Success" : "Error"}
-                    </div>
-                    <div
-                      class="text-sm mt-1 ${this.lastResult.success
-                        ? "text-green-300"
-                        : "text-red-300"}"
-                    >
-                      ${this.lastResult.message}
-                    </div>
-                  </div>
-                </div>
-              `
-            : ""}
+          ${this.renderPageResult(this.lastResult)}
           ${!isConnected
             ? html`
                 <ui-connection-required

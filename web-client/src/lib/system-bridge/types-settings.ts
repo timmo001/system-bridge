@@ -5,22 +5,14 @@ const SettingsHotkeySchema = z.object({
   key: z.string(),
 });
 
-export type SettingsHotkey = z.infer<typeof SettingsHotkeySchema>;
-
 const SettingsMediaDirectorySchema = z.object({
   name: z.string().min(1),
   path: z.string().min(1),
 });
 
-export type SettingsMediaDirectory = z.infer<
-  typeof SettingsMediaDirectorySchema
->;
-
 const SettingsMediaSchema = z.object({
   directories: z.array(SettingsMediaDirectorySchema),
 });
-
-export type SettingsMedia = z.infer<typeof SettingsMediaSchema>;
 
 const SettingsCommandDefinitionSchema = z.object({
   id: z.string(),
@@ -37,8 +29,6 @@ export type SettingsCommandDefinition = z.infer<
 const SettingsCommandsSchema = z.object({
   allowlist: z.array(SettingsCommandDefinitionSchema),
 });
-
-export type SettingsCommands = z.infer<typeof SettingsCommandsSchema>;
 
 const SettingsSchema = z.object({
   autostart: z.boolean(),

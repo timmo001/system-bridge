@@ -5,7 +5,7 @@ import type { ModuleData } from "~/lib/system-bridge/types-modules";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import type { WebSocketRequest } from "~/lib/system-bridge/types-websocket";
 
-export interface CommandExecutionResult {
+interface CommandExecutionResult {
   commandID: string;
   exitCode: number;
   stdout: string;
@@ -13,12 +13,12 @@ export interface CommandExecutionResult {
   error?: string;
 }
 
-export interface CommandExecutionState {
+interface CommandExecutionState {
   isExecuting: boolean;
   result: CommandExecutionResult | null;
 }
 
-export interface SettingsUpdateError {
+interface SettingsUpdateError {
   requestId: string;
   message: string;
   timestamp: number;

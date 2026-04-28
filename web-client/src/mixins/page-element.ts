@@ -6,6 +6,11 @@ import "../components/ui/button";
 import "../components/ui/connection-indicator";
 import "../components/ui/icon";
 
+interface PageResult {
+  success: boolean;
+  message: string;
+}
+
 /**
  * Base class for page components.
  * Extends UIElement with page-specific functionality like navigation.
@@ -119,6 +124,41 @@ export class PageElement extends UIElement {
         ${showConnectionIndicator
           ? html`<ui-connection-indicator></ui-connection-indicator>`
           : ""}
+      </div>
+    `;
+  }
+
+  protected renderPageResult(result: PageResult | null): TemplateResult {
+    if (!result) {
+      return html``;
+    }
+
+    return html`
+      <div
+        class="rounded-lg border p-4 flex items-start gap-3 ${result.success
+          ? "border-green-800 bg-green-950/30"
+          : "border-red-800 bg-red-950/30"}"
+      >
+        <ui-icon
+          name=${result.success ? "CheckCircle2" : "AlertCircle"}
+          class="${result.success ? "text-green-400" : "text-red-400"}"
+        ></ui-icon>
+        <div class="flex-1">
+          <div
+            class="font-medium ${result.success
+              ? "text-green-200"
+              : "text-red-200"}"
+          >
+            ${result.success ? "Success" : "Error"}
+          </div>
+          <div
+            class="text-sm mt-1 ${result.success
+              ? "text-green-300"
+              : "text-red-300"}"
+          >
+            ${result.message}
+          </div>
+        </div>
       </div>
     `;
   }
