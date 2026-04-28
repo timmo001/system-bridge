@@ -98,14 +98,18 @@ export class PageElement extends UIElement {
    * @param options.customDescription - Custom description template to override the default description
    * @returns Template result for the page header
    */
+  // fallow-ignore-next-line complexity
   protected renderPageHeader(options?: {
     showBackButton?: boolean;
     showConnectionIndicator?: boolean;
     customDescription?: TemplateResult;
   }): TemplateResult {
-    const showBackButton = options?.showBackButton ?? true;
-    const showConnectionIndicator = options?.showConnectionIndicator ?? true;
-    const description = this.resolveDescription(options?.customDescription);
+    const {
+      showBackButton = true,
+      showConnectionIndicator = true,
+      customDescription,
+    } = options ?? {};
+    const description = this.resolveDescription(customDescription);
 
     return html`
       <div

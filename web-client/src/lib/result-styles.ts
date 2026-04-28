@@ -3,7 +3,7 @@
  * Eliminates repeated ternaries on a `success` boolean across render functions.
  */
 
-export interface ResultStyle {
+interface ResultStyle {
   borderClass: string;
   bgClass: string;
   iconName: string;

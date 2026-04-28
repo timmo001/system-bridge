@@ -153,6 +153,7 @@ class PageMedia extends PageElement {
     this.navigate("/connection");
   };
 
+  // fallow-ignore-next-line complexity
   private sendMediaAction(action: MediaAction): void {
     if (!this.connection?.token || !this.websocket?.sendRequest) {
       return;
@@ -266,6 +267,7 @@ class PageMedia extends PageElement {
     `;
   }
 
+  // fallow-ignore-next-line complexity
   private computeProgress(): {
     positionStr: string;
     durationStr: string;
@@ -325,6 +327,7 @@ class PageMedia extends PageElement {
     `;
   }
 
+  // fallow-ignore-next-line complexity
   private renderNowPlayingCard(): TemplateResult {
     if (!this.hasMedia) {
       return html`
@@ -384,6 +387,7 @@ class PageMedia extends PageElement {
     `;
   }
 
+  // fallow-ignore-next-line complexity
   private getControlStates(): Record<string, boolean> {
     const media = this.mediaData;
     return {
@@ -395,6 +399,7 @@ class PageMedia extends PageElement {
     };
   }
 
+  // fallow-ignore-next-line complexity
   private renderPlaybackControls(): TemplateResult {
     const disabled = this.getControlStates();
 

@@ -25,3 +25,23 @@ export function getBoolParam(
 ): boolean | undefined {
   return params.has(key) ? params.get(key) === "true" : undefined;
 }
+
+/** Assign a value to a partial settings object only when defined. */
+export function assignIfDefined<
+  T extends Record<string, unknown>,
+  K extends keyof T,
+>(target: T, key: K, value: T[K] | undefined): void {
+  if (value !== undefined) target[key] = value;
+}
+
+/**
+ * Resolve the API token from URL params.
+ * Prefers `apiKey` over `token`; converts empty strings to null.
+ */
+export function resolveTokenParam(
+  params: URLSearchParams,
+): string | null | undefined {
+  const token = getStringParam(params, "apiKey") ?? getStringParam(params, "token");
+  if (token === undefined) return undefined;
+  return token || null;
+}

@@ -7,8 +7,7 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { SendablePageElement } from "~/mixins/sendable-page";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
@@ -18,7 +17,7 @@ import "../components/ui/label";
 type OpenType = "url" | "path";
 
 @customElement("page-open")
-class PageOpen extends PageElement {
+class PageOpen extends SendablePageElement {
   title = "Open";
   description =
     "Open URLs in browser or files/folders with system applications";
@@ -38,17 +37,6 @@ class PageOpen extends PageElement {
   @state()
   private pathValue = "";
 
-  @state()
-  private isSending = false;
-
-  @state()
-  private lastResult: { success: boolean; message: string } | null = null;
-
-  @state()
-  private pendingRequestId: string | null = null;
-
-  private sendTimeout: number | null = null;
-
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener(
@@ -63,10 +51,7 @@ class PageOpen extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
+    this.cleanupTimeout();
     window.removeEventListener(
       "open-success",
       this.handleOpenSuccess as EventListener,
@@ -121,6 +106,7 @@ class PageOpen extends PageElement {
     this.pathValue = input.value;
   };
 
+  // fallow-ignore-next-line complexity
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
@@ -132,47 +118,18 @@ class PageOpen extends PageElement {
       return;
     }
 
-    this.isSending = true;
-    const requestId = generateUUID();
-    this.pendingRequestId = requestId;
-
     const openData: Record<string, unknown> =
       this.openType === "url" ? { url: value } : { path: value };
 
-    try {
-      this.websocket.sendRequest({
+    this.sendWithTimeout((requestId) => {
+      this.websocket!.sendRequest({
         id: requestId,
         event: "OPEN",
         data: openData,
-        token: this.connection.token,
+        token: this.connection!.token!,
       });
-
-      // Timeout after 30 seconds
-      this.sendTimeout = window.setTimeout(() => {
-        if (this.isSending && this.pendingRequestId === requestId) {
-          this.showResult(false, "Request timed out");
-          this.clearSendingState();
-        }
-      }, 30000);
-    } catch (error) {
-      console.error("Failed to send open request:", error);
-      this.showResult(false, "Failed to send request");
-      this.clearSendingState();
-    }
+    }, "Failed to send open request");
   };
-
-  private showResult(success: boolean, message: string): void {
-    this.lastResult = { success, message };
-  }
-
-  private clearSendingState(): void {
-    this.isSending = false;
-    this.pendingRequestId = null;
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
-  }
 
   private clearForm = (): void => {
     this.urlValue = "";

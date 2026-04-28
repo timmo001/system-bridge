@@ -1,9 +1,11 @@
 import { createContext } from "@lit/context";
 
 import {
+  assignIfDefined,
   getBoolParam,
   getIntParam,
   getStringParam,
+  resolveTokenParam,
 } from "../lib/url-params";
 
 export interface ConnectionSettings {
@@ -35,19 +37,10 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
     const params = new URLSearchParams(window.location.search);
     const settings: Partial<ConnectionSettings> = {};
 
-    const host = getStringParam(params, "host");
-    if (host !== undefined) settings.host = host;
-
-    const port = getIntParam(params, "port");
-    if (port !== undefined) settings.port = port;
-
-    const ssl = getBoolParam(params, "ssl");
-    if (ssl !== undefined) settings.ssl = ssl;
-
-    // Support both 'apiKey' (used by backend) and 'token' (for compatibility)
-    const token =
-      getStringParam(params, "apiKey") ?? getStringParam(params, "token");
-    if (token !== undefined) settings.token = token || null;
+    assignIfDefined(settings, "host", getStringParam(params, "host"));
+    assignIfDefined(settings, "port", getIntParam(params, "port"));
+    assignIfDefined(settings, "ssl", getBoolParam(params, "ssl"));
+    assignIfDefined(settings, "token", resolveTokenParam(params));
 
     return Object.keys(settings).length > 0 ? settings : null;
   } catch (error) {

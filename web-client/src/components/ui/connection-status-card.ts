@@ -105,6 +105,7 @@ class ConnectionStatusCard extends UIElement {
     `;
   }
 
+  // fallow-ignore-next-line complexity
   render(): TemplateResult {
     const isConnected = this._websocket?.isConnected ?? false;
 

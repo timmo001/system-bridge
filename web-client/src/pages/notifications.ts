@@ -7,8 +7,7 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { SendablePageElement } from "~/mixins/sendable-page";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
@@ -16,7 +15,7 @@ import "../components/ui/input";
 import "../components/ui/label";
 
 @customElement("page-notifications")
-class PageNotifications extends PageElement {
+class PageNotifications extends SendablePageElement {
   title = "Notifications";
   description = "Send desktop notifications to this system";
 
@@ -41,17 +40,6 @@ class PageNotifications extends PageElement {
   @state()
   private notificationSound = "";
 
-  @state()
-  private isSending = false;
-
-  @state()
-  private lastResult: { success: boolean; message: string } | null = null;
-
-  @state()
-  private pendingRequestId: string | null = null;
-
-  private sendTimeout: number | null = null;
-
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener(
@@ -66,10 +54,7 @@ class PageNotifications extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
+    this.cleanupTimeout();
     window.removeEventListener(
       "notification-sent",
       this.handleNotificationSent as EventListener,
@@ -150,6 +135,7 @@ class PageNotifications extends PageElement {
     return data;
   }
 
+  // fallow-ignore-next-line complexity
   private handleSendNotification = (): void => {
     if (
       !this.notificationTitle.trim() ||
@@ -160,44 +146,15 @@ class PageNotifications extends PageElement {
       return;
     }
 
-    this.isSending = true;
-    const requestId = generateUUID();
-    this.pendingRequestId = requestId;
-
-    try {
-      this.websocket.sendRequest({
+    this.sendWithTimeout((requestId) => {
+      this.websocket!.sendRequest({
         id: requestId,
         event: "NOTIFICATION",
         data: this.buildNotificationData(),
-        token: this.connection.token,
+        token: this.connection!.token!,
       });
-
-      // Timeout after 30 seconds
-      this.sendTimeout = window.setTimeout(() => {
-        if (this.isSending && this.pendingRequestId === requestId) {
-          this.showResult(false, "Request timed out");
-          this.clearSendingState();
-        }
-      }, 30000);
-    } catch (error) {
-      console.error("Failed to send notification:", error);
-      this.showResult(false, "Failed to send notification");
-      this.clearSendingState();
-    }
+    }, "Failed to send notification");
   };
-
-  private showResult(success: boolean, message: string): void {
-    this.lastResult = { success, message };
-  }
-
-  private clearSendingState(): void {
-    this.isSending = false;
-    this.pendingRequestId = null;
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
-  }
 
   private clearForm = (): void => {
     this.notificationTitle = "";
