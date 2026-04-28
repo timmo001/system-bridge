@@ -109,7 +109,7 @@ class PageSettingsMedia extends PageElement {
           data: { path: this.newDirectoryPath },
           token: this.connection.token,
         },
-        DirectoryValidationSchema as never,
+        DirectoryValidationSchema,
       );
 
       if (response.valid) {

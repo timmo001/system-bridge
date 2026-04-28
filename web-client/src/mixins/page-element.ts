@@ -2,6 +2,7 @@ import { html, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
 import { getResultStyle } from "../lib/result-styles";
+
 import { UIElement } from "./light-dom";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
