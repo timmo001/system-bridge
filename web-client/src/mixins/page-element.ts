@@ -1,6 +1,7 @@
 import { html, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
+import { getResultStyle } from "../lib/result-styles";
 import { UIElement } from "./light-dom";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
@@ -75,6 +76,18 @@ export class PageElement extends UIElement {
   }
 
   /**
+   * Resolves the description template from options or the component's description property.
+   */
+  private resolveDescription(
+    customDescription?: TemplateResult,
+  ): TemplateResult {
+    if (customDescription) return customDescription;
+    if (this.description)
+      return html`<p class="text-muted-foreground">${this.description}</p>`;
+    return html``;
+  }
+
+  /**
    * Renders the page header with title, description, back button, and connection indicator.
    * Pages can override this method or customize it by overriding the description property.
    *
@@ -91,11 +104,7 @@ export class PageElement extends UIElement {
   }): TemplateResult {
     const showBackButton = options?.showBackButton ?? true;
     const showConnectionIndicator = options?.showConnectionIndicator ?? true;
-    const description =
-      options?.customDescription ??
-      (this.description
-        ? html`<p class="text-muted-foreground">${this.description}</p>`
-        : html``);
+    const description = this.resolveDescription(options?.customDescription);
 
     return html`
       <div
@@ -129,38 +138,53 @@ export class PageElement extends UIElement {
   }
 
   protected renderPageResult(result: PageResult | null): TemplateResult {
-    if (!result) {
-      return html``;
-    }
+    if (!result) return html``;
 
+    const style = getResultStyle(result.success);
     return html`
       <div
-        class="rounded-lg border p-4 flex items-start gap-3 ${result.success
-          ? "border-green-800 bg-green-950/30"
-          : "border-red-800 bg-red-950/30"}"
+        class="rounded-lg border p-4 flex items-start gap-3 ${style.borderClass} ${style.bgClass}"
       >
         <ui-icon
-          name=${result.success ? "CheckCircle2" : "AlertCircle"}
-          class="${result.success ? "text-green-400" : "text-red-400"}"
+          name=${style.iconName}
+          class="${style.iconClass}"
         ></ui-icon>
         <div class="flex-1">
-          <div
-            class="font-medium ${result.success
-              ? "text-green-200"
-              : "text-red-200"}"
-          >
-            ${result.success ? "Success" : "Error"}
+          <div class="font-medium ${style.headingClass}">
+            ${style.heading}
           </div>
-          <div
-            class="text-sm mt-1 ${result.success
-              ? "text-green-300"
-              : "text-red-300"}"
-          >
+          <div class="text-sm mt-1 ${style.bodyClass}">
             ${result.message}
           </div>
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Renders content gated behind a connection check.
+   * Shows a connection-required prompt when disconnected, or the provided content when connected.
+   *
+   * @param isConnected - Whether the WebSocket is connected
+   * @param connectionMessage - Message to show in the connection-required prompt
+   * @param onConfigureConnection - Handler for the configure connection button
+   * @param content - Content to render when connected
+   */
+  protected renderWithConnection(
+    isConnected: boolean,
+    connectionMessage: string,
+    onConfigureConnection: () => void,
+    content: TemplateResult,
+  ): TemplateResult {
+    if (!isConnected) {
+      return html`
+        <ui-connection-required
+          message=${connectionMessage}
+          @configure-connection=${onConfigureConnection}
+        ></ui-connection-required>
+      `;
+    }
+    return content;
   }
 
   /**
