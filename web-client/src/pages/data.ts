@@ -61,29 +61,20 @@ class PageData extends PageElement {
           ?hidden=${this.selectedTab !== module}
           class="flex flex-col flex-1 min-h-0 mt-2"
         >
-          <div class="flex flex-col flex-1 min-h-0 mt-4">
-            <div
-              class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
-            >
-              <h2 class="text-xl font-semibold mb-4">
-                ${ModuleLabels[module]} Data
-              </h2>
-              ${this.websocket?.data?.[module]
-                ? html`
-                    <ui-code-block
-                      class="flex-1 min-h-0"
-                      .data=${this.websocket.data[module]}
-                    ></ui-code-block>
-                  `
-                : html`
-                    <div
-                      class="text-sm text-muted-foreground italic p-4 text-center"
-                    >
-                      No data available for ${module}
-                    </div>
-                  `}
-            </div>
-          </div>
+          ${this.websocket?.data?.[module]
+            ? html`
+                <ui-code-block
+                  class="flex-1 min-h-0"
+                  .data=${this.websocket.data[module]}
+                ></ui-code-block>
+              `
+            : html`
+                <div
+                  class="text-sm text-muted-foreground italic p-4 text-center"
+                >
+                  No data available for ${module}
+                </div>
+              `}
         </ui-tabs-content>
       `,
     );
@@ -108,15 +99,19 @@ class PageData extends PageElement {
                 ></ui-connection-required>
               `
             : html`
-                <ui-tabs
-                  class="flex flex-col flex-1 min-h-0"
-                  .value=${this.selectedTab}
-                  @tab-change=${this.handleTabChange}
+                <div
+                  class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
                 >
-                  <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
+                  <ui-tabs
+                    class="flex flex-col flex-1 min-h-0"
+                    .value=${this.selectedTab}
+                    @tab-change=${this.handleTabChange}
+                  >
+                    <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
 
-                  ${this.renderTabContents()}
-                </ui-tabs>
+                    ${this.renderTabContents()}
+                  </ui-tabs>
+                </div>
               `}
         </div>
       </div>

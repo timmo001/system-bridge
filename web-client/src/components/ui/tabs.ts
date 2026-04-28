@@ -37,7 +37,8 @@ class TabsList extends UIElement {
   connectedCallback() {
     super.connectedCallback();
     const classes = cn(
-      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
+      "flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
+      "overflow-x-auto overflow-y-hidden scrollbar-thin",
     );
     // eslint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
