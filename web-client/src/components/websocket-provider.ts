@@ -38,6 +38,15 @@ interface PendingResolver<T = unknown> {
 }
 
 type AnyPendingResolver = PendingResolver;
+type WebSocketResponse = z.infer<typeof WebSocketResponseSchema>;
+type ResponseSubtype = WebSocketResponse["subtype"];
+type CommandResult = {
+  commandID: string;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  error?: string;
+};
 
 @customElement("websocket-provider")
 class WebSocketProvider extends ProviderElement {
@@ -105,6 +114,50 @@ class WebSocketProvider extends ProviderElement {
   // @ts-expect-error - TS6133: Field is used via subscription callback
   private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
   private _websocketProvider!: ContextProvider<typeof websocketContext>;
+
+  private readonly responseHandlers: Partial<
+    Record<WebSocketResponse["type"], (message: WebSocketResponse) => void>
+  > = {
+    DATA_UPDATE: (message) => this.handleDataUpdate(message),
+    SETTINGS_RESULT: (message) => this.handleSettingsResult(message),
+    SETTINGS_UPDATED: (message) => this.handleSettingsUpdated(message),
+    NOTIFICATION_SENT: (message) =>
+      this.dispatchComponentEvent("notification-sent", message.id),
+    OPENED: (message) =>
+      this.dispatchComponentEvent("open-success", message.id),
+    MEDIA_CONTROLLED: (message) => this.handleMediaControlled(message),
+    COMMAND_EXECUTING: (message) => this.handleCommandExecuting(message),
+    COMMAND_COMPLETED: (message) => this.handleCommandCompleted(message),
+    ERROR: (message) => this.handleError(message),
+  };
+
+  private readonly componentRequestErrors: Partial<
+    Record<ResponseSubtype, { eventName: string; fallbackMessage: string }>
+  > = {
+    MISSING_TITLE: {
+      eventName: "notification-error",
+      fallbackMessage: "Failed to send notification",
+    },
+    BAD_REQUEST: {
+      eventName: "notification-error",
+      fallbackMessage: "Failed to send notification",
+    },
+    BAD_PATH: {
+      eventName: "open-error",
+      fallbackMessage: "Failed to open",
+    },
+    MISSING_PATH_URL: {
+      eventName: "open-error",
+      fallbackMessage: "Failed to open",
+    },
+  };
+
+  private readonly commandErrorSubtypes = new Set<ResponseSubtype>([
+    "COMMAND_NOT_FOUND",
+    "BAD_PATH",
+    "BAD_DIRECTORY",
+    "BAD_REQUEST",
+  ]);
 
   constructor() {
     super();
@@ -175,19 +228,46 @@ class WebSocketProvider extends ProviderElement {
     this._pendingResolvers.clear();
   }
 
+  private cancelCommandCleanupTimeout(commandID: string) {
+    const existingTimeout =
+      this._commandExecutionCleanupTimeouts.get(commandID);
+    if (existingTimeout !== undefined) {
+      clearTimeout(existingTimeout);
+      this._commandExecutionCleanupTimeouts.delete(commandID);
+    }
+  }
+
+  private scheduleCommandCleanup(commandID: string) {
+    const cleanupTimeout = window.setTimeout(
+      () => {
+        this._commandExecutions.delete(commandID);
+        this._commandExecutionCleanupTimeouts.delete(commandID);
+        this.requestUpdate();
+      },
+      5 * 60 * 1000,
+    );
+
+    this._commandExecutionCleanupTimeouts.set(commandID, cleanupTimeout);
+  }
+
+  private setCommandResult(result: CommandResult) {
+    this.cancelCommandCleanupTimeout(result.commandID);
+    this.enforceCommandExecutionsLimit();
+    this._commandExecutions.set(result.commandID, {
+      isExecuting: false,
+      result,
+    });
+    this.requestUpdate();
+    this.scheduleCommandCleanup(result.commandID);
+  }
+
   private enforceCommandExecutionsLimit() {
     // Remove oldest completed entries if we exceed the limit
     if (this._commandExecutions.size >= this.MAX_COMMAND_EXECUTIONS) {
       // Find oldest completed entry to remove
       for (const [commandID, execution] of this._commandExecutions) {
         if (!execution.isExecuting) {
-          // Cancel any cleanup timeout for this command
-          const existingTimeout =
-            this._commandExecutionCleanupTimeouts.get(commandID);
-          if (existingTimeout !== undefined) {
-            clearTimeout(existingTimeout);
-            this._commandExecutionCleanupTimeouts.delete(commandID);
-          }
+          this.cancelCommandCleanupTimeout(commandID);
           this._commandExecutions.delete(commandID);
           break; // Only remove one entry at a time
         }
@@ -199,37 +279,13 @@ class WebSocketProvider extends ProviderElement {
     // Mark all currently executing commands as failed due to connection loss
     this._commandExecutions.forEach((execution, commandID) => {
       if (execution.isExecuting) {
-        // Cancel any existing cleanup timeout for this command
-        const existingTimeout =
-          this._commandExecutionCleanupTimeouts.get(commandID);
-        if (existingTimeout !== undefined) {
-          clearTimeout(existingTimeout);
-          this._commandExecutionCleanupTimeouts.delete(commandID);
-        }
-
-        // Set error result for the command
-        this._commandExecutions.set(commandID, {
-          isExecuting: false,
-          result: {
-            commandID,
-            exitCode: 1,
-            stdout: "",
-            stderr: "",
-            error: "Command execution interrupted due to connection loss",
-          },
+        this.setCommandResult({
+          commandID,
+          exitCode: 1,
+          stdout: "",
+          stderr: "",
+          error: "Command execution interrupted due to connection loss",
         });
-
-        // Schedule cleanup after 5 minutes to allow users to see the error
-        const cleanupTimeout = window.setTimeout(
-          () => {
-            this._commandExecutions.delete(commandID);
-            this._commandExecutionCleanupTimeouts.delete(commandID);
-            this.requestUpdate();
-          },
-          5 * 60 * 1000,
-        ); // 5 minutes
-
-        this._commandExecutionCleanupTimeouts.set(commandID, cleanupTimeout);
       }
     });
 
@@ -237,7 +293,7 @@ class WebSocketProvider extends ProviderElement {
     this._pendingCommandRequests.clear();
   }
 
-  private handleMessage(event: MessageEvent<string>) {
+  private parseWebSocketMessage(event: MessageEvent<string>) {
     let parsedMessage;
     try {
       parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
@@ -249,7 +305,7 @@ class WebSocketProvider extends ProviderElement {
         event.data,
       );
       this._error = "Received invalid message from server";
-      return;
+      return null;
     }
 
     if (!parsedMessage.success) {
@@ -260,432 +316,309 @@ class WebSocketProvider extends ProviderElement {
         event.data,
       );
       this._error = "Received invalid message format from server";
+      return null;
+    }
+
+    return parsedMessage.data;
+  }
+
+  private handleMessage(event: MessageEvent<string>) {
+    const message = this.parseWebSocketMessage(event);
+    if (!message || this.resolvePendingResponse(message)) {
       return;
     }
 
-    const message = parsedMessage.data;
+    this.responseHandlers[message.type]?.(message);
+    this.requestUpdate();
+  }
 
-    if (message.id && this._pendingResolvers.has(message.id)) {
-      const resolver = this._pendingResolvers.get(message.id);
-      if (!resolver) return;
+  private resolvePendingResponse(message: WebSocketResponse) {
+    if (!this._pendingResolvers.has(message.id)) {
+      return false;
+    }
 
-      // Clear the timeout since we received a response
-      clearTimeout(resolver.timeoutId);
+    const resolver = this._pendingResolvers.get(message.id);
+    if (!resolver) {
+      return true;
+    }
 
-      const parsedData = resolver.schema.safeParse(message.data);
-      if (parsedData?.success) {
-        resolver.resolve(parsedData.data);
-      } else {
-        this._error = "Received invalid message data from server";
-        resolver.reject(parsedData?.error);
-      }
-      this._pendingResolvers.delete(message.id);
+    clearTimeout(resolver.timeoutId);
+
+    const parsedData = resolver.schema.safeParse(message.data);
+    if (parsedData?.success) {
+      resolver.resolve(parsedData.data);
+    } else {
+      this._error = "Received invalid message data from server";
+      resolver.reject(parsedData?.error);
+    }
+    this._pendingResolvers.delete(message.id);
+    return true;
+  }
+
+  private handleDataUpdate(message: WebSocketResponse) {
+    if (!message.module || !message.data) {
       return;
     }
 
-    switch (message.type) {
-      case "DATA_UPDATE": {
-        if (!message.module || !message.data) {
-          return;
-        }
-        const moduleValidation = ModuleNameSchema.safeParse(message.module);
-        if (!moduleValidation.success) {
-          this._error = `Received invalid module name: ${message.module}`;
-          return;
-        }
-        const moduleName = moduleValidation.data;
-        const moduleSchema = ModuleDataSchemas[moduleName];
-        const dataValidation = moduleSchema.safeParse(message.data);
-        if (!dataValidation.success) {
-          this._error = `Received invalid data for module ${moduleName}`;
-          console.error(
-            `Module ${moduleName} validation error:`,
-            dataValidation.error,
-          );
-          return;
-        }
-        this._data = {
-          ...this._data,
-          [moduleName]: dataValidation.data,
-        };
-        this._isRequestingData = false;
-        break;
-      }
-
-      case "SETTINGS_RESULT": {
-        if (this._isSettingsUpdatePending) {
-          break;
-        }
-        const receivedSettings = message.data as Partial<Settings>;
-        this._settings = {
-          autostart: receivedSettings.autostart ?? false,
-          hotkeys: receivedSettings.hotkeys ?? [],
-          logLevel: receivedSettings.logLevel ?? "INFO",
-          commands: {
-            allowlist: receivedSettings.commands?.allowlist ?? [],
-          },
-          media: {
-            directories: receivedSettings.media?.directories ?? [],
-          },
-        };
-        this._isRequestingData = false;
-        break;
-      }
-
-      case "DATA_LISTENER_REGISTERED":
-        break;
-
-      case "SETTINGS_UPDATED": {
-        const updatedSettings = message.data as Partial<Settings>;
-        this._settings = {
-          autostart:
-            updatedSettings.autostart ?? this._settings?.autostart ?? false,
-          hotkeys: updatedSettings.hotkeys ?? this._settings?.hotkeys ?? [],
-          logLevel:
-            updatedSettings.logLevel ?? this._settings?.logLevel ?? "INFO",
-          commands: {
-            allowlist:
-              updatedSettings.commands?.allowlist ??
-              this._settings?.commands.allowlist ??
-              [],
-          },
-          media: {
-            directories:
-              updatedSettings.media?.directories ??
-              this._settings?.media.directories ??
-              [],
-          },
-        };
-        this._isSettingsUpdatePending = false;
-        if (this._settingsUpdateTimeout) {
-          clearTimeout(this._settingsUpdateTimeout);
-          this._settingsUpdateTimeout = null;
-        }
-        // Clear pending settings request tracking
-        if (this._pendingSettingsRequests.has(message.id)) {
-          this._pendingSettingsRequests.delete(message.id);
-        }
-        // Notify consumers that settings have been updated
-        this.updateWebSocketContext();
-
-        // Also dispatch a custom event for more reliable delivery
-        this.dispatchEvent(
-          new CustomEvent("settings-updated", {
-            detail: {
-              requestId: message.id,
-              timestamp: Date.now(),
-            },
-            bubbles: true,
-            composed: true,
-          }),
-        );
-        break;
-      }
-
-      case "NOTIFICATION_SENT": {
-        // Dispatch a custom event to notify consumers that notification was sent
-        this.dispatchEvent(
-          new CustomEvent("notification-sent", {
-            detail: {
-              requestId: message.id,
-              timestamp: Date.now(),
-            },
-            bubbles: true,
-            composed: true,
-          }),
-        );
-        break;
-      }
-
-      case "OPENED": {
-        // Dispatch a custom event to notify consumers that the URL/path was opened
-        this.dispatchEvent(
-          new CustomEvent("open-success", {
-            detail: {
-              requestId: message.id,
-              timestamp: Date.now(),
-            },
-            bubbles: true,
-            composed: true,
-          }),
-        );
-        break;
-      }
-
-      case "MEDIA_CONTROLLED": {
-        // Clean up the pending request tracking
-        if (message.id) {
-          this._pendingMediaControlRequests.delete(message.id);
-        }
-        // Dispatch a custom event to notify consumers that media control succeeded
-        window.dispatchEvent(
-          new CustomEvent("media-control-success", {
-            detail: {
-              requestId: message.id,
-              timestamp: Date.now(),
-            },
-          }),
-        );
-        break;
-      }
-
-      case "COMMAND_EXECUTING": {
-        const commandData = message.data as { commandID: string };
-        if (commandData?.commandID) {
-          // Clean up the pending request tracking
-          if (message.id) {
-            this._pendingCommandRequests.delete(message.id);
-          }
-
-          // Cancel any existing cleanup timeout for this command
-          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
-            commandData.commandID,
-          );
-          if (existingTimeout !== undefined) {
-            clearTimeout(existingTimeout);
-            this._commandExecutionCleanupTimeouts.delete(commandData.commandID);
-          }
-
-          // Enforce size limit before adding new entry
-          this.enforceCommandExecutionsLimit();
-
-          // Set new execution state
-          this._commandExecutions.set(commandData.commandID, {
-            isExecuting: true,
-            result: null,
-          });
-          this.requestUpdate();
-        }
-        break;
-      }
-
-      case "COMMAND_COMPLETED": {
-        const result = message.data as {
-          commandID: string;
-          exitCode: number;
-          stdout: string;
-          stderr: string;
-          error?: string;
-        };
-        if (result?.commandID) {
-          // Clean up the pending request tracking
-          if (message.id) {
-            this._pendingCommandRequests.delete(message.id);
-          }
-
-          // Cancel any existing cleanup timeout for this command
-          const existingTimeout = this._commandExecutionCleanupTimeouts.get(
-            result.commandID,
-          );
-          if (existingTimeout !== undefined) {
-            clearTimeout(existingTimeout);
-            this._commandExecutionCleanupTimeouts.delete(result.commandID);
-          }
-
-          // Enforce size limit before adding new entry
-          this.enforceCommandExecutionsLimit();
-
-          // Set completed state
-          this._commandExecutions.set(result.commandID, {
-            isExecuting: false,
-            result,
-          });
-          this.requestUpdate();
-
-          // Schedule cleanup after 5 minutes to allow users to see results
-          const cleanupTimeout = window.setTimeout(
-            () => {
-              this._commandExecutions.delete(result.commandID);
-              this._commandExecutionCleanupTimeouts.delete(result.commandID);
-              this.requestUpdate();
-            },
-            5 * 60 * 1000,
-          ); // 5 minutes
-
-          this._commandExecutionCleanupTimeouts.set(
-            result.commandID,
-            cleanupTimeout,
-          );
-        }
-        break;
-      }
-
-      case "ERROR":
-        {
-          if (message.subtype === "BAD_TOKEN") {
-            this._error =
-              "Invalid API token. Please check your connection settings and update your token.";
-            this._isConnected = false;
-            this._retryCount = MAX_RETRIES + 1;
-            this._ws?.close();
-            return;
-          }
-
-          // Check if this error is for a notification request (MISSING_TITLE or MISSING_MESSAGE)
-          if (
-            message.subtype === "MISSING_TITLE" ||
-            message.subtype === "BAD_REQUEST"
-          ) {
-            // Dispatch notification error event
-            this.dispatchEvent(
-              new CustomEvent("notification-error", {
-                detail: {
-                  requestId: message.id,
-                  message: message.message ?? "Failed to send notification",
-                  timestamp: Date.now(),
-                },
-                bubbles: true,
-                composed: true,
-              }),
-            );
-          }
-
-          // Check if this error is for an open request (BAD_PATH or MISSING_PATH_URL)
-          if (
-            message.subtype === "BAD_PATH" ||
-            message.subtype === "MISSING_PATH_URL"
-          ) {
-            // Dispatch open error event
-            this.dispatchEvent(
-              new CustomEvent("open-error", {
-                detail: {
-                  requestId: message.id,
-                  message: message.message ?? "Failed to open",
-                  timestamp: Date.now(),
-                },
-                bubbles: true,
-                composed: true,
-              }),
-            );
-          }
-
-          // Check if this error is for a media control request
-          if (this._pendingMediaControlRequests.has(message.id)) {
-            this._pendingMediaControlRequests.delete(message.id);
-            // Dispatch media control error event
-            window.dispatchEvent(
-              new CustomEvent("media-control-error", {
-                detail: {
-                  requestId: message.id,
-                  message: message.message ?? "Failed to control media",
-                  timestamp: Date.now(),
-                },
-              }),
-            );
-          }
-
-          const errorMessage = message.message ?? "Unknown error";
-          this._error = `Server error: ${errorMessage}`;
-
-          // Check if this error is for a pending UPDATE_SETTINGS request
-          if (this._pendingSettingsRequests.has(message.id)) {
-            // Clear any existing error timeout
-            if (this._settingsErrorTimeout !== null) {
-              clearTimeout(this._settingsErrorTimeout);
-            }
-
-            // Clear the settings update timeout to prevent it from firing
-            this._isSettingsUpdatePending = false;
-            if (this._settingsUpdateTimeout) {
-              clearTimeout(this._settingsUpdateTimeout);
-              this._settingsUpdateTimeout = null;
-            }
-
-            // Set the error
-            this._settingsUpdateError = {
-              requestId: message.id,
-              message: errorMessage,
-              timestamp: Date.now(),
-            };
-
-            // Clear the pending request
-            this._pendingSettingsRequests.delete(message.id);
-
-            // Dispatch a custom event to directly notify consumers
-            // This bypasses the Lit context system for more reliable delivery
-            this.dispatchEvent(
-              new CustomEvent("settings-update-error", {
-                detail: {
-                  requestId: message.id,
-                  message: errorMessage,
-                  timestamp: Date.now(),
-                },
-                bubbles: true,
-                composed: true,
-              }),
-            );
-
-            // Clear the error after 10 seconds
-            this._settingsErrorTimeout = window.setTimeout(() => {
-              this._settingsUpdateError = null;
-              this._settingsErrorTimeout = null;
-              this.updateWebSocketContext();
-            }, 10000);
-
-            this.requestUpdate();
-          }
-
-          // Handle command execution errors
-          if (
-            message.subtype === "COMMAND_NOT_FOUND" ||
-            message.subtype === "BAD_PATH" ||
-            message.subtype === "BAD_DIRECTORY" ||
-            message.subtype === "BAD_REQUEST"
-          ) {
-            // Check if this error is for a pending command execution
-            const commandId = this._pendingCommandRequests.get(message.id);
-            if (commandId) {
-              // Cancel any existing cleanup timeout for this command
-              const existingTimeout =
-                this._commandExecutionCleanupTimeouts.get(commandId);
-              if (existingTimeout !== undefined) {
-                clearTimeout(existingTimeout);
-                this._commandExecutionCleanupTimeouts.delete(commandId);
-              }
-
-              // Enforce size limit before adding new entry
-              this.enforceCommandExecutionsLimit();
-
-              // Set error result
-              this._commandExecutions.set(commandId, {
-                isExecuting: false,
-                result: {
-                  commandID: commandId,
-                  exitCode: 1,
-                  stdout: "",
-                  stderr: "",
-                  error: errorMessage,
-                },
-              });
-              this.requestUpdate();
-
-              // Schedule cleanup after 5 minutes
-              const cleanupTimeout = window.setTimeout(
-                () => {
-                  this._commandExecutions.delete(commandId);
-                  this._commandExecutionCleanupTimeouts.delete(commandId);
-                  this.requestUpdate();
-                },
-                5 * 60 * 1000,
-              );
-
-              this._commandExecutionCleanupTimeouts.set(
-                commandId,
-                cleanupTimeout,
-              );
-
-              // Clean up the pending request tracking
-              this._pendingCommandRequests.delete(message.id);
-            }
-          }
-        }
-        break;
-
-      default:
-        break;
+    const moduleValidation = ModuleNameSchema.safeParse(message.module);
+    if (!moduleValidation.success) {
+      this._error = `Received invalid module name: ${message.module}`;
+      return;
     }
+
+    const moduleName = moduleValidation.data;
+    const dataValidation = ModuleDataSchemas[moduleName].safeParse(
+      message.data,
+    );
+    if (!dataValidation.success) {
+      this._error = `Received invalid data for module ${moduleName}`;
+      console.error(
+        `Module ${moduleName} validation error:`,
+        dataValidation.error,
+      );
+      return;
+    }
+
+    this._data = {
+      ...this._data,
+      [moduleName]: dataValidation.data,
+    };
+    this._isRequestingData = false;
+  }
+
+  private normalizeSettings(
+    settings: Partial<Settings>,
+    current?: Settings | null,
+  ): Settings {
+    const fallback =
+      current ??
+      ({
+        autostart: false,
+        hotkeys: [],
+        logLevel: "INFO",
+        commands: { allowlist: [] },
+        media: { directories: [] },
+      } satisfies Settings);
+    const {
+      autostart = fallback.autostart,
+      hotkeys = fallback.hotkeys,
+      logLevel = fallback.logLevel,
+    } = settings;
+    const { allowlist = fallback.commands.allowlist } = settings.commands ?? {};
+    const { directories = fallback.media.directories } = settings.media ?? {};
+
+    return {
+      autostart,
+      hotkeys,
+      logLevel,
+      commands: { allowlist },
+      media: { directories },
+    };
+  }
+
+  private handleSettingsResult(message: WebSocketResponse) {
+    if (this._isSettingsUpdatePending) {
+      return;
+    }
+
+    this._settings = this.normalizeSettings(message.data as Partial<Settings>);
+    this._isRequestingData = false;
+  }
+
+  private handleSettingsUpdated(message: WebSocketResponse) {
+    this._settings = this.normalizeSettings(
+      message.data as Partial<Settings>,
+      this._settings,
+    );
+    this._isSettingsUpdatePending = false;
+    if (this._settingsUpdateTimeout) {
+      clearTimeout(this._settingsUpdateTimeout);
+      this._settingsUpdateTimeout = null;
+    }
+    this._pendingSettingsRequests.delete(message.id);
+    this.updateWebSocketContext();
+    this.dispatchComponentEvent("settings-updated", message.id);
+  }
+
+  private dispatchComponentEvent(eventName: string, requestId: string) {
+    this.dispatchEvent(
+      new CustomEvent(eventName, {
+        detail: {
+          requestId,
+          timestamp: Date.now(),
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private dispatchComponentError(
+    eventName: string,
+    requestId: string,
+    message: string,
+  ) {
+    this.dispatchEvent(
+      new CustomEvent(eventName, {
+        detail: {
+          requestId,
+          message,
+          timestamp: Date.now(),
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private dispatchWindowEvent(eventName: string, requestId: string) {
+    window.dispatchEvent(
+      new CustomEvent(eventName, {
+        detail: {
+          requestId,
+          timestamp: Date.now(),
+        },
+      }),
+    );
+  }
+
+  private dispatchWindowError(
+    eventName: string,
+    requestId: string,
+    message: string,
+  ) {
+    window.dispatchEvent(
+      new CustomEvent(eventName, {
+        detail: {
+          requestId,
+          message,
+          timestamp: Date.now(),
+        },
+      }),
+    );
+  }
+
+  private handleMediaControlled(message: WebSocketResponse) {
+    this._pendingMediaControlRequests.delete(message.id);
+    this.dispatchWindowEvent("media-control-success", message.id);
+  }
+
+  private handleCommandExecuting(message: WebSocketResponse) {
+    const commandData = message.data as { commandID?: string };
+    if (!commandData?.commandID) {
+      return;
+    }
+
+    this._pendingCommandRequests.delete(message.id);
+    this.cancelCommandCleanupTimeout(commandData.commandID);
+    this.enforceCommandExecutionsLimit();
+    this._commandExecutions.set(commandData.commandID, {
+      isExecuting: true,
+      result: null,
+    });
+    this.requestUpdate();
+  }
+
+  private handleCommandCompleted(message: WebSocketResponse) {
+    const result = message.data as CommandResult;
+    if (!result?.commandID) {
+      return;
+    }
+
+    this._pendingCommandRequests.delete(message.id);
+    this.setCommandResult(result);
+  }
+
+  private handleError(message: WebSocketResponse) {
+    if (message.subtype === "BAD_TOKEN") {
+      this._error =
+        "Invalid API token. Please check your connection settings and update your token.";
+      this._isConnected = false;
+      this._retryCount = MAX_RETRIES + 1;
+      this._ws?.close();
+      return;
+    }
+
+    this.dispatchRequestErrors(message);
+
+    const errorMessage = message.message ?? "Unknown error";
+    this._error = `Server error: ${errorMessage}`;
+
+    if (this._pendingSettingsRequests.has(message.id)) {
+      this.handleSettingsUpdateError(message.id, errorMessage);
+    }
+
+    if (this.isCommandError(message.subtype)) {
+      this.handleCommandError(message.id, errorMessage);
+    }
+  }
+
+  private dispatchRequestErrors(message: WebSocketResponse) {
+    const componentError = this.componentRequestErrors[message.subtype];
+    if (componentError) {
+      this.dispatchComponentError(
+        componentError.eventName,
+        message.id,
+        message.message ?? componentError.fallbackMessage,
+      );
+    }
+
+    if (this._pendingMediaControlRequests.has(message.id)) {
+      this._pendingMediaControlRequests.delete(message.id);
+      this.dispatchWindowError(
+        "media-control-error",
+        message.id,
+        message.message ?? "Failed to control media",
+      );
+    }
+  }
+
+  private handleSettingsUpdateError(requestId: string, message: string) {
+    if (this._settingsErrorTimeout !== null) {
+      clearTimeout(this._settingsErrorTimeout);
+    }
+
+    this._isSettingsUpdatePending = false;
+    if (this._settingsUpdateTimeout) {
+      clearTimeout(this._settingsUpdateTimeout);
+      this._settingsUpdateTimeout = null;
+    }
+
+    this._settingsUpdateError = {
+      requestId,
+      message,
+      timestamp: Date.now(),
+    };
+    this._pendingSettingsRequests.delete(requestId);
+    this.dispatchComponentError("settings-update-error", requestId, message);
+
+    this._settingsErrorTimeout = window.setTimeout(() => {
+      this._settingsUpdateError = null;
+      this._settingsErrorTimeout = null;
+      this.updateWebSocketContext();
+    }, 10000);
 
     this.requestUpdate();
+  }
+
+  private isCommandError(subtype: ResponseSubtype) {
+    return this.commandErrorSubtypes.has(subtype);
+  }
+
+  private handleCommandError(requestId: string, message: string) {
+    const commandId = this._pendingCommandRequests.get(requestId);
+    if (!commandId) {
+      return;
+    }
+
+    this.setCommandResult({
+      commandID: commandId,
+      exitCode: 1,
+      stdout: "",
+      stderr: "",
+      error: message,
+    });
+    this._pendingCommandRequests.delete(requestId);
   }
 
   private connect() {
