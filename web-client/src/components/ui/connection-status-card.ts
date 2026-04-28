@@ -10,7 +10,7 @@ import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-status-card")
-export class ConnectionStatusCard extends UIElement {
+class ConnectionStatusCard extends UIElement {
   @property({ type: Boolean }) showSetupButton = false;
 
   private _websocket?: WebSocketState;

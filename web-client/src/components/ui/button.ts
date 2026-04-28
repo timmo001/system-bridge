@@ -37,7 +37,7 @@ const buttonVariants = cva(
 type ButtonVariants = VariantProps<typeof buttonVariants>;
 
 @customElement("ui-button")
-export class Button extends UIElement {
+class Button extends UIElement {
   @property() variant: ButtonVariants["variant"] = "default";
   @property() size: ButtonVariants["size"] = "default";
   @property({ type: Boolean }) disabled = false;

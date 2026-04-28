@@ -7,7 +7,7 @@ export interface ConnectionSettings {
   token: string | null;
 }
 
-export const defaultConnectionSettings: ConnectionSettings = {
+const defaultConnectionSettings: ConnectionSettings = {
   host: "0.0.0.0",
   port: 9170,
   ssl: false,

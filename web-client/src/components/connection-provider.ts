@@ -11,7 +11,7 @@ import {
 import { ProviderElement } from "~/mixins/provider-element";
 
 @customElement("connection-provider")
-export class ConnectionProvider extends ProviderElement {
+class ConnectionProvider extends ProviderElement {
   private _connection: ConnectionSettings;
   private _provider!: ContextProvider<typeof connectionContext>;
 

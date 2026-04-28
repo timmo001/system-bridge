@@ -18,7 +18,7 @@ export const ModuleNameSchema = z.enum(Modules);
 
 export type ModuleName = z.infer<typeof ModuleNameSchema>;
 
-export const ModuleDataSchema = z.record(ModuleNameSchema, z.any());
+const ModuleDataSchema = z.record(ModuleNameSchema, z.any());
 
 export type ModuleData = z.infer<typeof ModuleDataSchema>;
 

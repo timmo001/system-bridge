@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-tabs")
-export class Tabs extends UIElement {
+class Tabs extends UIElement {
   @property() value = "";
 
   connectedCallback() {
@@ -33,7 +33,7 @@ export class Tabs extends UIElement {
 }
 
 @customElement("ui-tabs-list")
-export class TabsList extends UIElement {
+class TabsList extends UIElement {
   connectedCallback() {
     super.connectedCallback();
     const classes = cn(
@@ -51,7 +51,7 @@ export class TabsList extends UIElement {
 }
 
 @customElement("ui-tabs-trigger")
-export class TabsTrigger extends UIElement {
+class TabsTrigger extends UIElement {
   @property() value = "";
   @property({ type: Boolean }) active = false;
 
@@ -104,7 +104,7 @@ export class TabsTrigger extends UIElement {
 }
 
 @customElement("ui-tabs-content")
-export class TabsContent extends UIElement {
+class TabsContent extends UIElement {
   @property() value = "";
   @property({ type: Boolean, reflect: true }) hidden = false;
 

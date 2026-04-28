@@ -27,7 +27,7 @@ const ConnectionSchema = z.object({
 type ConnectionForm = z.infer<typeof ConnectionSchema>;
 
 @customElement("page-connection")
-export class PageConnection extends PageElement {
+class PageConnection extends PageElement {
   title = "Connection Settings";
   description = "Configure your connection to System Bridge";
 

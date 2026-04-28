@@ -23,7 +23,7 @@ interface MediaDirectory {
 }
 
 @customElement("page-settings-media")
-export class PageSettingsMedia extends PageElement {
+class PageSettingsMedia extends PageElement {
   title = "Media Directories";
   description = "Manage directories for media scanning";
 

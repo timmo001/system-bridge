@@ -19,7 +19,7 @@ import "../components/ui/label";
 import "../components/ui/switch";
 
 @customElement("page-settings-general")
-export class PageSettingsGeneral extends PageElement {
+class PageSettingsGeneral extends PageElement {
   title = "General Settings";
   description = "Configure your System Bridge general settings";
 

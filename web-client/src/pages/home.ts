@@ -6,7 +6,7 @@ import "../components/ui/button";
 import "../components/ui/connection-status-card";
 
 @customElement("page-home")
-export class PageHome extends PageElement {
+class PageHome extends PageElement {
   title = "System Bridge";
   description = "A bridge for your systems";
 

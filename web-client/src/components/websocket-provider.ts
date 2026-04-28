@@ -40,7 +40,7 @@ interface PendingResolver<T = unknown> {
 type AnyPendingResolver = PendingResolver;
 
 @customElement("websocket-provider")
-export class WebSocketProvider extends ProviderElement {
+class WebSocketProvider extends ProviderElement {
   connection: ConnectionSettings | undefined;
 
   @state()

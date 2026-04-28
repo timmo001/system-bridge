@@ -18,7 +18,7 @@ import "../components/ui/label";
 type OpenType = "url" | "path";
 
 @customElement("page-open")
-export class PageOpen extends PageElement {
+class PageOpen extends PageElement {
   title = "Open";
   description =
     "Open URLs in browser or files/folders with system applications";

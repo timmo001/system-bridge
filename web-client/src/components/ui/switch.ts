@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-switch")
-export class Switch extends UIElement {
+class Switch extends UIElement {
   @property({ type: Boolean }) checked = false;
   @property({ type: Boolean }) disabled = false;
   @property() name = "";

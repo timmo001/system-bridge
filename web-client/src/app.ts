@@ -7,7 +7,7 @@ import "./components/connection-provider";
 import "./components/websocket-provider";
 
 @customElement("app-root")
-export class App extends LitElement {
+class App extends LitElement {
   private router = new Router(this, [
     {
       path: "/",

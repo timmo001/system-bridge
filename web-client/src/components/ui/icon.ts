@@ -5,7 +5,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-icon")
-export class Icon extends UIElement {
+class Icon extends UIElement {
   @property() name = "";
   @property() size: string | number = 24;
   @property() className = "";

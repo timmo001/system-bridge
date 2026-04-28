@@ -31,7 +31,7 @@ interface ActionResult {
 }
 
 @customElement("page-media")
-export class PageMedia extends PageElement {
+class PageMedia extends PageElement {
   title = "Media Controls";
   description = "Control media playback on this system";
 

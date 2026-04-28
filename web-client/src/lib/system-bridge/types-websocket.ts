@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ModuleNameSchema } from "~/lib/system-bridge/types-modules";
 
-export const EventTypeSchema = z.enum([
+const EventTypeSchema = z.enum([
   "COMMAND_EXECUTE",
   "EXIT_APPLICATION",
   "GET_DATA",
@@ -31,7 +31,7 @@ export const EventTypeSchema = z.enum([
 
 export type EventType = z.infer<typeof EventTypeSchema>;
 
-export const ResponseTypeSchema = z.enum([
+const ResponseTypeSchema = z.enum([
   "ERROR",
   "APPLICATION_EXITING",
   "COMMAND_EXECUTING",
@@ -62,7 +62,7 @@ export const ResponseTypeSchema = z.enum([
 
 export type ResponseType = z.infer<typeof ResponseTypeSchema>;
 
-export const ResponseSubtypeSchema = z.enum([
+const ResponseSubtypeSchema = z.enum([
   "NONE",
   "BAD_REQUEST",
   "BAD_TOKEN",
@@ -90,7 +90,7 @@ export const ResponseSubtypeSchema = z.enum([
 
 export type ResponseSubtype = z.infer<typeof ResponseSubtypeSchema>;
 
-export const WebSocketRequestSchema = z.object({
+const WebSocketRequestSchema = z.object({
   id: z.string(),
   event: EventTypeSchema,
   // Request data type varies by event type
@@ -113,7 +113,7 @@ export const WebSocketResponseSchema = z.object({
 
 export type WebsocketResponse = z.infer<typeof WebSocketResponseSchema>;
 
-export const ValidateDirectoryResponseSchema = z.object({
+const ValidateDirectoryResponseSchema = z.object({
   valid: z.boolean(),
 });
 

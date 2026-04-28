@@ -6,7 +6,7 @@ import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-required")
-export class ConnectionRequired extends UIElement {
+class ConnectionRequired extends UIElement {
   @consume({ context: websocketContext, subscribe: true })
   private _websocket?: WebSocketState;
 

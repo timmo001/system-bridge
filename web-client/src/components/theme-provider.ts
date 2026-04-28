@@ -14,7 +14,7 @@ import {
 import { ProviderElement } from "~/mixins/provider-element";
 
 @customElement("theme-provider")
-export class ThemeProvider extends ProviderElement {
+class ThemeProvider extends ProviderElement {
   @state()
   private _theme: Theme = "system";
 

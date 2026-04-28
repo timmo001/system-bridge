@@ -16,7 +16,7 @@ import "../components/ui/input";
 import "../components/ui/label";
 
 @customElement("page-notifications")
-export class PageNotifications extends PageElement {
+class PageNotifications extends PageElement {
   title = "Notifications";
   description = "Send desktop notifications to this system";
 

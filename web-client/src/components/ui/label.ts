@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-label")
-export class Label extends UIElement {
+class Label extends UIElement {
   connectedCallback() {
     super.connectedCallback();
     // Apply label classes directly to host element

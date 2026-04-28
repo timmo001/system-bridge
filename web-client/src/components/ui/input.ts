@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-input")
-export class Input extends UIElement {
+class Input extends UIElement {
   @property() type = "text";
   @property() value = "";
   @property() placeholder = "";

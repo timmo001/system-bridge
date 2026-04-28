@@ -21,7 +21,7 @@ import "../components/ui/input";
 import "../components/ui/label";
 
 @customElement("page-settings-commands")
-export class PageSettingsCommands extends PageElement {
+class PageSettingsCommands extends PageElement {
   title = "Commands";
   description = "Manage commands that can be executed remotely";
 

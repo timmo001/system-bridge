@@ -3,7 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 @customElement("ui-code-block")
-export class CodeBlock extends LitElement {
+class CodeBlock extends LitElement {
   static styles = css`
     :host {
       display: block;

@@ -13,7 +13,7 @@ import "../components/ui/icon";
 import "../components/ui/tabs";
 
 @customElement("page-data")
-export class PageData extends PageElement {
+class PageData extends PageElement {
   title = "Data";
   description = "Real-time data from System Bridge modules";
 
