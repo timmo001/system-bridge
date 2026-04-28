@@ -22,6 +22,16 @@ const editorTheme = EditorView.theme(
     },
     ".cm-scroller": {
       overflow: "auto",
+      scrollbarColor: "oklch(0.45 0.02 256.848) transparent",
+      scrollbarWidth: "thin",
+    },
+    ".cm-scroller::-webkit-scrollbar": {
+      width: "0.4rem",
+      height: "0.4rem",
+    },
+    ".cm-scroller::-webkit-scrollbar-thumb": {
+      borderRadius: "0.25rem",
+      background: "oklch(0.45 0.02 256.848)",
     },
     ".cm-content": {
       fontFamily: "'Courier New', Courier, monospace",

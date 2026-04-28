@@ -119,6 +119,16 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-color: oklch(0.45 0.02 256.848) transparent;
+    scrollbar-width: thin;
+  }
+  *::-webkit-scrollbar {
+    width: 0.4rem;
+    height: 0.4rem;
+  }
+  *::-webkit-scrollbar-thumb {
+    border-radius: 0.25rem;
+    background: oklch(0.45 0.02 256.848);
   }
   body {
     @apply bg-background text-foreground;
