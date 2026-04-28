@@ -209,8 +209,7 @@ class PageNotifications extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          ${this.renderPageHeader()}
-          ${this.renderPageResult(this.lastResult)}
+          ${this.renderPageHeader()} ${this.renderPageResult(this.lastResult)}
           ${!isConnected
             ? html`
                 <ui-connection-required
