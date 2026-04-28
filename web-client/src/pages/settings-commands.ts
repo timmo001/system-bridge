@@ -177,8 +177,7 @@ class PageSettingsCommands extends PageElement {
   private checkPendingSubmission(): void {
     if (!this.isSubmitting || this.pendingRequestId === null) return;
 
-    const currentCommands =
-      this.websocket?.settings?.commands.allowlist ?? [];
+    const currentCommands = this.websocket?.settings?.commands.allowlist ?? [];
     const previousCommandsStr = JSON.stringify(this.previousCommands);
     const currentCommandsStr = JSON.stringify(currentCommands);
 
@@ -275,11 +274,7 @@ class PageSettingsCommands extends PageElement {
   private handleExecuteCommand = (e: Event): void => {
     const button = e.currentTarget as HTMLElement;
     const id = button.getAttribute("data-id");
-    if (
-      !id ||
-      !this.connection?.token ||
-      !this.websocket?.sendCommandExecute
-    ) {
+    if (!id || !this.connection?.token || !this.websocket?.sendCommandExecute) {
       return;
     }
 
@@ -549,12 +544,8 @@ ${result.stderr}</pre
       >
         <ui-icon name="AlertCircle" class="text-red-400"></ui-icon>
         <div class="flex-1">
-          <div class="font-medium text-red-200">
-            Failed to save command
-          </div>
-          <div class="text-sm text-red-300 mt-1">
-            ${this.errorMessage}
-          </div>
+          <div class="font-medium text-red-200">Failed to save command</div>
+          <div class="text-sm text-red-300 mt-1">${this.errorMessage}</div>
         </div>
       </div>
     `;
@@ -597,9 +588,7 @@ ${result.stderr}</pre
             ></ui-input>
           </div>
           <div>
-            <ui-label
-              >Arguments (optional, comma-separated)</ui-label
-            >
+            <ui-label>Arguments (optional, comma-separated)</ui-label>
             <ui-input
               placeholder="arg1, arg2, arg3"
               .value=${this.newCommandArguments}
@@ -634,9 +623,7 @@ ${result.stderr}</pre
       <div class="rounded-lg border bg-card p-6 space-y-4">
         <h2 class="text-xl font-semibold">
           Commands
-          ${this.commands.length > 0
-            ? `(${this.commands.length})`
-            : ""}
+          ${this.commands.length > 0 ? `(${this.commands.length})` : ""}
         </h2>
         ${this.renderCommandList()}
       </div>
@@ -649,8 +636,7 @@ ${result.stderr}</pre
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          ${this.renderPageHeader()}
-          ${this.renderErrorMessage()}
+          ${this.renderPageHeader()} ${this.renderErrorMessage()}
           ${this.renderWithConnection(
             isConnected,
             "Please connect to System Bridge to manage commands.",

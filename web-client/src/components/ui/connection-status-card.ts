@@ -69,9 +69,7 @@ class ConnectionStatusCard extends UIElement {
   private renderErrorBanner(): TemplateResult {
     if (!this._websocket?.error) return html``;
     return html`
-      <div
-        class="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-      >
+      <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
         ${this._websocket.error}
       </div>
     `;
@@ -91,9 +89,7 @@ class ConnectionStatusCard extends UIElement {
         </div>
         <div>
           <span class="text-muted-foreground">SSL:</span>
-          <span class="ml-2"
-            >${this._connection.ssl ? "Yes" : "No"}</span
-          >
+          <span class="ml-2">${this._connection.ssl ? "Yes" : "No"}</span>
         </div>
         <div>
           <span class="text-muted-foreground">Token:</span>
@@ -131,8 +127,7 @@ class ConnectionStatusCard extends UIElement {
           </div>
 
           ${this.renderConnectionIndicator(isConnected)}
-          ${this.renderErrorBanner()}
-          ${this.renderConnectionDetails()}
+          ${this.renderErrorBanner()} ${this.renderConnectionDetails()}
         </div>
       </div>
     `;

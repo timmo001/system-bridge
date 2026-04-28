@@ -110,11 +110,7 @@ class PageOpen extends SendablePageElement {
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
-    if (
-      !value ||
-      !this.connection?.token ||
-      !this.websocket?.sendRequest
-    ) {
+    if (!value || !this.connection?.token || !this.websocket?.sendRequest) {
       return;
     }
 
@@ -146,9 +142,7 @@ class PageOpen extends SendablePageElement {
         <ui-label>Type</ui-label>
         <div class="flex gap-2 mt-1">
           <ui-button
-            variant=${this.openType === "url"
-              ? "default"
-              : "outline"}
+            variant=${this.openType === "url" ? "default" : "outline"}
             size="sm"
             @click=${this.handleTypeChangeUrl}
             ?disabled=${this.isSending}
@@ -157,9 +151,7 @@ class PageOpen extends SendablePageElement {
             URL
           </ui-button>
           <ui-button
-            variant=${this.openType === "path"
-              ? "default"
-              : "outline"}
+            variant=${this.openType === "path" ? "default" : "outline"}
             size="sm"
             @click=${this.handleTypeChangePath}
             ?disabled=${this.isSending}
@@ -212,13 +204,12 @@ class PageOpen extends SendablePageElement {
         <div class="rounded-lg border bg-card p-6 space-y-4">
           <h2 class="text-xl font-semibold">Open URL or Path</h2>
           <p class="text-sm text-muted-foreground">
-            Open a URL in the default browser or a file/folder with
-            the default system application.
+            Open a URL in the default browser or a file/folder with the default
+            system application.
           </p>
 
           <div class="space-y-3">
-            ${this.renderOpenTypeSelector()}
-            ${this.renderValueInput()}
+            ${this.renderOpenTypeSelector()} ${this.renderValueInput()}
 
             <div class="flex justify-end gap-2 pt-2">
               <ui-button
@@ -232,18 +223,14 @@ class PageOpen extends SendablePageElement {
               <ui-button
                 variant="default"
                 @click=${this.handleOpen}
-                ?disabled=${this.isSending ||
-                !this.currentValue.trim()}
+                ?disabled=${this.isSending || !this.currentValue.trim()}
               >
                 ${this.isSending
                   ? html`<ui-icon
                       name="Loader2"
                       className="animate-spin mr-2"
                     ></ui-icon>`
-                  : html`<ui-icon
-                      name="ExternalLink"
-                      class="mr-2"
-                    ></ui-icon>`}
+                  : html`<ui-icon name="ExternalLink" class="mr-2"></ui-icon>`}
                 Open
               </ui-button>
             </div>

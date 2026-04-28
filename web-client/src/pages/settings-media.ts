@@ -226,8 +226,8 @@ class PageSettingsMedia extends PageElement {
       <div class="rounded-lg border bg-card p-6 space-y-4">
         <h2 class="text-xl font-semibold">Add Directory</h2>
         <p class="text-sm text-muted-foreground">
-          Add directories to be used for media scanning. Only
-          existing directories are allowed.
+          Add directories to be used for media scanning. Only existing
+          directories are allowed.
         </p>
 
         <div class="flex gap-2">

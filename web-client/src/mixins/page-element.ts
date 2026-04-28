@@ -150,17 +150,10 @@ export class PageElement extends UIElement {
       <div
         class="rounded-lg border p-4 flex items-start gap-3 ${style.borderClass} ${style.bgClass}"
       >
-        <ui-icon
-          name=${style.iconName}
-          class="${style.iconClass}"
-        ></ui-icon>
+        <ui-icon name=${style.iconName} class="${style.iconClass}"></ui-icon>
         <div class="flex-1">
-          <div class="font-medium ${style.headingClass}">
-            ${style.heading}
-          </div>
-          <div class="text-sm mt-1 ${style.bodyClass}">
-            ${result.message}
-          </div>
+          <div class="font-medium ${style.headingClass}">${style.heading}</div>
+          <div class="text-sm mt-1 ${style.bodyClass}">${result.message}</div>
         </div>
       </div>
     `;

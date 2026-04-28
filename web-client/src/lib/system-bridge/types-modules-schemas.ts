@@ -4,11 +4,11 @@ import { z } from "zod";
 // Generated from backend types in types/ directory
 
 // RunMode enum
-const RunModeSchema = z.enum(["standalone"]);
+export const RunModeSchema = z.enum(["standalone"]);
 export type RunMode = z.infer<typeof RunModeSchema>;
 
 // CPU Frequency
-const CPUFrequencySchema = z.object({
+export const CPUFrequencySchema = z.object({
   current: z.number().nullish(),
   min: z.number().nullish(),
   max: z.number().nullish(),
@@ -17,7 +17,7 @@ const CPUFrequencySchema = z.object({
 export type CPUFrequency = z.infer<typeof CPUFrequencySchema>;
 
 // CPU Stats
-const CPUStatsSchema = z.object({
+export const CPUStatsSchema = z.object({
   ctx_switches: z.number().nullish(),
   interrupts: z.number().nullish(),
   soft_interrupts: z.number().nullish(),
@@ -27,7 +27,7 @@ const CPUStatsSchema = z.object({
 export type CPUStats = z.infer<typeof CPUStatsSchema>;
 
 // CPU Times
-const CPUTimesSchema = z.object({
+export const CPUTimesSchema = z.object({
   user: z.number().nullish(),
   system: z.number().nullish(),
   idle: z.number().nullish(),
@@ -38,7 +38,7 @@ const CPUTimesSchema = z.object({
 export type CPUTimes = z.infer<typeof CPUTimesSchema>;
 
 // Disk IO Counters
-const DiskIOCountersSchema = z.object({
+export const DiskIOCountersSchema = z.object({
   read_count: z.number(),
   write_count: z.number(),
   read_bytes: z.number(),
@@ -50,7 +50,7 @@ const DiskIOCountersSchema = z.object({
 export type DiskIOCounters = z.infer<typeof DiskIOCountersSchema>;
 
 // Disk Usage
-const DiskUsageSchema = z.object({
+export const DiskUsageSchema = z.object({
   total: z.number(),
   used: z.number(),
   free: z.number(),
@@ -60,7 +60,7 @@ const DiskUsageSchema = z.object({
 export type DiskUsage = z.infer<typeof DiskUsageSchema>;
 
 // Network Address
-const NetworkAddressSchema = z.object({
+export const NetworkAddressSchema = z.object({
   address: z.string().nullish(),
   family: z.string().nullish(),
   netmask: z.string().nullish(),
@@ -71,7 +71,7 @@ const NetworkAddressSchema = z.object({
 export type NetworkAddress = z.infer<typeof NetworkAddressSchema>;
 
 // Network Stats
-const NetworkStatsSchema = z.object({
+export const NetworkStatsSchema = z.object({
   isup: z.boolean().nullish(),
   duplex: z.string().nullish(),
   speed: z.number().nullish(),
@@ -82,7 +82,7 @@ const NetworkStatsSchema = z.object({
 export type NetworkStats = z.infer<typeof NetworkStatsSchema>;
 
 // Network IO
-const NetworkIOSchema = z.object({
+export const NetworkIOSchema = z.object({
   bytes_sent: z.number().nullish(),
   bytes_recv: z.number().nullish(),
   packets_sent: z.number().nullish(),
@@ -96,7 +96,7 @@ const NetworkIOSchema = z.object({
 export type NetworkIO = z.infer<typeof NetworkIOSchema>;
 
 // Temperature Sensor
-const TemperatureSchema = z.object({
+export const TemperatureSchema = z.object({
   key: z.string(),
   temperature: z.number(),
   high: z.number(),
@@ -106,7 +106,7 @@ const TemperatureSchema = z.object({
 export type Temperature = z.infer<typeof TemperatureSchema>;
 
 // System User
-const SystemUserSchema = z.object({
+export const SystemUserSchema = z.object({
   name: z.string(),
   active: z.boolean(),
   terminal: z.string(),
@@ -118,7 +118,7 @@ const SystemUserSchema = z.object({
 export type SystemUser = z.infer<typeof SystemUserSchema>;
 
 // Memory Swap
-const MemorySwapSchema = z.object({
+export const MemorySwapSchema = z.object({
   total: z.number().nullish(),
   used: z.number().nullish(),
   free: z.number().nullish(),
@@ -130,7 +130,7 @@ const MemorySwapSchema = z.object({
 export type MemorySwap = z.infer<typeof MemorySwapSchema>;
 
 // Memory Virtual
-const MemoryVirtualSchema = z.object({
+export const MemoryVirtualSchema = z.object({
   total: z.number().nullish(),
   available: z.number().nullish(),
   percent: z.number().nullish(),
@@ -147,7 +147,7 @@ const MemoryVirtualSchema = z.object({
 export type MemoryVirtual = z.infer<typeof MemoryVirtualSchema>;
 
 // Per-CPU Data
-const PerCPUSchema = z.object({
+export const PerCPUSchema = z.object({
   id: z.number(),
   frequency: CPUFrequencySchema.nullish(),
   power: z.number().nullish(),
@@ -160,7 +160,7 @@ const PerCPUSchema = z.object({
 export type PerCPU = z.infer<typeof PerCPUSchema>;
 
 // Disk Partition
-const DiskPartitionSchema = z.object({
+export const DiskPartitionSchema = z.object({
   device: z.string(),
   mount_point: z.string(),
   filesystem_type: z.string(),
@@ -173,7 +173,7 @@ const DiskPartitionSchema = z.object({
 export type DiskPartition = z.infer<typeof DiskPartitionSchema>;
 
 // Network Connection
-const NetworkConnectionSchema = z.object({
+export const NetworkConnectionSchema = z.object({
   fd: z.number().nullish(),
   family: z.number().nullish(),
   type: z.number().nullish(),
@@ -186,7 +186,7 @@ const NetworkConnectionSchema = z.object({
 export type NetworkConnection = z.infer<typeof NetworkConnectionSchema>;
 
 // Windows Sensor
-const SensorsWindowsSensorSchema = z.object({
+export const SensorsWindowsSensorSchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.string(),
@@ -196,7 +196,7 @@ const SensorsWindowsSensorSchema = z.object({
 export type SensorsWindowsSensor = z.infer<typeof SensorsWindowsSensorSchema>;
 
 // NVIDIA Chipset
-const SensorsNVIDIAChipsetSchema = z.object({
+export const SensorsNVIDIAChipsetSchema = z.object({
   id: z.number(),
   name: z.string(),
   flags: z.string(),
@@ -207,7 +207,7 @@ const SensorsNVIDIAChipsetSchema = z.object({
 export type SensorsNVIDIAChipset = z.infer<typeof SensorsNVIDIAChipsetSchema>;
 
 // NVIDIA Display
-const SensorsNVIDIADisplaySchema = z.object({
+export const SensorsNVIDIADisplaySchema = z.object({
   id: z.number(),
   name: z.string(),
   active: z.boolean(),
@@ -231,7 +231,7 @@ const SensorsNVIDIADisplaySchema = z.object({
 export type SensorsNVIDIADisplay = z.infer<typeof SensorsNVIDIADisplaySchema>;
 
 // NVIDIA Driver
-const SensorsNVIDIADriverSchema = z.object({
+export const SensorsNVIDIADriverSchema = z.object({
   branch_version: z.string(),
   interface_version: z.string(),
   version: z.number(),
@@ -240,7 +240,7 @@ const SensorsNVIDIADriverSchema = z.object({
 export type SensorsNVIDIADriver = z.infer<typeof SensorsNVIDIADriverSchema>;
 
 // NVIDIA GPU
-const SensorsNVIDIAGPUSchema = z.object({
+export const SensorsNVIDIAGPUSchema = z.object({
   id: z.number(),
   name: z.string(),
   bios_oem_revision: z.number().nullish(),
@@ -260,7 +260,7 @@ const SensorsNVIDIAGPUSchema = z.object({
 export type SensorsNVIDIAGPU = z.infer<typeof SensorsNVIDIAGPUSchema>;
 
 // Disk
-const DiskSchema = z.object({
+export const DiskSchema = z.object({
   name: z.string(),
   partitions: z.array(DiskPartitionSchema),
   io_counters: DiskIOCountersSchema.nullish(),
@@ -269,7 +269,7 @@ const DiskSchema = z.object({
 export type Disk = z.infer<typeof DiskSchema>;
 
 // Display
-const DisplaySchema = z.object({
+export const DisplaySchema = z.object({
   id: z.string(),
   name: z.string(),
   resolution_horizontal: z.number(),
@@ -286,7 +286,7 @@ const DisplaySchema = z.object({
 export type Display = z.infer<typeof DisplaySchema>;
 
 // GPU
-const GPUSchema = z.object({
+export const GPUSchema = z.object({
   id: z.string(),
   name: z.string(),
   core_clock: z.number().nullish(),
@@ -304,7 +304,7 @@ const GPUSchema = z.object({
 export type GPU = z.infer<typeof GPUSchema>;
 
 // Network
-const NetworkSchema = z.object({
+export const NetworkSchema = z.object({
   name: z.string().nullish(),
   addresses: z.array(NetworkAddressSchema),
   stats: NetworkStatsSchema.nullish(),
@@ -313,7 +313,7 @@ const NetworkSchema = z.object({
 export type Network = z.infer<typeof NetworkSchema>;
 
 // Process
-const ProcessSchema = z.object({
+export const ProcessSchema = z.object({
   id: z.number(),
   name: z.string().nullish(),
   cpu_usage: z.number().nullish(),
@@ -328,7 +328,7 @@ const ProcessSchema = z.object({
 export type Process = z.infer<typeof ProcessSchema>;
 
 // NVIDIA Sensors
-const SensorsNVIDIASchema = z.object({
+export const SensorsNVIDIASchema = z.object({
   chipset: SensorsNVIDIAChipsetSchema.nullish(),
   displays: z.array(SensorsNVIDIADisplaySchema),
   driver: SensorsNVIDIADriverSchema.nullish(),
@@ -338,7 +338,7 @@ const SensorsNVIDIASchema = z.object({
 export type SensorsNVIDIA = z.infer<typeof SensorsNVIDIASchema>;
 
 // Windows Hardware
-const SensorsWindowsHardwareSchema: z.ZodType<{
+export const SensorsWindowsHardwareSchema: z.ZodType<{
   id: string;
   name: string;
   type: string;
@@ -362,7 +362,7 @@ export type SensorsWindowsHardware = z.infer<
 >;
 
 // Windows Sensors
-const SensorsWindowsSchema = z.object({
+export const SensorsWindowsSchema = z.object({
   hardware: z.array(SensorsWindowsHardwareSchema),
   nvidia: SensorsNVIDIASchema.nullish(),
 });
@@ -370,7 +370,7 @@ const SensorsWindowsSchema = z.object({
 export type SensorsWindows = z.infer<typeof SensorsWindowsSchema>;
 
 // Battery Module
-const BatteryDataSchema = z.object({
+export const BatteryDataSchema = z.object({
   is_charging: z.boolean().nullish(),
   percentage: z.number().nullish(),
   time_remaining: z.number().nullish(),
@@ -379,7 +379,7 @@ const BatteryDataSchema = z.object({
 export type BatteryData = z.infer<typeof BatteryDataSchema>;
 
 // CPU Module
-const CPUDataSchema = z.object({
+export const CPUDataSchema = z.object({
   count: z.number().nullish(),
   frequency: CPUFrequencySchema.nullish(),
   load_average: z.number().nullish(),
@@ -396,7 +396,7 @@ const CPUDataSchema = z.object({
 export type CPUData = z.infer<typeof CPUDataSchema>;
 
 // Disks Module
-const DisksDataSchema = z.object({
+export const DisksDataSchema = z.object({
   devices: z.array(DiskSchema),
   io_counters: DiskIOCountersSchema.nullish(),
 });
@@ -404,17 +404,17 @@ const DisksDataSchema = z.object({
 export type DisksData = z.infer<typeof DisksDataSchema>;
 
 // Displays Module
-const DisplaysDataSchema = z.array(DisplaySchema);
+export const DisplaysDataSchema = z.array(DisplaySchema);
 
 export type DisplaysData = z.infer<typeof DisplaysDataSchema>;
 
 // GPUs Module
-const GPUsDataSchema = z.array(GPUSchema);
+export const GPUsDataSchema = z.array(GPUSchema);
 
 export type GPUsData = z.infer<typeof GPUsDataSchema>;
 
 // Media Module
-const MediaDataSchema = z.object({
+export const MediaDataSchema = z.object({
   album_artist: z.string().nullish(),
   album_title: z.string().nullish(),
   artist: z.string().nullish(),
@@ -443,7 +443,7 @@ const MediaDataSchema = z.object({
 export type MediaData = z.infer<typeof MediaDataSchema>;
 
 // Memory Module
-const MemoryDataSchema = z.object({
+export const MemoryDataSchema = z.object({
   swap: MemorySwapSchema.nullish(),
   virtual: MemoryVirtualSchema.nullish(),
 });
@@ -451,7 +451,7 @@ const MemoryDataSchema = z.object({
 export type MemoryData = z.infer<typeof MemoryDataSchema>;
 
 // Networks Module
-const NetworksDataSchema = z.object({
+export const NetworksDataSchema = z.object({
   connections: z.array(NetworkConnectionSchema),
   io: NetworkIOSchema.nullish(),
   networks: z.array(NetworkSchema),
@@ -460,12 +460,12 @@ const NetworksDataSchema = z.object({
 export type NetworksData = z.infer<typeof NetworksDataSchema>;
 
 // Processes Module
-const ProcessesDataSchema = z.array(ProcessSchema);
+export const ProcessesDataSchema = z.array(ProcessSchema);
 
 export type ProcessesData = z.infer<typeof ProcessesDataSchema>;
 
 // Sensors Module
-const SensorsDataSchema = z.object({
+export const SensorsDataSchema = z.object({
   fans: z.unknown(),
   temperatures: z.array(TemperatureSchema),
   windows_sensors: SensorsWindowsSchema.nullish(),
@@ -474,7 +474,7 @@ const SensorsDataSchema = z.object({
 export type SensorsData = z.infer<typeof SensorsDataSchema>;
 
 // System Module
-const SystemDataSchema = z.object({
+export const SystemDataSchema = z.object({
   boot_time: z.number(),
   fqdn: z.string(),
   hostname: z.string(),
@@ -501,7 +501,7 @@ const SystemDataSchema = z.object({
 export type SystemData = z.infer<typeof SystemDataSchema>;
 
 // Module
-const ModuleSchema = z.object({
+export const ModuleSchema = z.object({
   module: z.unknown(),
   data: z.unknown(),
   updated: z.string(),

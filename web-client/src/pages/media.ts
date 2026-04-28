@@ -232,8 +232,7 @@ class PageMedia extends PageElement {
 
   private renderStatusBadge(): TemplateResult {
     const status = this.mediaData?.status ?? "Unknown";
-    const config =
-      statusStyles[status.toLowerCase()] ?? defaultStatusStyle;
+    const config = statusStyles[status.toLowerCase()] ?? defaultStatusStyle;
 
     return html`
       <div
@@ -278,10 +277,8 @@ class PageMedia extends PageElement {
 
     if (position == null && duration == null) return null;
 
-    const positionStr =
-      position != null ? formatDuration(position) : "--:--";
-    const durationStr =
-      duration != null ? formatDuration(duration) : "--:--";
+    const positionStr = position != null ? formatDuration(position) : "--:--";
+    const durationStr = duration != null ? formatDuration(duration) : "--:--";
     const percent =
       position != null && duration != null && duration > 0
         ? Math.min((position / duration) * 100, 100)
@@ -424,8 +421,7 @@ class PageMedia extends PageElement {
                   variant="default"
                   size="icon"
                   class="size-12"
-                  ?disabled=${disabled.PAUSE ||
-                  this.pendingAction === "PAUSE"}
+                  ?disabled=${disabled.PAUSE || this.pendingAction === "PAUSE"}
                   @click=${this.handlePause}
                   title="Pause"
                 >
@@ -437,8 +433,7 @@ class PageMedia extends PageElement {
                   variant="default"
                   size="icon"
                   class="size-12"
-                  ?disabled=${disabled.PLAY ||
-                  this.pendingAction === "PLAY"}
+                  ?disabled=${disabled.PLAY || this.pendingAction === "PLAY"}
                   @click=${this.handlePlay}
                   title="Play"
                 >
@@ -544,17 +539,10 @@ class PageMedia extends PageElement {
       <div
         class="rounded-lg border p-4 flex items-start gap-3 ${style.borderClass} ${style.bgClass}"
       >
-        <ui-icon
-          name=${style.iconName}
-          class="${style.iconClass}"
-        ></ui-icon>
+        <ui-icon name=${style.iconName} class="${style.iconClass}"></ui-icon>
         <div class="flex-1">
-          <div class="font-medium ${style.headingClass}">
-            ${style.heading}
-          </div>
-          <div class="text-sm mt-1 ${style.bodyClass}">
-            ${message}
-          </div>
+          <div class="font-medium ${style.headingClass}">${style.heading}</div>
+          <div class="text-sm mt-1 ${style.bodyClass}">${message}</div>
           ${errorHint}
         </div>
       </div>
@@ -576,8 +564,7 @@ class PageMedia extends PageElement {
               ${this.renderActionResult()} ${this.renderNowPlayingCard()}
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                ${this.renderPlaybackControls()}
-                ${this.renderVolumeControls()}
+                ${this.renderPlaybackControls()} ${this.renderVolumeControls()}
               </div>
             `,
           )}

@@ -178,9 +178,8 @@ class PageNotifications extends SendablePageElement {
         <div class="rounded-lg border bg-card p-6 space-y-4">
           <h2 class="text-xl font-semibold">Send Notification</h2>
           <p class="text-sm text-muted-foreground">
-            Send a desktop notification to this system. The
-            notification will appear using the system's native
-            notification system.
+            Send a desktop notification to this system. The notification will
+            appear using the system's native notification system.
           </p>
 
           <div class="space-y-3">
@@ -251,10 +250,7 @@ class PageNotifications extends SendablePageElement {
                       name="Loader2"
                       className="animate-spin mr-2"
                     ></ui-icon>`
-                  : html`<ui-icon
-                      name="Bell"
-                      class="mr-2"
-                    ></ui-icon>`}
+                  : html`<ui-icon name="Bell" class="mr-2"></ui-icon>`}
                 Send Notification
               </ui-button>
             </div>

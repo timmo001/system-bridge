@@ -41,7 +41,8 @@ export function assignIfDefined<
 export function resolveTokenParam(
   params: URLSearchParams,
 ): string | null | undefined {
-  const token = getStringParam(params, "apiKey") ?? getStringParam(params, "token");
+  const token =
+    getStringParam(params, "apiKey") ?? getStringParam(params, "token");
   if (token === undefined) return undefined;
   return token || null;
 }
