@@ -3,7 +3,11 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
+import {
+  Modules,
+  ModuleLabels,
+  type ModuleName,
+} from "~/lib/system-bridge/types-modules";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/code-block";
@@ -39,15 +43,11 @@ class PageData extends PageElement {
     this.navigate("/connection");
   };
 
-  private capitalizeFirst(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
   private renderTabTriggers() {
     return Modules.map(
       (module) => html`
         <ui-tabs-trigger value=${module} ?active=${this.selectedTab === module}>
-          ${this.capitalizeFirst(module)}
+          ${ModuleLabels[module]}
         </ui-tabs-trigger>
       `,
     );
@@ -56,27 +56,25 @@ class PageData extends PageElement {
   private renderTabContents() {
     return Modules.map(
       (module) => html`
-        <ui-tabs-content value=${module} ?hidden=${this.selectedTab !== module}>
-          <div class="mt-4">
-            <div class="rounded-lg border bg-card p-4">
-              <h2 class="text-xl font-semibold mb-4">
-                ${this.capitalizeFirst(module)} Data
-              </h2>
-              ${this.websocket?.data?.[module]
-                ? html`
-                    <ui-code-block
-                      .data=${this.websocket.data[module]}
-                    ></ui-code-block>
-                  `
-                : html`
-                    <div
-                      class="text-sm text-muted-foreground italic p-4 text-center"
-                    >
-                      No data available for ${module}
-                    </div>
-                  `}
-            </div>
-          </div>
+        <ui-tabs-content
+          value=${module}
+          ?hidden=${this.selectedTab !== module}
+          class="flex flex-col flex-1 min-h-0 mt-2"
+        >
+          ${this.websocket?.data?.[module]
+            ? html`
+                <ui-code-block
+                  class="flex-1 min-h-0"
+                  .data=${this.websocket.data[module]}
+                ></ui-code-block>
+              `
+            : html`
+                <div
+                  class="text-sm text-muted-foreground italic p-4 text-center"
+                >
+                  No data available for ${module}
+                </div>
+              `}
         </ui-tabs-content>
       `,
     );
@@ -86,8 +84,12 @@ class PageData extends PageElement {
     const isConnected = this.websocket?.isConnected ?? false;
 
     return html`
-      <div class="min-h-screen bg-background text-foreground p-8">
-        <div class="max-w-7xl mx-auto space-y-6">
+      <div
+        class="flex flex-col h-dvh overflow-hidden bg-background text-foreground p-8"
+      >
+        <div
+          class="flex flex-col flex-1 min-h-0 max-w-7xl mx-auto w-full gap-6"
+        >
           ${this.renderPageHeader()}
           ${!isConnected
             ? html`
@@ -97,14 +99,19 @@ class PageData extends PageElement {
                 ></ui-connection-required>
               `
             : html`
-                <ui-tabs
-                  .value=${this.selectedTab}
-                  @tab-change=${this.handleTabChange}
+                <div
+                  class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
                 >
-                  <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
+                  <ui-tabs
+                    class="flex flex-col flex-1 min-h-0"
+                    .value=${this.selectedTab}
+                    @tab-change=${this.handleTabChange}
+                  >
+                    <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
 
-                  ${this.renderTabContents()}
-                </ui-tabs>
+                    ${this.renderTabContents()}
+                  </ui-tabs>
+                </div>
               `}
         </div>
       </div>

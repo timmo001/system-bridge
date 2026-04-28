@@ -11,7 +11,7 @@ class Tabs extends UIElement {
   connectedCallback() {
     super.connectedCallback();
     // eslint-disable-next-line wc/no-self-class
-    this.setAttribute("class", "w-full block");
+    this.classList.add("w-full", "block");
   }
 
   render() {
@@ -37,7 +37,8 @@ class TabsList extends UIElement {
   connectedCallback() {
     super.connectedCallback();
     const classes = cn(
-      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
+      "flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
+      "overflow-x-auto overflow-y-hidden scrollbar-thin",
     );
     // eslint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
@@ -114,7 +115,7 @@ class TabsContent extends UIElement {
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     );
     // eslint-disable-next-line wc/no-self-class
-    this.setAttribute("class", classes);
+    this.classList.add(...classes.split(/\s+/));
     this.setAttribute("role", "tabpanel");
   }
 

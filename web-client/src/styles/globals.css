@@ -120,6 +120,29 @@
   * {
     @apply border-border outline-ring/50;
   }
+  *::-webkit-scrollbar {
+    width: 0.4rem;
+    height: 0.4rem;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    border-radius: 0.25rem;
+    background: oklch(0.45 0.02 256.848);
+  }
+  *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  /* Firefox fallback (does not support ::-webkit-scrollbar) */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-color: oklch(0.45 0.02 256.848) transparent;
+      scrollbar-width: thin;
+    }
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -137,5 +160,27 @@
   ui-tabs-list,
   ui-tabs-content {
     display: block;
+  }
+}
+
+@utility scrollbar-thin {
+  &::-webkit-scrollbar {
+    width: 0.25rem;
+    height: 0.25rem;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 0.125rem;
+    background: oklch(0.45 0.02 256.848);
+  }
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
   }
 }
