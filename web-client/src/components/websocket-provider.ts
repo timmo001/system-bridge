@@ -40,13 +40,13 @@ interface PendingResolver<T = unknown> {
 type AnyPendingResolver = PendingResolver;
 type WebSocketResponse = z.infer<typeof WebSocketResponseSchema>;
 type ResponseSubtype = WebSocketResponse["subtype"];
-type CommandResult = {
+interface CommandResult {
   commandID: string;
   exitCode: number;
   stdout: string;
   stderr: string;
   error?: string;
-};
+}
 type ValidConnectionSettings = ConnectionSettings & { token: string };
 
 @customElement("websocket-provider")
@@ -116,21 +116,26 @@ class WebSocketProvider extends ProviderElement {
   private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
   private _websocketProvider!: ContextProvider<typeof websocketContext>;
 
-  private readonly responseHandlers: Partial<
-    Record<WebSocketResponse["type"], (message: WebSocketResponse) => void>
-  > = {
-    DATA_UPDATE: (message) => this.handleDataUpdate(message),
-    SETTINGS_RESULT: (message) => this.handleSettingsResult(message),
-    SETTINGS_UPDATED: (message) => this.handleSettingsUpdated(message),
-    NOTIFICATION_SENT: (message) =>
-      this.dispatchComponentEvent("notification-sent", message.id),
-    OPENED: (message) =>
-      this.dispatchComponentEvent("open-success", message.id),
-    MEDIA_CONTROLLED: (message) => this.handleMediaControlled(message),
-    COMMAND_EXECUTING: (message) => this.handleCommandExecuting(message),
-    COMMAND_COMPLETED: (message) => this.handleCommandCompleted(message),
-    ERROR: (message) => this.handleError(message),
-  };
+  private readonly responseHandlers = new Map<
+    WebSocketResponse["type"],
+    (message: WebSocketResponse) => void
+  >([
+    ["DATA_UPDATE", (message) => this.handleDataUpdate(message)],
+    ["SETTINGS_RESULT", (message) => this.handleSettingsResult(message)],
+    ["SETTINGS_UPDATED", (message) => this.handleSettingsUpdated(message)],
+    [
+      "NOTIFICATION_SENT",
+      (message) => this.dispatchComponentEvent("notification-sent", message.id),
+    ],
+    [
+      "OPENED",
+      (message) => this.dispatchComponentEvent("open-success", message.id),
+    ],
+    ["MEDIA_CONTROLLED", (message) => this.handleMediaControlled(message)],
+    ["COMMAND_EXECUTING", (message) => this.handleCommandExecuting(message)],
+    ["COMMAND_COMPLETED", (message) => this.handleCommandCompleted(message)],
+    ["ERROR", (message) => this.handleError(message)],
+  ]);
 
   private readonly componentRequestErrors: Partial<
     Record<ResponseSubtype, { eventName: string; fallbackMessage: string }>
@@ -370,7 +375,7 @@ class WebSocketProvider extends ProviderElement {
       return;
     }
 
-    this.responseHandlers[message.type]?.(message);
+    this.responseHandlers.get(message.type)?.(message);
     this.requestUpdate();
   }
 
@@ -697,7 +702,7 @@ class WebSocketProvider extends ProviderElement {
       return null;
     }
 
-    return { ...this.connection, token: this.connection.token as string };
+    return { ...this.connection, token: this.connection.token! };
   }
 
   private startConnectionTimeout() {
