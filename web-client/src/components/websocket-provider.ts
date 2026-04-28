@@ -47,6 +47,7 @@ type CommandResult = {
   stderr: string;
   error?: string;
 };
+type ValidConnectionSettings = ConnectionSettings & { token: string };
 
 @customElement("websocket-provider")
 class WebSocketProvider extends ProviderElement {
@@ -228,6 +229,40 @@ class WebSocketProvider extends ProviderElement {
     this._pendingResolvers.clear();
   }
 
+  private clearConnectionTimeout() {
+    if (this._connectionTimeout) {
+      clearTimeout(this._connectionTimeout);
+      this._connectionTimeout = null;
+    }
+  }
+
+  private clearReconnectTimeout() {
+    if (this._reconnectTimeout) {
+      clearTimeout(this._reconnectTimeout);
+      this._reconnectTimeout = null;
+    }
+  }
+
+  private clearSettingsUpdateTimeout() {
+    if (this._settingsUpdateTimeout) {
+      clearTimeout(this._settingsUpdateTimeout);
+      this._settingsUpdateTimeout = null;
+    }
+  }
+
+  private clearSettingsErrorTimeout() {
+    if (this._settingsErrorTimeout !== null) {
+      clearTimeout(this._settingsErrorTimeout);
+      this._settingsErrorTimeout = null;
+    }
+  }
+
+  private setDisconnectedError(message: string) {
+    this._error = message;
+    this._isConnected = false;
+    this.requestUpdate();
+  }
+
   private cancelCommandCleanupTimeout(commandID: string) {
     const existingTimeout =
       this._commandExecutionCleanupTimeouts.get(commandID);
@@ -248,6 +283,13 @@ class WebSocketProvider extends ProviderElement {
     );
 
     this._commandExecutionCleanupTimeouts.set(commandID, cleanupTimeout);
+  }
+
+  private clearCommandCleanupTimeouts() {
+    for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
+      clearTimeout(timeoutId);
+    }
+    this._commandExecutionCleanupTimeouts.clear();
   }
 
   private setCommandResult(result: CommandResult) {
@@ -333,24 +375,22 @@ class WebSocketProvider extends ProviderElement {
   }
 
   private resolvePendingResponse(message: WebSocketResponse) {
-    if (!this._pendingResolvers.has(message.id)) {
-      return false;
-    }
-
     const resolver = this._pendingResolvers.get(message.id);
     if (!resolver) {
-      return true;
+      return false;
     }
 
     clearTimeout(resolver.timeoutId);
 
     const parsedData = resolver.schema.safeParse(message.data);
-    if (parsedData?.success) {
-      resolver.resolve(parsedData.data);
-    } else {
+    if (!parsedData.success) {
       this._error = "Received invalid message data from server";
-      resolver.reject(parsedData?.error);
+      resolver.reject(parsedData.error);
+      this._pendingResolvers.delete(message.id);
+      return true;
     }
+
+    resolver.resolve(parsedData.data);
     this._pendingResolvers.delete(message.id);
     return true;
   }
@@ -360,30 +400,37 @@ class WebSocketProvider extends ProviderElement {
       return;
     }
 
-    const moduleValidation = ModuleNameSchema.safeParse(message.module);
-    if (!moduleValidation.success) {
-      this._error = `Received invalid module name: ${message.module}`;
+    const update = this.parseDataUpdate(message.module, message.data);
+    if (!update) {
       return;
     }
 
+    this._data = {
+      ...this._data,
+      [update.moduleName]: update.data,
+    };
+    this._isRequestingData = false;
+  }
+
+  private parseDataUpdate(module: string, data: unknown) {
+    const moduleValidation = ModuleNameSchema.safeParse(module);
+    if (!moduleValidation.success) {
+      this._error = `Received invalid module name: ${module}`;
+      return null;
+    }
+
     const moduleName = moduleValidation.data;
-    const dataValidation = ModuleDataSchemas[moduleName].safeParse(
-      message.data,
-    );
+    const dataValidation = ModuleDataSchemas[moduleName].safeParse(data);
     if (!dataValidation.success) {
       this._error = `Received invalid data for module ${moduleName}`;
       console.error(
         `Module ${moduleName} validation error:`,
         dataValidation.error,
       );
-      return;
+      return null;
     }
 
-    this._data = {
-      ...this._data,
-      [moduleName]: dataValidation.data,
-    };
-    this._isRequestingData = false;
+    return { moduleName, data: dataValidation.data };
   }
 
   private normalizeSettings(
@@ -531,11 +578,7 @@ class WebSocketProvider extends ProviderElement {
 
   private handleError(message: WebSocketResponse) {
     if (message.subtype === "BAD_TOKEN") {
-      this._error =
-        "Invalid API token. Please check your connection settings and update your token.";
-      this._isConnected = false;
-      this._retryCount = MAX_RETRIES + 1;
-      this._ws?.close();
+      this.handleBadTokenError();
       return;
     }
 
@@ -543,11 +586,28 @@ class WebSocketProvider extends ProviderElement {
 
     const errorMessage = message.message ?? "Unknown error";
     this._error = `Server error: ${errorMessage}`;
+    this.handleSettingsErrorIfPending(message.id, errorMessage);
+    this.handleCommandErrorIfPending(message, errorMessage);
+  }
 
-    if (this._pendingSettingsRequests.has(message.id)) {
-      this.handleSettingsUpdateError(message.id, errorMessage);
+  private handleBadTokenError() {
+    this._error =
+      "Invalid API token. Please check your connection settings and update your token.";
+    this._isConnected = false;
+    this._retryCount = MAX_RETRIES + 1;
+    this._ws?.close();
+  }
+
+  private handleSettingsErrorIfPending(requestId: string, message: string) {
+    if (this._pendingSettingsRequests.has(requestId)) {
+      this.handleSettingsUpdateError(requestId, message);
     }
+  }
 
+  private handleCommandErrorIfPending(
+    message: WebSocketResponse,
+    errorMessage: string,
+  ) {
     if (this.isCommandError(message.subtype)) {
       this.handleCommandError(message.id, errorMessage);
     }
@@ -562,27 +622,24 @@ class WebSocketProvider extends ProviderElement {
         message.message ?? componentError.fallbackMessage,
       );
     }
+    this.dispatchMediaControlError(message);
+  }
 
-    if (this._pendingMediaControlRequests.has(message.id)) {
-      this._pendingMediaControlRequests.delete(message.id);
-      this.dispatchWindowError(
-        "media-control-error",
-        message.id,
-        message.message ?? "Failed to control media",
-      );
-    }
+  private dispatchMediaControlError(message: WebSocketResponse) {
+    if (!this._pendingMediaControlRequests.has(message.id)) return;
+    this._pendingMediaControlRequests.delete(message.id);
+    this.dispatchWindowError(
+      "media-control-error",
+      message.id,
+      message.message ?? "Failed to control media",
+    );
   }
 
   private handleSettingsUpdateError(requestId: string, message: string) {
-    if (this._settingsErrorTimeout !== null) {
-      clearTimeout(this._settingsErrorTimeout);
-    }
+    this.clearSettingsErrorTimeout();
 
     this._isSettingsUpdatePending = false;
-    if (this._settingsUpdateTimeout) {
-      clearTimeout(this._settingsUpdateTimeout);
-      this._settingsUpdateTimeout = null;
-    }
+    this.clearSettingsUpdateTimeout();
 
     this._settingsUpdateError = {
       requestId,
@@ -621,186 +678,196 @@ class WebSocketProvider extends ProviderElement {
     this._pendingCommandRequests.delete(requestId);
   }
 
-  private connect() {
-    // Guard against undefined connection (context not yet provided)
-    if (!this.connection) {
-      return;
+  /** Returns an error message if host/port/token are missing, or null if valid. */
+  private getConnectionFieldError(): string | null {
+    const { host, port, token } = this.connection!;
+    if (!host || !port)
+      return "Connection settings are incomplete. Please configure host and port.";
+    if (!token)
+      return "API token is required. Please configure your token in connection settings.";
+    return null;
+  }
+
+  private getValidConnectionSettings(): ValidConnectionSettings | null {
+    if (!this.connection) return null;
+
+    const fieldError = this.getConnectionFieldError();
+    if (fieldError) {
+      this.setDisconnectedError(fieldError);
+      return null;
     }
 
-    const { host, port, ssl, token } = this.connection;
+    return { ...this.connection, token: this.connection.token as string };
+  }
 
-    if (!host || !port) {
-      const error =
-        "Connection settings are incomplete. Please configure host and port.";
-      this._error = error;
-      this._isConnected = false;
-      this.requestUpdate();
-      return;
-    }
-
-    if (!token) {
-      const error =
-        "API token is required. Please configure your token in connection settings.";
-      this._error = error;
-      this._isConnected = false;
-      this.requestUpdate();
-      return;
-    }
-
-    if (this._ws) {
-      return;
-    }
-
-    if (this._connectionTimeout) {
-      clearTimeout(this._connectionTimeout);
-    }
-
+  private startConnectionTimeout() {
+    this.clearConnectionTimeout();
     this._connectionTimeout = window.setTimeout(() => {
-      // Fix race condition: Store WebSocket reference and state before check
       const ws = this._ws;
-      const currentState = ws?.readyState;
-      if (ws && currentState === WebSocket.CONNECTING) {
-        ws.close();
-        this._error =
-          "Connection timeout. Please check your host, port, and network connection.";
-        this._isConnected = false;
-        this.requestUpdate();
+      if (ws?.readyState !== WebSocket.CONNECTING) {
+        return;
       }
-    }, CONNECTION_TIMEOUT);
 
+      ws.close();
+      this.setDisconnectedError(
+        "Connection timeout. Please check your host, port, and network connection.",
+      );
+    }, CONNECTION_TIMEOUT);
+  }
+
+  private createWebSocketConnection(host: string, port: number, ssl: boolean) {
     try {
-      this._ws = new WebSocket(
+      return new WebSocket(
         `${ssl ? "wss" : "ws"}://${host}:${port}/api/websocket`,
       );
     } catch (error) {
       console.error("Failed to create WebSocket connection:", error);
-      this._error =
-        "Failed to create connection. Please check your connection settings.";
-      this._isConnected = false;
-      this.requestUpdate();
+      this.setDisconnectedError(
+        "Failed to create connection. Please check your connection settings.",
+      );
+      return null;
+    }
+  }
+
+  private attachSocketHandlers(ws: WebSocket, token: string) {
+    ws.onopen = () => this.handleSocketOpen(token);
+    ws.onclose = (event) => this.handleSocketClose(event);
+    ws.onerror = () => this.handleSocketError();
+    ws.onmessage = this.handleMessage.bind(this);
+  }
+
+  private handleSocketOpen(token: string) {
+    this._isConnected = true;
+    this._error = null;
+    this._retryCount = 0;
+    this.clearConnectionTimeout();
+    this.clearReconnectTimeout();
+    this._previousConnectedState = true;
+    this.requestInitialData(token);
+    this.requestUpdate();
+  }
+
+  private requestInitialData(token: string) {
+    if (this._isRequestingData) {
       return;
     }
 
-    this._ws.onopen = () => {
-      this._isConnected = true;
-      this._error = null;
-      this._retryCount = 0;
+    this._isRequestingData = true;
+    this.sendRequest({
+      id: generateUUID(),
+      event: "GET_SETTINGS",
+      token,
+    });
+    this.sendRequest({
+      id: generateUUID(),
+      event: "GET_DATA",
+      data: { modules: Modules },
+      token,
+    });
+    this.sendRequest({
+      id: generateUUID(),
+      event: "REGISTER_DATA_LISTENER",
+      data: { modules: Modules },
+      token,
+    });
+  }
 
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
+  private handleSocketClose(event: CloseEvent) {
+    this._isConnected = false;
+    this.clearConnectionTimeout();
+    this.clearAllPendingResolvers("WebSocket connection closed");
+    this.clearExecutingCommandsOnDisconnect();
+    this._previousConnectedState = false;
+    this.applyCloseError(event);
+    this.requestUpdate();
+    this.scheduleReconnect();
+  }
 
-      if (this._reconnectTimeout) {
-        clearTimeout(this._reconnectTimeout);
-      }
+  private applyCloseError(event: CloseEvent) {
+    const knownCloseError = this.getKnownCloseError(event.code);
+    if (knownCloseError) {
+      this._error = knownCloseError;
+      return;
+    }
 
-      this._previousConnectedState = true;
+    if (event.code !== 1000 && event.code !== 1001) {
+      this._error = this.formatCloseError(event);
+    }
+  }
 
-      if (!this._isRequestingData) {
-        this._isRequestingData = true;
-        this.sendRequest({
-          id: generateUUID(),
-          event: "GET_SETTINGS",
-          token: token,
-        });
+  private formatCloseError(event: CloseEvent): string {
+    return `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
+  }
 
-        this.sendRequest({
-          id: generateUUID(),
-          event: "GET_DATA",
-          data: { modules: Modules },
-          token: token,
-        });
+  private getKnownCloseError(code: number) {
+    if (code === 1003) {
+      this._retryCount = MAX_RETRIES + 1;
+    }
 
-        this.sendRequest({
-          id: generateUUID(),
-          event: "REGISTER_DATA_LISTENER",
-          data: { modules: Modules },
-          token: token,
-        });
-      }
+    return (
+      {
+        1006: "Connection closed unexpectedly. Please check your host and port settings.",
+        1002: "Connection failed due to protocol error.",
+        1003: "Invalid API token. Please check your connection settings.",
+      } as Record<number, string>
+    )[code];
+  }
 
-      this.requestUpdate();
-    };
+  private handleSocketError() {
+    this._isConnected = false;
+    this.clearConnectionTimeout();
+    this.clearAllPendingResolvers("WebSocket connection error");
+    this.clearExecutingCommandsOnDisconnect();
+    if (this._retryCount === 0) {
+      this._error =
+        "Connection failed. Please check your host, port, and network connection.";
+    }
+    this.requestUpdate();
+  }
 
-    this._ws.onclose = (event: CloseEvent) => {
-      this._isConnected = false;
+  private connect() {
+    const connection = this.getValidConnectionSettings();
+    if (!connection || this._ws) {
+      return;
+    }
 
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
+    const { host, port, ssl, token } = connection;
+    this.startConnectionTimeout();
+    this._ws = this.createWebSocketConnection(host, port, ssl);
+    if (!this._ws) {
+      return;
+    }
 
-      this.clearAllPendingResolvers("WebSocket connection closed");
-      this.clearExecutingCommandsOnDisconnect();
-
-      this._previousConnectedState = false;
-
-      if (event.code === 1006) {
-        this._error =
-          "Connection closed unexpectedly. Please check your host and port settings.";
-      } else if (event.code === 1002) {
-        this._error = "Connection failed due to protocol error.";
-      } else if (event.code === 1003) {
-        this._error =
-          "Invalid API token. Please check your connection settings.";
-        this._retryCount = MAX_RETRIES + 1;
-      } else if (event.code !== 1000 && event.code !== 1001) {
-        this._error = `Connection closed with code ${event.code}: ${event.reason || "Unknown reason"}`;
-      }
-
-      this.requestUpdate();
-      this.scheduleReconnect();
-    };
-
-    this._ws.onerror = () => {
-      this._isConnected = false;
-
-      if (this._connectionTimeout) {
-        clearTimeout(this._connectionTimeout);
-        this._connectionTimeout = null;
-      }
-
-      this.clearAllPendingResolvers("WebSocket connection error");
-      this.clearExecutingCommandsOnDisconnect();
-
-      if (this._retryCount === 0) {
-        this._error =
-          "Connection failed. Please check your host, port, and network connection.";
-      }
-
-      this.requestUpdate();
-    };
-
-    this._ws.onmessage = this.handleMessage.bind(this);
+    this.attachSocketHandlers(this._ws, token);
   }
 
   private scheduleReconnect() {
-    // Guard against undefined connection (context not yet provided)
-    if (!this.connection) return;
-
-    const { host, port, token } = this.connection;
-
-    if (!host || !port || !token) {
-      // Don't attempt reconnect if settings are incomplete
+    if (!this.hasReconnectSettings() || this._isConnected) {
       return;
     }
-    if (this._isConnected) return;
 
-    if (this._reconnectTimeout) {
-      clearTimeout(this._reconnectTimeout);
+    this.clearReconnectTimeout();
+    this._reconnectTimeout = window.setTimeout(() => {
+      this.handleReconnectTimeout();
+    }, RETRY_DELAY);
+  }
+
+  private hasReconnectSettings() {
+    return Boolean(
+      this.connection?.host && this.connection.port && this.connection.token,
+    );
+  }
+
+  private handleReconnectTimeout() {
+    if (this._retryCount >= MAX_RETRIES) {
+      this._error = `Failed to connect after ${MAX_RETRIES} attempts. Please check your connection settings and try again.`;
+      this.requestUpdate();
+      return;
     }
 
-    this._reconnectTimeout = window.setTimeout(() => {
-      if (this._retryCount < MAX_RETRIES) {
-        this._retryCount++;
-        this._ws = null;
-        this.connect();
-      } else {
-        this._error = `Failed to connect after ${MAX_RETRIES} attempts. Please check your connection settings and try again.`;
-        this.requestUpdate();
-      }
-    }, RETRY_DELAY);
+    this._retryCount++;
+    this._ws = null;
+    this.connect();
   }
 
   sendCommandExecute(messageId: string, commandId: string, token: string) {
@@ -826,33 +893,74 @@ class WebSocketProvider extends ProviderElement {
     if (this._ws?.readyState !== WebSocket.OPEN) return;
     if (!request.token) throw new Error("No token found");
 
-    if (request.event === "UPDATE_SETTINGS") {
-      this._isSettingsUpdatePending = true;
-      const requestId = request.id;
-      if (requestId) {
-        this._pendingSettingsRequests.add(requestId);
-      }
-      if (this._settingsUpdateTimeout) {
-        clearTimeout(this._settingsUpdateTimeout);
-      }
-      this._settingsUpdateTimeout = window.setTimeout(() => {
-        this._isSettingsUpdatePending = false;
-        // Clean up stale pending request to prevent memory leak
-        if (requestId) {
-          this._pendingSettingsRequests.delete(requestId);
-        }
-        this._error =
-          "Settings update timed out. Please try again or check your connection.";
-        this.requestUpdate();
-      }, UPDATE_TIMEOUT);
-    }
-
-    // Track media control requests
-    if (request.event === "MEDIA_CONTROL" && request.id) {
-      this._pendingMediaControlRequests.add(request.id);
-    }
-
+    this.trackRequest(request);
     this._ws.send(JSON.stringify(request));
+  }
+
+  private trackRequest(request: WebSocketRequest) {
+    if (request.event === "UPDATE_SETTINGS") {
+      this.trackSettingsUpdateRequest(request.id);
+    }
+
+    if (request.event === "MEDIA_CONTROL") {
+      this.trackMediaControlRequest(request.id);
+    }
+  }
+
+  private trackSettingsUpdateRequest(requestId: string) {
+    this._isSettingsUpdatePending = true;
+    this._pendingSettingsRequests.add(requestId);
+    this.clearSettingsUpdateTimeout();
+    this._settingsUpdateTimeout = window.setTimeout(() => {
+      this.handleSettingsUpdateTimeout(requestId);
+    }, UPDATE_TIMEOUT);
+  }
+
+  private handleSettingsUpdateTimeout(requestId: string) {
+    this._isSettingsUpdatePending = false;
+    this._pendingSettingsRequests.delete(requestId);
+    this._error =
+      "Settings update timed out. Please try again or check your connection.";
+    this.requestUpdate();
+  }
+
+  private trackMediaControlRequest(requestId: string) {
+    this._pendingMediaControlRequests.add(requestId);
+  }
+
+  /**
+   * Throws if the WebSocket is not open or the request has no id.
+   * Called inside the Promise executor so thrown errors reject the promise.
+   */
+  private validateRequestReady(request: WebSocketRequest) {
+    if (this._ws?.readyState !== WebSocket.OPEN) {
+      throw new Error("WebSocket is not connected");
+    }
+    if (!request.id) {
+      throw new Error("Request must have an id");
+    }
+  }
+
+  private startRequestTimeout(
+    requestId: string,
+    reject: (reason: Error) => void,
+  ): number {
+    return window.setTimeout(() => {
+      if (this._pendingResolvers.has(requestId)) {
+        this._pendingResolvers.delete(requestId);
+        reject(new Error("WebSocket response timed out"));
+      }
+    }, UPDATE_TIMEOUT);
+  }
+
+  private sendTrackedRequest(request: WebSocketRequest, timeoutId: number) {
+    try {
+      this._ws!.send(JSON.stringify(request));
+    } catch (e) {
+      clearTimeout(timeoutId);
+      this._pendingResolvers.delete(request.id);
+      throw e instanceof Error ? e : new Error("Unknown error");
+    }
   }
 
   sendRequestWithResponse<T>(
@@ -860,36 +968,15 @@ class WebSocketProvider extends ProviderElement {
     schema: z.ZodType<T>,
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      if (this._ws?.readyState !== WebSocket.OPEN) {
-        reject(new Error("WebSocket is not connected"));
-        return;
-      }
-      if (!request.id) {
-        reject(new Error("Request must have an id"));
-        return;
-      }
-
-      const timeoutId = window.setTimeout(() => {
-        if (this._pendingResolvers.has(request.id)) {
-          this._pendingResolvers.delete(request.id);
-          reject(new Error("WebSocket response timed out"));
-        }
-      }, UPDATE_TIMEOUT);
-
+      this.validateRequestReady(request);
+      const timeoutId = this.startRequestTimeout(request.id, reject);
       this._pendingResolvers.set(request.id, {
         resolve: resolve as (value: unknown) => void,
         reject,
         schema,
         timeoutId,
       });
-
-      try {
-        this._ws.send(JSON.stringify(request));
-      } catch (e) {
-        clearTimeout(timeoutId);
-        this._pendingResolvers.delete(request.id);
-        reject(e instanceof Error ? e : new Error("Unknown error"));
-      }
+      this.sendTrackedRequest(request, timeoutId);
     });
   }
 
@@ -905,36 +992,24 @@ class WebSocketProvider extends ProviderElement {
   }
 
   private cleanup() {
-    if (this._ws) {
-      this._ws.close();
-      this._ws = null;
-    }
-    if (this._connectionTimeout) {
-      clearTimeout(this._connectionTimeout);
-      this._connectionTimeout = null;
-    }
-    if (this._reconnectTimeout) {
-      clearTimeout(this._reconnectTimeout);
-      this._reconnectTimeout = null;
-    }
-    if (this._settingsUpdateTimeout) {
-      clearTimeout(this._settingsUpdateTimeout);
-      this._settingsUpdateTimeout = null;
-    }
-    if (this._settingsErrorTimeout !== null) {
-      clearTimeout(this._settingsErrorTimeout);
-      this._settingsErrorTimeout = null;
-    }
-    // Clean up all command execution timeouts
-    for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
-      clearTimeout(timeoutId);
-    }
-    this._commandExecutionCleanupTimeouts.clear();
+    this.closeWebSocket();
+    this.clearConnectionTimeout();
+    this.clearReconnectTimeout();
+    this.clearSettingsUpdateTimeout();
+    this.clearSettingsErrorTimeout();
+    this.clearCommandCleanupTimeouts();
     this._commandExecutions.clear();
     this._pendingCommandRequests.clear();
     this._pendingSettingsRequests.clear();
     this._pendingMediaControlRequests.clear();
     this.clearAllPendingResolvers("WebSocket provider disconnected");
+  }
+
+  private closeWebSocket() {
+    if (this._ws) {
+      this._ws.close();
+      this._ws = null;
+    }
   }
 
   render() {
