@@ -1,5 +1,11 @@
 import { createContext } from "@lit/context";
 
+import {
+  getBoolParam,
+  getIntParam,
+  getStringParam,
+} from "../lib/url-params";
+
 export interface ConnectionSettings {
   host: string;
   port: number;
@@ -20,50 +26,30 @@ export const connectionContext =
 const STORAGE_KEY = "system-bridge-connection";
 
 /**
- * Load connection settings from URL query parameters
- * Returns partial settings (only params that were provided in URL)
+ * Load connection settings from URL query parameters.
+ * Returns partial settings (only params that were provided in URL),
+ * or null if no connection params are present.
  */
 function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
   try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasAnyParam =
-      urlParams.has("host") ||
-      urlParams.has("port") ||
-      urlParams.has("ssl") ||
-      urlParams.has("apiKey") ||
-      urlParams.has("token");
-
-    if (!hasAnyParam) {
-      return null;
-    }
-
+    const params = new URLSearchParams(window.location.search);
     const settings: Partial<ConnectionSettings> = {};
 
-    if (urlParams.has("host")) {
-      settings.host = urlParams.get("host")!;
-    }
+    const host = getStringParam(params, "host");
+    if (host !== undefined) settings.host = host;
 
-    if (urlParams.has("port")) {
-      const port = parseInt(urlParams.get("port")!, 10);
-      if (!isNaN(port)) {
-        settings.port = port;
-      }
-    }
+    const port = getIntParam(params, "port");
+    if (port !== undefined) settings.port = port;
 
-    if (urlParams.has("ssl")) {
-      settings.ssl = urlParams.get("ssl") === "true";
-    }
+    const ssl = getBoolParam(params, "ssl");
+    if (ssl !== undefined) settings.ssl = ssl;
 
     // Support both 'apiKey' (used by backend) and 'token' (for compatibility)
-    if (urlParams.has("apiKey")) {
-      const token = urlParams.get("apiKey")!;
-      settings.token = token || null;
-    } else if (urlParams.has("token")) {
-      const token = urlParams.get("token")!;
-      settings.token = token || null;
-    }
+    const token =
+      getStringParam(params, "apiKey") ?? getStringParam(params, "token");
+    if (token !== undefined) settings.token = token || null;
 
-    return settings;
+    return Object.keys(settings).length > 0 ? settings : null;
   } catch (error) {
     console.error("Error loading connection settings from URL", error);
     return null;
