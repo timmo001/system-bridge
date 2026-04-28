@@ -51,6 +51,60 @@ class ConnectionStatusCard extends UIElement {
     );
   };
 
+  private renderConnectionIndicator(isConnected: boolean): TemplateResult {
+    return html`
+      <div class="flex items-center gap-2">
+        <div
+          class="h-3 w-3 rounded-full ${isConnected
+            ? "bg-primary"
+            : "bg-destructive"}"
+        ></div>
+        <span class="text-sm font-medium">
+          ${isConnected ? "Connected" : "Disconnected"}
+        </span>
+      </div>
+    `;
+  }
+
+  private renderErrorBanner(): TemplateResult {
+    if (!this._websocket?.error) return html``;
+    return html`
+      <div
+        class="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+      >
+        ${this._websocket.error}
+      </div>
+    `;
+  }
+
+  private renderConnectionDetails(): TemplateResult {
+    if (!this._connection) return html``;
+    return html`
+      <div class="grid grid-cols-2 gap-4 text-sm pt-2">
+        <div>
+          <span class="text-muted-foreground">Host:</span>
+          <span class="ml-2 font-mono">${this._connection.host}</span>
+        </div>
+        <div>
+          <span class="text-muted-foreground">Port:</span>
+          <span class="ml-2 font-mono">${this._connection.port}</span>
+        </div>
+        <div>
+          <span class="text-muted-foreground">SSL:</span>
+          <span class="ml-2"
+            >${this._connection.ssl ? "Yes" : "No"}</span
+          >
+        </div>
+        <div>
+          <span class="text-muted-foreground">Token:</span>
+          <span class="ml-2 font-mono">
+            ${this._connection.token ? "••••••••" : "Not set"}
+          </span>
+        </div>
+      </div>
+    `;
+  }
+
   render(): TemplateResult {
     const isConnected = this._websocket?.isConnected ?? false;
 
@@ -75,52 +129,9 @@ class ConnectionStatusCard extends UIElement {
               : ""}
           </div>
 
-          <div class="flex items-center gap-2">
-            <div
-              class="h-3 w-3 rounded-full ${isConnected
-                ? "bg-primary"
-                : "bg-destructive"}"
-            ></div>
-            <span class="text-sm font-medium">
-              ${isConnected ? "Connected" : "Disconnected"}
-            </span>
-          </div>
-
-          ${this._websocket?.error
-            ? html`
-                <div
-                  class="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-                >
-                  ${this._websocket.error}
-                </div>
-              `
-            : ""}
-          ${this._connection
-            ? html`
-                <div class="grid grid-cols-2 gap-4 text-sm pt-2">
-                  <div>
-                    <span class="text-muted-foreground">Host:</span>
-                    <span class="ml-2 font-mono">${this._connection.host}</span>
-                  </div>
-                  <div>
-                    <span class="text-muted-foreground">Port:</span>
-                    <span class="ml-2 font-mono">${this._connection.port}</span>
-                  </div>
-                  <div>
-                    <span class="text-muted-foreground">SSL:</span>
-                    <span class="ml-2"
-                      >${this._connection.ssl ? "Yes" : "No"}</span
-                    >
-                  </div>
-                  <div>
-                    <span class="text-muted-foreground">Token:</span>
-                    <span class="ml-2 font-mono">
-                      ${this._connection.token ? "••••••••" : "Not set"}
-                    </span>
-                  </div>
-                </div>
-              `
-            : ""}
+          ${this.renderConnectionIndicator(isConnected)}
+          ${this.renderErrorBanner()}
+          ${this.renderConnectionDetails()}
         </div>
       </div>
     `;

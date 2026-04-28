@@ -1,5 +1,5 @@
 import { consume } from "@lit/context";
-import { html } from "lit";
+import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import {
@@ -7,6 +7,7 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { getResultStyle } from "~/lib/result-styles";
 import type {
   Settings,
   SettingsCommandDefinition,
@@ -19,6 +20,13 @@ import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
+
+interface CommandResult {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  error?: string;
+}
 
 @customElement("page-settings-commands")
 class PageSettingsCommands extends PageElement {
@@ -96,18 +104,10 @@ class PageSettingsCommands extends PageElement {
 
   private extractErrorMessage(fullMessage: string): string {
     // Extract the meaningful part of the error message
-    // Example: "settings validation failed: command at index 0: command c60de62f-9e8f-4d8d-af71-9bd03b64cbf3 must use absolute path"
-    // Should return: "Command must use absolute path"
-
-    // Try multiple patterns in order of specificity
     const patterns = [
-      // Pattern for command UUID errors: "command [uuid] error text"
       /command\s+[a-f0-9-]+\s+(.+)$/i,
-      // Pattern for validation errors: "validation failed: actual error"
       /validation\s+failed:\s*(.+)$/i,
-      // Pattern for generic "failed to" errors
       /failed\s+to\s+[^:]+:\s*(.+)$/i,
-      // Pattern for errors after colon
       /:\s*([^:]+)$/,
     ];
 
@@ -115,12 +115,10 @@ class PageSettingsCommands extends PageElement {
       const match = pattern.exec(fullMessage);
       if (match?.[1]) {
         const extracted = match[1].trim();
-        // Capitalize first letter and return
         return extracted.charAt(0).toUpperCase() + extracted.slice(1);
       }
     }
 
-    // Fallback: return the original message
     return fullMessage;
   }
 
@@ -175,30 +173,29 @@ class PageSettingsCommands extends PageElement {
     }
   };
 
+  private checkPendingSubmission(): void {
+    if (!this.isSubmitting || this.pendingRequestId === null) return;
+
+    const currentCommands =
+      this.websocket?.settings?.commands.allowlist ?? [];
+    const previousCommandsStr = JSON.stringify(this.previousCommands);
+    const currentCommandsStr = JSON.stringify(currentCommands);
+
+    if (previousCommandsStr !== currentCommandsStr) {
+      this.handleSuccessfulSave();
+    }
+  }
+
   updated(changedProperties: Map<PropertyKey, unknown>) {
     if (changedProperties.has("websocket")) {
       this.loadSettings();
-
-      // Check if settings have been updated successfully after a pending submission
-      if (this.isSubmitting && this.pendingRequestId !== null) {
-        const currentCommands =
-          this.websocket?.settings?.commands.allowlist ?? [];
-        const previousCommandsStr = JSON.stringify(this.previousCommands);
-        const currentCommandsStr = JSON.stringify(currentCommands);
-
-        // If commands have changed, clear the submitting state
-        if (previousCommandsStr !== currentCommandsStr) {
-          this.handleSuccessfulSave();
-        }
-      }
+      this.checkPendingSubmission();
     }
   }
 
   private loadSettings() {
     if (this.websocket?.settings) {
       this.commands = [...this.websocket.settings.commands.allowlist];
-      // Don't update previousCommands here - it should only be updated when initiating a submission
-      // This allows the updated() method to detect when settings have changed successfully
     }
   }
 
@@ -258,8 +255,6 @@ class PageSettingsCommands extends PageElement {
       arguments: args,
     };
 
-    // Don't optimistically add - wait for backend confirmation
-    // Just save with the new command included
     const updatedCommands = [...this.commands, newCommand];
     this.pendingCommandAction = "add";
     this.saveSettingsWithCommands(updatedCommands);
@@ -270,7 +265,6 @@ class PageSettingsCommands extends PageElement {
     const id = button.getAttribute("data-id");
     if (!id) return;
 
-    // Don't optimistically remove - wait for backend confirmation
     const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
     this.pendingCommandAction = "remove";
     this.saveSettingsWithCommands(updatedCommands);
@@ -279,16 +273,16 @@ class PageSettingsCommands extends PageElement {
   private handleExecuteCommand = (e: Event): void => {
     const button = e.currentTarget as HTMLElement;
     const id = button.getAttribute("data-id");
-    if (!id) return;
-
-    if (!this.connection?.token || !this.websocket?.sendCommandExecute) {
+    if (
+      !id ||
+      !this.connection?.token ||
+      !this.websocket?.sendCommandExecute
+    ) {
       return;
     }
 
     const command = this.commands.find((cmd) => cmd.id === id);
-    if (!command) {
-      return;
-    }
+    if (!command) return;
 
     this.websocket.sendCommandExecute(
       generateUUID(),
@@ -309,22 +303,36 @@ class PageSettingsCommands extends PageElement {
     }
   };
 
-  private saveSettingsWithCommands(
-    commands: SettingsCommandDefinition[],
-  ): void {
-    if (!this.connection?.token) {
-      return;
-    }
-
-    if (!this.websocket?.sendRequest || !this.websocket?.settings) {
-      return;
-    }
-
-    // Clear any existing timeout
+  private clearExistingTimeout(): void {
     if (this.submissionTimeout !== null) {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+  }
+
+  private startSubmissionTimeout(requestId: string): void {
+    this.submissionTimeout = window.setTimeout(() => {
+      if (this.isSubmitting && this.pendingRequestId === requestId) {
+        console.warn(
+          "Settings update timeout: no response received after 30 seconds",
+        );
+        this.clearSubmissionState();
+      }
+    }, 30000);
+  }
+
+  private saveSettingsWithCommands(
+    commands: SettingsCommandDefinition[],
+  ): void {
+    if (
+      !this.connection?.token ||
+      !this.websocket?.sendRequest ||
+      !this.websocket?.settings
+    ) {
+      return;
+    }
+
+    this.clearExistingTimeout();
 
     this.isSubmitting = true;
     const requestId = generateUUID();
@@ -347,17 +355,7 @@ class PageSettingsCommands extends PageElement {
         token: this.connection.token,
       });
 
-      // Set timeout to clear submitting state if no response received
-      // Using 30s timeout (increased from 10s) to accommodate slower systems
-      // and prevent premature timeout on settings validation/persistence
-      this.submissionTimeout = window.setTimeout(() => {
-        if (this.isSubmitting && this.pendingRequestId === requestId) {
-          console.warn(
-            "Settings update timeout: no response received after 30 seconds",
-          );
-          this.clearSubmissionState();
-        }
-      }, 30000);
+      this.startSubmissionTimeout(requestId);
     } catch (error) {
       console.error("Failed to update command settings:", error);
       this.clearSubmissionState();
@@ -378,18 +376,117 @@ class PageSettingsCommands extends PageElement {
     this.clearSubmissionState();
   }
 
+  private renderCommandMeta(cmd: SettingsCommandDefinition): TemplateResult {
+    return html`
+      ${cmd.workingDir
+        ? html`
+            <div class="text-xs text-muted-foreground">
+              Working Dir: ${cmd.workingDir}
+            </div>
+          `
+        : ""}
+      ${cmd.arguments.length > 0
+        ? html`
+            <div class="text-xs text-muted-foreground">
+              Arguments: ${cmd.arguments.join(", ")}
+            </div>
+          `
+        : ""}
+    `;
+  }
+
+  private renderCommandActions(
+    cmd: SettingsCommandDefinition,
+    isExecuting: boolean,
+  ): TemplateResult {
+    return html`
+      <div class="flex gap-2">
+        <ui-button
+          variant="default"
+          size="sm"
+          data-id=${cmd.id}
+          @click=${this.handleExecuteCommand}
+          ?disabled=${isExecuting || this.isSubmitting}
+          title="Execute command"
+        >
+          <ui-icon
+            name=${isExecuting ? "Loader2" : "Play"}
+            className=${isExecuting ? "animate-spin" : ""}
+          ></ui-icon>
+        </ui-button>
+        <ui-button
+          variant="destructive"
+          size="sm"
+          data-id=${cmd.id}
+          @click=${this.handleRemoveCommand}
+          ?disabled=${this.isSubmitting}
+          title="Remove command"
+        >
+          <ui-icon
+            name=${this.isSubmitting ? "Loader2" : "Trash2"}
+            className=${this.isSubmitting ? "animate-spin" : ""}
+          ></ui-icon>
+        </ui-button>
+      </div>
+    `;
+  }
+
+  private renderCommandResultBlock(
+    result: CommandResult | null | undefined,
+  ): TemplateResult {
+    if (!result) return html``;
+
+    const style = getResultStyle(result.exitCode === 0);
+
+    return html`
+      <div
+        class="p-3 rounded-md border ${style.bgClass} ${style.borderClass} space-y-2"
+      >
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <ui-icon
+            name=${result.exitCode === 0 ? "CheckCircle2" : "XCircle"}
+          ></ui-icon>
+          <span
+            >Exit Code: ${result.exitCode}
+            ${result.error ? `(${result.error})` : ""}</span
+          >
+        </div>
+        ${result.stdout
+          ? html`
+              <div class="space-y-1">
+                <div class="text-xs font-medium text-muted-foreground">
+                  Output:
+                </div>
+                <pre
+                  class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                >
+${result.stdout}</pre
+                >
+              </div>
+            `
+          : ""}
+        ${result.stderr
+          ? html`
+              <div class="space-y-1">
+                <div class="text-xs font-medium text-red-400">
+                  Error Output:
+                </div>
+                <pre
+                  class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                >
+${result.stderr}</pre
+                >
+              </div>
+            `
+          : ""}
+      </div>
+    `;
+  }
+
   private renderCommandItem(cmd: SettingsCommandDefinition) {
     const executionState = this.websocket?.commandExecutions.get(cmd.id);
     const isExecuting = executionState?.isExecuting ?? false;
-    const result = executionState?.result as
-      | {
-          exitCode: number;
-          stdout: string;
-          stderr: string;
-          error?: string;
-        }
-      | null
-      | undefined;
+    const result = executionState?.result as CommandResult | null | undefined;
 
     return html`
       <div class="flex flex-col gap-3 p-4 rounded-md border">
@@ -412,97 +509,11 @@ class PageSettingsCommands extends PageElement {
                 <ui-icon name="Copy" size="12"></ui-icon>
               </ui-button>
             </div>
-            ${cmd.workingDir
-              ? html`
-                  <div class="text-xs text-muted-foreground">
-                    Working Dir: ${cmd.workingDir}
-                  </div>
-                `
-              : ""}
-            ${cmd.arguments.length > 0
-              ? html`
-                  <div class="text-xs text-muted-foreground">
-                    Arguments: ${cmd.arguments.join(", ")}
-                  </div>
-                `
-              : ""}
+            ${this.renderCommandMeta(cmd)}
           </div>
-          <div class="flex gap-2">
-            <ui-button
-              variant="default"
-              size="sm"
-              data-id=${cmd.id}
-              @click=${this.handleExecuteCommand}
-              ?disabled=${isExecuting || this.isSubmitting}
-              title="Execute command"
-            >
-              <ui-icon
-                name=${isExecuting ? "Loader2" : "Play"}
-                className=${isExecuting ? "animate-spin" : ""}
-              ></ui-icon>
-            </ui-button>
-            <ui-button
-              variant="destructive"
-              size="sm"
-              data-id=${cmd.id}
-              @click=${this.handleRemoveCommand}
-              ?disabled=${this.isSubmitting}
-              title="Remove command"
-            >
-              <ui-icon
-                name=${this.isSubmitting ? "Loader2" : "Trash2"}
-                className=${this.isSubmitting ? "animate-spin" : ""}
-              ></ui-icon>
-            </ui-button>
-          </div>
+          ${this.renderCommandActions(cmd, isExecuting)}
         </div>
-        ${result
-          ? html`
-              <div
-                class="p-3 rounded-md border ${result.exitCode === 0
-                  ? "bg-green-950/30 border-green-800"
-                  : "bg-red-950/30 border-red-800"} space-y-2"
-              >
-                <div class="flex items-center gap-2 text-sm font-medium">
-                  <ui-icon
-                    name=${result.exitCode === 0 ? "CheckCircle2" : "XCircle"}
-                  ></ui-icon>
-                  <span
-                    >Exit Code: ${result.exitCode}
-                    ${result.error ? `(${result.error})` : ""}</span
-                  >
-                </div>
-                ${result.stdout
-                  ? html`
-                      <div class="space-y-1">
-                        <div class="text-xs font-medium text-muted-foreground">
-                          Output:
-                        </div>
-                        <pre
-                          class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
-                        >
-${result.stdout}</pre
-                        >
-                      </div>
-                    `
-                  : ""}
-                ${result.stderr
-                  ? html`
-                      <div class="space-y-1">
-                        <div class="text-xs font-medium text-red-400">
-                          Error Output:
-                        </div>
-                        <pre
-                          class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
-                        >
-${result.stderr}</pre
-                        >
-                      </div>
-                    `
-                  : ""}
-              </div>
-            `
-          : ""}
+        ${this.renderCommandResultBlock(result)}
       </div>
     `;
   }
@@ -525,6 +536,108 @@ ${result.stderr}</pre
     return html` <div class="space-y-2">${commandItems}</div> `;
   }
 
+  private renderErrorMessage(): TemplateResult {
+    if (!this.errorMessage) return html``;
+    return html`
+      <div
+        class="rounded-lg border border-red-800 bg-red-950/30 p-4 flex items-start gap-3"
+      >
+        <ui-icon name="AlertCircle" class="text-red-400"></ui-icon>
+        <div class="flex-1">
+          <div class="font-medium text-red-200">
+            Failed to save command
+          </div>
+          <div class="text-sm text-red-300 mt-1">
+            ${this.errorMessage}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderAddCommandForm(): TemplateResult {
+    return html`
+      <div class="rounded-lg border bg-card p-6 space-y-4">
+        <h2 class="text-xl font-semibold">Add Command</h2>
+        <p class="text-sm text-muted-foreground">
+          Add commands that can be executed remotely via the API.
+        </p>
+
+        <div class="space-y-3">
+          <div>
+            <ui-label>Name</ui-label>
+            <ui-input
+              placeholder="Enter command name"
+              .value=${this.newCommandName}
+              @input=${this.handleNameInput}
+              ?disabled=${this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div>
+            <ui-label>Command</ui-label>
+            <ui-input
+              placeholder="Enter command to execute"
+              .value=${this.newCommandCommand}
+              @input=${this.handleCommandInput}
+              ?disabled=${this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div>
+            <ui-label>Working Directory (optional)</ui-label>
+            <ui-input
+              placeholder="Enter working directory"
+              .value=${this.newCommandWorkingDir}
+              @input=${this.handleWorkingDirInput}
+              ?disabled=${this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div>
+            <ui-label
+              >Arguments (optional, comma-separated)</ui-label
+            >
+            <ui-input
+              placeholder="arg1, arg2, arg3"
+              .value=${this.newCommandArguments}
+              @input=${this.handleArgumentsInput}
+              ?disabled=${this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div class="flex justify-end">
+            <ui-button
+              variant="secondary"
+              @click=${this.handleAddCommand}
+              ?disabled=${this.isSubmitting ||
+              !this.newCommandName.trim() ||
+              !this.newCommandCommand.trim()}
+            >
+              ${this.isSubmitting
+                ? html`<ui-icon
+                    name="Loader2"
+                    className="animate-spin"
+                  ></ui-icon>`
+                : ""}
+              Add Command
+            </ui-button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderCommandListSection(): TemplateResult {
+    return html`
+      <div class="rounded-lg border bg-card p-6 space-y-4">
+        <h2 class="text-xl font-semibold">
+          Commands
+          ${this.commands.length > 0
+            ? `(${this.commands.length})`
+            : ""}
+        </h2>
+        ${this.renderCommandList()}
+      </div>
+    `;
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
@@ -532,108 +645,18 @@ ${result.stderr}</pre
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
-          ${this.errorMessage
-            ? html`
-                <div
-                  class="rounded-lg border border-red-800 bg-red-950/30 p-4 flex items-start gap-3"
-                >
-                  <ui-icon name="AlertCircle" class="text-red-400"></ui-icon>
-                  <div class="flex-1">
-                    <div class="font-medium text-red-200">
-                      Failed to save command
-                    </div>
-                    <div class="text-sm text-red-300 mt-1">
-                      ${this.errorMessage}
-                    </div>
-                  </div>
-                </div>
-              `
-            : ""}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to manage commands."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <div class="space-y-6">
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">Add Command</h2>
-                    <p class="text-sm text-muted-foreground">
-                      Add commands that can be executed remotely via the API.
-                    </p>
-
-                    <div class="space-y-3">
-                      <div>
-                        <ui-label>Name</ui-label>
-                        <ui-input
-                          placeholder="Enter command name"
-                          .value=${this.newCommandName}
-                          @input=${this.handleNameInput}
-                          ?disabled=${this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label>Command</ui-label>
-                        <ui-input
-                          placeholder="Enter command to execute"
-                          .value=${this.newCommandCommand}
-                          @input=${this.handleCommandInput}
-                          ?disabled=${this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label>Working Directory (optional)</ui-label>
-                        <ui-input
-                          placeholder="Enter working directory"
-                          .value=${this.newCommandWorkingDir}
-                          @input=${this.handleWorkingDirInput}
-                          ?disabled=${this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label
-                          >Arguments (optional, comma-separated)</ui-label
-                        >
-                        <ui-input
-                          placeholder="arg1, arg2, arg3"
-                          .value=${this.newCommandArguments}
-                          @input=${this.handleArgumentsInput}
-                          ?disabled=${this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div class="flex justify-end">
-                        <ui-button
-                          variant="secondary"
-                          @click=${this.handleAddCommand}
-                          ?disabled=${this.isSubmitting ||
-                          !this.newCommandName.trim() ||
-                          !this.newCommandCommand.trim()}
-                        >
-                          ${this.isSubmitting
-                            ? html`<ui-icon
-                                name="Loader2"
-                                className="animate-spin"
-                              ></ui-icon>`
-                            : ""}
-                          Add Command
-                        </ui-button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">
-                      Commands
-                      ${this.commands.length > 0
-                        ? `(${this.commands.length})`
-                        : ""}
-                    </h2>
-                    ${this.renderCommandList()}
-                  </div>
-                </div>
-              `}
+          ${this.renderErrorMessage()}
+          ${this.renderWithConnection(
+            isConnected,
+            "Please connect to System Bridge to manage commands.",
+            this.handleNavigateToConnection,
+            html`
+              <div class="space-y-6">
+                ${this.renderAddCommandForm()}
+                ${this.renderCommandListSection()}
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;

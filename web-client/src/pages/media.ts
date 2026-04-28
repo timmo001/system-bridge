@@ -7,6 +7,7 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import { getResultStyle } from "~/lib/result-styles";
 import type { MediaData } from "~/lib/system-bridge/types-modules-schemas";
 import { formatDuration, generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
@@ -29,6 +30,36 @@ interface ActionResult {
   message: string;
   timestamp: number;
 }
+
+interface StatusConfig {
+  bg: string;
+  text: string;
+  icon: string;
+}
+
+const statusStyles: Record<string, StatusConfig> = {
+  playing: {
+    bg: "bg-green-500/20",
+    text: "text-green-400",
+    icon: "Play",
+  },
+  paused: {
+    bg: "bg-yellow-500/20",
+    text: "text-yellow-400",
+    icon: "Pause",
+  },
+  stopped: {
+    bg: "bg-red-500/20",
+    text: "text-red-400",
+    icon: "Square",
+  },
+};
+
+const defaultStatusStyle: StatusConfig = {
+  bg: "bg-gray-500/20",
+  text: "text-gray-400",
+  icon: "Circle",
+};
 
 @customElement("page-media")
 class PageMedia extends PageElement {
@@ -170,11 +201,13 @@ class PageMedia extends PageElement {
     return this.mediaData?.status?.toLowerCase() === "playing";
   }
 
+  // fallow-ignore-next-line complexity
   private get hasMedia(): boolean {
     const media = this.mediaData;
     return !!(media?.title || media?.artist || media?.status);
   }
 
+  // fallow-ignore-next-line complexity
   private formatLastUpdated(timestamp: number | null | undefined): string {
     if (timestamp == null) {
       return "Never";
@@ -198,31 +231,14 @@ class PageMedia extends PageElement {
 
   private renderStatusBadge(): TemplateResult {
     const status = this.mediaData?.status ?? "Unknown";
-    const statusLower = status.toLowerCase();
-
-    let bgColor = "bg-gray-500/20";
-    let textColor = "text-gray-400";
-    let iconName = "Circle";
-
-    if (statusLower === "playing") {
-      bgColor = "bg-green-500/20";
-      textColor = "text-green-400";
-      iconName = "Play";
-    } else if (statusLower === "paused") {
-      bgColor = "bg-yellow-500/20";
-      textColor = "text-yellow-400";
-      iconName = "Pause";
-    } else if (statusLower === "stopped") {
-      bgColor = "bg-red-500/20";
-      textColor = "text-red-400";
-      iconName = "Square";
-    }
+    const config =
+      statusStyles[status.toLowerCase()] ?? defaultStatusStyle;
 
     return html`
       <div
-        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bgColor} ${textColor}"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}"
       >
-        <ui-icon name=${iconName} class="size-3"></ui-icon>
+        <ui-icon name=${config.icon} class="size-3"></ui-icon>
         ${status}
       </div>
     `;
@@ -250,32 +266,43 @@ class PageMedia extends PageElement {
     `;
   }
 
-  private renderProgress(): TemplateResult {
+  private computeProgress(): {
+    positionStr: string;
+    durationStr: string;
+    percent: number;
+  } | null {
     const position = this.mediaData?.position;
     const duration = this.mediaData?.duration;
 
-    if (position == null && duration == null) {
-      return html``;
-    }
+    if (position == null && duration == null) return null;
 
-    const positionStr = position != null ? formatDuration(position) : "--:--";
-    const durationStr = duration != null ? formatDuration(duration) : "--:--";
-    const progressPercent =
+    const positionStr =
+      position != null ? formatDuration(position) : "--:--";
+    const durationStr =
+      duration != null ? formatDuration(duration) : "--:--";
+    const percent =
       position != null && duration != null && duration > 0
         ? Math.min((position / duration) * 100, 100)
         : 0;
+
+    return { positionStr, durationStr, percent };
+  }
+
+  private renderProgress(): TemplateResult {
+    const progress = this.computeProgress();
+    if (!progress) return html``;
 
     return html`
       <div class="space-y-1.5">
         <div class="h-1.5 bg-muted rounded-full overflow-hidden">
           <div
             class="h-full bg-primary rounded-full transition-all duration-300"
-            style="width: ${progressPercent}%"
+            style="width: ${progress.percent}%"
           ></div>
         </div>
         <div class="flex justify-between text-xs text-muted-foreground">
-          <span>${positionStr}</span>
-          <span>${durationStr}</span>
+          <span>${progress.positionStr}</span>
+          <span>${progress.durationStr}</span>
         </div>
       </div>
     `;
@@ -326,6 +353,7 @@ class PageMedia extends PageElement {
     }
 
     const media = this.mediaData!;
+    const albumTitle = media.album_title;
 
     return html`
       <div class="rounded-lg border bg-card p-6 space-y-4">
@@ -343,9 +371,9 @@ class PageMedia extends PageElement {
             <p class="text-sm text-muted-foreground truncate">
               ${media.artist ?? "Unknown Artist"}
             </p>
-            ${media.album_title
+            ${albumTitle
               ? html`<p class="text-xs text-muted-foreground/70 truncate">
-                  ${media.album_title}
+                  ${albumTitle}
                 </p>`
               : ""}
           </div>
@@ -356,13 +384,19 @@ class PageMedia extends PageElement {
     `;
   }
 
-  private renderPlaybackControls(): TemplateResult {
+  private getControlStates(): Record<string, boolean> {
     const media = this.mediaData;
-    const isPreviousDisabled = media?.is_previous_enabled === false;
-    const isPlayDisabled = media?.is_play_enabled === false;
-    const isPauseDisabled = media?.is_pause_enabled === false;
-    const isStopDisabled = media?.is_stop_enabled === false;
-    const isNextDisabled = media?.is_next_enabled === false;
+    return {
+      PREVIOUS: media?.is_previous_enabled === false,
+      PLAY: media?.is_play_enabled === false,
+      PAUSE: media?.is_pause_enabled === false,
+      STOP: media?.is_stop_enabled === false,
+      NEXT: media?.is_next_enabled === false,
+    };
+  }
+
+  private renderPlaybackControls(): TemplateResult {
+    const disabled = this.getControlStates();
 
     return html`
       <div class="rounded-lg border bg-card p-6 space-y-4">
@@ -372,7 +406,7 @@ class PageMedia extends PageElement {
           <ui-button
             variant="outline"
             size="icon"
-            ?disabled=${isPreviousDisabled || this.pendingAction === "PREVIOUS"}
+            ?disabled=${disabled.PREVIOUS || this.pendingAction === "PREVIOUS"}
             @click=${this.handlePrevious}
             title="Previous"
           >
@@ -385,7 +419,8 @@ class PageMedia extends PageElement {
                   variant="default"
                   size="icon"
                   class="size-12"
-                  ?disabled=${isPauseDisabled || this.pendingAction === "PAUSE"}
+                  ?disabled=${disabled.PAUSE ||
+                  this.pendingAction === "PAUSE"}
                   @click=${this.handlePause}
                   title="Pause"
                 >
@@ -397,7 +432,8 @@ class PageMedia extends PageElement {
                   variant="default"
                   size="icon"
                   class="size-12"
-                  ?disabled=${isPlayDisabled || this.pendingAction === "PLAY"}
+                  ?disabled=${disabled.PLAY ||
+                  this.pendingAction === "PLAY"}
                   @click=${this.handlePlay}
                   title="Play"
                 >
@@ -408,7 +444,7 @@ class PageMedia extends PageElement {
           <ui-button
             variant="outline"
             size="icon"
-            ?disabled=${isStopDisabled || this.pendingAction === "STOP"}
+            ?disabled=${disabled.STOP || this.pendingAction === "STOP"}
             @click=${this.handleStop}
             title="Stop"
           >
@@ -418,7 +454,7 @@ class PageMedia extends PageElement {
           <ui-button
             variant="outline"
             size="icon"
-            ?disabled=${isNextDisabled || this.pendingAction === "NEXT"}
+            ?disabled=${disabled.NEXT || this.pendingAction === "NEXT"}
             @click=${this.handleNext}
             title="Next"
           >
@@ -482,13 +518,11 @@ class PageMedia extends PageElement {
   }
 
   private renderActionResult(): TemplateResult {
-    if (!this.actionResult) {
-      return html``;
-    }
+    if (!this.actionResult) return html``;
 
     const { success, message } = this.actionResult;
+    const style = getResultStyle(success);
 
-    // Provide helpful context for errors
     const errorHint = !success
       ? html`<div class="text-xs mt-2 text-red-400/80">
           <p class="mb-1">Common causes:</p>
@@ -503,23 +537,17 @@ class PageMedia extends PageElement {
 
     return html`
       <div
-        class="rounded-lg border p-4 flex items-start gap-3 ${success
-          ? "border-green-800 bg-green-950/30"
-          : "border-red-800 bg-red-950/30"}"
+        class="rounded-lg border p-4 flex items-start gap-3 ${style.borderClass} ${style.bgClass}"
       >
         <ui-icon
-          name=${success ? "CheckCircle2" : "AlertCircle"}
-          class="${success ? "text-green-400" : "text-red-400"}"
+          name=${style.iconName}
+          class="${style.iconClass}"
         ></ui-icon>
         <div class="flex-1">
-          <div
-            class="font-medium ${success ? "text-green-200" : "text-red-200"}"
-          >
-            ${success ? "Success" : "Error"}
+          <div class="font-medium ${style.headingClass}">
+            ${style.heading}
           </div>
-          <div
-            class="text-sm mt-1 ${success ? "text-green-300" : "text-red-300"}"
-          >
+          <div class="text-sm mt-1 ${style.bodyClass}">
             ${message}
           </div>
           ${errorHint}
@@ -535,21 +563,19 @@ class PageMedia extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Connect to a System Bridge server to control media playback."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                ${this.renderActionResult()} ${this.renderNowPlayingCard()}
+          ${this.renderWithConnection(
+            isConnected,
+            "Connect to a System Bridge server to control media playback.",
+            this.handleNavigateToConnection,
+            html`
+              ${this.renderActionResult()} ${this.renderNowPlayingCard()}
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  ${this.renderPlaybackControls()}
-                  ${this.renderVolumeControls()}
-                </div>
-              `}
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                ${this.renderPlaybackControls()}
+                ${this.renderVolumeControls()}
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;
