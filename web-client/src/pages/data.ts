@@ -3,7 +3,11 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import { Modules, type ModuleName } from "~/lib/system-bridge/types-modules";
+import {
+  Modules,
+  ModuleLabels,
+  type ModuleName,
+} from "~/lib/system-bridge/types-modules";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/code-block";
@@ -39,15 +43,11 @@ class PageData extends PageElement {
     this.navigate("/connection");
   };
 
-  private capitalizeFirst(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
   private renderTabTriggers() {
     return Modules.map(
       (module) => html`
         <ui-tabs-trigger value=${module} ?active=${this.selectedTab === module}>
-          ${this.capitalizeFirst(module)}
+          ${ModuleLabels[module]}
         </ui-tabs-trigger>
       `,
     );
@@ -66,7 +66,7 @@ class PageData extends PageElement {
               class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
             >
               <h2 class="text-xl font-semibold mb-4">
-                ${this.capitalizeFirst(module)} Data
+                ${ModuleLabels[module]} Data
               </h2>
               ${this.websocket?.data?.[module]
                 ? html`
