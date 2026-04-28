@@ -177,7 +177,7 @@ test: test_go
 test_go:
 	go test -v ./...
 
-lint: lint_go lint_web_client
+lint: lint_go lint_web_client lint_fallow
 
 lint_go:
 	go fmt ./...
@@ -186,6 +186,9 @@ lint_go:
 lint_web_client:
 	cd web-client && pnpm lint
 	cd web-client && pnpm typecheck
+
+lint_fallow:
+	cd web-client && npx fallow --fail-on-issues
 
 clean:
 ifeq ($(OS),Windows_NT)
@@ -254,7 +257,10 @@ help:
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
 	@echo "  stop_processes           Stop all running System Bridge processes (Windows only)"
 	@echo "  test                     Run tests"
-	@echo "  lint                     Run Go linters (fmt, vet)"
+	@echo "  lint                     Run all linters (Go, web client, fallow)"
+	@echo "  lint_go                  Run Go linters (fmt, vet)"
+	@echo "  lint_web_client          Run web client linters (eslint, typecheck)"
+	@echo "  lint_fallow              Run fallow dead code analysis"
 	@echo "  clean                    Remove build artifacts"
 	@echo "  clean_dist               Remove dist directory"
 	@echo "  clean_web_client         Remove web client build artifacts"
