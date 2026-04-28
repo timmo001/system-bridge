@@ -56,15 +56,22 @@ class PageData extends PageElement {
   private renderTabContents() {
     return Modules.map(
       (module) => html`
-        <ui-tabs-content value=${module} ?hidden=${this.selectedTab !== module}>
-          <div class="mt-4">
-            <div class="rounded-lg border bg-card p-4">
+        <ui-tabs-content
+          value=${module}
+          ?hidden=${this.selectedTab !== module}
+          class="flex flex-col flex-1 min-h-0 mt-2"
+        >
+          <div class="flex flex-col flex-1 min-h-0 mt-4">
+            <div
+              class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
+            >
               <h2 class="text-xl font-semibold mb-4">
                 ${this.capitalizeFirst(module)} Data
               </h2>
               ${this.websocket?.data?.[module]
                 ? html`
                     <ui-code-block
+                      class="flex-1 min-h-0"
                       .data=${this.websocket.data[module]}
                     ></ui-code-block>
                   `
@@ -86,8 +93,12 @@ class PageData extends PageElement {
     const isConnected = this.websocket?.isConnected ?? false;
 
     return html`
-      <div class="min-h-screen bg-background text-foreground p-8">
-        <div class="max-w-7xl mx-auto space-y-6">
+      <div
+        class="flex flex-col h-dvh overflow-hidden bg-background text-foreground p-8"
+      >
+        <div
+          class="flex flex-col flex-1 min-h-0 max-w-7xl mx-auto w-full gap-6"
+        >
           ${this.renderPageHeader()}
           ${!isConnected
             ? html`
@@ -98,6 +109,7 @@ class PageData extends PageElement {
               `
             : html`
                 <ui-tabs
+                  class="flex flex-col flex-1 min-h-0"
                   .value=${this.selectedTab}
                   @tab-change=${this.handleTabChange}
                 >
