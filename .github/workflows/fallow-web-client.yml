@@ -8,6 +8,7 @@ on:
       - dev
     paths:
       - "web-client/**"
+      - ".fallowrc.json"
       - ".github/workflows/fallow-web-client.yml"
   pull_request:
     types:
@@ -15,6 +16,7 @@ on:
       - synchronize
     paths:
       - "web-client/**"
+      - ".fallowrc.json"
       - ".github/workflows/fallow-web-client.yml"
   workflow_dispatch: {}
 
@@ -36,7 +38,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         uses: fallow-rs/fallow@v2
         with:
-          root: web-client
+          root: .
           format: sarif
           changed-since: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
 
@@ -44,5 +46,5 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: fallow-rs/fallow@v2
         with:
-          root: web-client
+          root: .
           format: sarif

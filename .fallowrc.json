@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": ["web-client/index.html"],
+  "ignorePatterns": [
+    ".github/scripts/dependency-pr-comment.js",
+    "web-client/vite.config.ts",
+    "web-client/src/lib/system-bridge/types-modules-schemas.ts"
+  ]
+}
