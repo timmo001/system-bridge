@@ -1,5 +1,5 @@
 import { consume, provide } from "@lit/context";
-import { html } from "lit";
+import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
 
@@ -107,6 +107,50 @@ class PageConnection extends PageElement {
     return true;
   }
 
+  private handleTestMessage(
+    message: { type?: string; subtype?: string; id?: string },
+    ws: WebSocket,
+  ): void {
+    if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
+      ws.close();
+      this.isSubmitting = false;
+      this.requestUpdate();
+      return;
+    }
+
+    if (
+      message.type !== "SETTINGS_RESULT" &&
+      message.id !== "test-connection"
+    ) {
+      return;
+    }
+
+    const newSettings: ConnectionSettings = {
+      host: this.formData.host,
+      port: this.formData.port,
+      ssl: this.formData.ssl,
+      token: this.formData.token,
+    };
+
+    saveConnectionSettings(newSettings);
+
+    this.dispatchEvent(
+      new CustomEvent("connection-updated", {
+        detail: newSettings,
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    ws.close();
+    this.isSubmitting = false;
+    this.requestUpdate();
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }
+
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
     if (!this.validateForm()) return;
@@ -143,53 +187,14 @@ class PageConnection extends PageElement {
           subtype?: string;
           id?: string;
         };
-
-        if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
-          ws.close();
-          this.isSubmitting = false;
-          this.requestUpdate();
-          return;
-        }
-
-        if (
-          message.type === "SETTINGS_RESULT" ||
-          message.id === "test-connection"
-        ) {
-          const newSettings: ConnectionSettings = {
-            host: this.formData.host,
-            port: this.formData.port,
-            ssl: this.formData.ssl,
-            token: this.formData.token,
-          };
-
-          saveConnectionSettings(newSettings);
-
-          this.dispatchEvent(
-            new CustomEvent("connection-updated", {
-              detail: newSettings,
-              bubbles: true,
-              composed: true,
-            }),
-          );
-
-          ws.close();
-          this.isSubmitting = false;
-          this.requestUpdate();
-
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
+        this.handleTestMessage(message, ws);
       } catch (error) {
         console.error("Failed to parse connection test response:", error);
-
         this.isSubmitting = false;
         this.requestUpdate();
       }
     };
 
-    // Connection close handler for test connection
-    // No specific error handling needed - this is just a test to verify connectivity
     ws.onclose = () => {
       clearTimeout(timeout);
       this.isSubmitting = false;
@@ -198,11 +203,16 @@ class PageConnection extends PageElement {
 
     ws.onerror = () => {
       clearTimeout(timeout);
-
       this.isSubmitting = false;
       this.requestUpdate();
     };
   };
+
+  private renderFieldError(field: keyof ConnectionForm): TemplateResult {
+    const error = this.errors[field];
+    if (!error) return html``;
+    return html`<p class="text-sm text-destructive">${error}</p>`;
+  }
 
   render() {
     return html`
@@ -221,11 +231,7 @@ class PageConnection extends PageElement {
                 ?disabled=${this.isSubmitting}
                 @input=${this.handleHostInput}
               ></ui-input>
-              ${this.errors.host
-                ? html`<p class="text-sm text-destructive">
-                    ${this.errors.host}
-                  </p>`
-                : ""}
+              ${this.renderFieldError("host")}
               <p class="text-sm text-muted-foreground">
                 The hostname or IP address of the System Bridge server
               </p>
@@ -241,11 +247,7 @@ class PageConnection extends PageElement {
                 ?disabled=${this.isSubmitting}
                 @input=${this.handlePortInput}
               ></ui-input>
-              ${this.errors.port
-                ? html`<p class="text-sm text-destructive">
-                    ${this.errors.port}
-                  </p>`
-                : ""}
+              ${this.renderFieldError("port")}
               <p class="text-sm text-muted-foreground">
                 The port number of the System Bridge server (default: 9170)
               </p>
@@ -275,11 +277,7 @@ class PageConnection extends PageElement {
                 ?disabled=${this.isSubmitting}
                 @input=${this.handleTokenInput}
               ></ui-input>
-              ${this.errors.token
-                ? html`<p class="text-sm text-destructive">
-                    ${this.errors.token}
-                  </p>`
-                : ""}
+              ${this.renderFieldError("token")}
               <p class="text-sm text-muted-foreground">
                 Your System Bridge API token for authentication
               </p>

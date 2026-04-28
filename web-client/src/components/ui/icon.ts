@@ -25,6 +25,16 @@ class Icon extends UIElement {
     }
   }
 
+  private applyIconAttributes(element: Element): void {
+    if (this.size) {
+      element.setAttribute("width", String(this.size));
+      element.setAttribute("height", String(this.size));
+    }
+    if (this.className) {
+      element.setAttribute("class", this.className);
+    }
+  }
+
   private async loadIcon() {
     if (!this.name) {
       this.iconHtml = "";
@@ -42,18 +52,7 @@ class Icon extends UIElement {
       }
 
       const element = createElement(iconData);
-
-      // Apply size if provided
-      if (this.size) {
-        element.setAttribute("width", String(this.size));
-        element.setAttribute("height", String(this.size));
-      }
-
-      // Apply className if provided
-      if (this.className) {
-        element.setAttribute("class", this.className);
-      }
-
+      this.applyIconAttributes(element);
       this.iconHtml = element.outerHTML;
     } catch (error) {
       console.error(`Failed to load icon "${this.name}":`, error);

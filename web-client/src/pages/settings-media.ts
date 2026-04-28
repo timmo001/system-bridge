@@ -1,6 +1,7 @@
 import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { z } from "zod";
 
 import {
   connectionContext,
@@ -16,6 +17,8 @@ import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
+
+const DirectoryValidationSchema = z.object({ valid: z.boolean() });
 
 interface MediaDirectory {
   name: string;
@@ -83,15 +86,12 @@ class PageSettingsMedia extends PageElement {
   };
 
   private handleAddDirectory = async (): Promise<void> => {
-    if (!this.newDirectoryName.trim() || !this.newDirectoryPath.trim()) {
-      return;
-    }
-
-    if (!this.connection?.token) {
-      return;
-    }
-
-    if (!this.websocket?.sendRequestWithResponse) {
+    if (
+      !this.newDirectoryName.trim() ||
+      !this.newDirectoryPath.trim() ||
+      !this.connection?.token ||
+      !this.websocket?.sendRequestWithResponse
+    ) {
       return;
     }
 
@@ -109,33 +109,7 @@ class PageSettingsMedia extends PageElement {
           data: { path: this.newDirectoryPath },
           token: this.connection.token,
         },
-        // Simple validation schema
-        {
-          parse: (data: unknown) => {
-            if (
-              typeof data === "object" &&
-              data !== null &&
-              "valid" in data &&
-              typeof data.valid === "boolean"
-            ) {
-              return data as { valid: boolean };
-            }
-            throw new Error("Invalid response");
-          },
-          safeParse: (data: unknown) => {
-            try {
-              return {
-                success: true as const,
-                data: {
-                  parse: (d: unknown) => d,
-                  safeParse: () => ({ success: true as const, data: data }),
-                }.parse(data) as { valid: boolean },
-              };
-            } catch (error) {
-              return { success: false as const, error };
-            }
-          },
-        } as never,
+        DirectoryValidationSchema as never,
       );
 
       if (response.valid) {
@@ -173,11 +147,11 @@ class PageSettingsMedia extends PageElement {
   };
 
   private saveSettings(): void {
-    if (!this.connection?.token) {
-      return;
-    }
-
-    if (!this.websocket?.sendRequest || !this.websocket?.settings) {
+    if (
+      !this.connection?.token ||
+      !this.websocket?.sendRequest ||
+      !this.websocket?.settings
+    ) {
       return;
     }
 
@@ -244,6 +218,59 @@ class PageSettingsMedia extends PageElement {
     return html` <div class="space-y-2">${directoryItems}</div> `;
   }
 
+  private renderAddDirectoryForm() {
+    return html`
+      <div class="rounded-lg border bg-card p-6 space-y-4">
+        <h2 class="text-xl font-semibold">Add Directory</h2>
+        <p class="text-sm text-muted-foreground">
+          Add directories to be used for media scanning. Only
+          existing directories are allowed.
+        </p>
+
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <ui-label>Name</ui-label>
+            <ui-input
+              placeholder="Enter directory name"
+              .value=${this.newDirectoryName}
+              @input=${this.handleNameInput}
+              ?disabled=${this.isValidating || this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div class="flex-1">
+            <ui-label>Path</ui-label>
+            <ui-input
+              placeholder="Enter directory path"
+              .value=${this.newDirectoryPath}
+              @input=${this.handlePathInput}
+              ?disabled=${this.isValidating || this.isSubmitting}
+            ></ui-input>
+          </div>
+          <div class="self-end">
+            <ui-button
+              variant="secondary"
+              @click=${this.handleAddDirectory}
+              ?disabled=${this.isValidating ||
+              this.isSubmitting ||
+              !this.newDirectoryName.trim() ||
+              !this.newDirectoryPath.trim()}
+            >
+              ${this.isValidating ? "Validating..." : "Add"}
+            </ui-button>
+          </div>
+        </div>
+
+        ${this.validationError
+          ? html`
+              <div class="text-sm text-destructive">
+                ${this.validationError}
+              </div>
+            `
+          : ""}
+      </div>
+    `;
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
@@ -251,75 +278,26 @@ class PageSettingsMedia extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to manage media directories."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <div class="space-y-6">
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">Add Directory</h2>
-                    <p class="text-sm text-muted-foreground">
-                      Add directories to be used for media scanning. Only
-                      existing directories are allowed.
-                    </p>
+          ${this.renderWithConnection(
+            isConnected,
+            "Please connect to System Bridge to manage media directories.",
+            this.handleNavigateToConnection,
+            html`
+              <div class="space-y-6">
+                ${this.renderAddDirectoryForm()}
 
-                    <div class="flex gap-2">
-                      <div class="flex-1">
-                        <ui-label>Name</ui-label>
-                        <ui-input
-                          placeholder="Enter directory name"
-                          .value=${this.newDirectoryName}
-                          @input=${this.handleNameInput}
-                          ?disabled=${this.isValidating || this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div class="flex-1">
-                        <ui-label>Path</ui-label>
-                        <ui-input
-                          placeholder="Enter directory path"
-                          .value=${this.newDirectoryPath}
-                          @input=${this.handlePathInput}
-                          ?disabled=${this.isValidating || this.isSubmitting}
-                        ></ui-input>
-                      </div>
-                      <div class="self-end">
-                        <ui-button
-                          variant="secondary"
-                          @click=${this.handleAddDirectory}
-                          ?disabled=${this.isValidating ||
-                          this.isSubmitting ||
-                          !this.newDirectoryName.trim() ||
-                          !this.newDirectoryPath.trim()}
-                        >
-                          ${this.isValidating ? "Validating..." : "Add"}
-                        </ui-button>
-                      </div>
-                    </div>
-
-                    ${this.validationError
-                      ? html`
-                          <div class="text-sm text-destructive">
-                            ${this.validationError}
-                          </div>
-                        `
+                <div class="rounded-lg border bg-card p-6 space-y-4">
+                  <h2 class="text-xl font-semibold">
+                    Directories
+                    ${this.mediaDirectories.length > 0
+                      ? `(${this.mediaDirectories.length})`
                       : ""}
-                  </div>
-
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">
-                      Directories
-                      ${this.mediaDirectories.length > 0
-                        ? `(${this.mediaDirectories.length})`
-                        : ""}
-                    </h2>
-                    ${this.renderDirectoryList()}
-                  </div>
+                  </h2>
+                  ${this.renderDirectoryList()}
                 </div>
-              `}
+              </div>
+            `,
+          )}
         </div>
       </div>
     `;

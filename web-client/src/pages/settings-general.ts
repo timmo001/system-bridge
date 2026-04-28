@@ -88,17 +88,13 @@ class PageSettingsGeneral extends PageElement {
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
 
-    if (!this.connection?.token) {
-      return;
-    }
-
-    if (!this.websocket?.sendRequest) {
+    if (!this.connection?.token || !this.websocket?.sendRequest) {
       return;
     }
 
     // Read current form values to ensure we have the latest data
     const form = e.target as HTMLFormElement;
-    const selectElement = form.querySelector("select")!;
+    const selectElement = form.querySelector("select");
     if (selectElement) {
       this.formData = {
         ...this.formData,
@@ -142,6 +138,56 @@ class PageSettingsGeneral extends PageElement {
     this.navigate("/connection");
   };
 
+  private renderSettingsForm() {
+    return html`
+      <form class="space-y-8">
+        <div class="rounded-lg border bg-card p-6 space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="space-y-0.5">
+              <ui-label>Autostart</ui-label>
+              <p class="text-sm text-muted-foreground">
+                Start System Bridge automatically on system boot
+              </p>
+            </div>
+            <ui-switch
+              .checked=${this.formData.autostart}
+              ?disabled=${this.isSubmitting}
+              @switch-change=${this.handleAutostartChange}
+            ></ui-switch>
+          </div>
+
+          <div class="space-y-2">
+            <ui-label>Log Level</ui-label>
+            <select
+              class="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              ?disabled=${this.isSubmitting}
+              .value=${this.formData.logLevel}
+              @blur=${this.handleLogLevelChange}
+            >
+              <option value="DEBUG">Debug</option>
+              <option value="INFO">Info</option>
+              <option value="WARN">Warning</option>
+              <option value="ERROR">Error</option>
+            </select>
+            <p class="text-sm text-muted-foreground">
+              Set the logging level for the application
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <ui-button
+            type="submit"
+            variant="default"
+            ?disabled=${this.isSubmitting}
+          >
+            ${this.isSubmitting ? "Saving..." : "Save Settings"}
+          </ui-button>
+        </div>
+      </form>
+    `;
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
@@ -149,60 +195,12 @@ class PageSettingsGeneral extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to manage settings."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <form class="space-y-8">
-                  <div class="rounded-lg border bg-card p-6 space-y-6">
-                    <div class="flex items-center justify-between">
-                      <div class="space-y-0.5">
-                        <ui-label>Autostart</ui-label>
-                        <p class="text-sm text-muted-foreground">
-                          Start System Bridge automatically on system boot
-                        </p>
-                      </div>
-                      <ui-switch
-                        .checked=${this.formData.autostart}
-                        ?disabled=${this.isSubmitting}
-                        @switch-change=${this.handleAutostartChange}
-                      ></ui-switch>
-                    </div>
-
-                    <div class="space-y-2">
-                      <ui-label>Log Level</ui-label>
-                      <select
-                        class="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        ?disabled=${this.isSubmitting}
-                        .value=${this.formData.logLevel}
-                        @blur=${this.handleLogLevelChange}
-                      >
-                        <option value="DEBUG">Debug</option>
-                        <option value="INFO">Info</option>
-                        <option value="WARN">Warning</option>
-                        <option value="ERROR">Error</option>
-                      </select>
-                      <p class="text-sm text-muted-foreground">
-                        Set the logging level for the application
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="flex gap-4">
-                    <ui-button
-                      type="submit"
-                      variant="default"
-                      ?disabled=${this.isSubmitting}
-                    >
-                      ${this.isSubmitting ? "Saving..." : "Save Settings"}
-                    </ui-button>
-                  </div>
-                </form>
-              `}
+          ${this.renderWithConnection(
+            isConnected,
+            "Please connect to System Bridge to manage settings.",
+            this.handleNavigateToConnection,
+            this.renderSettingsForm(),
+          )}
         </div>
       </div>
     `;

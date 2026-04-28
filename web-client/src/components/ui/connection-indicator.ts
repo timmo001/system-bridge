@@ -10,6 +10,7 @@ class ConnectionIndicator extends UIElement {
   @consume({ context: websocketContext, subscribe: true })
   private _websocket?: WebSocketState;
 
+  // fallow-ignore-next-line complexity
   render(): TemplateResult {
     const isConnected = this._websocket?.isConnected ?? false;
 

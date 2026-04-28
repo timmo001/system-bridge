@@ -130,12 +130,33 @@ class PageNotifications extends PageElement {
     this.notificationSound = input.value;
   };
 
-  private handleSendNotification = (): void => {
-    if (!this.notificationTitle.trim() || !this.notificationMessage.trim()) {
-      return;
+  private buildNotificationData(): Record<string, unknown> {
+    const data: Record<string, unknown> = {
+      title: this.notificationTitle.trim(),
+      message: this.notificationMessage.trim(),
+    };
+
+    const optionalFields: Record<string, string> = {
+      icon: this.notificationIcon,
+      actionUrl: this.notificationActionUrl,
+      sound: this.notificationSound,
+    };
+
+    for (const [key, value] of Object.entries(optionalFields)) {
+      const trimmed = value.trim();
+      if (trimmed) data[key] = trimmed;
     }
 
-    if (!this.connection?.token || !this.websocket?.sendRequest) {
+    return data;
+  }
+
+  private handleSendNotification = (): void => {
+    if (
+      !this.notificationTitle.trim() ||
+      !this.notificationMessage.trim() ||
+      !this.connection?.token ||
+      !this.websocket?.sendRequest
+    ) {
       return;
     }
 
@@ -143,28 +164,11 @@ class PageNotifications extends PageElement {
     const requestId = generateUUID();
     this.pendingRequestId = requestId;
 
-    const notificationData: Record<string, unknown> = {
-      title: this.notificationTitle.trim(),
-      message: this.notificationMessage.trim(),
-    };
-
-    if (this.notificationIcon.trim()) {
-      notificationData.icon = this.notificationIcon.trim();
-    }
-
-    if (this.notificationActionUrl.trim()) {
-      notificationData.actionUrl = this.notificationActionUrl.trim();
-    }
-
-    if (this.notificationSound.trim()) {
-      notificationData.sound = this.notificationSound.trim();
-    }
-
     try {
       this.websocket.sendRequest({
         id: requestId,
         event: "NOTIFICATION",
-        data: notificationData,
+        data: this.buildNotificationData(),
         token: this.connection.token,
       });
 
@@ -203,6 +207,106 @@ class PageNotifications extends PageElement {
     this.notificationSound = "";
   };
 
+  private get canSend(): boolean {
+    return (
+      !this.isSending &&
+      !!this.notificationTitle.trim() &&
+      !!this.notificationMessage.trim()
+    );
+  }
+
+  private renderNotificationForm() {
+    return html`
+      <div class="space-y-6">
+        <div class="rounded-lg border bg-card p-6 space-y-4">
+          <h2 class="text-xl font-semibold">Send Notification</h2>
+          <p class="text-sm text-muted-foreground">
+            Send a desktop notification to this system. The
+            notification will appear using the system's native
+            notification system.
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <ui-label>Title *</ui-label>
+              <ui-input
+                placeholder="Enter notification title"
+                .value=${this.notificationTitle}
+                @input=${this.handleTitleInput}
+                ?disabled=${this.isSending}
+              ></ui-input>
+            </div>
+            <div>
+              <ui-label>Message *</ui-label>
+              <ui-input
+                placeholder="Enter notification message"
+                .value=${this.notificationMessage}
+                @input=${this.handleMessageInput}
+                ?disabled=${this.isSending}
+              ></ui-input>
+            </div>
+            <div>
+              <ui-label>Icon Path (optional)</ui-label>
+              <ui-input
+                placeholder="/path/to/icon.png"
+                .value=${this.notificationIcon}
+                @input=${this.handleIconInput}
+                ?disabled=${this.isSending}
+              ></ui-input>
+            </div>
+            <div>
+              <ui-label>Action URL (optional)</ui-label>
+              <ui-input
+                placeholder="https://example.com"
+                .value=${this.notificationActionUrl}
+                @input=${this.handleActionUrlInput}
+                ?disabled=${this.isSending}
+              ></ui-input>
+              <p class="text-xs text-muted-foreground mt-1">
+                URL to open when the notification is clicked
+              </p>
+            </div>
+            <div>
+              <ui-label>Sound Path (optional)</ui-label>
+              <ui-input
+                placeholder="/path/to/sound.wav"
+                .value=${this.notificationSound}
+                @input=${this.handleSoundInput}
+                ?disabled=${this.isSending}
+              ></ui-input>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+              <ui-button
+                variant="outline"
+                @click=${this.clearForm}
+                ?disabled=${this.isSending}
+              >
+                <ui-icon name="X" class="mr-2"></ui-icon>
+                Clear
+              </ui-button>
+              <ui-button
+                variant="default"
+                @click=${this.handleSendNotification}
+                ?disabled=${!this.canSend}
+              >
+                ${this.isSending
+                  ? html`<ui-icon
+                      name="Loader2"
+                      className="animate-spin mr-2"
+                    ></ui-icon>`
+                  : html`<ui-icon
+                      name="Bell"
+                      class="mr-2"
+                    ></ui-icon>`}
+                Send Notification
+              </ui-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
@@ -210,104 +314,12 @@ class PageNotifications extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()} ${this.renderPageResult(this.lastResult)}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to send notifications."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <div class="space-y-6">
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">Send Notification</h2>
-                    <p class="text-sm text-muted-foreground">
-                      Send a desktop notification to this system. The
-                      notification will appear using the system's native
-                      notification system.
-                    </p>
-
-                    <div class="space-y-3">
-                      <div>
-                        <ui-label>Title *</ui-label>
-                        <ui-input
-                          placeholder="Enter notification title"
-                          .value=${this.notificationTitle}
-                          @input=${this.handleTitleInput}
-                          ?disabled=${this.isSending}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label>Message *</ui-label>
-                        <ui-input
-                          placeholder="Enter notification message"
-                          .value=${this.notificationMessage}
-                          @input=${this.handleMessageInput}
-                          ?disabled=${this.isSending}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label>Icon Path (optional)</ui-label>
-                        <ui-input
-                          placeholder="/path/to/icon.png"
-                          .value=${this.notificationIcon}
-                          @input=${this.handleIconInput}
-                          ?disabled=${this.isSending}
-                        ></ui-input>
-                      </div>
-                      <div>
-                        <ui-label>Action URL (optional)</ui-label>
-                        <ui-input
-                          placeholder="https://example.com"
-                          .value=${this.notificationActionUrl}
-                          @input=${this.handleActionUrlInput}
-                          ?disabled=${this.isSending}
-                        ></ui-input>
-                        <p class="text-xs text-muted-foreground mt-1">
-                          URL to open when the notification is clicked
-                        </p>
-                      </div>
-                      <div>
-                        <ui-label>Sound Path (optional)</ui-label>
-                        <ui-input
-                          placeholder="/path/to/sound.wav"
-                          .value=${this.notificationSound}
-                          @input=${this.handleSoundInput}
-                          ?disabled=${this.isSending}
-                        ></ui-input>
-                      </div>
-                      <div class="flex justify-end gap-2 pt-2">
-                        <ui-button
-                          variant="outline"
-                          @click=${this.clearForm}
-                          ?disabled=${this.isSending}
-                        >
-                          <ui-icon name="X" class="mr-2"></ui-icon>
-                          Clear
-                        </ui-button>
-                        <ui-button
-                          variant="default"
-                          @click=${this.handleSendNotification}
-                          ?disabled=${this.isSending ||
-                          !this.notificationTitle.trim() ||
-                          !this.notificationMessage.trim()}
-                        >
-                          ${this.isSending
-                            ? html`<ui-icon
-                                name="Loader2"
-                                className="animate-spin mr-2"
-                              ></ui-icon>`
-                            : html`<ui-icon
-                                name="Bell"
-                                class="mr-2"
-                              ></ui-icon>`}
-                          Send Notification
-                        </ui-button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `}
+          ${this.renderWithConnection(
+            isConnected,
+            "Please connect to System Bridge to send notifications.",
+            this.handleNavigateToConnection,
+            this.renderNotificationForm(),
+          )}
         </div>
       </div>
     `;

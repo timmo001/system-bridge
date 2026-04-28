@@ -11,6 +11,7 @@ export const themeContext = createContext<ThemeState>("theme");
 
 const STORAGE_KEY = "system-bridge-theme";
 
+// fallow-ignore-next-line complexity
 export function loadTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);

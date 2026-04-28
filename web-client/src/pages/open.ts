@@ -124,11 +124,11 @@ class PageOpen extends PageElement {
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
-    if (!value) {
-      return;
-    }
-
-    if (!this.connection?.token || !this.websocket?.sendRequest) {
+    if (
+      !value ||
+      !this.connection?.token ||
+      !this.websocket?.sendRequest
+    ) {
       return;
     }
 
@@ -183,6 +183,119 @@ class PageOpen extends PageElement {
     return this.openType === "url" ? this.urlValue : this.pathValue;
   }
 
+  private renderOpenTypeSelector() {
+    return html`
+      <div>
+        <ui-label>Type</ui-label>
+        <div class="flex gap-2 mt-1">
+          <ui-button
+            variant=${this.openType === "url"
+              ? "default"
+              : "outline"}
+            size="sm"
+            @click=${this.handleTypeChangeUrl}
+            ?disabled=${this.isSending}
+          >
+            <ui-icon name="Globe" class="mr-2"></ui-icon>
+            URL
+          </ui-button>
+          <ui-button
+            variant=${this.openType === "path"
+              ? "default"
+              : "outline"}
+            size="sm"
+            @click=${this.handleTypeChangePath}
+            ?disabled=${this.isSending}
+          >
+            <ui-icon name="FolderOpen" class="mr-2"></ui-icon>
+            Path
+          </ui-button>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderValueInput() {
+    if (this.openType === "url") {
+      return html`
+        <div>
+          <ui-label>URL *</ui-label>
+          <ui-input
+            placeholder="https://example.com"
+            .value=${this.urlValue}
+            @input=${this.handleUrlInput}
+            ?disabled=${this.isSending}
+          ></ui-input>
+          <p class="text-xs text-muted-foreground mt-1">
+            The URL will be opened in the system's default browser
+          </p>
+        </div>
+      `;
+    }
+    return html`
+      <div>
+        <ui-label>Path *</ui-label>
+        <ui-input
+          placeholder="/path/to/file/or/folder"
+          .value=${this.pathValue}
+          @input=${this.handlePathInput}
+          ?disabled=${this.isSending}
+        ></ui-input>
+        <p class="text-xs text-muted-foreground mt-1">
+          The file or folder will be opened with the system's default
+          application
+        </p>
+      </div>
+    `;
+  }
+
+  private renderOpenForm() {
+    return html`
+      <div class="space-y-6">
+        <div class="rounded-lg border bg-card p-6 space-y-4">
+          <h2 class="text-xl font-semibold">Open URL or Path</h2>
+          <p class="text-sm text-muted-foreground">
+            Open a URL in the default browser or a file/folder with
+            the default system application.
+          </p>
+
+          <div class="space-y-3">
+            ${this.renderOpenTypeSelector()}
+            ${this.renderValueInput()}
+
+            <div class="flex justify-end gap-2 pt-2">
+              <ui-button
+                variant="outline"
+                @click=${this.clearForm}
+                ?disabled=${this.isSending}
+              >
+                <ui-icon name="X" class="mr-2"></ui-icon>
+                Clear
+              </ui-button>
+              <ui-button
+                variant="default"
+                @click=${this.handleOpen}
+                ?disabled=${this.isSending ||
+                !this.currentValue.trim()}
+              >
+                ${this.isSending
+                  ? html`<ui-icon
+                      name="Loader2"
+                      className="animate-spin mr-2"
+                    ></ui-icon>`
+                  : html`<ui-icon
+                      name="ExternalLink"
+                      class="mr-2"
+                    ></ui-icon>`}
+                Open
+              </ui-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   render() {
     const isConnected = this.websocket?.isConnected ?? false;
 
@@ -190,114 +303,12 @@ class PageOpen extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
           ${this.renderPageHeader()} ${this.renderPageResult(this.lastResult)}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to open URLs or paths."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <div class="space-y-6">
-                  <div class="rounded-lg border bg-card p-6 space-y-4">
-                    <h2 class="text-xl font-semibold">Open URL or Path</h2>
-                    <p class="text-sm text-muted-foreground">
-                      Open a URL in the default browser or a file/folder with
-                      the default system application.
-                    </p>
-
-                    <div class="space-y-3">
-                      <div>
-                        <ui-label>Type</ui-label>
-                        <div class="flex gap-2 mt-1">
-                          <ui-button
-                            variant=${this.openType === "url"
-                              ? "default"
-                              : "outline"}
-                            size="sm"
-                            @click=${this.handleTypeChangeUrl}
-                            ?disabled=${this.isSending}
-                          >
-                            <ui-icon name="Globe" class="mr-2"></ui-icon>
-                            URL
-                          </ui-button>
-                          <ui-button
-                            variant=${this.openType === "path"
-                              ? "default"
-                              : "outline"}
-                            size="sm"
-                            @click=${this.handleTypeChangePath}
-                            ?disabled=${this.isSending}
-                          >
-                            <ui-icon name="FolderOpen" class="mr-2"></ui-icon>
-                            Path
-                          </ui-button>
-                        </div>
-                      </div>
-
-                      ${this.openType === "url"
-                        ? html`
-                            <div>
-                              <ui-label>URL *</ui-label>
-                              <ui-input
-                                placeholder="https://example.com"
-                                .value=${this.urlValue}
-                                @input=${this.handleUrlInput}
-                                ?disabled=${this.isSending}
-                              ></ui-input>
-                              <p class="text-xs text-muted-foreground mt-1">
-                                The URL will be opened in the system's default
-                                browser
-                              </p>
-                            </div>
-                          `
-                        : html`
-                            <div>
-                              <ui-label>Path *</ui-label>
-                              <ui-input
-                                placeholder="/path/to/file/or/folder"
-                                .value=${this.pathValue}
-                                @input=${this.handlePathInput}
-                                ?disabled=${this.isSending}
-                              ></ui-input>
-                              <p class="text-xs text-muted-foreground mt-1">
-                                The file or folder will be opened with the
-                                system's default application
-                              </p>
-                            </div>
-                          `}
-
-                      <div class="flex justify-end gap-2 pt-2">
-                        <ui-button
-                          variant="outline"
-                          @click=${this.clearForm}
-                          ?disabled=${this.isSending}
-                        >
-                          <ui-icon name="X" class="mr-2"></ui-icon>
-                          Clear
-                        </ui-button>
-                        <ui-button
-                          variant="default"
-                          @click=${this.handleOpen}
-                          ?disabled=${this.isSending ||
-                          !this.currentValue.trim()}
-                        >
-                          ${this.isSending
-                            ? html`<ui-icon
-                                name="Loader2"
-                                className="animate-spin mr-2"
-                              ></ui-icon>`
-                            : html`<ui-icon
-                                name="ExternalLink"
-                                class="mr-2"
-                              ></ui-icon>`}
-                          Open
-                        </ui-button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `}
+          ${this.renderWithConnection(
+            isConnected,
+            "Please connect to System Bridge to open URLs or paths.",
+            this.handleNavigateToConnection,
+            this.renderOpenForm(),
+          )}
         </div>
       </div>
     `;
