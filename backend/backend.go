@@ -21,6 +21,7 @@ import (
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
 	"github.com/timmo001/system-bridge/version"
@@ -34,6 +35,18 @@ type Backend struct {
 	webClientContent *embed.FS
 	discoveryManager *discovery.DiscoveryManager
 	token            string
+}
+
+type dataListenerRegistry struct {
+	ws *websocket.WebsocketServer
+}
+
+func (r dataListenerRegistry) RegisterDataListener(connection string, modules []types.ModuleName) {
+	r.ws.RegisterDataListener(connection, modules)
+}
+
+func (r dataListenerRegistry) UnregisterDataListener(connection string) {
+	r.ws.UnregisterDataListener(connection)
 }
 
 func New(settings *settings.Settings, dataStore *data.DataStore, token string, webClientContent *embed.FS) *Backend {
@@ -86,7 +99,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	command.SetServerContext(ctx)
 
 	// Setup event handlers
-	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
+	event_handler.RegisterHandlers(b.eventRouter, b.dataStore, dataListenerRegistry{ws: b.wsServer})
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()

@@ -3,9 +3,15 @@ package event_handler
 import (
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/types"
 )
 
-func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
+type DataListenerRegistry interface {
+	RegisterDataListener(connection string, modules []types.ModuleName)
+	UnregisterDataListener(connection string)
+}
+
+func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore, listeners DataListenerRegistry) {
 	RegisterExitApplicationHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
@@ -24,8 +30,8 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterPowerRestartHandler(router)
 	RegisterPowerShutdownHandler(router)
 	RegisterPowerSleepHandler(router)
-	RegisterRegisterDataListenerHandler(router)
-	RegisterUnregisterDataListenerHandler(router)
+	RegisterRegisterDataListenerHandler(router, listeners)
+	RegisterUnregisterDataListenerHandler(router, listeners)
 	RegisterCommandExecuteHandler(router)
 	RegisterUpdateSettingsHandler(router)
 	RegisterValidateDirectoryHandler(router)

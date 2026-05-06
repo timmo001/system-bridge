@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
@@ -13,7 +12,7 @@ type RegisterDataListenerRequestData struct {
 	Modules []types.ModuleName `json:"modules" mapstructure:"modules"`
 }
 
-func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
+func RegisterRegisterDataListenerHandler(router *event.MessageRouter, listeners DataListenerRegistry) {
 	router.RegisterSimpleHandler(event.EventRegisterDataListener, func(connection string, message event.Message) event.MessageResponse {
 		slog.Debug("Received register data listener event", "message", message)
 
@@ -27,18 +26,7 @@ func RegisterRegisterDataListenerHandler(router *event.MessageRouter) {
 			}
 		}
 
-		ws := websocket.GetInstance()
-		if ws == nil {
-			slog.Error("No websocket instance found")
-			return event.MessageResponse{
-				ID:      message.ID,
-				Type:    event.ResponseTypeError,
-				Subtype: event.ResponseSubtypeNone,
-				Message: "No websocket instance found",
-			}
-		}
-
-		ws.RegisterDataListener(connection, data.Modules)
+		listeners.RegisterDataListener(connection, data.Modules)
 
 		return event.MessageResponse{
 			ID:      message.ID,
