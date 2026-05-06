@@ -26,6 +26,16 @@ func RegisterRegisterDataListenerHandler(router *event.MessageRouter, listeners 
 			}
 		}
 
+		if listeners == nil {
+			slog.Error("No websocket instance found")
+			return event.MessageResponse{
+				ID:      message.ID,
+				Type:    event.ResponseTypeError,
+				Subtype: event.ResponseSubtypeNone,
+				Message: "No websocket instance found",
+			}
+		}
+
 		listeners.RegisterDataListener(connection, data.Modules)
 
 		return event.MessageResponse{

@@ -34,7 +34,7 @@ func TestRegisterDataListenerHandler(t *testing.T) {
 			ID:    "register-1",
 			Event: event.EventRegisterDataListener,
 			Data: map[string]interface{}{
-				"modules": []string{"cpu", "memory"},
+				"modules": []interface{}{"cpu", "memory"},
 			},
 		}
 
@@ -68,21 +68,58 @@ func TestRegisterDataListenerHandler(t *testing.T) {
 		assert.Empty(t, registry.registeredConnection)
 		assert.Nil(t, registry.registeredModules)
 	})
+
+	t.Run("returns error when registry is nil", func(t *testing.T) {
+		router := event.NewMessageRouter()
+		RegisterRegisterDataListenerHandler(router, nil)
+
+		msg := event.Message{
+			ID:    "register-3",
+			Event: event.EventRegisterDataListener,
+			Data: map[string]interface{}{
+				"modules": []interface{}{"cpu"},
+			},
+		}
+
+		response := router.HandleMessage("conn-1", msg)
+
+		assert.Equal(t, event.ResponseTypeError, response.Type)
+		assert.Equal(t, event.ResponseSubtypeNone, response.Subtype)
+		assert.Equal(t, "No websocket instance found", response.Message)
+	})
 }
 
 func TestUnregisterDataListenerHandler(t *testing.T) {
-	registry := &fakeDataListenerRegistry{}
-	router := event.NewMessageRouter()
-	RegisterUnregisterDataListenerHandler(router, registry)
+	t.Run("unregisters listener", func(t *testing.T) {
+		registry := &fakeDataListenerRegistry{}
+		router := event.NewMessageRouter()
+		RegisterUnregisterDataListenerHandler(router, registry)
 
-	msg := event.Message{
-		ID:    "unregister-1",
-		Event: event.EventUnregisterDataListener,
-	}
+		msg := event.Message{
+			ID:    "unregister-1",
+			Event: event.EventUnregisterDataListener,
+		}
 
-	response := router.HandleMessage("conn-3", msg)
+		response := router.HandleMessage("conn-3", msg)
 
-	assert.Equal(t, event.ResponseTypeDataListenerUnregistered, response.Type)
-	assert.Equal(t, "Listener unregistered", response.Message)
-	assert.Equal(t, "conn-3", registry.unregisteredConnection)
+		assert.Equal(t, event.ResponseTypeDataListenerUnregistered, response.Type)
+		assert.Equal(t, "Listener unregistered", response.Message)
+		assert.Equal(t, "conn-3", registry.unregisteredConnection)
+	})
+
+	t.Run("returns error when registry is nil", func(t *testing.T) {
+		router := event.NewMessageRouter()
+		RegisterUnregisterDataListenerHandler(router, nil)
+
+		msg := event.Message{
+			ID:    "unregister-2",
+			Event: event.EventUnregisterDataListener,
+		}
+
+		response := router.HandleMessage("conn-3", msg)
+
+		assert.Equal(t, event.ResponseTypeError, response.Type)
+		assert.Equal(t, event.ResponseSubtypeNone, response.Subtype)
+		assert.Equal(t, "No websocket instance found", response.Message)
+	})
 }
