@@ -19,12 +19,18 @@ type MCPServer struct {
 	service     *service.Service
 }
 
-// NewMCPServer creates a new MCP server
+// NewMCPServer creates a new MCP server from a datastore.
+// Prefer NewMCPServerWithService in production wiring when a shared service already exists.
 func NewMCPServer(token string, eventRouter *event.MessageRouter, dataStore *data.DataStore) *MCPServer {
+	return NewMCPServerWithService(token, eventRouter, service.New(dataStore, nil, nil))
+}
+
+// NewMCPServerWithService creates a new MCP server using the shared backend service.
+func NewMCPServerWithService(token string, eventRouter *event.MessageRouter, backendService *service.Service) *MCPServer {
 	return &MCPServer{
 		token:       token,
 		eventRouter: eventRouter,
-		service:     service.New(dataStore, nil, nil),
+		service:     backendService,
 	}
 }
 
