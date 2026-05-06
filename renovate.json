@@ -53,7 +53,7 @@
     },
     {
       "description": "Group toolchain version updates.",
-      "matchManagers": ["mise", "regex"],
+      "matchManagers": ["mise","custom.regex"],
       "groupName": "Toolchain versions"
     },
     {
