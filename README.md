@@ -35,7 +35,8 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 ## Development Setup
 
 1. Install `mise`
-1. Run `mise install` in the repo root to install the pinned Go, Node, and pnpm toolchains.
+1. Run `mise install` in the repo root to install the pinned Go, Node,
+   and pnpm toolchains.
 
 `mise.toml` is the source of truth for local and CI runtimes.
 
