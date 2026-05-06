@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
-import importPlugin from "eslint-plugin-import";
+import importPlugin from "eslint-plugin-import-x";
 import litPlugin from "eslint-plugin-lit";
 import wcPlugin from "eslint-plugin-wc";
 import litA11yPlugin from "eslint-plugin-lit-a11y";
@@ -32,7 +32,7 @@ export default tseslint.config(
     },
 
     plugins: {
-      import: importPlugin,
+      "import-x": importPlugin,
       lit: litPlugin,
       wc: wcPlugin,
       "lit-a11y": litA11yPlugin,
@@ -40,14 +40,14 @@ export default tseslint.config(
     },
 
     settings: {
-      "import/resolver": {
+      "import-x/resolver": {
         typescript: {
           alwaysTryTypes: true,
           project: "./tsconfig.json",
         },
         node: true,
       },
-      "import/parsers": {
+      "import-x/parsers": {
         "@typescript-eslint/parser": [".ts", ".tsx"],
       },
     },
@@ -120,11 +120,11 @@ export default tseslint.config(
       "@typescript-eslint/unbound-method": "warn",
 
       // Import rules
-      "import/no-default-export": "off",
-      "import/prefer-default-export": "off",
-      "import/no-unresolved": "off", // TypeScript handles this
-      "import/extensions": "off", // Let TypeScript handle this with moduleResolution: bundler
-      "import/order": [
+      "import-x/no-default-export": "off",
+      "import-x/prefer-default-export": "off",
+      "import-x/no-unresolved": "off", // TypeScript handles this
+      "import-x/extensions": "off", // Let TypeScript handle this with moduleResolution: bundler
+      "import-x/order": [
         "warn",
         {
           groups: [
