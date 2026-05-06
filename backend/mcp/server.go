@@ -6,6 +6,7 @@ import (
 
 	"log/slog"
 
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/version"
@@ -13,7 +14,7 @@ import (
 
 // MCPServer handles MCP protocol requests
 type MCPServer struct {
-	token       string
+	validator   *backend_auth.Validator
 	eventRouter *event.MessageRouter
 	dataStore   *data.DataStore
 }
@@ -21,7 +22,7 @@ type MCPServer struct {
 // NewMCPServer creates a new MCP server
 func NewMCPServer(token string, eventRouter *event.MessageRouter, dataStore *data.DataStore) *MCPServer {
 	return &MCPServer{
-		token:       token,
+		validator:   backend_auth.NewValidator(token),
 		eventRouter: eventRouter,
 		dataStore:   dataStore,
 	}

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
@@ -29,7 +30,7 @@ type connectionInfo struct {
 }
 
 type WebsocketServer struct {
-	token         string
+	validator     *backend_auth.Validator
 	upgrader      websocket.Upgrader
 	connections   map[string]*connectionInfo
 	dataListeners map[string][]types.ModuleName
@@ -40,7 +41,7 @@ type WebsocketServer struct {
 
 func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
-		token:         token,
+		validator:     backend_auth.NewValidator(token),
 		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),
 		dataStore:     dataStore,

@@ -10,158 +10,144 @@ import (
 	"runtime"
 	"strings"
 
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 	"github.com/timmo001/system-bridge/settings"
-	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 )
 
 // ServeMediaFileDataHandler handles requests to serve media files from predefined base directories
-func ServeMediaFileDataHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	// Get query parameters
-	base := r.URL.Query().Get("base")
-	path := r.URL.Query().Get("path")
-	token := r.URL.Query().Get("token")
-
-	// Validate required parameters
-	if base == "" || path == "" || token == "" {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Missing required parameters: base, path, token"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	// Validate API token
-	expectedToken, err := utils.LoadToken()
-	if err != nil {
-		slog.Error("Failed to load token for authentication", "error", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	if token != expectedToken {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	// Get base directory path
-	basePath, err := getBaseDirectoryPath(base)
-	if err != nil {
-		slog.Error("Invalid base directory", "base", base, "error", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid base directory"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	// Construct full file path
-	fullPath := filepath.Join(basePath, path)
-
-	// Security: Clean and validate path to prevent directory traversal
-	cleanPath := filepath.Clean(fullPath)
-	relPath, err := filepath.Rel(basePath, cleanPath)
-	if err != nil || strings.HasPrefix(relPath, "..") {
-		slog.Error("Path traversal attempt detected", "requested_path", fullPath, "base_path", basePath, "rel_path", relPath)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Access denied"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
-		}
-		return
-	}
-
-	// Check if file exists
-	fileInfo, err := os.Stat(cleanPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			slog.Info("File not found", "path", cleanPath)
+func ServeMediaFileDataHandler(validator *backend_auth.Validator) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusNotFound)
-			if err := json.NewEncoder(w).Encode(map[string]string{"error": "File not found"}); err != nil {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"}); err != nil {
 				slog.Error("Failed to encode response", "error", err)
 			}
 			return
 		}
-		slog.Error("Failed to stat file", "path", cleanPath, "error", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
+
+		// Get query parameters
+		base := r.URL.Query().Get("base")
+		path := r.URL.Query().Get("path")
+
+		// Validate required parameters
+		if base == "" || path == "" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Missing required parameters: base, path"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
 		}
-		return
-	}
 
-	// Ensure it's a regular file (not a directory)
-	if !fileInfo.Mode().IsRegular() {
-		slog.Error("Requested path is not a regular file", "path", cleanPath)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "Path is not a file"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
+		token := backend_auth.TokenFromRequest(r, backend_auth.RequestTokenOptions{AllowQuery: true})
+		if !validator.ValidateToken(token) {
+			backend_auth.WriteUnauthorized(w)
+			return
 		}
-		return
-	}
 
-	// Basic file type restrictions (allow common media types)
-	ext := strings.ToLower(filepath.Ext(cleanPath))
-	allowedExtensions := map[string]bool{
-		".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".bmp": true, ".webp": true,
-		".mp3": true, ".wav": true, ".flac": true, ".aac": true, ".ogg": true, ".m4a": true,
-		".mp4": true, ".avi": true, ".mkv": true, ".mov": true, ".wmv": true, ".webm": true,
-		".txt": true, ".pdf": true, ".doc": true, ".docx": true, ".xls": true, ".xlsx": true,
-	}
-
-	if !allowedExtensions[ext] {
-		slog.Error("File type not allowed", "extension", ext, "path", cleanPath)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "File type not allowed"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
+		// Get base directory path
+		basePath, err := getBaseDirectoryPath(base)
+		if err != nil {
+			slog.Error("Invalid base directory", "base", base, "error", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid base directory"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
 		}
-		return
-	}
 
-	// Size limit (100MB)
-	const maxFileSize = 100 * 1024 * 1024 // 100MB
-	if fileInfo.Size() > maxFileSize {
-		slog.Error("File too large", "size", fileInfo.Size(), "max_size", maxFileSize)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusRequestEntityTooLarge)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "File too large"}); err != nil {
-			slog.Error("Failed to encode response", "error", err)
+		// Construct full file path
+		fullPath := filepath.Join(basePath, path)
+
+		// Security: Clean and validate path to prevent directory traversal
+		cleanPath := filepath.Clean(fullPath)
+		relPath, err := filepath.Rel(basePath, cleanPath)
+		if err != nil || strings.HasPrefix(relPath, "..") {
+			slog.Error("Path traversal attempt detected", "requested_path", fullPath, "base_path", basePath, "rel_path", relPath)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Access denied"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
 		}
-		return
+
+		// Check if file exists
+		fileInfo, err := os.Stat(cleanPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				slog.Info("File not found", "path", cleanPath)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusNotFound)
+				if err := json.NewEncoder(w).Encode(map[string]string{"error": "File not found"}); err != nil {
+					slog.Error("Failed to encode response", "error", err)
+				}
+				return
+			}
+			slog.Error("Failed to stat file", "path", cleanPath, "error", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
+		}
+
+		// Ensure it's a regular file (not a directory)
+		if !fileInfo.Mode().IsRegular() {
+			slog.Error("Requested path is not a regular file", "path", cleanPath)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Path is not a file"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
+		}
+
+		// Basic file type restrictions (allow common media types)
+		ext := strings.ToLower(filepath.Ext(cleanPath))
+		allowedExtensions := map[string]bool{
+			".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".bmp": true, ".webp": true,
+			".mp3": true, ".wav": true, ".flac": true, ".aac": true, ".ogg": true, ".m4a": true,
+			".mp4": true, ".avi": true, ".mkv": true, ".mov": true, ".wmv": true, ".webm": true,
+			".txt": true, ".pdf": true, ".doc": true, ".docx": true, ".xls": true, ".xlsx": true,
+		}
+
+		if !allowedExtensions[ext] {
+			slog.Error("File type not allowed", "extension", ext, "path", cleanPath)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "File type not allowed"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
+		}
+
+		// Size limit (100MB)
+		const maxFileSize = 100 * 1024 * 1024 // 100MB
+		if fileInfo.Size() > maxFileSize {
+			slog.Error("File too large", "size", fileInfo.Size(), "max_size", maxFileSize)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusRequestEntityTooLarge)
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "File too large"}); err != nil {
+				slog.Error("Failed to encode response", "error", err)
+			}
+			return
+		}
+
+		// Set appropriate headers
+		contentType := getContentType(cleanPath)
+		w.Header().Set("Content-Type", contentType)
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+		w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filepath.Base(cleanPath)))
+
+		// Serve the file
+		slog.Info("Serving media file", "path", cleanPath, "size", fileInfo.Size())
+		http.ServeFile(w, r, cleanPath)
 	}
-
-	// Set appropriate headers
-	contentType := getContentType(cleanPath)
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
-	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filepath.Base(cleanPath)))
-
-	// Serve the file
-	slog.Info("Serving media file", "path", cleanPath, "size", fileInfo.Size())
-	http.ServeFile(w, r, cleanPath)
 }
 
 // getBaseDirectoryPath returns the absolute path for a base directory key

@@ -6,36 +6,17 @@ import (
 
 	"log/slog"
 
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/types"
-	"github.com/timmo001/system-bridge/utils"
 )
 
 // GetModuleDataHandler handles requests to get data for a specific module
-func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
+func GetModuleDataHandler(dataStore *data.DataStore, validator *backend_auth.Validator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		expectedToken, err := utils.LoadToken()
-		if err != nil {
-			slog.Error("Failed to load token for authentication", "error", err)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Authentication error"}); err != nil {
-				slog.Error("Failed to encode response", "error", err)
-			}
-			return
-		}
-
-		// Check for API token in both X-API-Token and token headers
-		token := r.Header.Get("X-API-Token")
-		if token == "" {
-			token = r.Header.Get("token")
-		}
-		if token != expectedToken {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			if err := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid API token"}); err != nil {
-				slog.Error("Failed to encode response", "error", err)
-			}
+		token := backend_auth.TokenFromRequest(r, backend_auth.RequestTokenOptions{})
+		if !validator.ValidateToken(token) {
+			backend_auth.WriteUnauthorized(w)
 			return
 		}
 

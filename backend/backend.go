@@ -12,6 +12,7 @@ import (
 
 	"log/slog"
 
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/mcp"
 	"github.com/timmo001/system-bridge/backend/websocket"
@@ -90,6 +91,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
+	authValidator := backend_auth.NewValidator(b.token)
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {
@@ -118,6 +120,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Set up module data endpoint
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
 		b.dataStore,
+		authValidator,
 	))
 
 	// Set up health check endpoint
@@ -142,7 +145,7 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
+	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler(authValidator))
 
 	// Set up SPA file server (must be last to avoid catching API routes)
 	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")

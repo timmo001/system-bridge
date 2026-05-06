@@ -9,6 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/websocket"
+	backend_auth "github.com/timmo001/system-bridge/backend/auth"
 )
 
 var upgrader = websocket.Upgrader{
@@ -21,20 +22,10 @@ var upgrader = websocket.Upgrader{
 
 // HandleConnection handles a new MCP WebSocket connection
 func (s *MCPServer) HandleConnection(w http.ResponseWriter, r *http.Request) error {
-	// Check for token in query parameters or headers
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		token = r.Header.Get("Authorization")
-		// Remove "Bearer " prefix if present
-		if len(token) > 7 && token[:7] == "Bearer " {
-			token = token[7:]
-		}
-	}
-
-	// Validate token
-	if token != s.token {
+	token := backend_auth.TokenFromRequest(r, backend_auth.RequestTokenOptions{AllowQuery: true})
+	if !s.validator.ValidateToken(token) {
 		slog.Warn("MCP connection rejected: invalid token")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		backend_auth.WriteUnauthorized(w)
 		return nil
 	}
 
