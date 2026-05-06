@@ -9,11 +9,8 @@ runs:
       with:
         package_json_file: web-client/package.json
 
-    - name: Cache pnpm
-      uses: actions/cache@v4
+    - uses: actions/setup-node@v6
       with:
-        path: |
-          ~/.pnpm-store
-        key: ${{ runner.os }}-pnpm-v1-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-v1-
+        node-version-file: .node-version
+        cache: pnpm
+        cache-dependency-path: web-client/pnpm-lock.yaml

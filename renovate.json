@@ -1,0 +1,79 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update annotated tool version ARGs in Dockerfiles.",
+      "managerFilePatterns": [
+        "/(^|/)Dockerfile$/",
+        "/(^|/)Dockerfile\\.[^/]*$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+packageName=(?<packageName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s+ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Update annotated Go tool versions in workflows.",
+      "managerFilePatterns": ["/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*run:\\s*.*?@(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group web client dependency updates.",
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web-client/package.json", "web-client/pnpm-lock.yaml"],
+      "groupName": "Web client dependencies"
+    },
+    {
+      "description": "Group Go module updates.",
+      "matchManagers": ["gomod"],
+      "groupName": "Go modules"
+    },
+    {
+      "description": "Group GitHub Actions updates.",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Group CI Docker image updates.",
+      "matchManagers": ["dockerfile"],
+      "groupName": "CI Docker images"
+    },
+    {
+      "description": "Group toolchain version updates.",
+      "matchManagers": ["mise", "regex"],
+      "groupName": "Toolchain versions"
+    },
+    {
+      "description": "Pin Docker image digests.",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "Normalize Go tags from golang/go.",
+      "matchDatasources": ["github-tags"],
+      "matchPackageNames": ["golang/go"],
+      "extractVersion": "^go(?<version>.*)$",
+      "versioning": "semver"
+    },
+    {
+      "description": "Normalize Node tags from nodejs/node.",
+      "matchDatasources": ["github-tags"],
+      "matchPackageNames": ["nodejs/node"],
+      "extractVersion": "^v(?<version>.*)$",
+      "versioning": "node"
+    }
+  ]
+}

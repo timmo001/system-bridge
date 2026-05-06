@@ -57,4 +57,5 @@ jobs:
           go-version-file: go.mod
 
       - name: Lint GitHub Actions workflows
+        # renovate: datasource=go depName=github.com/rhysd/actionlint/cmd/actionlint versioning=semver
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes=
