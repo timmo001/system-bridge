@@ -19,19 +19,19 @@ func withRobotgoStubs(t *testing.T) (*[]keyTapCall, *[]string) {
 
 	// save originals
 	origKeyTap := robotKeyTap
-	origTypeStr := robotTypeStr
+	origType := robotType
 
 	robotKeyTap = func(key string, args ...any) error {
 		keyCalls = append(keyCalls, keyTapCall{key: key, modifiers: args})
 		return nil
 	}
-	robotTypeStr = func(text string, args ...int) {
+	robotType = func(text string, args ...int) {
 		typeCalls = append(typeCalls, text)
 	}
 
 	t.Cleanup(func() {
 		robotKeyTap = origKeyTap
-		robotTypeStr = origTypeStr
+		robotType = origType
 	})
 
 	return &keyCalls, &typeCalls

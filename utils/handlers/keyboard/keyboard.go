@@ -27,8 +27,8 @@ func SendText(text string) error {
 
 // indirection for testability
 var (
-	robotKeyTap                                = robotgo.KeyTap
-	robotTypeStr func(str string, args ...int) = robotgo.TypeStr
+	robotKeyTap                               = robotgo.KeyTap
+	robotType   func(str string, args ...int) = robotgo.Type
 )
 
 func sendKeypress(data KeypressData) error {
@@ -62,6 +62,6 @@ func sendKeypress(data KeypressData) error {
 }
 
 func sendText(text string) error {
-	robotTypeStr(text)
+	robotType(text)
 	return nil
 }
