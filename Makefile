@@ -1,10 +1,12 @@
 # OS detection
+MISE=mise exec --
+
 ifeq ($(OS),Windows_NT)
 	EXE=.exe
 	RM=del /q /f
 	RMDIR=rmdir /s /q
 	OUT=system-bridge.exe
-	BUN_BUILD=set STATIC_EXPORT=true && pnpm run build
+	BUN_BUILD=set STATIC_EXPORT=true && $(MISE) pnpm run build
 	EXTRA_LDFLAGS=-H windowsgui
 	GEN_RC=powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
 else
@@ -12,7 +14,7 @@ else
 	RM=rm -f
 	RMDIR=rm -rf
 	OUT=system-bridge-linux
-	BUN_BUILD=STATIC_EXPORT=true pnpm run build
+	BUN_BUILD=STATIC_EXPORT=true $(MISE) pnpm run build
 	EXTRA_LDFLAGS=
 	CREATE_ARCH=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 	CREATE_DEB=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
@@ -24,27 +26,27 @@ build: clean build_web_client
 ifeq ($(OS),Windows_NT)
 	$(GEN_RC)
 	windres system-bridge.rc -O coff -o system-bridge.syso
-	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" . 
+	$(MISE) go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" . 
 else
-	go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" .
+	$(MISE) go build -v -ldflags="$(EXTRA_LDFLAGS) -X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "$(OUT)" .
 endif
 
 # Build console version for debugging (Windows only)
 build_console: clean build_web_client
 ifeq ($(OS),Windows_NT)
-	go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "system-bridge-console.exe" .
+	$(MISE) go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=$(shell git describe --tags --abbrev=0)'" -o "system-bridge-console.exe" .
 else
 	@echo "Console build is only supported on Windows"
 endif
 
 generate_schemas:
 	@echo "Generating Zod schemas from Go types..."
-	@go run tools/generate-schemas/main.go
+	@$(MISE) go run tools/generate-schemas/main.go
 	@echo "Formatting generated schemas..."
-	@cd web-client && pnpm install && pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
+	@cd web-client && $(MISE) pnpm install && $(MISE) pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
 
 build_web_client: clean_web_client generate_schemas
-	cd web-client && pnpm build
+	cd web-client && $(MISE) pnpm build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
@@ -133,14 +135,14 @@ download_windows_now_playing:
 	powershell -ExecutionPolicy Bypass -File ./.scripts/windows/download-now-playing.ps1
 
 install: build
-	go install .
+	$(MISE) go install .
 
 run: build
 	@echo "Starting web client and backend in parallel..."
-	cd web-client && pnpm exec concurrently -n "web,backend" -c "blue,green" "pnpm dev" "../$(OUT) backend"
+	cd web-client && $(MISE) pnpm exec concurrently -n "web,backend" -c "blue,green" "mise exec -- pnpm dev" "../$(OUT) backend"
 
 run-web-client:
-	cd web-client && pnpm dev
+	cd web-client && $(MISE) pnpm dev
 
 run-backend: build
 	./$(OUT) backend
@@ -175,20 +177,20 @@ endif
 test: test_go
 
 test_go:
-	go test -v ./...
+	$(MISE) go test -v ./...
 
 lint: lint_go lint_web_client lint_fallow
 
 lint_go:
-	go fmt ./...
-	go vet ./...
+	$(MISE) go fmt ./...
+	$(MISE) go vet ./...
 
 lint_web_client:
-	cd web-client && pnpm lint
-	cd web-client && pnpm typecheck
+	cd web-client && $(MISE) pnpm lint
+	cd web-client && $(MISE) pnpm typecheck
 
 lint_fallow:
-	cd web-client && npx fallow --fail-on-issues
+	cd web-client && $(MISE) npx fallow --fail-on-issues
 
 clean:
 ifeq ($(OS),Windows_NT)
@@ -231,7 +233,7 @@ else
 endif
 
 deps:
-	go mod tidy
+	$(MISE) go mod tidy
 
 version: build
 	./$(OUT) version
