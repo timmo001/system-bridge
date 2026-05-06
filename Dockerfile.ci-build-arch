@@ -1,9 +1,13 @@
 FROM archlinux:base-20260419.0.517065@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da
 
-# renovate: datasource=npm packageName=corepack versioning=semver
-ARG COREPACK_VERSION=0.34.7
-
 WORKDIR /workspace
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV MISE_DATA_DIR="/mise"
+ENV MISE_CACHE_DIR="/mise/cache"
+ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
+ENV PATH="/mise/shims:/usr/local/bin:/usr/bin:$PATH"
 
 # Install build dependencies
 RUN pacman -Syu --noconfirm && \
@@ -34,19 +38,16 @@ RUN pacman -Syu --noconfirm && \
         xorgproto \
     && pacman -Scc --noconfirm
 
-# Install Go (use Arch package for simplicity)
-RUN pacman -S --noconfirm --needed go
-ENV PATH="/usr/lib/go/bin:/usr/bin:$PATH"
+# Install pinned runtimes from mise.toml.
+COPY mise.toml ./
+RUN curl https://mise.run | sh \
+    && mise trust -a \
+    && mise install
 
 # Copy Go module files and download dependencies
 COPY go.mod go.sum ./
 RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
     go mod download && go mod verify
-
-# Install Node.js and corepack, then let corepack resolve the pinned pnpm version from package.json.
-RUN pacman -S --noconfirm --needed nodejs npm && \
-    npm install -g "corepack@${COREPACK_VERSION}" && \
-    corepack enable
 
 # Install AppImageTool
 RUN wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool && \

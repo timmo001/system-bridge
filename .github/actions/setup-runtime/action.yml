@@ -1,0 +1,22 @@
+---
+name: Setup Runtime
+description: Setup pinned Go, Node, and pnpm via mise
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up mise
+      uses: jdx/mise-action@v4
+      with:
+        cache: true
+
+    - name: Trust runtime config
+      run: mise trust -a
+      shell: bash
+
+    - name: Show runtime versions
+      run: |
+        mise exec -- go version
+        mise exec -- node --version
+        mise exec -- pnpm --version
+      shell: bash
