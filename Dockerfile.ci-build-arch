@@ -1,5 +1,8 @@
 FROM archlinux:latest
 
+# renovate: datasource=npm packageName=corepack versioning=semver
+ARG COREPACK_VERSION=0.34.7
+
 WORKDIR /workspace
 
 # Install build dependencies
@@ -40,8 +43,9 @@ COPY go.mod go.sum ./
 RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
     go mod download && go mod verify
 
-# Install Node.js and let corepack resolve the pinned pnpm version from package.json.
+# Install Node.js and corepack, then let corepack resolve the pinned pnpm version from package.json.
 RUN pacman -S --noconfirm --needed nodejs npm && \
+    npm install -g "corepack@${COREPACK_VERSION}" && \
     corepack enable
 
 # Install AppImageTool
