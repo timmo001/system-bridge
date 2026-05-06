@@ -4,17 +4,15 @@ import (
 	"log/slog"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/backend/service"
 	"github.com/timmo001/system-bridge/event"
-	"github.com/timmo001/system-bridge/types"
-	"github.com/timmo001/system-bridge/utils/handlers/media"
 )
 
 type MediaControlRequestData struct {
 	Action string `json:"action" mapstructure:"action"`
 }
 
-func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.DataStore) {
+func RegisterMediaControlHandler(router *event.MessageRouter, backendService *service.Service) {
 	router.RegisterSimpleHandler(event.EventMediaControl, func(connection string, message event.Message) event.MessageResponse {
 		slog.Debug("Received media control event", "message", message)
 
@@ -41,7 +39,7 @@ func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.Da
 			}
 		}
 
-		err = media.Control(media.MediaAction(data.Action))
+		err = backendService.MediaControl(data.Action)
 		if err != nil {
 			slog.Error("Failed to control media", "error", err)
 			return event.MessageResponse{
@@ -49,15 +47,6 @@ func RegisterMediaControlHandler(router *event.MessageRouter, dataStore *data.Da
 				Type:    event.ResponseTypeError,
 				Subtype: event.ResponseSubtypeNone,
 				Message: "Failed to control media",
-			}
-		}
-
-		// Trigger an update to the media module
-		if dataStore != nil {
-			if err := dataStore.TriggerModuleUpdate(types.ModuleMedia); err != nil {
-				slog.Warn("Failed to trigger media module update", "error", err)
-			} else {
-				slog.Debug("Triggered media module update after media control action", "action", data.Action)
 			}
 		}
 

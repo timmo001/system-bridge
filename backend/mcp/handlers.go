@@ -50,14 +50,9 @@ func (s *MCPServer) handleGetData(ctx context.Context, arguments map[string]inte
 	}
 
 	// Get data for each module
-	result := make(map[string]interface{})
-	for _, moduleName := range modules {
-		module, err := s.dataStore.GetModule(moduleName)
-		if err != nil {
-			slog.Warn("Module not found", "module", moduleName, "error", err)
-			continue
-		}
-		result[string(moduleName)] = module.Data
+	result, err := s.service.GetModules(modules)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -84,20 +79,23 @@ func (s *MCPServer) handleNotification(ctx context.Context, arguments map[string
 
 // handleMediaControl controls media playback
 func (s *MCPServer) handleMediaControl(ctx context.Context, arguments map[string]interface{}) (interface{}, error) {
-	message := event.Message{
-		ID:    generateID(),
-		Event: event.EventMediaControl,
-		Data:  arguments,
+	actionRaw, ok := arguments["action"]
+	if !ok {
+		return nil, fmt.Errorf("missing required parameter: action")
 	}
 
-	response := s.eventRouter.HandleMessage("mcp", message)
-	if response.Type == event.ResponseTypeError {
-		return nil, fmt.Errorf("%s", response.Message)
+	action, ok := actionRaw.(string)
+	if !ok {
+		return nil, fmt.Errorf("action must be a string")
+	}
+
+	if err := s.service.MediaControl(action); err != nil {
+		return nil, err
 	}
 
 	return map[string]interface{}{
 		"success": true,
-		"message": response.Message,
+		"message": "Media controlled",
 	}, nil
 }
 

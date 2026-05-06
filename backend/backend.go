@@ -14,6 +14,7 @@ import (
 
 	api_http "github.com/timmo001/system-bridge/backend/http"
 	"github.com/timmo001/system-bridge/backend/mcp"
+	"github.com/timmo001/system-bridge/backend/service"
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
@@ -21,6 +22,7 @@ import (
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
 	"github.com/timmo001/system-bridge/version"
@@ -31,6 +33,7 @@ type Backend struct {
 	dataStore        *data.DataStore
 	eventRouter      *event.MessageRouter
 	wsServer         *websocket.WebsocketServer
+	service          *service.Service
 	webClientContent *embed.FS
 	discoveryManager *discovery.DiscoveryManager
 	token            string
@@ -43,6 +46,13 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 
 	eventRouter := event.NewMessageRouter()
 	wsServer := websocket.NewWebsocketServer(token, dataStore, eventRouter)
+	backendService := service.New(
+		dataStore,
+		func(connection string, modules []types.ModuleName) {
+			wsServer.RegisterDataListener(connection, modules)
+		},
+		wsServer.UnregisterDataListener,
+	)
 
 	// Initialize discovery manager
 	discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
@@ -52,6 +62,7 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 		dataStore:        dataStore,
 		eventRouter:      eventRouter,
 		wsServer:         wsServer,
+		service:          backendService,
 		webClientContent: webClientContent,
 		discoveryManager: discoveryManager,
 		token:            token,
@@ -86,7 +97,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	command.SetServerContext(ctx)
 
 	// Setup event handlers
-	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
+	event_handler.RegisterHandlers(b.eventRouter, b.service)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
@@ -117,7 +128,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api", api_http.HandleAPI)
 	// Set up module data endpoint
 	mux.HandleFunc("/api/data/", api_http.GetModuleDataHandler(
-		b.dataStore,
+		b.service,
 	))
 
 	// Set up health check endpoint

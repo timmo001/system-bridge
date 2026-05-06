@@ -6,13 +6,13 @@ import (
 
 	"log/slog"
 
-	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/backend/service"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
 // GetModuleDataHandler handles requests to get data for a specific module
-func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
+func GetModuleDataHandler(backendService *service.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		expectedToken, err := utils.LoadToken()
 		if err != nil {
@@ -53,7 +53,7 @@ func GetModuleDataHandler(dataStore *data.DataStore) http.HandlerFunc {
 		}
 
 		// Get module data
-		m, err := dataStore.GetModule(module)
+		m, err := backendService.GetModule(module)
 		if err != nil {
 			slog.Info("GET: /api/data/:module", "module", module, "data", "not found")
 			w.Header().Set("Content-Type", "application/json")

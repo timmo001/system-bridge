@@ -225,7 +225,7 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 	for _, moduleName := range moduleRequest.Modules {
 		slog.Debug("WS: Broadcasting module update", "module", moduleName)
 
-		module, err := ws.dataStore.GetModule(moduleName)
+		module, err := ws.service.GetModule(moduleName)
 		if err != nil {
 			slog.Warn("Data module not registered", "module", moduleName)
 			continue

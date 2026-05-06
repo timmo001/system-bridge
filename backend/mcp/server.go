@@ -6,6 +6,7 @@ import (
 
 	"log/slog"
 
+	"github.com/timmo001/system-bridge/backend/service"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/version"
@@ -15,7 +16,7 @@ import (
 type MCPServer struct {
 	token       string
 	eventRouter *event.MessageRouter
-	dataStore   *data.DataStore
+	service     *service.Service
 }
 
 // NewMCPServer creates a new MCP server
@@ -23,7 +24,7 @@ func NewMCPServer(token string, eventRouter *event.MessageRouter, dataStore *dat
 	return &MCPServer{
 		token:       token,
 		eventRouter: eventRouter,
-		dataStore:   dataStore,
+		service:     service.New(dataStore, nil, nil),
 	}
 }
 

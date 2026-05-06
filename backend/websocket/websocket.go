@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/timmo001/system-bridge/backend/service"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
@@ -35,6 +36,7 @@ type WebsocketServer struct {
 	dataListeners map[string][]types.ModuleName
 	mutex         sync.RWMutex
 	dataStore     *data.DataStore
+	service       *service.Service
 	EventRouter   *event.MessageRouter
 }
 
@@ -51,6 +53,13 @@ func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *ev
 			},
 		},
 	}
+	ws.service = service.New(
+		dataStore,
+		func(addr string, modules []types.ModuleName) {
+			ws.RegisterDataListener(addr, modules)
+		},
+		ws.UnregisterDataListener,
+	)
 	SetInstance(ws)
 
 	// Subscribe to module data updates
