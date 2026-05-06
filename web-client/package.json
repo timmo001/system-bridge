@@ -17,7 +17,7 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
-    "@codemirror/view": "^6.41.1",
+    "@codemirror/view": "^6.42.0",
     "@lezer/highlight": "^1.2.3",
     "@lit-labs/router": "^0.1.4",
     "@lit/context": "^1.1.6",
