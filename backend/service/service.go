@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/types"
@@ -83,7 +84,7 @@ func (s *Service) MediaControl(action string) error {
 	}
 
 	if err := s.dataStore.TriggerModuleUpdate(types.ModuleMedia); err != nil {
-		return fmt.Errorf("failed to trigger media module update: %w", err)
+		slog.Warn("Failed to trigger media module update after media control action", "action", action, "error", err)
 	}
 
 	return nil
