@@ -1,4 +1,4 @@
-FROM archlinux:latest
+FROM archlinux:latest@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da
 
 # renovate: datasource=npm packageName=corepack versioning=semver
 ARG COREPACK_VERSION=0.34.7
