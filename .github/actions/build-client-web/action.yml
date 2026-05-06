@@ -8,7 +8,7 @@ runs:
     - uses: ./.github/actions/setup-client-web
 
     - name: Cache Vite build cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/web-client/dist
         key: ${{ runner.os }}-vite-v3-${{ hashFiles('web-client/**/pnpm-lock.yaml') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx', 'web-client/**/*.css', 'web-client/vite.config.ts') }}
