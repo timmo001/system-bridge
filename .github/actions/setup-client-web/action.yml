@@ -5,12 +5,8 @@ description: Setup steps for the System Bridge web client
 runs:
   using: "composite"
   steps:
-    - uses: pnpm/action-setup@v6
-      with:
-        package_json_file: web-client/package.json
+    - uses: ./.github/actions/setup-runtime
 
-    - uses: actions/setup-node@v6
-      with:
-        node-version-file: .node-version
-        cache: pnpm
-        cache-dependency-path: web-client/pnpm-lock.yaml
+    - name: Install web client dependencies
+      run: mise exec -C web-client -- pnpm install --frozen-lockfile
+      shell: bash

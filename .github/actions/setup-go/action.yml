@@ -5,16 +5,12 @@ description: Common steps for setting up System Bridge (Go)
 runs:
   using: "composite"
   steps:
+    - uses: ./.github/actions/setup-runtime
+
     - name: Clean go module cache
       run: |
         rm -rf ~/go/pkg/mod
       shell: bash
-
-    - name: Set up go
-      uses: actions/setup-go@v6
-      with:
-        cache: true
-        go-version-file: "go.mod"
 
     - name: Cache go build
       uses: actions/cache@v5
@@ -22,12 +18,12 @@ runs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-        key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.mod', '**/go.sum') }}
+        key: ${{ runner.os }}-go-build-${{ hashFiles('mise.toml', '**/go.mod', '**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-build-
 
     - name: Install dependencies
       run: |
-        go mod download
-        go mod verify
+        mise exec -- go mod download
+        mise exec -- go mod verify
       shell: bash

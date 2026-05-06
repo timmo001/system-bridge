@@ -34,13 +34,10 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
 ## Development Setup
 
-1. Install go
-1. Set up your go workspace and make sure that your `GOPATH` is set correctly.
+1. Install `mise`
+1. Run `mise install` in the repo root to install the pinned Go, Node, and pnpm toolchains.
 
-```zsh
-export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-```
+`mise.toml` is the source of truth for local and CI runtimes.
 
 ## Build and Install
 

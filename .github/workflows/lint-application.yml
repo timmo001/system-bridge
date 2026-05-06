@@ -32,9 +32,6 @@ jobs:
       - name: Set up Go
         uses: ./.github/actions/setup-go
 
-      - name: Setup client web
-        uses: ./.github/actions/setup-client-web
-
       - name: Build client project
         uses: ./.github/actions/build-client-web
 
