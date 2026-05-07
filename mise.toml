@@ -1,6 +1,6 @@
 min_version = "2025.1.0"
 
 [tools]
-go = "1.26.2"
+go = "1.26.3"
 node = "26.1.0"
 "npm:pnpm" = "11.0.8"
