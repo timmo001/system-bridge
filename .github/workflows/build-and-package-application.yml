@@ -147,19 +147,31 @@ jobs:
   build-package-windows:
     name: Build and package windows
     runs-on: windows-latest
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
+      - name: Detect NowPlaying-related changes
+        id: nowplaying_changes
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        run: |
+          changed_files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^(\.github/workflows/build-and-package-application\.yml|data/module/media/media_windows\.go|\.scripts/windows/(create-installer\.ps1|download-now-playing\.ps1|installer\.nsi\.template))$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download NowPlaying helper
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        if: ${{ env.GH_TOKEN != '' }}
+          GH_TOKEN: ${{ github.token }}
+          ALLOW_RATE_LIMIT_SKIP: ${{ github.event_name == 'pull_request' && steps.nowplaying_changes.outputs.changed != 'true' && 'true' || 'false' }}
+        if: ${{ github.token != '' }}
         run: ./.scripts/windows/download-now-playing.ps1
 
       - name: Setup Go
