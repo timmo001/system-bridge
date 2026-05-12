@@ -100,6 +100,8 @@ github.com/tklauser/numcpus v0.11.0 h1:nSTwhKH5e1dMNsCdVBukSZrURJRoHbSEQjdEbY+9R
 github.com/tklauser/numcpus v0.11.0/go.mod h1:z+LwcLq54uWZTX0u/bGobaV34u6V7KNlTZejzM6/3MQ=
 github.com/urfave/cli/v3 v3.8.0 h1:XqKPrm0q4P0q5JpoclYoCAv0/MIvH/jZ2umzuf8pNTI=
 github.com/urfave/cli/v3 v3.8.0/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
+github.com/urfave/cli/v3 v3.9.0 h1:AV9lIiPv3ukYnxunaCUsHnEozptYmDN2F0+yWqLMn/c=
+github.com/urfave/cli/v3 v3.9.0/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
 github.com/vcaesar/gops v0.41.0 h1:FG748Jyw3FOuZnbzSgB+CQSx2e5LbLCPWV2JU1brFdc=
 github.com/vcaesar/gops v0.41.0/go.mod h1:/3048L7Rj7QjQKTSB+kKc7hDm63YhTWy5QJ10TCP37A=
 github.com/vcaesar/imgo v0.41.0 h1:kNLYGrThXhB9Dd6IwFmfPnxq9P6yat2g7dpPjr7OWO8=
