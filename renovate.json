@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "group:monorepos",
+    "group:recommended"
+  ],
   "dependencyDashboard": true,
   "labels": ["dependencies"],
   "lockFileMaintenance": {
@@ -48,6 +53,21 @@
       "matchPackageNames": ["nodejs/node"],
       "extractVersion": "^v(?<version>.*)$",
       "versioning": "node"
+    },
+    {
+      "description": "Group ESLint packages.",
+      "groupName": "eslint",
+      "matchPackageNames": ["eslint", "@eslint/**", "eslint-**", "typescript-eslint"]
+    },
+    {
+      "description": "Group Tailwind CSS packages.",
+      "groupName": "tailwindcss",
+      "matchPackageNames": ["tailwindcss", "@tailwindcss/**", "tailwind-merge", "postcss"]
+    },
+    {
+      "description": "Group GitHub Actions.",
+      "groupName": "github actions",
+      "matchManagers": ["github-actions"]
     }
   ]
 }
