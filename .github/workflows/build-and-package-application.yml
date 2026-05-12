@@ -32,7 +32,7 @@ jobs:
       version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -74,7 +74,7 @@ jobs:
           ./.scripts/verify-css.sh ./system-bridge-linux
 
       - name: Upload application
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: system-bridge-linux
@@ -103,12 +103,12 @@ jobs:
       VERSION: ${{ needs.build-linux.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
       - name: Download application
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: .
@@ -138,7 +138,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: system-bridge-linux-packages-${{ matrix.build.package }}-${{ env.VERSION }}
           path: dist/**
@@ -149,7 +149,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -181,7 +181,7 @@ jobs:
         uses: ./.github/actions/build-client-web
 
       - name: Setup MinGW
-        uses: egor-tensin/setup-mingw@v3
+        uses: egor-tensin/setup-mingw@41b837e47d7f85214629d255b9c4bc3fcbe9fd63 # v3
         with:
           platform: x64
           # https://github.com/egor-tensin/setup-mingw/issues/17#issuecomment-1890253793
@@ -237,7 +237,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: system-bridge-windows-packages-${{ env.VERSION }}
           path: dist/**
@@ -257,7 +257,7 @@ jobs:
       VERSION: ${{ needs.build-linux.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: Update AUR package
@@ -314,37 +314,37 @@ jobs:
       contents: write
     steps:
       - name: Download linux arch packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-linux-packages-arch-${{ needs.build-linux.outputs.version }}
           path: dist/linux/arch
 
       - name: Download linux deb packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-linux-packages-deb-${{ needs.build-linux.outputs.version }}
           path: dist/linux/deb
 
       - name: Download linux rpm packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-linux-packages-rpm-${{ needs.build-linux.outputs.version }}
           path: dist/linux/rpm
 
       - name: Download linux flatpak packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-linux-packages-flatpak-${{ needs.build-linux.outputs.version }}
           path: dist/linux/flatpak
 
       - name: Download windows packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
       - name: Update release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           files: |
             dist/linux/arch/*.pkg.tar.zst
@@ -410,7 +410,7 @@ jobs:
       contents: write
     steps:
       - name: Create draft prerelease
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           draft: true
           prerelease: false
