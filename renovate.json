@@ -31,32 +31,6 @@
   ],
   "packageRules": [
     {
-      "description": "Group web client dependency updates.",
-      "matchManagers": ["npm"],
-      "matchFileNames": ["web-client/package.json", "web-client/pnpm-lock.yaml"],
-      "groupName": "Web client dependencies"
-    },
-    {
-      "description": "Group Go module updates.",
-      "matchManagers": ["gomod"],
-      "groupName": "Go modules"
-    },
-    {
-      "description": "Group GitHub Actions updates.",
-      "matchManagers": ["github-actions"],
-      "groupName": "GitHub Actions"
-    },
-    {
-      "description": "Group CI Docker image updates.",
-      "matchManagers": ["dockerfile"],
-      "groupName": "CI Docker images"
-    },
-    {
-      "description": "Group toolchain version updates.",
-      "matchManagers": ["mise","custom.regex"],
-      "groupName": "Toolchain versions"
-    },
-    {
       "description": "Pin Docker image digests.",
       "matchDatasources": ["docker"],
       "pinDigests": true
