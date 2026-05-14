@@ -37,6 +37,9 @@ class PageSettingsGeneral extends PageElement {
     commands: {
       allowlist: [],
     },
+    disks: {
+      allowedSecondaryMountPoints: [],
+    },
     media: {
       directories: [],
     },

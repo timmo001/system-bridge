@@ -27,6 +27,7 @@ const EventTypeSchema = z.enum([
   "DATA_UPDATE",
   "UPDATE_SETTINGS",
   "VALIDATE_DIRECTORY",
+  "GET_DISK_MOUNTS",
 ]);
 
 const ResponseTypeSchema = z.enum([
@@ -56,6 +57,7 @@ const ResponseTypeSchema = z.enum([
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
   "DIRECTORY_VALIDATED",
+  "DISK_MOUNTS",
 ]);
 
 const ResponseSubtypeSchema = z.enum([

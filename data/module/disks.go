@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 )
 
@@ -17,15 +18,38 @@ func (diskModule DiskModule) Name() types.ModuleName { return types.ModuleDisks 
 func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	slog.Debug("Getting disks data")
 
+	cfg, err := settings.Load()
+	if err != nil {
+		slog.Warn("Failed to load settings for disk filtering, using defaults", "error", err)
+		cfg = &settings.Settings{}
+	}
+
 	var disksData types.DisksData
-	// Initialize arrays
 	disksData.Devices = make([]types.Disk, 0)
 
-	// Get all partitions
-	partitions, err := disk.Partitions(false)
+	// Get all partitions (true includes device-mapper, LUKS, LVM, btrfs subvolumes)
+	allPartitions, err := disk.Partitions(true)
 	if err != nil {
 		slog.Error("Failed to get disk partitions", "error", err)
 		return disksData, err
+	}
+
+	// Filter to relevant partitions based on settings
+	allowedSet := make(map[string]bool, len(cfg.Disks.AllowedSecondaryMountPoints))
+	for _, mp := range cfg.Disks.AllowedSecondaryMountPoints {
+		allowedSet[mp] = true
+	}
+
+	var partitions []disk.PartitionStat
+	for _, p := range allPartitions {
+		if !strings.HasPrefix(p.Device, "/dev/") {
+			continue
+		}
+		category := ClassifyMount(p)
+		if category != types.DiskMountCategoryPrimary && !allowedSet[p.Mountpoint] {
+			continue
+		}
+		partitions = append(partitions, p)
 	}
 
 	// Get IO counters for all devices
@@ -116,4 +140,83 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	})
 
 	return disksData, nil
+}
+
+// ClassifyMount determines the category of a partition based on its properties.
+func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
+	if p.Fstype == "squashfs" {
+		return types.DiskMountCategorySquashFS
+	}
+	for _, opt := range p.Opts {
+		if opt == "bind" {
+			return types.DiskMountCategoryBind
+		}
+	}
+	return types.DiskMountCategoryPrimary
+}
+
+// GetAllMountsCategorized returns all /dev/ mounts categorized for the settings UI.
+func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
+	allPartitions, err := disk.Partitions(true)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &types.DiskMountsResponse{
+		Primary: make([]types.DiskMountInfo, 0),
+		Secondary: types.DiskMountsSecondary{
+			Bind:     make([]types.DiskMountInfo, 0),
+			SquashFS: make([]types.DiskMountInfo, 0),
+		},
+	}
+
+	for _, p := range allPartitions {
+		if !strings.HasPrefix(p.Device, "/dev/") {
+			continue
+		}
+
+		category := ClassifyMount(p)
+
+		// Get usage stats
+		var diskUsage *types.DiskUsage
+		usage, err := disk.Usage(p.Mountpoint)
+		if err == nil {
+			diskUsage = &types.DiskUsage{
+				Total:   usage.Total,
+				Used:    usage.Used,
+				Free:    usage.Free,
+				Percent: usage.UsedPercent,
+			}
+		}
+
+		info := types.DiskMountInfo{
+			Device:         p.Device,
+			MountPoint:     p.Mountpoint,
+			FilesystemType: p.Fstype,
+			Category:       category,
+			Usage:          diskUsage,
+		}
+
+		switch category {
+		case types.DiskMountCategoryPrimary:
+			response.Primary = append(response.Primary, info)
+		case types.DiskMountCategoryBind:
+			response.Secondary.Bind = append(response.Secondary.Bind, info)
+		case types.DiskMountCategorySquashFS:
+			response.Secondary.SquashFS = append(response.Secondary.SquashFS, info)
+		}
+	}
+
+	// Sort each category by mount point for stable ordering
+	sort.Slice(response.Primary, func(i, j int) bool {
+		return response.Primary[i].MountPoint < response.Primary[j].MountPoint
+	})
+	sort.Slice(response.Secondary.Bind, func(i, j int) bool {
+		return response.Secondary.Bind[i].MountPoint < response.Secondary.Bind[j].MountPoint
+	})
+	sort.Slice(response.Secondary.SquashFS, func(i, j int) bool {
+		return response.Secondary.SquashFS[i].MountPoint < response.Secondary.SquashFS[j].MountPoint
+	})
+
+	return response, nil
 }

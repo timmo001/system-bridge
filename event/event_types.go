@@ -8,6 +8,7 @@ const (
 	EventGetData                EventType = "GET_DATA"
 	EventGetDirectories         EventType = "GET_DIRECTORIES"
 	EventGetDirectory           EventType = "GET_DIRECTORY"
+	EventGetDiskMounts          EventType = "GET_DISK_MOUNTS"
 	EventGetFiles               EventType = "GET_FILES"
 	EventGetFile                EventType = "GET_FILE"
 	EventGetSettings            EventType = "GET_SETTINGS"

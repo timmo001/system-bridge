@@ -30,6 +30,10 @@ class PageHome extends PageElement {
     this.navigate("/settings/commands");
   };
 
+  private handleNavigateToDisks = (): void => {
+    this.navigate("/settings/disks");
+  };
+
   private handleNavigateToNotifications = (): void => {
     this.navigate("/notifications");
   };
@@ -100,6 +104,13 @@ class PageHome extends PageElement {
                     @click=${this.handleNavigateToCommands}
                   >
                     Commands
+                  </ui-button>
+                  <ui-button
+                    variant="default"
+                    class="w-full"
+                    @click=${this.handleNavigateToDisks}
+                  >
+                    Disks
                   </ui-button>
                 </div>
               </div>

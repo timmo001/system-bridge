@@ -58,6 +58,14 @@ class App extends LitElement {
       },
     },
     {
+      path: "/settings/disks",
+      render: () => html`<page-settings-disks></page-settings-disks>`,
+      enter: async () => {
+        await import("./pages/settings-disks");
+        return true;
+      },
+    },
+    {
       path: "/notifications",
       render: () => html`<page-notifications></page-notifications>`,
       enter: async () => {

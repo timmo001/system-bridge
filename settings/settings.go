@@ -95,11 +95,16 @@ type SettingsMedia struct {
 	Directories []SettingsMediaDirectory `json:"directories" mapstructure:"directories"`
 }
 
+type SettingsDisks struct {
+	AllowedSecondaryMountPoints []string `json:"allowedSecondaryMountPoints" mapstructure:"allowedSecondaryMountPoints"`
+}
+
 type Settings struct {
 	Autostart bool             `json:"autostart" mapstructure:"autostart"`
 	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel  LogLevel         `json:"logLevel" mapstructure:"logLevel"`
 	Commands  SettingsCommands `json:"commands" mapstructure:"commands"`
+	Disks     SettingsDisks    `json:"disks" mapstructure:"disks"`
 	Media     SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
@@ -119,6 +124,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("autostart", false)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelWarn)
+	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
 
@@ -207,6 +213,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
+	viper.Set("disks.allowedSecondaryMountPoints", cfg.Disks.AllowedSecondaryMountPoints)
 	viper.Set("media.directories", cfg.Media.Directories)
 
 	if err := viper.WriteConfig(); err != nil {
