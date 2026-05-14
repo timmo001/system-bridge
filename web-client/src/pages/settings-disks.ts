@@ -12,6 +12,7 @@ import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
+import "../components/ui/checkbox";
 import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
@@ -206,15 +207,13 @@ class PageSettingsDisks extends PageElement {
           ? "opacity-75"
           : ""}"
       >
-        <input
-          type="checkbox"
-          class="h-4 w-4 rounded border-input"
+        <ui-checkbox
           .checked=${checked}
           ?disabled=${disabled}
-          @change=${() => {
+          @checkbox-change=${() => {
             if (!disabled) this.handleToggleMount(mount.mount_point);
           }}
-        />
+        ></ui-checkbox>
         <div class="flex-1 min-w-0">
           <div class="font-medium font-mono text-sm truncate">
             ${mount.mount_point}
