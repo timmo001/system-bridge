@@ -145,7 +145,11 @@ class PageSettingsDisks extends PageElement {
     }
   }
 
-  private handleToggleMount(mountPoint: string) {
+  private handleToggleMount = (e: Event): void => {
+    const el = e.currentTarget as HTMLElement;
+    const mountPoint = el.getAttribute("data-mount");
+    if (!mountPoint) return;
+
     if (this.allowedMountPoints.includes(mountPoint)) {
       this.allowedMountPoints = this.allowedMountPoints.filter(
         (mp) => mp !== mountPoint,
@@ -154,7 +158,7 @@ class PageSettingsDisks extends PageElement {
       this.allowedMountPoints = [...this.allowedMountPoints, mountPoint];
     }
     this.saveSettings();
-  }
+  };
 
   private saveSettings(): void {
     if (
@@ -210,9 +214,8 @@ class PageSettingsDisks extends PageElement {
         <ui-checkbox
           .checked=${checked}
           ?disabled=${disabled}
-          @checkbox-change=${() => {
-            if (!disabled) this.handleToggleMount(mount.mount_point);
-          }}
+          data-mount=${mount.mount_point}
+          @checkbox-change=${this.handleToggleMount}
         ></ui-checkbox>
         <div class="flex-1 min-w-0">
           <div class="font-medium font-mono text-sm truncate">
