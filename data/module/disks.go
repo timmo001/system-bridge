@@ -2,6 +2,7 @@ package data_module
 
 import (
 	"context"
+	"sort"
 	"strings"
 
 	"log/slog"
@@ -102,8 +103,17 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 
 	// Convert map to array
 	for _, device := range deviceMap {
+		// Sort partitions within each device by mount point for stable ordering
+		sort.Slice(device.Partitions, func(i, j int) bool {
+			return device.Partitions[i].MountPoint < device.Partitions[j].MountPoint
+		})
 		disksData.Devices = append(disksData.Devices, *device)
 	}
+
+	// Sort devices by name for deterministic ordering across API calls
+	sort.Slice(disksData.Devices, func(i, j int) bool {
+		return disksData.Devices[i].Name < disksData.Devices[j].Name
+	})
 
 	return disksData, nil
 }
