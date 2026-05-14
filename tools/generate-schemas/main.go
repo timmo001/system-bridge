@@ -340,6 +340,9 @@ func getStructComment(name string) string {
 		"DiskIOCounters":         "Disk IO Counters",
 		"DiskUsage":              "Disk Usage",
 		"DiskPartition":          "Disk Partition",
+		"DiskMountInfo":          "Disk Mount Info",
+		"DiskMountsSecondary":    "Disk Mounts Secondary",
+		"DiskMountsResponse":     "Disk Mounts Response",
 		"Disk":                   "Disk",
 		"Display":                "Display",
 		"GPU":                    "GPU",
@@ -581,6 +584,11 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"ProcessesData",
 		"SensorsData",
 		"SystemData",
+
+		// Disk mount types (for settings UI)
+		"DiskMountInfo",
+		"DiskMountsSecondary",
+		"DiskMountsResponse",
 	}
 
 	// Filter to only include structs that exist

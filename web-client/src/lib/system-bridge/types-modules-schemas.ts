@@ -361,9 +361,7 @@ export const SensorsWindowsHardwareSchema: z.ZodType<{
   sensors: z.array(SensorsWindowsSensorSchema),
 });
 
-export type SensorsWindowsHardware = z.infer<
-  typeof SensorsWindowsHardwareSchema
->;
+export type SensorsWindowsHardware = z.infer<typeof SensorsWindowsHardwareSchema>;
 
 // Windows Sensors
 export const SensorsWindowsSchema = z.object({
@@ -504,16 +502,7 @@ export const SystemDataSchema = z.object({
 
 export type SystemData = z.infer<typeof SystemDataSchema>;
 
-// Module
-export const ModuleSchema = z.object({
-  module: z.unknown(),
-  data: z.unknown(),
-  updated: z.string(),
-});
-
-export type Module = z.infer<typeof ModuleSchema>;
-
-// DiskMountInfo
+// Disk Mount Info
 export const DiskMountInfoSchema = z.object({
   device: z.string(),
   mount_point: z.string(),
@@ -524,7 +513,7 @@ export const DiskMountInfoSchema = z.object({
 
 export type DiskMountInfo = z.infer<typeof DiskMountInfoSchema>;
 
-// DiskMountsSecondary
+// Disk Mounts Secondary
 export const DiskMountsSecondarySchema = z.object({
   bind: z.array(DiskMountInfoSchema),
   squashfs: z.array(DiskMountInfoSchema),
@@ -532,13 +521,22 @@ export const DiskMountsSecondarySchema = z.object({
 
 export type DiskMountsSecondary = z.infer<typeof DiskMountsSecondarySchema>;
 
-// DiskMountsResponse
+// Disk Mounts Response
 export const DiskMountsResponseSchema = z.object({
   primary: z.array(DiskMountInfoSchema),
   secondary: DiskMountsSecondarySchema,
 });
 
 export type DiskMountsResponse = z.infer<typeof DiskMountsResponseSchema>;
+
+// Module
+export const ModuleSchema = z.object({
+  module: z.unknown(),
+  data: z.unknown(),
+  updated: z.string(),
+});
+
+export type Module = z.infer<typeof ModuleSchema>;
 
 // Module Data Union Type
 export const ModuleDataSchemas = {
