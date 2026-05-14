@@ -3,4 +3,4 @@ min_version = "2025.1.0"
 [tools]
 go = "1.26.3"
 node = "26.1.0"
-"npm:pnpm" = "11.1.1"
+"npm:pnpm" = "11.1.2"
