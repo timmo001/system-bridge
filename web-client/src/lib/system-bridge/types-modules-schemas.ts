@@ -523,6 +523,14 @@ export const DiskMountsSecondarySchema = z.object({
 
 export type DiskMountsSecondary = z.infer<typeof DiskMountsSecondarySchema>;
 
+// DiskMountsResponse
+export const DiskMountsResponseSchema = z.object({
+  primary: z.array(DiskMountInfoSchema),
+  secondary: DiskMountsSecondarySchema,
+});
+
+export type DiskMountsResponse = z.infer<typeof DiskMountsResponseSchema>;
+
 // Module
 export const ModuleSchema = z.object({
   module: z.unknown(),
@@ -531,14 +539,6 @@ export const ModuleSchema = z.object({
 });
 
 export type Module = z.infer<typeof ModuleSchema>;
-
-// DiskMountsResponse
-export const DiskMountsResponseSchema = z.object({
-  primary: z.array(DiskMountInfoSchema),
-  secondary: DiskMountsSecondarySchema,
-});
-
-export type DiskMountsResponse = z.infer<typeof DiskMountsResponseSchema>;
 
 // Module Data Union Type
 export const ModuleDataSchemas = {

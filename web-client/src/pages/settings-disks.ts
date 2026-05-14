@@ -102,7 +102,7 @@ class PageSettingsDisks extends PageElement {
 
   private loadData() {
     this.loadSettings();
-    this.loadMounts();
+    void this.loadMounts();
   }
 
   private loadSettings() {
@@ -244,21 +244,21 @@ class PageSettingsDisks extends PageElement {
       return html``;
     }
 
+    const mountRows = mounts.map((mount) =>
+      this.renderMountRow(mount, {
+        disabled,
+        checked:
+          disabled || this.allowedMountPoints.includes(mount.mount_point),
+      }),
+    );
+
     return html`
       <div class="rounded-lg border bg-card p-6 space-y-4">
         <div class="space-y-1">
           <h2 class="text-lg font-semibold">${title}</h2>
           <p class="text-sm text-muted-foreground">${description}</p>
         </div>
-        <div class="space-y-2">
-          ${mounts.map((mount) =>
-            this.renderMountRow(mount, {
-              disabled,
-              checked:
-                disabled || this.allowedMountPoints.includes(mount.mount_point),
-            }),
-          )}
-        </div>
+        <div class="space-y-2">${mountRows}</div>
       </div>
     `;
   }
