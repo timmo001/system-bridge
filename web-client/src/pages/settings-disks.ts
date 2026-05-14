@@ -116,7 +116,11 @@ class PageSettingsDisks extends PageElement {
   // fallow-ignore-next-line complexity
   private async loadMounts() {
     const token = this.connection?.token;
-    if (!token || !this.websocket?.sendRequestWithResponse || !this.websocket.isConnected) {
+    if (
+      !token ||
+      !this.websocket?.sendRequestWithResponse ||
+      !this.websocket.isConnected
+    ) {
       return;
     }
 
