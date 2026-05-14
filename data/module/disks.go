@@ -15,6 +15,12 @@ import (
 
 type DiskModule struct{}
 
+// partitionsFunc is the function used to retrieve partitions. Override in tests.
+var partitionsFunc = disk.Partitions
+
+// usageFunc is the function used to retrieve disk usage. Override in tests.
+var usageFunc = disk.Usage
+
 func (diskModule DiskModule) Name() types.ModuleName { return types.ModuleDisks }
 func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	slog.Debug("Getting disks data")
@@ -29,7 +35,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	disksData.Devices = make([]types.Disk, 0)
 
 	// Get all partitions (true includes device-mapper, LUKS, LVM, btrfs subvolumes)
-	allPartitions, err := disk.Partitions(true)
+	allPartitions, err := partitionsFunc(true)
 	if err != nil {
 		slog.Error("Failed to get disk partitions", "error", err)
 		return disksData, err
@@ -88,7 +94,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		}
 
 		// Get usage statistics
-		usage, err := disk.Usage(partition.Mountpoint)
+		usage, err := usageFunc(partition.Mountpoint)
 		var diskUsage *types.DiskUsage
 		if err != nil {
 			slog.Error("Failed to get disk usage:", "mountpoint", partition.Mountpoint, "error", err)
@@ -154,14 +160,14 @@ func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
 		return types.DiskMountCategorySquashFS
 	}
 	if slices.Contains(p.Opts, "bind") {
-			return types.DiskMountCategoryBind
-		}
+		return types.DiskMountCategoryBind
+	}
 	return types.DiskMountCategoryPrimary
 }
 
 // GetAllMountsCategorized returns all /dev/ mounts categorized for the settings UI.
 func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
-	allPartitions, err := disk.Partitions(true)
+	allPartitions, err := partitionsFunc(true)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +189,7 @@ func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
 
 		// Get usage stats
 		var diskUsage *types.DiskUsage
-		usage, err := disk.Usage(p.Mountpoint)
+		usage, err := usageFunc(p.Mountpoint)
 		if err == nil {
 			diskUsage = &types.DiskUsage{
 				Total:   usage.Total,

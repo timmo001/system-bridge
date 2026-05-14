@@ -180,15 +180,47 @@ func TestClassifyMount(t *testing.T) {
 	}
 }
 
+// mockPartitions returns a fixed set of partitions for testing.
+func mockPartitions(_ bool) ([]disk.PartitionStat, error) {
+	return []disk.PartitionStat{
+		{Device: "/dev/nvme0n1p2", Mountpoint: "/", Fstype: "ext4", Opts: []string{"rw", "relatime"}},
+		{Device: "/dev/nvme0n1p1", Mountpoint: "/boot", Fstype: "vfat", Opts: []string{"rw", "relatime"}},
+		{Device: "/dev/dm-0", Mountpoint: "/home", Fstype: "btrfs", Opts: []string{"rw", "relatime", "bind"}},
+		{Device: "/dev/loop0", Mountpoint: "/snap/snapd/25202", Fstype: "squashfs", Opts: []string{"ro", "nodev"}},
+		{Device: "tmpfs", Mountpoint: "/tmp", Fstype: "tmpfs", Opts: []string{"rw"}},
+		{Device: "overlay", Mountpoint: "/var/lib/docker/overlay2/abc/merged", Fstype: "overlay", Opts: []string{"rw"}},
+	}, nil
+}
+
+// mockUsage returns synthetic usage stats for any mount point.
+func mockUsage(_ string) (*disk.UsageStat, error) {
+	return &disk.UsageStat{
+		Total:       100 * 1024 * 1024 * 1024,
+		Used:        40 * 1024 * 1024 * 1024,
+		Free:        60 * 1024 * 1024 * 1024,
+		UsedPercent: 40.0,
+	}, nil
+}
+
 func TestGetAllMountsCategorized(t *testing.T) {
+	// Replace real functions with mocks for deterministic results.
+	origPartitions := partitionsFunc
+	origUsage := usageFunc
+	partitionsFunc = mockPartitions
+	usageFunc = mockUsage
+	t.Cleanup(func() {
+		partitionsFunc = origPartitions
+		usageFunc = origUsage
+	})
+
 	response, err := GetAllMountsCategorized()
 	if err != nil {
 		t.Fatalf("GetAllMountsCategorized() returned error: %v", err)
 	}
 
-	// Primary mounts should have at least one entry (the root filesystem)
-	if len(response.Primary) == 0 {
-		t.Error("expected at least one primary mount")
+	// Primary mounts: / and /boot (both are /dev/ devices, not bind/squashfs)
+	if len(response.Primary) != 2 {
+		t.Fatalf("expected 2 primary mounts, got %d", len(response.Primary))
 	}
 
 	// All primary mounts should be real devices
@@ -201,24 +233,44 @@ func TestGetAllMountsCategorized(t *testing.T) {
 		}
 	}
 
-	// Verify secondary bind mounts are categorized correctly
-	for _, m := range response.Secondary.Bind {
-		if m.Category != types.DiskMountCategoryBind {
-			t.Errorf("bind mount %q has wrong category: %q", m.MountPoint, m.Category)
+	// Verify secondary bind mounts
+	if len(response.Secondary.Bind) != 1 {
+		t.Fatalf("expected 1 bind mount, got %d", len(response.Secondary.Bind))
+	}
+	if response.Secondary.Bind[0].MountPoint != "/home" {
+		t.Errorf("expected bind mount at /home, got %q", response.Secondary.Bind[0].MountPoint)
+	}
+	if response.Secondary.Bind[0].Category != types.DiskMountCategoryBind {
+		t.Errorf("bind mount has wrong category: %q", response.Secondary.Bind[0].Category)
+	}
+
+	// Verify secondary squashfs mounts
+	if len(response.Secondary.SquashFS) != 1 {
+		t.Fatalf("expected 1 squashfs mount, got %d", len(response.Secondary.SquashFS))
+	}
+	if response.Secondary.SquashFS[0].Category != types.DiskMountCategorySquashFS {
+		t.Errorf("squashfs mount has wrong category: %q", response.Secondary.SquashFS[0].Category)
+	}
+
+	// Non-/dev/ devices (tmpfs, overlay) should be excluded entirely
+	allMounts := append(append(response.Primary, response.Secondary.Bind...), response.Secondary.SquashFS...)
+	for _, m := range allMounts {
+		if m.Device == "tmpfs" || m.Device == "overlay" {
+			t.Errorf("virtual filesystem %q should have been filtered out", m.Device)
 		}
 	}
 
-	// Verify secondary squashfs mounts are categorized correctly
-	for _, m := range response.Secondary.SquashFS {
-		if m.Category != types.DiskMountCategorySquashFS {
-			t.Errorf("squashfs mount %q has wrong category: %q", m.MountPoint, m.Category)
-		}
-	}
-
-	// Verify primary mounts are sorted
+	// Verify primary mounts are sorted by mount point
 	if !sort.SliceIsSorted(response.Primary, func(i, j int) bool {
 		return response.Primary[i].MountPoint < response.Primary[j].MountPoint
 	}) {
 		t.Error("primary mounts are not sorted by mount point")
+	}
+
+	// Verify usage stats are populated
+	for _, m := range response.Primary {
+		if m.Usage == nil {
+			t.Errorf("primary mount %q has nil usage", m.MountPoint)
+		}
 	}
 }
