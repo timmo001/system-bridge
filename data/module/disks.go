@@ -2,6 +2,7 @@ package data_module
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strings"
 
@@ -106,6 +107,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 			MountPoint:     partition.Mountpoint,
 			FilesystemType: partition.Fstype,
 			Options:        strings.Join(partition.Opts, ","),
+			Category:       ClassifyMount(partition),
 			Usage:          diskUsage,
 		}
 
@@ -151,11 +153,9 @@ func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
 	if p.Fstype == "squashfs" {
 		return types.DiskMountCategorySquashFS
 	}
-	for _, opt := range p.Opts {
-		if opt == "bind" {
+	if slices.Contains(p.Opts, "bind") {
 			return types.DiskMountCategoryBind
 		}
-	}
 	return types.DiskMountCategoryPrimary
 }
 

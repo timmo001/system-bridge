@@ -20,13 +20,14 @@ type DiskUsage struct {
 
 // DiskPartition represents information about a disk partition
 type DiskPartition struct {
-	Device         string     `json:"device"`
-	MountPoint     string     `json:"mount_point"`
-	FilesystemType string     `json:"filesystem_type"`
-	Options        string     `json:"options"`
-	MaxFileSize    int64      `json:"max_file_size"`
-	MaxPathLength  int64      `json:"max_path_length"`
-	Usage          *DiskUsage `json:"usage"`
+	Device         string            `json:"device"`
+	MountPoint     string            `json:"mount_point"`
+	FilesystemType string            `json:"filesystem_type"`
+	Options        string            `json:"options"`
+	MaxFileSize    int64             `json:"max_file_size"`
+	MaxPathLength  int64             `json:"max_path_length"`
+	Category       DiskMountCategory `json:"category"`
+	Usage          *DiskUsage        `json:"usage"`
 }
 
 // Disk represents information about a single disk device

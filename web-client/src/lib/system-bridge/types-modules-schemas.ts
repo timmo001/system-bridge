@@ -6,10 +6,18 @@ import { z } from "zod";
 // DiskMountCategory enum
 export const DiskMountCategorySchema = z.enum(["primary", "bind", "squashfs"]);
 export type DiskMountCategory = z.infer<typeof DiskMountCategorySchema>;
+export const DiskMountCategory = {
+  PRIMARY: "primary",
+  BIND: "bind",
+  SQUASHFS: "squashfs",
+} as const;
 
 // RunMode enum
 export const RunModeSchema = z.enum(["standalone"]);
 export type RunMode = z.infer<typeof RunModeSchema>;
+export const RunMode = {
+  STANDALONE: "standalone",
+} as const;
 
 // CPU Frequency
 export const CPUFrequencySchema = z.object({
@@ -171,6 +179,7 @@ export const DiskPartitionSchema = z.object({
   options: z.string(),
   max_file_size: z.number(),
   max_path_length: z.number(),
+  category: DiskMountCategorySchema,
   usage: DiskUsageSchema.nullish(),
 });
 
@@ -361,7 +370,9 @@ export const SensorsWindowsHardwareSchema: z.ZodType<{
   sensors: z.array(SensorsWindowsSensorSchema),
 });
 
-export type SensorsWindowsHardware = z.infer<typeof SensorsWindowsHardwareSchema>;
+export type SensorsWindowsHardware = z.infer<
+  typeof SensorsWindowsHardwareSchema
+>;
 
 // Windows Sensors
 export const SensorsWindowsSchema = z.object({
