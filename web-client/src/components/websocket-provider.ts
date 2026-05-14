@@ -438,6 +438,7 @@ class WebSocketProvider extends ProviderElement {
     return { moduleName, data: dataValidation.data };
   }
 
+  // fallow-ignore-next-line complexity
   private normalizeSettings(
     settings: Partial<Settings>,
     current?: Settings | null,

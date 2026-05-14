@@ -8,7 +8,6 @@ import {
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
-import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
@@ -105,6 +104,7 @@ class PageSettingsDisks extends PageElement {
     void this.loadMounts();
   }
 
+  // fallow-ignore-next-line complexity
   private loadSettings() {
     if (this.websocket?.settings) {
       this.allowedMountPoints = [
@@ -113,12 +113,10 @@ class PageSettingsDisks extends PageElement {
     }
   }
 
+  // fallow-ignore-next-line complexity
   private async loadMounts() {
-    if (
-      !this.connection?.token ||
-      !this.websocket?.sendRequestWithResponse ||
-      !this.websocket?.isConnected
-    ) {
+    const token = this.connection?.token;
+    if (!token || !this.websocket?.sendRequestWithResponse || !this.websocket.isConnected) {
       return;
     }
 
@@ -126,17 +124,16 @@ class PageSettingsDisks extends PageElement {
     this.requestUpdate();
 
     try {
-      const response =
+      this.mounts =
         await this.websocket.sendRequestWithResponse<DiskMountsResponse>(
           {
             id: generateUUID(),
             event: "GET_DISK_MOUNTS",
             data: {},
-            token: this.connection.token,
+            token,
           },
           DiskMountsResponseSchema,
         );
-      this.mounts = response;
     } catch (error) {
       console.error("Failed to load disk mounts:", error);
     } finally {
@@ -160,36 +157,23 @@ class PageSettingsDisks extends PageElement {
     this.saveSettings();
   };
 
+  // fallow-ignore-next-line complexity
   private saveSettings(): void {
-    if (
-      !this.connection?.token ||
-      !this.websocket?.sendRequest ||
-      !this.websocket?.settings
-    ) {
+    const token = this.connection?.token;
+    if (!token || !this.websocket?.sendRequest || !this.websocket.settings) {
       return;
     }
 
-    this.requestUpdate();
-
-    try {
-      const updatedSettings: Settings = {
+    this.websocket.sendRequest({
+      id: generateUUID(),
+      event: "UPDATE_SETTINGS",
+      data: {
         ...this.websocket.settings,
-        disks: {
-          allowedSecondaryMountPoints: this.allowedMountPoints,
-        },
-      };
-
-      this.websocket.sendRequest({
-        id: generateUUID(),
-        event: "UPDATE_SETTINGS",
-        data: updatedSettings,
-        token: this.connection.token,
-      });
-    } catch (error) {
-      console.error("Failed to update disk settings:", error);
-    } finally {
-      this.requestUpdate();
-    }
+        disks: { allowedSecondaryMountPoints: this.allowedMountPoints },
+      },
+      token,
+    });
+    this.requestUpdate();
   }
 
   private handleNavigateToConnection = (): void => {

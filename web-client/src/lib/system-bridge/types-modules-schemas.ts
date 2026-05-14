@@ -504,6 +504,15 @@ export const SystemDataSchema = z.object({
 
 export type SystemData = z.infer<typeof SystemDataSchema>;
 
+// Module
+export const ModuleSchema = z.object({
+  module: z.unknown(),
+  data: z.unknown(),
+  updated: z.string(),
+});
+
+export type Module = z.infer<typeof ModuleSchema>;
+
 // DiskMountInfo
 export const DiskMountInfoSchema = z.object({
   device: z.string(),
@@ -530,15 +539,6 @@ export const DiskMountsResponseSchema = z.object({
 });
 
 export type DiskMountsResponse = z.infer<typeof DiskMountsResponseSchema>;
-
-// Module
-export const ModuleSchema = z.object({
-  module: z.unknown(),
-  data: z.unknown(),
-  updated: z.string(),
-});
-
-export type Module = z.infer<typeof ModuleSchema>;
 
 // Module Data Union Type
 export const ModuleDataSchemas = {
