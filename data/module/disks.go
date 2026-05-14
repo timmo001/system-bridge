@@ -144,6 +144,10 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 
 // ClassifyMount determines the category of a partition based on its properties.
 func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
+	// Root mount is always primary regardless of options
+	if p.Mountpoint == "/" {
+		return types.DiskMountCategoryPrimary
+	}
 	if p.Fstype == "squashfs" {
 		return types.DiskMountCategorySquashFS
 	}

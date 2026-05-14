@@ -158,6 +158,16 @@ func TestClassifyMount(t *testing.T) {
 			},
 			expected: types.DiskMountCategoryPrimary,
 		},
+		{
+			name: "root btrfs with bind is still primary",
+			input: disk.PartitionStat{
+				Device:     "/dev/dm-0",
+				Mountpoint: "/",
+				Fstype:     "btrfs",
+				Opts:       []string{"rw", "relatime", "bind"},
+			},
+			expected: types.DiskMountCategoryPrimary,
+		},
 	}
 
 	for _, tt := range tests {
