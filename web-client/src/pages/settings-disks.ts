@@ -1,13 +1,17 @@
 import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { z } from "zod";
 
 import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
 import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  DiskMountsResponseSchema,
+  type DiskMountInfo,
+  type DiskMountsResponse,
+} from "~/lib/system-bridge/types-modules-schemas";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
@@ -16,50 +20,6 @@ import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/label";
-
-interface DiskMountInfo {
-  device: string;
-  mount_point: string;
-  filesystem_type: string;
-  category: string;
-  usage: {
-    total: number;
-    used: number;
-    free: number;
-    percent: number;
-  } | null;
-}
-
-interface DiskMountsResponse {
-  primary: DiskMountInfo[];
-  secondary: {
-    bind: DiskMountInfo[];
-    squashfs: DiskMountInfo[];
-  };
-}
-
-const DiskUsageSchema = z.object({
-  total: z.number(),
-  used: z.number(),
-  free: z.number(),
-  percent: z.number(),
-});
-
-const DiskMountInfoSchema = z.object({
-  device: z.string(),
-  mount_point: z.string(),
-  filesystem_type: z.string(),
-  category: z.string(),
-  usage: DiskUsageSchema.nullable(),
-});
-
-const DiskMountsResponseSchema = z.object({
-  primary: z.array(DiskMountInfoSchema),
-  secondary: z.object({
-    bind: z.array(DiskMountInfoSchema),
-    squashfs: z.array(DiskMountInfoSchema),
-  }),
-});
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
