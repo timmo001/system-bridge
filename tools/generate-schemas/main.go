@@ -264,7 +264,15 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 				fmt.Fprintf(&buf, `"%s"`, value)
 			}
 			buf.WriteString("]);\n")
-			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n\n", name, name)
+			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n", name, name)
+
+			// Generate constants object for enum values
+			fmt.Fprintf(&buf, "export const %s = {\n", name)
+			for _, value := range enum.Values {
+				constName := strings.ToUpper(value)
+				fmt.Fprintf(&buf, "  %s: \"%s\",\n", constName, value)
+			}
+			buf.WriteString("} as const;\n\n")
 		}
 	}
 
@@ -340,6 +348,9 @@ func getStructComment(name string) string {
 		"DiskIOCounters":         "Disk IO Counters",
 		"DiskUsage":              "Disk Usage",
 		"DiskPartition":          "Disk Partition",
+		"DiskMountInfo":          "Disk Mount Info",
+		"DiskMountsSecondary":    "Disk Mounts Secondary",
+		"DiskMountsResponse":     "Disk Mounts Response",
 		"Disk":                   "Disk",
 		"Display":                "Display",
 		"GPU":                    "GPU",
@@ -581,6 +592,11 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"ProcessesData",
 		"SensorsData",
 		"SystemData",
+
+		// Disk mount types (for settings UI)
+		"DiskMountInfo",
+		"DiskMountsSecondary",
+		"DiskMountsResponse",
 	}
 
 	// Filter to only include structs that exist

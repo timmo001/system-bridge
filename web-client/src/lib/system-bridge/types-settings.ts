@@ -14,6 +14,10 @@ const SettingsMediaSchema = z.object({
   directories: z.array(SettingsMediaDirectorySchema),
 });
 
+const SettingsDisksSchema = z.object({
+  allowedSecondaryMountPoints: z.array(z.string()),
+});
+
 const SettingsCommandDefinitionSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
@@ -35,6 +39,7 @@ const SettingsSchema = z.object({
   hotkeys: z.array(SettingsHotkeySchema),
   logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
   commands: SettingsCommandsSchema,
+  disks: SettingsDisksSchema,
   media: SettingsMediaSchema,
 });
 

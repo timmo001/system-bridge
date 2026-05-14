@@ -9,6 +9,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterExitApplicationHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
+	RegisterGetDiskMountsHandler(router)
 	RegisterGetFilesHandler(router)
 	RegisterGetFileHandler(router)
 	RegisterGetDirectoryHandler(router)

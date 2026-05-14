@@ -9,6 +9,7 @@ const (
 	ResponseTypeDataGet                  ResponseType = "DATA_GET"
 	ResponseTypeDirectories              ResponseType = "DIRECTORIES"
 	ResponseTypeDirectory                ResponseType = "DIRECTORY"
+	ResponseTypeDiskMounts               ResponseType = "DISK_MOUNTS"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"

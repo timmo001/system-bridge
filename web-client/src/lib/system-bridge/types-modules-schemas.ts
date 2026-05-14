@@ -3,9 +3,21 @@ import { z } from "zod";
 // Auto-generated file. Do not edit manually.
 // Generated from backend types in types/ directory
 
+// DiskMountCategory enum
+export const DiskMountCategorySchema = z.enum(["primary", "bind", "squashfs"]);
+export type DiskMountCategory = z.infer<typeof DiskMountCategorySchema>;
+export const DiskMountCategory = {
+  PRIMARY: "primary",
+  BIND: "bind",
+  SQUASHFS: "squashfs",
+} as const;
+
 // RunMode enum
 export const RunModeSchema = z.enum(["standalone"]);
 export type RunMode = z.infer<typeof RunModeSchema>;
+export const RunMode = {
+  STANDALONE: "standalone",
+} as const;
 
 // CPU Frequency
 export const CPUFrequencySchema = z.object({
@@ -167,6 +179,7 @@ export const DiskPartitionSchema = z.object({
   options: z.string(),
   max_file_size: z.number(),
   max_path_length: z.number(),
+  category: DiskMountCategorySchema,
   usage: DiskUsageSchema.nullish(),
 });
 
@@ -499,6 +512,33 @@ export const SystemDataSchema = z.object({
 });
 
 export type SystemData = z.infer<typeof SystemDataSchema>;
+
+// Disk Mount Info
+export const DiskMountInfoSchema = z.object({
+  device: z.string(),
+  mount_point: z.string(),
+  filesystem_type: z.string(),
+  category: DiskMountCategorySchema,
+  usage: DiskUsageSchema.nullish(),
+});
+
+export type DiskMountInfo = z.infer<typeof DiskMountInfoSchema>;
+
+// Disk Mounts Secondary
+export const DiskMountsSecondarySchema = z.object({
+  bind: z.array(DiskMountInfoSchema),
+  squashfs: z.array(DiskMountInfoSchema),
+});
+
+export type DiskMountsSecondary = z.infer<typeof DiskMountsSecondarySchema>;
+
+// Disk Mounts Response
+export const DiskMountsResponseSchema = z.object({
+  primary: z.array(DiskMountInfoSchema),
+  secondary: DiskMountsSecondarySchema,
+});
+
+export type DiskMountsResponse = z.infer<typeof DiskMountsResponseSchema>;
 
 // Module
 export const ModuleSchema = z.object({

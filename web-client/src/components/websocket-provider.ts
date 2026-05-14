@@ -438,6 +438,7 @@ class WebSocketProvider extends ProviderElement {
     return { moduleName, data: dataValidation.data };
   }
 
+  // fallow-ignore-next-line complexity
   private normalizeSettings(
     settings: Partial<Settings>,
     current?: Settings | null,
@@ -449,6 +450,7 @@ class WebSocketProvider extends ProviderElement {
         hotkeys: [],
         logLevel: "INFO",
         commands: { allowlist: [] },
+        disks: { allowedSecondaryMountPoints: [] },
         media: { directories: [] },
       } satisfies Settings);
     const {
@@ -457,6 +459,9 @@ class WebSocketProvider extends ProviderElement {
       logLevel = fallback.logLevel,
     } = settings;
     const { allowlist = fallback.commands.allowlist } = settings.commands ?? {};
+    const {
+      allowedSecondaryMountPoints = fallback.disks.allowedSecondaryMountPoints,
+    } = settings.disks ?? {};
     const { directories = fallback.media.directories } = settings.media ?? {};
 
     return {
@@ -464,6 +469,7 @@ class WebSocketProvider extends ProviderElement {
       hotkeys,
       logLevel,
       commands: { allowlist },
+      disks: { allowedSecondaryMountPoints },
       media: { directories },
     };
   }

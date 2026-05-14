@@ -22,6 +22,7 @@ func Update(current *Settings, new *Settings) error {
 	current.Autostart = new.Autostart
 	current.Hotkeys = new.Hotkeys
 	current.LogLevel = new.LogLevel
+	current.Disks = new.Disks
 	current.Media = new.Media
 	current.Commands = new.Commands
 	return current.Save()
