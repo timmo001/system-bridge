@@ -40,7 +40,7 @@ importers:
         version: 3.3.3
       lucide:
         specifier: ^1.14.0
-        version: 1.14.0
+        version: 1.16.0
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.6.0
@@ -1104,8 +1104,8 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lucide@1.14.0:
-    resolution: {integrity: sha512-IoRC3lHwemJWvsXKcHK90hkgY4h1HGztBL63w2XwFtIu8gFDPp4/kiuqVtlN3vaM9bxsLQ4ZUBJfGsbKFaB2IA==}
+  lucide@1.16.0:
+    resolution: {integrity: sha512-20QvduCJTB7e7K9WVvoLBuKPsYZ8d6ptwe9PIdTFiZmjVTPdFWQreBNyNCM9QQtGnqHR0PLiEQdxyhYsL1LdoA==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -2286,7 +2286,7 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lucide@1.14.0: {}
+  lucide@1.16.0: {}
 
   magic-string@0.30.21:
     dependencies:
