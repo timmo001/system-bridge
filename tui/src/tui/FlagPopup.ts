@@ -534,6 +534,9 @@ export class FlagPopup {
 
       if (state.field.type === "bool" && state.value === "true") {
         cmd += ` --${state.field.name}`;
+      } else if (state.field.type === "select" && state.value === "ALL") {
+        // "ALL" is a synthetic option — emit --all instead of --module ALL
+        cmd += " --all";
       } else if (state.field.type === "string" || state.field.type === "select") {
         // Shell-quote the value
         const quoted = state.value.replace(/'/g, "'\\''");

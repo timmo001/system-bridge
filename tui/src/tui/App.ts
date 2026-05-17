@@ -264,10 +264,11 @@ export class App {
         const output = await new Response(proc.stdout).text();
         await proc.exited;
         const modules: string[] = JSON.parse(output.trim());
-        this.flagPopup.updateSelectOptions("module", modules);
+        this.flagPopup.updateSelectOptions("module", [...modules, "ALL"]);
       } catch (err) {
         log(`Failed to fetch modules: ${err}`);
-        // Fall back to empty list — user can still use --all
+        // Fall back to just "All"
+        this.flagPopup.updateSelectOptions("module", ["ALL"]);
       }
     } else {
       this.flagPopup.show(action);

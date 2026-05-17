@@ -116,17 +116,10 @@ const dataRunFields: readonly FlagField[] = [
     name: "module",
     label: "Module",
     type: "select",
-    required: false,
-    placeholder: "Select a module (or use --all)",
-    // Options populated dynamically at runtime
+    required: true,
+    placeholder: "Select a module",
+    // Options populated dynamically at runtime; "All" appended after fetch
     options: [],
-  },
-  {
-    name: "all",
-    label: "Run All",
-    type: "bool",
-    required: false,
-    defaultValue: "false",
   },
   {
     name: "pretty",
