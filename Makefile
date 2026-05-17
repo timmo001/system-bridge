@@ -152,6 +152,9 @@ run-web-client:
 run-backend: build
 	./$(OUT) backend
 
+run-tui: build_tui
+	./system-bridge-tui
+
 cli: build
 	./$(OUT) cli $(ARGS)
 
@@ -260,6 +263,7 @@ help:
 	@echo "  run                      Build and run the application (development only)"
 	@echo "  run-web-client           Run the web client dev server (Vite)"
 	@echo "  run-backend              Build and run the backend server"
+	@echo "  run-tui                  Build and run the TUI"
 	@echo "  cli                      Build and run the CLI (pass ARGS= for subcommands)"
 	@echo "  run_console              Build and run console version for debugging (Windows only)"
 	@echo "  list_processes           List running System Bridge processes (Windows only)"
