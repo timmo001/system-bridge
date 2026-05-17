@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { Effect } from "effect";
 import type { CliRenderer } from "@opentui/core";
 import type { NotifyConfig } from "../types.js";
 import type { Toast } from "../tui/Toast.js";
@@ -26,14 +26,12 @@ export interface CommandRunnerService {
   ) => Effect.Effect<void, CommandRunnerError>;
 }
 
-export class CommandRunner extends Context.Service<
-  CommandRunner,
-  CommandRunnerService
->()("CommandRunner") {}
-
-/** Create a live CommandRunner layer bound to the given renderer and toast */
-export const CommandRunnerLive = (renderer: CliRenderer, toast: Toast) =>
-  Layer.succeed(CommandRunner, {
+/** Create a CommandRunner bound to the given renderer and toast */
+export function createCommandRunner(
+  renderer: CliRenderer,
+  toast: Toast,
+): CommandRunnerService {
+  return {
     runSuspended: Effect.fn("CommandRunner.runSuspended")(function* (
       cmd: string,
       wait: boolean,
@@ -159,4 +157,5 @@ export const CommandRunnerLive = (renderer: CliRenderer, toast: Toast) =>
         );
       }
     }),
-  });
+  };
+}

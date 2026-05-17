@@ -3,7 +3,7 @@ import { createCliRenderer } from "@opentui/core";
 import { loadTheme } from "./theme.js";
 import { Toast } from "./tui/Toast.js";
 import { App } from "./tui/App.js";
-import { CommandRunner, CommandRunnerLive } from "./services/CommandRunner.js";
+import { createCommandRunner } from "./services/CommandRunner.js";
 import { parseFlags, resolveSubcommand, printHelp } from "./flags.js";
 import { menuItemsById } from "./menu.js";
 import type { ViewId } from "./types.js";
@@ -70,10 +70,7 @@ const program = Effect.gen(function* () {
   log("Renderer created");
 
   const toast = new Toast(renderer, theme);
-  const commandRunner = yield* Effect.provide(
-    CommandRunner,
-    CommandRunnerLive(renderer, toast),
-  );
+  const commandRunner = createCommandRunner(renderer, toast);
 
   // Create the app
   const app = new App(
