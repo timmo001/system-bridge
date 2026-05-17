@@ -44,6 +44,10 @@ function submenu(menuId: string): MenuItem["action"] {
   return { type: "submenu", menuId };
 }
 
+function exec(command: string): MenuItem["action"] {
+  return { type: "exec", cmd: command };
+}
+
 function flagPopup(
   baseCmd: string,
   title: string,
@@ -138,17 +142,17 @@ export const mainMenuItems: readonly MenuItem[] = [
     "󰒋",
     "Backend",
     "Start the backend server",
-    cmd("system-bridge backend"),
+    exec("system-bridge backend"),
     [
       {
         label: "Default",
         description: "Start the backend server",
-        action: cmd("system-bridge backend"),
+        action: exec("system-bridge backend"),
       },
       {
         label: "Open Web Client",
         description: "Start backend and open web client in browser",
-        action: cmd("system-bridge backend --open-web-client"),
+        action: exec("system-bridge backend --open-web-client"),
       },
     ],
     ["server", "start", "run", "api", "http", "websocket"],

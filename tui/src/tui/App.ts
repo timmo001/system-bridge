@@ -232,6 +232,19 @@ export class App {
       case "quit":
         this.renderer.destroy();
         process.exit(0);
+
+      case "exec":
+        this.renderer.destroy();
+        log(`Exec: ${action.cmd}`);
+        {
+          const proc = Bun.spawn(["bash", "-c", action.cmd], {
+            stdin: "inherit",
+            stdout: "inherit",
+            stderr: "inherit",
+          });
+          proc.exited.then((code) => process.exit(code));
+        }
+        break;
     }
   }
 

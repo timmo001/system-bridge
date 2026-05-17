@@ -56,6 +56,12 @@ export interface QuitAction {
   readonly type: "quit";
 }
 
+/** Action that exits the TUI and replaces the process with a command */
+export interface ExecAction {
+  readonly type: "exec";
+  readonly cmd: string;
+}
+
 /** Action that opens a flag popup form to collect flag values before running */
 export interface FlagPopupAction {
   readonly type: "flagPopup";
@@ -77,6 +83,7 @@ export type MenuAction =
   | ViewAction
   | SubmenuAction
   | QuitAction
+  | ExecAction
   | FlagPopupAction;
 
 /** A selectable variant for a menu item offering an alternative action */
