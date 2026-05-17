@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -485,10 +486,15 @@ func openLogsDirectory() {
 // launchTUI finds and exec's the system-bridge-tui binary.
 // It looks next to the current executable first, then falls back to PATH.
 func launchTUI(args ...string) error {
+	tuiName := "system-bridge-tui"
+	if runtime.GOOS == "windows" {
+		tuiName = "system-bridge-tui.exe"
+	}
+
 	// Look next to the current executable
 	exe, err := os.Executable()
 	if err == nil {
-		candidate := filepath.Join(filepath.Dir(exe), "system-bridge-tui")
+		candidate := filepath.Join(filepath.Dir(exe), tuiName)
 		if _, err := os.Stat(candidate); err == nil {
 			cmd := exec.Command(candidate, args...)
 			cmd.Stdin = os.Stdin
@@ -499,9 +505,9 @@ func launchTUI(args ...string) error {
 	}
 
 	// Fall back to PATH lookup
-	tuiPath, err := exec.LookPath("system-bridge-tui")
+	tuiPath, err := exec.LookPath(tuiName)
 	if err != nil {
-		return fmt.Errorf("system-bridge-tui not found (build with 'make build_tui'): %w", err)
+		return fmt.Errorf("%s not found (build with 'make build_tui'): %w", tuiName, err)
 	}
 
 	cmd := exec.Command(tuiPath, args...)

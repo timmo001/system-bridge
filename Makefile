@@ -105,8 +105,13 @@ endif
 
 build_tui:
 	@echo "Building TUI..."
+ifeq ($(OS),Windows_NT)
+	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe
+	@echo "TUI built: system-bridge-tui.exe"
+else
 	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui
 	@echo "TUI built: system-bridge-tui"
+endif
 
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)
@@ -206,6 +211,7 @@ ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.exe 2>nul
 	-$(RM) system-bridge-console.exe 2>nul
 	-$(RM) system-bridge-windows.exe 2>nul
+	-$(RM) system-bridge-tui.exe 2>nul
 	-$(RM) installer.nsi 2>nul
 	-$(RM) system-bridge.rc 2>nul
 	-$(RM) system-bridge.syso 2>nul
@@ -214,6 +220,7 @@ ifeq ($(OS),Windows_NT)
 else
 	-$(RM) system-bridge 2>/dev/null
 	-$(RM) system-bridge-linux 2>/dev/null
+	-$(RM) system-bridge-tui 2>/dev/null
 endif
 
 clean_dist:

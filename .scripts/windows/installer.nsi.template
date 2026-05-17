@@ -73,6 +73,7 @@ SectionEnd
 Section "Install"
   SetOutPath "$INSTDIR"
   File "dist\system-bridge.exe"
+  File "dist\system-bridge-tui.exe"
   File /oname=system-bridge.ico ".resources\system-bridge-dimmed.ico"
   
   ; Include NowPlaying helper if available at build time
@@ -97,6 +98,7 @@ SectionEnd
 
 Section "Uninstall"
   Delete "$INSTDIR\system-bridge.exe"
+  Delete "$INSTDIR\system-bridge-tui.exe"
   Delete "$INSTDIR\system-bridge.ico"
   Delete "$INSTDIR\uninstall.exe"
 

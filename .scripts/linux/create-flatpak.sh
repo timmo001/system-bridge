@@ -8,6 +8,11 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
+if [ ! -f "system-bridge-tui" ]; then
+  echo "system-bridge-tui not found, please build the TUI first (make build_tui)"
+  exit 1
+fi
+
 # Verify CSS inclusion in binary
 echo "Verifying CSS inclusion in binary..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

@@ -18,6 +18,7 @@ modules:
     buildsystem: simple
     build-commands:
       - install -Dm755 system-bridge-linux /app/bin/system-bridge
+      - install -Dm755 system-bridge-tui /app/bin/system-bridge-tui
       - install -Dm755 system-bridge-backend.sh /app/bin/system-bridge-backend
       - mkdir -p /app/share/applications
       - cp system-bridge.desktop /app/share/applications/dev.timmo.system-bridge.desktop
@@ -38,6 +39,8 @@ modules:
     sources:
       - type: file
         path: ../../system-bridge-linux
+      - type: file
+        path: ../../system-bridge-tui
       - type: file
         path: system-bridge-backend.sh
       - type: file
