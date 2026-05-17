@@ -105,8 +105,8 @@ endif
 
 build_tui:
 	@echo "Building TUI..."
-	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../dist/system-bridge-tui
-	@echo "TUI built: dist/system-bridge-tui"
+	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui
+	@echo "TUI built: system-bridge-tui"
 
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --compile --outfile ../dist/system-bridge-tui",
+    "build": "bun build src/index.ts --compile --outfile ../system-bridge-tui",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
