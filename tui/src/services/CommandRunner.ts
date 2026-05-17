@@ -30,6 +30,21 @@ export function createCommandRunner(
       renderer.currentRenderBuffer.clear();
 
       try {
+        const cols = process.stdout.columns || 80;
+        const label = ` ${cmd} `;
+        const pad = Math.max(0, cols - label.length);
+        const left = Math.floor(pad / 2);
+        const right = pad - left;
+        const header =
+          "\x1b[90m" +
+          "─".repeat(left) +
+          "\x1b[0m\x1b[1m" +
+          label +
+          "\x1b[0m\x1b[90m" +
+          "─".repeat(right) +
+          "\x1b[0m";
+        process.stdout.write(`\n\n${header}\n\n`);
+
         const proc = Bun.spawn(["bash", "-c", cmd], {
           stdin: "inherit",
           stdout: "inherit",
@@ -38,7 +53,9 @@ export function createCommandRunner(
         await proc.exited;
 
         if (wait) {
-          process.stdout.write("\n\x1b[90mPress any key to continue...\x1b[0m");
+          process.stdout.write(
+            "\n\x1b[90mPress any key to continue...\x1b[0m",
+          );
           await new Promise<void>((resolve) => {
             const wasRaw = process.stdin.isRaw;
             if (process.stdin.isTTY) process.stdin.setRawMode(true);
