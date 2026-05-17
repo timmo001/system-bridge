@@ -216,16 +216,17 @@ export class FlagPopup {
           this.toggleAdvanced();
           return true;
         }
-        // For string fields, let the input handle it
+        // For string fields, the focused InputRenderable handles it via its own listener
         if (state?.inputRenderable) {
-          return state.inputRenderable.handleKeyPress(key);
+          return true;
         }
         return false;
 
       default:
-        // For string input fields, delegate to the InputRenderable
+        // For string input fields, the focused InputRenderable handles its own
+        // keypress events — just swallow the key so App doesn't process it further.
         if (state?.field.type === "string" && state.inputRenderable) {
-          return state.inputRenderable.handleKeyPress(key);
+          return true;
         }
         // For select fields, handle left/right to cycle options
         if (state?.field.type === "select" && state.field.options) {
@@ -354,8 +355,10 @@ export class FlagPopup {
 
     if (state.field.type === "bool") {
       const checked = state.value === "true";
-      const box = checked ? `[${fg(th.green)("✓")}]` : `[ ]`;
-      return t`${fg(th.fg)(box)}`;
+      if (checked) {
+        return t`${fg(th.fg)("[")}${fg(th.green)("✓")}${fg(th.fg)("]")}`;
+      }
+      return t`${fg(th.fg)("[ ]")}`;
     }
 
     if (state.field.type === "select") {
