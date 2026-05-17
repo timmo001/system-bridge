@@ -22,7 +22,7 @@ else
 	CREATE_RPM=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 endif
 
-build: clean build_web_client
+build: clean build_web_client build_tui
 ifeq ($(OS),Windows_NT)
 	$(GEN_RC)
 	windres system-bridge.rc -O coff -o system-bridge.syso
@@ -102,6 +102,11 @@ else
 	fi
 	@echo "✓ Build files verified and ready for embedding"
 endif
+
+build_tui:
+	@echo "Building TUI..."
+	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../dist/system-bridge-tui
+	@echo "TUI built: dist/system-bridge-tui"
 
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)
@@ -243,6 +248,7 @@ help:
 	@echo "Available targets:"
 	@echo "  build                    Build the application"
 	@echo "  build_console            Build console version for debugging (Windows only)"
+	@echo "  build_tui                Build the TUI binary"
 	@echo "  build_web_client         Build the web client"
 	@echo "  generate_schemas         Generate Zod schemas from Go types"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
