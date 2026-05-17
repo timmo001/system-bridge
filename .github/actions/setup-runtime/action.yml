@@ -16,6 +16,7 @@ runs:
 
     - name: Show runtime versions
       run: |
+        mise exec -- bun --version
         mise exec -- go version
         mise exec -- node --version
         mise exec -- pnpm --version

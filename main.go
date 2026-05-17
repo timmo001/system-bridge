@@ -6,13 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 
 	"log/slog"
 
 	"github.com/pkg/browser"
+	"golang.org/x/term"
 
 	"github.com/timmo001/system-bridge/backend"
 	"github.com/timmo001/system-bridge/data"
@@ -65,6 +69,14 @@ func main() {
 		Name:    "System Bridge",
 		Usage:   "A bridge for your systems",
 		Version: version.Version,
+		Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+			// When run interactively with no subcommand, launch the TUI
+			if term.IsTerminal(int(os.Stdin.Fd())) {
+				return launchTUI()
+			}
+			// Non-interactive: show help
+			return cli.ShowAppHelp(cmd)
+		},
 		Commands: []*cli.Command{
 			{
 				Name:    "backend",
@@ -418,6 +430,14 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:    "tui",
+				Aliases: []string{"t"},
+				Usage:   "Launch the interactive TUI",
+				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+					return launchTUI(cmd.Args().Slice()...)
+				},
+			},
 		},
 	}
 
@@ -461,4 +481,38 @@ func openLogsDirectory() {
 			slog.Error("Failed to send notification", "err", err)
 		}
 	}
+}
+
+// launchTUI finds and exec's the system-bridge-tui binary.
+// It looks next to the current executable first, then falls back to PATH.
+func launchTUI(args ...string) error {
+	tuiName := "system-bridge-tui"
+	if runtime.GOOS == "windows" {
+		tuiName = "system-bridge-tui.exe"
+	}
+
+	// Look next to the current executable
+	exe, err := os.Executable()
+	if err == nil {
+		candidate := filepath.Join(filepath.Dir(exe), tuiName)
+		if _, err := os.Stat(candidate); err == nil {
+			cmd := exec.Command(candidate, args...)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			return cmd.Run()
+		}
+	}
+
+	// Fall back to PATH lookup
+	tuiPath, err := exec.LookPath(tuiName)
+	if err != nil {
+		return fmt.Errorf("%s not found (build with 'make build_tui'): %w", tuiName, err)
+	}
+
+	cmd := exec.Command(tuiPath, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

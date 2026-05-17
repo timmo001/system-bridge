@@ -112,8 +112,8 @@ jobs:
           # Create an empty file to serve as the dummy executable for the main application
           New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
 
-          # Create dist directory for NSIS output
-          New-Item -ItemType Directory -Path "dist" -Force
+          # Create an empty file to serve as the dummy executable for the TUI
+          New-Item -ItemType File -Path "dist/system-bridge-tui.exe" -Force
 
       - name: Validate nsis script
         run: |
@@ -213,6 +213,8 @@ jobs:
         run: |
           touch system-bridge-linux
           chmod +x system-bridge-linux
+          touch system-bridge-tui
+          chmod +x system-bridge-tui
 
       - name: Replace pkgver in flatpak manifest with 5.0.0
         run: |

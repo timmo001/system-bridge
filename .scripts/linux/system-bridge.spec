@@ -21,6 +21,7 @@ mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps
 mkdir -p %{buildroot}/usr/share/icons/hicolor/512x512/apps
 
 cp %{_stagedir}/bin/system-bridge %{buildroot}/usr/bin/
+cp %{_stagedir}/bin/system-bridge-tui %{buildroot}/usr/bin/
 cp %{_stagedir}/share/applications/system-bridge.desktop %{buildroot}/usr/share/applications/
 cp %{_stagedir}/share/icons/hicolor/scalable/apps/system-bridge.svg %{buildroot}/usr/share/icons/hicolor/scalable/apps/
 cp %{_stagedir}/share/icons/hicolor/16x16/apps/system-bridge.png %{buildroot}/usr/share/icons/hicolor/16x16/apps/
@@ -32,6 +33,7 @@ cp %{_stagedir}/share/icons/hicolor/512x512/apps/system-bridge.png %{buildroot}/
 
 %files
 /usr/bin/system-bridge
+/usr/bin/system-bridge-tui
 /usr/share/applications/system-bridge.desktop
 /usr/share/icons/hicolor/scalable/apps/system-bridge.svg
 /usr/share/icons/hicolor/16x16/apps/system-bridge.png

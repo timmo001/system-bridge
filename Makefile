@@ -22,7 +22,7 @@ else
 	CREATE_RPM=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-rpm.sh
 endif
 
-build: clean build_web_client
+build: clean build_web_client build_tui
 ifeq ($(OS),Windows_NT)
 	$(GEN_RC)
 	windres system-bridge.rc -O coff -o system-bridge.syso
@@ -103,6 +103,16 @@ else
 	@echo "✓ Build files verified and ready for embedding"
 endif
 
+build_tui:
+	@echo "Building TUI..."
+ifeq ($(OS),Windows_NT)
+	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe
+	@echo "TUI built: system-bridge-tui.exe"
+else
+	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui
+	@echo "TUI built: system-bridge-tui"
+endif
+
 create_all_packages: clean_dist build
 ifeq ($(OS),Windows_NT)
 	@echo "create_all_packages is only supported on Linux hosts"
@@ -146,6 +156,9 @@ run-web-client:
 
 run-backend: build
 	./$(OUT) backend
+
+run-tui: build_tui
+	./system-bridge-tui
 
 cli: build
 	./$(OUT) cli $(ARGS)
@@ -198,6 +211,7 @@ ifeq ($(OS),Windows_NT)
 	-$(RM) system-bridge.exe 2>nul
 	-$(RM) system-bridge-console.exe 2>nul
 	-$(RM) system-bridge-windows.exe 2>nul
+	-$(RM) system-bridge-tui.exe 2>nul
 	-$(RM) installer.nsi 2>nul
 	-$(RM) system-bridge.rc 2>nul
 	-$(RM) system-bridge.syso 2>nul
@@ -206,6 +220,7 @@ ifeq ($(OS),Windows_NT)
 else
 	-$(RM) system-bridge 2>/dev/null
 	-$(RM) system-bridge-linux 2>/dev/null
+	-$(RM) system-bridge-tui 2>/dev/null
 endif
 
 clean_dist:
@@ -243,6 +258,7 @@ help:
 	@echo "Available targets:"
 	@echo "  build                    Build the application"
 	@echo "  build_console            Build console version for debugging (Windows only)"
+	@echo "  build_tui                Build the TUI binary"
 	@echo "  build_web_client         Build the web client"
 	@echo "  generate_schemas         Generate Zod schemas from Go types"
 	@echo "  create_all_packages      Build all Linux packages (AppImage, DEB, RPM, Arch, Flatpak)"
@@ -254,6 +270,7 @@ help:
 	@echo "  run                      Build and run the application (development only)"
 	@echo "  run-web-client           Run the web client dev server (Vite)"
 	@echo "  run-backend              Build and run the backend server"
+	@echo "  run-tui                  Build and run the TUI"
 	@echo "  cli                      Build and run the CLI (pass ARGS= for subcommands)"
 	@echo "  run_console              Build and run console version for debugging (Windows only)"
 	@echo "  list_processes           List running System Bridge processes (Windows only)"

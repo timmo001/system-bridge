@@ -10,6 +10,7 @@ on:
       - .github/workflows/build-and-push-ci-image.yml
       - Dockerfile.ci-build-arch
       - Dockerfile.ci-build-ubuntu
+      - mise.toml
   schedule:
     - cron: "0 3 * * 0"  # Every Sunday at 03:00 UTC
   workflow_dispatch:
