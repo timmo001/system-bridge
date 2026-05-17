@@ -1,3 +1,6 @@
+# Dependencies
+node_modules/
+
 # Builds
 *.exe
 system-bridge
