@@ -215,10 +215,10 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         "client.discovery",
         "󰊗",
         "Discovery",
-        "Service discovery",
-        submenu("client.discovery"),
+        "List discovered services on the network",
+        cmd("system-bridge client discovery list"),
         undefined,
-        ["mdns", "services", "network", "find"],
+        ["mdns", "services", "network", "find", "scan"],
       ),
       item(
         "client.data",
@@ -228,20 +228,6 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         submenu("client.data"),
         undefined,
         ["modules", "info", "system", "cpu", "memory"],
-      ),
-    ],
-  ],
-  [
-    "client.discovery",
-    [
-      item(
-        "client.discovery.list",
-        "󰋘",
-        "List Services",
-        "List discovered services on the network",
-        cmd("system-bridge client discovery list"),
-        undefined,
-        ["mdns", "scan", "find", "network"],
       ),
     ],
   ],
@@ -303,7 +289,6 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
 
 export const submenuTitles: Map<string, string> = new Map([
   ["client", "Client"],
-  ["client.discovery", "Discovery"],
   ["client.data", "Data"],
 ]);
 
