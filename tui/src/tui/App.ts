@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import type { CliRenderer } from "@opentui/core";
 import type {
   ViewId,
@@ -54,15 +55,10 @@ export class App {
       initialSelectedId: options.executeItemId,
     });
 
-    this.clientMenu = new SubMenu(
-      deps.renderer,
-      deps.theme,
-      "client",
-      {
-        onAction: (item) => this.handleMenuAction(item),
-        onBack: () => this.popView(),
-      },
-    );
+    this.clientMenu = new SubMenu(deps.renderer, deps.theme, "client", {
+      onAction: (item) => this.handleMenuAction(item),
+      onBack: () => this.popView(),
+    });
 
     this.variantPopup = new VariantPopup(deps.renderer, deps.theme, {
       onSelect: (action) => {
@@ -125,8 +121,7 @@ export class App {
           action.type === "notify"
         ) {
           setTimeout(() => {
-            this.commandRunner
-              .runSuspended(action.cmd, true)
+            Effect.runPromise(this.commandRunner.runSuspended(action.cmd, true))
               .then(() => process.exit(0))
               .catch((err) => {
                 log(`Execute error: ${err}`);
@@ -198,23 +193,36 @@ export class App {
 
     switch (action.type) {
       case "command":
-        this.commandRunner
-          .runSuspended(action.cmd, action.wait)
-          .catch((err) => {
-            log(`Command error: ${err}`);
-          });
+        Effect.runPromise(
+          this.commandRunner.runSuspended(action.cmd, action.wait).pipe(
+            Effect.catch(() => {
+              log(`Command error`);
+              return Effect.void;
+            }),
+          ),
+        );
         break;
 
       case "silent":
-        this.commandRunner.runSilent(action.cmd).catch((err) => {
-          log(`Silent command error: ${err}`);
-        });
+        Effect.runPromise(
+          this.commandRunner.runSilent(action.cmd).pipe(
+            Effect.catch(() => {
+              log(`Silent command error`);
+              return Effect.void;
+            }),
+          ),
+        );
         break;
 
       case "notify":
-        this.commandRunner.runNotify(action.cmd, action.notify).catch((err) => {
-          log(`Notify command error: ${err}`);
-        });
+        Effect.runPromise(
+          this.commandRunner.runNotify(action.cmd, action.notify).pipe(
+            Effect.catch(() => {
+              log(`Notify command error`);
+              return Effect.void;
+            }),
+          ),
+        );
         break;
 
       case "view":

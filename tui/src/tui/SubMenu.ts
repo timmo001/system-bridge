@@ -219,8 +219,7 @@ export class SubMenu {
 
     // Add current if different from root and not already added
     if (this.currentMenuId !== this.rootMenuId) {
-      const title =
-        submenuTitles.get(this.currentMenuId) ?? this.currentMenuId;
+      const title = submenuTitles.get(this.currentMenuId) ?? this.currentMenuId;
       if (parts[parts.length - 1] !== title) {
         parts.push(title);
       }

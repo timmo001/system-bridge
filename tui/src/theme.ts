@@ -1,3 +1,5 @@
+import { Effect } from "effect";
+
 /** Semantic colour tokens for the TUI */
 export interface Theme {
   /** App background */
@@ -50,3 +52,6 @@ export const theme: Theme = {
   yellow: "#f9e2af",
   transparent: false,
 };
+
+/** Theme as an Effect — composable in the entry point via `yield* loadTheme` */
+export const loadTheme: Effect.Effect<Theme> = Effect.succeed(theme);

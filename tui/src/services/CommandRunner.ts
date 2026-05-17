@@ -1,6 +1,8 @@
+import { Context, Effect, Layer } from "effect";
 import type { CliRenderer } from "@opentui/core";
 import type { NotifyConfig } from "../types.js";
 import type { Toast } from "../tui/Toast.js";
+import { CommandRunnerError } from "./CommandRunnerError.js";
 
 const log = (msg: string) => console.error(`[sb-tui:CommandRunner] ${msg}`);
 
@@ -8,28 +10,39 @@ const log = (msg: string) => console.error(`[sb-tui:CommandRunner] ${msg}`);
 export interface CommandRunnerService {
   /** Suspend the TUI, run the command with inherited stdio, then resume.
    *  When wait is true, shows "Press any key to continue" before resuming. */
-  readonly runSuspended: (cmd: string, wait: boolean) => Promise<void>;
+  readonly runSuspended: (
+    cmd: string,
+    wait: boolean,
+  ) => Effect.Effect<void, CommandRunnerError>;
 
   /** Run a command in the background without suspending the TUI.
    *  Returns immediately; stdout/stderr are captured silently. */
-  readonly runSilent: (cmd: string) => Promise<void>;
+  readonly runSilent: (cmd: string) => Effect.Effect<void, CommandRunnerError>;
 
   /** Run a command silently with toast notifications for progress and result. */
-  readonly runNotify: (cmd: string, notify: NotifyConfig) => Promise<void>;
+  readonly runNotify: (
+    cmd: string,
+    notify: NotifyConfig,
+  ) => Effect.Effect<void, CommandRunnerError>;
 }
 
-/** Create a {@link CommandRunnerService} bound to the given renderer for suspend/resume */
-export function createCommandRunner(
-  renderer: CliRenderer,
-  toast: Toast,
-): CommandRunnerService {
-  return {
-    runSuspended: async (cmd, wait) => {
-      log(`Suspending for: ${cmd}`);
-      renderer.suspend();
-      renderer.currentRenderBuffer.clear();
+export class CommandRunner extends Context.Service<
+  CommandRunner,
+  CommandRunnerService
+>()("CommandRunner") {}
 
-      try {
+/** Create a live CommandRunner layer bound to the given renderer and toast */
+export const CommandRunnerLive = (renderer: CliRenderer, toast: Toast) =>
+  Layer.succeed(CommandRunner, {
+    runSuspended: Effect.fn("CommandRunner.runSuspended")(function* (
+      cmd: string,
+      wait: boolean,
+    ) {
+      log(`Suspending for: ${cmd}`);
+      yield* Effect.sync(() => {
+        renderer.suspend();
+        renderer.currentRenderBuffer.clear();
+
         const cols = process.stdout.columns || 80;
         const label = ` ${cmd} `;
         const pad = Math.max(0, cols - label.length);
@@ -44,72 +57,106 @@ export function createCommandRunner(
           "─".repeat(right) +
           "\x1b[0m";
         process.stdout.write(`\n\n${header}\n\n`);
+      });
 
-        const proc = Bun.spawn(["bash", "-c", cmd], {
-          stdin: "inherit",
-          stdout: "inherit",
-          stderr: "inherit",
-        });
-        await proc.exited;
-
-        if (wait) {
-          process.stdout.write(
-            "\n\x1b[90mPress any key to continue...\x1b[0m",
-          );
-          await new Promise<void>((resolve) => {
-            const wasRaw = process.stdin.isRaw;
-            if (process.stdin.isTTY) process.stdin.setRawMode(true);
-            process.stdin.resume();
-            process.stdin.once("data", () => {
-              if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw);
-              process.stdin.pause();
-              resolve();
-            });
+      yield* Effect.tryPromise({
+        try: () => {
+          const proc = Bun.spawn(["bash", "-c", cmd], {
+            stdin: "inherit",
+            stdout: "inherit",
+            stderr: "inherit",
           });
-        }
-      } finally {
+          return proc.exited;
+        },
+        catch: (err) =>
+          new CommandRunnerError({ message: `Spawn failed: ${err}` }),
+      });
+
+      if (wait) {
+        yield* Effect.promise(
+          () =>
+            new Promise<void>((resolve) => {
+              process.stdout.write(
+                "\n\x1b[90mPress any key to continue...\x1b[0m",
+              );
+              const wasRaw = process.stdin.isRaw;
+              if (process.stdin.isTTY) process.stdin.setRawMode(true);
+              process.stdin.resume();
+              process.stdin.once("data", () => {
+                if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw);
+                process.stdin.pause();
+                resolve();
+              });
+            }),
+        );
+      }
+
+      yield* Effect.sync(() => {
         renderer.currentRenderBuffer.clear();
         renderer.resume();
         renderer.requestRender();
         log("Resumed after command");
-      }
-    },
-
-    runSilent: async (cmd) => {
-      log(`Running silently: ${cmd}`);
-      const proc = Bun.spawn(["bash", "-c", cmd], {
-        stdout: "pipe",
-        stderr: "pipe",
       });
-      const exitCode = await proc.exited;
+    }),
+
+    runSilent: Effect.fn("CommandRunner.runSilent")(function* (cmd: string) {
+      log(`Running silently: ${cmd}`);
+
+      const exitCode = yield* Effect.tryPromise({
+        try: () => {
+          const proc = Bun.spawn(["bash", "-c", cmd], {
+            stdout: "pipe",
+            stderr: "pipe",
+          });
+          return proc.exited;
+        },
+        catch: (err) =>
+          new CommandRunnerError({ message: `Spawn failed: ${err}` }),
+      });
 
       if (exitCode !== 0) {
-        const stderr = await new Response(proc.stderr).text();
-        log(`Silent command failed (exit ${exitCode}): ${stderr}`);
+        log(`Silent command failed (exit ${exitCode}): ${cmd}`);
       } else {
         log(`Silent command completed: ${cmd}`);
       }
-    },
+    }),
 
-    runNotify: async (cmd, notify) => {
+    runNotify: Effect.fn("CommandRunner.runNotify")(function* (
+      cmd: string,
+      notify: NotifyConfig,
+    ) {
       log(`Running with notification: ${cmd}`);
-      toast.show(notify.id, notify.progress, "info");
+      yield* Effect.sync(() => toast.show(notify.id, notify.progress, "info"));
 
-      const proc = Bun.spawn(["bash", "-c", cmd], {
-        stdout: "pipe",
-        stderr: "pipe",
+      const exitCode = yield* Effect.tryPromise({
+        try: async () => {
+          const proc = Bun.spawn(["bash", "-c", cmd], {
+            stdout: "pipe",
+            stderr: "pipe",
+          });
+          const code = await proc.exited;
+
+          if (code !== 0) {
+            const stderr = await new Response(proc.stderr).text();
+            return { code, stderr: stderr.trim() };
+          }
+          return { code, stderr: "" };
+        },
+        catch: (err) =>
+          new CommandRunnerError({ message: `Spawn failed: ${err}` }),
       });
-      const exitCode = await proc.exited;
 
-      if (exitCode !== 0) {
-        const stderr = await new Response(proc.stderr).text();
-        const errMsg = stderr.trim().split("\n")[0] || "Command failed";
-        log(`Notify command failed (exit ${exitCode}): ${stderr}`);
-        toast.show(notify.id, errMsg, "error");
+      if (exitCode.code !== 0) {
+        const errMsg = exitCode.stderr.split("\n")[0] || "Command failed";
+        log(
+          `Notify command failed (exit ${exitCode.code}): ${exitCode.stderr}`,
+        );
+        yield* Effect.sync(() => toast.show(notify.id, errMsg, "error"));
       } else {
         log(`Notify command completed: ${cmd}`);
-        toast.show(notify.id, notify.success, "success");
+        yield* Effect.sync(() =>
+          toast.show(notify.id, notify.success, "success"),
+        );
       }
-    },
-  };
-}
+    }),
+  });

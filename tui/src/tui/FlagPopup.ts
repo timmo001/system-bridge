@@ -61,11 +61,7 @@ export class FlagPopup {
   private fieldRows: BoxRenderable[] = [];
   private fieldValueTexts: TextRenderable[] = [];
 
-  constructor(
-    renderer: CliRenderer,
-    theme: Theme,
-    options: FlagPopupOptions,
-  ) {
+  constructor(renderer: CliRenderer, theme: Theme, options: FlagPopupOptions) {
     this.renderer = renderer;
     this.theme = theme;
     this.callbacks = options;
@@ -537,7 +533,10 @@ export class FlagPopup {
       } else if (state.field.type === "select" && state.value === "ALL") {
         // "ALL" is a synthetic option — emit --all instead of --module ALL
         cmd += " --all";
-      } else if (state.field.type === "string" || state.field.type === "select") {
+      } else if (
+        state.field.type === "string" ||
+        state.field.type === "select"
+      ) {
         // Shell-quote the value
         const quoted = state.value.replace(/'/g, "'\\''");
         cmd += ` --${state.field.name} '${quoted}'`;
