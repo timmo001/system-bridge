@@ -85,6 +85,8 @@ export class App {
     this.clientMenu.setVisible(false);
 
     // --- Global keyboard ---
+    // Ctrl+C is handled by OpenTUI's exitOnCtrlC option which ensures
+    // terminal state is fully restored before exiting.
     deps.renderer.keyInput.on("keypress", (key) => {
       // Route keys to popups when visible
       if (this.flagPopup.visible) {
@@ -94,11 +96,6 @@ export class App {
       if (this.variantPopup.visible) {
         this.variantPopup.handleKeyPress(key);
         return;
-      }
-      if (key.name === "c" && key.ctrl) {
-        log("Quit requested");
-        deps.renderer.destroy();
-        process.exit(0);
       }
     });
 
@@ -122,10 +119,10 @@ export class App {
         ) {
           setTimeout(() => {
             Effect.runPromise(this.commandRunner.runSuspended(action.cmd, true))
-              .then(() => process.exit(0))
+              .then(() => deps.renderer.destroy())
               .catch((err) => {
                 log(`Execute error: ${err}`);
-                process.exit(1);
+                deps.renderer.destroy();
               });
           }, 50);
         } else {
@@ -239,10 +236,10 @@ export class App {
 
       case "quit":
         this.renderer.destroy();
-        process.exit(0);
+        break;
 
       case "exec":
-        this.renderer.destroy();
+        this.renderer.suspend();
         log(`Exec: ${action.cmd}`);
         {
           const proc = Bun.spawn(["bash", "-c", action.cmd], {
