@@ -155,7 +155,7 @@ export const mainMenuItems: readonly MenuItem[] = [
         action: exec("system-bridge backend --open-web-client"),
       },
     ],
-    ["server", "start", "run", "api", "http", "websocket"],
+    ["server", "start", "run", "api", "http", "websocket", ":run", ":start", "serve", "launch"],
   ),
   item(
     "client",
@@ -164,7 +164,7 @@ export const mainMenuItems: readonly MenuItem[] = [
     "Client commands",
     submenu("client"),
     undefined,
-    ["cli", "commands", "tools"],
+    ["cli", "commands", "tools", ":c", "cmd"],
   ),
   item(
     "version",
@@ -173,12 +173,16 @@ export const mainMenuItems: readonly MenuItem[] = [
     "Show application version",
     cmd("system-bridge version"),
     undefined,
-    ["ver", "about", "info"],
+    ["ver", "about", "info", ":v", ":ver"],
   ),
   item("quit", "󰩈", "Quit", "Exit the TUI", { type: "quit" }, undefined, [
+    ":q",
+    ":wq",
+    ":qa",
     "exit",
     "close",
-    "q",
+    "quit",
+    "bye",
   ]),
 ];
 
@@ -195,7 +199,7 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         "Print the API token",
         cmd("system-bridge client token"),
         undefined,
-        ["key", "api", "auth", "secret"],
+        ["key", "api", "auth", "secret", ":token", "apikey"],
       ),
       item(
         "client.notification",
@@ -209,7 +213,7 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
           [3, 4, 5], // sound, action-url, action-path are advanced
         ),
         undefined,
-        ["notify", "alert", "message", "toast"],
+        ["notify", "alert", "message", "toast", ":notify", "send"],
       ),
       item(
         "client.discovery",
@@ -218,7 +222,7 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         "List discovered services on the network",
         cmd("system-bridge client discovery list"),
         undefined,
-        ["mdns", "services", "network", "find", "scan"],
+        ["mdns", "services", "network", "find", "scan", ":disc", "discover"],
       ),
       item(
         "client.data",
@@ -227,7 +231,7 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         "Data modules",
         submenu("client.data"),
         undefined,
-        ["modules", "info", "system", "cpu", "memory"],
+        ["modules", "info", "system", "cpu", "memory", ":data", "stats"],
       ),
     ],
   ],
@@ -252,7 +256,7 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
             action: cmd("system-bridge client data list --json"),
           },
         ],
-        ["modules", "available"],
+        ["modules", "available", ":list", "show"],
       ),
       item(
         "client.data.run",
@@ -268,6 +272,8 @@ export const submenus: Map<string, readonly MenuItem[]> = new Map([
         [
           "execute",
           "module",
+          ":run",
+          ":exec",
           "cpu",
           "memory",
           "battery",
