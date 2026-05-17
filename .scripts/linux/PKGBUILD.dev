@@ -18,6 +18,7 @@ license=('Apache-2.0')
 keywords=('system-bridge' 'automation' 'home-assistant' 'api' 'websocket')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 provides=('system-bridge')
+options=('!strip')
 
 build() {
   cd "$pkgname"
