@@ -49,5 +49,5 @@
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.10"
   },
-  "packageManager": "pnpm@11.3.0"
+  "packageManager": "pnpm@11.4.0"
 }
