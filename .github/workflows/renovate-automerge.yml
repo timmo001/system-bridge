@@ -5,21 +5,9 @@ name: Renovate automerge
 on:
   pull_request_target: {}
 
-permissions:
-  pull-requests: write
-  contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  renovate-automerge:
-    runs-on: ubuntu-latest
-    if: ${{ github.actor == 'renovate[bot]' || github.actor == 'renovate-bot' }}
-    steps:
-      - name: Enable auto-merge for Renovate PRs
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  automerge:
+    uses: timmo001/workflows/.github/workflows/renovate-automerge.yml@master
+    permissions:
+      pull-requests: write
+      contents: write
