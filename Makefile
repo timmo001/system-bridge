@@ -1,5 +1,7 @@
-# OS detection
-MISE=mise exec --
+# Use mise if available; fall back to direct tool invocation for environments
+# without mise (e.g. Raspberry Pi source builds). Override with MISE= to force
+# direct invocation even when mise is installed.
+MISE := $(shell command -v mise >/dev/null 2>&1 && printf 'mise exec --')
 
 ifeq ($(OS),Windows_NT)
 	EXE=.exe
@@ -106,10 +108,10 @@ endif
 build_tui:
 	@echo "Building TUI..."
 ifeq ($(OS),Windows_NT)
-	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe
+	cd tui && $(MISE) bun install --frozen-lockfile && $(MISE) bun build src/index.ts --compile --outfile ../system-bridge-tui.exe
 	@echo "TUI built: system-bridge-tui.exe"
 else
-	cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui
+	cd tui && $(MISE) bun install --frozen-lockfile && $(MISE) bun build src/index.ts --compile --outfile ../system-bridge-tui
 	@echo "TUI built: system-bridge-tui"
 endif
 
@@ -149,7 +151,7 @@ install: build
 
 run: build
 	@echo "Starting web client and backend in parallel..."
-	cd web-client && $(MISE) pnpm exec concurrently -n "web,backend" -c "blue,green" "mise exec -- pnpm dev" "../$(OUT) backend"
+	cd web-client && $(MISE) pnpm exec concurrently -n "web,backend" -c "blue,green" "$(MISE) pnpm dev" "../$(OUT) backend"
 
 run-web-client:
 	cd web-client && $(MISE) pnpm dev
