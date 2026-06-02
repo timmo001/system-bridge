@@ -59,7 +59,7 @@ importers:
         version: 25.9.1
       concurrently:
         specifier: ^10.0.0
-        version: 10.0.0
+        version: 10.0.1
       eslint:
         specifier: 10.4.0
         version: 10.4.0(jiti@2.7.0)
@@ -698,8 +698,8 @@ packages:
     resolution: {integrity: sha512-0h+uSNtQGW3D98eQt3jJ8L06Fves8hncB4V/PKdw/Qb8Hnk19VaKuTr55UNRYiSoVa7WwrFls+rh3ux9agmkeQ==}
     engines: {node: '>= 12.0.0'}
 
-  concurrently@10.0.0:
-    resolution: {integrity: sha512-DRrk10z3sVPpguNe8od2cGNqZGqbT15rwAnxD4dG3b78mdNNb/gJyr8T834Oj518WcBmTktrt4FhdwZn09ZWSg==}
+  concurrently@10.0.1:
+    resolution: {integrity: sha512-vN61cP9COzctyhBqKUOh9YHqU70hYPnaHqNpXdBzM9PcwIpfPAvNK06hjm4gEJEGuvy4GBairO6uU32+FKpS4g==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -1859,7 +1859,7 @@ snapshots:
 
   comment-parser@1.4.7: {}
 
-  concurrently@10.0.0:
+  concurrently@10.0.1:
     dependencies:
       chalk: 5.6.2
       rxjs: 7.8.2
