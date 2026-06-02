@@ -2,7 +2,7 @@ module github.com/timmo001/system-bridge
 
 go 1.26.0
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
 	fyne.io/systray v1.12.1
