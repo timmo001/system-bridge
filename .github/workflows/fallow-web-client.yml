@@ -30,13 +30,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 0
 
       - name: Run Fallow on changed files
         if: github.event_name != 'workflow_dispatch'
-        uses: fallow-rs/fallow@1c8319d890a2c984d3ef6dd67aaeca79fa1a284c # v2
+        uses: fallow-rs/fallow@d9d22a3d447bf9581594d0cced31796cd294d9e2 # v2
         with:
           root: .
           format: sarif
@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Fallow full scan
         if: github.event_name == 'workflow_dispatch'
-        uses: fallow-rs/fallow@1c8319d890a2c984d3ef6dd67aaeca79fa1a284c # v2
+        uses: fallow-rs/fallow@d9d22a3d447bf9581594d0cced31796cd294d9e2 # v2
         with:
           root: .
           format: sarif
