@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   exclude-dirs:
     - node_modules
