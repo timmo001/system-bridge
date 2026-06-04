@@ -1,6 +1,6 @@
 ---
 name: Setup Runtime
-description: Setup pinned Go and Bun via mise
+description: Setup pinned Go, Bun, and Node via mise
 
 runs:
   using: "composite"
@@ -18,4 +18,5 @@ runs:
       run: |
         mise exec -- bun --version
         mise exec -- go version
+        mise exec -- node --version
       shell: bash
