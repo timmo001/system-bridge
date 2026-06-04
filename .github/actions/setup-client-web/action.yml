@@ -8,5 +8,5 @@ runs:
     - uses: ./.github/actions/setup-runtime
 
     - name: Install web client dependencies
-      run: mise exec -C web-client -- pnpm install --frozen-lockfile
+      run: mise exec -C web-client -- bun install --frozen-lockfile
       shell: bash

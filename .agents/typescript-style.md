@@ -134,19 +134,19 @@ this.addEventListener("keydown", (e) => {
 cd web-client
 
 # Run linter
-pnpm lint
+bun run lint
 
 # Fix linting errors automatically
-pnpm lint:fix
+bun run lint:fix
 
 # Type checking
-pnpm typecheck
+bun run typecheck
 
 # Format checking (Prettier)
-pnpm format:check
+bun run format:check
 
 # Format automatically (Prettier)
-pnpm format:write
+bun run format:write
 ```
 
 **Important:** Prettier is the formatter, ESLint is the TypeScript linter. They serve different purposes.
@@ -155,7 +155,7 @@ pnpm format:write
 
 ```bash
 # Auto-fix what's possible
-pnpm lint:fix
+bun run lint:fix
 
 # For persistent errors, check:
 # 1. Import order (must follow prescribed groups)
