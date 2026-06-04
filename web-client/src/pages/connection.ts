@@ -1,4 +1,4 @@
-import { consume, provide } from "@lit/context";
+import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
@@ -6,7 +6,6 @@ import { z } from "zod";
 import {
   connectionContext,
   type ConnectionSettings,
-  saveConnectionSettings,
 } from "~/contexts/connection";
 import { CONNECTION_TIMEOUT } from "~/contexts/websocket";
 import { PageElement } from "~/mixins/page-element";
@@ -48,11 +47,6 @@ class PageConnection extends PageElement {
 
   @state()
   private isSubmitting = false;
-
-  @provide({ context: connectionContext })
-  get updatedConnection(): ConnectionSettings {
-    return this.connection!;
-  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -133,8 +127,6 @@ class PageConnection extends PageElement {
       token: this.formData.token,
     };
 
-    saveConnectionSettings(newSettings);
-
     this.dispatchEvent(
       new CustomEvent("connection-updated", {
         detail: newSettings,
@@ -146,10 +138,6 @@ class PageConnection extends PageElement {
     ws.close();
     this.isSubmitting = false;
     this.requestUpdate();
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
   }
 
   private handleSubmit = (e: Event): void => {

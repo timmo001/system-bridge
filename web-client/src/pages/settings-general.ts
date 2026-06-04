@@ -3,10 +3,21 @@ import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import {
+  bridgeSettingsContext,
+  type BridgeSettingsState,
+} from "~/contexts/bridge-settings";
+import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
@@ -23,8 +34,14 @@ class PageSettingsGeneral extends PageElement {
   title = "General Settings";
   description = "Configure your System Bridge general settings";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: bridgeSettingsContext, subscribe: true })
+  bridgeSettings?: BridgeSettingsState;
+
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -65,7 +82,7 @@ class PageSettingsGeneral extends PageElement {
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("websocket")) {
+    if (changedProperties.has("bridgeSettings")) {
       this.loadSettings();
     }
     // Attach submit handler after render (light DOM workaround)
@@ -82,8 +99,8 @@ class PageSettingsGeneral extends PageElement {
   }
 
   private loadSettings() {
-    if (this.websocket?.settings) {
-      this.formData = { ...this.websocket.settings };
+    if (this.bridgeSettings?.settings) {
+      this.formData = { ...this.bridgeSettings.settings };
       this.requestUpdate();
     }
   }
@@ -92,7 +109,7 @@ class PageSettingsGeneral extends PageElement {
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
 
-    if (!this.connection?.token || !this.websocket?.sendRequest) {
+    if (!this.connection?.token || !this.actions) {
       return;
     }
 
@@ -110,7 +127,7 @@ class PageSettingsGeneral extends PageElement {
     this.requestUpdate();
 
     try {
-      this.websocket.sendRequest({
+      this.actions.sendRequest({
         id: generateUUID(),
         event: "UPDATE_SETTINGS",
         data: this.formData,
@@ -193,7 +210,7 @@ class PageSettingsGeneral extends PageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

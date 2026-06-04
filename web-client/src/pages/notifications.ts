@@ -6,7 +6,14 @@ import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import { SendablePageElement } from "~/mixins/sendable-page";
 import "../components/ui/button";
 import "../components/ui/connection-required";
@@ -19,8 +26,11 @@ class PageNotifications extends SendablePageElement {
   title = "Notifications";
   description = "Send desktop notifications to this system";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -141,13 +151,13 @@ class PageNotifications extends SendablePageElement {
       !this.notificationTitle.trim() ||
       !this.notificationMessage.trim() ||
       !this.connection?.token ||
-      !this.websocket?.sendRequest
+      !this.actions
     ) {
       return;
     }
 
     this.sendWithTimeout((requestId) => {
-      this.websocket!.sendRequest({
+      this.actions!.sendRequest({
         id: requestId,
         event: "NOTIFICATION",
         data: this.buildNotificationData(),
@@ -261,7 +271,7 @@ class PageNotifications extends SendablePageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

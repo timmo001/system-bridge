@@ -6,8 +6,17 @@ import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import { moduleDataContext } from "~/contexts/module-data";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import { getResultStyle } from "~/lib/result-styles";
+import type { ModuleData } from "~/lib/system-bridge/types-modules";
 import type { MediaData } from "~/lib/system-bridge/types-modules-schemas";
 import { formatDuration, generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
@@ -66,8 +75,14 @@ class PageMedia extends PageElement {
   title = "Media Controls";
   description = "Control media playback on this system";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: moduleDataContext, subscribe: true })
+  data?: ModuleData;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -155,7 +170,7 @@ class PageMedia extends PageElement {
 
   // fallow-ignore-next-line complexity
   private sendMediaAction(action: MediaAction): void {
-    if (!this.connection?.token || !this.websocket?.sendRequest) {
+    if (!this.connection?.token || !this.actions) {
       return;
     }
 
@@ -164,7 +179,7 @@ class PageMedia extends PageElement {
     this.pendingRequestId = requestId;
 
     try {
-      this.websocket.sendRequest({
+      this.actions.sendRequest({
         id: requestId,
         event: "MEDIA_CONTROL",
         data: { action },
@@ -195,7 +210,7 @@ class PageMedia extends PageElement {
   private handleMute = (): void => this.sendMediaAction("MUTE");
 
   private get mediaData(): MediaData | null {
-    return (this.websocket?.data?.media as MediaData) ?? null;
+    return (this.data?.media as MediaData) ?? null;
   }
 
   private get isPlaying(): boolean {
@@ -550,7 +565,7 @@ class PageMedia extends PageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

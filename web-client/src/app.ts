@@ -2,9 +2,7 @@ import { Router } from "@lit-labs/router";
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import "./styles/globals.css";
-import "./components/theme-provider";
-import "./components/connection-provider";
-import "./components/websocket-provider";
+import "./components/app-provider";
 
 @customElement("app-root")
 class App extends LitElement {
@@ -97,13 +95,9 @@ class App extends LitElement {
 
   render() {
     return html`
-      <theme-provider>
-        <connection-provider>
-          <websocket-provider>
-            <main>${this.router.outlet()}</main>
-          </websocket-provider>
-        </connection-provider>
-      </theme-provider>
+      <app-provider>
+        <main>${this.router.outlet()}</main>
+      </app-provider>
     `;
   }
 }

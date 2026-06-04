@@ -6,7 +6,14 @@ import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import { SendablePageElement } from "~/mixins/sendable-page";
 import "../components/ui/button";
 import "../components/ui/connection-required";
@@ -22,8 +29,11 @@ class PageOpen extends SendablePageElement {
   description =
     "Open URLs in browser or files/folders with system applications";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -110,7 +120,7 @@ class PageOpen extends SendablePageElement {
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
-    if (!value || !this.connection?.token || !this.websocket?.sendRequest) {
+    if (!value || !this.connection?.token || !this.actions) {
       return;
     }
 
@@ -118,7 +128,7 @@ class PageOpen extends SendablePageElement {
       this.openType === "url" ? { url: value } : { path: value };
 
     this.sendWithTimeout((requestId) => {
-      this.websocket!.sendRequest({
+      this.actions!.sendRequest({
         id: requestId,
         event: "OPEN",
         data: openData,
@@ -241,7 +251,7 @@ class PageOpen extends SendablePageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

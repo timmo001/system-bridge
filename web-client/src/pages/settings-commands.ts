@@ -3,10 +3,21 @@ import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import {
+  bridgeSettingsContext,
+  type BridgeSettingsState,
+} from "~/contexts/bridge-settings";
+import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import { getResultStyle } from "~/lib/result-styles";
 import type {
   Settings,
@@ -33,8 +44,14 @@ class PageSettingsCommands extends PageElement {
   title = "Commands";
   description = "Manage commands that can be executed remotely";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: bridgeSettingsContext, subscribe: true })
+  bridgeSettings?: BridgeSettingsState;
+
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -73,10 +90,8 @@ class PageSettingsCommands extends PageElement {
     this.loadSettings();
     this.previousCommands = [...this.commands];
 
-    // Listen for settings update events on window scope
-    // The websocket-provider dispatches these events with bubbling enabled,
-    // and we use window to reliably catch them regardless of DOM structure.
-    // This bypasses Lit's context system for more immediate event delivery.
+    // Listen on window to reliably catch settings update events regardless of
+    // DOM structure. This bypasses Lit context for immediate event delivery.
     window.addEventListener(
       "settings-update-error",
       this.handleSettingsUpdateError,
@@ -177,7 +192,8 @@ class PageSettingsCommands extends PageElement {
   private checkPendingSubmission(): void {
     if (!this.isSubmitting || this.pendingRequestId === null) return;
 
-    const currentCommands = this.websocket?.settings?.commands.allowlist ?? [];
+    const currentCommands =
+      this.bridgeSettings?.settings?.commands.allowlist ?? [];
     const previousCommandsStr = JSON.stringify(this.previousCommands);
     const currentCommandsStr = JSON.stringify(currentCommands);
 
@@ -187,15 +203,15 @@ class PageSettingsCommands extends PageElement {
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("websocket")) {
+    if (changedProperties.has("bridgeSettings")) {
       this.loadSettings();
       this.checkPendingSubmission();
     }
   }
 
   private loadSettings() {
-    if (this.websocket?.settings) {
-      this.commands = [...this.websocket.settings.commands.allowlist];
+    if (this.bridgeSettings?.settings) {
+      this.commands = [...this.bridgeSettings.settings.commands.allowlist];
     }
   }
 
@@ -274,18 +290,14 @@ class PageSettingsCommands extends PageElement {
   private handleExecuteCommand = (e: Event): void => {
     const button = e.currentTarget as HTMLElement;
     const id = button.getAttribute("data-id");
-    if (!id || !this.connection?.token || !this.websocket?.sendCommandExecute) {
+    if (!id || !this.connection?.token || !this.actions) {
       return;
     }
 
     const command = this.commands.find((cmd) => cmd.id === id);
     if (!command) return;
 
-    this.websocket.sendCommandExecute(
-      generateUUID(),
-      id,
-      this.connection.token,
-    );
+    this.actions.sendCommandExecute(generateUUID(), id, this.connection.token);
   };
 
   private handleCopyId = async (e: Event): Promise<void> => {
@@ -324,8 +336,8 @@ class PageSettingsCommands extends PageElement {
   ): void {
     if (
       !this.connection?.token ||
-      !this.websocket?.sendRequest ||
-      !this.websocket?.settings
+      !this.actions ||
+      !this.bridgeSettings?.settings
     ) {
       return;
     }
@@ -340,13 +352,13 @@ class PageSettingsCommands extends PageElement {
 
     try {
       const updatedSettings: Settings = {
-        ...this.websocket.settings,
+        ...this.bridgeSettings.settings,
         commands: {
           allowlist: commands,
         },
       };
 
-      this.websocket.sendRequest({
+      this.actions.sendRequest({
         id: requestId,
         event: "UPDATE_SETTINGS",
         data: updatedSettings,
@@ -484,7 +496,7 @@ ${result.stderr}</pre
   }
 
   private renderCommandItem(cmd: SettingsCommandDefinition) {
-    const executionState = this.websocket?.commandExecutions.get(cmd.id);
+    const executionState = this.bridgeSettings?.commandExecutions.get(cmd.id);
     const isExecuting = executionState?.isExecuting ?? false;
     const result = executionState?.result as CommandResult | null | undefined;
 
@@ -631,7 +643,7 @@ ${result.stderr}</pre
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

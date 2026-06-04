@@ -4,10 +4,21 @@ import { customElement, state } from "lit/decorators.js";
 import { z } from "zod";
 
 import {
+  bridgeSettingsContext,
+  type BridgeSettingsState,
+} from "~/contexts/bridge-settings";
+import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import type { Settings } from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
@@ -30,8 +41,14 @@ class PageSettingsMedia extends PageElement {
   title = "Media Directories";
   description = "Manage directories for media scanning";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: bridgeSettingsContext, subscribe: true })
+  bridgeSettings?: BridgeSettingsState;
+
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -60,14 +77,16 @@ class PageSettingsMedia extends PageElement {
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("websocket")) {
+    if (changedProperties.has("bridgeSettings")) {
       this.loadSettings();
     }
   }
 
   private loadSettings() {
-    if (this.websocket?.settings) {
-      this.mediaDirectories = [...this.websocket.settings.media.directories];
+    if (this.bridgeSettings?.settings) {
+      this.mediaDirectories = [
+        ...this.bridgeSettings.settings.media.directories,
+      ];
     }
   }
 
@@ -91,7 +110,7 @@ class PageSettingsMedia extends PageElement {
       !this.newDirectoryName.trim() ||
       !this.newDirectoryPath.trim() ||
       !this.connection?.token ||
-      !this.websocket?.sendRequestWithResponse
+      !this.actions
     ) {
       return;
     }
@@ -101,7 +120,7 @@ class PageSettingsMedia extends PageElement {
     this.requestUpdate();
 
     try {
-      const response = await this.websocket.sendRequestWithResponse<{
+      const response = await this.actions.sendRequestWithResponse<{
         valid: boolean;
       }>(
         {
@@ -151,8 +170,8 @@ class PageSettingsMedia extends PageElement {
   private saveSettings(): void {
     if (
       !this.connection?.token ||
-      !this.websocket?.sendRequest ||
-      !this.websocket?.settings
+      !this.actions ||
+      !this.bridgeSettings?.settings
     ) {
       return;
     }
@@ -162,13 +181,13 @@ class PageSettingsMedia extends PageElement {
 
     try {
       const updatedSettings: Settings = {
-        ...this.websocket.settings,
+        ...this.bridgeSettings.settings,
         media: {
           directories: this.mediaDirectories,
         },
       };
 
-      this.websocket.sendRequest({
+      this.actions.sendRequest({
         id: generateUUID(),
         event: "UPDATE_SETTINGS",
         data: updatedSettings,
@@ -275,7 +294,7 @@ class PageSettingsMedia extends PageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
