@@ -149,7 +149,7 @@ install: build
 
 run: build
 	@echo "Starting web client and backend in parallel..."
-	cd web-client && $(MISE) bun x concurrently -n "web,backend" -c "blue,green" "$(MISE) bun run dev" "../$(OUT) backend"
+	cd web-client && $(MISE) bunx concurrently -n "web,backend" -c "blue,green" "$(MISE) bun run dev" "../$(OUT) backend"
 
 run-web-client:
 	cd web-client && $(MISE) bun run dev
