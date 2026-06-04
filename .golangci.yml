@@ -1,6 +1,7 @@
 version: "2"
 
-run:
-  exclude-dirs:
-    - node_modules
-    - web-client/node_modules
+linters:
+  exclusions:
+    paths:
+      - node_modules
+      - web-client/node_modules
