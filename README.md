@@ -35,15 +35,15 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 ## Development Setup
 
 1. Install [`mise`](https://mise.jdx.dev/installing-mise.html) (recommended)
-1. Run `mise install` in the repo root to install the pinned Go and Bun
+1. Run `mise install` in the repo root to install the pinned Go, Bun, and Node
    toolchains.
 
 `mise.toml` is the source of truth for local and CI runtimes.
 
 > **Building without mise:** If you cannot install `mise` (e.g. Raspberry Pi
-> armhf), ensure compatible versions of `go` and `bun` are on your PATH. The
-> Makefile auto-detects `mise` and falls back to invoking tools directly when it
-> is not available.
+> armhf), ensure compatible versions of `go`, `bun`, and `node` are on your
+> PATH. The Makefile auto-detects `mise` and falls back to invoking tools
+> directly when it is not available.
 
 ## Build and Install
 
