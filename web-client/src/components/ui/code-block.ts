@@ -157,7 +157,7 @@ class CodeBlock extends LitElement {
     try {
       return JSON.stringify(this.data, null, 2);
     } catch {
-      return String(this.data);
+      return "Unable to format data";
     }
   }
 }

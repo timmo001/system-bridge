@@ -2,13 +2,16 @@ import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-required")
 class ConnectionRequired extends UIElement {
-  @consume({ context: websocketContext, subscribe: true })
-  private _websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  private _status?: ConnectionStatus;
 
   @property() message = "Please connect to System Bridge.";
 
@@ -22,7 +25,7 @@ class ConnectionRequired extends UIElement {
   };
 
   render(): TemplateResult {
-    const error = this._websocket?.error;
+    const error = this._status?.error;
 
     return html`
       <div class="rounded-lg border border-destructive bg-destructive/10 p-6">

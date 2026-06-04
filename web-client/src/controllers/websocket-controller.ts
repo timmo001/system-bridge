@@ -1,20 +1,16 @@
-import { ContextConsumer, ContextProvider } from "@lit/context";
-import { html } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import type { ReactiveController, ReactiveControllerHost } from "lit";
 import type { z } from "zod";
 
+import type { BridgeSettingsState } from "~/contexts/bridge-settings";
+import type { ConnectionSettings } from "~/contexts/connection";
+import type { ConnectionStatus } from "~/contexts/connection-status";
 import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  websocketContext,
-  type WebSocketState,
   CONNECTION_TIMEOUT,
   UPDATE_TIMEOUT,
   MAX_RETRIES,
   RETRY_DELAY,
 } from "~/contexts/websocket";
+import type { WebSocketActions } from "~/contexts/websocket-actions";
 import {
   DefaultModuleData,
   ModuleNameSchema,
@@ -28,7 +24,6 @@ import {
   type WebSocketRequest,
 } from "~/lib/system-bridge/types-websocket";
 import { generateUUID } from "~/lib/utils";
-import { ProviderElement } from "~/mixins/provider-element";
 
 interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -40,6 +35,7 @@ interface PendingResolver<T = unknown> {
 type AnyPendingResolver = PendingResolver;
 type WebSocketResponse = z.infer<typeof WebSocketResponseSchema>;
 type ResponseSubtype = WebSocketResponse["subtype"];
+
 interface CommandResult {
   commandID: string;
   exitCode: number;
@@ -47,34 +43,29 @@ interface CommandResult {
   stderr: string;
   error?: string;
 }
+
 type ValidConnectionSettings = ConnectionSettings & { token: string };
+type WebSocketControllerHost = ReactiveControllerHost & HTMLElement;
 
-@customElement("websocket-provider")
-class WebSocketProvider extends ProviderElement {
-  connection: ConnectionSettings | undefined;
+export class WebSocketController implements ReactiveController {
+  private readonly host: WebSocketControllerHost;
+  private readonly syncContexts: () => void;
+  private connection: ConnectionSettings | undefined;
 
-  @state()
   private _data: ModuleData = DefaultModuleData;
 
-  @state()
   private _isConnected = false;
 
-  @state()
   private _settings: Settings | null = null;
 
-  @state()
   private _error: string | null = null;
 
-  @state()
   private _retryCount = 0;
 
-  @state()
   private _isRequestingData = false;
 
-  @state()
   private _isSettingsUpdatePending = false;
 
-  @state()
   private _commandExecutions = new Map<
     string,
     {
@@ -111,10 +102,14 @@ class WebSocketProvider extends ProviderElement {
   // @ts-expect-error - TS6133: Reserved for future state change detection
   private _previousConnectedState = false;
   private _pendingResolvers = new Map<string, AnyPendingResolver>();
-  // Consumer must be stored to keep subscription alive
-  // @ts-expect-error - TS6133: Field is used via subscription callback
-  private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
-  private _websocketProvider!: ContextProvider<typeof websocketContext>;
+  private _commandExecutionsVersion = 0;
+  private readonly _retryConnection = this.retryConnection.bind(this);
+
+  readonly actions: WebSocketActions = {
+    sendRequest: this.sendRequest.bind(this),
+    sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
+    sendCommandExecute: this.sendCommandExecute.bind(this),
+  };
 
   private readonly responseHandlers = new Map<
     WebSocketResponse["type"],
@@ -165,55 +160,61 @@ class WebSocketProvider extends ProviderElement {
     "BAD_REQUEST",
   ]);
 
-  constructor() {
-    super();
-    this._connectionConsumer = new ContextConsumer(this, {
-      context: connectionContext,
-      callback: (value) => {
-        this.connection = value;
-        this.handleConnectionChange();
-      },
-      subscribe: true,
-    });
-    this._websocketProvider = new ContextProvider(this, {
-      context: websocketContext,
-    });
+  constructor(
+    host: WebSocketControllerHost,
+    connection: ConnectionSettings,
+    syncContexts: () => void,
+  ) {
+    this.host = host;
+    this.syncContexts = syncContexts;
+    this.connection = connection;
+    this.host.addController(this);
   }
 
-  private get websocketState(): WebSocketState {
+  get status(): ConnectionStatus {
     return {
-      data: this._data,
       isConnected: this._isConnected,
-      settings: this._settings,
       error: this._error,
-      settingsUpdateError: this._settingsUpdateError,
-      commandExecutions: this._commandExecutions,
-      sendRequest: this.sendRequest.bind(this),
-      sendRequestWithResponse: this.sendRequestWithResponse.bind(this),
-      sendCommandExecute: this.sendCommandExecute.bind(this),
-      retryConnection: this.retryConnection.bind(this),
+      retryConnection: this._retryConnection,
     };
   }
 
-  private updateWebSocketContext() {
-    if (this._websocketProvider) {
-      this._websocketProvider.setValue(this.websocketState);
-    }
+  get data(): ModuleData {
+    return this._data;
   }
 
-  requestUpdate(name?: PropertyKey, oldValue?: unknown): void {
-    super.requestUpdate(name, oldValue);
-    this.updateWebSocketContext();
+  get bridgeSettings(): BridgeSettingsState {
+    return {
+      settings: this._settings,
+      settingsUpdateError: this._settingsUpdateError,
+      commandExecutions: this._commandExecutions,
+    };
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.updateWebSocketContext();
+  get commandExecutionsVersion(): number {
+    return this._commandExecutionsVersion;
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
+  hostConnected() {
+    this.connect();
+  }
+
+  hostDisconnected() {
     this.cleanup();
+  }
+
+  setConnection(connection: ConnectionSettings) {
+    this.connection = connection;
+    this.handleConnectionChange();
+  }
+
+  private requestUpdate(): void {
+    this.syncContexts();
+    this.host.requestUpdate();
+  }
+
+  private markCommandExecutionsChanged(): void {
+    this._commandExecutionsVersion++;
   }
 
   private handleConnectionChange() {
@@ -281,6 +282,7 @@ class WebSocketProvider extends ProviderElement {
     const cleanupTimeout = window.setTimeout(
       () => {
         this._commandExecutions.delete(commandID);
+        this.markCommandExecutionsChanged();
         this._commandExecutionCleanupTimeouts.delete(commandID);
         this.requestUpdate();
       },
@@ -304,6 +306,7 @@ class WebSocketProvider extends ProviderElement {
       isExecuting: false,
       result,
     });
+    this.markCommandExecutionsChanged();
     this.requestUpdate();
     this.scheduleCommandCleanup(result.commandID);
   }
@@ -316,6 +319,7 @@ class WebSocketProvider extends ProviderElement {
         if (!execution.isExecuting) {
           this.cancelCommandCleanupTimeout(commandID);
           this._commandExecutions.delete(commandID);
+          this.markCommandExecutionsChanged();
           break; // Only remove one entry at a time
         }
       }
@@ -494,12 +498,12 @@ class WebSocketProvider extends ProviderElement {
       this._settingsUpdateTimeout = null;
     }
     this._pendingSettingsRequests.delete(message.id);
-    this.updateWebSocketContext();
+    this.syncContexts();
     this.dispatchComponentEvent("settings-updated", message.id);
   }
 
   private dispatchComponentEvent(eventName: string, requestId: string) {
-    this.dispatchEvent(
+    this.host.dispatchEvent(
       new CustomEvent(eventName, {
         detail: {
           requestId,
@@ -516,7 +520,7 @@ class WebSocketProvider extends ProviderElement {
     requestId: string,
     message: string,
   ) {
-    this.dispatchEvent(
+    this.host.dispatchEvent(
       new CustomEvent(eventName, {
         detail: {
           requestId,
@@ -574,6 +578,7 @@ class WebSocketProvider extends ProviderElement {
       isExecuting: true,
       result: null,
     });
+    this.markCommandExecutionsChanged();
     this.requestUpdate();
   }
 
@@ -663,7 +668,7 @@ class WebSocketProvider extends ProviderElement {
     this._settingsErrorTimeout = window.setTimeout(() => {
       this._settingsUpdateError = null;
       this._settingsErrorTimeout = null;
-      this.updateWebSocketContext();
+      this.syncContexts();
     }, 10000);
 
     this.requestUpdate();
@@ -1010,6 +1015,7 @@ class WebSocketProvider extends ProviderElement {
     this.clearSettingsErrorTimeout();
     this.clearCommandCleanupTimeouts();
     this._commandExecutions.clear();
+    this.markCommandExecutionsChanged();
     this._pendingCommandRequests.clear();
     this._pendingSettingsRequests.clear();
     this._pendingMediaControlRequests.clear();
@@ -1021,16 +1027,5 @@ class WebSocketProvider extends ProviderElement {
       this._ws.close();
       this._ws = null;
     }
-  }
-
-  render() {
-    // In Light DOM, content passes through naturally
-    return html``;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "websocket-provider": WebSocketProvider;
   }
 }

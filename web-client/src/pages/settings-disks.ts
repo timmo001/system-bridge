@@ -3,10 +3,21 @@ import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import {
+  bridgeSettingsContext,
+  type BridgeSettingsState,
+} from "~/contexts/bridge-settings";
+import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import {
+  websocketActionsContext,
+  type WebSocketActions,
+} from "~/contexts/websocket-actions";
 import {
   DiskMountsResponseSchema,
   type DiskMountInfo,
@@ -33,8 +44,14 @@ class PageSettingsDisks extends PageElement {
   title = "Disk Mounts";
   description = "Configure which disk mounts are reported";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: bridgeSettingsContext, subscribe: true })
+  bridgeSettings?: BridgeSettingsState;
+
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: websocketActionsContext, subscribe: true })
+  actions?: WebSocketActions;
 
   @consume({ context: connectionContext, subscribe: true })
   connection?: ConnectionSettings;
@@ -54,7 +71,10 @@ class PageSettingsDisks extends PageElement {
   }
 
   updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("websocket")) {
+    if (
+      changedProperties.has("bridgeSettings") ||
+      changedProperties.has("status")
+    ) {
       this.loadData();
     }
   }
@@ -66,9 +86,10 @@ class PageSettingsDisks extends PageElement {
 
   // fallow-ignore-next-line complexity
   private loadSettings() {
-    if (this.websocket?.settings) {
+    if (this.bridgeSettings?.settings) {
       this.allowedMountPoints = [
-        ...(this.websocket.settings.disks?.allowedSecondaryMountPoints ?? []),
+        ...(this.bridgeSettings.settings.disks?.allowedSecondaryMountPoints ??
+          []),
       ];
     }
   }
@@ -76,11 +97,7 @@ class PageSettingsDisks extends PageElement {
   // fallow-ignore-next-line complexity
   private async loadMounts() {
     const token = this.connection?.token;
-    if (
-      !token ||
-      !this.websocket?.sendRequestWithResponse ||
-      !this.websocket.isConnected
-    ) {
+    if (!token || !this.actions || !this.status?.isConnected) {
       return;
     }
 
@@ -89,7 +106,7 @@ class PageSettingsDisks extends PageElement {
 
     try {
       this.mounts =
-        await this.websocket.sendRequestWithResponse<DiskMountsResponse>(
+        await this.actions.sendRequestWithResponse<DiskMountsResponse>(
           {
             id: generateUUID(),
             event: "GET_DISK_MOUNTS",
@@ -124,15 +141,15 @@ class PageSettingsDisks extends PageElement {
   // fallow-ignore-next-line complexity
   private saveSettings(): void {
     const token = this.connection?.token;
-    if (!token || !this.websocket?.sendRequest || !this.websocket.settings) {
+    if (!token || !this.actions || !this.bridgeSettings?.settings) {
       return;
     }
 
-    this.websocket.sendRequest({
+    this.actions.sendRequest({
       id: generateUUID(),
       event: "UPDATE_SETTINGS",
       data: {
-        ...this.websocket.settings,
+        ...this.bridgeSettings.settings,
         disks: { allowedSecondaryMountPoints: this.allowedMountPoints },
       },
       token,
@@ -244,7 +261,7 @@ class PageSettingsDisks extends PageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">

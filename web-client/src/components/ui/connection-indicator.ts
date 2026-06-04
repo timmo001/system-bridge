@@ -2,17 +2,20 @@ import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement } from "lit/decorators.js";
 
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-indicator")
 class ConnectionIndicator extends UIElement {
-  @consume({ context: websocketContext, subscribe: true })
-  private _websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  private _status?: ConnectionStatus;
 
   // fallow-ignore-next-line complexity
   render(): TemplateResult {
-    const isConnected = this._websocket?.isConnected ?? false;
+    const isConnected = this._status?.isConnected ?? false;
 
     return html`
       <div class="flex items-center gap-2">

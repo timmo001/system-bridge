@@ -1,4 +1,4 @@
-import { ContextConsumer } from "@lit/context";
+import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
@@ -6,41 +6,21 @@ import {
   connectionContext,
   type ConnectionSettings,
 } from "~/contexts/connection";
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
+import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-status-card")
 class ConnectionStatusCard extends UIElement {
   @property({ type: Boolean }) showSetupButton = false;
 
-  private _websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  private _status?: ConnectionStatus;
+
+  @consume({ context: connectionContext, subscribe: true })
   private _connection?: ConnectionSettings;
-
-  // Consumers must be stored to keep subscriptions alive
-  // @ts-expect-error - TS6133: Field is used via subscription callback
-  private _websocketConsumer!: ContextConsumer<typeof websocketContext, this>;
-  // @ts-expect-error - TS6133: Field is used via subscription callback
-  private _connectionConsumer!: ContextConsumer<typeof connectionContext, this>;
-
-  constructor() {
-    super();
-    this._websocketConsumer = new ContextConsumer(this, {
-      context: websocketContext,
-      callback: (value) => {
-        this._websocket = value;
-        this.requestUpdate();
-      },
-      subscribe: true,
-    });
-    this._connectionConsumer = new ContextConsumer(this, {
-      context: connectionContext,
-      callback: (value) => {
-        this._connection = value;
-        this.requestUpdate();
-      },
-      subscribe: true,
-    });
-  }
 
   private handleSetupConnection = (): void => {
     this.dispatchEvent(
@@ -67,10 +47,10 @@ class ConnectionStatusCard extends UIElement {
   }
 
   private renderErrorBanner(): TemplateResult {
-    if (!this._websocket?.error) return html``;
+    if (!this._status?.error) return html``;
     return html`
       <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-        ${this._websocket.error}
+        ${this._status.error}
       </div>
     `;
   }
@@ -103,7 +83,7 @@ class ConnectionStatusCard extends UIElement {
 
   // fallow-ignore-next-line complexity
   render(): TemplateResult {
-    const isConnected = this._websocket?.isConnected ?? false;
+    const isConnected = this._status?.isConnected ?? false;
 
     return html`
       <div

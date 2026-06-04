@@ -2,8 +2,13 @@ import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import { websocketContext, type WebSocketState } from "~/contexts/websocket";
 import {
+  connectionStatusContext,
+  type ConnectionStatus,
+} from "~/contexts/connection-status";
+import { moduleDataContext } from "~/contexts/module-data";
+import {
+  type ModuleData,
   Modules,
   ModuleLabels,
   type ModuleName,
@@ -21,8 +26,11 @@ class PageData extends PageElement {
   title = "Data";
   description = "Real-time data from System Bridge modules";
 
-  @consume({ context: websocketContext, subscribe: true })
-  websocket?: WebSocketState;
+  @consume({ context: connectionStatusContext, subscribe: true })
+  status?: ConnectionStatus;
+
+  @consume({ context: moduleDataContext, subscribe: true })
+  data?: ModuleData;
 
   @state()
   private selectedTab: ModuleName = "system";
@@ -61,11 +69,11 @@ class PageData extends PageElement {
           ?hidden=${this.selectedTab !== module}
           class="flex flex-col flex-1 min-h-0 mt-2"
         >
-          ${this.websocket?.data?.[module]
+          ${this.data?.[module]
             ? html`
                 <ui-code-block
                   class="flex-1 min-h-0"
-                  .data=${this.websocket.data[module]}
+                  .data=${this.data[module]}
                 ></ui-code-block>
               `
             : html`
@@ -81,7 +89,7 @@ class PageData extends PageElement {
   }
 
   render() {
-    const isConnected = this.websocket?.isConnected ?? false;
+    const isConnected = this.status?.isConnected ?? false;
 
     return html`
       <div
