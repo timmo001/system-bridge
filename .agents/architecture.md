@@ -113,18 +113,18 @@ The web client is a Lit + Vite application in `web-client/`:
 cd web-client
 
 # Install dependencies
-pnpm install
+bun install
 
 # Development mode
-pnpm dev
+bun run dev
 
 # Build (static export for embedding)
-pnpm build
+bun run build
 
 # Linting and formatting
-pnpm format:check
-pnpm format:write
-pnpm typecheck
+bun run format:check
+bun run format:write
+bun run typecheck
 ```
 
 **Note**: The previous Next.js version has been preserved in `web-client-nextjs/` for reference.
@@ -173,16 +173,16 @@ go mod verify
 cd web-client
 
 # Add dependency
-pnpm add package-name
+bun add package-name
 
 # Add dev dependency
-pnpm add -D package-name
+bun add -D package-name
 
 # Update dependencies
-pnpm update
+bun update
 
 # Check for outdated packages
-pnpm outdated
+bun outdated
 ```
 
 **When adding new dependencies:**

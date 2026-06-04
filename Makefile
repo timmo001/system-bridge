@@ -8,7 +8,6 @@ ifeq ($(OS),Windows_NT)
 	RM=del /q /f
 	RMDIR=rmdir /s /q
 	OUT=system-bridge.exe
-	BUN_BUILD=set STATIC_EXPORT=true && $(MISE) pnpm run build
 	EXTRA_LDFLAGS=-H windowsgui
 	GEN_RC=powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
 else
@@ -16,7 +15,6 @@ else
 	RM=rm -f
 	RMDIR=rm -rf
 	OUT=system-bridge-linux
-	BUN_BUILD=STATIC_EXPORT=true $(MISE) pnpm run build
 	EXTRA_LDFLAGS=
 	CREATE_ARCH=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-arch.sh
 	CREATE_DEB=VERSION=5.0.0-dev+$(shell git rev-parse --short HEAD) ./.scripts/linux/create-deb.sh
@@ -45,10 +43,10 @@ generate_schemas:
 	@echo "Generating Zod schemas from Go types..."
 	@$(MISE) go run tools/generate-schemas/main.go
 	@echo "Formatting generated schemas..."
-	@cd web-client && $(MISE) pnpm install && $(MISE) pnpm format:write src/lib/system-bridge/types-modules-schemas.ts
+	@cd web-client && $(MISE) bun install && $(MISE) bun run format:write src/lib/system-bridge/types-modules-schemas.ts
 
 build_web_client: clean_web_client generate_schemas
-	cd web-client && $(MISE) pnpm build
+	cd web-client && $(MISE) bun run build
 ifeq ($(OS),Windows_NT)
 	@echo "Waiting for file system to sync..."
 	@powershell -Command "Start-Sleep -Seconds 2"
@@ -151,10 +149,10 @@ install: build
 
 run: build
 	@echo "Starting web client and backend in parallel..."
-	cd web-client && $(MISE) pnpm exec concurrently -n "web,backend" -c "blue,green" "$(MISE) pnpm dev" "../$(OUT) backend"
+	cd web-client && $(MISE) bunx concurrently -n "web,backend" -c "blue,green" "$(MISE) bun run dev" "../$(OUT) backend"
 
 run-web-client:
-	cd web-client && $(MISE) pnpm dev
+	cd web-client && $(MISE) bun run dev
 
 run-backend: build
 	./$(OUT) backend
@@ -201,11 +199,11 @@ lint_go:
 	$(MISE) go vet ./...
 
 lint_web_client:
-	cd web-client && $(MISE) pnpm lint
-	cd web-client && $(MISE) pnpm typecheck
+	cd web-client && $(MISE) bun run lint
+	cd web-client && $(MISE) bun run typecheck
 
 lint_fallow:
-	cd web-client && $(MISE) npx fallow --fail-on-issues
+	cd web-client && $(MISE) bunx fallow --fail-on-issues
 
 clean:
 ifeq ($(OS),Windows_NT)

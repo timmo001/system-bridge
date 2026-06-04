@@ -11,9 +11,9 @@ runs:
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
         path: ${{ github.workspace }}/web-client/dist
-        key: ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'web-client/**/pnpm-lock.yaml') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx', 'web-client/**/*.css', 'web-client/vite.config.ts') }}
+        key: ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'web-client/**/bun.lock') }}-${{ hashFiles('web-client/**/*.js', 'web-client/**/*.jsx', 'web-client/**/*.ts', 'web-client/**/*.tsx', 'web-client/**/*.css', 'web-client/vite.config.ts') }}
         restore-keys: |
-          ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'web-client/**/pnpm-lock.yaml') }}
+          ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'web-client/**/bun.lock') }}
 
     - name: Build client project
       run: make build_web_client

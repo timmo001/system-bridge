@@ -26,7 +26,7 @@ make help
 ## Key Conventions
 
 - **Build system**: Always use Makefile (not direct `go build`)
-- **Package manager**: pnpm for web client
+- **Package manager**: bun for all JavaScript/TypeScript (web client + TUI)
 - **Schema sync**: Run `make generate_schemas` after changing Go types in `types/` directory
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 

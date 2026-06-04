@@ -1,6 +1,6 @@
 ---
 name: Setup Runtime
-description: Setup pinned Go, Node, and pnpm via mise
+description: Setup pinned Go, Bun, and Node via mise
 
 runs:
   using: "composite"
@@ -19,5 +19,4 @@ runs:
         mise exec -- bun --version
         mise exec -- go version
         mise exec -- node --version
-        mise exec -- pnpm --version
       shell: bash

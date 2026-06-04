@@ -91,18 +91,18 @@ GOOS=windows GOARCH=amd64 go build -o system-bridge.exe
 cd web-client
 
 # Clear node_modules and reinstall
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
+rm -rf node_modules bun.lock
+bun install
 
 # Rebuild
-pnpm build
+bun run build
 ```
 
 ### ESLint Errors
 
 ```bash
 # Auto-fix what's possible
-pnpm lint:fix
+bun run lint:fix
 
 # For persistent errors, check:
 # 1. Import order (must follow prescribed groups)

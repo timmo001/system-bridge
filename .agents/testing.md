@@ -34,19 +34,19 @@ The web client does not have automated unit tests. Code quality is maintained th
 cd web-client
 
 # Run linter
-pnpm lint
+bun run lint
 
 # Fix linting errors automatically
-pnpm lint:fix
+bun run lint:fix
 
 # Type checking
-pnpm typecheck
+bun run typecheck
 
 # Format checking
-pnpm format:check
+bun run format:check
 
 # Format automatically
-pnpm format:write
+bun run format:write
 ```
 
 ### Running All Linters (GitHub Workflow)
@@ -58,7 +58,7 @@ To run all linters used in the GitHub workflows:
 make lint
 
 # Web client formatting
-cd web-client && pnpm format:check
+cd web-client && bun run format:check
 
 # Markdown linting (ignoring node_modules)
 bunx markdownlint-cli . --ignore node_modules --ignore web-client/node_modules
@@ -261,8 +261,8 @@ act -l                                       # List all workflows
 ```bash
 # Testing
 make test                     # Run Go tests
-cd web-client && pnpm lint    # Lint web client
-cd web-client && pnpm typecheck  # Type check web client
-cd web-client && pnpm format:check  # Check web client formatting
+cd web-client && bun run lint    # Lint web client
+cd web-client && bun run typecheck  # Type check web client
+cd web-client && bun run format:check  # Check web client formatting
 go run . client data run --module cpu --pretty  # Test a data module
 ```

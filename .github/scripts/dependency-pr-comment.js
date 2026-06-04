@@ -28,7 +28,7 @@ const SUPPORTED_ECOSYSTEMS = [
   {
     id: "web-client",
     title: "Web client",
-    files: ["web-client/package.json", "web-client/pnpm-lock.yaml"],
+    files: ["web-client/package.json", "web-client/bun.lock"],
   },
 ];
 
@@ -485,12 +485,12 @@ const buildWebClientSection = async ({
       }),
       getFileContent({
         github,
-        path: "web-client/pnpm-lock.yaml",
+        path: "web-client/bun.lock",
         ...baseRef,
       }),
       getFileContent({
         github,
-        path: "web-client/pnpm-lock.yaml",
+        path: "web-client/bun.lock",
         ...headRef,
       }),
     ]);
@@ -597,7 +597,7 @@ export default async ({
 
       if (!section) {
         core.info(
-          "web-client/package.json or pnpm-lock.yaml contain non-version dependency changes"
+          "web-client/package.json or bun.lock contain non-version dependency changes"
         );
         await upsertComment({
           github,

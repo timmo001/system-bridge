@@ -1,0 +1,7 @@
+version: "2"
+
+linters:
+  exclusions:
+    paths:
+      - node_modules
+      - web-client/node_modules
