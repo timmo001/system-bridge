@@ -62,6 +62,27 @@ class AppProvider extends UIElement {
     commandExecutions: new Map(),
   };
 
+  @provide({ context: themeContext })
+  themeState: ThemeState = {
+    theme: this._theme,
+    setTheme: (theme: Theme) => this.setTheme(theme),
+  };
+
+  @provide({ context: connectionContext })
+  connectionSettings: ConnectionSettings = this._connection;
+
+  @provide({ context: connectionStatusContext })
+  connectionStatus: ConnectionStatus = this._connectionStatus;
+
+  @provide({ context: moduleDataContext })
+  moduleData: ModuleData = this._moduleData;
+
+  @provide({ context: bridgeSettingsContext })
+  bridgeSettings: BridgeSettingsState = this._bridgeSettings;
+
+  @provide({ context: websocketActionsContext })
+  websocketActions!: WebSocketActions;
+
   private readonly _websocket = new WebSocketController(
     this,
     this._connection,
@@ -74,42 +95,11 @@ class AppProvider extends UIElement {
 
   private _commandExecutionsVersion = -1;
 
-  @provide({ context: themeContext })
-  get themeState(): ThemeState {
-    return {
-      theme: this._theme,
-      setTheme: this.setTheme,
-    };
-  }
-
-  @provide({ context: connectionContext })
-  get connectionSettings(): ConnectionSettings {
-    return this._connection;
-  }
-
-  @provide({ context: connectionStatusContext })
-  get connectionStatus(): ConnectionStatus {
-    return this._connectionStatus;
-  }
-
-  @provide({ context: moduleDataContext })
-  get moduleData(): ModuleData {
-    return this._moduleData;
-  }
-
-  @provide({ context: bridgeSettingsContext })
-  get bridgeSettings(): BridgeSettingsState {
-    return this._bridgeSettings;
-  }
-
-  @provide({ context: websocketActionsContext })
-  get websocketActions(): WebSocketActions {
-    return this._websocket.actions;
-  }
-
   connectedCallback() {
     super.connectedCallback();
+    this.websocketActions = this._websocket.actions;
     this._theme = loadTheme();
+    this.themeState = { ...this.themeState, theme: this._theme };
     this.applyCurrentTheme();
     this._mediaQuery.addEventListener(
       "change",
@@ -139,6 +129,7 @@ class AppProvider extends UIElement {
 
   private readonly setTheme = (theme: Theme): void => {
     this._theme = theme;
+    this.themeState = { ...this.themeState, theme };
     saveTheme(theme);
   };
 
@@ -155,6 +146,7 @@ class AppProvider extends UIElement {
   private readonly handleConnectionUpdated = (event: Event): void => {
     const { detail } = event as CustomEvent<ConnectionSettings>;
     this._connection = detail;
+    this.connectionSettings = detail;
     saveConnectionSettings(detail);
     this._websocket.setConnection(detail);
   };
@@ -167,11 +159,13 @@ class AppProvider extends UIElement {
       status.retryConnection !== this._connectionStatus.retryConnection
     ) {
       this._connectionStatus = status;
+      this.connectionStatus = status;
     }
 
     const data = this._websocket.data;
     if (data !== this._moduleData) {
       this._moduleData = data;
+      this.moduleData = data;
     }
 
     const bridgeSettings = this._websocket.bridgeSettings;
@@ -183,6 +177,7 @@ class AppProvider extends UIElement {
       commandExecutionsVersion !== this._commandExecutionsVersion
     ) {
       this._bridgeSettings = bridgeSettings;
+      this.bridgeSettings = bridgeSettings;
       this._commandExecutionsVersion = commandExecutionsVersion;
     }
   };
