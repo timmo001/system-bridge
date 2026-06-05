@@ -12,9 +12,13 @@ if (-not $ghToken) {
 }
 
 try {
-    gh auth status
+    $authStatusOutput = & gh auth status 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw ($authStatusOutput | Out-String).Trim()
+    }
 } catch {
     Write-Error 'Error calling gh auth status. Please check if the GH_TOKEN is set correctly.'
+    exit 1
 }
 
 function Test-RateLimitError {
