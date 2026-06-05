@@ -12,9 +12,9 @@ if (-not $ghToken) {
 }
 
 try {
-    $authStatusOutput = & gh auth status 2>&1
+    & gh auth status *> $null
     if ($LASTEXITCODE -ne 0) {
-        throw ($authStatusOutput | Out-String).Trim()
+        throw
     }
 } catch {
     Write-Error 'Error calling gh auth status. Please check if the GH_TOKEN is set correctly.'
