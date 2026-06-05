@@ -29,7 +29,7 @@ build() {
   export CGO_ENABLED=1
   mise trust -a
   mise install
-  mise exec -C web-client -- pnpm install --frozen-lockfile
+  mise exec -C web-client -- bun install --frozen-lockfile
   mise exec -- make build_web_client
   mise exec -- make build_tui
   local version
