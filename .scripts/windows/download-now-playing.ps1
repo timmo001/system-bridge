@@ -12,9 +12,13 @@ if (-not $ghToken) {
 }
 
 try {
-    gh auth status
+    & gh auth status *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw
+    }
 } catch {
     Write-Error 'Error calling gh auth status. Please check if the GH_TOKEN is set correctly.'
+    exit 1
 }
 
 function Test-RateLimitError {

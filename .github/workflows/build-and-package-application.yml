@@ -179,6 +179,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ALLOW_RATE_LIMIT_SKIP: ${{ github.event_name == 'pull_request' && steps.nowplaying_changes.outputs.changed != 'true' && 'true' || 'false' }}
         if: ${{ github.token != '' }}
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         run: ./.scripts/windows/download-now-playing.ps1
 
       - name: Setup Go
