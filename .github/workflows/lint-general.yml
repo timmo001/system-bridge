@@ -14,4 +14,4 @@ on:
 
 jobs:
   lint:
-    uses: timmo001/workflows/.github/workflows/lint-general.yml@f6d123aef443f9ca40703259bc10c82ca8859bea # master
+    uses: timmo001/workflows/.github/workflows/lint-general.yml@d577d5bde425317b8ee0cd5e0ea4f78a1be9586e # master
