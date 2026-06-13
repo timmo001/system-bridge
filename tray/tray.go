@@ -18,6 +18,7 @@ var trayIconIcoData []byte
 // Handlers holds the callback functions for tray menu actions
 type Handlers struct {
 	OpenWebClient func()
+	LaunchTUI     func()
 	OpenLogsDir   func()
 	Quit          func()
 }
@@ -61,6 +62,7 @@ func OnReady() {
 
 	// Create menu items
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
+	mLaunchTUI := systray.AddMenuItem("Launch TUI", "Open the interactive TUI in a terminal window")
 	systray.AddSeparator()
 	mOpenLogsDirectory := systray.AddMenuItem("Open logs directory", "Open the logs directory")
 	systray.AddSeparator()
@@ -76,6 +78,13 @@ func OnReady() {
 					go h.OpenWebClient()
 				} else {
 					slog.Warn("OpenWebClient handler not registered")
+				}
+			case <-mLaunchTUI.ClickedCh:
+				h := getHandlers()
+				if h.LaunchTUI != nil {
+					go h.LaunchTUI()
+				} else {
+					slog.Warn("LaunchTUI handler not registered")
 				}
 			case <-mOpenLogsDirectory.ClickedCh:
 				h := getHandlers()

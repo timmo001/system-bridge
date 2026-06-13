@@ -370,7 +370,9 @@ export const SensorsWindowsHardwareSchema: z.ZodType<{
   sensors: z.array(SensorsWindowsSensorSchema),
 });
 
-export type SensorsWindowsHardware = z.infer<typeof SensorsWindowsHardwareSchema>;
+export type SensorsWindowsHardware = z.infer<
+  typeof SensorsWindowsHardwareSchema
+>;
 
 // Windows Sensors
 export const SensorsWindowsSchema = z.object({

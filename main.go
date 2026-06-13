@@ -143,6 +143,9 @@ func main() {
 						OpenWebClient: func() {
 							openWebClient(token)
 						},
+						LaunchTUI: func() {
+							launchTUIInTerminal()
+						},
 						OpenLogsDir: func() {
 							openLogsDirectory()
 						},
@@ -483,31 +486,36 @@ func openLogsDirectory() {
 	}
 }
 
-// launchTUI finds and exec's the system-bridge-tui binary.
-// It looks next to the current executable first, then falls back to PATH.
-func launchTUI(args ...string) error {
+// findTUIBinary locates the system-bridge-tui binary, checking next to the
+// current executable first, then falling back to PATH.
+func findTUIBinary() (string, error) {
 	tuiName := "system-bridge-tui"
 	if runtime.GOOS == "windows" {
 		tuiName = "system-bridge-tui.exe"
 	}
 
 	// Look next to the current executable
-	exe, err := os.Executable()
-	if err == nil {
+	if exe, err := os.Executable(); err == nil {
 		candidate := filepath.Join(filepath.Dir(exe), tuiName)
 		if _, err := os.Stat(candidate); err == nil {
-			cmd := exec.Command(candidate, args...)
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			return cmd.Run()
+			return candidate, nil
 		}
 	}
 
 	// Fall back to PATH lookup
 	tuiPath, err := exec.LookPath(tuiName)
 	if err != nil {
-		return fmt.Errorf("%s not found (build with 'make build_tui'): %w", tuiName, err)
+		return "", fmt.Errorf("%s not found (build with 'make build_tui'): %w", tuiName, err)
+	}
+	return tuiPath, nil
+}
+
+// launchTUI finds and exec's the system-bridge-tui binary, attaching the
+// current process's stdio. Used for interactive CLI invocation.
+func launchTUI(args ...string) error {
+	tuiPath, err := findTUIBinary()
+	if err != nil {
+		return err
 	}
 
 	cmd := exec.Command(tuiPath, args...)
@@ -515,4 +523,95 @@ func launchTUI(args ...string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+// launchTUIInTerminal opens the system-bridge-tui binary inside a new terminal
+// window. Used by the system tray, which has no terminal of its own.
+func launchTUIInTerminal() {
+	tuiPath, err := findTUIBinary()
+	if err != nil {
+		slog.Error("Failed to find TUI binary", "err", err)
+		notifyTUILaunchFailed()
+		return
+	}
+
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		// start "" opens a new console window running the binary
+		cmd = exec.Command("cmd", "/c", "start", "", tuiPath)
+	case "darwin":
+		// open -a Terminal runs the binary in a new Terminal.app window
+		cmd = exec.Command("open", "-a", "Terminal", tuiPath)
+	default:
+		c, ok := linuxTerminalCommand(tuiPath)
+		if !ok {
+			slog.Error("No terminal emulator found to launch TUI")
+			notifyTUILaunchFailed()
+			return
+		}
+		cmd = c
+	}
+
+	if err := cmd.Start(); err != nil {
+		slog.Error("Failed to launch TUI in terminal", "err", err)
+		notifyTUILaunchFailed()
+	}
+}
+
+// linuxTerminals lists known terminal emulators in priority order, along with
+// how to invoke each to run a program in a new window. The arg builders account
+// for the differing flags terminals use (-e, --, direct program, etc).
+var linuxTerminals = []struct {
+	name string
+	args func(prog string) []string
+}{
+	{"x-terminal-emulator", func(p string) []string { return []string{"-e", p} }},
+	{"alacritty", func(p string) []string { return []string{"-e", p} }},
+	{"ghostty", func(p string) []string { return []string{"-e", p} }},
+	{"kitty", func(p string) []string { return []string{p} }},
+	{"foot", func(p string) []string { return []string{p} }},
+	{"wezterm", func(p string) []string { return []string{"start", "--", p} }},
+	{"konsole", func(p string) []string { return []string{"-e", p} }},
+	{"gnome-terminal", func(p string) []string { return []string{"--", p} }},
+	{"xfce4-terminal", func(p string) []string { return []string{"-x", p} }},
+	{"xterm", func(p string) []string { return []string{"-e", p} }},
+}
+
+// linuxTerminalCommand builds a command to run prog in a new terminal window,
+// honoring $TERMINAL when set and otherwise falling back to known emulators.
+func linuxTerminalCommand(prog string) (*exec.Cmd, bool) {
+	if t := os.Getenv("TERMINAL"); t != "" {
+		base := filepath.Base(t)
+		for _, term := range linuxTerminals {
+			if term.name == base {
+				if path, err := exec.LookPath(t); err == nil {
+					return exec.Command(path, term.args(prog)...), true
+				}
+			}
+		}
+		// Unknown $TERMINAL: best-effort -e.
+		if path, err := exec.LookPath(t); err == nil {
+			return exec.Command(path, "-e", prog), true
+		}
+	}
+
+	for _, term := range linuxTerminals {
+		if path, err := exec.LookPath(term.name); err == nil {
+			return exec.Command(path, term.args(prog)...), true
+		}
+	}
+	return nil, false
+}
+
+// notifyTUILaunchFailed sends a desktop notification when the TUI cannot be
+// launched from the system tray.
+func notifyTUILaunchFailed() {
+	if err := notification.Send(notification.NotificationData{
+		Title:   "Failed to launch TUI",
+		Message: "Could not open the TUI in a terminal window",
+		Icon:    "system-bridge",
+	}); err != nil {
+		slog.Error("Failed to send notification", "err", err)
+	}
 }
