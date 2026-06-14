@@ -31,6 +31,13 @@ cp %{_stagedir}/share/icons/hicolor/128x128/apps/system-bridge.png %{buildroot}/
 cp %{_stagedir}/share/icons/hicolor/256x256/apps/system-bridge.png %{buildroot}/usr/share/icons/hicolor/256x256/apps/
 cp %{_stagedir}/share/icons/hicolor/512x512/apps/system-bridge.png %{buildroot}/usr/share/icons/hicolor/512x512/apps/
 
+mkdir -p %{buildroot}/usr/share/bash-completion/completions
+mkdir -p %{buildroot}/usr/share/zsh/site-functions
+mkdir -p %{buildroot}/usr/share/fish/vendor_completions.d
+cp %{_stagedir}/share/bash-completion/completions/system-bridge %{buildroot}/usr/share/bash-completion/completions/
+cp %{_stagedir}/share/zsh/site-functions/_system-bridge %{buildroot}/usr/share/zsh/site-functions/
+cp %{_stagedir}/share/fish/vendor_completions.d/system-bridge.fish %{buildroot}/usr/share/fish/vendor_completions.d/
+
 %files
 /usr/bin/system-bridge
 /usr/bin/system-bridge-tui
@@ -42,3 +49,6 @@ cp %{_stagedir}/share/icons/hicolor/512x512/apps/system-bridge.png %{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/system-bridge.png
 /usr/share/icons/hicolor/256x256/apps/system-bridge.png
 /usr/share/icons/hicolor/512x512/apps/system-bridge.png
+/usr/share/bash-completion/completions/system-bridge
+/usr/share/zsh/site-functions/_system-bridge
+/usr/share/fish/vendor_completions.d/system-bridge.fish

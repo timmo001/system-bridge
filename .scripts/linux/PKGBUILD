@@ -6,7 +6,7 @@ pkgname=system-bridge
 pkgver=${ARCH_PKGVER}
 pkgrel=1
 pkgdesc="A bridge for your systems"
-source=('system-bridge' 'system-bridge-tui' 'system-bridge.desktop' 'system-bridge.svg' 'system-bridge-16.png' 'system-bridge-32.png' 'system-bridge-48.png' 'system-bridge-128.png' 'system-bridge-256.png' 'system-bridge-512.png' 'LICENSE')
+source=('system-bridge' 'system-bridge-tui' 'system-bridge.desktop' 'system-bridge.svg' 'system-bridge-16.png' 'system-bridge-32.png' 'system-bridge-48.png' 'system-bridge-128.png' 'system-bridge-256.png' 'system-bridge-512.png' 'system-bridge.bash' '_system-bridge' 'system-bridge.fish' 'LICENSE')
 conflicts=('system-bridge-git' 'system-bridge-git-debug')
 
 arch=('x86_64')
@@ -43,5 +43,8 @@ package() {
   install -Dm644 system-bridge-128.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/system-bridge.png"
   install -Dm644 system-bridge-256.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
   install -Dm644 system-bridge-512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/system-bridge.png"
+  install -Dm644 system-bridge.bash "$pkgdir/usr/share/bash-completion/completions/system-bridge"
+  install -Dm644 _system-bridge "$pkgdir/usr/share/zsh/site-functions/_system-bridge"
+  install -Dm644 system-bridge.fish "$pkgdir/usr/share/fish/vendor_completions.d/system-bridge.fish"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

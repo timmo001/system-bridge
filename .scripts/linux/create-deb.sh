@@ -71,6 +71,19 @@ mkdir -p deb-structure/DEBIAN
 install -Dm755 system-bridge-linux deb-structure/usr/bin/system-bridge
 install -Dm755 system-bridge-tui deb-structure/usr/bin/system-bridge-tui
 
+# Install shell completions generated from the binary
+sb_completions_tmp="$(mktemp -d)"
+./system-bridge-linux completions bash >"$sb_completions_tmp/system-bridge"
+./system-bridge-linux completions zsh >"$sb_completions_tmp/_system-bridge"
+./system-bridge-linux completions fish >"$sb_completions_tmp/system-bridge.fish"
+install -Dm644 "$sb_completions_tmp/system-bridge" \
+  deb-structure/usr/share/bash-completion/completions/system-bridge
+install -Dm644 "$sb_completions_tmp/_system-bridge" \
+  deb-structure/usr/share/zsh/site-functions/_system-bridge
+install -Dm644 "$sb_completions_tmp/system-bridge.fish" \
+  deb-structure/usr/share/fish/vendor_completions.d/system-bridge.fish
+rm -rf "$sb_completions_tmp"
+
 # Install desktop file
 install -Dm644 "$SCRIPT_DIR/system-bridge.desktop" \
   deb-structure/usr/share/applications/system-bridge.desktop

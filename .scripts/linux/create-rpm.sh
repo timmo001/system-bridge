@@ -96,6 +96,16 @@ install -Dm644 .resources/system-bridge-dimmed-128.png "$STAGING_DIR/usr/share/i
 install -Dm644 .resources/system-bridge-dimmed-256.png "$STAGING_DIR/usr/share/icons/hicolor/256x256/apps/system-bridge.png"
 install -Dm644 .resources/system-bridge-dimmed-512.png "$STAGING_DIR/usr/share/icons/hicolor/512x512/apps/system-bridge.png"
 
+# Stage shell completions generated from the binary
+sb_completions_tmp="$(mktemp -d)"
+./system-bridge-linux completions bash >"$sb_completions_tmp/system-bridge"
+./system-bridge-linux completions zsh >"$sb_completions_tmp/_system-bridge"
+./system-bridge-linux completions fish >"$sb_completions_tmp/system-bridge.fish"
+install -Dm644 "$sb_completions_tmp/system-bridge" "$STAGING_DIR/usr/share/bash-completion/completions/system-bridge"
+install -Dm644 "$sb_completions_tmp/_system-bridge" "$STAGING_DIR/usr/share/zsh/site-functions/_system-bridge"
+install -Dm644 "$sb_completions_tmp/system-bridge.fish" "$STAGING_DIR/usr/share/fish/vendor_completions.d/system-bridge.fish"
+rm -rf "$sb_completions_tmp"
+
 # Mirror staged content into the rpmbuild working subdirectory expected by rpmbuild
 BUILD_SUBDIR_NAME="system-bridge-${RPM_VERSION}-build"
 BUILD_SUBDIR_PATH="${STAGING_DIR}/${BUILD_SUBDIR_NAME}"

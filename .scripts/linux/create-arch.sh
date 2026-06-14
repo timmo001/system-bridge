@@ -63,6 +63,11 @@ cp ../../.resources/system-bridge-dimmed-128.png system-bridge-128.png
 cp ../../.resources/system-bridge-dimmed-256.png system-bridge-256.png
 cp ../../.resources/system-bridge-dimmed-512.png system-bridge-512.png
 
+# Generate shell completions from the built binary
+./system-bridge completions bash >system-bridge.bash
+./system-bridge completions zsh >_system-bridge
+./system-bridge completions fish >system-bridge.fish
+
 # Sanitize VERSION for Arch pkgver
 ARCH_PKGVER=$(echo "$VERSION" | sed 's/[-+]/./g')
 export ARCH_PKGVER

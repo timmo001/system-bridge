@@ -66,9 +66,11 @@ func main() {
 	// spawning a tray when using CLI-only commands.
 
 	cmd := &cli.Command{
-		Name:    "System Bridge",
-		Usage:   "A bridge for your systems",
-		Version: version.Version,
+		Name:                       "system-bridge",
+		Usage:                      "A bridge for your systems",
+		Version:                    version.Version,
+		EnableShellCompletion:      true,
+		ShellCompletionCommandName: "completions",
 		Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 			// When run interactively with no subcommand, launch the TUI
 			if term.IsTerminal(int(os.Stdin.Fd())) {
@@ -355,6 +357,26 @@ func main() {
 										Usage: "Pretty-print JSON output",
 										Value: false,
 									},
+								},
+								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
+									// Complete --module with available data module names
+									args := os.Args
+									if len(args) >= 2 {
+										prev := args[len(args)-2]
+										if prev == "--module" || prev == "-m" {
+											dataStore, err := data.NewDataStore()
+											if err != nil {
+												return
+											}
+											for _, u := range dataStore.GetRegisteredModules() {
+												if u != nil {
+													fmt.Fprintln(cmd.Root().Writer, string(u.Name()))
+												}
+											}
+											return
+										}
+									}
+									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
 								},
 								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 									runAll := cmd.Bool("all")
