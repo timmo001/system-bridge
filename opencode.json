@@ -4,6 +4,14 @@
     "system-bridge-website": {
       "repository": "timmo001/system-bridge-website",
       "description": "Use for the System Bridge documentation site (Astro + Starlight) that documents this backend: docs content, site structure, and published API/feature descriptions"
+    },
+    "system-bridge-connector": {
+      "repository": "timmo001/system-bridge-connector",
+      "description": "Use for the System Bridge connector package that clients use to talk to this backend: connection handling, API/WebSocket client behaviour, and integration details"
+    },
+    "homeassistant-core": {
+      "repository": "home-assistant/core",
+      "description": "Use for the official Home Assistant System Bridge integration in core (homeassistant/components/system_bridge): config flow, coordinator, and entity/sensor mapping that consume this backend"
     }
   }
 }
