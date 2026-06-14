@@ -7,7 +7,6 @@ import type {
   FlagPopupAction,
 } from "../types.js";
 import type { Theme } from "../theme.js";
-import { menuItemsById, submenus } from "../menu.js";
 import type { CommandRunnerService } from "../services/CommandRunner.js";
 import { MainMenu } from "./MainMenu.js";
 import { SubMenu } from "./SubMenu.js";
@@ -17,10 +16,8 @@ import { FlagPopup } from "./FlagPopup.js";
 const log = (msg: string) => console.error(`[sb-tui:App] ${msg}`);
 
 export interface AppOptions {
-  /** Which view to start on (default: "main") */
-  readonly initialView?: ViewId;
-  /** If set, execute this menu item immediately on startup and pre-select it */
-  readonly executeItemId?: string;
+  /** If set, open this submenu on startup instead of the main menu */
+  readonly initialSubmenuId?: string;
 }
 
 /** Dependencies injected into the App at construction time */
@@ -52,7 +49,6 @@ export class App {
 
     this.mainMenu = new MainMenu(deps.renderer, deps.theme, {
       onSelect: (item) => this.handleMenuAction(item),
-      initialSelectedId: options.executeItemId,
     });
 
     this.clientMenu = new SubMenu(deps.renderer, deps.theme, "client", {
@@ -100,39 +96,12 @@ export class App {
     });
 
     // --- Determine initial view ---
-    const startView = options.initialView ?? "main";
+    this.showView("main");
 
-    if (startView !== "main") {
-      this.viewStack.push("main");
+    // Open a submenu directly if a known submenu path was passed
+    if (options.initialSubmenuId) {
+      this.handleSubmenuAction(options.initialSubmenuId);
     }
-
-    // Handle immediate item execution (subcommand mode)
-    if (options.executeItemId) {
-      const item = menuItemsById.get(options.executeItemId);
-      if (item) {
-        this.showView("main");
-        const { action } = item;
-        if (
-          action.type === "command" ||
-          action.type === "silent" ||
-          action.type === "notify"
-        ) {
-          setTimeout(() => {
-            Effect.runPromise(this.commandRunner.runSuspended(action.cmd, true))
-              .then(() => deps.renderer.destroy())
-              .catch((err) => {
-                log(`Execute error: ${err}`);
-                deps.renderer.destroy();
-              });
-          }, 50);
-        } else {
-          setTimeout(() => this.handleMenuAction(item), 50);
-        }
-        return;
-      }
-    }
-
-    this.showView(startView);
   }
 
   /** Navigate to a view, pushing the current one onto the stack */

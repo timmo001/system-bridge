@@ -308,20 +308,3 @@ export const submenuTitles: Map<string, string> = new Map([
   ["client", "Client"],
   ["client.data", "Data"],
 ]);
-
-// --- Flat lookup of every menu item by ID ---
-
-function buildItemMap(): Map<string, MenuItem> {
-  const map = new Map<string, MenuItem>();
-  for (const item of mainMenuItems) {
-    map.set(item.id, item);
-  }
-  for (const [, items] of submenus) {
-    for (const item of items) {
-      map.set(item.id, item);
-    }
-  }
-  return map;
-}
-
-export const menuItemsById: Map<string, MenuItem> = buildItemMap();

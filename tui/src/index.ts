@@ -4,9 +4,7 @@ import { loadTheme } from "./theme.js";
 import { Toast } from "./tui/Toast.js";
 import { App } from "./tui/App.js";
 import { createCommandRunner } from "./services/CommandRunner.js";
-import { parseFlags, resolveSubcommand, printHelp } from "./flags.js";
-import { menuItemsById } from "./menu.js";
-import type { ViewId } from "./types.js";
+import { parseFlags, printHelp } from "./flags.js";
 
 const log = (msg: string) => console.error(`[sb-tui] ${msg}`);
 
@@ -15,40 +13,8 @@ const log = (msg: string) => console.error(`[sb-tui] ${msg}`);
 const flags = parseFlags(process.argv.slice(2));
 
 if (flags.help) {
-  printHelp(flags.subcommand);
+  printHelp();
   process.exit(0);
-}
-
-// Resolve subcommand to determine startup behaviour
-let initialView: ViewId = "main";
-let executeItemId: string | undefined;
-
-if (flags.subcommand) {
-  const resolved = resolveSubcommand(flags.subcommand);
-  if (!resolved) {
-    console.error(`Unknown subcommand: ${flags.subcommand}`);
-    printHelp();
-    process.exit(1);
-  }
-
-  if (resolved.type === "view") {
-    initialView = resolved.viewId;
-  } else {
-    const item = menuItemsById.get(resolved.itemId);
-    if (item) {
-      const { action } = item;
-      if (
-        action.type === "command" ||
-        action.type === "silent" ||
-        action.type === "notify" ||
-        action.type === "submenu"
-      ) {
-        executeItemId = resolved.itemId;
-      } else if (action.type === "view") {
-        initialView = action.viewId;
-      }
-    }
-  }
 }
 
 // --- Effect program ---
@@ -81,8 +47,7 @@ const program = Effect.gen(function* () {
       commandRunner,
     },
     {
-      initialView,
-      executeItemId,
+      initialSubmenuId: flags.submenuId,
     },
   );
   log("App created");

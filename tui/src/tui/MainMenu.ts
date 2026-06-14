@@ -24,8 +24,6 @@ const HELP: readonly HelpEntry[] = [
 export interface MainMenuOptions {
   /** Called when the user selects a menu item */
   readonly onSelect: (item: MenuItem) => void;
-  /** If set, pre-select the item with this ID on startup */
-  readonly initialSelectedId?: string;
 }
 
 /** Top-level menu rendered as a {@link MenuList} with type-to-filter */
@@ -68,13 +66,6 @@ export class MainMenu {
     this.root.add(this.filterBar);
 
     // Menu list
-    const initialIdx = options.initialSelectedId
-      ? Math.max(
-          0,
-          mainMenuItems.findIndex((m) => m.id === options.initialSelectedId),
-        )
-      : 0;
-
     this.menuList = new MenuList(renderer, {
       id: "main-menu-list",
       items: mainMenuItems,
@@ -86,7 +77,7 @@ export class MainMenu {
       onEscape: () => {
         // Escape on main menu with empty filter — no-op (quit via Ctrl+c)
       },
-      initialSelectedIndex: initialIdx,
+      initialSelectedIndex: 0,
       wrapSelection: true,
     });
     this.root.add(this.menuList);
