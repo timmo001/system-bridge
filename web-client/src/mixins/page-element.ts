@@ -1,6 +1,7 @@
 import { html, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
+import { DOCS_URL } from "../lib/links";
 import { getResultStyle } from "../lib/result-styles";
 
 import { UIElement } from "./light-dom";
@@ -98,6 +99,25 @@ export class PageElement extends UIElement {
    * @param options.customDescription - Custom description template to override the default description
    * @returns Template result for the page header
    */
+  /**
+   * Renders a documentation link styled as an icon, intended for the right side
+   * of a page header.
+   */
+  protected renderDocsLink(): TemplateResult {
+    return html`
+      <a
+        href=${DOCS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Documentation"
+        title="Documentation"
+        class="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ui-icon name="BookOpen"></ui-icon>
+      </a>
+    `;
+  }
+
   // fallow-ignore-next-line complexity
   protected renderPageHeader(options?: {
     showBackButton?: boolean;
@@ -112,11 +132,7 @@ export class PageElement extends UIElement {
     const description = this.resolveDescription(customDescription);
 
     return html`
-      <div
-        class="flex items-center ${showConnectionIndicator
-          ? "justify-between"
-          : "gap-3"}"
-      >
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           ${showBackButton
             ? html`
@@ -135,9 +151,12 @@ export class PageElement extends UIElement {
             ${description}
           </div>
         </div>
-        ${showConnectionIndicator
-          ? html`<ui-connection-indicator></ui-connection-indicator>`
-          : ""}
+        <div class="flex items-center gap-2">
+          ${this.renderDocsLink()}
+          ${showConnectionIndicator
+            ? html`<ui-connection-indicator></ui-connection-indicator>`
+            : ""}
+        </div>
       </div>
     `;
   }

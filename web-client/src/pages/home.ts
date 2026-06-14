@@ -50,9 +50,12 @@ class PageHome extends PageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-8">
-          <div class="space-y-2">
-            <h1 class="text-4xl font-bold">${this.title}</h1>
-            <p class="text-muted-foreground">${this.description}</p>
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-2">
+              <h1 class="text-4xl font-bold">${this.title}</h1>
+              <p class="text-muted-foreground">${this.description}</p>
+            </div>
+            ${this.renderDocsLink()}
           </div>
 
           <div class="space-y-6">

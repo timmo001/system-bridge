@@ -24,6 +24,9 @@ export interface CommandRunnerService {
     cmd: string,
     notify: NotifyConfig,
   ) => Effect.Effect<void, CommandRunnerError>;
+
+  /** Open a URL in the default browser without suspending the TUI. */
+  readonly openUrl: (url: string) => Effect.Effect<void, CommandRunnerError>;
 }
 
 /** Create a CommandRunner bound to the given renderer and toast */
@@ -156,6 +159,29 @@ export function createCommandRunner(
           toast.show(notify.id, notify.success, "success"),
         );
       }
+    }),
+
+    openUrl: Effect.fn("CommandRunner.openUrl")(function* (url: string) {
+      log(`Opening URL: ${url}`);
+      yield* Effect.sync(() => {
+        try {
+          const argv =
+            process.platform === "darwin"
+              ? ["open", url]
+              : process.platform === "win32"
+                ? ["cmd", "/c", "start", "", url]
+                : ["xdg-open", url];
+          const proc = Bun.spawn(argv, {
+            stdin: "ignore",
+            stdout: "ignore",
+            stderr: "ignore",
+          });
+          proc.unref();
+        } catch (err) {
+          log(`Open URL failed: ${err}`);
+          toast.show("open-url", "Failed to open browser", "error");
+        }
+      });
     }),
   };
 }

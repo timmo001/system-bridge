@@ -23,6 +23,19 @@ var (
 	// LatestVersionUserURL is the URL to check for the latest version for the user
 	LatestVersionUserURL = "https://github.com/timmo001/system-bridge/releases/latest"
 
+	// docsBaseURL is the documentation site root. It is used to build the
+	// per-surface documentation links below and is not linked directly.
+	docsBaseURL = "https://system-bridge.timmo.dev"
+
+	// DocsURL is the documentation landing page (used by the system tray).
+	DocsURL = docsBaseURL + "/overview"
+
+	// DocsCLIURL is the CLI documentation page (used by the CLI help and version output).
+	DocsCLIURL = docsBaseURL + "/using/cli"
+
+	// DocsMCPURL is the MCP server documentation page (used by the MCP server instructions).
+	DocsMCPURL = docsBaseURL + "/api/mcp"
+
 	// HTTP client with caching and rate limiting
 	client = http.NewClient(&http.ClientConfig{
 		DefaultTTL:  5 * time.Minute,

@@ -19,6 +19,7 @@ var trayIconIcoData []byte
 type Handlers struct {
 	OpenWebClient func()
 	LaunchTUI     func()
+	OpenDocs      func()
 	OpenLogsDir   func()
 	Quit          func()
 }
@@ -64,6 +65,7 @@ func OnReady() {
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
 	mLaunchTUI := systray.AddMenuItem("Launch TUI", "Open the interactive TUI in a terminal window")
 	systray.AddSeparator()
+	mOpenDocs := systray.AddMenuItem("Documentation", "Open the System Bridge documentation in your default browser")
 	mOpenLogsDirectory := systray.AddMenuItem("Open logs directory", "Open the logs directory")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
@@ -85,6 +87,13 @@ func OnReady() {
 					go h.LaunchTUI()
 				} else {
 					slog.Warn("LaunchTUI handler not registered")
+				}
+			case <-mOpenDocs.ClickedCh:
+				h := getHandlers()
+				if h.OpenDocs != nil {
+					go h.OpenDocs()
+				} else {
+					slog.Warn("OpenDocs handler not registered")
 				}
 			case <-mOpenLogsDirectory.ClickedCh:
 				h := getHandlers()

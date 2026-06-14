@@ -62,6 +62,12 @@ export interface ExecAction {
   readonly cmd: string;
 }
 
+/** Action that opens a URL in the default browser without suspending the TUI */
+export interface OpenUrlAction {
+  readonly type: "openUrl";
+  readonly url: string;
+}
+
 /** Action that opens a flag popup form to collect flag values before running */
 export interface FlagPopupAction {
   readonly type: "flagPopup";
@@ -84,6 +90,7 @@ export type MenuAction =
   | SubmenuAction
   | QuitAction
   | ExecAction
+  | OpenUrlAction
   | FlagPopupAction;
 
 /** A selectable variant for a menu item offering an alternative action */

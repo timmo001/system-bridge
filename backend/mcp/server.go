@@ -67,6 +67,7 @@ func (s *MCPServer) handleInitialize(req MCPRequest) MCPResponse {
 			Name:    "system-bridge",
 			Version: version.Version,
 		},
+		Instructions: "System Bridge MCP server. Documentation: " + version.DocsMCPURL,
 	}
 
 	return NewSuccessResponse(req.ID, result)

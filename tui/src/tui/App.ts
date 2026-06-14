@@ -219,6 +219,17 @@ export class App {
           proc.exited.then((code) => process.exit(code));
         }
         break;
+
+      case "openUrl":
+        Effect.runPromise(
+          this.commandRunner.openUrl(action.url).pipe(
+            Effect.catch(() => {
+              log(`Open URL error`);
+              return Effect.void;
+            }),
+          ),
+        );
+        break;
     }
   }
 

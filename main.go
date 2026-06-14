@@ -68,6 +68,7 @@ func main() {
 	cmd := &cli.Command{
 		Name:                       "system-bridge",
 		Usage:                      "A bridge for your systems",
+		Description:                "Documentation: " + version.DocsCLIURL,
 		Version:                    version.Version,
 		EnableShellCompletion:      true,
 		ShellCompletionCommandName: "completions",
@@ -147,6 +148,9 @@ func main() {
 						},
 						LaunchTUI: func() {
 							launchTUIInTerminal()
+						},
+						OpenDocs: func() {
+							openExternalURL(version.DocsURL, "documentation")
 						},
 						OpenLogsDir: func() {
 							openLogsDirectory()
@@ -466,6 +470,11 @@ func main() {
 		},
 	}
 
+	cli.VersionPrinter = func(cmd *cli.Command) {
+		fmt.Printf("%s version %s\n", cmd.Name, cmd.Version)
+		fmt.Printf("Documentation: %s\n", version.DocsCLIURL)
+	}
+
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		tray.Quit()
 		slog.Error("error running cmd", "err", err)
@@ -486,6 +495,21 @@ func openWebClient(token string) {
 			slog.Error("Failed to send notification", "err", err)
 		}
 		slog.Error("Failed to open web client", "err", err)
+	}
+}
+
+// openExternalURL opens a URL in the default browser, notifying on failure.
+func openExternalURL(url, label string) {
+	slog.Info("Opening URL", "url", url, "label", label)
+	if err := browser.OpenURL(url); err != nil {
+		if err := notification.Send(notification.NotificationData{
+			Title:   "Failed to open " + label,
+			Message: "Failed to open the " + label + " in the default browser",
+			Icon:    "system-bridge",
+		}); err != nil {
+			slog.Error("Failed to send notification", "err", err)
+		}
+		slog.Error("Failed to open URL", "label", label, "err", err)
 	}
 }
 

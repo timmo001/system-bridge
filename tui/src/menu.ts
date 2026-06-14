@@ -48,6 +48,10 @@ function exec(command: string): MenuItem["action"] {
   return { type: "exec", cmd: command };
 }
 
+function openUrl(url: string): MenuItem["action"] {
+  return { type: "openUrl", url };
+}
+
 function flagPopup(
   baseCmd: string,
   title: string,
@@ -134,6 +138,11 @@ const dataRunFields: readonly FlagField[] = [
   },
 ];
 
+// --- Documentation ---
+
+/** Documentation link for the TUI. */
+const DOCS_URL = "https://system-bridge.timmo.dev/using/tui";
+
 // --- Main menu items ---
 
 export const mainMenuItems: readonly MenuItem[] = [
@@ -185,6 +194,15 @@ export const mainMenuItems: readonly MenuItem[] = [
     cmd("system-bridge version"),
     undefined,
     ["ver", "about", "info", ":v", ":ver"],
+  ),
+  item(
+    "documentation",
+    "󰗚",
+    "Documentation",
+    "Open the documentation in your browser",
+    openUrl(DOCS_URL),
+    undefined,
+    ["docs", "help", "manual", "guide", "website", "wiki"],
   ),
   item("quit", "󰩈", "Quit", "Exit the TUI", { type: "quit" }, undefined, [
     ":q",
