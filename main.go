@@ -370,7 +370,7 @@ func main() {
 											}
 											for _, u := range dataStore.GetRegisteredModules() {
 												if u != nil {
-													fmt.Fprintln(cmd.Root().Writer, string(u.Name()))
+													_, _ = fmt.Fprintln(cmd.Root().Writer, string(u.Name()))
 												}
 											}
 											return
