@@ -8,11 +8,11 @@ If you see errors about missing `web-client/dist/index.html`:
 
 ```bash
 # Clean and rebuild
-make clean_web_client
-make build_web_client
+mise run clean_web_client
+mise run build_web_client
 
 # On Windows, wait for filesystem sync
-# The Makefile includes automatic sync delays
+# The build task includes automatic sync delays
 ```
 
 ### Go Embed Issues
@@ -20,7 +20,7 @@ make build_web_client
 After changing web client files, always rebuild:
 
 ```bash
-make build  # This rebuilds web client AND Go binary
+mise run build  # This rebuilds web client AND Go binary
 ```
 
 The `//go:embed` directive includes files at compile time, so changes to web client files require recompiling the Go binary.
@@ -123,14 +123,14 @@ bun run lint:fix
 - Use PowerShell (not cmd.exe) for modern command support
 - Paths with spaces must be quoted
 - Some features require Administrator privileges
-- Use `make list_processes` and `make stop_processes` for debugging multiple instances
+- Use `mise run list_processes` and `mise run stop_processes` for debugging multiple instances
 
 **Windows-specific development commands:**
 ```bash
-make build_console        # Build console version (shows logs in terminal)
-make run_console          # Run console version
-make list_processes       # List running System Bridge processes
-make stop_processes       # Stop all System Bridge processes
+mise run build_console        # Build console version (shows logs in terminal)
+mise run run_console          # Run console version
+mise run list_processes       # List running System Bridge processes
+mise run stop_processes       # Stop all System Bridge processes
 ```
 
 ### macOS
@@ -143,7 +143,7 @@ make stop_processes       # Stop all System Bridge processes
 
 ```bash
 # Troubleshooting
-make clean                    # Clean build artifacts
+mise run clean                # Clean build artifacts
 go mod tidy                   # Tidy dependencies
 lsof -i :9170                 # Check port usage (Linux/macOS)
 netstat -ano | findstr :9170  # Check port usage (Windows)

@@ -31,7 +31,7 @@ if [ ! -f "system-bridge-linux" ]; then
 fi
 
 if [ ! -f "system-bridge-tui" ]; then
-  echo "system-bridge-tui not found, please build the TUI first (make build_tui)"
+  echo "system-bridge-tui not found, please build the TUI first (mise run build_tui)"
   exit 1
 fi
 

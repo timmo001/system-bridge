@@ -16,5 +16,5 @@ runs:
           ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'web-client/**/bun.lock') }}
 
     - name: Build client project
-      run: make build_web_client
+      run: mise run build_web_client
       shell: bash

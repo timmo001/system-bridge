@@ -15,7 +15,7 @@ Before committing Go code changes, run the linter to catch potential issues:
 golangci-lint run ./...
 
 # Or run the project's lint target
-make lint
+mise run lint
 ```
 
 **Important**: The CI pipeline runs golangci-lint automatically. Common issues to watch for:

@@ -6,12 +6,12 @@ Cross-platform application (Linux, Windows, macOS) that bridges system informati
 
 ```bash
 # Build and run
-make build    # Build everything (frontend + backend)
-make run      # Run backend server
-make test     # Run tests
+mise run build    # Build everything (frontend + backend)
+mise run run      # Run backend server
+mise run test     # Run tests
 
 # See all commands
-make help
+mise tasks
 ```
 
 **After editing Go code:** Always run `go fmt ./...`
@@ -25,9 +25,9 @@ make help
 
 ## Key Conventions
 
-- **Build system**: Always use Makefile (not direct `go build`)
+- **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
 - **Package manager**: bun for all JavaScript/TypeScript (web client + TUI)
-- **Schema sync**: Run `make generate_schemas` after changing Go types in `types/` directory
+- **Schema sync**: Run `mise run generate_schemas` after changing Go types in `types/` directory
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 
 ## Additional Documentation

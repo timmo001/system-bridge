@@ -15,7 +15,7 @@ if (-not (Test-Path "dist\system-bridge.exe") -and -not (Test-Path "system-bridg
 }
 
 if (-not (Test-Path "dist\system-bridge-tui.exe") -and -not (Test-Path "system-bridge-tui.exe")) {
-    Write-Error "TUI executable not found. Build the TUI first (make build_tui)"
+    Write-Error "TUI executable not found. Build the TUI first (mise run build_tui)"
     exit 1
 }
 

@@ -40,15 +40,16 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
 `mise.toml` is the source of truth for local and CI runtimes.
 
-> **Building without mise:** If you cannot install `mise` (e.g. Raspberry Pi
-> armhf), ensure compatible versions of `go`, `bun`, and `node` are on your
-> PATH. The Makefile auto-detects `mise` and falls back to invoking tools
-> directly when it is not available.
+> **Building without mise:** `mise run` tasks require `mise`. If you cannot
+> install it (e.g. Raspberry Pi armhf), ensure compatible versions of `go`,
+> `bun`, and `node` (see `mise.toml`) are on your PATH and run the underlying
+> commands from the `[tasks]` in `mise.toml` directly (build the web client and
+> TUI with `bun`, then `go build`).
 
 ## Build and Install
 
 1. Clone this repo
-1. Run `make build`
+1. Run `mise run build`
 
 ## Packages
 

@@ -6,7 +6,7 @@
 
 ```bash
 # Run all tests
-make test
+mise run test
 
 # Run tests with verbose output
 go test -v ./...
@@ -55,7 +55,7 @@ To run all linters used in the GitHub workflows:
 
 ```bash
 # Application linting (Go + web client)
-make lint
+mise run lint
 
 # Web client formatting
 cd web-client && bun run format:check
@@ -136,7 +136,7 @@ For testing web client changes and WebSocket communication, use the chrome-devto
 
 1. **Start the development environment:**
 ```bash
-make run  # Starts both backend (port 9170) and web client (port 5173)
+mise run run  # Starts both backend (port 9170) and web client (port 5173)
 ```
 
 2. **Access via browser:**
@@ -175,8 +175,8 @@ mcp__chrome-devtools__list_console_messages
 
 **Testing schema changes:**
 1. Modify Go struct in `types/` directory
-2. Run `make generate_schemas` to update Zod schemas
-3. Start dev environment with `make run`
+2. Run `mise run generate_schemas` to update Zod schemas
+3. Start dev environment with `mise run run`
 4. Navigate to relevant page in browser
 5. Use chrome-devtools to verify:
    - No console errors
@@ -201,7 +201,7 @@ mcp__chrome-devtools__take_snapshot verbose=true
 ```
 
 **Testing error states:**
-1. Stop backend: Kill the `make run` process
+1. Stop backend: Kill the `mise run run` process
 2. Observe connection error handling in UI
 3. Restart backend and verify reconnection
 
@@ -260,7 +260,7 @@ act -l                                       # List all workflows
 
 ```bash
 # Testing
-make test                     # Run Go tests
+mise run test                 # Run Go tests
 cd web-client && bun run lint    # Lint web client
 cd web-client && bun run typecheck  # Type check web client
 cd web-client && bun run format:check  # Check web client formatting

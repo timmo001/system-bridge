@@ -1,0 +1,26 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Build Process
+
+When building the application, always use the mise tasks defined in
+[mise.toml](mdc:mise.toml). Do not invoke build commands directly; instead, run
+the appropriate task with `mise run <task>` (e.g., `mise run build`). This
+ensures all required steps and dependencies are handled consistently. List every
+task with `mise tasks`.
+
+## Examples
+
+Below are some examples of how to run/test the application.
+
+- Build the application: `mise run build` (runs cleanup, builds the web client (Lit + Vite) and backend (go))
+- Run the application backend: `mise run run` (runs the web client and backend together for development)
+- Test the application: `mise run test`
+- Clean the application: `mise run clean`
+- Clean and remove all build artifacts: `mise run clean_dist` (removes the `dist` directory)
+- Clean web client build output: `mise run clean_web_client` (removes the `web-client/dist` directory)
+- Install dependencies: `mise run deps` (runs `go mod tidy` internally)
+- Show all available tasks: `mise tasks`

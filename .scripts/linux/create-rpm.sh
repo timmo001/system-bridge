@@ -26,12 +26,12 @@ fi
 
 # Check if binary exists
 if [ ! -f "system-bridge-linux" ]; then
-  echo "system-bridge-linux not found, please build the application first (e.g. 'make build')" >&2
+  echo "system-bridge-linux not found, please build the application first (e.g. 'mise run build')" >&2
   exit 1
 fi
 
 if [ ! -f "system-bridge-tui" ]; then
-  echo "system-bridge-tui not found, please build the TUI first (make build_tui)" >&2
+  echo "system-bridge-tui not found, please build the TUI first (mise run build_tui)" >&2
   exit 1
 fi
 

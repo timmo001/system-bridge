@@ -30,8 +30,8 @@ build() {
   mise trust -a
   mise install
   mise exec -C web-client -- bun install --frozen-lockfile
-  mise exec -- make build_web_client
-  mise exec -- make build_tui
+  mise run build_web_client
+  mise run build_tui
   local version
   version="$(cd "$srcdir/$pkgname" && git describe --long --tags --abbrev=7 2>/dev/null | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' || printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)")"
   mise exec -- go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${version}'" -o "system-bridge" .

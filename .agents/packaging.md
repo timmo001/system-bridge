@@ -6,17 +6,17 @@
 
 ```bash
 # Build all formats in parallel (DEB, RPM, Arch, Flatpak)
-make create_all_packages
+mise run create_all_packages
 
 # Individual formats
-make create_deb           # Debian package only
-make create_rpm           # RPM package only
-make create_arch          # Arch package only
-make create_flatpak       # Flatpak package only
+mise run create_deb           # Debian package only
+mise run create_rpm           # RPM package only
+mise run create_arch          # Arch package only
+mise run create_flatpak       # Flatpak package only
 ```
 
 ## Windows Installer
 
 ```bash
-make create_windows_installer
+mise run create_windows_installer
 ```
