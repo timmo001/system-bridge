@@ -93,22 +93,7 @@ if [ "$TAILWIND_FOUND" -eq 0 ]; then
 fi
 echo "✓ Build files verified and ready for embedding"
 '''
-run_windows = '''
-#!/usr/bin/env pwsh
-Set-Location web-client
-bun run build
-Set-Location ..
-Write-Host "Waiting for file system to sync..."
-Start-Sleep -Seconds 2
-Write-Host "Verifying build files are accessible..."
-if (!(Test-Path 'web-client/dist/index.html')) { Write-Host 'ERROR: web-client/dist/index.html not found'; exit 1 }
-if (!(Get-ChildItem 'web-client/dist/assets/*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in web-client/dist/assets/'; Get-ChildItem 'web-client/dist/assets/' -ErrorAction SilentlyContinue; exit 1 }
-if (!(Get-ChildItem 'web-client/dist/assets/*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in web-client/dist/assets/'; Get-ChildItem 'web-client/dist/assets/' -ErrorAction SilentlyContinue; exit 1 }
-Write-Host "Verifying Tailwind CSS compilation..."
-$css = Get-ChildItem 'web-client/dist/assets/*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw
-if ($css -match '@layer utilities|--tw-|\.(flex|grid|hidden|block)\{') { Write-Host '  [OK] Found Tailwind CSS patterns' } else { Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'; Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'; exit 1 }
-Write-Host "[OK] Build files verified and ready for embedding"
-'''
+run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/build-web-client.ps1"
 
 [tasks.build_tui]
 description = "Build the TUI binary"
@@ -242,17 +227,17 @@ run = "cd web-client && bunx fallow --fail-on-issues"
 [tasks.clean]
 description = "Remove build artifacts"
 run = "rm -f system-bridge system-bridge-linux system-bridge-tui"
-run_windows = "powershell -Command \"Remove-Item -Force -ErrorAction SilentlyContinue system-bridge.syso,system-bridge.exe,system-bridge-console.exe,system-bridge-windows.exe,system-bridge-tui.exe,installer.nsi,system-bridge.rc; Remove-Item -Recurse -Force -ErrorAction SilentlyContinue now-playing,./.scripts/windows/now-playing; exit 0\""
+run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean.ps1"
 
 [tasks.clean_dist]
 description = "Remove dist directory"
 run = "rm -rf .flatpak-builder AppDir appimagetool build dist dist-agg rpm-structure rpmbuild flatpak-build repo deb-structure"
-run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue dist; exit 0\""
+run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-dist.ps1"
 
 [tasks.clean_web_client]
 description = "Remove web client build artifacts"
 run = "rm -rf web-client/dist"
-run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue web-client/dist; exit 0\""
+run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-web-client.ps1"
 
 [tasks.deps]
 description = "Install dependencies (go mod tidy)"
