@@ -242,17 +242,17 @@ run = "cd web-client && bunx fallow --fail-on-issues"
 [tasks.clean]
 description = "Remove build artifacts"
 run = "rm -f system-bridge system-bridge-linux system-bridge-tui"
-run_windows = "powershell -Command \"Remove-Item -Force -ErrorAction SilentlyContinue system-bridge.syso,system-bridge.exe,system-bridge-console.exe,system-bridge-windows.exe,system-bridge-tui.exe,installer.nsi,system-bridge.rc; Remove-Item -Recurse -Force -ErrorAction SilentlyContinue now-playing,./.scripts/windows/now-playing\""
+run_windows = "powershell -Command \"Remove-Item -Force -ErrorAction SilentlyContinue system-bridge.syso,system-bridge.exe,system-bridge-console.exe,system-bridge-windows.exe,system-bridge-tui.exe,installer.nsi,system-bridge.rc; Remove-Item -Recurse -Force -ErrorAction SilentlyContinue now-playing,./.scripts/windows/now-playing; exit 0\""
 
 [tasks.clean_dist]
 description = "Remove dist directory"
 run = "rm -rf .flatpak-builder AppDir appimagetool build dist dist-agg rpm-structure rpmbuild flatpak-build repo deb-structure"
-run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue dist\""
+run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue dist; exit 0\""
 
 [tasks.clean_web_client]
 description = "Remove web client build artifacts"
 run = "rm -rf web-client/dist"
-run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue web-client/dist\""
+run_windows = "powershell -Command \"Remove-Item -Recurse -Force -ErrorAction SilentlyContinue web-client/dist; exit 0\""
 
 [tasks.deps]
 description = "Install dependencies (go mod tidy)"
