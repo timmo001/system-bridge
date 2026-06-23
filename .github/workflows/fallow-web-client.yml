@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Fallow on changed files
         if: github.event_name != 'workflow_dispatch'
-        uses: fallow-rs/fallow@5da5e73aba1b06bebe51be17f1d65c30c5a36ee7 # v2
+        uses: fallow-rs/fallow@8a83dc0e86232d874f845eee306c75f3fb9c95d7 # v2
         with:
           root: .
           format: sarif
@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Fallow full scan
         if: github.event_name == 'workflow_dispatch'
-        uses: fallow-rs/fallow@5da5e73aba1b06bebe51be17f1d65c30c5a36ee7 # v2
+        uses: fallow-rs/fallow@8a83dc0e86232d874f845eee306c75f3fb9c95d7 # v2
         with:
           root: .
           format: sarif
