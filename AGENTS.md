@@ -37,7 +37,7 @@ mise tasks
 - Prefer the `serve:*` mise tasks over foreground `run:*` tasks when starting long-running dev servers from an agent or background workflow.
 - `mise run serve:backend` starts the backend through pitchfork. The wrapper stops any production `system-bridge` process that owns `:9170` (systemd, Hyprland, desktop autostart, or manual shell), runs the dev backend, and restores the previously running live service or process when dev stops.
 - `mise run serve:web` starts the Vite web client through pitchfork. It has no production counterpart.
-- Use `mise run serve:status`, `mise run serve:logs`, and `mise run serve:stop` for status, logs, and cleanup.
+- Use `mise run serve:status`, `mise run serve:logs`, `mise run serve:restart`, and `mise run serve:stop` for status, logs, restart, and cleanup.
 - Keep direct `mise run run:*` usage for foreground debugging only, or when pitchfork is unavailable.
 - The pitchfork config lives in `pitchfork.toml`; wrapper scripts live under `.scripts/linux/pitchfork-*.sh`.
 

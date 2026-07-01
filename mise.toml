@@ -196,6 +196,10 @@ run = "pitchfork status"
 description = "Follow backend dev server logs"
 run = "pitchfork logs -t backend"
 
+[tasks."serve:restart"]
+description = "Restart pitchfork dev servers"
+run = "pitchfork restart backend web"
+
 [tasks."serve:stop"]
 description = "Stop pitchfork dev servers"
 run = "pitchfork stop backend web"
