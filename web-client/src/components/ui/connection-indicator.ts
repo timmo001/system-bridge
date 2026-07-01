@@ -20,9 +20,9 @@ class ConnectionIndicator extends UIElement {
     return html`
       <div class="flex items-center gap-2">
         <div
-          class="h-3 w-3 rounded-full ${isConnected
-            ? "bg-primary"
-            : "bg-destructive"}"
+          class="h-3 w-3 rounded-full ${
+            isConnected ? "bg-primary" : "bg-destructive"
+          }"
         ></div>
         <span class="text-sm text-muted-foreground">
           ${isConnected ? "Connected" : "Disconnected"}

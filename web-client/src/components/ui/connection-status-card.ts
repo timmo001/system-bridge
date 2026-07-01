@@ -35,9 +35,9 @@ class ConnectionStatusCard extends UIElement {
     return html`
       <div class="flex items-center gap-2">
         <div
-          class="h-3 w-3 rounded-full ${isConnected
-            ? "bg-primary"
-            : "bg-destructive"}"
+          class="h-3 w-3 rounded-full ${
+            isConnected ? "bg-primary" : "bg-destructive"
+          }"
         ></div>
         <span class="text-sm font-medium">
           ${isConnected ? "Connected" : "Disconnected"}
@@ -87,23 +87,25 @@ class ConnectionStatusCard extends UIElement {
 
     return html`
       <div
-        class="rounded-lg border bg-card p-6 mb-6 ${isConnected
-          ? "border-primary"
-          : "border-destructive"}"
+        class="rounded-lg border bg-card p-6 mb-6 ${
+          isConnected ? "border-primary" : "border-destructive"
+        }"
       >
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-2xl font-semibold">Connection</h2>
-            ${this.showSetupButton
-              ? html`
-                  <ui-button
-                    variant="outline"
-                    @click=${this.handleSetupConnection}
-                  >
-                    Setup Connection
-                  </ui-button>
-                `
-              : ""}
+            ${
+              this.showSetupButton
+                ? html`
+                    <ui-button
+                      variant="outline"
+                      @click=${this.handleSetupConnection}
+                    >
+                      Setup Connection
+                    </ui-button>
+                  `
+                : ""
+            }
           </div>
 
           ${this.renderConnectionIndicator(isConnected)}

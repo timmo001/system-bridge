@@ -272,23 +272,27 @@ class PageSettingsMedia extends PageElement {
             <ui-button
               variant="secondary"
               @click=${this.handleAddDirectory}
-              ?disabled=${this.isValidating ||
-              this.isSubmitting ||
-              !this.newDirectoryName.trim() ||
-              !this.newDirectoryPath.trim()}
+              ?disabled=${
+                this.isValidating ||
+                this.isSubmitting ||
+                !this.newDirectoryName.trim() ||
+                !this.newDirectoryPath.trim()
+              }
             >
               ${this.isValidating ? "Validating..." : "Add"}
             </ui-button>
           </div>
         </div>
 
-        ${this.validationError
-          ? html`
-              <div class="text-sm text-destructive">
-                ${this.validationError}
-              </div>
-            `
-          : ""}
+        ${
+          this.validationError
+            ? html`
+                <div class="text-sm text-destructive">
+                  ${this.validationError}
+                </div>
+              `
+            : ""
+        }
       </div>
     `;
   }
@@ -311,9 +315,11 @@ class PageSettingsMedia extends PageElement {
                 <div class="rounded-lg border bg-card p-6 space-y-4">
                   <h2 class="text-xl font-semibold">
                     Directories
-                    ${this.mediaDirectories.length > 0
-                      ? `(${this.mediaDirectories.length})`
-                      : ""}
+                    ${
+                      this.mediaDirectories.length > 0
+                        ? `(${this.mediaDirectories.length})`
+                        : ""
+                    }
                   </h2>
                   ${this.renderDirectoryList()}
                 </div>

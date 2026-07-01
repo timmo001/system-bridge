@@ -278,9 +278,11 @@ class PageConnection extends PageElement {
                 variant="default"
                 ?disabled=${this.isSubmitting}
               >
-                ${this.isSubmitting
-                  ? "Testing Connection..."
-                  : "Test Connection"}
+                ${
+                  this.isSubmitting
+                    ? "Testing Connection..."
+                    : "Test Connection"
+                }
               </ui-button>
               <ui-button
                 type="button"

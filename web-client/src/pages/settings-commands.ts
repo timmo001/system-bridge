@@ -388,20 +388,24 @@ class PageSettingsCommands extends PageElement {
 
   private renderCommandMeta(cmd: SettingsCommandDefinition): TemplateResult {
     return html`
-      ${cmd.workingDir
-        ? html`
-            <div class="text-xs text-muted-foreground">
-              Working Dir: ${cmd.workingDir}
-            </div>
-          `
-        : ""}
-      ${cmd.arguments.length > 0
-        ? html`
-            <div class="text-xs text-muted-foreground">
-              Arguments: ${cmd.arguments.join(", ")}
-            </div>
-          `
-        : ""}
+      ${
+        cmd.workingDir
+          ? html`
+              <div class="text-xs text-muted-foreground">
+                Working Dir: ${cmd.workingDir}
+              </div>
+            `
+          : ""
+      }
+      ${
+        cmd.arguments.length > 0
+          ? html`
+              <div class="text-xs text-muted-foreground">
+                Arguments: ${cmd.arguments.join(", ")}
+              </div>
+            `
+          : ""
+      }
     `;
   }
 
@@ -463,34 +467,36 @@ class PageSettingsCommands extends PageElement {
             ${result.error ? `(${result.error})` : ""}</span
           >
         </div>
-        ${result.stdout
-          ? html`
-              <div class="space-y-1">
-                <div class="text-xs font-medium text-muted-foreground">
-                  Output:
+        ${
+          result.stdout
+            ? html`
+                <div class="space-y-1">
+                  <div class="text-xs font-medium text-muted-foreground">
+                    Output:
+                  </div>
+                  <pre
+                    class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                  >
+${result.stdout}</pre>
                 </div>
-                <pre
-                  class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
-                >
-${result.stdout}</pre
-                >
-              </div>
-            `
-          : ""}
-        ${result.stderr
-          ? html`
-              <div class="space-y-1">
-                <div class="text-xs font-medium text-red-400">
-                  Error Output:
+              `
+            : ""
+        }
+        ${
+          result.stderr
+            ? html`
+                <div class="space-y-1">
+                  <div class="text-xs font-medium text-red-400">
+                    Error Output:
+                  </div>
+                  <pre
+                    class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
+                  >
+${result.stderr}</pre>
                 </div>
-                <pre
-                  class="text-xs bg-black/30 p-2 rounded overflow-x-auto max-h-32"
-                >
-${result.stderr}</pre
-                >
-              </div>
-            `
-          : ""}
+              `
+            : ""
+        }
       </div>
     `;
   }
@@ -612,16 +618,20 @@ ${result.stderr}</pre
             <ui-button
               variant="secondary"
               @click=${this.handleAddCommand}
-              ?disabled=${this.isSubmitting ||
-              !this.newCommandName.trim() ||
-              !this.newCommandCommand.trim()}
+              ?disabled=${
+                this.isSubmitting ||
+                !this.newCommandName.trim() ||
+                !this.newCommandCommand.trim()
+              }
             >
-              ${this.isSubmitting
-                ? html`<ui-icon
-                    name="Loader2"
-                    className="animate-spin"
-                  ></ui-icon>`
-                : ""}
+              ${
+                this.isSubmitting
+                  ? html`<ui-icon
+                      name="Loader2"
+                      className="animate-spin"
+                    ></ui-icon>`
+                  : ""
+              }
               Add Command
             </ui-button>
           </div>

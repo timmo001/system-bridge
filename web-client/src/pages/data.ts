@@ -69,20 +69,22 @@ class PageData extends PageElement {
           ?hidden=${this.selectedTab !== module}
           class="flex flex-col flex-1 min-h-0 mt-2"
         >
-          ${this.data?.[module]
-            ? html`
-                <ui-code-block
-                  class="flex-1 min-h-0"
-                  .data=${this.data[module]}
-                ></ui-code-block>
-              `
-            : html`
-                <div
-                  class="text-sm text-muted-foreground italic p-4 text-center"
-                >
-                  No data available for ${module}
-                </div>
-              `}
+          ${
+            this.data?.[module]
+              ? html`
+                  <ui-code-block
+                    class="flex-1 min-h-0"
+                    .data=${this.data[module]}
+                  ></ui-code-block>
+                `
+              : html`
+                  <div
+                    class="text-sm text-muted-foreground italic p-4 text-center"
+                  >
+                    No data available for ${module}
+                  </div>
+                `
+          }
         </ui-tabs-content>
       `,
     );
@@ -99,28 +101,30 @@ class PageData extends PageElement {
           class="flex flex-col flex-1 min-h-0 max-w-7xl mx-auto w-full gap-6"
         >
           ${this.renderPageHeader()}
-          ${!isConnected
-            ? html`
-                <ui-connection-required
-                  message="Please connect to System Bridge to view data."
-                  @configure-connection=${this.handleNavigateToConnection}
-                ></ui-connection-required>
-              `
-            : html`
-                <div
-                  class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
-                >
-                  <ui-tabs
-                    class="flex flex-col flex-1 min-h-0"
-                    .value=${this.selectedTab}
-                    @tab-change=${this.handleTabChange}
+          ${
+            !isConnected
+              ? html`
+                  <ui-connection-required
+                    message="Please connect to System Bridge to view data."
+                    @configure-connection=${this.handleNavigateToConnection}
+                  ></ui-connection-required>
+                `
+              : html`
+                  <div
+                    class="flex flex-col flex-1 min-h-0 rounded-lg border bg-card p-4"
                   >
-                    <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
+                    <ui-tabs
+                      class="flex flex-col flex-1 min-h-0"
+                      .value=${this.selectedTab}
+                      @tab-change=${this.handleTabChange}
+                    >
+                      <ui-tabs-list> ${this.renderTabTriggers()} </ui-tabs-list>
 
-                    ${this.renderTabContents()}
-                  </ui-tabs>
-                </div>
-              `}
+                      ${this.renderTabContents()}
+                    </ui-tabs>
+                  </div>
+                `
+          }
         </div>
       </div>
     `;

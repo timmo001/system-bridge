@@ -329,9 +329,11 @@ class PageMedia extends PageElement {
     return html`
       <div
         class="flex items-center gap-1.5 text-xs text-muted-foreground/70"
-        title=${updatedAt
-          ? `Last updated: ${new Date(updatedAt * 1000).toLocaleString()}`
-          : "No update received"}
+        title=${
+          updatedAt
+            ? `Last updated: ${new Date(updatedAt * 1000).toLocaleString()}`
+            : "No update received"
+        }
       >
         <ui-icon name="Clock" class="size-3"></ui-icon>
         <span>Updated ${lastUpdatedStr}</span>
@@ -386,11 +388,13 @@ class PageMedia extends PageElement {
             <p class="text-sm text-muted-foreground truncate">
               ${media.artist ?? "Unknown Artist"}
             </p>
-            ${albumTitle
-              ? html`<p class="text-xs text-muted-foreground/70 truncate">
-                  ${albumTitle}
-                </p>`
-              : ""}
+            ${
+              albumTitle
+                ? html`<p class="text-xs text-muted-foreground/70 truncate">
+                    ${albumTitle}
+                  </p>`
+                : ""
+            }
           </div>
         </div>
 
@@ -430,31 +434,33 @@ class PageMedia extends PageElement {
             <ui-icon name="SkipBack" class="size-5"></ui-icon>
           </ui-button>
 
-          ${this.isPlaying
-            ? html`
-                <ui-button
-                  variant="default"
-                  size="icon"
-                  class="size-12"
-                  ?disabled=${disabled.PAUSE || this.pendingAction === "PAUSE"}
-                  @click=${this.handlePause}
-                  title="Pause"
-                >
-                  <ui-icon name="Pause" class="size-6"></ui-icon>
-                </ui-button>
-              `
-            : html`
-                <ui-button
-                  variant="default"
-                  size="icon"
-                  class="size-12"
-                  ?disabled=${disabled.PLAY || this.pendingAction === "PLAY"}
-                  @click=${this.handlePlay}
-                  title="Play"
-                >
-                  <ui-icon name="Play" class="size-6"></ui-icon>
-                </ui-button>
-              `}
+          ${
+            this.isPlaying
+              ? html`
+                  <ui-button
+                    variant="default"
+                    size="icon"
+                    class="size-12"
+                    ?disabled=${disabled.PAUSE || this.pendingAction === "PAUSE"}
+                    @click=${this.handlePause}
+                    title="Pause"
+                  >
+                    <ui-icon name="Pause" class="size-6"></ui-icon>
+                  </ui-button>
+                `
+              : html`
+                  <ui-button
+                    variant="default"
+                    size="icon"
+                    class="size-12"
+                    ?disabled=${disabled.PLAY || this.pendingAction === "PLAY"}
+                    @click=${this.handlePlay}
+                    title="Play"
+                  >
+                    <ui-icon name="Play" class="size-6"></ui-icon>
+                  </ui-button>
+                `
+          }
 
           <ui-button
             variant="outline"
@@ -490,11 +496,13 @@ class PageMedia extends PageElement {
       <div class="rounded-lg border bg-card p-6 space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold">Volume</h2>
-          ${volumeDisplay
-            ? html`<span class="text-sm text-muted-foreground"
-                >${volumeDisplay}</span
-              >`
-            : ""}
+          ${
+            volumeDisplay
+              ? html`<span class="text-sm text-muted-foreground"
+                  >${volumeDisplay}</span
+                >`
+              : ""
+          }
         </div>
 
         <div class="flex items-center justify-center gap-2">

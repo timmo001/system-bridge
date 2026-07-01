@@ -172,9 +172,9 @@ class PageSettingsDisks extends PageElement {
 
     return html`
       <label
-        class="flex items-center gap-4 p-3 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors ${disabled
-          ? "opacity-75"
-          : ""}"
+        class="flex items-center gap-4 p-3 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors ${
+          disabled ? "opacity-75" : ""
+        }"
       >
         <ui-checkbox
           .checked=${checked}

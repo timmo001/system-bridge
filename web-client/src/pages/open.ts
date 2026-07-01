@@ -235,12 +235,14 @@ class PageOpen extends SendablePageElement {
                 @click=${this.handleOpen}
                 ?disabled=${this.isSending || !this.currentValue.trim()}
               >
-                ${this.isSending
-                  ? html`<ui-icon
-                      name="Loader2"
-                      className="animate-spin mr-2"
-                    ></ui-icon>`
-                  : html`<ui-icon name="ExternalLink" class="mr-2"></ui-icon>`}
+                ${
+                  this.isSending
+                    ? html`<ui-icon
+                        name="Loader2"
+                        className="animate-spin mr-2"
+                      ></ui-icon>`
+                    : html`<ui-icon name="ExternalLink" class="mr-2"></ui-icon>`
+                }
                 Open
               </ui-button>
             </div>

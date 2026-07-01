@@ -255,12 +255,14 @@ class PageNotifications extends SendablePageElement {
                 @click=${this.handleSendNotification}
                 ?disabled=${!this.canSend}
               >
-                ${this.isSending
-                  ? html`<ui-icon
-                      name="Loader2"
-                      className="animate-spin mr-2"
-                    ></ui-icon>`
-                  : html`<ui-icon name="Bell" class="mr-2"></ui-icon>`}
+                ${
+                  this.isSending
+                    ? html`<ui-icon
+                        name="Loader2"
+                        className="animate-spin mr-2"
+                      ></ui-icon>`
+                    : html`<ui-icon name="Bell" class="mr-2"></ui-icon>`
+                }
                 Send Notification
               </ui-button>
             </div>

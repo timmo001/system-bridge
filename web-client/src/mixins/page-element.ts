@@ -134,18 +134,20 @@ export class PageElement extends UIElement {
     return html`
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          ${showBackButton
-            ? html`
-                <ui-button
-                  variant="ghost"
-                  size="icon"
-                  @click=${this.handleNavigateToHome}
-                  aria-label="Back to home"
-                >
-                  <ui-icon name="ArrowLeft"></ui-icon>
-                </ui-button>
-              `
-            : ""}
+          ${
+            showBackButton
+              ? html`
+                  <ui-button
+                    variant="ghost"
+                    size="icon"
+                    @click=${this.handleNavigateToHome}
+                    aria-label="Back to home"
+                  >
+                    <ui-icon name="ArrowLeft"></ui-icon>
+                  </ui-button>
+                `
+              : ""
+          }
           <div>
             <h1 class="text-3xl font-bold mb-2">${this.title}</h1>
             ${description}
@@ -153,9 +155,11 @@ export class PageElement extends UIElement {
         </div>
         <div class="flex items-center gap-2">
           ${this.renderDocsLink()}
-          ${showConnectionIndicator
-            ? html`<ui-connection-indicator></ui-connection-indicator>`
-            : ""}
+          ${
+            showConnectionIndicator
+              ? html`<ui-connection-indicator></ui-connection-indicator>`
+              : ""
+          }
         </div>
       </div>
     `;
