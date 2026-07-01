@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "golang.go",
+    "oven.bun-vscode",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "astro-build.astro-vscode",
+    "redhat.vscode-yaml",
+    "davidanson.vscode-markdownlint"
+  ],
+  "unwantedRecommendations": []
+}

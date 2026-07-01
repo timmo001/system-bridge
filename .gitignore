@@ -61,3 +61,8 @@ rpmbuild/
 AppDir/
 appimagetool
 temp/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
