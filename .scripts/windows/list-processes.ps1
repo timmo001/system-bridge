@@ -30,4 +30,4 @@ foreach ($process in $processes) {
     Write-Host ""
 }
 
-Write-Host "Use 'mise run stop_processes' to stop all System Bridge processes." -ForegroundColor Cyan
+Write-Host "Use 'mise run processes:stop' to stop all System Bridge processes." -ForegroundColor Cyan

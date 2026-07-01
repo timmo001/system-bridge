@@ -10,7 +10,7 @@ Project-specific Go patterns for the system-bridge backend. General Go style an 
 ## Format and Lint
 
 - Always run `go fmt ./...` from the repo root after editing Go.
-- Before committing, run `mise run lint` (or `golangci-lint run ./...`).
+- Before committing, run `mise run lint:all` (or `golangci-lint run ./...`).
 - CI runs golangci-lint. Watch `errcheck`: never leave unchecked error returns, especially deferred cleanup. All deferred `os.RemoveAll()` calls in tests must check the error.
 
 ## File Naming

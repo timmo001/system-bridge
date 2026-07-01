@@ -8,34 +8,35 @@ node = "26.4.0"
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
 # every task, so commands call `go`/`bun`/`bunx` directly (no `mise exec --`).
+# Naming: `verb:all` is the full aggregate, `verb:<target>` is a single component.
 
-[tasks.build]
-description = "Build the application"
+[tasks."build:all"]
+description = "Build everything (web client, TUI, backend)"
 run = [
   { task = "clean" },
-  { task = "build_web_client" },
-  { task = "build_tui" },
+  { task = "build:web-client" },
+  { task = "build:tui" },
   "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux .",
 ]
 run_windows = [
   { task = "clean" },
-  { task = "build_web_client" },
-  { task = "build_tui" },
+  { task = "build:web-client" },
+  { task = "build:tui" },
   "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1",
   "windres system-bridge.rc -O coff -o system-bridge.syso",
   "go build -v -ldflags=\"-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe .",
 ]
 
-[tasks.build_console]
+[tasks."build:console"]
 description = "Build console version for debugging (Windows only)"
 run = "echo 'Console build is only supported on Windows'"
 run_windows = [
   { task = "clean" },
-  { task = "build_web_client" },
+  { task = "build:web-client" },
   "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe .",
 ]
 
-[tasks.generate_schemas]
+[tasks."generate:schemas"]
 description = "Generate Zod schemas from Go types"
 run = [
   "echo 'Generating Zod schemas from Go types...'",
@@ -44,9 +45,9 @@ run = [
   "cd web-client && bun install && bun run format:write src/lib/system-bridge/types-modules-schemas.ts",
 ]
 
-[tasks.build_web_client]
+[tasks."build:web-client"]
 description = "Build the web client"
-depends = ["clean_web_client", "generate_schemas"]
+depends = ["clean:web-client", "generate:schemas"]
 run = '''
 (cd web-client && bun run build)
 echo "Waiting for file system to sync..."
@@ -95,14 +96,15 @@ echo "✓ Build files verified and ready for embedding"
 '''
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/build-web-client.ps1"
 
-[tasks.build_tui]
+[tasks."build:tui"]
 description = "Build the TUI binary"
-run = "cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui"
-run_windows = "cd tui && bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe"
+dir = "tui"
+run = "bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui"
+run_windows = "bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe"
 
-[tasks.create_all_packages]
+[tasks."package:all"]
 description = "Build all Linux packages (DEB, RPM, Arch, Flatpak)"
-depends = ["clean_dist", "build"]
+depends = ["clean:dist", "build:all"]
 run = '''
 echo "Packaging all Linux formats in parallel..."
 chmod +x ./.scripts/linux/create-deb.sh ./.scripts/linux/create-rpm.sh ./.scripts/linux/create-arch.sh ./.scripts/linux/create-flatpak.sh
@@ -112,151 +114,163 @@ VERSION="5.0.0-dev+$(git rev-parse --short HEAD)" ./.scripts/linux/create-arch.s
 VERSION="5.0.0-dev+$(git rev-parse --short HEAD)" ./.scripts/linux/create-flatpak.sh &
 wait
 '''
-run_windows = "echo create_all_packages is only supported on Linux hosts"
+run_windows = "echo 'package:all is only supported on Linux hosts'"
 
-[tasks.create_arch]
+[tasks."package:arch"]
 description = "Create Arch Linux package"
-depends = ["clean_dist"]
+depends = ["clean:dist"]
 run = "VERSION=\"5.0.0-dev+$(git rev-parse --short HEAD)\" ./.scripts/linux/create-arch.sh"
 
-[tasks.create_flatpak]
+[tasks."package:flatpak"]
 description = "Create Flatpak package"
-depends = ["clean_dist"]
+depends = ["clean:dist"]
 run = "VERSION=\"5.0.0-dev+$(git rev-parse --short HEAD)\" ./.scripts/linux/create-flatpak.sh"
 
-[tasks.create_deb]
+[tasks."package:deb"]
 description = "Create Debian package"
-depends = ["clean_dist"]
+depends = ["clean:dist"]
 run = "VERSION=\"5.0.0-dev+$(git rev-parse --short HEAD)\" ./.scripts/linux/create-deb.sh"
 
-[tasks.create_rpm]
+[tasks."package:rpm"]
 description = "Create RPM package"
-depends = ["clean_dist"]
+depends = ["clean:dist"]
 run = "VERSION=\"5.0.0-dev+$(git rev-parse --short HEAD)\" ./.scripts/linux/create-rpm.sh"
 
-[tasks.create_windows_installer]
+[tasks."package:windows-installer"]
 description = "Create Windows installer"
-depends = ["clean_dist", "download_windows_now_playing"]
+depends = ["clean:dist", "download:now-playing"]
 run = "echo 'Creating the Windows installer is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/create-installer.ps1 /Clean"
 
-[tasks.download_windows_now_playing]
+[tasks."download:now-playing"]
 description = "Download the Windows NowPlaying helper (Windows only)"
 run = "echo 'Downloading the NowPlaying helper is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/download-now-playing.ps1"
 
 [tasks.install]
 description = "Install the application with go install"
-depends = ["build"]
+depends = ["build:all"]
 run = "go install ."
 
 [tasks.run]
 description = "Build and run the application (development only)"
-depends = ["build"]
-run = 'cd web-client && bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge-linux backend"'
-run_windows = 'cd web-client && bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge.exe backend"'
+depends = ["build:all"]
+dir = "web-client"
+run = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge-linux backend"'
+run_windows = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge.exe backend"'
 
-[tasks."run-web-client"]
+[tasks."run:web-client"]
 description = "Run the web client dev server (Vite)"
-run = "cd web-client && bun run dev"
+dir = "web-client"
+run = "bun run dev"
 
-[tasks."run-backend"]
+[tasks."run:backend"]
 description = "Build and run the backend server"
-depends = ["build"]
+depends = ["build:all"]
 run = "./system-bridge-linux backend"
 run_windows = "./system-bridge.exe backend"
 
-[tasks."run-tui"]
+[tasks."run:tui"]
 description = "Build and run the TUI"
-depends = ["build_tui"]
+depends = ["build:tui"]
 run = "./system-bridge-tui"
 run_windows = "./system-bridge-tui.exe"
 
 [tasks.cli]
 description = "Build and run the CLI (append subcommands after --, e.g. mise run cli -- version)"
-depends = ["build"]
+depends = ["build:all"]
 run = "./system-bridge-linux cli"
 run_windows = "./system-bridge.exe cli"
 
-[tasks.run_console]
+[tasks."run:console"]
 description = "Build and run console version for debugging (Windows only)"
-depends = ["build_console"]
+depends = ["build:console"]
 run = "echo 'Console run is only supported on Windows'"
 run_windows = "./system-bridge-console.exe backend"
 
-[tasks.list_processes]
+[tasks."processes:list"]
 description = "List running System Bridge processes (Windows only)"
 run = "echo 'Process management is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/list-processes.ps1"
 
-[tasks.stop_processes]
+[tasks."processes:stop"]
 description = "Stop all running System Bridge processes (Windows only)"
 run = "echo 'Process management is only supported on Windows'"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/stop-processes.ps1"
 
 [tasks.test]
-description = "Run tests"
-depends = ["test_go"]
-
-[tasks.test_go]
 description = "Run Go tests"
 run = "go test -v ./..."
 
-[tasks.lint]
-description = "Run all linters (Go, web client, fallow)"
-depends = ["lint_go", "lint_web_client", "lint_fallow"]
+[tasks.check]
+description = "Run all linters and tests"
+depends = ["lint:all", "test"]
 
-[tasks.lint_go]
+[tasks."lint:all"]
+description = "Run all linters (Go, web client, fallow)"
+depends = ["lint:go", "lint:web-client", "lint:fallow"]
+
+[tasks."lint:go"]
 description = "Run Go linters (fmt, vet)"
 run = [
   "go fmt ./...",
   "go vet ./...",
 ]
 
-[tasks.lint_web_client]
+[tasks."lint:web-client"]
 description = "Run web client linters (eslint, typecheck)"
+dir = "web-client"
 run = [
-  "cd web-client && bun run lint",
-  "cd web-client && bun run typecheck",
+  "bun run lint",
+  "bun run typecheck",
 ]
 
-[tasks.lint_fallow]
+[tasks."lint:fallow"]
 description = "Run fallow dead code analysis"
-run = "cd web-client && bunx fallow --fail-on-issues"
+dir = "web-client"
+run = "bunx fallow --fail-on-issues"
 
 [tasks.clean]
 description = "Remove build artifacts"
 run = "rm -f system-bridge system-bridge-linux system-bridge-tui"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean.ps1"
 
-[tasks.clean_dist]
+[tasks."clean:dist"]
 description = "Remove dist directory"
 run = "rm -rf .flatpak-builder AppDir appimagetool build dist dist-agg rpm-structure rpmbuild flatpak-build repo deb-structure"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-dist.ps1"
 
-[tasks.clean_web_client]
+[tasks."clean:web-client"]
 description = "Remove web client build artifacts"
 run = "rm -rf web-client/dist"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-web-client.ps1"
 
 [tasks.deps]
-description = "Install dependencies (go mod tidy)"
-run = "go mod tidy"
+description = "Install all dependencies (go, web client, TUI, docs)"
+run = '''
+go mod tidy
+(cd web-client && bun install)
+(cd tui && bun install)
+(cd docs && bun install)
+'''
 
 [tasks.version]
 description = "Show the version of the application"
-depends = ["build"]
+depends = ["build:all"]
 run = "./system-bridge-linux version"
 run_windows = "./system-bridge.exe version"
 
-[tasks.docs-dev]
+[tasks."docs:dev"]
 description = "Run the docs site dev server (Astro + Starlight)"
-run = "cd docs && bun run dev"
+dir = "docs"
+run = "bun run dev"
 
-[tasks.docs-build]
+[tasks."docs:build"]
 description = "Build the docs site (validates internal links)"
-run = "cd docs && bun install --frozen-lockfile && bun run build"
+dir = "docs"
+run = "bun install --frozen-lockfile && bun run build"
 
-[tasks.docs-lint]
+[tasks."docs:lint"]
 description = "Lint docs markdown with the docs ruleset"
-run = "cd docs && bunx markdownlint-cli --config .markdownlint.json \"**/*.md\""
+dir = "docs"
+run = "bunx markdownlint-cli --config .markdownlint.json \"**/*.md\""

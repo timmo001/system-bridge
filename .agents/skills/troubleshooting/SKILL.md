@@ -10,14 +10,14 @@ description: Known System Bridge build and runtime failures and their fixes, plu
 **Missing `web-client/dist/index.html`:**
 
 ```bash
-mise run clean_web_client
-mise run build_web_client
+mise run clean:web-client
+mise run build:web-client
 ```
 
 **Go embed stale after web-client changes:** the `//go:embed` directive bundles files at compile time, so rebuild the binary:
 
 ```bash
-mise run build   # rebuilds web client AND Go binary
+mise run build:all   # rebuilds web client AND Go binary
 ```
 
 **Module / dependency issues:**
@@ -62,7 +62,7 @@ Some modules may not cross-build due to OS-specific dependencies.
 ## OS-Specific
 
 - **Linux:** install required system libraries (see README.md); systray may need `libayatana-appindicator`; some modules need root.
-- **Windows:** use PowerShell; quote paths with spaces; some features need Administrator. Debug multiple instances with `mise run list_processes` / `mise run stop_processes`, and `mise run build_console` / `mise run run_console` for terminal logs.
+- **Windows:** use PowerShell; quote paths with spaces; some features need Administrator. Debug multiple instances with `mise run processes:list` / `mise run processes:stop`, and `mise run build:console` / `mise run run:console` for terminal logs.
 - **macOS:** grant monitoring permissions in System Settings > Privacy & Security; some features are experimental; Apple Silicon may differ from Intel.
 
 ## File Locations

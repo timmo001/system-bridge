@@ -13,7 +13,7 @@ Run from `docs/`:
 - Preview build: `bun run preview`
 - Astro CLI: `bun run astro -- --help`
 
-From the repo root: `mise run docs-dev`, `mise run docs-build`.
+From the repo root: `mise run docs:dev`, `mise run docs:build`.
 
 ## Lint / Test
 

@@ -13,8 +13,8 @@ Run from `docs/`:
 
 From the repo root you can also use the mise tasks:
 
-- `mise run docs-dev`
-- `mise run docs-build`
+- `mise run docs:dev`
+- `mise run docs:build`
 
 ## Structure
 

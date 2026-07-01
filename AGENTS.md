@@ -6,9 +6,9 @@ Cross-platform application (Linux, Windows, macOS) that bridges system informati
 
 ```bash
 # Build and run
-mise run build    # Build everything (frontend + backend)
-mise run run      # Run backend server
-mise run test     # Run tests
+mise run build:all  # Build everything (frontend + backend)
+mise run run        # Run backend server
+mise run test       # Run tests
 
 # See all commands
 mise tasks
@@ -28,7 +28,7 @@ mise tasks
 
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
 - **Package manager**: bun for all JavaScript/TypeScript (web client, TUI, docs)
-- **Schema sync**: Run `mise run generate_schemas` after changing Go types in `types/`. Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated
+- **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 
 ## Platforms
@@ -47,9 +47,9 @@ mise tasks
 ## Packaging
 
 ```bash
-mise run create_all_packages   # DEB, RPM, Arch, Flatpak (Linux host only)
-mise run create_deb            # or create_rpm / create_arch / create_flatpak
-mise run create_windows_installer
+mise run package:all   # DEB, RPM, Arch, Flatpak (Linux host only)
+mise run package:deb            # or package:rpm / package:arch / package:flatpak
+mise run package:windows-installer
 ```
 
 ## Additional Documentation

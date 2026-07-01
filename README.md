@@ -49,7 +49,7 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 ## Build and Install
 
 1. Clone this repo
-1. Run `mise run build`
+1. Run `mise run build:all`
 
 ## Packages
 

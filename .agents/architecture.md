@@ -94,16 +94,16 @@ The project includes an automatic schema generator that keeps frontend and backe
 
 ```bash
 # Generate Zod schemas from Go types (runs automatically during build)
-mise run generate_schemas
+mise run generate:schemas
 ```
 
 **How it works:**
 - Parses Go struct definitions in `types/` directory
 - Generates TypeScript Zod schemas in `web-client/src/lib/system-bridge/types-modules-schemas.ts`
-- Runs automatically before every `mise run build` or `mise run build_web_client`
+- Runs automatically before every `mise run build:all` or `mise run build:web-client`
 - See `tools/generate-schemas/README.md` for details
 
-**Important:** Never manually edit `types-modules-schemas.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate_schemas` to update the frontend schemas.
+**Important:** Never manually edit `types-modules-schemas.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate:schemas` to update the frontend schemas.
 
 ## Web Client Development
 

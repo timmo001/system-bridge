@@ -70,7 +70,7 @@ jobs:
 
       - name: Build TUI
         run: |
-          mise run build_tui
+          mise run build:tui
 
       - name: Verify CSS in Linux binary
         run: |
@@ -226,7 +226,7 @@ jobs:
 
       - name: Build TUI
         run: |
-          mise run build_tui
+          mise run build:tui
 
       - name: Verify CSS in Windows binary
         shell: pwsh

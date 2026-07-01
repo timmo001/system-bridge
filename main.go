@@ -551,7 +551,7 @@ func findTUIBinary() (string, error) {
 	// Fall back to PATH lookup
 	tuiPath, err := exec.LookPath(tuiName)
 	if err != nil {
-		return "", fmt.Errorf("%s not found (build with 'mise run build_tui'): %w", tuiName, err)
+		return "", fmt.Errorf("%s not found (build with 'mise run build:tui'): %w", tuiName, err)
 	}
 	return tuiPath, nil
 }
