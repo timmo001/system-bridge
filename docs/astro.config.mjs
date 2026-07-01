@@ -93,7 +93,6 @@ export default defineConfig({
         PageFrame: './src/components/PageFrame.astro',
       },
       social: [
-        { icon: 'pencil', label: 'Website Repository', href: 'https://github.com/timmo001/system-bridge/tree/dev/docs' },
         { icon: 'comment', label: 'Discussions', href: 'https://github.com/timmo001/system-bridge/discussions' },
         { icon: 'github', label: 'GitHub', href: 'https://github.com/timmo001/system-bridge' },
       ],
