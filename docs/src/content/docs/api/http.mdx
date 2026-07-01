@@ -1,0 +1,30 @@
+---
+title: Overview
+description: The System Bridge HTTP API for simple request/response reads, and when to use the WebSocket API instead.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+The HTTP API handles simple request/response reads: confirming the backend is running and fetching a module's current data. For everything else, use the [WebSocket API](/api/websocket/), which is the primary interface and covers most operations: live data, input, media and power control, notifications, settings, and commands.
+
+:::note
+Most endpoints need your API token. See [Authentication](/api/#authentication).
+:::
+
+## Base URL
+
+By default the backend listens on port `9170`, so the base URL is:
+
+```text
+http://{host}:9170
+```
+
+Replace `{host}` with the hostname or IP address of the machine running System Bridge. The port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable.
+
+## Endpoints
+
+<CardGrid>
+  <LinkCard title="Status & Health" href="/api/status/" description="Confirm the backend is running. No token required." />
+  <LinkCard title="Data" href="/api/data/" description="Fetch a module's current data on demand." />
+  <LinkCard title="Media File Data" href="/api/media-file-data/" description="Download a media file by base directory and path." />
+</CardGrid>

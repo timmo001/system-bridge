@@ -1,0 +1,79 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props {
+  title: string;
+  class?: HTMLAttributes<'article'>['class'];
+}
+
+const { title, class: className } = Astro.props;
+const hasIcon = Astro.slots.has('icon');
+---
+
+<article class={['sb-card sl-flex', className].filter(Boolean).join(' ')}>
+  <p class="sb-card-title sl-flex">
+    {hasIcon && (
+      <span class="sb-card-icon" aria-hidden="true">
+        <slot name="icon" />
+      </span>
+    )}
+    <span set:html={title} />
+  </p>
+  <div class="sb-card-body"><slot /></div>
+</article>
+
+<style>
+  @layer starlight.components {
+    .sb-card {
+      --sb-card-border: var(--sl-color-purple);
+      --sb-card-bg: var(--sl-color-purple-low);
+      border: 1px solid var(--sl-color-gray-5);
+      background-color: var(--sl-color-black);
+      padding: clamp(1rem, calc(0.125rem + 3vw), 2.5rem);
+      flex-direction: column;
+      gap: clamp(0.5rem, calc(0.125rem + 1vw), 1rem);
+    }
+    .sb-card:nth-child(4n + 1) {
+      --sb-card-border: var(--sl-color-orange);
+      --sb-card-bg: var(--sl-color-orange-low);
+    }
+    .sb-card:nth-child(4n + 3) {
+      --sb-card-border: var(--sl-color-green);
+      --sb-card-bg: var(--sl-color-green-low);
+    }
+    .sb-card:nth-child(4n + 4) {
+      --sb-card-border: var(--sl-color-red);
+      --sb-card-bg: var(--sl-color-red-low);
+    }
+    .sb-card:nth-child(4n + 5) {
+      --sb-card-border: var(--sl-color-blue);
+      --sb-card-bg: var(--sl-color-blue-low);
+    }
+    .sb-card-title {
+      font-weight: 600;
+      font-size: var(--sl-text-h4);
+      color: var(--sl-color-white);
+      line-height: var(--sl-line-height-headings);
+      gap: 1rem;
+      align-items: center;
+    }
+    .sb-card-icon {
+      background-color: var(--sl-color-gray-6);
+      padding: 0.2em;
+      border-radius: 0.25rem;
+      flex-shrink: 0;
+      color: var(--sb-card-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sb-card-icon :global(svg) {
+      width: 1.333em;
+      height: 1.333em;
+    }
+    .sb-card-body {
+      margin: 0;
+      font-size: var(--sl-text-body);
+    }
+  }
+</style>

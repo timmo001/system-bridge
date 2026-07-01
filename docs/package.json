@@ -1,0 +1,28 @@
+{
+  "name": "docs",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/starlight": "^0.40.0",
+    "@iconify-json/mdi": "^1.2.3",
+    "astro": "^6.4.6",
+    "astro-icon": "^1.1.5",
+    "sharp": "^0.35.1",
+    "starlight-contextual-menu": "^0.1.5",
+    "starlight-links-validator": "^0.24.1",
+    "starlight-llms-txt": "^0.10.0"
+  },
+  "trustedDependencies": [
+    "esbuild",
+    "sharp"
+  ]
+}

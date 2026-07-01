@@ -1,0 +1,58 @@
+h1 {
+  @apply text-5xl mt-10 mb-3;
+}
+
+h2 {
+  @apply text-4xl mt-8 mb-3;
+}
+
+h3 {
+  @apply text-3xl mt-6 mb-3;
+}
+
+h4 {
+  @apply text-2xl mt-4 mb-2;
+}
+
+h5 {
+  @apply text-xl mt-2 mb-2;
+}
+
+p {
+  @apply text-sm mt-1 mb-1;
+}
+
+ul {
+  @apply mt-1 mb-1;
+}
+
+li {
+  @apply text-sm ml-8 list-disc;
+}
+
+pre {
+  @apply text-sm mt-1 mb-1 p-3;
+}
+
+a {
+  @apply text-primary;
+}
+
+a,
+.btn {
+  @apply transition-colors duration-200;
+  @apply hover:text-secondary;
+}
+
+.nav-text {
+  @apply text-current;
+}
+
+.nav-text:active {
+  @apply text-secondary;
+}
+
+.gradient-text {
+  @apply text-transparent bg-clip-text;
+  @apply bg-gradient-to-br from-indigo-700 via-indigo-700 to-purple-700;
+}

@@ -1,0 +1,23 @@
+[data-theme="light"] {
+  --color-primary: theme("colors.violet.700");
+  --color-secondary: theme("colors.indigo.500");
+  --color-active: theme("colors.indigo.800");
+  --color-nav-active: theme("colors.indigo.200");
+  --color-text: theme("colors.gray.900");
+  --color-text-offset: theme("colors.gray.600");
+  --color-background: theme("colors.gray.50");
+  --color-background-offset: theme("colors.gray.100");
+  --color-border: theme("colors.stone.800");
+}
+
+[data-theme="dark"] {
+  --color-primary: theme("colors.violet.600");
+  --color-secondary: theme("colors.indigo.400");
+  --color-active: theme("colors.indigo.200");
+  --color-nav-active: theme("colors.indigo.200");
+  --color-text: theme("colors.gray.50");
+  --color-text-offset: theme("colors.gray.400");
+  --color-background: theme("colors.neutral.900");
+  --color-background-offset: theme("colors.neutral.800");
+  --color-border: theme("colors.stone.900");
+}

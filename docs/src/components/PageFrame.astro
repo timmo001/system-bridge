@@ -1,0 +1,46 @@
+---
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+
+const year = new Date().getFullYear();
+---
+
+<Default>
+  <slot name="header" slot="header" />
+  <slot name="sidebar" slot="sidebar" />
+  <slot />
+</Default>
+
+<footer class="sb-footer print:hidden">
+  <p>&copy; {year} Aidan Timson</p>
+  <p>
+    Website source available on{' '}
+    <a
+      href="https://github.com/timmo001/system-bridge/tree/dev/docs"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      GitHub</a
+    >.
+  </p>
+</footer>
+
+<style>
+  .sb-footer {
+    padding: 1.5rem var(--sl-nav-pad-x);
+    border-top: 1px solid var(--sl-color-hairline-shade);
+    text-align: center;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+    background-color: var(--sl-color-bg-sidebar);
+  }
+
+  .sb-footer p {
+    margin: 0.25rem 0;
+  }
+
+  @media (min-width: 50rem) {
+    .sb-footer {
+      padding-inline-start: calc(var(--sl-sidebar-width) + var(--sl-nav-pad-x));
+    }
+  }
+</style>

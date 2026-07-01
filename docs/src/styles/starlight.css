@@ -1,0 +1,38 @@
+:root,
+:root[data-theme='light'] {
+  --sl-color-accent: #6d28d9;
+  --sl-color-accent-high: #5b21b6;
+  --sl-color-accent-low: #c7d2fe;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #a78bfa;
+  --sl-color-accent-low: #2e1065;
+}
+
+header.header {
+  background-color: color-mix(in srgb, var(--sl-color-bg) 20%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+header.header .site-title {
+  color: var(--sl-color-white);
+}
+
+@media (min-width: 50rem) {
+  /* Pin the title column so the search box position and width stay the same
+     on the splash overview page and on docs pages. */
+  header.header {
+    grid-template-columns:
+      minmax(calc(var(--sl-sidebar-width) - var(--sl-nav-pad-x)), auto)
+      1fr
+      auto;
+  }
+
+  /* Widen the search trigger (Starlight default caps it at 22rem). */
+  header.header site-search button[data-open-modal] {
+    max-width: 34rem;
+  }
+}

@@ -248,3 +248,15 @@ description = "Show the version of the application"
 depends = ["build"]
 run = "./system-bridge-linux version"
 run_windows = "./system-bridge.exe version"
+
+[tasks.docs-dev]
+description = "Run the docs site dev server (Astro + Starlight)"
+run = "cd docs && bun run dev"
+
+[tasks.docs-build]
+description = "Build the docs site (validates internal links)"
+run = "cd docs && bun install --frozen-lockfile && bun run build"
+
+[tasks.docs-lint]
+description = "Lint docs markdown with the docs ruleset"
+run = "cd docs && bunx markdownlint-cli --config .markdownlint.json \"**/*.md\""

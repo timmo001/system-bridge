@@ -1,0 +1,72 @@
+---
+title: Overview
+description: Guides and reference for installing, running, and integrating with System Bridge.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+export const gettingStarted = [
+  { title: 'Install', href: '/install/', description: 'Download and install System Bridge on Windows or Linux.' },
+  { title: 'Running', href: '/running/', description: 'Start System Bridge and keep it running.' },
+];
+
+export const usingCards = [
+  { title: 'Desktop', href: '/using/desktop/', description: 'Use the system tray and desktop app launcher.' },
+  { title: 'CLI', href: '/using/cli/', description: 'Control System Bridge from the command line.' },
+  { title: 'TUI', href: '/using/tui/', description: 'Control System Bridge from an interactive terminal interface.' },
+  { title: 'Web Client', href: '/using/web-client/', description: 'Monitor and control System Bridge from the browser.' },
+  { title: 'Home Assistant', href: '/using/home-assistant/', description: 'Monitor and control your machine from Home Assistant.' },
+];
+
+export const apiCards = [
+  { title: 'Overview', href: '/api/', description: 'Base URL, authentication and the three protocols.' },
+  { title: 'HTTP', href: '/api/http/', description: 'Simple request/response reads over the HTTP API.' },
+  { title: 'Status & Health', href: '/api/status/', description: 'Check whether the backend is running.' },
+  { title: 'Data', href: '/api/data/', description: 'Request system data over the HTTP API.' },
+  { title: 'Media File Data', href: '/api/media-file-data/', description: 'Access media file information.' },
+  { title: 'MCP Server', href: '/api/mcp/', description: 'Connect agents over the Model Context Protocol.' },
+];
+
+export const llmsCards = [
+  { title: 'LLMs', href: '/llms/', description: 'Feed the documentation to an agent using llms.txt.' },
+];
+
+export const websocketCards = [
+  { title: 'Overview', href: '/api/websocket/', description: 'Connection URL, message envelopes and errors.' },
+  { title: 'Data', href: '/api/websocket/data/', description: 'Request, subscribe to and receive system data.' },
+  { title: 'Input', href: '/api/websocket/input/', description: 'Send keyboard keypresses and text.' },
+  { title: 'Control', href: '/api/websocket/control/', description: 'Media, notifications, opening files/URLs and power.' },
+  { title: 'System', href: '/api/websocket/system/', description: 'Files, settings, commands and exiting the app.' },
+];
+
+System Bridge runs on your desktop and exposes your system over a local API and WebSocket. Use these guides to get set up and start integrating.
+
+## Getting Started
+
+<CardGrid>
+  {gettingStarted.map((card) => <LinkCard key={card.href} {...card} />)}
+</CardGrid>
+
+## Using
+
+<CardGrid>
+  {usingCards.map((card) => <LinkCard key={card.href} {...card} />)}
+</CardGrid>
+
+## API
+
+<CardGrid>
+  {apiCards.map((card) => <LinkCard key={card.href} {...card} />)}
+</CardGrid>
+
+## WebSocket
+
+<CardGrid>
+  {websocketCards.map((card) => <LinkCard key={card.href} {...card} />)}
+</CardGrid>
+
+## LLMs
+
+<CardGrid>
+  {llmsCards.map((card) => <LinkCard key={card.href} {...card} />)}
+</CardGrid>

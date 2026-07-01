@@ -1,0 +1,106 @@
+---
+title: Download & Install
+---
+
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+Download the package for your platform from the [releases page](https://github.com/timmo001/system-bridge/releases).
+
+Each release ships these assets:
+
+- Arch Linux: `system-bridge-<version>-1-x86_64.pkg.tar.zst`
+- Debian / Ubuntu: `system-bridge_<version>_<arch>.deb`
+- Fedora / RHEL: `system-bridge-<version>.<arch>.rpm`
+- Flatpak: `system-bridge-<version>.flatpak`
+- Windows: `system-bridge-<version>-setup.exe`
+
+:::note
+Stable builds are attached to the releases page. Development builds from the latest `dev` branch are also available as workflow artifacts on the [GitHub Actions runs](https://github.com/timmo001/system-bridge/actions), which require a GitHub account to download.
+:::
+
+<Tabs syncKey="os">
+  <TabItem label="Linux">
+    Install the package that matches your distribution's package manager.
+
+    <Tabs syncKey="distro">
+      <TabItem label="Arch Linux">
+        Install from the AUR with an AUR helper such as [yay](https://github.com/Jguer/yay).
+
+        For the latest stable release, use the [system-bridge](https://aur.archlinux.org/packages/system-bridge) package:
+
+        ```bash
+        yay -S system-bridge
+        ```
+
+        For the development branch, use the [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) package. This builds and installs the application from the latest `dev` branch, which is updated automatically every commit:
+
+        ```bash
+        yay -S system-bridge-git
+        ```
+
+        Alternatively, install the `.pkg.tar.zst` from the releases page or downloaded workflow asset directly:
+
+        ```bash
+        sudo pacman -U system-bridge-<version>-1-x86_64.pkg.tar.zst
+        ```
+      </TabItem>
+      <TabItem label="Debian / Ubuntu">
+        Install the `.deb` asset with `apt` so dependencies are resolved automatically:
+
+        ```bash
+        sudo apt install ./system-bridge_<version>_<arch>.deb
+        ```
+
+        You can also install it with `dpkg`:
+
+        ```bash
+        sudo dpkg -i system-bridge_<version>_<arch>.deb
+        ```
+      </TabItem>
+      <TabItem label="Fedora / RHEL">
+        Install the `.rpm` asset with `dnf`:
+
+        ```bash
+        sudo dnf install ./system-bridge-<version>.<arch>.rpm
+        ```
+      </TabItem>
+      <TabItem label="Flatpak">
+        Install the `.flatpak` bundle:
+
+        ```bash
+        flatpak install system-bridge-<version>.flatpak
+        ```
+
+        Then run it with:
+
+        ```bash
+        flatpak run dev.timmo.system-bridge
+        ```
+      </TabItem>
+    </Tabs>
+  </TabItem>
+  <TabItem label="Windows">
+    Run the `system-bridge-<version>-setup.exe` installer to install the application. After installation completes, you can start System Bridge from the Start Menu shortcut.
+  </TabItem>
+  <TabItem label="macOS">
+    macOS is not officially supported and has no prebuilt packages. You can still build it from source and test it for yourself.
+
+    <Steps>
+    1. Clone the [repository](https://github.com/timmo001/system-bridge).
+    2. Run `mise run build`.
+    </Steps>
+
+    See the project's [README](https://github.com/timmo001/system-bridge#readme) for the development setup and toolchain requirements.
+
+    :::note
+    Please do not submit feedback or bug reports for macOS, as it is not supported. Contributions are welcome if you would like to help improve macOS support.
+    :::
+  </TabItem>
+</Tabs>
+
+## Next steps
+
+- Start System Bridge: see [Running](/running/).
+- Monitor and control your system from the [web client](/using/web-client/).
+- Explore the [CLI](/using/cli/) and [TUI](/using/tui/), and get your [token](/using/cli/#token).
+- Connect it to [Home Assistant](/using/home-assistant/).

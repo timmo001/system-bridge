@@ -1,0 +1,73 @@
+---
+title: Home Assistant
+description: Monitor and control System Bridge from Home Assistant.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+System Bridge integrates with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge), so you can monitor and control your machine from your Home Assistant instance. The integration uses a local push connection and is maintained by the System Bridge author.
+
+:::tip
+The official [System Bridge integration documentation](https://www.home-assistant.io/integrations/system_bridge) is the most up-to-date reference for entities, actions, and setup. Use this page as a starting point and follow the official docs for the current details.
+:::
+
+## Prerequisites
+
+- A running System Bridge backend. See [Running](/running/).
+- Your API token. See [how to find your token](/running/#token).
+
+## Adding the integration
+
+System Bridge can be auto-discovered by Home Assistant. When an instance is found, it appears under **Settings > Devices & services** as a discovered device, ready to set up.
+
+To add it manually:
+
+<Steps>
+
+1. In Home Assistant, go to **Settings > Devices & services**.
+2. Select **Add Integration** and choose **System Bridge**.
+3. Enter the host and your token when prompted, then follow the on-screen steps.
+
+</Steps>
+
+## Features
+
+The integration exposes your system as sensors, a media player, and a set of actions, plus notifications and update tracking.
+
+### Sensors
+
+Sensors report system information such as battery, CPU speed, memory, load, displays, filesystems, GPU usage, processes, and version details. Many are enabled by default, with additional CPU and GPU sensors (temperatures, clock speeds, fan speed, and more) available to enable manually.
+
+### Binary sensors
+
+Binary sensors report on/off states such as whether the battery is charging, the camera is in use, a reboot is pending, or a new version is available.
+
+### Media player
+
+Control currently playing media on your device from Home Assistant. Media player support is currently limited to devices running System Bridge on Windows.
+
+### Media source
+
+Browse and play media from your system through the Home Assistant media browser and supported media players.
+
+### Update
+
+An update entity notifies you when a new version of System Bridge is available.
+
+### Notifications
+
+Send rich notifications to your device, including a title, message, image, action buttons, and audio.
+
+### Actions
+
+Trigger actions on the machine running System Bridge:
+
+- Get a process by its ID, or get processes by name.
+- Open a path or a URL with the default application.
+- Send a keypress or type text.
+- Send a power command such as `sleep`, `lock`, `restart`, or `shutdown`.
+
+## Next steps
+
+- Read the official [integration documentation](https://www.home-assistant.io/integrations/system_bridge) for entity names, action parameters, and examples.
+- Connect to System Bridge directly with the [API and WebSocket](/api/).

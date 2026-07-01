@@ -1,0 +1,148 @@
+---
+title: System Bridge
+description: Monitor and control your system with a local API and WebSocket.
+template: splash
+hero:
+  tagline: A bridge for your systems.
+  image:
+    file: ../../assets/logo.svg
+    alt: System Bridge logo
+  actions:
+    - text: Download & Install
+      link: /install/
+      icon: right-arrow
+    - text: View Docs
+      link: /overview/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { CardGrid, LinkButton } from '@astrojs/starlight/components';
+import { Icon } from 'astro-icon/components';
+import LandingCard from '../../components/LandingCard.astro';
+
+<p class="sb-lede">
+  System Bridge is an application for your desktop that allows you to monitor and control your system.
+</p>
+
+## Features
+
+<CardGrid>
+  <LandingCard title="System Information">
+    <Icon slot="icon" name="mdi:information-outline" />
+    Access your system's information via the data modules using the API/WebSocket.
+  </LandingCard>
+  <LandingCard title="Open files and URLs">
+    <Icon slot="icon" name="mdi:cogs" />
+    Automate your system by opening a URL/path via the API/WebSocket.
+  </LandingCard>
+  <LandingCard title="Send Notifications">
+    <Icon slot="icon" name="mdi:bell" />
+    Send system notifications via the API/WebSocket.
+  </LandingCard>
+  <LandingCard title="AI / MCP Integration">
+    <Icon slot="icon" name="mdi:robot-outline" />
+    Connect agents to your system with the built-in
+    <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> server,
+    or feed the docs to a model with <a href="/llms/">llms.txt</a>.
+  </LandingCard>
+  <LandingCard title="Cross-Platform">
+    <Icon slot="icon" name="mdi:desktop-tower-monitor" />
+    Compatible with Windows and Linux.
+  </LandingCard>
+  <LandingCard title="Integrated with Home Assistant">
+    <Icon slot="icon" name="mdi:home-assistant" />
+    Interact with your Bridges using
+    <a href="https://www.home-assistant.io/integrations/system_bridge" target="_blank" rel="noopener noreferrer">Home Assistant</a>.
+    See the <a href="/using/home-assistant/">Home Assistant guide</a> to get started.
+  </LandingCard>
+  <LandingCard title="Android Companion App">
+    <Icon slot="icon" name="mdi:android" />
+    Available on the
+    <a href="https://play.google.com/store/apps/details?id=dev.timmo.systembridge" target="_blank" rel="noopener noreferrer">Play Store</a>.
+    Source is on
+    <a href="https://github.com/timmo001/system-bridge-android-companion" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </LandingCard>
+</CardGrid>
+
+## Modules
+
+<CardGrid>
+  <LandingCard title="Battery">
+    <Icon slot="icon" name="mdi:battery-charging" />
+    Battery level, capacity and configuration.
+  </LandingCard>
+  <LandingCard title="CPU">
+    <Icon slot="icon" name="mdi:cpu-64-bit" />
+    CPU usage, clock speed, and configuration.
+  </LandingCard>
+  <LandingCard title="Disks">
+    <Icon slot="icon" name="mdi:harddisk" />
+    Disk and filesystem information.
+  </LandingCard>
+  <LandingCard title="Display">
+    <Icon slot="icon" name="mdi:monitor" />
+    Display information.
+  </LandingCard>
+  <LandingCard title="GPU">
+    <Icon slot="icon" name="mdi:expansion-card" />
+    Graphics card configuration and usage.
+  </LandingCard>
+  <LandingCard title="Media">
+    <Icon slot="icon" name="mdi:video-vintage" />
+    Media player information.
+  </LandingCard>
+  <LandingCard title="Memory">
+    <Icon slot="icon" name="mdi:memory" />
+    Memory configuration and usage.
+  </LandingCard>
+  <LandingCard title="Network">
+    <Icon slot="icon" name="mdi:network-outline" />
+    Networking information.
+  </LandingCard>
+  <LandingCard title="Processes">
+    <Icon slot="icon" name="mdi:window-maximize" />
+    Process information.
+  </LandingCard>
+  <LandingCard title="Sensors">
+    <Icon slot="icon" name="mdi:chip" />
+    Sensor data.
+  </LandingCard>
+  <LandingCard title="System">
+    <Icon slot="icon" name="mdi:desktop-tower" />
+    System information.
+  </LandingCard>
+</CardGrid>
+
+## Links / Resources
+
+<CardGrid>
+  <LandingCard title="Discussions">
+    <Icon slot="icon" name="mdi:forum-outline" />
+    Participate in discussions and get help here.
+    <LinkButton href="https://github.com/timmo001/system-bridge/discussions" variant="secondary" target="_blank" rel="noopener noreferrer">
+      Open discussions
+    </LinkButton>
+  </LandingCard>
+  <LandingCard title="Suggest a Feature / Report a Bug">
+    <Icon slot="icon" name="mdi:notebook-plus-outline" />
+    Thought of a feature that could be added? Found an issue? Suggest it here.
+    <LinkButton href="https://github.com/timmo001/system-bridge/issues" variant="secondary" target="_blank" rel="noopener noreferrer">
+      Open issues
+    </LinkButton>
+  </LandingCard>
+  <LandingCard title="Contribute to the Application">
+    <Icon slot="icon" name="mdi:github" />
+    Contribute to the project by submitting a pull request.
+    <LinkButton href="https://github.com/timmo001/system-bridge" variant="secondary" target="_blank" rel="noopener noreferrer">
+      View repository
+    </LinkButton>
+  </LandingCard>
+  <LandingCard title="Contribute to the Website / Documentation">
+    <Icon slot="icon" name="mdi:notebook-edit-outline" />
+    Contribute to the website by submitting a pull request.
+    <LinkButton href="https://github.com/timmo001/system-bridge/tree/dev/docs" variant="secondary" target="_blank" rel="noopener noreferrer">
+      View website repository
+    </LinkButton>
+  </LandingCard>
+</CardGrid>

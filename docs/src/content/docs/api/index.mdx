@@ -1,0 +1,52 @@
+---
+title: API
+description: Reference for the System Bridge HTTP, WebSocket and MCP interfaces.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+System Bridge exposes your system over a local API. There are three ways to interact with it: an HTTP API for simple request/response calls, a WebSocket API for live data and control, and an MCP server for agents.
+
+The [WebSocket API](/api/websocket/) is the primary interface and covers most operations: live data, input, media and power control, notifications, settings, and commands. Reach for HTTP only when you want a quick one-off read of status or a module's current data.
+
+## Base URL
+
+By default the backend listens on port `9170`, so the base URL is:
+
+```text
+http://{host}:9170
+```
+
+Replace `{host}` with the hostname or IP address of the machine running System Bridge. The port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable.
+
+## Authentication
+
+Most endpoints require your API token. Get it with the CLI:
+
+```bash
+system-bridge client token
+```
+
+See the [CLI reference](/using/cli/#token) for more ways to find it. How you pass the token depends on the protocol:
+
+- **HTTP**: send the `X-API-Token` or `token` header. The media file endpoint takes a `token` query parameter instead.
+- **WebSocket**: include `token` in every message you send.
+- **MCP**: authenticated with the same token.
+
+The `GET /api` and `GET /api/health` endpoints do not require a token.
+
+## Protocols
+
+<CardGrid>
+  <LinkCard title="WebSocket" href="/api/websocket/" description="Live data subscriptions and system control. Covers most operations." />
+  <LinkCard title="HTTP" href="/api/status/" description="Request/response endpoints for status and module data." />
+  <LinkCard title="MCP Server" href="/api/mcp/" description="Connect agents over the Model Context Protocol." />
+</CardGrid>
+
+### When to use which
+
+| Protocol | Best for |
+| --- | --- |
+| WebSocket | Most operations: live updates, control actions (media, power, notifications, input), settings, and commands. |
+| HTTP | Simple one-off reads: health checks and fetching a module's current data. |
+| MCP | Letting agents query data and trigger actions. |

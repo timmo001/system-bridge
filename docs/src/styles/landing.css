@@ -1,0 +1,75 @@
+/* Purple hero panel: theme-agnostic background with the white logo.
+   Full-bleed background across the viewport, with inner content kept aligned
+   to the container width used by the rest of the page. */
+.hero {
+  background: #512da8;
+  color: #fff;
+  margin-inline: calc(50% - 50vw);
+  padding-block: 4.8rem;
+  padding-inline: max(calc(50vw - 50%), 1.5rem);
+  margin-block-start: -1.5rem;
+  margin-block-end: 2.8rem;
+}
+
+/* Contain the full-bleed hero's scrollbar-width overflow without affecting
+   doc pages or the sticky header. */
+main:has(.hero) {
+  overflow-x: clip;
+}
+
+.hero h1 {
+  color: #fff;
+}
+
+.hero .tagline {
+  color: color-mix(in srgb, #fff 85%, transparent);
+}
+
+/* Supporting blurb shown beneath the tagline inside the hero. */
+.hero .tagline .hero-blurb {
+  display: block;
+  margin-block-start: 1rem;
+  font-size: var(--sl-text-base);
+  color: color-mix(in srgb, #fff 80%, transparent);
+}
+
+/* CTA buttons need contrast against the purple panel. */
+.hero .sl-link-button.primary {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+.hero .sl-link-button.primary:hover {
+  background: color-mix(in srgb, #fff 88%, #512da8);
+}
+
+.hero .sl-link-button.minimal {
+  color: #fff;
+  border-color: transparent;
+  padding-inline: 1.125rem;
+}
+
+@media (min-width: 50rem) {
+  .hero .sl-link-button.minimal {
+    padding-inline: 1.25rem;
+  }
+}
+
+.hero .sl-link-button.minimal:hover {
+  background: color-mix(in srgb, #fff 12%, transparent);
+  color: #fff;
+}
+
+/* Secondary CTA buttons inside the landing cards have no hover state from
+   Starlight. Give them a subtle fill that picks up each card's accent. */
+.sl-link-button.secondary {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.sl-link-button.secondary:hover {
+  background: color-mix(in srgb, var(--sb-card-border, var(--sl-color-gray-5)) 15%, transparent);
+  border-color: var(--sb-card-border, var(--sl-color-gray-4));
+}

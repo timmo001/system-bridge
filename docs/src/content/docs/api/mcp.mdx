@@ -1,0 +1,166 @@
+---
+title: MCP Server
+description: Connect agents to System Bridge over the Model Context Protocol to query system data and trigger actions.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+System Bridge includes a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, letting agents and other MCP clients query your system and trigger actions.
+
+The server runs over a WebSocket at `ws://{host}:9170/api/mcp`. Replace `{host}` with the hostname or IP of the machine running System Bridge; the port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable. The connection is authenticated with your API token, passed either as a `token` query parameter or an `Authorization: Bearer {token}` header. A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+
+## Setup
+
+Agents launch MCP servers as a local command and talk to them over stdio. Because System Bridge serves MCP over a WebSocket, a bridge such as [`websocat`](https://github.com/vi/websocat) is needed to pipe stdio to the WebSocket.
+
+### Install websocat
+
+<Tabs syncKey="os">
+  <TabItem label="Linux">
+    On Arch Linux, install from the `extra` repository:
+
+    ```bash
+    sudo pacman -S websocat
+    ```
+
+    On other distributions, install with `cargo` or download a binary from the [websocat releases](https://github.com/vi/websocat/releases):
+
+    ```bash
+    cargo install websocat
+    ```
+  </TabItem>
+  <TabItem label="macOS">
+    Install with [Homebrew](https://brew.sh):
+
+    ```bash
+    brew install websocat
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    Download a binary from the [websocat releases](https://github.com/vi/websocat/releases) and add it to your `PATH`.
+  </TabItem>
+</Tabs>
+
+### Configure your agent
+
+With `websocat` installed, add System Bridge to your agent's MCP config:
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "system-bridge": {
+      "command": "websocat",
+      "args": ["ws://localhost:9170/api/mcp?token=YOUR_TOKEN"]
+    }
+  }
+}
+```
+
+- Replace `localhost` with the host running System Bridge if the agent is on another machine.
+- Replace `YOUR_TOKEN` with your API token. See [how to find your token](/using/cli/#token).
+
+:::note
+The config key and file location vary by agent. Check your agent's MCP documentation for where its config lives and which key it uses.
+:::
+
+:::tip
+If you sync one config across several machines, hardcoding a token doesn't travel well. Use a small wrapper script that reads the token from `system-bridge client token` at launch and execs `websocat`. Save it as `system-bridge-mcp` somewhere on your `PATH` and make it executable:
+
+```bash title="system-bridge-mcp"
+#!/usr/bin/env bash
+set -euo pipefail
+
+host="${SYSTEM_BRIDGE_HOST:-localhost}"
+port="${SYSTEM_BRIDGE_PORT:-9170}"
+
+token="$(system-bridge client token | tr -d '[:space:]')"
+if [[ -z "$token" ]]; then
+  echo "system-bridge-mcp: failed to get token from 'system-bridge client token'" >&2
+  exit 1
+fi
+
+exec websocat "ws://${host}:${port}/api/mcp?token=${token}"
+```
+
+Then point `command` at it so each machine uses its own token automatically:
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "system-bridge": {
+      "command": "system-bridge-mcp"
+    }
+  }
+}
+```
+
+:::
+
+## Tools
+
+### `system_bridge_get_data`
+
+Get current system information from one or more data modules. The tool returns each requested module's latest data as JSON.
+
+- `modules` (required): An array of module names to fetch.
+
+Available modules:
+
+| Module | Description |
+| --- | --- |
+| `battery` | Charge level, charging state, and time remaining. |
+| `cpu` | Usage, frequency, core counts, and per-core load. |
+| `disks` | Mounted devices, partitions, and used/free space. |
+| `displays` | Connected displays, resolution, and refresh rate. |
+| `gpus` | GPU model, load, memory, and temperature. |
+| `media` | Currently playing media: title, artist, and playback state. |
+| `memory` | Physical and virtual memory usage. |
+| `networks` | Network interfaces, addresses, and throughput. |
+| `processes` | Running processes with CPU and memory usage. |
+| `sensors` | Hardware sensors such as temperatures and fan speeds. |
+| `system` | Hostname, OS, uptime, users, and version details. |
+
+Example arguments:
+
+```json
+{ "modules": ["cpu", "memory", "battery"] }
+```
+
+### `system_bridge_send_notification`
+
+Send a desktop notification to the machine running System Bridge.
+
+- `title` (required): The notification title.
+- `message` (required): The notification body text.
+- `icon` (optional): An icon name to display with the notification.
+
+Example arguments:
+
+```json
+{ "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
+```
+
+### `system_bridge_media_control`
+
+Control playback of the system's current media session.
+
+- `action` (required): The action to perform. Must be uppercase.
+
+Available actions:
+
+| Action | Effect |
+| --- | --- |
+| `PLAY` | Resume playback. |
+| `PAUSE` | Pause playback. |
+| `STOP` | Stop playback. |
+| `NEXT` | Skip to the next track. |
+| `PREVIOUS` | Return to the previous track. |
+| `VOLUME_UP` | Raise the volume. |
+| `VOLUME_DOWN` | Lower the volume. |
+| `MUTE` | Toggle mute. |
+
+Example arguments:
+
+```json
+{ "action": "PAUSE" }
+```
