@@ -2,7 +2,7 @@
 title: CLI
 ---
 
-The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `tui` and `version` are top-level commands.
+The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `tui`, `version` and `completions` are top-level commands.
 
 ## Token
 
@@ -132,6 +132,41 @@ To get the version of System Bridge, run:
 ```bash
 system-bridge version
 ```
+
+## Completions
+
+System Bridge can generate shell completion scripts for the CLI, so you get tab-completion of commands, flags and data module names.
+
+On Linux, the DEB, RPM and Arch packages install completions for bash, zsh and fish automatically. Start a new shell after installing and completion works with no extra setup.
+
+To enable completions yourself, or on another shell, generate a script with:
+
+```bash
+system-bridge completions <shell>
+```
+
+Supported shells are `bash`, `zsh`, `fish` and `pwsh` (PowerShell). Source the output to load completion into your shell:
+
+```bash
+# bash (~/.bashrc)
+source <(system-bridge completions bash)
+
+# zsh (~/.zshrc)
+source <(system-bridge completions zsh)
+
+# fish
+system-bridge completions fish > ~/.config/fish/completions/system-bridge.fish
+```
+
+On PowerShell, load it in the current session, and add the same line to your profile to make it persist:
+
+```powershell
+system-bridge completions pwsh | Out-String | Invoke-Expression
+```
+
+:::tip
+Completion is aware of your data modules. Once it is enabled, type `system-bridge client data run --module ` and press Tab to complete with the available module names.
+:::
 
 ## Next steps
 
