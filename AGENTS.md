@@ -7,7 +7,8 @@ Cross-platform application (Linux, Windows, macOS) that bridges system informati
 ```bash
 # Build and run
 mise run build:all  # Build everything (frontend + backend)
-mise run run        # Run backend server
+mise run run        # Run backend + web in the foreground
+mise run serve:all  # Start backend + web through pitchfork in the background
 mise run test       # Run tests
 
 # See all commands
@@ -30,6 +31,15 @@ mise tasks
 - **Package manager**: bun for all JavaScript/TypeScript (web client, TUI, docs)
 - **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
+
+## Background Dev Servers
+
+- Prefer the `serve:*` mise tasks over foreground `run:*` tasks when starting long-running dev servers from an agent or background workflow.
+- `mise run serve:backend` starts the backend through pitchfork. The wrapper stops any production `system-bridge` process that owns `:9170` (systemd, Hyprland, desktop autostart, or manual shell), runs the dev backend, and restores the previously running live service or process when dev stops.
+- `mise run serve:web` starts the Vite web client through pitchfork. It has no production counterpart.
+- Use `mise run serve:status`, `mise run serve:logs`, and `mise run serve:stop` for status, logs, and cleanup.
+- Keep direct `mise run run:*` usage for foreground debugging only, or when pitchfork is unavailable.
+- The pitchfork config lives in `pitchfork.toml`; wrapper scripts live under `.scripts/linux/pitchfork-*.sh`.
 
 ## Platforms
 

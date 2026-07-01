@@ -170,6 +170,36 @@ depends = ["build:all"]
 run = "./system-bridge-linux backend"
 run_windows = "./system-bridge.exe backend"
 
+[tasks."run:backend-dev"]
+description = "Build and run the backend server without the TUI build"
+depends = ["clean", "build:web-client"]
+run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
+run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
+
+[tasks."serve:backend"]
+description = "Start the backend dev server through pitchfork"
+run = "pitchfork start backend"
+
+[tasks."serve:web"]
+description = "Start the web client dev server through pitchfork"
+run = "pitchfork start web"
+
+[tasks."serve:all"]
+description = "Start all pitchfork dev servers"
+run = "pitchfork start -l"
+
+[tasks."serve:status"]
+description = "Show pitchfork dev server status"
+run = "pitchfork status"
+
+[tasks."serve:logs"]
+description = "Follow backend dev server logs"
+run = "pitchfork logs -t backend"
+
+[tasks."serve:stop"]
+description = "Stop pitchfork dev servers"
+run = "pitchfork stop backend web"
+
 [tasks."run:tui"]
 description = "Build and run the TUI"
 depends = ["build:tui"]
