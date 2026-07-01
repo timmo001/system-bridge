@@ -142,9 +142,12 @@ From the repo root: `mise run docs-dev`, `mise run docs-build`.
 - No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
 - No Copilot instructions found in `.github/copilot-instructions.md`.
 
-## OpenCode Skills (Use for Infrequent Tasks)
+## Project Skills (Use for Infrequent Tasks)
 
-- `/.opencode/skills/docs-page-workflow.md`
-- `/.opencode/skills/landing-content-updates.md`
+Docs workflows live as project skills in the repo root at `.agents/skills/` and
+load on demand:
+
+- `docs-page-workflow` - add or restructure a Starlight docs page
+- `landing-content-updates` - edit the landing page content
 
 Keep this file focused on always-needed guidance. Move rare workflows to skills.

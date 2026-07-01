@@ -1,5 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "paths": [".agents/skills"]
+  },
   "references": {
     "system-bridge-connector": {
       "repository": "timmo001/system-bridge-connector",
