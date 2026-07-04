@@ -285,9 +285,9 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 
 		// Check if this struct has recursive dependencies
 		if hasRecursiveDependency(name, structInfo, structs) {
-			generateRecursiveSchema(&buf, structInfo)
+			generateRecursiveSchema(&buf, structInfo, structs)
 		} else {
-			generateNormalSchema(&buf, structInfo, enums)
+			generateNormalSchema(&buf, structInfo, enums, structs)
 		}
 	}
 
@@ -371,7 +371,9 @@ func getStructComment(name string) string {
 		"SensorsNVIDIA":          "NVIDIA Sensors",
 		"SensorsWindows":         "Windows Sensors",
 		"Temperature":            "Temperature Sensor",
+		"Fan":                    "Fan Sensor",
 		"SystemUser":             "System User",
+		"DeviceInfo":             "Device Info",
 	}
 
 	if comment, exists := comments[name]; exists {
@@ -385,7 +387,7 @@ func hasRecursiveDependency(name string, structInfo StructInfo, structs map[stri
 	return name == "SensorsWindowsHardware"
 }
 
-func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
+func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo, structs map[string]StructInfo) {
 	// For SensorsWindowsHardware with recursive structure
 	fmt.Fprintf(buf, "export const %sSchema: z.ZodType<{\n", structInfo.Name)
 
@@ -397,7 +399,7 @@ func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	buf.WriteString("}> = z.object({\n")
 
 	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, structInfo.Name)
+		zodSchema := mapGoTypeToZodSchema(field, structInfo.Name, structs)
 		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
@@ -410,7 +412,7 @@ func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo) {
 	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
 }
 
-func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo) {
+func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo, structs map[string]StructInfo) {
 	// Check if this is an array type alias
 	if len(structInfo.Fields) == 1 && structInfo.Fields[0].Name == "__array_element__" {
 		elemType := structInfo.Fields[0].Type
@@ -423,7 +425,7 @@ func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[st
 	fmt.Fprintf(buf, "export const %sSchema = z.object({\n", structInfo.Name)
 
 	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, "")
+		zodSchema := mapGoTypeToZodSchema(field, "", structs)
 		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
 		if i < len(structInfo.Fields)-1 {
 			buf.WriteString(",\n")
@@ -451,7 +453,7 @@ func mapGoTypeToZodWithRecursive(field FieldInfo, parentStruct string) string {
 	return zodType
 }
 
-func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
+func mapGoTypeToZodSchema(field FieldInfo, parentStruct string, structs map[string]StructInfo) string {
 	var zodSchema string
 
 	// Handle recursive reference for SensorsWindowsHardware
@@ -473,18 +475,9 @@ func mapGoTypeToZodSchema(field FieldInfo, parentStruct string) string {
 	case "RunMode":
 		baseSchema = "z.enum([\"standalone\"])"
 	default:
-		// Check if it's a defined struct
-		if strings.HasSuffix(field.Type, "Data") ||
-			strings.HasPrefix(field.Type, "CPU") ||
-			strings.HasPrefix(field.Type, "Disk") ||
-			strings.HasPrefix(field.Type, "Display") ||
-			strings.HasPrefix(field.Type, "GPU") ||
-			strings.HasPrefix(field.Type, "Memory") ||
-			strings.HasPrefix(field.Type, "Network") ||
-			strings.HasPrefix(field.Type, "Process") ||
-			strings.HasPrefix(field.Type, "Sensors") ||
-			strings.HasPrefix(field.Type, "System") ||
-			strings.HasPrefix(field.Type, "Temperature") {
+		// Reference the generated schema when the field type is a parsed struct.
+		// This is robust to new types without needing a name-prefix allow-list.
+		if _, ok := structs[field.Type]; ok {
 			baseSchema = field.Type + "Schema"
 		} else {
 			baseSchema = "z.unknown()"
@@ -554,7 +547,9 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"NetworkStats",
 		"NetworkIO",
 		"Temperature",
+		"Fan",
 		"SystemUser",
+		"DeviceInfo",
 		"MemorySwap",
 		"MemoryVirtual",
 

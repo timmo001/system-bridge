@@ -188,7 +188,6 @@ class PageSettingsCommands extends PageElement {
     }
   };
 
-  // fallow-ignore-next-line complexity
   private checkPendingSubmission(): void {
     if (!this.isSubmitting || this.pendingRequestId === null) return;
 
@@ -286,7 +285,6 @@ class PageSettingsCommands extends PageElement {
     this.saveSettingsWithCommands(updatedCommands);
   };
 
-  // fallow-ignore-next-line complexity
   private handleExecuteCommand = (e: Event): void => {
     const button = e.currentTarget as HTMLElement;
     const id = button.getAttribute("data-id");
@@ -330,7 +328,6 @@ class PageSettingsCommands extends PageElement {
     }, 30000);
   }
 
-  // fallow-ignore-next-line complexity
   private saveSettingsWithCommands(
     commands: SettingsCommandDefinition[],
   ): void {
@@ -409,7 +406,6 @@ class PageSettingsCommands extends PageElement {
     `;
   }
 
-  // fallow-ignore-next-line complexity
   private renderCommandActions(
     cmd: SettingsCommandDefinition,
     isExecuting: boolean,
@@ -446,7 +442,6 @@ class PageSettingsCommands extends PageElement {
     `;
   }
 
-  // fallow-ignore-next-line complexity
   private renderCommandResultBlock(
     result: CommandResult | null | undefined,
   ): TemplateResult {

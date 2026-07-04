@@ -242,9 +242,17 @@ func TestMapGoTypeToZodSchema(t *testing.T) {
 		},
 	}
 
+	// Struct set used to resolve type references. UnknownType is intentionally
+	// absent so it falls back to z.unknown().
+	knownStructs := map[string]StructInfo{
+		"CPUData":                {Name: "CPUData"},
+		"Process":                {Name: "Process"},
+		"SensorsWindowsHardware": {Name: "SensorsWindowsHardware"},
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := mapGoTypeToZodSchema(tt.field, tt.parent)
+			result := mapGoTypeToZodSchema(tt.field, tt.parent, knownStructs)
 			if result != tt.expected {
 				t.Errorf("mapGoTypeToZodSchema() = %v, want %v", result, tt.expected)
 			}

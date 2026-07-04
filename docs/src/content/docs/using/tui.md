@@ -46,6 +46,10 @@ Run client commands:
 
 Show the application version.
 
+### Documentation
+
+Open the documentation site in your default browser.
+
 ### Quit
 
 Exit the TUI.

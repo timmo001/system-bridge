@@ -6,6 +6,11 @@ Summary:        System Bridge
 License:        Apache-2.0
 ExclusiveArch:  x86_64
 
+# Optional runtime tools that improve hardware detection when present.
+Recommends:     pciutils
+Suggests:       lm_sensors
+Suggests:       nvidia-smi
+
 %description
 A bridge for your systems.
 

@@ -101,7 +101,6 @@ class PageConnection extends PageElement {
     return true;
   }
 
-  // fallow-ignore-next-line complexity
   private handleTestMessage(
     message: { type?: string; subtype?: string; id?: string },
     ws: WebSocket,

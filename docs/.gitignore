@@ -20,9 +20,6 @@ dist-ssr
 .env
 .env.production
 
-# Fallow
-.fallow
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -23,6 +23,24 @@ A bridge for your systems.
 
 See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
+### Optional dependencies
+
+System Bridge reads most hardware metrics directly from the kernel, so these
+tools are not required. Installing them improves detection on some systems:
+
+- **Linux**
+  - `pciutils` (`lspci`): resolves friendly GPU model names. GPUs are still
+    detected without it, but fall back to a generic name.
+  - `lm_sensors`: helps expose the full set of temperature and fan sensors on
+    some boards. Run `sudo sensors-detect` once to load the relevant modules.
+  - `nvidia-utils` (`nvidia-smi`): required for NVIDIA GPU metrics. Intel and
+    AMD GPUs use the kernel `drm`/`hwmon` interfaces and need nothing extra.
+
+  Install with pacman (`sudo pacman -S pciutils lm_sensors`) or apt
+  (`sudo apt install pciutils lm-sensors`).
+
+- **Windows / macOS**: no optional tools are needed.
+
 ## File Locations
 
 - Linux settings/token: `~/.local/share/system-bridge/v5/`
@@ -34,22 +52,15 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
 ## Development Setup
 
-1. Install [`mise`](https://mise.jdx.dev/installing-mise.html) (recommended)
-1. Run `mise install` in the repo root to install the pinned Go, Bun, and Node
-   toolchains.
+See the [developing documentation](https://system-bridge.timmo.dev/developing/)
+for toolchain setup, build tasks, the pitchfork dev-server workflow, testing,
+and quality checks.
 
-`mise.toml` is the source of truth for local and CI runtimes.
+Quick start:
 
-> **Building without mise:** `mise run` tasks require `mise`. If you cannot
-> install it (e.g. Raspberry Pi armhf), ensure compatible versions of `go`,
-> `bun`, and `node` (see `mise.toml`) are on your PATH and run the underlying
-> commands from the `[tasks]` in `mise.toml` directly (build the web client and
-> TUI with `bun`, then `go build`).
-
-## Build and Install
-
-1. Clone this repo
-1. Run `mise run build:all`
+1. Install [`mise`](https://mise.jdx.dev/installing-mise.html) and run `mise install`
+1. Run `mise run deps` then `mise run build:all`
+1. Run `mise run serve:all` (Linux) or `mise run run` (all platforms)
 
 ## Packages
 

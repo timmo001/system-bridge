@@ -104,7 +104,6 @@ class PageSettingsMedia extends PageElement {
     this.newDirectoryPath = input.value;
   };
 
-  // fallow-ignore-next-line complexity
   private handleAddDirectory = async (): Promise<void> => {
     if (
       !this.newDirectoryName.trim() ||
@@ -166,7 +165,6 @@ class PageSettingsMedia extends PageElement {
     this.saveSettings();
   };
 
-  // fallow-ignore-next-line complexity
   private saveSettings(): void {
     if (
       !this.connection?.token ||
@@ -239,7 +237,6 @@ class PageSettingsMedia extends PageElement {
     return html` <div class="space-y-2">${directoryItems}</div> `;
   }
 
-  // fallow-ignore-next-line complexity
   private renderAddDirectoryForm() {
     return html`
       <div class="rounded-lg border bg-card p-6 space-y-4">

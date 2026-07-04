@@ -13,7 +13,6 @@ class ConnectionIndicator extends UIElement {
   @consume({ context: connectionStatusContext, subscribe: true })
   private _status?: ConnectionStatus;
 
-  // fallow-ignore-next-line complexity
   render(): TemplateResult {
     const isConnected = this._status?.isConnected ?? false;
 

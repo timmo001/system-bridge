@@ -197,6 +197,9 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		if pu := system.GetPSUPowerUsage(); pu != nil {
 			systemData.PowerUsage = pu
 		}
+		if di := system.GetDeviceInfo(); di != nil {
+			systemData.DeviceInfo = di
+		}
 	}
 
 	// Get version information

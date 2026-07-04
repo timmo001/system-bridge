@@ -442,7 +442,6 @@ export class WebSocketController implements ReactiveController {
     return { moduleName, data: dataValidation.data };
   }
 
-  // fallow-ignore-next-line complexity
   private normalizeSettings(
     settings: Partial<Settings>,
     current?: Settings | null,

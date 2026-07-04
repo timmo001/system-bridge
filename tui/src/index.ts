@@ -61,7 +61,7 @@ const program = Effect.gen(function* () {
   renderer.start();
   log("Renderer started — TUI is live");
 
-  yield* Effect.never;
+  return yield* Effect.never;
 });
 
 Effect.runPromise(program).catch((err) => {

@@ -90,6 +90,10 @@ func main() {
 						Name:  "open-web-client",
 						Usage: "Open the web client in the default browser",
 					},
+					&cli.BoolFlag{
+						Name:  "no-tray",
+						Usage: "Disable the system tray icon",
+					},
 				},
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					slog.Info("------ System Bridge ------")
@@ -141,32 +145,34 @@ func main() {
 						}
 					}()
 
-					// Set up tray handlers
-					tray.SetHandlers(tray.Handlers{
-						OpenWebClient: func() {
-							openWebClient(token)
-						},
-						LaunchTUI: func() {
-							launchTUIInTerminal()
-						},
-						OpenDocs: func() {
-							openExternalURL(version.DocsURL, "documentation")
-						},
-						OpenLogsDir: func() {
-							openLogsDirectory()
-						},
-						Quit: func() {
-							slog.Info("Quitting...")
-							// Cancel context to trigger graceful shutdown
-							// The backend.Run() will return, allowing deferred cleanup to run
-							cancel()
-							// Quit the tray to unblock systray.Run()
-							tray.Quit()
-						},
-					})
+					if !cmd.Bool("no-tray") {
+						// Set up tray handlers
+						tray.SetHandlers(tray.Handlers{
+							OpenWebClient: func() {
+								openWebClient(token)
+							},
+							LaunchTUI: func() {
+								launchTUIInTerminal()
+							},
+							OpenDocs: func() {
+								openExternalURL(version.DocsURL, "documentation")
+							},
+							OpenLogsDir: func() {
+								openLogsDirectory()
+							},
+							Quit: func() {
+								slog.Info("Quitting...")
+								// Cancel context to trigger graceful shutdown
+								// The backend.Run() will return, allowing deferred cleanup to run
+								cancel()
+								// Quit the tray to unblock systray.Run()
+								tray.Quit()
+							},
+						})
 
-					// Start the system tray UI
-					go tray.Run()
+						// Start the system tray UI
+						go tray.Run()
+					}
 
 					// Create and run backend server with signal-aware context
 					b := backend.New(s, dataStore, token, &webClientContent)

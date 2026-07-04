@@ -118,7 +118,6 @@ export class PageElement extends UIElement {
     `;
   }
 
-  // fallow-ignore-next-line complexity
   protected renderPageHeader(options?: {
     showBackButton?: boolean;
     showConnectionIndicator?: boolean;

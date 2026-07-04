@@ -1,0 +1,21 @@
+# Optional pitchfork (https://pitchfork.jdx.dev) dev-loop supervisor config.
+# Install once with `mise use -g pitchfork`, then:
+#   pitchfork start -l          # start every daemon defined here
+#   pitchfork status            # PIDs, ports, state
+#   pitchfork logs -t backend   # follow a daemon's logs
+#   pitchfork stop backend      # stop
+# Inert unless you run pitchfork; it does not affect builds or CI.
+#
+# The backend daemon owns :9170. The wrapper stops the known production systemd
+# user unit, also terminates whichever process currently owns the port, then
+# restores the previously running live service or process when the dev backend exits.
+
+[daemons.backend]
+# Stop production by service and by port, then run the dev backend.
+run = ".scripts/linux/pitchfork-backend-dev.sh"
+ready_delay = 3
+
+[daemons.web]
+# Vite dev server (hot reload) for the web client. No production counterpart.
+run = "exec mise run run:web-client"
+ready_delay = 1

@@ -29,7 +29,6 @@ export class SendablePageElement extends PageElement {
     this.lastResult = { success, message };
   }
 
-  // fallow-ignore-next-line complexity
   protected clearSendingState(): void {
     this.isSending = false;
     this.pendingRequestId = null;
@@ -54,7 +53,6 @@ export class SendablePageElement extends PageElement {
    * @param sendFn - Performs the actual send; receives the generated requestId
    * @param errorLabel - Error message to display and log on failure
    */
-  // fallow-ignore-next-line complexity
   protected sendWithTimeout(
     sendFn: (requestId: string) => void,
     errorLabel: string,

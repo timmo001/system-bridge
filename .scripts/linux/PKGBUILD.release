@@ -18,6 +18,9 @@ url="https://github.com/timmo001/system-bridge"
 license=('Apache-2.0')
 keywords=('system-bridge' 'automation' 'home-assistant' 'api' 'websocket')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
+optdepends=('pciutils: GPU model identification via lspci'
+            'lm_sensors: broader temperature and fan sensor coverage'
+            'nvidia-utils: NVIDIA GPU metrics via nvidia-smi')
 provides=('system-bridge')
 options=('!strip')
 

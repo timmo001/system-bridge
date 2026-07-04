@@ -1,0 +1,162 @@
+---
+title: Developing
+description: Build, run, and test System Bridge from source.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+This guide covers the contributor workflow for building and running System Bridge locally. End-user install steps are on the [Install](/install/) page.
+
+## Prerequisites
+
+<Steps>
+
+1. Install [`mise`](https://mise.jdx.dev/installing-mise.html) (recommended). `mise.toml` pins the Go, Bun, and Node versions used by local development and CI.
+
+2. Clone the [repository](https://github.com/timmo001/system-bridge) and install toolchains:
+
+   ```bash
+   git clone https://github.com/timmo001/system-bridge.git
+   cd system-bridge
+   mise install
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   mise run deps
+   ```
+
+</Steps>
+
+:::note
+**Building without mise:** `mise run` tasks require `mise`. If you cannot install it, put compatible versions of `go`, `bun`, and `node` (see `mise.toml`) on your `PATH` and run the underlying commands from the `[tasks]` section directly.
+:::
+
+## Build
+
+Build everything (web client, TUI, and backend binary):
+
+```bash
+mise run build:all
+```
+
+On Linux this produces `system-bridge-linux` in the repo root. On Windows it produces `system-bridge.exe`.
+
+Common component tasks:
+
+| Task | Purpose |
+| --- | --- |
+| `mise run build:web-client` | Build the Lit + Vite web client into `web-client/dist/` |
+| `mise run build:tui` | Build the terminal UI binary |
+| `mise run generate:schemas` | Regenerate Zod schemas after changing Go types in `types/` |
+
+List every task with `mise tasks`.
+
+## Run during development
+
+### Foreground (all platforms)
+
+`mise run run` builds the project and starts the Vite dev server and backend together in the foreground. Use this when you want live reload and logs in one terminal.
+
+| Task | What it starts |
+| --- | --- |
+| `mise run run` | Vite dev server + backend (via `concurrently`) |
+| `mise run run:web-client` | Vite dev server only (default port `5173`) |
+| `mise run run:backend` | Backend only on port `9170` |
+| `mise run run:backend-dev` | Backend without rebuilding the TUI (faster iteration) |
+| `mise run run:tui` | Build and run the TUI |
+
+When using the Vite dev server, open `http://localhost:5173` and connect to the backend at port `9170`. Get your token with [`system-bridge client token`](/using/cli/#token).
+
+### Background with pitchfork (Linux)
+
+On Linux, [pitchfork](https://pitchfork.jdx.dev) can supervise dev servers in the background. Install it once:
+
+```bash
+mise use -g pitchfork
+```
+
+Then use the `serve:*` tasks (defined in `pitchfork.toml`):
+
+| Task | Purpose |
+| --- | --- |
+| `mise run serve:all` | Start backend and web dev servers |
+| `mise run serve:backend` | Start the backend dev server only |
+| `mise run serve:web` | Start the Vite dev server only |
+| `mise run serve:status` | Show daemon PIDs, ports, and state |
+| `mise run serve:logs` | Follow backend logs |
+| `mise run serve:restart` | Restart backend and web daemons |
+| `mise run serve:stop` | Stop backend and web daemons |
+
+:::caution
+The backend daemon owns port `9170`. On start, the wrapper in `.scripts/linux/pitchfork-backend-dev.sh` stops any production `system-bridge` process using that port (systemd user service, compositor autostart, or a manual shell process) and restores it when the dev backend exits. Plan for a brief interruption to your running instance while developing.
+:::
+
+Prefer `serve:*` for long-running background work (agents, repeated UI checks). Use `run:*` for foreground debugging or on platforms where pitchfork is not set up.
+
+## Test data modules locally
+
+Data modules live under `data/module/`. After building, exercise a module without starting the full backend:
+
+```bash
+mise run cli -- client data list
+mise run cli -- client data run --module cpu --pretty
+```
+
+Or with `go run` before a full build:
+
+```bash
+go run . client data run --module cpu --pretty
+```
+
+OS-specific module code belongs in build-tagged files inside subpackages (for example `data/module/system/system_linux.go`). See `.agents/architecture.md` in the repository for the required pattern.
+
+## Schema and type changes
+
+When you change Go types under `types/`, regenerate the web client Zod schemas:
+
+```bash
+mise run generate:schemas
+```
+
+Do not hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts`; it is generated output.
+
+## Quality checks
+
+| Task | Purpose |
+| --- | --- |
+| `mise run test` | Run Go tests (`go test -v ./...`) |
+| `mise run lint:all` | Go fmt/vet, web-client ESLint/typecheck, TUI typecheck |
+| `mise run check` | `lint:all` plus tests |
+
+After editing Go code, run `go fmt ./...` (included in `lint:go`).
+
+## Documentation site
+
+Docs live in `docs/` (Astro + Starlight). From the repo root:
+
+```bash
+mise run docs:dev    # dev server
+mise run docs:build  # production build (validates internal links)
+```
+
+See `docs/AGENTS.md` for authoring conventions.
+
+## Configuration paths
+
+During development, settings and tokens use the same per-user locations as a normal install:
+
+| Platform | Settings / token | Logs |
+| --- | --- | --- |
+| Linux | `~/.local/share/system-bridge/v5/` | `~/.local/state/system-bridge/YYYY-MM-DD.log` |
+| Windows | `%LOCALAPPDATA%\system-bridge\v5\` | `%LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log` |
+| macOS | `~/Library/Application Support/system-bridge/v5/` | `~/Library/Logs/system-bridge/YYYY-MM-DD.log` |
+
+The backend port defaults to `9170` and can be overridden with `SYSTEM_BRIDGE_PORT`. The SSDP discovery port defaults to `1900` and can be overridden with `SYSTEM_BRIDGE_SSDP_PORT`. Override the settings and log directories with `SYSTEM_BRIDGE_CONFIG_DIR` and `SYSTEM_BRIDGE_LOG_DIR` (both must be absolute paths). See [Running → Configuration](/running/#configuration) for the full list of environment variables.
+
+## Next steps
+
+- Read the [API overview](/api/) and [MCP server](/api/mcp/) docs for integration work.
+- Use the [CLI](/using/cli/) reference for token, data, and completion commands.
+- Open the [web client](/using/web-client/) against your dev backend once it is running.

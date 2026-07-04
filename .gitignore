@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+/bun.lock
 
 # Builds
 *.exe
@@ -26,9 +27,6 @@ system-bridge.syso
 
 # OpenCode
 .opencode
-
-# Fallow
-.fallow/
 
 # NSIS
 !installer.nsi.template
