@@ -145,7 +145,6 @@ class PageNotifications extends SendablePageElement {
     return data;
   }
 
-  // fallow-ignore-next-line complexity
   private handleSendNotification = (): void => {
     if (
       !this.notificationTitle.trim() ||

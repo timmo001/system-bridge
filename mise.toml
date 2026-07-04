@@ -241,8 +241,8 @@ description = "Run all linters and tests"
 depends = ["lint:all", "test"]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client, TUI, fallow)"
-depends = ["lint:go", "lint:web-client", "lint:tui", "lint:fallow"]
+description = "Run all linters (Go, web client, TUI)"
+depends = ["lint:go", "lint:web-client", "lint:tui"]
 
 [tasks."lint:go"]
 description = "Run Go linters (fmt, vet)"
@@ -263,11 +263,6 @@ run = [
 description = "Run TUI linter (typecheck)"
 dir = "tui"
 run = "bun run typecheck"
-
-[tasks."lint:fallow"]
-description = "Run fallow dead code analysis"
-dir = "web-client"
-run = "bunx fallow --fail-on-issues"
 
 [tasks.clean]
 description = "Remove build artifacts"

@@ -84,7 +84,6 @@ class PageSettingsDisks extends PageElement {
     void this.loadMounts();
   }
 
-  // fallow-ignore-next-line complexity
   private loadSettings() {
     if (this.bridgeSettings?.settings) {
       this.allowedMountPoints = [
@@ -94,7 +93,6 @@ class PageSettingsDisks extends PageElement {
     }
   }
 
-  // fallow-ignore-next-line complexity
   private async loadMounts() {
     const token = this.connection?.token;
     if (!token || !this.actions || !this.status?.isConnected) {
@@ -138,7 +136,6 @@ class PageSettingsDisks extends PageElement {
     this.saveSettings();
   };
 
-  // fallow-ignore-next-line complexity
   private saveSettings(): void {
     const token = this.connection?.token;
     if (!token || !this.actions || !this.bridgeSettings?.settings) {
@@ -228,7 +225,6 @@ class PageSettingsDisks extends PageElement {
     `;
   }
 
-  // fallow-ignore-next-line complexity
   private renderContent() {
     if (this.isLoading || !this.mounts) {
       return html`

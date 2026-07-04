@@ -35,7 +35,6 @@ class Icon extends UIElement {
     }
   }
 
-  // fallow-ignore-next-line complexity
   private async loadIcon() {
     if (!this.name) {
       this.iconHtml = "";

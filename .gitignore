@@ -28,9 +28,6 @@ system-bridge.syso
 # OpenCode
 .opencode
 
-# Fallow
-.fallow/
-
 # NSIS
 !installer.nsi.template
 installer.nsi

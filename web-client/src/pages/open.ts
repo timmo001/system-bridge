@@ -116,7 +116,6 @@ class PageOpen extends SendablePageElement {
     this.pathValue = input.value;
   };
 
-  // fallow-ignore-next-line complexity
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();

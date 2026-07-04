@@ -105,7 +105,6 @@ class PageSettingsGeneral extends PageElement {
     }
   }
 
-  // fallow-ignore-next-line complexity
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
 
