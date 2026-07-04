@@ -153,7 +153,7 @@ During development, settings and tokens use the same per-user locations as a nor
 | Windows | `%LOCALAPPDATA%\system-bridge\v5\` | `%LOCALAPPDATA%\system-bridge\logs\YYYY-MM-DD.log` |
 | macOS | `~/Library/Application Support/system-bridge/v5/` | `~/Library/Logs/system-bridge/YYYY-MM-DD.log` |
 
-The backend port defaults to `9170` and can be overridden with `SYSTEM_BRIDGE_PORT`.
+The backend port defaults to `9170` and can be overridden with `SYSTEM_BRIDGE_PORT`. The SSDP discovery port defaults to `1900` and can be overridden with `SYSTEM_BRIDGE_SSDP_PORT`. Override the settings and log directories with `SYSTEM_BRIDGE_CONFIG_DIR` and `SYSTEM_BRIDGE_LOG_DIR` (both must be absolute paths). See [Running → Configuration](/running/#configuration) for the full list of environment variables.
 
 ## Next steps
 
