@@ -34,9 +34,9 @@ See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
 ## Development Setup
 
-See the [developing documentation](https://system-bridge.timmo.dev/developing/) for
-toolchain setup, build tasks, the pitchfork dev-server workflow, testing, and
-quality checks.
+See the [developing documentation](https://system-bridge.timmo.dev/developing/)
+for toolchain setup, build tasks, the pitchfork dev-server workflow, testing,
+and quality checks.
 
 Quick start:
 
