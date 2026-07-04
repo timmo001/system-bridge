@@ -16,6 +16,20 @@ type SystemUser struct {
 	PID      float64 `json:"pid" mapstructure:"pid"`
 }
 
+// DeviceInfo represents hardware and firmware identity from DMI/SMBIOS.
+// Populated best-effort on Linux from /sys/class/dmi/id. Fields that require
+// elevated privileges (such as serial numbers) are intentionally omitted.
+type DeviceInfo struct {
+	Manufacturer *string `json:"manufacturer" mapstructure:"manufacturer"`
+	Model        *string `json:"model" mapstructure:"model"`
+	Version      *string `json:"version" mapstructure:"version"`
+	BoardVendor  *string `json:"board_vendor" mapstructure:"board_vendor"`
+	BoardName    *string `json:"board_name" mapstructure:"board_name"`
+	BIOSVendor   *string `json:"bios_vendor" mapstructure:"bios_vendor"`
+	BIOSVersion  *string `json:"bios_version" mapstructure:"bios_version"`
+	ChassisType  *string `json:"chassis_type" mapstructure:"chassis_type"`
+}
+
 // SystemData represents system information
 type SystemData struct {
 	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
@@ -39,4 +53,5 @@ type SystemData struct {
 	VersionLatestURL      *string      `json:"version_latest_url" mapstructure:"version_latest_url"`
 	VersionLatest         *string      `json:"version_latest" mapstructure:"version_latest"`
 	VersionNewerAvailable *bool        `json:"version_newer_available" mapstructure:"version_newer_available"`
+	DeviceInfo            *DeviceInfo  `json:"device_info" mapstructure:"device_info"`
 }

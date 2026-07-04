@@ -2,6 +2,8 @@
 
 package system
 
+import "github.com/timmo001/system-bridge/types"
+
 func GetCameraUsage() []string {
 	return nil
 }
@@ -15,5 +17,9 @@ func GetPendingReboot() *bool {
 }
 
 func GetPSUPowerUsage() *float64 {
+	return nil
+}
+
+func GetDeviceInfo() *types.DeviceInfo {
 	return nil
 }

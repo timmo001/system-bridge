@@ -117,6 +117,18 @@ export const TemperatureSchema = z.object({
 
 export type Temperature = z.infer<typeof TemperatureSchema>;
 
+// Fan Sensor
+export const FanSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  label: z.string(),
+  speed_rpm: z.number().nullish(),
+  speed_min: z.number().nullish(),
+  speed_max: z.number().nullish(),
+});
+
+export type Fan = z.infer<typeof FanSchema>;
+
 // System User
 export const SystemUserSchema = z.object({
   name: z.string(),
@@ -128,6 +140,20 @@ export const SystemUserSchema = z.object({
 });
 
 export type SystemUser = z.infer<typeof SystemUserSchema>;
+
+// Device Info
+export const DeviceInfoSchema = z.object({
+  manufacturer: z.string().nullish(),
+  model: z.string().nullish(),
+  version: z.string().nullish(),
+  board_vendor: z.string().nullish(),
+  board_name: z.string().nullish(),
+  bios_vendor: z.string().nullish(),
+  bios_version: z.string().nullish(),
+  chassis_type: z.string().nullish(),
+});
+
+export type DeviceInfo = z.infer<typeof DeviceInfoSchema>;
 
 // Memory Swap
 export const MemorySwapSchema = z.object({
@@ -179,7 +205,7 @@ export const DiskPartitionSchema = z.object({
   options: z.string(),
   max_file_size: z.number(),
   max_path_length: z.number(),
-  category: DiskMountCategorySchema,
+  category: z.unknown(),
   usage: DiskUsageSchema.nullish(),
 });
 
@@ -277,6 +303,7 @@ export const DiskSchema = z.object({
   name: z.string(),
   partitions: z.array(DiskPartitionSchema),
   io_counters: DiskIOCountersSchema.nullish(),
+  temperature: z.number().nullish(),
 });
 
 export type Disk = z.infer<typeof DiskSchema>;
@@ -394,9 +421,12 @@ export type BatteryData = z.infer<typeof BatteryDataSchema>;
 // CPU Module
 export const CPUDataSchema = z.object({
   count: z.number().nullish(),
+  name: z.string().nullish(),
+  vendor: z.string().nullish(),
+  family: z.string().nullish(),
   frequency: CPUFrequencySchema.nullish(),
   load_average: z.number().nullish(),
-  per_cpu: z.array(z.unknown()),
+  per_cpu: z.array(PerCPUSchema),
   power: z.number().nullish(),
   stats: CPUStatsSchema.nullish(),
   temperature: z.number().nullish(),
@@ -479,7 +509,7 @@ export type ProcessesData = z.infer<typeof ProcessesDataSchema>;
 
 // Sensors Module
 export const SensorsDataSchema = z.object({
-  fans: z.unknown(),
+  fans: z.array(FanSchema),
   temperatures: z.array(TemperatureSchema),
   windows_sensors: SensorsWindowsSchema.nullish(),
 });
@@ -509,6 +539,7 @@ export const SystemDataSchema = z.object({
   version_latest_url: z.string().nullish(),
   version_latest: z.string().nullish(),
   version_newer_available: z.boolean().nullish(),
+  device_info: DeviceInfoSchema.nullish(),
 });
 
 export type SystemData = z.infer<typeof SystemDataSchema>;
@@ -518,7 +549,7 @@ export const DiskMountInfoSchema = z.object({
   device: z.string(),
   mount_point: z.string(),
   filesystem_type: z.string(),
-  category: DiskMountCategorySchema,
+  category: z.unknown(),
   usage: DiskUsageSchema.nullish(),
 });
 

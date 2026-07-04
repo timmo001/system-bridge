@@ -38,6 +38,9 @@ type PerCPU struct {
 // CPUData represents overall CPU information
 type CPUData struct {
 	Count        *int          `json:"count"`
+	Name         *string       `json:"name"`
+	Vendor       *string       `json:"vendor"`
+	Family       *string       `json:"family"`
 	Frequency    *CPUFrequency `json:"frequency"`
 	LoadAverage  *float64      `json:"load_average"`
 	PerCPU       []PerCPU      `json:"per_cpu"`

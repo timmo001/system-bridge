@@ -94,10 +94,19 @@ type Temperature struct {
 	Critical    float64 `json:"critical"`
 }
 
+// Fan represents a single fan sensor reading
+type Fan struct {
+	SensorKey string   `json:"key"`       // Stable identifier, e.g. "dell_smm_fan1"
+	Name      string   `json:"name"`      // Human readable name, prefers the hwmon label
+	Label     string   `json:"label"`     // Raw hwmon label when provided by the driver
+	SpeedRPM  *float64 `json:"speed_rpm"` // Current fan speed in revolutions per minute
+	SpeedMin  *float64 `json:"speed_min"` // Minimum fan speed in RPM when reported
+	SpeedMax  *float64 `json:"speed_max"` // Maximum fan speed in RPM when reported
+}
+
 // SensorsData represents all sensor information
 type SensorsData struct {
-	// TODO: Add fans model
-	Fans           any             `json:"fans"`
+	Fans           []Fan           `json:"fans"`
 	Temperatures   []Temperature   `json:"temperatures"`
 	WindowsSensors *SensorsWindows `json:"windows_sensors"`
 }

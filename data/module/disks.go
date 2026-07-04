@@ -133,12 +133,23 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		}
 	}
 
+	// Read physical device temperatures once (best-effort, Linux via hwmon)
+	diskTemperatures := readDiskTemperatures()
+
 	// Convert map to array
 	for _, device := range deviceMap {
 		// Sort partitions within each device by mount point for stable ordering
 		sort.Slice(device.Partitions, func(i, j int) bool {
 			return device.Partitions[i].MountPoint < device.Partitions[j].MountPoint
 		})
+		// Attach temperature by resolving the device to its physical parent disk
+		if len(diskTemperatures) > 0 {
+			physical := resolvePhysicalDevice(device.Name)
+			if temp, ok := diskTemperatures[physical]; ok {
+				t := temp
+				device.Temperature = &t
+			}
+		}
 		disksData.Devices = append(disksData.Devices, *device)
 	}
 

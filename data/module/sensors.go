@@ -23,9 +23,11 @@ func (sm SensorModule) Update(ctx context.Context) (any, error) {
 		slog.Warn("Could not fetch temperature sensor data", "err", err)
 	}
 
+	fans := sensors.GetFansData()
+
 	return types.SensorsData{
 		WindowsSensors: windowsSensors,
 		Temperatures:   temperatures,
-		Fans:           nil,
+		Fans:           fans,
 	}, nil
 }
