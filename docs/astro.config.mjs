@@ -103,6 +103,7 @@ export default defineConfig({
           items: [
             { label: 'Install', slug: 'install' },
             { label: 'Running', slug: 'running' },
+            { label: 'Developing', slug: 'developing' },
           ],
         },
         {

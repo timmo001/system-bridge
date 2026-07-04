@@ -164,3 +164,22 @@ Example arguments:
 ```json
 { "action": "PAUSE" }
 ```
+
+## Troubleshooting
+
+### Connection refused
+
+- Confirm System Bridge is running. See [Running](/running/).
+- Check the port (default `9170`) and `SYSTEM_BRIDGE_PORT` if you changed it.
+- Verify the host in your config matches the machine running the backend.
+
+### Unauthorized (`401`)
+
+- The token is missing or incorrect. Run `system-bridge client token` on the host running the backend.
+- Pass the token as a `token` query parameter or `Authorization: Bearer {token}` header.
+
+### Tool execution fails
+
+- Check backend logs for the underlying error.
+- For `system_bridge_get_data`, use valid module names (see the table above).
+- For `system_bridge_media_control`, actions must be uppercase (`PLAY`, `PAUSE`, and so on).

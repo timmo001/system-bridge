@@ -165,7 +165,7 @@ system-bridge completions pwsh | Out-String | Invoke-Expression
 ```
 
 :::tip
-Completion is aware of your data modules. Once it is enabled, type `system-bridge client data run --module ` and press Tab to complete with the available module names.
+Completion is aware of your data modules. Once it is enabled, type `system-bridge client data run --module` followed by a space and press Tab to complete with the available module names.
 :::
 
 ## Next steps
