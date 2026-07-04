@@ -63,24 +63,6 @@ With `websocat` installed, add System Bridge to your agent's MCP config:
 The config key and file location vary by agent. Check your agent's MCP documentation for where its config lives and which key it uses.
 :::
 
-### Quick setup with deep links
-
-Some clients support one-click MCP registration. Replace `YOUR_TOKEN` with your API token.
-
-**Claude Desktop** — paste into your browser:
-
-```text
-claude://addServer/system-bridge?transport=websocket&url=ws://localhost:9170/api/mcp?token=YOUR_TOKEN
-```
-
-**Cursor** — requires `websocat` (see above). Paste into your browser:
-
-```text
-cursor://addServer/system-bridge?command=websocat&args=ws://localhost:9170/api/mcp?token=YOUR_TOKEN
-```
-
-For manual config file paths and other clients, see `backend/mcp/README.md` in the repository.
-
 :::tip
 If you sync one config across several machines, hardcoding a token doesn't travel well. Use a small wrapper script that reads the token from `system-bridge client token` at launch and execs `websocat`. Save it as `system-bridge-mcp` somewhere on your `PATH` and make it executable:
 
