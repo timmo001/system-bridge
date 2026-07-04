@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/v4/process"
+	"github.com/timmo001/system-bridge/types"
 )
 
 // GetCameraUsage attempts to detect processes currently using video devices on Linux
@@ -225,4 +226,91 @@ func GetPSUPowerUsage() *float64 {
 
 	slog.Debug("No PSU power usage sensors found")
 	return nil
+}
+
+// GetDeviceInfo reads hardware and firmware identity from the DMI/SMBIOS sysfs
+// interface (/sys/class/dmi/id). Returns nil when no DMI fields are readable.
+// Root-only fields such as product_serial are intentionally not read.
+func GetDeviceInfo() *types.DeviceInfo {
+	const dmiBase = "/sys/class/dmi/id"
+
+	read := func(file string) *string {
+		data, err := os.ReadFile(filepath.Join(dmiBase, file))
+		if err != nil {
+			return nil
+		}
+		value := strings.TrimSpace(string(data))
+		// DMI fields are frequently populated with placeholder strings on
+		// consumer hardware; treat these as absent.
+		if value == "" {
+			return nil
+		}
+		switch strings.ToLower(value) {
+		case "to be filled by o.e.m.", "default string", "none", "not specified", "system manufacturer", "system product name", "unknown":
+			return nil
+		}
+		return &value
+	}
+
+	info := &types.DeviceInfo{
+		Manufacturer: read("sys_vendor"),
+		Model:        read("product_name"),
+		Version:      read("product_version"),
+		BoardVendor:  read("board_vendor"),
+		BoardName:    read("board_name"),
+		BIOSVendor:   read("bios_vendor"),
+		BIOSVersion:  read("bios_version"),
+		ChassisType:  chassisTypeName(read("chassis_type")),
+	}
+
+	// Return nil when nothing meaningful was found.
+	if info.Manufacturer == nil && info.Model == nil && info.Version == nil &&
+		info.BoardVendor == nil && info.BoardName == nil &&
+		info.BIOSVendor == nil && info.BIOSVersion == nil && info.ChassisType == nil {
+		return nil
+	}
+
+	return info
+}
+
+// chassisTypeName maps an SMBIOS chassis type number to a human readable form.
+// When the code is unknown the raw value is preserved.
+func chassisTypeName(raw *string) *string {
+	if raw == nil {
+		return nil
+	}
+	code, err := strconv.Atoi(*raw)
+	if err != nil {
+		return raw
+	}
+	names := map[int]string{
+		1:  "Other",
+		2:  "Unknown",
+		3:  "Desktop",
+		4:  "Low Profile Desktop",
+		5:  "Pizza Box",
+		6:  "Mini Tower",
+		7:  "Tower",
+		8:  "Portable",
+		9:  "Laptop",
+		10: "Notebook",
+		11: "Handheld",
+		12: "Docking Station",
+		13: "All in One",
+		14: "Sub Notebook",
+		15: "Space-saving",
+		16: "Lunch Box",
+		17: "Main Server Chassis",
+		18: "Expansion Chassis",
+		21: "Peripheral Chassis",
+		23: "Rack Mount Chassis",
+		24: "Sealed-case PC",
+		30: "Tablet",
+		31: "Convertible",
+		32: "Detachable",
+	}
+	if name, ok := names[code]; ok {
+		return &name
+	}
+	return raw
 }

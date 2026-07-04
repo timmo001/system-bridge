@@ -39,6 +39,18 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	// Get CPU frequency
 	frequencies, err := cpu.InfoWithContext(ctx)
 	if err == nil && len(frequencies) > 0 {
+		// Populate CPU identity from the first logical processor entry. Useful for
+		// identifying newer silicon (e.g. Intel Core Ultra / Panther Lake).
+		if name := strings.TrimSpace(frequencies[0].ModelName); name != "" {
+			cpuData.Name = &name
+		}
+		if vendor := strings.TrimSpace(frequencies[0].VendorID); vendor != "" {
+			cpuData.Vendor = &vendor
+		}
+		if family := strings.TrimSpace(frequencies[0].Family); family != "" {
+			cpuData.Family = &family
+		}
+
 		freq := types.CPUFrequency{
 			Current: &frequencies[0].Mhz,
 		}

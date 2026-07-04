@@ -32,9 +32,10 @@ type DiskPartition struct {
 
 // Disk represents information about a single disk device
 type Disk struct {
-	Name       string          `json:"name"`
-	Partitions []DiskPartition `json:"partitions"`
-	IOCounters *DiskIOCounters `json:"io_counters"`
+	Name        string          `json:"name"`
+	Partitions  []DiskPartition `json:"partitions"`
+	IOCounters  *DiskIOCounters `json:"io_counters"`
+	Temperature *float64        `json:"temperature"`
 }
 
 // DisksData represents information about all disk devices

@@ -23,6 +23,24 @@ A bridge for your systems.
 
 See [installation documentation](https://system-bridge.timmo.dev/docs/install).
 
+### Optional dependencies
+
+System Bridge reads most hardware metrics directly from the kernel, so these
+tools are not required. Installing them improves detection on some systems:
+
+- **Linux**
+  - `pciutils` (`lspci`): resolves friendly GPU model names. GPUs are still
+    detected without it, but fall back to a generic name.
+  - `lm_sensors`: helps expose the full set of temperature and fan sensors on
+    some boards. Run `sudo sensors-detect` once to load the relevant modules.
+  - `nvidia-utils` (`nvidia-smi`): required for NVIDIA GPU metrics. Intel and
+    AMD GPUs use the kernel `drm`/`hwmon` interfaces and need nothing extra.
+
+  Install with pacman (`sudo pacman -S pciutils lm_sensors`) or apt
+  (`sudo apt install pciutils lm-sensors`).
+
+- **Windows / macOS**: no optional tools are needed.
+
 ## File Locations
 
 - Linux settings/token: `~/.local/share/system-bridge/v5/`

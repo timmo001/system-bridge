@@ -5,5 +5,7 @@ Priority: optional
 Architecture: $ARCH
 Maintainer: Aidan Timson <aidan@timmo.dev>
 Homepage: https://github.com/timmo001/system-bridge
+Recommends: pciutils
+Suggests: lm-sensors, nvidia-smi
 Description: System Bridge
  A bridge for your systems.
