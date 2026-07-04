@@ -1,0 +1,8 @@
+{
+  "name": "system-bridge-root-lsp",
+  "private": true,
+  "description": "Root-level typescript so OpenCode's TS LSP resolves from the repo root (ctx.directory) for subprojects like tui/, web-client/, and docs/. Not a real project.",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
