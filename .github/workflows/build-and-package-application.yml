@@ -273,7 +273,21 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
+
+      - name: Detect AUR-relevant changes
+        id: aur_changes
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        shell: bash
+        run: |
+          changed_files="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")"
+          if printf '%s\n' "$changed_files" | grep -Eq '(^|/)[^/]+\.go$|^(web-client/src/|tui/src/|\.github/workflows/|\.github/actions/|\.scripts/)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Update AUR package
+        if: github.ref_type == 'tag' || steps.aur_changes.outputs.changed == 'true'
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           GITHUB_SHA: ${{ github.sha }}
@@ -301,7 +315,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Report AUR update status
-        if: always()
+        if: always() && (github.ref_type == 'tag' || steps.aur_changes.outputs.changed == 'true')
         run: |
           if [ "${{ job.status }}" == 'success' ]; then
             echo "✅ AUR package updated successfully!"
@@ -314,6 +328,10 @@ jobs:
             echo "❌ Failed to update AUR package"
             echo "Check the logs above for details"
           fi
+
+      - name: Report skipped AUR update
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push' && steps.aur_changes.outputs.changed != 'true'
+        run: echo "No source, workflow, or build script changes detected; skipping AUR update."
 
   update-release:
     name: Update release
