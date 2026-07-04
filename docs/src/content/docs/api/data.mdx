@@ -31,9 +31,158 @@ This endpoint requires authentication via the `X-API-Token` header or the `token
 
 ## Response
 
-The response format varies depending on the module requested. Here's an example:
+The response is the raw data for the requested module. The shape depends on the module. Most modules return a JSON object; `displays`, `gpus`, and `processes` return a JSON array of objects.
 
-```json title="Response"
+:::note
+Most fields serialise as `null` when the value is unavailable on your platform or hardware, rather than being omitted. Some fields are only populated on certain operating systems, noted below where it matters.
+:::
+
+The same payloads are pushed over the WebSocket API as [`DATA_UPDATE`](/api/websocket/data/#receiving-data) messages.
+
+### `battery`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `is_charging` | boolean | Whether the battery is charging. |
+| `percentage` | number | Charge level, 0-100. |
+| `time_remaining` | number | Estimated time remaining, in seconds. |
+
+All fields are `null` when no battery is present.
+
+### `cpu`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `count` | number | Number of logical cores. |
+| `frequency` | object | Current, min, and max frequency in MHz (`current`, `min`, `max`). |
+| `load_average` | number | System load average. Unix only; `null` on Windows. |
+| `per_cpu` | array | Per-core entries with `id`, `frequency`, `power`, `times`, `times_percent`, `usage`, and `voltage`. |
+| `power` | number | Package power draw, in watts. |
+| `stats` | object | Counters: `ctx_switches`, `interrupts`, `soft_interrupts`, `syscalls`. |
+| `temperature` | number | CPU temperature, in degrees Celsius. |
+| `times` | object | Cumulative CPU time in seconds (`user`, `system`, `idle`, `interrupt`, `dpc`). `dpc` is Windows only. |
+| `times_percent` | object | The same breakdown as percentages. |
+| `usage` | number | Overall CPU usage percentage. |
+| `voltage` | number | Core voltage. |
+
+### `disks`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `devices` | array | Disks, each with `name`, `partitions`, and `io_counters`. |
+| `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`. |
+
+Each partition has `device`, `mount_point`, `filesystem_type`, `options`, `category` (`primary`, `bind`, or `squashfs`), and `usage` (`total`, `used`, `free`, `percent`).
+
+### `displays`
+
+Returns an array of objects, one per display.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | Display identifier. |
+| `name` | string | Display name. |
+| `resolution_horizontal` | number | Horizontal resolution in pixels. |
+| `resolution_vertical` | number | Vertical resolution in pixels. |
+| `x` | number | X position in the virtual desktop. |
+| `y` | number | Y position in the virtual desktop. |
+| `width` | number | Physical width in millimetres. Linux only. |
+| `height` | number | Physical height in millimetres. Linux only. |
+| `is_primary` | boolean | Whether this is the primary display. |
+| `pixel_clock` | number | Pixel clock. |
+| `refresh_rate` | number | Refresh rate in Hz. |
+
+### `gpus`
+
+Returns an array of objects, one per GPU. Full metrics require an NVIDIA GPU; other GPUs report a subset (typically `id`, `name`, and memory).
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | GPU identifier. |
+| `name` | string | GPU name. |
+| `core_clock` | number | Core clock in MHz. |
+| `core_load` | number | Core load percentage. |
+| `memory_clock` | number | Memory clock in MHz. |
+| `memory_load` | number | Memory load percentage. |
+| `memory_free` | number | Free memory. |
+| `memory_used` | number | Used memory. |
+| `memory_total` | number | Total memory. |
+| `power_usage` | number | Power draw in watts. |
+| `temperature` | number | Temperature in degrees Celsius. |
+| `fan_speed` | number | Fan speed. Not currently reported (`null`). |
+
+### `media`
+
+Details of the current media session: `title`, `artist`, `album_title`, `album_artist`, `subtitle`, `type`, and `status`; playback state `position`, `duration`, `playback_rate`, `volume`, `shuffle`, `repeat`, and `track_number`; capability flags `is_play_enabled`, `is_pause_enabled`, `is_stop_enabled`, `is_next_enabled`, `is_previous_enabled`, `is_fast_forward_enabled`, and `is_rewind_enabled`; a `thumbnail`; and `updated_at`. Available fields vary by operating system and media player.
+
+### `memory`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `virtual` | object | Physical memory: `total`, `available`, `percent`, `used`, `free`, `active`, `inactive`, `buffers`, `cached`, `wired`, `shared`. |
+| `swap` | object | Swap: `total`, `used`, `free`, `percent`, `sin`, `sout`. |
+
+### `networks`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `networks` | array | Interfaces, each with `name`, `addresses`, and `stats`. |
+| `connections` | array | Active connections with `fd`, `family`, `type`, `laddr`, `raddr`, `status`, and `pid`. |
+| `io` | object | Aggregate I/O: `bytes_sent`, `bytes_recv`, `packets_sent`, `packets_recv`, `errin`, `errout`, `dropin`, `dropout`. |
+
+Each interface address has `address`, `family`, `netmask`, `broadcast`, and `ptp`; interface `stats` has `isup`, `duplex`, `speed`, `mtu`, and `flags`.
+
+### `processes`
+
+Returns an array of objects, one per process.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | number | Process ID. |
+| `name` | string | Process name. |
+| `cpu_usage` | number | CPU usage percentage. |
+| `memory_usage` | number | Memory usage percentage. |
+| `created` | number | Creation time. |
+| `path` | string | Executable path. |
+| `status` | string | Process status. |
+| `username` | string | Owning user. |
+| `working_directory` | string | Working directory. |
+
+### `sensors`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `temperatures` | array | Temperature readings with `key`, `temperature`, `high`, and `critical`. |
+| `fans` | object | Fan readings. Not currently reported (`null`). |
+| `windows_sensors` | object | Windows-only hardware and NVIDIA sensor tree. |
+
+### `system`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `hostname` | string | Machine hostname. |
+| `fqdn` | string | Fully qualified domain name. |
+| `platform` | string | Operating system. |
+| `platform_version` | string | OS version. |
+| `kernel_version` | string | Kernel version. |
+| `boot_time` | number | Boot time as a Unix timestamp. |
+| `uptime` | number | Uptime in seconds. |
+| `ip_address_4` | string | IPv4 address. |
+| `ip_address_6` | string | IPv6 address. |
+| `mac_address` | string | MAC address. |
+| `uuid` | string | Stable machine identifier. |
+| `users` | array | Logged-in users with `name`, `active`, `terminal`, `host`, `started`, and `pid`. |
+| `version` | string | Installed System Bridge version. |
+| `version_latest` | string | Latest available version. |
+| `version_latest_url` | string | URL for the latest release. |
+| `version_newer_available` | boolean | Whether a newer version is available. |
+| `camera_usage` | array | Processes using the camera. Linux only. |
+| `microphone_usage` | array | Processes using the microphone. Linux only. |
+| `pending_reboot` | boolean | Whether a reboot is pending. Linux only. |
+| `power_usage` | number | System power draw in watts. Linux only. |
+| `run_mode` | string | How the backend is running. |
+
+```json title="Example: system"
 {
     "boot_time": 1651433957.3015134,
     "fqdn": "Desktop",
