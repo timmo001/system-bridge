@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "node node_modules/typescript-7/bin/tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format:check": "prettier --check \"src/**/*.{ts,css}\"",
     "format:write": "prettier --write \"src/**/*.{ts,css}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node node_modules/typescript-7/bin/tsc --noEmit"
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.2",
@@ -46,6 +46,7 @@
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.3",
+    "typescript-7": "npm:typescript@~7.0.0",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.10"
   },
