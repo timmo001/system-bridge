@@ -38,7 +38,10 @@ jobs:
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
+        env:
+          # renovate: datasource=github-tags packageName=PowerShell/PSScriptAnalyzer
+          PSSCRIPTANALYZER_VERSION: "1.25.0"
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+          Install-Module -Name PSScriptAnalyzer -RequiredVersion $env:PSSCRIPTANALYZER_VERSION -Force -Scope CurrentUser
           Invoke-ScriptAnalyzer -Path .github/scripts/pwsh -Recurse -EnableExit -Severity @('Warning', 'Error')

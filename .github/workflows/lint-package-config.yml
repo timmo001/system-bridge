@@ -139,9 +139,10 @@ jobs:
 
       - name: Add Flathub repository and install SDK
         run: |
+          runtime_version="$(sed -n 's/^runtime-version:[[:space:]]*"\([^"]*\)".*/\1/p' .scripts/linux/dev.timmo.system-bridge.yml)"
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Sdk//24.08
-          sudo flatpak install -y flathub org.freedesktop.Platform//24.08
+          sudo flatpak install -y flathub "org.freedesktop.Sdk//${runtime_version}"
+          sudo flatpak install -y flathub "org.freedesktop.Platform//${runtime_version}"
 
       - name: Create dummy binary for validation
         run: |

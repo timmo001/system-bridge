@@ -50,9 +50,17 @@ if ! command -v flatpak-builder &>/dev/null; then
   fi
 fi
 
+# Derive the freedesktop runtime version from the manifest so it is defined in
+# one place (the manifest's runtime-version) rather than duplicated here.
+RUNTIME_VERSION="$(sed -n 's/^runtime-version:[[:space:]]*"\([^"]*\)".*/\1/p' "$SCRIPT_DIR/dev.timmo.system-bridge.yml")"
+if [ -z "$RUNTIME_VERSION" ]; then
+  echo "Could not determine runtime-version from dev.timmo.system-bridge.yml" >&2
+  exit 1
+fi
+
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
-sudo flatpak install -y flathub org.freedesktop.Sdk//24.08
-sudo flatpak install -y flathub org.freedesktop.Platform//24.08
+sudo flatpak install -y flathub "org.freedesktop.Sdk//${RUNTIME_VERSION}"
+sudo flatpak install -y flathub "org.freedesktop.Platform//${RUNTIME_VERSION}"
 
 # Create build directory
 BUILD_DIR="flatpak-build"

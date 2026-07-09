@@ -32,6 +32,18 @@
         "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*run:\\s*.*?@(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Update annotated tool versions in scripts and workflow env vars.",
+      "managerFilePatterns": [
+        "/(^|/)\\.github/scripts/.+$/",
+        "/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+packageName=(?<packageName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*\\$?[A-Za-z_][A-Za-z0-9_]*\\s*[:=]\\s*[\"']?(?<currentValue>[^\\s\"']+)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ],
   "packageRules": [
