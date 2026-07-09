@@ -1,0 +1,44 @@
+---
+name: Lint scripts
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - ".github/scripts/**"
+      - ".github/workflows/lint-scripts.yml"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - ".github/scripts/**"
+      - ".github/workflows/lint-scripts.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@d58029e7835aa103b56734cc2a82cb9ce1caf768 # master
+    with:
+      scandir: .github/scripts/bash
+
+  lint-powershell:
+    name: Lint PowerShell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+          Invoke-ScriptAnalyzer -Path .github/scripts/pwsh -Recurse -EnableExit -Severity @('Warning', 'Error')

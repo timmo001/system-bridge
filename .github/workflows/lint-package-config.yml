@@ -59,17 +59,7 @@ jobs:
           sudo apt-get install -y dpkg-dev gettext-base
 
       - name: Validate Debian control file
-        run: |
-          # Create a temporary directory structure
-          mkdir -p debian/DEBIAN
-          VERSION=1.0.0 envsubst < .scripts/linux/control.template > debian/DEBIAN/control
-          # Validate control file syntax
-          dpkg-parsechangelog -l debian/DEBIAN/control || echo "Control file validation failed"
-          # Additional basic validation
-          grep -q "^Package:" debian/DEBIAN/control || exit 1
-          grep -q "^Version:" debian/DEBIAN/control || exit 1
-          grep -q "^Architecture:" debian/DEBIAN/control || exit 1
-          grep -q "^Description:" debian/DEBIAN/control || exit 1
+        run: .github/scripts/bash/validate-debian-control.sh
 
   lint-rpm-spec:
     name: Lint rpm spec
@@ -99,66 +89,10 @@ jobs:
           choco install nsis -y
 
       - name: Create dummy files for validation
-        run: |
-          # Create dist directory for NSIS output
-          New-Item -ItemType Directory -Path ".scripts/windows/now-playing" -Force
-
-          # Create an empty file to serve as the dummy executable for the now-playing helper
-          New-Item -ItemType File -Path ".scripts/windows/now-playing/NowPlaying.exe" -Force
-
-          # Create dist directory for NSIS output
-          New-Item -ItemType Directory -Path "dist" -Force
-
-          # Create an empty file to serve as the dummy executable for the main application
-          New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
-
-          # Create an empty file to serve as the dummy executable for the TUI
-          New-Item -ItemType File -Path "dist/system-bridge-tui.exe" -Force
+        run: ./.github/scripts/pwsh/create-nsis-dummy-files.ps1
 
       - name: Validate nsis script
-        run: |
-          $version = '5.0.0-dev+123a4bcd'
-          $templateContent = Get-Content -Path ".scripts/windows/installer.nsi.template" -Raw
-          $YEAR = (Get-Date).Year
-          if ($VERSION -match "^(\d+)\.(\d+)\.(\d+)") {
-              $major = $matches[1]
-              $minor = $matches[2]
-              $patch = $matches[3]
-              $build = 0
-              $DOT_VERSION = "$major.$minor.$patch.$build"
-          } else {
-              $DOT_VERSION = "0.0.0.0"
-          }
-          $installerScript = $templateContent -replace '\$VERSION', $VERSION -replace '\$YEAR', $YEAR -replace '\$DOT_VERSION', $DOT_VERSION
-          Set-Content -Path "installer.nsi" -Value $installerScript
-
-          # Find makensis executable (same logic as create-installer.ps1)
-          $makensisCmd = Get-Command makensis -ErrorAction SilentlyContinue
-          if ($makensisCmd) {
-              $makensisPath = $makensisCmd.Source
-          } else {
-              # Try common installation paths
-              $possiblePaths = @(
-                  "${env:ProgramFiles(x86)}\NSIS\makensis.exe",
-                  "${env:ProgramFiles}\NSIS\makensis.exe",
-                  "$env:ChocolateyInstall\lib\nsis\tools\makensis.exe",
-                  "C:\ProgramData\chocolatey\lib\nsis\tools\makensis.exe"
-              )
-              foreach ($path in $possiblePaths) {
-                  if (Test-Path $path) {
-                      $makensisPath = $path
-                      break
-                  }
-              }
-          }
-
-          if (-not $makensisPath) {
-              Write-Error "makensis not found. Please ensure NSIS is installed correctly."
-              exit 1
-          }
-
-          # Check for syntax errors in NSIS script (this is a basic check, it just tries to compile)
-          & $makensisPath /V2 installer.nsi
+        run: ./.github/scripts/pwsh/validate-nsis.ps1
 
   lint-arch-pkgbuild:
     name: Lint arch pkgbuild

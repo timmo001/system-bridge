@@ -48,14 +48,7 @@ jobs:
       - name: Get version
         id: get_version
         shell: bash
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION="5.0.0-dev+${{ github.sha }}"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        run: .github/scripts/bash/get-version.sh "${{ github.ref_type }}" "${{ github.ref_name }}" "${{ github.sha }}"
 
       - name: Write version to file
         run: echo "${{ env.VERSION }}" > VERSION
@@ -120,29 +113,7 @@ jobs:
           path: .
 
       - name: Package for linux
-        run: |
-          echo "::group::Setup"
-          mkdir -p dist
-          chmod +x ./system-bridge-linux
-          chmod +x ./system-bridge-tui
-          chmod +x ./.scripts/linux/create-*.sh
-          echo "::endgroup::"
-
-          echo "::group::List files"
-          ls -la
-          echo "::endgroup::"
-
-          echo "::group::List scripts"
-          ls -la ./.scripts/linux/
-          echo "::endgroup::"
-
-          echo "::group::Create ${{ matrix.build.package }} package"
-          ./.scripts/linux/create-${{ matrix.build.package }}.sh
-          echo "::endgroup::"
-
-          echo "::group::List dist"
-          ls -la dist
-          echo "::endgroup::"
+        run: .github/scripts/bash/package-linux.sh "${{ matrix.build.package }}"
 
       - name: Upload packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -164,14 +135,7 @@ jobs:
         id: nowplaying_changes
         if: ${{ github.event_name == 'pull_request' }}
         shell: bash
-        run: |
-          changed_files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
-
-          if printf '%s\n' "$changed_files" | grep -Eq '^(\.github/workflows/build-and-package-application\.yml|data/module/media/media_windows\.go|\.scripts/windows/(create-installer\.ps1|download-now-playing\.ps1|installer\.nsi\.template))$'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: .github/scripts/bash/detect-nowplaying-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
 
       - name: Download NowPlaying helper
         shell: pwsh
@@ -201,14 +165,7 @@ jobs:
       - name: Get version
         id: get_version
         shell: bash
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION="5.0.0-dev+${{ github.sha }}"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        run: .github/scripts/bash/get-version.sh "${{ github.ref_type }}" "${{ github.ref_name }}" "${{ github.sha }}"
 
       - name: Generate resource file
         run: |
@@ -234,20 +191,7 @@ jobs:
           ./.scripts/windows/create-installer.ps1 -VerifyBinaryOnly
 
       - name: Package for Windows
-        run: |
-          echo "::group::Setup"
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Move-Item system-bridge.exe dist/system-bridge.exe -Force
-          Move-Item system-bridge-tui.exe dist/system-bridge-tui.exe -Force
-          echo "::endgroup::"
-
-          echo "::group::Create installer"
-          ./.scripts/windows/create-installer.ps1
-          echo "::endgroup::"
-
-          echo "::group::List dist"
-          Get-ChildItem dist -Recurse | Format-Table -AutoSize
-          echo "::endgroup::"
+        run: ./.github/scripts/pwsh/package-windows.ps1
 
       - name: Upload packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -278,28 +222,7 @@ jobs:
         id: aur_changes
         if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         shell: bash
-        run: |
-          before="${{ github.event.before }}"
-          after="${{ github.sha }}"
-
-          # Fall back to updating the AUR package whenever we cannot reliably
-          # diff (first push, force-push/rewritten history, or the "before"
-          # object is missing from the checkout). Better to publish than to
-          # silently skip a real change or crash the whole job.
-          if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ] \
-            || ! git cat-file -e "${before}^{commit}" 2>/dev/null \
-            || ! git cat-file -e "${after}^{commit}" 2>/dev/null; then
-            echo "Diff base unavailable (${before}..${after}); assuming AUR-relevant changes."
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          changed_files="$(git diff --name-only "$before" "$after")"
-          if printf '%s\n' "$changed_files" | grep -Eq '(^|/)[^/]+\.go$|^(web-client/src/|tui/src/|\.github/workflows/|\.github/actions/|\.scripts/)'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: .github/scripts/bash/detect-aur-changes.sh "${{ github.event.before }}" "${{ github.sha }}"
 
       - name: Update AUR package
         if: github.ref_type == 'tag' || steps.aur_changes.outputs.changed == 'true'
@@ -308,41 +231,11 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_WORKSPACE: ${{ github.workspace }}
           VERSION: ${{ env.VERSION }}
-        run: |
-          echo "::group::Setup"
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            GIT_BUILD="0"
-          else
-            GIT_BUILD="1"
-          fi
-          export GIT_BUILD
-          chmod +x .scripts/linux/update-aur.sh
-
-          if [ "$(id -u)" -eq 0 ] && id -u builduser >/dev/null 2>&1; then
-            echo "Switching to builduser..."
-            chown -R builduser:builduser "$(pwd)"
-            exec sudo --preserve-env=VERSION,AUR_SSH_PRIVATE_KEY,GITHUB_SHA,GITHUB_WORKSPACE,GIT_BUILD -u builduser -H bash ./.scripts/linux/update-aur.sh
-          fi
-          echo "::endgroup::"
-
-          echo "::group::Update AUR package"
-          ./.scripts/linux/update-aur.sh
-          echo "::endgroup::"
+        run: .github/scripts/bash/update-aur-runner.sh "${{ github.ref_type }}"
 
       - name: Report AUR update status
         if: always() && (github.ref_type == 'tag' || steps.aur_changes.outputs.changed == 'true')
-        run: |
-          if [ "${{ job.status }}" == 'success' ]; then
-            echo "✅ AUR package updated successfully!"
-            if [[ "${{ github.ref_type }}" == "tag" ]]; then
-              echo "Package: https://aur.archlinux.org/packages/system-bridge"
-            else
-              echo "Package: https://aur.archlinux.org/packages/system-bridge-git"
-            fi
-          else
-            echo "❌ Failed to update AUR package"
-            echo "Check the logs above for details"
-          fi
+        run: .github/scripts/bash/report-aur-status.sh "${{ job.status }}" "${{ github.ref_type }}"
 
       - name: Report skipped AUR update
         if: github.ref == 'refs/heads/dev' && github.event_name == 'push' && steps.aur_changes.outputs.changed != 'true'
@@ -411,40 +304,7 @@ jobs:
       - name: Compute next patch tag
         id: compute
         shell: bash
-        run: |
-          set -euo pipefail
-          PREV_TAG="${{ github.event.release.tag_name }}"
-          if [[ -z "${PREV_TAG}" ]]; then
-            echo "Release tag not available in context." >&2
-            exit 1
-          fi
-          echo "Previous tag: ${PREV_TAG}"
-          NEXT_TAG=""
-          if [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+)$ ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            PATCH="${BASH_REMATCH[3]}"
-            NEXT_TAG="${MAJOR}.${MINOR}.${PATCH}"
-          elif [[ "${PREV_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            PATCH="${BASH_REMATCH[3]}"
-            NEXT_PATCH=$((PATCH+1))
-            NEXT_TAG="${MAJOR}.${MINOR}.${NEXT_PATCH}"
-          else
-            # Fallback: strip common prerelease suffix and try to bump patch
-            CLEAN_TAG="${PREV_TAG%%-*}"
-            if [[ "${CLEAN_TAG}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-              MAJOR="${BASH_REMATCH[1]}"
-              MINOR="${BASH_REMATCH[2]}"
-              PATCH="${BASH_REMATCH[3]}"
-              NEXT_TAG="${MAJOR}.${MINOR}.$((PATCH+1))"
-            else
-              NEXT_TAG="${PREV_TAG}"
-            fi
-          fi
-          echo "Next patch tag: ${NEXT_TAG}"
-          echo "next_tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+        run: .github/scripts/bash/compute-next-patch.sh "${{ github.event.release.tag_name }}"
 
   create-prerelease:
     name: Create draft release
