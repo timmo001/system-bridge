@@ -65,6 +65,8 @@ func GetFansData() []types.Fan {
 		}
 	}
 
+	fans = append(fans, getLianLiUniFansData()...)
+
 	return fans
 }
 

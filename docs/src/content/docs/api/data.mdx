@@ -153,7 +153,7 @@ Returns an array of objects, one per process.
 | Field | Type | Description |
 | --- | --- | --- |
 | `temperatures` | array | Temperature readings with `key`, `temperature`, `high`, and `critical`. |
-| `fans` | object | Fan readings. Not currently reported (`null`). |
+| `fans` | array | Fan readings with `key`, `name`, `label`, `speed_rpm`, `speed_min`, and `speed_max`. On Linux this includes hwmon fans and supported Lian Li UNI HID fan controllers when the process can read `/dev/hidraw*`. |
 | `windows_sensors` | object | Windows-only hardware and NVIDIA sensor tree. |
 
 ### `system`
