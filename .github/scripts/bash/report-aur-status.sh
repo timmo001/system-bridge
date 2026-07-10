@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
-# Print the outcome of the AUR update job and, on success, the package URL.
+# Print the outcome of a shared AUR publication call.
 #
-# Usage: report-aur-status.sh <job_status> <ref_type>
+# Usage: report-aur-status.sh <package_name> <job_result> <changed>
 set -euo pipefail
 
-job_status="${1:?job_status required}"
-ref_type="${2:-}"
+package_name="${1:?package_name required}"
+job_result="${2:?job_result required}"
+changed="${3:-false}"
+package_url="https://aur.archlinux.org/packages/${package_name}"
 
-if [ "${job_status}" == 'success' ]; then
-  echo "✅ AUR package updated successfully!"
-  if [[ "${ref_type}" == "tag" ]]; then
-    echo "Package: https://aur.archlinux.org/packages/system-bridge"
+if [[ "$job_result" == "success" ]]; then
+  if [[ "$changed" == "true" ]]; then
+    echo "AUR package updated successfully."
   else
-    echo "Package: https://aur.archlinux.org/packages/system-bridge-git"
+    echo "AUR package is already current."
   fi
+elif [[ "$job_result" == "skipped" ]]; then
+  echo "AUR publication was skipped."
 else
-  echo "❌ Failed to update AUR package"
-  echo "Check the logs above for details"
+  echo "AUR publication ${job_result}. Check the publisher logs for details."
 fi
+
+echo "Package: ${package_url}"

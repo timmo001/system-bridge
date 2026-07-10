@@ -1,7 +1,7 @@
 #!/bin/sh
 # PKGBUILD for AUR -git (development) package
 # This is used for the AUR system-bridge-git package
-# pkgver is set to 5.0.0+dev is replaced in the update-aur.sh script
+# pkgver is replaced by prepare-aur.sh before publication
 
 pkgname=system-bridge-git
 pkgver=5.0.0+dev

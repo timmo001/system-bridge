@@ -1,7 +1,7 @@
 #!/bin/sh
 # PKGBUILD for release package (builds from tagged source)
 # This is used for the AUR system-bridge package
-# pkgver is set to 5.0.0 is replaced in the update-aur.sh script
+# pkgver and source checksum are replaced by prepare-aur.sh before publication
 
 pkgname=system-bridge
 pkgver=5.0.0
@@ -42,8 +42,13 @@ build() {
   mise trust -a
   mise install
   mise exec -C web-client -- bun install --frozen-lockfile
-  mise run build:web-client
-  mise run build:tui
+  if grep -q '^\[tasks\."build:web-client"\]$' mise.toml; then
+    mise run build:web-client
+    mise run build:tui
+  else
+    mise run build_web_client
+    mise run build_tui
+  fi
   mise exec -- go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${pkgver}'" -o "system-bridge" .
   ./system-bridge completions bash >system-bridge.bash
   ./system-bridge completions zsh >_system-bridge
