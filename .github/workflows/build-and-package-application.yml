@@ -256,7 +256,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@a89dc2dc0bd3e776ac4b92757a384257f265e61c # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@4cedc6db32c48335c71bab8ff2d4ac57470605fb # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -339,7 +339,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@a89dc2dc0bd3e776ac4b92757a384257f265e61c # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@4cedc6db32c48335c71bab8ff2d4ac57470605fb # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -418,7 +418,7 @@ jobs:
           path: dist/windows
 
       - name: Update release
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           files: |
             dist/linux/arch/*.pkg.tar.zst
@@ -451,7 +451,7 @@ jobs:
       contents: write
     steps:
       - name: Create draft prerelease
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           draft: true
           prerelease: false
