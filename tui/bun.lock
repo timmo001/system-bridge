@@ -10,7 +10,7 @@
         "fuse.js": "^7.3.0",
       },
       "devDependencies": {
-        "@effect/tsgo": "^0.21.0",
+        "@effect/tsgo": "^0.22.0",
         "@types/bun": "^1.3.13",
         "prettier": "^3.5.3",
         "typescript": "^7.0.0",
@@ -18,21 +18,21 @@
     },
   },
   "packages": {
-    "@effect/tsgo": ["@effect/tsgo@0.21.0", "", { "optionalDependencies": { "@effect/tsgo-darwin-arm64": "0.21.0", "@effect/tsgo-darwin-x64": "0.21.0", "@effect/tsgo-linux-arm": "0.21.0", "@effect/tsgo-linux-arm64": "0.21.0", "@effect/tsgo-linux-x64": "0.21.0", "@effect/tsgo-win32-arm64": "0.21.0", "@effect/tsgo-win32-x64": "0.21.0" }, "bin": { "effect-tsgo": "dist/effect-tsgo.js" } }, "sha512-bsctKj3pcr/pz6mzGq/AGpFoa8LFkKukmpYmXKxdCRbPybC2EBJHOLag8mAKkr64ZqKpjHthgb2X4xXEKV+McA=="],
+    "@effect/tsgo": ["@effect/tsgo@0.22.0", "", { "optionalDependencies": { "@effect/tsgo-darwin-arm64": "0.22.0", "@effect/tsgo-darwin-x64": "0.22.0", "@effect/tsgo-linux-arm": "0.22.0", "@effect/tsgo-linux-arm64": "0.22.0", "@effect/tsgo-linux-x64": "0.22.0", "@effect/tsgo-win32-arm64": "0.22.0", "@effect/tsgo-win32-x64": "0.22.0" }, "bin": { "effect-tsgo": "dist/effect-tsgo.js" } }, "sha512-fzZCIhNznBaV3wJdJi8cx7eZmd2iBRWmeSWBK+uWgCtO9RZ/rW59m/+zPsJoD4T6uUk3Ky10Y5mWK33LcTxL0A=="],
 
-    "@effect/tsgo-darwin-arm64": ["@effect/tsgo-darwin-arm64@0.21.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-cTh8nsNwsxyCAwKEc8euvon2zMMBBA7ZlHmPKEX5hcX1iLCbAeOg0uOQKse3uGwg2dZG1C8YTMBdGN+JQIdPrA=="],
+    "@effect/tsgo-darwin-arm64": ["@effect/tsgo-darwin-arm64@0.22.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-ECdPNAQZ6aAOASzjyCEfjB2fR0G3TSe+x4F7ZIbxnbDDd8mFEQbylZNXXyjW9f1Di5H+UkrO6oGc1hGXvIsiFQ=="],
 
-    "@effect/tsgo-darwin-x64": ["@effect/tsgo-darwin-x64@0.21.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-FlQ9s23fvHI094mtPI1mOTLJVdKWE3+Nk9PyAIwGl3tD4hQ+J9GCEkVBrpAKS1/OGJmBcPSL87LqiwcLE+jU8w=="],
+    "@effect/tsgo-darwin-x64": ["@effect/tsgo-darwin-x64@0.22.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-R5Qq6uIxtSeEQw5vNCaKsuGlNbUw9AjeKftmNwnG9PKhIbHct++nYoSDdlRXFUjwlZT3aBIuCgYG3RCe5BpXsA=="],
 
-    "@effect/tsgo-linux-arm": ["@effect/tsgo-linux-arm@0.21.0", "", { "os": "linux", "cpu": "arm" }, "sha512-Ez04FzLvojCpRH5QcUa354G9FkcOVtCwoMT+lpzxER5A7eVM7BwhfOFRtABCBaBqSv+FwHzfHSihv6lZv9CZBg=="],
+    "@effect/tsgo-linux-arm": ["@effect/tsgo-linux-arm@0.22.0", "", { "os": "linux", "cpu": "arm" }, "sha512-ZrDB4jyz6Il2MfFIM0ypbusC3PuycWctOH4LiG4SFY3Z96b/Y8OhmPztPuHusIoGwtJnj3cV9qsEBrqiV9tPMQ=="],
 
-    "@effect/tsgo-linux-arm64": ["@effect/tsgo-linux-arm64@0.21.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-grfqrxLQvO6bgvxdRaEQhOnAnrZAmKpLbIbwKmYfnCG/cwuwHKjxB1UUlQECr5PfQr+79EFugB9Ja7GzEbeQVg=="],
+    "@effect/tsgo-linux-arm64": ["@effect/tsgo-linux-arm64@0.22.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-VcAwDHaO3I1Obd0UsPsIlc+qwhsu1NIbJ9GO4wqNagIOE6uweHBAkdiDL/9wo9jAcw/6hZGwN34zocxiyYP/GQ=="],
 
-    "@effect/tsgo-linux-x64": ["@effect/tsgo-linux-x64@0.21.0", "", { "os": "linux", "cpu": "x64" }, "sha512-ZbHTKCrVVAQpQ/Wbm+Q3Gg3vQluXqVHyYaNw8RmmAUrOXQ+pxPnrny2+T1G/u4pixWEtfTCKzX/GOM0/64l8Hw=="],
+    "@effect/tsgo-linux-x64": ["@effect/tsgo-linux-x64@0.22.0", "", { "os": "linux", "cpu": "x64" }, "sha512-rfkhgbP0g9jsIN7qcciTbRfN+1TQ4g9GI90hRUc4FxeYdcPGO2RQrM7LWLqzhrlTqzqjlg0HDV+Ozd+jqUnU6A=="],
 
-    "@effect/tsgo-win32-arm64": ["@effect/tsgo-win32-arm64@0.21.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-Yq/NrK0AFmN2sbVJwAUYSATwcuXyl+aSf3yKzkKB72L1UzohsA12UABbKlhe5JLpI8sujT5rCSCuKbRbEDOTTw=="],
+    "@effect/tsgo-win32-arm64": ["@effect/tsgo-win32-arm64@0.22.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-rJ5QnoJ55i3KtcIfh+6w5mr8ok5tla+oJPSQfnngJQCsjmddxOLj4xKEZKb01TSgtHgzM5Lb7t9GdGy7woiGUg=="],
 
-    "@effect/tsgo-win32-x64": ["@effect/tsgo-win32-x64@0.21.0", "", { "os": "win32", "cpu": "x64" }, "sha512-vE6hifasQTWw1Y5RN02GfxHcPgcgLxtnrMfX9kWaic709zmFPKtvYUipFhVEFhlftGSxH0tL6ZoSKVRytQNy+Q=="],
+    "@effect/tsgo-win32-x64": ["@effect/tsgo-win32-x64@0.22.0", "", { "os": "win32", "cpu": "x64" }, "sha512-vJAZuUpkTpPVU5Actsu5LjfNw2BZDKcHdh/wliUviD8xODo8HF5VFs5YRSHREgnZd44vF04Zy1H/WvOKXfWkxg=="],
 
     "@msgpackr-extract/msgpackr-extract-darwin-arm64": ["@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4", "", { "os": "darwin", "cpu": "arm64" }, "sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ=="],
 
