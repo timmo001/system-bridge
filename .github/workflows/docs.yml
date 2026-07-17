@@ -43,6 +43,10 @@ jobs:
         working-directory: docs
         run: bun run build
 
+      - name: Validate Cloudflare Workers upload
+        working-directory: docs
+        run: bun run deploy --dry-run
+
   lint-markdown:
     name: Lint markdown
     runs-on: ubuntu-latest

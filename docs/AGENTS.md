@@ -11,13 +11,16 @@ Run from `docs/`:
 - Dev server: `bun run dev` (alias: `bun run start`)
 - Build: `bun run build`
 - Preview build: `bun run preview`
+- Validate Worker upload: `bun run deploy --dry-run`
+- Upload preview Worker version: `bun run deploy:preview`
+- Deploy Worker: `bun run deploy`
 - Astro CLI: `bun run astro -- --help`
 
 From the repo root: `mise run docs:dev`, `mise run docs:build`.
 
 ## Lint / Test
 
-- No lint script is configured in `package.json`.
+- Markdown lint runs from the repo root with `mise run docs:lint`.
 - No tests are configured in this repo.
 - Running a single test is not applicable here.
 - If you add lint/tests, update `package.json` and this file with exact commands.
@@ -42,6 +45,7 @@ From the repo root: `mise run docs:dev`, `mise run docs:build`.
 - Styles: `src/styles/` and component `<style>` blocks.
 - Public assets: `public/`.
 - Build output: `dist/` (generated; do not edit).
+- Worker deployment config: `wrangler.jsonc`.
 
 ## Content Authoring (Always On)
 
@@ -130,6 +134,7 @@ From the repo root: `mise run docs:dev`, `mise run docs:build`.
 
 - Run `bun run dev` for quick visual verification.
 - Run `bun run build` before publishing changes that touch layout or config.
+- Run `bun run deploy --dry-run` after the build when changing hosting config.
 - Confirm nav links and sidebar entries resolve correctly.
 
 ## Updating Navigation
