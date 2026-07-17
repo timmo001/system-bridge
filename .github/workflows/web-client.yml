@@ -1,0 +1,60 @@
+---
+name: Web client
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "web-client/**"
+      - ".github/workflows/web-client.yml"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - "web-client/**"
+      - ".github/workflows/web-client.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install dependencies
+        working-directory: web-client
+        run: bun install --frozen-lockfile
+
+      - name: Lint web client
+        working-directory: web-client
+        run: bun run lint
+
+      - name: Typecheck web client
+        working-directory: web-client
+        run: bun run typecheck
+
+      - name: Check web client formatting
+        working-directory: web-client
+        run: bun run format:check
+
+      - name: Build web client
+        working-directory: web-client
+        run: bun run build
+
+      - name: Validate Cloudflare Workers upload
+        working-directory: web-client
+        run: bun run deploy --dry-run

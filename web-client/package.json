@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "node node_modules/typescript-7/bin/tsc && vite build",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler versions upload",
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -48,7 +50,8 @@
     "typescript": "~7.0.0",
     "typescript-7": "npm:typescript@~7.0.0",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "wrangler": "4.112.0"
   },
   "trustedDependencies": [
     "unrs-resolver"
