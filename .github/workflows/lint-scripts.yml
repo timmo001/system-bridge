@@ -25,7 +25,7 @@ concurrency:
 jobs:
   shellcheck:
     name: ShellCheck
-    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@7c0c9b99547a5d90bb16f35ac848695c4b6473ab # master
+    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@89463002ce025fb5be762b11083f1f26f58d76b1 # master
     with:
       scandir: .github/scripts/bash
 
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
