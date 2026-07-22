@@ -256,7 +256,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@258c64aeee76aec4a45ed2a3e54b2393460c303b # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@405726c0d3241169dc241682ffa91176f9a82916 # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -339,7 +339,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@258c64aeee76aec4a45ed2a3e54b2393460c303b # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@405726c0d3241169dc241682ffa91176f9a82916 # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
