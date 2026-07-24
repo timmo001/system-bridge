@@ -256,7 +256,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@aa9e6d61a254018160ae491b799b36ecdf2d114d # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@a4091353aaeb94959d5d667f11adc12e2f76ce04 # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -304,7 +304,7 @@ jobs:
 
   prepare-aur-stable:
     name: Prepare AUR package (system-bridge)
-    if: github.ref_type == 'tag'
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
     needs:
       - build-linux
     container:
@@ -315,10 +315,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Prepare AUR package files
         env:
-          VERSION: ${{ needs.build-linux.outputs.version }}
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
           mkdir -p "${{ runner.temp }}/aur-package"
           chown builduser:builduser "${{ runner.temp }}/aur-package"
@@ -334,12 +336,12 @@ jobs:
 
   update-aur-stable:
     name: Update AUR (system-bridge)
-    if: github.ref_type == 'tag'
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
     needs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@aa9e6d61a254018160ae491b799b36ecdf2d114d # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@a4091353aaeb94959d5d667f11adc12e2f76ce04 # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -349,7 +351,7 @@ jobs:
 
   report-aur-stable:
     name: Report AUR status (system-bridge)
-    if: always() && github.ref_type == 'tag'
+    if: always() && github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
     needs:
       - prepare-aur-stable
       - update-aur-stable
