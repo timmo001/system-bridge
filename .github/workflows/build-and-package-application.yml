@@ -256,7 +256,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@721f4b1e2ed4957afb95ac49968d361e18554497 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@4f72a0cdee79dcaa134241497c51f727a90e1a3f # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -308,7 +308,7 @@ jobs:
     needs:
       - build-linux
     container:
-      image: ghcr.io/timmo001/system-bridge/ci-build-arch:latest@sha256:97a711cb2b21b1281e5127def83074d3fd08b628e77852250a07731dcf9690a1
+      image: ghcr.io/timmo001/system-bridge/ci-build-arch:latest@sha256:45a3287268acac8b1cf461270544f6b8c5729e0bf1217fc0d95dcfcb9d91178c
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -341,7 +341,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@721f4b1e2ed4957afb95ac49968d361e18554497 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@4f72a0cdee79dcaa134241497c51f727a90e1a3f # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
