@@ -24,7 +24,7 @@
     "starlight-llms-txt": "^0.11.0"
   },
   "devDependencies": {
-    "wrangler": "4.114.0"
+    "wrangler": "4.115.0"
   },
   "trustedDependencies": [
     "esbuild",
