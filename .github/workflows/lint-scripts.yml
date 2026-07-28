@@ -25,7 +25,7 @@ concurrency:
 jobs:
   shellcheck:
     name: ShellCheck
-    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@4cdb8cb31ae11db8e53fe0fa39031eb3fd40fbc7 # master
+    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@e288922717ddd852f355f8ed558370eaf074392b # master
     with:
       scandir: .github/scripts/bash
 
