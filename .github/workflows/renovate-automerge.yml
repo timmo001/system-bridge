@@ -7,7 +7,7 @@ on:
 
 jobs:
   automerge:
-    uses: timmo001/workflows/.github/workflows/renovate-automerge.yml@8b435c1ef0ba93347b09ae549db256cfeaae8338 # master
+    uses: timmo001/workflows/.github/workflows/renovate-automerge.yml@55c7e33ad32c1f449394d11f4889680218fb28aa # master
     permissions:
       pull-requests: write
       contents: write
