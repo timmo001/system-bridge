@@ -438,6 +438,9 @@ jobs:
     outputs:
       next_tag: ${{ steps.compute.outputs.next_tag }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
       - name: Compute next patch tag
         id: compute
         shell: bash
