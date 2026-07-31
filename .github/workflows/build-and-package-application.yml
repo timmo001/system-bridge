@@ -322,15 +322,15 @@ jobs:
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
-          mkdir -p "${{ github.workspace }}/aur-package"
-          chown builduser:builduser "${{ github.workspace }}/aur-package"
-          sudo -u builduser -H .scripts/linux/prepare-aur.sh stable "${{ github.workspace }}/aur-package" "$VERSION"
+          mkdir -p "$GITHUB_WORKSPACE/aur-package"
+          chown builduser:builduser "$GITHUB_WORKSPACE/aur-package"
+          sudo -u builduser -H .scripts/linux/prepare-aur.sh stable "$GITHUB_WORKSPACE/aur-package" "$VERSION"
 
       - name: Upload AUR package files
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ github.workspace }}/aur-package
+          path: aur-package
           if-no-files-found: error
           retention-days: 1
 
