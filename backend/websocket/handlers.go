@@ -3,9 +3,11 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"slices"
 	"sync"
+	"time"
 
 	"log/slog"
 
@@ -21,6 +23,13 @@ func (ws *WebsocketServer) HandleConnection(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		slog.Error("Failed to upgrade connection", "error", err)
 		return nil, err
+	}
+	conn.SetReadLimit(maxMessageBytes)
+	if err := conn.SetReadDeadline(time.Now().Add(ws.authTimeout)); err != nil {
+		if closeErr := conn.Close(); closeErr != nil {
+			slog.Error("Error closing connection", "error", closeErr)
+		}
+		return nil, fmt.Errorf("failed to set WebSocket authentication deadline: %w", err)
 	}
 
 	// Add the connection to our map
@@ -40,10 +49,12 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 		}
 	}()
 
+	authenticated := false
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			netErr, isNetErr := err.(net.Error)
+			if (!isNetErr || !netErr.Timeout()) && websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				slog.Error("WebSocket error", "error", err)
 			}
 			break
@@ -61,6 +72,13 @@ func (ws *WebsocketServer) handleMessages(conn *websocket.Conn) {
 			slog.Error("Invalid token received")
 			ws.SendError(conn, msg, "BAD_TOKEN", "Invalid token")
 			continue
+		}
+		if !authenticated {
+			if err := conn.SetReadDeadline(time.Time{}); err != nil {
+				slog.Error("Failed to clear WebSocket authentication deadline", "error", err)
+				break
+			}
+			authenticated = true
 		}
 
 		// Handle different event types

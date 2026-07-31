@@ -26,6 +26,8 @@ import (
 	"github.com/timmo001/system-bridge/version"
 )
 
+const readHeaderTimeout = 10 * time.Second
+
 type Backend struct {
 	settings         *settings.Settings
 	dataStore        *data.DataStore
@@ -157,8 +159,9 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
-		Handler: mux,
+		Addr:              fmt.Sprintf("0.0.0.0:%d", port),
+		Handler:           mux,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 	defer func() {
 		err = server.Shutdown(ctx)

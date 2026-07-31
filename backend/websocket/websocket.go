@@ -3,12 +3,18 @@ package websocket
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
+)
+
+const (
+	websocketAuthTimeout = 10 * time.Second
+	maxMessageBytes      = 1 << 20
 )
 
 // WebSocketRequest represents the structure of messages sent over the WebSocket
@@ -30,6 +36,7 @@ type connectionInfo struct {
 
 type WebsocketServer struct {
 	token         string
+	authTimeout   time.Duration
 	upgrader      websocket.Upgrader
 	connections   map[string]*connectionInfo
 	dataListeners map[string][]types.ModuleName
@@ -41,6 +48,7 @@ type WebsocketServer struct {
 func NewWebsocketServer(token string, dataStore *data.DataStore, eventRouter *event.MessageRouter) *WebsocketServer {
 	ws := &WebsocketServer{
 		token:         token,
+		authTimeout:   websocketAuthTimeout,
 		connections:   make(map[string]*connectionInfo),
 		dataListeners: make(map[string][]types.ModuleName),
 		dataStore:     dataStore,
