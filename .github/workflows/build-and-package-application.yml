@@ -334,6 +334,22 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  build-arch-package-stable:
+    name: Build Arch package (system-bridge)
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    needs:
+      - prepare-aur-stable
+    permissions:
+      contents: read
+    # yamllint disable-line rule:comments
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@0ccca490086f604ff9d1c6005ee6c4338bc639b8 # master
+    with:
+      package-name: system-bridge
+      package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
+      pkgbuild-path: PKGBUILD
+    secrets:
+      ARCH_REPO_DISPATCH_TOKEN: ${{ secrets.ARCH_REPO_DISPATCH_TOKEN }}
+
   update-aur-stable:
     name: Update AUR (system-bridge)
     if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
