@@ -342,7 +342,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@0ccca490086f604ff9d1c6005ee6c4338bc639b8 # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@bb5682350cf340c8a9e95247322cb6ccf9bde8e3 # master
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
