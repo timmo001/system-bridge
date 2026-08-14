@@ -1,6 +1,5 @@
-import { Schema } from "effect";
+import { Data } from "effect";
 
-export class CommandRunnerError extends Schema.TaggedErrorClass<CommandRunnerError>()(
-  "CommandRunnerError",
-  { message: Schema.String },
-) {}
+export class CommandRunnerError extends Data.TaggedError("CommandRunnerError")<{
+  readonly message: string;
+}> {}
