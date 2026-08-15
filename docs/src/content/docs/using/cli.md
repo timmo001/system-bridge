@@ -109,6 +109,18 @@ Available flags:
 - `--all`: Run all modules
 - `--pretty`: Pretty-print JSON output
 
+### Watch Modules
+
+To stream module updates from the running backend, repeat `--module` or `-m` for each module:
+
+```bash
+system-bridge client data watch --module cpu --module memory
+```
+
+The command loads the current user's API token internally and connects to the local backend. Each `DATA_UPDATE` response is written to standard output as one line of newline-delimited JSON (NDJSON). A token is never written to standard output.
+
+The `--module` flag is required and may be repeated. Unknown module names are rejected before connecting. Stop the stream with Ctrl+C; the client closes the WebSocket normally and does not reconnect.
+
 ## Backend
 
 To run the backend server, use:

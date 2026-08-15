@@ -19,6 +19,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/timmo001/system-bridge/backend"
+	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/settings"
@@ -345,6 +346,48 @@ func main() {
 										fmt.Println(name)
 									}
 									return nil
+								},
+							},
+							{
+								Name:  "watch",
+								Usage: "Watch data modules and print updates as NDJSON",
+								Flags: []cli.Flag{
+									&cli.StringSliceFlag{
+										Name:     "module",
+										Aliases:  []string{"m"},
+										Usage:    "Module name (repeat for multiple modules)",
+										Required: true,
+									},
+								},
+								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
+									args := os.Args
+									if len(args) >= 2 {
+										prev := args[len(args)-2]
+										if prev == "--module" || prev == "-m" {
+											dataStore, err := data.NewDataStore()
+											if err != nil {
+												return
+											}
+											for _, u := range dataStore.GetRegisteredModules() {
+												if u != nil {
+													_, _ = fmt.Fprintln(cmd.Root().Writer, string(u.Name()))
+												}
+											}
+											return
+										}
+									}
+									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									moduleNames := cmd.StringSlice("module")
+									modules := make([]types.ModuleName, len(moduleNames))
+									for i, moduleName := range moduleNames {
+										modules[i] = types.ModuleName(moduleName)
+									}
+									return client.Watch(cmdCtx, client.WatchOptions{
+										Modules: modules,
+										Writer:  cmd.Root().Writer,
+									})
 								},
 							},
 							{
