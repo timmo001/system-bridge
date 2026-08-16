@@ -24,7 +24,9 @@ Accept the prompt to enable the plugin during installation.
 For an unattended install from a repository you already trust:
 
 ```bash
-omarchy plugin add https://github.com/timmo001/omarchy-system-bridge.git --enable --yes
+omarchy plugin add \
+  https://github.com/timmo001/omarchy-system-bridge.git \
+  --enable --yes
 ```
 
 ## Use
@@ -74,7 +76,9 @@ source before installing it.
 The plugin starts one long-running local process:
 
 ```text
-system-bridge client data watch --module cpu --module memory --module disks --module sensors --module gpus --module system --module battery
+system-bridge client data watch \
+  --module cpu --module memory --module disks --module sensors \
+  --module gpus --module system --module battery
 ```
 
 It reads System Bridge settings and its local authentication token through the
