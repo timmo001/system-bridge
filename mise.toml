@@ -308,3 +308,11 @@ run = "bun install --frozen-lockfile && bun run build"
 description = "Lint docs markdown with the docs ruleset"
 dir = "docs"
 run = "bunx markdownlint-cli --config .markdownlint.json \"**/*.md\""
+
+[tasks."omarchy-plugin:test-publisher"]
+description = "Test the Omarchy plugin publisher"
+run = "bash .github/scripts/bash/publish-omarchy-plugin.test.sh"
+
+[tasks."omarchy-plugin:validate"]
+description = "Validate the Omarchy plugin with the installed Omarchy"
+run = "omarchy plugin validate omarchy-plugin"

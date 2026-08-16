@@ -1,0 +1,105 @@
+---
+name: Publish Omarchy plugin
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "omarchy-plugin/**"
+      - "LICENSE"
+      - "mise.toml"
+      - ".github/scripts/bash/publish-omarchy-plugin.sh"
+      - ".github/scripts/bash/publish-omarchy-plugin.test.sh"
+      - ".github/workflows/publish-omarchy-plugin.yml"
+  pull_request:
+    paths:
+      - "omarchy-plugin/**"
+      - "LICENSE"
+      - "mise.toml"
+      - ".github/scripts/bash/publish-omarchy-plugin.sh"
+      - ".github/scripts/bash/publish-omarchy-plugin.test.sh"
+      - ".github/workflows/publish-omarchy-plugin.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-omarchy-plugin-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install validation tools
+        run: |
+          pacman -Sy --noconfirm --needed archlinux-keyring
+          pacman -Su --noconfirm --needed git quickshell qt6-declarative shellcheck
+
+      - name: Checkout System Bridge
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Checkout Omarchy Quattro
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: basecamp/omarchy
+          ref: quattro
+          path: _omarchy
+
+      - name: Trust checkouts
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/_omarchy"
+
+      - name: Test publisher
+        run: bash .github/scripts/bash/publish-omarchy-plugin.test.sh
+
+      - name: Lint publisher
+        run: shellcheck .github/scripts/bash/publish-omarchy-plugin.sh .github/scripts/bash/publish-omarchy-plugin.test.sh
+
+      - name: Validate manifest
+        env:
+          OMARCHY_PATH: ${{ github.workspace }}/_omarchy
+        run: _omarchy/bin/omarchy-plugin validate omarchy-plugin
+
+      - name: Lint QML
+        run: |
+          export PATH="/usr/lib/qt6/bin:$PATH"
+          mapfile -t qml_files < <(find omarchy-plugin -maxdepth 1 -name '*.qml' -type f -print | sort)
+          qmllint -I /usr/lib/qt6/qml --import disable --unqualified disable "${qml_files[@]}"
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout System Bridge
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Checkout publish repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ github.repository_owner }}/omarchy-system-bridge
+          path: _publish
+          token: ${{ secrets.PUSH_TOKEN }}
+
+      - name: Publish plugin files
+        run: .github/scripts/bash/publish-omarchy-plugin.sh omarchy-plugin _publish
+
+      - name: Commit published plugin
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git -C _publish config user.name 'github-actions[bot]'
+          git -C _publish config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C _publish add -A
+          if git -C _publish diff --cached --quiet; then
+            echo 'Published plugin is already current.'
+            exit 0
+          fi
+          git -C _publish commit -m "Publish from system-bridge@${SOURCE_SHA:0:8}"
+          git -C _publish push

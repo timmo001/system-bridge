@@ -24,6 +24,7 @@ mise tasks
 - **Web Client**: Lit + Vite (embedded in Go binary at `web-client/`)
 - **CLI**: Command-line interface
 - **Docs**: Astro + Starlight site at `docs/` (deployed separately)
+- **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
 
 ## Key Conventions
 
@@ -61,6 +62,17 @@ mise run package:all   # DEB, RPM, Arch, Flatpak (Linux host only)
 mise run package:deb            # or package:rpm / package:arch / package:flatpak
 mise run package:windows-installer
 ```
+
+## Omarchy Plugin
+
+- Edit `omarchy-plugin/` in this repository. Do not edit the generated
+  `timmo001/omarchy-system-bridge` repository directly.
+- The plugin must remain self-contained, with no symlinks or imports outside
+  `omarchy-plugin/`.
+- Run `mise run omarchy-plugin:test-publisher` and
+  `mise run omarchy-plugin:validate` after changing it.
+- A validated push to `dev` publishes the directory and root `LICENSE` to the
+  generated repository through `.github/workflows/publish-omarchy-plugin.yml`.
 
 ## Additional Documentation
 

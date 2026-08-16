@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "timmo.system-bridge",
+  "name": "System Bridge",
+  "version": "1.0.0",
+  "author": "Timmo",
+  "license": "MIT",
+  "description": "Local system health from System Bridge",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "System Bridge",
+    "description": "Shows CPU, memory, disk, fan, GPU, temperature, and system health",
+    "category": "Info",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "primaryOnly": false,
+      "primaryOutput": ""
+    },
+    "schema": [
+      {
+        "key": "primaryOnly",
+        "type": "boolean",
+        "label": "Primary output only",
+        "defaultValue": false
+      },
+      {
+        "key": "primaryOutput",
+        "type": "string",
+        "label": "Primary output",
+        "defaultValue": "",
+        "description": "Optional output name used when primary output only is enabled."
+      }
+    ]
+  }
+}

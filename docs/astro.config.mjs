@@ -112,6 +112,7 @@ export default defineConfig({
             { label: 'Desktop', slug: 'using/desktop' },
             { label: 'CLI', slug: 'using/cli' },
             { label: 'TUI', slug: 'using/tui' },
+            { label: 'Omarchy', slug: 'using/omarchy' },
             { label: 'Web Client', slug: 'using/web-client' },
             { label: 'Home Assistant', slug: 'using/home-assistant' },
           ],
