@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "timmo.system-bridge",
   "name": "System Bridge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Timmo",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "description": "Local system health from System Bridge",
   "kinds": [
     "service",
