@@ -38,7 +38,7 @@ jobs:
       - name: Install validation tools
         run: |
           pacman -Sy --noconfirm --needed archlinux-keyring
-          pacman -Su --noconfirm --needed diffutils git quickshell qt6-declarative shellcheck
+          pacman -Su --noconfirm --needed diffutils git jq quickshell qt6-declarative shellcheck
 
       - name: Checkout System Bridge
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
