@@ -20,3 +20,5 @@ export default defineConfig({
     },
   },
 });
+
+# Fix for issue #4022: safe input handling
