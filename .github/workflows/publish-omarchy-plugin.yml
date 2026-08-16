@@ -52,8 +52,8 @@ jobs:
 
       - name: Trust checkouts
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global --add safe.directory "$GITHUB_WORKSPACE/_omarchy"
+          git config --global --add safe.directory "$PWD"
+          git config --global --add safe.directory "$PWD/_omarchy"
 
       - name: Test publisher
         run: bash .github/scripts/bash/publish-omarchy-plugin.test.sh
@@ -62,9 +62,7 @@ jobs:
         run: shellcheck .github/scripts/bash/publish-omarchy-plugin.sh .github/scripts/bash/publish-omarchy-plugin.test.sh
 
       - name: Validate manifest
-        env:
-          OMARCHY_PATH: ${{ github.workspace }}/_omarchy
-        run: _omarchy/bin/omarchy-plugin validate omarchy-plugin
+        run: OMARCHY_PATH="$PWD/_omarchy" _omarchy/bin/omarchy-plugin-validate omarchy-plugin
 
       - name: Lint QML
         run: |
