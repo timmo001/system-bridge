@@ -37,6 +37,15 @@ Panel {
     if (minutes > 0 || values.length === 0) values.push(minutes + "m")
     return values.join(" ")
   }
+  function formatLastUpdated(timestamp, currentTime) {
+    if (timestamp <= 0) return ""
+    var elapsedSeconds = Math.max(0, Math.floor((currentTime - timestamp) / 1000))
+    if (elapsedSeconds < 10) return "Last updated just now"
+    if (elapsedSeconds < 60) return "Last updated " + elapsedSeconds + "s ago"
+    var elapsedMinutes = Math.floor(elapsedSeconds / 60)
+    if (elapsedMinutes < 60) return "Last updated " + elapsedMinutes + "m ago"
+    return "Last updated " + Math.floor(elapsedMinutes / 60) + "h ago"
+  }
   function buildPanelRows() {
     if (!service) return []
     var values = []
@@ -160,7 +169,8 @@ Panel {
             width: parent.width
             title: root.service && root.service.hostname !== "" ? root.service.hostname : "System Bridge"
             meta: root.service && root.service.connected
-              ? (root.service.stale ? "Data is stale" : "")
+              ? root.formatLastUpdated(root.service.lastUpdateAt, root.service.currentTime)
+                + (root.service.stale ? " · Data is stale" : "")
               : "Waiting for System Bridge"
             detail: root.service && root.service.connected ? "ONLINE" : "OFFLINE"
             foreground: root.contentForeground
