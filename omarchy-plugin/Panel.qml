@@ -83,13 +83,13 @@ Panel {
       var gpu = service.gpus[gpuIndex]
       var gpuValues = []
       if (gpu.core_load !== undefined && gpu.core_load !== null)
-        gpuValues.push("Load " + formatPercent(Number(gpu.core_load)))
+        gpuValues.push("󰓅 " + formatPercent(Number(gpu.core_load)))
       if (gpu.memory_used !== undefined && gpu.memory_used !== null && gpu.memory_total !== undefined && gpu.memory_total !== null)
-        gpuValues.push("Memory " + formatMebibytes(Number(gpu.memory_used)) + " / " + formatMebibytes(Number(gpu.memory_total)))
+        gpuValues.push(" " + formatMebibytes(Number(gpu.memory_used)) + " / " + formatMebibytes(Number(gpu.memory_total)))
       if (gpu.power_usage !== undefined && gpu.power_usage !== null)
-        gpuValues.push("Power " + Number(gpu.power_usage).toFixed(1) + " W")
+        gpuValues.push("󱐋 " + Number(gpu.power_usage).toFixed(1) + " W")
       if (gpu.temperature !== undefined && gpu.temperature !== null)
-        gpuValues.push("Temperature " + formatTemperature(Number(gpu.temperature)))
+        gpuValues.push(" " + formatTemperature(Number(gpu.temperature)))
       if (gpuValues.length > 0)
         values.push({ key: "gpu-" + (gpu.id || gpuIndex), icon: "󰢮", primaryText: gpu.name || "GPU", secondaryText: gpuValues.join(" · ") })
     }
