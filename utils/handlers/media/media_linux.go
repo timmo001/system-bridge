@@ -11,8 +11,10 @@ func control(action MediaAction) error {
 	var cmd *exec.Cmd
 
 	switch action {
-	case MediaActionPlay, MediaActionPause:
-		cmd = exec.Command("playerctl", "play-pause")
+	case MediaActionPlay:
+		cmd = exec.Command("playerctl", "play")
+	case MediaActionPause:
+		cmd = exec.Command("playerctl", "pause")
 	case MediaActionNext:
 		cmd = exec.Command("playerctl", "next")
 	case MediaActionPrevious:
