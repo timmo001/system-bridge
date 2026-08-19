@@ -41,7 +41,7 @@ The plugin exposes the `timmo.system-bridge` shell IPC target with `open`,
 `close`, `show`, `hide`, and `toggle` methods:
 
 ```bash
-omarchy-shell timmo.system-bridge toggle
+omarchy-shell shell toggle timmo.system-bridge
 ```
 
 ## Settings
