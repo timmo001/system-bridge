@@ -4,11 +4,13 @@ An Omarchy bar widget and panel for local System Bridge health data. It shows
 CPU and memory usage in the bar, with disk, fan, GPU, temperature, uptime, and
 reboot details in a keyboard-filterable panel.
 
+![System Bridge panel in Omarchy](screenshot.png)
+
 ## Requirements
 
 - Omarchy Quattro
-- System Bridge installed with the `system-bridge` executable available on
-  `PATH`
+- [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
+  `system-bridge` executable available on `PATH`
 - A running local System Bridge service
 
 ## Install
