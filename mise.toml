@@ -3,7 +3,7 @@ min_version = "2025.1.0"
 [tools]
 bun = "1.4.0"
 go = "1.27.0"
-node = "26.7.0"
+node = "26.8.0"
 
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
