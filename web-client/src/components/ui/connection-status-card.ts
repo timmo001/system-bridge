@@ -77,6 +77,14 @@ class ConnectionStatusCard extends UIElement {
             ${this._connection.token ? "••••••••" : "Not set"}
           </span>
         </div>
+        <div class="col-span-2">
+          <span class="text-muted-foreground">MCP URL:</span>
+          <span class="ml-2 font-mono break-all">
+            ${this._connection.ssl ? "wss" : "ws"}://${
+              this._connection.host
+            }:${this._connection.port}/api/mcp
+          </span>
+        </div>
       </div>
     `;
   }
