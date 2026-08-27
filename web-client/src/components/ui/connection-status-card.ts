@@ -119,7 +119,9 @@ class ConnectionStatusCard extends UIElement {
         </div>
         <div class="col-span-2 flex items-center gap-2">
           <span class="text-muted-foreground">MCP URL:</span>
-          <span class="min-w-0 flex-1 font-mono break-all">${mcpURL}</span>
+          <span class="min-w-0 flex-1 font-mono break-all">
+            ${mcpURL}${this._connection.token ? "?token=*****" : ""}
+          </span>
           ${
             this._connection.token
               ? html`
