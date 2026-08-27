@@ -56,6 +56,8 @@ class ConnectionStatusCard extends UIElement {
         document.body.append(input);
         try {
           input.select();
+          // Keep copying available when the async Clipboard API requires HTTPS.
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           if (!document.execCommand("copy")) {
             throw new Error("Browser rejected the copy command");
           }

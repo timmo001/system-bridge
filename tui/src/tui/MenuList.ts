@@ -268,7 +268,7 @@ export class MenuList extends ScrollBoxRenderable {
 
   private _clearRows(): void {
     for (const row of this._rows) {
-      this.remove(row.container.id);
+      this.remove(row.container);
     }
     this._rows = [];
   }

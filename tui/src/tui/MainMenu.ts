@@ -121,7 +121,7 @@ export class MainMenu {
 
   /** Remove the main menu from the render tree */
   destroy(): void {
-    this.renderer.root.remove(this.root.id);
+    this.renderer.root.remove(this.root);
   }
 
   /** Update the filter bar display based on current filter text */
