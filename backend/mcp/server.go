@@ -1,115 +1,53 @@
 package mcp
 
 import (
-	"context"
-	"encoding/json"
+	"net/http"
 
-	"log/slog"
-
+	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/version"
 )
 
-// MCPServer handles MCP protocol requests
+// MCPServer serves MCP over Streamable HTTP and WebSocket transports.
 type MCPServer struct {
-	token       string
-	eventRouter *event.MessageRouter
-	dataStore   *data.DataStore
+	token                 string
+	server                *sdkmcp.Server
+	streamableHTTPHandler http.Handler
 }
 
-// NewMCPServer creates a new MCP server
+// NewMCPServer creates a new MCP HTTP handler.
 func NewMCPServer(token string, eventRouter *event.MessageRouter, dataStore *data.DataStore) *MCPServer {
-	return &MCPServer{
-		token:       token,
-		eventRouter: eventRouter,
-		dataStore:   dataStore,
-	}
-}
-
-// HandleRequest processes an MCP JSON-RPC request
-func (s *MCPServer) HandleRequest(ctx context.Context, req MCPRequest) MCPResponse {
-	slog.Debug("MCP request received", "method", req.Method, "id", req.ID)
-
-	switch req.Method {
-	case "initialize":
-		return s.handleInitialize(req)
-	case "tools/list":
-		return s.handleToolsList(req)
-	case "tools/call":
-		return s.handleToolCall(ctx, req)
-	default:
-		return NewErrorResponse(req.ID, ErrorCodeMethodNotFound, "Method not found", nil)
-	}
-}
-
-// handleInitialize handles the initialize request
-func (s *MCPServer) handleInitialize(req MCPRequest) MCPResponse {
-	var params InitializeParams
-	if req.Params != nil {
-		// Try to decode params
-		paramsJSON, err := json.Marshal(req.Params)
-		if err == nil {
-			_ = json.Unmarshal(paramsJSON, &params)
-		}
-	}
-
-	slog.Info("MCP client initializing", "client", params.ClientInfo.Name, "version", params.ClientInfo.Version)
-
-	result := InitializeResult{
-		ProtocolVersion: "2024-11-05",
-		Capabilities: ServerCapabilities{
-			Tools: map[string]interface{}{
-				"listChanged": false,
+	server := sdkmcp.NewServer(
+		&sdkmcp.Implementation{Name: "system-bridge", Version: version.Version},
+		&sdkmcp.ServerOptions{
+			Instructions: "System Bridge MCP server. Documentation: " + version.DocsMCPURL,
+			Capabilities: &sdkmcp.ServerCapabilities{
+				Tools: &sdkmcp.ToolCapabilities{},
 			},
 		},
-		ServerInfo: ServerInfo{
-			Name:    "system-bridge",
-			Version: version.Version,
-		},
-		Instructions: "System Bridge MCP server. Documentation: " + version.DocsMCPURL,
-	}
+	)
+	registerTools(server, eventRouter, dataStore)
 
-	return NewSuccessResponse(req.ID, result)
+	s := &MCPServer{token: token, server: server}
+	s.streamableHTTPHandler = sdkmcp.NewStreamableHTTPHandler(
+		func(*http.Request) *sdkmcp.Server { return server },
+		&sdkmcp.StreamableHTTPOptions{Stateless: true, JSONResponse: true},
+	)
+	return s
 }
 
-// handleToolsList handles the tools/list request
-func (s *MCPServer) handleToolsList(req MCPRequest) MCPResponse {
-	result := ToolsListResult{
-		Tools: GetToolDefinitions(),
+// ServeHTTP authenticates and dispatches MCP requests by transport.
+func (s *MCPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !s.authenticated(r) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 
-	return NewSuccessResponse(req.ID, result)
-}
-
-// handleToolCall handles the tools/call request
-func (s *MCPServer) handleToolCall(ctx context.Context, req MCPRequest) MCPResponse {
-	var params ToolCallParams
-
-	// Convert params to ToolCallParams
-	paramsJSON, err := json.Marshal(req.Params)
-	if err != nil {
-		return NewErrorResponse(req.ID, ErrorCodeInvalidParams, "Invalid parameters", nil)
+	if isWebSocketUpgrade(r) {
+		s.serveWebSocket(w, r)
+		return
 	}
 
-	if err := json.Unmarshal(paramsJSON, &params); err != nil {
-		return NewErrorResponse(req.ID, ErrorCodeInvalidParams, "Invalid parameters", nil)
-	}
-
-	// Validate tool name
-	if params.Name == "" {
-		return NewErrorResponse(req.ID, ErrorCodeInvalidParams, "Missing tool name", nil)
-	}
-
-	// Execute the tool
-	result, err := s.ExecuteTool(ctx, params.Name, params.Arguments)
-	if err != nil {
-		slog.Error("Tool execution failed", "tool", params.Name, "error", err)
-		return NewErrorResponse(req.ID, ErrorCodeInternalError, err.Error(), nil)
-	}
-
-	// Format result as MCP ToolCallResult
-	toolResult := formatToolResult(result)
-
-	return NewSuccessResponse(req.ID, toolResult)
+	s.streamableHTTPHandler.ServeHTTP(w, r)
 }

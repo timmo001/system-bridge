@@ -107,13 +107,9 @@ func (b *Backend) Run(ctx context.Context) error {
 		}
 	})
 
-	// Set up MCP WebSocket endpoint
+	// Set up MCP endpoint
 	mcpServer := mcp.NewMCPServer(b.token, b.eventRouter, b.dataStore)
-	mux.HandleFunc("/api/mcp", func(w http.ResponseWriter, r *http.Request) {
-		if err := mcpServer.HandleConnection(w, r); err != nil {
-			slog.Error("MCP connection error", "error", err)
-		}
-	})
+	mux.Handle("/api/mcp", mcpServer)
 
 	// Set up API endpoint
 	mux.HandleFunc("/api", api_http.HandleAPI)
