@@ -16,4 +16,4 @@ permissions: {}
 
 jobs:
   lint:
-    uses: timmo001/workflows/.github/workflows/lint-general.yml@51fc1b612809aa0dc5d79654b1948971d0c449d3 # master
+    uses: timmo001/workflows/.github/workflows/lint-general.yml@43e7be6974bb98454ffa56fc5a4b46cc160e09bc # master
