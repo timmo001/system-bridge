@@ -77,6 +77,11 @@
       "matchPackageNames": ["tailwindcss", "@tailwindcss/**", "tailwind-merge", "postcss"]
     },
     {
+      "description": "Update first-party workflows without a release delay.",
+      "matchPackageNames": ["timmo001/workflows"],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Group GitHub Actions.",
       "groupName": "github actions",
       "matchManagers": ["github-actions"]
