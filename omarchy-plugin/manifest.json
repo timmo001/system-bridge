@@ -23,7 +23,8 @@
     "defaultSection": "right",
     "defaults": {
       "primaryOnly": false,
-      "primaryOutput": ""
+      "primaryOutput": "",
+      "itemActions": {}
     },
     "schema": [
       {

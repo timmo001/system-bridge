@@ -14,6 +14,23 @@ Panel {
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property var panelRows: buildPanelRows()
+  readonly property var itemActions: setting("itemActions", ({}))
+
+  function actionForKey(key) {
+    if (!Util.isPlainObject(itemActions)) return []
+    var argv = itemActions[key]
+    if (!Array.isArray(argv) || argv.length === 0) return []
+    if (!argv.every(function(arg) { return typeof arg === "string" })) return []
+    return argv[0].trim() === "" ? [] : argv
+  }
+
+  function activateEntry(entry) {
+    if (!root.opened || !entry) return
+    var argv = actionForKey(entry.key)
+    if (argv.length === 0) return
+    root.close()
+    Util.execArgv(argv)
+  }
 
   function formatPercent(value) { return value === null ? "" : Math.round(value) + "%" }
   function formatTemperature(value) { return value === null ? "" : Math.round(value) + " °C" }
@@ -145,6 +162,7 @@ Panel {
       id: filterController
       anchors.fill: parent
       model: root.panelRows
+      onActivateRequested: function(entry) { root.activateEntry(entry) }
       onRevealRequested: Qt.callLater(root.scrollCursorIntoView)
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
@@ -259,7 +277,10 @@ Panel {
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
+                  cursorShape: root.actionForKey(modelData.key).length > 0
+                    ? Qt.PointingHandCursor : Qt.ArrowCursor
                   onEntered: filterController.cursorIndex = filterController.indexForKey(modelData.key)
+                  onClicked: root.activateEntry(modelData)
                 }
               }
             }
