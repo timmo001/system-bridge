@@ -14,7 +14,8 @@ Panel {
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property var panelRows: buildPanelRows()
-  readonly property var itemActions: setting("itemActions", ({}))
+  // QML models expose nested arrays as native lists; normalise them for validation.
+  readonly property var itemActions: Util.cloneJson(setting("itemActions", ({})))
 
   function actionForKey(key) {
     if (!Util.isPlainObject(itemActions)) return []
