@@ -14,6 +14,11 @@ Panel {
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property var panelRows: buildPanelRows()
+  readonly property var headerActions: [
+    { key: "action:settings" },
+    { key: "action:quit" }
+  ]
+  readonly property string cursorKey: filterController.selectedEntry() ? filterController.selectedEntry().key : ""
   // QML models expose nested arrays as native lists; normalise them for validation.
   readonly property var itemActions: Util.cloneJson(setting("itemActions", ({})))
 
@@ -27,6 +32,16 @@ Panel {
 
   function activateEntry(entry) {
     if (!root.opened || !entry) return
+    if (entry.key === "action:settings") {
+      root.close()
+      Util.execArgv(["system-bridge", "client", "open", "--settings"])
+      return
+    }
+    if (entry.key === "action:quit") {
+      root.close()
+      Util.execArgv(["system-bridge", "client", "quit"])
+      return
+    }
     var argv = actionForKey(entry.key)
     if (argv.length === 0) return
     root.close()
@@ -137,6 +152,7 @@ Panel {
   function cursorItem() {
     var entry = filterController.selectedEntry()
     if (!entry) return null
+    if (entry.key === "action:settings" || entry.key === "action:quit") return systemHeading
     return rowRepeater.itemAt(filterController.filteredModel.indexOf(entry))
   }
 
@@ -163,6 +179,7 @@ Panel {
       id: filterController
       anchors.fill: parent
       model: root.panelRows
+      navigationModel: root.headerActions.concat(filteredModel)
       onActivateRequested: function(entry) { root.activateEntry(entry) }
       onRevealRequested: Qt.callLater(root.scrollCursorIntoView)
       onCloseRequested: root.close()
@@ -205,14 +222,36 @@ Panel {
             }
           }
 
-          Text {
-            visible: filterController.count > 0
-            text: filterController.filterText || "SYSTEM"
-            color: Qt.darker(root.contentForeground, 1.4)
-            font.family: root.contentFontFamily
-            font.pixelSize: Style.font.caption
-            font.bold: true
-            font.letterSpacing: 1.2
+          SectionHeading {
+            id: systemHeading
+            title: "System Bridge"
+            foreground: root.contentForeground
+            fontFamily: root.contentFontFamily
+            trailingControl: Component {
+              Row {
+                spacing: Style.space(4)
+
+                PanelActionButton {
+                  iconText: ""
+                  tooltipText: "Open General Settings"
+                  foreground: root.contentForeground
+                  fontFamily: root.contentFontFamily
+                  hasCursor: root.cursorKey === "action:settings"
+                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey("action:settings") }
+                  onClicked: root.activateEntry(root.headerActions[0])
+                }
+
+                PanelActionButton {
+                  iconText: "󰩈"
+                  tooltipText: "Quit System Bridge"
+                  foreground: root.contentForeground
+                  fontFamily: root.contentFontFamily
+                  hasCursor: root.cursorKey === "action:quit"
+                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey("action:quit") }
+                  onClicked: root.activateEntry(root.headerActions[1])
+                }
+              }
+            }
           }
 
           Column {

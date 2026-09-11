@@ -12,6 +12,7 @@ reboot details in a keyboard-filterable panel.
 - [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
   `system-bridge` executable available on `PATH`
 - A running local System Bridge service
+- `zenity` for the exit confirmation prompt
 
 ## Install
 
@@ -37,6 +38,12 @@ Select the widget to open its panel. Type to filter the available readings,
 use Up and Down to move through the list, and press Escape to clear the filter
 or close the panel. Click a reading or press Enter to run its configured action.
 Readings without an action remain informational.
+
+The **System Bridge** heading has two icons: the settings cog opens the web
+client's General Settings, and the exit icon asks for confirmation before
+stopping System Bridge. Both actions are also available with Up/Down and Enter.
+These controls use `system-bridge client open --settings` and
+`system-bridge client quit` and need a System Bridge version with those commands.
 
 The plugin exposes the `timmo.system-bridge` shell IPC target with `open`,
 `close`, `show`, `hide`, and `toggle` methods:
