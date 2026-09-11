@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
@@ -13,6 +14,8 @@ import (
 
 // LogLevel represents the logging level as a string enum
 type LogLevel string
+
+var configMu sync.Mutex
 
 const (
 	LogLevelDebug LogLevel = "DEBUG"
@@ -100,15 +103,18 @@ type SettingsDisks struct {
 }
 
 type Settings struct {
-	Autostart bool             `json:"autostart" mapstructure:"autostart"`
-	Hotkeys   []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
-	LogLevel  LogLevel         `json:"logLevel" mapstructure:"logLevel"`
-	Commands  SettingsCommands `json:"commands" mapstructure:"commands"`
-	Disks     SettingsDisks    `json:"disks" mapstructure:"disks"`
-	Media     SettingsMedia    `json:"media" mapstructure:"media"`
+	Autostart  bool             `json:"autostart" mapstructure:"autostart"`
+	SystemTray bool             `json:"systemTray" mapstructure:"systemTray"`
+	Hotkeys    []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
+	LogLevel   LogLevel         `json:"logLevel" mapstructure:"logLevel"`
+	Commands   SettingsCommands `json:"commands" mapstructure:"commands"`
+	Disks      SettingsDisks    `json:"disks" mapstructure:"disks"`
+	Media      SettingsMedia    `json:"media" mapstructure:"media"`
 }
 
 func Load() (*Settings, error) {
+	configMu.Lock()
+	defer configMu.Unlock()
 	viper.AutomaticEnv()
 
 	viper.SetConfigName("settings")
@@ -122,6 +128,7 @@ func Load() (*Settings, error) {
 
 	// Set default values (token and port removed)
 	viper.SetDefault("autostart", false)
+	viper.SetDefault("systemTray", true)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelWarn)
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
@@ -204,12 +211,15 @@ func (cfg *Settings) Validate() error {
 }
 
 func (cfg *Settings) Save() error {
+	configMu.Lock()
+	defer configMu.Unlock()
 	// Validate settings before saving
 	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("settings validation failed: %w", err)
 	}
 
 	viper.Set("autostart", cfg.Autostart)
+	viper.Set("systemTray", cfg.SystemTray)
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)

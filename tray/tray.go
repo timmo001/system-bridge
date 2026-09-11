@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"runtime"
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/systray"
 )
@@ -19,14 +20,18 @@ var trayIconIcoData []byte
 type Handlers struct {
 	OpenWebClient func()
 	LaunchTUI     func()
+	Hide          func()
 	OpenDocs      func()
 	OpenLogsDir   func()
 	Quit          func()
 }
 
 var (
-	handlers   Handlers
-	handlersMu sync.RWMutex
+	handlers      Handlers
+	handlersMu    sync.RWMutex
+	ready         atomic.Bool
+	quitRequested atomic.Bool
+	done          = make(chan struct{})
 )
 
 // SetHandlers registers callbacks for tray menu actions.
@@ -65,15 +70,27 @@ func OnReady() {
 	mOpenWebClient := systray.AddMenuItem("Open web client", "Open the web client in your default browser")
 	mLaunchTUI := systray.AddMenuItem("Launch TUI", "Open the interactive TUI in a terminal window")
 	systray.AddSeparator()
+	mHide := systray.AddMenuItem("Hide system tray", "Hide the icon until re-enabled in General Settings")
+	systray.AddSeparator()
 	mOpenDocs := systray.AddMenuItem("Documentation", "Open the System Bridge documentation in your default browser")
 	mOpenLogsDirectory := systray.AddMenuItem("Open logs directory", "Open the logs directory")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit the application")
+	ready.Store(true)
+	if quitRequested.Load() {
+		systray.Quit()
+	}
 
 	// Handle menu item clicks
 	go func() {
 		for {
 			select {
+			case <-done:
+				return
+			case <-mHide.ClickedCh:
+				if h := getHandlers(); h.Hide != nil {
+					go h.Hide()
+				}
 			case <-mOpenWebClient.ClickedCh:
 				h := getHandlers()
 				if h.OpenWebClient != nil {
@@ -106,10 +123,8 @@ func OnReady() {
 				slog.Info("Quit menu item clicked")
 				h := getHandlers()
 				if h.Quit != nil {
-					h.Quit()
+					go h.Quit()
 				}
-				systray.Quit()
-				return
 			}
 		}
 	}()
@@ -117,10 +132,14 @@ func OnReady() {
 
 // OnExit is called when the system tray is exiting
 func OnExit() {
+	close(done)
 	slog.Info("System tray exiting...")
 }
 
 // Quit exits the system tray
 func Quit() {
-	systray.Quit()
+	quitRequested.Store(true)
+	if ready.Load() {
+		systray.Quit()
+	}
 }

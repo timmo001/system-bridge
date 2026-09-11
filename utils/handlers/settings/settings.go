@@ -20,6 +20,7 @@ func Save(settings *Settings) error {
 // Update updates the settings with new values
 func Update(current *Settings, new *Settings) error {
 	current.Autostart = new.Autostart
+	current.SystemTray = new.SystemTray
 	current.Hotkeys = new.Hotkeys
 	current.LogLevel = new.LogLevel
 	current.Disks = new.Disks

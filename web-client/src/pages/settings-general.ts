@@ -49,6 +49,7 @@ class PageSettingsGeneral extends PageElement {
   @state()
   private formData: Settings = {
     autostart: false,
+    systemTray: true,
     hotkeys: [],
     logLevel: "INFO",
     commands: {
@@ -154,6 +155,10 @@ class PageSettingsGeneral extends PageElement {
     };
   };
 
+  private handleSystemTrayChange = (e: CustomEvent<{ checked: boolean }>) => {
+    this.formData = { ...this.formData, systemTray: e.detail.checked };
+  };
+
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
   };
@@ -173,6 +178,23 @@ class PageSettingsGeneral extends PageElement {
               .checked=${this.formData.autostart}
               ?disabled=${this.isSubmitting}
               @switch-change=${this.handleAutostartChange}
+            ></ui-switch>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="space-y-0.5">
+              <ui-label>System tray</ui-label>
+              <p class="text-sm text-muted-foreground">
+                Show the System Bridge tray icon. Hiding takes effect when you
+                save. After re-enabling, save and restart System Bridge. On
+                macOS, hiding the icon also requires a restart.
+              </p>
+            </div>
+            <ui-switch
+              aria-label="System tray"
+              .checked=${this.formData.systemTray}
+              ?disabled=${this.isSubmitting}
+              @switch-change=${this.handleSystemTrayChange}
             ></ui-switch>
           </div>
 

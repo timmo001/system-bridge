@@ -450,6 +450,7 @@ export class WebSocketController implements ReactiveController {
       current ??
       ({
         autostart: false,
+        systemTray: true,
         hotkeys: [],
         logLevel: "INFO",
         commands: { allowlist: [] },
@@ -458,6 +459,7 @@ export class WebSocketController implements ReactiveController {
       } satisfies Settings);
     const {
       autostart = fallback.autostart,
+      systemTray = fallback.systemTray,
       hotkeys = fallback.hotkeys,
       logLevel = fallback.logLevel,
     } = settings;
@@ -469,6 +471,7 @@ export class WebSocketController implements ReactiveController {
 
     return {
       autostart,
+      systemTray,
       hotkeys,
       logLevel,
       commands: { allowlist },

@@ -6,11 +6,12 @@ import (
 
 func settingsToFrontend(s *settings.Settings) map[string]interface{} {
 	return map[string]interface{}{
-		"autostart": s.Autostart,
-		"commands":  s.Commands,
-		"disks":     s.Disks,
-		"hotkeys":   s.Hotkeys,
-		"logLevel":  string(s.LogLevel),
-		"media":     s.Media,
+		"autostart":  s.Autostart,
+		"systemTray": s.SystemTray,
+		"commands":   s.Commands,
+		"disks":      s.Disks,
+		"hotkeys":    s.Hotkeys,
+		"logLevel":   string(s.LogLevel),
+		"media":      s.Media,
 	}
 }

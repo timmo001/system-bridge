@@ -36,6 +36,7 @@ const SettingsCommandsSchema = z.object({
 
 const SettingsSchema = z.object({
   autostart: z.boolean(),
+  systemTray: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
   logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
   commands: SettingsCommandsSchema,

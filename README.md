@@ -42,6 +42,19 @@ tools are not required. Installing them improves detection on some systems:
 
 - **Windows / macOS**: no optional tools are needed.
 
+## Desktop controls
+
+The system tray is enabled by default. Choose **Hide system tray** to hide it
+after confirmation while the backend keeps running. To restore it, open the web
+client's **General Settings**, enable **System tray**, save, and restart System
+Bridge. The `backend --no-tray` flag overrides this setting.
+On experimental macOS builds, hiding the icon also requires a restart.
+
+Tray and Omarchy exit actions ask for confirmation before stopping System Bridge.
+On Linux, these desktop prompts need `zenity`: install it with
+`sudo pacman -S zenity` or `sudo apt install zenity`. Windows uses PowerShell and
+macOS uses `osascript`, both included with the OS.
+
 ## File Locations
 
 - Linux settings/token: `~/.local/share/system-bridge/v5/`

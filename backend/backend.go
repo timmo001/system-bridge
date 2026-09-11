@@ -92,6 +92,7 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
+	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
 
 	// Set up WebSocket endpoint
 	mux.HandleFunc("/api/websocket", func(w http.ResponseWriter, r *http.Request) {

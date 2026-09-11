@@ -26,6 +26,7 @@ import (
 	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/confirmation"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/timmo001/system-bridge/version"
@@ -146,7 +147,7 @@ func main() {
 						}
 					}()
 
-					if !cmd.Bool("no-tray") {
+					if !cmd.Bool("no-tray") && s.SystemTray {
 						// Set up tray handlers
 						tray.SetHandlers(tray.Handlers{
 							OpenWebClient: func() {
@@ -155,6 +156,25 @@ func main() {
 							LaunchTUI: func() {
 								launchTUIInTerminal()
 							},
+							Hide: func() {
+								message := fmt.Sprintf("Hide the System Bridge tray icon? System Bridge will keep running. To restore it, open http://127.0.0.1:%d/settings, enable System tray in General Settings, save, then restart System Bridge.", utils.GetPort())
+								if runtime.GOOS == "darwin" {
+									message += " On macOS, hiding the icon also requires a restart."
+								}
+								if !confirmDesktopAction(cmdCtx, "Hide system tray", message) {
+									return
+								}
+								current, err := settings.Load()
+								if err == nil {
+									current.SystemTray = false
+									err = current.Save()
+								}
+								if err != nil {
+									reportDesktopError("Failed to hide system tray", err)
+									return
+								}
+								tray.Quit()
+							},
 							OpenDocs: func() {
 								openExternalURL(version.DocsURL, "documentation")
 							},
@@ -162,6 +182,9 @@ func main() {
 								openLogsDirectory()
 							},
 							Quit: func() {
+								if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+									return
+								}
 								slog.Info("Quitting...")
 								// Cancel context to trigger graceful shutdown
 								// The backend.Run() will return, allowing deferred cleanup to run
@@ -173,6 +196,7 @@ func main() {
 
 						// Start the system tray UI
 						go tray.Run()
+						defer tray.Quit()
 					}
 
 					// Create and run backend server with signal-aware context
@@ -197,6 +221,37 @@ func main() {
 				// 	return nil
 				// },
 				Commands: []*cli.Command{
+					{
+						Name:  "open",
+						Usage: "Open the web client",
+						Flags: []cli.Flag{&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"}},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							token, err := utils.LoadToken()
+							if err != nil {
+								return fmt.Errorf("load token: %w", err)
+							}
+							path := "/"
+							if cmd.Bool("settings") {
+								path = "/settings"
+							}
+							openWebClientPath(token, path)
+							return nil
+						},
+					},
+					{
+						Name:  "quit",
+						Usage: "Confirm and quit the local System Bridge backend",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+								return nil
+							}
+							if err := client.Quit(cmdCtx); err != nil {
+								reportDesktopError("Failed to quit System Bridge", err)
+								return err
+							}
+							return nil
+						},
+					},
 					{
 						Name:    "token",
 						Aliases: []string{"t"},
@@ -532,8 +587,12 @@ func main() {
 }
 
 func openWebClient(token string) {
+	openWebClientPath(token, "/")
+}
+
+func openWebClientPath(token, path string) {
 	port := utils.GetPort()
-	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
+	url := fmt.Sprintf("http://127.0.0.1:%d%s?host=127.0.0.1&port=%d&apiKey=%s", port, path, port, token)
 	slog.Info("Opening web client URL", "url", url)
 	if err := browser.OpenURL(url); err != nil {
 		if err := notification.Send(notification.NotificationData{
@@ -544,6 +603,21 @@ func openWebClient(token string) {
 			slog.Error("Failed to send notification", "err", err)
 		}
 		slog.Error("Failed to open web client", "err", err)
+	}
+}
+
+func confirmDesktopAction(ctx context.Context, title, message string) bool {
+	confirmed, err := confirmation.Ask(ctx, title, message)
+	if err != nil {
+		reportDesktopError("Failed to show confirmation", err)
+	}
+	return confirmed
+}
+
+func reportDesktopError(title string, err error) {
+	slog.Error(title, "error", err)
+	if notifyErr := notification.Send(notification.NotificationData{Title: title, Message: err.Error(), Icon: "system-bridge"}); notifyErr != nil {
+		slog.Error("Failed to send notification", "error", notifyErr)
 	}
 }
 
