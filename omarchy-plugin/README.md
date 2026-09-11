@@ -62,8 +62,14 @@ directory with your chosen repository:
 
 ```bash
 omarchy bar set timmo.system-bridge itemActions '{
-  "cpu": ["dot", "herdr", "repo-open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
-  "memory": ["dot", "herdr", "repo-open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
+  "cpu": [
+    "dot", "herdr", "repo-open",
+    "<repository-label>", "<repository-directory>", "Btop", "btop"
+  ],
+  "memory": [
+    "dot", "herdr", "repo-open",
+    "<repository-label>", "<repository-directory>", "Btop", "btop"
+  ],
   "uptime": ["notify-send", "System Bridge", "Uptime selected"]
 }' --json
 ```
