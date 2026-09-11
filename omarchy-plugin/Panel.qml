@@ -14,10 +14,12 @@ Panel {
   readonly property color contentForeground: bar ? bar.foreground : Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property var panelRows: buildPanelRows()
-  readonly property var headerActions: [
+  readonly property bool connected: service !== null && service.connected
+  readonly property string serverActionKey: connected ? "action:quit" : "action:start"
+  readonly property var headerActions: connected ? [
     { key: "action:settings" },
     { key: "action:quit" }
-  ]
+  ] : [{ key: "action:start" }]
   readonly property string cursorKey: filterController.selectedEntry() ? filterController.selectedEntry().key : ""
   // QML models expose nested arrays as native lists; normalise them for validation.
   readonly property var itemActions: Util.cloneJson(setting("itemActions", ({})))
@@ -33,13 +35,21 @@ Panel {
   function activateEntry(entry) {
     if (!root.opened || !entry) return
     if (entry.key === "action:settings") {
+      if (!root.connected) return
       root.close()
       Util.execArgv(["system-bridge", "client", "open", "--settings"])
       return
     }
     if (entry.key === "action:quit") {
+      if (!root.connected) return
       root.close()
       Util.execArgv(["system-bridge", "client", "quit"])
+      return
+    }
+    if (entry.key === "action:start") {
+      if (root.connected) return
+      root.close()
+      Util.execArgv(["system-bridge", "backend"])
       return
     }
     var argv = actionForKey(entry.key)
@@ -152,7 +162,7 @@ Panel {
   function cursorItem() {
     var entry = filterController.selectedEntry()
     if (!entry) return null
-    if (entry.key === "action:settings" || entry.key === "action:quit") return systemHeading
+    if (entry.key === "action:settings" || entry.key === root.serverActionKey) return systemHeading
     return rowRepeater.itemAt(filterController.filteredModel.indexOf(entry))
   }
 
@@ -232,23 +242,24 @@ Panel {
                 spacing: Style.space(4)
 
                 PanelActionButton {
+                  enabled: root.connected
                   iconText: ""
                   tooltipText: "Open General Settings"
                   foreground: root.contentForeground
                   fontFamily: root.contentFontFamily
                   hasCursor: root.cursorKey === "action:settings"
                   onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey("action:settings") }
-                  onClicked: root.activateEntry(root.headerActions[0])
+                  onClicked: root.activateEntry({ key: "action:settings" })
                 }
 
                 PanelActionButton {
-                  iconText: "󰩈"
-                  tooltipText: "Quit System Bridge"
+                  iconText: root.connected ? "󰩈" : ""
+                  tooltipText: root.connected ? "Quit System Bridge" : "Start System Bridge"
                   foreground: root.contentForeground
                   fontFamily: root.contentFontFamily
-                  hasCursor: root.cursorKey === "action:quit"
-                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey("action:quit") }
-                  onClicked: root.activateEntry(root.headerActions[1])
+                  hasCursor: root.cursorKey === root.serverActionKey
+                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey(root.serverActionKey) }
+                  onClicked: root.activateEntry({ key: root.serverActionKey })
                 }
               }
             }

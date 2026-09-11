@@ -42,6 +42,8 @@ Readings without an action remain informational.
 The **System Bridge** heading has two icons: the settings cog opens the web
 client's General Settings, and the exit icon asks for confirmation before
 stopping System Bridge. Both actions are also available with Up/Down and Enter.
+While disconnected, the settings cog is disabled and the exit icon becomes a
+start button that launches `system-bridge backend`.
 These controls use `system-bridge client open --settings` and
 `system-bridge client quit` and need a System Bridge version with those commands.
 
