@@ -435,14 +435,18 @@ jobs:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
-      - name: Update release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
-        with:
-          files: |
-            dist/linux/arch/*.pkg.tar.zst
-            dist/linux/deb/*.deb
-            dist/linux/rpm/*.rpm
-            dist/linux/flatpak/*.flatpak
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          shopt -s failglob
+          gh release upload "$RELEASE_TAG" \
+            dist/linux/arch/*.pkg.tar.zst \
+            dist/linux/deb/*.deb \
+            dist/linux/rpm/*.rpm \
+            dist/linux/flatpak/*.flatpak \
             dist/windows/*-setup.exe
 
   compute-next-patch:
