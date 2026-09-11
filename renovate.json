@@ -48,11 +48,11 @@
   ],
   "packageRules": [
     {
-      "description": "Keep the web-client TypeScript API on 6.0 for typescript-eslint.",
+      "description": "Keep TypeScript 6.0.3 for ESLint until TypeScript 7 is supported.",
       "matchManagers": ["npm"],
       "matchFileNames": ["web-client/package.json"],
       "matchDepNames": ["typescript"],
-      "allowedVersions": "<6.1.0"
+      "enabled": false
     },
     {
       "description": "Pin Docker image digests.",
