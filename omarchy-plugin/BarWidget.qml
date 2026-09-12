@@ -33,8 +33,7 @@ BarWidget {
     systemBridge.cpuUsage !== null && systemBridge.cpuUsage >= 90
     || systemBridge.memoryPercent !== null && systemBridge.memoryPercent >= 90
     || systemBridge.highTemperature || systemBridge.stale
-    || systemBridge.pendingReboot === true
-    || systemBridge.newerVersionAvailable === true)
+    || systemBridge.pendingReboot === true)
   readonly property string displayText: {
     if (!systemBridge || !systemBridge.connected) return " --%   --%"
     var cpu = systemBridge.cpuUsage === null ? "--" : Math.round(systemBridge.cpuUsage)
