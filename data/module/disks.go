@@ -2,6 +2,7 @@ package data_module
 
 import (
 	"context"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -49,7 +50,9 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 
 	var partitions []disk.PartitionStat
 	for _, p := range allPartitions {
-		if !strings.HasPrefix(p.Device, "/dev/") {
+		// "/dev/*" device paths are Linux-specific.
++		// On Windows, gopsutil reports devices differently (e.g. drive letters), so applying this filter cross-platform drops all disks.
+		if runtime.GOOS == "linux" && !strings.HasPrefix(p.Device, "/dev/") {
 			continue
 		}
 		category := ClassifyMount(p)
