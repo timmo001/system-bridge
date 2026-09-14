@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/mdns v1.0.7
 	github.com/jezek/xgb v1.3.1
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/phsym/console-slog v0.3.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/shirou/gopsutil/v4 v4.26.8
