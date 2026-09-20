@@ -31,7 +31,7 @@ jobs:
   publish:
     name: Publish Arch package (system-bridge-git)
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@3677c61f9edc025528749995498bdbc93fbe21f3 # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@065e689c85cec1e7d025f6d074b2589e41d6bb2b # master
     with:
       package-name: system-bridge-git
       pkgbuild-path: .scripts/linux/PKGBUILD.dev
