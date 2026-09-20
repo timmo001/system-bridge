@@ -45,3 +45,9 @@ const SettingsSchema = z.object({
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;
+
+export const PartialSettingsSchema = SettingsSchema.partial().extend({
+  commands: SettingsCommandsSchema.partial().optional(),
+  disks: SettingsDisksSchema.partial().optional(),
+  media: SettingsMediaSchema.partial().optional(),
+});

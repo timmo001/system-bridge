@@ -38,6 +38,7 @@ class ConnectionStatusCard extends UIElement {
 
   private get mcpURL(): string | null {
     if (!this._connection) return null;
+
     return `${this._connection.ssl ? "https" : "http"}://${this._connection.host}:${this._connection.port}/api/mcp`;
   }
 
@@ -45,6 +46,7 @@ class ConnectionStatusCard extends UIElement {
     if (!this.mcpURL || !this._connection?.token) return;
 
     const url = `${this.mcpURL}?token=${encodeURIComponent(this._connection.token)}`;
+
     try {
       if (window.isSecureContext && navigator.clipboard) {
         await navigator.clipboard.writeText(url);
@@ -54,10 +56,12 @@ class ConnectionStatusCard extends UIElement {
         input.style.position = "fixed";
         input.style.opacity = "0";
         document.body.append(input);
+
         try {
           input.select();
+
           // Keep copying available when the async Clipboard API requires HTTPS.
-          // eslint-disable-next-line @typescript-eslint/no-deprecated
+          // oxlint-disable-next-line typescript/no-deprecated
           if (!document.execCommand("copy")) {
             throw new Error("Browser rejected the copy command");
           }
@@ -65,6 +69,7 @@ class ConnectionStatusCard extends UIElement {
           input.remove();
         }
       }
+
       this._copyStatus = "copied";
     } catch (error) {
       this._copyStatus = "error";
@@ -89,6 +94,7 @@ class ConnectionStatusCard extends UIElement {
 
   private renderErrorBanner(): TemplateResult {
     if (!this._status?.error) return html``;
+
     return html`
       <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
         ${this._status.error}
@@ -98,7 +104,9 @@ class ConnectionStatusCard extends UIElement {
 
   private renderConnectionDetails(): TemplateResult {
     const mcpURL = this.mcpURL;
+
     if (!this._connection || !mcpURL) return html``;
+
     return html`
       <div class="grid grid-cols-2 gap-4 text-sm pt-2">
         <div>

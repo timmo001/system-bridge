@@ -32,6 +32,7 @@ export class SendablePageElement extends PageElement {
   protected clearSendingState(): void {
     this.isSending = false;
     this.pendingRequestId = null;
+
     if (this.sendTimeout !== null) {
       clearTimeout(this.sendTimeout);
       this.sendTimeout = null;

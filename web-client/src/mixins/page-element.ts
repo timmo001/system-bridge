@@ -60,6 +60,7 @@ export class PageElement extends UIElement {
 
   updated(changedProperties: Map<PropertyKey, unknown>): void {
     super.updated?.(changedProperties);
+
     if (changedProperties.has("title")) {
       this.updateDocumentTitle();
     }
@@ -84,8 +85,10 @@ export class PageElement extends UIElement {
     customDescription?: TemplateResult,
   ): TemplateResult {
     if (customDescription) return customDescription;
+
     if (this.description)
       return html`<p class="text-muted-foreground">${this.description}</p>`;
+
     return html``;
   }
 
@@ -128,6 +131,7 @@ export class PageElement extends UIElement {
       showConnectionIndicator = true,
       customDescription,
     } = options ?? {};
+
     const description = this.resolveDescription(customDescription);
 
     return html`
@@ -168,6 +172,7 @@ export class PageElement extends UIElement {
     if (!result) return html``;
 
     const style = getResultStyle(result.success);
+
     return html`
       <div
         class="rounded-lg border p-4 flex items-start gap-3 ${style.borderClass} ${style.bgClass}"
@@ -204,6 +209,7 @@ export class PageElement extends UIElement {
         ></ui-connection-required>
       `;
     }
+
     return content;
   }
 

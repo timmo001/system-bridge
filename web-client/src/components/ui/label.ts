@@ -8,11 +8,13 @@ import { UIElement } from "~/mixins/light-dom";
 class Label extends UIElement {
   connectedCallback() {
     super.connectedCallback();
+
     // Apply label classes directly to host element
     const classes = cn(
       "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
     );
-    // eslint-disable-next-line wc/no-self-class
+
+    // oxlint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
   }
 

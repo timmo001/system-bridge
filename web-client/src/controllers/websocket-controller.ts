@@ -1,5 +1,5 @@
 import type { ReactiveController, ReactiveControllerHost } from "lit";
-import type { z } from "zod";
+import { z } from "zod";
 
 import type { BridgeSettingsState } from "~/contexts/bridge-settings";
 import type { ConnectionSettings } from "~/contexts/connection";
@@ -18,7 +18,10 @@ import {
   type ModuleData,
 } from "~/lib/system-bridge/types-modules";
 import { ModuleDataSchemas } from "~/lib/system-bridge/types-modules-schemas";
-import type { Settings } from "~/lib/system-bridge/types-settings";
+import {
+  PartialSettingsSchema,
+  type Settings,
+} from "~/lib/system-bridge/types-settings";
 import {
   WebSocketResponseSchema,
   type WebSocketRequest,
@@ -27,24 +30,30 @@ import { generateUUID } from "~/lib/utils";
 
 interface PendingResolver<T = unknown> {
   resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: unknown) => void;
+  reject: (reason: Error) => void;
   schema: z.ZodType<T>;
   timeoutId: number;
 }
 
 type AnyPendingResolver = PendingResolver;
+
 type WebSocketResponse = z.infer<typeof WebSocketResponseSchema>;
+
 type ResponseSubtype = WebSocketResponse["subtype"];
 
-interface CommandResult {
-  commandID: string;
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-  error?: string;
-}
+const CommandExecutingSchema = z.object({ commandID: z.string() });
+
+const CommandResultSchema = CommandExecutingSchema.extend({
+  exitCode: z.number(),
+  stdout: z.string(),
+  stderr: z.string(),
+  error: z.string().optional(),
+});
+
+type CommandResult = z.infer<typeof CommandResultSchema>;
 
 type ValidConnectionSettings = ConnectionSettings & { token: string };
+
 type WebSocketControllerHost = ReactiveControllerHost & HTMLElement;
 
 export class WebSocketController implements ReactiveController {
@@ -222,6 +231,7 @@ export class WebSocketController implements ReactiveController {
       this._ws.close();
       this._ws = null;
     }
+
     this._retryCount = 0;
     this._error = null;
     this.connect();
@@ -272,6 +282,7 @@ export class WebSocketController implements ReactiveController {
   private cancelCommandCleanupTimeout(commandID: string) {
     const existingTimeout =
       this._commandExecutionCleanupTimeouts.get(commandID);
+
     if (existingTimeout !== undefined) {
       clearTimeout(existingTimeout);
       this._commandExecutionCleanupTimeouts.delete(commandID);
@@ -296,6 +307,7 @@ export class WebSocketController implements ReactiveController {
     for (const timeoutId of this._commandExecutionCleanupTimeouts.values()) {
       clearTimeout(timeoutId);
     }
+
     this._commandExecutionCleanupTimeouts.clear();
   }
 
@@ -346,6 +358,7 @@ export class WebSocketController implements ReactiveController {
 
   private parseWebSocketMessage(event: MessageEvent<string>) {
     let parsedMessage;
+
     try {
       parsedMessage = WebSocketResponseSchema.safeParse(JSON.parse(event.data));
     } catch (error) {
@@ -356,6 +369,7 @@ export class WebSocketController implements ReactiveController {
         event.data,
       );
       this._error = "Received invalid message from server";
+
       return null;
     }
 
@@ -367,6 +381,7 @@ export class WebSocketController implements ReactiveController {
         event.data,
       );
       this._error = "Received invalid message format from server";
+
       return null;
     }
 
@@ -375,6 +390,7 @@ export class WebSocketController implements ReactiveController {
 
   private handleMessage(event: MessageEvent<string>) {
     const message = this.parseWebSocketMessage(event);
+
     if (!message || this.resolvePendingResponse(message)) {
       return;
     }
@@ -385,6 +401,7 @@ export class WebSocketController implements ReactiveController {
 
   private resolvePendingResponse(message: WebSocketResponse) {
     const resolver = this._pendingResolvers.get(message.id);
+
     if (!resolver) {
       return false;
     }
@@ -392,15 +409,18 @@ export class WebSocketController implements ReactiveController {
     clearTimeout(resolver.timeoutId);
 
     const parsedData = resolver.schema.safeParse(message.data);
+
     if (!parsedData.success) {
       this._error = "Received invalid message data from server";
       resolver.reject(parsedData.error);
       this._pendingResolvers.delete(message.id);
+
       return true;
     }
 
     resolver.resolve(parsedData.data);
     this._pendingResolvers.delete(message.id);
+
     return true;
   }
 
@@ -410,6 +430,7 @@ export class WebSocketController implements ReactiveController {
     }
 
     const update = this.parseDataUpdate(message.module, message.data);
+
     if (!update) {
       return;
     }
@@ -421,21 +442,27 @@ export class WebSocketController implements ReactiveController {
     this._isRequestingData = false;
   }
 
+  // This is the input boundary: the module-specific schema below parses the raw payload.
+  // oxlint-disable-next-line anti-slop/no-unknown-parameters
   private parseDataUpdate(module: string, data: unknown) {
     const moduleValidation = ModuleNameSchema.safeParse(module);
+
     if (!moduleValidation.success) {
       this._error = `Received invalid module name: ${module}`;
+
       return null;
     }
 
     const moduleName = moduleValidation.data;
     const dataValidation = ModuleDataSchemas[moduleName].safeParse(data);
+
     if (!dataValidation.success) {
       this._error = `Received invalid data for module ${moduleName}`;
       console.error(
         `Module ${moduleName} validation error:`,
         dataValidation.error,
       );
+
       return null;
     }
 
@@ -443,7 +470,7 @@ export class WebSocketController implements ReactiveController {
   }
 
   private normalizeSettings(
-    settings: Partial<Settings>,
+    settings: z.infer<typeof PartialSettingsSchema>,
     current?: Settings | null,
   ): Settings {
     const fallback =
@@ -457,16 +484,20 @@ export class WebSocketController implements ReactiveController {
         disks: { allowedSecondaryMountPoints: [] },
         media: { directories: [] },
       } satisfies Settings);
+
     const {
       autostart = fallback.autostart,
       systemTray = fallback.systemTray,
       hotkeys = fallback.hotkeys,
       logLevel = fallback.logLevel,
     } = settings;
+
     const { allowlist = fallback.commands.allowlist } = settings.commands ?? {};
+
     const {
       allowedSecondaryMountPoints = fallback.disks.allowedSecondaryMountPoints,
     } = settings.disks ?? {};
+
     const { directories = fallback.media.directories } = settings.media ?? {};
 
     return {
@@ -485,20 +516,35 @@ export class WebSocketController implements ReactiveController {
       return;
     }
 
-    this._settings = this.normalizeSettings(message.data as Partial<Settings>);
+    const settings = PartialSettingsSchema.safeParse(message.data);
+
+    if (!settings.success) {
+      this._error = "Received invalid settings from server";
+
+      return;
+    }
+
+    this._settings = this.normalizeSettings(settings.data);
     this._isRequestingData = false;
   }
 
   private handleSettingsUpdated(message: WebSocketResponse) {
-    this._settings = this.normalizeSettings(
-      message.data as Partial<Settings>,
-      this._settings,
-    );
+    const settings = PartialSettingsSchema.safeParse(message.data);
+
+    if (!settings.success) {
+      this._error = "Received invalid settings from server";
+
+      return;
+    }
+
+    this._settings = this.normalizeSettings(settings.data, this._settings);
     this._isSettingsUpdatePending = false;
+
     if (this._settingsUpdateTimeout) {
       clearTimeout(this._settingsUpdateTimeout);
       this._settingsUpdateTimeout = null;
     }
+
     this._pendingSettingsRequests.delete(message.id);
     this.syncContexts();
     this.dispatchComponentEvent("settings-updated", message.id);
@@ -568,15 +614,16 @@ export class WebSocketController implements ReactiveController {
   }
 
   private handleCommandExecuting(message: WebSocketResponse) {
-    const commandData = message.data as { commandID?: string };
-    if (!commandData?.commandID) {
+    const commandData = CommandExecutingSchema.safeParse(message.data);
+
+    if (!commandData.success || !commandData.data.commandID) {
       return;
     }
 
     this._pendingCommandRequests.delete(message.id);
-    this.cancelCommandCleanupTimeout(commandData.commandID);
+    this.cancelCommandCleanupTimeout(commandData.data.commandID);
     this.enforceCommandExecutionsLimit();
-    this._commandExecutions.set(commandData.commandID, {
+    this._commandExecutions.set(commandData.data.commandID, {
       isExecuting: true,
       result: null,
     });
@@ -585,18 +632,20 @@ export class WebSocketController implements ReactiveController {
   }
 
   private handleCommandCompleted(message: WebSocketResponse) {
-    const result = message.data as CommandResult;
-    if (!result?.commandID) {
+    const result = CommandResultSchema.safeParse(message.data);
+
+    if (!result.success || !result.data.commandID) {
       return;
     }
 
     this._pendingCommandRequests.delete(message.id);
-    this.setCommandResult(result);
+    this.setCommandResult(result.data);
   }
 
   private handleError(message: WebSocketResponse) {
     if (message.subtype === "BAD_TOKEN") {
       this.handleBadTokenError();
+
       return;
     }
 
@@ -633,6 +682,7 @@ export class WebSocketController implements ReactiveController {
 
   private dispatchRequestErrors(message: WebSocketResponse) {
     const componentError = this.componentRequestErrors[message.subtype];
+
     if (componentError) {
       this.dispatchComponentError(
         componentError.eventName,
@@ -640,6 +690,7 @@ export class WebSocketController implements ReactiveController {
         message.message ?? componentError.fallbackMessage,
       );
     }
+
     this.dispatchMediaControlError(message);
   }
 
@@ -682,6 +733,7 @@ export class WebSocketController implements ReactiveController {
 
   private handleCommandError(requestId: string, message: string) {
     const commandId = this._pendingCommandRequests.get(requestId);
+
     if (!commandId) {
       return;
     }
@@ -699,10 +751,13 @@ export class WebSocketController implements ReactiveController {
   /** Returns an error message if host/port/token are missing, or null if valid. */
   private getConnectionFieldError(): string | null {
     const { host, port, token } = this.connection!;
+
     if (!host || !port)
       return "Connection settings are incomplete. Please configure host and port.";
+
     if (!token)
       return "API token is required. Please configure your token in connection settings.";
+
     return null;
   }
 
@@ -710,8 +765,10 @@ export class WebSocketController implements ReactiveController {
     if (!this.connection) return null;
 
     const fieldError = this.getConnectionFieldError();
+
     if (fieldError) {
       this.setDisconnectedError(fieldError);
+
       return null;
     }
 
@@ -722,6 +779,7 @@ export class WebSocketController implements ReactiveController {
     this.clearConnectionTimeout();
     this._connectionTimeout = window.setTimeout(() => {
       const ws = this._ws;
+
       if (ws?.readyState !== WebSocket.CONNECTING) {
         return;
       }
@@ -743,6 +801,7 @@ export class WebSocketController implements ReactiveController {
       this.setDisconnectedError(
         "Failed to create connection. Please check your connection settings.",
       );
+
       return null;
     }
   }
@@ -803,8 +862,10 @@ export class WebSocketController implements ReactiveController {
 
   private applyCloseError(event: CloseEvent) {
     const knownCloseError = this.getKnownCloseError(event.code);
+
     if (knownCloseError) {
       this._error = knownCloseError;
+
       return;
     }
 
@@ -822,13 +883,16 @@ export class WebSocketController implements ReactiveController {
       this._retryCount = MAX_RETRIES + 1;
     }
 
-    return (
-      {
-        1006: "Connection closed unexpectedly. Please check your host and port settings.",
-        1002: "Connection failed due to protocol error.",
-        1003: "Invalid API token. Please check your connection settings.",
-      } as Record<number, string>
-    )[code];
+    switch (code) {
+      case 1006:
+        return "Connection closed unexpectedly. Please check your host and port settings.";
+      case 1002:
+        return "Connection failed due to protocol error.";
+      case 1003:
+        return "Invalid API token. Please check your connection settings.";
+      default:
+        return undefined;
+    }
   }
 
   private handleSocketError() {
@@ -836,15 +900,18 @@ export class WebSocketController implements ReactiveController {
     this.clearConnectionTimeout();
     this.clearAllPendingResolvers("WebSocket connection error");
     this.clearExecutingCommandsOnDisconnect();
+
     if (this._retryCount === 0) {
       this._error =
         "Connection failed. Please check your host, port, and network connection.";
     }
+
     this.requestUpdate();
   }
 
   private connect() {
     const connection = this.getValidConnectionSettings();
+
     if (!connection || this._ws) {
       return;
     }
@@ -852,6 +919,7 @@ export class WebSocketController implements ReactiveController {
     const { host, port, ssl, token } = connection;
     this.startConnectionTimeout();
     this._ws = this.createWebSocketConnection(host, port, ssl);
+
     if (!this._ws) {
       return;
     }
@@ -880,6 +948,7 @@ export class WebSocketController implements ReactiveController {
     if (this._retryCount >= MAX_RETRIES) {
       this._error = `Failed to connect after ${MAX_RETRIES} attempts. Please check your connection settings and try again.`;
       this.requestUpdate();
+
       return;
     }
 
@@ -909,6 +978,7 @@ export class WebSocketController implements ReactiveController {
 
   sendRequest(request: WebSocketRequest) {
     if (this._ws?.readyState !== WebSocket.OPEN) return;
+
     if (!request.token) throw new Error("No token found");
 
     this.trackRequest(request);
@@ -954,6 +1024,7 @@ export class WebSocketController implements ReactiveController {
     if (this._ws?.readyState !== WebSocket.OPEN) {
       throw new Error("WebSocket is not connected");
     }
+
     if (!request.id) {
       throw new Error("Request must have an id");
     }
@@ -989,7 +1060,8 @@ export class WebSocketController implements ReactiveController {
       this.validateRequestReady(request);
       const timeoutId = this.startRequestTimeout(request.id, reject);
       this._pendingResolvers.set(request.id, {
-        resolve: resolve as (value: unknown) => void,
+        // SAFETY: resolvePendingResponse validates with this request's schema before calling this resolver.
+        resolve: resolve as AnyPendingResolver["resolve"],
         reject,
         schema,
         timeoutId,
@@ -1002,10 +1074,12 @@ export class WebSocketController implements ReactiveController {
     this._error = null;
     this._retryCount = 0;
     this.clearAllPendingResolvers("WebSocket connection retried");
+
     if (this._ws) {
       this._ws.close();
       this._ws = null;
     }
+
     this.connect();
   }
 

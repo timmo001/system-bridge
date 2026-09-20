@@ -48,13 +48,6 @@
   ],
   "packageRules": [
     {
-      "description": "Keep TypeScript 6.0.3 for ESLint until TypeScript 7 is supported.",
-      "matchManagers": ["npm"],
-      "matchFileNames": ["web-client/package.json"],
-      "matchDepNames": ["typescript"],
-      "enabled": false
-    },
-    {
       "description": "Pin Docker image digests.",
       "matchDatasources": ["docker"],
       "pinDigests": true
@@ -74,14 +67,26 @@
       "versioning": "node"
     },
     {
-      "description": "Group ESLint packages.",
-      "groupName": "eslint",
-      "matchPackageNames": ["eslint", "@eslint/**", "eslint-**", "typescript-eslint"]
+      "description": "Group Oxlint and lint plugins.",
+      "groupName": "oxlint",
+      "matchPackageNames": [
+        "oxlint",
+        "oxlint-tsgolint",
+        "@oxlint/plugins",
+        "@timmo001/oxlint-rules",
+        "eslint-plugin-lit",
+        "eslint-plugin-wc"
+      ]
     },
     {
       "description": "Group Tailwind CSS packages.",
       "groupName": "tailwindcss",
-      "matchPackageNames": ["tailwindcss", "@tailwindcss/**", "tailwind-merge", "postcss"]
+      "matchPackageNames": [
+        "tailwindcss",
+        "@tailwindcss/**",
+        "tailwind-merge",
+        "postcss"
+      ]
     },
     {
       "description": "Update first-party workflows without a release delay.",

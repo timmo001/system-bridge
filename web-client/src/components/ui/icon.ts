@@ -20,6 +20,7 @@ class Icon extends UIElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
+
     if (changedProperties.has("name")) {
       void this.loadIcon();
     }
@@ -30,6 +31,7 @@ class Icon extends UIElement {
       element.setAttribute("width", String(this.size));
       element.setAttribute("height", String(this.size));
     }
+
     if (this.className) {
       element.setAttribute("class", this.className);
     }
@@ -38,19 +40,22 @@ class Icon extends UIElement {
   private async loadIcon() {
     if (!this.name) {
       this.iconHtml = "";
+
       return;
     }
 
     try {
       const { createElement, icons } = await import("lucide");
-      const iconKey = this.name as keyof typeof icons;
-      const iconData = icons[iconKey];
 
-      if (!iconData || typeof iconData !== "object") {
+      if (!Object.hasOwn(icons, this.name)) {
         this.iconHtml = "";
+
         return;
       }
 
+      // SAFETY: The own-property check above confirms this name is a key in Lucide's icon table.
+      const iconKey = this.name as keyof typeof icons;
+      const iconData = icons[iconKey];
       const element = createElement(iconData);
       this.applyIconAttributes(element);
       this.iconHtml = element.outerHTML;

@@ -51,7 +51,6 @@ mise tasks
 ## Web Client
 
 - Uses the `~/` path alias and the `UIElement` mixin from `~/mixins`
-- `any` is an ESLint error in the web-client config
 - Zod provides runtime validation and type inference
 - Checks: `cd web-client && bun run lint`, `bun run typecheck`, `bun run format:check`
 

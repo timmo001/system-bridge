@@ -41,7 +41,7 @@ The web client has **no automated unit tests** (Playwright/web-test-runner were 
 
 ```bash
 cd web-client
-bun run lint        # ESLint
+bun run lint        # Oxlint with type-aware, Lit and Web Components rules
 bun run typecheck   # tsc --noEmit
 bun run format:check
 ```

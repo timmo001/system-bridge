@@ -21,6 +21,14 @@ import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 
+interface NotificationData {
+  title: string;
+  message: string;
+  icon?: string;
+  actionUrl?: string;
+  sound?: string;
+}
+
 @customElement("page-notifications")
 class PageNotifications extends SendablePageElement {
   title = "Notifications";
@@ -52,14 +60,8 @@ class PageNotifications extends SendablePageElement {
 
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener(
-      "notification-sent",
-      this.handleNotificationSent as EventListener,
-    );
-    window.addEventListener(
-      "notification-error",
-      this.handleNotificationError as EventListener,
-    );
+    window.addEventListener("notification-sent", this.handleNotificationSent);
+    window.addEventListener("notification-error", this.handleNotificationError);
   }
 
   disconnectedCallback() {
@@ -67,11 +69,11 @@ class PageNotifications extends SendablePageElement {
     this.cleanupTimeout();
     window.removeEventListener(
       "notification-sent",
-      this.handleNotificationSent as EventListener,
+      this.handleNotificationSent,
     );
     window.removeEventListener(
       "notification-error",
-      this.handleNotificationError as EventListener,
+      this.handleNotificationError,
     );
   }
 
@@ -100,45 +102,49 @@ class PageNotifications extends SendablePageElement {
     this.navigate("/connection");
   };
 
-  private handleTitleInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.notificationTitle = input.value;
+  private handleTitleInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.notificationTitle = e.target.value;
   };
 
-  private handleMessageInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.notificationMessage = input.value;
+  private handleMessageInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.notificationMessage = e.target.value;
   };
 
-  private handleIconInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.notificationIcon = input.value;
+  private handleIconInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.notificationIcon = e.target.value;
   };
 
-  private handleActionUrlInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.notificationActionUrl = input.value;
+  private handleActionUrlInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.notificationActionUrl = e.target.value;
   };
 
-  private handleSoundInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.notificationSound = input.value;
+  private handleSoundInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.notificationSound = e.target.value;
   };
 
-  private buildNotificationData(): Record<string, unknown> {
-    const data: Record<string, unknown> = {
+  private buildNotificationData() {
+    const data: NotificationData = {
       title: this.notificationTitle.trim(),
       message: this.notificationMessage.trim(),
     };
 
-    const optionalFields: Record<string, string> = {
+    const optionalFields = {
       icon: this.notificationIcon,
       actionUrl: this.notificationActionUrl,
       sound: this.notificationSound,
     };
 
-    for (const [key, value] of Object.entries(optionalFields)) {
-      const trimmed = value.trim();
+    for (const key of ["icon", "actionUrl", "sound"] as const) {
+      const trimmed = optionalFields[key].trim();
+
       if (trimmed) data[key] = trimmed;
     }
 

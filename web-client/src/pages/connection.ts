@@ -25,6 +25,12 @@ const ConnectionSchema = z.object({
 
 type ConnectionForm = z.infer<typeof ConnectionSchema>;
 
+const ConnectionTestResponseSchema = z.object({
+  type: z.string().optional(),
+  subtype: z.string().optional(),
+  id: z.string().optional(),
+});
+
 @customElement("page-connection")
 class PageConnection extends PageElement {
   title = "Connection Settings";
@@ -50,6 +56,7 @@ class PageConnection extends PageElement {
 
   connectedCallback() {
     super.connectedCallback();
+
     if (this.connection) {
       this.formData = {
         host: this.connection.host,
@@ -60,23 +67,22 @@ class PageConnection extends PageElement {
     }
   }
 
-  private handleHostInput = (e: Event): void => {
-    const input = e.target as HTMLInputElement;
-    this.formData = { ...this.formData, host: input.value };
+  private handleHostInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.formData = { ...this.formData, host: e.target.value };
   };
 
-  private handlePortInput = (e: Event): void => {
-    const input = e.target as HTMLInputElement;
-    this.formData = { ...this.formData, port: parseInt(input.value, 10) };
+  private handlePortInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.formData = { ...this.formData, port: parseInt(e.target.value, 10) };
   };
 
   private handleSslChange = (e: CustomEvent<{ checked: boolean }>): void => {
     this.formData = { ...this.formData, ssl: e.detail.checked };
   };
 
-  private handleTokenInput = (e: Event): void => {
-    const input = e.target as HTMLInputElement;
-    this.formData = { ...this.formData, token: input.value };
+  private handleTokenInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.formData = { ...this.formData, token: e.target.value };
   };
 
   private handleCancel = (): void => {
@@ -85,19 +91,29 @@ class PageConnection extends PageElement {
 
   private validateForm(): boolean {
     const result = ConnectionSchema.safeParse(this.formData);
+
     if (!result.success) {
       this.errors = {};
       result.error.issues.forEach((err) => {
         const pathKey = err.path[0];
-        if (pathKey && typeof pathKey === "string") {
-          this.errors[pathKey as keyof ConnectionForm] = err.message;
+
+        if (
+          pathKey === "host" ||
+          pathKey === "port" ||
+          pathKey === "ssl" ||
+          pathKey === "token"
+        ) {
+          this.errors[pathKey] = err.message;
         }
       });
       this.requestUpdate();
+
       return false;
     }
+
     this.errors = {};
     this.requestUpdate();
+
     return true;
   }
 
@@ -109,6 +125,7 @@ class PageConnection extends PageElement {
       ws.close();
       this.isSubmitting = false;
       this.requestUpdate();
+
       return;
     }
 
@@ -141,6 +158,7 @@ class PageConnection extends PageElement {
 
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
+
     if (!this.validateForm()) return;
 
     this.isSubmitting = true;
@@ -170,11 +188,10 @@ class PageConnection extends PageElement {
 
     ws.onmessage = (event) => {
       try {
-        const message = JSON.parse(String(event.data)) as {
-          type?: string;
-          subtype?: string;
-          id?: string;
-        };
+        const message = ConnectionTestResponseSchema.parse(
+          JSON.parse(String(event.data)),
+        );
+
         this.handleTestMessage(message, ws);
       } catch (error) {
         console.error("Failed to parse connection test response:", error);
@@ -198,7 +215,9 @@ class PageConnection extends PageElement {
 
   private renderFieldError(field: keyof ConnectionForm): TemplateResult {
     const error = this.errors[field];
+
     if (!error) return html``;
+
     return html`<p class="text-sm text-destructive">${error}</p>`;
   }
 

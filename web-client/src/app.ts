@@ -12,6 +12,7 @@ class App extends LitElement {
       render: () => html`<page-home></page-home>`,
       enter: async () => {
         await import("./pages/home");
+
         return true;
       },
     },
@@ -20,6 +21,7 @@ class App extends LitElement {
       render: () => html`<page-connection></page-connection>`,
       enter: async () => {
         await import("./pages/connection");
+
         return true;
       },
     },
@@ -28,6 +30,7 @@ class App extends LitElement {
       render: () => html`<page-data></page-data>`,
       enter: async () => {
         await import("./pages/data");
+
         return true;
       },
     },
@@ -36,6 +39,7 @@ class App extends LitElement {
       render: () => html`<page-settings-general></page-settings-general>`,
       enter: async () => {
         await import("./pages/settings-general");
+
         return true;
       },
     },
@@ -44,6 +48,7 @@ class App extends LitElement {
       render: () => html`<page-settings-media></page-settings-media>`,
       enter: async () => {
         await import("./pages/settings-media");
+
         return true;
       },
     },
@@ -52,6 +57,7 @@ class App extends LitElement {
       render: () => html`<page-settings-commands></page-settings-commands>`,
       enter: async () => {
         await import("./pages/settings-commands");
+
         return true;
       },
     },
@@ -60,6 +66,7 @@ class App extends LitElement {
       render: () => html`<page-settings-disks></page-settings-disks>`,
       enter: async () => {
         await import("./pages/settings-disks");
+
         return true;
       },
     },
@@ -68,6 +75,7 @@ class App extends LitElement {
       render: () => html`<page-notifications></page-notifications>`,
       enter: async () => {
         await import("./pages/notifications");
+
         return true;
       },
     },
@@ -76,6 +84,7 @@ class App extends LitElement {
       render: () => html`<page-open></page-open>`,
       enter: async () => {
         await import("./pages/open");
+
         return true;
       },
     },
@@ -84,6 +93,7 @@ class App extends LitElement {
       render: () => html`<page-media></page-media>`,
       enter: async () => {
         await import("./pages/media");
+
         return true;
       },
     },

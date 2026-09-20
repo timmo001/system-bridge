@@ -8,16 +8,17 @@ export function cn(...inputs: ClassValue[]) {
 export function generateUUID(): string {
   // crypto.randomUUID() requires secure context (HTTPS or localhost)
   // Fallback for HTTP connections
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+  if (globalThis.crypto && "randomUUID" in globalThis.crypto) {
     return crypto.randomUUID();
   }
 
   // Fallback UUID v4 generator
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    // eslint-disable-next-line no-bitwise
+    // oxlint-disable-next-line no-bitwise
     const r = (Math.random() * 16) | 0;
-    // eslint-disable-next-line no-bitwise
+    // oxlint-disable-next-line no-bitwise
     const v = c === "x" ? r : (r & 0x3) | 0x8;
+
     return v.toString(16);
   });
 }
@@ -36,5 +37,6 @@ export function formatDuration(seconds: number): string {
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
+
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }

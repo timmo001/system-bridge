@@ -65,6 +65,7 @@ class Button extends UIElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
+
     if (
       changedProperties.has("variant") ||
       changedProperties.has("size") ||
@@ -79,7 +80,8 @@ class Button extends UIElement {
       variant: this.variant,
       size: this.size,
     });
-    // eslint-disable-next-line wc/no-self-class
+
+    // oxlint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
 
     if (this.disabled) {
@@ -103,17 +105,20 @@ class Button extends UIElement {
     if (this.disabled) {
       e.preventDefault();
       e.stopPropagation();
+
       return;
     }
 
     // Handle form submission for submit buttons
     if (this.type === "submit") {
       const form = this.closest("form");
+
       if (form) {
         // Trigger form submission
         form.dispatchEvent(
           new Event("submit", { bubbles: true, cancelable: true }),
         );
+
         return;
       }
     }

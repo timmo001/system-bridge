@@ -73,6 +73,8 @@ class CodeBlock extends LitElement {
   // Styles are inline in render() because CodeMirror's style-mod replaces
   // adoptedStyleSheets on the shadow root, wiping out LitElement's static styles.
 
+  // This display accepts arbitrary values and only serialises them with JSON.stringify.
+  // oxlint-disable-next-line anti-slop/no-known-value-widening
   @property({ type: Object }) data: unknown = null;
   @property() language = "json";
 
@@ -110,6 +112,7 @@ class CodeBlock extends LitElement {
     if (changed.has("data") && this._editorView) {
       const newDoc = this._formatData();
       const currentDoc = this._editorView.state.doc.toString();
+
       if (newDoc !== currentDoc) {
         this._editorView.dispatch({
           changes: { from: 0, to: currentDoc.length, insert: newDoc },
@@ -120,6 +123,7 @@ class CodeBlock extends LitElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+
     if (this._editorView) {
       this._editorView.destroy();
       this._editorView = null;
@@ -128,6 +132,7 @@ class CodeBlock extends LitElement {
 
   private _createEditor(): void {
     const container = this.renderRoot.querySelector("#editor");
+
     if (!container) return;
 
     const extensions = [
@@ -154,6 +159,7 @@ class CodeBlock extends LitElement {
     if (this.data === null || this.data === undefined) {
       return "null";
     }
+
     try {
       return JSON.stringify(this.data, null, 2);
     } catch {

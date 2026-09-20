@@ -263,8 +263,8 @@ func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo
 				}
 				fmt.Fprintf(&buf, `"%s"`, value)
 			}
-			buf.WriteString("]);\n")
-			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n", name, name)
+			buf.WriteString("]);\n\n")
+			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n\n", name, name)
 
 			// Generate constants object for enum values
 			fmt.Fprintf(&buf, "export const %s = {\n", name)

@@ -5,15 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node node_modules/typescript-7/bin/tsc && vite build",
+    "build": "tsc && vite build",
     "deploy": "wrangler deploy",
     "deploy:preview": "wrangler versions upload",
     "preview": "vite preview",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
     "format:check": "prettier --check \"src/**/*.{ts,css}\"",
     "format:write": "prettier --write \"src/**/*.{ts,css}\"",
-    "typecheck": "node node_modules/typescript-7/bin/tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.2",
@@ -31,29 +31,20 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@eslint/js": "10.0.1",
+    "@oxlint/plugins": "1.83.0",
     "@tailwindcss/vite": "^4.2.4",
+    "@timmo001/oxlint-rules": "0.3.4",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
-    "eslint": "10.11.0",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-lit": "2.3.1",
-    "eslint-plugin-lit-a11y": "5.1.1",
-    "eslint-plugin-unused-imports": "4.4.1",
     "eslint-plugin-wc": "3.1.0",
-    "globals": "^17.6.0",
+    "oxlint": "1.83.0",
+    "oxlint-tsgolint": "7.0.2002",
     "postcss": "^8.5.14",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.4",
     "typescript": "7.0.2",
-    "typescript-7": "npm:typescript@~7.0.0",
-    "typescript-eslint": "^8.59.2",
     "vite": "^8.0.10",
     "wrangler": "4.135.0"
-  },
-  "trustedDependencies": [
-    "unrs-resolver"
-  ]
+  }
 }

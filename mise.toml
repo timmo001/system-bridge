@@ -252,7 +252,7 @@ run = [
 ]
 
 [tasks."lint:web-client"]
-description = "Run web client linters (eslint, typecheck)"
+description = "Run web client linters (Oxlint, typecheck)"
 dir = "web-client"
 run = [
   "bun run lint",

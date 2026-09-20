@@ -36,6 +36,7 @@ function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
 }
 
@@ -95,6 +96,7 @@ class PageSettingsDisks extends PageElement {
 
   private async loadMounts() {
     const token = this.connection?.token;
+
     if (!token || !this.actions || !this.status?.isConnected) {
       return;
     }
@@ -121,9 +123,11 @@ class PageSettingsDisks extends PageElement {
     }
   }
 
-  private handleToggleMount = (e: Event): void => {
-    const el = e.currentTarget as HTMLElement;
-    const mountPoint = el.getAttribute("data-mount");
+  private handleToggleMount = (
+    e: Event & { currentTarget: HTMLElement },
+  ): void => {
+    const mountPoint = e.currentTarget.getAttribute("data-mount");
+
     if (!mountPoint) return;
 
     if (this.allowedMountPoints.includes(mountPoint)) {
@@ -133,11 +137,13 @@ class PageSettingsDisks extends PageElement {
     } else {
       this.allowedMountPoints = [...this.allowedMountPoints, mountPoint];
     }
+
     this.saveSettings();
   };
 
   private saveSettings(): void {
     const token = this.connection?.token;
+
     if (!token || !this.actions || !this.bridgeSettings?.settings) {
       return;
     }
@@ -163,6 +169,7 @@ class PageSettingsDisks extends PageElement {
     options: { disabled?: boolean; checked?: boolean } = {},
   ) {
     const { disabled = false, checked = false } = options;
+
     const usageText = mount.usage
       ? `${mount.usage.percent.toFixed(1)}% (${formatBytes(mount.usage.used)} / ${formatBytes(mount.usage.total)})`
       : "N/A";

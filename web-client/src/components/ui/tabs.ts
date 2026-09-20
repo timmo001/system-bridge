@@ -10,7 +10,7 @@ class Tabs extends UIElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // eslint-disable-next-line wc/no-self-class
+    // oxlint-disable-next-line wc/no-self-class
     this.classList.add("w-full", "block");
   }
 
@@ -36,11 +36,13 @@ class Tabs extends UIElement {
 class TabsList extends UIElement {
   connectedCallback() {
     super.connectedCallback();
+
     const classes = cn(
       "flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground gap-1",
       "overflow-x-auto overflow-y-hidden scrollbar-thin",
     );
-    // eslint-disable-next-line wc/no-self-class
+
+    // oxlint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
     this.setAttribute("role", "tablist");
   }
@@ -71,6 +73,7 @@ class TabsTrigger extends UIElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
+
     if (changedProperties.has("active")) {
       this.updateStyles();
     }
@@ -86,7 +89,8 @@ class TabsTrigger extends UIElement {
         ? "bg-background text-foreground shadow"
         : "hover:bg-background/50 hover:text-foreground",
     );
-    // eslint-disable-next-line wc/no-self-class
+
+    // oxlint-disable-next-line wc/no-self-class
     this.setAttribute("class", classes);
     this.setAttribute("aria-selected", String(this.active));
   }
@@ -98,6 +102,7 @@ class TabsTrigger extends UIElement {
 
   private _handleClick = () => {
     const tabs = this.closest("ui-tabs")!;
+
     if (tabs) {
       tabs.handleTabChange(this.value);
     }
@@ -111,10 +116,12 @@ class TabsContent extends UIElement {
 
   connectedCallback() {
     super.connectedCallback();
+
     const classes = cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     );
-    // eslint-disable-next-line wc/no-self-class
+
+    // oxlint-disable-next-line wc/no-self-class
     this.classList.add(...classes.split(/\s+/));
     this.setAttribute("role", "tabpanel");
   }

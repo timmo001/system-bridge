@@ -75,6 +75,7 @@ class PageSettingsGeneral extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+
     // Remove form event listener if it exists
     if (this._formElement) {
       this._formElement.removeEventListener("submit", this.handleSubmit);
@@ -86,12 +87,14 @@ class PageSettingsGeneral extends PageElement {
     if (changedProperties.has("bridgeSettings")) {
       this.loadSettings();
     }
+
     // Attach submit handler after render (light DOM workaround)
     this.attachFormHandler();
   }
 
   private attachFormHandler() {
     const form = this.querySelector("form");
+
     if (form && !form.dataset.handlerAttached) {
       form.dataset.handlerAttached = "true";
       form.addEventListener("submit", this.handleSubmit);
@@ -114,11 +117,12 @@ class PageSettingsGeneral extends PageElement {
     }
 
     // Read current form values to ensure we have the latest data
-    const form = e.target as HTMLFormElement;
-    const selectElement = form.querySelector("select");
+    const selectElement = this._formElement?.querySelector("select");
+
     if (selectElement) {
       this.formData = {
         ...this.formData,
+        // SAFETY: This select contains only the four Settings log-level options rendered below.
         logLevel: selectElement.value as Settings["logLevel"],
       };
     }
@@ -147,11 +151,13 @@ class PageSettingsGeneral extends PageElement {
     this.formData = { ...this.formData, autostart: e.detail.checked };
   };
 
-  private handleLogLevelChange = (e: Event): void => {
-    const select = e.target as HTMLSelectElement;
+  private handleLogLevelChange = (
+    e: Event & { target: HTMLSelectElement },
+  ): void => {
     this.formData = {
       ...this.formData,
-      logLevel: select.value as Settings["logLevel"],
+      // SAFETY: This handler is attached to the select containing the Settings log-level options.
+      logLevel: e.target.value as Settings["logLevel"],
     };
   };
 
