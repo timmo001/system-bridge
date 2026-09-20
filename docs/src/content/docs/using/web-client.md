@@ -64,4 +64,4 @@ Trigger actions on the machine running System Bridge:
 ## Next steps
 
 - Connect programmatically with the [API and WebSocket](/api/).
-- Prefer the terminal? Use the [TUI](/using/tui/) or [CLI](/using/cli/).
+- Prefer the terminal? Use the [CLI](/using/cli/).

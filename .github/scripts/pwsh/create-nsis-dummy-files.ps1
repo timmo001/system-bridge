@@ -15,6 +15,3 @@ New-Item -ItemType Directory -Path "dist" -Force
 
 # Create an empty file to serve as the dummy executable for the main application
 New-Item -ItemType File -Path "dist/system-bridge.exe" -Force
-
-# Create an empty file to serve as the dummy executable for the TUI
-New-Item -ItemType File -Path "dist/system-bridge-tui.exe" -Force

@@ -13,7 +13,6 @@ on:
       - mise.toml
       - LICENSE
       - web-client/**
-      - tui/**
       - .resources/**
       - .scripts/linux/PKGBUILD.dev
       - .scripts/linux/system-bridge.desktop

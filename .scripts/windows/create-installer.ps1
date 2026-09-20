@@ -14,11 +14,6 @@ if (-not (Test-Path "dist\system-bridge.exe") -and -not (Test-Path "system-bridg
     exit 1
 }
 
-if (-not (Test-Path "dist\system-bridge-tui.exe") -and -not (Test-Path "system-bridge-tui.exe")) {
-    Write-Error "TUI executable not found. Build the TUI first (mise run build:tui)"
-    exit 1
-}
-
 if (-not (Test-Path "dist") -or $Clean) {
     Write-Host "Creating dist directory"
     New-Item -ItemType Directory -Path "dist"
@@ -28,12 +23,6 @@ if (-not (Test-Path "dist\system-bridge.exe") -or $Clean) {
     Write-Host "Copying system-bridge.exe to dist directory"
     Copy-Item system-bridge.exe dist\system-bridge.exe
 }
-
-if (-not (Test-Path "dist\system-bridge-tui.exe") -or $Clean) {
-    Write-Host "Copying system-bridge-tui.exe to dist directory"
-    Copy-Item system-bridge-tui.exe dist\system-bridge-tui.exe
-}
-
 
 # Verify Visual C++ Runtime
 Write-Host "Verifying Visual C++ Runtime..."

@@ -22,7 +22,7 @@ if [ -z "${before}" ] || [ "${before}" = "00000000000000000000000000000000000000
 fi
 
 changed_files="$(git diff --name-only "${before}" "${after}")"
-if printf '%s\n' "${changed_files}" | grep -Eq '(^|/)[^/]+\.go$|^(web-client/src/|tui/src/|\.github/workflows/|\.github/actions/|\.scripts/)'; then
+if printf '%s\n' "${changed_files}" | grep -Eq '(^|/)[^/]+\.go$|^(web-client/src/|\.github/workflows/|\.github/actions/|\.scripts/)'; then
   echo "changed=true" >>"${GITHUB_OUTPUT}"
 else
   echo "changed=false" >>"${GITHUB_OUTPUT}"

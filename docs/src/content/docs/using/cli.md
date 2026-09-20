@@ -2,7 +2,7 @@
 title: CLI
 ---
 
-The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `tui`, `version` and `completions` are top-level commands.
+The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `version` and `completions` are top-level commands. Running `system-bridge` without a subcommand shows help.
 
 ## Token
 
@@ -183,7 +183,6 @@ Completion is aware of your data modules. Once it is enabled, type `system-bridg
 ## Next steps
 
 - Prefer a graphical interface? Use the [web client](/using/web-client/).
-- Prefer an interactive menu? Use the [TUI](/using/tui/).
 - Connect to the [API and WebSocket](/api/) to read data and control your system.
 - Integrate with [Home Assistant](/using/home-assistant/).
 - Not started the backend yet? See [Running](/running/).

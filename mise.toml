@@ -11,17 +11,15 @@ node = "26.9.0"
 # Naming: `verb:all` is the full aggregate, `verb:<target>` is a single component.
 
 [tasks."build:all"]
-description = "Build everything (web client, TUI, backend)"
+description = "Build everything (web client, backend)"
 run = [
   { task = "clean" },
   { task = "build:web-client" },
-  { task = "build:tui" },
   "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux .",
 ]
 run_windows = [
   { task = "clean" },
   { task = "build:web-client" },
-  { task = "build:tui" },
   "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1",
   "windres system-bridge.rc -O coff -o system-bridge.syso",
   "go build -v -ldflags=\"-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe .",
@@ -96,12 +94,6 @@ echo "✓ Build files verified and ready for embedding"
 '''
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/build-web-client.ps1"
 
-[tasks."build:tui"]
-description = "Build the TUI binary"
-dir = "tui"
-run = "bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui"
-run_windows = "bun install --frozen-lockfile && bun build src/index.ts --compile --outfile ../system-bridge-tui.exe"
-
 [tasks."package:all"]
 description = "Build all Linux packages (DEB, RPM, Arch, Flatpak)"
 depends = ["clean:dist", "build:all"]
@@ -171,7 +163,7 @@ run = "./system-bridge-linux backend"
 run_windows = "./system-bridge.exe backend"
 
 [tasks."run:backend-dev"]
-description = "Build and run the backend server without the TUI build"
+description = "Build and run the backend server with console output"
 depends = ["clean", "build:web-client"]
 run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
 run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
@@ -204,12 +196,6 @@ run = "pitchfork restart backend web"
 description = "Stop pitchfork dev servers"
 run = "pitchfork stop backend web"
 
-[tasks."run:tui"]
-description = "Build and run the TUI"
-depends = ["build:tui"]
-run = "./system-bridge-tui"
-run_windows = "./system-bridge-tui.exe"
-
 [tasks.cli]
 description = "Build and run the CLI (append subcommands after --, e.g. mise run cli -- version)"
 depends = ["build:all"]
@@ -241,8 +227,8 @@ description = "Run all linters and tests"
 depends = ["lint:all", "test"]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client, TUI)"
-depends = ["lint:go", "lint:web-client", "lint:tui"]
+description = "Run all linters (Go, web client)"
+depends = ["lint:go", "lint:web-client"]
 
 [tasks."lint:go"]
 description = "Run Go linters (fmt, vet)"
@@ -259,14 +245,9 @@ run = [
   "bun run typecheck",
 ]
 
-[tasks."lint:tui"]
-description = "Run TUI linter (typecheck)"
-dir = "tui"
-run = "bun run typecheck"
-
 [tasks.clean]
 description = "Remove build artifacts"
-run = "rm -f system-bridge system-bridge-linux system-bridge-tui"
+run = "rm -f system-bridge system-bridge-linux"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean.ps1"
 
 [tasks."clean:dist"]
@@ -280,11 +261,10 @@ run = "rm -rf web-client/dist"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-web-client.ps1"
 
 [tasks.deps]
-description = "Install all dependencies (go, web client, TUI, docs)"
+description = "Install all dependencies (go, web client, docs)"
 run = '''
 go mod tidy
 (cd web-client && bun install)
-(cd tui && bun install)
 (cd docs && bun install)
 '''
 

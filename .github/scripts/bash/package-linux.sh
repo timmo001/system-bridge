@@ -10,7 +10,6 @@ package="${1:?package required}"
 echo "::group::Setup"
 mkdir -p dist
 chmod +x ./system-bridge-linux
-chmod +x ./system-bridge-tui
 chmod +x ./.scripts/linux/create-*.sh
 echo "::endgroup::"
 

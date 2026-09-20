@@ -6,7 +6,6 @@ $ErrorActionPreference = 'Stop'
 Write-Output "::group::Setup"
 New-Item -ItemType Directory -Force -Path dist | Out-Null
 Move-Item system-bridge.exe dist/system-bridge.exe -Force
-Move-Item system-bridge-tui.exe dist/system-bridge-tui.exe -Force
 Write-Output "::endgroup::"
 
 Write-Output "::group::Create installer"
