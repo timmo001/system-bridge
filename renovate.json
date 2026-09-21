@@ -1,13 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests",
-    "group:monorepos",
-    "group:recommended"
-  ],
-  "dependencyDashboard": true,
-  "labels": ["dependencies"],
+  "extends": ["github>timmo001/renovate-config"],
   "lockFileMaintenance": {
     "enabled": true
   },
@@ -67,16 +60,9 @@
       "versioning": "node"
     },
     {
-      "description": "Group Oxlint and lint plugins.",
+      "description": "Include Lit lint plugins in the shared Oxlint group.",
       "groupName": "oxlint",
-      "matchPackageNames": [
-        "oxlint",
-        "oxlint-tsgolint",
-        "@oxlint/plugins",
-        "@timmo001/oxlint-rules",
-        "eslint-plugin-lit",
-        "eslint-plugin-wc"
-      ]
+      "matchPackageNames": ["eslint-plugin-lit", "eslint-plugin-wc"]
     },
     {
       "description": "Group Tailwind CSS packages.",
@@ -87,16 +73,6 @@
         "tailwind-merge",
         "postcss"
       ]
-    },
-    {
-      "description": "Update first-party workflows without a release delay.",
-      "matchPackageNames": ["timmo001/workflows"],
-      "minimumReleaseAge": null
-    },
-    {
-      "description": "Group GitHub Actions.",
-      "groupName": "github actions",
-      "matchManagers": ["github-actions"]
     }
   ]
 }
