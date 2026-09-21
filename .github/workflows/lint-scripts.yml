@@ -39,7 +39,7 @@ jobs:
       - name: Run PSScriptAnalyzer
         shell: pwsh
         env:
-          # renovate: datasource=github-tags packageName=PowerShell/PSScriptAnalyzer
+          # renovate: datasource=github-tags depName=PowerShell/PSScriptAnalyzer
           PSSCRIPTANALYZER_VERSION: "1.25.0"
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
