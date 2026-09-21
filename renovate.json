@@ -3,11 +3,6 @@
   "extends": ["github>timmo001/renovate-config"],
   "packageRules": [
     {
-      "description": "Pin Docker image digests.",
-      "matchDatasources": ["docker"],
-      "pinDigests": true
-    },
-    {
       "description": "Normalize Go tags from golang/go.",
       "matchDatasources": ["github-tags"],
       "matchPackageNames": ["golang/go"],
