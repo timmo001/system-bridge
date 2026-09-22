@@ -31,14 +31,14 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.83.0",
+    "@oxlint/plugins": "1.85.0",
     "@tailwindcss/vite": "^4.2.4",
-    "@timmo001/oxlint-rules": "0.3.5",
+    "@timmo001/oxlint-rules": "0.3.6",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
-    "oxlint": "1.83.0",
+    "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2002",
     "postcss": "^8.5.14",
     "prettier": "^3.8.3",
