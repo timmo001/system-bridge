@@ -246,7 +246,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@68adb4ba625cbc742312fe526d57024f1ec4b493 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ee51b59fac85756d78f89c26f2c5db58ecd5d36a # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -332,7 +332,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@68adb4ba625cbc742312fe526d57024f1ec4b493 # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@ee51b59fac85756d78f89c26f2c5db58ecd5d36a # master
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -347,7 +347,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@68adb4ba625cbc742312fe526d57024f1ec4b493 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ee51b59fac85756d78f89c26f2c5db58ecd5d36a # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
