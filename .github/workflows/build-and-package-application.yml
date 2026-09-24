@@ -340,6 +340,34 @@ jobs:
     secrets:
       ARCH_REPO_DISPATCH_TOKEN: ${{ secrets.ARCH_REPO_DISPATCH_TOKEN }}
 
+  attest-arch-package-stable:
+    name: Attest Arch package (system-bridge)
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    needs:
+      - build-arch-package-stable
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download validated Arch package
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
+          path: arch-package-artifact
+
+      - name: Extract Arch package
+        run: |
+          mkdir -p arch-package
+          tar --extract --file arch-package-artifact/candidate.tar \
+            --directory arch-package --no-same-owner --no-same-permissions \
+            --wildcards '*.pkg.tar.zst'
+
+      - name: Attest Arch package
+        uses: timmo001/workflows/.github/actions/attest-release-assets@e924e79cb7bb8705d3891723674545d55ef17dc5 # master
+        with:
+          subject-patterns: arch-package/*.pkg.tar.zst
+
   update-aur-stable:
     name: Update AUR (system-bridge)
     if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
@@ -394,6 +422,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - name: Download linux arch packages
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
@@ -425,19 +455,28 @@ jobs:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
+      - name: Attest release assets
+        id: attest
+        uses: timmo001/workflows/.github/actions/attest-release-assets@e924e79cb7bb8705d3891723674545d55ef17dc5 # master
+        with:
+          subject-patterns: |
+            dist/linux/arch/*.pkg.tar.zst
+            dist/linux/deb/*.deb
+            dist/linux/rpm/*.rpm
+            dist/linux/flatpak/*.flatpak
+            dist/windows/*-setup.exe
+          bundle-path: dist/system-bridge-${{ github.event.release.tag_name }}.sigstore.json
+
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          SUBJECTS: ${{ steps.attest.outputs.subjects }}
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
         run: |
-          shopt -s failglob
-          gh release upload "$RELEASE_TAG" \
-            dist/linux/arch/*.pkg.tar.zst \
-            dist/linux/deb/*.deb \
-            dist/linux/rpm/*.rpm \
-            dist/linux/flatpak/*.flatpak \
-            dist/windows/*-setup.exe
+          mapfile -t assets < <(sed '/^$/d' <<< "$SUBJECTS")
+          gh release upload "$RELEASE_TAG" "${assets[@]}" "$BUNDLE_PATH"
 
   compute-next-patch:
     name: Compute next patch tag
