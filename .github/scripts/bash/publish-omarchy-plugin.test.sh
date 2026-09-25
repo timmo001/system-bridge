@@ -14,7 +14,7 @@ git -C "$publish_dir" init --quiet
 
 "$publisher" "$repo_root/omarchy-plugin" "$publish_dir"
 
-for file in BarWidget.qml FilterablePanel.qml Panel.qml README.md SectionHeading.qml Service.qml manifest.json screenshot.png; do
+for file in BarWidget.qml FilterablePanel.qml Panel.qml PanelFlickable.qml README.md SectionHeading.qml Service.qml manifest.json screenshot.png; do
   printf '%s\n' "$file" >"$source_dir/$file"
 done
 printf 'stale\n' >"$publish_dir/stale"
@@ -24,7 +24,7 @@ printf 'stale\n' >"$publish_dir/stale"
 test -d "$publish_dir/.git"
 test ! -e "$publish_dir/stale"
 test -f "$publish_dir/LICENSE"
-for file in BarWidget.qml FilterablePanel.qml Panel.qml README.md SectionHeading.qml Service.qml manifest.json screenshot.png; do
+for file in BarWidget.qml FilterablePanel.qml Panel.qml PanelFlickable.qml README.md SectionHeading.qml Service.qml manifest.json screenshot.png; do
   cmp "$source_dir/$file" "$publish_dir/$file"
 done
 

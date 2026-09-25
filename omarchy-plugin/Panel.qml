@@ -195,7 +195,7 @@ Panel {
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
 
-      Flickable {
+      PanelFlickable {
         id: panelFlick
         anchors.fill: parent
         contentWidth: width
