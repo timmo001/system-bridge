@@ -34,7 +34,7 @@ from systembridgeconnector.models.settings import SettingsCommands
 from systembridgeconnector.models.update import Update
 from systembridgeconnector.websocket_client import WebSocketClient
 
-from . import API_HOST, API_PORT, REQUEST_ID, ClientSessionGenerator
+from . import API_HOST, REQUEST_ID, ClientSessionGenerator
 
 
 @pytest.mark.asyncio
@@ -881,7 +881,7 @@ async def test_bad_token(
 
     websocket_client = WebSocketClient(
         api_host=API_HOST,
-        api_port=API_PORT,
+        api_port=client.port,
         token="badtoken",
         session=client.session,
         websocket=ws,

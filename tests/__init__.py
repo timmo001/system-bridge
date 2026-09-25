@@ -31,7 +31,6 @@ from systembridgeconnector.models.response import Response
 _LOGGER = logging.getLogger(__name__)
 
 API_HOST: Final[str] = "127.0.0.1"
-API_PORT: Final[int] = 9170
 TOKEN: Final[str] = "abc123"
 
 WEBSOCKET_PATH: Final[str] = "/api/websocket"

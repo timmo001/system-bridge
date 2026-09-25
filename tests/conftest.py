@@ -19,7 +19,6 @@ from systembridgeconnector.websocket_client import WebSocketClient
 from . import (
     _LOGGER,
     API_HOST,
-    API_PORT,
     MODULES_DATA,
     TOKEN,
     ClientSessionGenerator,
@@ -49,12 +48,7 @@ def mock_http_client_session_generator(
         app.router.add_post("/test/json", json_response)
         app.router.add_put("/test/json", json_response)
 
-        return await aiohttp_client(
-            app,
-            server_kwargs={
-                "port": API_PORT,
-            },
-        )
+        return await aiohttp_client(app)
 
     return create_client
 
@@ -68,7 +62,7 @@ async def mock_http_client(
 
     return HTTPClient(
         api_host=API_HOST,
-        api_port=API_PORT,
+        api_port=client.port,
         token=TOKEN,
         session=client.session,
     )
@@ -92,12 +86,7 @@ async def mock_websocket_session_generator(
         app = web.Application()
         app.router.add_get("/api/websocket", websocket_response)
 
-        return await aiohttp_client(
-            app,
-            server_kwargs={
-                "port": API_PORT,
-            },
-        )
+        return await aiohttp_client(app)
 
     async def websocket_response(request) -> web.WebSocketResponse:
         """Return a websocket response."""
@@ -176,7 +165,7 @@ async def mock_websocket_client_not_connected(
 
     return WebSocketClient(
         api_host=API_HOST,
-        api_port=API_PORT,
+        api_port=client.port,
         token=TOKEN,
         session=client.session,
         websocket=ws,
