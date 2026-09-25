@@ -51,7 +51,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	var partitions []disk.PartitionStat
 	for _, p := range allPartitions {
 		// "/dev/*" device paths are Linux-specific.
-+		// On Windows, gopsutil reports devices differently (e.g. drive letters), so applying this filter cross-platform drops all disks.
+		// On Windows, gopsutil reports devices differently (e.g. drive letters), so applying this filter cross-platform drops all disks.
 		if runtime.GOOS == "linux" && !strings.HasPrefix(p.Device, "/dev/") {
 			continue
 		}
