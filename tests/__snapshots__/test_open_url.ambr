@@ -1,4 +1,6 @@
 # serializer version: 1
 # name: test_open_url
-  OpenUrl(url='https://www.example.com')
+  OpenUrl(
+    url='https://www.example.com',
+  )
 # ---

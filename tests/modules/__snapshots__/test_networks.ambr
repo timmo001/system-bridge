@@ -1,6 +1,52 @@
 # serializer version: 1
 # name: test_networks
-  Networks(connections=[NetworkConnection(fd=1, family=2, type=3, laddr='laddr', raddr='raddr', status='status', pid=4)], io=NetworkIO(bytes_sent=1, bytes_recv=2, packets_sent=3, packets_recv=4, errin=5, errout=6, dropin=7, dropout=8), networks=[Network(name='name', addresses=[NetworkAddress(address='address', family=None, netmask='netmask', broadcast='broadcast', ptp='ptp')], stats=NetworkStats(isup=True, duplex='duplex', speed=1, mtu=2, flags=['flag1', 'flag2']))])
+  Networks(
+    connections=list([
+      NetworkConnection(
+        family=2,
+        fd=1,
+        laddr='laddr',
+        pid=4,
+        raddr='raddr',
+        status='status',
+        type=3,
+      ),
+    ]),
+    io=NetworkIO(
+      bytes_recv=2,
+      bytes_sent=1,
+      dropin=7,
+      dropout=8,
+      errin=5,
+      errout=6,
+      packets_recv=4,
+      packets_sent=3,
+    ),
+    networks=list([
+      Network(
+        addresses=list([
+          NetworkAddress(
+            address='address',
+            broadcast='broadcast',
+            family=None,
+            netmask='netmask',
+            ptp='ptp',
+          ),
+        ]),
+        name='name',
+        stats=NetworkStats(
+          duplex='duplex',
+          flags=list([
+            'flag1',
+            'flag2',
+          ]),
+          isup=True,
+          mtu=2,
+          speed=1,
+        ),
+      ),
+    ]),
+  )
 # ---
 # name: test_networks_dict
   dict({
@@ -52,5 +98,51 @@
   })
 # ---
 # name: test_networks_dict[networks-dict-converted]
-  Networks(connections=[NetworkConnection(fd=1, family=2, type=3, laddr='laddr', raddr='raddr', status='status', pid=4)], io=NetworkIO(bytes_sent=1, bytes_recv=2, packets_sent=3, packets_recv=4, errin=5, errout=6, dropin=7, dropout=8), networks=[Network(name='name', addresses=[NetworkAddress(address='address', family=None, netmask='netmask', broadcast='broadcast', ptp='ptp')], stats=NetworkStats(isup=True, duplex='duplex', speed=1, mtu=2, flags=['flag1', 'flag2']))])
+  Networks(
+    connections=list([
+      NetworkConnection(
+        family=2,
+        fd=1,
+        laddr='laddr',
+        pid=4,
+        raddr='raddr',
+        status='status',
+        type=3,
+      ),
+    ]),
+    io=NetworkIO(
+      bytes_recv=2,
+      bytes_sent=1,
+      dropin=7,
+      dropout=8,
+      errin=5,
+      errout=6,
+      packets_recv=4,
+      packets_sent=3,
+    ),
+    networks=list([
+      Network(
+        addresses=list([
+          NetworkAddress(
+            address='address',
+            broadcast='broadcast',
+            family=None,
+            netmask='netmask',
+            ptp='ptp',
+          ),
+        ]),
+        name='name',
+        stats=NetworkStats(
+          duplex='duplex',
+          flags=list([
+            'flag1',
+            'flag2',
+          ]),
+          isup=True,
+          mtu=2,
+          speed=1,
+        ),
+      ),
+    ]),
+  )
 # ---

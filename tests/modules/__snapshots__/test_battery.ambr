@@ -1,4 +1,8 @@
 # serializer version: 1
 # name: test_battery
-  Battery(is_charging=True, percentage=98.4, time_remaining=12)
+  Battery(
+    is_charging=True,
+    percentage=98.4,
+    time_remaining=12,
+  )
 # ---

@@ -1,71 +1,405 @@
 # serializer version: 1
 # name: test_application_update
-  Response(id='test', type='N/A', data={}, subtype=None, message='Message sent', module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message='Message sent',
+    module=None,
+    subtype=None,
+    type='N/A',
+  )
 # ---
 # name: test_bad_token
-  Response(id='test', type='N/A', data={}, subtype=None, message='Message sent', module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message='Message sent',
+    module=None,
+    subtype=None,
+    type='N/A',
+  )
+# ---
+# name: test_execute_command
+  ExecuteResult(
+    commandID='test-command',
+    error=None,
+    exitCode=0,
+    stderr='',
+    stdout='Command output',
+  )
+# ---
+# name: test_execute_command_timeout
+  ExecuteResult(
+    commandID='test-command',
+    error=None,
+    exitCode=0,
+    stderr='',
+    stdout='Command output',
+  )
 # ---
 # name: test_exit_backend
-  Response(id='test', type='N/A', data={}, subtype=None, message='Message sent', module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message='Message sent',
+    module=None,
+    subtype=None,
+    type='N/A',
+  )
+# ---
+# name: test_get_commands
+  SettingsCommands(
+    allowlist=list([
+      SettingsCommandDefinition(
+        arguments=list([
+        ]),
+        command='/usr/bin/test',
+        id='test-command-id',
+        name='Test Command',
+        workingDir='',
+      ),
+    ]),
+  )
 # ---
 # name: test_get_data
-  ModulesData(battery=None, cpu=None, disks=None, displays=None, gpus=None, media=None, memory=None, networks=None, processes=None, sensors=None, system=System(boot_time=1234, fqdn='hostname.local', hostname='hostname', kernel_version='6.1.0', ip_address_4='192.168.1.100', mac_address='00:00:00:00:00:00', platform_version='1.0.0', platform='platform', uptime=1234, users=[{'name': 'username', 'active': True, 'terminal': 'terminal', 'host': 'host', 'started': 1234, 'pid': 1234}], uuid='uuid', version='1.0.0', camera_usage=['camera1', 'camera2'], microphone_usage=['microphone1', 'microphone2'], ip_address_6='::1', pending_reboot=True, power_usage=None, run_mode='standalone', version_latest_url='https://github.com/timmo001/system-bridge/releases/latest', version_latest='4.99.0', version_newer_available=True, device_info=DeviceInfo(manufacturer='manufacturer', model='model', version='version', board_vendor='board_vendor', board_name='board_name', bios_vendor='bios_vendor', bios_version='bios_version', chassis_type='chassis_type')))
+  ModulesData(
+    battery=None,
+    cpu=None,
+    disks=None,
+    displays=None,
+    gpus=None,
+    media=None,
+    memory=None,
+    networks=None,
+    processes=None,
+    sensors=None,
+    system=System(
+      boot_time=1234,
+      camera_usage=list([
+        'camera1',
+        'camera2',
+      ]),
+      device_info=DeviceInfo(
+        bios_vendor='bios_vendor',
+        bios_version='bios_version',
+        board_name='board_name',
+        board_vendor='board_vendor',
+        chassis_type='chassis_type',
+        manufacturer='manufacturer',
+        model='model',
+        version='version',
+      ),
+      fqdn='hostname.local',
+      hostname='hostname',
+      ip_address_4='192.168.1.100',
+      ip_address_6='::1',
+      kernel_version='6.1.0',
+      mac_address='00:00:00:00:00:00',
+      microphone_usage=list([
+        'microphone1',
+        'microphone2',
+      ]),
+      pending_reboot=True,
+      platform='platform',
+      platform_version='1.0.0',
+      power_usage=None,
+      run_mode='standalone',
+      uptime=1234,
+      users=list([
+        dict({
+          'active': True,
+          'host': 'host',
+          'name': 'username',
+          'pid': 1234,
+          'started': 1234,
+          'terminal': 'terminal',
+        }),
+      ]),
+      uuid='uuid',
+      version='1.0.0',
+      version_latest='4.99.0',
+      version_latest_url='https://github.com/timmo001/system-bridge/releases/latest',
+      version_newer_available=True,
+    ),
+  )
 # ---
 # name: test_get_directories
   list([
+    MediaDirectory(
+      description=None,
+      key='documents',
+      name='Documents',
+      path='/home/user/documents',
+    ),
+    MediaDirectory(
+      description=None,
+      key='music',
+      name='Music',
+      path='/home/user/music',
+    ),
   ])
 # ---
 # name: test_get_file
-  MediaFile(name='file1', path='path/to/file1', fullpath='/full/path/to/file1', size=100, last_accessed=100.0, created=100.0, modified=100.0, is_directory=False, is_file=True, is_link=False, mime_type='text/plain')
+  MediaFile(
+    content_type='text/plain',
+    extension='.txt',
+    is_directory=False,
+    mod_time=100.0,
+    name='file1',
+    path='/full/path/to/file1',
+    permissions='-rw-r--r--',
+    size=100,
+  )
 # ---
 # name: test_get_files
-  MediaFiles(files=[], path='/home/user/documents')
+  MediaFiles(
+    files=list([
+    ]),
+    path='/home/user/documents',
+  )
 # ---
 # name: test_keyboard_keypress
-  Response(id='test', type='KEYBOARD_KEY_PRESSED', data={'key': 'a'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'key': 'a',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='KEYBOARD_KEY_PRESSED',
+  )
 # ---
 # name: test_keyboard_text
-  Response(id='test', type='KEYBOARD_TEXT_SENT', data={'text': 'test'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'text': 'test',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='KEYBOARD_TEXT_SENT',
+  )
 # ---
 # name: test_media_control
-  Response(id='test', type='N/A', data={}, subtype=None, message='Message sent', module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message='Message sent',
+    module=None,
+    subtype=None,
+    type='N/A',
+  )
 # ---
 # name: test_open_path
-  Response(id='test', type='OPENED', data={'path': '/home/user/documents'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'path': '/home/user/documents',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='OPENED',
+  )
 # ---
 # name: test_open_url
-  Response(id='test', type='OPENED', data={'url': 'https://www.google.com'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'url': 'https://www.google.com',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='OPENED',
+  )
 # ---
 # name: test_power_hibernate
-  Response(id='test', type='POWER_HIBERNATING', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_HIBERNATING',
+  )
 # ---
 # name: test_power_lock
-  Response(id='test', type='POWER_LOCKING', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_LOCKING',
+  )
 # ---
 # name: test_power_logout
-  Response(id='test', type='POWER_LOGGINGOUT', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_LOGGINGOUT',
+  )
 # ---
 # name: test_power_restart
-  Response(id='test', type='POWER_RESTARTING', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_RESTARTING',
+  )
 # ---
 # name: test_power_shutdown
-  Response(id='test', type='POWER_SHUTTINGDOWN', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_SHUTTINGDOWN',
+  )
 # ---
 # name: test_power_sleep
-  Response(id='test', type='POWER_SLEEPING', data={}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='POWER_SLEEPING',
+  )
 # ---
 # name: test_register_data_listener
-  Response(id='test', type='DATA_LISTENER_REGISTERED', data={'modules': ['system']}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'modules': list([
+        'system',
+      ]),
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='DATA_LISTENER_REGISTERED',
+  )
 # ---
 # name: test_send_notification
-  Response(id='test', type='NOTIFICATION_SENT', data={'title': 'Test', 'message': 'test'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'message': 'test',
+      'title': 'Test',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='NOTIFICATION_SENT',
+  )
 # ---
 # name: test_send_notification_with_new_fields
-  Response(id='test', type='NOTIFICATION_SENT', data={'title': 'Test', 'message': 'test', 'duration': 3000, 'actionUrl': 'https://example.com', 'actionPath': '/home/user/documents', 'sound': '/home/user/notify.wav'}, subtype=None, message=None, module=None)
+  Response(
+    data=dict({
+      'actionPath': '/home/user/documents',
+      'actionUrl': 'https://example.com',
+      'duration': 3000,
+      'message': 'test',
+      'sound': '/home/user/notify.wav',
+      'title': 'Test',
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='NOTIFICATION_SENT',
+  )
 # ---
 # name: test_unknown_message
-  Response(id='test', type='N/A', data={}, subtype=None, message='Message sent', module=None)
+  Response(
+    data=dict({
+    }),
+    id='test',
+    message='Message sent',
+    module=None,
+    subtype=None,
+    type='N/A',
+  )
 # ---
 # name: test_wait_for_response_timeout
-  ModulesData(battery=None, cpu=None, disks=None, displays=None, gpus=None, media=None, memory=None, networks=None, processes=None, sensors=None, system=System(boot_time=1234, fqdn='hostname.local', hostname='hostname', kernel_version='6.1.0', ip_address_4='192.168.1.100', mac_address='00:00:00:00:00:00', platform_version='1.0.0', platform='platform', uptime=1234, users=[{'name': 'username', 'active': True, 'terminal': 'terminal', 'host': 'host', 'started': 1234, 'pid': 1234}], uuid='uuid', version='1.0.0', camera_usage=['camera1', 'camera2'], microphone_usage=['microphone1', 'microphone2'], ip_address_6='::1', pending_reboot=True, power_usage=None, run_mode='standalone', version_latest_url='https://github.com/timmo001/system-bridge/releases/latest', version_latest='4.99.0', version_newer_available=True, device_info=DeviceInfo(manufacturer='manufacturer', model='model', version='version', board_vendor='board_vendor', board_name='board_name', bios_vendor='bios_vendor', bios_version='bios_version', chassis_type='chassis_type')))
+  ModulesData(
+    battery=None,
+    cpu=None,
+    disks=None,
+    displays=None,
+    gpus=None,
+    media=None,
+    memory=None,
+    networks=None,
+    processes=None,
+    sensors=None,
+    system=System(
+      boot_time=1234,
+      camera_usage=list([
+        'camera1',
+        'camera2',
+      ]),
+      device_info=DeviceInfo(
+        bios_vendor='bios_vendor',
+        bios_version='bios_version',
+        board_name='board_name',
+        board_vendor='board_vendor',
+        chassis_type='chassis_type',
+        manufacturer='manufacturer',
+        model='model',
+        version='version',
+      ),
+      fqdn='hostname.local',
+      hostname='hostname',
+      ip_address_4='192.168.1.100',
+      ip_address_6='::1',
+      kernel_version='6.1.0',
+      mac_address='00:00:00:00:00:00',
+      microphone_usage=list([
+        'microphone1',
+        'microphone2',
+      ]),
+      pending_reboot=True,
+      platform='platform',
+      platform_version='1.0.0',
+      power_usage=None,
+      run_mode='standalone',
+      uptime=1234,
+      users=list([
+        dict({
+          'active': True,
+          'host': 'host',
+          'name': 'username',
+          'pid': 1234,
+          'started': 1234,
+          'terminal': 'terminal',
+        }),
+      ]),
+      uuid='uuid',
+      version='1.0.0',
+      version_latest='4.99.0',
+      version_latest_url='https://github.com/timmo001/system-bridge/releases/latest',
+      version_newer_available=True,
+    ),
+  )
 # ---

@@ -1,6 +1,36 @@
 # serializer version: 1
 # name: test_notification
-  Notification(title='Title', message='Message', icon='https://www.example.com/icon.png', image='https://www.example.com/image.png', actions=[Action(command='OPEN_URL', label='Open URL', data={'url': 'https://www.example.com'}), Action(command='OPEN_PATH', label='Open Path', data={'path': '/home/user/documents'})], timeout=1000, audio=Audio(source='/home/user/notification.wav', volume=100), duration=1500, action_url='https://www.example.com/docs', action_path='/home/user/downloads', sound='/home/user/custom-notification.wav')
+  Notification(
+    action_path='/home/user/downloads',
+    action_url='https://www.example.com/docs',
+    actions=list([
+      Action(
+        command='OPEN_URL',
+        data=dict({
+          'url': 'https://www.example.com',
+        }),
+        label='Open URL',
+      ),
+      Action(
+        command='OPEN_PATH',
+        data=dict({
+          'path': '/home/user/documents',
+        }),
+        label='Open Path',
+      ),
+    ]),
+    audio=Audio(
+      source='/home/user/notification.wav',
+      volume=100,
+    ),
+    duration=1500,
+    icon='https://www.example.com/icon.png',
+    image='https://www.example.com/image.png',
+    message='Message',
+    sound='/home/user/custom-notification.wav',
+    timeout=1000,
+    title='Title',
+  )
 # ---
 # name: test_notification_dict
   dict({
@@ -36,7 +66,37 @@
   })
 # ---
 # name: test_notification_dict[notification-dict-converted]
-  Notification(title='Title', message='Message', icon='https://www.example.com/icon.png', image='https://www.example.com/image.png', actions=[Action(command='OPEN_URL', label='Open URL', data={'url': 'https://www.example.com'}), Action(command='OPEN_PATH', label='Open Path', data={'path': '/home/user/documents'})], timeout=1000, audio=Audio(source='/home/user/notification.wav', volume=100), duration=1500, action_url='https://www.example.com/docs', action_path='/home/user/downloads', sound='/home/user/custom-notification.wav')
+  Notification(
+    action_path='/home/user/downloads',
+    action_url='https://www.example.com/docs',
+    actions=list([
+      Action(
+        command='OPEN_URL',
+        data=dict({
+          'url': 'https://www.example.com',
+        }),
+        label='Open URL',
+      ),
+      Action(
+        command='OPEN_PATH',
+        data=dict({
+          'path': '/home/user/documents',
+        }),
+        label='Open Path',
+      ),
+    ]),
+    audio=Audio(
+      source='/home/user/notification.wav',
+      volume=100,
+    ),
+    duration=1500,
+    icon='https://www.example.com/icon.png',
+    image='https://www.example.com/image.png',
+    message='Message',
+    sound='/home/user/custom-notification.wav',
+    timeout=1000,
+    title='Title',
+  )
 # ---
 # name: test_notification_payload
   dict({

@@ -1,6 +1,20 @@
 # serializer version: 1
 # name: test_media_files
-  MediaFiles(files=[MediaFile(name='file1', path='/full/path/to/file1', size=100, is_directory=False, mod_time=100.0, permissions='-rw-r--r--', content_type='text/plain', extension='.txt')], path='path/to/file')
+  MediaFiles(
+    files=list([
+      MediaFile(
+        content_type='text/plain',
+        extension='.txt',
+        is_directory=False,
+        mod_time=100.0,
+        name='file1',
+        path='/full/path/to/file1',
+        permissions='-rw-r--r--',
+        size=100,
+      ),
+    ]),
+    path='path/to/file',
+  )
 # ---
 # name: test_media_files_dict
   dict({
@@ -20,5 +34,19 @@
   })
 # ---
 # name: test_media_files_dict[media-files-dict-converted]
-  MediaFiles(files=[MediaFile(name='file1', path='/full/path/to/file1', size=100, is_directory=False, mod_time=100.0, permissions='-rw-r--r--', content_type='text/plain', extension='.txt')], path='path/to/file')
+  MediaFiles(
+    files=list([
+      MediaFile(
+        content_type='text/plain',
+        extension='.txt',
+        is_directory=False,
+        mod_time=100.0,
+        name='file1',
+        path='/full/path/to/file1',
+        permissions='-rw-r--r--',
+        size=100,
+      ),
+    ]),
+    path='path/to/file',
+  )
 # ---

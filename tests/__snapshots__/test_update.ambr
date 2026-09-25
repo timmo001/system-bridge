@@ -1,4 +1,6 @@
 # serializer version: 1
 # name: test_update
-  Update(version='5.4.4')
+  Update(
+    version='5.4.4',
+  )
 # ---

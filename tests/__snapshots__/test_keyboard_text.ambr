@@ -1,4 +1,6 @@
 # serializer version: 1
 # name: test_keyboard_text
-  KeyboardText(text='Test')
+  KeyboardText(
+    text='Test',
+  )
 # ---
