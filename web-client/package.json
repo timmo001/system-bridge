@@ -39,7 +39,7 @@
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
     "oxlint": "1.85.0",
-    "oxlint-tsgolint": "7.0.2002",
+    "oxlint-tsgolint": "7.0.2003",
     "postcss": "^8.5.14",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.4",
