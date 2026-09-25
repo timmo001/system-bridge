@@ -45,6 +45,6 @@
     "tailwindcss": "^4.2.4",
     "typescript": "7.0.2",
     "vite": "^8.0.10",
-    "wrangler": "4.136.3"
+    "wrangler": "4.137.0"
   }
 }
