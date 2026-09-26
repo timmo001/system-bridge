@@ -3,10 +3,10 @@ import QtQuick
 Flickable {
   id: root
 
-  WheelHandler {
+  MouseArea {
     parent: root
-    target: null
-    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+    anchors.fill: parent
+    acceptedButtons: Qt.NoButton
     enabled: root.interactive && root.contentHeight > root.height
 
     onWheel: function(event) {
