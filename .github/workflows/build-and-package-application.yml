@@ -246,7 +246,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@22a25f920f0e1d0679340aa5bea0157aff9ea326 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@414d822006b46f7d5f2b4d2b6fda12807994c212 # master
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -332,7 +332,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@22a25f920f0e1d0679340aa5bea0157aff9ea326 # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@414d822006b46f7d5f2b4d2b6fda12807994c212 # master
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -364,7 +364,7 @@ jobs:
             --wildcards '*.pkg.tar.zst'
 
       - name: Attest Arch package
-        uses: timmo001/workflows/.github/actions/attest-release-assets@22a25f920f0e1d0679340aa5bea0157aff9ea326 # master
+        uses: timmo001/workflows/.github/actions/attest-release-assets@414d822006b46f7d5f2b4d2b6fda12807994c212 # master
         with:
           subject-patterns: arch-package/*.pkg.tar.zst
 
@@ -375,7 +375,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@22a25f920f0e1d0679340aa5bea0157aff9ea326 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@414d822006b46f7d5f2b4d2b6fda12807994c212 # master
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -457,7 +457,7 @@ jobs:
 
       - name: Attest release assets
         id: attest
-        uses: timmo001/workflows/.github/actions/attest-release-assets@22a25f920f0e1d0679340aa5bea0157aff9ea326 # master
+        uses: timmo001/workflows/.github/actions/attest-release-assets@414d822006b46f7d5f2b4d2b6fda12807994c212 # master
         with:
           subject-patterns: |
             dist/linux/arch/*.pkg.tar.zst
