@@ -21,7 +21,7 @@ jobs:
   test:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/test-pytest.yml@ef14244e5cfe3a9da6441796ee7f39f2f5bde233
+    uses: timmo001/workflows/.github/workflows/test-pytest.yml@0f94251168336b74fadf271a955d24d1de4de343 # 20260927.1
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:

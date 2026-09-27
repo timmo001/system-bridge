@@ -15,7 +15,7 @@ jobs:
     if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@635f5727c8686b952f53d2fbe1d2e80d2480c831
+    uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@0f94251168336b74fadf271a955d24d1de4de343 # 20260927.1
     with:
       package-name: "systembridgeconnector"
 
