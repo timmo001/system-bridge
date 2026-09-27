@@ -37,9 +37,8 @@ class Input extends UIElement {
     `;
   }
 
-  private _handleInput = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    this.value = input.value;
+  private _handleInput = (e: Event & { target: HTMLInputElement }) => {
+    this.value = e.target.value;
     this.dispatchEvent(
       new CustomEvent("input-change", {
         detail: { value: this.value },
@@ -49,9 +48,8 @@ class Input extends UIElement {
     );
   };
 
-  private _handleChange = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    this.value = input.value;
+  private _handleChange = (e: Event & { target: HTMLInputElement }) => {
+    this.value = e.target.value;
     this.dispatchEvent(
       new CustomEvent("value-changed", {
         detail: { value: this.value },

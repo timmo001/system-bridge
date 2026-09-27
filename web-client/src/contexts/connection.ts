@@ -1,4 +1,5 @@
 import { createContext } from "@lit/context";
+import { z } from "zod";
 
 import {
   assignIfDefined,
@@ -8,12 +9,14 @@ import {
   resolveTokenParam,
 } from "../lib/url-params";
 
-export interface ConnectionSettings {
-  host: string;
-  port: number;
-  ssl: boolean;
-  token: string | null;
-}
+const ConnectionSettingsSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  ssl: z.boolean(),
+  token: z.string().nullable(),
+});
+
+export type ConnectionSettings = z.infer<typeof ConnectionSettingsSchema>;
 
 const defaultConnectionSettings: ConnectionSettings = {
   host: "0.0.0.0",
@@ -45,6 +48,7 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
     return Object.keys(settings).length > 0 ? settings : null;
   } catch (error) {
     console.error("Error loading connection settings from URL", error);
+
     return null;
   }
 }
@@ -52,18 +56,21 @@ function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
 export function loadConnectionSettings(): ConnectionSettings {
   // Priority 1: Check URL query parameters
   const urlSettings = loadConnectionSettingsFromURL();
+
   if (urlSettings) {
     // Merge URL params with defaults, then save to localStorage
     const mergedSettings = { ...defaultConnectionSettings, ...urlSettings };
     saveConnectionSettings(mergedSettings);
+
     return mergedSettings;
   }
 
   // Priority 2: Load from localStorage
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
+
     if (stored) {
-      return JSON.parse(stored) as ConnectionSettings;
+      return ConnectionSettingsSchema.parse(JSON.parse(stored));
     }
   } catch (error) {
     console.error("Error loading connection settings from localStorage", error);

@@ -16,11 +16,10 @@ For terminal launch, services, and autostart, see [Running](/running/).
 While the backend is running, a System Bridge icon appears in your system tray. Its menu has the following options:
 
 - **Open web client**: open the [web client](/using/web-client/) in your default browser.
-- **Launch TUI**: open the interactive [TUI](/using/tui/) in a terminal window.
 - **Open logs directory**: open the folder containing the application logs.
 - **Quit**: stop the backend and exit System Bridge.
 
 ## Next steps
 
 - Monitor and control your system from the [web client](/using/web-client/).
-- Prefer the terminal? Use the [TUI](/using/tui/) or [CLI](/using/cli/).
+- Prefer the terminal? Use the [CLI](/using/cli/).

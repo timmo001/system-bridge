@@ -3,98 +3,73 @@ title: MCP Server
 description: Connect agents to System Bridge over the Model Context Protocol to query system data and trigger actions.
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+System Bridge includes a <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> (MCP) server, letting agents and other MCP clients query your system and trigger actions.
 
-System Bridge includes a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, letting agents and other MCP clients query your system and trigger actions.
+The primary endpoint uses Streamable HTTP:
 
-The server runs over a WebSocket at `ws://{host}:9170/api/mcp`. Replace `{host}` with the hostname or IP of the machine running System Bridge; the port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable. The connection is authenticated with your API token, passed either as a `token` query parameter or an `Authorization: Bearer {token}` header. A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
-
-## Setup
-
-Agents launch MCP servers as a local command and talk to them over stdio. Because System Bridge serves MCP over a WebSocket, a bridge such as [`websocat`](https://github.com/vi/websocat) is needed to pipe stdio to the WebSocket.
-
-### Install websocat
-
-<Tabs syncKey="os">
-  <TabItem label="Linux">
-    On Arch Linux, install from the `extra` repository:
-
-    ```bash
-    sudo pacman -S websocat
-    ```
-
-    On other distributions, install with `cargo` or download a binary from the [websocat releases](https://github.com/vi/websocat/releases):
-
-    ```bash
-    cargo install websocat
-    ```
-  </TabItem>
-  <TabItem label="macOS">
-    Install with [Homebrew](https://brew.sh):
-
-    ```bash
-    brew install websocat
-    ```
-  </TabItem>
-  <TabItem label="Windows">
-    Download a binary from the [websocat releases](https://github.com/vi/websocat/releases) and add it to your `PATH`.
-  </TabItem>
-</Tabs>
-
-### Configure your agent
-
-With `websocat` installed, add System Bridge to your agent's MCP config:
-
-```json title="mcp.json"
-{
-  "mcpServers": {
-    "system-bridge": {
-      "command": "websocat",
-      "args": ["ws://localhost:9170/api/mcp?token=YOUR_TOKEN"]
-    }
-  }
-}
+```text
+http://{host}:9170/api/mcp
 ```
 
-- Replace `localhost` with the host running System Bridge if the agent is on another machine.
-- Replace `YOUR_TOKEN` with your API token. See [how to find your token](/using/cli/#token).
+Replace `{host}` with the hostname or IP address of the machine running System Bridge. The port can be changed with the `SYSTEM_BRIDGE_PORT` environment variable. Use `https://` when System Bridge is exposed through SSL configuration or TLS termination.
 
-:::note
-The config key and file location vary by agent. Check your agent's MCP documentation for where its config lives and which key it uses.
+All connections require your API token. Pass it as a `token` query parameter:
+
+```text
+http://{host}:9170/api/mcp?token=YOUR_TOKEN
+```
+
+Clients that support custom headers can instead send:
+
+```text
+Authorization: Bearer YOUR_TOKEN
+```
+
+A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
+
+:::caution
+The token provides access to MCP tools that can read system data, send notifications, and control media. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
 :::
 
-:::tip
-If you sync one config across several machines, hardcoding a token doesn't travel well. Use a small wrapper script that reads the token from `system-bridge client token` at launch and execs `websocat`. Save it as `system-bridge-mcp` somewhere on your `PATH` and make it executable:
+## Home Assistant
 
-```bash title="system-bridge-mcp"
-#!/usr/bin/env bash
-set -euo pipefail
+Home Assistant's <a href="https://www.home-assistant.io/integrations/mcp" target="_blank" rel="noopener noreferrer">Model Context Protocol integration</a> can connect directly to System Bridge. No command or WebSocket bridge is required.
 
-host="${SYSTEM_BRIDGE_HOST:-localhost}"
-port="${SYSTEM_BRIDGE_PORT:-9170}"
+1. In Home Assistant, go to **Settings** > **Devices & services**.
+2. Select **Add integration**, then search for **Model Context Protocol**.
+3. Enter the token-bearing Streamable HTTP URL, for example `http://192.168.1.10:9170/api/mcp?token=YOUR_TOKEN`.
+4. Complete the setup flow.
+5. Configure your conversation agent to use the System Bridge MCP tools.
 
-token="$(system-bridge client token | tr -d '[:space:]')"
-if [[ -z "$token" ]]; then
-  echo "system-bridge-mcp: failed to get token from 'system-bridge client token'" >&2
-  exit 1
-fi
+Use a hostname or IP address that Home Assistant can reach. Use `https://` if the endpoint is exposed over HTTPS.
 
-exec websocat "ws://${host}:${port}/api/mcp?token=${token}"
+## Other MCP clients
+
+For a remote MCP client, choose its Streamable HTTP transport and use the token-bearing endpoint:
+
+```text
+http://{host}:9170/api/mcp?token=YOUR_TOKEN
 ```
 
-Then point `command` at it so each machine uses its own token automatically:
+Client configuration formats and option names vary. Some clients accept a remote MCP URL directly, while others require a transport type, URL field, or custom `Authorization` header. Follow the client's documentation rather than assuming a particular configuration key.
 
-```json title="mcp.json"
-{
-  "mcpServers": {
-    "system-bridge": {
-      "command": "system-bridge-mcp"
-    }
-  }
-}
+## Legacy WebSocket transport
+
+The SDK-backed WebSocket transport remains available at the same path for compatibility:
+
+```text
+ws://{host}:9170/api/mcp?token=YOUR_TOKEN
 ```
 
-:::
+Use `wss://` when connecting through TLS. Streamable HTTP is the primary setup for clients that support remote MCP servers.
+
+For a stdio-only client, <a href="https://github.com/vi/websocat" target="_blank" rel="noopener noreferrer">`websocat`</a> can bridge the client's standard input and output to the legacy WebSocket:
+
+```bash
+websocat "ws://localhost:9170/api/mcp?token=YOUR_TOKEN"
+```
+
+Configure the client to launch `websocat` with the WebSocket URL as its argument. The exact command and argument fields depend on the client.
 
 ## Tools
 
@@ -172,6 +147,7 @@ Example arguments:
 - Confirm System Bridge is running. See [Running](/running/).
 - Check the port (default `9170`) and `SYSTEM_BRIDGE_PORT` if you changed it.
 - Verify the host in your config matches the machine running the backend.
+- Confirm the client uses Streamable HTTP unless it explicitly needs the legacy WebSocket transport.
 
 ### Unauthorized (`401`)
 

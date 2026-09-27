@@ -46,23 +46,25 @@ interface StatusConfig {
   icon: string;
 }
 
-const statusStyles: Record<string, StatusConfig> = {
-  playing: {
-    bg: "bg-green-500/20",
-    text: "text-green-400",
-    icon: "Play",
-  },
-  paused: {
-    bg: "bg-yellow-500/20",
-    text: "text-yellow-400",
-    icon: "Pause",
-  },
-  stopped: {
-    bg: "bg-red-500/20",
-    text: "text-red-400",
-    icon: "Square",
-  },
-};
+const statusStyles = new Map<string, StatusConfig>(
+  Object.entries({
+    playing: {
+      bg: "bg-green-500/20",
+      text: "text-green-400",
+      icon: "Play",
+    },
+    paused: {
+      bg: "bg-yellow-500/20",
+      text: "text-yellow-400",
+      icon: "Pause",
+    },
+    stopped: {
+      bg: "bg-red-500/20",
+      text: "text-red-400",
+      icon: "Square",
+    },
+  }),
+);
 
 const defaultStatusStyle: StatusConfig = {
   bg: "bg-gray-500/20",
@@ -102,27 +104,29 @@ class PageMedia extends PageElement {
     super.connectedCallback();
     window.addEventListener(
       "media-control-success",
-      this.handleMediaControlSuccess as EventListener,
+      this.handleMediaControlSuccess,
     );
     window.addEventListener(
       "media-control-error",
-      this.handleMediaControlError as EventListener,
+      this.handleMediaControlError,
     );
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+
     if (this.sendTimeout !== null) {
       clearTimeout(this.sendTimeout);
       this.sendTimeout = null;
     }
+
     window.removeEventListener(
       "media-control-success",
-      this.handleMediaControlSuccess as EventListener,
+      this.handleMediaControlSuccess,
     );
     window.removeEventListener(
       "media-control-error",
-      this.handleMediaControlError as EventListener,
+      this.handleMediaControlError,
     );
   }
 
@@ -150,6 +154,7 @@ class PageMedia extends PageElement {
   private clearPendingState(): void {
     this.pendingAction = null;
     this.pendingRequestId = null;
+
     if (this.sendTimeout !== null) {
       clearTimeout(this.sendTimeout);
       this.sendTimeout = null;
@@ -209,6 +214,7 @@ class PageMedia extends PageElement {
   private handleMute = (): void => this.sendMediaAction("MUTE");
 
   private get mediaData(): MediaData | null {
+    // SAFETY: WebSocketController validates media updates with MediaDataSchema; the initial empty object also matches its optional fields.
     return (this.data?.media as MediaData) ?? null;
   }
 
@@ -218,6 +224,7 @@ class PageMedia extends PageElement {
 
   private get hasMedia(): boolean {
     const media = this.mediaData;
+
     return !!(media?.title || media?.artist || media?.status);
   }
 
@@ -225,6 +232,7 @@ class PageMedia extends PageElement {
     if (timestamp == null) {
       return "Never";
     }
+
     const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -236,6 +244,7 @@ class PageMedia extends PageElement {
       return `${diffSeconds} seconds ago`;
     } else if (diffSeconds < 3600) {
       const minutes = Math.floor(diffSeconds / 60);
+
       return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
     } else {
       return date.toLocaleTimeString();
@@ -244,7 +253,7 @@ class PageMedia extends PageElement {
 
   private renderStatusBadge(): TemplateResult {
     const status = this.mediaData?.status ?? "Unknown";
-    const config = statusStyles[status.toLowerCase()] ?? defaultStatusStyle;
+    const config = statusStyles.get(status.toLowerCase()) ?? defaultStatusStyle;
 
     return html`
       <div
@@ -290,6 +299,7 @@ class PageMedia extends PageElement {
 
     const positionStr = position != null ? formatDuration(position) : "--:--";
     const durationStr = duration != null ? formatDuration(duration) : "--:--";
+
     const percent =
       position != null && duration != null && duration > 0
         ? Math.min((position / duration) * 100, 100)
@@ -300,6 +310,7 @@ class PageMedia extends PageElement {
 
   private renderProgress(): TemplateResult {
     const progress = this.computeProgress();
+
     if (!progress) return html``;
 
     return html`
@@ -398,8 +409,9 @@ class PageMedia extends PageElement {
     `;
   }
 
-  private getControlStates(): Record<string, boolean> {
+  private getControlStates() {
     const media = this.mediaData;
+
     return {
       PREVIOUS: media?.is_previous_enabled === false,
       PLAY: media?.is_play_enabled === false,
@@ -482,6 +494,7 @@ class PageMedia extends PageElement {
   private renderVolumeControls(): TemplateResult {
     const media = this.mediaData;
     const volume = media?.volume;
+
     const volumeDisplay =
       volume != null ? `${Math.round(volume * 100)}%` : null;
 

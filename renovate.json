@@ -1,57 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests",
-    "group:monorepos",
-    "group:recommended"
-  ],
-  "dependencyDashboard": true,
-  "labels": ["dependencies"],
-  "lockFileMaintenance": {
-    "enabled": true
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Update annotated tool version ARGs in Dockerfiles.",
-      "managerFilePatterns": [
-        "/(^|/)Dockerfile$/",
-        "/(^|/)Dockerfile\\.[^/]*$/"
-      ],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+packageName=(?<packageName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s+ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    },
-    {
-      "customType": "regex",
-      "description": "Update annotated Go tool versions in workflows.",
-      "managerFilePatterns": ["/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*run:\\s*.*?@(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    },
-    {
-      "customType": "regex",
-      "description": "Update annotated tool versions in scripts and workflow env vars.",
-      "managerFilePatterns": [
-        "/(^|/)\\.github/scripts/.+$/",
-        "/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"
-      ],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+packageName=(?<packageName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*\\$?[A-Za-z_][A-Za-z0-9_]*\\s*[:=]\\s*[\"']?(?<currentValue>[^\\s\"']+)"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    }
-  ],
+  "extends": ["github>timmo001/renovate-config"],
   "packageRules": [
-    {
-      "description": "Pin Docker image digests.",
-      "matchDatasources": ["docker"],
-      "pinDigests": true
-    },
     {
       "description": "Normalize Go tags from golang/go.",
       "matchDatasources": ["github-tags"],
@@ -67,19 +17,19 @@
       "versioning": "node"
     },
     {
-      "description": "Group ESLint packages.",
-      "groupName": "eslint",
-      "matchPackageNames": ["eslint", "@eslint/**", "eslint-**", "typescript-eslint"]
+      "description": "Include Lit lint plugins in the shared Oxlint group.",
+      "groupName": "oxlint",
+      "matchPackageNames": ["eslint-plugin-lit", "eslint-plugin-wc"]
     },
     {
       "description": "Group Tailwind CSS packages.",
       "groupName": "tailwindcss",
-      "matchPackageNames": ["tailwindcss", "@tailwindcss/**", "tailwind-merge", "postcss"]
-    },
-    {
-      "description": "Group GitHub Actions.",
-      "groupName": "github actions",
-      "matchManagers": ["github-actions"]
+      "matchPackageNames": [
+        "tailwindcss",
+        "@tailwindcss/**",
+        "tailwind-merge",
+        "postcss"
+      ]
     }
   ]
 }

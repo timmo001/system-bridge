@@ -2,7 +2,7 @@
 title: CLI
 ---
 
-The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `tui`, `version` and `completions` are top-level commands.
+The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `version` and `completions` are top-level commands. Running `system-bridge` without a subcommand shows help.
 
 ## Token
 
@@ -109,6 +109,18 @@ Available flags:
 - `--all`: Run all modules
 - `--pretty`: Pretty-print JSON output
 
+### Watch Modules
+
+To stream module updates from the running backend, repeat `--module` or `-m` for each module:
+
+```bash
+system-bridge client data watch --module cpu --module memory
+```
+
+The command loads the current user's API token internally and connects to the local backend. Each `DATA_UPDATE` response is written to standard output as one line of newline-delimited JSON (NDJSON). A token is never written to standard output.
+
+The `--module` flag is required and may be repeated. Unknown module names are rejected before connecting. Stop the stream with Ctrl+C; the client closes the WebSocket normally and does not reconnect.
+
 ## Backend
 
 To run the backend server, use:
@@ -171,7 +183,6 @@ Completion is aware of your data modules. Once it is enabled, type `system-bridg
 ## Next steps
 
 - Prefer a graphical interface? Use the [web client](/using/web-client/).
-- Prefer an interactive menu? Use the [TUI](/using/tui/).
 - Connect to the [API and WebSocket](/api/) to read data and control your system.
 - Integrate with [Home Assistant](/using/home-assistant/).
 - Not started the backend yet? See [Running](/running/).

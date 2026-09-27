@@ -6,9 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
@@ -16,15 +14,16 @@ import (
 	"log/slog"
 
 	"github.com/pkg/browser"
-	"golang.org/x/term"
 
 	"github.com/timmo001/system-bridge/backend"
+	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/confirmation"
 	"github.com/timmo001/system-bridge/utils/handlers/filesystem"
 	"github.com/timmo001/system-bridge/utils/handlers/notification"
 	"github.com/timmo001/system-bridge/version"
@@ -73,11 +72,6 @@ func main() {
 		EnableShellCompletion:      true,
 		ShellCompletionCommandName: "completions",
 		Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-			// When run interactively with no subcommand, launch the TUI
-			if term.IsTerminal(int(os.Stdin.Fd())) {
-				return launchTUI()
-			}
-			// Non-interactive: show help
 			return cli.ShowAppHelp(cmd)
 		},
 		Commands: []*cli.Command{
@@ -145,14 +139,30 @@ func main() {
 						}
 					}()
 
-					if !cmd.Bool("no-tray") {
+					if !cmd.Bool("no-tray") && s.SystemTray {
 						// Set up tray handlers
 						tray.SetHandlers(tray.Handlers{
 							OpenWebClient: func() {
 								openWebClient(token)
 							},
-							LaunchTUI: func() {
-								launchTUIInTerminal()
+							Hide: func() {
+								message := fmt.Sprintf("Hide the System Bridge tray icon? System Bridge will keep running. To restore it, open http://127.0.0.1:%d/settings, enable System tray in General Settings, save, then restart System Bridge.", utils.GetPort())
+								if runtime.GOOS == "darwin" {
+									message += " On macOS, hiding the icon also requires a restart."
+								}
+								if !confirmDesktopAction(cmdCtx, "Hide system tray", message) {
+									return
+								}
+								current, err := settings.Load()
+								if err == nil {
+									current.SystemTray = false
+									err = current.Save()
+								}
+								if err != nil {
+									reportDesktopError("Failed to hide system tray", err)
+									return
+								}
+								tray.Quit()
 							},
 							OpenDocs: func() {
 								openExternalURL(version.DocsURL, "documentation")
@@ -161,6 +171,9 @@ func main() {
 								openLogsDirectory()
 							},
 							Quit: func() {
+								if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+									return
+								}
 								slog.Info("Quitting...")
 								// Cancel context to trigger graceful shutdown
 								// The backend.Run() will return, allowing deferred cleanup to run
@@ -172,6 +185,7 @@ func main() {
 
 						// Start the system tray UI
 						go tray.Run()
+						defer tray.Quit()
 					}
 
 					// Create and run backend server with signal-aware context
@@ -196,6 +210,37 @@ func main() {
 				// 	return nil
 				// },
 				Commands: []*cli.Command{
+					{
+						Name:  "open",
+						Usage: "Open the web client",
+						Flags: []cli.Flag{&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"}},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							token, err := utils.LoadToken()
+							if err != nil {
+								return fmt.Errorf("load token: %w", err)
+							}
+							path := "/"
+							if cmd.Bool("settings") {
+								path = "/settings"
+							}
+							openWebClientPath(token, path)
+							return nil
+						},
+					},
+					{
+						Name:  "quit",
+						Usage: "Confirm and quit the local System Bridge backend",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+								return nil
+							}
+							if err := client.Quit(cmdCtx); err != nil {
+								reportDesktopError("Failed to quit System Bridge", err)
+								return err
+							}
+							return nil
+						},
+					},
 					{
 						Name:    "token",
 						Aliases: []string{"t"},
@@ -348,6 +393,48 @@ func main() {
 								},
 							},
 							{
+								Name:  "watch",
+								Usage: "Watch data modules and print updates as NDJSON",
+								Flags: []cli.Flag{
+									&cli.StringSliceFlag{
+										Name:     "module",
+										Aliases:  []string{"m"},
+										Usage:    "Module name (repeat for multiple modules)",
+										Required: true,
+									},
+								},
+								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
+									args := os.Args
+									if len(args) >= 2 {
+										prev := args[len(args)-2]
+										if prev == "--module" || prev == "-m" {
+											dataStore, err := data.NewDataStore()
+											if err != nil {
+												return
+											}
+											for _, u := range dataStore.GetRegisteredModules() {
+												if u != nil {
+													_, _ = fmt.Fprintln(cmd.Root().Writer, string(u.Name()))
+												}
+											}
+											return
+										}
+									}
+									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									moduleNames := cmd.StringSlice("module")
+									modules := make([]types.ModuleName, len(moduleNames))
+									for i, moduleName := range moduleNames {
+										modules[i] = types.ModuleName(moduleName)
+									}
+									return client.Watch(cmdCtx, client.WatchOptions{
+										Modules: modules,
+										Writer:  cmd.Root().Writer,
+									})
+								},
+							},
+							{
 								Name:  "run",
 								Usage: "Run a data module and print JSON output",
 								Flags: []cli.Flag{
@@ -465,14 +552,6 @@ func main() {
 					return nil
 				},
 			},
-			{
-				Name:    "tui",
-				Aliases: []string{"t"},
-				Usage:   "Launch the interactive TUI",
-				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-					return launchTUI(cmd.Args().Slice()...)
-				},
-			},
 		},
 	}
 
@@ -489,8 +568,12 @@ func main() {
 }
 
 func openWebClient(token string) {
+	openWebClientPath(token, "/")
+}
+
+func openWebClientPath(token, path string) {
 	port := utils.GetPort()
-	url := fmt.Sprintf("http://127.0.0.1:%d/?host=127.0.0.1&port=%d&apiKey=%s", port, port, token)
+	url := fmt.Sprintf("http://127.0.0.1:%d%s?host=127.0.0.1&port=%d&apiKey=%s", port, path, port, token)
 	slog.Info("Opening web client URL", "url", url)
 	if err := browser.OpenURL(url); err != nil {
 		if err := notification.Send(notification.NotificationData{
@@ -501,6 +584,21 @@ func openWebClient(token string) {
 			slog.Error("Failed to send notification", "err", err)
 		}
 		slog.Error("Failed to open web client", "err", err)
+	}
+}
+
+func confirmDesktopAction(ctx context.Context, title, message string) bool {
+	confirmed, err := confirmation.Ask(ctx, title, message)
+	if err != nil {
+		reportDesktopError("Failed to show confirmation", err)
+	}
+	return confirmed
+}
+
+func reportDesktopError(title string, err error) {
+	slog.Error(title, "error", err)
+	if notifyErr := notification.Send(notification.NotificationData{Title: title, Message: err.Error(), Icon: "system-bridge"}); notifyErr != nil {
+		slog.Error("Failed to send notification", "error", notifyErr)
 	}
 }
 
@@ -535,135 +633,5 @@ func openLogsDirectory() {
 		}); err != nil {
 			slog.Error("Failed to send notification", "err", err)
 		}
-	}
-}
-
-// findTUIBinary locates the system-bridge-tui binary, checking next to the
-// current executable first, then falling back to PATH.
-func findTUIBinary() (string, error) {
-	tuiName := "system-bridge-tui"
-	if runtime.GOOS == "windows" {
-		tuiName = "system-bridge-tui.exe"
-	}
-
-	// Look next to the current executable
-	if exe, err := os.Executable(); err == nil {
-		candidate := filepath.Join(filepath.Dir(exe), tuiName)
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate, nil
-		}
-	}
-
-	// Fall back to PATH lookup
-	tuiPath, err := exec.LookPath(tuiName)
-	if err != nil {
-		return "", fmt.Errorf("%s not found (build with 'mise run build:tui'): %w", tuiName, err)
-	}
-	return tuiPath, nil
-}
-
-// launchTUI finds and exec's the system-bridge-tui binary, attaching the
-// current process's stdio. Used for interactive CLI invocation.
-func launchTUI(args ...string) error {
-	tuiPath, err := findTUIBinary()
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.Command(tuiPath, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-// launchTUIInTerminal opens the system-bridge-tui binary inside a new terminal
-// window. Used by the system tray, which has no terminal of its own.
-func launchTUIInTerminal() {
-	tuiPath, err := findTUIBinary()
-	if err != nil {
-		slog.Error("Failed to find TUI binary", "err", err)
-		notifyTUILaunchFailed()
-		return
-	}
-
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		// start "" opens a new console window running the binary
-		cmd = exec.Command("cmd", "/c", "start", "", tuiPath)
-	case "darwin":
-		// open -a Terminal runs the binary in a new Terminal.app window
-		cmd = exec.Command("open", "-a", "Terminal", tuiPath)
-	default:
-		c, ok := linuxTerminalCommand(tuiPath)
-		if !ok {
-			slog.Error("No terminal emulator found to launch TUI")
-			notifyTUILaunchFailed()
-			return
-		}
-		cmd = c
-	}
-
-	if err := cmd.Start(); err != nil {
-		slog.Error("Failed to launch TUI in terminal", "err", err)
-		notifyTUILaunchFailed()
-	}
-}
-
-// linuxTerminals lists known terminal emulators in priority order, along with
-// how to invoke each to run a program in a new window. The arg builders account
-// for the differing flags terminals use (-e, --, direct program, etc).
-var linuxTerminals = []struct {
-	name string
-	args func(prog string) []string
-}{
-	{"x-terminal-emulator", func(p string) []string { return []string{"-e", p} }},
-	{"alacritty", func(p string) []string { return []string{"-e", p} }},
-	{"ghostty", func(p string) []string { return []string{"-e", p} }},
-	{"kitty", func(p string) []string { return []string{p} }},
-	{"foot", func(p string) []string { return []string{p} }},
-	{"wezterm", func(p string) []string { return []string{"start", "--", p} }},
-	{"konsole", func(p string) []string { return []string{"-e", p} }},
-	{"gnome-terminal", func(p string) []string { return []string{"--", p} }},
-	{"xfce4-terminal", func(p string) []string { return []string{"-x", p} }},
-	{"xterm", func(p string) []string { return []string{"-e", p} }},
-}
-
-// linuxTerminalCommand builds a command to run prog in a new terminal window,
-// honoring $TERMINAL when set and otherwise falling back to known emulators.
-func linuxTerminalCommand(prog string) (*exec.Cmd, bool) {
-	if t := os.Getenv("TERMINAL"); t != "" {
-		base := filepath.Base(t)
-		for _, term := range linuxTerminals {
-			if term.name == base {
-				if path, err := exec.LookPath(t); err == nil {
-					return exec.Command(path, term.args(prog)...), true
-				}
-			}
-		}
-		// Unknown $TERMINAL: best-effort -e.
-		if path, err := exec.LookPath(t); err == nil {
-			return exec.Command(path, "-e", prog), true
-		}
-	}
-
-	for _, term := range linuxTerminals {
-		if path, err := exec.LookPath(term.name); err == nil {
-			return exec.Command(path, term.args(prog)...), true
-		}
-	}
-	return nil, false
-}
-
-// notifyTUILaunchFailed sends a desktop notification when the TUI cannot be
-// launched from the system tray.
-func notifyTUILaunchFailed() {
-	if err := notification.Send(notification.NotificationData{
-		Title:   "Failed to launch TUI",
-		Message: "Could not open the TUI in a terminal window",
-		Icon:    "system-bridge",
-	}); err != nil {
-		slog.Error("Failed to send notification", "err", err)
 	}
 }

@@ -5,7 +5,6 @@ $files = @(
     'system-bridge.exe',
     'system-bridge-console.exe',
     'system-bridge-windows.exe',
-    'system-bridge-tui.exe',
     'installer.nsi',
     'system-bridge.rc'
 )

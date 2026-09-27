@@ -101,14 +101,17 @@ class PageSettingsCommands extends PageElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+
     if (this.submissionTimeout !== null) {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+
     if (this.errorTimeout !== null) {
       clearTimeout(this.errorTimeout);
       this.errorTimeout = null;
     }
+
     // Remove event listeners from window
     window.removeEventListener(
       "settings-update-error",
@@ -128,8 +131,10 @@ class PageSettingsCommands extends PageElement {
 
     for (const pattern of patterns) {
       const match = pattern.exec(fullMessage);
+
       if (match?.[1]) {
         const extracted = match[1].trim();
+
         return extracted.charAt(0).toUpperCase() + extracted.slice(1);
       }
     }
@@ -137,28 +142,22 @@ class PageSettingsCommands extends PageElement {
     return fullMessage;
   }
 
-  private handleSettingsUpdateError = (event: Event): void => {
-    const customEvent = event as CustomEvent<{
-      requestId: string;
-      message: string;
-      timestamp: number;
-    }>;
-
+  private handleSettingsUpdateError = (
+    event: WindowEventMap["settings-update-error"],
+  ): void => {
     // Check if this error is for our pending request
-    if (
-      this.isSubmitting &&
-      this.pendingRequestId === customEvent.detail.requestId
-    ) {
+    if (this.isSubmitting && this.pendingRequestId === event.detail.requestId) {
       // Reload commands from actual settings (which won't include the invalid command)
       this.loadSettings();
 
       // Show error message with cleaned up text
-      this.errorMessage = this.extractErrorMessage(customEvent.detail.message);
+      this.errorMessage = this.extractErrorMessage(event.detail.message);
 
       // Clear error after 10 seconds
       if (this.errorTimeout !== null) {
         clearTimeout(this.errorTimeout);
       }
+
       this.errorTimeout = window.setTimeout(() => {
         this.errorMessage = null;
         this.errorTimeout = null;
@@ -170,17 +169,11 @@ class PageSettingsCommands extends PageElement {
     }
   };
 
-  private handleSettingsUpdated = (event: Event): void => {
-    const customEvent = event as CustomEvent<{
-      requestId: string;
-      timestamp: number;
-    }>;
-
+  private handleSettingsUpdated = (
+    event: WindowEventMap["settings-updated"],
+  ): void => {
     // Check if this update is for our pending request
-    if (
-      this.isSubmitting &&
-      this.pendingRequestId === customEvent.detail.requestId
-    ) {
+    if (this.isSubmitting && this.pendingRequestId === event.detail.requestId) {
       // Load updated settings from websocket context
       this.loadSettings();
 
@@ -193,6 +186,7 @@ class PageSettingsCommands extends PageElement {
 
     const currentCommands =
       this.bridgeSettings?.settings?.commands.allowlist ?? [];
+
     const previousCommandsStr = JSON.stringify(this.previousCommands);
     const currentCommandsStr = JSON.stringify(currentCommands);
 
@@ -218,10 +212,12 @@ class PageSettingsCommands extends PageElement {
     this.isSubmitting = false;
     this.pendingRequestId = null;
     this.pendingCommandAction = null;
+
     if (this.submissionTimeout !== null) {
       clearTimeout(this.submissionTimeout);
       this.submissionTimeout = null;
     }
+
     // Update previousCommands to current state after submission completes
     this.previousCommands = [...this.commands];
     this.requestUpdate();
@@ -231,24 +227,26 @@ class PageSettingsCommands extends PageElement {
     this.navigate("/connection");
   };
 
-  private handleNameInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newCommandName = input.value;
+  private handleNameInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.newCommandName = e.target.value;
   };
 
-  private handleCommandInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newCommandCommand = input.value;
+  private handleCommandInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.newCommandCommand = e.target.value;
   };
 
-  private handleWorkingDirInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newCommandWorkingDir = input.value;
+  private handleWorkingDirInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.newCommandWorkingDir = e.target.value;
   };
 
-  private handleArgumentsInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newCommandArguments = input.value;
+  private handleArgumentsInput = (
+    e: Event & { target: HTMLInputElement },
+  ): void => {
+    this.newCommandArguments = e.target.value;
   };
 
   private handleAddCommand = (): void => {
@@ -275,9 +273,11 @@ class PageSettingsCommands extends PageElement {
     this.saveSettingsWithCommands(updatedCommands);
   };
 
-  private handleRemoveCommand = (e: Event): void => {
-    const button = e.currentTarget as HTMLElement;
-    const id = button.getAttribute("data-id");
+  private handleRemoveCommand = (
+    e: Event & { currentTarget: HTMLElement },
+  ): void => {
+    const id = e.currentTarget.getAttribute("data-id");
+
     if (!id) return;
 
     const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
@@ -285,22 +285,27 @@ class PageSettingsCommands extends PageElement {
     this.saveSettingsWithCommands(updatedCommands);
   };
 
-  private handleExecuteCommand = (e: Event): void => {
-    const button = e.currentTarget as HTMLElement;
-    const id = button.getAttribute("data-id");
+  private handleExecuteCommand = (
+    e: Event & { currentTarget: HTMLElement },
+  ): void => {
+    const id = e.currentTarget.getAttribute("data-id");
+
     if (!id || !this.connection?.token || !this.actions) {
       return;
     }
 
     const command = this.commands.find((cmd) => cmd.id === id);
+
     if (!command) return;
 
     this.actions.sendCommandExecute(generateUUID(), id, this.connection.token);
   };
 
-  private handleCopyId = async (e: Event): Promise<void> => {
-    const button = e.currentTarget as HTMLElement;
-    const id = button.getAttribute("data-id");
+  private handleCopyId = async (
+    e: Event & { currentTarget: HTMLElement },
+  ): Promise<void> => {
+    const id = e.currentTarget.getAttribute("data-id");
+
     if (!id) return;
 
     try {
@@ -380,6 +385,7 @@ class PageSettingsCommands extends PageElement {
     if (this.pendingCommandAction === "add") {
       this.clearCommandForm();
     }
+
     this.clearSubmissionState();
   }
 
@@ -499,7 +505,7 @@ ${result.stderr}</pre>
   private renderCommandItem(cmd: SettingsCommandDefinition) {
     const executionState = this.bridgeSettings?.commandExecutions.get(cmd.id);
     const isExecuting = executionState?.isExecuting ?? false;
-    const result = executionState?.result as CommandResult | null | undefined;
+    const result = executionState?.result;
 
     return html`
       <div class="flex flex-col gap-3 p-4 rounded-md border">
@@ -551,6 +557,7 @@ ${result.stderr}</pre>
 
   private renderErrorMessage(): TemplateResult {
     if (!this.errorMessage) return html``;
+
     return html`
       <div
         class="rounded-lg border border-red-800 bg-red-950/30 p-4 flex items-start gap-3"

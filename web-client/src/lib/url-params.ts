@@ -16,6 +16,7 @@ export function getIntParam(
 ): number | undefined {
   if (!params.has(key)) return undefined;
   const value = parseInt(params.get(key)!, 10);
+
   return isNaN(value) ? undefined : value;
 }
 
@@ -43,6 +44,8 @@ export function resolveTokenParam(
 ): string | null | undefined {
   const token =
     getStringParam(params, "apiKey") ?? getStringParam(params, "token");
+
   if (token === undefined) return undefined;
+
   return token || null;
 }

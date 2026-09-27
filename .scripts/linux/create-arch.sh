@@ -30,11 +30,6 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
-if [ ! -f "system-bridge-tui" ]; then
-  echo "system-bridge-tui not found, please build the TUI first (mise run build:tui)"
-  exit 1
-fi
-
 # Verify CSS inclusion in binary
 echo "Verifying CSS inclusion in binary..."
 if [ -f "$SCRIPT_DIR/../verify-css.sh" ]; then
@@ -49,7 +44,6 @@ cd build/arch
 
 # Copy necessary files
 cp ../../system-bridge-linux system-bridge
-cp ../../system-bridge-tui system-bridge-tui
 cp ../../.scripts/linux/system-bridge.desktop .
 cp ../../LICENSE .
 cp ../../.scripts/linux/PKGBUILD .

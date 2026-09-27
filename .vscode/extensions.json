@@ -2,7 +2,7 @@
   "recommendations": [
     "golang.go",
     "oven.bun-vscode",
-    "dbaeumer.vscode-eslint",
+    "oxc.oxc-vscode",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
     "astro-build.astro-vscode",

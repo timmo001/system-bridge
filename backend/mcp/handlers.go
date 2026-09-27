@@ -8,51 +8,35 @@ import (
 
 	"log/slog"
 
+	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
 
-// ExecuteTool routes tool calls to appropriate handlers
-func (s *MCPServer) ExecuteTool(ctx context.Context, toolName string, arguments map[string]interface{}) (interface{}, error) {
-	slog.Debug("Executing MCP tool", "tool", toolName, "arguments", arguments)
-
-	switch toolName {
-	case "system_bridge_get_data":
-		return s.handleGetData(ctx, arguments)
-	case "system_bridge_send_notification":
-		return s.handleNotification(ctx, arguments)
-	case "system_bridge_media_control":
-		return s.handleMediaControl(ctx, arguments)
-	default:
-		return nil, fmt.Errorf("unknown tool: %s", toolName)
-	}
+type toolHandlers struct {
+	eventRouter *event.MessageRouter
+	dataStore   *data.DataStore
 }
 
-// handleGetData gets system data from specified modules
-func (s *MCPServer) handleGetData(ctx context.Context, arguments map[string]interface{}) (interface{}, error) {
-	modulesRaw, ok := arguments["modules"]
-	if !ok {
-		return nil, fmt.Errorf("missing required parameter: modules")
-	}
+type getDataInput struct {
+	Modules []types.ModuleName `json:"modules"`
+}
 
-	modulesArray, ok := modulesRaw.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("modules must be an array")
-	}
+type notificationInput struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+	Icon    string `json:"icon,omitempty"`
+}
 
-	modules := make([]types.ModuleName, 0, len(modulesArray))
-	for _, m := range modulesArray {
-		moduleStr, ok := m.(string)
-		if !ok {
-			return nil, fmt.Errorf("module names must be strings")
-		}
-		modules = append(modules, types.ModuleName(moduleStr))
-	}
+type mediaControlInput struct {
+	Action string `json:"action"`
+}
 
-	// Get data for each module
+func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, any, error) {
 	result := make(map[string]interface{})
-	for _, moduleName := range modules {
-		module, err := s.dataStore.GetModule(moduleName)
+	for _, moduleName := range input.Modules {
+		module, err := h.dataStore.GetModule(moduleName)
 		if err != nil {
 			slog.Warn("Module not found", "module", moduleName, "error", err)
 			continue
@@ -60,45 +44,48 @@ func (s *MCPServer) handleGetData(ctx context.Context, arguments map[string]inte
 		result[string(moduleName)] = module.Data
 	}
 
-	return result, nil
+	return formatToolResult(result)
 }
 
-// handleNotification sends a desktop notification
-func (s *MCPServer) handleNotification(ctx context.Context, arguments map[string]interface{}) (interface{}, error) {
+func (h toolHandlers) handleNotification(_ context.Context, _ *sdkmcp.CallToolRequest, input notificationInput) (*sdkmcp.CallToolResult, any, error) {
+	arguments := map[string]interface{}{"title": input.Title, "message": input.Message}
+	if input.Icon != "" {
+		arguments["icon"] = input.Icon
+	}
 	message := event.Message{
 		ID:    generateID(),
 		Event: event.EventNotification,
 		Data:  arguments,
 	}
 
-	response := s.eventRouter.HandleMessage("mcp", message)
+	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, fmt.Errorf("%s", response.Message)
+		return nil, nil, fmt.Errorf("%s", response.Message)
 	}
 
-	return map[string]interface{}{
+	return formatToolResult(map[string]interface{}{
 		"success": true,
 		"message": response.Message,
-	}, nil
+	})
 }
 
-// handleMediaControl controls media playback
-func (s *MCPServer) handleMediaControl(ctx context.Context, arguments map[string]interface{}) (interface{}, error) {
+func (h toolHandlers) handleMediaControl(_ context.Context, _ *sdkmcp.CallToolRequest, input mediaControlInput) (*sdkmcp.CallToolResult, any, error) {
+	arguments := map[string]interface{}{"action": input.Action}
 	message := event.Message{
 		ID:    generateID(),
 		Event: event.EventMediaControl,
 		Data:  arguments,
 	}
 
-	response := s.eventRouter.HandleMessage("mcp", message)
+	response := h.eventRouter.HandleMessage("mcp", message)
 	if response.Type == event.ResponseTypeError {
-		return nil, fmt.Errorf("%s", response.Message)
+		return nil, nil, fmt.Errorf("%s", response.Message)
 	}
 
-	return map[string]interface{}{
+	return formatToolResult(map[string]interface{}{
 		"success": true,
 		"message": response.Message,
-	}, nil
+	})
 }
 
 // generateID generates a unique request ID
@@ -106,27 +93,11 @@ func generateID() string {
 	return fmt.Sprintf("mcp-%d", time.Now().UnixNano())
 }
 
-// formatToolResult converts a result into MCP ToolCallResult format
-func formatToolResult(result interface{}) ToolCallResult {
-	// Convert result to JSON string
+func formatToolResult(result interface{}) (*sdkmcp.CallToolResult, any, error) {
 	resultJSON, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return ToolCallResult{
-			Content: []ContentItem{
-				{
-					Type: "text",
-					Text: fmt.Sprintf("Error formatting result: %v", err),
-				},
-			},
-		}
+		return nil, nil, fmt.Errorf("format tool result: %v", err)
 	}
 
-	return ToolCallResult{
-		Content: []ContentItem{
-			{
-				Type: "text",
-				Text: string(resultJSON),
-			},
-		},
-	}
+	return &sdkmcp.CallToolResult{Content: []sdkmcp.Content{&sdkmcp.TextContent{Text: string(resultJSON)}}}, nil, nil
 }

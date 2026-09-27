@@ -102,7 +102,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Docker
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Validate pkgbuild with Arch Linux container
         run: |
@@ -148,8 +148,6 @@ jobs:
         run: |
           touch system-bridge-linux
           chmod +x system-bridge-linux
-          touch system-bridge-tui
-          chmod +x system-bridge-tui
 
       - name: Replace pkgver in flatpak manifest with 5.0.0
         run: |

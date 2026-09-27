@@ -35,6 +35,7 @@ func TestLoad(t *testing.T) {
 
 		// Check default values
 		assert.False(t, settings.Autostart)
+		assert.True(t, settings.SystemTray)
 		assert.Empty(t, settings.Hotkeys)
 		assert.Equal(t, LogLevelWarn, settings.LogLevel)
 		assert.Empty(t, settings.Media.Directories)
@@ -81,6 +82,7 @@ func TestLoad(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, settings.Autostart)
+		assert.True(t, settings.SystemTray)
 		assert.Equal(t, LogLevelDebug, settings.LogLevel)
 		assert.Len(t, settings.Hotkeys, 1)
 		assert.Equal(t, "test-hotkey", settings.Hotkeys[0].Name)

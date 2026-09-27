@@ -13,7 +13,6 @@ on:
       - mise.toml
       - LICENSE
       - web-client/**
-      - tui/**
       - .resources/**
       - .scripts/linux/PKGBUILD.dev
       - .scripts/linux/system-bridge.desktop
@@ -31,7 +30,7 @@ jobs:
   publish:
     name: Publish Arch package (system-bridge-git)
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@dcc044376a732ab21a9718e50b0cc17aa5096e0b # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
     with:
       package-name: system-bridge-git
       pkgbuild-path: .scripts/linux/PKGBUILD.dev

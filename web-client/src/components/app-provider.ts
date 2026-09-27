@@ -143,8 +143,10 @@ class AppProvider extends UIElement {
     applyTheme(getEffectiveTheme(this._theme));
   }
 
-  private readonly handleConnectionUpdated = (event: Event): void => {
-    const { detail } = event as CustomEvent<ConnectionSettings>;
+  private readonly handleConnectionUpdated = (
+    event: HTMLElementEventMap["connection-updated"],
+  ): void => {
+    const { detail } = event;
     this._connection = detail;
     this.connectionSettings = detail;
     saveConnectionSettings(detail);
@@ -153,6 +155,7 @@ class AppProvider extends UIElement {
 
   private readonly syncWebSocketContexts = (): void => {
     const status = this._websocket.status;
+
     if (
       status.isConnected !== this._connectionStatus.isConnected ||
       status.error !== this._connectionStatus.error ||
@@ -163,6 +166,7 @@ class AppProvider extends UIElement {
     }
 
     const data = this._websocket.data;
+
     if (data !== this._moduleData) {
       this._moduleData = data;
       this.moduleData = data;
@@ -170,6 +174,7 @@ class AppProvider extends UIElement {
 
     const bridgeSettings = this._websocket.bridgeSettings;
     const commandExecutionsVersion = this._websocket.commandExecutionsVersion;
+
     if (
       bridgeSettings.settings !== this._bridgeSettings.settings ||
       bridgeSettings.settingsUpdateError !==

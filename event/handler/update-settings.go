@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/event"
 	settingspkg "github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/settings"
 	"github.com/timmo001/system-bridge/utils/logging"
@@ -43,7 +44,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		// Keep a copy of the original settings for comparison
 		originalSettings := *currentSettings
 
-		newSettings := UpdateSettingsRequestData{}
+		newSettings := UpdateSettingsRequestData{SystemTray: currentSettings.SystemTray}
 		// Add decode hook for LogLevel
 		dc := &mapstructure.DecoderConfig{
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -97,6 +98,9 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		}
 
 		slog.Info("Settings updated", "original", originalSettings, "new", newSettings)
+		if !newSettings.SystemTray {
+			tray.Quit()
+		}
 
 		// Only handle autostart changes when running from a real binary
 		if !utils.IsRunningFromRealBinary() {

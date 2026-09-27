@@ -14,12 +14,14 @@ const STORAGE_KEY = "system-bridge-theme";
 export function loadTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
+
     if (stored === "light" || stored === "dark" || stored === "system") {
       return stored;
     }
   } catch (error) {
     console.error("Failed to load theme from localStorage:", error);
   }
+
   return "system";
 }
 
@@ -37,6 +39,7 @@ export function getEffectiveTheme(theme: Theme): "light" | "dark" {
       ? "dark"
       : "light";
   }
+
   return theme;
 }
 

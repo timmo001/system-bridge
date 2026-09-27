@@ -5,7 +5,9 @@ import { z } from "zod";
 
 // DiskMountCategory enum
 export const DiskMountCategorySchema = z.enum(["primary", "bind", "squashfs"]);
+
 export type DiskMountCategory = z.infer<typeof DiskMountCategorySchema>;
+
 export const DiskMountCategory = {
   PRIMARY: "primary",
   BIND: "bind",
@@ -14,7 +16,9 @@ export const DiskMountCategory = {
 
 // RunMode enum
 export const RunModeSchema = z.enum(["standalone"]);
+
 export type RunMode = z.infer<typeof RunModeSchema>;
+
 export const RunMode = {
   STANDALONE: "standalone",
 } as const;

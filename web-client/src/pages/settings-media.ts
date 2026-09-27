@@ -94,14 +94,12 @@ class PageSettingsMedia extends PageElement {
     this.navigate("/connection");
   };
 
-  private handleNameInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newDirectoryName = input.value;
+  private handleNameInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.newDirectoryName = e.target.value;
   };
 
-  private handlePathInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.newDirectoryPath = input.value;
+  private handlePathInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.newDirectoryPath = e.target.value;
   };
 
   private handleAddDirectory = async (): Promise<void> => {
@@ -154,9 +152,11 @@ class PageSettingsMedia extends PageElement {
     }
   };
 
-  private handleRemoveDirectory = (e: Event): void => {
-    const button = e.currentTarget as HTMLElement;
-    const path = button.getAttribute("data-path");
+  private handleRemoveDirectory = (
+    e: Event & { currentTarget: HTMLElement },
+  ): void => {
+    const path = e.currentTarget.getAttribute("data-path");
+
     if (!path) return;
 
     this.mediaDirectories = this.mediaDirectories.filter(

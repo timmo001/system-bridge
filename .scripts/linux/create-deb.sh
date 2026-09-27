@@ -34,11 +34,6 @@ if [ ! -f "system-bridge-linux" ]; then
   exit 1
 fi
 
-if [ ! -f "system-bridge-tui" ]; then
-  echo "system-bridge-tui not found, please build the TUI first (mise run build:tui)" >&2
-  exit 1
-fi
-
 # Verify CSS inclusion in binary
 echo "Verifying CSS inclusion in binary..."
 if [ -f "$SCRIPT_DIR/../verify-css.sh" ]; then
@@ -69,7 +64,6 @@ mkdir -p deb-structure/DEBIAN
 
 # Install binary
 install -Dm755 system-bridge-linux deb-structure/usr/bin/system-bridge
-install -Dm755 system-bridge-tui deb-structure/usr/bin/system-bridge-tui
 
 # Install shell completions generated from the binary
 sb_completions_tmp="$(mktemp -d)"

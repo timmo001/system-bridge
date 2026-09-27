@@ -35,7 +35,7 @@ This guide covers the contributor workflow for building and running System Bridg
 
 ## Build
 
-Build everything (web client, TUI, and backend binary):
+Build everything (web client and backend binary):
 
 ```bash
 mise run build:all
@@ -48,7 +48,6 @@ Common component tasks:
 | Task | Purpose |
 | --- | --- |
 | `mise run build:web-client` | Build the Lit + Vite web client into `web-client/dist/` |
-| `mise run build:tui` | Build the terminal UI binary |
 | `mise run generate:schemas` | Regenerate Zod schemas after changing Go types in `types/` |
 
 List every task with `mise tasks`.
@@ -64,8 +63,7 @@ List every task with `mise tasks`.
 | `mise run run` | Vite dev server + backend (via `concurrently`) |
 | `mise run run:web-client` | Vite dev server only (default port `5173`) |
 | `mise run run:backend` | Backend only on port `9170` |
-| `mise run run:backend-dev` | Backend without rebuilding the TUI (faster iteration) |
-| `mise run run:tui` | Build and run the TUI |
+| `mise run run:backend-dev` | Build and run the backend with console output |
 
 When using the Vite dev server, open `http://localhost:5173` and connect to the backend at port `9170`. Get your token with [`system-bridge client token`](/using/cli/#token).
 
@@ -127,7 +125,7 @@ Do not hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts`; it
 | Task | Purpose |
 | --- | --- |
 | `mise run test` | Run Go tests (`go test -v ./...`) |
-| `mise run lint:all` | Go fmt/vet, web-client ESLint/typecheck, TUI typecheck |
+| `mise run lint:all` | Go fmt/vet, web-client ESLint/typecheck |
 | `mise run check` | `lint:all` plus tests |
 
 After editing Go code, run `go fmt ./...` (included in `lint:go`).

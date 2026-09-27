@@ -49,27 +49,15 @@ class PageOpen extends SendablePageElement {
 
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener(
-      "open-success",
-      this.handleOpenSuccess as EventListener,
-    );
-    window.addEventListener(
-      "open-error",
-      this.handleOpenError as EventListener,
-    );
+    window.addEventListener("open-success", this.handleOpenSuccess);
+    window.addEventListener("open-error", this.handleOpenError);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.cleanupTimeout();
-    window.removeEventListener(
-      "open-success",
-      this.handleOpenSuccess as EventListener,
-    );
-    window.removeEventListener(
-      "open-error",
-      this.handleOpenError as EventListener,
-    );
+    window.removeEventListener("open-success", this.handleOpenSuccess);
+    window.removeEventListener("open-error", this.handleOpenError);
   }
 
   private handleOpenSuccess = (
@@ -80,6 +68,7 @@ class PageOpen extends SendablePageElement {
         this.openType === "url"
           ? "URL opened in default browser"
           : "Path opened with default application";
+
       this.showResult(true, message);
       this.clearSendingState();
     }
@@ -106,25 +95,23 @@ class PageOpen extends SendablePageElement {
     this.openType = "path";
   };
 
-  private handleUrlInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.urlValue = input.value;
+  private handleUrlInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.urlValue = e.target.value;
   };
 
-  private handlePathInput = (e: InputEvent): void => {
-    const input = e.target as HTMLInputElement;
-    this.pathValue = input.value;
+  private handlePathInput = (e: Event & { target: HTMLInputElement }): void => {
+    this.pathValue = e.target.value;
   };
 
   private handleOpen = (): void => {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
+
     if (!value || !this.connection?.token || !this.actions) {
       return;
     }
 
-    const openData: Record<string, unknown> =
-      this.openType === "url" ? { url: value } : { path: value };
+    const openData = this.openType === "url" ? { url: value } : { path: value };
 
     this.sendWithTimeout((requestId) => {
       this.actions!.sendRequest({
@@ -190,6 +177,7 @@ class PageOpen extends SendablePageElement {
         </div>
       `;
     }
+
     return html`
       <div>
         <ui-label>Path *</ui-label>

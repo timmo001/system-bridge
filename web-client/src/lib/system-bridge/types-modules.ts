@@ -36,7 +36,6 @@ export const ModuleLabels: Record<ModuleName, string> = {
   system: "System",
 };
 
-export const DefaultModuleData: ModuleData = Modules.reduce((acc, module) => {
-  acc[module] = {};
-  return acc;
-}, {} as ModuleData);
+export const DefaultModuleData: ModuleData = ModuleDataSchema.parse(
+  Object.fromEntries(Modules.map((module) => [module, {}])),
+);

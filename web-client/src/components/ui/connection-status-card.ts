@@ -1,6 +1,6 @@
 import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 
 import {
   connectionContext,
@@ -11,6 +11,8 @@ import {
   type ConnectionStatus,
 } from "~/contexts/connection-status";
 import { UIElement } from "~/mixins/light-dom";
+import "./button";
+import "./icon";
 
 @customElement("ui-connection-status-card")
 class ConnectionStatusCard extends UIElement {
@@ -22,6 +24,9 @@ class ConnectionStatusCard extends UIElement {
   @consume({ context: connectionContext, subscribe: true })
   private _connection?: ConnectionSettings;
 
+  @state()
+  private _copyStatus: "idle" | "copied" | "error" = "idle";
+
   private handleSetupConnection = (): void => {
     this.dispatchEvent(
       new CustomEvent("setup-connection", {
@@ -29,6 +34,47 @@ class ConnectionStatusCard extends UIElement {
         composed: true,
       }),
     );
+  };
+
+  private get mcpURL(): string | null {
+    if (!this._connection) return null;
+
+    return `${this._connection.ssl ? "https" : "http"}://${this._connection.host}:${this._connection.port}/api/mcp`;
+  }
+
+  private handleCopyMCPURL = async (): Promise<void> => {
+    if (!this.mcpURL || !this._connection?.token) return;
+
+    const url = `${this.mcpURL}?token=${encodeURIComponent(this._connection.token)}`;
+
+    try {
+      if (window.isSecureContext && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = url;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.append(input);
+
+        try {
+          input.select();
+
+          // Keep copying available when the async Clipboard API requires HTTPS.
+          // oxlint-disable-next-line typescript/no-deprecated
+          if (!document.execCommand("copy")) {
+            throw new Error("Browser rejected the copy command");
+          }
+        } finally {
+          input.remove();
+        }
+      }
+
+      this._copyStatus = "copied";
+    } catch (error) {
+      this._copyStatus = "error";
+      console.error("Failed to copy MCP URL to clipboard:", error);
+    }
   };
 
   private renderConnectionIndicator(isConnected: boolean): TemplateResult {
@@ -48,6 +94,7 @@ class ConnectionStatusCard extends UIElement {
 
   private renderErrorBanner(): TemplateResult {
     if (!this._status?.error) return html``;
+
     return html`
       <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
         ${this._status.error}
@@ -56,7 +103,10 @@ class ConnectionStatusCard extends UIElement {
   }
 
   private renderConnectionDetails(): TemplateResult {
-    if (!this._connection) return html``;
+    const mcpURL = this.mcpURL;
+
+    if (!this._connection || !mcpURL) return html``;
+
     return html`
       <div class="grid grid-cols-2 gap-4 text-sm pt-2">
         <div>
@@ -76,6 +126,40 @@ class ConnectionStatusCard extends UIElement {
           <span class="ml-2 font-mono">
             ${this._connection.token ? "••••••••" : "Not set"}
           </span>
+        </div>
+        <div class="col-span-2 flex items-center gap-2">
+          <span class="text-muted-foreground">MCP URL:</span>
+          <span class="min-w-0 flex-1 font-mono break-all">
+            ${mcpURL}${this._connection.token ? "?token=*****" : ""}
+          </span>
+          ${
+            this._connection.token
+              ? html`
+                  <span
+                    class="text-xs text-muted-foreground"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    ${
+                      this._copyStatus === "copied"
+                        ? "Copied"
+                        : this._copyStatus === "error"
+                          ? "Copy failed"
+                          : ""
+                    }
+                  </span>
+                  <ui-button
+                    variant="ghost"
+                    size="icon"
+                    @click=${this.handleCopyMCPURL}
+                    aria-label="Copy authenticated MCP URL"
+                    title="Copy authenticated MCP URL"
+                  >
+                    <ui-icon name="Copy" size="16"></ui-icon>
+                  </ui-button>
+                `
+              : ""
+          }
         </div>
       </div>
     `;

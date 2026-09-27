@@ -25,7 +25,7 @@ concurrency:
 jobs:
   shellcheck:
     name: ShellCheck
-    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@dcc044376a732ab21a9718e50b0cc17aa5096e0b # master
+    uses: timmo001/workflows/.github/workflows/lint-shellcheck.yml@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
     with:
       scandir: .github/scripts/bash
 
@@ -39,7 +39,7 @@ jobs:
       - name: Run PSScriptAnalyzer
         shell: pwsh
         env:
-          # renovate: datasource=github-tags packageName=PowerShell/PSScriptAnalyzer
+          # renovate: datasource=github-tags depName=PowerShell/PSScriptAnalyzer
           PSSCRIPTANALYZER_VERSION: "1.25.0"
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted

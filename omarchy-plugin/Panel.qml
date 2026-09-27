@@ -1,0 +1,355 @@
+import QtQuick
+import QtQuick.Controls
+import qs.Commons
+import qs.Ui
+
+Panel {
+  id: root
+  moduleName: "timmo.system-bridge"
+
+  property var anchorItem: null
+  property var hostWidget: null
+  property var service: null
+  readonly property var barIdentity: hostWidget || root
+  readonly property color contentForeground: bar ? bar.foreground : Color.foreground
+  readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
+  readonly property var panelRows: buildPanelRows()
+  readonly property bool connected: service !== null && service.connected
+  readonly property string serverActionKey: connected ? "action:quit" : "action:start"
+  readonly property var headerActions: connected ? [
+    { key: "action:settings" },
+    { key: "action:quit" }
+  ] : [{ key: "action:start" }]
+  readonly property string cursorKey: filterController.selectedEntry() ? filterController.selectedEntry().key : ""
+  // QML models expose nested arrays as native lists; normalise them for validation.
+  readonly property var itemActions: Util.cloneJson(setting("itemActions", ({})))
+
+  function actionForKey(key) {
+    if (!Util.isPlainObject(itemActions)) return []
+    var argv = itemActions[key]
+    if (!Array.isArray(argv) || argv.length === 0) return []
+    if (!argv.every(function(arg) { return typeof arg === "string" })) return []
+    return argv[0].trim() === "" ? [] : argv
+  }
+
+  function activateEntry(entry) {
+    if (!root.opened || !entry) return
+    if (entry.key === "action:settings") {
+      if (!root.connected) return
+      root.close()
+      Util.execArgv(["system-bridge", "client", "open", "--settings"])
+      return
+    }
+    if (entry.key === "action:quit") {
+      if (!root.connected) return
+      root.close()
+      Util.execArgv(["system-bridge", "client", "quit"])
+      return
+    }
+    if (entry.key === "action:start") {
+      if (root.connected) return
+      root.close()
+      Util.execArgv(["system-bridge", "backend"])
+      return
+    }
+    var argv = actionForKey(entry.key)
+    if (argv.length === 0) return
+    root.close()
+    Util.execArgv(argv)
+  }
+
+  function formatPercent(value) { return value === null ? "" : Math.round(value) + "%" }
+  function formatTemperature(value) { return value === null ? "" : Math.round(value) + " °C" }
+  function formatBytes(value) {
+    if (value === null) return ""
+    return (value / 1073741824).toFixed(1) + " GiB"
+  }
+  function formatMebibytes(value) {
+    if (value === null) return ""
+    return value >= 1024 ? (value / 1024).toFixed(1) + " GiB" : Math.round(value) + " MiB"
+  }
+  function formatDuration(seconds) {
+    if (seconds === null) return ""
+    var totalMinutes = Math.floor(seconds / 60)
+    var days = Math.floor(totalMinutes / 1440)
+    var hours = Math.floor((totalMinutes % 1440) / 60)
+    var minutes = totalMinutes % 60
+    var values = []
+    if (days > 0) values.push(days + "d")
+    if (hours > 0) values.push(hours + "h")
+    if (minutes > 0 || values.length === 0) values.push(minutes + "m")
+    return values.join(" ")
+  }
+  function formatLastUpdated(timestamp, currentTime) {
+    if (timestamp <= 0) return ""
+    var elapsedSeconds = Math.max(0, Math.floor((currentTime - timestamp) / 1000))
+    if (elapsedSeconds < 10) return "Last updated just now"
+    if (elapsedSeconds < 60) return "Last updated " + elapsedSeconds + "s ago"
+    var elapsedMinutes = Math.floor(elapsedSeconds / 60)
+    if (elapsedMinutes < 60) return "Last updated " + elapsedMinutes + "m ago"
+    return "Last updated " + Math.floor(elapsedMinutes / 60) + "h ago"
+  }
+  function buildPanelRows() {
+    if (!service) return []
+    var values = []
+    if (service.cpuUsage !== null)
+      values.push({ key: "cpu", icon: "", primaryText: "CPU", secondaryText: formatPercent(service.cpuUsage) })
+    if (service.memoryPercent !== null || service.memoryUsed !== null || service.memoryTotal !== null) {
+      var memory = []
+      if (service.memoryPercent !== null) memory.push(formatPercent(service.memoryPercent))
+      if (service.memoryUsed !== null && service.memoryTotal !== null)
+        memory.push(formatBytes(service.memoryUsed) + " / " + formatBytes(service.memoryTotal))
+      values.push({ key: "memory", icon: "", primaryText: "Memory", secondaryText: memory.join(" · ") })
+    }
+    if (service.cpuLoad !== null)
+      values.push({ key: "load", icon: "󰓅", primaryText: "Load", secondaryText: service.cpuLoad.toFixed(2) })
+    if (service.cpuTemperature !== null)
+      values.push({ key: "cpu-temperature", icon: "", primaryText: "CPU temperature", secondaryText: formatTemperature(service.cpuTemperature) })
+    if (service.hottestTemperature !== null)
+      values.push({ key: "hottest-sensor", icon: "󰔏", primaryText: "Hottest sensor", secondaryText: (service.hottestSensor ? service.hottestSensor + " · " : "") + formatTemperature(service.hottestTemperature) })
+    if (service.rootDisk !== null) {
+      var disk = service.rootDisk
+      var diskUsage = disk.usage
+      var diskValues = []
+      if (diskUsage.percent !== undefined && diskUsage.percent !== null)
+        diskValues.push(formatPercent(Number(diskUsage.percent)))
+      if (diskUsage.used !== undefined && diskUsage.total !== undefined)
+        diskValues.push(formatBytes(Number(diskUsage.used)) + " / " + formatBytes(Number(diskUsage.total)))
+      values.push({ key: "disk-root", icon: "󰋊", primaryText: "/", secondaryText: diskValues.join(" · ") })
+    }
+    for (var fanIndex = 0; fanIndex < service.fans.length; fanIndex++) {
+      var fan = service.fans[fanIndex]
+      if (fan.speed_rpm === undefined || fan.speed_rpm === null) continue
+      values.push({ key: "fan-" + fan.key, icon: "󰈐", primaryText: fan.label || fan.name || "Fan", secondaryText: Math.round(Number(fan.speed_rpm)) + " RPM" })
+    }
+    for (var gpuIndex = 0; gpuIndex < service.gpus.length; gpuIndex++) {
+      var gpu = service.gpus[gpuIndex]
+      var gpuValues = []
+      if (gpu.core_load !== undefined && gpu.core_load !== null)
+        gpuValues.push("󰓅 " + formatPercent(Number(gpu.core_load)))
+      if (gpu.memory_used !== undefined && gpu.memory_used !== null && gpu.memory_total !== undefined && gpu.memory_total !== null)
+        gpuValues.push(" " + formatMebibytes(Number(gpu.memory_used)) + " / " + formatMebibytes(Number(gpu.memory_total)))
+      if (gpu.power_usage !== undefined && gpu.power_usage !== null)
+        gpuValues.push("󱐋 " + Number(gpu.power_usage).toFixed(1) + " W")
+      if (gpu.temperature !== undefined && gpu.temperature !== null)
+        gpuValues.push(" " + formatTemperature(Number(gpu.temperature)))
+      if (gpuValues.length > 0)
+        values.push({ key: "gpu-" + (gpu.id || gpuIndex), icon: "󰢮", primaryText: gpu.name || "GPU", secondaryText: gpuValues.join(" · ") })
+    }
+    if (service.uptime !== null)
+      values.push({ key: "uptime", icon: "󰅐", primaryText: "Uptime", secondaryText: formatDuration(service.uptime) })
+    if (service.pendingReboot !== null)
+      values.push({ key: "pending-reboot", icon: "󰜉", primaryText: "Pending reboot", secondaryText: service.pendingReboot ? "Required" : "No" })
+    return values
+  }
+
+  function open() {
+    filterController.reset()
+    controller.show()
+    Qt.callLater(function() {
+      panelFlick.contentY = 0
+      filterController.forceActiveFocus()
+    })
+  }
+  function close() { controller.hide() }
+  function toggle() { if (opened) close(); else open() }
+  function switchPanel(direction) {
+    if (bar && typeof bar.switchPanelFrom === "function")
+      return bar.switchPanelFrom(barIdentity, direction)
+    return false
+  }
+
+  function cursorItem() {
+    var entry = filterController.selectedEntry()
+    if (!entry) return null
+    if (entry.key === "action:settings" || entry.key === root.serverActionKey) return systemHeading
+    return rowRepeater.itemAt(filterController.filteredModel.indexOf(entry))
+  }
+
+  function scrollCursorIntoView() {
+    var item = cursorItem()
+    if (!item) return
+    var point = item.mapToItem(contentColumn, 0, 0)
+    if (point.y < panelFlick.contentY) panelFlick.contentY = point.y
+    else if (point.y + item.height > panelFlick.contentY + panelFlick.height)
+      panelFlick.contentY = point.y + item.height - panelFlick.height
+  }
+
+  KeyboardPanel {
+    id: panel
+    anchorItem: root.anchorItem
+    owner: root.barIdentity
+    bar: root.bar
+    open: root.opened
+    focusTarget: filterController
+    contentWidth: panel.fittedContentWidth(Style.space(430))
+    contentHeight: panel.fittedContentHeight(contentColumn.implicitHeight, Style.space(670))
+
+    FilterablePanel {
+      id: filterController
+      anchors.fill: parent
+      model: root.panelRows
+      navigationModel: root.headerActions.concat(filteredModel)
+      onActivateRequested: function(entry) { root.activateEntry(entry) }
+      onRevealRequested: Qt.callLater(root.scrollCursorIntoView)
+      onCloseRequested: root.close()
+      onTabRequested: function(direction) { root.switchPanel(direction) }
+
+      PanelFlickable {
+        id: panelFlick
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: contentColumn.implicitHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.VerticalFlick
+        interactive: contentHeight > height
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+        Column {
+          id: contentColumn
+          width: panelFlick.width
+          spacing: Style.space(12)
+
+          PanelHero {
+            width: parent.width
+            title: root.service && root.service.hostname !== "" ? root.service.hostname : "System Bridge"
+            meta: root.service && root.service.connected
+              ? root.formatLastUpdated(root.service.lastUpdateAt, root.service.currentTime)
+                + (root.service.stale ? " · Data is stale" : "")
+              : "Waiting for System Bridge"
+            detail: root.service && root.service.connected ? "ONLINE" : "OFFLINE"
+            foreground: root.contentForeground
+            fontFamily: root.contentFontFamily
+            iconOpacity: root.service && root.service.connected ? 1 : 0.5
+            iconComponent: Component {
+              Text {
+                text: "󰒋"
+                color: root.hostWidget ? root.hostWidget.displayColor : root.contentForeground
+                font.family: root.contentFontFamily
+                font.pixelSize: Style.font.display
+              }
+            }
+          }
+
+          SectionHeading {
+            id: systemHeading
+            title: "System Bridge"
+            foreground: root.contentForeground
+            fontFamily: root.contentFontFamily
+            trailingControl: Component {
+              Row {
+                spacing: Style.space(4)
+
+                PanelActionButton {
+                  enabled: root.connected
+                  iconText: ""
+                  tooltipText: "Open General Settings"
+                  foreground: root.contentForeground
+                  fontFamily: root.contentFontFamily
+                  hasCursor: root.cursorKey === "action:settings"
+                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey("action:settings") }
+                  onClicked: root.activateEntry({ key: "action:settings" })
+                }
+
+                PanelActionButton {
+                  iconText: root.connected ? "󰩈" : ""
+                  tooltipText: root.connected ? "Quit System Bridge" : "Start System Bridge"
+                  foreground: root.contentForeground
+                  fontFamily: root.contentFontFamily
+                  hasCursor: root.cursorKey === root.serverActionKey
+                  onHovered: function(hovered) { if (hovered) filterController.cursorIndex = filterController.indexForKey(root.serverActionKey) }
+                  onClicked: root.activateEntry({ key: root.serverActionKey })
+                }
+              }
+            }
+          }
+
+          Column {
+            width: parent.width
+            spacing: Style.space(2)
+
+            Repeater {
+              id: rowRepeater
+              model: filterController.filteredModel
+
+              CursorSurface {
+                required property int index
+                required property var modelData
+                width: contentColumn.width
+                implicitHeight: rowColumn.implicitHeight + Style.space(12)
+                hasCursor: filterController.cursorIndex === filterController.indexForKey(modelData.key)
+                foreground: root.contentForeground
+                accent: root.contentForeground
+
+                Row {
+                  anchors.left: parent.left
+                  anchors.right: parent.right
+                  anchors.verticalCenter: parent.verticalCenter
+                  anchors.leftMargin: Style.space(8)
+                  anchors.rightMargin: Style.space(8)
+                  spacing: Style.space(10)
+
+                  Text {
+                    width: Style.space(22)
+                    text: modelData.icon
+                    color: root.contentForeground
+                    font.family: root.contentFontFamily
+                    font.pixelSize: Style.font.icon
+                    horizontalAlignment: Text.AlignHCenter
+                  }
+
+                  Column {
+                    id: rowColumn
+                    width: Math.max(0, parent.width - Style.space(32))
+                    spacing: Style.space(2)
+
+                    Text {
+                      width: parent.width
+                      text: modelData.primaryText
+                      color: root.contentForeground
+                      font.family: root.contentFontFamily
+                      font.pixelSize: Style.font.body
+                      font.bold: true
+                      elide: Text.ElideRight
+                    }
+
+                    Text {
+                      width: parent.width
+                      text: modelData.secondaryText
+                      color: Qt.darker(root.contentForeground, 1.4)
+                      font.family: root.contentFontFamily
+                      font.pixelSize: Style.font.caption
+                      elide: Text.ElideRight
+                    }
+                  }
+                }
+
+                MouseArea {
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: root.actionForKey(modelData.key).length > 0
+                    ? Qt.PointingHandCursor : Qt.ArrowCursor
+                  onEntered: filterController.cursorIndex = filterController.indexForKey(modelData.key)
+                  onClicked: root.activateEntry(modelData)
+                }
+              }
+            }
+          }
+
+          Text {
+            visible: filterController.count === 0
+            width: parent.width
+            text: filterController.filterText
+              ? "No matches for “" + filterController.filterText + "”"
+              : (root.service && root.service.connected ? "No system data available" : "System Bridge is offline")
+            color: Qt.darker(root.contentForeground, 1.4)
+            font.family: root.contentFontFamily
+            font.pixelSize: Style.font.body
+            horizontalAlignment: Text.AlignHCenter
+          }
+        }
+      }
+    }
+  }
+}

@@ -37,6 +37,7 @@ class PageData extends PageElement {
 
   connectedCallback() {
     super.connectedCallback();
+
     // Set first module as default
     if (Modules.length > 0) {
       this.selectedTab = Modules[0];
@@ -44,6 +45,7 @@ class PageData extends PageElement {
   }
 
   private handleTabChange = (e: CustomEvent<{ value: string }>): void => {
+    // SAFETY: Tab values are assigned from Modules by renderTabTriggers.
     this.selectedTab = e.detail.value as ModuleName;
   };
 

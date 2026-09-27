@@ -19,6 +19,7 @@ license=('Apache-2.0')
 keywords=('system-bridge' 'automation' 'home-assistant' 'api' 'websocket')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
 optdepends=('pciutils: GPU model identification via lspci'
+            'zenity: tray and desktop confirmation prompts'
             'lm_sensors: broader temperature and fan sensor coverage'
             'nvidia-utils: NVIDIA GPU metrics via nvidia-smi')
 provides=('system-bridge')
@@ -44,10 +45,8 @@ build() {
   mise exec -C web-client -- bun install --frozen-lockfile
   if grep -q '^\[tasks\."build:web-client"\]$' mise.toml; then
     mise run build:web-client
-    mise run build:tui
   else
     mise run build_web_client
-    mise run build_tui
   fi
   mise exec -- go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${pkgver}'" -o "system-bridge" .
   ./system-bridge completions bash >system-bridge.bash
@@ -72,7 +71,6 @@ package() {
   ver="${ver/.rc./-rc.}"
   cd "${srcdir}/${pkgname}-${ver}"
   install -Dm755 system-bridge "$pkgdir/usr/bin/system-bridge"
-  install -Dm755 system-bridge-tui "$pkgdir/usr/bin/system-bridge-tui"
   install -Dm644 system-bridge.bash "$pkgdir/usr/share/bash-completion/completions/system-bridge"
   install -Dm644 _system-bridge "$pkgdir/usr/share/zsh/site-functions/_system-bridge"
   install -Dm644 system-bridge.fish "$pkgdir/usr/share/fish/vendor_completions.d/system-bridge.fish"
