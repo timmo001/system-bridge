@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { MediaDataSchema } from "~/lib/system-bridge/types-modules-schemas";
+
 export const Modules = [
   "battery",
   "cpu",
@@ -18,7 +20,9 @@ export const ModuleNameSchema = z.enum(Modules);
 
 export type ModuleName = z.infer<typeof ModuleNameSchema>;
 
-const ModuleDataSchema = z.record(ModuleNameSchema, z.any());
+const ModuleDataSchema = z
+  .record(ModuleNameSchema, z.any())
+  .transform((data) => ({ ...data, media: MediaDataSchema.parse(data.media) }));
 
 export type ModuleData = z.infer<typeof ModuleDataSchema>;
 

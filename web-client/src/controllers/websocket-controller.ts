@@ -28,14 +28,11 @@ import {
 } from "~/lib/system-bridge/types-websocket";
 import { generateUUID } from "~/lib/utils";
 
-interface PendingResolver<T = unknown> {
-  resolve: (value: T | PromiseLike<T>) => void;
+interface PendingResolver {
+  resolve: (message: WebSocketResponse) => void;
   reject: (reason: Error) => void;
-  schema: z.ZodType<T>;
   timeoutId: number;
 }
-
-type AnyPendingResolver = PendingResolver;
 
 type WebSocketResponse = z.infer<typeof WebSocketResponseSchema>;
 
@@ -110,7 +107,7 @@ export class WebSocketController implements ReactiveController {
   private _settingsUpdateTimeout: number | null = null;
   // @ts-expect-error - TS6133: Reserved for future state change detection
   private _previousConnectedState = false;
-  private _pendingResolvers = new Map<string, AnyPendingResolver>();
+  private _pendingResolvers = new Map<string, PendingResolver>();
   private _commandExecutionsVersion = 0;
   private readonly _retryConnection = this.retryConnection.bind(this);
 
@@ -408,17 +405,7 @@ export class WebSocketController implements ReactiveController {
 
     clearTimeout(resolver.timeoutId);
 
-    const parsedData = resolver.schema.safeParse(message.data);
-
-    if (!parsedData.success) {
-      this._error = "Received invalid message data from server";
-      resolver.reject(parsedData.error);
-      this._pendingResolvers.delete(message.id);
-
-      return true;
-    }
-
-    resolver.resolve(parsedData.data);
+    resolver.resolve(message);
     this._pendingResolvers.delete(message.id);
 
     return true;
@@ -1060,10 +1047,19 @@ export class WebSocketController implements ReactiveController {
       this.validateRequestReady(request);
       const timeoutId = this.startRequestTimeout(request.id, reject);
       this._pendingResolvers.set(request.id, {
-        // SAFETY: resolvePendingResponse validates with this request's schema before calling this resolver.
-        resolve: resolve as AnyPendingResolver["resolve"],
+        resolve: (message) => {
+          const parsedData = schema.safeParse(message.data);
+
+          if (!parsedData.success) {
+            this._error = "Received invalid message data from server";
+            reject(parsedData.error);
+
+            return;
+          }
+
+          resolve(parsedData.data);
+        },
         reject,
-        schema,
         timeoutId,
       });
       this.sendTrackedRequest(request, timeoutId);

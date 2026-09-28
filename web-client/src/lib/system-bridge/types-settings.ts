@@ -34,11 +34,18 @@ const SettingsCommandsSchema = z.object({
   allowlist: z.array(SettingsCommandDefinitionSchema),
 });
 
+export const SettingsLogLevelSchema = z.enum([
+  "DEBUG",
+  "INFO",
+  "WARN",
+  "ERROR",
+]);
+
 const SettingsSchema = z.object({
   autostart: z.boolean(),
   systemTray: z.boolean(),
   hotkeys: z.array(SettingsHotkeySchema),
-  logLevel: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+  logLevel: SettingsLogLevelSchema,
   commands: SettingsCommandsSchema,
   disks: SettingsDisksSchema,
   media: SettingsMediaSchema,

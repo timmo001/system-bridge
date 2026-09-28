@@ -214,8 +214,7 @@ class PageMedia extends PageElement {
   private handleMute = (): void => this.sendMediaAction("MUTE");
 
   private get mediaData(): MediaData | null {
-    // SAFETY: WebSocketController validates media updates with MediaDataSchema; the initial empty object also matches its optional fields.
-    return (this.data?.media as MediaData) ?? null;
+    return this.data?.media ?? null;
   }
 
   private get isPlaying(): boolean {
