@@ -22,7 +22,7 @@
       "devDependencies": {
         "@oxlint/plugins": "1.86.0",
         "@tailwindcss/vite": "^4.2.4",
-        "@timmo001/oxlint-rules": "0.4.0",
+        "@timmo001/oxlint-rules": "0.5.0",
         "@types/node": "^26.0.0",
         "concurrently": "^10.0.0",
         "eslint-plugin-lit": "2.3.1",
@@ -357,7 +357,7 @@
 
     "@tailwindcss/vite": ["@tailwindcss/vite@4.3.3", "", { "dependencies": { "@tailwindcss/node": "4.3.3", "@tailwindcss/oxide": "4.3.3", "tailwindcss": "4.3.3" }, "peerDependencies": { "vite": "^5.2.0 || ^6 || ^7 || ^8" } }, "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw=="],
 
-    "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.4.0", "", { "peerDependencies": { "@oxlint/plugins": "1.86.0", "oxlint": "1.86.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-R6qwr/D+vGcJT7039BGJ/sPsag8Aft/B4fDYPxEFkc+ZBNShcKYZ1vXgbIWdfXoVKPlzdTrD24TVUhcRJ6E5TA=="],
+    "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.5.0", "", { "peerDependencies": { "@oxlint/plugins": "1.86.0", "oxlint": "1.86.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-5Tm1duCF2fzPRSwFGTOIDoR4qWXQIUtf0dYWt4ApoRbtJTPrPi4OZjdmhglaE/IoEaDSuUFp2Jx08Emmno/o1g=="],
 
     "@types/esrecurse": ["@types/esrecurse@4.3.1", "", {}, "sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw=="],
 
