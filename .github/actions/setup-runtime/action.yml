@@ -5,18 +5,28 @@ description: Setup pinned Go, Bun, and Node via mise
 runs:
   using: "composite"
   steps:
+    # Composite actions reuse this setup, so skip it once the job has it.
+    # Rerunning mise-action on Windows fails when it self-updates the locked mise.exe.
     - name: Set up mise
+      if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
       uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5
       with:
         cache: true
 
     - name: Trust runtime config
+      if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
       run: mise trust -a
       shell: bash
 
     - name: Show runtime versions
+      if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
       run: |
         mise exec -- bun --version
         mise exec -- go version
         mise exec -- node --version
+      shell: bash
+
+    - name: Mark runtime ready
+      if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
+      run: echo "SYSTEM_BRIDGE_RUNTIME_READY=true" >> "$GITHUB_ENV"
       shell: bash
