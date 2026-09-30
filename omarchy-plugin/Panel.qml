@@ -211,8 +211,7 @@ Panel {
           width: panelFlick.width
           spacing: Style.space(12)
 
-          PanelHero {
-            width: parent.width
+          PanelHeader {
             title: root.service && root.service.hostname !== "" ? root.service.hostname : "System Bridge"
             meta: root.service && root.service.connected
               ? root.formatLastUpdated(root.service.lastUpdateAt, root.service.currentTime)
