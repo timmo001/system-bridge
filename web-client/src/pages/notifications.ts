@@ -152,21 +152,24 @@ class PageNotifications extends SendablePageElement {
   }
 
   private handleSendNotification = (): void => {
+    const actions = this.actions;
+    const token = this.connection?.token;
+
     if (
       !this.notificationTitle.trim() ||
       !this.notificationMessage.trim() ||
-      !this.connection?.token ||
-      !this.actions
+      !token ||
+      !actions
     ) {
       return;
     }
 
     this.sendWithTimeout((requestId) => {
-      this.actions!.sendRequest({
+      actions.sendRequest({
         id: requestId,
         event: "NOTIFICATION",
         data: this.buildNotificationData(),
-        token: this.connection!.token!,
+        token,
       });
     }, "Failed to send notification");
   };

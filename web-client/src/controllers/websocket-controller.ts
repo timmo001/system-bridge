@@ -736,8 +736,10 @@ export class WebSocketController implements ReactiveController {
   }
 
   /** Returns an error message if host/port/token are missing, or null if valid. */
-  private getConnectionFieldError(): string | null {
-    const { host, port, token } = this.connection!;
+  private getConnectionFieldError(
+    connection: ConnectionSettings,
+  ): string | null {
+    const { host, port, token } = connection;
 
     if (!host || !port)
       return "Connection settings are incomplete. Please configure host and port.";
@@ -749,9 +751,11 @@ export class WebSocketController implements ReactiveController {
   }
 
   private getValidConnectionSettings(): ValidConnectionSettings | null {
-    if (!this.connection) return null;
+    const connection = this.connection;
 
-    const fieldError = this.getConnectionFieldError();
+    if (!connection) return null;
+
+    const fieldError = this.getConnectionFieldError(connection);
 
     if (fieldError) {
       this.setDisconnectedError(fieldError);
@@ -759,7 +763,11 @@ export class WebSocketController implements ReactiveController {
       return null;
     }
 
-    return { ...this.connection, token: this.connection.token! };
+    const { token } = connection;
+
+    if (!token) return null;
+
+    return { ...connection, token };
   }
 
   private startConnectionTimeout() {
@@ -1031,7 +1039,7 @@ export class WebSocketController implements ReactiveController {
 
   private sendTrackedRequest(request: WebSocketRequest, timeoutId: number) {
     try {
-      this._ws!.send(JSON.stringify(request));
+      this._ws?.send(JSON.stringify(request));
     } catch (e) {
       clearTimeout(timeoutId);
       this._pendingResolvers.delete(request.id);

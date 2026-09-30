@@ -348,7 +348,9 @@ class PageMedia extends PageElement {
   }
 
   private renderNowPlayingCard(): TemplateResult {
-    if (!this.hasMedia) {
+    const media = this.mediaData;
+
+    if (!media || !this.hasMedia) {
       return html`
         <div class="rounded-lg border bg-card p-6">
           <div class="flex flex-col items-center justify-center py-8 gap-4">
@@ -374,7 +376,6 @@ class PageMedia extends PageElement {
       `;
     }
 
-    const media = this.mediaData!;
     const albumTitle = media.album_title;
 
     return html`

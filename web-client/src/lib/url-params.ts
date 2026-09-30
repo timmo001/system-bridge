@@ -7,15 +7,17 @@ export function getStringParam(
   params: URLSearchParams,
   key: string,
 ): string | undefined {
-  return params.has(key) ? params.get(key)! : undefined;
+  return params.get(key) ?? undefined;
 }
 
 export function getIntParam(
   params: URLSearchParams,
   key: string,
 ): number | undefined {
-  if (!params.has(key)) return undefined;
-  const value = parseInt(params.get(key)!, 10);
+  const raw = params.get(key);
+
+  if (raw === null) return undefined;
+  const value = parseInt(raw, 10);
 
   return isNaN(value) ? undefined : value;
 }
