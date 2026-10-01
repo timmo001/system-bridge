@@ -44,9 +44,14 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		// Keep a copy of the original settings for comparison
 		originalSettings := *currentSettings
 
-		newSettings := UpdateSettingsRequestData{SystemTray: currentSettings.SystemTray}
+		// Decode into a copy of the saved settings. Clients, including the
+		// documented API, may send a partial object; omitted fields must stay.
+		newSettings := *currentSettings
 		// Add decode hook for LogLevel
 		dc := &mapstructure.DecoderConfig{
+			// Zero present slices and maps before writing so an empty allowlist
+			// replaces the saved list instead of leaving the previous entries.
+			ZeroFields: true,
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
 				func(from, to reflect.Type, data any) (any, error) {
 					if to == reflect.TypeOf(settingspkg.LogLevel("")) && from.Kind() == reflect.String {
