@@ -16,6 +16,6 @@ jobs:
   labels:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/labels.yml@da1f8d52a56ce02034b676a8c91275e822934a68 # 20261001.0
+    uses: timmo001/workflows/.github/workflows/labels.yml@36527a2230bed48409ccd595b17f8344efe0acdd # 20261001.1
     with:
       labels-ref: 635f5727c8686b952f53d2fbe1d2e80d2480c831
