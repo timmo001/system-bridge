@@ -99,6 +99,10 @@ jobs:
     permissions:
       contents: read
     uses: timmo001/workflows/.github/workflows/lint-arch-pkgbuild.yml@4562274d170ccaa4b5d5bc776684caaa8d61b007 # 20261002.0
+    with:
+      pkgbuild-paths: |-
+        .scripts/linux/PKGBUILD.dev
+        .scripts/linux/PKGBUILD.release
 
   lint-flatpak:
     name: Lint flatpak manifest
