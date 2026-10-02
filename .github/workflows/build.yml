@@ -21,4 +21,4 @@ jobs:
   build:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@36527a2230bed48409ccd595b17f8344efe0acdd # 20261001.1
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@a7b34d53ef8f83b1763fd0d3257a0168416e23ab # 20261001.2
