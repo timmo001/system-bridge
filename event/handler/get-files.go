@@ -25,7 +25,12 @@ func GetFiles(path string) []GetFileResponseData {
 
 	responseData := []GetFileResponseData{}
 	for _, file := range files {
+		// ReadDir lists names that Stat cannot follow, such as a broken symlink.
+		// Skip those entries; dereferencing a nil result crashes the process.
 		fileInfo := GetFileInfo(path, file.Name())
+		if fileInfo == nil {
+			continue
+		}
 		responseData = append(responseData, *fileInfo)
 	}
 	return responseData
