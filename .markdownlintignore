@@ -4,3 +4,4 @@ temp/
 web-client/node_modules/
 # Docs has its own markdown ruleset and lint workflow (.github/workflows/docs.yml)
 docs/
+.agents/skills/
