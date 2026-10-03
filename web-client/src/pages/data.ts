@@ -9,6 +9,7 @@ import {
 import { moduleDataContext } from "~/contexts/module-data";
 import {
   type ModuleData,
+  ModuleNameSchema,
   Modules,
   ModuleLabels,
   type ModuleName,
@@ -45,8 +46,9 @@ class PageData extends PageElement {
   }
 
   private handleTabChange = (e: CustomEvent<{ value: string }>): void => {
-    // SAFETY: Tab values are assigned from Modules by renderTabTriggers.
-    this.selectedTab = e.detail.value as ModuleName;
+    const module = ModuleNameSchema.safeParse(e.detail.value);
+
+    if (module.success) this.selectedTab = module.data;
   };
 
   private handleNavigateToConnection = (): void => {

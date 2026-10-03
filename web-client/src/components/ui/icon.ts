@@ -4,6 +4,13 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import { UIElement } from "~/mixins/light-dom";
 
+function isIconName(
+  name: string,
+  icons: typeof import("lucide").icons,
+): name is keyof typeof icons {
+  return Object.hasOwn(icons, name);
+}
+
 @customElement("ui-icon")
 class Icon extends UIElement {
   @property() name = "";
@@ -47,15 +54,13 @@ class Icon extends UIElement {
     try {
       const { createElement, icons } = await import("lucide");
 
-      if (!Object.hasOwn(icons, this.name)) {
+      if (!isIconName(this.name, icons)) {
         this.iconHtml = "";
 
         return;
       }
 
-      // SAFETY: The own-property check above confirms this name is a key in Lucide's icon table.
-      const iconKey = this.name as keyof typeof icons;
-      const iconData = icons[iconKey];
+      const iconData = icons[this.name];
       const element = createElement(iconData);
       this.applyIconAttributes(element);
       this.iconHtml = element.outerHTML;

@@ -214,8 +214,7 @@ class PageMedia extends PageElement {
   private handleMute = (): void => this.sendMediaAction("MUTE");
 
   private get mediaData(): MediaData | null {
-    // SAFETY: WebSocketController validates media updates with MediaDataSchema; the initial empty object also matches its optional fields.
-    return (this.data?.media as MediaData) ?? null;
+    return this.data?.media ?? null;
   }
 
   private get isPlaying(): boolean {
@@ -349,7 +348,9 @@ class PageMedia extends PageElement {
   }
 
   private renderNowPlayingCard(): TemplateResult {
-    if (!this.hasMedia) {
+    const media = this.mediaData;
+
+    if (!media || !this.hasMedia) {
       return html`
         <div class="rounded-lg border bg-card p-6">
           <div class="flex flex-col items-center justify-center py-8 gap-4">
@@ -375,7 +376,6 @@ class PageMedia extends PageElement {
       `;
     }
 
-    const media = this.mediaData!;
     const albumTitle = media.album_title;
 
     return html`

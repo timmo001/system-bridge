@@ -246,7 +246,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -332,7 +332,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -340,33 +340,20 @@ jobs:
     secrets:
       ARCH_REPO_DISPATCH_TOKEN: ${{ secrets.ARCH_REPO_DISPATCH_TOKEN }}
 
-  attest-arch-package-stable:
-    name: Attest Arch package (system-bridge)
+  attach-arch-package-stable:
+    name: Attach Arch package (system-bridge)
     if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
     needs:
       - build-arch-package-stable
-    runs-on: ubuntu-latest
     permissions:
+      contents: write
       id-token: write
       attestations: write
-    steps:
-      - name: Download validated Arch package
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
-          path: arch-package-artifact
-
-      - name: Extract Arch package
-        run: |
-          mkdir -p arch-package
-          tar --extract --file arch-package-artifact/candidate.tar \
-            --directory arch-package --no-same-owner --no-same-permissions \
-            --wildcards '*.pkg.tar.zst'
-
-      - name: Attest Arch package
-        uses: timmo001/workflows/.github/actions/attest-release-assets@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
-        with:
-          subject-patterns: arch-package/*.pkg.tar.zst
+    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    with:
+      artifact-name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
+      release-tag: ${{ github.event.release.tag_name }}
+      package-name: system-bridge
 
   update-aur-stable:
     name: Update AUR (system-bridge)
@@ -375,7 +362,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -425,12 +412,6 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - name: Download linux arch packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: system-bridge-linux-packages-arch-${{ needs.build-linux.outputs.version }}
-          path: dist/linux/arch
-
       - name: Download linux deb packages
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
@@ -455,28 +436,16 @@ jobs:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
-      - name: Attest release assets
-        id: attest
-        uses: timmo001/workflows/.github/actions/attest-release-assets@de3c480e54564ef39fd13d1f097d48a62bef5f30 # master
+      - name: Publish release assets
+        uses: timmo001/workflows/.github/actions/publish-release-assets@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
         with:
+          release-tag: ${{ github.event.release.tag_name }}
           subject-patterns: |
-            dist/linux/arch/*.pkg.tar.zst
             dist/linux/deb/*.deb
             dist/linux/rpm/*.rpm
             dist/linux/flatpak/*.flatpak
             dist/windows/*-setup.exe
           bundle-path: dist/system-bridge-${{ github.event.release.tag_name }}.sigstore.json
-
-      - name: Upload release assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          SUBJECTS: ${{ steps.attest.outputs.subjects }}
-          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
-        run: |
-          mapfile -t assets < <(sed '/^$/d' <<< "$SUBJECTS")
-          gh release upload "$RELEASE_TAG" "${assets[@]}" "$BUNDLE_PATH"
 
   compute-next-patch:
     name: Compute next patch tag

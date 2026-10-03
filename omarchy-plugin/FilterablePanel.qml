@@ -8,28 +8,38 @@ Item {
   property var navigationModel: null
   property string filterText: ""
   property int cursorIndex: 0
+  property string cursorKey: ""
   property bool cursorStartsActive: true
   property bool cursorActive: cursorStartsActive
+  property bool backOnEmptyFilter: false
+  property bool keyboardEnabled: true
+  property bool bypassFilter: false
 
-  readonly property var filteredModel: filterModel(model, filterText)
+  readonly property var filteredModel: bypassFilter ? (model || []) : filterModel(model, filterText)
   readonly property var navigationEntries: navigationModel === null ? filteredModel : navigationModel
   readonly property int count: filteredModel.length
 
-  signal activateRequested(var entry)
+  signal activateRequested(var entry, int modifiers)
   signal closeRequested()
+  signal backRequested()
   signal refreshRequested()
   signal tabRequested(int direction)
   signal revealRequested()
 
   focus: true
   Keys.priority: Keys.BeforeItem
+  Keys.enabled: keyboardEnabled
 
+  onCursorIndexChanged: cursorKey = navigationEntries[cursorIndex]?.key || ""
   onFilteredModelChanged: {
     clampCursor()
     revealRequested()
   }
   onNavigationEntriesChanged: {
-    clampCursor()
+    var index = indexForKey(cursorKey)
+    if (index >= 0) cursorIndex = index
+    else clampCursor()
+    cursorKey = navigationEntries[cursorIndex]?.key || ""
     revealRequested()
   }
 
@@ -38,7 +48,8 @@ Item {
     if (!term) return entries || []
     var source = entries || []
     var matches = source.filter(function(entry) {
-      return [entry.primaryText, entry.secondaryText].join(" ").toLowerCase().indexOf(term) >= 0
+      return entry.navigation === true
+        || [entry.primaryText, entry.secondaryText, entry.tertiaryText].join(" ").toLowerCase().indexOf(term) >= 0
     })
     return matches.sort(function(a, b) {
       var aSection = String(a.section || "")
@@ -55,15 +66,20 @@ Item {
     })
   }
 
+  function firstCursorIndex() {
+    var index = navigationEntries.findIndex(function(entry) { return entry.navigation !== true })
+    return index < 0 ? 0 : index
+  }
+
   function reset() {
     filterText = ""
-    cursorIndex = 0
+    cursorIndex = firstCursorIndex()
     cursorActive = cursorStartsActive
   }
 
   function setFilter(nextFilter) {
     filterText = nextFilter
-    cursorIndex = 0
+    cursorIndex = firstCursorIndex()
     cursorActive = cursorStartsActive
   }
 
@@ -97,6 +113,17 @@ Item {
     return -1
   }
 
+  function deletesLastCharacter(text) {
+    var end = text.length - 1
+    if (end > 0) {
+      var trailingCode = text.charCodeAt(end)
+      var precedingCode = text.charCodeAt(end - 1)
+      if (trailingCode >= 0xDC00 && trailingCode <= 0xDFFF
+          && precedingCode >= 0xD800 && precedingCode <= 0xDBFF) end--
+    }
+    return text.slice(0, Math.max(0, end))
+  }
+
   Keys.onPressed: function(event) {
     if (event.key === Qt.Key_Escape) {
       if (root.filterText) root.setFilter("")
@@ -105,8 +132,13 @@ Item {
     } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
       root.tabRequested((event.modifiers & Qt.ShiftModifier) || event.key === Qt.Key_Backtab ? -1 : 1)
       event.accepted = true
+    } else if (event.key === Qt.Key_Backspace && !root.filterText && root.backOnEmptyFilter) {
+      root.backRequested()
+      event.accepted = true
     } else if (Util.editsFilter(event, root.filterText)) {
-      root.setFilter(Util.editedFilter(event, root.filterText))
+      root.setFilter(event.key === Qt.Key_Backspace && !(event.modifiers & Qt.ControlModifier)
+        ? root.deletesLastCharacter(root.filterText)
+        : Util.editedFilter(event, root.filterText))
       event.accepted = true
     } else if (event.key === Qt.Key_Up) {
       root.moveCursor(-1)
@@ -116,13 +148,12 @@ Item {
       event.accepted = true
     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
       var entry = root.selectedEntry()
-      if (entry) root.activateRequested(entry)
+      if (entry) root.activateRequested(entry, event.modifiers)
       event.accepted = true
     } else if (event.key === Qt.Key_R && event.modifiers === Qt.ControlModifier) {
       root.refreshRequested()
       event.accepted = true
-    } else if (event.text && event.text.length === 1
-        && event.text.charCodeAt(0) >= 32 && event.text.charCodeAt(0) !== 127
+    } else if (event.text && !/[\u0000-\u001f\u007f]/.test(event.text)
         && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier)) {
       root.setFilter(root.filterText + event.text)
       event.accepted = true

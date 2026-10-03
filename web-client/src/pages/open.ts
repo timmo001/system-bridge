@@ -107,18 +107,21 @@ class PageOpen extends SendablePageElement {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
 
-    if (!value || !this.connection?.token || !this.actions) {
+    const actions = this.actions;
+    const token = this.connection?.token;
+
+    if (!value || !token || !actions) {
       return;
     }
 
     const openData = this.openType === "url" ? { url: value } : { path: value };
 
     this.sendWithTimeout((requestId) => {
-      this.actions!.sendRequest({
+      actions.sendRequest({
         id: requestId,
         event: "OPEN",
         data: openData,
-        token: this.connection!.token!,
+        token,
       });
     }, "Failed to send open request");
   };

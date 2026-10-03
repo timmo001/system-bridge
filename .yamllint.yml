@@ -2,6 +2,7 @@
 extends: default
 
 ignore: |
+  .agents/skills/
   web-client/node_modules/
   temp/
 

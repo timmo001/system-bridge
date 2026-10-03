@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 
 import { EditorState } from "@codemirror/state";
 import { EditorView, lineNumbers } from "@codemirror/view";
@@ -78,6 +78,8 @@ class CodeBlock extends LitElement {
   @property({ type: Object }) data: unknown = null;
   @property() language = "json";
 
+  @query("#editor") private _editorContainer?: HTMLElement;
+
   private _editorView: EditorView | null = null;
 
   protected createRenderRoot() {
@@ -131,7 +133,7 @@ class CodeBlock extends LitElement {
   }
 
   private _createEditor(): void {
-    const container = this.renderRoot.querySelector("#editor");
+    const container = this._editorContainer;
 
     if (!container) return;
 

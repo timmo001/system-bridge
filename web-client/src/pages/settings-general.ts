@@ -18,7 +18,10 @@ import {
   websocketActionsContext,
   type WebSocketActions,
 } from "~/contexts/websocket-actions";
-import type { Settings } from "~/lib/system-bridge/types-settings";
+import {
+  SettingsLogLevelSchema,
+  type Settings,
+} from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
@@ -119,13 +122,7 @@ class PageSettingsGeneral extends PageElement {
     // Read current form values to ensure we have the latest data
     const selectElement = this._formElement?.querySelector("select");
 
-    if (selectElement) {
-      this.formData = {
-        ...this.formData,
-        // SAFETY: This select contains only the four Settings log-level options rendered below.
-        logLevel: selectElement.value as Settings["logLevel"],
-      };
-    }
+    if (selectElement) this.setLogLevel(selectElement.value);
 
     this.isSubmitting = true;
     this.requestUpdate();
@@ -151,14 +148,18 @@ class PageSettingsGeneral extends PageElement {
     this.formData = { ...this.formData, autostart: e.detail.checked };
   };
 
+  private setLogLevel(value: string): void {
+    const logLevel = SettingsLogLevelSchema.safeParse(value);
+
+    if (logLevel.success) {
+      this.formData = { ...this.formData, logLevel: logLevel.data };
+    }
+  }
+
   private handleLogLevelChange = (
     e: Event & { target: HTMLSelectElement },
   ): void => {
-    this.formData = {
-      ...this.formData,
-      // SAFETY: This handler is attached to the select containing the Settings log-level options.
-      logLevel: e.target.value as Settings["logLevel"],
-    };
+    this.setLogLevel(e.target.value);
   };
 
   private handleSystemTrayChange = (e: CustomEvent<{ checked: boolean }>) => {
