@@ -15,12 +15,26 @@
       "skillPath": "code-review/SKILL.md",
       "computedHash": "bc6af04ecee3f4a40dcacc77a8c6cd3046f3982159b9469eae49f30bb14d02cd"
     },
+    "effect-principles": {
+      "source": "timmo001/skills",
+      "ref": "67e578d01d302c86b90dc7d30d3e06f255a664a0",
+      "sourceType": "github",
+      "skillPath": "effect-principles/SKILL.md",
+      "computedHash": "8d56fdf5c00665759b049647ea356b387c628eef9807ffdf6165b0413ac3ab31"
+    },
     "testing": {
       "source": "timmo001/skills",
       "ref": "e35288def78a7f71ce15128a742ed94eb7d3fbde",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
       "computedHash": "a3166533159feeddfc00b124f1ac083cfa0d5d1055d8953f19a4e61e7c0b01ad"
+    },
+    "types-enforce-ts": {
+      "source": "timmo001/skills",
+      "ref": "67e578d01d302c86b90dc7d30d3e06f255a664a0",
+      "sourceType": "github",
+      "skillPath": "types-enforce-ts/SKILL.md",
+      "computedHash": "099482db0c2750f6ce7d7a938782f08213a488b0fb6b9d0c40df28bb6828b2e0"
     },
     "writing-style": {
       "source": "timmo001/skills",
