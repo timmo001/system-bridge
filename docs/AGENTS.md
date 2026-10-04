@@ -152,7 +152,7 @@ From the repo root: `mise run docs:dev`, `mise run docs:build`.
 Docs workflows live as project skills in the repo root at `.agents/skills/` and
 load on demand:
 
-- `docs-page-workflow` - add or restructure a Starlight docs page
-- `landing-content-updates` - edit the landing page content
+- `system-bridge-docs-page-workflow` - add or restructure a Starlight docs page
+- `system-bridge-landing-content-updates` - edit the landing page content
 
 Keep this file focused on always-needed guidance. Move rare workflows to skills.

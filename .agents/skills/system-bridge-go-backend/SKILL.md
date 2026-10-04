@@ -1,5 +1,5 @@
 ---
-name: go-backend
+name: system-bridge-go-backend
 description: System Bridge Go backend conventions - error wrapping, graceful degradation for data modules, nil-pointer safety, context-aware Module.Update, structured slog logging, and errcheck-clean deferred cleanup. Use when writing or reviewing Go code in the system-bridge backend (data modules, HTTP/WebSocket APIs, CLI, discovery).
 ---
 

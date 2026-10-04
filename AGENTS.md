@@ -81,8 +81,8 @@ mise run package:windows-installer
 
 Task-scoped skills load on demand from `.agents/skills/` (registered via `skills.paths` in `opencode.json`):
 
-- `go-backend` - Go backend patterns: error wrapping, graceful degradation, slog, context, nil safety
-- `testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
-- `troubleshooting` - build/runtime fixes and per-OS file locations
-- `docs-page-workflow` - add or restructure Starlight docs pages
-- `landing-content-updates` - edit the docs landing page
+- `system-bridge-go-backend` - Go backend patterns: error wrapping, graceful degradation, slog, context, nil safety
+- `system-bridge-testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
+- `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
+- `system-bridge-docs-page-workflow` - add or restructure Starlight docs pages
+- `system-bridge-landing-content-updates` - edit the docs landing page

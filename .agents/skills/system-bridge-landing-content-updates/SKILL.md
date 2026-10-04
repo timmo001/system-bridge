@@ -1,5 +1,5 @@
 ---
-name: landing-content-updates
+name: system-bridge-landing-content-updates
 description: Update the System Bridge marketing landing page in the Astro + Starlight docs site. Use when editing the landing page (docs/src/content/docs/index.mdx), its LandingCard/CardGrid components, or the landing styles.
 ---
 

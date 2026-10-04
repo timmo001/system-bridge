@@ -1,5 +1,5 @@
 ---
-name: docs-page-workflow
+name: system-bridge-docs-page-workflow
 description: Add or restructure a page in the System Bridge Astro + Starlight docs site under docs/ - create the content file, set frontmatter, and wire the sidebar. Use when adding, moving, or restructuring documentation pages in docs/src/content/docs/.
 ---
 

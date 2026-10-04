@@ -1,5 +1,5 @@
 ---
-name: testing-workflow
+name: system-bridge-testing-workflow
 description: How to test System Bridge - Go table-driven tests and commands, web-client quality checks (lint/typecheck/format, no unit tests), the Chrome DevTools MCP interactive test loop for UI and WebSocket, the generate:schemas verification cycle, and running GitHub workflows locally with act. Use when writing or running system-bridge tests, verifying Go type/schema changes, or interactively testing the web client.
 ---
 

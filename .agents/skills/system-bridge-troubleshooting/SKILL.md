@@ -1,5 +1,5 @@
 ---
-name: troubleshooting
+name: system-bridge-troubleshooting
 description: Known System Bridge build and runtime failures and their fixes, plus per-OS token/log/settings/data file locations. Use when a system-bridge build fails, the web-client embed is stale, ports conflict, token auth fails, cross-compilation breaks, or you need the on-disk data/log paths.
 ---
 
