@@ -22,12 +22,19 @@
       "skillPath": "effect-principles/SKILL.md",
       "computedHash": "8d56fdf5c00665759b049647ea356b387c628eef9807ffdf6165b0413ac3ab31"
     },
+    "skill-prefixes": {
+      "source": "timmo001/skills",
+      "ref": "97143e4b7a29e9bae2f3d089299ebe2ca221b2e7",
+      "sourceType": "github",
+      "skillPath": "skill-prefixes/SKILL.md",
+      "computedHash": "8c4203c19621bc61824eb955e9584dbebc47774de8bad7b02653fb59c1e419c4"
+    },
     "testing": {
       "source": "timmo001/skills",
-      "ref": "e35288def78a7f71ce15128a742ed94eb7d3fbde",
+      "ref": "97143e4b7a29e9bae2f3d089299ebe2ca221b2e7",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
-      "computedHash": "a3166533159feeddfc00b124f1ac083cfa0d5d1055d8953f19a4e61e7c0b01ad"
+      "computedHash": "fe5131dfc17131ba492a72213951abc0a635ac5bacc32f867865fe79329f29c3"
     },
     "types-enforce-ts": {
       "source": "timmo001/skills",
