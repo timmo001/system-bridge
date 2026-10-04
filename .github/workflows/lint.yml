@@ -21,11 +21,11 @@ jobs:
   lint-jsonlint:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@82ee28374d3471231113dabc3dd436f65a47132f # 20261004.0
   lint-markdown-links:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@82ee28374d3471231113dabc3dd436f65a47132f # 20261004.0
   lint-markdownlint:
     name: 👕 MarkdownLint
     runs-on: ubuntu-latest
@@ -61,4 +61,4 @@ jobs:
   lint-ruff:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/lint-ruff.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/lint-ruff.yml@82ee28374d3471231113dabc3dd436f65a47132f # 20261004.0
