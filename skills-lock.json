@@ -29,12 +29,19 @@
       "skillPath": "skill-prefixes/SKILL.md",
       "computedHash": "8c4203c19621bc61824eb955e9584dbebc47774de8bad7b02653fb59c1e419c4"
     },
+    "task-runners": {
+      "source": "timmo001/skills",
+      "ref": "b7812455a43a2df7023e7f2615726be96312f338",
+      "sourceType": "github",
+      "skillPath": "task-runners/SKILL.md",
+      "computedHash": "7441acdfc4682beb6889856331104b0d3eb2c532a295ef35d7ab1df5db8bea4c"
+    },
     "testing": {
       "source": "timmo001/skills",
-      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
+      "ref": "b7812455a43a2df7023e7f2615726be96312f338",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
-      "computedHash": "7c74f791a944918717c04032b10821667d252f50a39e14e58e642074275280f9"
+      "computedHash": "6172813610101738077bfa2dfaa927349b78d1e1a265473ad31dc4beb7e9047e"
     },
     "writing-style": {
       "source": "timmo001/skills",

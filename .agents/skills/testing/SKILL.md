@@ -29,6 +29,7 @@ description: Choose tests for their concrete regression value, avoid low-value c
 - When you cannot run it yourself (hardware, a desktop session, credentials, or a running service you should not touch), tell the user exactly what to run or where to look and what they should see.
 - Repository instructions may add specific checks, such as browser testing against a dev server; follow them.
 - Run relevant existing checks and repository-required validation. Prefer the smallest reliable check or direct observation for the changed behaviour.
+- Run independent checks and builds together rather than one after another, and run steps that write files, such as formatters, first. Don't run a repository-wide aggregate such as `check` to cover a narrow change. `task-runners` covers the commands for each tool.
 - When checks and result collection form useful independent work and delegation is available, hand them to a smaller, lower-effort helper against a stable revision. Use a background shell for a known command that needs no interpretation. Test design and unexplained failures can require stronger reasoning; do not route all testing work to a smaller model or let a check runner weaken assertions.
 - Maintain an existing test when an intentional behaviour change makes it stale; that does not authorise extra cases or broader coverage. Do not delete or weaken tests just to obtain a pass.
 - Do not introduce test infrastructure, extract helpers, or redesign production code solely to make an optional test possible.
