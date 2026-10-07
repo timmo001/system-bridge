@@ -6,7 +6,7 @@ description: Keep all scoped code work contained to the user-defined changeset. 
 
 # Changeset Scope
 
-This skill owns containment, not scope discovery. Use the scope supplied by the user, command, agent, or context provider. When `branch-context-consumer` is active, it remains authoritative for parsing the injected scope.
+This skill owns containment, not scope discovery. Use the scope supplied by the user, command, agent, or context provider.
 
 Apply this contract before investigation, delegation, domain skills, or execution so later work cannot silently widen the boundary.
 

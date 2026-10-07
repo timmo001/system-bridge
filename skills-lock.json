@@ -3,10 +3,10 @@
   "skills": {
     "changeset-scope": {
       "source": "timmo001/skills",
-      "ref": "e21116d1409884a4f5427cb1a57871217aeda0a5",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
       "sourceType": "github",
       "skillPath": "changeset-scope/SKILL.md",
-      "computedHash": "76ccbe4cdb64d6fb9e035ce4e52d443b4199d9c3225e035ebcf160a3eca88ac2"
+      "computedHash": "792358f213f571ca78ed6b0a6118020398a9bb1288d855c8c127cb344e14f4be"
     },
     "code-review": {
       "source": "timmo001/skills",
@@ -31,10 +31,10 @@
     },
     "testing": {
       "source": "timmo001/skills",
-      "ref": "f04608d991091ce1b42df82acc14b735c6250bab",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
-      "computedHash": "fe5131dfc17131ba492a72213951abc0a635ac5bacc32f867865fe79329f29c3"
+      "computedHash": "7c74f791a944918717c04032b10821667d252f50a39e14e58e642074275280f9"
     },
     "writing-style": {
       "source": "timmo001/skills",
