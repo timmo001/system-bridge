@@ -3,10 +3,10 @@
   "skills": {
     "changeset-scope": {
       "source": "timmo001/skills",
-      "ref": "e35288def78a7f71ce15128a742ed94eb7d3fbde",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
       "sourceType": "github",
       "skillPath": "changeset-scope/SKILL.md",
-      "computedHash": "76ccbe4cdb64d6fb9e035ce4e52d443b4199d9c3225e035ebcf160a3eca88ac2"
+      "computedHash": "792358f213f571ca78ed6b0a6118020398a9bb1288d855c8c127cb344e14f4be"
     },
     "code-review": {
       "source": "timmo001/skills",
@@ -31,17 +31,17 @@
     },
     "testing": {
       "source": "timmo001/skills",
-      "ref": "97143e4b7a29e9bae2f3d089299ebe2ca221b2e7",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
       "sourceType": "github",
       "skillPath": "testing/SKILL.md",
-      "computedHash": "fe5131dfc17131ba492a72213951abc0a635ac5bacc32f867865fe79329f29c3"
+      "computedHash": "7c74f791a944918717c04032b10821667d252f50a39e14e58e642074275280f9"
     },
     "types-enforce-ts": {
       "source": "timmo001/skills",
-      "ref": "67e578d01d302c86b90dc7d30d3e06f255a664a0",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
       "sourceType": "github",
       "skillPath": "types-enforce-ts/SKILL.md",
-      "computedHash": "099482db0c2750f6ce7d7a938782f08213a488b0fb6b9d0c40df28bb6828b2e0"
+      "computedHash": "182012ad1eab7894f4736a0144bddf659a4e87bd6e992129837d0fcb704c1161"
     },
     "writing-style": {
       "source": "timmo001/skills",

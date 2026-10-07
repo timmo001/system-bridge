@@ -12,7 +12,7 @@ description: Choose tests for their concrete regression value, avoid low-value c
 - State the specific failure the test would catch and why that matters. An existing test file or helper, a convenient test seam, or the fact that code changed is not enough. Apply the same standard to new files and extra cases in existing files.
 - Honour explicit user requests and repository requirements. Do not use TDD, red-green-refactor, or test-first workflows.
 - Computations, data processing, utilities, config validation, and strategies are eligible areas, not automatic reasons to add tests. Do not cover every scenario, chase coverage, mirror the implementation, or exhaustively test behaviour that changes often.
-- If the value is uncertain, briefly describe the proposed test and what it would catch, then ask the user once. Tests with a clear benefit need no extra approval.
+- If the value is uncertain, skip the test and mention it in the final summary with what it would catch. Tests with a clear benefit need no extra approval.
 
 ## Rendering And Review
 
