@@ -39,21 +39,9 @@ jobs:
         working-directory: web-client
         run: bun install --frozen-lockfile
 
-      - name: Lint web client
+      - name: Lint, typecheck, format check and build web client
         working-directory: web-client
-        run: bun run lint
-
-      - name: Typecheck web client
-        working-directory: web-client
-        run: bun run typecheck
-
-      - name: Check web client formatting
-        working-directory: web-client
-        run: bun run format:check
-
-      - name: Build web client
-        working-directory: web-client
-        run: bun run build
+        run: bun run --parallel --no-exit-on-error lint typecheck format:check build
 
       - name: Validate Cloudflare Workers upload
         working-directory: web-client

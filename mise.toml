@@ -12,14 +12,9 @@ node = "26.10.0"
 
 [tasks."build:all"]
 description = "Build everything (web client, backend)"
-run = [
-  { task = "clean" },
-  { task = "build:web-client" },
-  "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux .",
-]
+depends = ["build:web-client"]
+run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux ."
 run_windows = [
-  { task = "clean" },
-  { task = "build:web-client" },
   "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1",
   "windres system-bridge.rc -O coff -o system-bridge.syso",
   "go build -v -ldflags=\"-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe .",
@@ -27,25 +22,43 @@ run_windows = [
 
 [tasks."build:console"]
 description = "Build console version for debugging (Windows only)"
+depends = ["build:web-client"]
 run = "echo 'Console build is only supported on Windows'"
-run_windows = [
-  { task = "clean" },
-  { task = "build:web-client" },
-  "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe .",
-]
+run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe ."
+
+[tasks."install:web-client"]
+description = "Install web client dependencies"
+dir = "web-client"
+run = "bun install --frozen-lockfile"
+
+[tasks."install:docs"]
+description = "Install docs site dependencies"
+dir = "docs"
+run = "bun install --frozen-lockfile"
 
 [tasks."generate:schemas"]
 description = "Generate Zod schemas from Go types"
+depends = ["install:web-client"]
+sources = ["types/**/*.go", "tools/generate-schemas/**/*.go"]
+outputs = ["web-client/src/lib/system-bridge/types-modules-schemas.ts"]
 run = [
-  "echo 'Generating Zod schemas from Go types...'",
   "go run tools/generate-schemas/main.go",
-  "echo 'Formatting generated schemas...'",
-  "cd web-client && bun install && bun run format:write src/lib/system-bridge/types-modules-schemas.ts",
+  "cd web-client && bun run format:write src/lib/system-bridge/types-modules-schemas.ts",
 ]
 
 [tasks."build:web-client"]
 description = "Build the web client"
-depends = ["clean:web-client", "generate:schemas"]
+depends = ["generate:schemas"]
+sources = [
+  "web-client/src/**/*",
+  "web-client/public/**/*",
+  "web-client/index.html",
+  "web-client/package.json",
+  "web-client/bun.lock",
+  "web-client/tsconfig.json",
+  "web-client/vite.config.ts",
+]
+outputs = ["web-client/dist/index.html"]
 run = '''
 (cd web-client && bun run build)
 echo "Waiting for file system to sync..."
@@ -164,7 +177,7 @@ run_windows = "./system-bridge.exe backend"
 
 [tasks."run:backend-dev"]
 description = "Build and run the backend server with console output"
-depends = ["clean", "build:web-client"]
+depends = ["build:web-client"]
 run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
 run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
 
@@ -220,7 +233,8 @@ run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/stop-
 
 [tasks.test]
 description = "Run Go tests"
-run = "go test -v ./..."
+depends = ["build:web-client"]
+run = "go test ./..."
 
 [tasks.check]
 description = "Run all linters and tests"
@@ -231,19 +245,34 @@ description = "Run all linters (Go, web client)"
 depends = ["lint:go", "lint:web-client"]
 
 [tasks."lint:go"]
-description = "Run Go linters (fmt, vet)"
-run = [
-  "go fmt ./...",
-  "go vet ./...",
-]
+description = "Run Go linters (format check, vet)"
+depends = ["lint:go:fmt", "lint:go:vet"]
+
+[tasks."lint:go:fmt"]
+description = "Check Go formatting without rewriting files"
+run = '''
+unformatted=$(gofmt -l $(git ls-files '*.go'))
+if [ -n "$unformatted" ]; then
+  echo "Unformatted Go files (run mise run format:go):"
+  echo "$unformatted"
+  exit 1
+fi
+'''
+
+[tasks."lint:go:vet"]
+description = "Run go vet"
+depends = ["build:web-client"]
+run = "go vet ./..."
+
+[tasks."format:go"]
+description = "Format Go code"
+run = "go fmt ./..."
 
 [tasks."lint:web-client"]
 description = "Run web client linters (Oxlint, typecheck)"
+depends = ["install:web-client"]
 dir = "web-client"
-run = [
-  "bun run lint",
-  "bun run typecheck",
-]
+run = "bun run --parallel --no-exit-on-error lint typecheck"
 
 [tasks.clean]
 description = "Remove build artifacts"
@@ -262,11 +291,8 @@ run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean
 
 [tasks.deps]
 description = "Install all dependencies (go, web client, docs)"
-run = '''
-go mod tidy
-(cd web-client && bun install)
-(cd docs && bun install)
-'''
+depends = ["install:web-client", "install:docs"]
+run = "go mod tidy"
 
 [tasks.version]
 description = "Show the version of the application"
@@ -281,8 +307,9 @@ run = "bun run dev"
 
 [tasks."docs:build"]
 description = "Build the docs site (validates internal links)"
+depends = ["install:docs"]
 dir = "docs"
-run = "bun install --frozen-lockfile && bun run build"
+run = "bun run build"
 
 [tasks."docs:lint"]
 description = "Lint docs markdown with the docs ruleset"

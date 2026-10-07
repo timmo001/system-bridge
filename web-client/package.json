@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "deploy": "wrangler deploy",
     "deploy:preview": "wrangler versions upload",
     "preview": "vite preview",

@@ -100,7 +100,7 @@ mise run generate:schemas
 **How it works:**
 - Parses Go struct definitions in `types/` directory
 - Generates TypeScript Zod schemas in `web-client/src/lib/system-bridge/types-modules-schemas.ts`
-- Runs automatically before every `mise run build:all` or `mise run build:web-client`
+- Runs automatically before `mise run build:all` or `mise run build:web-client` when a file under `types/` or the generator has changed
 - See `tools/generate-schemas/README.md` for details
 
 **Important:** Never manually edit `types-modules-schemas.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate:schemas` to update the frontend schemas.

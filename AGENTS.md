@@ -10,12 +10,13 @@ mise run build:all  # Build everything (frontend + backend)
 mise run run        # Run backend + web in the foreground
 mise run serve:all  # Start backend + web through pitchfork in the background
 mise run test       # Run tests
+mise run check      # Lint and test in parallel
 
 # See all commands
 mise tasks
 ```
 
-**After editing Go code:** Always run `go fmt ./...`
+**After editing Go code:** Always run `mise run format:go`. `lint:go` only checks formatting.
 
 ## Project Structure
 

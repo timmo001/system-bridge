@@ -124,11 +124,14 @@ Do not hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts`; it
 
 | Task | Purpose |
 | --- | --- |
-| `mise run test` | Run Go tests (`go test -v ./...`) |
-| `mise run lint:all` | Go fmt/vet, web-client ESLint/typecheck |
-| `mise run check` | `lint:all` plus tests |
+| `mise run test` | Build the web client if needed, then run Go tests (`go test ./...`) |
+| `mise run lint:all` | Go format check and vet, web client Oxlint and typecheck |
+| `mise run check` | `lint:all` plus tests, run in parallel |
+| `mise run format:go` | Format Go code |
 
-After editing Go code, run `go fmt ./...` (included in `lint:go`).
+`lint:go` checks formatting without changing files. After editing Go code, run `mise run format:go`.
+
+Pass several tasks to one run to execute them in parallel, for example `mise run check ::: build:all`. The schema and web client builds are skipped when their sources haven't changed.
 
 ## Documentation site
 
