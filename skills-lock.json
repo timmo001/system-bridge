@@ -31,10 +31,10 @@
     },
     "task-runners": {
       "source": "timmo001/skills",
-      "ref": "b7812455a43a2df7023e7f2615726be96312f338",
+      "ref": "a8579136e6380eb52b784c3460c98047ad45fee2",
       "sourceType": "github",
       "skillPath": "task-runners/SKILL.md",
-      "computedHash": "7441acdfc4682beb6889856331104b0d3eb2c532a295ef35d7ab1df5db8bea4c"
+      "computedHash": "5ac9ad674ac1ae85a95c7b4784909c4f74f8a1440395df3c3abff2663b061654"
     },
     "testing": {
       "source": "timmo001/skills",

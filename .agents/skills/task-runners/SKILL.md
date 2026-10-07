@@ -6,13 +6,21 @@ description: Run and write project tasks so checks, builds, tests and dev server
 
 # Task Runners
 
-Fast runs come from three things, in this order: run less, run it at the same time, and skip what is already done. The `testing` skill decides which checks a change needs; this skill covers running and writing them efficiently. Per-tool commands are in [references/tools.md](references/tools.md); read it before running or editing a tool's tasks.
+Fast runs come from three things, in this order: run less, run it at the same time, and skip what is already done. The `testing` skill decides which checks a change needs; this skill covers running and writing them efficiently.
+
+## References
+
+- [references/tools.md](references/tools.md): per-tool commands and flags. Read it before running or editing a tool's tasks.
+- `references/examples/`: a starting config for each tool. Read the one you need before writing or restructuring tasks: [mise](references/examples/mise.md), [Bun](references/examples/bun.md), [pnpm](references/examples/pnpm.md), [npm](references/examples/npm.md), [Yarn](references/examples/yarn.md), [Deno](references/examples/deno.md), [just](references/examples/just.md), [make](references/examples/make.md), [Rust](references/examples/rust.md), [Go](references/examples/go.md), [Python](references/examples/python.md), [Vitest](references/examples/vitest.md), [pitchfork](references/examples/pitchfork.md), [GitHub Actions](references/examples/github-actions.md).
+- [references/examples/scripts/](references/examples/scripts/): small scripts (`check.sh`, `check.mts`, `check.py`, `check.go`, `check.rs`) that run checks in parallel. Where a tool can't run tasks in parallel natively (npm, Yarn in one package, cargo, Go, uv), use an alternative task runner or write your own script from these.
+
+The scripts are a starting point, not a drop-in. They may be out of date or miss what a project needs, such as Windows support, signal handling or timeouts. Check them against current docs and the project's conventions, and adapt or rewrite them as needed.
 
 ## Running
 
 1. **Find the tasks.** List them first (`mise tasks`, `just --list`, `deno task`, the `scripts` in `package.json`). Prefer a repository's own task over the raw command it wraps, since the task carries the right flags, directory and dependencies. Local `AGENTS.md` instructions win.
 2. **Pick the narrowest tasks.** Map the changed files to the tasks that cover them: a YAML edit needs the YAML linter, not the test suite. Use a tool's changed-file selection where it exists (`bun test --changed`, `deno test --changed`, pnpm `--filter "...[origin/main]"`, `mise run --affected`). Don't run a repository-wide aggregate such as `check` or `validate` for a narrow change.
-3. **Run them together.** Pass independent tasks to one invocation (`mise run a ::: b`, `bun run --parallel a b`, `pnpm run a b`), or start separate commands as parallel tool calls. Never chain independent checks with `&&`.
+3. **Run them together.** Pass independent tasks to one invocation (`mise run a ::: b`, `bun run --parallel a b`, `pnpm run "/^(a|b)$/"`), or start separate commands as parallel tool calls. Never chain independent checks with `&&`.
 4. **Write first, then check.** Formatters, code generators and anything else that rewrites files run on their own before the read-only checks, so the checks see the final files.
 5. **Background long runs.** Start slow builds and full suites in a background shell and keep working; start dev servers through the project's daemon workflow rather than in the foreground.
 6. **Rerun narrowly.** After a failure, rerun only what failed (`pytest --lf`, a single task, a single test file) and widen again only when the fix could affect more.

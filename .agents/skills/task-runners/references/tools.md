@@ -6,7 +6,7 @@ Commands and config for running and writing fast tasks with each tool. Check `--
 
 Running:
 
-- `mise run a ::: b ::: c` runs several tasks at once, each with its own arguments after the task name.
+- `mise run a ::: b ::: c` runs several tasks at once, each with its own arguments after the task name. Quote it in YAML (`run: "mise run a ::: b"`): unquoted, the `:` followed by a space is read as a mapping.
 - Dependencies run in parallel, up to `--jobs` (`-j`, default 8). A dependency shared by several tasks runs once per invocation.
 - `mise run --affected` runs tasks only for monorepo projects changed in Git (`--affected-base <rev>` to compare against a branch).
 - `mise run -c` keeps going after a failure so one run reports every failing task.
@@ -47,20 +47,20 @@ run = [
 
 ## Bun
 
-- `bun run --parallel a b` runs several `package.json` scripts at once; `--sequential` runs them in order with the same prefixed output; `--no-exit-on-error` keeps going after a failure.
+- `bun run --parallel a b` runs several `package.json` scripts at once; `--sequential` runs them in order with the same prefixed output; `--no-exit-on-error` lets the others finish after a failure and still exits non-zero.
 - `bun run --filter '<pattern>' <script>` or `--workspaces` runs a script across workspace packages.
 - `bun test` runs files in one process by default. `--parallel[=N]` uses worker processes (one per core by default, implies `--isolate`); `--changed[=<ref>]` runs only files affected by Git changes; `--shard=1/3` with `--timings` splits suites across CI jobs.
 - `pre<script>` lifecycle hooks run on every `bun run <script>`; a task runner that already orders the build will build twice, possibly in parallel. Call the underlying command from the task instead.
 
 ## pnpm
 
-- `pnpm run a b` runs several scripts concurrently; `-s` runs them one by one.
+- `pnpm run a b` runs only `a` and passes `b` to it as an argument. To run several scripts concurrently (pnpm 12.2+), use an anchored regex selector: `pnpm run --no-bail "/^(lint|typecheck|test)$/"`. Output is prefixed per script; `--no-bail` lets every script finish and still exits non-zero; `-s` (`--sequential`) runs them one by one; `--workspace-concurrency <n>` caps concurrency. Anchor with `^...$`, since an unanchored pattern also matches longer names such as `lint:types:app`.
 - `pnpm -r run <script>` runs across the workspace in dependency order; add `--parallel` to ignore ordering for independent scripts such as lint or dev servers, and `--workspace-concurrency <n>` to cap it.
 - `--filter "...[origin/main]"` selects packages changed since a ref plus their dependents; `--filter "<pkg>..."` selects a package and its dependencies.
 
 ## npm and Yarn
 
-- `npm run` takes one script and `--workspaces` runs one package at a time. Put parallel orchestration in mise or another runner rather than `&` chains in scripts.
+- `npm run` takes one script and `--workspaces` runs one package at a time. To run checks in parallel, use the repository's task runner, a runner script, or a package such as `npm-run-all2`, `concurrently` or `wireit` ([examples/npm.md](examples/npm.md)). Don't chain them with a bare `&`.
 - Yarn 4: `yarn workspaces foreach -Apt run build` runs across all workspaces in parallel (`-p`), dependencies first (`-t`); `--since[=<ref>]` limits to changed workspaces; `-j` caps concurrency.
 
 ## Deno
