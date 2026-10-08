@@ -246,7 +246,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -332,7 +332,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -349,7 +349,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       artifact-name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
       release-tag: ${{ github.event.release.tag_name }}
@@ -362,7 +362,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -437,7 +437,7 @@ jobs:
           path: dist/windows
 
       - name: Publish release assets
-        uses: timmo001/workflows/.github/actions/publish-release-assets@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+        uses: timmo001/workflows/.github/actions/publish-release-assets@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
         with:
           release-tag: ${{ github.event.release.tag_name }}
           subject-patterns: |
