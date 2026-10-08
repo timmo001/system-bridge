@@ -10,7 +10,7 @@ from uuid import uuid4
 import aiohttp
 
 from .base import Base
-from .const import MODEL_MAP, EventKey, EventSubType, EventType, Model
+from .const import MODEL_MAP, EventKey, EventSubType, EventType
 from .exceptions import (
     AuthenticationException,
     BadMessageException,
@@ -190,9 +190,9 @@ class WebSocketClient(Base):
             # If the listener task threw an exception, raise it here
             if (
                 listener_task.done()
-                and (exception := listener_task.exception()) is not None
+                and (listener_exception := listener_task.exception()) is not None
             ):
-                raise exception
+                raise listener_exception
 
         return modules_data
 
@@ -694,7 +694,7 @@ class WebSocketClient(Base):
                 if accept_other_types:
                     model_cls = MODEL_MAP.get(
                         message[EventKey.TYPE],
-                        Model.RESPONSE,
+                        Response,
                     )
                     if model_cls is not None and callback is not None:
                         await callback(

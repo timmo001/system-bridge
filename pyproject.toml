@@ -42,6 +42,15 @@ include = ["systembridgeconnector*"]
 [tool.setuptools.package-data]
 systembridgeconnector = ["py.typed"]
 
+[tool.mypy]
+# renovate: datasource=custom.home-assistant-python-minor depName=python
+python_version = "3.14"
+check_untyped_defs = true
+no_implicit_reexport = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
 [tool.pylint.MAIN]
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 py-version = "3.14"

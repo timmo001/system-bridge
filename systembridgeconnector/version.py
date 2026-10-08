@@ -55,3 +55,4 @@ class Version(Base):
             ):
                 return None
             raise
+        return None

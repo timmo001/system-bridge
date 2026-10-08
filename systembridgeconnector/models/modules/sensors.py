@@ -43,8 +43,8 @@ class SensorsWindowsHardware:
             isinstance(item, dict) for item in self.sensors
         ):
             new_sensors: list[SensorsWindowsSensor] = []
-            for s in self.sensors:
-                sensor: dict = cast(dict, s)
+            for item in self.sensors:
+                sensor: dict = cast(dict, item)
                 new_sensors.append(SensorsWindowsSensor(**sensor))
             self.sensors = new_sensors
 
@@ -171,8 +171,8 @@ class SensorsNVIDIA:
             isinstance(item, dict) for item in self.gpus
         ):
             new_gpus: list[SensorsNVIDIAGPU] = []
-            for s in self.gpus:
-                gpu: dict = cast(dict, s)
+            for item in self.gpus:
+                gpu: dict = cast(dict, item)
                 new_gpus.append(SensorsNVIDIAGPU(**gpu))
             self.gpus = new_gpus
 
