@@ -20,10 +20,10 @@ concurrency:
 jobs:
   lint-jsonlint:
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@fcc6d0528cf0533614d1162c5c5b8ebbb6dfdad5 # 20261008.1
+    uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
   lint-markdown-links:
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@fcc6d0528cf0533614d1162c5c5b8ebbb6dfdad5 # 20261008.1
+    uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
   lint:
     name: Lint (mise)
     runs-on: ubuntu-latest
