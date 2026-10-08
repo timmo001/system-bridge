@@ -20,7 +20,7 @@ concurrency:
 jobs:
   build:
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       # renovate: datasource=custom.home-assistant-python-minor depName=python
       python-version: "3.14"

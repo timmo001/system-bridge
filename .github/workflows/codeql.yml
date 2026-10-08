@@ -25,4 +25,4 @@ permissions:
 jobs:
   codeql-analyze-python:
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/codeql-python.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/codeql-python.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
