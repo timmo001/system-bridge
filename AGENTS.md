@@ -4,11 +4,16 @@ Python library for connecting to System Bridge.
 
 ## Quick Start
 
-- **Build**: `python -m build`
-- **Lint**: `ruff check .` and `pylint systembridgeconnector`
-- **Format**: `ruff format .`
-- **Test all**: `pytest`
-- **Test single**: `pytest tests/test_module.py::test_function`
+Tasks run through mise, which sets up Python, uv and the `.venv`. Run `mise tasks` to list them.
+
+- **Every check, in parallel**: `mise run check`
+- **Only what a change needs**: for example `mise run lint ::: typecheck`
+- **Lint**: `mise run lint` (Ruff, Ruff format check and Pylint)
+- **Type check**: `mise run typecheck`
+- **Format**: `mise run format`
+- **Test all**: `mise run test`
+- **Test single**: `mise run test tests/test_module.py::test_function`
+- **Build**: `mise run build`
 
 ## Code Style
 

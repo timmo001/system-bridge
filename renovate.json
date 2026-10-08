@@ -30,6 +30,7 @@
       "description": "Keep annotated versions in step with the latest Home Assistant release.",
       "managerFilePatterns": [
         "/(^|/)pyproject\\.toml$/",
+        "/(^|/)mise\\.toml$/",
         "/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"
       ],
       "matchStrings": [
@@ -56,8 +57,8 @@
       "enabled": false
     },
     {
-      "description": "Python in setup-python follows Home Assistant, not the latest Python release.",
-      "matchManagers": ["github-actions"],
+      "description": "Python in setup-python and mise follows Home Assistant, not the latest Python release.",
+      "matchManagers": ["github-actions", "mise"],
       "matchDepNames": ["python"],
       "enabled": false
     }
