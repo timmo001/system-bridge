@@ -1,4 +1,0 @@
-global-exclude tests/
-global-exclude tests/**
-prune tests
-include requirements.txt
