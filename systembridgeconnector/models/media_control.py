@@ -20,8 +20,10 @@ class MediaAction(Enum):
     SHUFFLE = "SHUFFLE"
     REPEAT = "REPEAT"
     MUTE = "MUTE"
-    VOLUMEDOWN = "VOLUMEDOWN"
-    VOLUMEUP = "VOLUMEUP"
+    VOLUME_DOWN = "VOLUME_DOWN"
+    VOLUME_UP = "VOLUME_UP"
+    VOLUMEDOWN = "VOLUME_DOWN"
+    VOLUMEUP = "VOLUME_UP"
 
 
 @dataclass(slots=True)

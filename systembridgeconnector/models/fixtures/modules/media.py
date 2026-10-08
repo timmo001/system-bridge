@@ -24,4 +24,5 @@ FIXTURE_MEDIA = Media(
     track_number=1,
     type="type",
     updated_at=100,
+    volume=50,
 )

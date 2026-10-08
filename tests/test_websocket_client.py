@@ -802,6 +802,42 @@ async def test_wait_for_response_timeout(
 
 
 @pytest.mark.asyncio
+async def test_send_message_timeout_omits_token(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a timed out request does not return the token."""
+    with patch(
+        "systembridgeconnector.websocket_client.asyncio.wait_for",
+        side_effect=asyncio.TimeoutError(),
+    ):
+        response = await mock_websocket_client_connected.send_message(
+            EventType.GET_DATA,
+            REQUEST_ID,
+            {"modules": [Module.SYSTEM]},
+            wait_for_response=True,
+            response_type=EventType.DATA_GET,
+        )
+
+    assert response.subtype == "TIMEOUT"
+    assert "token" not in response.data
+
+
+@pytest.mark.asyncio
+async def test_request_ids_are_unique(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test each request gets its own ID when none is given."""
+    first = await mock_websocket_client_connected.media_control(
+        MediaControl(action="PLAY")
+    )
+    second = await mock_websocket_client_connected.media_control(
+        MediaControl(action="PLAY")
+    )
+
+    assert first.id != second.id
+
+
+@pytest.mark.asyncio
 async def test_get_data_data_missing(
     mock_websocket_client_connected: WebSocketClient,
 ):

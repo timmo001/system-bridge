@@ -11,7 +11,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="systembridgeconnector",
-    version="5.4.4",
+    version="5.4.5",
     author="Aidan Timson (Timmo)",
     author_email="aidan@timmo.dev",
     description="System Bridge Connector",
@@ -22,5 +22,6 @@ setup(
     url="https://github.com/timmo001/system-bridge-connector",
     install_requires=requirements,
     packages=find_packages(exclude=["tests", "tests.*", "generator", "generator.*"]),
+    package_data={"systembridgeconnector": ["py.typed"]},
     python_requires=">=3.11",
 )

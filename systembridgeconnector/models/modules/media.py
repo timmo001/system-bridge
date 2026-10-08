@@ -33,4 +33,5 @@ class Media:
     track_number: int | None = None
     type: str | None = None
     updated_at: float | None = None
+    volume: float | None = None
 

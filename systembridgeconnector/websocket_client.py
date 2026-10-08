@@ -100,7 +100,7 @@ class WebSocketClient(Base):
     async def application_update(
         self,
         model: Update,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Update application."""
         self._logger.info("Updating application")
@@ -113,7 +113,7 @@ class WebSocketClient(Base):
 
     async def exit_backend(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Exit backend."""
         self._logger.info("Exiting backend")
@@ -127,7 +127,7 @@ class WebSocketClient(Base):
     async def get_data(
         self,
         model: GetData,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
         timeout: int = 10,
     ) -> ModulesData:
         """Get data from server."""
@@ -200,7 +200,7 @@ class WebSocketClient(Base):
 
     async def get_directories(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> list[MediaDirectory]:
         """Get directories.
 
@@ -249,7 +249,7 @@ class WebSocketClient(Base):
     async def get_files(
         self,
         model: MediaGetFiles,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> MediaFiles:
         """Get files."""
         self._logger.info("Getting files: %s", model)
@@ -276,7 +276,7 @@ class WebSocketClient(Base):
     async def get_file(
         self,
         model: MediaGetFile,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> MediaFile | None:
         """Get files."""
         self._logger.info("Getting file: %s", model)
@@ -297,7 +297,7 @@ class WebSocketClient(Base):
     async def register_data_listener(
         self,
         model: RegisterDataListener,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Register data listener."""
         self._logger.info("Registering data listener: %s", model)
@@ -312,7 +312,7 @@ class WebSocketClient(Base):
     async def keyboard_keypress(
         self,
         model: KeyboardKey,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Keyboard keypress."""
         self._logger.info("Press key: %s", model)
@@ -327,7 +327,7 @@ class WebSocketClient(Base):
     async def keyboard_text(
         self,
         model: KeyboardText,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Keyboard keypress."""
         self._logger.info("Enter text: %s", model)
@@ -342,7 +342,7 @@ class WebSocketClient(Base):
     async def media_control(
         self,
         model: MediaControl,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Media control."""
         self._logger.info("Media control: %s", model)
@@ -356,7 +356,7 @@ class WebSocketClient(Base):
     async def send_notification(
         self,
         model: Notification,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Send notification."""
         self._logger.info("Send notification: %s", model)
@@ -371,7 +371,7 @@ class WebSocketClient(Base):
     async def open_path(
         self,
         model: OpenPath,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Open path."""
         self._logger.info("Opening path: %s", model)
@@ -386,7 +386,7 @@ class WebSocketClient(Base):
     async def open_url(
         self,
         model: OpenUrl,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Open url."""
         self._logger.info("Opening URL: %s", model)
@@ -400,7 +400,7 @@ class WebSocketClient(Base):
 
     async def power_sleep(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power sleep."""
         self._logger.info("Power sleep")
@@ -414,7 +414,7 @@ class WebSocketClient(Base):
 
     async def power_hibernate(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power hibernate."""
         self._logger.info("Power hibernate")
@@ -428,7 +428,7 @@ class WebSocketClient(Base):
 
     async def power_restart(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power restart."""
         self._logger.info("Power restart")
@@ -442,7 +442,7 @@ class WebSocketClient(Base):
 
     async def power_shutdown(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power shutdown."""
         self._logger.info("Power shutdown")
@@ -456,7 +456,7 @@ class WebSocketClient(Base):
 
     async def power_lock(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power lock."""
         self._logger.info("Power lock")
@@ -470,7 +470,7 @@ class WebSocketClient(Base):
 
     async def power_logout(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> Response:
         """Power logout."""
         self._logger.info("Power logout")
@@ -485,7 +485,7 @@ class WebSocketClient(Base):
     async def execute_command(
         self,
         model: ExecuteRequest,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
         timeout: float = 8.0,
     ) -> ExecuteResult:
         """Execute command and wait for completion."""
@@ -521,7 +521,7 @@ class WebSocketClient(Base):
 
     async def get_commands(
         self,
-        request_id: str = uuid4().hex,
+        request_id: str | None = None,
     ) -> SettingsCommands:
         """Get commands from server settings."""
         self._logger.info("Getting commands from server")
@@ -766,7 +766,7 @@ class WebSocketClient(Base):
     async def send_message(
         self,
         event: str,
-        request_id: str,
+        request_id: str | None,
         data: dict[str, Any],
         wait_for_response: bool,
         response_type: str | None = None,
@@ -781,48 +781,54 @@ class WebSocketClient(Base):
 
         request = Request(
             token=self._token,
-            id=request_id,
+            id=request_id if request_id is not None else uuid4().hex,
             event=event,
             data=data,
         )
 
+        if not wait_for_response:
+            await self._websocket.send_json(asdict(request))
+            self._logger.debug("Sent message: %s", request)
+            return Response(
+                id=request.id,
+                type="N/A",
+                message="Message sent",
+                subtype=None,
+                module=None,
+                data={},
+            )
+
         future: asyncio.Future[Response] = asyncio.get_running_loop().create_future()
         self._responses[request.id] = future, response_type
 
-        await self._websocket.send_json(asdict(request))
-        self._logger.debug("Sent message: %s", request)
+        timeout_value = timeout if timeout is not None else 8.0
+        try:
+            await self._websocket.send_json(asdict(request))
+            self._logger.debug("Sent message: %s", request)
 
-        if wait_for_response:
-            timeout_value = timeout if timeout is not None else 8.0
             self._logger.info(
                 "Waiting for future: event '%s' for request: %s (timeout: %s)",
                 response_type,
                 request,
                 timeout_value,
             )
-            try:
-                return await asyncio.wait_for(future, timeout=timeout_value)
-            except asyncio.TimeoutError:
-                self._logger.error(
-                    "Timeout waiting for future event '%s' for request: %s",
-                    response_type,
-                    request,
-                )
-                return Response(
-                    id=request.id,
-                    type=EventType.ERROR,
-                    subtype="TIMEOUT",
-                    message="Timeout waiting for response",
-                    data=asdict(request),
-                )
-            finally:
-                self._responses.pop(request.id)
-
-        return Response(
-            id=request.id,
-            type="N/A",
-            message="Message sent",
-            subtype=None,
-            module=None,
-            data={},
-        )
+            return await asyncio.wait_for(future, timeout=timeout_value)
+        except asyncio.TimeoutError:
+            self._logger.error(
+                "Timeout waiting for future event '%s' for request: %s",
+                response_type,
+                request,
+            )
+            return Response(
+                id=request.id,
+                type=EventType.ERROR,
+                subtype="TIMEOUT",
+                message="Timeout waiting for response",
+                data={
+                    "id": request.id,
+                    "event": request.event,
+                    "data": request.data,
+                },
+            )
+        finally:
+            self._responses.pop(request.id)
