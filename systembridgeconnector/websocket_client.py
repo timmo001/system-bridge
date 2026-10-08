@@ -170,7 +170,7 @@ class WebSocketClient(Base):
                     await asyncio.sleep(0.1)
                     if listener_task.done():
                         break
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             modules_missing = [
                 module_name
                 for module_name in model.modules
@@ -813,7 +813,7 @@ class WebSocketClient(Base):
                 timeout_value,
             )
             return await asyncio.wait_for(future, timeout=timeout_value)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._logger.error(
                 "Timeout waiting for future event '%s' for request: %s",
                 response_type,

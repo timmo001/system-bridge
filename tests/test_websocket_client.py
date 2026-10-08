@@ -789,7 +789,7 @@ async def test_wait_for_response_timeout(
     """Test the websocket client."""
     with patch(
         "systembridgeconnector.websocket_client.asyncio.wait_for",
-        side_effect=asyncio.TimeoutError(),
+        side_effect=TimeoutError(),
     ):
         assert (
             await mock_websocket_client_connected.get_data(
@@ -808,7 +808,7 @@ async def test_send_message_timeout_omits_token(
     """Test a timed out request does not return the token."""
     with patch(
         "systembridgeconnector.websocket_client.asyncio.wait_for",
-        side_effect=asyncio.TimeoutError(),
+        side_effect=TimeoutError(),
     ):
         response = await mock_websocket_client_connected.send_message(
             EventType.GET_DATA,

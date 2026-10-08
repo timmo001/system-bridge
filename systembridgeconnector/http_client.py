@@ -151,7 +151,7 @@ class HTTPClient(Base):
                     }
                 )
             return response
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             raise ConnectionErrorException(
                 {
                     "request": {
