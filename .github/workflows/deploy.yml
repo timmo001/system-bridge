@@ -14,7 +14,7 @@ jobs:
   build:
     if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
+    uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@fcc6d0528cf0533614d1162c5c5b8ebbb6dfdad5 # 20261008.1
     with:
       package-name: "systembridgeconnector"
       # renovate: datasource=custom.home-assistant-python-minor depName=python
