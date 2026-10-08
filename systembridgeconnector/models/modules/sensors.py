@@ -231,4 +231,3 @@ class Sensors:
 
         if isinstance(self.windows_sensors, dict):
             self.windows_sensors = SensorsWindows(**self.windows_sensors)
-

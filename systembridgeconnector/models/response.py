@@ -1,4 +1,5 @@
 """Response."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,4 +16,3 @@ class Response:
     subtype: str | None = None
     message: str | None = None
     module: str | None = None
-

@@ -1,4 +1,5 @@
 """Media Files."""
+
 from __future__ import annotations
 
 from dataclasses import MISSING, dataclass, fields
@@ -67,4 +68,3 @@ class MediaFiles:
                 file: dict = cast(dict, f)
                 new_files.append(MediaFile(**file))
             self.files = new_files
-

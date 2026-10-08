@@ -1,4 +1,5 @@
 """Displays."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -22,4 +23,3 @@ class Display:
     is_primary: bool | None = None
     pixel_clock: float | None = None
     refresh_rate: float | None = None
-

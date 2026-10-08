@@ -1,4 +1,5 @@
 """Fixture for memory module."""
+
 from systembridgeconnector.models.modules.memory import (
     Memory,
     MemorySwap,

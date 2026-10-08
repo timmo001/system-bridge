@@ -1,4 +1,5 @@
 """Request."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -13,4 +14,3 @@ class Request:
     id: str
     event: str
     data: dict[str, Any]
-

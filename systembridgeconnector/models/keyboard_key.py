@@ -10,4 +10,3 @@ class KeyboardKey:
     """Keyboard Key."""
 
     key: str
-

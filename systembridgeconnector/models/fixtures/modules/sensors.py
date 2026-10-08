@@ -1,4 +1,5 @@
 """Fixture for sensors module."""
+
 from systembridgeconnector.models.modules.sensors import (
     Fan,
     Sensors,

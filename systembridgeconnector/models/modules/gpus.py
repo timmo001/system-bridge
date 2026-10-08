@@ -24,4 +24,3 @@ class GPU:
     memory_total: float | None = None
     power_usage: float | None = None
     temperature: float | None = None
-

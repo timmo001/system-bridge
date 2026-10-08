@@ -1,4 +1,5 @@
 """Media Get File."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -10,4 +11,3 @@ class MediaGetFile:
 
     base: str
     path: str
-

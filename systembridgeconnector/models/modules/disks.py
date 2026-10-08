@@ -1,4 +1,5 @@
 """Disks."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -109,4 +110,3 @@ class Disks:
 
         if isinstance(self.io_counters, dict):
             self.io_counters = DiskIOCounters(**self.io_counters)
-

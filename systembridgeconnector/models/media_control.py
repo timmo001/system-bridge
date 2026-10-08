@@ -1,4 +1,5 @@
 """Media Control."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -32,4 +33,3 @@ class MediaControl:
 
     action: str
     value: Any | None = None
-

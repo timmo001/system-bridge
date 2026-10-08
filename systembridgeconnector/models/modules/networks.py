@@ -118,4 +118,3 @@ class Networks:
                 network: dict = cast(dict, n)
                 new_networks.append(Network(**network))
             self.networks = new_networks
-

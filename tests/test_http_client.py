@@ -72,18 +72,24 @@ async def test_unauthorised(mock_http_client: HTTPClient):
 @pytest.mark.asyncio
 async def test_timeout(mock_http_client: HTTPClient):
     """Test the timeout."""
-    with patch(
-        "aiohttp.client.ClientSession.request",
-        side_effect=asyncio.TimeoutError,
-    ), pytest.raises(ConnectionErrorException):
+    with (
+        patch(
+            "aiohttp.client.ClientSession.request",
+            side_effect=asyncio.TimeoutError,
+        ),
+        pytest.raises(ConnectionErrorException),
+    ):
         await mock_http_client.get("/test/json")
 
 
 @pytest.mark.asyncio
 async def test_connection_error(mock_http_client: HTTPClient):
     """Test the connection error."""
-    with patch(
-        "aiohttp.client.ClientSession.request",
-        side_effect=ConnectionResetError,
-    ), pytest.raises(ConnectionErrorException):
+    with (
+        patch(
+            "aiohttp.client.ClientSession.request",
+            side_effect=ConnectionResetError,
+        ),
+        pytest.raises(ConnectionErrorException),
+    ):
         await mock_http_client.get("/test/json")

@@ -1,4 +1,5 @@
 """System."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -107,4 +108,3 @@ class Settings:
     log_level: str = field(default="INFO")
     media: SettingsMedia = field(default_factory=SettingsMedia)
     commands: SettingsCommands = field(default_factory=SettingsCommands)
-

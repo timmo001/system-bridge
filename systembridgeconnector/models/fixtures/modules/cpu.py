@@ -1,4 +1,5 @@
 """Fixture for cpu module."""
+
 from systembridgeconnector.models.modules.cpu import (
     CPU,
     CPUFrequency,

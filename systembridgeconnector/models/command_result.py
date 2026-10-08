@@ -14,4 +14,3 @@ class ExecuteResult:
     stdout: str
     stderr: str
     error: str | None = None
-

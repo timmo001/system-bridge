@@ -53,4 +53,3 @@ class Memory:
 
         if isinstance(self.virtual, dict):
             self.virtual = MemoryVirtual(**self.virtual)
-

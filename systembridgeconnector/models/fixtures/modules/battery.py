@@ -1,4 +1,5 @@
 """Fixture for battery module."""
+
 from systembridgeconnector.models.modules.battery import Battery
 
 FIXTURE_BATTERY = Battery(

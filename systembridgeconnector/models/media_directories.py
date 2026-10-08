@@ -16,4 +16,3 @@ class MediaDirectory:
     name: str
     path: str
     description: str | None = None
-

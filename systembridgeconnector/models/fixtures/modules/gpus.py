@@ -1,4 +1,5 @@
 """Fixtures for GPU models."""
+
 from systembridgeconnector.models.modules.gpus import GPU
 
 FIXTURE_GPUS = [

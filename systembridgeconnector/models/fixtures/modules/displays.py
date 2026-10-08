@@ -1,4 +1,5 @@
 """Fixtures for displays module."""
+
 from systembridgeconnector.models.modules.displays import Display
 
 FIXTURE_DISPLAYS = [

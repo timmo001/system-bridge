@@ -19,4 +19,3 @@ def filter_unexpected_fields(cls):
 
     cls.__init__ = new_init
     return cls
-

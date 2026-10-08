@@ -1,4 +1,5 @@
 """Test fixtures for the disks module."""
+
 from systembridgeconnector.models.modules.disks import (
     Disk,
     DiskIOCounters,

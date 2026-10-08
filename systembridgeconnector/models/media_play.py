@@ -1,4 +1,5 @@
 """Media Play."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,4 +16,3 @@ class MediaPlay:
     cover: str | None = None
     title: str | None = None
     volume: float | None = 40
-

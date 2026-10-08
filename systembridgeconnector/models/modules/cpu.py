@@ -123,4 +123,3 @@ class CPU:
 
         if isinstance(self.times_percent, dict):
             self.times_percent = CPUTimes(**self.times_percent)
-

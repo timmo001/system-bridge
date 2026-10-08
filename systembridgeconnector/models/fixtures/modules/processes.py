@@ -1,4 +1,5 @@
 """Fixture for processes module."""
+
 from systembridgeconnector.models.modules.processes import Process
 
 FIXTURE_PROCESSES = [

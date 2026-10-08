@@ -10,4 +10,3 @@ class ExecuteRequest:
     """Execute Request."""
 
     commandID: str  # noqa: N815  # pylint: disable=invalid-name
-

@@ -1,4 +1,5 @@
 """Fixtures for media models."""
+
 from systembridgeconnector.models.modules.media import Media
 
 FIXTURE_MEDIA = Media(

@@ -1,4 +1,5 @@
 """Media."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -34,4 +35,3 @@ class Media:
     type: str | None = None
     updated_at: float | None = None
     volume: float | None = None
-

@@ -61,4 +61,3 @@ class ModulesData:
     processes: list[Process] | None = None
     sensors: Sensors | None = None
     system: System | None = None
-

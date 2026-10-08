@@ -1,4 +1,5 @@
 """Fixture for media files."""
+
 from systembridgeconnector.models.media_files import MediaFile, MediaFiles
 
 FIXTURE_MEDIA_FILES = MediaFiles(
