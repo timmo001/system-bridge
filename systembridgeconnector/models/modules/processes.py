@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from ..helpers import filter_unexpected_fields
+from systembridgeconnector.models.helpers import filter_unexpected_fields
 
 
 @filter_unexpected_fields

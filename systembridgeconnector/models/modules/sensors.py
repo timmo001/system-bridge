@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import cast
 
-from ..helpers import filter_unexpected_fields
+from systembridgeconnector.models.helpers import filter_unexpected_fields
 
 
 @filter_unexpected_fields

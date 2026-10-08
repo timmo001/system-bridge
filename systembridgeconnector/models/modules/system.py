@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
-from ..helpers import filter_unexpected_fields
+from systembridgeconnector.models.helpers import filter_unexpected_fields
 
 
 class RunMode(StrEnum):
