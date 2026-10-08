@@ -760,7 +760,6 @@ class WebSocketClient(Base):
 
         raise BadMessageException(f"Unknown message type: {message.type}")
 
-    # pylint: disable=too-many-positional-arguments
     async def send_message(
         self,
         event: str,

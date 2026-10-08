@@ -7,8 +7,8 @@ from dataclasses import dataclass
 class ExecuteResult:
     """Execute Result."""
 
-    commandID: str  # noqa: N815  # pylint: disable=invalid-name
-    exitCode: int  # noqa: N815  # pylint: disable=invalid-name
+    commandID: str  # noqa: N815
+    exitCode: int  # noqa: N815
     stdout: str
     stderr: str
     error: str | None = None

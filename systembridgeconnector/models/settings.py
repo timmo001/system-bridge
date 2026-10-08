@@ -85,7 +85,7 @@ class SettingsCommandDefinition:
     id: str
     name: str
     command: str
-    workingDir: str = ""  # noqa: N815  # pylint: disable=invalid-name
+    workingDir: str = ""  # noqa: N815
     arguments: list[str] = field(default_factory=list)
 
 

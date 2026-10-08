@@ -7,4 +7,4 @@ from dataclasses import dataclass
 class ExecuteRequest:
     """Execute Request."""
 
-    commandID: str  # noqa: N815  # pylint: disable=invalid-name
+    commandID: str  # noqa: N815

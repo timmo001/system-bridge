@@ -3,7 +3,7 @@
 import logging
 
 
-class Base:  # pylint: disable=too-few-public-methods
+class Base:
     """Base."""
 
     def __init__(self):
