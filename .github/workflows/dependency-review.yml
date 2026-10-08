@@ -12,4 +12,4 @@ jobs:
   dependency-review:
     # master
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/dependency-review.yml@82ee28374d3471231113dabc3dd436f65a47132f # 20261004.0
+    uses: timmo001/workflows/.github/workflows/dependency-review.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
