@@ -88,7 +88,7 @@ Then use the `serve:*` tasks (defined in `pitchfork.toml`):
 | `mise run serve:stop` | Stop backend and web daemons |
 
 :::caution
-The backend daemon owns port `9170`. On start, the wrapper in `.scripts/linux/pitchfork-backend-dev.sh` stops any production `system-bridge` process using that port (systemd user service, compositor autostart, or a manual shell process) and restores it when the dev backend exits. Plan for a brief interruption to your running instance while developing.
+The backend daemon owns port `9170` and is also at `https://backend.system-bridge.localhost`. On start, `.scripts/linux/pitchfork-backend-prep.sh` stops any production `system-bridge` process using that port (systemd user service, compositor autostart, or a manual shell process). When the dev backend stops, `.scripts/linux/pitchfork-backend-restore.sh` brings it back. Plan for a brief interruption to your running instance while developing.
 :::
 
 Prefer `serve:*` for long-running background work (agents, repeated UI checks). Use `run:*` for foreground debugging or on platforms where pitchfork is not set up.
