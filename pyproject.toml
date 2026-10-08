@@ -20,9 +20,12 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    # renovate: datasource=custom.home-assistant-python-minor depName=python
+    "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-requires-python = ">=3.11"
+# renovate: datasource=custom.home-assistant-python depName=python
+requires-python = ">=3.14.2"
 dependencies = [
     "aiohttp>=3.14.3",
     "packaging>=26.3",
@@ -39,7 +42,8 @@ include = ["systembridgeconnector*"]
 systembridgeconnector = ["py.typed"]
 
 [tool.pylint.MAIN]
-py-version = "3.11"
+# renovate: datasource=custom.home-assistant-python-minor depName=python
+py-version = "3.14"
 ignore = [
     "tests",
 ]

@@ -186,7 +186,7 @@ async def mock_connected_websocket_client(
 @pytest.fixture(name="mock_websocket_client_listening")
 async def mock_listening_websocket_client(
     mock_websocket_client_connected: WebSocketClient,
-) -> AsyncGenerator[WebSocketClient, None]:
+) -> AsyncGenerator[WebSocketClient]:
     """Return a websocket client which is connected and listening."""
     listener_task = asyncio.create_task(
         mock_websocket_client_connected.listen(

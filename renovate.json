@@ -1,4 +1,52 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>timmo001/renovate-config"]
+  "extends": ["github>timmo001/renovate-config"],
+  "customDatasources": {
+    "home-assistant-python": {
+      "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/home-assistant/core/master/pyproject.toml",
+      "format": "toml",
+      "transformTemplates": [
+        "{\"releases\": [{\"version\": $substringAfter(project.`requires-python`, \">=\")}], \"sourceUrl\": \"https://github.com/home-assistant/core\"}"
+      ]
+    },
+    "home-assistant-python-minor": {
+      "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/home-assistant/core/master/pyproject.toml",
+      "format": "toml",
+      "transformTemplates": [
+        "{\"releases\": [{\"version\": $join($split($substringAfter(project.`requires-python`, \">=\"), \".\")[[0..1]], \".\")}], \"sourceUrl\": \"https://github.com/home-assistant/core\"}"
+      ]
+    }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Keep the Python version in step with the latest Home Assistant release.",
+      "managerFilePatterns": [
+        "/(^|/)pyproject\\.toml$/",
+        "/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>custom\\.home-assistant-python(?:-minor)?)\\s+depName=(?<depName>\\S+)\\s*\\n[^\\n]*?(?<currentValue>\\d+\\.\\d+(?:\\.\\d+)?)\""
+      ],
+      "versioningTemplate": "pep440"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Update every Python version that follows Home Assistant together.",
+      "matchDatasources": [
+        "custom.home-assistant-python",
+        "custom.home-assistant-python-minor"
+      ],
+      "groupName": "Home Assistant Python",
+      "groupSlug": "home-assistant-python",
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Python in setup-python follows Home Assistant, not the latest Python release.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["python"],
+      "enabled": false
+    }
+  ]
 }

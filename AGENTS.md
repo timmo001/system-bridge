@@ -12,7 +12,7 @@ Python library for connecting to System Bridge.
 
 ## Code Style
 
-- **Python**: 3.11+, use `from __future__ import annotations`
+- **Python**: the `requires-python` version in `pyproject.toml`, which follows Home Assistant
 - **Formatting**: 4-space indentation, Ruff formatter, 88 char line length
 - **Imports**: sorted by Ruff, group first-party imports
 - **Types**: Use type hints, prefer `|` union syntax, dataclasses with slots
