@@ -27,7 +27,8 @@ classifiers = [
 # renovate: datasource=custom.home-assistant-python depName=python
 requires-python = ">=3.14.2"
 dependencies = [
-    "aiohttp>=3.14.3",
+    # renovate: datasource=custom.home-assistant-aiohttp depName=aiohttp
+    "aiohttp>=3.14.4",
     "packaging>=26.3",
 ]
 
