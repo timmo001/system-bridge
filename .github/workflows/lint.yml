@@ -19,15 +19,12 @@ concurrency:
 
 jobs:
   lint-jsonlint:
-    # master
     # yamllint disable-line rule:line-length
     uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
   lint-markdown-links:
-    # master
     # yamllint disable-line rule:line-length
     uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
   lint-general:
-    # master
     # yamllint disable-line rule:line-length
     uses: timmo001/workflows/.github/workflows/lint-general.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
   lint:

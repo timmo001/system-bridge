@@ -19,7 +19,6 @@ concurrency:
 
 jobs:
   test:
-    # master
     # yamllint disable-line rule:line-length
     uses: timmo001/workflows/.github/workflows/test-pytest.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
     secrets:
