@@ -1,0 +1,15 @@
+---
+extends: default
+
+ignore: |
+  .agents/skills/
+  .venv/
+
+rules:
+  line-length:
+    ignore: |
+      .github/
+    level: warning
+  truthy:
+    ignore: |
+      .github/workflows/
