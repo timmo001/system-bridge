@@ -65,4 +65,4 @@ daemons = ["api"]     # experimental: mise starts them through pitchfork first
 run = "playwright test"
 ```
 
-Check the project's `AGENTS.md` and the framework's own background mode before reaching for pitchfork.
+Check the project's `AGENTS.md` first. Run servers in the foreground under pitchfork; a server that detaches itself, such as `astro dev` under an agent, needs its opt-out (`--ignore-lock` for Astro) or pitchfork loses track of it.
