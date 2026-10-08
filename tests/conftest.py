@@ -176,11 +176,13 @@ async def mock_websocket_client_not_connected(
 @pytest.fixture(name="mock_websocket_client_connected")
 async def mock_connected_websocket_client(
     mock_websocket_client: WebSocketClient,
-) -> WebSocketClient:
+) -> AsyncGenerator[WebSocketClient]:
     """Return a websocket client which is connected."""
     await mock_websocket_client.connect()
 
-    return mock_websocket_client
+    yield mock_websocket_client
+
+    await mock_websocket_client.close()
 
 
 @pytest.fixture(name="mock_websocket_client_listening")
