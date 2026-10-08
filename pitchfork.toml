@@ -17,5 +17,8 @@ ready_delay = 3
 
 [daemons.web]
 # Vite dev server (hot reload) for the web client. No production counterpart.
-run = "exec mise run run:web-client"
-ready_delay = 1
+run = 'exec mise run run:web-client --host 127.0.0.1 --port "$PORT" --strictPort'
+port = { expect = [7680], bump = 10 }
+ready_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
+health_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
+retry = true

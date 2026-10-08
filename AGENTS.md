@@ -37,8 +37,9 @@ mise tasks
 ## Background Dev Servers
 
 - Prefer the `serve:*` mise tasks over foreground `run:*` tasks when starting long-running dev servers from an agent or background workflow.
-- `mise run serve:backend` starts the backend through pitchfork. The wrapper stops any production `system-bridge` process that owns `:9170` (systemd, Hyprland, desktop autostart, or manual shell), runs the dev backend, and restores the previously running live service or process when dev stops.
-- `mise run serve:web` starts the Vite web client through pitchfork. It has no production counterpart.
+- `mise run serve:backend` starts the backend through pitchfork. The wrapper stops any production `system-bridge` process that owns `:9170` (systemd, Hyprland, desktop autostart, or manual shell), runs the dev backend, and restores the previously running live service or process when dev stops. It keeps the fixed port `9170` on purpose, so it has no proxy address.
+- `mise run serve:web` starts the Vite web client through pitchfork. It has no production counterpart. It serves `http://127.0.0.1:7680/`, or the next free port, and is always at `https://web.system-bridge.localhost` through the Pitchfork proxy; connect it to the backend on `localhost:9170`.
+- Test the web client through that HTTPS address. Never add the proxy's own port, such as `:8443`, even if Pitchfork prints one: that means the 443 redirect is missing (it's lost on reboot), so run `pitchfork proxy doctor`, then `pitchfork proxy setup -y` to restore it. Use the `127.0.0.1` port only when the proxy isn't running.
 - Use `mise run serve:status`, `mise run serve:logs`, `mise run serve:restart`, and `mise run serve:stop` for status, logs, restart, and cleanup.
 - Keep direct `mise run run:*` usage for foreground debugging only, or when pitchfork is unavailable.
 - The pitchfork config lives in `pitchfork.toml`; wrapper scripts live under `.scripts/linux/pitchfork-*.sh`.
