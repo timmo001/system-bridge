@@ -25,4 +25,6 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
+      # renovate: datasource=custom.home-assistant-python-minor depName=python
+      python-version: "3.14"
       module-name: "systembridgeconnector"

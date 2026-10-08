@@ -18,6 +18,8 @@ jobs:
     uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@2fb8b15d5e72caaea35cc5e4541733d87ef66002 # 20261008.0
     with:
       package-name: "systembridgeconnector"
+      # renovate: datasource=custom.home-assistant-python-minor depName=python
+      python-version: "3.14"
 
   publish:
     name: Publish distributions to PyPI
