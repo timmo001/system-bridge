@@ -31,3 +31,13 @@ port = { expect = [7680], bump = 10 }
 ready_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
 health_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
 retry = true
+
+[daemons.docs]
+# Astro docs site. --ignore-lock stops Astro from detaching itself when it
+# detects an agent, so pitchfork keeps hold of the server.
+dir = "docs"
+run = 'exec bunx astro dev --ignore-lock --host 127.0.0.1 --port "$PORT"'
+port = { expect = [7660], bump = 10 }
+ready_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
+health_cmd = 'curl -fsS "http://127.0.0.1:$PORT/" >/dev/null'
+retry = true

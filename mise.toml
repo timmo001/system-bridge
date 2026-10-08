@@ -189,6 +189,27 @@ run = "pitchfork start backend"
 description = "Start the web client dev server through pitchfork"
 run = "pitchfork start web"
 
+[tasks."serve:docs"]
+description = "Start the docs dev server in the background through pitchfork"
+depends = ["install:docs"]
+run = "pitchfork start docs"
+
+[tasks."serve:docs:status"]
+description = "Show the background docs dev server status"
+run = "pitchfork status docs"
+
+[tasks."serve:docs:logs"]
+description = "Follow the background docs dev server logs"
+run = "pitchfork logs -t docs"
+
+[tasks."serve:docs:restart"]
+description = "Restart the background docs dev server"
+run = "pitchfork restart docs"
+
+[tasks."serve:docs:stop"]
+description = "Stop the background docs dev server"
+run = "pitchfork stop docs"
+
 [tasks."serve:all"]
 description = "Start all pitchfork dev servers"
 run = "pitchfork start -l"

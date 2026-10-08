@@ -16,7 +16,7 @@ Run from `docs/`:
 - Deploy Worker: `bun run deploy`
 - Astro CLI: `bun run astro -- --help`
 
-From the repo root: `mise run docs:dev`, `mise run docs:build`.
+From the repo root: `mise run docs:build`. From an agent, start the dev server in the background with `mise run serve:docs`; it is at `https://docs.system-bridge.localhost` (see the root `AGENTS.md`). Use `mise run docs:dev` only for foreground debugging.
 
 ## Lint / Test
 
@@ -132,7 +132,7 @@ From the repo root: `mise run docs:dev`, `mise run docs:build`.
 
 ## Quality Checks
 
-- Run `bun run dev` for quick visual verification.
+- Run `mise run serve:docs` from the repo root for quick visual verification at `https://docs.system-bridge.localhost`.
 - Run `bun run build` before publishing changes that touch layout or config.
 - Run `bun run deploy --dry-run` after the build when changing hosting config.
 - Confirm nav links and sidebar entries resolve correctly.
