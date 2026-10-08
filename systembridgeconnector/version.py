@@ -1,7 +1,5 @@
 """Version."""
 
-from __future__ import annotations
-
 from aiohttp import ClientSession
 from packaging.version import parse
 

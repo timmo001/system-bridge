@@ -1,7 +1,5 @@
 """GPUs."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from ..helpers import filter_unexpected_fields
