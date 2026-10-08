@@ -74,7 +74,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
           pip install -r requirements_test.txt
-          pip install "pylint>=3.2"
       - name: Run pylint (uses pyproject.toml)
         run: |
           pylint --rcfile=pyproject.toml systembridgeconnector
