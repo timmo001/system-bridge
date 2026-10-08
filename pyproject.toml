@@ -38,40 +38,16 @@ include = ["systembridgeconnector*"]
 [tool.setuptools.package-data]
 systembridgeconnector = ["py.typed"]
 
-[tool.black]
-extend-exclude = "/generated/"
-
 [tool.pylint.MAIN]
-py-version = "3.12"
+py-version = "3.11"
 ignore = [
     "tests",
 ]
-# Use a conservative default here; 2 should speed up most setups and not hurt
-# any too bad. Override on command line as appropriate.
-jobs = 2
-init-hook = """\
-    from pathlib import Path; \
-    import sys; \
-
-    from pylint.config import find_default_config_files; \
-
-    sys.path.append( \
-        str(Path(next(find_default_config_files())).parent.joinpath('pylint/plugins'))
-    ) \
-    """
 load-plugins = [
     "pylint.extensions.code_style",
     "pylint.extensions.typing",
 ]
 persistent = false
-extension-pkg-allow-list = [
-    "av.audio.stream",
-    "av.logging",
-    "av.stream",
-    "ciso8601",
-    "orjson",
-    "cv2",
-]
 fail-on = [
     "I",
 ]
@@ -81,7 +57,7 @@ class-const-naming-style = "any"
 
 [tool.pylint."MESSAGES CONTROL"]
 # Reasons disabled:
-# format - handled by black
+# format - handled by ruff
 # locally-disabled - it spams too much
 # duplicate-code - unavoidable
 # cyclic-import - doesn't test if both import on load
@@ -122,18 +98,8 @@ enable = [
     "use-symbolic-message-instead",
 ]
 
-[tool.isort]
-profile = "black"
-line_length = 88
-
 [tool.pylint.REPORTS]
 score = false
-
-[tool.pylint.TYPECHECK]
-ignored-classes = [
-    "_CountingAttr",  # for attrs
-]
-mixin-class-rgx = ".*[Mm]ix[Ii]n"
 
 [tool.pylint.FORMAT]
 expected-line-ending-format = "LF"
@@ -249,12 +215,7 @@ ignore = [
     "PLR0917", # Too many positional arguments ({c_args} > {max_args})
     "PLR2004",  # Magic value used in comparison, consider replacing {value} with a constant variable
     "PLW2901", # Outer {outer_kind} variable {name} overwritten by inner {inner_kind} target
-    "UP006", # keep type annotation style as is
-    "UP007", # keep type annotation style as is
 ]
-
-[tool.ruff.lint.flake8-import-conventions.extend-aliases]
-voluptuous = "vol"
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
@@ -265,22 +226,9 @@ fixture-parentheses = false
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = [
-    "systembridgebackend",
-    "systembridgecli",
-    "systembridgeconnector",
-    "systembridgefrontend",
-    "systembridgegui",
-    "systembridgemodels",
-    "systembridgeshared",
-    "systembridgewindowssensors",
-]
+known-first-party = ["systembridgeconnector"]
 combine-as-imports = true
 split-on-trailing-comma = false
-
-[tool.ruff.lint.per-file-ignores]
-# Allow for main entry & scripts to write to stdout
-"script/*" = ["T20"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 25
