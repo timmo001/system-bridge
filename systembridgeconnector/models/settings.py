@@ -75,7 +75,7 @@ class SettingDirectory:
 class SettingsMedia:
     """Settings Media."""
 
-    directories: list[SettingDirectory] = field(default_factory=lambda: [])
+    directories: list[SettingDirectory] = field(default_factory=list)
 
 
 @dataclass
@@ -86,14 +86,14 @@ class SettingsCommandDefinition:
     name: str
     command: str
     workingDir: str = ""  # noqa: N815  # pylint: disable=invalid-name
-    arguments: list[str] = field(default_factory=lambda: [])
+    arguments: list[str] = field(default_factory=list)
 
 
 @dataclass
 class SettingsCommands:
     """Settings Commands."""
 
-    allowlist: list[SettingsCommandDefinition] = field(default_factory=lambda: [])
+    allowlist: list[SettingsCommandDefinition] = field(default_factory=list)
 
 
 @dataclass
@@ -102,7 +102,7 @@ class Settings:
 
     api: SettingsAPI = field(default_factory=SettingsAPI)
     autostart: bool = field(default=False)
-    keyboard_hotkeys: list[SettingHotkey] = field(default_factory=lambda: [])
+    keyboard_hotkeys: list[SettingHotkey] = field(default_factory=list)
     log_level: str = field(default="INFO")
     media: SettingsMedia = field(default_factory=SettingsMedia)
     commands: SettingsCommands = field(default_factory=SettingsCommands)

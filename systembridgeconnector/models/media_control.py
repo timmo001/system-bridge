@@ -21,8 +21,8 @@ class MediaAction(Enum):
     MUTE = "MUTE"
     VOLUME_DOWN = "VOLUME_DOWN"
     VOLUME_UP = "VOLUME_UP"
-    VOLUMEDOWN = "VOLUME_DOWN"
-    VOLUMEUP = "VOLUME_UP"
+    VOLUMEDOWN = "VOLUME_DOWN"  # noqa: PIE796
+    VOLUMEUP = "VOLUME_UP"  # noqa: PIE796
 
 
 @dataclass(slots=True)

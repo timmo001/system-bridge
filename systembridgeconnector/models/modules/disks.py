@@ -90,9 +90,10 @@ class Disks:
             new_devices: list[Disk] = []
             for d in self.devices:
                 device: dict = cast(dict, d)
-                partitions: list[DiskPartition] = []
-                for partition in device.get("partitions", []):
-                    partitions.append(DiskPartition(**partition))
+                partitions = [
+                    DiskPartition(**partition)
+                    for partition in device.get("partitions", [])
+                ]
                 io_counters = device.get("io_counters")
                 new_devices.append(
                     Disk(

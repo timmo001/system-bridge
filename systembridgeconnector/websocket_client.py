@@ -229,7 +229,7 @@ class WebSocketClient(Base):
             }
 
             # Derive 'name' from 'key' if not provided by API
-            if "name" in directory and directory["name"]:
+            if directory.get("name"):
                 directory_data["name"] = directory["name"]
             elif directory_data["key"]:
                 # Capitalize first letter of key

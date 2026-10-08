@@ -59,7 +59,7 @@ class Version(Base):
                 and error["status"] == 404  # pylint: disable=invalid-sequence-index
             ):
                 return None
-            raise exception
+            raise
 
     async def check_version(self) -> str | None:
         """Check the system version for 3.x.x and above."""
@@ -79,4 +79,4 @@ class Version(Base):
                 and error["status"] == 404  # pylint: disable=invalid-sequence-index
             ):
                 return None
-            raise exception
+            raise

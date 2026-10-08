@@ -32,7 +32,7 @@ class HTTPClient(Base):
         super().__init__()
         self._token = token
         self._base_url = f"http://{api_host}:{api_port}"
-        self._session = session if session else ClientSession()
+        self._session = session or ClientSession()
 
     async def delete(
         self,
@@ -148,7 +148,6 @@ class HTTPClient(Base):
                         "status": response.status,
                     }
                 )
-            return response
         except TimeoutError as exception:
             raise ConnectionErrorException(
                 {
@@ -173,3 +172,4 @@ class HTTPClient(Base):
                     "status": "connection error",
                 }
             ) from exception
+        return response
