@@ -8,6 +8,8 @@ on:
       - dev
     paths:
       - "docs/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/docs.yml"
   pull_request:
     types:
@@ -15,6 +17,8 @@ on:
       - synchronize
     paths:
       - "docs/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/docs.yml"
   workflow_dispatch: {}
 

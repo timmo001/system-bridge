@@ -8,6 +8,9 @@ on:
       - dev
     paths:
       - "web-client/**"
+      - "connector/typescript/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/web-client.yml"
   pull_request:
     types:
@@ -15,6 +18,9 @@ on:
       - synchronize
     paths:
       - "web-client/**"
+      - "connector/typescript/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/web-client.yml"
   workflow_dispatch: {}
 

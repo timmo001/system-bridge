@@ -29,19 +29,13 @@ depends = ["build:web-client"]
 run = "echo 'Console build is only supported on Windows'"
 run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe ."
 
-[tasks."install:web-client"]
-description = "Install web client dependencies"
-dir = "web-client"
-run = "bun install --frozen-lockfile"
-
-[tasks."install:docs"]
-description = "Install docs site dependencies"
-dir = "docs"
+[tasks."install:js"]
+description = "Install the Bun workspace dependencies (connector, web client and docs)"
 run = "bun install --frozen-lockfile"
 
 [tasks."generate:schemas"]
 description = "Generate Effect schemas from Go types"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 sources = ["types/**/*.go", "tools/generate-schemas/**/*.go"]
 outputs = ["connector/typescript/src/generated/modules.ts"]
 run = [
@@ -57,7 +51,9 @@ sources = [
   "web-client/public/**/*",
   "web-client/index.html",
   "web-client/package.json",
-  "web-client/bun.lock",
+  "bun.lock",
+  "connector/typescript/package.json",
+  "connector/typescript/src/**/*.ts",
   "web-client/tsconfig.json",
   "web-client/vite.config.ts",
 ]
@@ -194,7 +190,7 @@ run = "pitchfork start web"
 
 [tasks."serve:docs"]
 description = "Start the docs dev server in the background through pitchfork"
-depends = ["install:docs"]
+depends = ["install:js"]
 run = "pitchfork start docs"
 
 [tasks."serve:docs:status"]
@@ -301,7 +297,7 @@ run = "go fmt ./..."
 
 [tasks."lint:web-client"]
 description = "Run web client linters (Oxlint, typecheck)"
-depends = ["install:web-client"]
+depends = ["install:js"]
 dir = "web-client"
 run = "bun run --parallel --no-exit-on-error lint typecheck"
 
@@ -362,38 +358,33 @@ outputs = ["dist/*"]
 # license-files can't point outside the package, so copy the root licence in
 run = ["cp ../../LICENSE LICENSE", "uv build"]
 
-[tasks."install:connector:typescript"]
-description = "Install the TypeScript connector dependencies"
-dir = "connector/typescript"
-run = "bun install --frozen-lockfile"
-
 [tasks."format:connector:typescript"]
 description = "Format the TypeScript connector with Prettier"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 dir = "connector/typescript"
 run = "bun run format"
 
 [tasks."lint:connector:typescript"]
 description = "Lint the TypeScript connector with Oxlint and check its formatting"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 dir = "connector/typescript"
 run = "bun run --parallel --no-exit-on-error lint format:check"
 
 [tasks."typecheck:connector:typescript"]
 description = "Type check the TypeScript connector"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 dir = "connector/typescript"
 run = "bun run typecheck"
 
 [tasks."test:connector:typescript"]
 description = "Run the TypeScript connector tests"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 dir = "connector/typescript"
 run = "bun run test"
 
 [tasks."build:connector:typescript"]
 description = "Build the TypeScript connector"
-depends = ["install:connector:typescript"]
+depends = ["install:js"]
 dir = "connector/typescript"
 sources = ["../../LICENSE", "package.json", "tsconfig.json", "src/**"]
 outputs = ["dist/index.js"]
@@ -416,7 +407,7 @@ run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean
 
 [tasks.deps]
 description = "Install all dependencies (go, web client, docs)"
-depends = ["install:web-client", "install:docs"]
+depends = ["install:js"]
 run = "go mod tidy"
 
 [tasks.version]
@@ -432,7 +423,7 @@ run = "bun run dev"
 
 [tasks."docs:build"]
 description = "Build the docs site (validates internal links)"
-depends = ["install:docs"]
+depends = ["install:js"]
 dir = "docs"
 run = "bun run build"
 

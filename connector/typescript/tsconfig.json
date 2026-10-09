@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@effect/tsgo/schema.json",
+  "$schema": "../../node_modules/@effect/tsgo/schema.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],

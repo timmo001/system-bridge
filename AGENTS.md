@@ -31,7 +31,7 @@ mise tasks
 ## Key Conventions
 
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
-- **Package manager**: bun for all JavaScript/TypeScript (web client, docs)
+- **Package manager**: bun for all JavaScript/TypeScript. `connector/typescript`, `docs` and `web-client` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
 - **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 

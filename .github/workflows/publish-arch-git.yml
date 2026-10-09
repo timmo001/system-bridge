@@ -13,6 +13,9 @@ on:
       - mise.toml
       - LICENSE
       - web-client/**
+      - connector/typescript/src/**
+      - package.json
+      - bun.lock
       - .resources/**
       - .scripts/linux/PKGBUILD.dev
       - .scripts/linux/system-bridge.desktop

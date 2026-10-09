@@ -1,0 +1,3 @@
+[install]
+# Astro needs auto-installed peers and optional native bindings reachable from docs/
+linker = "hoisted"

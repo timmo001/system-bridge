@@ -28,7 +28,7 @@ const SUPPORTED_ECOSYSTEMS = [
   {
     id: "web-client",
     title: "Web client",
-    files: ["web-client/package.json", "web-client/bun.lock"],
+    files: ["web-client/package.json", "bun.lock"],
   },
 ];
 
@@ -485,12 +485,12 @@ const buildWebClientSection = async ({
       }),
       getFileContent({
         github,
-        path: "web-client/bun.lock",
+        path: "bun.lock",
         ...baseRef,
       }),
       getFileContent({
         github,
-        path: "web-client/bun.lock",
+        path: "bun.lock",
         ...headRef,
       }),
     ]);
