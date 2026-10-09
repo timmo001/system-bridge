@@ -198,6 +198,34 @@ export const DiscordUserSchema = z.object({
 
 export type DiscordUser = z.infer<typeof DiscordUserSchema>;
 
+// Discord Channel
+export const DiscordChannelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type DiscordChannel = z.infer<typeof DiscordChannelSchema>;
+
+// Discord Server
+export const DiscordServerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  icon_url: z.string().nullish(),
+});
+
+export type DiscordServer = z.infer<typeof DiscordServerSchema>;
+
+// Discord Voice Connection
+export const DiscordVoiceConnectionSchema = z.object({
+  state: z.string(),
+  last_ping: z.number().nullish(),
+  average_ping: z.number().nullish(),
+});
+
+export type DiscordVoiceConnection = z.infer<
+  typeof DiscordVoiceConnectionSchema
+>;
+
 // Discord Device
 export const DiscordDeviceSchema = z.object({
   id: z.string(),
@@ -340,6 +368,15 @@ export const SensorsNVIDIAGPUSchema = z.object({
 });
 
 export type SensorsNVIDIAGPU = z.infer<typeof SensorsNVIDIAGPUSchema>;
+
+// Discord Call
+export const DiscordCallSchema = z.object({
+  channel: DiscordChannelSchema,
+  server: DiscordServerSchema.nullish(),
+  connection: DiscordVoiceConnectionSchema.nullish(),
+});
+
+export type DiscordCall = z.infer<typeof DiscordCallSchema>;
 
 // Discord Audio
 export const DiscordAudioSchema = z.object({
@@ -503,6 +540,7 @@ export const DiscordDataSchema = z.object({
   connected: z.boolean(),
   authenticated: z.boolean(),
   user: DiscordUserSchema.nullish(),
+  call: DiscordCallSchema.nullish(),
   mute: z.boolean().nullish(),
   deaf: z.boolean().nullish(),
   input: DiscordAudioSchema.nullish(),

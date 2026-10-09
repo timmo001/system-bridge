@@ -377,6 +377,10 @@ func getStructComment(name string) string {
 		"SystemUser":             "System User",
 		"DeviceInfo":             "Device Info",
 		"DiscordUser":            "Discord User",
+		"DiscordCall":            "Discord Call",
+		"DiscordChannel":         "Discord Channel",
+		"DiscordServer":          "Discord Server",
+		"DiscordVoiceConnection": "Discord Voice Connection",
 		"DiscordDevice":          "Discord Device",
 		"DiscordAudio":           "Discord Audio",
 		"DiscordVoiceMode":       "Discord Voice Mode",
@@ -560,6 +564,9 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"MemorySwap",
 		"MemoryVirtual",
 		"DiscordUser",
+		"DiscordChannel",
+		"DiscordServer",
+		"DiscordVoiceConnection",
 		"DiscordDevice",
 		"DiscordVoiceMode",
 		"DiscordVoiceProcessing",
@@ -573,6 +580,7 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"SensorsNVIDIADisplay",
 		"SensorsNVIDIADriver",
 		"SensorsNVIDIAGPU",
+		"DiscordCall",
 		"DiscordAudio",
 
 		// Structs with nested dependencies

@@ -1,5 +1,6 @@
 // Package discord connects to the local Discord client over its RPC IPC socket.
-// It keeps the voice settings in sync and changes them on request.
+// It keeps the voice settings and the user's voice channel in sync, and changes
+// the voice settings on request.
 package discord
 
 import (
@@ -46,6 +47,9 @@ var (
 	current  *session
 	state    types.DiscordData
 	onUpdate func(types.DiscordData)
+	// connection is the latest voice connection status. Discord can send it
+	// before the voice channel has been fetched.
+	connection *types.DiscordVoiceConnection
 )
 
 // State returns the last known Discord state.
@@ -117,7 +121,10 @@ func runSession(ctx context.Context, creds *Credentials) error {
 		mu.Lock()
 		current = nil
 		mu.Unlock()
-		updateState(func(d *types.DiscordData) { *d = types.DiscordData{} })
+		updateState(func(d *types.DiscordData) {
+			*d = types.DiscordData{}
+			connection = nil
+		})
 	}()
 	stop := context.AfterFunc(ctx, func() { _ = conn.Close() })
 	defer stop()
@@ -152,14 +159,90 @@ func runSession(ctx context.Context, creds *Credentials) error {
 		return err
 	}
 
+	// The call is extra to the voice settings, so failures here are logged
+	// instead of ending the session.
+	for _, evt := range []string{"VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS"} {
+		if _, err := s.call(ctx, "SUBSCRIBE", nil, evt, rpcTimeout); err != nil {
+			slog.Warn("Failed to subscribe to Discord event", "event", evt, "error", err)
+		}
+	}
+	if err := refreshCall(ctx, s); err != nil {
+		slog.Warn("Failed to get the Discord voice channel", "error", err)
+	}
+
 	mu.Lock()
 	current = s
 	mu.Unlock()
 	slog.Info("Authenticated with Discord")
 	updateState(func(d *types.DiscordData) { d.Authenticated = true })
 
-	<-s.done
-	return s.err
+	for {
+		select {
+		case <-s.done:
+			return s.err
+		case <-s.callChanged:
+			if err := refreshCall(ctx, s); err != nil {
+				slog.Warn("Failed to get the Discord voice channel", "error", err)
+			}
+		}
+	}
+}
+
+// refreshCall fetches the voice channel the user is in and its server.
+func refreshCall(ctx context.Context, s *session) error {
+	data, err := s.call(ctx, "GET_SELECTED_VOICE_CHANNEL", nil, "", rpcTimeout)
+	if err != nil {
+		return err
+	}
+	var channel *struct {
+		ID      string  `json:"id"`
+		Name    string  `json:"name"`
+		GuildID *string `json:"guild_id"`
+	}
+	if err := json.Unmarshal(data, &channel); err != nil {
+		return fmt.Errorf("failed to parse GET_SELECTED_VOICE_CHANNEL response: %w", err)
+	}
+	if channel == nil {
+		updateState(func(d *types.DiscordData) { d.Call = nil })
+		return nil
+	}
+
+	// Direct message calls have no server.
+	var server *types.DiscordServer
+	if channel.GuildID != nil && *channel.GuildID != "" {
+		data, err := s.call(ctx, "GET_GUILD", map[string]string{"guild_id": *channel.GuildID}, "", rpcTimeout)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(data, &server); err != nil {
+			return fmt.Errorf("failed to parse GET_GUILD response: %w", err)
+		}
+	}
+
+	updateState(func(d *types.DiscordData) {
+		d.Call = &types.DiscordCall{
+			Channel:    types.DiscordChannel{ID: channel.ID, Name: channel.Name},
+			Server:     server,
+			Connection: connection,
+		}
+	})
+	return nil
+}
+
+func applyConnection(data json.RawMessage) {
+	var c types.DiscordVoiceConnection
+	if err := json.Unmarshal(data, &c); err != nil {
+		slog.Warn("Failed to parse Discord voice connection status", "error", err)
+		return
+	}
+	updateState(func(d *types.DiscordData) {
+		connection = &c
+		if d.Call != nil {
+			call := *d.Call
+			call.Connection = &c
+			d.Call = &call
+		}
+	})
 }
 
 // authenticate returns the AUTHENTICATE response.
@@ -385,6 +468,9 @@ type session struct {
 	ready     chan struct{}
 	readyOnce sync.Once
 	done      chan struct{}
+	// callChanged is signalled when the user joins, leaves or switches voice
+	// channel.
+	callChanged chan struct{}
 	// err is set before done is closed.
 	err error
 }
@@ -395,6 +481,8 @@ func newSession(conn net.Conn) *session {
 		pending: make(map[string]chan response),
 		ready:   make(chan struct{}),
 		done:    make(chan struct{}),
+		// One pending refresh covers any number of switches.
+		callChanged: make(chan struct{}, 1),
 	}
 }
 
@@ -497,7 +585,20 @@ func (s *session) handle(body []byte) {
 		return
 	}
 
-	if m.Cmd == "DISPATCH" && m.Evt == "VOICE_SETTINGS_UPDATE" {
+	if m.Cmd != "DISPATCH" {
+		return
+	}
+	switch m.Evt {
+	case "VOICE_SETTINGS_UPDATE":
 		applyVoice(m.Data)
+	case "VOICE_CONNECTION_STATUS":
+		applyConnection(m.Data)
+	case "VOICE_CHANNEL_SELECT":
+		// Fetching the channel waits for replies that this read loop delivers,
+		// so the session goroutine does it.
+		select {
+		case s.callChanged <- struct{}{}:
+		default:
+		}
 	}
 }

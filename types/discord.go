@@ -5,6 +5,7 @@ type DiscordData struct {
 	Connected      bool                    `json:"connected"`
 	Authenticated  bool                    `json:"authenticated"`
 	User           *DiscordUser            `json:"user"`
+	Call           *DiscordCall            `json:"call"`
 	Mute           *bool                   `json:"mute"`
 	Deaf           *bool                   `json:"deaf"`
 	Input          *DiscordAudio           `json:"input"`
@@ -21,6 +22,33 @@ type DiscordUser struct {
 	Username   string  `json:"username"`
 	GlobalName *string `json:"global_name"`
 	AvatarURL  *string `json:"avatar_url"`
+}
+
+// DiscordCall is the voice channel the user is in
+type DiscordCall struct {
+	Channel    DiscordChannel          `json:"channel"`
+	Server     *DiscordServer          `json:"server"`
+	Connection *DiscordVoiceConnection `json:"connection"`
+}
+
+// DiscordChannel is a Discord channel
+type DiscordChannel struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// DiscordServer is a Discord server, which Discord's API calls a guild
+type DiscordServer struct {
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	IconURL *string `json:"icon_url"`
+}
+
+// DiscordVoiceConnection is the state of the user's voice connection
+type DiscordVoiceConnection struct {
+	State       string   `json:"state"`
+	LastPing    *float64 `json:"last_ping"`
+	AveragePing *float64 `json:"average_ping"`
 }
 
 // DiscordAudio is the Discord input or output audio setup

@@ -83,6 +83,7 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `connected` | boolean | Whether System Bridge is connected to the Discord app. |
 | `authenticated` | boolean | Whether Discord accepted the authorization. |
 | `user` | object | The Discord account: `id`, `username`, `global_name` (display name), and `avatar_url`. |
+| `call` | object | The voice channel you're in, or `null` when you're not in one. See below. |
 | `mute` | boolean | Whether you are muted. |
 | `deaf` | boolean | Whether you are deafened. |
 | `input` | object | The microphone setup. See below. |
@@ -91,6 +92,14 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `processing` | object | Whether `noise_suppression`, `echo_cancellation`, and `automatic_gain_control` are on. |
 | `qos` | boolean | Whether Discord's quality of service for voice packets is on. |
 | `silence_warning` | boolean | Whether Discord warns you when your microphone picks up nothing. |
+
+`call` has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `channel` | object | The voice channel's `id` and `name`. |
+| `server` | object | The server's `id`, `name` and `icon_url`, also known as a guild in Discord's API. `null` for direct message calls. |
+| `connection` | object | Your voice connection: `state` (such as `VOICE_CONNECTED`, `CONNECTING` or `NO_ROUTE`), and `last_ping` and `average_ping` in milliseconds. `null` until Discord reports it. |
 
 `input` and `output` each have:
 
