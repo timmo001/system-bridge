@@ -148,6 +148,11 @@ func requestToken(ctx context.Context, form url.Values) (*oauthToken, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read token response: %w", err)
 	}
+	// OAuth returns 400 for a bad grant and 401 for bad client credentials.
+	// Other statuses may be temporary.
+	if resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnauthorized {
+		return nil, fmt.Errorf("%w: token request failed: %s: %s", errRejected, resp.Status, body)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("token request failed: %s: %s", resp.Status, body)
 	}

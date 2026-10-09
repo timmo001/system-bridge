@@ -103,6 +103,7 @@ func TestSessionCall(t *testing.T) {
 
 	_, err = s.call(t.Context(), "AUTHENTICATE", nil, "", time.Second)
 	assert.ErrorContains(t, err, "invalid token")
+	assert.ErrorIs(t, err, errRejected)
 }
 
 func TestSessionAppliesVoiceUpdates(t *testing.T) {

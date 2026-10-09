@@ -36,6 +36,9 @@ var (
 
 	errNoSocket = errors.New("no Discord socket")
 	errAuth     = errors.New("discord authorization failed")
+	// errRejected means Discord answered and refused the request, as opposed to
+	// a timeout or a dropped connection.
+	errRejected = errors.New("discord rejected the request")
 )
 
 var (
@@ -128,7 +131,7 @@ func runSession(ctx context.Context, creds *Credentials) error {
 	updateState(func(d *types.DiscordData) { d.Connected = true })
 
 	if err := authenticate(ctx, s, creds); err != nil {
-		return fmt.Errorf("%w: %w", errAuth, err)
+		return err
 	}
 
 	voice, err := s.call(ctx, "GET_VOICE_SETTINGS", nil, "", rpcTimeout)
@@ -156,13 +159,21 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) error {
 		slog.Warn("Ignoring stored Discord token", "error", err)
 		tok = nil
 	}
+	// Only a rejection from Discord means the stored token is bad. Other
+	// failures return without errAuth, so Run reconnects soon and keeps the token.
 	if tok != nil && tok.expired() {
-		tok, err = refreshToken(ctx, creds, tok.RefreshToken)
-		if err != nil {
-			slog.Info("Failed to refresh Discord token", "error", err)
+		refreshed, err := refreshToken(ctx, creds, tok.RefreshToken)
+		switch {
+		case errors.Is(err, errRejected):
+			slog.Info("Discord rejected the token refresh, authorizing again", "error", err)
 			tok = nil
-		} else if err := saveToken(tok); err != nil {
-			slog.Warn("Failed to save Discord token", "error", err)
+		case err != nil:
+			return fmt.Errorf("failed to refresh Discord token: %w", err)
+		default:
+			tok = refreshed
+			if err := saveToken(tok); err != nil {
+				slog.Warn("Failed to save Discord token", "error", err)
+			}
 		}
 	}
 	if tok != nil {
@@ -170,10 +181,21 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) error {
 		if err == nil {
 			return nil
 		}
+		if !errors.Is(err, errRejected) {
+			return err
+		}
 		slog.Info("Discord rejected the stored token, authorizing again", "error", err)
 		clearToken()
 	}
 
+	if err := authorize(ctx, s, creds); err != nil {
+		return fmt.Errorf("%w: %w", errAuth, err)
+	}
+	return nil
+}
+
+// authorize shows the Discord approval prompt and stores the new token.
+func authorize(ctx context.Context, s *session, creds *Credentials) error {
 	slog.Info("Requesting Discord authorization. Approve the prompt in Discord.")
 	data, err := s.call(ctx, "AUTHORIZE", map[string]any{
 		"client_id": creds.ClientID,
@@ -188,7 +210,7 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) error {
 	if err := json.Unmarshal(data, &authz); err != nil {
 		return fmt.Errorf("failed to parse AUTHORIZE response: %w", err)
 	}
-	tok, err = exchangeCode(ctx, creds, authz.Code)
+	tok, err := exchangeCode(ctx, creds, authz.Code)
 	if err != nil {
 		return err
 	}
@@ -379,7 +401,7 @@ func (s *session) handle(body []byte) {
 				Message string `json:"message"`
 			}
 			_ = json.Unmarshal(m.Data, &e)
-			r.err = fmt.Errorf("%s (%d)", e.Message, e.Code)
+			r.err = fmt.Errorf("%w: %s (%d)", errRejected, e.Message, e.Code)
 		}
 		ch <- r
 		return
