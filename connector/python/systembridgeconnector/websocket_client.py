@@ -862,10 +862,9 @@ class WebSocketClient(Base):
         if not self.connected or self._websocket is None:
             raise ConnectionClosedException("Connection is closed")
 
-        try:
-            message = await self._websocket.receive()
-        except RuntimeError:
-            return None
+        # aiohttp raises RuntimeError when two listeners share this connection.
+        # Let it propagate: swallowing it made listen() spin forever.
+        message = await self._websocket.receive()
 
         if message.type == aiohttp.WSMsgType.ERROR:
             raise ConnectionErrorException(self._websocket.exception())

@@ -1094,12 +1094,30 @@ async def test_receive_message_disconnnected(
 async def test_receive_message_runtime_error(
     mock_websocket_client_connected: WebSocketClient,
 ):
-    """Test the websocket client."""
-    with patch(
-        "aiohttp.ClientWebSocketResponse.receive",
-        side_effect=RuntimeError(),
+    """Test a concurrent receive raises instead of returning nothing."""
+    with (
+        patch(
+            "aiohttp.ClientWebSocketResponse.receive",
+            side_effect=RuntimeError("Concurrent call to receive() is not allowed"),
+        ),
+        pytest.raises(RuntimeError, match="Concurrent call"),
     ):
-        assert await mock_websocket_client_connected.receive_message() is None
+        await mock_websocket_client_connected.receive_message()
+
+
+@pytest.mark.asyncio
+async def test_listen_concurrent_listeners(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a second listener on one connection fails instead of spinning."""
+    first = asyncio.create_task(mock_websocket_client_connected.listen())
+    await asyncio.sleep(0.1)
+    try:
+        async with asyncio.timeout(5):
+            with pytest.raises(RuntimeError, match="Concurrent call"):
+                await mock_websocket_client_connected.listen()
+    finally:
+        first.cancel()
 
 
 @pytest.mark.asyncio
