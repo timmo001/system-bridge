@@ -259,7 +259,7 @@ System Bridge can read and change your Discord voice settings through the local 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create an application.
 2. On the **OAuth2** page, copy the **Client ID** and **Client Secret**.
 3. On the same page, add `http://localhost` as a redirect and save.
-4. Create `discord.json` in the settings directory:
+4. Create `discord.json` in the [settings directory](#file-locations):
 
    ```json
    {
@@ -270,7 +270,7 @@ System Bridge can read and change your Discord voice settings through the local 
 
 5. Make sure the Discord desktop app is running. Within 30 seconds, Discord shows an authorization prompt. Approve it with the account that owns the application.
 
-System Bridge stores the Discord token in `discord-token.json` in the settings directory. To authorize again, delete that file. The Discord state is in the [`discord`](/api/data/#discord) data module. To control Discord, send [`DISCORD_CONTROL`](/api/websocket/control/#discord-control).
+System Bridge stores the Discord token in `discord-token.json` in the [settings directory](#file-locations). To authorize again, delete that file. The Discord state is in the [`discord`](/api/data/#discord) data module. To control Discord, send [`DISCORD_CONTROL`](/api/websocket/control/#discord-control).
 
 ## Next steps
 
