@@ -1,18 +1,18 @@
 ---
 name: system-bridge-release
-description: Release System Bridge and the Python connector. Use when preparing or publishing a GitHub release, choosing the next version, checking what a release published (release assets, PyPI, the Arch package repository and AUR), or debugging the release jobs in build-and-package-application.yml.
+description: Release System Bridge and its Python and TypeScript connectors. Use when preparing or publishing a GitHub release, choosing the next version, checking what a release published (release assets, PyPI, npm, JSR, the Arch package repository and AUR), or debugging the release jobs in build-and-package-application.yml.
 ---
 
 # Releasing System Bridge
 
-One version covers the application and the Python connector (`systembridgeconnector`). Publishing a non-prerelease GitHub release runs `.github/workflows/build-and-package-application.yml`, which builds and publishes everything at once.
+One version covers the application, the Python connector (`systembridgeconnector`) and the TypeScript connector (`@timmo001/effect-system-bridge`). Publishing a non-prerelease GitHub release runs `.github/workflows/build-and-package-application.yml`, which builds and publishes everything at once.
 
 Releasing is a public, irreversible publish. Create a tag or release only when the user asks, and use their chosen version.
 
 ## Versions
 
 - Tags are the exact version with no `v` prefix, as in `5.11.1`.
-- Nothing needs bumping before a release. The Go binary gets its version from the tag at build time (`.github/scripts/bash/get-version.sh`), and CI writes the tag into `connector/python/pyproject.toml`, whose committed `version` stays `0.0.0`.
+- Nothing needs bumping before a release. The Go binary gets its version from the tag at build time (`.github/scripts/bash/get-version.sh`), and CI writes the tag into `connector/python/pyproject.toml` and the TypeScript connector's `package.json` and `jsr.json`, whose committed versions stay `0.0.0`.
 - The Omarchy plugin (`omarchy-plugin/manifest.json`) and the docs site are versioned and deployed separately, so a release doesn't change them.
 - Patch for fixes and quiet changes, minor for new features or modules. Large moves of existing code, such as importing the connector, are still patch.
 
@@ -59,6 +59,7 @@ All of this comes from the `release` jobs in `build-and-package-application.yml`
 - **Arch**: the `system-bridge` package (epoch `2:`), built and attached to the release with its own sigstore bundle, then dispatched to `timmo001/arch-repo` for the signed `timmo` pacman repository (`build-arch-package-stable`, `attach-arch-package-stable`)
 - **AUR**: `system-bridge` (`update-aur-stable`)
 - **PyPI**: `systembridgeconnector`, built from `connector/python` with the tag as its version (`build-connector-python`, `publish-connector-python`)
+- **npm and JSR**: `@timmo001/effect-system-bridge`, from `connector/typescript` with the tag as its version, through the shared `timmo001/workflows` publish workflows (`publish-connector-typescript-npm`, `publish-connector-typescript-jsr`)
 
 A prerelease only attaches assets. `system-bridge-git` publishes from pushes to `dev`, not from releases.
 
@@ -70,11 +71,13 @@ These jobs have passed on every recent release, so don't wait for them each time
 gh run list -R timmo001/system-bridge --event release --limit 1    # the release run
 gh release view <version> -R timmo001/system-bridge --json assets -q '.assets[].name'
 curl -s https://pypi.org/pypi/systembridgeconnector/json | jq -r .info.version
+npm view @timmo001/effect-system-bridge version
+curl -s https://jsr.io/@timmo001/effect-system-bridge/meta.json | jq -r .latest
 gh run list -R timmo001/arch-repo --limit 3                         # "Publish system-bridge" dispatch
 curl -s https://aur.archlinux.org/rpc/v5/info/system-bridge | jq -r '.results[0].Version'
 ```
 
-A finished release has seven assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI and the AUR show the new version once their jobs finish.
+A finished release has seven assets: `system-bridge-2.<version>-1-x86_64.pkg.tar.zst`, `system-bridge-<version>-1.x86_64.rpm`, `system-bridge_<version>_amd64.deb`, `system-bridge-<version>.flatpak`, `system-bridge-<version>-setup.exe`, `system-bridge-<version>.sigstore.json` and `system-bridge-<version>-arch.sigstore.json`. PyPI, npm, JSR and the AUR show the new version once their jobs finish.
 
 ## Setup
 
@@ -82,6 +85,7 @@ These live outside the repository and only need redoing when they break or are r
 
 - `AUR_SSH_PRIVATE_KEY` and `ARCH_REPO_DISPATCH_TOKEN` repository secrets. The `arch-repo-dispatch-secret` skill rotates the dispatch token.
 - A PyPI trusted publisher on `systembridgeconnector` for `timmo001/system-bridge`, workflow `build-and-package-application.yml`, no environment.
+- An npm trusted publisher on `@timmo001/effect-system-bridge` for `timmo001/system-bridge`, workflow `build-and-package-application.yml`, and the JSR package linked to `timmo001/system-bridge`. The `npm-jsr-first-publish` skill sets both up before the first release.
 
 ## After a release
 
