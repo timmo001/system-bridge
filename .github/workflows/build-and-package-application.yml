@@ -467,6 +467,8 @@ jobs:
     uses: timmo001/workflows/.github/workflows/publish-npm-package.yml@942a2e735c957787562e621d916fb6f78c9bb508 # 20261009.0
     with:
       package-path: connector/typescript
+      # Skip format:check: the release rewrites the version in the manifests
+      check-command: bun run lint && bun run typecheck && bun run test
       version-from-release-tag: true
 
   publish-connector-typescript-jsr:
@@ -478,8 +480,9 @@ jobs:
     uses: timmo001/workflows/.github/workflows/publish-jsr-package.yml@942a2e735c957787562e621d916fb6f78c9bb508 # 20261009.0
     with:
       package-path: connector/typescript
-      # JSR publishes the compiled dist, which the shared workflow doesn't build
-      check-command: bun run check && bun run build
+      # Skip format:check as above. JSR publishes the compiled dist, which the
+      # shared workflow doesn't build
+      check-command: bun run lint && bun run typecheck && bun run test && bun run build
       version-from-release-tag: true
 
   update-release:
