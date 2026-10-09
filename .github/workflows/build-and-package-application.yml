@@ -399,6 +399,65 @@ jobs:
           "${{ needs.prepare-aur-stable.result }}"
           false
 
+  build-connector-python:
+    name: Build Python connector
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Set up runtime
+        uses: ./.github/actions/setup-runtime
+
+      # The committed version is a placeholder; the release tag is the version
+      - name: Set version from release tag
+        working-directory: connector/python
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: uv version --frozen "$TAG"
+
+      - name: Build distributions
+        run: mise run build:connector:python
+
+      - name: Check distributions
+        working-directory: connector/python
+        run: uvx twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: connector-python-dist-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            connector/python/dist/*.whl
+            connector/python/dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-connector-python:
+    name: Publish Python connector to PyPI
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    needs:
+      - build-connector-python
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: connector-python-dist-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+
+      - name: Publish distributions to PyPI
+        # release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
+
   update-release:
     name: Update release
     if: github.event_name == 'release'

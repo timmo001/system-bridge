@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "systembridgeconnector"
-version = "5.5.0"
+# Set from the System Bridge release tag in CI
+version = "0.0.0"
 license = "Apache-2.0"
 license-files = ["LICENSE*"]
 description = "System Bridge Connector"
@@ -33,8 +34,8 @@ dependencies = [
 ]
 
 [project.urls]
-"Source Code" = "https://github.com/timmo001/system-bridge-connector"
-"Bug Reports" = "https://github.com/timmo001/system-bridge-connector/issues"
+"Source Code" = "https://github.com/timmo001/system-bridge"
+"Bug Reports" = "https://github.com/timmo001/system-bridge/issues"
 
 [tool.setuptools.packages.find]
 include = ["systembridgeconnector*"]
@@ -370,7 +371,6 @@ filterwarnings = [
 
 [tool.ruff]
 required-version = ">=0.16.9"
-extend-exclude = [".agents"]
 
 [tool.ruff.lint]
 select = [
