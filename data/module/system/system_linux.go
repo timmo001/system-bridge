@@ -3,11 +3,16 @@
 package system
 
 import (
+	"context"
+	"encoding/json"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
@@ -63,28 +68,50 @@ func GetCameraUsage() []string {
 		}
 	}
 
-	if len(pidHasVideo) == 0 {
-		return nil
-	}
+	pipeWireApps, pipeWireOK := pipeWireCaptureApps("Stream/Input/Video")
 
 	// Resolve process names
-	names := make([]string, 0, len(pidHasVideo))
+	names := make([]string, 0, len(pidHasVideo)+len(pipeWireApps))
 	for pid := range pidHasVideo {
 		p, err := process.NewProcess(pid)
 		if err != nil {
 			continue
 		}
-		if name, err := p.Name(); err == nil && name != "" {
+		name, err := p.Name()
+		if err != nil || name == "" {
+			continue
+		}
+		// PipeWire opens the device for apps using the camera portal; those
+		// apps are named from their streams below instead.
+		if pipeWireOK && (name == "pipewire" || name == "wireplumber") {
+			continue
+		}
+		if !slices.Contains(names, name) {
 			names = append(names, name)
 		}
+	}
+	for _, app := range pipeWireApps {
+		if !slices.Contains(names, app) {
+			names = append(names, app)
+		}
+	}
+
+	if len(names) == 0 {
+		return nil
 	}
 	return names
 }
 
-// GetMicrophoneUsage attempts to detect processes currently using audio capture devices on Linux
-// by reading ALSA capture substream status files under /proc/asound/.
-// A capture device with state "RUNNING" indicates active microphone usage.
+// GetMicrophoneUsage attempts to detect apps currently using the microphone on Linux.
+// It reads running PipeWire capture streams, falling back to ALSA capture substream
+// status files under /proc/asound/ when PipeWire is unavailable.
 func GetMicrophoneUsage() []string {
+	// PipeWire holds the ALSA device itself, so the ALSA owner_pid would
+	// always name pipewire rather than the app recording.
+	if apps, ok := pipeWireCaptureApps("Stream/Input/Audio"); ok {
+		return apps
+	}
+
 	names := make([]string, 0)
 
 	statusFiles, err := filepath.Glob("/proc/asound/card*/pcm*c/sub*/status")
@@ -146,6 +173,55 @@ func GetMicrophoneUsage() []string {
 		}
 	}
 	return names
+}
+
+const pipeWireDumpTimeout = 2 * time.Second
+
+// pipeWireCaptureApps returns the apps with a running PipeWire capture stream
+// of mediaClass, such as "Stream/Input/Audio". ok is false when PipeWire
+// can't be queried, so callers can fall back to another source.
+func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
+	ctx, cancel := context.WithTimeout(context.Background(), pipeWireDumpTimeout)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "pw-dump").Output()
+	if err != nil {
+		slog.Debug("Failed to run pw-dump", "error", err)
+		return nil, false
+	}
+
+	var objects []struct {
+		Type string `json:"type"`
+		Info struct {
+			State string         `json:"state"`
+			Props map[string]any `json:"props"`
+		} `json:"info"`
+	}
+	if err := json.Unmarshal(out, &objects); err != nil {
+		slog.Debug("Failed to parse pw-dump output", "error", err)
+		return nil, false
+	}
+
+	apps = make([]string, 0)
+	for _, o := range objects {
+		props := o.Info.Props
+		if o.Type != "PipeWire:Interface:Node" || o.Info.State != "running" || props["media.class"] != mediaClass {
+			continue
+		}
+		// Streams recording another app's output, such as a screen recorder
+		// capturing desktop audio, aren't using the microphone.
+		if captureSink := props["stream.capture.sink"]; captureSink == true || captureSink == "true" {
+			continue
+		}
+		for _, key := range []string{"application.name", "application.process.binary", "node.name"} {
+			if name, _ := props[key].(string); name != "" {
+				if !slices.Contains(apps, name) {
+					apps = append(apps, name)
+				}
+				break
+			}
+		}
+	}
+	return apps, true
 }
 
 // GetPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.
