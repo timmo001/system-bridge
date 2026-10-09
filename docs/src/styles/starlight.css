@@ -35,4 +35,11 @@ header.header .site-title {
   header.header site-search button[data-open-modal] {
     max-width: 34rem;
   }
+
+  /* Let tables fill the content width. Starlight sizes them to their content,
+     so short tables leave a gap. Narrow screens keep its scrolling tables. */
+  .sl-markdown-content table:not(:where(.not-content *)) {
+    display: table;
+    width: 100%;
+  }
 }
