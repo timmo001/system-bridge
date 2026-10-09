@@ -142,6 +142,7 @@ export default defineConfig({
             { label: 'MCP Server', slug: 'api/mcp' },
           ],
         },
+        { label: 'Privacy and security', slug: 'privacy' },
         { label: 'LLMs', slug: 'llms' },
       ],
     }),
