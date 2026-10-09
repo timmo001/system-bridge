@@ -97,9 +97,10 @@ The state of the local Discord app. This module only exists once Discord is [set
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `channel` | object | The voice channel's `id` and `name`. |
+| `channel` | object | The voice channel: `id`, `name`, `type` (`GUILD_VOICE`, `GUILD_STAGE_VOICE`, `DM` or `GROUP_DM`), `bitrate` in bits per second, and `user_limit` (0 for no limit). |
 | `server` | object | The server's `id`, `name` and `icon_url`, also known as a guild in Discord's API. `null` for direct message calls. |
 | `connection` | object | Your voice connection: `state` (such as `VOICE_CONNECTED`, `CONNECTING` or `NO_ROUTE`), and `last_ping` and `average_ping` in milliseconds. `null` until Discord reports it. |
+| `me` | object | Your state in the call: `nick` (your name in the call), `server_mute` and `server_deaf` (whether a moderator has muted or deafened you), `suppress` (whether you can't talk, such as in an AFK channel or as a Stage listener), and `speaking`. |
 
 `input` and `output` each have:
 

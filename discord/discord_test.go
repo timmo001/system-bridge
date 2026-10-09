@@ -179,6 +179,63 @@ func TestSessionAppliesVoiceUpdates(t *testing.T) {
 	}
 }
 
+func TestChannelArgs(t *testing.T) {
+	tests := []struct {
+		name    string
+		action  Action
+		params  ControlParams
+		want    string
+		wantErr error
+	}{
+		{name: "join", action: ActionJoinVoiceChannel, params: ControlParams{ChannelID: "1"}, want: `{"channel_id":"1","force":true}`},
+		{name: "join without channel", action: ActionJoinVoiceChannel, wantErr: ErrInvalidValue},
+		{name: "leave", action: ActionLeaveVoiceChannel, want: `{"channel_id":null}`},
+		{name: "open text channel", action: ActionOpenTextChannel, params: ControlParams{ChannelID: "2"}, want: `{"channel_id":"2"}`},
+		{name: "open without channel", action: ActionOpenTextChannel, wantErr: ErrInvalidValue},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := channelArgs(tt.action, tt.params)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			body, err := json.Marshal(got)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.want, string(body))
+		})
+	}
+}
+
+func TestCallEventsOnlyApplyToMe(t *testing.T) {
+	updates := make(chan types.DiscordData, 10)
+	mu.Lock()
+	state = types.DiscordData{
+		User: &types.DiscordUser{ID: "me"},
+		Call: &types.DiscordCall{Me: &types.DiscordCallMember{}},
+	}
+	onUpdate = func(d types.DiscordData) { updates <- d }
+	mu.Unlock()
+	t.Cleanup(func() {
+		mu.Lock()
+		state, onUpdate = types.DiscordData{}, nil
+		mu.Unlock()
+	})
+
+	applySpeaking(json.RawMessage(`{"user_id":"someone"}`), true)
+	applyVoiceState(json.RawMessage(`{"user":{"id":"someone"},"voice_state":{"mute":true}}`))
+	assert.Empty(t, updates)
+
+	applySpeaking(json.RawMessage(`{"user_id":"me"}`), true)
+	applyVoiceState(json.RawMessage(`{"user":{"id":"me"},"nick":"Me","voice_state":{"mute":true}}`))
+	require.Len(t, updates, 2)
+	<-updates
+	d := <-updates
+	require.NotNil(t, d.Call.Me)
+	assert.Equal(t, types.DiscordCallMember{Nick: new("Me"), ServerMute: true, Speaking: true}, *d.Call.Me)
+}
+
 func TestControlWithoutConnection(t *testing.T) {
 	assert.ErrorIs(t, Control(t.Context(), ActionMute, ControlParams{}), ErrNotConnected)
 }

@@ -11,10 +11,11 @@ import (
 )
 
 type DiscordControlRequestData struct {
-	Action   string   `json:"action" mapstructure:"action"`
-	Value    *float64 `json:"value" mapstructure:"value"`
-	DeviceID string   `json:"device_id" mapstructure:"device_id"`
-	Mode     string   `json:"mode" mapstructure:"mode"`
+	Action    string   `json:"action" mapstructure:"action"`
+	ChannelID string   `json:"channel_id" mapstructure:"channel_id"`
+	Value     *float64 `json:"value" mapstructure:"value"`
+	DeviceID  string   `json:"device_id" mapstructure:"device_id"`
+	Mode      string   `json:"mode" mapstructure:"mode"`
 }
 
 func RegisterDiscordControlHandler(router *event.MessageRouter) {
@@ -47,9 +48,10 @@ func RegisterDiscordControlHandler(router *event.MessageRouter) {
 		}
 
 		err = discord.Control(context.Background(), discord.Action(data.Action), discord.ControlParams{
-			Value:    data.Value,
-			DeviceID: data.DeviceID,
-			Mode:     data.Mode,
+			ChannelID: data.ChannelID,
+			Value:     data.Value,
+			DeviceID:  data.DeviceID,
+			Mode:      data.Mode,
 		})
 		if err != nil {
 			slog.Error("Failed to control Discord", "action", data.Action, "error", err)

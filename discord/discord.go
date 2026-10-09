@@ -161,7 +161,7 @@ func runSession(ctx context.Context, creds *Credentials) error {
 
 	// The call is extra to the voice settings, so failures here are logged
 	// instead of ending the session.
-	for _, evt := range []string{"VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS"} {
+	for _, evt := range []string{"CURRENT_USER_UPDATE", "VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS"} {
 		if _, err := s.call(ctx, "SUBSCRIBE", nil, evt, rpcTimeout); err != nil {
 			slog.Warn("Failed to subscribe to Discord event", "event", evt, "error", err)
 		}
@@ -188,6 +188,35 @@ func runSession(ctx context.Context, creds *Credentials) error {
 	}
 }
 
+// channelEvents need the voice channel's ID, so they follow the user between
+// channels.
+var channelEvents = []string{"VOICE_STATE_CREATE", "VOICE_STATE_UPDATE", "SPEAKING_START", "SPEAKING_STOP"}
+
+// channelTypes names the channel types a voice call can be in.
+var channelTypes = map[int]string{1: "DM", 2: "GUILD_VOICE", 3: "GROUP_DM", 13: "GUILD_STAGE_VOICE"}
+
+type rpcVoiceState struct {
+	Nick       *string `json:"nick"`
+	VoiceState struct {
+		Mute     bool `json:"mute"`
+		Deaf     bool `json:"deaf"`
+		Suppress bool `json:"suppress"`
+	} `json:"voice_state"`
+	User struct {
+		ID string `json:"id"`
+	} `json:"user"`
+}
+
+func (v rpcVoiceState) member(speaking bool) *types.DiscordCallMember {
+	return &types.DiscordCallMember{
+		Nick:       v.Nick,
+		ServerMute: v.VoiceState.Mute,
+		ServerDeaf: v.VoiceState.Deaf,
+		Suppress:   v.VoiceState.Suppress,
+		Speaking:   speaking,
+	}
+}
+
 // refreshCall fetches the voice channel the user is in and its server.
 func refreshCall(ctx context.Context, s *session) error {
 	data, err := s.call(ctx, "GET_SELECTED_VOICE_CHANNEL", nil, "", rpcTimeout)
@@ -195,17 +224,23 @@ func refreshCall(ctx context.Context, s *session) error {
 		return err
 	}
 	var channel *struct {
-		ID      string  `json:"id"`
-		Name    string  `json:"name"`
-		GuildID *string `json:"guild_id"`
+		ID          string          `json:"id"`
+		Name        string          `json:"name"`
+		Type        *int            `json:"type"`
+		Bitrate     *int            `json:"bitrate"`
+		UserLimit   *int            `json:"user_limit"`
+		GuildID     *string         `json:"guild_id"`
+		VoiceStates []rpcVoiceState `json:"voice_states"`
 	}
 	if err := json.Unmarshal(data, &channel); err != nil {
 		return fmt.Errorf("failed to parse GET_SELECTED_VOICE_CHANNEL response: %w", err)
 	}
 	if channel == nil {
+		s.followChannel(ctx, "")
 		updateState(func(d *types.DiscordData) { d.Call = nil })
 		return nil
 	}
+	s.followChannel(ctx, channel.ID)
 
 	// Direct message calls have no server.
 	var server *types.DiscordServer
@@ -219,14 +254,99 @@ func refreshCall(ctx context.Context, s *session) error {
 		}
 	}
 
+	var channelType *string
+	if channel.Type != nil {
+		if name, ok := channelTypes[*channel.Type]; ok {
+			channelType = &name
+		}
+	}
+
 	updateState(func(d *types.DiscordData) {
+		// Speaking is only known from events, so keep it while in the same channel.
+		speaking := d.Call != nil && d.Call.Channel.ID == channel.ID && d.Call.Me != nil && d.Call.Me.Speaking
+		var me *types.DiscordCallMember
+		if d.User != nil {
+			for _, vs := range channel.VoiceStates {
+				if vs.User.ID == d.User.ID {
+					me = vs.member(speaking)
+				}
+			}
+		}
 		d.Call = &types.DiscordCall{
-			Channel:    types.DiscordChannel{ID: channel.ID, Name: channel.Name},
+			Channel: types.DiscordChannel{
+				ID:        channel.ID,
+				Name:      channel.Name,
+				Type:      channelType,
+				Bitrate:   channel.Bitrate,
+				UserLimit: channel.UserLimit,
+			},
 			Server:     server,
 			Connection: connection,
+			Me:         me,
 		}
 	})
 	return nil
+}
+
+// followChannel moves the channelEvents subscriptions to channelID, or drops
+// them when it is empty.
+func (s *session) followChannel(ctx context.Context, channelID string) {
+	if s.callChannel == channelID {
+		return
+	}
+	for _, evt := range channelEvents {
+		if s.callChannel != "" {
+			if _, err := s.call(ctx, "UNSUBSCRIBE", map[string]string{"channel_id": s.callChannel}, evt, rpcTimeout); err != nil {
+				slog.Debug("Failed to unsubscribe from Discord event", "event", evt, "error", err)
+			}
+		}
+		if channelID != "" {
+			if _, err := s.call(ctx, "SUBSCRIBE", map[string]string{"channel_id": channelID}, evt, rpcTimeout); err != nil {
+				slog.Warn("Failed to subscribe to Discord event", "event", evt, "error", err)
+			}
+		}
+	}
+	s.callChannel = channelID
+}
+
+// applyVoiceState updates the user's own state in the call. Other users'
+// states are ignored.
+func applyVoiceState(data json.RawMessage) {
+	var vs rpcVoiceState
+	if err := json.Unmarshal(data, &vs); err != nil {
+		slog.Warn("Failed to parse Discord voice state", "error", err)
+		return
+	}
+	updateStateIf(func(d *types.DiscordData) bool {
+		if d.Call == nil || d.User == nil || vs.User.ID != d.User.ID {
+			return false
+		}
+		call := *d.Call
+		call.Me = vs.member(call.Me != nil && call.Me.Speaking)
+		d.Call = &call
+		return true
+	})
+}
+
+func applySpeaking(data json.RawMessage, speaking bool) {
+	var e struct {
+		UserID string `json:"user_id"`
+	}
+	if err := json.Unmarshal(data, &e); err != nil {
+		slog.Warn("Failed to parse Discord speaking event", "error", err)
+		return
+	}
+	updateStateIf(func(d *types.DiscordData) bool {
+		if d.Call == nil || d.Call.Me == nil || d.User == nil || e.UserID != d.User.ID || d.Call.Me.Speaking == speaking {
+			return false
+		}
+		me := *d.Call.Me
+		me.Speaking = speaking
+		call := *d.Call
+		call.Me = &me
+		d.Call = &call
+		return true
+	})
 }
 
 func applyConnection(data json.RawMessage) {
@@ -235,13 +355,15 @@ func applyConnection(data json.RawMessage) {
 		slog.Warn("Failed to parse Discord voice connection status", "error", err)
 		return
 	}
-	updateState(func(d *types.DiscordData) {
+	updateStateIf(func(d *types.DiscordData) bool {
 		connection = &c
-		if d.Call != nil {
-			call := *d.Call
-			call.Connection = &c
-			d.Call = &call
+		if d.Call == nil {
+			return false
 		}
+		call := *d.Call
+		call.Connection = &c
+		d.Call = &call
+		return true
 	})
 }
 
@@ -317,27 +439,41 @@ func authorize(ctx context.Context, s *session, creds *Credentials) (json.RawMes
 
 func applyUser(data json.RawMessage) {
 	var auth struct {
-		User *struct {
-			ID         string  `json:"id"`
-			Username   string  `json:"username"`
-			GlobalName *string `json:"global_name"`
-			Avatar     *string `json:"avatar"`
-		} `json:"user"`
+		User *rpcUser `json:"user"`
 	}
 	if err := json.Unmarshal(data, &auth); err != nil {
 		slog.Warn("Failed to parse Discord user", "error", err)
 		return
 	}
-	if auth.User == nil {
+	if auth.User != nil {
+		setUser(*auth.User)
+	}
+}
+
+func applyUserUpdate(data json.RawMessage) {
+	var u rpcUser
+	if err := json.Unmarshal(data, &u); err != nil {
+		slog.Warn("Failed to parse Discord user", "error", err)
 		return
 	}
+	setUser(u)
+}
+
+type rpcUser struct {
+	ID         string  `json:"id"`
+	Username   string  `json:"username"`
+	GlobalName *string `json:"global_name"`
+	Avatar     *string `json:"avatar"`
+}
+
+func setUser(u rpcUser) {
 	user := types.DiscordUser{
-		ID:         auth.User.ID,
-		Username:   auth.User.Username,
-		GlobalName: auth.User.GlobalName,
+		ID:         u.ID,
+		Username:   u.Username,
+		GlobalName: u.GlobalName,
 	}
-	if auth.User.Avatar != nil && *auth.User.Avatar != "" {
-		url := fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", auth.User.ID, *auth.User.Avatar)
+	if u.Avatar != nil && *u.Avatar != "" {
+		url := fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", u.ID, *u.Avatar)
 		user.AvatarURL = &url
 	}
 	updateState(func(d *types.DiscordData) { d.User = &user })
@@ -432,11 +568,20 @@ func applyVoice(data json.RawMessage) {
 // updateState replaces pointer fields instead of writing through them, so
 // copies returned by State stay unchanged.
 func updateState(fn func(*types.DiscordData)) {
+	updateStateIf(func(d *types.DiscordData) bool {
+		fn(d)
+		return true
+	})
+}
+
+// updateStateIf is updateState for events that may not change anything. It
+// only notifies when fn returns true.
+func updateStateIf(fn func(*types.DiscordData) bool) {
 	mu.Lock()
-	fn(&state)
+	changed := fn(&state)
 	d, notify := state, onUpdate
 	mu.Unlock()
-	if notify != nil {
+	if changed && notify != nil {
 		notify(d)
 	}
 }
@@ -471,6 +616,9 @@ type session struct {
 	// callChanged is signalled when the user joins, leaves or switches voice
 	// channel.
 	callChanged chan struct{}
+	// callChannel is the channel the channelEvents subscriptions are for. Only
+	// the session goroutine uses it.
+	callChannel string
 	// err is set before done is closed.
 	err error
 }
@@ -591,8 +739,16 @@ func (s *session) handle(body []byte) {
 	switch m.Evt {
 	case "VOICE_SETTINGS_UPDATE":
 		applyVoice(m.Data)
+	case "CURRENT_USER_UPDATE":
+		applyUserUpdate(m.Data)
 	case "VOICE_CONNECTION_STATUS":
 		applyConnection(m.Data)
+	case "VOICE_STATE_CREATE", "VOICE_STATE_UPDATE":
+		applyVoiceState(m.Data)
+	case "SPEAKING_START":
+		applySpeaking(m.Data, true)
+	case "SPEAKING_STOP":
+		applySpeaking(m.Data, false)
 	case "VOICE_CHANNEL_SELECT":
 		// Fetching the channel waits for replies that this read loop delivers,
 		// so the session goroutine does it.

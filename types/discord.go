@@ -29,12 +29,16 @@ type DiscordCall struct {
 	Channel    DiscordChannel          `json:"channel"`
 	Server     *DiscordServer          `json:"server"`
 	Connection *DiscordVoiceConnection `json:"connection"`
+	Me         *DiscordCallMember      `json:"me"`
 }
 
 // DiscordChannel is a Discord channel
 type DiscordChannel struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Type      *string `json:"type"`
+	Bitrate   *int    `json:"bitrate"`
+	UserLimit *int    `json:"user_limit"`
 }
 
 // DiscordServer is a Discord server, which Discord's API calls a guild
@@ -49,6 +53,15 @@ type DiscordVoiceConnection struct {
 	State       string   `json:"state"`
 	LastPing    *float64 `json:"last_ping"`
 	AveragePing *float64 `json:"average_ping"`
+}
+
+// DiscordCallMember is a user's state in a voice channel
+type DiscordCallMember struct {
+	Nick       *string `json:"nick"`
+	ServerMute bool    `json:"server_mute"`
+	ServerDeaf bool    `json:"server_deaf"`
+	Suppress   bool    `json:"suppress"`
+	Speaking   bool    `json:"speaking"`
 }
 
 // DiscordAudio is the Discord input or output audio setup

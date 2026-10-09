@@ -202,6 +202,9 @@ export type DiscordUser = z.infer<typeof DiscordUserSchema>;
 export const DiscordChannelSchema = z.object({
   id: z.string(),
   name: z.string(),
+  type: z.string().nullish(),
+  bitrate: z.number().nullish(),
+  user_limit: z.number().nullish(),
 });
 
 export type DiscordChannel = z.infer<typeof DiscordChannelSchema>;
@@ -225,6 +228,17 @@ export const DiscordVoiceConnectionSchema = z.object({
 export type DiscordVoiceConnection = z.infer<
   typeof DiscordVoiceConnectionSchema
 >;
+
+// Discord Call Member
+export const DiscordCallMemberSchema = z.object({
+  nick: z.string().nullish(),
+  server_mute: z.boolean(),
+  server_deaf: z.boolean(),
+  suppress: z.boolean(),
+  speaking: z.boolean(),
+});
+
+export type DiscordCallMember = z.infer<typeof DiscordCallMemberSchema>;
 
 // Discord Device
 export const DiscordDeviceSchema = z.object({
@@ -374,6 +388,7 @@ export const DiscordCallSchema = z.object({
   channel: DiscordChannelSchema,
   server: DiscordServerSchema.nullish(),
   connection: DiscordVoiceConnectionSchema.nullish(),
+  me: DiscordCallMemberSchema.nullish(),
 });
 
 export type DiscordCall = z.infer<typeof DiscordCallSchema>;

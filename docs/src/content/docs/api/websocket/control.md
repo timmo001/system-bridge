@@ -32,10 +32,13 @@ Available actions:
 
 ## Discord control
 
-Send the `DISCORD_CONTROL` event with an `action` to change your Discord voice settings. Discord must be [set up](/running/#discord) first.
+Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, or change your Discord voice settings. Discord must be [set up](/running/#discord) first.
 
 Available actions:
 
+- `JOIN_VOICE_CHANNEL`: set `channel_id` to a voice channel's ID. If you're already in a voice channel, this moves you.
+- `LEAVE_VOICE_CHANNEL`
+- `OPEN_TEXT_CHANNEL`: set `channel_id` to a text channel's ID to show it in Discord. Discord refuses forum channels.
 - `MUTE`, `UNMUTE`, `TOGGLE_MUTE`
 - `DEAFEN`, `UNDEAFEN`, `TOGGLE_DEAFEN`
 - `SET_INPUT_VOLUME`: set `value` to 0-100.

@@ -12,6 +12,9 @@ import (
 type Action string
 
 const (
+	ActionJoinVoiceChannel   Action = "JOIN_VOICE_CHANNEL"
+	ActionLeaveVoiceChannel  Action = "LEAVE_VOICE_CHANNEL"
+	ActionOpenTextChannel    Action = "OPEN_TEXT_CHANNEL"
 	ActionMute               Action = "MUTE"
 	ActionUnmute             Action = "UNMUTE"
 	ActionToggleMute         Action = "TOGGLE_MUTE"
@@ -32,6 +35,19 @@ const (
 	ActionDisableSilenceWarn Action = "DISABLE_SILENCE_WARNING"
 	ActionToggleSilenceWarn  Action = "TOGGLE_SILENCE_WARNING"
 )
+
+// selectChannel is the SELECT_VOICE_CHANNEL and SELECT_TEXT_CHANNEL args. A
+// null channel_id leaves the channel.
+type selectChannel struct {
+	ChannelID *string `json:"channel_id"`
+	Force     bool    `json:"force,omitempty"`
+}
+
+var channelCommands = map[Action]string{
+	ActionJoinVoiceChannel:  "SELECT_VOICE_CHANNEL",
+	ActionLeaveVoiceChannel: "SELECT_VOICE_CHANNEL",
+	ActionOpenTextChannel:   "SELECT_TEXT_CHANNEL",
+}
 
 // setVoiceSettings is the SET_VOICE_SETTINGS args. Discord only changes the
 // fields that are sent.
@@ -69,22 +85,34 @@ const (
 
 var voiceModes = []string{"VOICE_ACTIVITY", "PUSH_TO_TALK"}
 
-// ControlParams holds the value an action needs. Value is for the volume,
-// threshold and delay actions, DeviceID for the device actions and Mode for
-// SET_VOICE_MODE.
+// ControlParams holds the value an action needs. ChannelID is for the channel
+// actions, Value for the volume, threshold and delay actions, DeviceID for the
+// device actions and Mode for SET_VOICE_MODE.
 type ControlParams struct {
-	Value    *float64
-	DeviceID string
-	Mode     string
+	ChannelID string
+	Value     *float64
+	DeviceID  string
+	Mode      string
 }
 
-// Control changes the Discord voice settings.
+// Control joins, leaves or opens Discord channels, or changes the voice
+// settings.
 func Control(ctx context.Context, action Action, params ControlParams) error {
 	mu.Lock()
 	s, st := current, state
 	mu.Unlock()
 	if s == nil {
 		return ErrNotConnected
+	}
+
+	if cmd, ok := channelCommands[action]; ok {
+		args, err := channelArgs(action, params)
+		if err != nil {
+			return err
+		}
+		// The VOICE_CHANNEL_SELECT event updates the call.
+		_, err = s.call(ctx, cmd, args, "", rpcTimeout)
+		return err
 	}
 
 	args, err := controlArgs(action, params, st)
@@ -97,6 +125,18 @@ func Control(ctx context.Context, action Action, params ControlParams) error {
 	}
 	applyVoice(data)
 	return nil
+}
+
+func channelArgs(action Action, p ControlParams) (selectChannel, error) {
+	if action == ActionLeaveVoiceChannel {
+		return selectChannel{}, nil
+	}
+	if p.ChannelID == "" {
+		return selectChannel{}, fmt.Errorf("%w: channel_id is required", ErrInvalidValue)
+	}
+	// Discord refuses to move a user who is already in a voice channel unless
+	// forced. Sending the action is the user's approval to move.
+	return selectChannel{ChannelID: &p.ChannelID, Force: action == ActionJoinVoiceChannel}, nil
 }
 
 func controlArgs(action Action, p ControlParams, st types.DiscordData) (setVoiceSettings, error) {
