@@ -1,0 +1,71 @@
+{
+  "name": "@timmo001/effect-system-bridge",
+  "version": "0.0.0",
+  "description": "An Effect v4 connector for System Bridge",
+  "keywords": [
+    "effect",
+    "system-bridge",
+    "home-assistant"
+  ],
+  "homepage": "https://github.com/timmo001/system-bridge/tree/dev/connector/typescript#readme",
+  "bugs": {
+    "url": "https://github.com/timmo001/system-bridge/issues"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timmo001/system-bridge.git",
+    "directory": "connector/typescript"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "packageManager": "bun@1.4.2",
+  "scripts": {
+    "build": "rm -rf dist && tsc && cp ../../LICENSE LICENSE",
+    "check": "bun run --parallel --no-exit-on-error lint typecheck format:check test",
+    "lint": "oxlint .",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "test": "bun test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "effect-tsgo patch --force=false",
+    "prepack": "bun run build"
+  },
+  "peerDependencies": {
+    "effect": "4.0.2"
+  },
+  "devDependencies": {
+    "@effect/tsgo": "0.51.1",
+    "@oxlint/plugins": "1.87.0",
+    "@timmo001/oxlint-rules": "0.5.0",
+    "@types/bun": "1.4.2",
+    "effect": "4.0.2",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2003",
+    "prettier": "3.9.9",
+    "typescript": "7.0.2"
+  },
+  "trustedDependencies": [
+    "@effect/tsgo"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/@effect/tsgo/schema.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": [],
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "ignoreEffectWarningsInTscExitCode": true
+      }
+    ]
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
