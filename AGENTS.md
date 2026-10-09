@@ -89,5 +89,6 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
 - `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
 - `system-bridge-connector-python` - Python connector tasks, code style and release versioning
+- `system-bridge-release` - version, publish and sense-check a release (assets, PyPI, Arch, AUR)
 - `system-bridge-docs-page-workflow` - add or restructure Starlight docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page
