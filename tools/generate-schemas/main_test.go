@@ -295,7 +295,10 @@ func TestGenerateEffectSchemas(t *testing.T) {
 		"export interface TestTree {",
 		"readonly children: ReadonlyArray<TestTree>;",
 		"export const TestTree: Schema.Codec<TestTree> = Schema.Struct({",
+		"readonly battery: BatteryData;",
 		"battery: BatteryData,",
+		"battery: Schema.optionalKey(BatteryData),",
+		`Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),`,
 	}
 
 	for _, expected := range expectedElements {
@@ -304,8 +307,8 @@ func TestGenerateEffectSchemas(t *testing.T) {
 		}
 	}
 
-	if strings.Contains(result, "cpu:") {
-		t.Error("ModuleDataSchemas should only list modules whose data type was parsed")
+	if strings.Contains(result, "cpu:") || strings.Contains(result, `"cpu"`) {
+		t.Error("module schemas should only list modules whose data type was parsed")
 	}
 }
 

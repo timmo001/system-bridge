@@ -34,7 +34,7 @@ import { Schema } from "effect";
 			}
 			fmt.Fprintf(&buf, "%q", value)
 		}
-		buf.WriteString("]);\n")
+		buf.WriteString("]);\n\n")
 		fmt.Fprintf(&buf, "export type %s = typeof %s.Type;\n\n", name, name)
 	}
 
@@ -42,7 +42,7 @@ import { Schema } from "effect";
 		structInfo := structs[name]
 
 		if isArrayAlias(structInfo) {
-			fmt.Fprintf(&buf, "export const %s = Schema.Array(%s);\n", name, effectBaseSchema(structInfo.Fields[0].Type, "", structs, enums))
+			fmt.Fprintf(&buf, "export const %s = Schema.Array(%s);\n\n", name, effectBaseSchema(structInfo.Fields[0].Type, "", structs, enums))
 			fmt.Fprintf(&buf, "export type %s = typeof %s.Type;\n\n", name, name)
 			continue
 		}
@@ -56,7 +56,7 @@ import { Schema } from "effect";
 				}
 				fmt.Fprintf(&buf, "  readonly %s%s: %s;\n", field.JSONName, optional, mapGoTypeToTypeScript(field, structs, enums))
 			}
-			buf.WriteString("}\n")
+			buf.WriteString("}\n\n")
 			fmt.Fprintf(&buf, "export const %s: Schema.Codec<%s> = Schema.Struct({\n", name, name)
 		} else {
 			fmt.Fprintf(&buf, "export const %s = Schema.Struct({\n", name)
@@ -68,7 +68,7 @@ import { Schema } from "effect";
 		buf.WriteString("});\n")
 
 		if !isSelfReferencing(structInfo) {
-			fmt.Fprintf(&buf, "export interface %s extends Schema.Schema.Type<typeof %s> {}\n", name, name)
+			fmt.Fprintf(&buf, "\nexport interface %s extends Schema.Schema.Type<typeof %s> {}\n", name, name)
 		}
 		buf.WriteString("\n")
 	}
@@ -81,14 +81,32 @@ import { Schema } from "effect";
 	}
 	sort.Strings(moduleNames)
 
-	buf.WriteString("export const ModuleDataSchemas = {\n")
+	buf.WriteString("export interface ModuleData {\n")
+	for _, moduleName := range moduleNames {
+		fmt.Fprintf(&buf, "  readonly %s: %s;\n", moduleName, moduleDataTypes[moduleName])
+	}
+	buf.WriteString("}\n\n")
+	buf.WriteString("export const ModuleDataSchemas: {\n")
+	buf.WriteString("  readonly [K in keyof ModuleData]: Schema.Decoder<ModuleData[K]>;\n")
+	buf.WriteString("} = {\n")
 	for _, moduleName := range moduleNames {
 		fmt.Fprintf(&buf, "  %s: %s,\n", moduleName, moduleDataTypes[moduleName])
 	}
-	buf.WriteString("} as const;\n\n")
-	buf.WriteString("export type ModuleData = {\n")
-	buf.WriteString("  readonly [K in keyof typeof ModuleDataSchemas]: (typeof ModuleDataSchemas)[K][\"Type\"];\n")
-	buf.WriteString("};\n")
+	buf.WriteString("};\n\n")
+
+	buf.WriteString("export const ModulesData = Schema.Struct({\n")
+	for _, moduleName := range moduleNames {
+		fmt.Fprintf(&buf, "  %s: Schema.optionalKey(%s),\n", moduleName, moduleDataTypes[moduleName])
+	}
+	buf.WriteString("});\n\n")
+	buf.WriteString("export interface ModulesData extends Schema.Schema.Type<typeof ModulesData> {}\n\n")
+
+	buf.WriteString("export const ModuleDataUpdate = Schema.Union([\n")
+	for _, moduleName := range moduleNames {
+		fmt.Fprintf(&buf, "  Schema.Struct({ module: Schema.Literal(%q), data: %s }),\n", moduleName, moduleDataTypes[moduleName])
+	}
+	buf.WriteString("]);\n\n")
+	buf.WriteString("export type ModuleDataUpdate = typeof ModuleDataUpdate.Type;\n")
 
 	return buf.String()
 }

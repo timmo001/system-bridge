@@ -8,6 +8,7 @@ export const DiskMountCategory = Schema.Literals([
   "bind",
   "squashfs",
 ]);
+
 export type DiskMountCategory = typeof DiskMountCategory.Type;
 
 export const ModuleName = Schema.Literals([
@@ -24,9 +25,11 @@ export const ModuleName = Schema.Literals([
   "sensors",
   "system",
 ]);
+
 export type ModuleName = typeof ModuleName.Type;
 
 export const RunMode = Schema.Literals(["standalone"]);
+
 export type RunMode = typeof RunMode.Type;
 
 export const BatteryData = Schema.Struct({
@@ -34,6 +37,7 @@ export const BatteryData = Schema.Struct({
   percentage: Schema.NullOr(Schema.Finite),
   time_remaining: Schema.NullOr(Schema.Finite),
 });
+
 export interface BatteryData extends Schema.Schema.Type<typeof BatteryData> {}
 
 export const CPUFrequency = Schema.Struct({
@@ -41,6 +45,7 @@ export const CPUFrequency = Schema.Struct({
   min: Schema.NullOr(Schema.Finite),
   max: Schema.NullOr(Schema.Finite),
 });
+
 export interface CPUFrequency extends Schema.Schema.Type<typeof CPUFrequency> {}
 
 export const CPUTimes = Schema.Struct({
@@ -50,6 +55,7 @@ export const CPUTimes = Schema.Struct({
   interrupt: Schema.NullOr(Schema.Finite),
   dpc: Schema.NullOr(Schema.Finite),
 });
+
 export interface CPUTimes extends Schema.Schema.Type<typeof CPUTimes> {}
 
 export const PerCPU = Schema.Struct({
@@ -61,6 +67,7 @@ export const PerCPU = Schema.Struct({
   usage: Schema.NullOr(Schema.Finite),
   voltage: Schema.NullOr(Schema.Finite),
 });
+
 export interface PerCPU extends Schema.Schema.Type<typeof PerCPU> {}
 
 export const CPUStats = Schema.Struct({
@@ -69,6 +76,7 @@ export const CPUStats = Schema.Struct({
   soft_interrupts: Schema.NullOr(Schema.Finite),
   syscalls: Schema.NullOr(Schema.Finite),
 });
+
 export interface CPUStats extends Schema.Schema.Type<typeof CPUStats> {}
 
 export const CPUData = Schema.Struct({
@@ -87,6 +95,7 @@ export const CPUData = Schema.Struct({
   usage: Schema.NullOr(Schema.Finite),
   voltage: Schema.NullOr(Schema.Finite),
 });
+
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
 
 export const DeviceInfo = Schema.Struct({
@@ -99,12 +108,14 @@ export const DeviceInfo = Schema.Struct({
   bios_version: Schema.NullOr(Schema.String),
   chassis_type: Schema.NullOr(Schema.String),
 });
+
 export interface DeviceInfo extends Schema.Schema.Type<typeof DeviceInfo> {}
 
 export const DiscordDevice = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
 });
+
 export interface DiscordDevice extends Schema.Schema.Type<
   typeof DiscordDevice
 > {}
@@ -114,6 +125,7 @@ export const DiscordAudio = Schema.Struct({
   device_id: Schema.NullOr(Schema.String),
   devices: Schema.Array(DiscordDevice),
 });
+
 export interface DiscordAudio extends Schema.Schema.Type<typeof DiscordAudio> {}
 
 export const DiscordChannel = Schema.Struct({
@@ -123,6 +135,7 @@ export const DiscordChannel = Schema.Struct({
   bitrate: Schema.NullOr(Schema.Finite),
   user_limit: Schema.NullOr(Schema.Finite),
 });
+
 export interface DiscordChannel extends Schema.Schema.Type<
   typeof DiscordChannel
 > {}
@@ -132,6 +145,7 @@ export const DiscordServer = Schema.Struct({
   name: Schema.String,
   icon_url: Schema.NullOr(Schema.String),
 });
+
 export interface DiscordServer extends Schema.Schema.Type<
   typeof DiscordServer
 > {}
@@ -141,6 +155,7 @@ export const DiscordVoiceConnection = Schema.Struct({
   last_ping: Schema.NullOr(Schema.Finite),
   average_ping: Schema.NullOr(Schema.Finite),
 });
+
 export interface DiscordVoiceConnection extends Schema.Schema.Type<
   typeof DiscordVoiceConnection
 > {}
@@ -152,6 +167,7 @@ export const DiscordCallMember = Schema.Struct({
   suppress: Schema.Boolean,
   speaking: Schema.Boolean,
 });
+
 export interface DiscordCallMember extends Schema.Schema.Type<
   typeof DiscordCallMember
 > {}
@@ -162,6 +178,7 @@ export const DiscordCall = Schema.Struct({
   connection: Schema.NullOr(DiscordVoiceConnection),
   me: Schema.NullOr(DiscordCallMember),
 });
+
 export interface DiscordCall extends Schema.Schema.Type<typeof DiscordCall> {}
 
 export const DiscordUser = Schema.Struct({
@@ -170,6 +187,7 @@ export const DiscordUser = Schema.Struct({
   global_name: Schema.NullOr(Schema.String),
   avatar_url: Schema.NullOr(Schema.String),
 });
+
 export interface DiscordUser extends Schema.Schema.Type<typeof DiscordUser> {}
 
 export const DiscordVoiceMode = Schema.Struct({
@@ -178,6 +196,7 @@ export const DiscordVoiceMode = Schema.Struct({
   threshold: Schema.NullOr(Schema.Finite),
   delay: Schema.NullOr(Schema.Finite),
 });
+
 export interface DiscordVoiceMode extends Schema.Schema.Type<
   typeof DiscordVoiceMode
 > {}
@@ -187,6 +206,7 @@ export const DiscordVoiceProcessing = Schema.Struct({
   echo_cancellation: Schema.NullOr(Schema.Boolean),
   automatic_gain_control: Schema.NullOr(Schema.Boolean),
 });
+
 export interface DiscordVoiceProcessing extends Schema.Schema.Type<
   typeof DiscordVoiceProcessing
 > {}
@@ -205,6 +225,7 @@ export const DiscordData = Schema.Struct({
   qos: Schema.NullOr(Schema.Boolean),
   silence_warning: Schema.NullOr(Schema.Boolean),
 });
+
 export interface DiscordData extends Schema.Schema.Type<typeof DiscordData> {}
 
 export const DiskUsage = Schema.Struct({
@@ -213,6 +234,7 @@ export const DiskUsage = Schema.Struct({
   free: Schema.Finite,
   percent: Schema.Finite,
 });
+
 export interface DiskUsage extends Schema.Schema.Type<typeof DiskUsage> {}
 
 export const DiskPartition = Schema.Struct({
@@ -225,6 +247,7 @@ export const DiskPartition = Schema.Struct({
   category: DiskMountCategory,
   usage: Schema.NullOr(DiskUsage),
 });
+
 export interface DiskPartition extends Schema.Schema.Type<
   typeof DiskPartition
 > {}
@@ -237,6 +260,7 @@ export const DiskIOCounters = Schema.Struct({
   read_time: Schema.Finite,
   write_time: Schema.Finite,
 });
+
 export interface DiskIOCounters extends Schema.Schema.Type<
   typeof DiskIOCounters
 > {}
@@ -247,6 +271,7 @@ export const Disk = Schema.Struct({
   io_counters: Schema.NullOr(DiskIOCounters),
   temperature: Schema.NullOr(Schema.Finite),
 });
+
 export interface Disk extends Schema.Schema.Type<typeof Disk> {}
 
 export const DiskMountInfo = Schema.Struct({
@@ -256,6 +281,7 @@ export const DiskMountInfo = Schema.Struct({
   category: DiskMountCategory,
   usage: Schema.NullOr(DiskUsage),
 });
+
 export interface DiskMountInfo extends Schema.Schema.Type<
   typeof DiskMountInfo
 > {}
@@ -264,6 +290,7 @@ export const DiskMountsSecondary = Schema.Struct({
   bind: Schema.Array(DiskMountInfo),
   squashfs: Schema.Array(DiskMountInfo),
 });
+
 export interface DiskMountsSecondary extends Schema.Schema.Type<
   typeof DiskMountsSecondary
 > {}
@@ -272,6 +299,7 @@ export const DiskMountsResponse = Schema.Struct({
   primary: Schema.Array(DiskMountInfo),
   secondary: DiskMountsSecondary,
 });
+
 export interface DiskMountsResponse extends Schema.Schema.Type<
   typeof DiskMountsResponse
 > {}
@@ -280,6 +308,7 @@ export const DisksData = Schema.Struct({
   devices: Schema.Array(Disk),
   io_counters: Schema.NullOr(DiskIOCounters),
 });
+
 export interface DisksData extends Schema.Schema.Type<typeof DisksData> {}
 
 export const Display = Schema.Struct({
@@ -295,9 +324,11 @@ export const Display = Schema.Struct({
   pixel_clock: Schema.NullOr(Schema.Finite),
   refresh_rate: Schema.NullOr(Schema.Finite),
 });
+
 export interface Display extends Schema.Schema.Type<typeof Display> {}
 
 export const DisplaysData = Schema.Array(Display);
+
 export type DisplaysData = typeof DisplaysData.Type;
 
 export const Fan = Schema.Struct({
@@ -308,6 +339,7 @@ export const Fan = Schema.Struct({
   speed_min: Schema.NullOr(Schema.Finite),
   speed_max: Schema.NullOr(Schema.Finite),
 });
+
 export interface Fan extends Schema.Schema.Type<typeof Fan> {}
 
 export const GPU = Schema.Struct({
@@ -324,9 +356,11 @@ export const GPU = Schema.Struct({
   power_usage: Schema.NullOr(Schema.Finite),
   temperature: Schema.NullOr(Schema.Finite),
 });
+
 export interface GPU extends Schema.Schema.Type<typeof GPU> {}
 
 export const GPUsData = Schema.Array(GPU);
+
 export type GPUsData = typeof GPUsData.Type;
 
 export const MediaData = Schema.Struct({
@@ -354,6 +388,7 @@ export const MediaData = Schema.Struct({
   updated_at: Schema.NullOr(Schema.Finite),
   volume: Schema.NullOr(Schema.Finite),
 });
+
 export interface MediaData extends Schema.Schema.Type<typeof MediaData> {}
 
 export const MemorySwap = Schema.Struct({
@@ -364,6 +399,7 @@ export const MemorySwap = Schema.Struct({
   sin: Schema.NullOr(Schema.Finite),
   sout: Schema.NullOr(Schema.Finite),
 });
+
 export interface MemorySwap extends Schema.Schema.Type<typeof MemorySwap> {}
 
 export const MemoryVirtual = Schema.Struct({
@@ -379,6 +415,7 @@ export const MemoryVirtual = Schema.Struct({
   wired: Schema.NullOr(Schema.Finite),
   shared: Schema.NullOr(Schema.Finite),
 });
+
 export interface MemoryVirtual extends Schema.Schema.Type<
   typeof MemoryVirtual
 > {}
@@ -387,6 +424,7 @@ export const MemoryData = Schema.Struct({
   swap: Schema.NullOr(MemorySwap),
   virtual: Schema.NullOr(MemoryVirtual),
 });
+
 export interface MemoryData extends Schema.Schema.Type<typeof MemoryData> {}
 
 export const Module = Schema.Struct({
@@ -394,6 +432,7 @@ export const Module = Schema.Struct({
   data: Schema.Unknown,
   updated: Schema.String,
 });
+
 export interface Module extends Schema.Schema.Type<typeof Module> {}
 
 export const NetworkAddress = Schema.Struct({
@@ -403,6 +442,7 @@ export const NetworkAddress = Schema.Struct({
   broadcast: Schema.NullOr(Schema.String),
   ptp: Schema.NullOr(Schema.String),
 });
+
 export interface NetworkAddress extends Schema.Schema.Type<
   typeof NetworkAddress
 > {}
@@ -414,6 +454,7 @@ export const NetworkStats = Schema.Struct({
   mtu: Schema.NullOr(Schema.Finite),
   flags: Schema.Array(Schema.String),
 });
+
 export interface NetworkStats extends Schema.Schema.Type<typeof NetworkStats> {}
 
 export const Network = Schema.Struct({
@@ -421,6 +462,7 @@ export const Network = Schema.Struct({
   addresses: Schema.Array(NetworkAddress),
   stats: Schema.NullOr(NetworkStats),
 });
+
 export interface Network extends Schema.Schema.Type<typeof Network> {}
 
 export const NetworkConnection = Schema.Struct({
@@ -432,6 +474,7 @@ export const NetworkConnection = Schema.Struct({
   status: Schema.NullOr(Schema.String),
   pid: Schema.NullOr(Schema.Finite),
 });
+
 export interface NetworkConnection extends Schema.Schema.Type<
   typeof NetworkConnection
 > {}
@@ -446,6 +489,7 @@ export const NetworkIO = Schema.Struct({
   dropin: Schema.NullOr(Schema.Finite),
   dropout: Schema.NullOr(Schema.Finite),
 });
+
 export interface NetworkIO extends Schema.Schema.Type<typeof NetworkIO> {}
 
 export const NetworksData = Schema.Struct({
@@ -453,6 +497,7 @@ export const NetworksData = Schema.Struct({
   io: Schema.NullOr(NetworkIO),
   networks: Schema.Array(Network),
 });
+
 export interface NetworksData extends Schema.Schema.Type<typeof NetworksData> {}
 
 export const Process = Schema.Struct({
@@ -466,9 +511,11 @@ export const Process = Schema.Struct({
   username: Schema.NullOr(Schema.String),
   working_directory: Schema.NullOr(Schema.String),
 });
+
 export interface Process extends Schema.Schema.Type<typeof Process> {}
 
 export const ProcessesData = Schema.Array(Process);
+
 export type ProcessesData = typeof ProcessesData.Type;
 
 export const Temperature = Schema.Struct({
@@ -477,6 +524,7 @@ export const Temperature = Schema.Struct({
   high: Schema.Finite,
   critical: Schema.Finite,
 });
+
 export interface Temperature extends Schema.Schema.Type<typeof Temperature> {}
 
 export const SensorsWindowsSensor = Schema.Struct({
@@ -485,6 +533,7 @@ export const SensorsWindowsSensor = Schema.Struct({
   type: Schema.String,
   value: Schema.Unknown,
 });
+
 export interface SensorsWindowsSensor extends Schema.Schema.Type<
   typeof SensorsWindowsSensor
 > {}
@@ -496,6 +545,7 @@ export interface SensorsWindowsHardware {
   readonly subhardware: ReadonlyArray<SensorsWindowsHardware>;
   readonly sensors: ReadonlyArray<SensorsWindowsSensor>;
 }
+
 export const SensorsWindowsHardware: Schema.Codec<SensorsWindowsHardware> =
   Schema.Struct({
     id: Schema.String,
@@ -516,6 +566,7 @@ export const SensorsNVIDIAChipset = Schema.Struct({
   vendor_id: Schema.Finite,
   vendor_name: Schema.String,
 });
+
 export interface SensorsNVIDIAChipset extends Schema.Schema.Type<
   typeof SensorsNVIDIAChipset
 > {}
@@ -540,6 +591,7 @@ export const SensorsNVIDIADisplay = Schema.Struct({
   resolution_horizontal: Schema.Finite,
   resolution_vertical: Schema.Finite,
 });
+
 export interface SensorsNVIDIADisplay extends Schema.Schema.Type<
   typeof SensorsNVIDIADisplay
 > {}
@@ -549,6 +601,7 @@ export const SensorsNVIDIADriver = Schema.Struct({
   interface_version: Schema.String,
   version: Schema.Finite,
 });
+
 export interface SensorsNVIDIADriver extends Schema.Schema.Type<
   typeof SensorsNVIDIADriver
 > {}
@@ -569,6 +622,7 @@ export const SensorsNVIDIAGPU = Schema.Struct({
   system_type: Schema.NullOr(Schema.String),
   type: Schema.NullOr(Schema.String),
 });
+
 export interface SensorsNVIDIAGPU extends Schema.Schema.Type<
   typeof SensorsNVIDIAGPU
 > {}
@@ -579,6 +633,7 @@ export const SensorsNVIDIA = Schema.Struct({
   driver: Schema.NullOr(SensorsNVIDIADriver),
   gpus: Schema.Array(SensorsNVIDIAGPU),
 });
+
 export interface SensorsNVIDIA extends Schema.Schema.Type<
   typeof SensorsNVIDIA
 > {}
@@ -587,6 +642,7 @@ export const SensorsWindows = Schema.Struct({
   hardware: Schema.Array(SensorsWindowsHardware),
   nvidia: Schema.NullOr(SensorsNVIDIA),
 });
+
 export interface SensorsWindows extends Schema.Schema.Type<
   typeof SensorsWindows
 > {}
@@ -596,6 +652,7 @@ export const SensorsData = Schema.Struct({
   temperatures: Schema.Array(Temperature),
   windows_sensors: Schema.NullOr(SensorsWindows),
 });
+
 export interface SensorsData extends Schema.Schema.Type<typeof SensorsData> {}
 
 export const SystemUser = Schema.Struct({
@@ -606,6 +663,7 @@ export const SystemUser = Schema.Struct({
   started: Schema.Finite,
   pid: Schema.Finite,
 });
+
 export interface SystemUser extends Schema.Schema.Type<typeof SystemUser> {}
 
 export const SystemData = Schema.Struct({
@@ -632,9 +690,27 @@ export const SystemData = Schema.Struct({
   version_newer_available: Schema.NullOr(Schema.Boolean),
   device_info: Schema.NullOr(DeviceInfo),
 });
+
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}
 
-export const ModuleDataSchemas = {
+export interface ModuleData {
+  readonly battery: BatteryData;
+  readonly cpu: CPUData;
+  readonly discord: DiscordData;
+  readonly disks: DisksData;
+  readonly displays: DisplaysData;
+  readonly gpus: GPUsData;
+  readonly media: MediaData;
+  readonly memory: MemoryData;
+  readonly networks: NetworksData;
+  readonly processes: ProcessesData;
+  readonly sensors: SensorsData;
+  readonly system: SystemData;
+}
+
+export const ModuleDataSchemas: {
+  readonly [K in keyof ModuleData]: Schema.Decoder<ModuleData[K]>;
+} = {
   battery: BatteryData,
   cpu: CPUData,
   discord: DiscordData,
@@ -647,10 +723,38 @@ export const ModuleDataSchemas = {
   processes: ProcessesData,
   sensors: SensorsData,
   system: SystemData,
-} as const;
-
-export type ModuleData = {
-  readonly [
-    K in keyof typeof ModuleDataSchemas
-  ]: (typeof ModuleDataSchemas)[K]["Type"];
 };
+
+export const ModulesData = Schema.Struct({
+  battery: Schema.optionalKey(BatteryData),
+  cpu: Schema.optionalKey(CPUData),
+  discord: Schema.optionalKey(DiscordData),
+  disks: Schema.optionalKey(DisksData),
+  displays: Schema.optionalKey(DisplaysData),
+  gpus: Schema.optionalKey(GPUsData),
+  media: Schema.optionalKey(MediaData),
+  memory: Schema.optionalKey(MemoryData),
+  networks: Schema.optionalKey(NetworksData),
+  processes: Schema.optionalKey(ProcessesData),
+  sensors: Schema.optionalKey(SensorsData),
+  system: Schema.optionalKey(SystemData),
+});
+
+export interface ModulesData extends Schema.Schema.Type<typeof ModulesData> {}
+
+export const ModuleDataUpdate = Schema.Union([
+  Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),
+  Schema.Struct({ module: Schema.Literal("cpu"), data: CPUData }),
+  Schema.Struct({ module: Schema.Literal("discord"), data: DiscordData }),
+  Schema.Struct({ module: Schema.Literal("disks"), data: DisksData }),
+  Schema.Struct({ module: Schema.Literal("displays"), data: DisplaysData }),
+  Schema.Struct({ module: Schema.Literal("gpus"), data: GPUsData }),
+  Schema.Struct({ module: Schema.Literal("media"), data: MediaData }),
+  Schema.Struct({ module: Schema.Literal("memory"), data: MemoryData }),
+  Schema.Struct({ module: Schema.Literal("networks"), data: NetworksData }),
+  Schema.Struct({ module: Schema.Literal("processes"), data: ProcessesData }),
+  Schema.Struct({ module: Schema.Literal("sensors"), data: SensorsData }),
+  Schema.Struct({ module: Schema.Literal("system"), data: SystemData }),
+]);
+
+export type ModuleDataUpdate = typeof ModuleDataUpdate.Type;
