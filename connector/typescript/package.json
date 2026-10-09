@@ -55,11 +55,11 @@
   },
   "devDependencies": {
     "@effect/tsgo": "0.51.1",
-    "@oxlint/plugins": "1.86.0",
+    "@oxlint/plugins": "1.87.0",
     "@timmo001/oxlint-rules": "0.5.0",
     "@types/bun": "1.4.2",
     "effect": "4.0.2",
-    "oxlint": "1.86.0",
+    "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
     "prettier": "3.9.9",
     "typescript": "7.0.2"
