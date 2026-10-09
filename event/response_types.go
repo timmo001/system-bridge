@@ -10,6 +10,7 @@ const (
 	ResponseTypeDirectories              ResponseType = "DIRECTORIES"
 	ResponseTypeDirectory                ResponseType = "DIRECTORY"
 	ResponseTypeDiskMounts               ResponseType = "DISK_MOUNTS"
+	ResponseTypeDiscordControlled        ResponseType = "DISCORD_CONTROLLED"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"

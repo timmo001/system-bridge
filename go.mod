@@ -6,6 +6,7 @@ toolchain go1.27.2
 
 require (
 	fyne.io/systray v1.12.2
+	github.com/Microsoft/go-winio v0.6.3
 	github.com/distatus/battery v0.11.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v1.1.0
@@ -63,11 +64,11 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
 	golang.org/x/image v0.43.0 // indirect
-	golang.org/x/mod v0.37.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/tools v0.50.0 // indirect
 	howett.net/plist v1.0.1 // indirect
 )

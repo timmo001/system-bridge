@@ -20,6 +20,7 @@ var knownModules = map[types.ModuleName]struct{}{
 	types.ModuleBattery:   {},
 	types.ModuleCPU:       {},
 	types.ModuleDisks:     {},
+	types.ModuleDiscord:   {},
 	types.ModuleDisplays:  {},
 	types.ModuleGPUs:      {},
 	types.ModuleMedia:     {},

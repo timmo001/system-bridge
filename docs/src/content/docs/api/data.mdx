@@ -27,7 +27,7 @@ This endpoint requires authentication via the `X-API-Token` header or the `token
   </TabItem>
 </Tabs>
 
-`{module}` is one of: `battery`, `cpu`, `disks`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
+`{module}` is one of: `battery`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
 
 ## Response
 
@@ -73,6 +73,21 @@ All fields are `null` when no battery is present.
 | `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`. |
 
 Each partition has `device`, `mount_point`, `filesystem_type`, `options`, `category` (`primary`, `bind`, or `squashfs`), and `usage` (`total`, `used`, `free`, `percent`).
+
+### `discord`
+
+The state of the local Discord app. This module only exists once Discord is [set up](/running/#discord), and appears without a restart.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `connected` | boolean | Whether System Bridge is connected to the Discord app. |
+| `authenticated` | boolean | Whether Discord accepted the authorization. |
+| `mute` | boolean | Whether you are muted. |
+| `deaf` | boolean | Whether you are deafened. |
+| `input_volume` | number | Microphone volume as Discord's slider shows it, 0-100. |
+| `output_volume` | number | Output volume as Discord's slider shows it, 0-200. |
+
+The voice fields are `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
 
 ### `displays`
 

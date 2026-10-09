@@ -20,6 +20,13 @@ type DataStore struct {
 	registry map[types.ModuleName]types.Module
 }
 
+// lazyModules register when they first receive data instead of at startup.
+// Use this for integrations that only exist once the user sets them up, so
+// an unused one adds no data or broadcasts.
+var lazyModules = map[types.ModuleName]types.Updater{
+	types.ModuleDiscord: data_module.DiscordModule{},
+}
+
 func NewDataStore() (*DataStore, error) {
 	ds := &DataStore{registry: make(map[types.ModuleName]types.Module, 0)}
 
@@ -108,7 +115,12 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 
 	module, ok := d.registry[name]
 	if !ok {
-		return fmt.Errorf("%s not found in registry", name)
+		u, lazy := lazyModules[name]
+		if !lazy {
+			return fmt.Errorf("%s not found in registry", name)
+		}
+		slog.Info("Registering data module", "module", name)
+		module = types.Module{Updater: u, Name: name}
 	}
 
 	// Validate module updater
