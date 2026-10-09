@@ -93,6 +93,22 @@ Stable builds are attached to the releases page. Development builds from the lat
   </TabItem>
 </Tabs>
 
+## Optional dependencies
+
+System Bridge reads most hardware metrics directly from the kernel, so these tools aren't required. On Linux, installing them improves detection on some systems:
+
+| Package | Tool | What it adds |
+| --- | --- | --- |
+| `lm_sensors` (Arch, Fedora), `lm-sensors` (Debian / Ubuntu) | `sensors` | The full set of temperature and fan sensors on some boards. Run `sudo sensors-detect` once to load the relevant modules. |
+| `nvidia-utils` | `nvidia-smi` | NVIDIA GPU metrics. Intel and AMD GPUs use the kernel `drm`/`hwmon` interfaces and need nothing extra. |
+| `pciutils` | `lspci` | Friendly GPU model names. GPUs are still detected without it, but fall back to a generic name. |
+| `pipewire` (Arch), `pipewire-bin` (Debian / Ubuntu), `pipewire-utils` (Fedora) | `pw-dump` | Names the apps using the microphone or camera. Without it, microphone usage falls back to ALSA, which names the sound server instead of the app. |
+| `zenity` | `zenity` | The confirmation before **Quit** or **Hide system tray**. Without it, those actions can't be confirmed, so they don't run. |
+
+The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire and `zenity`, so `apt` and `dnf` install them by default. The Arch package lists all of these as optional dependencies, which `pacman` shows but doesn't install.
+
+Windows needs no optional tools.
+
 ## Next steps
 
 - Start System Bridge: see [Running](/running/).

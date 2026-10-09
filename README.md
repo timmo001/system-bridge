@@ -30,12 +30,18 @@ System Bridge reads most hardware metrics directly from the kernel, so these
 tools are not required. Installing them improves detection on some systems:
 
 - **Linux**
-  - `pciutils` (`lspci`): resolves friendly GPU model names. GPUs are still
-    detected without it, but fall back to a generic name.
   - `lm_sensors`: helps expose the full set of temperature and fan sensors on
     some boards. Run `sudo sensors-detect` once to load the relevant modules.
   - `nvidia-utils` (`nvidia-smi`): required for NVIDIA GPU metrics. Intel and
     AMD GPUs use the kernel `drm`/`hwmon` interfaces and need nothing extra.
+  - `pciutils` (`lspci`): resolves friendly GPU model names. GPUs are still
+    detected without it, but fall back to a generic name.
+  - `pipewire` (`pw-dump`; `pipewire-bin` on Ubuntu, `pipewire-utils` on
+    Fedora): names the apps using the microphone or camera. Without it,
+    microphone usage falls back to ALSA, which names the sound server instead
+    of the app.
+  - `zenity`: shows the confirmation before **Quit** or **Hide system tray**.
+    Without it, those actions can't be confirmed, so they don't run.
 
   Install with pacman (`sudo pacman -S pciutils lm_sensors`) or apt
   (`sudo apt install pciutils lm-sensors`).
