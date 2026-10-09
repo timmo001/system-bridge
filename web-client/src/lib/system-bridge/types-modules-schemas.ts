@@ -188,6 +188,45 @@ export const MemoryVirtualSchema = z.object({
 
 export type MemoryVirtual = z.infer<typeof MemoryVirtualSchema>;
 
+// Discord User
+export const DiscordUserSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  global_name: z.string().nullish(),
+  avatar_url: z.string().nullish(),
+});
+
+export type DiscordUser = z.infer<typeof DiscordUserSchema>;
+
+// Discord Device
+export const DiscordDeviceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type DiscordDevice = z.infer<typeof DiscordDeviceSchema>;
+
+// Discord Voice Mode
+export const DiscordVoiceModeSchema = z.object({
+  type: z.string().nullish(),
+  auto_threshold: z.boolean().nullish(),
+  threshold: z.number().nullish(),
+  delay: z.number().nullish(),
+});
+
+export type DiscordVoiceMode = z.infer<typeof DiscordVoiceModeSchema>;
+
+// Discord Voice Processing
+export const DiscordVoiceProcessingSchema = z.object({
+  noise_suppression: z.boolean().nullish(),
+  echo_cancellation: z.boolean().nullish(),
+  automatic_gain_control: z.boolean().nullish(),
+});
+
+export type DiscordVoiceProcessing = z.infer<
+  typeof DiscordVoiceProcessingSchema
+>;
+
 // Per-CPU Data
 export const PerCPUSchema = z.object({
   id: z.number(),
@@ -301,6 +340,15 @@ export const SensorsNVIDIAGPUSchema = z.object({
 });
 
 export type SensorsNVIDIAGPU = z.infer<typeof SensorsNVIDIAGPUSchema>;
+
+// Discord Audio
+export const DiscordAudioSchema = z.object({
+  volume: z.number().nullish(),
+  device_id: z.string().nullish(),
+  devices: z.array(DiscordDeviceSchema),
+});
+
+export type DiscordAudio = z.infer<typeof DiscordAudioSchema>;
 
 // Disk
 export const DiskSchema = z.object({
@@ -454,10 +502,15 @@ export type DisksData = z.infer<typeof DisksDataSchema>;
 export const DiscordDataSchema = z.object({
   connected: z.boolean(),
   authenticated: z.boolean(),
+  user: DiscordUserSchema.nullish(),
   mute: z.boolean().nullish(),
   deaf: z.boolean().nullish(),
-  input_volume: z.number().nullish(),
-  output_volume: z.number().nullish(),
+  input: DiscordAudioSchema.nullish(),
+  output: DiscordAudioSchema.nullish(),
+  mode: DiscordVoiceModeSchema.nullish(),
+  processing: DiscordVoiceProcessingSchema.nullish(),
+  qos: z.boolean().nullish(),
+  silence_warning: z.boolean().nullish(),
 });
 
 export type DiscordData = z.infer<typeof DiscordDataSchema>;

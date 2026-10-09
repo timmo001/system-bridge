@@ -137,9 +137,11 @@ func runSession(ctx context.Context, creds *Credentials) error {
 	slog.Info("Connected to Discord")
 	updateState(func(d *types.DiscordData) { d.Connected = true })
 
-	if err := authenticate(ctx, s, creds); err != nil {
+	auth, err := authenticate(ctx, s, creds)
+	if err != nil {
 		return err
 	}
+	applyUser(auth)
 
 	voice, err := s.call(ctx, "GET_VOICE_SETTINGS", nil, "", rpcTimeout)
 	if err != nil {
@@ -160,7 +162,8 @@ func runSession(ctx context.Context, creds *Credentials) error {
 	return s.err
 }
 
-func authenticate(ctx context.Context, s *session, creds *Credentials) error {
+// authenticate returns the AUTHENTICATE response.
+func authenticate(ctx context.Context, s *session, creds *Credentials) (json.RawMessage, error) {
 	tok, err := loadToken()
 	if err != nil {
 		slog.Warn("Ignoring stored Discord token", "error", err)
@@ -175,7 +178,7 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) error {
 			slog.Info("Discord rejected the token refresh, authorizing again", "error", err)
 			tok = nil
 		case err != nil:
-			return fmt.Errorf("failed to refresh Discord token: %w", err)
+			return nil, fmt.Errorf("failed to refresh Discord token: %w", err)
 		default:
 			tok = refreshed
 			if err := saveToken(tok); err != nil {
@@ -184,59 +187,128 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) error {
 		}
 	}
 	if tok != nil {
-		_, err := s.call(ctx, "AUTHENTICATE", map[string]any{"access_token": tok.AccessToken}, "", rpcTimeout)
+		data, err := s.call(ctx, "AUTHENTICATE", map[string]any{"access_token": tok.AccessToken}, "", rpcTimeout)
 		if err == nil {
-			return nil
+			return data, nil
 		}
 		if !errors.Is(err, errRejected) {
-			return err
+			return nil, err
 		}
 		slog.Info("Discord rejected the stored token, authorizing again", "error", err)
 		clearToken()
 	}
 
-	if err := authorize(ctx, s, creds); err != nil {
-		return fmt.Errorf("%w: %w", errAuth, err)
+	data, err := authorize(ctx, s, creds)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", errAuth, err)
 	}
-	return nil
+	return data, nil
 }
 
-// authorize shows the Discord approval prompt and stores the new token.
-func authorize(ctx context.Context, s *session, creds *Credentials) error {
+// authorize shows the Discord approval prompt, stores the new token and
+// returns the AUTHENTICATE response.
+func authorize(ctx context.Context, s *session, creds *Credentials) (json.RawMessage, error) {
 	slog.Info("Requesting Discord authorization. Approve the prompt in Discord.")
 	data, err := s.call(ctx, "AUTHORIZE", map[string]any{
 		"client_id": creds.ClientID,
 		"scopes":    []string{"rpc"},
 	}, "", authorizeTimeout)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var authz struct {
 		Code string `json:"code"`
 	}
 	if err := json.Unmarshal(data, &authz); err != nil {
-		return fmt.Errorf("failed to parse AUTHORIZE response: %w", err)
+		return nil, fmt.Errorf("failed to parse AUTHORIZE response: %w", err)
 	}
 	tok, err := exchangeCode(ctx, creds, authz.Code)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := saveToken(tok); err != nil {
 		slog.Warn("Failed to save Discord token", "error", err)
 	}
-	_, err = s.call(ctx, "AUTHENTICATE", map[string]any{"access_token": tok.AccessToken}, "", rpcTimeout)
-	return err
+	return s.call(ctx, "AUTHENTICATE", map[string]any{"access_token": tok.AccessToken}, "", rpcTimeout)
+}
+
+func applyUser(data json.RawMessage) {
+	var auth struct {
+		User *struct {
+			ID         string  `json:"id"`
+			Username   string  `json:"username"`
+			GlobalName *string `json:"global_name"`
+			Avatar     *string `json:"avatar"`
+		} `json:"user"`
+	}
+	if err := json.Unmarshal(data, &auth); err != nil {
+		slog.Warn("Failed to parse Discord user", "error", err)
+		return
+	}
+	if auth.User == nil {
+		return
+	}
+	user := types.DiscordUser{
+		ID:         auth.User.ID,
+		Username:   auth.User.Username,
+		GlobalName: auth.User.GlobalName,
+	}
+	if auth.User.Avatar != nil && *auth.User.Avatar != "" {
+		url := fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", auth.User.ID, *auth.User.Avatar)
+		user.AvatarURL = &url
+	}
+	updateState(func(d *types.DiscordData) { d.User = &user })
+}
+
+type voiceDevices struct {
+	DeviceID         *string               `json:"device_id"`
+	Volume           *float64              `json:"volume"`
+	AvailableDevices []types.DiscordDevice `json:"available_devices"`
 }
 
 type voiceSettings struct {
-	Mute  *bool `json:"mute"`
-	Deaf  *bool `json:"deaf"`
-	Input *struct {
-		Volume *float64 `json:"volume"`
-	} `json:"input"`
-	Output *struct {
-		Volume *float64 `json:"volume"`
-	} `json:"output"`
+	Mute                 *bool                   `json:"mute"`
+	Deaf                 *bool                   `json:"deaf"`
+	Input                *voiceDevices           `json:"input"`
+	Output               *voiceDevices           `json:"output"`
+	Mode                 *types.DiscordVoiceMode `json:"mode"`
+	AutomaticGainControl *bool                   `json:"automatic_gain_control"`
+	EchoCancellation     *bool                   `json:"echo_cancellation"`
+	NoiseSuppression     *bool                   `json:"noise_suppression"`
+	QoS                  *bool                   `json:"qos"`
+	SilenceWarning       *bool                   `json:"silence_warning"`
+}
+
+// setIfPresent leaves dst alone when Discord omitted the field.
+func setIfPresent[T any](dst **T, v *T) {
+	if v != nil {
+		*dst = v
+	}
+}
+
+// copyOf returns a new copy of cur, or a zero value when cur is nil.
+func copyOf[T any](cur *T) *T {
+	next := new(T)
+	if cur != nil {
+		*next = *cur
+	}
+	return next
+}
+
+func mergeAudio(cur *types.DiscordAudio, v *voiceDevices) *types.DiscordAudio {
+	next := copyOf(cur)
+	if v.Volume != nil {
+		slider := amplitudeToSlider(*v.Volume)
+		next.Volume = &slider
+	}
+	setIfPresent(&next.DeviceID, v.DeviceID)
+	if v.AvailableDevices != nil {
+		next.Devices = v.AvailableDevices
+	}
+	if next.Devices == nil {
+		next.Devices = []types.DiscordDevice{}
+	}
+	return next
 }
 
 func applyVoice(data json.RawMessage) {
@@ -246,20 +318,31 @@ func applyVoice(data json.RawMessage) {
 		return
 	}
 	updateState(func(d *types.DiscordData) {
-		if v.Mute != nil {
-			d.Mute = v.Mute
+		setIfPresent(&d.Mute, v.Mute)
+		setIfPresent(&d.Deaf, v.Deaf)
+		if v.Input != nil {
+			d.Input = mergeAudio(d.Input, v.Input)
 		}
-		if v.Deaf != nil {
-			d.Deaf = v.Deaf
+		if v.Output != nil {
+			d.Output = mergeAudio(d.Output, v.Output)
 		}
-		if v.Input != nil && v.Input.Volume != nil {
-			slider := amplitudeToSlider(*v.Input.Volume)
-			d.InputVolume = &slider
+		if v.Mode != nil {
+			mode := copyOf(d.Mode)
+			setIfPresent(&mode.Type, v.Mode.Type)
+			setIfPresent(&mode.AutoThreshold, v.Mode.AutoThreshold)
+			setIfPresent(&mode.Threshold, v.Mode.Threshold)
+			setIfPresent(&mode.Delay, v.Mode.Delay)
+			d.Mode = mode
 		}
-		if v.Output != nil && v.Output.Volume != nil {
-			slider := amplitudeToSlider(*v.Output.Volume)
-			d.OutputVolume = &slider
+		if v.NoiseSuppression != nil || v.EchoCancellation != nil || v.AutomaticGainControl != nil {
+			processing := copyOf(d.Processing)
+			setIfPresent(&processing.NoiseSuppression, v.NoiseSuppression)
+			setIfPresent(&processing.EchoCancellation, v.EchoCancellation)
+			setIfPresent(&processing.AutomaticGainControl, v.AutomaticGainControl)
+			d.Processing = processing
 		}
+		setIfPresent(&d.QoS, v.QoS)
+		setIfPresent(&d.SilenceWarning, v.SilenceWarning)
 	})
 }
 

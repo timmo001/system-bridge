@@ -376,6 +376,11 @@ func getStructComment(name string) string {
 		"Fan":                    "Fan Sensor",
 		"SystemUser":             "System User",
 		"DeviceInfo":             "Device Info",
+		"DiscordUser":            "Discord User",
+		"DiscordDevice":          "Discord Device",
+		"DiscordAudio":           "Discord Audio",
+		"DiscordVoiceMode":       "Discord Voice Mode",
+		"DiscordVoiceProcessing": "Discord Voice Processing",
 	}
 
 	if comment, exists := comments[name]; exists {
@@ -554,6 +559,10 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"DeviceInfo",
 		"MemorySwap",
 		"MemoryVirtual",
+		"DiscordUser",
+		"DiscordDevice",
+		"DiscordVoiceMode",
+		"DiscordVoiceProcessing",
 
 		// Structs with simple dependencies
 		"PerCPU",
@@ -564,6 +573,7 @@ func orderStructsByDependency(structs map[string]StructInfo) []string {
 		"SensorsNVIDIADisplay",
 		"SensorsNVIDIADriver",
 		"SensorsNVIDIAGPU",
+		"DiscordAudio",
 
 		// Structs with nested dependencies
 		"Disk",

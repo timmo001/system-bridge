@@ -82,12 +82,25 @@ The state of the local Discord app. This module only exists once Discord is [set
 | --- | --- | --- |
 | `connected` | boolean | Whether System Bridge is connected to the Discord app. |
 | `authenticated` | boolean | Whether Discord accepted the authorization. |
+| `user` | object | The Discord account: `id`, `username`, `global_name` (display name), and `avatar_url`. |
 | `mute` | boolean | Whether you are muted. |
 | `deaf` | boolean | Whether you are deafened. |
-| `input_volume` | number | Microphone volume as Discord's slider shows it, 0-100. |
-| `output_volume` | number | Output volume as Discord's slider shows it, 0-200. |
+| `input` | object | The microphone setup. See below. |
+| `output` | object | The output setup. See below. |
+| `mode` | object | `type` (`VOICE_ACTIVITY` or `PUSH_TO_TALK`), `auto_threshold` (whether Discord sets the voice activity sensitivity), `threshold` (voice activity sensitivity in dB, -100 to 0), and `delay` (push to talk release delay in milliseconds). |
+| `processing` | object | Whether `noise_suppression`, `echo_cancellation`, and `automatic_gain_control` are on. |
+| `qos` | boolean | Whether Discord's quality of service for voice packets is on. |
+| `silence_warning` | boolean | Whether Discord warns you when your microphone picks up nothing. |
 
-The voice fields are `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
+`input` and `output` each have:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `volume` | number | The volume as Discord's slider shows it: 0-100 for input, 0-200 for output. |
+| `device_id` | string | The selected device. `default` follows the system default. |
+| `devices` | array | Devices Discord can use, each with `id` and `name`. |
+
+Every field other than `connected` and `authenticated` is `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
 
 ### `displays`
 

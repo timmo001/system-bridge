@@ -125,15 +125,38 @@ func TestSessionAppliesVoiceUpdates(t *testing.T) {
 
 	require.NoError(t, writeFrame(server, opFrame, map[string]any{
 		"cmd": "DISPATCH", "evt": "VOICE_SETTINGS_UPDATE",
-		"data": map[string]any{"deaf": true, "output": map[string]any{"volume": 199.52623149688796}},
+		"data": map[string]any{
+			"deaf":   true,
+			"output": map[string]any{"volume": 199.52623149688796},
+			"input": map[string]any{
+				"device_id":         "mic",
+				"available_devices": []map[string]any{{"id": "mic", "name": "Microphone"}},
+			},
+			"mode":              map[string]any{"type": "PUSH_TO_TALK"},
+			"noise_suppression": true,
+		},
 	}))
 
 	select {
 	case d := <-updates:
 		require.NotNil(t, d.Deaf)
 		assert.True(t, *d.Deaf)
-		require.NotNil(t, d.OutputVolume)
-		assert.Equal(t, 200.0, *d.OutputVolume)
+		require.NotNil(t, d.Output)
+		require.NotNil(t, d.Output.Volume)
+		assert.Equal(t, 200.0, *d.Output.Volume)
+		assert.Equal(t, []types.DiscordDevice{}, d.Output.Devices)
+		require.NotNil(t, d.Input)
+		assert.Nil(t, d.Input.Volume)
+		require.NotNil(t, d.Input.DeviceID)
+		assert.Equal(t, "mic", *d.Input.DeviceID)
+		assert.Equal(t, []types.DiscordDevice{{ID: "mic", Name: "Microphone"}}, d.Input.Devices)
+		require.NotNil(t, d.Mode)
+		require.NotNil(t, d.Mode.Type)
+		assert.Equal(t, "PUSH_TO_TALK", *d.Mode.Type)
+		require.NotNil(t, d.Processing)
+		require.NotNil(t, d.Processing.NoiseSuppression)
+		assert.True(t, *d.Processing.NoiseSuppression)
+		assert.Nil(t, d.Processing.EchoCancellation)
 	case <-time.After(time.Second):
 		t.Fatal("no state update")
 	}

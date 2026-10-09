@@ -2,10 +2,51 @@ package types
 
 // DiscordData represents the state of the local Discord client
 type DiscordData struct {
-	Connected     bool     `json:"connected"`
-	Authenticated bool     `json:"authenticated"`
-	Mute          *bool    `json:"mute"`
-	Deaf          *bool    `json:"deaf"`
-	InputVolume   *float64 `json:"input_volume"`
-	OutputVolume  *float64 `json:"output_volume"`
+	Connected      bool                    `json:"connected"`
+	Authenticated  bool                    `json:"authenticated"`
+	User           *DiscordUser            `json:"user"`
+	Mute           *bool                   `json:"mute"`
+	Deaf           *bool                   `json:"deaf"`
+	Input          *DiscordAudio           `json:"input"`
+	Output         *DiscordAudio           `json:"output"`
+	Mode           *DiscordVoiceMode       `json:"mode"`
+	Processing     *DiscordVoiceProcessing `json:"processing"`
+	QoS            *bool                   `json:"qos"`
+	SilenceWarning *bool                   `json:"silence_warning"`
+}
+
+// DiscordUser is the Discord account System Bridge is authorized as
+type DiscordUser struct {
+	ID         string  `json:"id"`
+	Username   string  `json:"username"`
+	GlobalName *string `json:"global_name"`
+	AvatarURL  *string `json:"avatar_url"`
+}
+
+// DiscordAudio is the Discord input or output audio setup
+type DiscordAudio struct {
+	Volume   *float64        `json:"volume"`
+	DeviceID *string         `json:"device_id"`
+	Devices  []DiscordDevice `json:"devices"`
+}
+
+// DiscordDevice is an audio device Discord can use
+type DiscordDevice struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// DiscordVoiceMode is how Discord decides when to transmit
+type DiscordVoiceMode struct {
+	Type          *string  `json:"type"`
+	AutoThreshold *bool    `json:"auto_threshold"`
+	Threshold     *float64 `json:"threshold"`
+	Delay         *float64 `json:"delay"`
+}
+
+// DiscordVoiceProcessing is Discord's microphone processing
+type DiscordVoiceProcessing struct {
+	NoiseSuppression     *bool `json:"noise_suppression"`
+	EchoCancellation     *bool `json:"echo_cancellation"`
+	AutomaticGainControl *bool `json:"automatic_gain_control"`
 }
