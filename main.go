@@ -139,7 +139,8 @@ func main() {
 						}
 					}()
 
-					if !cmd.Bool("no-tray") && s.SystemTray {
+					useTray := !cmd.Bool("no-tray") && s.SystemTray
+					if useTray {
 						// Set up tray handlers
 						tray.SetHandlers(tray.Handlers{
 							OpenWebClient: func() {
@@ -182,10 +183,6 @@ func main() {
 								tray.Quit()
 							},
 						})
-
-						// Start the system tray UI
-						go tray.Run()
-						defer tray.Quit()
 					}
 
 					// Create and run backend server with signal-aware context
@@ -196,7 +193,20 @@ func main() {
 						openWebClient(token)
 					}
 
-					return b.Run(cmdCtx)
+					if !useTray {
+						return b.Run(cmdCtx)
+					}
+
+					// macOS only allows the tray on the main thread, which this
+					// goroutine holds, so the backend runs in its own goroutine.
+					backendErr := make(chan error, 1)
+					go func() {
+						err := b.Run(cmdCtx)
+						tray.Quit()
+						backendErr <- err
+					}()
+					tray.Run()
+					return <-backendErr
 				},
 			},
 			{
