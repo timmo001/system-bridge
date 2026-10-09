@@ -6,7 +6,7 @@ go = "1.27.2"
 node = "26.11.1"
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
-uv = "0.12.23"
+uv = "0.12.24"
 
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
