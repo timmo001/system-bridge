@@ -450,6 +450,18 @@ export const DisksDataSchema = z.object({
 
 export type DisksData = z.infer<typeof DisksDataSchema>;
 
+// Discord Module
+export const DiscordDataSchema = z.object({
+  connected: z.boolean(),
+  authenticated: z.boolean(),
+  mute: z.boolean().nullish(),
+  deaf: z.boolean().nullish(),
+  input_volume: z.number().nullish(),
+  output_volume: z.number().nullish(),
+});
+
+export type DiscordData = z.infer<typeof DiscordDataSchema>;
+
 // Displays Module
 export const DisplaysDataSchema = z.array(DisplaySchema);
 
@@ -588,6 +600,7 @@ export type Module = z.infer<typeof ModuleSchema>;
 export const ModuleDataSchemas = {
   battery: BatteryDataSchema,
   cpu: CPUDataSchema,
+  discord: DiscordDataSchema,
   disks: DisksDataSchema,
   displays: DisplaysDataSchema,
   gpus: GPUsDataSchema,

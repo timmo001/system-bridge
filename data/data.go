@@ -28,6 +28,7 @@ func NewDataStore() (*DataStore, error) {
 		data_module.BatteryModule{},
 		data_module.CPUModule{},
 		data_module.DiskModule{},
+		data_module.DiscordModule{},
 		data_module.DisplayModule{},
 		data_module.GPUModule{},
 		data_module.MediaModule{},

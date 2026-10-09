@@ -2,7 +2,7 @@
 title: Control
 ---
 
-Control playback, send notifications, open files and URLs, and manage system power state.
+Control playback and Discord, send notifications, open files and URLs, and manage system power state.
 
 ## Media control
 
@@ -29,6 +29,31 @@ Available actions:
     }
 }
 ```
+
+## Discord control
+
+Send the `DISCORD_CONTROL` event with an `action` to change your Discord voice settings. Discord must be [set up](/running/#discord) first.
+
+Available actions:
+
+- `MUTE`, `UNMUTE`, `TOGGLE_MUTE`
+- `DEAFEN`, `UNDEAFEN`, `TOGGLE_DEAFEN`
+- `SET_INPUT_VOLUME`: set `value` to 0-100.
+- `SET_OUTPUT_VOLUME`: set `value` to 0-200.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "DISCORD_CONTROL",
+    "data": {
+        "action": "SET_INPUT_VOLUME",
+        "value": 80
+    }
+}
+```
+
+The response type is `DISCORD_CONTROLLED`. If Discord is not connected, the response is an `ERROR`.
 
 ## Send notification
 
