@@ -43,7 +43,7 @@ description: Trigger a URL open action over WebSocket.
 ## Link Conventions
 
 - Internal links use root-relative slug paths, e.g. `/api/websocket/control/` or `/using/cli/`. Do **not** use `/docs/...` (legacy, redirected).
-- External links in MDX: include `target="_blank"` and `rel="noopener noreferrer"`.
+- External links open in a new tab automatically: a small script in the Starlight `head` config in `docs/astro.config.mjs` adds `target="_blank"` and `rel="noopener noreferrer"` to every external link. You don't need to add them by hand.
 
 ## Quick Local Check
 
