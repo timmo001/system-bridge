@@ -43,7 +43,6 @@ func TestNewDataStore(t *testing.T) {
 			types.ModuleBattery,
 			types.ModuleCPU,
 			types.ModuleDisks,
-			types.ModuleDiscord,
 			types.ModuleDisplays,
 			types.ModuleGPUs,
 			types.ModuleMedia,
@@ -206,6 +205,16 @@ func TestDataStore_SetModuleData(t *testing.T) {
 		err := ds.SetModuleData("non-existent", map[string]string{"test": "data"})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "not found in registry")
+	})
+
+	t.Run("Set data registers a lazy module", func(t *testing.T) {
+		ds, err := NewDataStore()
+		require.NoError(t, err)
+		assert.NotContains(t, ds.registry, types.ModuleDiscord)
+
+		err = ds.SetModuleData(types.ModuleDiscord, types.DiscordData{})
+		require.NoError(t, err)
+		assert.Contains(t, ds.registry, types.ModuleDiscord)
 	})
 
 	t.Run("Set module data updates timestamp", func(t *testing.T) {

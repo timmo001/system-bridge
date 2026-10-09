@@ -56,13 +56,15 @@ func State() types.DiscordData {
 }
 
 // Run keeps a connection to Discord open until ctx is done. It does nothing
-// until the credentials file exists. update receives every state change.
+// until the credentials file exists. update receives every state change, and
+// is first called once valid credentials load, before Discord connects.
 func Run(ctx context.Context, update func(types.DiscordData)) {
 	mu.Lock()
 	onUpdate = update
 	mu.Unlock()
 
 	lastErr := ""
+	configured := false
 	for {
 		wait := connectRetryDelay
 		creds, err := loadCredentials()
@@ -77,6 +79,11 @@ func Run(ctx context.Context, update func(types.DiscordData)) {
 			wait = credentialsRetryDelay
 		default:
 			lastErr = ""
+			if !configured {
+				configured = true
+				// Report the disconnected state while Discord is closed.
+				updateState(func(*types.DiscordData) {})
+			}
 			err := runSession(ctx, creds)
 			switch {
 			case ctx.Err() != nil:
