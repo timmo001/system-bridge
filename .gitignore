@@ -23,7 +23,8 @@ system-bridge.syso
 .secrets
 
 # Claude
-.claude
+.claude/*
+!.claude/skills
 
 # OpenCode
 .opencode
