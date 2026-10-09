@@ -6,10 +6,23 @@ import icon from 'astro-icon';
 import starlightLlmsTxt from 'starlight-llms-txt';
 import starlightContextualMenu from 'starlight-contextual-menu';
 import starlightLinksValidator from 'starlight-links-validator';
+const site = 'https://system-bridge.timmo.dev';
+
+// Open external links in a new tab. Links to this site, including absolute ones
+// such as the llms.txt files, stay in the same tab.
+const externalLinksScript = `
+document.addEventListener('DOMContentLoaded', () => {
+  for (const link of document.querySelectorAll('a[href^="http"]')) {
+    if (link.origin === location.origin || link.href.startsWith('${site}')) continue;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+});
+`;
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://system-bridge.timmo.dev',
+  site,
   // Old site served docs under /docs/*. Keep those URLs working after the
   // Starlight migration moved pages to the site root.
   redirects: {
@@ -86,6 +99,10 @@ export default defineConfig({
         {
           tag: 'meta',
           attrs: { name: 'twitter:image', content: 'https://system-bridge.timmo.dev/social.jpg' },
+        },
+        {
+          tag: 'script',
+          content: externalLinksScript,
         },
       ],
       components: {
