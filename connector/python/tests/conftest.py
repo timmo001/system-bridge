@@ -23,7 +23,9 @@ from . import (
     TOKEN,
     ClientSessionGenerator,
     bad_request_response,
+    health_response,
     json_response,
+    module_data_response,
     process_message,
     text_response,
     unauthorised_response,
@@ -40,6 +42,8 @@ def mock_http_client_session_generator(
     async def create_client() -> TestClient:
         """Create a client session."""
         app = web.Application()
+        app.router.add_get("/api/data/{module}", module_data_response)
+        app.router.add_get("/api/health", health_response)
         app.router.add_delete("/test/json", json_response)
         app.router.add_get("/test/badrequest", bad_request_response)
         app.router.add_get("/test/json", json_response)

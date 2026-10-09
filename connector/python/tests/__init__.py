@@ -62,6 +62,27 @@ async def bad_request_response(_: web.Request):
     )
 
 
+async def health_response(_: web.Request):
+    """Return a health response."""
+    return web.json_response(
+        {
+            "status": "healthy",
+            "timestamp": "2026-10-09T21:00:00+01:00",
+            "version": "5.0.0",
+        }
+    )
+
+
+async def module_data_response(request: web.Request):
+    """Return a module data response."""
+    module = request.match_info["module"]
+    if module == "cpu":
+        return web.json_response(asdict(FIXTURE_CPU))
+    if module == "displays":
+        return web.json_response([asdict(display) for display in FIXTURE_DISPLAYS])
+    return web.json_response({"error": "Module not found"}, status=404)
+
+
 async def json_response(_: web.Request):
     """Return a json response."""
     return web.json_response({"test": "test"})
@@ -156,9 +177,44 @@ async def process_request(request: Request) -> Response:
         return Response(
             id=request.id,
             type=EventType.FILE,
-            data=asdict(
-                FIXTURE_MEDIA_FILES.files[0],
-            ),
+            data={
+                "name": "test.txt",
+                "path": request.data["path"],
+                "size": 100,
+                "modified": 1630000000000,
+                "extension": "txt",
+                "mime_type": "text/plain; charset=utf-8",
+            },
+        )
+    if request.event == EventType.GET_DIRECTORY:
+        return Response(
+            id=request.id,
+            type=EventType.DIRECTORY,
+            data={
+                "key": request.data["base"],
+                "name": "Documents",
+                "path": "/home/user/documents",
+            },
+        )
+    if request.event == EventType.VALIDATE_DIRECTORY:
+        return Response(
+            id=request.id,
+            type=EventType.DIRECTORY_VALIDATED,
+            data={"valid": request.data["path"] == "/home/user/documents"},
+        )
+    if request.event == EventType.UNREGISTER_DATA_LISTENER:
+        return Response(
+            id=request.id,
+            type=EventType.DATA_LISTENER_UNREGISTERED,
+            data=None,
+            message="Listener unregistered",
+        )
+    if request.event == EventType.UPDATE_SETTINGS:
+        return Response(
+            id=request.id,
+            type=EventType.SETTINGS_UPDATED,
+            data=request.data,
+            message="Settings updated",
         )
     if request.event == EventType.REGISTER_DATA_LISTENER:
         return Response(
@@ -250,10 +306,11 @@ async def process_request(request: Request) -> Response:
             id=request.id,
             type=EventType.SETTINGS_RESULT,
             data={
-                "api": {"token": "test-token", "port": 9170},
                 "autostart": False,
-                "keyboard_hotkeys": [],
-                "log_level": "INFO",
+                "systemTray": True,
+                "hotkeys": [],
+                "logLevel": "WARN",
+                "disks": {"allowedSecondaryMountPoints": []},
                 "media": {"directories": []},
                 "commands": {
                     "allowlist": [

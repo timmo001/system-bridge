@@ -1,6 +1,8 @@
 # serializer version: 1
 # name: test_keyboard_key
   KeyboardKey(
+    delay=None,
     key='A',
+    modifiers=None,
   )
 # ---

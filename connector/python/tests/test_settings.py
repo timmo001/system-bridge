@@ -3,28 +3,64 @@
 from syrupy.assertion import SnapshotAssertion
 
 from systembridgeconnector.models.settings import (
+    SettingDirectory,
+    SettingHotkey,
     Settings,
-    SettingsAPI,
     SettingsCommandDefinition,
     SettingsCommands,
+    SettingsDisks,
 )
 
 
 def test_settings(snapshot: SnapshotAssertion):
     """Test the settings."""
-    settings = Settings(
-        api=SettingsAPI(
-            token="token",
-        ),
-    )
+    settings = Settings()
     assert isinstance(settings, Settings)
     assert settings == snapshot
 
 
-def test_settings_token():
-    """Test the settings token."""
-    settings = Settings()
-    assert settings.api.token != ""
+def test_settings_from_backend():
+    """Test settings parse the backend's settings data."""
+    settings = Settings(
+        autostart=True,
+        systemTray=False,
+        hotkeys=[{"name": "Lock", "key": "ctrl+l"}],
+        logLevel="DEBUG",
+        commands={
+            "allowlist": [
+                {
+                    "id": "test-command-id",
+                    "name": "Test Command",
+                    "command": "/usr/bin/test",
+                    "workingDir": "",
+                    "arguments": [],
+                }
+            ]
+        },
+        disks={"allowedSecondaryMountPoints": ["/mnt/data"]},
+        media={"directories": [{"name": "Music", "path": "/home/user/Music"}]},
+    )
+    assert settings.systemTray is False
+    assert settings.hotkeys == [SettingHotkey(name="Lock", key="ctrl+l")]
+    assert isinstance(settings.commands.allowlist[0], SettingsCommandDefinition)
+    assert settings.disks == SettingsDisks(
+        allowedSecondaryMountPoints=["/mnt/data"],
+    )
+    assert settings.media.directories == [
+        SettingDirectory(name="Music", path="/home/user/Music")
+    ]
+
+
+def test_settings_from_backend_null_lists():
+    """Test settings accept null lists from the backend."""
+    settings = Settings(
+        hotkeys=None,  # type: ignore[arg-type]
+        commands={"allowlist": None},  # type: ignore[arg-type]
+        media={"directories": None},  # type: ignore[arg-type]
+    )
+    assert settings.hotkeys == []
+    assert settings.commands.allowlist == []
+    assert settings.media.directories == []
 
 
 def test_settings_command_definition(snapshot: SnapshotAssertion):
@@ -86,7 +122,6 @@ def test_settings_commands_empty(snapshot: SnapshotAssertion):
 def test_settings_with_commands(snapshot: SnapshotAssertion):
     """Test settings with commands."""
     settings = Settings(
-        api=SettingsAPI(token="token"),
         commands=SettingsCommands(
             allowlist=[
                 SettingsCommandDefinition(

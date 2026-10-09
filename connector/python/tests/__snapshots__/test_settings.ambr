@@ -1,22 +1,23 @@
 # serializer version: 1
 # name: test_settings
   Settings(
-    api=SettingsAPI(
-      port=9170,
-      token='token',
-    ),
     autostart=False,
     commands=SettingsCommands(
       allowlist=list([
       ]),
     ),
-    keyboard_hotkeys=list([
+    disks=SettingsDisks(
+      allowedSecondaryMountPoints=list([
+      ]),
+    ),
+    hotkeys=list([
     ]),
-    log_level='INFO',
+    logLevel='WARN',
     media=SettingsMedia(
       directories=list([
       ]),
     ),
+    systemTray=True,
   )
 # ---
 # name: test_settings_command_definition
@@ -63,10 +64,6 @@
 # ---
 # name: test_settings_with_commands
   Settings(
-    api=SettingsAPI(
-      port=9170,
-      token='token',
-    ),
     autostart=False,
     commands=SettingsCommands(
       allowlist=list([
@@ -80,12 +77,17 @@
         ),
       ]),
     ),
-    keyboard_hotkeys=list([
+    disks=SettingsDisks(
+      allowedSecondaryMountPoints=list([
+      ]),
+    ),
+    hotkeys=list([
     ]),
-    log_level='INFO',
+    logLevel='WARN',
     media=SettingsMedia(
       directories=list([
       ]),
     ),
+    systemTray=True,
   )
 # ---

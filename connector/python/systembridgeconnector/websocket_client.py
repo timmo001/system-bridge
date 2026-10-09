@@ -26,7 +26,7 @@ from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_control import MediaControl
 from .models.media_directories import MediaDirectory
-from .models.media_files import MediaFile, MediaFiles
+from .models.media_files import FileInfo, MediaFile, MediaFiles
 from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.modules import GetData, ModulesData, RegisterDataListener
@@ -36,7 +36,7 @@ from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
 from .models.request import Request
 from .models.response import Response
-from .models.settings import SettingsCommandDefinition, SettingsCommands
+from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
 from .models.update import Update
 
 
@@ -260,19 +260,90 @@ class WebSocketClient(Base):
             response_type=EventType.DISK_MOUNTS,
         )
 
+        return DiskMounts(**self._response_dict(response, "disk mounts"))
+
+    async def get_directory(
+        self,
+        base: str,
+        request_id: str | None = None,
+    ) -> MediaDirectory:
+        """Get a media directory by its key."""
+        self._logger.info("Getting directory: %s", base)
+        response = await self.send_message(
+            EventType.GET_DIRECTORY,
+            request_id,
+            {"base": base},
+            wait_for_response=True,
+            response_type=EventType.DIRECTORY,
+        )
+
+        return MediaDirectory(**self._response_dict(response, "directory"))
+
+    async def validate_directory(
+        self,
+        path: str,
+        request_id: str | None = None,
+    ) -> bool:
+        """Check a path exists and is a directory."""
+        self._logger.info("Validating directory: %s", path)
+        response = await self.send_message(
+            EventType.VALIDATE_DIRECTORY,
+            request_id,
+            {"path": path},
+            wait_for_response=True,
+            response_type=EventType.DIRECTORY_VALIDATED,
+        )
+
+        return self._response_dict(response, "validate directory").get("valid") is True
+
+    async def get_settings(
+        self,
+        request_id: str | None = None,
+    ) -> Settings:
+        """Get settings."""
+        self._logger.info("Getting settings")
+        response = await self.send_message(
+            EventType.GET_SETTINGS,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.SETTINGS_RESULT,
+        )
+
+        return Settings(**self._response_dict(response, "settings"))
+
+    async def update_settings(
+        self,
+        model: Settings,
+        request_id: str | None = None,
+    ) -> Settings:
+        """Update settings, returning the saved settings."""
+        self._logger.info("Updating settings")
+        response = await self.send_message(
+            EventType.UPDATE_SETTINGS,
+            request_id,
+            asdict(model),
+            wait_for_response=True,
+            response_type=EventType.SETTINGS_UPDATED,
+        )
+
+        return Settings(**self._response_dict(response, "update settings"))
+
+    def _response_dict(self, response: Response, name: str) -> dict[str, Any]:
+        """Return a response's data, raising on an error, timeout or bad data."""
         if response.type == EventType.ERROR:
             if response.subtype == "TIMEOUT":
                 raise ConnectionErrorException(
-                    response.message or "Timeout waiting for disk mounts response"
+                    response.message or f"Timeout waiting for {name} response"
                 )
-            raise BadRequestException(response.message or "Failed to get disk mounts")
+            raise BadRequestException(response.message or f"Failed to get {name}")
 
         if not isinstance(response.data, dict):
             raise TypeError(
-                f"Disk mounts response data must be a dict, got {type(response.data).__name__}"
+                f"{name.capitalize()} response data must be a dict, got {type(response.data).__name__}"
             )
 
-        return DiskMounts(**response.data)
+        return response.data
 
     async def get_files(
         self,
@@ -305,20 +376,20 @@ class WebSocketClient(Base):
         self,
         model: MediaGetFile,
         request_id: str | None = None,
-    ) -> MediaFile | None:
-        """Get files."""
+    ) -> FileInfo | None:
+        """Get file info."""
         self._logger.info("Getting file: %s", model)
         response = await self.send_message(
             EventType.GET_FILE,
             request_id,
-            asdict(model),
+            {"path": model.path},
             wait_for_response=True,
             response_type=EventType.FILE,
         )
 
         return (
-            MediaFile(**response.data)
-            if response.data is not None and isinstance(response.data, dict)
+            FileInfo(**response.data)
+            if response.type == EventType.FILE and isinstance(response.data, dict)
             else None
         )
 
@@ -335,6 +406,20 @@ class WebSocketClient(Base):
             asdict(model),
             wait_for_response=True,
             response_type=EventType.DATA_LISTENER_REGISTERED,
+        )
+
+    async def unregister_data_listener(
+        self,
+        request_id: str | None = None,
+    ) -> Response:
+        """Unregister data listener."""
+        self._logger.info("Unregistering data listener")
+        return await self.send_message(
+            EventType.UNREGISTER_DATA_LISTENER,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.DATA_LISTENER_UNREGISTERED,
         )
 
     async def keyboard_keypress(

@@ -7,11 +7,13 @@ from aiohttp import ClientResponse, ClientSession
 from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
 
 from .base import Base
+from .const import MODEL_MAP, Model
 from .exceptions import (
     AuthenticationException,
     BadRequestException,
     ConnectionErrorException,
 )
+from .models.modules import Module
 
 BASE_HEADERS = {
     "Accept": "application/json",
@@ -67,6 +69,18 @@ class HTTPClient(Base):
         if "application/json" in response.headers.get("Content-Type", ""):
             return await response.json()
         return await response.text()
+
+    async def get_health(self) -> dict[str, Any]:
+        """Get the backend health: status, timestamp and version."""
+        return await self.get("/api/health")
+
+    async def get_module_data(self, module: Module) -> Any:
+        """Get the latest data for a module, mapped to its model."""
+        data = await self.get(f"/api/data/{module}")
+        model_cls = MODEL_MAP[Model(module)]
+        if isinstance(data, list):
+            return [model_cls(**item) for item in data]
+        return model_cls(**data)
 
     async def post(
         self,

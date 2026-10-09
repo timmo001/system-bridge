@@ -13,6 +13,7 @@ from systembridgeconnector.const import EventSubType, EventType
 from systembridgeconnector.exceptions import (
     AuthenticationException,
     BadMessageException,
+    BadRequestException,
     ConnectionClosedException,
     ConnectionErrorException,
     DataMissingException,
@@ -24,6 +25,7 @@ from systembridgeconnector.models.keyboard_key import KeyboardKey
 from systembridgeconnector.models.keyboard_text import KeyboardText
 from systembridgeconnector.models.media_control import MediaControl
 from systembridgeconnector.models.media_directories import MediaDirectory
+from systembridgeconnector.models.media_files import FileInfo
 from systembridgeconnector.models.media_get_file import MediaGetFile
 from systembridgeconnector.models.media_get_files import MediaGetFiles
 from systembridgeconnector.models.modules import GetData, Module, RegisterDataListener
@@ -36,7 +38,7 @@ from systembridgeconnector.models.notification import Notification
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
 from systembridgeconnector.models.response import Response
-from systembridgeconnector.models.settings import SettingsCommands
+from systembridgeconnector.models.settings import Settings, SettingsCommands
 from systembridgeconnector.models.update import Update
 from systembridgeconnector.websocket_client import WebSocketClient
 
@@ -276,16 +278,104 @@ async def test_get_file(
     mock_websocket_client_listening: WebSocketClient,
 ):
     """Test the websocket client."""
+    file_info = await mock_websocket_client_listening.get_file(
+        MediaGetFile(
+            base="documents",
+            path="/home/user/documents/test.txt",
+        ),
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(file_info, FileInfo)
+    assert file_info.path == "/home/user/documents/test.txt"
+    assert file_info == snapshot
+
+
+@pytest.mark.asyncio
+async def test_get_directory(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    assert await mock_websocket_client_listening.get_directory(
+        "documents",
+        request_id=REQUEST_ID,
+    ) == MediaDirectory(
+        key="documents",
+        name="Documents",
+        path="/home/user/documents",
+    )
+
+
+@pytest.mark.asyncio
+async def test_validate_directory(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    assert await mock_websocket_client_listening.validate_directory(
+        "/home/user/documents",
+    )
+    assert not await mock_websocket_client_listening.validate_directory(
+        "/home/user/missing",
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_settings(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    settings = await mock_websocket_client_listening.get_settings(
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(settings, Settings)
+    assert settings.systemTray is True
+    assert settings.commands.allowlist[0].id == "test-command-id"
+
+
+@pytest.mark.asyncio
+async def test_update_settings(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    settings = Settings(autostart=True, logLevel="DEBUG")
     assert (
-        await mock_websocket_client_listening.get_file(
-            MediaGetFile(
-                base="documents",
-                path="/home/user/documents/test.txt",
-            ),
+        await mock_websocket_client_listening.update_settings(
+            settings,
             request_id=REQUEST_ID,
         )
-        == snapshot
+        == settings
     )
+
+
+@pytest.mark.asyncio
+async def test_get_settings_error(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test get_settings raises on an error response."""
+    with (
+        patch.object(
+            mock_websocket_client_listening,
+            "send_message",
+            return_value=Response(
+                id=REQUEST_ID,
+                type=EventType.ERROR,
+                message="Failed to load settings",
+                data=None,
+            ),
+        ),
+        pytest.raises(BadRequestException),
+    ):
+        await mock_websocket_client_listening.get_settings()
+
+
+@pytest.mark.asyncio
+async def test_unregister_data_listener(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.unregister_data_listener(
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.DATA_LISTENER_UNREGISTERED
 
 
 @pytest.mark.asyncio

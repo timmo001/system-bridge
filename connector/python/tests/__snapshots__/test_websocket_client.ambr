@@ -191,14 +191,12 @@
   )
 # ---
 # name: test_get_file
-  MediaFile(
-    content_type='text/plain',
-    extension='.txt',
-    is_directory=False,
-    mod_time=100.0,
-    name='file1',
-    path='/full/path/to/file1',
-    permissions='-rw-r--r--',
+  FileInfo(
+    extension='txt',
+    mime_type='text/plain; charset=utf-8',
+    modified=1630000000000,
+    name='test.txt',
+    path='/home/user/documents/test.txt',
     size=100,
   )
 # ---
@@ -212,7 +210,9 @@
 # name: test_keyboard_keypress
   Response(
     data=dict({
+      'delay': None,
       'key': 'a',
+      'modifiers': None,
     }),
     id='test',
     message=None,
@@ -224,6 +224,7 @@
 # name: test_keyboard_text
   Response(
     data=dict({
+      'delay': None,
       'text': 'test',
     }),
     id='test',

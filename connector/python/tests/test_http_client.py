@@ -11,6 +11,23 @@ from systembridgeconnector.exceptions import (
     ConnectionErrorException,
 )
 from systembridgeconnector.http_client import HTTPClient
+from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
+from systembridgeconnector.models.fixtures.modules.displays import FIXTURE_DISPLAYS
+from systembridgeconnector.models.modules import Module
+
+
+@pytest.mark.asyncio
+async def test_get_health(mock_http_client: HTTPClient):
+    """Test the get health method."""
+    health = await mock_http_client.get_health()
+    assert health["status"] == "healthy"
+
+
+@pytest.mark.asyncio
+async def test_get_module_data(mock_http_client: HTTPClient):
+    """Test the get module data method maps data to models."""
+    assert await mock_http_client.get_module_data(Module.CPU) == FIXTURE_CPU
+    assert await mock_http_client.get_module_data(Module.DISPLAYS) == FIXTURE_DISPLAYS
 
 
 @pytest.mark.asyncio

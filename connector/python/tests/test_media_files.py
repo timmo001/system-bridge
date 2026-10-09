@@ -17,6 +17,23 @@ def test_media_files(snapshot: SnapshotAssertion):
     assert media_files == snapshot
 
 
+def test_media_file_from_backend():
+    """Test a media file parses the backend's GET_FILES item."""
+    media_file = MediaFile(
+        name="song.mp3",
+        path="/home/user/Music/song.mp3",
+        size=100,
+        isDirectory=False,
+        modTime="2021-08-26T17:46:40.123456789Z",
+        permissions="-rw-r--r--",
+        contentType="audio/mpeg",
+        extension=".mp3",
+    )
+    assert media_file.is_directory is False
+    assert media_file.content_type == "audio/mpeg"
+    assert media_file.mod_time == 1630000000.123456
+
+
 def test_media_files_dict(snapshot: SnapshotAssertion):
     """Test media files dict."""
     media_files_dict = asdict(FIXTURE_MEDIA_FILES)

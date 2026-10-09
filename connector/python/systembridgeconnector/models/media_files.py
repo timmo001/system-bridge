@@ -1,11 +1,18 @@
 """Media Files."""
 
 from dataclasses import MISSING, dataclass, fields
+from datetime import datetime
 from typing import Any, cast
+
+from .helpers import filter_unexpected_fields
 
 
 def _normalize_media_file_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
-    """Normalize camelCase JSON keys to snake_case for MediaFile."""
+    """Normalize camelCase JSON keys to snake_case for MediaFile.
+
+    The backend sends modTime as an RFC 3339 string, which becomes a Unix
+    timestamp in seconds.
+    """
     key_mapping = {
         "isDirectory": "is_directory",
         "modTime": "mod_time",
@@ -14,6 +21,8 @@ def _normalize_media_file_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
     normalized: dict[str, Any] = {}
     for key, value in kwargs.items():
         normalized[key_mapping.get(key, key)] = value
+    if isinstance(mod_time := normalized.get("mod_time"), str):
+        normalized["mod_time"] = datetime.fromisoformat(mod_time).timestamp()
     return normalized
 
 
@@ -47,6 +56,22 @@ class MediaFile:
                 object.__setattr__(self, field.name, field.default_factory())
             else:
                 raise TypeError(f"Missing required field: {field.name}")
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class FileInfo:
+    """File Info, as returned for a single file.
+
+    modified is a Unix timestamp in milliseconds and extension has no leading dot.
+    """
+
+    name: str
+    path: str
+    size: int
+    modified: int
+    extension: str
+    mime_type: str
 
 
 @dataclass(slots=True)
