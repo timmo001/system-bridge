@@ -39,9 +39,16 @@ Available actions:
 - `MUTE`, `UNMUTE`, `TOGGLE_MUTE`
 - `DEAFEN`, `UNDEAFEN`, `TOGGLE_DEAFEN`
 - `SET_INPUT_VOLUME`: set `value` to 0-100.
+- `SET_INPUT_DEVICE`: set `device_id` to a device `id` from `input.devices` in the [`discord`](/api/data/#discord) data.
 - `SET_OUTPUT_VOLUME`: set `value` to 0-200.
+- `SET_OUTPUT_DEVICE`: set `device_id` to a device `id` from `output.devices`.
+- `SET_VOICE_MODE`: set `mode` to `VOICE_ACTIVITY` or `PUSH_TO_TALK`.
+- `SET_VOICE_THRESHOLD`: set `value` to the voice activity sensitivity, -100 to 0 dB.
+- `SET_PUSH_TO_TALK_DELAY`: set `value` to the push to talk release delay, 0-2000 milliseconds.
+- `ENABLE_QOS`, `DISABLE_QOS`, `TOGGLE_QOS`
+- `ENABLE_SILENCE_WARNING`, `DISABLE_SILENCE_WARNING`, `TOGGLE_SILENCE_WARNING`
 
-The volume values are the percentages that Discord's sliders show.
+The volume values are the percentages that Discord's sliders show. In testing, Discord ignored changes to automatic sensitivity, noise suppression, echo cancellation and automatic gain control made over RPC, so those settings are only available as data.
 
 ```json title="Request"
 {
