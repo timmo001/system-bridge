@@ -52,7 +52,7 @@ function Verify-CSSInclusion {
     
     # Check if binary contains embedded web client
     # Use Select-String to search for the embedded content marker
-    $hasEmbeddedContent = Select-String -Path $BinaryPath -Pattern "web-client/dist/index.html" -Quiet
+    $hasEmbeddedContent = Select-String -Path $BinaryPath -Pattern "client/web/dist/index.html" -Quiet
     if (-not $hasEmbeddedContent) {
         Write-Error "Binary does not contain embedded web client"
         return $false

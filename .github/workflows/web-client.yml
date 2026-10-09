@@ -7,7 +7,7 @@ on:
     branches:
       - dev
     paths:
-      - "web-client/**"
+      - "client/web/**"
       - "connector/typescript/**"
       - "package.json"
       - "bun.lock"
@@ -18,7 +18,7 @@ on:
       - opened
       - synchronize
     paths:
-      - "web-client/**"
+      - "client/web/**"
       - "connector/typescript/**"
       - "package.json"
       - "bun.lock"
@@ -44,13 +44,13 @@ jobs:
           bun-version: "1.4.2"
 
       - name: Install dependencies
-        working-directory: web-client
+        working-directory: client/web
         run: bun install --frozen-lockfile
 
       - name: Lint, typecheck, format check and build web client
-        working-directory: web-client
+        working-directory: client/web
         run: bun run --parallel --no-exit-on-error lint typecheck format:check build
 
       - name: Validate Cloudflare Workers upload
-        working-directory: web-client
+        working-directory: client/web
         run: bun run deploy --dry-run

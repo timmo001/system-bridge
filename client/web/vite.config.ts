@@ -20,7 +20,7 @@ export default defineConfig({
       // Build the workspace connector from source, so it needs no build first
       "@timmo001/effect-system-bridge": resolve(
         __dirname,
-        "../connector/typescript/src/index.ts",
+        "../../connector/typescript/src/index.ts",
       ),
     },
   },

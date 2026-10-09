@@ -12,7 +12,7 @@ on:
       - go.sum
       - mise.toml
       - LICENSE
-      - web-client/**
+      - client/web/**
       - connector/typescript/src/**
       - package.json
       - bun.lock

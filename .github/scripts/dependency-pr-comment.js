@@ -28,7 +28,7 @@ const SUPPORTED_ECOSYSTEMS = [
   {
     id: "web-client",
     title: "Web client",
-    files: ["web-client/package.json", "bun.lock"],
+    files: ["client/web/package.json", "bun.lock"],
   },
 ];
 
@@ -273,9 +273,9 @@ const findJavaScriptUsage = (packageName, repositoryRoot) => {
       "-nE",
       pattern,
       "--",
-      "web-client/src",
-      "web-client/vite.config.ts",
-      "web-client/eslint.config.mjs",
+      "client/web/src",
+      "client/web/vite.config.ts",
+      "client/web/eslint.config.mjs",
     ], repositoryRoot)
   );
 };
@@ -324,10 +324,10 @@ const getNpmMetadata = async ({ packageName, version }) => {
 };
 
 const getAreaFromFile = (file) => {
-  if (file.startsWith("web-client/src/")) {
+  if (file.startsWith("client/web/src/")) {
     const parts = file.split("/");
 
-    return parts.length >= 4 ? `${parts[0]}/${parts[1]}/${parts[2]}` : "web-client/src";
+    return parts.length >= 5 ? parts.slice(0, 4).join("/") : "client/web/src";
   }
 
   if (file.includes("/")) {
@@ -475,12 +475,12 @@ const buildWebClientSection = async ({
     await Promise.all([
       getJsonFile({
         github,
-        path: "web-client/package.json",
+        path: "client/web/package.json",
         ...baseRef,
       }),
       getJsonFile({
         github,
-        path: "web-client/package.json",
+        path: "client/web/package.json",
         ...headRef,
       }),
       getFileContent({
@@ -597,7 +597,7 @@ export default async ({
 
       if (!section) {
         core.info(
-          "web-client/package.json or bun.lock contain non-version dependency changes"
+          "client/web/package.json or bun.lock contain non-version dependency changes"
         );
         await upsertComment({
           github,

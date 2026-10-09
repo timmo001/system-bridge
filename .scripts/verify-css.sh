@@ -19,7 +19,7 @@ fi
 
 # Check if binary contains embedded web client
 echo "Checking for embedded web client..."
-if ! strings "$BINARY_PATH" | grep -q "web-client/dist/index.html"; then
+if ! strings "$BINARY_PATH" | grep -q "client/web/dist/index.html"; then
     echo "ERROR: Binary does not contain embedded web client"
     exit 1
 fi

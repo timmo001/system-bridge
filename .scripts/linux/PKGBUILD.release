@@ -43,8 +43,15 @@ build() {
   export CGO_ENABLED=1
   mise trust -a
   mise install
-  mise exec -C web-client -- bun install --frozen-lockfile
-  if grep -q '^\[tasks\."build:web-client"\]$' mise.toml; then
+  # Releases before the move to client/web keep the web client in web-client
+  if [ -d client/web ]; then
+    mise exec -C client/web -- bun install --frozen-lockfile
+  else
+    mise exec -C web-client -- bun install --frozen-lockfile
+  fi
+  if grep -q '^\[tasks\."build:client:web"\]$' mise.toml; then
+    mise run build:client:web
+  elif grep -q '^\[tasks\."build:web-client"\]$' mise.toml; then
     mise run build:web-client
   else
     mise run build_web_client

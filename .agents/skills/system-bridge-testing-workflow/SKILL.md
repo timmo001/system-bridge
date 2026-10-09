@@ -40,7 +40,7 @@ Mock external dependencies (filesystem, network, system calls). Keep tests fast;
 The web client has **no automated unit tests** (Playwright/web-test-runner were removed). Quality is enforced by lint, typecheck, and format:
 
 ```bash
-cd web-client
+cd client/web
 bun run lint        # Oxlint with type-aware, Lit and Web Components rules
 bun run typecheck   # tsc --noEmit
 bun run format:check
@@ -90,6 +90,6 @@ Docker commands under `act` need sudo; pass secrets with `-s GITHUB_TOKEN=...`.
 
 ```bash
 mise run test
-cd web-client && bun run lint && bun run typecheck
+cd client/web && bun run lint && bun run typecheck
 go run . client data run --module cpu --pretty   # exercise a data module
 ```

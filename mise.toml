@@ -15,7 +15,7 @@ uv = "0.12.24"
 
 [tasks."build:all"]
 description = "Build everything (web client, backend)"
-depends = ["build:web-client"]
+depends = ["build:client:web"]
 run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux ."
 run_windows = [
   "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1",
@@ -25,7 +25,7 @@ run_windows = [
 
 [tasks."build:console"]
 description = "Build console version for debugging (Windows only)"
-depends = ["build:web-client"]
+depends = ["build:client:web"]
 run = "echo 'Console build is only supported on Windows'"
 run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge-console.exe ."
 
@@ -43,42 +43,42 @@ run = [
   "cd connector/typescript && bunx prettier --write src/generated/modules.ts",
 ]
 
-[tasks."build:web-client"]
+[tasks."build:client:web"]
 description = "Build the web client"
 depends = ["generate:schemas"]
 sources = [
-  "web-client/src/**/*",
-  "web-client/public/**/*",
-  "web-client/index.html",
-  "web-client/package.json",
+  "client/web/src/**/*",
+  "client/web/public/**/*",
+  "client/web/index.html",
+  "client/web/package.json",
   "bun.lock",
   "connector/typescript/package.json",
   "connector/typescript/src/**/*.ts",
-  "web-client/tsconfig.json",
-  "web-client/vite.config.ts",
+  "client/web/tsconfig.json",
+  "client/web/vite.config.ts",
 ]
-outputs = ["web-client/dist/index.html"]
+outputs = ["client/web/dist/index.html"]
 run = '''
-(cd web-client && bun run build)
+(cd client/web && bun run build)
 echo "Waiting for file system to sync..."
 sync
 echo "Verifying build files are accessible..."
-if ! ls web-client/dist/index.html >/dev/null 2>&1; then
-	echo "ERROR: web-client/dist/index.html not found"
+if ! ls client/web/dist/index.html >/dev/null 2>&1; then
+	echo "ERROR: client/web/dist/index.html not found"
 	exit 1
 fi
-if ! ls web-client/dist/assets/*.css >/dev/null 2>&1; then
-	echo "ERROR: CSS files not found in web-client/dist/assets/"
-	ls -la web-client/dist/assets/ || true
+if ! ls client/web/dist/assets/*.css >/dev/null 2>&1; then
+	echo "ERROR: CSS files not found in client/web/dist/assets/"
+	ls -la client/web/dist/assets/ || true
 	exit 1
 fi
-if ! ls web-client/dist/assets/*.js >/dev/null 2>&1; then
-	echo "ERROR: JS files not found in web-client/dist/assets/"
-	ls -la web-client/dist/assets/ || true
+if ! ls client/web/dist/assets/*.js >/dev/null 2>&1; then
+	echo "ERROR: JS files not found in client/web/dist/assets/"
+	ls -la client/web/dist/assets/ || true
 	exit 1
 fi
 echo "Verifying Tailwind CSS compilation..."
-CSS_FILE=$(find web-client/dist/assets -name "*.css" -type f 2>/dev/null | head -1)
+CSS_FILE=$(find client/web/dist/assets -name "*.css" -type f 2>/dev/null | head -1)
 if [ -z "$CSS_FILE" ]; then
 	echo "ERROR: No CSS file found for Tailwind verification"
 	exit 1
@@ -159,13 +159,13 @@ run = "go install ."
 [tasks.run]
 description = "Build and run the application (development only)"
 depends = ["build:all"]
-dir = "web-client"
-run = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge-linux backend"'
-run_windows = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../system-bridge.exe backend"'
+dir = "client/web"
+run = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../../system-bridge-linux backend"'
+run_windows = 'bunx concurrently -n "web,backend" -c "blue,green" "bun run dev" "../../system-bridge.exe backend"'
 
-[tasks."run:web-client"]
+[tasks."run:client:web"]
 description = "Run the web client dev server (Vite)"
-dir = "web-client"
+dir = "client/web"
 run = "bun run dev"
 
 [tasks."run:backend"]
@@ -176,7 +176,7 @@ run_windows = "./system-bridge.exe backend"
 
 [tasks."run:backend-dev"]
 description = "Build and run the backend server with console output"
-depends = ["build:web-client"]
+depends = ["build:client:web"]
 run = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version=$(git describe --tags --abbrev=0)'\" -o system-bridge-linux . && ./system-bridge-linux backend"
 run_windows = "go build -v -ldflags=\"-X 'github.com/timmo001/system-bridge/version.Version={{ exec(command='git describe --tags --abbrev=0') }}'\" -o system-bridge.exe . && ./system-bridge.exe backend"
 
@@ -253,7 +253,7 @@ run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/stop-
 
 [tasks.test]
 description = "Run Go tests"
-depends = ["build:web-client"]
+depends = ["build:client:web"]
 run = "go test ./..."
 
 [tasks.check]
@@ -264,7 +264,7 @@ depends = ["lint:all", "test", "test:connector:python", "test:connector:typescri
 description = "Run all linters (Go, web client, Python and TypeScript connectors)"
 depends = [
   "lint:go",
-  "lint:web-client",
+  "lint:client:web",
   "lint:connector:python",
   "typecheck:connector:python",
   "lint:connector:typescript",
@@ -288,17 +288,17 @@ fi
 
 [tasks."lint:go:vet"]
 description = "Run go vet"
-depends = ["build:web-client"]
+depends = ["build:client:web"]
 run = "go vet ./..."
 
 [tasks."format:go"]
 description = "Format Go code"
 run = "go fmt ./..."
 
-[tasks."lint:web-client"]
+[tasks."lint:client:web"]
 description = "Run web client linters (Oxlint, typecheck)"
 depends = ["install:js"]
-dir = "web-client"
+dir = "client/web"
 run = "bun run --parallel --no-exit-on-error lint typecheck"
 
 [tasks."install:connector:python"]
@@ -400,9 +400,9 @@ description = "Remove dist directory"
 run = "rm -rf .flatpak-builder AppDir appimagetool build dist dist-agg rpm-structure rpmbuild flatpak-build repo deb-structure"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-dist.ps1"
 
-[tasks."clean:web-client"]
+[tasks."clean:client:web"]
 description = "Remove web client build artifacts"
-run = "rm -rf web-client/dist"
+run = "rm -rf client/web/dist"
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/clean-web-client.ps1"
 
 [tasks.deps]

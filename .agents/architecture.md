@@ -21,7 +21,7 @@
 ├── types/               # Shared type definitions
 ├── bus/                 # Internal event bus
 ├── discovery/           # mDNS service discovery
-├── web-client/          # Lit + Vite frontend (embedded via go:embed)
+├── client/web/          # Lit + Vite frontend (embedded via go:embed)
 └── web-client-nextjs/   # Previous Next.js version (reference)
 ```
 
@@ -82,7 +82,7 @@ data/module/
 
 The Vite static build is embedded at compile time:
 ```go
-//go:embed all:web-client/dist/*
+//go:embed all:client/web/dist/*
 var webClientContent embed.FS
 ```
 
@@ -100,17 +100,17 @@ mise run generate:schemas
 **How it works:**
 - Parses Go struct definitions and string enums in the `types/` directory
 - Generates Effect schemas in `connector/typescript/src/generated/modules.ts`, each with a same-name type
-- Runs automatically before `mise run build:all` or `mise run build:web-client` when a file under `types/` or the generator has changed
+- Runs automatically before `mise run build:all` or `mise run build:client:web` when a file under `types/` or the generator has changed
 - The generator lives in `tools/generate-schemas/`
 
 **Important:** Never manually edit `connector/typescript/src/generated/modules.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate:schemas` to update the schemas.
 
 ## Web Client Development
 
-The web client is a Lit + Vite application in `web-client/`:
+The web client is a Lit + Vite application in `client/web/`:
 
 ```bash
-cd web-client
+cd client/web
 
 # Install dependencies
 bun install
@@ -170,7 +170,7 @@ go mod verify
 ### Adding Web Client Dependencies
 
 ```bash
-cd web-client
+cd client/web
 
 # Add dependency
 bun add package-name

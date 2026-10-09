@@ -4,9 +4,9 @@
   "description": "Bun workspace root for the TypeScript connector, web client and docs. Its TypeScript also lets the language server resolve from the repository root.",
   "packageManager": "bun@1.4.2",
   "workspaces": [
+    "client/web",
     "connector/typescript",
-    "docs",
-    "web-client"
+    "docs"
   ],
   "devDependencies": {
     "typescript": "7.0.2"

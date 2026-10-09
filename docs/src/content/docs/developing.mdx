@@ -47,7 +47,7 @@ Common component tasks:
 
 | Task | Purpose |
 | --- | --- |
-| `mise run build:web-client` | Build the Lit + Vite web client into `web-client/dist/` |
+| `mise run build:client:web` | Build the Lit + Vite web client into `client/web/dist/` |
 | `mise run generate:schemas` | Regenerate Zod schemas after changing Go types in `types/` |
 
 List every task with `mise tasks`.
@@ -61,7 +61,7 @@ List every task with `mise tasks`.
 | Task | What it starts |
 | --- | --- |
 | `mise run run` | Vite dev server + backend (via `concurrently`) |
-| `mise run run:web-client` | Vite dev server only (default port `5173`) |
+| `mise run run:client:web` | Vite dev server only (default port `5173`) |
 | `mise run run:backend` | Backend only on port `9170` |
 | `mise run run:backend-dev` | Build and run the backend with console output |
 
