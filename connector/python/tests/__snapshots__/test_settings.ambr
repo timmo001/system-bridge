@@ -1,0 +1,91 @@
+# serializer version: 1
+# name: test_settings
+  Settings(
+    api=SettingsAPI(
+      port=9170,
+      token='token',
+    ),
+    autostart=False,
+    commands=SettingsCommands(
+      allowlist=list([
+      ]),
+    ),
+    keyboard_hotkeys=list([
+    ]),
+    log_level='INFO',
+    media=SettingsMedia(
+      directories=list([
+      ]),
+    ),
+  )
+# ---
+# name: test_settings_command_definition
+  SettingsCommandDefinition(
+    arguments=list([
+      'arg1',
+      'arg2',
+    ]),
+    command='/usr/bin/test',
+    id='test-command-id',
+    name='Test Command',
+    workingDir='/tmp',
+  )
+# ---
+# name: test_settings_command_definition_defaults
+  SettingsCommandDefinition(
+    arguments=list([
+    ]),
+    command='/usr/bin/test',
+    id='test-command-id',
+    name='Test Command',
+    workingDir='',
+  )
+# ---
+# name: test_settings_commands
+  SettingsCommands(
+    allowlist=list([
+      SettingsCommandDefinition(
+        arguments=list([
+        ]),
+        command='/usr/bin/test',
+        id='test-command-id',
+        name='Test Command',
+        workingDir='',
+      ),
+    ]),
+  )
+# ---
+# name: test_settings_commands_empty
+  SettingsCommands(
+    allowlist=list([
+    ]),
+  )
+# ---
+# name: test_settings_with_commands
+  Settings(
+    api=SettingsAPI(
+      port=9170,
+      token='token',
+    ),
+    autostart=False,
+    commands=SettingsCommands(
+      allowlist=list([
+        SettingsCommandDefinition(
+          arguments=list([
+          ]),
+          command='/usr/bin/test',
+          id='test-command-id',
+          name='Test Command',
+          workingDir='',
+        ),
+      ]),
+    ),
+    keyboard_hotkeys=list([
+    ]),
+    log_level='INFO',
+    media=SettingsMedia(
+      directories=list([
+      ]),
+    ),
+  )
+# ---

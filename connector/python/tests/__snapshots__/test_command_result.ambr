@@ -1,0 +1,28 @@
+# serializer version: 1
+# name: test_execute_result
+  ExecuteResult(
+    commandID='test-command-id',
+    error=None,
+    exitCode=0,
+    stderr='',
+    stdout='Command output',
+  )
+# ---
+# name: test_execute_result_with_error
+  ExecuteResult(
+    commandID='test-command-id',
+    error='Command failed',
+    exitCode=1,
+    stderr='Error occurred',
+    stdout='',
+  )
+# ---
+# name: test_execute_result_with_stderr
+  ExecuteResult(
+    commandID='test-command-id',
+    error=None,
+    exitCode=0,
+    stderr='Warning message',
+    stdout='Output',
+  )
+# ---

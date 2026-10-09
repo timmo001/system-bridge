@@ -1,0 +1,148 @@
+# serializer version: 1
+# name: test_networks
+  Networks(
+    connections=list([
+      NetworkConnection(
+        family=2,
+        fd=1,
+        laddr='laddr',
+        pid=4,
+        raddr='raddr',
+        status='status',
+        type=3,
+      ),
+    ]),
+    io=NetworkIO(
+      bytes_recv=2,
+      bytes_sent=1,
+      dropin=7,
+      dropout=8,
+      errin=5,
+      errout=6,
+      packets_recv=4,
+      packets_sent=3,
+    ),
+    networks=list([
+      Network(
+        addresses=list([
+          NetworkAddress(
+            address='address',
+            broadcast='broadcast',
+            family=None,
+            netmask='netmask',
+            ptp='ptp',
+          ),
+        ]),
+        name='name',
+        stats=NetworkStats(
+          duplex='duplex',
+          flags=list([
+            'flag1',
+            'flag2',
+          ]),
+          isup=True,
+          mtu=2,
+          speed=1,
+        ),
+      ),
+    ]),
+  )
+# ---
+# name: test_networks_dict
+  dict({
+    'connections': list([
+      dict({
+        'family': 2,
+        'fd': 1,
+        'laddr': 'laddr',
+        'pid': 4,
+        'raddr': 'raddr',
+        'status': 'status',
+        'type': 3,
+      }),
+    ]),
+    'io': dict({
+      'bytes_recv': 2,
+      'bytes_sent': 1,
+      'dropin': 7,
+      'dropout': 8,
+      'errin': 5,
+      'errout': 6,
+      'packets_recv': 4,
+      'packets_sent': 3,
+    }),
+    'networks': list([
+      dict({
+        'addresses': list([
+          dict({
+            'address': 'address',
+            'broadcast': 'broadcast',
+            'family': None,
+            'netmask': 'netmask',
+            'ptp': 'ptp',
+          }),
+        ]),
+        'name': 'name',
+        'stats': dict({
+          'duplex': 'duplex',
+          'flags': list([
+            'flag1',
+            'flag2',
+          ]),
+          'isup': True,
+          'mtu': 2,
+          'speed': 1,
+        }),
+      }),
+    ]),
+  })
+# ---
+# name: test_networks_dict[networks-dict-converted]
+  Networks(
+    connections=list([
+      NetworkConnection(
+        family=2,
+        fd=1,
+        laddr='laddr',
+        pid=4,
+        raddr='raddr',
+        status='status',
+        type=3,
+      ),
+    ]),
+    io=NetworkIO(
+      bytes_recv=2,
+      bytes_sent=1,
+      dropin=7,
+      dropout=8,
+      errin=5,
+      errout=6,
+      packets_recv=4,
+      packets_sent=3,
+    ),
+    networks=list([
+      Network(
+        addresses=list([
+          NetworkAddress(
+            address='address',
+            broadcast='broadcast',
+            family=None,
+            netmask='netmask',
+            ptp='ptp',
+          ),
+        ]),
+        name='name',
+        stats=NetworkStats(
+          duplex='duplex',
+          flags=list([
+            'flag1',
+            'flag2',
+          ]),
+          isup=True,
+          mtu=2,
+          speed=1,
+        ),
+      ),
+    ]),
+  )
+# ---

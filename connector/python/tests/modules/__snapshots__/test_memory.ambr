@@ -1,0 +1,76 @@
+# serializer version: 1
+# name: test_memory
+  Memory(
+    swap=MemorySwap(
+      free=500,
+      percent=50.0,
+      sin=100,
+      sout=100,
+      total=1000,
+      used=500,
+    ),
+    virtual=MemoryVirtual(
+      active=500,
+      available=500,
+      buffers=500,
+      cached=500,
+      free=500,
+      inactive=500,
+      percent=50.0,
+      shared=500,
+      total=1000,
+      used=500,
+      wired=500,
+    ),
+  )
+# ---
+# name: test_memory_dict
+  dict({
+    'swap': dict({
+      'free': 500,
+      'percent': 50.0,
+      'sin': 100,
+      'sout': 100,
+      'total': 1000,
+      'used': 500,
+    }),
+    'virtual': dict({
+      'active': 500,
+      'available': 500,
+      'buffers': 500,
+      'cached': 500,
+      'free': 500,
+      'inactive': 500,
+      'percent': 50.0,
+      'shared': 500,
+      'total': 1000,
+      'used': 500,
+      'wired': 500,
+    }),
+  })
+# ---
+# name: test_memory_dict[memory-dict-converted]
+  Memory(
+    swap=MemorySwap(
+      free=500,
+      percent=50.0,
+      sin=100,
+      sout=100,
+      total=1000,
+      used=500,
+    ),
+    virtual=MemoryVirtual(
+      active=500,
+      available=500,
+      buffers=500,
+      cached=500,
+      free=500,
+      inactive=500,
+      percent=50.0,
+      shared=500,
+      total=1000,
+      used=500,
+      wired=500,
+    ),
+  )
+# ---

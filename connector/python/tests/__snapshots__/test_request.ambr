@@ -1,0 +1,11 @@
+# serializer version: 1
+# name: test_request
+  Request(
+    data=dict({
+      'test': 'test',
+    }),
+    event='EVENT_TEST',
+    id='abc123',
+    token='abc123',
+  )
+# ---

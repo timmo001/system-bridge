@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "skills": {
+    "changeset-scope": {
+      "source": "timmo001/skills",
+      "ref": "332f6d26c666c444aff48eaa75aeb920dd3b05ea",
+      "sourceType": "github",
+      "skillPath": "changeset-scope/SKILL.md",
+      "computedHash": "792358f213f571ca78ed6b0a6118020398a9bb1288d855c8c127cb344e14f4be"
+    },
+    "code-review": {
+      "source": "timmo001/skills",
+      "ref": "e21116d1409884a4f5427cb1a57871217aeda0a5",
+      "sourceType": "github",
+      "skillPath": "code-review/SKILL.md",
+      "computedHash": "bc6af04ecee3f4a40dcacc77a8c6cd3046f3982159b9469eae49f30bb14d02cd"
+    },
+    "effect-principles": {
+      "source": "timmo001/skills",
+      "ref": "4d34a598c785c84718396a1bce3c1f81af27fbcf",
+      "sourceType": "github",
+      "skillPath": "effect-principles/SKILL.md",
+      "computedHash": "8d56fdf5c00665759b049647ea356b387c628eef9807ffdf6165b0413ac3ab31"
+    },
+    "skill-prefixes": {
+      "source": "timmo001/skills",
+      "ref": "c7497d43ccf72ee0ca447b63fd7a4e9f687fb008",
+      "sourceType": "github",
+      "skillPath": "skill-prefixes/SKILL.md",
+      "computedHash": "8c4203c19621bc61824eb955e9584dbebc47774de8bad7b02653fb59c1e419c4"
+    },
+    "task-runners": {
+      "source": "timmo001/skills",
+      "ref": "0961680b19cbc9ff44355a02e6784609c86365d1",
+      "sourceType": "github",
+      "skillPath": "task-runners/SKILL.md",
+      "computedHash": "10a34db99cf5f030c06f9a00879c05a59a8c2df09595a3bfb40d133c6f4a0690"
+    },
+    "testing": {
+      "source": "timmo001/skills",
+      "ref": "b7812455a43a2df7023e7f2615726be96312f338",
+      "sourceType": "github",
+      "skillPath": "testing/SKILL.md",
+      "computedHash": "6172813610101738077bfa2dfaa927349b78d1e1a265473ad31dc4beb7e9047e"
+    },
+    "writing-style": {
+      "source": "timmo001/skills",
+      "ref": "acfb03257d922f31734a83b6352a50840b84ae86",
+      "sourceType": "github",
+      "skillPath": "writing-style/SKILL.md",
+      "computedHash": "b2fb6c12825c1e43aedcc53756af90b2058d5422a353110396fbb8c3375e51da"
+    }
+  }
+}

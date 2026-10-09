@@ -1,0 +1,6 @@
+# serializer version: 1
+# name: test_open_path
+  OpenPath(
+    path='/path/to/file',
+  )
+# ---

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "system-bridge": {
+      "repository": "timmo001/system-bridge",
+      "description": "Use for the main System Bridge backend this connector talks to: API/WebSocket endpoints, message shapes, and server behaviour"
+    },
+    "system-bridge-website": {
+      "repository": "timmo001/system-bridge-website",
+      "description": "Use for the System Bridge documentation site (Astro + Starlight): published API/WebSocket docs and feature descriptions relevant to this connector"
+    }
+  }
+}

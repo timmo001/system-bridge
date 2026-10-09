@@ -1,0 +1,219 @@
+# serializer version: 1
+# name: test_disks
+  Disks(
+    devices=list([
+      Disk(
+        io_counters=DiskIOCounters(
+          read_bytes=1,
+          read_count=3,
+          read_time=5,
+          write_bytes=2,
+          write_count=4,
+          write_time=6,
+        ),
+        name='name',
+        partitions=list([
+          DiskPartition(
+            device='device',
+            filesystem_type='fstype',
+            max_file_size=1,
+            max_path_length=2,
+            mount_point='mountpoint',
+            options='options',
+            usage=DiskUsage(
+              free=3,
+              percent=40.2,
+              total=1,
+              used=2,
+            ),
+          ),
+        ]),
+        temperature=45.5,
+      ),
+    ]),
+    io_counters=DiskIOCounters(
+      read_bytes=1,
+      read_count=3,
+      read_time=5,
+      write_bytes=2,
+      write_count=4,
+      write_time=6,
+    ),
+  )
+# ---
+# name: test_disks_devices_dict
+  dict({
+    'io_counters': dict({
+      'read_bytes': 1,
+      'read_count': 3,
+      'read_time': 5,
+      'write_bytes': 2,
+      'write_count': 4,
+      'write_time': 6,
+    }),
+    'name': 'name',
+    'partitions': list([
+      dict({
+        'device': 'device',
+        'filesystem_type': 'fstype',
+        'max_file_size': 1,
+        'max_path_length': 2,
+        'mount_point': 'mountpoint',
+        'options': 'options',
+        'usage': dict({
+          'free': 3,
+          'percent': 40.2,
+          'total': 1,
+          'used': 2,
+        }),
+      }),
+    ]),
+    'temperature': 45.5,
+  })
+# ---
+# name: test_disks_devices_dict[disks-devices-dict-converted]
+  Disk(
+    io_counters=DiskIOCounters(
+      read_bytes=1,
+      read_count=3,
+      read_time=5,
+      write_bytes=2,
+      write_count=4,
+      write_time=6,
+    ),
+    name='name',
+    partitions=list([
+      DiskPartition(
+        device='device',
+        filesystem_type='fstype',
+        max_file_size=1,
+        max_path_length=2,
+        mount_point='mountpoint',
+        options='options',
+        usage=DiskUsage(
+          free=3,
+          percent=40.2,
+          total=1,
+          used=2,
+        ),
+      ),
+    ]),
+    temperature=45.5,
+  )
+# ---
+# name: test_disks_devices_partition_dict
+  dict({
+    'device': 'device',
+    'filesystem_type': 'fstype',
+    'max_file_size': 1,
+    'max_path_length': 2,
+    'mount_point': 'mountpoint',
+    'options': 'options',
+    'usage': dict({
+      'free': 3,
+      'percent': 40.2,
+      'total': 1,
+      'used': 2,
+    }),
+  })
+# ---
+# name: test_disks_devices_partition_dict[disks-devices-partition-dict-converted]
+  DiskPartition(
+    device='device',
+    filesystem_type='fstype',
+    max_file_size=1,
+    max_path_length=2,
+    mount_point='mountpoint',
+    options='options',
+    usage=DiskUsage(
+      free=3,
+      percent=40.2,
+      total=1,
+      used=2,
+    ),
+  )
+# ---
+# name: test_disks_dict
+  dict({
+    'devices': list([
+      dict({
+        'io_counters': dict({
+          'read_bytes': 1,
+          'read_count': 3,
+          'read_time': 5,
+          'write_bytes': 2,
+          'write_count': 4,
+          'write_time': 6,
+        }),
+        'name': 'name',
+        'partitions': list([
+          dict({
+            'device': 'device',
+            'filesystem_type': 'fstype',
+            'max_file_size': 1,
+            'max_path_length': 2,
+            'mount_point': 'mountpoint',
+            'options': 'options',
+            'usage': dict({
+              'free': 3,
+              'percent': 40.2,
+              'total': 1,
+              'used': 2,
+            }),
+          }),
+        ]),
+        'temperature': 45.5,
+      }),
+    ]),
+    'io_counters': dict({
+      'read_bytes': 1,
+      'read_count': 3,
+      'read_time': 5,
+      'write_bytes': 2,
+      'write_count': 4,
+      'write_time': 6,
+    }),
+  })
+# ---
+# name: test_disks_dict[disks-dict-converted]
+  Disks(
+    devices=list([
+      Disk(
+        io_counters=DiskIOCounters(
+          read_bytes=1,
+          read_count=3,
+          read_time=5,
+          write_bytes=2,
+          write_count=4,
+          write_time=6,
+        ),
+        name='name',
+        partitions=list([
+          DiskPartition(
+            device='device',
+            filesystem_type='fstype',
+            max_file_size=1,
+            max_path_length=2,
+            mount_point='mountpoint',
+            options='options',
+            usage=DiskUsage(
+              free=3,
+              percent=40.2,
+              total=1,
+              used=2,
+            ),
+          ),
+        ]),
+        temperature=45.5,
+      ),
+    ]),
+    io_counters=DiskIOCounters(
+      read_bytes=1,
+      read_count=3,
+      read_time=5,
+      write_bytes=2,
+      write_count=4,
+      write_time=6,
+    ),
+  )
+# ---

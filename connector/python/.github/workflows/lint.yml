@@ -1,0 +1,38 @@
+---
+name: "Lint"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-jsonlint:
+    # yamllint disable-line rule:line-length
+    uses: timmo001/workflows/.github/workflows/lint-jsonlint.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
+  lint-markdown-links:
+    # yamllint disable-line rule:line-length
+    uses: timmo001/workflows/.github/workflows/lint-markdown-links.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
+  lint:
+    name: Lint (mise)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up mise
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - name: Run Ruff, Pylint and mypy
+        run: "mise run -c lint ::: typecheck"

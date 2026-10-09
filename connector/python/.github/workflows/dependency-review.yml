@@ -1,0 +1,14 @@
+---
+name: "Dependency Review"
+
+# yamllint disable-line rule:truthy
+on:
+  - pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    # yamllint disable-line rule:line-length
+    uses: timmo001/workflows/.github/workflows/dependency-review.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3

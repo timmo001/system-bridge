@@ -1,0 +1,26 @@
+# serializer version: 1
+# name: test_model_map
+  dict({
+    <Model.BATTERY: 'battery'>: <class 'systembridgeconnector.models.modules.battery.Battery'>,
+    <Model.CPU: 'cpu'>: <class 'systembridgeconnector.models.modules.cpu.CPU'>,
+    <Model.DATA: 'data'>: <class 'systembridgeconnector.models.modules.ModulesData'>,
+    <Model.DISKS: 'disks'>: <class 'systembridgeconnector.models.modules.disks.Disks'>,
+    <Model.DISPLAYS: 'displays'>: <class 'systembridgeconnector.models.modules.displays.Display'>,
+    <Model.GPUS: 'gpus'>: <class 'systembridgeconnector.models.modules.gpus.GPU'>,
+    <Model.KEYBOARD_KEY: 'keyboard_key'>: <class 'systembridgeconnector.models.keyboard_key.KeyboardKey'>,
+    <Model.KEYBOARD_TEXT: 'keyboard_text'>: <class 'systembridgeconnector.models.keyboard_text.KeyboardText'>,
+    <Model.MEDIA: 'media'>: <class 'systembridgeconnector.models.modules.media.Media'>,
+    <Model.MEDIA_DIRECTORIES: 'media_directories'>: <class 'systembridgeconnector.models.media_directories.MediaDirectory'>,
+    <Model.MEDIA_FILE: 'media_file'>: <class 'systembridgeconnector.models.media_files.MediaFile'>,
+    <Model.MEDIA_FILES: 'media_files'>: <class 'systembridgeconnector.models.media_files.MediaFiles'>,
+    <Model.MEMORY: 'memory'>: <class 'systembridgeconnector.models.modules.memory.Memory'>,
+    <Model.NETWORKS: 'networks'>: <class 'systembridgeconnector.models.modules.networks.Networks'>,
+    <Model.NOTIFICATION: 'notification'>: <class 'systembridgeconnector.models.notification.Notification'>,
+    <Model.OPEN_PATH: 'open_path'>: <class 'systembridgeconnector.models.open_path.OpenPath'>,
+    <Model.OPEN_URL: 'open_url'>: <class 'systembridgeconnector.models.open_url.OpenUrl'>,
+    <Model.PROCESSES: 'processes'>: <class 'systembridgeconnector.models.modules.processes.Process'>,
+    <Model.RESPONSE: 'response'>: <class 'systembridgeconnector.models.response.Response'>,
+    <Model.SENSORS: 'sensors'>: <class 'systembridgeconnector.models.modules.sensors.Sensors'>,
+    <Model.SYSTEM: 'system'>: <class 'systembridgeconnector.models.modules.system.System'>,
+  })
+# ---

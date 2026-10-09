@@ -1,0 +1,26 @@
+---
+name: "Build"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # yamllint disable-line rule:line-length
+    uses: timmo001/workflows/.github/workflows/build-python-linux.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
+    with:
+      # renovate: datasource=custom.home-assistant-python-minor depName=python
+      python-version: "3.14"

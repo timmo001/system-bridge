@@ -1,0 +1,56 @@
+[tools]
+# renovate: datasource=custom.home-assistant-python-minor depName=python
+python = "3.14"
+uv = "0.12.23"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+[tasks.install]
+description = "Install the package and test requirements into .venv"
+run = "uv pip install --requirement requirements_test.txt --editable ."
+sources = ["pyproject.toml", "requirements_test.txt"]
+
+[tasks.format]
+description = "Fix lint issues and format with Ruff"
+depends = ["install"]
+run = ["ruff check --fix .", "ruff format ."]
+
+[tasks."lint:ruff"]
+description = "Lint with Ruff"
+depends = ["install"]
+run = "ruff check ."
+
+[tasks."lint:format"]
+description = "Check formatting with Ruff"
+depends = ["install"]
+run = "ruff format --check ."
+
+[tasks."lint:pylint"]
+description = "Lint with Pylint"
+depends = ["install"]
+run = "pylint systembridgeconnector"
+
+[tasks.lint]
+description = "Run every linter"
+depends = ["lint:*"]
+
+[tasks.typecheck]
+description = "Type check with mypy"
+depends = ["install"]
+run = "mypy systembridgeconnector"
+
+[tasks.test]
+description = "Run the tests"
+depends = ["install"]
+run = "pytest"
+
+[tasks.build]
+description = "Build the sdist and wheel"
+run = "uv build"
+sources = ["pyproject.toml", "README.md", "LICENSE", "systembridgeconnector/**"]
+outputs = ["dist/*"]
+
+[tasks.check]
+description = "Run every check"
+depends = ["lint", "typecheck", "test", "build"]

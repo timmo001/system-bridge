@@ -1,0 +1,39 @@
+---
+name: "Deploy"
+
+# yamllint disable-line rule:truthy
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
+    # yamllint disable-line rule:line-length
+    uses: timmo001/workflows/.github/workflows/build-python-pypi-release.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
+    with:
+      package-name: "systembridgeconnector"
+      # renovate: datasource=custom.home-assistant-python-minor depName=python
+      python-version: "3.14"
+
+  publish:
+    name: Publish distributions to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download validated distributions
+        # yamllint disable-line rule:line-length
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: dist/
+      - name: Publish distributions to PyPI
+        # release/v1
+        # yamllint disable-line rule:line-length
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
