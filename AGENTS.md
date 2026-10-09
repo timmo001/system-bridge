@@ -26,6 +26,7 @@ mise tasks
 - **CLI**: Command-line interface
 - **Docs**: Astro + Starlight site at `docs/` (deployed separately)
 - **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
+- **Python connector**: `systembridgeconnector` at `connector/python/`, used by the Home Assistant integration. Published to PyPI with each stable release, using the release tag as its version
 
 ## Key Conventions
 
@@ -87,5 +88,6 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-go-backend` - Go backend patterns: error wrapping, graceful degradation, slog, context, nil safety
 - `system-bridge-testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
 - `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
+- `system-bridge-connector-python` - Python connector tasks, code style and release versioning
 - `system-bridge-docs-page-workflow` - add or restructure Starlight docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page

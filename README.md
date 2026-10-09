@@ -84,7 +84,7 @@ Quick start:
 
 ## Packages
 
-### [Connector](https://github.com/timmo001/system-bridge-connector)
+### [Connector](connector/python)
 
 Allows other applications to connect to the backend. For example, in the
 [Home Assistant](https://www.home-assistant.io/integrations/system_bridge)

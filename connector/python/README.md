@@ -6,6 +6,5 @@ Used in the System Bridge [Home Assistant](https://www.home-assistant.io/integra
 
 ## Releases
 
-Before publishing a GitHub Release, commit its stable PEP 440 version in
-`pyproject.toml` and tag that commit. The release workflow rejects development,
-prerelease and versions that are not PEP 440-equivalent to the tag.
+The connector is released to PyPI as `systembridgeconnector` with each stable
+System Bridge release, using the same version as the release tag.
