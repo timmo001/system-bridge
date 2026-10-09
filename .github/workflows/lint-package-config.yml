@@ -98,7 +98,7 @@ jobs:
     name: Lint arch pkgbuild
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/lint-arch-pkgbuild.yml@942a2e735c957787562e621d916fb6f78c9bb508 # 20261009.0
+    uses: timmo001/workflows/.github/workflows/lint-arch-pkgbuild.yml@dee521f49caa2626c8adeed2af4767887b2f202b # 20261009.1
     with:
       pkgbuild-paths: |-
         .scripts/linux/PKGBUILD.dev
