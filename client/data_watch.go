@@ -162,7 +162,9 @@ func Watch(ctx context.Context, options WatchOptions) error {
 }
 
 func readResponse(conn *websocket.Conn) (event.MessageResponse, error) {
-	var response event.MessageResponse
+	// Keep data as raw JSON so updates print in the backend's field order
+	// instead of being re-sorted through a map.
+	response := event.MessageResponse{Data: &json.RawMessage{}}
 	if err := conn.ReadJSON(&response); err != nil {
 		return event.MessageResponse{}, err
 	}
