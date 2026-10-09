@@ -4,6 +4,9 @@ min_version = "2025.1.0"
 bun = "1.4.2"
 go = "1.27.2"
 node = "26.11.1"
+# renovate: datasource=custom.home-assistant-python-minor depName=python
+python = "3.14"
+uv = "0.12.23"
 
 # Tasks replace the old Makefile. Run them with `mise run <task>` (or `mise <task>`).
 # List everything with `mise tasks`. Tools pinned in [tools] are on PATH inside
@@ -259,11 +262,11 @@ run = "go test ./..."
 
 [tasks.check]
 description = "Run all linters and tests"
-depends = ["lint:all", "test"]
+depends = ["lint:all", "test", "test:connector:python"]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client)"
-depends = ["lint:go", "lint:web-client"]
+description = "Run all linters (Go, web client, Python connector)"
+depends = ["lint:go", "lint:web-client", "lint:connector:python", "typecheck:connector:python"]
 
 [tasks."lint:go"]
 description = "Run Go linters (format check, vet)"
@@ -294,6 +297,63 @@ description = "Run web client linters (Oxlint, typecheck)"
 depends = ["install:web-client"]
 dir = "web-client"
 run = "bun run --parallel --no-exit-on-error lint typecheck"
+
+[tasks."install:connector:python"]
+description = "Install the Python connector and its test requirements into connector/python/.venv"
+dir = "connector/python"
+sources = ["pyproject.toml", "requirements_test.txt"]
+run = [
+  "uv venv --allow-existing",
+  "uv pip install --requirement requirements_test.txt --editable .",
+]
+
+[tasks."format:connector:python"]
+description = "Fix lint issues and format the Python connector with Ruff"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = ["uv run --no-sync ruff check --fix .", "uv run --no-sync ruff format ."]
+
+[tasks."lint:connector:python"]
+description = "Run Python connector linters (Ruff, Ruff format check, Pylint)"
+depends = ["lint:connector:python:*"]
+
+[tasks."lint:connector:python:ruff"]
+description = "Lint the Python connector with Ruff"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = "uv run --no-sync ruff check ."
+
+[tasks."lint:connector:python:format"]
+description = "Check Python connector formatting with Ruff"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = "uv run --no-sync ruff format --check ."
+
+[tasks."lint:connector:python:pylint"]
+description = "Lint the Python connector with Pylint"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = "uv run --no-sync pylint systembridgeconnector"
+
+[tasks."typecheck:connector:python"]
+description = "Type check the Python connector with mypy"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = "uv run --no-sync mypy systembridgeconnector"
+
+[tasks."test:connector:python"]
+description = "Run the Python connector tests"
+depends = ["install:connector:python"]
+dir = "connector/python"
+run = "uv run --no-sync pytest"
+
+[tasks."build:connector:python"]
+description = "Build the Python connector sdist and wheel"
+dir = "connector/python"
+sources = ["../../LICENSE", "pyproject.toml", "README.md", "systembridgeconnector/**"]
+outputs = ["dist/*"]
+# license-files can't point outside the package, so copy the root licence in
+run = ["cp ../../LICENSE LICENSE", "uv build"]
 
 [tasks.clean]
 description = "Remove build artifacts"
