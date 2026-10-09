@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": ".",
+    "resolveJsonModule": true,
     "types": ["bun"]
   },
   "include": ["src", "test"],

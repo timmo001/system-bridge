@@ -1,0 +1,70 @@
+{
+  "connections": [
+    {
+      "fd": 16,
+      "family": 2,
+      "type": 1,
+      "laddr": "127.0.0.1:9170",
+      "raddr": "0.0.0.0:0",
+      "status": "LISTEN",
+      "pid": 1000
+    }
+  ],
+  "io": {
+    "bytes_sent": 12907285833,
+    "bytes_recv": 177913179023,
+    "packets_sent": 18522687,
+    "packets_recv": 130766944,
+    "errin": 0,
+    "errout": 0,
+    "dropin": 0,
+    "dropout": 821
+  },
+  "networks": [
+    {
+      "name": "lo",
+      "addresses": [
+        {
+          "address": "127.0.0.1",
+          "family": "IPv4",
+          "netmask": "255.0.0.0",
+          "broadcast": "127.255.255.255",
+          "ptp": null
+        }
+      ],
+      "stats": {
+        "isup": true,
+        "duplex": "unknown",
+        "speed": 0,
+        "mtu": 65536,
+        "flags": ["up", "loopback"]
+      }
+    },
+    {
+      "name": "wlan0",
+      "addresses": [
+        {
+          "address": "192.0.2.10",
+          "family": "IPv4",
+          "netmask": "255.255.255.0",
+          "broadcast": "192.0.2.255",
+          "ptp": null
+        },
+        {
+          "address": "2001:db8::10",
+          "family": "IPv6",
+          "netmask": "/64",
+          "broadcast": null,
+          "ptp": null
+        }
+      ],
+      "stats": {
+        "isup": true,
+        "duplex": "unknown",
+        "speed": 1000,
+        "mtu": 1500,
+        "flags": ["up", "broadcast"]
+      }
+    }
+  ]
+}

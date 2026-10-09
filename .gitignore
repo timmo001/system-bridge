@@ -13,6 +13,7 @@ system-bridge.rc
 system-bridge.syso
 
 !system-bridge/
+!.agents/skills/system-bridge-*/
 
 # Legacy
 .legacy/

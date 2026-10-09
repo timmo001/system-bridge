@@ -1,0 +1,16 @@
+[
+  {
+    "id": "card0",
+    "name": "Intel Corporation Panther Lake [Arc B390]",
+    "core_clock": 900,
+    "core_load": 43.333333333333336,
+    "fan_speed": null,
+    "memory_clock": null,
+    "memory_load": null,
+    "memory_free": null,
+    "memory_used": null,
+    "memory_total": null,
+    "power_usage": null,
+    "temperature": null
+  }
+]

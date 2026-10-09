@@ -15,7 +15,12 @@
     "plugins": [
       {
         "name": "@effect/language-service",
-        "ignoreEffectWarningsInTscExitCode": true
+        "ignoreEffectWarningsInTscExitCode": true,
+        "allowedUnstableApis": [
+          "effect/http",
+          "effect/http-api",
+          "effect/socket"
+        ]
       }
     ]
   },
