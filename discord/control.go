@@ -58,7 +58,7 @@ func controlArgs(action Action, value *float64, st types.DiscordData) (map[strin
 		return map[string]any{"mute": false}, nil
 	case ActionToggleMute:
 		// Discord shows the user as muted while deafened.
-		return map[string]any{"mute": !(isTrue(st.Mute) || isTrue(st.Deaf))}, nil
+		return map[string]any{"mute": !isTrue(st.Mute) && !isTrue(st.Deaf)}, nil
 	case ActionDeafen:
 		return map[string]any{"deaf": true}, nil
 	case ActionUndeafen:
