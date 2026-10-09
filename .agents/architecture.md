@@ -93,17 +93,17 @@ The Makefile ensures proper build sequencing and file sync verification.
 The project includes an automatic schema generator that keeps frontend and backend types in sync:
 
 ```bash
-# Generate Zod schemas from Go types (runs automatically during build)
+# Generate Effect schemas from Go types (runs automatically during build)
 mise run generate:schemas
 ```
 
 **How it works:**
-- Parses Go struct definitions in `types/` directory
-- Generates TypeScript Zod schemas in `web-client/src/lib/system-bridge/types-modules-schemas.ts`
+- Parses Go struct definitions and string enums in the `types/` directory
+- Generates Effect schemas in `connector/typescript/src/generated/modules.ts`, each with a same-name type
 - Runs automatically before `mise run build:all` or `mise run build:web-client` when a file under `types/` or the generator has changed
-- See `tools/generate-schemas/README.md` for details
+- The generator lives in `tools/generate-schemas/`
 
-**Important:** Never manually edit `types-modules-schemas.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate:schemas` to update the frontend schemas.
+**Important:** Never manually edit `connector/typescript/src/generated/modules.ts` - it's auto-generated. When adding new types to `types/`, run `mise run generate:schemas` to update the schemas.
 
 ## Web Client Development
 

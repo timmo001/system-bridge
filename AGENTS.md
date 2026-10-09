@@ -32,7 +32,7 @@ mise tasks
 
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
 - **Package manager**: bun for all JavaScript/TypeScript (web client, docs)
-- **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated
+- **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 
 ## Background Dev Servers

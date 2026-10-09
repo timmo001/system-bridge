@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -9,7 +8,6 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -19,11 +17,12 @@ type StructInfo struct {
 }
 
 type FieldInfo struct {
-	Name     string
-	Type     string
-	JSONName string
-	IsArray  bool
-	IsPtr    bool
+	Name      string
+	Type      string
+	JSONName  string
+	IsArray   bool
+	IsPtr     bool
+	OmitEmpty bool
 }
 
 type EnumInfo struct {
@@ -34,7 +33,7 @@ type EnumInfo struct {
 func main() {
 	// Command-line flags for configuration
 	typesDir := flag.String("types-dir", "types", "Directory containing Go type definitions")
-	outputFile := flag.String("output", "web-client/src/lib/system-bridge/types-modules-schemas.ts", "Output file for generated TypeScript schemas")
+	outputFile := flag.String("output", "connector/typescript/src/generated/modules.ts", "Output file for generated Effect schemas")
 	flag.Parse()
 
 	// Parse all Go files in types directory
@@ -44,21 +43,39 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Generate TypeScript/Zod schemas
-	tsCode := generateZodSchemas(structs, enums)
+	if err := os.MkdirAll(filepath.Dir(*outputFile), 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating output directory: %v\n", err)
+		os.Exit(1)
+	}
 
-	// Write to output file
-	if err := os.WriteFile(*outputFile, []byte(tsCode), 0644); err != nil {
+	if err := os.WriteFile(*outputFile, []byte(generateEffectSchemas(structs, enums)), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Generated Zod schemas from %s to %s\n", *typesDir, *outputFile)
+	fmt.Printf("Generated Effect schemas from %s to %s\n", *typesDir, *outputFile)
+}
+
+// moduleDataTypes maps each module name to the type of its data.
+var moduleDataTypes = map[string]string{
+	"battery":   "BatteryData",
+	"cpu":       "CPUData",
+	"disks":     "DisksData",
+	"discord":   "DiscordData",
+	"displays":  "DisplaysData",
+	"gpus":      "GPUsData",
+	"media":     "MediaData",
+	"memory":    "MemoryData",
+	"networks":  "NetworksData",
+	"processes": "ProcessesData",
+	"sensors":   "SensorsData",
+	"system":    "SystemData",
 }
 
 func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo, error) {
 	structs := make(map[string]StructInfo)
 	enums := make(map[string]EnumInfo)
+	enumValues := make(map[string][]string)
 
 	fset := token.NewFileSet()
 
@@ -112,11 +129,12 @@ func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo
 						fieldType, isArray, isPtr := parseFieldType(field.Type)
 
 						structInfo.Fields = append(structInfo.Fields, FieldInfo{
-							Name:     fieldName,
-							Type:     fieldType,
-							JSONName: jsonTag,
-							IsArray:  isArray,
-							IsPtr:    isPtr,
+							Name:      fieldName,
+							Type:      fieldType,
+							JSONName:  jsonTag,
+							IsArray:   isArray,
+							IsPtr:     isPtr,
+							OmitEmpty: hasOmitEmpty(field.Tag),
 						})
 					}
 
@@ -137,16 +155,8 @@ func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo
 				// Check if it's an array type alias (e.g., type DisplaysData = []Display)
 				if arrayType, ok := typeSpec.Type.(*ast.ArrayType); ok {
 					elemType, _, _ := parseFieldType(arrayType.Elt)
-					// Create a pseudo-struct to represent the array
-					structs[typeName] = StructInfo{
-						Name:   typeName,
-						Fields: []FieldInfo{}, // Empty fields indicates it's an array type
-						// We'll use a special marker in the name or add a flag later if needed
-					}
-					// Store the element type in a comment or another way
-					// For now, we'll handle this in the schema generation
 					if elemType != "" {
-						// Store as a special field to indicate array type
+						// Store the element type as a special field to mark an array alias
 						structs[typeName] = StructInfo{
 							Name: typeName,
 							Fields: []FieldInfo{
@@ -171,22 +181,12 @@ func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo
 						continue
 					}
 
-					if len(valueSpec.Values) > 0 {
-						if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok {
-							if basicLit.Kind == token.STRING {
-								// Find which enum this belongs to
-								for enumName, enumInfo := range enums {
-									if len(valueSpec.Names) > 0 {
-										constName := valueSpec.Names[0].Name
-										if strings.HasPrefix(constName, enumName) {
-											value := strings.Trim(basicLit.Value, `"`)
-											enumInfo.Values = append(enumInfo.Values, value)
-											enums[enumName] = enumInfo
-										}
-									}
-								}
-							}
-						}
+					typeIdent, ok := valueSpec.Type.(*ast.Ident)
+					if !ok || len(valueSpec.Values) == 0 {
+						continue
+					}
+					if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+						enumValues[typeIdent.Name] = append(enumValues[typeIdent.Name], strings.Trim(basicLit.Value, `"`))
 					}
 				}
 			}
@@ -194,6 +194,12 @@ func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo
 
 		return nil
 	})
+
+	// Consts can be declared in a different file from their type
+	for name, enumInfo := range enums {
+		enumInfo.Values = enumValues[name]
+		enums[name] = enumInfo
+	}
 
 	return structs, enums, err
 }
@@ -217,6 +223,23 @@ func extractJSONTag(tag *ast.BasicLit) string {
 	return ""
 }
 
+func hasOmitEmpty(tag *ast.BasicLit) bool {
+	if tag == nil {
+		return false
+	}
+	for _, part := range strings.Fields(strings.Trim(tag.Value, "`")) {
+		if strings.HasPrefix(part, "json:") {
+			options := strings.Split(strings.Trim(part[5:], `"`), ",")[1:]
+			for _, option := range options {
+				if option == "omitempty" {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 func parseFieldType(expr ast.Expr) (string, bool, bool) {
 	switch t := expr.(type) {
 	case *ast.Ident:
@@ -230,414 +253,4 @@ func parseFieldType(expr ast.Expr) (string, bool, bool) {
 	default:
 		return "unknown", false, false
 	}
-}
-
-func generateZodSchemas(structs map[string]StructInfo, enums map[string]EnumInfo) string {
-	var buf bytes.Buffer
-
-	buf.WriteString(`import { z } from "zod";
-
-// Auto-generated file. Do not edit manually.
-// Generated from backend types in types/ directory
-
-`)
-
-	// Determine the order of structs (dependencies first)
-	orderedStructs := orderStructsByDependency(structs)
-
-	// Generate enum schemas first
-	enumNames := make([]string, 0, len(enums))
-	for name := range enums {
-		enumNames = append(enumNames, name)
-	}
-	sort.Strings(enumNames)
-
-	for _, name := range enumNames {
-		enum := enums[name]
-		if len(enum.Values) > 0 {
-			fmt.Fprintf(&buf, "// %s enum\n", name)
-			fmt.Fprintf(&buf, "export const %sSchema = z.enum([", name)
-			for i, value := range enum.Values {
-				if i > 0 {
-					buf.WriteString(", ")
-				}
-				fmt.Fprintf(&buf, `"%s"`, value)
-			}
-			buf.WriteString("]);\n\n")
-			fmt.Fprintf(&buf, "export type %s = z.infer<typeof %sSchema>;\n\n", name, name)
-
-			// Generate constants object for enum values
-			fmt.Fprintf(&buf, "export const %s = {\n", name)
-			for _, value := range enum.Values {
-				constName := strings.ToUpper(value)
-				fmt.Fprintf(&buf, "  %s: \"%s\",\n", constName, value)
-			}
-			buf.WriteString("} as const;\n\n")
-		}
-	}
-
-	// Generate struct schemas
-	for _, name := range orderedStructs {
-		structInfo := structs[name]
-		comment := getStructComment(name)
-
-		fmt.Fprintf(&buf, "// %s\n", comment)
-
-		// Check if this struct has recursive dependencies
-		if hasRecursiveDependency(name, structInfo, structs) {
-			generateRecursiveSchema(&buf, structInfo, structs)
-		} else {
-			generateNormalSchema(&buf, structInfo, enums, structs)
-		}
-	}
-
-	// Generate ModuleDataSchemas map
-	buf.WriteString("// Module Data Union Type\n")
-	buf.WriteString("export const ModuleDataSchemas = {\n")
-
-	moduleDataTypes := map[string]string{
-		"battery":   "BatteryData",
-		"cpu":       "CPUData",
-		"disks":     "DisksData",
-		"discord":   "DiscordData",
-		"displays":  "DisplaysData",
-		"gpus":      "GPUsData",
-		"media":     "MediaData",
-		"memory":    "MemoryData",
-		"networks":  "NetworksData",
-		"processes": "ProcessesData",
-		"sensors":   "SensorsData",
-		"system":    "SystemData",
-	}
-
-	// Sort module names for consistent output
-	moduleNames := make([]string, 0, len(moduleDataTypes))
-	for name := range moduleDataTypes {
-		moduleNames = append(moduleNames, name)
-	}
-	sort.Strings(moduleNames)
-
-	for _, moduleName := range moduleNames {
-		dataType := moduleDataTypes[moduleName]
-		if _, exists := structs[dataType]; exists {
-			fmt.Fprintf(&buf, "  %s: %sSchema,\n", moduleName, dataType)
-		}
-	}
-
-	buf.WriteString("} as const;\n")
-
-	return buf.String()
-}
-
-func getStructComment(name string) string {
-	comments := map[string]string{
-		"BatteryData":            "Battery Module",
-		"CPUData":                "CPU Module",
-		"DisksData":              "Disks Module",
-		"DiscordData":            "Discord Module",
-		"DisplaysData":           "Displays Module",
-		"GPUsData":               "GPUs Module",
-		"MediaData":              "Media Module",
-		"MemoryData":             "Memory Module",
-		"NetworksData":           "Networks Module",
-		"ProcessesData":          "Processes Module",
-		"SensorsData":            "Sensors Module",
-		"SystemData":             "System Module",
-		"CPUFrequency":           "CPU Frequency",
-		"CPUStats":               "CPU Stats",
-		"CPUTimes":               "CPU Times",
-		"PerCPU":                 "Per-CPU Data",
-		"DiskIOCounters":         "Disk IO Counters",
-		"DiskUsage":              "Disk Usage",
-		"DiskPartition":          "Disk Partition",
-		"DiskMountInfo":          "Disk Mount Info",
-		"DiskMountsSecondary":    "Disk Mounts Secondary",
-		"DiskMountsResponse":     "Disk Mounts Response",
-		"Disk":                   "Disk",
-		"Display":                "Display",
-		"GPU":                    "GPU",
-		"MemorySwap":             "Memory Swap",
-		"MemoryVirtual":          "Memory Virtual",
-		"NetworkAddress":         "Network Address",
-		"NetworkStats":           "Network Stats",
-		"NetworkConnection":      "Network Connection",
-		"NetworkIO":              "Network IO",
-		"Network":                "Network",
-		"Process":                "Process",
-		"SensorsWindowsSensor":   "Windows Sensor",
-		"SensorsWindowsHardware": "Windows Hardware",
-		"SensorsNVIDIAChipset":   "NVIDIA Chipset",
-		"SensorsNVIDIADisplay":   "NVIDIA Display",
-		"SensorsNVIDIADriver":    "NVIDIA Driver",
-		"SensorsNVIDIAGPU":       "NVIDIA GPU",
-		"SensorsNVIDIA":          "NVIDIA Sensors",
-		"SensorsWindows":         "Windows Sensors",
-		"Temperature":            "Temperature Sensor",
-		"Fan":                    "Fan Sensor",
-		"SystemUser":             "System User",
-		"DeviceInfo":             "Device Info",
-		"DiscordUser":            "Discord User",
-		"DiscordCall":            "Discord Call",
-		"DiscordChannel":         "Discord Channel",
-		"DiscordServer":          "Discord Server",
-		"DiscordVoiceConnection": "Discord Voice Connection",
-		"DiscordCallMember":      "Discord Call Member",
-		"DiscordDevice":          "Discord Device",
-		"DiscordAudio":           "Discord Audio",
-		"DiscordVoiceMode":       "Discord Voice Mode",
-		"DiscordVoiceProcessing": "Discord Voice Processing",
-	}
-
-	if comment, exists := comments[name]; exists {
-		return comment
-	}
-	return name
-}
-
-func hasRecursiveDependency(name string, structInfo StructInfo, structs map[string]StructInfo) bool {
-	// Check if SensorsWindowsHardware (has recursive subhardware field)
-	return name == "SensorsWindowsHardware"
-}
-
-func generateRecursiveSchema(buf *bytes.Buffer, structInfo StructInfo, structs map[string]StructInfo) {
-	// For SensorsWindowsHardware with recursive structure
-	fmt.Fprintf(buf, "export const %sSchema: z.ZodType<{\n", structInfo.Name)
-
-	for _, field := range structInfo.Fields {
-		zodType := mapGoTypeToZodWithRecursive(field, structInfo.Name)
-		fmt.Fprintf(buf, "  %s: %s;\n", field.JSONName, zodType)
-	}
-
-	buf.WriteString("}> = z.object({\n")
-
-	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, structInfo.Name, structs)
-		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
-		if i < len(structInfo.Fields)-1 {
-			buf.WriteString(",\n")
-		} else {
-			buf.WriteString(",\n")
-		}
-	}
-
-	buf.WriteString("});\n\n")
-	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
-}
-
-func generateNormalSchema(buf *bytes.Buffer, structInfo StructInfo, enums map[string]EnumInfo, structs map[string]StructInfo) {
-	// Check if this is an array type alias
-	if len(structInfo.Fields) == 1 && structInfo.Fields[0].Name == "__array_element__" {
-		elemType := structInfo.Fields[0].Type
-		elemSchema := elemType + "Schema"
-		fmt.Fprintf(buf, "export const %sSchema = z.array(%s);\n\n", structInfo.Name, elemSchema)
-		fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
-		return
-	}
-
-	fmt.Fprintf(buf, "export const %sSchema = z.object({\n", structInfo.Name)
-
-	for i, field := range structInfo.Fields {
-		zodSchema := mapGoTypeToZodSchema(field, "", structs)
-		fmt.Fprintf(buf, "  %s: %s", field.JSONName, zodSchema)
-		if i < len(structInfo.Fields)-1 {
-			buf.WriteString(",\n")
-		} else {
-			buf.WriteString(",\n")
-		}
-	}
-
-	buf.WriteString("});\n\n")
-	fmt.Fprintf(buf, "export type %s = z.infer<typeof %sSchema>;\n\n", structInfo.Name, structInfo.Name)
-}
-
-func mapGoTypeToZodWithRecursive(field FieldInfo, parentStruct string) string {
-	var zodType string
-
-	switch field.Type {
-	case parentStruct:
-		zodType = "unknown[]"
-	case "SensorsWindowsSensor":
-		zodType = "{\n    id: string;\n    name: string;\n    type: string;\n    value: unknown;\n  }[]"
-	default:
-		zodType = mapGoTypeToZod(field)
-	}
-
-	return zodType
-}
-
-func mapGoTypeToZodSchema(field FieldInfo, parentStruct string, structs map[string]StructInfo) string {
-	var zodSchema string
-
-	// Handle recursive reference for SensorsWindowsHardware
-	if parentStruct == "SensorsWindowsHardware" && field.Type == "SensorsWindowsHardware" {
-		zodSchema = "z.array(z.lazy(() => SensorsWindowsHardwareSchema))"
-		return zodSchema
-	}
-
-	// Map Go type to Zod schema
-	baseSchema := ""
-
-	switch field.Type {
-	case "bool":
-		baseSchema = "z.boolean()"
-	case "string":
-		baseSchema = "z.string()"
-	case "int", "int64", "uint64", "float64":
-		baseSchema = "z.number()"
-	case "RunMode":
-		baseSchema = "z.enum([\"standalone\"])"
-	default:
-		// Reference the generated schema when the field type is a parsed struct.
-		// This is robust to new types without needing a name-prefix allow-list.
-		if _, ok := structs[field.Type]; ok {
-			baseSchema = field.Type + "Schema"
-		} else {
-			baseSchema = "z.unknown()"
-		}
-	}
-
-	// Handle arrays
-	if field.IsArray {
-		zodSchema = fmt.Sprintf("z.array(%s)", baseSchema)
-	} else {
-		zodSchema = baseSchema
-	}
-
-	// Handle nullable (pointer) types
-	// Use .nullish() instead of .nullable() to match Go's pointer semantics and TypeScript behavior:
-	// - In Go, pointer fields (*T) can be nil, representing an "absent" or "not set" value
-	// - In TypeScript/JSON, this maps to either `null` (explicitly absent) or `undefined` (not present)
-	// - .nullish() allows both null and undefined (matches TypeScript's optional/nullable types)
-	// - .nullable() only allows null, which is more restrictive and doesn't handle undefined
-	// This ensures generated Zod schemas correctly validate TypeScript types where optional fields
-	// can be either undefined (field not present in JSON) or explicitly set to null
-	if field.IsPtr {
-		zodSchema += ".nullish()"
-	}
-
-	return zodSchema
-}
-
-func mapGoTypeToZod(field FieldInfo) string {
-	var zodType string
-
-	switch field.Type {
-	case "bool":
-		zodType = "boolean"
-	case "string":
-		zodType = "string"
-	case "int", "int64", "uint64", "float64":
-		zodType = "number"
-	default:
-		zodType = "unknown"
-	}
-
-	if field.IsArray {
-		zodType += "[]"
-	}
-
-	if field.IsPtr && !field.IsArray {
-		zodType += " | null"
-	}
-
-	return zodType
-}
-
-func orderStructsByDependency(structs map[string]StructInfo) []string {
-	// Define a custom order based on dependencies
-	order := []string{
-		// Enums first
-		"RunMode",
-
-		// Simple structs without dependencies
-		"CPUFrequency",
-		"CPUStats",
-		"CPUTimes",
-		"DiskIOCounters",
-		"DiskUsage",
-		"NetworkAddress",
-		"NetworkStats",
-		"NetworkIO",
-		"Temperature",
-		"Fan",
-		"SystemUser",
-		"DeviceInfo",
-		"MemorySwap",
-		"MemoryVirtual",
-		"DiscordUser",
-		"DiscordChannel",
-		"DiscordServer",
-		"DiscordVoiceConnection",
-		"DiscordCallMember",
-		"DiscordDevice",
-		"DiscordVoiceMode",
-		"DiscordVoiceProcessing",
-
-		// Structs with simple dependencies
-		"PerCPU",
-		"DiskPartition",
-		"NetworkConnection",
-		"SensorsWindowsSensor",
-		"SensorsNVIDIAChipset",
-		"SensorsNVIDIADisplay",
-		"SensorsNVIDIADriver",
-		"SensorsNVIDIAGPU",
-		"DiscordCall",
-		"DiscordAudio",
-
-		// Structs with nested dependencies
-		"Disk",
-		"Display",
-		"GPU",
-		"Network",
-		"Process",
-		"SensorsNVIDIA",
-
-		// Recursive struct
-		"SensorsWindowsHardware",
-		"SensorsWindows",
-
-		// Top-level data structs
-		"BatteryData",
-		"CPUData",
-		"DisksData",
-		"DiscordData",
-		"DisplaysData",
-		"GPUsData",
-		"MediaData",
-		"MemoryData",
-		"NetworksData",
-		"ProcessesData",
-		"SensorsData",
-		"SystemData",
-
-		// Disk mount types (for settings UI)
-		"DiskMountInfo",
-		"DiskMountsSecondary",
-		"DiskMountsResponse",
-	}
-
-	// Filter to only include structs that exist
-	result := []string{}
-	for _, name := range order {
-		if _, exists := structs[name]; exists {
-			result = append(result, name)
-		}
-	}
-
-	// Add any structs that weren't in the predefined order
-	for name := range structs {
-		found := false
-		for _, ordered := range result {
-			if ordered == name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			result = append(result, name)
-		}
-	}
-
-	return result
 }

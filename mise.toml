@@ -40,13 +40,13 @@ dir = "docs"
 run = "bun install --frozen-lockfile"
 
 [tasks."generate:schemas"]
-description = "Generate Zod schemas from Go types"
-depends = ["install:web-client"]
+description = "Generate Effect schemas from Go types"
+depends = ["install:connector:typescript"]
 sources = ["types/**/*.go", "tools/generate-schemas/**/*.go"]
-outputs = ["web-client/src/lib/system-bridge/types-modules-schemas.ts"]
+outputs = ["connector/typescript/src/generated/modules.ts"]
 run = [
-  "go run tools/generate-schemas/main.go",
-  "cd web-client && bun run format:write src/lib/system-bridge/types-modules-schemas.ts",
+  "go run ./tools/generate-schemas",
+  "cd connector/typescript && bunx prettier --write src/generated/modules.ts",
 ]
 
 [tasks."build:web-client"]
@@ -262,11 +262,18 @@ run = "go test ./..."
 
 [tasks.check]
 description = "Run all linters and tests"
-depends = ["lint:all", "test", "test:connector:python"]
+depends = ["lint:all", "test", "test:connector:python", "test:connector:typescript"]
 
 [tasks."lint:all"]
-description = "Run all linters (Go, web client, Python connector)"
-depends = ["lint:go", "lint:web-client", "lint:connector:python", "typecheck:connector:python"]
+description = "Run all linters (Go, web client, Python and TypeScript connectors)"
+depends = [
+  "lint:go",
+  "lint:web-client",
+  "lint:connector:python",
+  "typecheck:connector:python",
+  "lint:connector:typescript",
+  "typecheck:connector:typescript",
+]
 
 [tasks."lint:go"]
 description = "Run Go linters (format check, vet)"
@@ -354,6 +361,43 @@ sources = ["../../LICENSE", "pyproject.toml", "README.md", "systembridgeconnecto
 outputs = ["dist/*"]
 # license-files can't point outside the package, so copy the root licence in
 run = ["cp ../../LICENSE LICENSE", "uv build"]
+
+[tasks."install:connector:typescript"]
+description = "Install the TypeScript connector dependencies"
+dir = "connector/typescript"
+run = "bun install --frozen-lockfile"
+
+[tasks."format:connector:typescript"]
+description = "Format the TypeScript connector with Prettier"
+depends = ["install:connector:typescript"]
+dir = "connector/typescript"
+run = "bun run format"
+
+[tasks."lint:connector:typescript"]
+description = "Lint the TypeScript connector with Oxlint and check its formatting"
+depends = ["install:connector:typescript"]
+dir = "connector/typescript"
+run = "bun run --parallel --no-exit-on-error lint format:check"
+
+[tasks."typecheck:connector:typescript"]
+description = "Type check the TypeScript connector"
+depends = ["install:connector:typescript"]
+dir = "connector/typescript"
+run = "bun run typecheck"
+
+[tasks."test:connector:typescript"]
+description = "Run the TypeScript connector tests"
+depends = ["install:connector:typescript"]
+dir = "connector/typescript"
+run = "bun run test"
+
+[tasks."build:connector:typescript"]
+description = "Build the TypeScript connector"
+depends = ["install:connector:typescript"]
+dir = "connector/typescript"
+sources = ["../../LICENSE", "package.json", "tsconfig.json", "src/**"]
+outputs = ["dist/index.js"]
+run = "bun run build"
 
 [tasks.clean]
 description = "Remove build artifacts"
