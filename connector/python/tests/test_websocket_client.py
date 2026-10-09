@@ -19,6 +19,7 @@ from systembridgeconnector.exceptions import (
 )
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
+from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.keyboard_key import KeyboardKey
 from systembridgeconnector.models.keyboard_text import KeyboardText
 from systembridgeconnector.models.media_control import MediaControl
@@ -26,6 +27,11 @@ from systembridgeconnector.models.media_directories import MediaDirectory
 from systembridgeconnector.models.media_get_file import MediaGetFile
 from systembridgeconnector.models.media_get_files import MediaGetFiles
 from systembridgeconnector.models.modules import GetData, Module, RegisterDataListener
+from systembridgeconnector.models.modules.disks import (
+    DiskMountInfo,
+    DiskMounts,
+    DiskUsage,
+)
 from systembridgeconnector.models.notification import Notification
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
@@ -340,6 +346,37 @@ async def test_media_control(
         )
         == snapshot
     )
+
+
+@pytest.mark.asyncio
+async def test_discord_control(
+    snapshot: SnapshotAssertion,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    assert (
+        await mock_websocket_client_listening.discord_control(
+            DiscordControl(action=DiscordAction.TOGGLE_MUTE),
+            request_id=REQUEST_ID,
+        )
+        == snapshot
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_disk_mounts(
+    snapshot: SnapshotAssertion,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    disk_mounts = await mock_websocket_client_listening.get_disk_mounts(
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(disk_mounts, DiskMounts)
+    assert isinstance(disk_mounts.primary[0], DiskMountInfo)
+    assert isinstance(disk_mounts.primary[0].usage, DiskUsage)
+    assert isinstance(disk_mounts.secondary.squashfs[0], DiskMountInfo)
+    assert disk_mounts == snapshot
 
 
 @pytest.mark.asyncio

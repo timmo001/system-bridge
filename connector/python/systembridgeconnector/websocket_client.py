@@ -21,6 +21,7 @@ from .exceptions import (
 )
 from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
+from .models.discord_control import DiscordControl
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_control import MediaControl
@@ -29,6 +30,7 @@ from .models.media_files import MediaFile, MediaFiles
 from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
 from .models.modules import GetData, ModulesData, RegisterDataListener
+from .models.modules.disks import DiskMounts
 from .models.notification import Notification
 from .models.open_path import OpenPath
 from .models.open_url import OpenUrl
@@ -244,6 +246,34 @@ class WebSocketClient(Base):
 
         return directories
 
+    async def get_disk_mounts(
+        self,
+        request_id: str | None = None,
+    ) -> DiskMounts:
+        """Get disk mounts, grouped into primary and secondary mounts."""
+        self._logger.info("Getting disk mounts")
+        response = await self.send_message(
+            EventType.GET_DISK_MOUNTS,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.DISK_MOUNTS,
+        )
+
+        if response.type == EventType.ERROR:
+            if response.subtype == "TIMEOUT":
+                raise ConnectionErrorException(
+                    response.message or "Timeout waiting for disk mounts response"
+                )
+            raise BadRequestException(response.message or "Failed to get disk mounts")
+
+        if not isinstance(response.data, dict):
+            raise TypeError(
+                f"Disk mounts response data must be a dict, got {type(response.data).__name__}"
+            )
+
+        return DiskMounts(**response.data)
+
     async def get_files(
         self,
         model: MediaGetFiles,
@@ -349,6 +379,21 @@ class WebSocketClient(Base):
             request_id,
             asdict(model),
             wait_for_response=False,
+        )
+
+    async def discord_control(
+        self,
+        model: DiscordControl,
+        request_id: str | None = None,
+    ) -> Response:
+        """Discord control."""
+        self._logger.info("Discord control: %s", model)
+        return await self.send_message(
+            EventType.DISCORD_CONTROL,
+            request_id,
+            asdict(model),
+            wait_for_response=True,
+            response_type=EventType.DISCORD_CONTROLLED,
         )
 
     async def send_notification(

@@ -4,6 +4,7 @@
     <Model.BATTERY: 'battery'>: <class 'systembridgeconnector.models.modules.battery.Battery'>,
     <Model.CPU: 'cpu'>: <class 'systembridgeconnector.models.modules.cpu.CPU'>,
     <Model.DATA: 'data'>: <class 'systembridgeconnector.models.modules.ModulesData'>,
+    <Model.DISCORD: 'discord'>: <class 'systembridgeconnector.models.modules.discord.Discord'>,
     <Model.DISKS: 'disks'>: <class 'systembridgeconnector.models.modules.disks.Disks'>,
     <Model.DISPLAYS: 'displays'>: <class 'systembridgeconnector.models.modules.displays.Display'>,
     <Model.GPUS: 'gpus'>: <class 'systembridgeconnector.models.modules.gpus.GPU'>,

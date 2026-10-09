@@ -5,6 +5,7 @@ from enum import StrEnum
 
 from .battery import Battery
 from .cpu import CPU
+from .discord import Discord
 from .disks import Disks
 from .displays import Display
 from .gpus import GPU
@@ -21,6 +22,7 @@ class Module(StrEnum):
 
     BATTERY = "battery"
     CPU = "cpu"
+    DISCORD = "discord"
     DISKS = "disks"
     DISPLAYS = "displays"
     GPUS = "gpus"
@@ -50,6 +52,7 @@ class ModulesData:
 
     battery: Battery | None = None
     cpu: CPU | None = None
+    discord: Discord | None = None
     disks: Disks | None = None
     displays: list[Display] | None = None
     gpus: list[GPU] | None = None

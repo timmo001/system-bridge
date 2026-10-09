@@ -3,6 +3,7 @@
 from systembridgeconnector.models.modules.disks import (
     Disk,
     DiskIOCounters,
+    DiskMountCategory,
     DiskPartition,
     Disks,
     DiskUsage,
@@ -20,6 +21,7 @@ FIXTURE_DISKS = Disks(
                     options="options",
                     max_file_size=1,
                     max_path_length=2,
+                    category=DiskMountCategory.PRIMARY,
                     usage=DiskUsage(
                         total=1,
                         used=2,

@@ -21,6 +21,22 @@
     type='N/A',
   )
 # ---
+# name: test_discord_control
+  Response(
+    data=dict({
+      'action': 'TOGGLE_MUTE',
+      'channel_id': None,
+      'device_id': None,
+      'mode': None,
+      'value': None,
+    }),
+    id='test',
+    message=None,
+    module=None,
+    subtype=None,
+    type='DISCORD_CONTROLLED',
+  )
+# ---
 # name: test_execute_command
   ExecuteResult(
     commandID='test-command',
@@ -68,6 +84,7 @@
   ModulesData(
     battery=None,
     cpu=None,
+    discord=None,
     disks=None,
     displays=None,
     gpus=None,
@@ -141,6 +158,37 @@
       path='/home/user/music',
     ),
   ])
+# ---
+# name: test_get_disk_mounts
+  DiskMounts(
+    primary=list([
+      DiskMountInfo(
+        category='primary',
+        device='/dev/nvme0n1p2',
+        filesystem_type='ext4',
+        mount_point='/',
+        usage=DiskUsage(
+          free=1,
+          percent=75.0,
+          total=4,
+          used=3,
+        ),
+      ),
+    ]),
+    secondary=DiskMountsSecondary(
+      bind=list([
+      ]),
+      squashfs=list([
+        DiskMountInfo(
+          category='squashfs',
+          device='/dev/loop0',
+          filesystem_type='squashfs',
+          mount_point='/snap/core/1',
+          usage=None,
+        ),
+      ]),
+    ),
+  )
 # ---
 # name: test_get_file
   MediaFile(
@@ -345,6 +393,7 @@
   ModulesData(
     battery=None,
     cpu=None,
+    discord=None,
     disks=None,
     displays=None,
     gpus=None,

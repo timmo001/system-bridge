@@ -9,6 +9,7 @@ from .models.media_files import MediaFile, MediaFiles
 from .models.modules import Module, ModulesData
 from .models.modules.battery import Battery
 from .models.modules.cpu import CPU
+from .models.modules.discord import Discord
 from .models.modules.disks import Disks
 from .models.modules.displays import Display
 from .models.modules.gpus import GPU
@@ -84,12 +85,16 @@ class EventType(StrEnum):
     DATA_LISTENER_UNREGISTERED = "DATA_LISTENER_UNREGISTERED"
     DATA_UPDATE = "DATA_UPDATE"
     DIRECTORIES = "DIRECTORIES"
+    DISCORD_CONTROL = "DISCORD_CONTROL"
+    DISCORD_CONTROLLED = "DISCORD_CONTROLLED"
+    DISK_MOUNTS = "DISK_MOUNTS"
     ERROR = "ERROR"
     EXIT_APPLICATION = "EXIT_APPLICATION"
     FILE = "FILE"
     FILES = "FILES"
     GET_DATA = "GET_DATA"
     GET_DIRECTORIES = "GET_DIRECTORIES"
+    GET_DISK_MOUNTS = "GET_DISK_MOUNTS"
     GET_FILE = "GET_FILE"
     GET_FILES = "GET_FILES"
     GET_SETTINGS = "GET_SETTINGS"
@@ -155,6 +160,7 @@ class Model(StrEnum):
     BATTERY = Module.BATTERY
     CPU = Module.CPU
     DATA = "data"
+    DISCORD = Module.DISCORD
     DISKS = Module.DISKS
     DISPLAYS = Module.DISPLAYS
     GPUS = Module.GPUS
@@ -181,6 +187,7 @@ MODEL_MAP = {
     Model.BATTERY: Battery,
     Model.CPU: CPU,
     Model.DATA: ModulesData,
+    Model.DISCORD: Discord,
     Model.DISKS: Disks,
     Model.DISPLAYS: Display,  # Map to Display not list[Display] so it can be mapped
     Model.GPUS: GPU,  # Map to GPU not list[GPU] so it can be mapped

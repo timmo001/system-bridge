@@ -10,6 +10,7 @@ from systembridgeconnector.models.modules import (
 modules = [
     Module.BATTERY,
     Module.CPU,
+    Module.DISCORD,
     Module.DISKS,
     Module.DISPLAYS,
     Module.GPUS,
@@ -46,6 +47,7 @@ def test_modules_data():
     assert isinstance(modules_data, ModulesData)
     assert modules_data.battery is None
     assert modules_data.cpu is None
+    assert modules_data.discord is None
     assert modules_data.disks is None
     assert modules_data.displays is None
     assert modules_data.gpus is None

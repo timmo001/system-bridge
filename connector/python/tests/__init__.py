@@ -13,6 +13,7 @@ from systembridgeconnector.const import EventSubType, EventType
 from systembridgeconnector.models.fixtures.media_files import FIXTURE_MEDIA_FILES
 from systembridgeconnector.models.fixtures.modules.battery import FIXTURE_BATTERY
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
+from systembridgeconnector.models.fixtures.modules.discord import FIXTURE_DISCORD
 from systembridgeconnector.models.fixtures.modules.disks import FIXTURE_DISKS
 from systembridgeconnector.models.fixtures.modules.displays import FIXTURE_DISPLAYS
 from systembridgeconnector.models.fixtures.modules.gpus import FIXTURE_GPUS
@@ -38,6 +39,7 @@ REQUEST_ID: Final[str] = "test"
 MODULES_DATA = ModulesData(
     battery=FIXTURE_BATTERY,
     cpu=FIXTURE_CPU,
+    discord=FIXTURE_DISCORD,
     disks=FIXTURE_DISKS,
     displays=FIXTURE_DISPLAYS,
     gpus=FIXTURE_GPUS,
@@ -111,6 +113,39 @@ async def process_request(request: Request) -> Response:
                 },
             ],
         )
+    if request.event == EventType.GET_DISK_MOUNTS:
+        return Response(
+            id=request.id,
+            type=EventType.DISK_MOUNTS,
+            data={
+                "primary": [
+                    {
+                        "device": "/dev/nvme0n1p2",
+                        "mount_point": "/",
+                        "filesystem_type": "ext4",
+                        "category": "primary",
+                        "usage": {
+                            "total": 4,
+                            "used": 3,
+                            "free": 1,
+                            "percent": 75.0,
+                        },
+                    }
+                ],
+                "secondary": {
+                    "bind": [],
+                    "squashfs": [
+                        {
+                            "device": "/dev/loop0",
+                            "mount_point": "/snap/core/1",
+                            "filesystem_type": "squashfs",
+                            "category": "squashfs",
+                            "usage": None,
+                        }
+                    ],
+                },
+            },
+        )
     if request.event == EventType.GET_FILES:
         return Response(
             id=request.id,
@@ -141,6 +176,12 @@ async def process_request(request: Request) -> Response:
         return Response(
             id=request.id,
             type=EventType.KEYBOARD_TEXT_SENT,
+            data=request.data,
+        )
+    if request.event == EventType.DISCORD_CONTROL:
+        return Response(
+            id=request.id,
+            type=EventType.DISCORD_CONTROLLED,
             data=request.data,
         )
     if request.event == EventType.NOTIFICATION:

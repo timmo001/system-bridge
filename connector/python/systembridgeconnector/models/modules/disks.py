@@ -1,9 +1,18 @@
 """Disks."""
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import cast
 
 from systembridgeconnector.models.helpers import filter_unexpected_fields
+
+
+class DiskMountCategory(StrEnum):
+    """Disk Mount Category."""
+
+    PRIMARY = "primary"
+    BIND = "bind"
+    SQUASHFS = "squashfs"
 
 
 @filter_unexpected_fields
@@ -41,6 +50,7 @@ class DiskPartition:
     options: str
     max_file_size: int
     max_path_length: int
+    category: DiskMountCategory | None = None
     usage: DiskUsage | None = None
 
     def __post_init__(self) -> None:
@@ -72,6 +82,62 @@ class Disk:
 
         if isinstance(self.io_counters, dict):
             self.io_counters = DiskIOCounters(**self.io_counters)
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class DiskMountInfo:
+    """Disk Mount Info."""
+
+    device: str
+    mount_point: str
+    filesystem_type: str
+    category: DiskMountCategory
+    usage: DiskUsage | None = None
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        if isinstance(self.usage, dict):
+            self.usage = DiskUsage(**self.usage)
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class DiskMountsSecondary:
+    """Disk Mounts Secondary."""
+
+    bind: list[DiskMountInfo]
+    squashfs: list[DiskMountInfo]
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.bind = [
+            DiskMountInfo(**cast(dict, m)) if isinstance(m, dict) else m
+            for m in self.bind
+        ]
+        self.squashfs = [
+            DiskMountInfo(**cast(dict, m)) if isinstance(m, dict) else m
+            for m in self.squashfs
+        ]
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class DiskMounts:
+    """Disk Mounts."""
+
+    primary: list[DiskMountInfo]
+    secondary: DiskMountsSecondary
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.primary = [
+            DiskMountInfo(**cast(dict, m)) if isinstance(m, dict) else m
+            for m in self.primary
+        ]
+
+        if isinstance(self.secondary, dict):
+            self.secondary = DiskMountsSecondary(**self.secondary)
 
 
 @filter_unexpected_fields
