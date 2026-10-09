@@ -1,5 +1,4 @@
-import { createContext } from "@lit/context";
-import { z } from "zod";
+import { Schema } from "effect";
 
 import {
   assignIfDefined,
@@ -7,16 +6,22 @@ import {
   getIntParam,
   getStringParam,
   resolveTokenParam,
-} from "../lib/url-params";
+} from "./url-params";
 
-const ConnectionSettingsSchema = z.object({
-  host: z.string(),
-  port: z.number(),
-  ssl: z.boolean(),
-  token: z.string().nullable(),
+const ConnectionSettings = Schema.Struct({
+  host: Schema.String,
+  port: Schema.Finite,
+  ssl: Schema.Boolean,
+  token: Schema.NullOr(Schema.String),
 });
 
-export type ConnectionSettings = z.infer<typeof ConnectionSettingsSchema>;
+export interface ConnectionSettings extends Schema.Schema.Type<
+  typeof ConnectionSettings
+> {}
+
+const decodeStoredSettings = Schema.decodeUnknownSync(
+  Schema.fromJsonString(ConnectionSettings),
+);
 
 const defaultConnectionSettings: ConnectionSettings = {
   host: "0.0.0.0",
@@ -24,9 +29,6 @@ const defaultConnectionSettings: ConnectionSettings = {
   ssl: false,
   token: null,
 };
-
-export const connectionContext =
-  createContext<ConnectionSettings>("connection");
 
 const STORAGE_KEY = "system-bridge-connection";
 
@@ -38,7 +40,10 @@ const STORAGE_KEY = "system-bridge-connection";
 function loadConnectionSettingsFromURL(): Partial<ConnectionSettings> | null {
   try {
     const params = new URLSearchParams(window.location.search);
-    const settings: Partial<ConnectionSettings> = {};
+
+    const settings: {
+      -readonly [K in keyof ConnectionSettings]?: ConnectionSettings[K];
+    } = {};
 
     assignIfDefined(settings, "host", getStringParam(params, "host"));
     assignIfDefined(settings, "port", getIntParam(params, "port"));
@@ -70,7 +75,7 @@ export function loadConnectionSettings(): ConnectionSettings {
     const stored = localStorage.getItem(STORAGE_KEY);
 
     if (stored) {
-      return ConnectionSettingsSchema.parse(JSON.parse(stored));
+      return decodeStoredSettings(stored);
     }
   } catch (error) {
     console.error("Error loading connection settings from localStorage", error);

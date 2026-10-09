@@ -56,7 +56,7 @@ mise tasks
 ## Web Client
 
 - Uses the `~/` path alias and the `UIElement` mixin from `~/mixins`
-- Zod provides runtime validation and type inference
+- Data comes from the `@timmo001/effect-system-bridge` connector, held in `effect/reactivity` Atoms (`src/lib/atoms.ts`) and read through `AtomController`; Effect Schema handles validation
 - Checks: `cd web-client && bun run lint`, `bun run typecheck`, `bun run format:check`
 
 ## Packaging

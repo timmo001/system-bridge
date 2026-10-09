@@ -104,7 +104,10 @@ export default defineConfig({
     "typescript/no-base-to-string": "error",
     "typescript/no-duplicate-enum-values": "error",
     "typescript/no-duplicate-type-constituents": "error",
-    "typescript/no-empty-object-type": "error",
+    "typescript/no-empty-object-type": [
+      "error",
+      { allowInterfaces: "with-single-extends" },
+    ],
     "typescript/no-explicit-any": "error",
     "typescript/no-extra-non-null-assertion": "error",
     "typescript/no-floating-promises": "error",

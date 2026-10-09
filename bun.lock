@@ -62,7 +62,6 @@
         "lit": "^3.3.2",
         "lucide": "^1.14.0",
         "tailwind-merge": "^3.5.0",
-        "zod": "^4.1.12",
       },
       "devDependencies": {
         "@oxlint/plugins": "1.86.0",

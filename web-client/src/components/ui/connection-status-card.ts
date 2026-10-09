@@ -1,15 +1,9 @@
-import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
+import { AtomController } from "~/controllers/atom-controller";
+import { connectionSettings, connectionStatus } from "~/lib/atoms";
+import type { ConnectionSettings } from "~/lib/connection-settings";
 import { UIElement } from "~/mixins/light-dom";
 import "./button";
 import "./icon";
@@ -18,11 +12,13 @@ import "./icon";
 class ConnectionStatusCard extends UIElement {
   @property({ type: Boolean }) showSetupButton = false;
 
-  @consume({ context: connectionStatusContext, subscribe: true })
-  private _status?: ConnectionStatus;
+  readonly #status = new AtomController(this, () => connectionStatus);
 
-  @consume({ context: connectionContext, subscribe: true })
-  private _connection?: ConnectionSettings;
+  readonly #connection = new AtomController(this, () => connectionSettings);
+
+  private get _connection(): ConnectionSettings {
+    return this.#connection.value;
+  }
 
   @state()
   private _copyStatus: "idle" | "copied" | "error" = "idle";
@@ -36,14 +32,12 @@ class ConnectionStatusCard extends UIElement {
     );
   };
 
-  private get mcpURL(): string | null {
-    if (!this._connection) return null;
-
+  private get mcpURL(): string {
     return `${this._connection.ssl ? "https" : "http"}://${this._connection.host}:${this._connection.port}/api/mcp`;
   }
 
   private handleCopyMCPURL = async (): Promise<void> => {
-    if (!this.mcpURL || !this._connection?.token) return;
+    if (!this._connection.token) return;
 
     const url = `${this.mcpURL}?token=${encodeURIComponent(this._connection.token)}`;
 
@@ -93,19 +87,19 @@ class ConnectionStatusCard extends UIElement {
   }
 
   private renderErrorBanner(): TemplateResult {
-    if (!this._status?.error) return html``;
+    const { error } = this.#status.value;
+
+    if (!error) return html``;
 
     return html`
       <div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-        ${this._status.error}
+        ${error}
       </div>
     `;
   }
 
   private renderConnectionDetails(): TemplateResult {
     const mcpURL = this.mcpURL;
-
-    if (!this._connection || !mcpURL) return html``;
 
     return html`
       <div class="grid grid-cols-2 gap-4 text-sm pt-2">
@@ -166,7 +160,7 @@ class ConnectionStatusCard extends UIElement {
   }
 
   render(): TemplateResult {
-    const isConnected = this._status?.isConnected ?? false;
+    const { isConnected } = this.#status.value;
 
     return html`
       <div

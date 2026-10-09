@@ -1,20 +1,16 @@
-import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement } from "lit/decorators.js";
 
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
+import { AtomController } from "~/controllers/atom-controller";
+import { connectionStatus } from "~/lib/atoms";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-indicator")
 class ConnectionIndicator extends UIElement {
-  @consume({ context: connectionStatusContext, subscribe: true })
-  private _status?: ConnectionStatus;
+  readonly #status = new AtomController(this, () => connectionStatus);
 
   render(): TemplateResult {
-    const isConnected = this._status?.isConnected ?? false;
+    const { isConnected } = this.#status.value;
 
     return html`
       <div class="flex items-center gap-2">

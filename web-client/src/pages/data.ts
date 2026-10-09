@@ -1,19 +1,11 @@
-import { consume } from "@lit/context";
+import { ModuleName } from "@timmo001/effect-system-bridge";
+import { Schema } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import { moduleDataContext } from "~/contexts/module-data";
-import {
-  type ModuleData,
-  ModuleNameSchema,
-  Modules,
-  ModuleLabels,
-  type ModuleName,
-} from "~/lib/system-bridge/types-modules";
+import { AtomController } from "~/controllers/atom-controller";
+import { latestModuleData } from "~/lib/atoms";
+import { ModuleLabels } from "~/lib/modules";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/code-block";
@@ -22,33 +14,22 @@ import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/tabs";
 
+const Modules = ModuleName.literals;
+
+const isModuleName = Schema.is(ModuleName);
+
 @customElement("page-data")
 class PageData extends PageElement {
   title = "Data";
   description = "Real-time data from System Bridge modules";
 
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: moduleDataContext, subscribe: true })
-  data?: ModuleData;
+  readonly #data = new AtomController(this, () => latestModuleData);
 
   @state()
-  private selectedTab: ModuleName = "system";
-
-  connectedCallback() {
-    super.connectedCallback();
-
-    // Set first module as default
-    if (Modules.length > 0) {
-      this.selectedTab = Modules[0];
-    }
-  }
+  private selectedTab: ModuleName = Modules[0];
 
   private handleTabChange = (e: CustomEvent<{ value: string }>): void => {
-    const module = ModuleNameSchema.safeParse(e.detail.value);
-
-    if (module.success) this.selectedTab = module.data;
+    if (isModuleName(e.detail.value)) this.selectedTab = e.detail.value;
   };
 
   private handleNavigateToConnection = (): void => {
@@ -66,6 +47,8 @@ class PageData extends PageElement {
   }
 
   private renderTabContents() {
+    const data = this.#data.value;
+
     return Modules.map(
       (module) => html`
         <ui-tabs-content
@@ -74,11 +57,11 @@ class PageData extends PageElement {
           class="flex flex-col flex-1 min-h-0 mt-2"
         >
           ${
-            this.data?.[module]
+            data[module]
               ? html`
                   <ui-code-block
                     class="flex-1 min-h-0"
-                    .data=${this.data[module]}
+                    .data=${data[module]}
                   ></ui-code-block>
                 `
               : html`

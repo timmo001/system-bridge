@@ -1,17 +1,13 @@
-import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
+import { AtomController } from "~/controllers/atom-controller";
+import { connectionStatus } from "~/lib/atoms";
 import { UIElement } from "~/mixins/light-dom";
 
 @customElement("ui-connection-required")
 class ConnectionRequired extends UIElement {
-  @consume({ context: connectionStatusContext, subscribe: true })
-  private _status?: ConnectionStatus;
+  readonly #status = new AtomController(this, () => connectionStatus);
 
   @property() message = "Please connect to System Bridge.";
 
@@ -25,7 +21,7 @@ class ConnectionRequired extends UIElement {
   };
 
   render(): TemplateResult {
-    const error = this._status?.error;
+    const { error } = this.#status.value;
 
     return html`
       <div class="rounded-lg border border-destructive bg-destructive/10 p-6">

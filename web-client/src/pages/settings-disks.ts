@@ -1,30 +1,16 @@
-import { consume } from "@lit/context";
+import type {
+  DiskMountInfo,
+  DiskMountsResponse,
+  Settings,
+} from "@timmo001/effect-system-bridge";
+import { Option, Struct } from "effect";
+import { AsyncResult } from "effect/reactivity";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import {
-  bridgeSettingsContext,
-  type BridgeSettingsState,
-} from "~/contexts/bridge-settings";
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
-import {
-  DiskMountsResponseSchema,
-  type DiskMountInfo,
-  type DiskMountsResponse,
-} from "~/lib/system-bridge/types-modules-schemas";
-import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { AtomController } from "~/controllers/atom-controller";
+import { diskMounts } from "~/lib/atoms";
+import { SettingsPageElement } from "~/mixins/settings-page";
 import "../components/ui/button";
 import "../components/ui/checkbox";
 import "../components/ui/connection-indicator";
@@ -41,86 +27,21 @@ function formatBytes(bytes: number): string {
 }
 
 @customElement("page-settings-disks")
-class PageSettingsDisks extends PageElement {
+class PageSettingsDisks extends SettingsPageElement {
   title = "Disk Mounts";
   description = "Configure which disk mounts are reported";
 
-  @consume({ context: bridgeSettingsContext, subscribe: true })
-  bridgeSettings?: BridgeSettingsState;
-
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  readonly #mounts = new AtomController(this, () => diskMounts);
 
   @state()
-  private mounts: DiskMountsResponse | null = null;
+  private allowedMountPoints: readonly string[] = [];
 
-  @state()
-  private allowedMountPoints: string[] = [];
-
-  @state()
-  private isLoading = false;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadData();
+  private get mounts(): DiskMountsResponse | undefined {
+    return Option.getOrUndefined(AsyncResult.value(this.#mounts.value));
   }
 
-  updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (
-      changedProperties.has("bridgeSettings") ||
-      changedProperties.has("status")
-    ) {
-      this.loadData();
-    }
-  }
-
-  private loadData() {
-    this.loadSettings();
-    void this.loadMounts();
-  }
-
-  private loadSettings() {
-    if (this.bridgeSettings?.settings) {
-      this.allowedMountPoints = [
-        ...(this.bridgeSettings.settings.disks?.allowedSecondaryMountPoints ??
-          []),
-      ];
-    }
-  }
-
-  private async loadMounts() {
-    const token = this.connection?.token;
-
-    if (!token || !this.actions || !this.status?.isConnected) {
-      return;
-    }
-
-    this.isLoading = true;
-    this.requestUpdate();
-
-    try {
-      this.mounts =
-        await this.actions.sendRequestWithResponse<DiskMountsResponse>(
-          {
-            id: generateUUID(),
-            event: "GET_DISK_MOUNTS",
-            data: {},
-            token,
-          },
-          DiskMountsResponseSchema,
-        );
-    } catch (error) {
-      console.error("Failed to load disk mounts:", error);
-    } finally {
-      this.isLoading = false;
-      this.requestUpdate();
-    }
+  protected settingsLoaded(settings: Settings): void {
+    this.allowedMountPoints = settings.disks.allowedSecondaryMountPoints;
   }
 
   private handleToggleMount = (
@@ -138,26 +59,19 @@ class PageSettingsDisks extends PageElement {
       this.allowedMountPoints = [...this.allowedMountPoints, mountPoint];
     }
 
-    this.saveSettings();
+    this.saveDisks();
   };
 
-  private saveSettings(): void {
-    const token = this.connection?.token;
+  private saveDisks(): void {
+    const current = this.settings;
 
-    if (!token || !this.actions || !this.bridgeSettings?.settings) {
-      return;
-    }
+    if (!current) return;
 
-    this.actions.sendRequest({
-      id: generateUUID(),
-      event: "UPDATE_SETTINGS",
-      data: {
-        ...this.bridgeSettings.settings,
+    this.saveSettings(
+      Struct.assign(current, {
         disks: { allowedSecondaryMountPoints: this.allowedMountPoints },
-      },
-      token,
-    });
-    this.requestUpdate();
+      }),
+    );
   }
 
   private handleNavigateToConnection = (): void => {
@@ -204,7 +118,7 @@ class PageSettingsDisks extends PageElement {
   private renderSection(
     title: string,
     description: string,
-    mounts: DiskMountInfo[],
+    mounts: readonly DiskMountInfo[],
     options: { disabled?: boolean } = {},
   ): TemplateResult {
     const { disabled = false } = options;
@@ -233,7 +147,9 @@ class PageSettingsDisks extends PageElement {
   }
 
   private renderContent() {
-    if (this.isLoading || !this.mounts) {
+    const mounts = this.mounts;
+
+    if (!mounts) {
       return html`
         <div class="text-sm text-muted-foreground italic p-4 text-center">
           Loading disk mounts...
@@ -246,18 +162,18 @@ class PageSettingsDisks extends PageElement {
         ${this.renderSection(
           "Primary Mounts",
           "These mounts are always reported. They cannot be disabled.",
-          this.mounts.primary,
+          mounts.primary,
           { disabled: true },
         )}
         ${this.renderSection(
           "Bind Mounts",
           "Subvolume and bind mounts that share storage with a primary device (e.g., btrfs subvolumes).",
-          this.mounts.secondary.bind,
+          mounts.secondary.bind,
         )}
         ${this.renderSection(
           "SquashFS Mounts",
           "Read-only compressed mounts, always 100% full (e.g., snap packages).",
-          this.mounts.secondary.squashfs,
+          mounts.secondary.squashfs,
         )}
       </div>
     `;

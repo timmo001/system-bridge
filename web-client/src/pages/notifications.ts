@@ -1,47 +1,22 @@
-import { consume } from "@lit/context";
+import type { Notification } from "@timmo001/effect-system-bridge";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
-import { SendablePageElement } from "~/mixins/sendable-page";
+import { AtomController } from "~/controllers/atom-controller";
+import { actionResult, registry, sendNotification } from "~/lib/atoms";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 
-interface NotificationData {
-  title: string;
-  message: string;
-  icon?: string;
-  actionUrl?: string;
-  sound?: string;
-}
-
 @customElement("page-notifications")
-class PageNotifications extends SendablePageElement {
+class PageNotifications extends PageElement {
   title = "Notifications";
   description = "Send desktop notifications to this system";
 
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  readonly #send = new AtomController(this, () => sendNotification);
 
   @state()
   private notificationTitle = "";
@@ -58,45 +33,9 @@ class PageNotifications extends SendablePageElement {
   @state()
   private notificationSound = "";
 
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener("notification-sent", this.handleNotificationSent);
-    window.addEventListener("notification-error", this.handleNotificationError);
+  private get isSending(): boolean {
+    return this.#send.value.waiting;
   }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.cleanupTimeout();
-    window.removeEventListener(
-      "notification-sent",
-      this.handleNotificationSent,
-    );
-    window.removeEventListener(
-      "notification-error",
-      this.handleNotificationError,
-    );
-  }
-
-  private handleNotificationSent = (
-    event: CustomEvent<{ requestId: string }>,
-  ): void => {
-    if (this.pendingRequestId === event.detail.requestId) {
-      this.showResult(true, "Notification sent successfully");
-      this.clearSendingState();
-    }
-  };
-
-  private handleNotificationError = (
-    event: CustomEvent<{ requestId: string; message: string }>,
-  ): void => {
-    if (this.pendingRequestId === event.detail.requestId) {
-      this.showResult(
-        false,
-        event.detail.message || "Failed to send notification",
-      );
-      this.clearSendingState();
-    }
-  };
 
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
@@ -130,48 +69,25 @@ class PageNotifications extends SendablePageElement {
     this.notificationSound = e.target.value;
   };
 
-  private buildNotificationData() {
-    const data: NotificationData = {
+  private buildNotificationData(): Notification {
+    const optional = (value: string) => value.trim() || undefined;
+    const icon = optional(this.notificationIcon);
+    const actionUrl = optional(this.notificationActionUrl);
+    const sound = optional(this.notificationSound);
+
+    return {
       title: this.notificationTitle.trim(),
       message: this.notificationMessage.trim(),
+      ...(icon && { icon }),
+      ...(actionUrl && { actionUrl }),
+      ...(sound && { sound }),
     };
-
-    const optionalFields = {
-      icon: this.notificationIcon,
-      actionUrl: this.notificationActionUrl,
-      sound: this.notificationSound,
-    };
-
-    for (const key of ["icon", "actionUrl", "sound"] as const) {
-      const trimmed = optionalFields[key].trim();
-
-      if (trimmed) data[key] = trimmed;
-    }
-
-    return data;
   }
 
   private handleSendNotification = (): void => {
-    const actions = this.actions;
-    const token = this.connection?.token;
+    if (!this.canSend) return;
 
-    if (
-      !this.notificationTitle.trim() ||
-      !this.notificationMessage.trim() ||
-      !token ||
-      !actions
-    ) {
-      return;
-    }
-
-    this.sendWithTimeout((requestId) => {
-      actions.sendRequest({
-        id: requestId,
-        event: "NOTIFICATION",
-        data: this.buildNotificationData(),
-        token,
-      });
-    }, "Failed to send notification");
+    registry.set(sendNotification, this.buildNotificationData());
   };
 
   private clearForm = (): void => {
@@ -286,7 +202,10 @@ class PageNotifications extends SendablePageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          ${this.renderPageHeader()} ${this.renderPageResult(this.lastResult)}
+          ${this.renderPageHeader()}
+          ${this.renderPageResult(
+            actionResult(this.#send.value, "Notification sent successfully"),
+          )}
           ${this.renderWithConnection(
             isConnected,
             "Please connect to System Bridge to send notifications.",

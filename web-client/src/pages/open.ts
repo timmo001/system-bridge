@@ -1,20 +1,9 @@
-import { consume } from "@lit/context";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
-import { SendablePageElement } from "~/mixins/sendable-page";
+import { AtomController } from "~/controllers/atom-controller";
+import { actionResult, open, registry } from "~/lib/atoms";
+import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
@@ -24,19 +13,15 @@ import "../components/ui/label";
 type OpenType = "url" | "path";
 
 @customElement("page-open")
-class PageOpen extends SendablePageElement {
+class PageOpen extends PageElement {
   title = "Open";
   description =
     "Open URLs in browser or files/folders with system applications";
 
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
+  readonly #open = new AtomController(this, () => open);
 
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  @state()
+  private openedType: OpenType = "url";
 
   @state()
   private openType: OpenType = "url";
@@ -47,41 +32,9 @@ class PageOpen extends SendablePageElement {
   @state()
   private pathValue = "";
 
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener("open-success", this.handleOpenSuccess);
-    window.addEventListener("open-error", this.handleOpenError);
+  private get isSending(): boolean {
+    return this.#open.value.waiting;
   }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.cleanupTimeout();
-    window.removeEventListener("open-success", this.handleOpenSuccess);
-    window.removeEventListener("open-error", this.handleOpenError);
-  }
-
-  private handleOpenSuccess = (
-    event: CustomEvent<{ requestId: string }>,
-  ): void => {
-    if (this.pendingRequestId === event.detail.requestId) {
-      const message =
-        this.openType === "url"
-          ? "URL opened in default browser"
-          : "Path opened with default application";
-
-      this.showResult(true, message);
-      this.clearSendingState();
-    }
-  };
-
-  private handleOpenError = (
-    event: CustomEvent<{ requestId: string; message: string }>,
-  ): void => {
-    if (this.pendingRequestId === event.detail.requestId) {
-      this.showResult(false, event.detail.message || "Failed to open");
-      this.clearSendingState();
-    }
-  };
 
   private handleNavigateToConnection = (): void => {
     this.navigate("/connection");
@@ -107,23 +60,13 @@ class PageOpen extends SendablePageElement {
     const value =
       this.openType === "url" ? this.urlValue.trim() : this.pathValue.trim();
 
-    const actions = this.actions;
-    const token = this.connection?.token;
+    if (!value) return;
 
-    if (!value || !token || !actions) {
-      return;
-    }
-
-    const openData = this.openType === "url" ? { url: value } : { path: value };
-
-    this.sendWithTimeout((requestId) => {
-      actions.sendRequest({
-        id: requestId,
-        event: "OPEN",
-        data: openData,
-        token,
-      });
-    }, "Failed to send open request");
+    this.openedType = this.openType;
+    registry.set(
+      open,
+      this.openType === "url" ? { url: value } : { path: value },
+    );
   };
 
   private clearForm = (): void => {
@@ -248,7 +191,15 @@ class PageOpen extends SendablePageElement {
     return html`
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-4xl mx-auto space-y-6">
-          ${this.renderPageHeader()} ${this.renderPageResult(this.lastResult)}
+          ${this.renderPageHeader()}
+          ${this.renderPageResult(
+            actionResult(
+              this.#open.value,
+              this.openedType === "url"
+                ? "URL opened in default browser"
+                : "Path opened with default application",
+            ),
+          )}
           ${this.renderWithConnection(
             isConnected,
             "Please connect to System Bridge to open URLs or paths.",

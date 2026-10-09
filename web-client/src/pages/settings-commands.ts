@@ -1,30 +1,24 @@
-import { consume } from "@lit/context";
+import type {
+  CommandResult,
+  Settings,
+  SettingsCommandDefinition,
+} from "@timmo001/effect-system-bridge";
+import { Option, Struct } from "effect";
+import { AsyncResult } from "effect/reactivity";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import { AtomController } from "~/controllers/atom-controller";
 import {
-  bridgeSettingsContext,
-  type BridgeSettingsState,
-} from "~/contexts/bridge-settings";
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
+  type BridgeError,
+  commandExecutions,
+  errorMessage,
+  executeCommand,
+  registry,
+} from "~/lib/atoms";
 import { getResultStyle } from "~/lib/result-styles";
-import type {
-  Settings,
-  SettingsCommandDefinition,
-} from "~/lib/system-bridge/types-settings";
 import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { SettingsPageElement } from "~/mixins/settings-page";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
@@ -32,32 +26,19 @@ import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 
-interface CommandResult {
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-  error?: string;
-}
+type CommandOutcome = Omit<CommandResult, "commandID">;
 
 @customElement("page-settings-commands")
-class PageSettingsCommands extends PageElement {
+class PageSettingsCommands extends SettingsPageElement {
   title = "Commands";
   description = "Manage commands that can be executed remotely";
 
-  @consume({ context: bridgeSettingsContext, subscribe: true })
-  bridgeSettings?: BridgeSettingsState;
-
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  readonly #executions = new AtomController(this, () =>
+    commandExecutions(this.commands.map((cmd) => cmd.id).join("\n")),
+  );
 
   @state()
-  private commands: SettingsCommandDefinition[] = [];
+  private commands: readonly SettingsCommandDefinition[] = [];
 
   @state()
   private newCommandName = "";
@@ -71,53 +52,17 @@ class PageSettingsCommands extends PageElement {
   @state()
   private newCommandArguments = "";
 
-  @state()
-  private isSubmitting = false;
+  /** The ID of a command being added, so the form clears once it's saved. */
+  private addingCommandID: string | null = null;
 
-  @state()
-  private pendingRequestId: string | null = null;
-
-  @state()
-  private errorMessage: string | null = null;
-
-  private submissionTimeout: number | null = null;
-  private previousCommands: SettingsCommandDefinition[] = [];
-  private errorTimeout: number | null = null;
-  private pendingCommandAction: "add" | "remove" | null = null;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadSettings();
-    this.previousCommands = [...this.commands];
-
-    // Listen on window to reliably catch settings update events regardless of
-    // DOM structure. This bypasses Lit context for immediate event delivery.
-    window.addEventListener(
-      "settings-update-error",
-      this.handleSettingsUpdateError,
-    );
-    window.addEventListener("settings-updated", this.handleSettingsUpdated);
+  private get isSubmitting(): boolean {
+    return this.isSaving;
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
+  private get errorMessage(): string | null {
+    const error = this.saveError;
 
-    if (this.submissionTimeout !== null) {
-      clearTimeout(this.submissionTimeout);
-      this.submissionTimeout = null;
-    }
-
-    if (this.errorTimeout !== null) {
-      clearTimeout(this.errorTimeout);
-      this.errorTimeout = null;
-    }
-
-    // Remove event listeners from window
-    window.removeEventListener(
-      "settings-update-error",
-      this.handleSettingsUpdateError,
-    );
-    window.removeEventListener("settings-updated", this.handleSettingsUpdated);
+    return error === null ? null : this.extractErrorMessage(error);
   }
 
   private extractErrorMessage(fullMessage: string): string {
@@ -142,85 +87,16 @@ class PageSettingsCommands extends PageElement {
     return fullMessage;
   }
 
-  private handleSettingsUpdateError = (
-    event: WindowEventMap["settings-update-error"],
-  ): void => {
-    // Check if this error is for our pending request
-    if (this.isSubmitting && this.pendingRequestId === event.detail.requestId) {
-      // Reload commands from actual settings (which won't include the invalid command)
-      this.loadSettings();
+  protected settingsLoaded(settings: Settings): void {
+    this.commands = settings.commands.allowlist;
 
-      // Show error message with cleaned up text
-      this.errorMessage = this.extractErrorMessage(event.detail.message);
-
-      // Clear error after 10 seconds
-      if (this.errorTimeout !== null) {
-        clearTimeout(this.errorTimeout);
-      }
-
-      this.errorTimeout = window.setTimeout(() => {
-        this.errorMessage = null;
-        this.errorTimeout = null;
-        this.requestUpdate();
-      }, 10000);
-
-      // Clear submission state
-      this.clearSubmissionState();
+    if (
+      this.addingCommandID !== null &&
+      this.commands.some((cmd) => cmd.id === this.addingCommandID)
+    ) {
+      this.addingCommandID = null;
+      this.clearCommandForm();
     }
-  };
-
-  private handleSettingsUpdated = (
-    event: WindowEventMap["settings-updated"],
-  ): void => {
-    // Check if this update is for our pending request
-    if (this.isSubmitting && this.pendingRequestId === event.detail.requestId) {
-      // Load updated settings from websocket context
-      this.loadSettings();
-
-      this.handleSuccessfulSave();
-    }
-  };
-
-  private checkPendingSubmission(): void {
-    if (!this.isSubmitting || this.pendingRequestId === null) return;
-
-    const currentCommands =
-      this.bridgeSettings?.settings?.commands.allowlist ?? [];
-
-    const previousCommandsStr = JSON.stringify(this.previousCommands);
-    const currentCommandsStr = JSON.stringify(currentCommands);
-
-    if (previousCommandsStr !== currentCommandsStr) {
-      this.handleSuccessfulSave();
-    }
-  }
-
-  updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("bridgeSettings")) {
-      this.loadSettings();
-      this.checkPendingSubmission();
-    }
-  }
-
-  private loadSettings() {
-    if (this.bridgeSettings?.settings) {
-      this.commands = [...this.bridgeSettings.settings.commands.allowlist];
-    }
-  }
-
-  private clearSubmissionState(): void {
-    this.isSubmitting = false;
-    this.pendingRequestId = null;
-    this.pendingCommandAction = null;
-
-    if (this.submissionTimeout !== null) {
-      clearTimeout(this.submissionTimeout);
-      this.submissionTimeout = null;
-    }
-
-    // Update previousCommands to current state after submission completes
-    this.previousCommands = [...this.commands];
-    this.requestUpdate();
   }
 
   private handleNavigateToConnection = (): void => {
@@ -268,9 +144,8 @@ class PageSettingsCommands extends PageElement {
       arguments: args,
     };
 
-    const updatedCommands = [...this.commands, newCommand];
-    this.pendingCommandAction = "add";
-    this.saveSettingsWithCommands(updatedCommands);
+    this.addingCommandID = newCommand.id;
+    this.saveCommands([...this.commands, newCommand]);
   };
 
   private handleRemoveCommand = (
@@ -280,9 +155,7 @@ class PageSettingsCommands extends PageElement {
 
     if (!id) return;
 
-    const updatedCommands = this.commands.filter((cmd) => cmd.id !== id);
-    this.pendingCommandAction = "remove";
-    this.saveSettingsWithCommands(updatedCommands);
+    this.saveCommands(this.commands.filter((cmd) => cmd.id !== id));
   };
 
   private handleExecuteCommand = (
@@ -290,15 +163,9 @@ class PageSettingsCommands extends PageElement {
   ): void => {
     const id = e.currentTarget.getAttribute("data-id");
 
-    if (!id || !this.connection?.token || !this.actions) {
-      return;
-    }
+    if (!id || !this.commands.some((cmd) => cmd.id === id)) return;
 
-    const command = this.commands.find((cmd) => cmd.id === id);
-
-    if (!command) return;
-
-    this.actions.sendCommandExecute(generateUUID(), id, this.connection.token);
+    registry.set(executeCommand(id), undefined);
   };
 
   private handleCopyId = async (
@@ -315,63 +182,14 @@ class PageSettingsCommands extends PageElement {
     }
   };
 
-  private clearExistingTimeout(): void {
-    if (this.submissionTimeout !== null) {
-      clearTimeout(this.submissionTimeout);
-      this.submissionTimeout = null;
-    }
-  }
+  private saveCommands(commands: readonly SettingsCommandDefinition[]): void {
+    const current = this.settings;
 
-  private startSubmissionTimeout(requestId: string): void {
-    this.submissionTimeout = window.setTimeout(() => {
-      if (this.isSubmitting && this.pendingRequestId === requestId) {
-        console.warn(
-          "Settings update timeout: no response received after 30 seconds",
-        );
-        this.clearSubmissionState();
-      }
-    }, 30000);
-  }
+    if (!current) return;
 
-  private saveSettingsWithCommands(
-    commands: SettingsCommandDefinition[],
-  ): void {
-    if (
-      !this.connection?.token ||
-      !this.actions ||
-      !this.bridgeSettings?.settings
-    ) {
-      return;
-    }
-
-    this.clearExistingTimeout();
-
-    this.isSubmitting = true;
-    const requestId = generateUUID();
-    this.pendingRequestId = requestId;
-    this.previousCommands = [...this.commands];
-    this.requestUpdate();
-
-    try {
-      const updatedSettings: Settings = {
-        ...this.bridgeSettings.settings,
-        commands: {
-          allowlist: commands,
-        },
-      };
-
-      this.actions.sendRequest({
-        id: requestId,
-        event: "UPDATE_SETTINGS",
-        data: updatedSettings,
-        token: this.connection.token,
-      });
-
-      this.startSubmissionTimeout(requestId);
-    } catch (error) {
-      console.error("Failed to update command settings:", error);
-      this.clearSubmissionState();
-    }
+    this.saveSettings(
+      Struct.assign(current, { commands: { allowlist: commands } }),
+    );
   }
 
   private clearCommandForm(): void {
@@ -381,12 +199,23 @@ class PageSettingsCommands extends PageElement {
     this.newCommandArguments = "";
   }
 
-  private handleSuccessfulSave(): void {
-    if (this.pendingCommandAction === "add") {
-      this.clearCommandForm();
-    }
+  /** A finished execution, with failures shown like a failed command. */
+  private outcome(
+    execution: AsyncResult.AsyncResult<CommandResult, BridgeError>,
+  ): CommandOutcome | undefined {
+    if (AsyncResult.isSuccess(execution)) return execution.value;
 
-    this.clearSubmissionState();
+    if (!AsyncResult.isFailure(execution)) return undefined;
+
+    return {
+      exitCode: 1,
+      stdout: "",
+      stderr: "",
+      error: Option.match(AsyncResult.error(execution), {
+        onNone: () => "Command execution failed",
+        onSome: errorMessage,
+      }),
+    };
   }
 
   private renderCommandMeta(cmd: SettingsCommandDefinition): TemplateResult {
@@ -449,7 +278,7 @@ class PageSettingsCommands extends PageElement {
   }
 
   private renderCommandResultBlock(
-    result: CommandResult | null | undefined,
+    result: CommandOutcome | undefined,
   ): TemplateResult {
     if (!result) return html``;
 
@@ -503,9 +332,11 @@ ${result.stderr}</pre>
   }
 
   private renderCommandItem(cmd: SettingsCommandDefinition) {
-    const executionState = this.bridgeSettings?.commandExecutions.get(cmd.id);
-    const isExecuting = executionState?.isExecuting ?? false;
-    const result = executionState?.result;
+    const execution = this.#executions.value.get(cmd.id);
+    const isExecuting = execution?.waiting ?? false;
+
+    const result =
+      execution && !isExecuting ? this.outcome(execution) : undefined;
 
     return html`
       <div class="flex flex-col gap-3 p-4 rounded-md border">

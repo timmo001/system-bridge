@@ -1,29 +1,9 @@
-import { consume } from "@lit/context";
+import { LogLevel, type Settings } from "@timmo001/effect-system-bridge";
+import { Schema, Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
-import {
-  bridgeSettingsContext,
-  type BridgeSettingsState,
-} from "~/contexts/bridge-settings";
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
-import {
-  SettingsLogLevelSchema,
-  type Settings,
-} from "~/lib/system-bridge/types-settings";
-import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { SettingsPageElement } from "~/mixins/settings-page";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
@@ -32,22 +12,12 @@ import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
 
+const isLogLevel = Schema.is(LogLevel);
+
 @customElement("page-settings-general")
-class PageSettingsGeneral extends PageElement {
+class PageSettingsGeneral extends SettingsPageElement {
   title = "General Settings";
   description = "Configure your System Bridge general settings";
-
-  @consume({ context: bridgeSettingsContext, subscribe: true })
-  bridgeSettings?: BridgeSettingsState;
-
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
 
   @state()
   private formData: Settings = {
@@ -66,15 +36,11 @@ class PageSettingsGeneral extends PageElement {
     },
   };
 
-  @state()
-  private isSubmitting = false;
+  private get isSubmitting(): boolean {
+    return this.isSaving;
+  }
 
   private _formElement: HTMLFormElement | null = null;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadSettings();
-  }
 
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -86,11 +52,7 @@ class PageSettingsGeneral extends PageElement {
     }
   }
 
-  updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("bridgeSettings")) {
-      this.loadSettings();
-    }
-
+  updated() {
     // Attach submit handler after render (light DOM workaround)
     this.attachFormHandler();
   }
@@ -105,54 +67,32 @@ class PageSettingsGeneral extends PageElement {
     }
   }
 
-  private loadSettings() {
-    if (this.bridgeSettings?.settings) {
-      this.formData = { ...this.bridgeSettings.settings };
-      this.requestUpdate();
-    }
+  protected settingsLoaded(settings: Settings): void {
+    this.formData = settings;
   }
 
   private handleSubmit = (e: Event): void => {
     e.preventDefault();
-
-    if (!this.connection?.token || !this.actions) {
-      return;
-    }
 
     // Read current form values to ensure we have the latest data
     const selectElement = this._formElement?.querySelector("select");
 
     if (selectElement) this.setLogLevel(selectElement.value);
 
-    this.isSubmitting = true;
-    this.requestUpdate();
-
-    try {
-      this.actions.sendRequest({
-        id: generateUUID(),
-        event: "UPDATE_SETTINGS",
-        data: this.formData,
-        token: this.connection.token,
-      });
-    } catch (error) {
-      console.error("Failed to update general settings:", error);
-    } finally {
-      this.isSubmitting = false;
-      this.requestUpdate();
-    }
+    this.saveSettings(this.formData);
   };
 
   private handleAutostartChange = (
     e: CustomEvent<{ checked: boolean }>,
   ): void => {
-    this.formData = { ...this.formData, autostart: e.detail.checked };
+    this.formData = Struct.assign(this.formData, {
+      autostart: e.detail.checked,
+    });
   };
 
   private setLogLevel(value: string): void {
-    const logLevel = SettingsLogLevelSchema.safeParse(value);
-
-    if (logLevel.success) {
-      this.formData = { ...this.formData, logLevel: logLevel.data };
+    if (isLogLevel(value)) {
+      this.formData = Struct.assign(this.formData, { logLevel: value });
     }
   }
 
@@ -163,7 +103,9 @@ class PageSettingsGeneral extends PageElement {
   };
 
   private handleSystemTrayChange = (e: CustomEvent<{ checked: boolean }>) => {
-    this.formData = { ...this.formData, systemTray: e.detail.checked };
+    this.formData = Struct.assign(this.formData, {
+      systemTray: e.detail.checked,
+    });
   };
 
   private handleNavigateToConnection = (): void => {

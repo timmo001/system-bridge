@@ -1,13 +1,13 @@
-import { consume } from "@lit/context";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { z } from "zod";
 
+import { AtomController } from "~/controllers/atom-controller";
 import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import { CONNECTION_TIMEOUT } from "~/contexts/websocket";
+  actionResult,
+  connectionSettings,
+  registry,
+  testConnection,
+} from "~/lib/atoms";
 import { PageElement } from "~/mixins/page-element";
 
 import "../components/ui/button";
@@ -16,29 +16,29 @@ import "../components/ui/input";
 import "../components/ui/label";
 import "../components/ui/switch";
 
-const ConnectionSchema = z.object({
-  host: z.string().min(1, "Host is required"),
-  port: z.coerce.number().min(1, "Port must be at least 1"),
-  ssl: z.boolean(),
-  token: z.string().min(1, "Token is required"),
-});
+interface ConnectionForm {
+  host: string;
+  port: number;
+  ssl: boolean;
+  token: string;
+}
 
-type ConnectionForm = z.infer<typeof ConnectionSchema>;
-
-const ConnectionTestResponseSchema = z.object({
-  type: z.string().optional(),
-  subtype: z.string().optional(),
-  id: z.string().optional(),
-});
+function validate(
+  form: ConnectionForm,
+): Partial<Record<keyof ConnectionForm, string>> {
+  return {
+    ...(!form.host.trim() && { host: "Host is required" }),
+    ...(!(form.port >= 1) && { port: "Port must be at least 1" }),
+    ...(!form.token && { token: "Token is required" }),
+  };
+}
 
 @customElement("page-connection")
 class PageConnection extends PageElement {
   title = "Connection Settings";
   description = "Configure your connection to System Bridge";
 
-  @consume({ context: connectionContext, subscribe: true })
-  @state()
-  connection?: ConnectionSettings;
+  readonly #test = new AtomController(this, () => testConnection);
 
   @state()
   private formData: ConnectionForm = {
@@ -51,20 +51,21 @@ class PageConnection extends PageElement {
   @state()
   private errors: Partial<Record<keyof ConnectionForm, string>> = {};
 
-  @state()
-  private isSubmitting = false;
+  private get isSubmitting(): boolean {
+    return this.#test.value.waiting;
+  }
 
   connectedCallback() {
     super.connectedCallback();
 
-    if (this.connection) {
-      this.formData = {
-        host: this.connection.host,
-        port: this.connection.port,
-        ssl: this.connection.ssl,
-        token: this.connection.token || "",
-      };
-    }
+    const connection = registry.get(connectionSettings);
+
+    this.formData = {
+      host: connection.host,
+      port: connection.port,
+      ssl: connection.ssl,
+      token: connection.token ?? "",
+    };
   }
 
   private handleHostInput = (e: Event & { target: HTMLInputElement }): void => {
@@ -90,70 +91,9 @@ class PageConnection extends PageElement {
   };
 
   private validateForm(): boolean {
-    const result = ConnectionSchema.safeParse(this.formData);
+    this.errors = validate(this.formData);
 
-    if (!result.success) {
-      this.errors = {};
-      result.error.issues.forEach((err) => {
-        const pathKey = err.path[0];
-
-        if (
-          pathKey === "host" ||
-          pathKey === "port" ||
-          pathKey === "ssl" ||
-          pathKey === "token"
-        ) {
-          this.errors[pathKey] = err.message;
-        }
-      });
-      this.requestUpdate();
-
-      return false;
-    }
-
-    this.errors = {};
-    this.requestUpdate();
-
-    return true;
-  }
-
-  private handleTestMessage(
-    message: { type?: string; subtype?: string; id?: string },
-    ws: WebSocket,
-  ): void {
-    if (message.type === "ERROR" && message.subtype === "BAD_TOKEN") {
-      ws.close();
-      this.isSubmitting = false;
-      this.requestUpdate();
-
-      return;
-    }
-
-    if (
-      message.type !== "SETTINGS_RESULT" &&
-      message.id !== "test-connection"
-    ) {
-      return;
-    }
-
-    const newSettings: ConnectionSettings = {
-      host: this.formData.host,
-      port: this.formData.port,
-      ssl: this.formData.ssl,
-      token: this.formData.token,
-    };
-
-    this.dispatchEvent(
-      new CustomEvent("connection-updated", {
-        detail: newSettings,
-        bubbles: true,
-        composed: true,
-      }),
-    );
-
-    ws.close();
-    this.isSubmitting = false;
-    this.requestUpdate();
+    return Object.keys(this.errors).length === 0;
   }
 
   private handleSubmit = (e: Event): void => {
@@ -161,56 +101,12 @@ class PageConnection extends PageElement {
 
     if (!this.validateForm()) return;
 
-    this.isSubmitting = true;
-    this.requestUpdate();
+    const { host, port, ssl, token } = this.formData;
 
-    const ws = new WebSocket(
-      `${this.formData.ssl ? "wss" : "ws"}://${this.formData.host}:${this.formData.port}/api/websocket`,
-    );
-
-    const timeout = setTimeout(() => {
-      ws.close();
-      this.isSubmitting = false;
-      this.requestUpdate();
-    }, CONNECTION_TIMEOUT);
-
-    ws.onopen = () => {
-      clearTimeout(timeout);
-
-      ws.send(
-        JSON.stringify({
-          id: "test-connection",
-          event: "GET_SETTINGS",
-          token: this.formData.token,
-        }),
-      );
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const message = ConnectionTestResponseSchema.parse(
-          JSON.parse(String(event.data)),
-        );
-
-        this.handleTestMessage(message, ws);
-      } catch (error) {
-        console.error("Failed to parse connection test response:", error);
-        this.isSubmitting = false;
-        this.requestUpdate();
-      }
-    };
-
-    ws.onclose = () => {
-      clearTimeout(timeout);
-      this.isSubmitting = false;
-      this.requestUpdate();
-    };
-
-    ws.onerror = () => {
-      clearTimeout(timeout);
-      this.isSubmitting = false;
-      this.requestUpdate();
-    };
+    registry.set(testConnection, {
+      settings: { host, port, ssl, token },
+      token,
+    });
   };
 
   private renderFieldError(field: keyof ConnectionForm): TemplateResult {
@@ -226,6 +122,9 @@ class PageConnection extends PageElement {
       <div class="min-h-screen bg-background text-foreground p-8">
         <div class="max-w-2xl mx-auto space-y-6">
           ${this.renderPageHeader({ showConnectionIndicator: false })}
+          ${this.renderPageResult(
+            actionResult(this.#test.value, "Connected to System Bridge"),
+          )}
 
           <form @submit=${this.handleSubmit} class="space-y-6">
             <div class="space-y-2">

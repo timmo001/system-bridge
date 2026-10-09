@@ -1,27 +1,14 @@
-import { consume } from "@lit/context";
+import type {
+  Settings,
+  SettingsMediaDirectory,
+} from "@timmo001/effect-system-bridge";
+import { Struct } from "effect";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { z } from "zod";
 
-import {
-  bridgeSettingsContext,
-  type BridgeSettingsState,
-} from "~/contexts/bridge-settings";
-import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
-import type { Settings } from "~/lib/system-bridge/types-settings";
-import { generateUUID } from "~/lib/utils";
-import { PageElement } from "~/mixins/page-element";
+import { AtomController } from "~/controllers/atom-controller";
+import { actionResult, addMediaDirectory, registry } from "~/lib/atoms";
+import { SettingsPageElement } from "~/mixins/settings-page";
 import "../components/ui/button";
 import "../components/ui/connection-indicator";
 import "../components/ui/connection-required";
@@ -29,32 +16,15 @@ import "../components/ui/icon";
 import "../components/ui/input";
 import "../components/ui/label";
 
-const DirectoryValidationSchema = z.object({ valid: z.boolean() });
-
-interface MediaDirectory {
-  name: string;
-  path: string;
-}
-
 @customElement("page-settings-media")
-class PageSettingsMedia extends PageElement {
+class PageSettingsMedia extends SettingsPageElement {
   title = "Media Directories";
   description = "Manage directories for media scanning";
 
-  @consume({ context: bridgeSettingsContext, subscribe: true })
-  bridgeSettings?: BridgeSettingsState;
-
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  readonly #add = new AtomController(this, () => addMediaDirectory);
 
   @state()
-  private mediaDirectories: MediaDirectory[] = [];
+  private mediaDirectories: readonly SettingsMediaDirectory[] = [];
 
   @state()
   private newDirectoryName = "";
@@ -62,31 +32,28 @@ class PageSettingsMedia extends PageElement {
   @state()
   private newDirectoryPath = "";
 
-  @state()
-  private isValidating = false;
-
-  @state()
-  private isSubmitting = false;
-
-  @state()
-  private validationError: string | null = null;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadSettings();
+  private get isValidating(): boolean {
+    return this.#add.value.waiting;
   }
 
-  updated(changedProperties: Map<PropertyKey, unknown>) {
-    if (changedProperties.has("bridgeSettings")) {
-      this.loadSettings();
-    }
+  private get isSubmitting(): boolean {
+    return this.isSaving;
   }
 
-  private loadSettings() {
-    if (this.bridgeSettings?.settings) {
-      this.mediaDirectories = [
-        ...this.bridgeSettings.settings.media.directories,
-      ];
+  private get validationError(): string | null {
+    const result = actionResult(this.#add.value, "");
+
+    return result && !result.success ? result.message : null;
+  }
+
+  protected settingsLoaded(settings: Settings): void {
+    this.mediaDirectories = settings.media.directories;
+
+    const added = this.newDirectoryPath.trim();
+
+    if (added && this.mediaDirectories.some((d) => d.path === added)) {
+      this.newDirectoryName = "";
+      this.newDirectoryPath = "";
     }
   }
 
@@ -102,104 +69,34 @@ class PageSettingsMedia extends PageElement {
     this.newDirectoryPath = e.target.value;
   };
 
-  private handleAddDirectory = async (): Promise<void> => {
-    if (
-      !this.newDirectoryName.trim() ||
-      !this.newDirectoryPath.trim() ||
-      !this.connection?.token ||
-      !this.actions
-    ) {
-      return;
-    }
+  private handleAddDirectory = (): void => {
+    const name = this.newDirectoryName.trim();
+    const path = this.newDirectoryPath.trim();
 
-    this.validationError = null;
-    this.isValidating = true;
-    this.requestUpdate();
+    if (!name || !path) return;
 
-    try {
-      const response = await this.actions.sendRequestWithResponse<{
-        valid: boolean;
-      }>(
-        {
-          id: generateUUID(),
-          event: "VALIDATE_DIRECTORY",
-          data: { path: this.newDirectoryPath },
-          token: this.connection.token,
-        },
-        DirectoryValidationSchema,
-      );
-
-      if (response.valid) {
-        this.mediaDirectories = [
-          ...this.mediaDirectories,
-          {
-            name: this.newDirectoryName.trim(),
-            path: this.newDirectoryPath.trim(),
-          },
-        ];
-        this.saveSettings();
-        this.newDirectoryName = "";
-        this.newDirectoryPath = "";
-      } else {
-        this.validationError = "Directory does not exist or is not accessible.";
-      }
-    } catch (error) {
-      console.error("Failed to validate directory:", error);
-      this.validationError = "Failed to validate directory.";
-    } finally {
-      this.isValidating = false;
-      this.requestUpdate();
-    }
+    registry.set(addMediaDirectory, { name, path });
   };
 
   private handleRemoveDirectory = (
     e: Event & { currentTarget: HTMLElement },
   ): void => {
     const path = e.currentTarget.getAttribute("data-path");
+    const current = this.settings;
 
-    if (!path) return;
+    if (!path || !current) return;
 
     this.mediaDirectories = this.mediaDirectories.filter(
       (d) => d.path !== path,
     );
-    this.saveSettings();
+    this.saveSettings(
+      Struct.assign(current, {
+        media: { directories: this.mediaDirectories },
+      }),
+    );
   };
 
-  private saveSettings(): void {
-    if (
-      !this.connection?.token ||
-      !this.actions ||
-      !this.bridgeSettings?.settings
-    ) {
-      return;
-    }
-
-    this.isSubmitting = true;
-    this.requestUpdate();
-
-    try {
-      const updatedSettings: Settings = {
-        ...this.bridgeSettings.settings,
-        media: {
-          directories: this.mediaDirectories,
-        },
-      };
-
-      this.actions.sendRequest({
-        id: generateUUID(),
-        event: "UPDATE_SETTINGS",
-        data: updatedSettings,
-        token: this.connection.token,
-      });
-    } catch (error) {
-      console.error("Failed to update media settings:", error);
-    } finally {
-      this.isSubmitting = false;
-      this.requestUpdate();
-    }
-  }
-
-  private renderDirectoryItem(dir: MediaDirectory) {
+  private renderDirectoryItem(dir: SettingsMediaDirectory) {
     return html`
       <div class="flex items-center gap-4 p-3 rounded-md border">
         <div class="flex-1 space-y-1">

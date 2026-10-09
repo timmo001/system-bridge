@@ -112,13 +112,13 @@ OS-specific module code belongs in build-tagged files inside subpackages (for ex
 
 ## Schema and type changes
 
-When you change Go types under `types/`, regenerate the web client Zod schemas:
+When you change Go types under `types/`, regenerate the TypeScript connector's Effect schemas:
 
 ```bash
 mise run generate:schemas
 ```
 
-Do not hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts`; it is generated output.
+Do not hand-edit `connector/typescript/src/generated/modules.ts`; it is generated output.
 
 ## Quality checks
 

@@ -1,6 +1,8 @@
 import { html, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 
+import { AtomController } from "../controllers/atom-controller";
+import { type ConnectionStatus, connectionStatus } from "../lib/atoms";
 import { DOCS_URL } from "../lib/links";
 import { getResultStyle } from "../lib/result-styles";
 
@@ -52,6 +54,13 @@ export class PageElement extends UIElement {
    */
   @property()
   description = "";
+
+  readonly #status = new AtomController(this, () => connectionStatus);
+
+  /** The live connection status. */
+  protected get status(): ConnectionStatus {
+    return this.#status.value;
+  }
 
   connectedCallback(): void {
     super.connectedCallback();

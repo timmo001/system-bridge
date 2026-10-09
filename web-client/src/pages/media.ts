@@ -1,44 +1,20 @@
-import { consume } from "@lit/context";
+import type { MediaAction, MediaData } from "@timmo001/effect-system-bridge";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import { AtomController } from "~/controllers/atom-controller";
 import {
-  connectionContext,
-  type ConnectionSettings,
-} from "~/contexts/connection";
-import {
-  connectionStatusContext,
-  type ConnectionStatus,
-} from "~/contexts/connection-status";
-import { moduleDataContext } from "~/contexts/module-data";
-import {
-  websocketActionsContext,
-  type WebSocketActions,
-} from "~/contexts/websocket-actions";
+  actionResult,
+  latestModuleData,
+  mediaControl,
+  registry,
+} from "~/lib/atoms";
 import { getResultStyle } from "~/lib/result-styles";
-import type { ModuleData } from "~/lib/system-bridge/types-modules";
-import type { MediaData } from "~/lib/system-bridge/types-modules-schemas";
-import { formatDuration, generateUUID } from "~/lib/utils";
+import { formatDuration } from "~/lib/utils";
 import { PageElement } from "~/mixins/page-element";
 import "../components/ui/button";
 import "../components/ui/connection-required";
 import "../components/ui/icon";
-
-type MediaAction =
-  | "PLAY"
-  | "PAUSE"
-  | "STOP"
-  | "NEXT"
-  | "PREVIOUS"
-  | "VOLUME_UP"
-  | "VOLUME_DOWN"
-  | "MUTE";
-
-interface ActionResult {
-  success: boolean;
-  message: string;
-  timestamp: number;
-}
 
 interface StatusConfig {
   bg: string;
@@ -77,96 +53,16 @@ class PageMedia extends PageElement {
   title = "Media Controls";
   description = "Control media playback on this system";
 
-  @consume({ context: connectionStatusContext, subscribe: true })
-  status?: ConnectionStatus;
+  readonly #data = new AtomController(this, () => latestModuleData);
 
-  @consume({ context: moduleDataContext, subscribe: true })
-  data?: ModuleData;
-
-  @consume({ context: websocketActionsContext, subscribe: true })
-  actions?: WebSocketActions;
-
-  @consume({ context: connectionContext, subscribe: true })
-  connection?: ConnectionSettings;
+  readonly #control = new AtomController(this, () => mediaControl);
 
   @state()
-  private pendingAction: MediaAction | null = null;
+  private sentAction: MediaAction | null = null;
 
-  @state()
-  private pendingRequestId: string | null = null;
-
-  @state()
-  private actionResult: ActionResult | null = null;
-
-  private sendTimeout: number | null = null;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    window.addEventListener(
-      "media-control-success",
-      this.handleMediaControlSuccess,
-    );
-    window.addEventListener(
-      "media-control-error",
-      this.handleMediaControlError,
-    );
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
-
-    window.removeEventListener(
-      "media-control-success",
-      this.handleMediaControlSuccess,
-    );
-    window.removeEventListener(
-      "media-control-error",
-      this.handleMediaControlError,
-    );
-  }
-
-  private handleMediaControlSuccess = (
-    event: CustomEvent<{ requestId: string }>,
-  ): void => {
-    if (
-      this.pendingRequestId === event.detail.requestId &&
-      this.pendingAction
-    ) {
-      this.showResult(true, `${this.pendingAction} action completed`);
-      this.clearPendingState();
-    }
-  };
-
-  private handleMediaControlError = (
-    event: CustomEvent<{ requestId: string; message: string }>,
-  ): void => {
-    if (this.pendingRequestId === event.detail.requestId) {
-      this.showResult(false, event.detail.message || "Action failed");
-      this.clearPendingState();
-    }
-  };
-
-  private clearPendingState(): void {
-    this.pendingAction = null;
-    this.pendingRequestId = null;
-
-    if (this.sendTimeout !== null) {
-      clearTimeout(this.sendTimeout);
-      this.sendTimeout = null;
-    }
-  }
-
-  private showResult(success: boolean, message: string): void {
-    this.actionResult = {
-      success,
-      message,
-      timestamp: Date.now(),
-    };
+  /** The action waiting for a reply, if any. */
+  private get pendingAction(): MediaAction | null {
+    return this.#control.value.waiting ? this.sentAction : null;
   }
 
   private handleNavigateToConnection = (): void => {
@@ -174,34 +70,8 @@ class PageMedia extends PageElement {
   };
 
   private sendMediaAction(action: MediaAction): void {
-    if (!this.connection?.token || !this.actions) {
-      return;
-    }
-
-    const requestId = generateUUID();
-    this.pendingAction = action;
-    this.pendingRequestId = requestId;
-
-    try {
-      this.actions.sendRequest({
-        id: requestId,
-        event: "MEDIA_CONTROL",
-        data: { action },
-        token: this.connection.token,
-      });
-
-      // Timeout after 30 seconds
-      this.sendTimeout = window.setTimeout(() => {
-        if (this.pendingAction && this.pendingRequestId === requestId) {
-          this.showResult(false, "Request timed out");
-          this.clearPendingState();
-        }
-      }, 30000);
-    } catch (error) {
-      console.error("Failed to send media action:", error);
-      this.showResult(false, "Failed to send media action");
-      this.clearPendingState();
-    }
+    this.sentAction = action;
+    registry.set(mediaControl, action);
   }
 
   private handlePlay = (): void => this.sendMediaAction("PLAY");
@@ -214,7 +84,7 @@ class PageMedia extends PageElement {
   private handleMute = (): void => this.sendMediaAction("MUTE");
 
   private get mediaData(): MediaData | null {
-    return this.data?.media ?? null;
+    return this.#data.value.media ?? null;
   }
 
   private get isPlaying(): boolean {
@@ -547,9 +417,14 @@ class PageMedia extends PageElement {
   }
 
   private renderActionResult(): TemplateResult {
-    if (!this.actionResult) return html``;
+    const result = actionResult(
+      this.#control.value,
+      `${this.sentAction} action completed`,
+    );
 
-    const { success, message } = this.actionResult;
+    if (!result) return html``;
+
+    const { success, message } = result;
     const style = getResultStyle(success);
 
     const errorHint = !success
