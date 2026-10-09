@@ -708,9 +708,11 @@ export interface ModuleData {
   readonly system: SystemData;
 }
 
-export const ModuleDataSchemas: {
+export type ModuleDataSchemas = {
   readonly [K in keyof ModuleData]: Schema.Decoder<ModuleData[K]>;
-} = {
+};
+
+export const ModuleDataSchemas: ModuleDataSchemas = {
   battery: BatteryData,
   cpu: CPUData,
   discord: DiscordData,

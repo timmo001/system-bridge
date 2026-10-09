@@ -86,9 +86,10 @@ import { Schema } from "effect";
 		fmt.Fprintf(&buf, "  readonly %s: %s;\n", moduleName, moduleDataTypes[moduleName])
 	}
 	buf.WriteString("}\n\n")
-	buf.WriteString("export const ModuleDataSchemas: {\n")
+	buf.WriteString("export type ModuleDataSchemas = {\n")
 	buf.WriteString("  readonly [K in keyof ModuleData]: Schema.Decoder<ModuleData[K]>;\n")
-	buf.WriteString("} = {\n")
+	buf.WriteString("};\n\n")
+	buf.WriteString("export const ModuleDataSchemas: ModuleDataSchemas = {\n")
 	for _, moduleName := range moduleNames {
 		fmt.Fprintf(&buf, "  %s: %s,\n", moduleName, moduleDataTypes[moduleName])
 	}
