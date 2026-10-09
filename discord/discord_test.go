@@ -44,8 +44,8 @@ func TestControlArgs(t *testing.T) {
 		{name: "toggle mute when unmuted", action: ActionToggleMute, state: types.DiscordData{Mute: &no}, want: map[string]any{"mute": true}},
 		{name: "toggle mute when deafened", action: ActionToggleMute, state: types.DiscordData{Mute: &no, Deaf: &yes}, want: map[string]any{"mute": false}},
 		{name: "toggle deafen", action: ActionToggleDeafen, state: types.DiscordData{Deaf: &yes}, want: map[string]any{"deaf": false}},
-		{name: "input volume", action: ActionSetInputVolume, value: vol(50), want: map[string]any{"input": map[string]any{"volume": 50.0}}},
-		{name: "output volume above 100", action: ActionSetOutputVolume, value: vol(150), want: map[string]any{"output": map[string]any{"volume": 150.0}}},
+		{name: "input volume", action: ActionSetInputVolume, value: vol(100), want: map[string]any{"input": map[string]any{"volume": 100.0}}},
+		{name: "output volume above 100", action: ActionSetOutputVolume, value: vol(150), want: map[string]any{"output": map[string]any{"volume": sliderToAmplitude(150)}}},
 		{name: "input volume out of range", action: ActionSetInputVolume, value: vol(150), wantErr: ErrInvalidValue},
 		{name: "volume missing", action: ActionSetOutputVolume, wantErr: ErrInvalidValue},
 		{name: "unknown action", action: "DANCE", wantErr: ErrInvalidAction},
@@ -124,7 +124,7 @@ func TestSessionAppliesVoiceUpdates(t *testing.T) {
 
 	require.NoError(t, writeFrame(server, opFrame, map[string]any{
 		"cmd": "DISPATCH", "evt": "VOICE_SETTINGS_UPDATE",
-		"data": map[string]any{"deaf": true, "output": map[string]any{"volume": 120}},
+		"data": map[string]any{"deaf": true, "output": map[string]any{"volume": 199.52623149688796}},
 	}))
 
 	select {
@@ -132,7 +132,7 @@ func TestSessionAppliesVoiceUpdates(t *testing.T) {
 		require.NotNil(t, d.Deaf)
 		assert.True(t, *d.Deaf)
 		require.NotNil(t, d.OutputVolume)
-		assert.Equal(t, 120.0, *d.OutputVolume)
+		assert.Equal(t, 200.0, *d.OutputVolume)
 	case <-time.After(time.Second):
 		t.Fatal("no state update")
 	}

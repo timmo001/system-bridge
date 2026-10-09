@@ -84,8 +84,8 @@ The state of the local Discord app. Discord must be [set up](/running/#discord) 
 | `authenticated` | boolean | Whether Discord accepted the authorization. |
 | `mute` | boolean | Whether you are muted. |
 | `deaf` | boolean | Whether you are deafened. |
-| `input_volume` | number | Microphone volume, 0-100. |
-| `output_volume` | number | Output volume, 0-200. |
+| `input_volume` | number | Microphone volume as Discord's slider shows it, 0-100. |
+| `output_volume` | number | Output volume as Discord's slider shows it, 0-200. |
 
 The voice fields are `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
 

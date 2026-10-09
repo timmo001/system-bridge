@@ -20,7 +20,7 @@ const (
 	ActionSetOutputVolume Action = "SET_OUTPUT_VOLUME"
 )
 
-// Discord accepts input volume 0-100 and output volume 0-200.
+// The volumes are Discord slider percentages: input 0-100, output 0-200.
 const (
 	maxInputVolume  = 100
 	maxOutputVolume = 200
@@ -69,12 +69,12 @@ func controlArgs(action Action, value *float64, st types.DiscordData) (map[strin
 		if value == nil || *value < 0 || *value > maxInputVolume {
 			return nil, fmt.Errorf("%w: input volume must be 0-%d", ErrInvalidValue, maxInputVolume)
 		}
-		return map[string]any{"input": map[string]any{"volume": *value}}, nil
+		return map[string]any{"input": map[string]any{"volume": sliderToAmplitude(*value)}}, nil
 	case ActionSetOutputVolume:
 		if value == nil || *value < 0 || *value > maxOutputVolume {
 			return nil, fmt.Errorf("%w: output volume must be 0-%d", ErrInvalidValue, maxOutputVolume)
 		}
-		return map[string]any{"output": map[string]any{"volume": *value}}, nil
+		return map[string]any{"output": map[string]any{"volume": sliderToAmplitude(*value)}}, nil
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrInvalidAction, action)
 	}

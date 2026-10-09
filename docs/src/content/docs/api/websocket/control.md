@@ -41,6 +41,8 @@ Available actions:
 - `SET_INPUT_VOLUME`: set `value` to 0-100.
 - `SET_OUTPUT_VOLUME`: set `value` to 0-200.
 
+The volume values are the percentages that Discord's sliders show.
+
 ```json title="Request"
 {
     "id": "abc123",

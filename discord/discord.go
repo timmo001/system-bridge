@@ -224,10 +224,12 @@ func applyVoice(data json.RawMessage) {
 			d.Deaf = v.Deaf
 		}
 		if v.Input != nil && v.Input.Volume != nil {
-			d.InputVolume = v.Input.Volume
+			slider := amplitudeToSlider(*v.Input.Volume)
+			d.InputVolume = &slider
 		}
 		if v.Output != nil && v.Output.Volume != nil {
-			d.OutputVolume = v.Output.Volume
+			slider := amplitudeToSlider(*v.Output.Volume)
+			d.OutputVolume = &slider
 		}
 	})
 }
