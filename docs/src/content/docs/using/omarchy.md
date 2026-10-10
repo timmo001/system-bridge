@@ -58,8 +58,8 @@ with your chosen repository:
 
 ```bash
 omarchy bar set timmo.system-bridge itemActions '{
-  "cpu": ["dot", "herdr", "repo-open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
-  "memory": ["dot", "herdr", "repo-open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
+  "cpu": ["dot", "herdr", "repo", "open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
+  "memory": ["dot", "herdr", "repo", "open", "<repository-label>", "<repository-directory>", "Btop", "btop"],
   "uptime": ["notify-send", "System Bridge", "Uptime selected"]
 }' --json
 ```
@@ -82,7 +82,7 @@ in arguments. Invoke a shell explicitly when needed, for example
 `["bash", "-lc", "your shell command"]`.
 
 The CPU and memory examples use the existing
-[`dot herdr repo-open`](https://dotfiles.timmo.dev/dot/commands/) command to
+[`dot herdr repo open`](https://dotfiles.timmo.dev/dot/commands/) command to
 launch `btop`. They require `dot`, a running shared Herdr server, and `btop`
 available in the target shell. Herdr opens or focuses the repository workspace
 and runs the final command argument in its shell. Each activation opens a new

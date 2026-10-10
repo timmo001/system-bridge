@@ -72,11 +72,11 @@ directory with your chosen repository:
 ```bash
 omarchy bar set timmo.system-bridge itemActions '{
   "cpu": [
-    "dot", "herdr", "repo-open",
+    "dot", "herdr", "repo", "open",
     "<repository-label>", "<repository-directory>", "Btop", "btop"
   ],
   "memory": [
-    "dot", "herdr", "repo-open",
+    "dot", "herdr", "repo", "open",
     "<repository-label>", "<repository-directory>", "Btop", "btop"
   ],
   "uptime": ["notify-send", "System Bridge", "Uptime selected"]
@@ -113,7 +113,7 @@ expanded in arguments. To use shell syntax in an action, invoke a shell
 explicitly, for example `["bash", "-lc", "your shell command"]`.
 
 The Herdr example uses the existing
-[`dot herdr repo-open`](https://dotfiles.timmo.dev/dot/commands/) command. It
+[`dot herdr repo open`](https://dotfiles.timmo.dev/dot/commands/) command. It
 requires `dot`, a running shared Herdr server, and `btop` available in the target
 shell. The command resolves the workspace label from the repository picker cache
 when available, opens or focuses the repository workspace, and runs the final

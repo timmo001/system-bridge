@@ -38,13 +38,13 @@ Create the release at the checked commit:
 gh release create <version> --target <dev commit sha> --title <version> --notes-file notes.md
 ```
 
-When the maintainer's `dot git-releases` helper is available, use it instead: it compares `dev` with the last stable release, suggests an impact, and tags and publishes from a reviewed snapshot. Pass the same notes file.
+When the maintainer's `dot git releases` helper is available, use it instead: it compares `dev` with the last stable release, suggests an impact, and tags and publishes from a reviewed snapshot. Pass the same notes file.
 
 ```bash
-dot git-releases --repo timmo001/system-bridge --refresh
-dot git-releases review --repo timmo001/system-bridge --snapshot <id> --finding <id> --impact patch   # override a suggestion
-dot git-releases publish --repo timmo001/system-bridge --snapshot <id> --notes-file notes.md --notes-mode replace   # preview the plan
-dot git-releases publish --repo timmo001/system-bridge --snapshot <id> --notes-file notes.md --notes-mode replace --confirm <plan>
+dot git releases --repo timmo001/system-bridge --refresh
+dot git releases review --repo timmo001/system-bridge --snapshot <id> --finding <id> --impact patch   # override a suggestion
+dot git releases publish --repo timmo001/system-bridge --snapshot <id> --notes-file notes.md --notes-mode replace   # preview the plan
+dot git releases publish --repo timmo001/system-bridge --snapshot <id> --notes-file notes.md --notes-mode replace --confirm <plan>
 ```
 
 Its suggestion counts large added source as minor. Review those findings down to patch when the code isn't new behaviour.
