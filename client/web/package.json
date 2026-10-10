@@ -34,7 +34,7 @@
   "devDependencies": {
     "@oxlint/plugins": "1.87.0",
     "@tailwindcss/vite": "^4.2.4",
-    "@timmo001/oxlint-rules": "0.5.0",
+    "@timmo001/oxlint-rules": "0.6.2",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
