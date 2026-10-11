@@ -16,6 +16,7 @@ import (
 	"log/slog"
 
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // PCI vendor IDs for GPU vendors.
@@ -385,15 +386,30 @@ func readGPUMemory(devPath string) (total *float64, used *float64) {
 	return total, used
 }
 
+// lspciNameTTL is how long the PCI device names are kept. The devices only
+// change on hot-plug, and running lspci every update was the module's main
+// cost on systems without nvidia-smi.
+const lspciNameTTL = 10 * time.Minute
+
+var lspciNameCache = utils.TTLValue[map[string]string]{TTL: lspciNameTTL, FailTTL: lspciNameTTL}
+
 // lspciNameMap builds a map of PCI address -> human readable device name from
 // `lspci -D`. Both full ("0000:00:02.0") and short ("00:02.0") forms are keyed.
 func lspciNameMap() map[string]string {
+	names, _ := lspciNameCache.Get(readLspciNames)
+	if names == nil {
+		return map[string]string{}
+	}
+	return names
+}
+
+func readLspciNames() (map[string]string, bool) {
 	names := make(map[string]string)
 
 	cmd := exec.Command("lspci", "-D")
 	output, err := cmd.Output()
 	if err != nil {
-		return names
+		return names, false
 	}
 
 	for _, line := range strings.Split(string(output), "\n") {
@@ -421,7 +437,7 @@ func lspciNameMap() map[string]string {
 		names[strings.TrimPrefix(addr, "0000:")] = name
 	}
 
-	return names
+	return names, true
 }
 
 // gpuFallbackName constructs a name from PCI vendor, device ID, and driver when

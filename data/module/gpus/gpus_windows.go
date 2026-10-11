@@ -4,10 +4,12 @@ package gpus
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"log/slog"
 
@@ -66,8 +68,53 @@ func getGPUs() ([]types.GPU, error) {
 		slog.Debug("nvidia-smi not available or failed", "error", err)
 	}
 
-	// Fallback:  Get basic GPU information using PowerShell WMI
-	cmd = exec.Command("powershell", "-Command", `
+	// Fallback: basic adapter identity from WMI. It only changes with the
+	// hardware, so it is cached rather than running PowerShell every update.
+	controllers, ok := videoControllerCache.Get(readVideoControllers)
+	if !ok {
+		return gpus, errors.New("failed to get GPU info")
+	}
+
+	// Convert to our GPU type
+	for _, info := range controllers {
+		memoryTotal := info.MemoryTotal
+		gpus = append(gpus, types.GPU{
+			ID:          info.ID,
+			Name:        info.Name,
+			MemoryTotal: &memoryTotal,
+		})
+	}
+
+	// Best-effort temperature from the ACPI thermal zone (fallback for
+	// non-NVIDIA or when nvidia-smi unavailable). Few machines expose it, so a
+	// failure is remembered instead of retrying every update.
+	if temp, ok := thermalZoneCache.Get(readThermalZoneTemperature); ok && len(gpus) > 0 && gpus[0].Temperature == nil {
+		gpus[0].Temperature = &temp
+	}
+
+	return gpus, nil
+}
+
+const (
+	// staticTTL is for values that only change with the hardware.
+	staticTTL = 10 * time.Minute
+	// unavailableTTL is how long to wait before retrying a source that failed.
+	unavailableTTL = 10 * time.Minute
+)
+
+type videoController struct {
+	ID          string  `json:"ID"`
+	Name        string  `json:"Name"`
+	MemoryTotal float64 `json:"MemoryTotal"`
+}
+
+var (
+	videoControllerCache = utils.TTLValue[[]videoController]{TTL: staticTTL, FailTTL: unavailableTTL}
+	thermalZoneCache     = utils.TTLValue[float64]{FailTTL: unavailableTTL}
+)
+
+func readVideoControllers() ([]videoController, bool) {
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", `
 		class GPU {
 			[string]$ID
 			[string]$Name
@@ -86,54 +133,51 @@ func getGPUs() ([]types.GPU, error) {
 		ConvertTo-Json -Compress $gpus
 	`)
 	utils.SetHideWindow(cmd)
-	output, err = cmd.Output()
+	output, err := cmd.Output()
 	if err != nil {
 		slog.Error("failed to get GPU info", "error", err)
-		return gpus, err
+		return nil, false
 	}
 
-	// Parse the JSON output
-	var gpuInfo []struct {
-		ID          string  `json:"ID"`
-		Name        string  `json:"Name"`
-		MemoryTotal float64 `json:"MemoryTotal"`
-	}
-	if err := json.Unmarshal(output, &gpuInfo); err != nil {
+	var controllers []videoController
+	if err := json.Unmarshal(output, &controllers); err != nil {
 		slog.Error("failed to parse GPU info", "error", err)
-		return gpus, err
+		return nil, false
 	}
+	return controllers, true
+}
 
-	// Convert to our GPU type
-	for _, info := range gpuInfo {
-		gpus = append(gpus, types.GPU{
-			ID:          info.ID,
-			Name:        info.Name,
-			MemoryTotal: &info.MemoryTotal,
-		})
-	}
-
-	// Get GPU temperature using OpenHardwareMonitor (fallback for non-NVIDIA or when nvidia-smi unavailable)
-	cmd = exec.Command("powershell", "-Command", `
+func readThermalZoneTemperature() (float64, bool) {
+	cmd := exec.Command("powershell", "-NoProfile", "-Command", `
 		Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace "root/wmi" | ForEach-Object {
-			$temp = ($_.CurrentTemperature - 2732) / 10. 0
 			[PSCustomObject]@{
-				Temperature = $temp
+				Temperature = ($_.CurrentTemperature - 2732) / 10.0
 			}
 		} | ConvertTo-Json
 	`)
 	utils.SetHideWindow(cmd)
-	output, err = cmd.Output()
-	if err == nil {
-		var temps []struct {
-			Temperature float64 `json:"Temperature"`
-		}
-		if err := json.Unmarshal(output, &temps); err == nil && len(temps) > 0 {
-			// Assign temperature to the first GPU if it doesn't already have one
-			if len(gpus) > 0 && gpus[0].Temperature == nil {
-				gpus[0].Temperature = &temps[0].Temperature
-			}
-		}
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, false
 	}
-
-	return gpus, nil
+	s := strings.TrimSpace(string(output))
+	if s == "" {
+		return 0, false
+	}
+	type zone struct {
+		Temperature float64 `json:"Temperature"`
+	}
+	// ConvertTo-Json emits an object for one zone and an array for several
+	if strings.HasPrefix(s, "[") {
+		var temps []zone
+		if err := json.Unmarshal([]byte(s), &temps); err != nil || len(temps) == 0 {
+			return 0, false
+		}
+		return temps[0].Temperature, true
+	}
+	var one zone
+	if err := json.Unmarshal([]byte(s), &one); err != nil {
+		return 0, false
+	}
+	return one.Temperature, true
 }

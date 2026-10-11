@@ -12,10 +12,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/process"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // GetCameraUsage attempts to detect processes currently using video devices on Linux
@@ -175,36 +177,67 @@ func GetMicrophoneUsage() []string {
 	return names
 }
 
-const pipeWireDumpTimeout = 2 * time.Second
+const (
+	pipeWireDumpTimeout = 2 * time.Second
+	// pipeWireDumpTTL lets the camera and microphone checks of one update
+	// share a single pw-dump run.
+	pipeWireDumpTTL = 2 * time.Second
+	// pipeWireRetryTTL is how long to wait before retrying pw-dump after it
+	// failed, for example when PipeWire is not installed or not running.
+	pipeWireRetryTTL = time.Minute
+)
+
+type pipeWireNode struct {
+	Type string `json:"type"`
+	Info struct {
+		State string         `json:"state"`
+		Props map[string]any `json:"props"`
+	} `json:"info"`
+}
+
+var pipeWireDumpCache = utils.TTLValue[[]pipeWireNode]{TTL: pipeWireDumpTTL, FailTTL: pipeWireRetryTTL}
+
+// pipeWireNodes returns the PipeWire object graph from pw-dump. ok is false
+// when PipeWire can't be queried.
+func pipeWireNodes() ([]pipeWireNode, bool) {
+	return pipeWireDumpCache.Get(func() ([]pipeWireNode, bool) {
+		ctx, cancel := context.WithTimeout(context.Background(), pipeWireDumpTimeout)
+		defer cancel()
+		out, err := exec.CommandContext(ctx, "pw-dump").Output()
+		if err != nil {
+			slog.Debug("Failed to run pw-dump", "error", err)
+			return nil, false
+		}
+
+		var objects []pipeWireNode
+		if err := json.Unmarshal(out, &objects); err != nil {
+			slog.Debug("Failed to parse pw-dump output", "error", err)
+			return nil, false
+		}
+		// Only nodes are inspected; drop the rest so the cache stays small.
+		nodes := objects[:0]
+		for _, o := range objects {
+			if o.Type == "PipeWire:Interface:Node" {
+				nodes = append(nodes, o)
+			}
+		}
+		return nodes, true
+	})
+}
 
 // pipeWireCaptureApps returns the apps with a running PipeWire capture stream
 // of mediaClass, such as "Stream/Input/Audio". ok is false when PipeWire
 // can't be queried, so callers can fall back to another source.
 func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
-	ctx, cancel := context.WithTimeout(context.Background(), pipeWireDumpTimeout)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, "pw-dump").Output()
-	if err != nil {
-		slog.Debug("Failed to run pw-dump", "error", err)
-		return nil, false
-	}
-
-	var objects []struct {
-		Type string `json:"type"`
-		Info struct {
-			State string         `json:"state"`
-			Props map[string]any `json:"props"`
-		} `json:"info"`
-	}
-	if err := json.Unmarshal(out, &objects); err != nil {
-		slog.Debug("Failed to parse pw-dump output", "error", err)
+	nodes, ok := pipeWireNodes()
+	if !ok {
 		return nil, false
 	}
 
 	apps = make([]string, 0)
-	for _, o := range objects {
+	for _, o := range nodes {
 		props := o.Info.Props
-		if o.Type != "PipeWire:Interface:Node" || o.Info.State != "running" || props["media.class"] != mediaClass {
+		if o.Info.State != "running" || props["media.class"] != mediaClass {
 			continue
 		}
 		// Streams recording another app's output, such as a screen recorder
@@ -304,10 +337,23 @@ func GetPSUPowerUsage() *float64 {
 	return nil
 }
 
+var deviceInfoOnce struct {
+	sync.Once
+	info *types.DeviceInfo
+}
+
 // GetDeviceInfo reads hardware and firmware identity from the DMI/SMBIOS sysfs
 // interface (/sys/class/dmi/id). Returns nil when no DMI fields are readable.
-// Root-only fields such as product_serial are intentionally not read.
+// Root-only fields such as product_serial are intentionally not read. The
+// values are fixed for the life of the process, so they are read once.
 func GetDeviceInfo() *types.DeviceInfo {
+	deviceInfoOnce.Do(func() {
+		deviceInfoOnce.info = readDeviceInfo()
+	})
+	return deviceInfoOnce.info
+}
+
+func readDeviceInfo() *types.DeviceInfo {
 	const dmiBase = "/sys/class/dmi/id"
 
 	read := func(file string) *string {

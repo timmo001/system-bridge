@@ -335,11 +335,8 @@ func readVoltageValue(path string) *float64 {
 	return &volts
 }
 
-// GetDPCPercentages not available on Linux; return nil best-effort.
-func GetDPCPercentages(percpu bool) []float64 { return nil }
-
-// GetDPCTimeSeconds not supported on Linux; return nil.
-func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
+// SampleDPC is Windows-only; there is no DPC accounting here.
+func SampleDPC(sample time.Duration) DPCSample { return DPCSample{} }
 
 // ReadCPUTemperature attempts to read CPU temperature on Linux via hwmon
 func ReadCPUTemperature() *float64 {

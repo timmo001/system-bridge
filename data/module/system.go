@@ -95,7 +95,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 			slog.Warn("Failed to enumerate processes for user activity", "error", perr)
 		} else {
 			for _, p := range procs {
-				uname, uerr := p.Username()
+				uname, uerr := processUsername(p)
 				if uerr != nil || uname == "" {
 					continue
 				}
@@ -141,7 +141,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 			slog.Warn("Failed to enumerate processes for user activity", "error", perr)
 		} else {
 			for _, p := range procs {
-				uname, uerr := p.Username()
+				uname, uerr := processUsername(p)
 				if uerr != nil || uname == "" {
 					continue
 				}

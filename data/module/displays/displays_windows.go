@@ -5,6 +5,7 @@ package displays
 import (
 	"fmt"
 	"regexp"
+	"sync"
 	"syscall"
 	"unsafe"
 
@@ -41,10 +42,14 @@ func formatDisplayName(id string) string {
 	return id
 }
 
-func GetDisplays() ([]types.Display, error) {
-	var displays []types.Display
-
-	callback := syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
+// enumState carries the result of one EnumDisplayMonitors pass. The callback
+// is created once because syscall.NewCallback never frees a callback and
+// Windows allows only a limited number per process; creating one per update
+// leaked them and would eventually panic.
+var (
+	enumMu       sync.Mutex
+	enumDisplays []types.Display
+	enumCallback = syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
 		var info MONITORINFOEX
 		info.CbSize = uint32(unsafe.Sizeof(info))
 
@@ -77,14 +82,25 @@ func GetDisplays() ([]types.Display, error) {
 			RefreshRate:          &refreshRate,
 		}
 
-		displays = append(displays, display)
+		enumDisplays = append(enumDisplays, display)
 		return 1
 	})
+)
 
-	ret, _, err := enumDisplayMonitors.Call(0, 0, callback, 0)
+func GetDisplays() ([]types.Display, error) {
+	// EnumDisplayMonitors calls back synchronously, so the shared result
+	// slice is only touched while this lock is held.
+	enumMu.Lock()
+	defer enumMu.Unlock()
+	enumDisplays = nil
+
+	ret, _, err := enumDisplayMonitors.Call(0, 0, enumCallback, 0)
 	if ret == 0 {
 		return nil, fmt.Errorf("EnumDisplayMonitors failed: %v", err)
 	}
+
+	displays := enumDisplays
+	enumDisplays = nil
 
 	if len(displays) == 0 {
 		slog.Info("No displays found")

@@ -2,13 +2,16 @@ package data
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"log/slog"
 
-	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/bus"
 	data_module "github.com/timmo001/system-bridge/data/module"
 	"github.com/timmo001/system-bridge/types"
@@ -171,7 +174,10 @@ func (d *DataStore) GetRegisteredModules() []types.Updater {
 }
 
 func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
-	data := make(map[types.ModuleName]any)
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	data := make(map[types.ModuleName]any, len(d.registry))
 
 	for _, module := range d.registry {
 		// Skip modules with nil updaters
@@ -185,6 +191,22 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 	return data
 }
 
+// persistedModule is the on-disk shape of a module's last data. It matches
+// the files written by earlier releases, so existing data files still load.
+type persistedModule struct {
+	Name    types.ModuleName `json:"module"`
+	Data    any              `json:"data"`
+	Updated string           `json:"updated"`
+}
+
+func moduleDataFile(name types.ModuleName) (string, error) {
+	dataPath, err := utils.GetDataPath()
+	if err != nil {
+		return "", fmt.Errorf("could not get data path: %w", err)
+	}
+	return filepath.Join(dataPath, string(name)+".json"), nil
+}
+
 // loadModuleData loads the module data from a JSON file
 func (d *DataStore) loadModuleData(m *types.Module) error {
 	if m == nil {
@@ -195,61 +217,60 @@ func (d *DataStore) loadModuleData(m *types.Module) error {
 		return fmt.Errorf("module name cannot be empty")
 	}
 
-	dataPath, err := utils.GetDataPath()
+	file, err := moduleDataFile(m.Name)
 	if err != nil {
-		return fmt.Errorf("could not get data path: %w", err)
+		return err
 	}
 
-	v := viper.New()
-	v.SetConfigName(string(m.Name))
-	v.SetConfigType("json")
-	v.AddConfigPath(dataPath)
-
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found, use default values
+	b, err := os.ReadFile(file)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			// No data saved yet, use default values
 			return nil
 		}
-		return fmt.Errorf("error reading config file: %w", err)
+		return fmt.Errorf("error reading data file: %w", err)
 	}
 
-	if err := v.Unmarshal(m); err != nil {
-		return fmt.Errorf("unable to decode into struct: %w", err)
+	var stored persistedModule
+	if err := json.Unmarshal(b, &stored); err != nil {
+		return fmt.Errorf("unable to decode data file: %w", err)
 	}
+
+	if stored.Name != "" {
+		m.Name = stored.Name
+	}
+	m.Data = stored.Data
+	m.Updated = stored.Updated
 
 	return nil
 }
 
-// saveModuleData saves the module data to a JSON file
+// saveModuleData saves the module data to a JSON file. It encodes with
+// encoding/json and replaces the file atomically, which is far cheaper than
+// going through a configuration library for every update.
 func (d *DataStore) saveModuleData(m types.Module) error {
 	// Validate module
 	if m.Name == "" {
 		return fmt.Errorf("module name cannot be empty")
 	}
 
-	dataPath, err := utils.GetDataPath()
+	file, err := moduleDataFile(m.Name)
 	if err != nil {
-		return fmt.Errorf("could not get data path: %w", err)
+		return err
 	}
 
-	v := viper.New()
-	v.SetConfigName(string(m.Name))
-	v.SetConfigType("json")
-	v.AddConfigPath(dataPath)
+	b, err := json.Marshal(persistedModule{Name: m.Name, Data: m.Data, Updated: m.Updated})
+	if err != nil {
+		return fmt.Errorf("error encoding data file: %w", err)
+	}
 
-	v.Set("module", m.Name)
-	v.Set("data", m.Data)
-	v.Set("updated", m.Updated)
-
-	if err := v.WriteConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found, create it
-			if err := v.SafeWriteConfig(); err != nil {
-				return fmt.Errorf("error writing data file: %w", err)
-			}
-		} else {
-			return fmt.Errorf("error writing data file: %w", err)
-		}
+	tmp := file + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+		return fmt.Errorf("error writing data file: %w", err)
+	}
+	if err := os.Rename(tmp, file); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("error writing data file: %w", err)
 	}
 
 	return nil
