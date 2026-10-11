@@ -51,14 +51,14 @@
     "prepack": "bun run build"
   },
   "peerDependencies": {
-    "effect": "4.0.2"
+    "effect": "4.0.3"
   },
   "devDependencies": {
     "@effect/tsgo": "0.51.1",
     "@oxlint/plugins": "1.87.0",
     "@timmo001/oxlint-rules": "0.6.2",
     "@types/bun": "1.4.2",
-    "effect": "4.0.2",
+    "effect": "4.0.3",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
     "prettier": "3.9.10",
