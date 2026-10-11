@@ -158,7 +158,7 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 			Name: name,
 		}
 
-		if v := readGPUCoreClock(devPath); v != nil {
+		if v := readGPUCoreClock(cardPath, devPath); v != nil {
 			gpu.CoreClock = v
 		}
 		if v := readGPULoad(devPath); v != nil {
@@ -243,7 +243,8 @@ func getLspciGPUs() []types.GPU {
 // readGPUCoreClock returns the current GPU core (render) clock in MHz. It prefers
 // the actual clock and falls back to the requested clock, covering the xe driver
 // (tile*/gt*/freq0), the modern i915 layout (gt/gt*), and legacy i915 files.
-func readGPUCoreClock(devPath string) *float64 {
+// xe puts its files on the PCI device, while i915 puts them on the DRM card.
+func readGPUCoreClock(cardPath, devPath string) *float64 {
 	type freqPair struct{ act, cur string }
 	pairs := make([]freqPair, 0)
 
@@ -252,11 +253,11 @@ func readGPUCoreClock(devPath string) *float64 {
 		pairs = append(pairs, freqPair{filepath.Join(gt, "act_freq"), filepath.Join(gt, "cur_freq")})
 	}
 	// Modern multi-tile i915 layout.
-	for _, gt := range globSorted(filepath.Join(devPath, "gt", "gt*")) {
+	for _, gt := range globSorted(filepath.Join(cardPath, "gt", "gt*")) {
 		pairs = append(pairs, freqPair{filepath.Join(gt, "rps_act_freq_mhz"), filepath.Join(gt, "rps_cur_freq_mhz")})
 	}
 	// Legacy single-GT i915 layout.
-	pairs = append(pairs, freqPair{filepath.Join(devPath, "gt_act_freq_mhz"), filepath.Join(devPath, "gt_cur_freq_mhz")})
+	pairs = append(pairs, freqPair{filepath.Join(cardPath, "gt_act_freq_mhz"), filepath.Join(cardPath, "gt_cur_freq_mhz")})
 
 	for _, p := range pairs {
 		act := readSysFloat(p.act)
