@@ -180,6 +180,33 @@ func TestClassifyMount(t *testing.T) {
 	}
 }
 
+func TestIsDiskDevice(t *testing.T) {
+	tests := []struct {
+		name     string
+		goos     string
+		device   string
+		expected bool
+	}{
+		{name: "linux disk", goos: "linux", device: "/dev/nvme0n1p2", expected: true},
+		{name: "linux tmpfs", goos: "linux", device: "tmpfs", expected: false},
+		{name: "linux overlay", goos: "linux", device: "overlay", expected: false},
+		{name: "darwin disk", goos: "darwin", device: "/dev/disk3s1s1", expected: true},
+		{name: "darwin devfs", goos: "darwin", device: "devfs", expected: false},
+		{name: "darwin autofs", goos: "darwin", device: "map auto_home", expected: false},
+		{name: "windows drive letter", goos: "windows", device: "C:", expected: true},
+		{name: "windows second drive", goos: "windows", device: "D:", expected: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isDiskDevice(tt.goos, tt.device)
+			if result != tt.expected {
+				t.Errorf("isDiskDevice(%q, %q) = %v, want %v", tt.goos, tt.device, result, tt.expected)
+			}
+		})
+	}
+}
+
 // mockPartitions returns a fixed set of partitions for testing.
 func mockPartitions(_ bool) ([]disk.PartitionStat, error) {
 	return []disk.PartitionStat{

@@ -2,6 +2,7 @@ package data_module
 
 import (
 	"context"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
@@ -49,7 +50,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 
 	var partitions []disk.PartitionStat
 	for _, p := range allPartitions {
-		if !strings.HasPrefix(p.Device, "/dev/") {
+		if !isDiskDevice(runtime.GOOS, p.Device) {
 			continue
 		}
 		category := ClassifyMount(p)
@@ -161,6 +162,16 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	return disksData, nil
 }
 
+// isDiskDevice reports whether a partition device is a disk. Linux and macOS
+// name disks under /dev/, which skips virtual mounts such as tmpfs, overlay and
+// autofs. Windows names them by drive letter (e.g. "C:"), so nothing is skipped.
+func isDiskDevice(goos, device string) bool {
+	if goos == "windows" {
+		return true
+	}
+	return strings.HasPrefix(device, "/dev/")
+}
+
 // ClassifyMount determines the category of a partition based on its properties.
 func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
 	// Root mount is always primary regardless of options
@@ -176,7 +187,7 @@ func ClassifyMount(p disk.PartitionStat) types.DiskMountCategory {
 	return types.DiskMountCategoryPrimary
 }
 
-// GetAllMountsCategorized returns all /dev/ mounts categorized for the settings UI.
+// GetAllMountsCategorized returns all disk mounts categorized for the settings UI.
 func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
 	allPartitions, err := partitionsFunc(true)
 	if err != nil {
@@ -192,7 +203,7 @@ func GetAllMountsCategorized() (*types.DiskMountsResponse, error) {
 	}
 
 	for _, p := range allPartitions {
-		if !strings.HasPrefix(p.Device, "/dev/") {
+		if !isDiskDevice(runtime.GOOS, p.Device) {
 			continue
 		}
 
