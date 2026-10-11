@@ -13,6 +13,7 @@ import (
 
 	"log/slog"
 
+	"github.com/timmo001/system-bridge/data/module/cpu"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
@@ -86,10 +87,9 @@ func getGPUs() ([]types.GPU, error) {
 	}
 
 	// Best-effort temperature from the ACPI thermal zone (fallback for
-	// non-NVIDIA or when nvidia-smi unavailable). Few machines expose it, so a
-	// failure is remembered instead of retrying every update.
-	if temp, ok := thermalZoneCache.Get(readThermalZoneTemperature); ok && len(gpus) > 0 && gpus[0].Temperature == nil {
-		gpus[0].Temperature = &temp
+	// non-NVIDIA or when nvidia-smi unavailable), shared with the CPU module.
+	if len(gpus) > 0 && gpus[0].Temperature == nil {
+		gpus[0].Temperature = cpu.ReadCPUTemperature()
 	}
 
 	return gpus, nil
@@ -108,13 +108,10 @@ type videoController struct {
 	MemoryTotal float64 `json:"MemoryTotal"`
 }
 
-var (
-	videoControllerCache = utils.TTLValue[[]videoController]{TTL: staticTTL, FailTTL: unavailableTTL}
-	thermalZoneCache     = utils.TTLValue[float64]{FailTTL: unavailableTTL}
-)
+var videoControllerCache = utils.TTLValue[[]videoController]{TTL: staticTTL, FailTTL: unavailableTTL}
 
 func readVideoControllers() ([]videoController, bool) {
-	cmd := exec.Command("powershell", "-NoProfile", "-Command", `
+	output, ok := utils.RunHidden("powershell", "-NoProfile", "-Command", `
 		class GPU {
 			[string]$ID
 			[string]$Name
@@ -132,52 +129,15 @@ func readVideoControllers() ([]videoController, bool) {
 		}
 		ConvertTo-Json -Compress $gpus
 	`)
-	utils.SetHideWindow(cmd)
-	output, err := cmd.Output()
-	if err != nil {
-		slog.Error("failed to get GPU info", "error", err)
+	if !ok {
+		slog.Error("failed to get GPU info")
 		return nil, false
 	}
 
 	var controllers []videoController
-	if err := json.Unmarshal(output, &controllers); err != nil {
+	if err := json.Unmarshal([]byte(output), &controllers); err != nil {
 		slog.Error("failed to parse GPU info", "error", err)
 		return nil, false
 	}
 	return controllers, true
-}
-
-func readThermalZoneTemperature() (float64, bool) {
-	cmd := exec.Command("powershell", "-NoProfile", "-Command", `
-		Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace "root/wmi" | ForEach-Object {
-			[PSCustomObject]@{
-				Temperature = ($_.CurrentTemperature - 2732) / 10.0
-			}
-		} | ConvertTo-Json
-	`)
-	utils.SetHideWindow(cmd)
-	output, err := cmd.Output()
-	if err != nil {
-		return 0, false
-	}
-	s := strings.TrimSpace(string(output))
-	if s == "" {
-		return 0, false
-	}
-	type zone struct {
-		Temperature float64 `json:"Temperature"`
-	}
-	// ConvertTo-Json emits an object for one zone and an array for several
-	if strings.HasPrefix(s, "[") {
-		var temps []zone
-		if err := json.Unmarshal([]byte(s), &temps); err != nil || len(temps) == 0 {
-			return 0, false
-		}
-		return temps[0].Temperature, true
-	}
-	var one zone
-	if err := json.Unmarshal([]byte(s), &one); err != nil {
-		return 0, false
-	}
-	return one.Temperature, true
 }

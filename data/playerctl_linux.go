@@ -5,7 +5,6 @@ package data
 import (
 	"bufio"
 	"os/exec"
-	"sync"
 	"time"
 
 	"log/slog"
@@ -39,32 +38,18 @@ func StartPlayerctlListener(dataStore *DataStore) {
 		// A track change emits several lines in quick succession, so
 		// coalesce them into one media update instead of running playerctl
 		// once per line.
-		var (
-			debounceMu sync.Mutex
-			debounce   *time.Timer
-		)
-		trigger := func() {
+		debounce := time.AfterFunc(playerctlDebounce, func() {
 			if err := dataStore.TriggerModuleUpdate(types.ModuleMedia); err != nil {
 				slog.Warn("Failed to trigger media update from playerctl event", "error", err)
 			}
-		}
+		})
+		debounce.Stop()
 
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			debounceMu.Lock()
-			if debounce == nil {
-				debounce = time.AfterFunc(playerctlDebounce, trigger)
-			} else {
-				debounce.Reset(playerctlDebounce)
-			}
-			debounceMu.Unlock()
+			debounce.Reset(playerctlDebounce)
 		}
-
-		debounceMu.Lock()
-		if debounce != nil {
-			debounce.Stop()
-		}
-		debounceMu.Unlock()
+		debounce.Stop()
 
 		_ = cmd.Wait()
 

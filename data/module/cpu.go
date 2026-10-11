@@ -17,44 +17,27 @@ import (
 	"github.com/timmo001/system-bridge/utils"
 )
 
-// cpuSampleWindow is the one interval over which every delta-based reading
-// (times percent, package power, Windows DPC time) is sampled. They run at
-// the same time, so an update blocks for one window rather than one per
-// reading.
+// cpuSampleWindow is the interval over which the times percent and package
+// power deltas are sampled. They run at the same time, so an update blocks
+// for one window rather than one per reading. Windows DPC time is read from
+// a performance counter with its own window, reported in the sample.
 const cpuSampleWindow = 200 * time.Millisecond
 
 // cpuFreqBoundsTTL is how long per-CPU frequency limits are kept. They are
-// hardware constants, or on Windows a power plan setting, and were being
-// read twice per CPU on every update, which on Windows and macOS meant a
-// process start each time.
+// hardware constants, or on Windows a power plan setting, and on Windows
+// and macOS reading them means starting a process.
 const cpuFreqBoundsTTL = 10 * time.Minute
 
-type cpuFreqBounds struct {
-	min *float64
-	max *float64
-}
-
-var cpuFreqBoundsCache = utils.TTLValue[[]cpuFreqBounds]{TTL: cpuFreqBoundsTTL}
+var cpuFreqBoundsCache = utils.TTLValue[[]cm.FreqBounds]{TTL: cpuFreqBoundsTTL}
 
 // getCPUFreqBounds returns the min/max frequency for each of count CPUs.
-func getCPUFreqBounds(count int) []cpuFreqBounds {
-	bounds, _ := cpuFreqBoundsCache.Get(func() ([]cpuFreqBounds, bool) {
-		out := make([]cpuFreqBounds, count)
-		for i := range out {
-			out[i].min, out[i].max = cm.GetPerCPUFreqBounds(i)
-		}
-		return out, true
-	})
+func getCPUFreqBounds(count int) []cm.FreqBounds {
+	load := func() ([]cm.FreqBounds, bool) { return cm.FreqBoundsPerCPU(count), true }
+	bounds, _ := cpuFreqBoundsCache.Get(load)
 	if len(bounds) != count {
-		// CPU count changed (hot-plug); refresh once for the new layout.
+		// CPU count changed (hot-plug); refresh for the new layout.
 		cpuFreqBoundsCache.Reset()
-		bounds, _ = cpuFreqBoundsCache.Get(func() ([]cpuFreqBounds, bool) {
-			out := make([]cpuFreqBounds, count)
-			for i := range out {
-				out[i].min, out[i].max = cm.GetPerCPUFreqBounds(i)
-			}
-			return out, true
-		})
+		bounds, _ = cpuFreqBoundsCache.Get(load)
 	}
 	return bounds
 }
@@ -96,7 +79,7 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	}()
 	go func() {
 		defer sampleWG.Done()
-		dpc = cm.SampleDPC(cpuSampleWindow)
+		dpc = cm.SampleDPC()
 	}()
 
 	// Get CPU frequency and identity
@@ -121,11 +104,11 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 		// Overall min is the minimum of per-CPU mins and overall max the
 		// maximum of per-CPU maxes.
 		for _, b := range freqBounds {
-			if b.min != nil && (freq.Min == nil || *b.min < *freq.Min) {
-				freq.Min = b.min
+			if b.Min != nil && (freq.Min == nil || *b.Min < *freq.Min) {
+				freq.Min = b.Min
 			}
-			if b.max != nil && (freq.Max == nil || *b.max > *freq.Max) {
-				freq.Max = b.max
+			if b.Max != nil && (freq.Max == nil || *b.Max > *freq.Max) {
+				freq.Max = b.Max
 			}
 		}
 		cpuData.Frequency = &freq
@@ -136,13 +119,41 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	timesPerCPU, _ := cpu.TimesWithContext(ctx, true)
 	percentsPerCPU, _ := cpu.PercentWithContext(ctx, 0, true)
 	overallTimes, overallTimesErr := cpu.TimesWithContext(ctx, false)
-	overallPercents, overallPercentsErr := cpu.PercentWithContext(ctx, 0, false)
-	// Read overall CPU Vcore voltage once (best-effort, OS-specific)
-	vcore := cm.ReadCPUVcoreVoltage()
+	if percents, err := cpu.PercentWithContext(ctx, 0, false); err == nil && len(percents) > 0 {
+		usage := percents[0]
+		cpuData.Usage = &usage
+	}
+
+	// Get load average where supported (Unix systems)
+	if load, err := load.Avg(); err == nil {
+		loadAvg := load.Load1
+		cpuData.LoadAverage = &loadAvg
+	}
+
+	// Get CPU temperature where available
+	if temps, err := sensors.SensorsTemperatures(); err == nil {
+		for _, temp := range temps {
+			if strings.Contains(strings.ToLower(temp.SensorKey), "cpu") {
+				t := temp.Temperature
+				cpuData.Temperature = &t
+				break
+			}
+		}
+	}
+	// OS-specific fallbacks for temperature
+	if cpuData.Temperature == nil {
+		cpuData.Temperature = cm.ReadCPUTemperature()
+	}
+
+	// CPU statistics and voltage (OS-specific best-effort)
+	cpuData.Stats = cm.ReadCPUStats()
+	cpuData.Voltage = cm.ReadCPUVcoreVoltage()
 
 	sampleWG.Wait()
 
-	// Precompute weighted per-core power if overall power available
+	cpuData.Power = overallPower
+
+	// Distribute overall package power across cores weighted by usage
 	var perCorePowers []float64
 	if overallPower != nil && len(percentsPerCPU) > 0 {
 		var sum float64
@@ -185,43 +196,21 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 				Current: &cpuInfo.Mhz,
 			}
 			if i < len(freqBounds) {
-				perCpuData.Frequency.Min = freqBounds[i].min
-				perCpuData.Frequency.Max = freqBounds[i].max
+				perCpuData.Frequency.Min = freqBounds[i].Min
+				perCpuData.Frequency.Max = freqBounds[i].Max
 			}
 		}
 
-		// Get per CPU times
 		if i < len(timesPerCPU) {
-			perCpuData.Times = &types.CPUTimes{
-				User:      &timesPerCPU[i].User,
-				System:    &timesPerCPU[i].System,
-				Idle:      &timesPerCPU[i].Idle,
-				Interrupt: &timesPerCPU[i].Irq,
+			var pct *types.CPUTimes
+			if i < len(perPct) {
+				pct = perPct[i]
 			}
-
-			// Windows-only: DPC time in seconds and percent over the sample
+			var dpcPct *float64
 			if i < len(dpc.PerCPUPercent) {
-				secs := dpc.Seconds(dpc.PerCPUPercent[i])
-				perCpuData.Times.DPC = &secs
+				dpcPct = &dpc.PerCPUPercent[i]
 			}
-
-			// Per-CPU times percent from sampled delta
-			if i < len(perPct) && perPct[i] != nil {
-				perCpuData.TimesPercent = &types.CPUTimes{
-					User:      perPct[i].User,
-					System:    perPct[i].System,
-					Idle:      perPct[i].Idle,
-					Interrupt: perPct[i].Interrupt,
-				}
-			}
-
-			if i < len(dpc.PerCPUPercent) {
-				if perCpuData.TimesPercent == nil {
-					perCpuData.TimesPercent = &types.CPUTimes{}
-				}
-				d := dpc.PerCPUPercent[i]
-				perCpuData.TimesPercent.DPC = &d
-			}
+			perCpuData.Times, perCpuData.TimesPercent = buildCPUTimes(timesPerCPU[i], pct, dpcPct, dpc)
 		}
 
 		// Get per CPU usage percentage
@@ -230,7 +219,6 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 			perCpuData.Usage = &usage
 		}
 
-		// Best-effort: distribute overall package power across cores weighted by usage
 		if i < len(perCorePowers) {
 			val := perCorePowers[i]
 			perCpuData.Power = &val
@@ -240,87 +228,44 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 	}
 	cpuData.PerCPU = perCPU
 
-	// Get overall CPU times
+	// Overall CPU times, with the percent from the same sample as the
+	// per-CPU values
 	if overallTimesErr == nil && len(overallTimes) > 0 {
-		cpuData.Times = &types.CPUTimes{
-			User:      &overallTimes[0].User,
-			System:    &overallTimes[0].System,
-			Idle:      &overallTimes[0].Idle,
-			Interrupt: &overallTimes[0].Irq,
-		}
-
-		// Windows-only: absolute DPC time seconds overall
-		if dpc.TotalPercent != nil {
-			secs := dpc.Seconds(*dpc.TotalPercent)
-			cpuData.Times.DPC = &secs
-		}
-
-		// Overall times percent from the same sample as the per-CPU values
-		if overallPct != nil {
-			tp := types.CPUTimes{
-				User:      overallPct.User,
-				System:    overallPct.System,
-				Idle:      overallPct.Idle,
-				Interrupt: overallPct.Interrupt,
-			}
-			cpuData.TimesPercent = &tp
-		}
-
-		// Windows-only: best-effort overall DPC percentage
-		if dpc.TotalPercent != nil {
-			if cpuData.TimesPercent == nil {
-				cpuData.TimesPercent = &types.CPUTimes{}
-			}
-			d := *dpc.TotalPercent
-			cpuData.TimesPercent.DPC = &d
-		}
-	}
-
-	// Get overall CPU usage percentage (non-blocking)
-	if overallPercentsErr == nil && len(overallPercents) > 0 {
-		usage := overallPercents[0]
-		cpuData.Usage = &usage
-	}
-
-	// Get load average where supported (Unix systems)
-	if load, err := load.Avg(); err == nil {
-		loadAvg := load.Load1
-		cpuData.LoadAverage = &loadAvg
-	}
-
-	// Get CPU temperature where available
-	if temps, err := sensors.SensorsTemperatures(); err == nil {
-		for _, temp := range temps {
-			if strings.Contains(strings.ToLower(temp.SensorKey), "cpu") {
-				t := temp.Temperature
-				cpuData.Temperature = &t
-				break
-			}
-		}
-	}
-	// OS-specific fallbacks for temperature
-	if cpuData.Temperature == nil {
-		if t := cm.ReadCPUTemperature(); t != nil {
-			cpuData.Temperature = t
-		}
-	}
-
-	// Overall CPU power
-	if overallPower != nil {
-		cpuData.Power = overallPower
-	}
-
-	// CPU statistics (OS-specific best-effort)
-	if stats := cm.ReadCPUStats(); stats != nil {
-		cpuData.Stats = stats
-	}
-
-	// Overall CPU voltage (best-effort OS-specific)
-	if vcore != nil {
-		cpuData.Voltage = vcore
+		cpuData.Times, cpuData.TimesPercent = buildCPUTimes(overallTimes[0], overallPct, dpc.TotalPercent, dpc)
 	}
 
 	return cpuData, nil
+}
+
+// buildCPUTimes assembles the absolute and percentage time breakdowns for
+// one CPU, or for the whole system, from a times snapshot, the sampled
+// percentages and the Windows DPC percentage when available.
+func buildCPUTimes(stat cpu.TimesStat, pct *types.CPUTimes, dpcPct *float64, dpc cm.DPCSample) (*types.CPUTimes, *types.CPUTimes) {
+	times := &types.CPUTimes{
+		User:      &stat.User,
+		System:    &stat.System,
+		Idle:      &stat.Idle,
+		Interrupt: &stat.Irq,
+	}
+	var timesPercent *types.CPUTimes
+	if pct != nil {
+		timesPercent = &types.CPUTimes{
+			User:      pct.User,
+			System:    pct.System,
+			Idle:      pct.Idle,
+			Interrupt: pct.Interrupt,
+		}
+	}
+	if dpcPct != nil {
+		secs := dpc.Seconds(*dpcPct)
+		times.DPC = &secs
+		if timesPercent == nil {
+			timesPercent = &types.CPUTimes{}
+		}
+		d := *dpcPct
+		timesPercent.DPC = &d
+	}
+	return times, timesPercent
 }
 
 // computeTimesPercent calculates per-state CPU time percentages over one

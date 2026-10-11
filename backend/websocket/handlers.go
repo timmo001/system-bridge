@@ -12,7 +12,6 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/websocket"
-	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
@@ -244,14 +243,10 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 	slog.Debug("WS: EventGetDataModule", "eventData", event.Data)
 
-	// The bus delivers the request struct itself; only fall back to a
-	// reflective decode for other shapes.
 	moduleRequest, ok := event.Data.(bus.GetDataRequest)
 	if !ok {
-		if err := mapstructure.Decode(event.Data, &moduleRequest); err != nil {
-			slog.Error("Failed to decode module data", "error", err)
-			return
-		}
+		slog.Error("Unexpected data for get data module event", "type", fmt.Sprintf("%T", event.Data))
+		return
 	}
 
 	slog.Debug("WS: EventGetDataModule", "data", moduleRequest)
@@ -281,14 +276,10 @@ func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
 		return
 	}
 
-	// The data store publishes a types.Module; avoid walking the module
-	// data reflectively when it already has the right type.
 	module, ok := event.Data.(types.Module)
 	if !ok {
-		if err := mapstructure.Decode(event.Data, &module); err != nil {
-			slog.Error("Failed to decode module data", "error", err)
-			return
-		}
+		slog.Error("Unexpected data for module update event", "type", fmt.Sprintf("%T", event.Data))
+		return
 	}
 
 	slog.Debug("Received module data update from event bus", "module", module.Name)

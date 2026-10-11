@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"os"
 	"path/filepath"
 	"sync"
@@ -21,6 +22,9 @@ import (
 type DataStore struct {
 	mu       sync.RWMutex
 	registry map[types.ModuleName]types.Module
+	// saved holds a hash of each module's data as last written to disk, so
+	// an update that changed nothing does not rewrite the file.
+	saved map[types.ModuleName]uint64
 }
 
 // lazyModules register when they first receive data instead of at startup.
@@ -195,7 +199,7 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 // the files written by earlier releases, so existing data files still load.
 type persistedModule struct {
 	Name    types.ModuleName `json:"module"`
-	Data    any              `json:"data"`
+	Data    json.RawMessage  `json:"data"`
 	Updated string           `json:"updated"`
 }
 
@@ -235,11 +239,11 @@ func (d *DataStore) loadModuleData(m *types.Module) error {
 	if err := json.Unmarshal(b, &stored); err != nil {
 		return fmt.Errorf("unable to decode data file: %w", err)
 	}
-
-	if stored.Name != "" {
-		m.Name = stored.Name
+	if len(stored.Data) > 0 {
+		if err := json.Unmarshal(stored.Data, &m.Data); err != nil {
+			return fmt.Errorf("unable to decode data file: %w", err)
+		}
 	}
-	m.Data = stored.Data
 	m.Updated = stored.Updated
 
 	return nil
@@ -247,11 +251,23 @@ func (d *DataStore) loadModuleData(m *types.Module) error {
 
 // saveModuleData saves the module data to a JSON file. It encodes with
 // encoding/json and replaces the file atomically, which is far cheaper than
-// going through a configuration library for every update.
+// going through a configuration library for every update, and skips the
+// write when the data is the same as last time.
 func (d *DataStore) saveModuleData(m types.Module) error {
 	// Validate module
 	if m.Name == "" {
 		return fmt.Errorf("module name cannot be empty")
+	}
+
+	data, err := json.Marshal(m.Data)
+	if err != nil {
+		return fmt.Errorf("error encoding data file: %w", err)
+	}
+	hash := fnv.New64a()
+	_, _ = hash.Write(data)
+	sum := hash.Sum64()
+	if prev, ok := d.saved[m.Name]; ok && prev == sum {
+		return nil
 	}
 
 	file, err := moduleDataFile(m.Name)
@@ -259,7 +275,7 @@ func (d *DataStore) saveModuleData(m types.Module) error {
 		return err
 	}
 
-	b, err := json.Marshal(persistedModule{Name: m.Name, Data: m.Data, Updated: m.Updated})
+	b, err := json.Marshal(persistedModule{Name: m.Name, Data: data, Updated: m.Updated})
 	if err != nil {
 		return fmt.Errorf("error encoding data file: %w", err)
 	}
@@ -272,6 +288,11 @@ func (d *DataStore) saveModuleData(m types.Module) error {
 		_ = os.Remove(tmp)
 		return fmt.Errorf("error writing data file: %w", err)
 	}
+
+	if d.saved == nil {
+		d.saved = make(map[types.ModuleName]uint64)
+	}
+	d.saved[m.Name] = sum
 
 	return nil
 }

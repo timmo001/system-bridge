@@ -2,8 +2,11 @@ package data_module
 
 import (
 	"testing"
+	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
+	cm "github.com/timmo001/system-bridge/data/module/cpu"
+	"github.com/timmo001/system-bridge/types"
 )
 
 func TestTimesPercentDelta(t *testing.T) {
@@ -39,5 +42,33 @@ func TestAddTimesSumsEveryState(t *testing.T) {
 	addTimes(&sum, cpu.TimesStat{User: 1})
 	if got := timesTotal(sum); got != 56 {
 		t.Fatalf("total = %v, want 56", got)
+	}
+}
+
+func TestBuildCPUTimesWithDPC(t *testing.T) {
+	stat := cpu.TimesStat{User: 1, System: 2, Idle: 3, Irq: 4}
+	dpcPct := 5.0
+	sample := cm.DPCSample{Window: 2 * time.Second}
+
+	times, pct := buildCPUTimes(stat, nil, &dpcPct, sample)
+	if *times.User != 1 || *times.System != 2 || *times.Idle != 3 || *times.Interrupt != 4 {
+		t.Fatalf("times = %+v", times)
+	}
+	if times.DPC == nil || *times.DPC != 0.1 {
+		t.Fatalf("dpc seconds = %v, want 0.1", times.DPC)
+	}
+	if pct == nil || pct.DPC == nil || *pct.DPC != 5 || pct.User != nil {
+		t.Fatalf("times percent = %+v", pct)
+	}
+}
+
+func TestBuildCPUTimesWithoutDPC(t *testing.T) {
+	user := 50.0
+	times, pct := buildCPUTimes(cpu.TimesStat{}, &types.CPUTimes{User: &user}, nil, cm.DPCSample{})
+	if times.DPC != nil {
+		t.Fatalf("expected no dpc seconds, got %v", *times.DPC)
+	}
+	if pct == nil || pct.User == nil || *pct.User != 50 || pct.DPC != nil {
+		t.Fatalf("times percent = %+v", pct)
 	}
 }

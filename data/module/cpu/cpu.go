@@ -2,6 +2,13 @@ package cpu
 
 import "time"
 
+// FreqBounds is the minimum and maximum clock of a logical CPU in MHz. Either
+// value is nil when the platform does not report it.
+type FreqBounds struct {
+	Min *float64
+	Max *float64
+}
+
 // DPCSample holds the deferred procedure call time Windows measured over one
 // sampling window. Other platforms return an empty sample.
 type DPCSample struct {

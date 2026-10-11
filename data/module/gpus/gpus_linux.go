@@ -397,9 +397,6 @@ var lspciNameCache = utils.TTLValue[map[string]string]{TTL: lspciNameTTL, FailTT
 // `lspci -D`. Both full ("0000:00:02.0") and short ("00:02.0") forms are keyed.
 func lspciNameMap() map[string]string {
 	names, _ := lspciNameCache.Get(readLspciNames)
-	if names == nil {
-		return map[string]string{}
-	}
 	return names
 }
 
