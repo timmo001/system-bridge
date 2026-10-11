@@ -15,12 +15,26 @@
       "skillPath": "code-review/SKILL.md",
       "computedHash": "bc6af04ecee3f4a40dcacc77a8c6cd3046f3982159b9469eae49f30bb14d02cd"
     },
+    "effect": {
+      "source": "kitlangton/skills",
+      "ref": "a1537921969c7cfc4d985befaba7752313da0fce",
+      "sourceType": "github",
+      "skillPath": "skills/effect/SKILL.md",
+      "computedHash": "d88417dca5f22fcc80b03ebd4096dfa6113a50cc6bb574bf53f75248cd321e35"
+    },
     "effect-principles": {
       "source": "timmo001/skills",
       "ref": "67e578d01d302c86b90dc7d30d3e06f255a664a0",
       "sourceType": "github",
       "skillPath": "effect-principles/SKILL.md",
       "computedHash": "8d56fdf5c00665759b049647ea356b387c628eef9807ffdf6165b0413ac3ab31"
+    },
+    "effect-service-design": {
+      "source": "dmmulroy/skills",
+      "ref": "8603380821fee6a77c82639f364ce8fe4f5a92be",
+      "sourceType": "github",
+      "skillPath": "effect-service-design/SKILL.md",
+      "computedHash": "307d3af97e0343c761d56c260310c75b7e754aec2e64c3dee8c0946570d310ee"
     },
     "skill-prefixes": {
       "source": "timmo001/skills",

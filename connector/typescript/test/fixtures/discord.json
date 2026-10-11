@@ -1,0 +1,14 @@
+{
+  "connected": false,
+  "authenticated": false,
+  "user": null,
+  "call": null,
+  "mute": null,
+  "deaf": null,
+  "input": null,
+  "output": null,
+  "mode": null,
+  "processing": null,
+  "qos": null,
+  "silence_warning": null
+}

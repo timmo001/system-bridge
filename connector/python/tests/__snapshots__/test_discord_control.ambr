@@ -1,0 +1,10 @@
+# serializer version: 1
+# name: test_discord_control
+  DiscordControl(
+    action=<DiscordAction.SET_INPUT_VOLUME: 'SET_INPUT_VOLUME'>,
+    channel_id=None,
+    device_id=None,
+    mode=None,
+    value=50.0,
+  )
+# ---

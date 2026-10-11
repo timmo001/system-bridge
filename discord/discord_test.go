@@ -30,35 +30,52 @@ func TestReadFrameRejectsOversizedLength(t *testing.T) {
 
 func TestControlArgs(t *testing.T) {
 	yes, no := true, false
-	vol := func(v float64) *float64 { return &v }
+	devices := &types.DiscordAudio{Devices: []types.DiscordDevice{{ID: "default"}, {ID: "MOMENTUM 4"}}}
+
+	num := func(v float64) ControlParams { return ControlParams{Value: &v} }
 
 	tests := []struct {
 		name    string
 		action  Action
-		value   *float64
+		params  ControlParams
 		state   types.DiscordData
-		want    map[string]any
+		want    string
 		wantErr error
 	}{
-		{name: "mute", action: ActionMute, want: map[string]any{"mute": true}},
-		{name: "toggle mute when unmuted", action: ActionToggleMute, state: types.DiscordData{Mute: &no}, want: map[string]any{"mute": true}},
-		{name: "toggle mute when deafened", action: ActionToggleMute, state: types.DiscordData{Mute: &no, Deaf: &yes}, want: map[string]any{"mute": false}},
-		{name: "toggle deafen", action: ActionToggleDeafen, state: types.DiscordData{Deaf: &yes}, want: map[string]any{"deaf": false}},
-		{name: "input volume", action: ActionSetInputVolume, value: vol(100), want: map[string]any{"input": map[string]any{"volume": 100.0}}},
-		{name: "output volume above 100", action: ActionSetOutputVolume, value: vol(150), want: map[string]any{"output": map[string]any{"volume": sliderToAmplitude(150)}}},
-		{name: "input volume out of range", action: ActionSetInputVolume, value: vol(150), wantErr: ErrInvalidValue},
+		{name: "mute", action: ActionMute, want: `{"mute":true}`},
+		{name: "unmute", action: ActionUnmute, want: `{"mute":false}`},
+		{name: "toggle mute when unmuted", action: ActionToggleMute, state: types.DiscordData{Mute: &no}, want: `{"mute":true}`},
+		{name: "toggle mute when deafened", action: ActionToggleMute, state: types.DiscordData{Mute: &no, Deaf: &yes}, want: `{"mute":false}`},
+		{name: "toggle deafen", action: ActionToggleDeafen, state: types.DiscordData{Deaf: &yes}, want: `{"deaf":false}`},
+		{name: "input volume", action: ActionSetInputVolume, params: num(100), want: `{"input":{"volume":100}}`},
+		{name: "input volume 0", action: ActionSetInputVolume, params: num(0), want: `{"input":{"volume":0}}`},
+		{name: "input volume out of range", action: ActionSetInputVolume, params: num(150), wantErr: ErrInvalidValue},
 		{name: "volume missing", action: ActionSetOutputVolume, wantErr: ErrInvalidValue},
+		{name: "input device", action: ActionSetInputDevice, params: ControlParams{DeviceID: "MOMENTUM 4"}, state: types.DiscordData{Input: devices}, want: `{"input":{"device_id":"MOMENTUM 4"}}`},
+		{name: "unknown output device", action: ActionSetOutputDevice, params: ControlParams{DeviceID: "Speakers"}, state: types.DiscordData{Output: devices}, wantErr: ErrInvalidValue},
+		{name: "device missing", action: ActionSetOutputDevice, wantErr: ErrInvalidValue},
+		{name: "voice mode", action: ActionSetVoiceMode, params: ControlParams{Mode: "PUSH_TO_TALK"}, want: `{"mode":{"type":"PUSH_TO_TALK"}}`},
+		{name: "unknown voice mode", action: ActionSetVoiceMode, params: ControlParams{Mode: "SHOUTING"}, wantErr: ErrInvalidValue},
+		{name: "voice threshold", action: ActionSetVoiceThreshold, params: num(-60), want: `{"mode":{"threshold":-60}}`},
+		{name: "voice threshold above 0", action: ActionSetVoiceThreshold, params: num(5), wantErr: ErrInvalidValue},
+		{name: "push to talk delay 0", action: ActionSetPushToTalkDelay, params: num(0), want: `{"mode":{"delay":0}}`},
+		{name: "toggle qos when unknown", action: ActionToggleQoS, want: `{"qos":true}`},
+		{name: "disable silence warning", action: ActionDisableSilenceWarn, want: `{"silence_warning":false}`},
+		{name: "toggle silence warning", action: ActionToggleSilenceWarn, state: types.DiscordData{SilenceWarning: &yes}, want: `{"silence_warning":false}`},
+		{name: "noise suppression is not controllable", action: "ENABLE_NOISE_SUPPRESSION", wantErr: ErrInvalidAction},
 		{name: "unknown action", action: "DANCE", wantErr: ErrInvalidAction},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := controlArgs(tt.action, tt.value, tt.state)
+			got, err := controlArgs(tt.action, tt.params, tt.state)
 			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			body, err := json.Marshal(got)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.want, string(body))
 		})
 	}
 }
@@ -125,20 +142,100 @@ func TestSessionAppliesVoiceUpdates(t *testing.T) {
 
 	require.NoError(t, writeFrame(server, opFrame, map[string]any{
 		"cmd": "DISPATCH", "evt": "VOICE_SETTINGS_UPDATE",
-		"data": map[string]any{"deaf": true, "output": map[string]any{"volume": 199.52623149688796}},
+		"data": map[string]any{
+			"deaf":   true,
+			"output": map[string]any{"volume": 199.52623149688796},
+			"input": map[string]any{
+				"device_id":         "mic",
+				"available_devices": []map[string]any{{"id": "mic", "name": "Microphone"}},
+			},
+			"mode":              map[string]any{"type": "PUSH_TO_TALK"},
+			"noise_suppression": true,
+		},
 	}))
 
 	select {
 	case d := <-updates:
 		require.NotNil(t, d.Deaf)
 		assert.True(t, *d.Deaf)
-		require.NotNil(t, d.OutputVolume)
-		assert.Equal(t, 200.0, *d.OutputVolume)
+		require.NotNil(t, d.Output)
+		require.NotNil(t, d.Output.Volume)
+		assert.Equal(t, 200.0, *d.Output.Volume)
+		assert.Equal(t, []types.DiscordDevice{}, d.Output.Devices)
+		require.NotNil(t, d.Input)
+		assert.Nil(t, d.Input.Volume)
+		require.NotNil(t, d.Input.DeviceID)
+		assert.Equal(t, "mic", *d.Input.DeviceID)
+		assert.Equal(t, []types.DiscordDevice{{ID: "mic", Name: "Microphone"}}, d.Input.Devices)
+		require.NotNil(t, d.Mode)
+		require.NotNil(t, d.Mode.Type)
+		assert.Equal(t, "PUSH_TO_TALK", *d.Mode.Type)
+		require.NotNil(t, d.Processing)
+		require.NotNil(t, d.Processing.NoiseSuppression)
+		assert.True(t, *d.Processing.NoiseSuppression)
+		assert.Nil(t, d.Processing.EchoCancellation)
 	case <-time.After(time.Second):
 		t.Fatal("no state update")
 	}
 }
 
+func TestChannelArgs(t *testing.T) {
+	tests := []struct {
+		name    string
+		action  Action
+		params  ControlParams
+		want    string
+		wantErr error
+	}{
+		{name: "join", action: ActionJoinVoiceChannel, params: ControlParams{ChannelID: "1"}, want: `{"channel_id":"1","force":true}`},
+		{name: "join without channel", action: ActionJoinVoiceChannel, wantErr: ErrInvalidValue},
+		{name: "leave", action: ActionLeaveVoiceChannel, want: `{"channel_id":null}`},
+		{name: "open text channel", action: ActionOpenTextChannel, params: ControlParams{ChannelID: "2"}, want: `{"channel_id":"2"}`},
+		{name: "open without channel", action: ActionOpenTextChannel, wantErr: ErrInvalidValue},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := channelArgs(tt.action, tt.params)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			body, err := json.Marshal(got)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.want, string(body))
+		})
+	}
+}
+
+func TestCallEventsOnlyApplyToMe(t *testing.T) {
+	updates := make(chan types.DiscordData, 10)
+	mu.Lock()
+	state = types.DiscordData{
+		User: &types.DiscordUser{ID: "me"},
+		Call: &types.DiscordCall{Me: &types.DiscordCallMember{}},
+	}
+	onUpdate = func(d types.DiscordData) { updates <- d }
+	mu.Unlock()
+	t.Cleanup(func() {
+		mu.Lock()
+		state, onUpdate = types.DiscordData{}, nil
+		mu.Unlock()
+	})
+
+	applySpeaking(json.RawMessage(`{"user_id":"someone"}`), true)
+	applyVoiceState(json.RawMessage(`{"user":{"id":"someone"},"voice_state":{"mute":true}}`))
+	assert.Empty(t, updates)
+
+	applySpeaking(json.RawMessage(`{"user_id":"me"}`), true)
+	applyVoiceState(json.RawMessage(`{"user":{"id":"me"},"nick":"Me","voice_state":{"mute":true}}`))
+	require.Len(t, updates, 2)
+	<-updates
+	d := <-updates
+	require.NotNil(t, d.Call.Me)
+	assert.Equal(t, types.DiscordCallMember{Nick: new("Me"), ServerMute: true, Speaking: true}, *d.Call.Me)
+}
+
 func TestControlWithoutConnection(t *testing.T) {
-	assert.ErrorIs(t, Control(t.Context(), ActionMute, nil), ErrNotConnected)
+	assert.ErrorIs(t, Control(t.Context(), ActionMute, ControlParams{}), ErrNotConnected)
 }

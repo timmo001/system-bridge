@@ -1,0 +1,52 @@
+# serializer version: 1
+# name: test_media_files
+  MediaFiles(
+    files=list([
+      MediaFile(
+        content_type='text/plain',
+        extension='.txt',
+        is_directory=False,
+        mod_time=100.0,
+        name='file1',
+        path='/full/path/to/file1',
+        permissions='-rw-r--r--',
+        size=100,
+      ),
+    ]),
+    path='path/to/file',
+  )
+# ---
+# name: test_media_files_dict
+  dict({
+    'files': list([
+      dict({
+        'content_type': 'text/plain',
+        'extension': '.txt',
+        'is_directory': False,
+        'mod_time': 100.0,
+        'name': 'file1',
+        'path': '/full/path/to/file1',
+        'permissions': '-rw-r--r--',
+        'size': 100,
+      }),
+    ]),
+    'path': 'path/to/file',
+  })
+# ---
+# name: test_media_files_dict[media-files-dict-converted]
+  MediaFiles(
+    files=list([
+      MediaFile(
+        content_type='text/plain',
+        extension='.txt',
+        is_directory=False,
+        mod_time=100.0,
+        name='file1',
+        path='/full/path/to/file1',
+        permissions='-rw-r--r--',
+        size=100,
+      ),
+    ]),
+    path='path/to/file',
+  )
+# ---

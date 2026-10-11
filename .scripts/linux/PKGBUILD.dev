@@ -17,10 +17,11 @@ arch=('x86_64')
 url="https://github.com/timmo001/system-bridge"
 license=('Apache-2.0')
 depends=('libx11' 'libxtst' 'libxkbcommon' 'libxkbcommon-x11')
-optdepends=('pciutils: GPU model identification via lspci'
-            'zenity: tray and desktop confirmation prompts'
-            'lm_sensors: broader temperature and fan sensor coverage'
-            'nvidia-utils: NVIDIA GPU metrics via nvidia-smi')
+optdepends=('lm_sensors: broader temperature and fan sensor coverage'
+            'nvidia-utils: NVIDIA GPU metrics via nvidia-smi'
+            'pciutils: GPU model identification via lspci'
+            'pipewire: name apps using the microphone or camera via pw-dump'
+            'zenity: tray and desktop confirmation prompts')
 provides=('system-bridge')
 options=('!strip')
 
@@ -48,8 +49,8 @@ build() {
   export CGO_ENABLED=1
   mise trust -a
   mise install
-  mise exec -C web-client -- bun install --frozen-lockfile
-  mise run build:web-client
+  mise exec -C client/web -- bun install --frozen-lockfile
+  mise run build:client:web
   mise exec -- go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${pkgver}'" -o "system-bridge" .
   ./system-bridge completions bash >system-bridge.bash
   ./system-bridge completions zsh >_system-bridge

@@ -30,7 +30,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-//go:embed all:web-client/dist/*
+//go:embed all:client/web/dist/*
 var webClientContent embed.FS
 
 // Global notifier for the application

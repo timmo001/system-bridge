@@ -7,11 +7,11 @@ description: Known System Bridge build and runtime failures and their fixes, plu
 
 ## Build
 
-**Missing `web-client/dist/index.html`:**
+**Missing `client/web/dist/index.html`:**
 
 ```bash
-mise run clean:web-client
-mise run build:web-client
+mise run clean:client:web
+mise run build:client:web
 ```
 
 **Go embed stale after web-client changes:** the `//go:embed` directive bundles files at compile time, so rebuild the binary:
@@ -32,7 +32,7 @@ go mod tidy
 **TypeScript errors after a dependency update:**
 
 ```bash
-cd web-client
+cd client/web
 rm -rf node_modules bun.lock
 bun install
 bun run build

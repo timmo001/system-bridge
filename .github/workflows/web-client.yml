@@ -7,14 +7,22 @@ on:
     branches:
       - dev
     paths:
-      - "web-client/**"
+      - "client/web/**"
+      - "connector/typescript/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
       - ".github/workflows/web-client.yml"
   pull_request:
     types:
       - opened
       - synchronize
     paths:
-      - "web-client/**"
+      - "client/web/**"
+      - "connector/typescript/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
       - ".github/workflows/web-client.yml"
   workflow_dispatch: {}
 
@@ -33,16 +41,16 @@ jobs:
       - name: Setup bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: "1.4.2"
+          bun-version: "1.4.3"
 
       - name: Install dependencies
-        working-directory: web-client
+        working-directory: client/web
         run: bun install --frozen-lockfile
 
       - name: Lint, typecheck, format check and build web client
-        working-directory: web-client
+        working-directory: client/web
         run: bun run --parallel --no-exit-on-error lint typecheck format:check build
 
       - name: Validate Cloudflare Workers upload
-        working-directory: web-client
+        working-directory: client/web
         run: bun run deploy --dry-run

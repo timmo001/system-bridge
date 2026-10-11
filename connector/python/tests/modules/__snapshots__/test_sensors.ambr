@@ -1,0 +1,349 @@
+# serializer version: 1
+# name: test_sensors
+  Sensors(
+    fans=list([
+      Fan(
+        key='key',
+        label='label',
+        name='name',
+        speed_max=2000.0,
+        speed_min=0.0,
+        speed_rpm=1234.0,
+      ),
+    ]),
+    temperatures=list([
+      Temperature(
+        critical=100.0,
+        high=80.0,
+        key='cpu',
+        temperature=45.5,
+      ),
+      Temperature(
+        critical=95.0,
+        high=85.0,
+        key='gpu',
+        temperature=65.0,
+      ),
+    ]),
+    windows_sensors=SensorsWindows(
+      hardware=list([
+        SensorsWindowsHardware(
+          id='id',
+          name='name',
+          sensors=list([
+            SensorsWindowsSensor(
+              id='id',
+              name='name',
+              type='type',
+              value=12.3,
+            ),
+          ]),
+          subhardware=list([
+            SensorsWindowsHardware(
+              id='id',
+              name='name',
+              sensors=list([
+                SensorsWindowsSensor(
+                  id='id',
+                  name='name',
+                  type='type',
+                  value=12.3,
+                ),
+              ]),
+              subhardware=list([
+              ]),
+              type='type',
+            ),
+          ]),
+          type='type',
+        ),
+      ]),
+      nvidia=SensorsNVIDIA(
+        chipset=SensorsNVIDIAChipset(
+          flags='flags',
+          id=1234,
+          name='name',
+          vendor_id=1234,
+          vendor_name='Vendor Name',
+        ),
+        displays=list([
+          SensorsNVIDIADisplay(
+            active=True,
+            aspect_horizontal=16,
+            aspect_vertical=9,
+            available=True,
+            brightness_current=90,
+            brightness_default=80,
+            brightness_max=100,
+            brightness_min=0,
+            color_depth='Color Depth',
+            connected=True,
+            connection_type='Connection Type',
+            dynamic=True,
+            id=1234,
+            name='name',
+            pixel_clock=60,
+            refresh_rate=144,
+            resolution_horizontal=1920,
+            resolution_vertical=1080,
+          ),
+        ]),
+        driver=SensorsNVIDIADriver(
+          branch_version='Branch Version',
+          interface_version='Interface Version',
+          version=1234,
+        ),
+        gpus=list([
+          SensorsNVIDIAGPU(
+            bios_oem_revision=1234,
+            bios_revision=1234,
+            bios_version='bios_version',
+            current_fan_speed_level=1234,
+            current_fan_speed_rpm=1234,
+            driver_model=1234,
+            id=1234,
+            memory_available=1234,
+            memory_capacity=1234,
+            memory_maker='Memory Maker',
+            name='name',
+            serial='abc123',
+            system_type='System Type',
+            type='Type',
+          ),
+        ]),
+      ),
+    ),
+  )
+# ---
+# name: test_sensors_dict
+  dict({
+    'fans': list([
+      dict({
+        'key': 'key',
+        'label': 'label',
+        'name': 'name',
+        'speed_max': 2000.0,
+        'speed_min': 0.0,
+        'speed_rpm': 1234.0,
+      }),
+    ]),
+    'temperatures': list([
+      dict({
+        'critical': 100.0,
+        'high': 80.0,
+        'key': 'cpu',
+        'temperature': 45.5,
+      }),
+      dict({
+        'critical': 95.0,
+        'high': 85.0,
+        'key': 'gpu',
+        'temperature': 65.0,
+      }),
+    ]),
+    'windows_sensors': dict({
+      'hardware': list([
+        dict({
+          'id': 'id',
+          'name': 'name',
+          'sensors': list([
+            dict({
+              'id': 'id',
+              'name': 'name',
+              'type': 'type',
+              'value': 12.3,
+            }),
+          ]),
+          'subhardware': list([
+            dict({
+              'id': 'id',
+              'name': 'name',
+              'sensors': list([
+                dict({
+                  'id': 'id',
+                  'name': 'name',
+                  'type': 'type',
+                  'value': 12.3,
+                }),
+              ]),
+              'subhardware': list([
+              ]),
+              'type': 'type',
+            }),
+          ]),
+          'type': 'type',
+        }),
+      ]),
+      'nvidia': dict({
+        'chipset': dict({
+          'flags': 'flags',
+          'id': 1234,
+          'name': 'name',
+          'vendor_id': 1234,
+          'vendor_name': 'Vendor Name',
+        }),
+        'displays': list([
+          dict({
+            'active': True,
+            'aspect_horizontal': 16,
+            'aspect_vertical': 9,
+            'available': True,
+            'brightness_current': 90,
+            'brightness_default': 80,
+            'brightness_max': 100,
+            'brightness_min': 0,
+            'color_depth': 'Color Depth',
+            'connected': True,
+            'connection_type': 'Connection Type',
+            'dynamic': True,
+            'id': 1234,
+            'name': 'name',
+            'pixel_clock': 60,
+            'refresh_rate': 144,
+            'resolution_horizontal': 1920,
+            'resolution_vertical': 1080,
+          }),
+        ]),
+        'driver': dict({
+          'branch_version': 'Branch Version',
+          'interface_version': 'Interface Version',
+          'version': 1234,
+        }),
+        'gpus': list([
+          dict({
+            'bios_oem_revision': 1234,
+            'bios_revision': 1234,
+            'bios_version': 'bios_version',
+            'current_fan_speed_level': 1234,
+            'current_fan_speed_rpm': 1234,
+            'driver_model': 1234,
+            'id': 1234,
+            'memory_available': 1234,
+            'memory_capacity': 1234,
+            'memory_maker': 'Memory Maker',
+            'name': 'name',
+            'serial': 'abc123',
+            'system_type': 'System Type',
+            'type': 'Type',
+          }),
+        ]),
+      }),
+    }),
+  })
+# ---
+# name: test_sensors_dict[sensors-dict-converted]
+  Sensors(
+    fans=list([
+      Fan(
+        key='key',
+        label='label',
+        name='name',
+        speed_max=2000.0,
+        speed_min=0.0,
+        speed_rpm=1234.0,
+      ),
+    ]),
+    temperatures=list([
+      Temperature(
+        critical=100.0,
+        high=80.0,
+        key='cpu',
+        temperature=45.5,
+      ),
+      Temperature(
+        critical=95.0,
+        high=85.0,
+        key='gpu',
+        temperature=65.0,
+      ),
+    ]),
+    windows_sensors=SensorsWindows(
+      hardware=list([
+        SensorsWindowsHardware(
+          id='id',
+          name='name',
+          sensors=list([
+            SensorsWindowsSensor(
+              id='id',
+              name='name',
+              type='type',
+              value=12.3,
+            ),
+          ]),
+          subhardware=list([
+            SensorsWindowsHardware(
+              id='id',
+              name='name',
+              sensors=list([
+                SensorsWindowsSensor(
+                  id='id',
+                  name='name',
+                  type='type',
+                  value=12.3,
+                ),
+              ]),
+              subhardware=list([
+              ]),
+              type='type',
+            ),
+          ]),
+          type='type',
+        ),
+      ]),
+      nvidia=SensorsNVIDIA(
+        chipset=SensorsNVIDIAChipset(
+          flags='flags',
+          id=1234,
+          name='name',
+          vendor_id=1234,
+          vendor_name='Vendor Name',
+        ),
+        displays=list([
+          SensorsNVIDIADisplay(
+            active=True,
+            aspect_horizontal=16,
+            aspect_vertical=9,
+            available=True,
+            brightness_current=90,
+            brightness_default=80,
+            brightness_max=100,
+            brightness_min=0,
+            color_depth='Color Depth',
+            connected=True,
+            connection_type='Connection Type',
+            dynamic=True,
+            id=1234,
+            name='name',
+            pixel_clock=60,
+            refresh_rate=144,
+            resolution_horizontal=1920,
+            resolution_vertical=1080,
+          ),
+        ]),
+        driver=SensorsNVIDIADriver(
+          branch_version='Branch Version',
+          interface_version='Interface Version',
+          version=1234,
+        ),
+        gpus=list([
+          SensorsNVIDIAGPU(
+            bios_oem_revision=1234,
+            bios_revision=1234,
+            bios_version='bios_version',
+            current_fan_speed_level=1234,
+            current_fan_speed_rpm=1234,
+            driver_model=1234,
+            id=1234,
+            memory_available=1234,
+            memory_capacity=1234,
+            memory_maker='Memory Maker',
+            name='name',
+            serial='abc123',
+            system_type='System Type',
+            type='Type',
+          ),
+        ]),
+      ),
+    ),
+  )
+# ---

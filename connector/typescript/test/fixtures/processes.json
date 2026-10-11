@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "name": "systemd",
+    "cpu_usage": 0.009430181830256295,
+    "created": 1791305311.08,
+    "memory_usage": 0.00048073273152112963,
+    "path": null,
+    "status": "sleep",
+    "username": "root",
+    "working_directory": null
+  },
+  {
+    "id": 2,
+    "name": "kthreadd",
+    "cpu_usage": 0.00033145868906340255,
+    "created": 1791305311.08,
+    "memory_usage": 0,
+    "path": null,
+    "status": "sleep",
+    "username": "root",
+    "working_directory": null
+  }
+]

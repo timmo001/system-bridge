@@ -1,0 +1,93 @@
+# serializer version: 1
+# name: test_settings
+  Settings(
+    autostart=False,
+    commands=SettingsCommands(
+      allowlist=list([
+      ]),
+    ),
+    disks=SettingsDisks(
+      allowedSecondaryMountPoints=list([
+      ]),
+    ),
+    hotkeys=list([
+    ]),
+    logLevel='WARN',
+    media=SettingsMedia(
+      directories=list([
+      ]),
+    ),
+    systemTray=True,
+  )
+# ---
+# name: test_settings_command_definition
+  SettingsCommandDefinition(
+    arguments=list([
+      'arg1',
+      'arg2',
+    ]),
+    command='/usr/bin/test',
+    id='test-command-id',
+    name='Test Command',
+    workingDir='/tmp',
+  )
+# ---
+# name: test_settings_command_definition_defaults
+  SettingsCommandDefinition(
+    arguments=list([
+    ]),
+    command='/usr/bin/test',
+    id='test-command-id',
+    name='Test Command',
+    workingDir='',
+  )
+# ---
+# name: test_settings_commands
+  SettingsCommands(
+    allowlist=list([
+      SettingsCommandDefinition(
+        arguments=list([
+        ]),
+        command='/usr/bin/test',
+        id='test-command-id',
+        name='Test Command',
+        workingDir='',
+      ),
+    ]),
+  )
+# ---
+# name: test_settings_commands_empty
+  SettingsCommands(
+    allowlist=list([
+    ]),
+  )
+# ---
+# name: test_settings_with_commands
+  Settings(
+    autostart=False,
+    commands=SettingsCommands(
+      allowlist=list([
+        SettingsCommandDefinition(
+          arguments=list([
+          ]),
+          command='/usr/bin/test',
+          id='test-command-id',
+          name='Test Command',
+          workingDir='',
+        ),
+      ]),
+    ),
+    disks=SettingsDisks(
+      allowedSecondaryMountPoints=list([
+      ]),
+    ),
+    hotkeys=list([
+    ]),
+    logLevel='WARN',
+    media=SettingsMedia(
+      directories=list([
+      ]),
+    ),
+    systemTray=True,
+  )
+# ---

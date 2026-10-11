@@ -1,0 +1,15 @@
+[
+  {
+    "id": "eDP-1",
+    "name": "eDP-1",
+    "resolution_horizontal": 2880,
+    "resolution_vertical": 1800,
+    "x": 0,
+    "y": 0,
+    "width": 300,
+    "height": 190,
+    "is_primary": false,
+    "pixel_clock": 934,
+    "refresh_rate": 119.9621053323798
+  }
+]

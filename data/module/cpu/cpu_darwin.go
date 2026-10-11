@@ -3,30 +3,42 @@
 package cpu
 
 import (
-	"bytes"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
-func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
-	// Best-effort via sysctl: hw.cpufrequency_max (Hz) and hw.cpufrequency_min (Hz) if present
-	readSysctlFloat := func(name string) *float64 {
-		cmd := exec.Command("sysctl", "-n", name)
-		var out bytes.Buffer
-		cmd.Stdout = &out
-		if err := cmd.Run(); err != nil {
+const (
+	// powermetricsTTL lets one powermetrics run serve the power, voltage and
+	// temperature readers of the same update.
+	powermetricsTTL = 5 * time.Second
+	// unavailableTTL is how long to wait before retrying a tool that failed,
+	// for example powermetrics without root.
+	unavailableTTL = 10 * time.Minute
+)
+
+var (
+	powermetricsCache = utils.TTLValue[string]{TTL: powermetricsTTL, FailTTL: unavailableTTL}
+
+	cpuPowerRegex    = regexp.MustCompile(`CPU Power:\s*([0-9]+\.?[0-9]*)\s*(m?)W`)
+	cpuVcoreRegex    = regexp.MustCompile(`(?i)CPU\s*Vcore:\s*([0-9]+\.?[0-9]*)\s*V`)
+	anyVoltageRegex  = regexp.MustCompile(`(?i)voltage[^\n]*?([0-9]+\.?[0-9]*)\s*V`)
+	dieTemperatureRe = regexp.MustCompile(`(?i)CPU\s+die\s+temperature:\s*([0-9]+\.?[0-9]*)\s*C`)
+)
+
+// FreqBoundsPerCPU reads hw.cpufrequency_min and hw.cpufrequency_max through
+// sysctl. They are system-wide, so every CPU gets the same bounds.
+func FreqBoundsPerCPU(count int) []FreqBounds {
+	readSysctlMHz := func(name string) *float64 {
+		out, ok := utils.RunHidden("sysctl", "-n", name)
+		if !ok {
 			return nil
 		}
-		s := strings.TrimSpace(out.String())
-		if s == "" {
-			return nil
-		}
-		v, err := strconv.ParseFloat(s, 64)
+		v, err := strconv.ParseFloat(strings.TrimSpace(out), 64)
 		if err != nil {
 			return nil
 		}
@@ -34,9 +46,10 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 		mhz := v / 1_000_000.0
 		return &mhz
 	}
-	max := readSysctlFloat("hw.cpufrequency_max")
-	min := readSysctlFloat("hw.cpufrequency_min")
-	return min, max
+	return repeatBounds(count, FreqBounds{
+		Min: readSysctlMHz("hw.cpufrequency_min"),
+		Max: readSysctlMHz("hw.cpufrequency_max"),
+	})
 }
 
 func ReadCPUStats() *types.CPUStats {
@@ -44,49 +57,54 @@ func ReadCPUStats() *types.CPUStats {
 	return nil
 }
 
-// Best-effort: use `powermetrics` to estimate CPU package power (may require elevated privileges).
+// powermetricsOutput runs powermetrics once for the CPU power and SMC
+// samplers. It needs elevated privileges, so a failure is remembered.
+func powermetricsOutput() (string, bool) {
+	return powermetricsCache.Get(func() (string, bool) {
+		out, ok := utils.RunHidden("powermetrics", "-n", "1", "-i", "100", "--samplers", "cpu_power,smc")
+		if !ok || strings.TrimSpace(out) == "" {
+			return "", false
+		}
+		return out, true
+	})
+}
+
+// ComputeCPUPower reads the CPU package power from powermetrics in Watts.
 func ComputeCPUPower(sample time.Duration) *float64 {
-	cmd := exec.Command("powermetrics", "-n", "1", "-i", "100")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	_ = cmd.Run()
-	s := out.String()
-	if s == "" {
+	s, ok := powermetricsOutput()
+	if !ok {
 		return nil
 	}
-	re := regexp.MustCompile(`CPU Power:\s*([0-9]+\.?[0-9]*)\s*W`)
-	m := re.FindStringSubmatch(s)
-	if len(m) != 2 {
+	m := cpuPowerRegex.FindStringSubmatch(s)
+	if len(m) != 3 {
 		return nil
 	}
 	v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64)
 	if err != nil {
 		return nil
 	}
+	// Apple silicon reports milliwatts
+	if m[2] == "m" {
+		v /= 1000.0
+	}
 	return &v
 }
 
-// ReadCPUVcoreVoltage attempts to read CPU core voltage (Vcore) on macOS
-// by parsing powermetrics SMC sampler output if available.
+// ReadCPUVcoreVoltage reads the CPU core voltage from the powermetrics SMC
+// sampler when it is reported.
 func ReadCPUVcoreVoltage() *float64 {
-	cmd := exec.Command("powermetrics", "-n", "1", "-i", "100", "--samplers", "smc")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	_ = cmd.Run()
-	s := out.String()
-	if s == "" {
+	s, ok := powermetricsOutput()
+	if !ok {
 		return nil
 	}
 	// Prefer explicit CPU Vcore
-	reVcore := regexp.MustCompile(`(?i)CPU\s*Vcore:\s*([0-9]+\.?[0-9]*)\s*V`)
-	if m := reVcore.FindStringSubmatch(s); len(m) == 2 {
+	if m := cpuVcoreRegex.FindStringSubmatch(s); len(m) == 2 {
 		if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
 			return &v
 		}
 	}
 	// Fallback: first Voltage value in SMC section
-	reAny := regexp.MustCompile(`(?i)voltage[^\n]*?([0-9]+\.?[0-9]*)\s*V`)
-	if m := reAny.FindStringSubmatch(s); len(m) == 2 {
+	if m := anyVoltageRegex.FindStringSubmatch(s); len(m) == 2 {
 		if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
 			return &v
 		}
@@ -94,25 +112,18 @@ func ReadCPUVcoreVoltage() *float64 {
 	return nil
 }
 
-// GetDPCPercentages not supported on macOS; return nil best-effort.
-func GetDPCPercentages(percpu bool) []float64 { return nil }
+// SampleDPC is Windows-only; there is no DPC accounting here.
+func SampleDPC() DPCSample { return DPCSample{} }
 
-// GetDPCTimeSeconds not supported on macOS; return nil.
-func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
-
-// ReadCPUTemperature attempts to read CPU temperature via powermetrics SMC sampler
+// ReadCPUTemperature reads the CPU die temperature from the powermetrics
+// SMC sampler.
 func ReadCPUTemperature() *float64 {
-	cmd := exec.Command("powermetrics", "-n", "1", "-i", "100", "--samplers", "smc")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	_ = cmd.Run()
-	s := out.String()
-	if s == "" {
+	s, ok := powermetricsOutput()
+	if !ok {
 		return nil
 	}
-	// Example patterns: "CPU die temperature: 65.25 C"
-	re := regexp.MustCompile(`(?i)CPU\s+die\s+temperature:\s*([0-9]+\.?[0-9]*)\s*C`)
-	if m := re.FindStringSubmatch(s); len(m) == 2 {
+	// Example: "CPU die temperature: 65.25 C"
+	if m := dieTemperatureRe.FindStringSubmatch(s); len(m) == 2 {
 		if v, err := strconv.ParseFloat(strings.TrimSpace(m[1]), 64); err == nil {
 			return &v
 		}

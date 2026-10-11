@@ -22,16 +22,18 @@ mise tasks
 
 - **Backend**: Go application (HTTP/WebSocket APIs)
 - **MCP Server**: Model Context Protocol server
-- **Web Client**: Lit + Vite (embedded in Go binary at `web-client/`)
+- **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`)
 - **CLI**: Command-line interface
 - **Docs**: Astro + Starlight site at `docs/` (deployed separately)
 - **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
+- **Python connector**: `systembridgeconnector` at `connector/python/`, used by the Home Assistant integration. Published to PyPI with each stable release, using the release tag as its version
+- **TypeScript connector**: `@timmo001/effect-system-bridge` at `connector/typescript/`, an Effect v4 connector used by the web client. Published to npm and JSR with each stable release, using the release tag as its version
 
 ## Key Conventions
 
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
-- **Package manager**: bun for all JavaScript/TypeScript (web client, docs)
-- **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated
+- **Package manager**: bun for all JavaScript/TypeScript. `client/web`, `connector/typescript` and `docs` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
+- **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 
 ## Background Dev Servers
@@ -54,8 +56,8 @@ mise tasks
 ## Web Client
 
 - Uses the `~/` path alias and the `UIElement` mixin from `~/mixins`
-- Zod provides runtime validation and type inference
-- Checks: `cd web-client && bun run lint`, `bun run typecheck`, `bun run format:check`
+- Data comes from the `@timmo001/effect-system-bridge` connector, held in `effect/reactivity` Atoms (`src/lib/atoms.ts`) and read through `AtomController`; Effect Schema handles validation
+- Checks: `cd client/web && bun run lint`, `bun run typecheck`, `bun run format:check`
 
 ## Packaging
 
@@ -87,5 +89,8 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-go-backend` - Go backend patterns: error wrapping, graceful degradation, slog, context, nil safety
 - `system-bridge-testing-workflow` - Go tests, web-client checks, Chrome DevTools MCP, schema verification, act
 - `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
+- `system-bridge-connector-python` - Python connector tasks, code style and release versioning
+- `system-bridge-connector-typescript` - TypeScript connector layout, generated schemas, tasks and release versioning
+- `system-bridge-release` - version, publish and sense-check a release (assets, PyPI, Arch, AUR)
 - `system-bridge-docs-page-workflow` - add or restructure Starlight docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page

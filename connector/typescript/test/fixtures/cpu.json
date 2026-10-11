@@ -1,0 +1,88 @@
+{
+  "count": 16,
+  "name": "Intel(R) Core(TM) Ultra X7 358H",
+  "vendor": "GenuineIntel",
+  "family": "6",
+  "frequency": {
+    "current": 4800,
+    "min": 400,
+    "max": 4800
+  },
+  "load_average": 9.69,
+  "per_cpu": [
+    {
+      "id": 0,
+      "frequency": {
+        "current": 4800,
+        "min": 400,
+        "max": 4800
+      },
+      "power": null,
+      "times": {
+        "user": 20494.24,
+        "system": 9472.46,
+        "idle": 103132.26,
+        "interrupt": 854.04,
+        "dpc": null
+      },
+      "times_percent": {
+        "user": 0,
+        "system": 4.76190476153354,
+        "idle": 90.47619046827107,
+        "interrupt": 0,
+        "dpc": null
+      },
+      "usage": 20.87280108258482,
+      "voltage": null
+    },
+    {
+      "id": 1,
+      "frequency": {
+        "current": 4700,
+        "min": 400,
+        "max": 4700
+      },
+      "power": null,
+      "times": {
+        "user": 17594.04,
+        "system": 5187.37,
+        "idle": 109749.85,
+        "interrupt": 2729.94,
+        "dpc": null
+      },
+      "times_percent": {
+        "user": 0,
+        "system": 0,
+        "idle": 100,
+        "interrupt": 0,
+        "dpc": null
+      },
+      "usage": 17.637187447556663,
+      "voltage": null
+    }
+  ],
+  "power": null,
+  "stats": {
+    "ctx_switches": 4578711304,
+    "interrupts": 3394125738,
+    "soft_interrupts": 1148869145,
+    "syscalls": null
+  },
+  "temperature": 71,
+  "times": {
+    "user": 249747.49,
+    "system": 86047.21,
+    "idle": 1823162.5,
+    "interrupt": 14397.37,
+    "dpc": null
+  },
+  "times_percent": {
+    "user": 5.900621118562589,
+    "system": 1.5527950308201148,
+    "idle": 91.30434783174582,
+    "interrupt": 0.9316770186728379,
+    "dpc": null
+  },
+  "usage": 15.084751079689385,
+  "voltage": 13.082
+}

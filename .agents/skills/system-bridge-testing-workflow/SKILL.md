@@ -40,7 +40,7 @@ Mock external dependencies (filesystem, network, system calls). Keep tests fast;
 The web client has **no automated unit tests** (Playwright/web-test-runner were removed). Quality is enforced by lint, typecheck, and format:
 
 ```bash
-cd web-client
+cd client/web
 bun run lint        # Oxlint with type-aware, Lit and Web Components rules
 bun run typecheck   # tsc --noEmit
 bun run format:check
@@ -63,17 +63,17 @@ Open http://localhost:5173 in Chrome, then drive it with the MCP tools:
 - `list_console_messages` / `get_console_message msgid=...` to catch errors.
 - `list_network_requests` / `get_network_request reqid=...` for WebSocket traffic.
 
-Always check the console for Zod validation errors after navigating the module tabs (Battery, CPU, Disks, ...).
+Always check the console for schema decode errors after navigating the module tabs (Battery, CPU, Disks, ...).
 
 ## Verifying Schema Changes
 
 After changing a Go struct in `types/`:
 
-1. `mise run generate:schemas` to regenerate the Zod schemas.
+1. `mise run generate:schemas` to regenerate the connector's Effect schemas.
 2. `mise run run` and open the relevant page.
 3. Confirm no console errors, data validates, and new fields render.
 
-Never hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts` - it is generated.
+Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated.
 
 ## Running GitHub Workflows Locally
 
@@ -90,6 +90,6 @@ Docker commands under `act` need sudo; pass secrets with `-s GITHUB_TOKEN=...`.
 
 ```bash
 mise run test
-cd web-client && bun run lint && bun run typecheck
+cd client/web && bun run lint && bun run typecheck
 go run . client data run --module cpu --pretty   # exercise a data module
 ```

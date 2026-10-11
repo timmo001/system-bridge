@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-/bun.lock
 
 # Builds
 *.exe
@@ -14,6 +13,7 @@ system-bridge.rc
 system-bridge.syso
 
 !system-bridge/
+!.agents/skills/system-bridge-*/
 
 # Legacy
 .legacy/
@@ -23,7 +23,8 @@ system-bridge.syso
 .secrets
 
 # Claude
-.claude
+.claude/*
+!.claude/skills
 
 # OpenCode
 .opencode

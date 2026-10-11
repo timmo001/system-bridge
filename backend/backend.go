@@ -152,7 +152,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
 
 	// Set up SPA file server (must be last to avoid catching API routes)
-	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
+	subFS, err := fs.Sub(b.webClientContent, "client/web/dist")
 	if err != nil {
 		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
 	} else {

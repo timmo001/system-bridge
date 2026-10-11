@@ -32,16 +32,26 @@ Available actions:
 
 ## Discord control
 
-Send the `DISCORD_CONTROL` event with an `action` to change your Discord voice settings. Discord must be [set up](/running/#discord) first.
+Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, or change your Discord voice settings. Discord must be [set up](/running/#discord) first.
 
 Available actions:
 
+- `JOIN_VOICE_CHANNEL`: set `channel_id` to a voice channel's ID. If you're already in a voice channel, this moves you.
+- `LEAVE_VOICE_CHANNEL`
+- `OPEN_TEXT_CHANNEL`: set `channel_id` to a text channel's ID to show it in Discord. Discord refuses forum channels.
 - `MUTE`, `UNMUTE`, `TOGGLE_MUTE`
 - `DEAFEN`, `UNDEAFEN`, `TOGGLE_DEAFEN`
 - `SET_INPUT_VOLUME`: set `value` to 0-100.
+- `SET_INPUT_DEVICE`: set `device_id` to a device `id` from `input.devices` in the [`discord`](/api/data/#discord) data.
 - `SET_OUTPUT_VOLUME`: set `value` to 0-200.
+- `SET_OUTPUT_DEVICE`: set `device_id` to a device `id` from `output.devices`.
+- `SET_VOICE_MODE`: set `mode` to `VOICE_ACTIVITY` or `PUSH_TO_TALK`.
+- `SET_VOICE_THRESHOLD`: set `value` to the voice activity sensitivity, -100 to 0 dB.
+- `SET_PUSH_TO_TALK_DELAY`: set `value` to the push to talk release delay, 0-2000 milliseconds.
+- `ENABLE_QOS`, `DISABLE_QOS`, `TOGGLE_QOS`
+- `ENABLE_SILENCE_WARNING`, `DISABLE_SILENCE_WARNING`, `TOGGLE_SILENCE_WARNING`
 
-The volume values are the percentages that Discord's sliders show.
+The volume values are the percentages that Discord's sliders show. In testing, Discord ignored changes to automatic sensitivity, noise suppression, echo cancellation and automatic gain control made over RPC, so those settings are only available as data.
 
 ```json title="Request"
 {
