@@ -38,10 +38,10 @@
     },
     "skill-prefixes": {
       "source": "timmo001/skills",
-      "ref": "97143e4b7a29e9bae2f3d089299ebe2ca221b2e7",
+      "ref": "ffd3e6756336784993e1cf0af52d05dfcf76a27d",
       "sourceType": "github",
       "skillPath": "skill-prefixes/SKILL.md",
-      "computedHash": "8c4203c19621bc61824eb955e9584dbebc47774de8bad7b02653fb59c1e419c4"
+      "computedHash": "a54c4127997e3dc6207ac3dd167481b4ec1ff8eabdeb85ba71d6b938af56ed28"
     },
     "task-runners": {
       "source": "timmo001/skills",

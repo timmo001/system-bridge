@@ -33,7 +33,7 @@ such as `review`, `docs` or `release` will eventually clash.
   does not, and that is upstream's call. Do not rename them in place.
 - External imports keep their upstream name, since project-copy syncing relies
   on it. Rename an import only when it actually clashes with an existing skill,
-  and record the original under `sourceName` in `imports.json`.
+  and record the original under `sourceName` in `skills.yml`.
 
 ## Renaming
 
