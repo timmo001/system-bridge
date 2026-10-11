@@ -13,11 +13,20 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
+// FreqBoundsPerCPU reads each CPU's hardware clock limits from sysfs.
+func FreqBoundsPerCPU(count int) []FreqBounds {
+	out := make([]FreqBounds, count)
+	for i := range out {
+		out[i] = readFreqBounds(i)
+	}
+	return out
+}
+
+func readFreqBounds(cpuIndex int) FreqBounds {
 	base := "/sys/devices/system/cpu"
 	cpuDir := filepath.Join(base, fmt.Sprintf("cpu%d", cpuIndex), "cpufreq")
 	if _, err := os.Stat(cpuDir); err != nil {
-		return nil, nil
+		return FreqBounds{}
 	}
 	readMHz := func(path string) *float64 {
 		b, err := os.ReadFile(path)
@@ -35,9 +44,10 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 		mhz := v / 1000.0
 		return &mhz
 	}
-	minPath := filepath.Join(cpuDir, "cpuinfo_min_freq")
-	maxPath := filepath.Join(cpuDir, "cpuinfo_max_freq")
-	return readMHz(minPath), readMHz(maxPath)
+	return FreqBounds{
+		Min: readMHz(filepath.Join(cpuDir, "cpuinfo_min_freq")),
+		Max: readMHz(filepath.Join(cpuDir, "cpuinfo_max_freq")),
+	}
 }
 
 func ReadCPUStats() *types.CPUStats {
@@ -335,11 +345,8 @@ func readVoltageValue(path string) *float64 {
 	return &volts
 }
 
-// GetDPCPercentages not available on Linux; return nil best-effort.
-func GetDPCPercentages(percpu bool) []float64 { return nil }
-
-// GetDPCTimeSeconds not supported on Linux; return nil.
-func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
+// SampleDPC is Windows-only; there is no DPC accounting here.
+func SampleDPC() DPCSample { return DPCSample{} }
 
 // ReadCPUTemperature attempts to read CPU temperature on Linux via hwmon
 func ReadCPUTemperature() *float64 {

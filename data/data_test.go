@@ -448,3 +448,33 @@ func TestDataStore_TriggerModuleUpdate(t *testing.T) {
 		assert.Contains(t, err.Error(), "module name cannot be empty")
 	})
 }
+
+func TestDataStore_SaveModuleDataSkipsUnchangedData(t *testing.T) {
+	t.Setenv("SYSTEM_BRIDGE_CONFIG_DIR", t.TempDir())
+
+	ds := &DataStore{registry: make(map[types.ModuleName]types.Module)}
+	ds.Register(mockUpdater{name: "test-module"})
+
+	require.NoError(t, ds.SetModuleData("test-module", map[string]string{"key": "value"}))
+	file, err := moduleDataFile("test-module")
+	require.NoError(t, err)
+	first, err := os.Stat(file)
+	require.NoError(t, err)
+
+	// Same data: the file is left alone
+	time.Sleep(20 * time.Millisecond)
+	require.NoError(t, ds.SetModuleData("test-module", map[string]string{"key": "value"}))
+	second, err := os.Stat(file)
+	require.NoError(t, err)
+	assert.Equal(t, first.ModTime(), second.ModTime())
+
+	// Changed data: the file is rewritten and loads back
+	require.NoError(t, ds.SetModuleData("test-module", map[string]string{"key": "other"}))
+	third, err := os.Stat(file)
+	require.NoError(t, err)
+	assert.True(t, third.ModTime().After(first.ModTime()))
+
+	loaded := types.Module{Name: "test-module"}
+	require.NoError(t, ds.loadModuleData(&loaded))
+	assert.Equal(t, map[string]any{"key": "other"}, loaded.Data)
+}

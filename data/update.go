@@ -122,10 +122,13 @@ func (tp *UpdateTaskProcessor) worker() {
 			}
 
 			ctx, cancel := context.WithTimeout(tp.ctx, 20*time.Second)
-			defer cancel()
 
 			// Process task
 			data, err := task.Update(ctx)
+			// Release the timeout now rather than deferring it: a deferred
+			// cancel inside this loop would only run when the worker exits,
+			// holding a timer and the context for every update ever made.
+			cancel()
 			if err != nil {
 				moduleName := string(task.Name())
 				slog.Warn("Task processing error for module", "module", moduleName, "error", err)
