@@ -3,9 +3,9 @@
 package gpus
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -103,41 +103,36 @@ const (
 )
 
 type videoController struct {
-	ID          string  `json:"ID"`
-	Name        string  `json:"Name"`
-	MemoryTotal float64 `json:"MemoryTotal"`
+	ID          string
+	Name        string
+	MemoryTotal float64
 }
 
 var videoControllerCache = utils.TTLValue[[]videoController]{TTL: staticTTL, FailTTL: unavailableTTL}
 
 func readVideoControllers() ([]videoController, bool) {
-	output, ok := utils.RunHidden("powershell", "-NoProfile", "-Command", `
-		class GPU {
-			[string]$ID
-			[string]$Name
-			[int]$MemoryTotal
-		}
-
-		$gpus = [System.Collections.Generic.List[GPU]]::new()
-		Get-WmiObject Win32_VideoController | ForEach-Object {
-			$gpu = New-Object GPU -Property @{
-				ID = $_.DeviceID
-				Name = $_.Name
-				MemoryTotal = [math]::Round($_.AdapterRAM / 1GB, 2)
-			}
-			$gpus.Add($gpu)
-		}
-		ConvertTo-Json -Compress $gpus
-	`)
-	if !ok {
-		slog.Error("failed to get GPU info")
+	var adapters []struct {
+		DeviceID   string
+		Name       string
+		AdapterRAM *uint32
+	}
+	if err := utils.QueryWMI("", "SELECT DeviceID, Name, AdapterRAM FROM Win32_VideoController", &adapters); err != nil {
+		slog.Error("failed to get GPU info", "error", err)
 		return nil, false
 	}
 
-	var controllers []videoController
-	if err := json.Unmarshal([]byte(output), &controllers); err != nil {
-		slog.Error("failed to parse GPU info", "error", err)
-		return nil, false
+	controllers := make([]videoController, 0, len(adapters))
+	for _, adapter := range adapters {
+		var memoryTotal float64
+		if adapter.AdapterRAM != nil {
+			// Reported in whole GiB
+			memoryTotal = math.RoundToEven(float64(*adapter.AdapterRAM) / (1 << 30))
+		}
+		controllers = append(controllers, videoController{
+			ID:          adapter.DeviceID,
+			Name:        adapter.Name,
+			MemoryTotal: memoryTotal,
+		})
 	}
 	return controllers, true
 }
