@@ -3,28 +3,29 @@
 package cpu
 
 import (
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
+
+	"golang.org/x/sys/windows"
 
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 )
 
-// Every reading here shells out to typeperf, PowerShell or powercfg, and a
-// process start on Windows costs far more than the value it returns. So the
-// performance counters are read with one typeperf run per update, the
-// Win32_Processor query is shared by its readers, and a counter or WMI class
-// that is missing on this machine is not retried on every update.
+// Every reading here is taken in process, through PDH, WMI or the power
+// API. Starting typeperf, PowerShell or powercfg for them meant several new
+// processes a minute, which slowly grew Windows' kernel memory use. The
+// performance counters are read once per update, the Win32_Processor query
+// is shared by its readers, and a counter or WMI class that is missing on
+// this machine is not retried on every update.
 const (
-	// sharedTTL lets the readers of one update share a single command run
-	// without serving a later update stale values.
+	// sharedTTL lets the readers of one update share a single query without
+	// serving a later update stale values.
 	sharedTTL = 30 * time.Second
 	// unavailableTTL is how long to wait before retrying a source that failed.
 	unavailableTTL = 10 * time.Minute
-	// typeperfWindow is typeperf's default interval between its two samples.
-	typeperfWindow = time.Second
 
 	dpcCounter  = `\Processor(*)\% DPC Time`
 	ctxCounter  = `\System\Context Switches/sec`
@@ -33,9 +34,8 @@ const (
 )
 
 type win32Processor struct {
-	MaxClockSpeed     *float64 `json:"MaxClockSpeed"`
-	CurrentClockSpeed *float64 `json:"CurrentClockSpeed"`
-	CurrentVoltage    *float64 `json:"CurrentVoltage"`
+	MaxClockSpeed  *uint32
+	CurrentVoltage *uint16
 }
 
 var (
@@ -49,11 +49,11 @@ var (
 // the same clock limits for every package, so one entry is representative.
 func queryProcessorInfo() (win32Processor, bool) {
 	return processorInfoCache.Get(func() (win32Processor, bool) {
-		out, ok := utils.RunHidden("powershell", "-NoProfile", "-Command", "Get-CimInstance -ClassName Win32_Processor | Select-Object MaxClockSpeed,CurrentClockSpeed,CurrentVoltage | ConvertTo-Json")
-		if !ok {
+		var processors []win32Processor
+		if err := utils.QueryWMI("", "SELECT MaxClockSpeed, CurrentVoltage FROM Win32_Processor", &processors); err != nil || len(processors) == 0 {
 			return win32Processor{}, false
 		}
-		return utils.DecodeFirstJSON[win32Processor](out)
+		return processors[0], true
 	})
 }
 
@@ -63,7 +63,7 @@ func queryProcessorInfo() (win32Processor, bool) {
 func FreqBoundsPerCPU(count int) []FreqBounds {
 	var b FreqBounds
 	if info, ok := queryProcessorInfo(); ok && info.MaxClockSpeed != nil {
-		max := *info.MaxClockSpeed
+		max := float64(*info.MaxClockSpeed)
 		b.Max = &max
 		if pct, ok := readMinProcessorStatePercent(); ok {
 			min := max * pct / 100.0
@@ -73,16 +73,15 @@ func FreqBoundsPerCPU(count int) []FreqBounds {
 	return repeatBounds(count, b)
 }
 
-// systemCounters collects the DPC and system rate counters in one typeperf
-// run shared by the readers of one update.
+// systemCounters collects the DPC and system rate counters in one PDH query
+// shared by the readers of one update.
 func systemCounters() (map[string]float64, bool) {
 	return countersCache.Get(func() (map[string]float64, bool) {
-		return typeperfValues(dpcCounter, ctxCounter, intrCounter, sysCounter)
+		return pdhValues(dpcCounter, ctxCounter, intrCounter, sysCounter)
 	})
 }
 
-// counterValue finds a counter by the end of its expanded path, which
-// typeperf prefixes with the machine name.
+// counterValue finds a counter by the end of its expanded path.
 func counterValue(values map[string]float64, counter string) (float64, bool) {
 	for path, v := range values {
 		if strings.HasSuffix(strings.ToLower(path), strings.ToLower(counter)) {
@@ -119,9 +118,9 @@ func ReadCPUStats() *types.CPUStats {
 }
 
 // SampleDPC reads % DPC Time for every processor instance, including
-// _Total, from the shared typeperf run.
+// _Total, from the shared PDH query.
 func SampleDPC() DPCSample {
-	out := DPCSample{Window: typeperfWindow}
+	out := DPCSample{Window: pdhSampleWindow}
 	values, ok := systemCounters()
 	if !ok {
 		return out
@@ -132,7 +131,7 @@ func SampleDPC() DPCSample {
 		if !strings.HasSuffix(strings.ToLower(path), `\% dpc time`) {
 			continue
 		}
-		instance := typeperfInstance(path)
+		instance := counterInstance(path)
 		if strings.EqualFold(instance, "_Total") {
 			total := v
 			out.TotalPercent = &total
@@ -160,7 +159,7 @@ func SampleDPC() DPCSample {
 // systems expose in Watts. Most do not, so a failure is remembered.
 func ComputeCPUPower(sample time.Duration) *float64 {
 	total, ok := powerMeterCache.Get(func() (float64, bool) {
-		values, ok := typeperfValues(`\Power Meter(*)\Power`)
+		values, ok := pdhValues(`\Power Meter(*)\Power`)
 		if !ok {
 			return 0, false
 		}
@@ -183,7 +182,7 @@ func ReadCPUVcoreVoltage() *float64 {
 	if !ok || info.CurrentVoltage == nil {
 		return nil
 	}
-	raw := *info.CurrentVoltage
+	raw := float64(*info.CurrentVoltage)
 	// If bit 7 is set (>=128), actual voltage not reported
 	if raw >= 128 {
 		return nil
@@ -192,36 +191,23 @@ func ReadCPUVcoreVoltage() *float64 {
 	return &v
 }
 
-// typeperfValues collects the given counters once and returns the value of
-// each expanded counter path from the last sample row. Wildcard instances
-// expand to one column each.
-func typeperfValues(counters ...string) (map[string]float64, bool) {
-	args := append(append([]string{}, counters...), "-sc", "1")
-	out, ok := utils.RunHidden("typeperf", args...)
-	if !ok {
-		return nil, false
-	}
-	return parseTypeperfCSV(out)
-}
-
 // ReadCPUTemperature reads the ACPI thermal zone through WMI. It is only
 // available on some machines, so a failure is remembered. The GPU module
 // uses the same reading as its fallback.
 func ReadCPUTemperature() *float64 {
 	c, ok := thermalZoneCache.Get(func() (float64, bool) {
-		out, ok := utils.RunHidden("powershell", "-NoProfile", "-Command", "Get-WmiObject MSAcpi_ThermalZoneTemperature -Namespace root/wmi | Select-Object CurrentTemperature | ConvertTo-Json")
-		if !ok {
+		var zones []struct {
+			CurrentTemperature *uint32
+		}
+		if err := utils.QueryWMI(`root\wmi`, "SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature", &zones); err != nil || len(zones) == 0 {
 			return 0, false
 		}
-		type tz struct {
-			CurrentTemperature *float64 `json:"CurrentTemperature"`
-		}
-		zone, ok := utils.DecodeFirstJSON[tz](out)
-		if !ok || zone.CurrentTemperature == nil || *zone.CurrentTemperature <= 0 {
+		temp := zones[0].CurrentTemperature
+		if temp == nil || *temp == 0 {
 			return 0, false
 		}
 		// Convert from tenths of Kelvin to Celsius
-		return (*zone.CurrentTemperature / 10.0) - 273.15, true
+		return (float64(*temp) / 10.0) - 273.15, true
 	})
 	if !ok {
 		return nil
@@ -230,32 +216,42 @@ func ReadCPUTemperature() *float64 {
 }
 
 var (
-	acIndexRegex = regexp.MustCompile(`(?i)Current\s+AC\s+Power\s+Setting\s+Index:\s*0x([0-9a-f]+)`)
-	dcIndexRegex = regexp.MustCompile(`(?i)Current\s+DC\s+Power\s+Setting\s+Index:\s*0x([0-9a-f]+)`)
+	modPowrprof               = windows.NewLazySystemDLL("powrprof.dll")
+	procPowerGetActiveScheme  = modPowrprof.NewProc("PowerGetActiveScheme")
+	procPowerReadACValueIndex = modPowrprof.NewProc("PowerReadACValueIndex")
+	procPowerReadDCValueIndex = modPowrprof.NewProc("PowerReadDCValueIndex")
+
+	// GUID_PROCESSOR_SETTINGS_SUBGROUP and GUID_PROCESSOR_THROTTLE_MINIMUM
+	processorSettingsSubgroup = windows.GUID{Data1: 0x54533251, Data2: 0x82be, Data3: 0x4824, Data4: [8]byte{0x96, 0xc1, 0x47, 0xb6, 0x0b, 0x74, 0x0d, 0x00}}
+	processorThrottleMinimum  = windows.GUID{Data1: 0x893dee8e, Data2: 0x2bef, Data3: 0x41e0, Data4: [8]byte{0x89, 0xc6, 0xb5, 0x5d, 0x09, 0x29, 0x96, 0x4c}}
 )
 
-// readMinProcessorStatePercent queries the current power plan's minimum
+// readMinProcessorStatePercent reads the active power plan's minimum
 // processor state as a percentage, preferring the AC value.
 func readMinProcessorStatePercent() (float64, bool) {
-	text, ok := utils.RunHidden("powercfg", "/query", "SCHEME_CURRENT", "SUB_PROCESSOR", "PROCTHROTTLEMIN")
-	if !ok || text == "" {
+	if !procsAvailable(procPowerGetActiveScheme, procPowerReadACValueIndex, procPowerReadDCValueIndex) {
 		return 0, false
 	}
-	var hexStr string
-	if m := acIndexRegex.FindStringSubmatch(text); len(m) == 2 {
-		hexStr = m[1]
-	} else if m := dcIndexRegex.FindStringSubmatch(text); len(m) == 2 {
-		hexStr = m[1]
-	} else {
+	var scheme *windows.GUID
+	if r, _, _ := procPowerGetActiveScheme.Call(0, uintptr(unsafe.Pointer(&scheme))); r != 0 || scheme == nil {
 		return 0, false
 	}
-	iv, err := strconv.ParseInt(hexStr, 16, 64)
-	if err != nil {
-		return 0, false
+	defer func() { _, _ = windows.LocalFree(windows.Handle(unsafe.Pointer(scheme))) }()
+
+	for _, read := range []*windows.LazyProc{procPowerReadACValueIndex, procPowerReadDCValueIndex} {
+		var value uint32
+		r, _, _ := read.Call(0,
+			uintptr(unsafe.Pointer(scheme)),
+			uintptr(unsafe.Pointer(&processorSettingsSubgroup)),
+			uintptr(unsafe.Pointer(&processorThrottleMinimum)),
+			uintptr(unsafe.Pointer(&value)))
+		if r != 0 {
+			continue
+		}
+		if value > 100 {
+			return 0, false
+		}
+		return float64(value), true
 	}
-	p := float64(iv)
-	if p < 0 || p > 100 {
-		return 0, false
-	}
-	return p, true
+	return 0, false
 }
