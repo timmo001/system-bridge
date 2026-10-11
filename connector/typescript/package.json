@@ -61,7 +61,7 @@
     "effect": "4.0.2",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2003",
-    "prettier": "3.9.9",
+    "prettier": "3.9.10",
     "typescript": "7.0.2"
   }
 }
