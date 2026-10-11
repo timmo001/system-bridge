@@ -48,7 +48,8 @@ func getHandlers() Handlers {
 	return handlers
 }
 
-// Run starts the system tray. This should be called in a goroutine.
+// Run starts the system tray and blocks until Quit is called. Call it from the
+// main goroutine: macOS only allows the tray on the main thread.
 func Run() {
 	systray.Run(OnReady, OnExit)
 }

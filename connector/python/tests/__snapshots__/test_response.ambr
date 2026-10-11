@@ -1,0 +1,13 @@
+# serializer version: 1
+# name: test_response
+  Response(
+    data=dict({
+      'test': 'test',
+    }),
+    id='abc123',
+    message='MESSAGE_TEST',
+    module='MODULE_TEST',
+    subtype='SUBTYPE_TEST',
+    type='TYPE_TEST',
+  )
+# ---

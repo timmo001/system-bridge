@@ -1,0 +1,7 @@
+# serializer version: 1
+# name: test_media_get_files
+  MediaGetFiles(
+    base='music',
+    path='path/to/file',
+  )
+# ---

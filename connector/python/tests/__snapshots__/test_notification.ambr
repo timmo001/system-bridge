@@ -1,0 +1,164 @@
+# serializer version: 1
+# name: test_notification
+  Notification(
+    action_path='/home/user/downloads',
+    action_url='https://www.example.com/docs',
+    actions=list([
+      Action(
+        command='OPEN_URL',
+        data=dict({
+          'url': 'https://www.example.com',
+        }),
+        label='Open URL',
+      ),
+      Action(
+        command='OPEN_PATH',
+        data=dict({
+          'path': '/home/user/documents',
+        }),
+        label='Open Path',
+      ),
+    ]),
+    audio=Audio(
+      source='/home/user/notification.wav',
+      volume=100,
+    ),
+    duration=1500,
+    icon='https://www.example.com/icon.png',
+    image='https://www.example.com/image.png',
+    message='Message',
+    sound='/home/user/custom-notification.wav',
+    timeout=1000,
+    title='Title',
+  )
+# ---
+# name: test_notification_dict
+  dict({
+    'action_path': '/home/user/downloads',
+    'action_url': 'https://www.example.com/docs',
+    'actions': list([
+      dict({
+        'command': 'OPEN_URL',
+        'data': dict({
+          'url': 'https://www.example.com',
+        }),
+        'label': 'Open URL',
+      }),
+      dict({
+        'command': 'OPEN_PATH',
+        'data': dict({
+          'path': '/home/user/documents',
+        }),
+        'label': 'Open Path',
+      }),
+    ]),
+    'audio': dict({
+      'source': '/home/user/notification.wav',
+      'volume': 100,
+    }),
+    'duration': 1500,
+    'icon': 'https://www.example.com/icon.png',
+    'image': 'https://www.example.com/image.png',
+    'message': 'Message',
+    'sound': '/home/user/custom-notification.wav',
+    'timeout': 1000,
+    'title': 'Title',
+  })
+# ---
+# name: test_notification_dict[notification-dict-converted]
+  Notification(
+    action_path='/home/user/downloads',
+    action_url='https://www.example.com/docs',
+    actions=list([
+      Action(
+        command='OPEN_URL',
+        data=dict({
+          'url': 'https://www.example.com',
+        }),
+        label='Open URL',
+      ),
+      Action(
+        command='OPEN_PATH',
+        data=dict({
+          'path': '/home/user/documents',
+        }),
+        label='Open Path',
+      ),
+    ]),
+    audio=Audio(
+      source='/home/user/notification.wav',
+      volume=100,
+    ),
+    duration=1500,
+    icon='https://www.example.com/icon.png',
+    image='https://www.example.com/image.png',
+    message='Message',
+    sound='/home/user/custom-notification.wav',
+    timeout=1000,
+    title='Title',
+  )
+# ---
+# name: test_notification_payload
+  dict({
+    'actionPath': '/home/user/downloads',
+    'actionUrl': 'https://www.example.com/docs',
+    'actions': list([
+      dict({
+        'command': 'OPEN_URL',
+        'data': dict({
+          'url': 'https://www.example.com',
+        }),
+        'label': 'Open URL',
+      }),
+      dict({
+        'command': 'OPEN_PATH',
+        'data': dict({
+          'path': '/home/user/documents',
+        }),
+        'label': 'Open Path',
+      }),
+    ]),
+    'audio': dict({
+      'source': '/home/user/notification.wav',
+      'volume': 100,
+    }),
+    'duration': 1500,
+    'icon': 'https://www.example.com/icon.png',
+    'image': 'https://www.example.com/image.png',
+    'message': 'Message',
+    'sound': '/home/user/custom-notification.wav',
+    'timeout': 1000,
+    'title': 'Title',
+  })
+# ---
+# name: test_notification_payload_legacy_support
+  dict({
+    'actionPath': '/home/user/documents',
+    'actionUrl': 'https://example.com',
+    'actions': list([
+      dict({
+        'command': 'OPEN_URL',
+        'data': dict({
+          'url': 'https://example.com',
+        }),
+        'label': 'Open URL',
+      }),
+      dict({
+        'command': 'OPEN_PATH',
+        'data': dict({
+          'path': '/home/user/documents',
+        }),
+        'label': 'Open Path',
+      }),
+    ]),
+    'audio': dict({
+      'source': '/home/user/notify.wav',
+      'volume': None,
+    }),
+    'duration': 2500,
+    'message': 'Message',
+    'sound': '/home/user/notify.wav',
+    'timeout': 2500,
+    'title': 'Title',
+  })
+# ---

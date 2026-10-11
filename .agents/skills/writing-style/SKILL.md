@@ -2,12 +2,12 @@
 name: writing-style
 license: Apache-2.0
 description: >
-  Write commit messages, PR and issue text, docs (README), code comments, and
-  user-facing strings (notifications, UI labels, toasts, error messages) in the
-  project owner's voice: concise, human, UK English, no em-dashes, no robotic or
-  marketing tone. Use when writing, editing, or reviewing these, including
-  requests to make writing sound natural or remove jargon. Keep the meaning and
-  follow the repo's established writing style.
+  Write commit messages, PR and issue text and comments, docs (README), code
+  comments, and user-facing strings (notifications, UI labels, toasts, error
+  messages) in the project owner's voice: concise, human, UK English, no
+  em-dashes, no robotic or marketing tone. Use when writing, editing, or
+  reviewing these, including requests to make writing sound natural or remove
+  jargon. Keep the meaning and follow the repo's established writing style.
 ---
 
 # Writing Style
@@ -77,7 +77,7 @@ When only the wording needs changing, preserve quotations, code, commands, paths
 - Remove empty contrasts such as "not just X, but Y" and rebuttals to objections nobody raised. Keep a contrast when both sides convey facts or it corrects a real misunderstanding.
 - State the facts without exaggerating their importance or claiming unnamed experts agree. Say what changed instead of calling it "a pivotal improvement"; name a source only when it is available.
 - Cut duplicated work: a heading restated in its first sentence, a punchy closer repeating the paragraph, or a generic conclusion after the answer is complete. Keep summaries that help readers navigate long documents.
-- Check repeated sentence frames, forced three-part lists, and decorative bold labels. Give each distinct point the space it needs. Keep useful lists, headings, tables, and required templates; do not impose sentence-length or item-count quotas.
+- Check repeated sentence frames, forced three-part lists, and decorative bold labels (bold labels that group bullets by area, as in PR descriptions, are fine). Give each distinct point the space it needs. Keep useful lists, headings, tables, and required templates; do not impose sentence-length or item-count quotas.
 - Prefer simple verbs such as "is", "has", and "uses" when they express the relationship. Use active voice when the actor matters; keep passive voice when it is clearer. Trim stacked qualifiers without removing real uncertainty: "may fail" must not become "fails".
 - Match the tone to where the text will appear. Keep genuine humour and asides where they fit; do not force personality through slang, deliberate mistakes, or choppy fragments.
 
@@ -92,7 +92,42 @@ When only the wording needs changing, preserve quotations, code, commands, paths
 
 ## PR and issue text
 
-- Lead with what and why in a sentence or two. Skip template padding unless the repo requires it.
+Size the description to the change. Most PRs need a sentence or two, such as "Fixes the incorrect URL to media source files. Started with the upgrade to 4.x.x"; there is no fixed format.
+
+- Open with what changed, verb-first in the present tense ("Adds", "Fixes", "Moves"), plus the reason when the title does not make it obvious.
+- Link rather than explain: the issue it fixes, the review it follows up, release notes or a compare link for package bumps, a line of code, the docs behind a decision. Keep links easy to spot: on their own line, or in a short `References:` list at the end for external docs and sources.
+- State caveats bluntly: "No functional changes", "Handles the error, doesn't fix it", "Untested on Linux", "Tests to follow after #123".
+- For UI changes, use a line plus before and after screenshots.
+- Use a plain bullet list for several changes in one area. Only when a change spans distinct areas, group bullets under a short bold label per area, naming real identifiers in backticks.
+- No closing summary, testing essay, or restated title.
+- Inside a repo template, write in its description section (such as "Proposed change"), put links and screenshots in the template's own fields when it has them, and keep everything else, removing only what the template says to. Tick boxes only where the repo's PR guidance says to, such as the type of change; leave the rest for the author.
+- Never add placeholders or notes to the author, such as "Add screenshots here", "Insert issue link", or `<!-- TODO -->`, whether drafting or editing an existing description. Leave a section empty if you have nothing for it. This applies only to text you add: keep the template's own comments, prompts, and placeholders (such as `fixes #`) exactly as written.
+- Issues: a clear title can stand alone for small tasks; add a line or link when it needs context. Use a checklist for tracking issues. For bug templates, give the problem in a sentence plus logs.
+
+Longer examples, each a complete body; read the one closest to the change before drafting:
+
+- [Package bump](references/pr-package-bump.md): what changed functionally plus a compare link.
+- [External sources](references/pr-with-sources.md): a short explanation, a test run link, and a `References:` list at the end.
+- [Multi-area change](references/pr-multi-area.md): bullets grouped under bold area labels.
+- [Bug issue](references/issue-bug.md): where it was reported, the log, and what should happen.
+- [Problem issue](references/issue-problem.md): the facts, why they are a problem, and the next step.
+
+## Issue and PR comments
+
+Write in the first person, as yourself, like a reply to a colleague.
+
+- Reply in a line or two with what you found, what happens next, or what you need. A status can be a few words: "Fixed in #123", "Duplicate of #123", "Merged, will be in the next release", "Monitoring after the latest change".
+- Ask direct questions: "Is the backend running?", "Does the CPU go straight back down afterwards?", "Can you post any logs you can find?".
+- Say plainly when you are unsure or cannot test something, and ask for help when someone else can: "I'm unsure what is happening here", "I don't have a Mac to test this".
+- Point to the right place when the issue belongs elsewhere, with a link. Credit whoever found or fixed it: "Spotted and fixed by @user in #123".
+- Give opinions and decisions as your own: "Signing is not something I'm willing to do", "IMHO this is a false positive".
+- Link the release, issue, or line of code instead of describing it. Share findings as logs or code blocks. Quote the part you are replying to with `>` in a busy thread.
+- Thanks, light humour, and the odd emoji are fine. No headings or bullet lists unless listing steps or TODOs.
+
+Longer examples:
+
+- [Unsure](references/comment-unsure.md): what you tried, what you can't test, and a request for help.
+- [Explaining a cause](references/comment-cause.md): a quote, the cause, and a link to the code.
 
 ## Docs, READMEs, and code comments
 

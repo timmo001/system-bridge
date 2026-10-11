@@ -1,0 +1,73 @@
+"""Fixture for cpu module."""
+
+from systembridgeconnector.models.modules.cpu import (
+    CPU,
+    CPUFrequency,
+    CPUStats,
+    CPUTimes,
+    PerCPU,
+)
+
+FIXTURE_CPU = CPU(
+    count=4,
+    name="name",
+    vendor="vendor",
+    family="family",
+    frequency=CPUFrequency(
+        current=2.3,
+        min=0.8,
+        max=3.1,
+    ),
+    load_average=1.5,
+    per_cpu=[
+        PerCPU(
+            id=0,
+            frequency=CPUFrequency(
+                current=2.3,
+                min=0.8,
+                max=3.1,
+            ),
+            power=50.0,
+            times=CPUTimes(
+                user=120.0,
+                system=30.0,
+                idle=600.0,
+                interrupt=0.0,
+                dpc=0.0,
+            ),
+            times_percent=CPUTimes(
+                user=20.0,
+                system=5.0,
+                idle=100.0,
+                interrupt=0.0,
+                dpc=0.0,
+            ),
+            usage=20.0,
+            voltage=1.2,
+        )
+    ],
+    power=200.0,
+    stats=CPUStats(
+        ctx_switches=1000,
+        interrupts=500,
+        soft_interrupts=200,
+        syscalls=8000,
+    ),
+    temperature=45.0,
+    times=CPUTimes(
+        user=480.0,
+        system=120.0,
+        idle=2400.0,
+        interrupt=0.0,
+        dpc=0.0,
+    ),
+    times_percent=CPUTimes(
+        user=80.0,
+        system=20.0,
+        idle=400.0,
+        interrupt=0.0,
+        dpc=0.0,
+    ),
+    usage=80.0,
+    voltage=1.2,
+)

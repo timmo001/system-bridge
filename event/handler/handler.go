@@ -7,6 +7,7 @@ import (
 
 func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterExitApplicationHandler(router)
+	RegisterDiscordControlHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
 	RegisterGetDiskMountsHandler(router)

@@ -1,0 +1,71 @@
+{
+  "devices": [
+    {
+      "name": "/dev/dm-0",
+      "partitions": [
+        {
+          "device": "/dev/dm-0",
+          "mount_point": "/",
+          "filesystem_type": "btrfs",
+          "options": "rw,relatime",
+          "max_file_size": 0,
+          "max_path_length": 0,
+          "category": "primary",
+          "usage": {
+            "total": 1022042832896,
+            "used": 886365155328,
+            "free": 129219301376,
+            "percent": 87.27636086560726
+          }
+        },
+        {
+          "device": "/dev/dm-0",
+          "mount_point": "/home",
+          "filesystem_type": "btrfs",
+          "options": "rw,relatime",
+          "max_file_size": 0,
+          "max_path_length": 0,
+          "category": "primary",
+          "usage": {
+            "total": 1022042832896,
+            "used": 886365155328,
+            "free": 129219301376,
+            "percent": 87.27636086560726
+          }
+        }
+      ],
+      "io_counters": null,
+      "temperature": 49.85
+    },
+    {
+      "name": "/dev/nvme0n1p1",
+      "partitions": [
+        {
+          "device": "/dev/nvme0n1p1",
+          "mount_point": "/boot",
+          "filesystem_type": "vfat",
+          "options": "rw,relatime",
+          "max_file_size": 0,
+          "max_path_length": 0,
+          "category": "primary",
+          "usage": {
+            "total": 2143281152,
+            "used": 255164416,
+            "free": 1888116736,
+            "percent": 11.905317030474217
+          }
+        }
+      ],
+      "io_counters": null,
+      "temperature": 49.85
+    }
+  ],
+  "io_counters": {
+    "read_count": 11795791,
+    "write_count": 121473669,
+    "read_bytes": 365109053440,
+    "write_bytes": 2471153591296,
+    "read_time": 4701122,
+    "write_time": 3598565128
+  }
+}

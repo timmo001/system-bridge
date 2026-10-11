@@ -12,7 +12,6 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/websocket"
-	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
@@ -207,20 +206,32 @@ func (ws *WebsocketServer) BroadcastModuleUpdate(module types.Module, addr *stri
 		} else {
 			slog.Warn("WS: Connection not found for specific address", "addr", *addr)
 		}
-	} else {
-		// Broadcast to all connections that are listening for this module
-		broadcastCount := 0
-		for remote_addr, connInfo := range ws.connections {
-			modules, ok := ws.dataListeners[remote_addr]
-
-			if ok && slices.Contains(modules, module.Name) {
-				slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
-				ws.SendMessageWithLock(connInfo, response, true)
-				broadcastCount++
-			}
-		}
-		slog.Debug("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
+		return
 	}
+
+	// Broadcast to all connections that are listening for this module.
+	// Encode once: module data such as the process list is large, and
+	// encoding it per listener multiplied the work by the listener count.
+	var payload []byte
+	broadcastCount := 0
+	for remote_addr, connInfo := range ws.connections {
+		modules, ok := ws.dataListeners[remote_addr]
+		if !ok || !slices.Contains(modules, module.Name) {
+			continue
+		}
+		if payload == nil {
+			encoded, err := json.Marshal(response)
+			if err != nil {
+				slog.Error("Failed to encode module update", "module", module.Name, "error", err)
+				return
+			}
+			payload = encoded
+		}
+		slog.Debug("WS: Broadcasting module update to listener", "addr", remote_addr, "module", module.Name)
+		ws.sendPayloadWithLock(connInfo, payload, true)
+		broadcastCount++
+	}
+	slog.Debug("WS: Broadcast complete", "module", module.Name, "recipients", broadcastCount)
 }
 
 // handleGetDataModule handles module data updates from the event bus
@@ -232,9 +243,9 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 	slog.Debug("WS: EventGetDataModule", "eventData", event.Data)
 
-	var moduleRequest bus.GetDataRequest
-	if err := mapstructure.Decode(event.Data, &moduleRequest); err != nil {
-		slog.Error("Failed to decode module data", "error", err)
+	moduleRequest, ok := event.Data.(bus.GetDataRequest)
+	if !ok {
+		slog.Error("Unexpected data for get data module event", "type", fmt.Sprintf("%T", event.Data))
 		return
 	}
 
@@ -265,9 +276,9 @@ func (ws *WebsocketServer) handleDataModuleUpdate(event bus.Event) {
 		return
 	}
 
-	var module types.Module
-	if err := mapstructure.Decode(event.Data, &module); err != nil {
-		slog.Error("Failed to decode module data", "error", err)
+	module, ok := event.Data.(types.Module)
+	if !ok {
+		slog.Error("Unexpected data for module update event", "type", fmt.Sprintf("%T", event.Data))
 		return
 	}
 

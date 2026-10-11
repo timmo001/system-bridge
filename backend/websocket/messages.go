@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log/slog"
 
 	"github.com/gorilla/websocket"
@@ -12,17 +13,29 @@ func (ws *WebsocketServer) SendMessage(connInfo *connectionInfo, message event.M
 }
 
 func (ws *WebsocketServer) SendMessageWithLock(connInfo *connectionInfo, message event.MessageResponse, lockHeld bool) {
+	payload, err := json.Marshal(message)
+	if err != nil {
+		slog.Error("Failed to encode response", "error", err, "message_id", message.ID)
+		return
+	}
+	ws.sendPayloadWithLock(connInfo, payload, lockHeld)
+}
+
+// sendPayloadWithLock writes an already encoded message. Broadcasts encode
+// once and reuse the bytes for every listener instead of encoding the module
+// data again per connection.
+func (ws *WebsocketServer) sendPayloadWithLock(connInfo *connectionInfo, payload []byte, lockHeld bool) {
 	// Use per-connection mutex to prevent concurrent writes
 	connInfo.writeMux.Lock()
 	defer connInfo.writeMux.Unlock()
 
 	// Handle test connections with nil conn (used in unit tests)
 	if connInfo.conn == nil {
-		slog.Debug("Skipping message send to test connection", "message_id", message.ID)
+		slog.Debug("Skipping message send to test connection")
 		return
 	}
 
-	if err := connInfo.conn.WriteJSON(message); err != nil {
+	if err := connInfo.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 		slog.Error("Failed to send response", "error", err)
 		// If there's an error, close the connection
 		if closeErr := connInfo.conn.Close(); closeErr != nil {

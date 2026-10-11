@@ -1,0 +1,61 @@
+# serializer version: 1
+# name: test_battery_time_remaining
+  datetime.datetime(2024, 1, 1, 0, 0, 12, tzinfo=datetime.timezone.utc)
+# ---
+# name: test_camera_in_use
+  True
+# ---
+# name: test_cpu_power_per_cpu
+  50.0
+# ---
+# name: test_cpu_speed
+  0.0
+# ---
+# name: test_cpu_usage_per_cpu
+  20.0
+# ---
+# name: test_display_refresh_rate
+  60.0
+# ---
+# name: test_display_resolution_horizontal
+  1920
+# ---
+# name: test_display_resolution_vertical
+  1080
+# ---
+# name: test_gpu_core_clock_speed
+  1000.0
+# ---
+# name: test_gpu_fan_speed
+  100.0
+# ---
+# name: test_gpu_memory_clock_speed
+  1000.0
+# ---
+# name: test_gpu_memory_free
+  1000.0
+# ---
+# name: test_gpu_memory_used
+  1000.0
+# ---
+# name: test_gpu_memory_used_percentage
+  100.0
+# ---
+# name: test_gpu_power_usage
+  100.0
+# ---
+# name: test_gpu_temperature
+  100.0
+# ---
+# name: test_gpu_usage_percentage
+  100.0
+# ---
+# name: test_memory_free
+  0.0
+# ---
+# name: test_memory_used
+  0.0
+# ---
+# name: test_partition_usage
+  40.2
+# ---

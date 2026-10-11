@@ -16,6 +16,7 @@ import (
 	"log/slog"
 
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils"
 )
 
 // PCI vendor IDs for GPU vendors.
@@ -157,7 +158,7 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 			Name: name,
 		}
 
-		if v := readGPUCoreClock(devPath); v != nil {
+		if v := readGPUCoreClock(cardPath, devPath); v != nil {
 			gpu.CoreClock = v
 		}
 		if v := readGPULoad(devPath); v != nil {
@@ -242,7 +243,8 @@ func getLspciGPUs() []types.GPU {
 // readGPUCoreClock returns the current GPU core (render) clock in MHz. It prefers
 // the actual clock and falls back to the requested clock, covering the xe driver
 // (tile*/gt*/freq0), the modern i915 layout (gt/gt*), and legacy i915 files.
-func readGPUCoreClock(devPath string) *float64 {
+// xe puts its files on the PCI device, while i915 puts them on the DRM card.
+func readGPUCoreClock(cardPath, devPath string) *float64 {
 	type freqPair struct{ act, cur string }
 	pairs := make([]freqPair, 0)
 
@@ -251,11 +253,11 @@ func readGPUCoreClock(devPath string) *float64 {
 		pairs = append(pairs, freqPair{filepath.Join(gt, "act_freq"), filepath.Join(gt, "cur_freq")})
 	}
 	// Modern multi-tile i915 layout.
-	for _, gt := range globSorted(filepath.Join(devPath, "gt", "gt*")) {
+	for _, gt := range globSorted(filepath.Join(cardPath, "gt", "gt*")) {
 		pairs = append(pairs, freqPair{filepath.Join(gt, "rps_act_freq_mhz"), filepath.Join(gt, "rps_cur_freq_mhz")})
 	}
 	// Legacy single-GT i915 layout.
-	pairs = append(pairs, freqPair{filepath.Join(devPath, "gt_act_freq_mhz"), filepath.Join(devPath, "gt_cur_freq_mhz")})
+	pairs = append(pairs, freqPair{filepath.Join(cardPath, "gt_act_freq_mhz"), filepath.Join(cardPath, "gt_cur_freq_mhz")})
 
 	for _, p := range pairs {
 		act := readSysFloat(p.act)
@@ -385,15 +387,27 @@ func readGPUMemory(devPath string) (total *float64, used *float64) {
 	return total, used
 }
 
+// lspciNameTTL is how long the PCI device names are kept. The devices only
+// change on hot-plug, and running lspci every update was the module's main
+// cost on systems without nvidia-smi.
+const lspciNameTTL = 10 * time.Minute
+
+var lspciNameCache = utils.TTLValue[map[string]string]{TTL: lspciNameTTL, FailTTL: lspciNameTTL}
+
 // lspciNameMap builds a map of PCI address -> human readable device name from
 // `lspci -D`. Both full ("0000:00:02.0") and short ("00:02.0") forms are keyed.
 func lspciNameMap() map[string]string {
+	names, _ := lspciNameCache.Get(readLspciNames)
+	return names
+}
+
+func readLspciNames() (map[string]string, bool) {
 	names := make(map[string]string)
 
 	cmd := exec.Command("lspci", "-D")
 	output, err := cmd.Output()
 	if err != nil {
-		return names
+		return names, false
 	}
 
 	for _, line := range strings.Split(string(output), "\n") {
@@ -421,7 +435,7 @@ func lspciNameMap() map[string]string {
 		names[strings.TrimPrefix(addr, "0000:")] = name
 	}
 
-	return names
+	return names, true
 }
 
 // gpuFallbackName constructs a name from PCI vendor, device ID, and driver when

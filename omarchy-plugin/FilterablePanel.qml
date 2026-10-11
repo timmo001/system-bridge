@@ -20,6 +20,7 @@ Item {
   readonly property int count: filteredModel.length
 
   signal activateRequested(var entry, int modifiers)
+  signal menuRequested(var entry)
   signal closeRequested()
   signal backRequested()
   signal refreshRequested()
@@ -31,16 +32,14 @@ Item {
   Keys.enabled: keyboardEnabled
 
   onCursorIndexChanged: cursorKey = navigationEntries[cursorIndex]?.key || ""
-  onFilteredModelChanged: {
-    clampCursor()
-    revealRequested()
-  }
+  // Rows change when the data does, so these keep the selection but don't
+  // scroll to it. Only moving the cursor or changing the filter does.
+  onFilteredModelChanged: clampCursor()
   onNavigationEntriesChanged: {
     var index = indexForKey(cursorKey)
     if (index >= 0) cursorIndex = index
     else clampCursor()
     cursorKey = navigationEntries[cursorIndex]?.key || ""
-    revealRequested()
   }
 
   function filterModel(entries, query) {
@@ -81,6 +80,7 @@ Item {
     filterText = nextFilter
     cursorIndex = firstCursorIndex()
     cursorActive = cursorStartsActive
+    revealRequested()
   }
 
   function clampCursor() {
@@ -149,6 +149,11 @@ Item {
     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
       var entry = root.selectedEntry()
       if (entry) root.activateRequested(entry, event.modifiers)
+      event.accepted = true
+    } else if (event.key === Qt.Key_Menu
+        || (event.key === Qt.Key_F10 && event.modifiers === Qt.ShiftModifier)) {
+      var menuEntry = root.selectedEntry()
+      if (menuEntry) root.menuRequested(menuEntry)
       event.accepted = true
     } else if (event.key === Qt.Key_R && event.modifiers === Qt.ControlModifier) {
       root.refreshRequested()

@@ -1,0 +1,10 @@
+# serializer version: 1
+# name: test_action
+  Action(
+    command='command',
+    data=dict({
+      'key': 'value',
+    }),
+    label='label',
+  )
+# ---

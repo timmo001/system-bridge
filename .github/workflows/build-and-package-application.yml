@@ -67,7 +67,7 @@ jobs:
           ./.scripts/verify-css.sh ./system-bridge-linux
 
       - name: Upload application
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: system-bridge-linux
@@ -101,7 +101,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download application
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: system-bridge-linux-${{ env.VERSION }}
           path: .
@@ -110,7 +110,7 @@ jobs:
         run: .github/scripts/bash/package-linux.sh "${{ matrix.build.package }}"
 
       - name: Upload packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: system-bridge-linux-packages-${{ matrix.build.package }}-${{ env.VERSION }}
           path: dist/**
@@ -184,7 +184,7 @@ jobs:
         run: ./.github/scripts/pwsh/package-windows.ps1
 
       - name: Upload packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: system-bridge-windows-packages-${{ env.VERSION }}
           path: dist/**
@@ -231,7 +231,7 @@ jobs:
         run: .scripts/linux/prepare-aur.sh development "${{ runner.temp }}/aur-package"
 
       - name: Upload AUR package files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/aur-package
@@ -246,7 +246,7 @@ jobs:
       - prepare-aur-development
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
     with:
       package-name: system-bridge-git
       artifact-name: aur-system-bridge-git-${{ github.run_id }}-${{ github.run_attempt }}
@@ -317,7 +317,7 @@ jobs:
           sudo -u builduser -H .scripts/linux/prepare-aur.sh stable "$GITHUB_WORKSPACE/aur-package" "$VERSION"
 
       - name: Upload AUR package files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
           path: aur-package
@@ -332,7 +332,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:comments
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
     with:
       package-name: system-bridge
       package-files-artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -349,7 +349,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
     with:
       artifact-name: ${{ needs.build-arch-package-stable.outputs.artifact-name }}
       release-tag: ${{ github.event.release.tag_name }}
@@ -362,7 +362,7 @@ jobs:
       - prepare-aur-stable
     permissions:
       contents: read
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
     with:
       package-name: system-bridge
       artifact-name: aur-system-bridge-${{ github.run_id }}-${{ github.run_attempt }}
@@ -399,6 +399,92 @@ jobs:
           "${{ needs.prepare-aur-stable.result }}"
           false
 
+  build-connector-python:
+    name: Build Python connector
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Set up runtime
+        uses: ./.github/actions/setup-runtime
+
+      # The committed version is a placeholder; the release tag is the version
+      - name: Set version from release tag
+        working-directory: connector/python
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: uv version --frozen "$TAG"
+
+      - name: Build distributions
+        run: mise run build:connector:python
+
+      - name: Check distributions
+        working-directory: connector/python
+        run: uvx twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: connector-python-dist-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            connector/python/dist/*.whl
+            connector/python/dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-connector-python:
+    name: Publish Python connector to PyPI
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    needs:
+      - build-connector-python
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: connector-python-dist-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+
+      - name: Publish distributions to PyPI
+        # release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
+
+  publish-connector-typescript-npm:
+    name: Publish TypeScript connector to npm
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    permissions:
+      contents: read
+      id-token: write
+    uses: timmo001/workflows/.github/workflows/publish-npm-package.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
+    with:
+      package-path: connector/typescript
+      # Skip format:check: the release rewrites the version in the manifests
+      check-command: bun run lint && bun run typecheck && bun run test
+      version-from-release-tag: true
+
+  publish-connector-typescript-jsr:
+    name: Publish TypeScript connector to JSR
+    if: github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false
+    permissions:
+      contents: read
+      id-token: write
+    uses: timmo001/workflows/.github/workflows/publish-jsr-package.yml@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
+    with:
+      package-path: connector/typescript
+      # Skip format:check as above. JSR publishes the compiled dist, which the
+      # shared workflow doesn't build
+      check-command: bun run lint && bun run typecheck && bun run test && bun run build
+      version-from-release-tag: true
+
   update-release:
     name: Update release
     if: github.event_name == 'release'
@@ -413,31 +499,31 @@ jobs:
       attestations: write
     steps:
       - name: Download linux deb packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: system-bridge-linux-packages-deb-${{ needs.build-linux.outputs.version }}
           path: dist/linux/deb
 
       - name: Download linux rpm packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: system-bridge-linux-packages-rpm-${{ needs.build-linux.outputs.version }}
           path: dist/linux/rpm
 
       - name: Download linux flatpak packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: system-bridge-linux-packages-flatpak-${{ needs.build-linux.outputs.version }}
           path: dist/linux/flatpak
 
       - name: Download windows packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: system-bridge-windows-packages-${{ needs.build-package-windows.outputs.version }}
           path: dist/windows
 
       - name: Publish release assets
-        uses: timmo001/workflows/.github/actions/publish-release-assets@f72d1eb6c310502499f5551d65ceca1e478eb266 # 20261003.0
+        uses: timmo001/workflows/.github/actions/publish-release-assets@271a88a8ebedd8166c86c1aec827ea864a284bcc # 20261010.0
         with:
           release-tag: ${{ github.event.release.tag_name }}
           subject-patterns: |
@@ -446,39 +532,3 @@ jobs:
             dist/linux/flatpak/*.flatpak
             dist/windows/*-setup.exe
           bundle-path: dist/system-bridge-${{ github.event.release.tag_name }}.sigstore.json
-
-  compute-next-patch:
-    name: Compute next patch tag
-    runs-on: ubuntu-latest
-    needs:
-      - update-release
-    if: github.event_name == 'release'
-    outputs:
-      next_tag: ${{ steps.compute.outputs.next_tag }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Compute next patch tag
-        id: compute
-        shell: bash
-        run: .github/scripts/bash/compute-next-patch.sh "${{ github.event.release.tag_name }}"
-
-  create-prerelease:
-    name: Create draft release
-    runs-on: ubuntu-latest
-    needs:
-      - compute-next-patch
-    if: github.event_name == 'release'
-    permissions:
-      contents: write
-    steps:
-      - name: Create draft prerelease
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
-        with:
-          draft: true
-          prerelease: false
-          make_latest: true
-          name: ${{ needs.compute-next-patch.outputs.next_tag }}
-          tag_name: ${{ needs.compute-next-patch.outputs.next_tag }}
-          generate_release_notes: false

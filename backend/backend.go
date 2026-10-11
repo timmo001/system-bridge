@@ -17,10 +17,12 @@ import (
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
 	event_handler "github.com/timmo001/system-bridge/event/handler"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
 	"github.com/timmo001/system-bridge/version"
@@ -90,6 +92,12 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
 
+	go discord.Run(ctx, func(d types.DiscordData) {
+		if err := b.dataStore.SetModuleData(types.ModuleDiscord, d); err != nil {
+			slog.Warn("Failed to update Discord module data", "error", err)
+		}
+	})
+
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/quit", api_http.QuitHandler(b.token, cancel))
@@ -144,7 +152,7 @@ func (b *Backend) Run(ctx context.Context) error {
 	mux.HandleFunc("/api/media/file/data", api_http.ServeMediaFileDataHandler)
 
 	// Set up SPA file server (must be last to avoid catching API routes)
-	subFS, err := fs.Sub(b.webClientContent, "web-client/dist")
+	subFS, err := fs.Sub(b.webClientContent, "client/web/dist")
 	if err != nil {
 		slog.Warn("Failed to create sub filesystem. Web client will not be served.", "err", err)
 	} else {

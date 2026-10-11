@@ -14,6 +14,7 @@ const (
 	EventGetSettings            EventType = "GET_SETTINGS"
 	EventKeyboardKeypress       EventType = "KEYBOARD_KEYPRESS"
 	EventKeyboardText           EventType = "KEYBOARD_TEXT"
+	EventDiscordControl         EventType = "DISCORD_CONTROL"
 	EventMediaControl           EventType = "MEDIA_CONTROL"
 	EventNotification           EventType = "NOTIFICATION"
 	EventOpen                   EventType = "OPEN"

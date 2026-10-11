@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -13,11 +14,20 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
+// FreqBoundsPerCPU reads each CPU's hardware clock limits from sysfs.
+func FreqBoundsPerCPU(count int) []FreqBounds {
+	out := make([]FreqBounds, count)
+	for i := range out {
+		out[i] = readFreqBounds(i)
+	}
+	return out
+}
+
+func readFreqBounds(cpuIndex int) FreqBounds {
 	base := "/sys/devices/system/cpu"
 	cpuDir := filepath.Join(base, fmt.Sprintf("cpu%d", cpuIndex), "cpufreq")
 	if _, err := os.Stat(cpuDir); err != nil {
-		return nil, nil
+		return FreqBounds{}
 	}
 	readMHz := func(path string) *float64 {
 		b, err := os.ReadFile(path)
@@ -35,9 +45,10 @@ func GetPerCPUFreqBounds(cpuIndex int) (minMHz *float64, maxMHz *float64) {
 		mhz := v / 1000.0
 		return &mhz
 	}
-	minPath := filepath.Join(cpuDir, "cpuinfo_min_freq")
-	maxPath := filepath.Join(cpuDir, "cpuinfo_max_freq")
-	return readMHz(minPath), readMHz(maxPath)
+	return FreqBounds{
+		Min: readMHz(filepath.Join(cpuDir, "cpuinfo_min_freq")),
+		Max: readMHz(filepath.Join(cpuDir, "cpuinfo_max_freq")),
+	}
 }
 
 func ReadCPUStats() *types.CPUStats {
@@ -335,48 +346,54 @@ func readVoltageValue(path string) *float64 {
 	return &volts
 }
 
-// GetDPCPercentages not available on Linux; return nil best-effort.
-func GetDPCPercentages(percpu bool) []float64 { return nil }
+// SampleDPC is Windows-only; there is no DPC accounting here.
+func SampleDPC() DPCSample { return DPCSample{} }
 
-// GetDPCTimeSeconds not supported on Linux; return nil.
-func GetDPCTimeSeconds(percpu bool, sample time.Duration) []float64 { return nil }
+// cpuHwmonNames are hwmon driver names that report the CPU itself.
+var cpuHwmonNames = []string{"coretemp", "k10temp", "zenpower", "cpu_thermal"}
 
 // ReadCPUTemperature attempts to read CPU temperature on Linux via hwmon
 func ReadCPUTemperature() *float64 {
-	// Search for temp*_input under hwmon devices where name indicates CPU/package
-	hwmons, err := filepath.Glob("/sys/class/hwmon/hwmon*")
+	return readCPUTemperature("/sys/class/hwmon")
+}
+
+// readCPUTemperature checks every hwmon device before falling back, so an
+// unrelated sensor listed first (such as acpitz) can't win over the CPU's own.
+// In order it prefers a package-style label on a CPU driver, any reading from a
+// CPU driver, a package-style label anywhere, then the first temp1_input.
+func readCPUTemperature(hwmonRoot string) *float64 {
+	hwmons, err := filepath.Glob(filepath.Join(hwmonRoot, "hwmon*"))
 	if err != nil || len(hwmons) == 0 {
 		return nil
 	}
+
+	var cpuDriverLabelled, cpuDriverFirst, otherLabelled, firstInput string
 	for _, hm := range hwmons {
-		// If name doesn't clearly indicate a CPU sensor (e.g. coretemp/k10temp/cpu/zenpower),
-		// we still continue to check labels below as some hwmon entries expose useful labels
-		// without matching these identifiers.
-		// Prefer temp with label "Package id 0" or similar
-		entries, _ := os.ReadDir(hm)
-		var candidate string
-		for _, e := range entries {
-			en := e.Name()
-			if strings.HasPrefix(en, "temp") && strings.HasSuffix(en, "_label") {
-				lbPath := filepath.Join(hm, en)
-				lb, err := os.ReadFile(lbPath)
-				if err != nil {
-					continue
-				}
-				lbl := strings.ToLower(strings.TrimSpace(string(lb)))
-				if strings.Contains(lbl, "package") || strings.Contains(lbl, "cpu") || strings.Contains(lbl, "tctl") || strings.Contains(lbl, "tdie") {
-					candidate = strings.TrimSuffix(lbPath, "_label") + "_input"
-					break
-				}
+		nameB, _ := os.ReadFile(filepath.Join(hm, "name"))
+		isCPUDriver := slices.Contains(cpuHwmonNames, strings.TrimSpace(string(nameB)))
+		labelled := findCPUTemperatureLabel(hm)
+		first := filepath.Join(hm, "temp1_input")
+		switch {
+		case isCPUDriver && labelled != "" && cpuDriverLabelled == "":
+			cpuDriverLabelled = labelled
+		case isCPUDriver && cpuDriverFirst == "":
+			cpuDriverFirst = first
+		case labelled != "" && otherLabelled == "":
+			otherLabelled = labelled
+		}
+		if firstInput == "" {
+			if _, err := os.Stat(first); err == nil {
+				firstInput = first
 			}
 		}
+	}
+
+	for _, candidate := range []string{cpuDriverLabelled, cpuDriverFirst, otherLabelled, firstInput} {
 		if candidate == "" {
-			// Fallback: temp1_input
-			candidate = filepath.Join(hm, "temp1_input")
+			continue
 		}
 		if b, err := os.ReadFile(candidate); err == nil {
-			s := strings.TrimSpace(string(b))
-			if v, err := strconv.ParseFloat(s, 64); err == nil {
+			if v, err := strconv.ParseFloat(strings.TrimSpace(string(b)), 64); err == nil {
 				// values typically in millidegrees C
 				c := v / 1000.0
 				return &c
@@ -384,4 +401,27 @@ func ReadCPUTemperature() *float64 {
 		}
 	}
 	return nil
+}
+
+// findCPUTemperatureLabel returns the input path of the first temp*_label in
+// an hwmon device that names the package or CPU, such as "Package id 0" or
+// "Tctl", or an empty string when there is none.
+func findCPUTemperatureLabel(hwmonDir string) string {
+	entries, _ := os.ReadDir(hwmonDir)
+	for _, e := range entries {
+		en := e.Name()
+		if !strings.HasPrefix(en, "temp") || !strings.HasSuffix(en, "_label") {
+			continue
+		}
+		lbPath := filepath.Join(hwmonDir, en)
+		lb, err := os.ReadFile(lbPath)
+		if err != nil {
+			continue
+		}
+		lbl := strings.ToLower(strings.TrimSpace(string(lb)))
+		if strings.Contains(lbl, "package") || strings.Contains(lbl, "cpu") || strings.Contains(lbl, "tctl") || strings.Contains(lbl, "tdie") {
+			return strings.TrimSuffix(lbPath, "_label") + "_input"
+		}
+	}
+	return ""
 }

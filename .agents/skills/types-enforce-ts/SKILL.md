@@ -1,7 +1,7 @@
 ---
 name: types-enforce-ts
 license: Apache-2.0
-description: TypeScript type-safety guidance for editing and reviewing `.ts`, `.tsx`, `.mts`, and `.cts` files.
+description: TypeScript type-safety guidance. Use when editing or reviewing `.ts`, `.tsx`, `.mts`, or `.cts` files.
 ---
 
 # TypeScript Type Safety

@@ -2,13 +2,14 @@ module github.com/timmo001/system-bridge
 
 go 1.26.0
 
-toolchain go1.27.1
+toolchain go1.27.2
 
 require (
 	fyne.io/systray v1.12.2
+	github.com/Microsoft/go-winio v0.6.3
 	github.com/distatus/battery v0.11.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
-	github.com/go-vgo/robotgo v1.1.0
+	github.com/go-vgo/robotgo v1.3.5
 	github.com/godbus/dbus/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
@@ -22,7 +23,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli/v3 v3.14.0
-	golang.org/x/sys v0.48.0
+	golang.org/x/sys v0.49.0
 	golang.org/x/time v0.16.0
 )
 
@@ -35,12 +36,12 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/jezek/xgbutil v0.0.0-20260124183602-9fd151d6a51a // indirect
-	github.com/lufia/plan9stats v0.0.0-20260627054121-477a66015f15 // indirect
+	github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 // indirect
 	github.com/miekg/dns v1.1.72 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/power-devops/perfstat v0.0.0-20260805114148-88456608a4f6 // indirect
+	github.com/power-devops/perfstat v0.0.0-20260916203055-22a1a467d9f0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect
@@ -53,21 +54,21 @@ require (
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/vcaesar/go-wayland v0.40.0 // indirect
-	github.com/vcaesar/gops v0.42.0 // indirect
-	github.com/vcaesar/imgo v0.42.0 // indirect
+	github.com/vcaesar/gops v0.43.0 // indirect
+	github.com/vcaesar/imgo v0.44.0 // indirect
 	github.com/vcaesar/keycode v0.20.0 // indirect
-	github.com/vcaesar/screenshot v0.11.1 // indirect
-	github.com/vcaesar/tt v0.30.0 // indirect
+	github.com/vcaesar/screenshot v0.40.0 // indirect
+	github.com/vcaesar/tt v0.40.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
-	golang.org/x/image v0.43.0 // indirect
-	golang.org/x/mod v0.37.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/image v0.46.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
-	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/tools v0.50.0 // indirect
 	howett.net/plist v1.0.1 // indirect
 )

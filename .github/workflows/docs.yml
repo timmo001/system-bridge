@@ -8,6 +8,8 @@ on:
       - dev
     paths:
       - "docs/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/docs.yml"
   pull_request:
     types:
@@ -15,6 +17,8 @@ on:
       - synchronize
     paths:
       - "docs/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/docs.yml"
   workflow_dispatch: {}
 
@@ -33,7 +37,7 @@ jobs:
       - name: Setup bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: "1.4.2"
+          bun-version: "1.4.3"
 
       - name: Install dependencies
         working-directory: docs
@@ -57,7 +61,7 @@ jobs:
       - name: Setup bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: "1.4.2"
+          bun-version: "1.4.3"
 
       - name: Lint docs markdown
         working-directory: docs

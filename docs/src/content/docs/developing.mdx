@@ -47,7 +47,7 @@ Common component tasks:
 
 | Task | Purpose |
 | --- | --- |
-| `mise run build:web-client` | Build the Lit + Vite web client into `web-client/dist/` |
+| `mise run build:client:web` | Build the Lit + Vite web client into `client/web/dist/` |
 | `mise run generate:schemas` | Regenerate Zod schemas after changing Go types in `types/` |
 
 List every task with `mise tasks`.
@@ -61,7 +61,7 @@ List every task with `mise tasks`.
 | Task | What it starts |
 | --- | --- |
 | `mise run run` | Vite dev server + backend (via `concurrently`) |
-| `mise run run:web-client` | Vite dev server only (default port `5173`) |
+| `mise run run:client:web` | Vite dev server only (default port `5173`) |
 | `mise run run:backend` | Backend only on port `9170` |
 | `mise run run:backend-dev` | Build and run the backend with console output |
 
@@ -88,7 +88,7 @@ Then use the `serve:*` tasks (defined in `pitchfork.toml`):
 | `mise run serve:stop` | Stop backend and web daemons |
 
 :::caution
-The backend daemon owns port `9170`. On start, the wrapper in `.scripts/linux/pitchfork-backend-dev.sh` stops any production `system-bridge` process using that port (systemd user service, compositor autostart, or a manual shell process) and restores it when the dev backend exits. Plan for a brief interruption to your running instance while developing.
+The backend daemon owns port `9170` and is also at `https://backend.system-bridge.localhost`. On start, `.scripts/linux/pitchfork-backend-prep.sh` stops any production `system-bridge` process using that port (systemd user service, compositor autostart, or a manual shell process). When the dev backend stops, `.scripts/linux/pitchfork-backend-restore.sh` brings it back. Plan for a brief interruption to your running instance while developing.
 :::
 
 Prefer `serve:*` for long-running background work (agents, repeated UI checks). Use `run:*` for foreground debugging or on platforms where pitchfork is not set up.
@@ -112,23 +112,26 @@ OS-specific module code belongs in build-tagged files inside subpackages (for ex
 
 ## Schema and type changes
 
-When you change Go types under `types/`, regenerate the web client Zod schemas:
+When you change Go types under `types/`, regenerate the TypeScript connector's Effect schemas:
 
 ```bash
 mise run generate:schemas
 ```
 
-Do not hand-edit `web-client/src/lib/system-bridge/types-modules-schemas.ts`; it is generated output.
+Do not hand-edit `connector/typescript/src/generated/modules.ts`; it is generated output.
 
 ## Quality checks
 
 | Task | Purpose |
 | --- | --- |
-| `mise run test` | Run Go tests (`go test -v ./...`) |
-| `mise run lint:all` | Go fmt/vet, web-client ESLint/typecheck |
-| `mise run check` | `lint:all` plus tests |
+| `mise run test` | Build the web client if needed, then run Go tests (`go test ./...`) |
+| `mise run lint:all` | Go format check and vet, web client Oxlint and typecheck |
+| `mise run check` | `lint:all` plus tests, run in parallel |
+| `mise run format:go` | Format Go code |
 
-After editing Go code, run `go fmt ./...` (included in `lint:go`).
+`lint:go` checks formatting without changing files. After editing Go code, run `mise run format:go`.
+
+Pass several tasks to one run to execute them in parallel, for example `mise run check ::: build:all`. The schema and web client builds are skipped when their sources haven't changed.
 
 ## Documentation site
 

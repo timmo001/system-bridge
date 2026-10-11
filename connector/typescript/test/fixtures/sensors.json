@@ -1,0 +1,43 @@
+{
+  "fans": [
+    {
+      "key": "dell_ddv_fan1",
+      "name": "dell_ddv Video Fan",
+      "label": "Video Fan",
+      "speed_rpm": 4379,
+      "speed_min": null,
+      "speed_max": null
+    },
+    {
+      "key": "dell_ddv_fan2",
+      "name": "dell_ddv CPU Fan",
+      "label": "CPU Fan",
+      "speed_rpm": 4408,
+      "speed_min": null,
+      "speed_max": null
+    }
+  ],
+  "temperatures": [
+    {
+      "key": "BAT0_temp",
+      "temperature": 37.8,
+      "high": 0,
+      "critical": 0
+    },
+    {
+      "key": "nvme_composite",
+      "temperature": 49.85,
+      "high": 82.85,
+      "critical": 87.85
+    }
+  ],
+  "windows_sensors": {
+    "hardware": [],
+    "nvidia": {
+      "chipset": null,
+      "displays": [],
+      "driver": null,
+      "gpus": []
+    }
+  }
+}

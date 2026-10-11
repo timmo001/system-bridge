@@ -1,0 +1,250 @@
+# serializer version: 1
+# name: test_cpu
+  CPU(
+    count=4,
+    family='family',
+    frequency=CPUFrequency(
+      current=2.3,
+      max=3.1,
+      min=0.8,
+    ),
+    load_average=1.5,
+    name='name',
+    per_cpu=list([
+      PerCPU(
+        frequency=CPUFrequency(
+          current=2.3,
+          max=3.1,
+          min=0.8,
+        ),
+        id=0,
+        power=50.0,
+        times=CPUTimes(
+          dpc=0.0,
+          idle=600.0,
+          interrupt=0.0,
+          system=30.0,
+          user=120.0,
+        ),
+        times_percent=CPUTimes(
+          dpc=0.0,
+          idle=100.0,
+          interrupt=0.0,
+          system=5.0,
+          user=20.0,
+        ),
+        usage=20.0,
+        voltage=1.2,
+      ),
+    ]),
+    power=200.0,
+    stats=CPUStats(
+      ctx_switches=1000,
+      interrupts=500,
+      soft_interrupts=200,
+      syscalls=8000,
+    ),
+    temperature=45.0,
+    times=CPUTimes(
+      dpc=0.0,
+      idle=2400.0,
+      interrupt=0.0,
+      system=120.0,
+      user=480.0,
+    ),
+    times_percent=CPUTimes(
+      dpc=0.0,
+      idle=400.0,
+      interrupt=0.0,
+      system=20.0,
+      user=80.0,
+    ),
+    usage=80.0,
+    vendor='vendor',
+    voltage=1.2,
+  )
+# ---
+# name: test_cpu_dict
+  dict({
+    'count': 4,
+    'family': 'family',
+    'frequency': dict({
+      'current': 2.3,
+      'max': 3.1,
+      'min': 0.8,
+    }),
+    'load_average': 1.5,
+    'name': 'name',
+    'per_cpu': list([
+      dict({
+        'frequency': dict({
+          'current': 2.3,
+          'max': 3.1,
+          'min': 0.8,
+        }),
+        'id': 0,
+        'power': 50.0,
+        'times': dict({
+          'dpc': 0.0,
+          'idle': 600.0,
+          'interrupt': 0.0,
+          'system': 30.0,
+          'user': 120.0,
+        }),
+        'times_percent': dict({
+          'dpc': 0.0,
+          'idle': 100.0,
+          'interrupt': 0.0,
+          'system': 5.0,
+          'user': 20.0,
+        }),
+        'usage': 20.0,
+        'voltage': 1.2,
+      }),
+    ]),
+    'power': 200.0,
+    'stats': dict({
+      'ctx_switches': 1000,
+      'interrupts': 500,
+      'soft_interrupts': 200,
+      'syscalls': 8000,
+    }),
+    'temperature': 45.0,
+    'times': dict({
+      'dpc': 0.0,
+      'idle': 2400.0,
+      'interrupt': 0.0,
+      'system': 120.0,
+      'user': 480.0,
+    }),
+    'times_percent': dict({
+      'dpc': 0.0,
+      'idle': 400.0,
+      'interrupt': 0.0,
+      'system': 20.0,
+      'user': 80.0,
+    }),
+    'usage': 80.0,
+    'vendor': 'vendor',
+    'voltage': 1.2,
+  })
+# ---
+# name: test_cpu_dict[cpu-dict-converted]
+  CPU(
+    count=4,
+    family='family',
+    frequency=CPUFrequency(
+      current=2.3,
+      max=3.1,
+      min=0.8,
+    ),
+    load_average=1.5,
+    name='name',
+    per_cpu=list([
+      PerCPU(
+        frequency=CPUFrequency(
+          current=2.3,
+          max=3.1,
+          min=0.8,
+        ),
+        id=0,
+        power=50.0,
+        times=CPUTimes(
+          dpc=0.0,
+          idle=600.0,
+          interrupt=0.0,
+          system=30.0,
+          user=120.0,
+        ),
+        times_percent=CPUTimes(
+          dpc=0.0,
+          idle=100.0,
+          interrupt=0.0,
+          system=5.0,
+          user=20.0,
+        ),
+        usage=20.0,
+        voltage=1.2,
+      ),
+    ]),
+    power=200.0,
+    stats=CPUStats(
+      ctx_switches=1000,
+      interrupts=500,
+      soft_interrupts=200,
+      syscalls=8000,
+    ),
+    temperature=45.0,
+    times=CPUTimes(
+      dpc=0.0,
+      idle=2400.0,
+      interrupt=0.0,
+      system=120.0,
+      user=480.0,
+    ),
+    times_percent=CPUTimes(
+      dpc=0.0,
+      idle=400.0,
+      interrupt=0.0,
+      system=20.0,
+      user=80.0,
+    ),
+    usage=80.0,
+    vendor='vendor',
+    voltage=1.2,
+  )
+# ---
+# name: test_cpu_per_cpu_dict
+  dict({
+    'frequency': dict({
+      'current': 2.3,
+      'max': 3.1,
+      'min': 0.8,
+    }),
+    'id': 0,
+    'power': 50.0,
+    'times': dict({
+      'dpc': 0.0,
+      'idle': 600.0,
+      'interrupt': 0.0,
+      'system': 30.0,
+      'user': 120.0,
+    }),
+    'times_percent': dict({
+      'dpc': 0.0,
+      'idle': 100.0,
+      'interrupt': 0.0,
+      'system': 5.0,
+      'user': 20.0,
+    }),
+    'usage': 20.0,
+    'voltage': 1.2,
+  })
+# ---
+# name: test_cpu_per_cpu_dict[per-cpu-dict-converted]
+  PerCPU(
+    frequency=CPUFrequency(
+      current=2.3,
+      max=3.1,
+      min=0.8,
+    ),
+    id=0,
+    power=50.0,
+    times=CPUTimes(
+      dpc=0.0,
+      idle=600.0,
+      interrupt=0.0,
+      system=30.0,
+      user=120.0,
+    ),
+    times_percent=CPUTimes(
+      dpc=0.0,
+      idle=100.0,
+      interrupt=0.0,
+      system=5.0,
+      user=20.0,
+    ),
+    usage=20.0,
+    voltage=1.2,
+  )
+# ---

@@ -1,0 +1,42 @@
+{
+  "boot_time": 1791305311,
+  "fqdn": "example-host",
+  "hostname": "example-host",
+  "kernel_version": "7.2.5-arch1-1",
+  "ip_address_4": "192.0.2.10",
+  "mac_address": "00:00:5e:00:53:01",
+  "platform_version": "4.0.4",
+  "platform": "arch",
+  "power_usage": null,
+  "uptime": 274544,
+  "users": [
+    {
+      "name": "user",
+      "active": true,
+      "terminal": "tty1",
+      "host": "",
+      "started": 1791305335,
+      "pid": 1244
+    }
+  ],
+  "uuid": "00000000-0000-4000-8000-000000000000",
+  "version": "5.11.1",
+  "camera_usage": [],
+  "microphone_usage": [],
+  "ip_address_6": "",
+  "pending_reboot": null,
+  "run_mode": "standalone",
+  "version_latest_url": "https://github.com/timmo001/system-bridge/releases/latest",
+  "version_latest": "5.11.1",
+  "version_newer_available": false,
+  "device_info": {
+    "manufacturer": "Example",
+    "model": "Laptop 14",
+    "version": null,
+    "board_vendor": "Example",
+    "board_name": "0EXAMPLE",
+    "bios_vendor": "Example",
+    "bios_version": "1.0.0",
+    "chassis_type": "Notebook"
+  }
+}

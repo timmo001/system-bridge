@@ -3,7 +3,7 @@ extends: default
 
 ignore: |
   .agents/skills/
-  web-client/node_modules/
+  client/web/node_modules/
   temp/
 
 rules:
