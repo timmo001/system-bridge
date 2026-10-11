@@ -63,11 +63,12 @@ func (pm ProcessModule) Update(ctx context.Context) (any, error) {
 
 		// CPU usage since the process started, as the library computes it,
 		// but reusing the cached creation time instead of reading the
-		// process stat file twice more.
+		// process stat file twice more. timesTotal sums the same states as
+		// the library's deprecated Total.
 		if times, err := p.TimesWithContext(ctx); err == nil && createErr == nil {
 			cpuPercent := 0.0
 			if elapsed := now.Sub(time.UnixMilli(createTime)).Seconds(); elapsed > 0 {
-				cpuPercent = 100 * times.Total() / elapsed
+				cpuPercent = 100 * timesTotal(*times) / elapsed
 			}
 			proc.CPUUsage = &cpuPercent
 		}
