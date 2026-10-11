@@ -25,8 +25,9 @@ func withRobotgoStubs(t *testing.T) (*[]keyTapCall, *[]string) {
 		keyCalls = append(keyCalls, keyTapCall{key: key, modifiers: args})
 		return nil
 	}
-	robotType = func(text string, args ...int) {
+	robotType = func(text string, args ...int) error {
 		typeCalls = append(typeCalls, text)
+		return nil
 	}
 
 	t.Cleanup(func() {
@@ -107,6 +108,17 @@ func TestSendKeypress_PropagatesError(t *testing.T) {
 	robotKeyTap = func(key string, args ...any) error { return errors.New("boom") }
 
 	if err := sendKeypress(KeypressData{Key: "x"}); err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+}
+
+func TestSendText_PropagatesError(t *testing.T) {
+	origType := robotType
+	t.Cleanup(func() { robotType = origType })
+
+	robotType = func(text string, args ...int) error { return errors.New("boom") }
+
+	if err := sendText("x"); err == nil {
 		t.Fatalf("expected error, got nil")
 	}
 }
