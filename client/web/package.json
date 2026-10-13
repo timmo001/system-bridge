@@ -26,7 +26,7 @@
     "@timmo001/effect-system-bridge": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "effect": "4.0.3",
+    "effect": "4.0.4",
     "lit": "^3.3.2",
     "lucide": "^1.14.0",
     "tailwind-merge": "^3.5.0"
