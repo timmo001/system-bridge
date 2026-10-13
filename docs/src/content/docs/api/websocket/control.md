@@ -50,6 +50,8 @@ Available actions:
 - `SET_PUSH_TO_TALK_DELAY`: set `value` to the push to talk release delay, 0-2000 milliseconds.
 - `ENABLE_QOS`, `DISABLE_QOS`, `TOGGLE_QOS`
 - `ENABLE_SILENCE_WARNING`, `DISABLE_SILENCE_WARNING`, `TOGGLE_SILENCE_WARNING`
+- `MUTE_USER`, `UNMUTE_USER`, `TOGGLE_USER_MUTE`: set `user_id` to a user's ID. This mutes them for you only. `TOGGLE_USER_MUTE` needs the user to be in your call.
+- `SET_USER_VOLUME`: set `user_id`, and set `value` to 0-200. This changes their volume for you only.
 
 The volume values are the percentages that Discord's sliders show. In testing, Discord ignored changes to automatic sensitivity, noise suppression, echo cancellation and automatic gain control made over RPC, so those settings are only available as data.
 

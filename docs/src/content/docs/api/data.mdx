@@ -100,7 +100,8 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `channel` | object | The voice channel: `id`, `name`, `type` (`GUILD_VOICE`, `GUILD_STAGE_VOICE`, `DM` or `GROUP_DM`), `bitrate` in bits per second, and `user_limit` (0 for no limit). |
 | `server` | object | The server's `id`, `name` and `icon_url`, also known as a guild in Discord's API. `null` for direct message calls. |
 | `connection` | object | Your voice connection: `state` (such as `VOICE_CONNECTED`, `CONNECTING` or `NO_ROUTE`), and `last_ping` and `average_ping` in milliseconds. `null` until Discord reports it. |
-| `me` | object | Your state in the call: `nick` (your name in the call), `server_mute` and `server_deaf` (whether a moderator has muted or deafened you), `suppress` (whether you can't talk, such as in an AFK channel or as a Stage listener), and `speaking`. |
+| `me` | object | Your entry in `members`. |
+| `members` | array | Everyone in the call, including you: `user` (`id`, `username`, `global_name` and `avatar_url`), `nick` (their name in the call), `server_mute` and `server_deaf` (whether a moderator has muted or deafened them), `self_mute` and `self_deaf`, `suppress` (whether they can't talk, such as in an AFK channel or as a Stage listener), `speaking`, and your settings for them: `local_mute` and `volume` (0-200, as Discord's slider shows it). `local_mute` and `volume` are `null` for you. |
 
 `input` and `output` each have:
 

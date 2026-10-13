@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"slices"
 	"sync"
 	"time"
 
@@ -190,31 +191,58 @@ func runSession(ctx context.Context, creds *Credentials) error {
 
 // channelEvents need the voice channel's ID, so they follow the user between
 // channels.
-var channelEvents = []string{"VOICE_STATE_CREATE", "VOICE_STATE_UPDATE", "SPEAKING_START", "SPEAKING_STOP"}
+var channelEvents = []string{"VOICE_STATE_CREATE", "VOICE_STATE_UPDATE", "VOICE_STATE_DELETE", "SPEAKING_START", "SPEAKING_STOP"}
 
 // channelTypes names the channel types a voice call can be in.
 var channelTypes = map[int]string{1: "DM", 2: "GUILD_VOICE", 3: "GROUP_DM", 13: "GUILD_STAGE_VOICE"}
 
+// rpcVoiceState is a member of a voice channel. Mute and Volume are the
+// authorized user's local settings for the member. Unlike the input and
+// output volumes, Volume is already the slider percentage.
 type rpcVoiceState struct {
-	Nick       *string `json:"nick"`
+	Nick       *string  `json:"nick"`
+	Mute       *bool    `json:"mute"`
+	Volume     *float64 `json:"volume"`
 	VoiceState struct {
 		Mute     bool `json:"mute"`
 		Deaf     bool `json:"deaf"`
+		SelfMute bool `json:"self_mute"`
+		SelfDeaf bool `json:"self_deaf"`
 		Suppress bool `json:"suppress"`
 	} `json:"voice_state"`
-	User struct {
-		ID string `json:"id"`
-	} `json:"user"`
+	User rpcUser `json:"user"`
 }
 
-func (v rpcVoiceState) member(speaking bool) *types.DiscordCallMember {
-	return &types.DiscordCallMember{
+func (v rpcVoiceState) member(speaking, isMe bool) types.DiscordCallMember {
+	m := types.DiscordCallMember{
+		User:       v.User.toUser(),
 		Nick:       v.Nick,
 		ServerMute: v.VoiceState.Mute,
 		ServerDeaf: v.VoiceState.Deaf,
+		SelfMute:   v.VoiceState.SelfMute,
+		SelfDeaf:   v.VoiceState.SelfDeaf,
 		Suppress:   v.VoiceState.Suppress,
 		Speaking:   speaking,
 	}
+	if !isMe {
+		m.LocalMute = v.Mute
+		m.Volume = v.Volume
+	}
+	return m
+}
+
+// speakingIn returns the IDs of the members speaking in channelID. Speaking is
+// only known from events, so a refresh of the same channel keeps it.
+func speakingIn(call *types.DiscordCall, channelID string) map[string]bool {
+	speaking := map[string]bool{}
+	if call != nil && call.Channel.ID == channelID {
+		for _, m := range call.Members {
+			if m.Speaking {
+				speaking[m.User.ID] = true
+			}
+		}
+	}
+	return speaking
 }
 
 // refreshCall fetches the voice channel the user is in and its server.
@@ -262,15 +290,10 @@ func refreshCall(ctx context.Context, s *session) error {
 	}
 
 	updateState(func(d *types.DiscordData) {
-		// Speaking is only known from events, so keep it while in the same channel.
-		speaking := d.Call != nil && d.Call.Channel.ID == channel.ID && d.Call.Me != nil && d.Call.Me.Speaking
-		var me *types.DiscordCallMember
-		if d.User != nil {
-			for _, vs := range channel.VoiceStates {
-				if vs.User.ID == d.User.ID {
-					me = vs.member(speaking)
-				}
-			}
+		speaking := speakingIn(d.Call, channel.ID)
+		members := make([]types.DiscordCallMember, 0, len(channel.VoiceStates))
+		for _, vs := range channel.VoiceStates {
+			members = append(members, vs.member(speaking[vs.User.ID], isMe(d, vs.User.ID)))
 		}
 		d.Call = &types.DiscordCall{
 			Channel: types.DiscordChannel{
@@ -282,10 +305,50 @@ func refreshCall(ctx context.Context, s *session) error {
 			},
 			Server:     server,
 			Connection: connection,
-			Me:         me,
+			Members:    members,
 		}
+		d.Call.Me = findMe(d)
 	})
 	return nil
+}
+
+func isMe(d *types.DiscordData, userID string) bool {
+	return d.User != nil && d.User.ID == userID
+}
+
+// findMe returns a copy of the authorized user's member, or nil when they are
+// not listed.
+func findMe(d *types.DiscordData) *types.DiscordCallMember {
+	for _, m := range d.Call.Members {
+		if isMe(d, m.User.ID) {
+			return &m
+		}
+	}
+	return nil
+}
+
+// updateMembers replaces the call's members with the result of fn, which gets
+// a copy it can change. Nothing changes when there is no call or fn returns
+// false.
+func updateMembers(fn func(d *types.DiscordData, members []types.DiscordCallMember) ([]types.DiscordCallMember, bool)) {
+	updateStateIf(func(d *types.DiscordData) bool {
+		if d.Call == nil {
+			return false
+		}
+		members, changed := fn(d, slices.Clone(d.Call.Members))
+		if !changed {
+			return false
+		}
+		call := *d.Call
+		call.Members = members
+		d.Call = &call
+		d.Call.Me = findMe(d)
+		return true
+	})
+}
+
+func memberIndex(members []types.DiscordCallMember, userID string) int {
+	return slices.IndexFunc(members, func(m types.DiscordCallMember) bool { return m.User.ID == userID })
 }
 
 // followChannel moves the channelEvents subscriptions to channelID, or drops
@@ -309,22 +372,36 @@ func (s *session) followChannel(ctx context.Context, channelID string) {
 	s.callChannel = channelID
 }
 
-// applyVoiceState updates the user's own state in the call. Other users'
-// states are ignored.
+// applyVoiceState adds or updates a member of the call.
 func applyVoiceState(data json.RawMessage) {
 	var vs rpcVoiceState
 	if err := json.Unmarshal(data, &vs); err != nil {
 		slog.Warn("Failed to parse Discord voice state", "error", err)
 		return
 	}
-	updateStateIf(func(d *types.DiscordData) bool {
-		if d.Call == nil || d.User == nil || vs.User.ID != d.User.ID {
-			return false
+	updateMembers(func(d *types.DiscordData, members []types.DiscordCallMember) ([]types.DiscordCallMember, bool) {
+		me := isMe(d, vs.User.ID)
+		i := memberIndex(members, vs.User.ID)
+		if i < 0 {
+			return append(members, vs.member(false, me)), true
 		}
-		call := *d.Call
-		call.Me = vs.member(call.Me != nil && call.Me.Speaking)
-		d.Call = &call
-		return true
+		members[i] = vs.member(members[i].Speaking, me)
+		return members, true
+	})
+}
+
+func applyVoiceStateDelete(data json.RawMessage) {
+	var vs rpcVoiceState
+	if err := json.Unmarshal(data, &vs); err != nil {
+		slog.Warn("Failed to parse Discord voice state", "error", err)
+		return
+	}
+	updateMembers(func(_ *types.DiscordData, members []types.DiscordCallMember) ([]types.DiscordCallMember, bool) {
+		i := memberIndex(members, vs.User.ID)
+		if i < 0 {
+			return nil, false
+		}
+		return slices.Delete(members, i, i+1), true
 	})
 }
 
@@ -336,16 +413,35 @@ func applySpeaking(data json.RawMessage, speaking bool) {
 		slog.Warn("Failed to parse Discord speaking event", "error", err)
 		return
 	}
-	updateStateIf(func(d *types.DiscordData) bool {
-		if d.Call == nil || d.Call.Me == nil || d.User == nil || e.UserID != d.User.ID || d.Call.Me.Speaking == speaking {
-			return false
+	updateMembers(func(_ *types.DiscordData, members []types.DiscordCallMember) ([]types.DiscordCallMember, bool) {
+		i := memberIndex(members, e.UserID)
+		if i < 0 || members[i].Speaking == speaking {
+			return nil, false
 		}
-		me := *d.Call.Me
-		me.Speaking = speaking
-		call := *d.Call
-		call.Me = &me
-		d.Call = &call
-		return true
+		members[i].Speaking = speaking
+		return members, true
+	})
+}
+
+// applyUserVoice applies a SET_USER_VOICE_SETTINGS response to the member.
+func applyUserVoice(data json.RawMessage) {
+	var v struct {
+		UserID string   `json:"user_id"`
+		Mute   *bool    `json:"mute"`
+		Volume *float64 `json:"volume"`
+	}
+	if err := json.Unmarshal(data, &v); err != nil {
+		slog.Warn("Failed to parse Discord user voice settings", "error", err)
+		return
+	}
+	updateMembers(func(_ *types.DiscordData, members []types.DiscordCallMember) ([]types.DiscordCallMember, bool) {
+		i := memberIndex(members, v.UserID)
+		if i < 0 {
+			return nil, false
+		}
+		setIfPresent(&members[i].LocalMute, v.Mute)
+		setIfPresent(&members[i].Volume, v.Volume)
+		return members, true
 	})
 }
 
@@ -466,7 +562,7 @@ type rpcUser struct {
 	Avatar     *string `json:"avatar"`
 }
 
-func setUser(u rpcUser) {
+func (u rpcUser) toUser() types.DiscordUser {
 	user := types.DiscordUser{
 		ID:         u.ID,
 		Username:   u.Username,
@@ -476,6 +572,11 @@ func setUser(u rpcUser) {
 		url := fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", u.ID, *u.Avatar)
 		user.AvatarURL = &url
 	}
+	return user
+}
+
+func setUser(u rpcUser) {
+	user := u.toUser()
 	updateState(func(d *types.DiscordData) { d.User = &user })
 }
 
@@ -745,6 +846,8 @@ func (s *session) handle(body []byte) {
 		applyConnection(m.Data)
 	case "VOICE_STATE_CREATE", "VOICE_STATE_UPDATE":
 		applyVoiceState(m.Data)
+	case "VOICE_STATE_DELETE":
+		applyVoiceStateDelete(m.Data)
 	case "SPEAKING_START":
 		applySpeaking(m.Data, true)
 	case "SPEAKING_STOP":
