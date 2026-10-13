@@ -10,5 +10,9 @@
   "mode": null,
   "processing": null,
   "qos": null,
-  "silence_warning": null
+  "silence_warning": null,
+  "video": null,
+  "screenshare": null,
+  "sounds": null,
+  "notification": null
 }

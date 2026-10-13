@@ -7,7 +7,9 @@ from systembridgeconnector.models.modules.discord import (
     DiscordCallMember,
     DiscordChannel,
     DiscordDevice,
+    DiscordNotification,
     DiscordServer,
+    DiscordSound,
     DiscordUser,
     DiscordVoiceConnection,
     DiscordVoiceMode,
@@ -74,4 +76,22 @@ FIXTURE_DISCORD = Discord(
     ),
     qos=True,
     silence_warning=True,
+    video=False,
+    screenshare=True,
+    sounds=[
+        DiscordSound(id="1", name="quack", emoji="🦆"),
+        DiscordSound(
+            id="10",
+            name="Listen",
+            server_id="3",
+            emoji_url="https://cdn.discordapp.com/emojis/4.png",
+        ),
+    ],
+    notification=DiscordNotification(
+        message_id="5",
+        channel_id="2",
+        title="friend (#general, Server)",
+        body="hello",
+        icon_url="https://cdn.discordapp.com/avatars/4/a.png",
+    ),
 )

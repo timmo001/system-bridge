@@ -32,7 +32,7 @@ Available actions:
 
 ## Discord control
 
-Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, or change your Discord voice settings. Discord must be [set up](/running/#discord) first.
+Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, toggle your camera or screenshare, play a soundboard sound, or change your Discord voice settings. Discord must be [set up](/running/#discord) first.
 
 Available actions:
 
@@ -50,6 +50,9 @@ Available actions:
 - `SET_PUSH_TO_TALK_DELAY`: set `value` to the push to talk release delay, 0-2000 milliseconds.
 - `ENABLE_QOS`, `DISABLE_QOS`, `TOGGLE_QOS`
 - `ENABLE_SILENCE_WARNING`, `DISABLE_SILENCE_WARNING`, `TOGGLE_SILENCE_WARNING`
+- `TOGGLE_VIDEO`: turn your camera on or off.
+- `TOGGLE_SCREENSHARE`: start or stop sharing your screen.
+- `PLAY_SOUND`: set `sound_id` to a sound `id` from `sounds` in the [`discord`](/api/data/#discord) data. You must be in a call.
 
 The volume values are the percentages that Discord's sliders show. In testing, Discord ignored changes to automatic sensitivity, noise suppression, echo cancellation and automatic gain control made over RPC, so those settings are only available as data.
 

@@ -11,6 +11,8 @@ from systembridgeconnector.models.modules.discord import (
     DiscordCall,
     DiscordChannel,
     DiscordDevice,
+    DiscordNotification,
+    DiscordSound,
 )
 
 
@@ -30,6 +32,9 @@ def test_discord_dict():
     assert isinstance(discord.input, DiscordAudio)
     assert discord.input.devices is not None
     assert isinstance(discord.input.devices[0], DiscordDevice)
+    assert discord.sounds is not None
+    assert isinstance(discord.sounds[0], DiscordSound)
+    assert isinstance(discord.notification, DiscordNotification)
 
 
 def test_discord_not_connected():

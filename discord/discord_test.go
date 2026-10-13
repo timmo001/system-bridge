@@ -236,6 +236,99 @@ func TestCallEventsOnlyApplyToMe(t *testing.T) {
 	assert.Equal(t, types.DiscordCallMember{Nick: new("Me"), ServerMute: true, Speaking: true}, *d.Call.Me)
 }
 
+func TestSoundArgs(t *testing.T) {
+	server := "3"
+	st := types.DiscordData{
+		Call:   &types.DiscordCall{Channel: types.DiscordChannel{ID: "2"}},
+		Sounds: &[]types.DiscordSound{{ID: "1"}, {ID: "10", ServerID: &server}},
+	}
+
+	tests := []struct {
+		name    string
+		params  ControlParams
+		state   types.DiscordData
+		want    string
+		wantErr error
+	}{
+		{name: "default sound", params: ControlParams{SoundID: "1"}, state: st, want: `{"sound_id":"1","guild_id":"0","channel_id":"2"}`},
+		{name: "server sound", params: ControlParams{SoundID: "10"}, state: st, want: `{"sound_id":"10","guild_id":"3","channel_id":"2"}`},
+		{name: "unknown sound", params: ControlParams{SoundID: "4"}, state: st, wantErr: ErrInvalidValue},
+		{name: "sound missing", state: st, wantErr: ErrInvalidValue},
+		{name: "not in a call", params: ControlParams{SoundID: "1"}, state: types.DiscordData{Sounds: st.Sounds}, wantErr: ErrInvalidValue},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := soundArgs(tt.params, tt.state)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			body, err := json.Marshal(got)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.want, string(body))
+		})
+	}
+}
+
+func TestHasScopes(t *testing.T) {
+	assert.False(t, hasScopes(json.RawMessage(`{"scopes":["rpc"]}`)))
+	assert.True(t, hasScopes(json.RawMessage(`{"scopes":["rpc.voice.read","rpc","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write","rpc.notifications.read"]}`)))
+}
+
+func TestSoundsAndActiveStates(t *testing.T) {
+	client, server := net.Pipe()
+	t.Cleanup(func() { _ = client.Close(); _ = server.Close() })
+	mu.Lock()
+	state = types.DiscordData{}
+	mu.Unlock()
+	t.Cleanup(func() {
+		mu.Lock()
+		state = types.DiscordData{}
+		mu.Unlock()
+	})
+
+	fakeDiscord(t, server, func(req map[string]any) map[string]any {
+		return map[string]any{"cmd": req["cmd"], "nonce": req["nonce"], "data": []map[string]any{
+			{"name": "quack", "available": true, "sound_id": "1", "guild_id": "0", "emoji_id": nil, "emoji_name": "🦆"},
+			{"name": "Listen", "available": true, "sound_id": "11", "guild_id": "3", "emoji_id": "4", "emoji_name": nil},
+			{"name": "locked", "available": false, "sound_id": "12", "guild_id": "5"},
+		}}
+	})
+	s := newSession(client)
+	go s.readLoop()
+
+	require.NoError(t, refreshSounds(t.Context(), s))
+	applyActive(json.RawMessage(`{"active":true,"pid":1,"application":{"name":"Firefox"}}`), func(d *types.DiscordData) **bool { return &d.Screenshare })
+
+	d := State()
+	require.NotNil(t, d.Sounds)
+	assert.Equal(t, []types.DiscordSound{
+		{ID: "1", Name: "quack", Emoji: new("🦆")},
+		{ID: "11", Name: "Listen", ServerID: new("3"), EmojiURL: new("https://cdn.discordapp.com/emojis/4.png")},
+	}, *d.Sounds)
+	assert.Equal(t, new(true), d.Screenshare)
+	assert.Nil(t, d.Video)
+}
+
+func TestApplyNotification(t *testing.T) {
+	t.Cleanup(func() {
+		mu.Lock()
+		state = types.DiscordData{}
+		mu.Unlock()
+	})
+
+	applyNotification(json.RawMessage(`{"channel_id":"2","title":"friend (#general, Server)","body":"hello","icon_url":"https://cdn.discordapp.com/avatars/4/a.png","message":{"id":"5","content":"hello"}}`))
+
+	assert.Equal(t, &types.DiscordNotification{
+		MessageID: new("5"),
+		ChannelID: "2",
+		Title:     "friend (#general, Server)",
+		Body:      "hello",
+		IconURL:   new("https://cdn.discordapp.com/avatars/4/a.png"),
+	}, State().Notification)
+}
+
 func TestControlWithoutConnection(t *testing.T) {
 	assert.ErrorIs(t, Control(t.Context(), ActionMute, ControlParams{}), ErrNotConnected)
 }

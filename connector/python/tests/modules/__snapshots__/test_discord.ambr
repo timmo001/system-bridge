@@ -47,6 +47,13 @@
       type='VOICE_ACTIVITY',
     ),
     mute=False,
+    notification=DiscordNotification(
+      body='hello',
+      channel_id='2',
+      icon_url='https://cdn.discordapp.com/avatars/4/a.png',
+      message_id='5',
+      title='friend (#general, Server)',
+    ),
     output=DiscordAudio(
       device_id='default',
       devices=list([
@@ -63,12 +70,30 @@
       noise_suppression=True,
     ),
     qos=True,
+    screenshare=True,
     silence_warning=True,
+    sounds=list([
+      DiscordSound(
+        emoji='🦆',
+        emoji_url=None,
+        id='1',
+        name='quack',
+        server_id=None,
+      ),
+      DiscordSound(
+        emoji=None,
+        emoji_url='https://cdn.discordapp.com/emojis/4.png',
+        id='10',
+        name='Listen',
+        server_id='3',
+      ),
+    ]),
     user=DiscordUser(
       avatar_url='https://cdn.discordapp.com/avatars/1/avatar.png',
       global_name='Global Name',
       id='1',
       username='username',
     ),
+    video=False,
   )
 # ---
