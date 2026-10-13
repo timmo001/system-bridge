@@ -7,6 +7,7 @@ from systembridgeconnector.models.modules.discord import (
     DiscordCallMember,
     DiscordChannel,
     DiscordDevice,
+    DiscordNotification,
     DiscordServer,
     DiscordSound,
     DiscordUser,
@@ -107,4 +108,11 @@ FIXTURE_DISCORD = Discord(
             emoji_url="https://cdn.discordapp.com/emojis/4.png",
         ),
     ],
+    notification=DiscordNotification(
+        message_id="5",
+        channel_id="2",
+        title="friend (#general, Server)",
+        body="hello",
+        icon_url="https://cdn.discordapp.com/avatars/4/a.png",
+    ),
 )

@@ -227,6 +227,18 @@ export const DiscordSound = Schema.Struct({
 
 export interface DiscordSound extends Schema.Schema.Type<typeof DiscordSound> {}
 
+export const DiscordNotification = Schema.Struct({
+  message_id: Schema.NullOr(Schema.String),
+  channel_id: Schema.String,
+  title: Schema.String,
+  body: Schema.String,
+  icon_url: Schema.NullOr(Schema.String),
+});
+
+export interface DiscordNotification extends Schema.Schema.Type<
+  typeof DiscordNotification
+> {}
+
 export const DiscordData = Schema.Struct({
   connected: Schema.Boolean,
   authenticated: Schema.Boolean,
@@ -243,6 +255,7 @@ export const DiscordData = Schema.Struct({
   video: Schema.NullOr(Schema.Boolean),
   screenshare: Schema.NullOr(Schema.Boolean),
   sounds: Schema.NullOr(Schema.Array(DiscordSound)),
+  notification: Schema.NullOr(DiscordNotification),
 });
 
 export interface DiscordData extends Schema.Schema.Type<typeof DiscordData> {}
