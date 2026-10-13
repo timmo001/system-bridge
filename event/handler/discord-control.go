@@ -13,6 +13,7 @@ import (
 type DiscordControlRequestData struct {
 	Action    string   `json:"action" mapstructure:"action"`
 	ChannelID string   `json:"channel_id" mapstructure:"channel_id"`
+	UserID    string   `json:"user_id" mapstructure:"user_id"`
 	Value     *float64 `json:"value" mapstructure:"value"`
 	DeviceID  string   `json:"device_id" mapstructure:"device_id"`
 	Mode      string   `json:"mode" mapstructure:"mode"`
@@ -49,6 +50,7 @@ func RegisterDiscordControlHandler(router *event.MessageRouter) {
 
 		err = discord.Control(context.Background(), discord.Action(data.Action), discord.ControlParams{
 			ChannelID: data.ChannelID,
+			UserID:    data.UserID,
 			Value:     data.Value,
 			DeviceID:  data.DeviceID,
 			Mode:      data.Mode,

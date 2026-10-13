@@ -9,8 +9,10 @@ from systembridgeconnector.models.modules.discord import (
     Discord,
     DiscordAudio,
     DiscordCall,
+    DiscordCallMember,
     DiscordChannel,
     DiscordDevice,
+    DiscordUser,
 )
 
 
@@ -27,6 +29,9 @@ def test_discord_dict():
     assert discord == FIXTURE_DISCORD
     assert isinstance(discord.call, DiscordCall)
     assert isinstance(discord.call.channel, DiscordChannel)
+    assert discord.call.members is not None
+    assert isinstance(discord.call.members[1], DiscordCallMember)
+    assert isinstance(discord.call.members[1].user, DiscordUser)
     assert isinstance(discord.input, DiscordAudio)
     assert discord.input.devices is not None
     assert isinstance(discord.input.devices[0], DiscordDevice)

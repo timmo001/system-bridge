@@ -34,6 +34,10 @@ const (
 	ActionEnableSilenceWarn  Action = "ENABLE_SILENCE_WARNING"
 	ActionDisableSilenceWarn Action = "DISABLE_SILENCE_WARNING"
 	ActionToggleSilenceWarn  Action = "TOGGLE_SILENCE_WARNING"
+	ActionMuteUser           Action = "MUTE_USER"
+	ActionUnmuteUser         Action = "UNMUTE_USER"
+	ActionToggleUserMute     Action = "TOGGLE_USER_MUTE"
+	ActionSetUserVolume      Action = "SET_USER_VOLUME"
 )
 
 // selectChannel is the SELECT_VOICE_CHANNEL and SELECT_TEXT_CHANNEL args. A
@@ -61,6 +65,16 @@ type setVoiceSettings struct {
 	SilenceWarning *bool         `json:"silence_warning,omitempty"`
 }
 
+// setUserVoiceSettings is the SET_USER_VOICE_SETTINGS args. They are the
+// authorized user's local settings for another user.
+type setUserVoiceSettings struct {
+	UserID string   `json:"user_id"`
+	Mute   *bool    `json:"mute,omitempty"`
+	Volume *float64 `json:"volume,omitempty"`
+}
+
+var userActions = []Action{ActionMuteUser, ActionUnmuteUser, ActionToggleUserMute, ActionSetUserVolume}
+
 type setVoiceIO struct {
 	Volume   *float64 `json:"volume,omitempty"`
 	DeviceID *string  `json:"device_id,omitempty"`
@@ -72,10 +86,12 @@ type setVoiceMode struct {
 	Delay     *float64 `json:"delay,omitempty"`
 }
 
-// The volumes are Discord slider percentages: input 0-100, output 0-200.
+// The volumes are Discord slider percentages: input 0-100, output and user
+// 0-200.
 const (
 	maxInputVolume  = 100
 	maxOutputVolume = 200
+	maxUserVolume   = 200
 	// Voice activity sensitivity, in dB.
 	minVoiceThreshold = -100
 	maxVoiceThreshold = 0
@@ -86,17 +102,18 @@ const (
 var voiceModes = []string{"VOICE_ACTIVITY", "PUSH_TO_TALK"}
 
 // ControlParams holds the value an action needs. ChannelID is for the channel
-// actions, Value for the volume, threshold and delay actions, DeviceID for the
-// device actions and Mode for SET_VOICE_MODE.
+// actions, UserID for the user actions, Value for the volume, threshold and
+// delay actions, DeviceID for the device actions and Mode for SET_VOICE_MODE.
 type ControlParams struct {
 	ChannelID string
+	UserID    string
 	Value     *float64
 	DeviceID  string
 	Mode      string
 }
 
 // Control joins, leaves or opens Discord channels, or changes the voice
-// settings.
+// settings or another user's local voice settings.
 func Control(ctx context.Context, action Action, params ControlParams) error {
 	mu.Lock()
 	s, st := current, state
@@ -113,6 +130,19 @@ func Control(ctx context.Context, action Action, params ControlParams) error {
 		// The VOICE_CHANNEL_SELECT event updates the call.
 		_, err = s.call(ctx, cmd, args, "", rpcTimeout)
 		return err
+	}
+
+	if slices.Contains(userActions, action) {
+		args, err := userArgs(action, params, st)
+		if err != nil {
+			return err
+		}
+		data, err := s.call(ctx, "SET_USER_VOICE_SETTINGS", args, "", rpcTimeout)
+		if err != nil {
+			return err
+		}
+		applyUserVoice(data)
+		return nil
 	}
 
 	args, err := controlArgs(action, params, st)
@@ -137,6 +167,39 @@ func channelArgs(action Action, p ControlParams) (selectChannel, error) {
 	// Discord refuses to move a user who is already in a voice channel unless
 	// forced. Sending the action is the user's approval to move.
 	return selectChannel{ChannelID: &p.ChannelID, Force: action == ActionJoinVoiceChannel}, nil
+}
+
+func userArgs(action Action, p ControlParams, st types.DiscordData) (setUserVoiceSettings, error) {
+	if p.UserID == "" {
+		return setUserVoiceSettings{}, fmt.Errorf("%w: user_id is required", ErrInvalidValue)
+	}
+	args := setUserVoiceSettings{UserID: p.UserID}
+	switch action {
+	case ActionMuteUser:
+		args.Mute = new(true)
+	case ActionUnmuteUser:
+		args.Mute = new(false)
+	case ActionToggleUserMute:
+		// Discord keeps local settings for users outside the call, but only
+		// reports them for members.
+		var member *types.DiscordCallMember
+		if st.Call != nil {
+			if i := memberIndex(st.Call.Members, p.UserID); i >= 0 {
+				member = &st.Call.Members[i]
+			}
+		}
+		if member == nil {
+			return setUserVoiceSettings{}, fmt.Errorf("%w: user %s is not in the call", ErrInvalidValue, p.UserID)
+		}
+		args.Mute = new(member.LocalMute == nil || !*member.LocalMute)
+	case ActionSetUserVolume:
+		v, err := numberValue(p.Value, 0, maxUserVolume, "user volume")
+		if err != nil {
+			return setUserVoiceSettings{}, err
+		}
+		args.Volume = &v
+	}
+	return args, nil
 }
 
 func controlArgs(action Action, p ControlParams, st types.DiscordData) (setVoiceSettings, error) {

@@ -208,12 +208,12 @@ func TestChannelArgs(t *testing.T) {
 	}
 }
 
-func TestCallEventsOnlyApplyToMe(t *testing.T) {
+func TestCallMemberEvents(t *testing.T) {
 	updates := make(chan types.DiscordData, 10)
 	mu.Lock()
 	state = types.DiscordData{
 		User: &types.DiscordUser{ID: "me"},
-		Call: &types.DiscordCall{Me: &types.DiscordCallMember{}},
+		Call: &types.DiscordCall{Members: []types.DiscordCallMember{{User: types.DiscordUser{ID: "me"}}}},
 	}
 	onUpdate = func(d types.DiscordData) { updates <- d }
 	mu.Unlock()
@@ -222,18 +222,86 @@ func TestCallEventsOnlyApplyToMe(t *testing.T) {
 		state, onUpdate = types.DiscordData{}, nil
 		mu.Unlock()
 	})
+	latest := func() types.DiscordData {
+		t.Helper()
+		require.NotEmpty(t, updates)
+		var d types.DiscordData
+		for len(updates) > 0 {
+			d = <-updates
+		}
+		return d
+	}
 
-	applySpeaking(json.RawMessage(`{"user_id":"someone"}`), true)
-	applyVoiceState(json.RawMessage(`{"user":{"id":"someone"},"voice_state":{"mute":true}}`))
+	applySpeaking(json.RawMessage(`{"user_id":"stranger"}`), true)
 	assert.Empty(t, updates)
 
+	applyVoiceState(json.RawMessage(`{"user":{"id":"friend","username":"friend"},"mute":true,"volume":100,"voice_state":{"self_deaf":true}}`))
+	applySpeaking(json.RawMessage(`{"user_id":"friend"}`), true)
 	applySpeaking(json.RawMessage(`{"user_id":"me"}`), true)
-	applyVoiceState(json.RawMessage(`{"user":{"id":"me"},"nick":"Me","voice_state":{"mute":true}}`))
-	require.Len(t, updates, 2)
-	<-updates
-	d := <-updates
+	applyVoiceState(json.RawMessage(`{"user":{"id":"me"},"nick":"Me","mute":false,"volume":100,"voice_state":{"mute":true}}`))
+	d := latest()
+	require.Len(t, d.Call.Members, 2)
+	assert.Equal(t, types.DiscordCallMember{
+		User:      types.DiscordUser{ID: "friend", Username: "friend"},
+		SelfDeaf:  true,
+		Speaking:  true,
+		LocalMute: new(true),
+		Volume:    new(100.0),
+	}, d.Call.Members[1])
+	// The local settings only apply to other users.
+	want := types.DiscordCallMember{User: types.DiscordUser{ID: "me"}, Nick: new("Me"), ServerMute: true, Speaking: true}
+	assert.Equal(t, want, d.Call.Members[0])
 	require.NotNil(t, d.Call.Me)
-	assert.Equal(t, types.DiscordCallMember{Nick: new("Me"), ServerMute: true, Speaking: true}, *d.Call.Me)
+	assert.Equal(t, want, *d.Call.Me)
+
+	applyUserVoice(json.RawMessage(`{"user_id":"friend","mute":false}`))
+	d = latest()
+	assert.Equal(t, new(false), d.Call.Members[1].LocalMute)
+	assert.Equal(t, new(100.0), d.Call.Members[1].Volume)
+
+	applyVoiceStateDelete(json.RawMessage(`{"user":{"id":"friend"}}`))
+	d = latest()
+	require.Len(t, d.Call.Members, 1)
+	assert.Equal(t, "me", d.Call.Members[0].User.ID)
+}
+
+func TestUserArgs(t *testing.T) {
+	no := false
+	call := types.DiscordData{Call: &types.DiscordCall{Members: []types.DiscordCallMember{
+		{User: types.DiscordUser{ID: "friend"}, LocalMute: &no},
+		{User: types.DiscordUser{ID: "unknown"}},
+	}}}
+	num := func(v float64) *float64 { return &v }
+
+	tests := []struct {
+		name    string
+		action  Action
+		params  ControlParams
+		want    string
+		wantErr error
+	}{
+		{name: "mute user", action: ActionMuteUser, params: ControlParams{UserID: "1"}, want: `{"user_id":"1","mute":true}`},
+		{name: "unmute user", action: ActionUnmuteUser, params: ControlParams{UserID: "1"}, want: `{"user_id":"1","mute":false}`},
+		{name: "toggle user mute", action: ActionToggleUserMute, params: ControlParams{UserID: "friend"}, want: `{"user_id":"friend","mute":true}`},
+		{name: "toggle user mute when unknown", action: ActionToggleUserMute, params: ControlParams{UserID: "unknown"}, want: `{"user_id":"unknown","mute":true}`},
+		{name: "toggle user mute outside the call", action: ActionToggleUserMute, params: ControlParams{UserID: "1"}, wantErr: ErrInvalidValue},
+		{name: "user volume", action: ActionSetUserVolume, params: ControlParams{UserID: "1", Value: num(100)}, want: `{"user_id":"1","volume":100}`},
+		{name: "user volume out of range", action: ActionSetUserVolume, params: ControlParams{UserID: "1", Value: num(201)}, wantErr: ErrInvalidValue},
+		{name: "user missing", action: ActionMuteUser, wantErr: ErrInvalidValue},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := userArgs(tt.action, tt.params, call)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			body, err := json.Marshal(got)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.want, string(body))
+		})
+	}
 }
 
 func TestControlWithoutConnection(t *testing.T) {

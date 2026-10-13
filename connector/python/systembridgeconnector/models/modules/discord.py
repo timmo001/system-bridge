@@ -52,13 +52,27 @@ class DiscordVoiceConnection:
 @filter_unexpected_fields
 @dataclass(slots=True)
 class DiscordCallMember:
-    """Discord Call Member."""
+    """Discord Call Member.
+
+    local_mute and volume are your settings for the member, so they are None
+    for you.
+    """
 
     server_mute: bool
     server_deaf: bool
     suppress: bool
     speaking: bool
+    user: DiscordUser | None = None
     nick: str | None = None
+    self_mute: bool = False
+    self_deaf: bool = False
+    local_mute: bool | None = None
+    volume: float | None = None
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        if isinstance(self.user, dict):
+            self.user = DiscordUser(**self.user)
 
 
 @filter_unexpected_fields
@@ -70,9 +84,15 @@ class DiscordCall:
     server: DiscordServer | None = None
     connection: DiscordVoiceConnection | None = None
     me: DiscordCallMember | None = None
+    members: list[DiscordCallMember] | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
+        if isinstance(self.members, list) and all(
+            isinstance(item, dict) for item in self.members
+        ):
+            self.members = [DiscordCallMember(**cast(dict, m)) for m in self.members]
+
         if isinstance(self.channel, dict):
             self.channel = DiscordChannel(**self.channel)
 

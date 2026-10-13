@@ -160,12 +160,26 @@ export interface DiscordVoiceConnection extends Schema.Schema.Type<
   typeof DiscordVoiceConnection
 > {}
 
+export const DiscordUser = Schema.Struct({
+  id: Schema.String,
+  username: Schema.String,
+  global_name: Schema.NullOr(Schema.String),
+  avatar_url: Schema.NullOr(Schema.String),
+});
+
+export interface DiscordUser extends Schema.Schema.Type<typeof DiscordUser> {}
+
 export const DiscordCallMember = Schema.Struct({
+  user: DiscordUser,
   nick: Schema.NullOr(Schema.String),
   server_mute: Schema.Boolean,
   server_deaf: Schema.Boolean,
+  self_mute: Schema.Boolean,
+  self_deaf: Schema.Boolean,
   suppress: Schema.Boolean,
   speaking: Schema.Boolean,
+  local_mute: Schema.NullOr(Schema.Boolean),
+  volume: Schema.NullOr(Schema.Finite),
 });
 
 export interface DiscordCallMember extends Schema.Schema.Type<
@@ -177,18 +191,10 @@ export const DiscordCall = Schema.Struct({
   server: Schema.NullOr(DiscordServer),
   connection: Schema.NullOr(DiscordVoiceConnection),
   me: Schema.NullOr(DiscordCallMember),
+  members: Schema.Array(DiscordCallMember),
 });
 
 export interface DiscordCall extends Schema.Schema.Type<typeof DiscordCall> {}
-
-export const DiscordUser = Schema.Struct({
-  id: Schema.String,
-  username: Schema.String,
-  global_name: Schema.NullOr(Schema.String),
-  avatar_url: Schema.NullOr(Schema.String),
-});
-
-export interface DiscordUser extends Schema.Schema.Type<typeof DiscordUser> {}
 
 export const DiscordVoiceMode = Schema.Struct({
   type: Schema.NullOr(Schema.String),

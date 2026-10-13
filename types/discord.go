@@ -30,6 +30,7 @@ type DiscordCall struct {
 	Server     *DiscordServer          `json:"server"`
 	Connection *DiscordVoiceConnection `json:"connection"`
 	Me         *DiscordCallMember      `json:"me"`
+	Members    []DiscordCallMember     `json:"members"`
 }
 
 // DiscordChannel is a Discord channel
@@ -55,13 +56,20 @@ type DiscordVoiceConnection struct {
 	AveragePing *float64 `json:"average_ping"`
 }
 
-// DiscordCallMember is a user's state in a voice channel
+// DiscordCallMember is a user's state in a voice channel. LocalMute and
+// Volume are what the authorized user set for this member, so they are null
+// for the authorized user.
 type DiscordCallMember struct {
-	Nick       *string `json:"nick"`
-	ServerMute bool    `json:"server_mute"`
-	ServerDeaf bool    `json:"server_deaf"`
-	Suppress   bool    `json:"suppress"`
-	Speaking   bool    `json:"speaking"`
+	User       DiscordUser `json:"user"`
+	Nick       *string     `json:"nick"`
+	ServerMute bool        `json:"server_mute"`
+	ServerDeaf bool        `json:"server_deaf"`
+	SelfMute   bool        `json:"self_mute"`
+	SelfDeaf   bool        `json:"self_deaf"`
+	Suppress   bool        `json:"suppress"`
+	Speaking   bool        `json:"speaking"`
+	LocalMute  *bool       `json:"local_mute"`
+	Volume     *float64    `json:"volume"`
 }
 
 // DiscordAudio is the Discord input or output audio setup
