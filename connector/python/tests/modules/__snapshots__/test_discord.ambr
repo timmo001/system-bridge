@@ -47,6 +47,13 @@
       type='VOICE_ACTIVITY',
     ),
     mute=False,
+    notification=DiscordNotification(
+      body='hello',
+      channel_id='2',
+      icon_url='https://cdn.discordapp.com/avatars/4/a.png',
+      message_id='5',
+      title='friend (#general, Server)',
+    ),
     output=DiscordAudio(
       device_id='default',
       devices=list([

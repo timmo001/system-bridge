@@ -112,6 +112,18 @@ class DiscordSound:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class DiscordNotification:
+    """Discord Notification."""
+
+    channel_id: str
+    title: str
+    body: str
+    message_id: str | None = None
+    icon_url: str | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class DiscordAudio:
     """Discord Audio."""
 
@@ -172,6 +184,7 @@ class Discord:
     video: bool | None = None
     screenshare: bool | None = None
     sounds: list[DiscordSound] | None = None
+    notification: DiscordNotification | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
@@ -192,6 +205,9 @@ class Discord:
 
         if isinstance(self.processing, dict):
             self.processing = DiscordVoiceProcessing(**self.processing)
+
+        if isinstance(self.notification, dict):
+            self.notification = DiscordNotification(**self.notification)
 
         if isinstance(self.sounds, list) and all(
             isinstance(item, dict) for item in self.sounds

@@ -162,7 +162,7 @@ func runSession(ctx context.Context, creds *Credentials) error {
 
 	// The call is extra to the voice settings, so failures here are logged
 	// instead of ending the session.
-	for _, evt := range []string{"CURRENT_USER_UPDATE", "VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS", "VIDEO_STATE_UPDATE", "SCREENSHARE_STATE_UPDATE"} {
+	for _, evt := range []string{"CURRENT_USER_UPDATE", "VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS", "VIDEO_STATE_UPDATE", "SCREENSHARE_STATE_UPDATE", "NOTIFICATION_CREATE"} {
 		if _, err := s.call(ctx, "SUBSCRIBE", nil, evt, rpcTimeout); err != nil {
 			slog.Warn("Failed to subscribe to Discord event", "event", evt, "error", err)
 		}
@@ -426,6 +426,27 @@ func applyActive(data json.RawMessage, field func(*types.DiscordData) **bool) {
 	updateState(func(d *types.DiscordData) { *field(d) = e.Active })
 }
 
+func applyNotification(data json.RawMessage) {
+	var e struct {
+		ChannelID string  `json:"channel_id"`
+		Title     string  `json:"title"`
+		Body      string  `json:"body"`
+		IconURL   *string `json:"icon_url"`
+		Message   *struct {
+			ID string `json:"id"`
+		} `json:"message"`
+	}
+	if err := json.Unmarshal(data, &e); err != nil {
+		slog.Warn("Failed to parse Discord notification", "error", err)
+		return
+	}
+	n := types.DiscordNotification{ChannelID: e.ChannelID, Title: e.Title, Body: e.Body, IconURL: e.IconURL}
+	if e.Message != nil && e.Message.ID != "" {
+		n.MessageID = &e.Message.ID
+	}
+	updateState(func(d *types.DiscordData) { d.Notification = &n })
+}
+
 // authenticate returns the AUTHENTICATE response.
 func authenticate(ctx context.Context, s *session, creds *Credentials) (json.RawMessage, error) {
 	tok, err := loadToken()
@@ -475,8 +496,8 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 
 // scopes are the OAuth scopes System Bridge authorizes with. The video and
 // screenshare scopes allow toggling the camera and screenshare and reading
-// their state.
-var scopes = []string{"rpc", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read", "rpc.screenshare.write"}
+// their state. The notifications scope allows reading notifications.
+var scopes = []string{"rpc", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read", "rpc.screenshare.write", "rpc.notifications.read"}
 
 // hasScopes reports whether an AUTHENTICATE response grants every scope.
 func hasScopes(auth json.RawMessage) bool {
@@ -831,6 +852,8 @@ func (s *session) handle(body []byte) {
 		applyActive(m.Data, func(d *types.DiscordData) **bool { return &d.Video })
 	case "SCREENSHARE_STATE_UPDATE":
 		applyActive(m.Data, func(d *types.DiscordData) **bool { return &d.Screenshare })
+	case "NOTIFICATION_CREATE":
+		applyNotification(m.Data)
 	case "VOICE_STATE_CREATE", "VOICE_STATE_UPDATE":
 		applyVoiceState(m.Data)
 	case "SPEAKING_START":
