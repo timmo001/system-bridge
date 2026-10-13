@@ -270,7 +270,7 @@ System Bridge can read and change your Discord voice settings through the local 
 
 5. Make sure the Discord desktop app is running. Within 30 seconds, Discord shows an authorization prompt. Approve it with the account that owns the application.
 
-System Bridge stores the Discord token in `discord-token.json` in the [settings directory](#file-locations). To authorize again, delete that file. The Discord state is in the [`discord`](/api/data/#discord) data module. To control Discord, send [`DISCORD_CONTROL`](/api/websocket/control/#discord-control).
+System Bridge stores the Discord token in `discord-token.json` in the [settings directory](#file-locations). To authorize again, delete that file. Discord also asks again when a System Bridge update needs new permissions. The Discord state is in the [`discord`](/api/data/#discord) data module. To control Discord, send [`DISCORD_CONTROL`](/api/websocket/control/#discord-control).
 
 ## Next steps
 

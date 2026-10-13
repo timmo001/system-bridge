@@ -211,6 +211,16 @@ export interface DiscordVoiceProcessing extends Schema.Schema.Type<
   typeof DiscordVoiceProcessing
 > {}
 
+export const DiscordSound = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  server_id: Schema.NullOr(Schema.String),
+  emoji: Schema.NullOr(Schema.String),
+  emoji_url: Schema.NullOr(Schema.String),
+});
+
+export interface DiscordSound extends Schema.Schema.Type<typeof DiscordSound> {}
+
 export const DiscordData = Schema.Struct({
   connected: Schema.Boolean,
   authenticated: Schema.Boolean,
@@ -224,6 +234,9 @@ export const DiscordData = Schema.Struct({
   processing: Schema.NullOr(DiscordVoiceProcessing),
   qos: Schema.NullOr(Schema.Boolean),
   silence_warning: Schema.NullOr(Schema.Boolean),
+  video: Schema.NullOr(Schema.Boolean),
+  screenshare: Schema.NullOr(Schema.Boolean),
+  sounds: Schema.NullOr(Schema.Array(DiscordSound)),
 });
 
 export interface DiscordData extends Schema.Schema.Type<typeof DiscordData> {}

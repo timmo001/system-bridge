@@ -28,6 +28,7 @@
       'channel_id': None,
       'device_id': None,
       'mode': None,
+      'sound_id': None,
       'value': None,
     }),
     id='test',
