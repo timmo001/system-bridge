@@ -29,6 +29,9 @@ class DiscordAction(StrEnum):
     ENABLE_SILENCE_WARNING = "ENABLE_SILENCE_WARNING"
     DISABLE_SILENCE_WARNING = "DISABLE_SILENCE_WARNING"
     TOGGLE_SILENCE_WARNING = "TOGGLE_SILENCE_WARNING"
+    TOGGLE_VIDEO = "TOGGLE_VIDEO"
+    TOGGLE_SCREENSHARE = "TOGGLE_SCREENSHARE"
+    PLAY_SOUND = "PLAY_SOUND"
 
 
 class DiscordVoiceModeType(StrEnum):
@@ -42,12 +45,14 @@ class DiscordVoiceModeType(StrEnum):
 class DiscordControl:
     """Discord Control.
 
-    channel_id is for the channel actions, value for the volume, threshold and
-    delay actions, device_id for the device actions and mode for SET_VOICE_MODE.
+    channel_id is for the channel actions, sound_id for PLAY_SOUND, value for
+    the volume, threshold and delay actions, device_id for the device actions
+    and mode for SET_VOICE_MODE.
     """
 
     action: str
     channel_id: str | None = None
+    sound_id: str | None = None
     value: float | None = None
     device_id: str | None = None
     mode: str | None = None

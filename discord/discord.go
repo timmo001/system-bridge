@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"slices"
 	"sync"
 	"time"
 
@@ -161,13 +162,16 @@ func runSession(ctx context.Context, creds *Credentials) error {
 
 	// The call is extra to the voice settings, so failures here are logged
 	// instead of ending the session.
-	for _, evt := range []string{"CURRENT_USER_UPDATE", "VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS"} {
+	for _, evt := range []string{"CURRENT_USER_UPDATE", "VOICE_CHANNEL_SELECT", "VOICE_CONNECTION_STATUS", "VIDEO_STATE_UPDATE", "SCREENSHARE_STATE_UPDATE"} {
 		if _, err := s.call(ctx, "SUBSCRIBE", nil, evt, rpcTimeout); err != nil {
 			slog.Warn("Failed to subscribe to Discord event", "event", evt, "error", err)
 		}
 	}
 	if err := refreshCall(ctx, s); err != nil {
 		slog.Warn("Failed to get the Discord voice channel", "error", err)
+	}
+	if err := refreshSounds(ctx, s); err != nil {
+		slog.Warn("Failed to get the Discord soundboard sounds", "error", err)
 	}
 
 	mu.Lock()
@@ -183,6 +187,11 @@ func runSession(ctx context.Context, creds *Credentials) error {
 		case <-s.callChanged:
 			if err := refreshCall(ctx, s); err != nil {
 				slog.Warn("Failed to get the Discord voice channel", "error", err)
+			}
+			// Sounds can only be played in a call, so joining one is a good
+			// time to pick up sounds added since the last fetch.
+			if err := refreshSounds(ctx, s); err != nil {
+				slog.Warn("Failed to get the Discord soundboard sounds", "error", err)
 			}
 		}
 	}
@@ -367,6 +376,56 @@ func applyConnection(data json.RawMessage) {
 	})
 }
 
+// refreshSounds fetches the soundboard sounds the user can play.
+func refreshSounds(ctx context.Context, s *session) error {
+	data, err := s.call(ctx, "GET_SOUNDBOARD_SOUNDS", nil, "", rpcTimeout)
+	if err != nil {
+		return err
+	}
+	var rpcSounds []struct {
+		SoundID   string  `json:"sound_id"`
+		Name      string  `json:"name"`
+		GuildID   string  `json:"guild_id"`
+		EmojiID   *string `json:"emoji_id"`
+		EmojiName *string `json:"emoji_name"`
+		Available bool    `json:"available"`
+	}
+	if err := json.Unmarshal(data, &rpcSounds); err != nil {
+		return fmt.Errorf("failed to parse GET_SOUNDBOARD_SOUNDS response: %w", err)
+	}
+	sounds := []types.DiscordSound{}
+	for _, rs := range rpcSounds {
+		if !rs.Available {
+			continue
+		}
+		sound := types.DiscordSound{ID: rs.SoundID, Name: rs.Name, Emoji: rs.EmojiName}
+		// Discord's default sounds have guild ID 0.
+		if rs.GuildID != "" && rs.GuildID != "0" {
+			sound.ServerID = &rs.GuildID
+		}
+		if rs.EmojiID != nil && *rs.EmojiID != "" {
+			url := fmt.Sprintf("https://cdn.discordapp.com/emojis/%s.png", *rs.EmojiID)
+			sound.EmojiURL = &url
+		}
+		sounds = append(sounds, sound)
+	}
+	updateState(func(d *types.DiscordData) { d.Sounds = &sounds })
+	return nil
+}
+
+// applyActive applies a VIDEO_STATE_UPDATE or SCREENSHARE_STATE_UPDATE event to
+// field.
+func applyActive(data json.RawMessage, field func(*types.DiscordData) **bool) {
+	var e struct {
+		Active *bool `json:"active"`
+	}
+	if err := json.Unmarshal(data, &e); err != nil || e.Active == nil {
+		slog.Warn("Failed to parse Discord state update", "error", err)
+		return
+	}
+	updateState(func(d *types.DiscordData) { *field(d) = e.Active })
+}
+
 // authenticate returns the AUTHENTICATE response.
 func authenticate(ctx context.Context, s *session, creds *Credentials) (json.RawMessage, error) {
 	tok, err := loadToken()
@@ -393,14 +452,18 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 	}
 	if tok != nil {
 		data, err := s.call(ctx, "AUTHENTICATE", map[string]any{"access_token": tok.AccessToken}, "", rpcTimeout)
-		if err == nil {
+		switch {
+		case err == nil && hasScopes(data):
 			return data, nil
-		}
-		if !errors.Is(err, errRejected) {
+		case err == nil:
+			// Tokens from older versions lack the newer scopes.
+			slog.Info("The stored Discord token is missing scopes, authorizing again")
+		case errors.Is(err, errRejected):
+			slog.Info("Discord rejected the stored token, authorizing again", "error", err)
+			clearToken()
+		default:
 			return nil, err
 		}
-		slog.Info("Discord rejected the stored token, authorizing again", "error", err)
-		clearToken()
 	}
 
 	data, err := authorize(ctx, s, creds)
@@ -410,13 +473,34 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 	return data, nil
 }
 
+// scopes are the OAuth scopes System Bridge authorizes with. The video and
+// screenshare scopes allow toggling the camera and screenshare and reading
+// their state.
+var scopes = []string{"rpc", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read", "rpc.screenshare.write"}
+
+// hasScopes reports whether an AUTHENTICATE response grants every scope.
+func hasScopes(auth json.RawMessage) bool {
+	var a struct {
+		Scopes []string `json:"scopes"`
+	}
+	if err := json.Unmarshal(auth, &a); err != nil {
+		return false
+	}
+	for _, scope := range scopes {
+		if !slices.Contains(a.Scopes, scope) {
+			return false
+		}
+	}
+	return true
+}
+
 // authorize shows the Discord approval prompt, stores the new token and
 // returns the AUTHENTICATE response.
 func authorize(ctx context.Context, s *session, creds *Credentials) (json.RawMessage, error) {
 	slog.Info("Requesting Discord authorization. Approve the prompt in Discord.")
 	data, err := s.call(ctx, "AUTHORIZE", map[string]any{
 		"client_id": creds.ClientID,
-		"scopes":    []string{"rpc"},
+		"scopes":    scopes,
 	}, "", authorizeTimeout)
 	if err != nil {
 		return nil, err
@@ -743,6 +827,10 @@ func (s *session) handle(body []byte) {
 		applyUserUpdate(m.Data)
 	case "VOICE_CONNECTION_STATUS":
 		applyConnection(m.Data)
+	case "VIDEO_STATE_UPDATE":
+		applyActive(m.Data, func(d *types.DiscordData) **bool { return &d.Video })
+	case "SCREENSHARE_STATE_UPDATE":
+		applyActive(m.Data, func(d *types.DiscordData) **bool { return &d.Screenshare })
 	case "VOICE_STATE_CREATE", "VOICE_STATE_UPDATE":
 		applyVoiceState(m.Data)
 	case "SPEAKING_START":

@@ -92,6 +92,9 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `processing` | object | Whether `noise_suppression`, `echo_cancellation`, and `automatic_gain_control` are on. |
 | `qos` | boolean | Whether Discord's quality of service for voice packets is on. |
 | `silence_warning` | boolean | Whether Discord warns you when your microphone picks up nothing. |
+| `video` | boolean | Whether your camera is on. `null` until it changes, as Discord only reports changes. |
+| `screenshare` | boolean | Whether you are sharing your screen. `null` until it changes. |
+| `sounds` | array | The soundboard sounds you can play: `id`, `name`, `server_id` (`null` for Discord's default sounds), `emoji`, and `emoji_url` for custom emoji. |
 
 `call` has:
 
