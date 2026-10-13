@@ -14,6 +14,9 @@ type DiscordData struct {
 	Processing     *DiscordVoiceProcessing `json:"processing"`
 	QoS            *bool                   `json:"qos"`
 	SilenceWarning *bool                   `json:"silence_warning"`
+	Video          *bool                   `json:"video"`
+	Screenshare    *bool                   `json:"screenshare"`
+	Sounds         *[]DiscordSound         `json:"sounds"`
 }
 
 // DiscordUser is the Discord account System Bridge is authorized as
@@ -70,6 +73,16 @@ type DiscordCallMember struct {
 	Speaking   bool        `json:"speaking"`
 	LocalMute  *bool       `json:"local_mute"`
 	Volume     *float64    `json:"volume"`
+}
+
+// DiscordSound is a soundboard sound the user can play. ServerID is null for
+// Discord's default sounds.
+type DiscordSound struct {
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	ServerID *string `json:"server_id"`
+	Emoji    *string `json:"emoji"`
+	EmojiURL *string `json:"emoji_url"`
 }
 
 // DiscordAudio is the Discord input or output audio setup
