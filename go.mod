@@ -6,7 +6,7 @@ toolchain go1.27.2
 
 require (
 	fyne.io/systray v1.12.2
-	github.com/Microsoft/go-winio v0.6.3
+	github.com/Microsoft/go-winio v0.6.4
 	github.com/distatus/battery v0.11.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/go-vgo/robotgo v1.3.5
