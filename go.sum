@@ -4,6 +4,8 @@ github.com/BurntSushi/freetype-go v0.0.0-20160129220410-b763ddbfe298/go.mod h1:D
 github.com/BurntSushi/graphics-go v0.0.0-20160129215708-b43f31a4a966/go.mod h1:Mid70uvE93zn9wgF92A/r5ixgnvX8Lh68fxp9KQBaI0=
 github.com/Microsoft/go-winio v0.6.3 h1:M/52tsoyTfwaxajLnXZm7PqkbMGRH8iSWP+8fcg9MQ4=
 github.com/Microsoft/go-winio v0.6.3/go.mod h1:ma0QpxizD4fyyzJ1C7MIblymTD2Nxz5Mho/3CepwIZg=
+github.com/Microsoft/go-winio v0.6.4 h1:kJF2pamtYCWXf0xAT8sAkwKC0pMl2HYBrRPHAqyUc+g=
+github.com/Microsoft/go-winio v0.6.4/go.mod h1:1xl5JXG4ze/m74GH6Dc4Mwxfc3VL5siRVQjIAlHH07U=
 github.com/dblohm7/wingoes v0.0.0-20260526185140-fb298caac7ca h1:h1Awca4lQOspNR/2eeo04Ricn5NixDX9mb17WSAgLhQ=
 github.com/dblohm7/wingoes v0.0.0-20260526185140-fb298caac7ca/go.mod h1:2TGl1jRJrRpbzykmg7asHm3h08TqutUgQqY5v9k/g3c=
 github.com/distatus/battery v0.11.0 h1:KJk89gz90Iq/wJtbjjM9yUzBXV+ASV/EG2WOOL7N8lc=
