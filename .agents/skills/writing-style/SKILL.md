@@ -100,7 +100,7 @@ Size the description to the change. Most PRs need a sentence or two, such as "Fi
 - For UI changes, use a line plus before and after screenshots.
 - Use a plain bullet list for several changes in one area. Only when a change spans distinct areas, group bullets under a short bold label per area, naming real identifiers in backticks.
 - No closing summary, testing essay, or restated title.
-- Inside a repo template, write in its description section (such as "Proposed change"), put links and screenshots in the template's own fields when it has them, and keep everything else, removing only what the template says to. Tick boxes only where the repo's PR guidance says to, such as the type of change; leave the rest for the author.
+- Inside a repo template, write in its description section (such as "Proposed change"), put links and screenshots in the template's own fields when it has them, and keep everything else, removing only what the template says to. Tick the boxes that are true for the change, following any rules the repo sets for them. When the user reviews the text and ticks or unticks boxes, or says which to tick in their notes, keep exactly their choices.
 - Never add placeholders or notes to the author, such as "Add screenshots here", "Insert issue link", or `<!-- TODO -->`, whether drafting or editing an existing description. Leave a section empty if you have nothing for it. This applies only to text you add: keep the template's own comments, prompts, and placeholders (such as `fixes #`) exactly as written.
 - Issues: a clear title can stand alone for small tasks; add a line or link when it needs context. Use a checklist for tracking issues. For bug templates, give the problem in a sentence plus logs.
 
