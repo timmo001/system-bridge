@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 BarWidget {
@@ -42,9 +43,9 @@ BarWidget {
   }
   readonly property color displayColor: {
     if (!systemBridge || !systemBridge.connected) return "#9b9b9b"
-    if (systemBridge.criticalTemperature) return bar ? bar.urgent : Color.urgent
+    if (systemBridge.criticalTemperature) return bar ? bar.urgent : Commons.Color.urgent
     if (warning) return "#e5c07b"
-    return bar ? bar.barForeground : Color.foreground
+    return bar ? bar.barForeground : Commons.Color.foreground
   }
   readonly property string tooltipText: buildTooltip()
 

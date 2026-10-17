@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 // PanelHero with an optional leading back button. Panels keep the back entry
@@ -13,7 +14,7 @@ Item {
   property string title: ""
   property string meta: ""
   property string detail: ""
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
   property real iconOpacity: 1.0
   property string backText: ""
