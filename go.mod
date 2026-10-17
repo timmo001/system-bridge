@@ -9,7 +9,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.4
 	github.com/distatus/battery v0.11.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
-	github.com/go-vgo/robotgo v1.3.5
+	github.com/go-vgo/robotgo v1.3.6
 	github.com/godbus/dbus/v5 v5.2.4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3

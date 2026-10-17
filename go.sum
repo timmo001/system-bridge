@@ -25,6 +25,8 @@ github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 h1:qZNfIGkIANxGv/Oq
 github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4/go.mod h1:kW3HQ4UdaAyrUCSSDR4xUzBKW6O2iA4uHhk7AtyYp10=
 github.com/go-vgo/robotgo v1.3.5 h1:Ina1Al9mL9NYHSVTdOE4bv6yqUjdxx9MrNQsvI88cjA=
 github.com/go-vgo/robotgo v1.3.5/go.mod h1:ej1ABKMyt/we/fK0LZfbO5mjQfkvwZQWDAWIgU04LcQ=
+github.com/go-vgo/robotgo v1.3.6 h1:s766lPAzayJE3yLP1JU6mvgCNX75LGE4Gk2shlB9E38=
+github.com/go-vgo/robotgo v1.3.6/go.mod h1:ej1ABKMyt/we/fK0LZfbO5mjQfkvwZQWDAWIgU04LcQ=
 github.com/go-viper/mapstructure/v2 v2.4.0 h1:EBsztssimR/CONLSZZ04E8qAkxNYq4Qp9LvH92wZUgs=
 github.com/go-viper/mapstructure/v2 v2.4.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
 github.com/godbus/dbus/v5 v5.2.2 h1:TUR3TgtSVDmjiXOgAAyaZbYmIeP3DPkld3jgKGV8mXQ=
