@@ -2,6 +2,12 @@
 name: Setup Runtime
 description: Setup pinned Go, Bun, and Node via mise
 
+inputs:
+  install_args:
+    description: Tools for mise to install, such as "go bun node". Empty installs every tool in mise.toml
+    required: false
+    default: ""
+
 runs:
   using: "composite"
   steps:
@@ -12,6 +18,7 @@ runs:
       uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5
       with:
         cache: true
+        install_args: ${{ inputs.install_args }}
 
     - name: Trust runtime config
       if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
