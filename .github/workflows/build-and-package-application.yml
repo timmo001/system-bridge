@@ -183,8 +183,19 @@ jobs:
           # docs isn't needed for the build
           bun_install_args: --filter ./client/web --filter ./connector/typescript
 
+      # choco exits 0 when the community feed fails, so check NSIS is there
       - name: Install NSIS
-        run: choco install nsis -y --no-progress --limit-output
+        shell: pwsh
+        run: |
+          $makensis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            choco install nsis -y --no-progress --limit-output
+            if (Test-Path $makensis) { exit 0 }
+            Write-Host "NSIS isn't installed after attempt $attempt"
+            Start-Sleep -Seconds (15 * $attempt)
+          }
+          Write-Error "Couldn't install NSIS"
+          exit 1
 
       - name: Get version
         id: get_version
