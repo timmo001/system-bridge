@@ -572,8 +572,12 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 		case err == nil && hasScopes(data):
 			return data, nil
 		case err == nil:
-			// Tokens from older versions lack the newer scopes.
+			// Tokens from older versions lack the newer scopes. Discord refuses
+			// AUTHORIZE once this connection has authenticated, so drop the
+			// token and reconnect to authorize on a fresh connection.
 			slog.Info("The stored Discord token is missing scopes, authorizing again")
+			clearToken()
+			return nil, errors.New("the stored Discord token is missing scopes")
 		case errors.Is(err, errRejected):
 			slog.Info("Discord rejected the stored token, authorizing again", "error", err)
 			clearToken()
@@ -591,8 +595,9 @@ func authenticate(ctx context.Context, s *session, creds *Credentials) (json.Raw
 
 // scopes are the OAuth scopes System Bridge authorizes with. The video and
 // screenshare scopes allow toggling the camera and screenshare and reading
-// their state. The notifications scope allows reading notifications.
-var scopes = []string{"rpc", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read", "rpc.screenshare.write", "rpc.notifications.read"}
+// their state. The voice write scope allows playing soundboard sounds, and the
+// notifications scope allows reading notifications.
+var scopes = []string{"rpc", "rpc.voice.write", "rpc.video.read", "rpc.video.write", "rpc.screenshare.read", "rpc.screenshare.write", "rpc.notifications.read"}
 
 // hasScopes reports whether an AUTHENTICATE response grants every scope.
 func hasScopes(auth json.RawMessage) bool {

@@ -341,7 +341,8 @@ func TestSoundArgs(t *testing.T) {
 
 func TestHasScopes(t *testing.T) {
 	assert.False(t, hasScopes(json.RawMessage(`{"scopes":["rpc"]}`)))
-	assert.True(t, hasScopes(json.RawMessage(`{"scopes":["rpc.voice.read","rpc","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write","rpc.notifications.read"]}`)))
+	assert.False(t, hasScopes(json.RawMessage(`{"scopes":["rpc","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write","rpc.notifications.read"]}`)))
+	assert.True(t, hasScopes(json.RawMessage(`{"scopes":["rpc.voice.read","rpc","rpc.voice.write","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write","rpc.notifications.read"]}`)))
 }
 
 func TestSoundsAndActiveStates(t *testing.T) {
