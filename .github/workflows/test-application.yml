@@ -40,3 +40,6 @@ jobs:
       - name: Run tests
         run: mise run test
         shell: bash
+
+      - name: Save Go cache
+        uses: ./.github/actions/save-go-cache

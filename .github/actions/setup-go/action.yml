@@ -2,25 +2,53 @@
 name: Setup Go Steps
 description: Common steps for setting up System Bridge (Go)
 
+inputs:
+  mise_install_args:
+    description: Tools for mise to install, such as "go bun node". Empty installs every tool in mise.toml
+    required: false
+    default: ""
+
 runs:
   using: "composite"
   steps:
     - uses: ./.github/actions/setup-runtime
+      with:
+        install_args: ${{ inputs.mise_install_args }}
 
-    - name: Clean go module cache
+    # On Windows, Go's default caches sit on C:, which is much slower than the
+    # D: drive the runner works from, so keep them under the runner's temp dir
+    - name: Set Go cache paths
       run: |
-        rm -rf ~/go/pkg/mod
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          echo "GOCACHE=${RUNNER_TEMP}\\go-build" >> "$GITHUB_ENV"
+          echo "GOMODCACHE=${RUNNER_TEMP}\\go-mod" >> "$GITHUB_ENV"
+        else
+          echo "GOCACHE=${HOME}/.cache/go-build" >> "$GITHUB_ENV"
+          echo "GOMODCACHE=${HOME}/go/pkg/mod" >> "$GITHUB_ENV"
+        fi
+        echo "GO_CACHE_KEY=${{ runner.os }}-go-build-${{ hashFiles('mise.toml', '**/go.mod', '**/go.sum') }}" >> "$GITHUB_ENV"
       shell: bash
 
-    - name: Cache go build
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+    - name: Clean go module cache
+      run: rm -rf "$GOMODCACHE"
+      shell: bash
+
+    # Only dev pushes save the cache (see save-go-cache), so pull requests
+    # restore from dev and don't spend time uploading caches nobody else reads
+    - name: Restore go build cache
+      id: restore
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
       with:
         path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-build-${{ hashFiles('mise.toml', '**/go.mod', '**/go.sum') }}
+          ${{ env.GOCACHE }}
+          ${{ env.GOMODCACHE }}
+        key: ${{ env.GO_CACHE_KEY }}
         restore-keys: |
           ${{ runner.os }}-go-build-
+
+    - name: Record go build cache hit
+      run: echo "GO_CACHE_HIT=${{ steps.restore.outputs.cache-hit }}" >> "$GITHUB_ENV"
+      shell: bash
 
     - name: Install dependencies
       run: |
