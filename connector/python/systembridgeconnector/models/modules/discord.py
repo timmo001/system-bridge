@@ -117,6 +117,21 @@ class DiscordDevice:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class DiscordSound:
+    """Discord Sound.
+
+    server_id is None for Discord's default sounds.
+    """
+
+    id: str
+    name: str
+    server_id: str | None = None
+    emoji: str | None = None
+    emoji_url: str | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class DiscordAudio:
     """Discord Audio."""
 
@@ -174,6 +189,9 @@ class Discord:
     processing: DiscordVoiceProcessing | None = None
     qos: bool | None = None
     silence_warning: bool | None = None
+    video: bool | None = None
+    screenshare: bool | None = None
+    sounds: list[DiscordSound] | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
@@ -194,3 +212,8 @@ class Discord:
 
         if isinstance(self.processing, dict):
             self.processing = DiscordVoiceProcessing(**self.processing)
+
+        if isinstance(self.sounds, list) and all(
+            isinstance(item, dict) for item in self.sounds
+        ):
+            self.sounds = [DiscordSound(**cast(dict, s)) for s in self.sounds]

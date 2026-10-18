@@ -38,6 +38,9 @@ const (
 	ActionUnmuteUser         Action = "UNMUTE_USER"
 	ActionToggleUserMute     Action = "TOGGLE_USER_MUTE"
 	ActionSetUserVolume      Action = "SET_USER_VOLUME"
+	ActionToggleVideo        Action = "TOGGLE_VIDEO"
+	ActionToggleScreenshare  Action = "TOGGLE_SCREENSHARE"
+	ActionPlaySound          Action = "PLAY_SOUND"
 )
 
 // selectChannel is the SELECT_VOICE_CHANNEL and SELECT_TEXT_CHANNEL args. A
@@ -51,6 +54,20 @@ var channelCommands = map[Action]string{
 	ActionJoinVoiceChannel:  "SELECT_VOICE_CHANNEL",
 	ActionLeaveVoiceChannel: "SELECT_VOICE_CHANNEL",
 	ActionOpenTextChannel:   "SELECT_TEXT_CHANNEL",
+}
+
+// toggleCommands take no args. Discord sends a state update event after the
+// toggle.
+var toggleCommands = map[Action]string{
+	ActionToggleVideo:       "TOGGLE_VIDEO",
+	ActionToggleScreenshare: "TOGGLE_SCREENSHARE",
+}
+
+// playSound is the PLAY_SOUNDBOARD_SOUND args.
+type playSound struct {
+	SoundID   string `json:"sound_id"`
+	GuildID   string `json:"guild_id"`
+	ChannelID string `json:"channel_id"`
 }
 
 // setVoiceSettings is the SET_VOICE_SETTINGS args. Discord only changes the
@@ -102,18 +119,21 @@ const (
 var voiceModes = []string{"VOICE_ACTIVITY", "PUSH_TO_TALK"}
 
 // ControlParams holds the value an action needs. ChannelID is for the channel
-// actions, UserID for the user actions, Value for the volume, threshold and
-// delay actions, DeviceID for the device actions and Mode for SET_VOICE_MODE.
+// actions, UserID for the user actions, SoundID for PLAY_SOUND, Value for the
+// volume, threshold and delay actions, DeviceID for the device actions and Mode
+// for SET_VOICE_MODE.
 type ControlParams struct {
 	ChannelID string
 	UserID    string
+	SoundID   string
 	Value     *float64
 	DeviceID  string
 	Mode      string
 }
 
-// Control joins, leaves or opens Discord channels, or changes the voice
-// settings or another user's local voice settings.
+// Control joins, leaves or opens Discord channels, toggles the camera or
+// screenshare, plays a soundboard sound, or changes the voice settings or
+// another user's local voice settings.
 func Control(ctx context.Context, action Action, params ControlParams) error {
 	mu.Lock()
 	s, st := current, state
@@ -143,6 +163,20 @@ func Control(ctx context.Context, action Action, params ControlParams) error {
 		}
 		applyUserVoice(data)
 		return nil
+	}
+
+	if cmd, ok := toggleCommands[action]; ok {
+		_, err := s.call(ctx, cmd, struct{}{}, "", rpcTimeout)
+		return err
+	}
+
+	if action == ActionPlaySound {
+		args, err := soundArgs(params, st)
+		if err != nil {
+			return err
+		}
+		_, err = s.call(ctx, "PLAY_SOUNDBOARD_SOUND", args, "", rpcTimeout)
+		return err
 	}
 
 	args, err := controlArgs(action, params, st)
@@ -200,6 +234,30 @@ func userArgs(action Action, p ControlParams, st types.DiscordData) (setUserVoic
 		args.Volume = &v
 	}
 	return args, nil
+}
+
+// soundArgs finds the sound's server in the state, and plays it in the call.
+func soundArgs(p ControlParams, st types.DiscordData) (playSound, error) {
+	if p.SoundID == "" {
+		return playSound{}, fmt.Errorf("%w: sound_id is required", ErrInvalidValue)
+	}
+	var sounds []types.DiscordSound
+	if st.Sounds != nil {
+		sounds = *st.Sounds
+	}
+	i := slices.IndexFunc(sounds, func(s types.DiscordSound) bool { return s.ID == p.SoundID })
+	if i < 0 {
+		return playSound{}, fmt.Errorf("%w: unknown sound %q", ErrInvalidValue, p.SoundID)
+	}
+	if st.Call == nil {
+		return playSound{}, fmt.Errorf("%w: sounds can only be played in a call", ErrInvalidValue)
+	}
+	// Discord's default sounds have guild ID 0.
+	guildID := "0"
+	if sounds[i].ServerID != nil {
+		guildID = *sounds[i].ServerID
+	}
+	return playSound{SoundID: p.SoundID, GuildID: guildID, ChannelID: st.Call.Channel.ID}, nil
 }
 
 func controlArgs(action Action, p ControlParams, st types.DiscordData) (setVoiceSettings, error) {

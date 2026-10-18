@@ -278,6 +278,7 @@ export const DiscordControl = Schema.Struct({
   action: Schema.String,
   channel_id: Schema.optionalKey(Schema.String),
   user_id: Schema.optionalKey(Schema.String),
+  sound_id: Schema.optionalKey(Schema.String),
   value: Schema.optionalKey(Schema.NullOr(Schema.Finite)),
   device_id: Schema.optionalKey(Schema.String),
   mode: Schema.optionalKey(Schema.String),
