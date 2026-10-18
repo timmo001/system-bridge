@@ -60,8 +60,6 @@ sources = [
 outputs = ["client/web/dist/index.html"]
 run = '''
 (cd client/web && bun run build)
-echo "Waiting for file system to sync..."
-sync
 echo "Verifying build files are accessible..."
 if ! ls client/web/dist/index.html >/dev/null 2>&1; then
 	echo "ERROR: client/web/dist/index.html not found"
