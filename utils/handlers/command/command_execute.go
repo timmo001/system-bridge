@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"os/exec"
+	"time"
 
 	"github.com/timmo001/system-bridge/settings"
 )
@@ -49,6 +50,9 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 	// Using shell wrappers would allow shell metacharacter injection despite argument validation.
 	// This is safe because exec.CommandContext does NOT invoke a shell - it executes the binary directly.
 	cmd := exec.CommandContext(ctx, commandDef.Command, commandDef.Arguments...)
+	// Once the context ends, stop waiting on output that a child process
+	// still holds open, or a timeout returns only when that child exits
+	cmd.WaitDelay = time.Second
 
 	// Set working directory if specified
 	if commandDef.WorkingDir != "" {

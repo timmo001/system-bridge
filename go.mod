@@ -4,6 +4,14 @@ go 1.26.0
 
 toolchain go1.27.2
 
+// Keep ./... out of JavaScript dependencies that ship Go files
+ignore (
+	./node_modules
+	./client/web/node_modules
+	./connector/typescript/node_modules
+	./docs/node_modules
+)
+
 require (
 	fyne.io/systray v1.12.2
 	github.com/Microsoft/go-winio v0.6.4

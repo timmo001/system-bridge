@@ -5,9 +5,6 @@ bun run build
 if ($LASTEXITCODE -ne 0) { Write-Host 'ERROR: bun run build failed'; exit $LASTEXITCODE }
 Set-Location ../..
 
-Write-Host "Waiting for file system to sync..."
-Start-Sleep -Seconds 2
-
 Write-Host "Verifying build files are accessible..."
 if (!(Test-Path 'client/web/dist/index.html')) { Write-Host 'ERROR: client/web/dist/index.html not found'; exit 1 }
 if (!(Get-ChildItem 'client/web/dist/assets/*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in client/web/dist/assets/'; Get-ChildItem 'client/web/dist/assets/' -ErrorAction SilentlyContinue; exit 1 }
