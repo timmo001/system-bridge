@@ -60,7 +60,7 @@ Treat the token like a password. A client with it can:
 - Run commands from your command allowlist, and nothing else. The allowlist is empty by default.
 - Lock, sleep, restart or shut down your machine, or log you out.
 - Read and change System Bridge settings.
-- Mute, deafen and change volumes in Discord, if you've set it up.
+- Mute, deafen, change volumes, toggle your camera and screenshare, and play soundboard sounds in Discord, if you've set it up.
 
 System Bridge only sends system data to clients that have connected with the token and asked for it.
 
@@ -148,5 +148,17 @@ Once you've set it up:
 - System Bridge connects to the Discord desktop app through its local socket, or a named pipe on Windows. This connection stays on your machine. System Bridge uses it to read and change your mute, deafen and volume settings.
 - When you first authorise, and whenever the access token expires, System Bridge sends a request to `https://discord.com/api/oauth2/token`. The request contains your application's client ID and client secret, plus the authorisation code or refresh token. Discord replies with an access token.
 - The access token is stored in `discord-token.json` in the settings directory, and only your user can read it. Delete it to authorise again.
+
+### Discord permissions
+
+When you authorise, Discord asks you to grant these scopes:
+
+| Scope | What System Bridge uses it for |
+| --- | --- |
+| `rpc` | Reading your voice settings and call, joining, leaving and opening channels, changing your mute, deafen, volume and voice settings, changing other users' volume and mute for you, and playing soundboard sounds |
+| `rpc.video.read`, `rpc.video.write` | Reading whether your camera is on, and turning it on or off |
+| `rpc.screenshare.read`, `rpc.screenshare.write` | Reading whether you're sharing your screen, and starting or stopping it |
+
+If an update adds a scope, Discord asks you to authorise again.
 
 What Discord does with these requests is covered by [Discord's privacy policy](https://discord.com/privacy).
