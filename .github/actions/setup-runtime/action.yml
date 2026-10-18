@@ -17,7 +17,8 @@ runs:
       if: env.SYSTEM_BRIDGE_RUNTIME_READY != 'true'
       uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5
       with:
-        cache: true
+        # CI container images already ship the tools in /mise
+        cache: ${{ job.container.id == '' }}
         # Pull requests restore from dev, so only dev pushes spend time saving
         cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
         install_args: ${{ inputs.install_args }}
