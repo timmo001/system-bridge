@@ -2,10 +2,18 @@
 name: Build Client (Web)
 description: Build steps for the System Bridge web client
 
+inputs:
+  bun_install_args:
+    description: Extra arguments for bun install, such as --filter flags to install only some workspaces
+    required: false
+    default: ""
+
 runs:
   using: "composite"
   steps:
     - uses: ./.github/actions/setup-client-web
+      with:
+        bun_install_args: ${{ inputs.bun_install_args }}
 
     - name: Cache Vite build cache
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -15,6 +23,10 @@ runs:
         restore-keys: |
           ${{ runner.os }}-vite-v3-${{ hashFiles('mise.toml', 'bun.lock') }}
 
+    # setup-client-web has installed the dependencies, so skip install:js,
+    # which would run a second, unfiltered bun install
     - name: Build client project
-      run: mise run build:client:web
+      run: |
+        mise run --skip-deps generate:schemas
+        mise run --skip-deps build:client:web
       shell: bash
