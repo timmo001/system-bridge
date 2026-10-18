@@ -53,8 +53,8 @@ Available actions:
 - `MUTE_USER`, `UNMUTE_USER`, `TOGGLE_USER_MUTE`: set `user_id` to a user's ID. This mutes them for you only. `TOGGLE_USER_MUTE` needs the user to be in your call.
 - `SET_USER_VOLUME`: set `user_id`, and set `value` to 0-200. This changes their volume for you only.
 - `TOGGLE_VIDEO`: turn your camera on or off.
-- `TOGGLE_SCREENSHARE`: start or stop sharing your screen.
-- `PLAY_SOUND`: set `sound_id` to a sound `id` from `sounds` in the [`discord`](/api/data/#discord) data. You must be in a call.
+- `TOGGLE_SCREENSHARE`: start or stop sharing your screen. Starting opens Discord's source picker, so pick a screen or window to share.
+- `PLAY_SOUND`: set `sound_id` to a sound `id` from `sounds` in the [`discord`](/api/data/#discord) data. You must be in a call. Discord may refuse a sound from a server other than the one you're in.
 
 The volume values are the percentages that Discord's sliders show. In testing, Discord ignored changes to automatic sensitivity, noise suppression, echo cancellation and automatic gain control made over RPC, so those settings are only available as data.
 

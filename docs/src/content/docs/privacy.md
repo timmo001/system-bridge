@@ -53,7 +53,7 @@ The WebSocket and MCP endpoints accept connections from any web origin, so the t
 
 Treat the token like a password. A client with it can:
 
-- Read every [data module](/api/data/). These include your hostname, IP and MAC addresses, logged-in users, running processes, what's playing, which apps are using your camera or microphone, and your Discord voice state.
+- Read every [data module](/api/data/). These include your hostname, IP and MAC addresses, logged-in users, running processes, what's playing, which apps are using your camera or microphone, and your Discord voice state and latest notification.
 - List files and read file details anywhere your user can access, starting from your user directories and any media directories you add.
 - Download media files from your user directories and media directories.
 - Open any file your user can access, open URLs, send notifications, and type keys and text.
@@ -145,7 +145,7 @@ Nothing happens until you create `discord.json` in the settings directory. Until
 
 Once you've set it up:
 
-- System Bridge connects to the Discord desktop app through its local socket, or a named pipe on Windows. This connection stays on your machine. System Bridge uses it to read and change your mute, deafen and volume settings.
+- System Bridge connects to the Discord desktop app through its local socket, or a named pipe on Windows. This connection stays on your machine. System Bridge uses it to read and change your voice settings, camera and screenshare, play soundboard sounds, and read your latest notification.
 - When you first authorise, and whenever the access token expires, System Bridge sends a request to `https://discord.com/api/oauth2/token`. The request contains your application's client ID and client secret, plus the authorisation code or refresh token. Discord replies with an access token.
 - The access token is stored in `discord-token.json` in the settings directory, and only your user can read it. Delete it to authorise again.
 
@@ -155,9 +155,11 @@ When you authorise, Discord asks you to grant these scopes:
 
 | Scope | What System Bridge uses it for |
 | --- | --- |
-| `rpc` | Reading your voice settings and call, joining, leaving and opening channels, changing your mute, deafen, volume and voice settings, changing other users' volume and mute for you, and playing soundboard sounds |
+| `rpc` | Reading your voice settings and call, joining, leaving and opening channels, changing your mute, deafen, volume and voice settings, and changing other users' volume and mute for you |
+| `rpc.voice.write` | Playing soundboard sounds |
 | `rpc.video.read`, `rpc.video.write` | Reading whether your camera is on, and turning it on or off |
 | `rpc.screenshare.read`, `rpc.screenshare.write` | Reading whether you're sharing your screen, and starting or stopping it |
+| `rpc.notifications.read` | Reading your latest Discord notification: its channel, title, body and icon |
 
 If an update adds a scope, Discord asks you to authorise again.
 
