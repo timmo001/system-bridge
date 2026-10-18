@@ -2,11 +2,24 @@
 name: Setup Client (Web)
 description: Setup steps for the System Bridge web client
 
+inputs:
+  bun_install_args:
+    description: Extra arguments for bun install, such as --filter flags to install only some workspaces
+    required: false
+    default: ""
+
 runs:
   using: "composite"
   steps:
     - uses: ./.github/actions/setup-runtime
 
+    # Bun can only hardlink from its cache when both sit on the same drive, and
+    # on Windows the default cache is on C: while the checkout is on D:
+    - name: Set Bun cache path
+      if: runner.os == 'Windows'
+      run: echo "BUN_INSTALL_CACHE_DIR=${RUNNER_TEMP}\\bun-cache" >> "$GITHUB_ENV"
+      shell: bash
+
     - name: Install Bun workspace dependencies
-      run: mise exec -- bun install --frozen-lockfile
+      run: mise exec -- bun install --frozen-lockfile ${{ inputs.bun_install_args }}
       shell: bash

@@ -61,6 +61,9 @@ jobs:
         run: |
           go build -v -ldflags="-X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge-linux"
 
+      - name: Save Go cache
+        uses: ./.github/actions/save-go-cache
+
       - name: Verify CSS in Linux binary
         run: |
           chmod +x ./.scripts/verify-css.sh
@@ -116,9 +119,38 @@ jobs:
           path: dist/**
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
 
+  windows-changes:
+    name: Check Windows-relevant changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.windows_changes.outputs.changed || 'true' }}
+    steps:
+      - name: Checkout code
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect Windows-relevant changes
+        id: windows_changes
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: .github/scripts/bash/detect-windows-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+
+  # A job skipped by its `if` reports success, so the required check still
+  # passes on pull requests that can't affect the Windows build
   build-package-windows:
     name: Build and package windows
+    needs:
+      - windows-changes
+    # Still build if the check itself fails, rather than skip and pass
+    if: ${{ !cancelled() && (needs.windows-changes.result != 'success' || needs.windows-changes.outputs.changed == 'true') }}
     runs-on: windows-latest
+    env:
+      # python and uv are only needed by the Python connector
+      MISE_DISABLE_TOOLS: python,uv
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -142,19 +174,28 @@ jobs:
 
       - name: Setup Go
         uses: ./.github/actions/setup-go
+        with:
+          mise_install_args: go bun node
 
       - name: Build web client
         uses: ./.github/actions/build-client-web
-
-      - name: Setup MinGW
-        uses: egor-tensin/setup-mingw@41b837e47d7f85214629d255b9c4bc3fcbe9fd63 # v3
         with:
-          platform: x64
-          # https://github.com/egor-tensin/setup-mingw/issues/17#issuecomment-1890253793
-          version: 12.2.0
+          # docs isn't needed for the build
+          bun_install_args: --filter ./client/web --filter ./connector/typescript
 
+      # choco exits 0 when the community feed fails, so check NSIS is there
       - name: Install NSIS
-        run: choco install nsis -y --no-progress --limit-output
+        shell: pwsh
+        run: |
+          $makensis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            choco install nsis -y --no-progress --limit-output
+            if (Test-Path $makensis) { exit 0 }
+            Write-Host "NSIS isn't installed after attempt $attempt"
+            Start-Sleep -Seconds (15 * $attempt)
+          }
+          Write-Error "Couldn't install NSIS"
+          exit 1
 
       - name: Get version
         id: get_version
@@ -166,6 +207,8 @@ jobs:
           powershell -ExecutionPolicy Bypass -File ./.scripts/windows/generate-rc.ps1
           windres system-bridge.rc -O coff -o system-bridge.syso
 
+      # The runner image's MinGW (C:\mingw64) is on PATH. Link statically so the
+      # exe doesn't need its runtime DLLs, such as libwinpthread-1.dll
       - name: Build application
         env:
           GOOS: windows
@@ -173,12 +216,20 @@ jobs:
           CGO_ENABLED: 1
           CC: gcc
         run: |
-          go build -v -ldflags="-H windowsgui -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
+          go build -v -ldflags="-H windowsgui -extldflags=-static -X 'github.com/timmo001/system-bridge/version.Version=${{ env.VERSION }}'" -o "system-bridge.exe"
 
-      - name: Verify CSS in Windows binary
-        shell: pwsh
+      - name: Save Go cache
+        uses: ./.github/actions/save-go-cache
+
+      - name: Check for MinGW runtime DLL imports
+        shell: bash
         run: |
-          ./.scripts/windows/create-installer.ps1 -VerifyBinaryOnly
+          dlls="$(objdump -p system-bridge.exe | grep 'DLL Name')"
+          echo "$dlls"
+          if grep -Eiq 'DLL Name: (libwinpthread|libgcc|libstdc\+\+|libssp|libgomp)' <<<"$dlls"; then
+            echo "::error::system-bridge.exe imports a MinGW runtime DLL"
+            exit 1
+          fi
 
       - name: Package for Windows
         run: ./.github/scripts/pwsh/package-windows.ps1

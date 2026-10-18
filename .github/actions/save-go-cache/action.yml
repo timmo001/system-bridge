@@ -1,0 +1,15 @@
+---
+name: Save Go Cache
+description: Save the Go build and module caches set up by setup-go, on dev pushes only
+
+runs:
+  using: "composite"
+  steps:
+    - name: Save go build cache
+      if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && env.GO_CACHE_HIT != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: |
+          ${{ env.GOCACHE }}
+          ${{ env.GOMODCACHE }}
+        key: ${{ env.GO_CACHE_KEY }}
