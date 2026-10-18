@@ -341,7 +341,7 @@ func TestSoundArgs(t *testing.T) {
 
 func TestHasScopes(t *testing.T) {
 	assert.False(t, hasScopes(json.RawMessage(`{"scopes":["rpc"]}`)))
-	assert.True(t, hasScopes(json.RawMessage(`{"scopes":["rpc.voice.read","rpc","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write"]}`)))
+	assert.True(t, hasScopes(json.RawMessage(`{"scopes":["rpc.voice.read","rpc","rpc.video.read","rpc.video.write","rpc.screenshare.read","rpc.screenshare.write","rpc.notifications.read"]}`)))
 }
 
 func TestSoundsAndActiveStates(t *testing.T) {
@@ -377,6 +377,24 @@ func TestSoundsAndActiveStates(t *testing.T) {
 	}, *d.Sounds)
 	assert.Equal(t, new(true), d.Screenshare)
 	assert.Nil(t, d.Video)
+}
+
+func TestApplyNotification(t *testing.T) {
+	t.Cleanup(func() {
+		mu.Lock()
+		state = types.DiscordData{}
+		mu.Unlock()
+	})
+
+	applyNotification(json.RawMessage(`{"channel_id":"2","title":"friend (#general, Server)","body":"hello","icon_url":"https://cdn.discordapp.com/avatars/4/a.png","message":{"id":"5","content":"hello"}}`))
+
+	assert.Equal(t, &types.DiscordNotification{
+		MessageID: new("5"),
+		ChannelID: "2",
+		Title:     "friend (#general, Server)",
+		Body:      "hello",
+		IconURL:   new("https://cdn.discordapp.com/avatars/4/a.png"),
+	}, State().Notification)
 }
 
 func TestControlWithoutConnection(t *testing.T) {

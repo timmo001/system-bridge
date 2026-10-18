@@ -17,6 +17,7 @@ type DiscordData struct {
 	Video          *bool                   `json:"video"`
 	Screenshare    *bool                   `json:"screenshare"`
 	Sounds         *[]DiscordSound         `json:"sounds"`
+	Notification   *DiscordNotification    `json:"notification"`
 }
 
 // DiscordUser is the Discord account System Bridge is authorized as
@@ -83,6 +84,15 @@ type DiscordSound struct {
 	ServerID *string `json:"server_id"`
 	Emoji    *string `json:"emoji"`
 	EmojiURL *string `json:"emoji_url"`
+}
+
+// DiscordNotification is the latest notification Discord showed
+type DiscordNotification struct {
+	MessageID *string `json:"message_id"`
+	ChannelID string  `json:"channel_id"`
+	Title     string  `json:"title"`
+	Body      string  `json:"body"`
+	IconURL   *string `json:"icon_url"`
 }
 
 // DiscordAudio is the Discord input or output audio setup

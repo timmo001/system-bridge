@@ -13,5 +13,6 @@
   "silence_warning": null,
   "video": null,
   "screenshare": null,
-  "sounds": null
+  "sounds": null,
+  "notification": null
 }
