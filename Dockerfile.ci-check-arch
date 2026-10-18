@@ -1,0 +1,33 @@
+FROM archlinux:base-20260419.0.517065@sha256:5ba8bb318666baef4d33afefc0e65db80f38b23503cb8e7b150d315cc2d4d5da
+
+# Slim image for the lint and test jobs: only what building the Go app and
+# web client needs. Packaging tools live in the ci-build images.
+
+WORKDIR /workspace
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV MISE_DATA_DIR="/mise"
+ENV MISE_CACHE_DIR="/mise/cache"
+ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
+ENV PATH="/mise/shims:/usr/local/bin:/usr/bin:$PATH"
+
+# Same libraries the Arch package builds against
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed \
+        gcc \
+        git \
+        libx11 \
+        libxkbcommon \
+        libxkbcommon-x11 \
+        libxtst \
+        pkgconf \
+    && pacman -Scc --noconfirm
+
+# Install the runtimes the jobs use from mise.toml (not Python or uv)
+COPY mise.toml ./
+RUN curl https://mise.run | sh \
+    && mise trust -a \
+    && mise install go bun node
+
+CMD ["bash"]

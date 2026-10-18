@@ -10,6 +10,7 @@ on:
       - .github/workflows/build-and-push-ci-image.yml
       - Dockerfile.ci-build-arch
       - Dockerfile.ci-build-ubuntu
+      - Dockerfile.ci-check-arch
       - mise.toml
   schedule:
     - cron: "0 3 * * 0"  # Every Sunday at 03:00 UTC
@@ -17,13 +18,14 @@ on:
 
 jobs:
   build-and-push:
-    name: Build and push CI ${{ matrix.os }} image
+    name: Build and push CI ${{ matrix.image }} image
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os:
-          - arch
-          - ubuntu
+        image:
+          - build-arch
+          - build-ubuntu
+          - check-arch
     permissions:
       contents: read
       packages: write
@@ -45,8 +47,8 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
-          file: Dockerfile.ci-build-${{ matrix.os }}
+          file: Dockerfile.ci-${{ matrix.image }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/ci-build-${{ matrix.os }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ghcr.io/${{ github.repository }}/ci-${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
