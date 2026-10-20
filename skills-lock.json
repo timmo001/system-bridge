@@ -10,10 +10,10 @@
     },
     "code-review": {
       "source": "timmo001/skills",
-      "ref": "e35288def78a7f71ce15128a742ed94eb7d3fbde",
+      "ref": "464b598d62528b331021dee2242fc7febb242f11",
       "sourceType": "github",
       "skillPath": "code-review/SKILL.md",
-      "computedHash": "bc6af04ecee3f4a40dcacc77a8c6cd3046f3982159b9469eae49f30bb14d02cd"
+      "computedHash": "6fc74fbcf3fd7f5afcbff958b549755e688ed7a448b2a5dd0b97f3eb186c54c2"
     },
     "effect": {
       "source": "kitlangton/skills",
@@ -38,10 +38,10 @@
     },
     "skill-prefixes": {
       "source": "timmo001/skills",
-      "ref": "ffd3e6756336784993e1cf0af52d05dfcf76a27d",
+      "ref": "464b598d62528b331021dee2242fc7febb242f11",
       "sourceType": "github",
       "skillPath": "skill-prefixes/SKILL.md",
-      "computedHash": "a54c4127997e3dc6207ac3dd167481b4ec1ff8eabdeb85ba71d6b938af56ed28"
+      "computedHash": "d89cce02ac5549f3be1adc6166a903adfda1201d0269d32d370966e0946cdc49"
     },
     "task-runners": {
       "source": "timmo001/skills",
@@ -66,10 +66,10 @@
     },
     "writing-style": {
       "source": "timmo001/skills",
-      "ref": "570ba955fe0e89886b80811d1c5c7bd70d8f1020",
+      "ref": "464b598d62528b331021dee2242fc7febb242f11",
       "sourceType": "github",
       "skillPath": "writing-style/SKILL.md",
-      "computedHash": "3bbf1e2f3b1e66ab45f20a6cb510b03e8edbdabcf204094e9e854190764f22a3"
+      "computedHash": "7cdc03731339bf0b1791cdd6da227f70279ac3cdb57776acb92def3cb343e155"
     }
   }
 }

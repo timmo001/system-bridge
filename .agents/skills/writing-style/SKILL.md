@@ -40,23 +40,23 @@ Apply these rules to all writing covered by this skill. Follow AGENTS.md for cha
 
 Do not use these as fancy substitutes for ordinary words:
 
-| Avoid | Write instead |
-| --- | --- |
-| humanise prose | make writing sound natural |
-| prose | writing or text |
-| register | tone |
-| venue | where the text will appear |
-| artefact / artifact | file, document, or output, whichever you mean |
-| corpus | writing samples or existing work |
-| provenance | source or where it came from |
-| materialise | create or write |
-| canonical | main or source, whichever you mean |
-| scaffolding / ceremony | setup or extra steps, whichever you mean |
-| leverage / utilise | use |
-| delve into | read, check, or investigate |
-| facilitate | help or enable |
-| rationale | reason |
-| calibrate against | compare with or match |
+| Avoid                  | Write instead                                 |
+| ---------------------- | --------------------------------------------- |
+| humanise prose         | make writing sound natural                    |
+| prose                  | writing or text                               |
+| register               | tone                                          |
+| venue                  | where the text will appear                    |
+| artefact / artifact    | file, document, or output, whichever you mean |
+| corpus                 | writing samples or existing work              |
+| provenance             | source or where it came from                  |
+| materialise            | create or write                               |
+| canonical              | main or source, whichever you mean            |
+| scaffolding / ceremony | setup or extra steps, whichever you mean      |
+| leverage / utilise     | use                                           |
+| delve into             | read, check, or investigate                   |
+| facilitate             | help or enable                                |
+| rationale              | reason                                        |
+| calibrate against      | compare with or match                         |
 
 Cut empty praise and padding: "seamlessly", "robust", "powerful", "effortless", "groundbreaking", "pivotal", "comprehensive", "It is worth noting", "In order to", "Furthermore", and "Let's dive in". State the useful fact instead of replacing one buzzword with another.
 
@@ -97,7 +97,8 @@ Size the description to the change. Most PRs need a sentence or two, such as "Fi
 - Open with what changed, verb-first in the present tense ("Adds", "Fixes", "Moves"), plus the reason when the title does not make it obvious.
 - Link rather than explain: the issue it fixes, the review it follows up, release notes or a compare link for package bumps, a line of code, the docs behind a decision. Keep links easy to spot: on their own line, or in a short `References:` list at the end for external docs and sources.
 - State caveats bluntly: "No functional changes", "Handles the error, doesn't fix it", "Untested on Linux", "Tests to follow after #123".
-- For UI changes, use a line plus before and after screenshots.
+- For UI changes, use a line plus before and after screenshots, laid out side by side in a table (`| Before | After |`). Put screenshots of earlier iterations or superseded changes in a `<details>` block with a short `<summary>`, so they stay hidden by default.
+- Upload images and videos with `gh`'s `--attach` flag (gh 2.99.0+) rather than asking the user to drag them in. It works on `gh pr` and `gh issue` `create`, `edit` and `comment`; reference the local path in the body (`![Settings after the fix](./after.png)`) and gh swaps in the uploaded URL. Review bodies and inline review comments have no `--attach`, so attach media there only when the user has a separate upload tool.
 - Use a plain bullet list for several changes in one area. Only when a change spans distinct areas, group bullets under a short bold label per area, naming real identifiers in backticks.
 - No closing summary, testing essay, or restated title.
 - Inside a repo template, write in its description section (such as "Proposed change"), put links and screenshots in the template's own fields when it has them, and keep everything else, removing only what the template says to. Tick the boxes that are true for the change, following any rules the repo sets for them. When the user reviews the text and ticks or unticks boxes, or says which to tick in their notes, keep exactly their choices.
@@ -107,6 +108,7 @@ Size the description to the change. Most PRs need a sentence or two, such as "Fi
 Longer examples, each a complete body; read the one closest to the change before drafting:
 
 - [Package bump](references/pr-package-bump.md): what changed functionally plus a compare link.
+- [UI change](references/pr-screenshots.md): before and after screenshots in a table, with earlier iterations in a collapsed `<details>` block.
 - [External sources](references/pr-with-sources.md): a short explanation, a test run link, and a `References:` list at the end.
 - [Multi-area change](references/pr-multi-area.md): bullets grouped under bold area labels.
 - [Bug issue](references/issue-bug.md): where it was reported, the log, and what should happen.
