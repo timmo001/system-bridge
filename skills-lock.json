@@ -66,10 +66,10 @@
     },
     "writing-style": {
       "source": "timmo001/skills",
-      "ref": "464b598d62528b331021dee2242fc7febb242f11",
+      "ref": "5f16a39d2616ae64a332fc7251121d7911328e47",
       "sourceType": "github",
       "skillPath": "writing-style/SKILL.md",
-      "computedHash": "7cdc03731339bf0b1791cdd6da227f70279ac3cdb57776acb92def3cb343e155"
+      "computedHash": "86d053ceb2db469c36bd96f07c7e8c09588e827541f5f8a8e691b69ceb59d331"
     }
   }
 }

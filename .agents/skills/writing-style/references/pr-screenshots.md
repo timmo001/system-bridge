@@ -14,3 +14,13 @@ Fixes #123
 | ![First pass with the forecast hidden](./first-hidden.png) | ![First pass with the forecast shown](./first-shown.png) |
 
 </details>
+
+Several views, one table per pair, with the URL after each caption:
+
+| Integration page link (`/config/devices/dashboard?domain=wled`) | Area page link (`/config/devices/dashboard?area=kitchen`) |
+| --- | --- |
+| ![Devices filtered to WLED](./integration-link.png) | ![Devices filtered to the kitchen](./area-link.png) |
+
+| Grouped by manufacturer (`/config/devices/dashboard?group=manufacturer`) | The same with a search (`/config/devices/dashboard?group=manufacturer&search=light`) |
+| --- | --- |
+| ![Devices grouped by manufacturer](./group.png) | ![Grouped devices matching light](./search.png) |
