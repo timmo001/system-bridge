@@ -54,7 +54,7 @@
     "effect": "4.0.5"
   },
   "devDependencies": {
-    "@effect/tsgo": "0.54.0",
+    "@effect/tsgo": "0.54.1",
     "@oxlint/plugins": "1.88.0",
     "@timmo001/oxlint-rules": "0.6.3",
     "@types/bun": "1.4.3",
