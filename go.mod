@@ -2,7 +2,7 @@ module github.com/timmo001/system-bridge
 
 go 1.26.0
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 // Keep ./... out of JavaScript dependencies that ship Go files
 ignore (
