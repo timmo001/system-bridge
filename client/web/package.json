@@ -32,14 +32,14 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.88.0",
+    "@oxlint/plugins": "1.89.0",
     "@tailwindcss/vite": "^4.2.4",
     "@timmo001/oxlint-rules": "0.6.3",
     "@types/node": "^26.0.0",
     "concurrently": "^10.0.0",
     "eslint-plugin-lit": "2.3.1",
     "eslint-plugin-wc": "3.1.0",
-    "oxlint": "1.88.0",
+    "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2004",
     "postcss": "^8.5.14",
     "prettier": "^3.8.3",
