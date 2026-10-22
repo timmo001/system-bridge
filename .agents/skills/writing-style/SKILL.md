@@ -128,7 +128,7 @@ Write in the first person, as yourself, like a reply to a colleague.
 - Point to the right place when the issue belongs elsewhere, with a link. Credit whoever found or fixed it: "Spotted and fixed by @user in #123".
 - Give opinions and decisions as your own: "Signing is not something I'm willing to do", "IMHO this is a false positive".
 - Link the release, issue, or line of code instead of describing it. Share findings as logs or code blocks. Quote the part you are replying to with `>` in a busy thread.
-- Thanks, light humour, and the odd emoji are fine. No headings or bullet lists unless listing steps or TODOs.
+- No stock pleasantries or praise such as "Good catch", "Nice find", "Great question" or "Thanks for flagging", to people or bots. Open with the substance: "Fixed in abc1234, the detached page now keeps the filter's items", "Not changing this, the value is always set by then". Thanks, light humour or the odd emoji only where genuinely meant, such as thanking someone who put real time into a report or fix, and never in replies to bots. No headings or bullet lists unless listing steps or TODOs.
 
 Longer examples:
 
