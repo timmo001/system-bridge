@@ -3,7 +3,7 @@ min_version = "2025.1.0"
 [tools]
 bun = "1.4.3"
 go = "1.27.3"
-node = "26.12.0"
+node = "26.12.1"
 # renovate: datasource=custom.home-assistant-python-minor depName=python
 python = "3.14"
 uv = "0.13.4"
