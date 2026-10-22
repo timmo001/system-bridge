@@ -97,52 +97,52 @@ checksum = "sha256:f26081f438319757f8a1b46d7d0b2c5ec7583d4038e485e0aa725cfde7885
 url = "https://dl.google.com/go/go1.27.3.windows-amd64.zip"
 
 [[tools.node]]
-version = "26.12.0"
+version = "26.12.1"
 backend = "core:node"
 
 [tools.node."platforms.linux-arm64"]
-checksum = "sha256:ec53c915c3fdd8786c5685abd25ae3fe9fba0692307f9811d7caaadea1bcaf03"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-arm64.tar.gz"
+checksum = "sha256:a6c01af459dd8972ab3fb08ee5da81244d26ba8c4944a62d5bbba8c597ae154f"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-linux-arm64.tar.gz"
 
 [tools.node."platforms.linux-arm64-musl"]
-checksum = "sha256:2e70b6d5adbae94546c4d7e01de7b64c50bf8d3dbfaad2bb0774942e9da902b8"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.12.0/node-v26.12.0-linux-arm64-musl.tar.gz"
+checksum = "sha256:c3694551f6cb888fe0befb4cb2e13ffe45b0bb2528ec141e7c3a29a7d7974d13"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.12.1/node-v26.12.1-linux-arm64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:d9f88af72ad34f7ddf8e67289829f1698f54b6254f7d4f54b7453117ff1a3d2c"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-x64.tar.gz"
+checksum = "sha256:0fd1eb7770598f52a21995edf6ed35fc690400fa437c2386af329519e9143132"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-baseline"]
-checksum = "sha256:d9f88af72ad34f7ddf8e67289829f1698f54b6254f7d4f54b7453117ff1a3d2c"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-x64.tar.gz"
+checksum = "sha256:0fd1eb7770598f52a21995edf6ed35fc690400fa437c2386af329519e9143132"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:48ba1cdf21e684f13f38b6295f43bfea951f1ffd008b4cf93361c966b33f6938"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.12.0/node-v26.12.0-linux-x64-musl.tar.gz"
+checksum = "sha256:8bf9cc0e7f8e3c7ec5368dca19242cad651b6b09d35bcdcf290ac3f80925e8dd"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.12.1/node-v26.12.1-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:48ba1cdf21e684f13f38b6295f43bfea951f1ffd008b4cf93361c966b33f6938"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.12.0/node-v26.12.0-linux-x64-musl.tar.gz"
+checksum = "sha256:8bf9cc0e7f8e3c7ec5368dca19242cad651b6b09d35bcdcf290ac3f80925e8dd"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.12.1/node-v26.12.1-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:2a154d4a5458930e0a2d6a1ecf64eddf5a2b3e1c13636b609c2ecb042e8c4553"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-darwin-arm64.tar.gz"
+checksum = "sha256:1901d539912c02afa10d1cc126943a8855a7eedebe830119463470db5e6c59e8"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-darwin-arm64.tar.gz"
 
 [tools.node."platforms.macos-x64"]
-checksum = "sha256:878ecede191c7abc1bff01d3fb81f7ed81aa1161040dba18776b8ff8593614b1"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-darwin-x64.tar.gz"
+checksum = "sha256:b85c2ea4420ad0bc4abf2dc6cf1f55130ed681f1cabf60cf3f526e4c9e2712ff"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-darwin-x64.tar.gz"
 
 [tools.node."platforms.macos-x64-baseline"]
-checksum = "sha256:878ecede191c7abc1bff01d3fb81f7ed81aa1161040dba18776b8ff8593614b1"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-darwin-x64.tar.gz"
+checksum = "sha256:b85c2ea4420ad0bc4abf2dc6cf1f55130ed681f1cabf60cf3f526e4c9e2712ff"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-darwin-x64.tar.gz"
 
 [tools.node."platforms.windows-x64"]
-checksum = "sha256:50efaf01a08c520b4bbe499c09a8c5a5c370002c419c0d9da2c6815d3066a453"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-win-x64.zip"
+checksum = "sha256:b3efd5c70cba3308ed46e7e699a9b8aac075bbc6b027fcb39c84c31acc25e2b4"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-win-x64.zip"
 
 [tools.node."platforms.windows-x64-baseline"]
-checksum = "sha256:50efaf01a08c520b4bbe499c09a8c5a5c370002c419c0d9da2c6815d3066a453"
-url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-win-x64.zip"
+checksum = "sha256:b3efd5c70cba3308ed46e7e699a9b8aac075bbc6b027fcb39c84c31acc25e2b4"
+url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-win-x64.zip"
 
 [[tools.python]]
 version = "3.14.8"
