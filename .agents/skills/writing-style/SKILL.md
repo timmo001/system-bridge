@@ -7,7 +7,10 @@ description: >
   messages) in the project owner's voice: concise, human, UK English, no
   em-dashes, no robotic or marketing tone. Use when writing, editing, or
   reviewing these, including requests to make writing sound natural or remove
-  jargon. Keep the meaning and follow the repo's established writing style.
+  jargon, and before adding screenshots, images or videos to a PR, issue or
+  comment: gh pr/issue create, edit and comment upload them with --attach,
+  so never ask the user to drag them in. Keep the meaning and follow the
+  repo's established writing style.
 ---
 
 # Writing Style
