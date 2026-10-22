@@ -22,7 +22,7 @@
         "@timmo001/effect-system-bridge": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "effect": "4.0.5",
+        "effect": "4.0.6",
         "lit": "^3.3.2",
         "lucide": "^1.14.0",
         "tailwind-merge": "^3.5.0",
@@ -53,14 +53,14 @@
         "@oxlint/plugins": "1.89.0",
         "@timmo001/oxlint-rules": "0.6.3",
         "@types/bun": "1.4.3",
-        "effect": "4.0.5",
+        "effect": "4.0.6",
         "oxlint": "1.89.0",
         "oxlint-tsgolint": "7.0.2004",
         "prettier": "3.9.10",
         "typescript": "7.0.2",
       },
       "peerDependencies": {
-        "effect": "4.0.5",
+        "effect": "4.0.6",
       },
     },
     "docs": {
@@ -774,7 +774,7 @@
 
     "dset": ["dset@3.1.4", "", {}, "sha512-2QF/g9/zTaPDc3BjNcVTGoBbXBgYfMTTceLaYcFJ/W9kggFUkhxD/hMEeuLKbugyef9SqAx8cpgwlIP/jinUTA=="],
 
-    "effect": ["effect@4.0.5", "", {}, "sha512-BY4/28NlpOd99yzmV741xbVGmp+1U7tks4oB7F/Png64bTa5tm5eCA6W0RiXsnuLDDoJpjfVSo4Dnq4BZb/89Q=="],
+    "effect": ["effect@4.0.6", "", {}, "sha512-Tc3mkzuLR6t6P9dhLt0D2GrxYtmU5td4XEJEiXCmILz53IRIfJyHsKZWjTA3xEjiwpNTtXBgI4iqYPxMztBDrw=="],
 
     "emoji-regex": ["emoji-regex@10.6.0", "", {}, "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A=="],
 
