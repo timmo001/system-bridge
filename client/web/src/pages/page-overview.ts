@@ -1,20 +1,21 @@
-import { mdiAlertCircleOutline, mdiDownload, mdiMusicNote } from "@mdi/js";
+import { mdiAlertCircleOutline, mdiMusicNote } from "@mdi/js";
 import type { ModuleName, ModulesData } from "@timmo001/effect-system-bridge";
 import { css, html, nothing } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 
 import "~/components/sb-card";
 import "~/components/sb-gauge";
+import "~/components/sb-history-export";
 import "~/components/sb-meter";
 import "~/components/sb-timeseries";
-import { icon, pageStyles, shared, spinner } from "~/components/shared-styles";
+import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   dashboardStyles,
   powerSeries,
   temperatureSeries,
 } from "~/dashboards/shared";
-import { actionResult, moduleState, registry } from "~/lib/atoms";
+import { actionResult, moduleState } from "~/lib/atoms";
 import {
   formatBytes,
   formatFrequency,
@@ -26,7 +27,7 @@ import {
   formatUptime,
   formatWatts,
 } from "~/lib/format";
-import { type ExportFormat, exportHistory, metricHistory } from "~/lib/history";
+import { exportHistory, metricHistory } from "~/lib/history";
 import { moduleInfo, moduleOrder } from "~/lib/navigation";
 import { href } from "~/lib/router";
 
@@ -137,42 +138,7 @@ export class PageOverview extends SbPage {
 
   readonly #export = new AtomController(this, () => exportHistory);
 
-  /** The format being exported, for its button's spinner. */
-  @state() private exporting: ExportFormat = "csv";
-
   protected readonly pageTitle = "Overview";
-
-  #onExport = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLElement)) return;
-
-    const format = event.currentTarget.dataset.format;
-
-    if (format !== "csv" && format !== "json") return;
-
-    this.exporting = format;
-    registry.set(exportHistory, format);
-  };
-
-  #renderExport() {
-    const busy = this.#export.value.waiting;
-
-    const button = (format: ExportFormat, label: string) =>
-      html`<button
-        class="button small"
-        type="button"
-        data-format=${format}
-        title="Download up to the last 24 hours of readings as ${label}"
-        ?disabled=${busy}
-        @click=${this.#onExport}
-      >
-        ${busy && this.exporting === format ? spinner() : icon(mdiDownload)}
-        ${label}
-      </button>`;
-
-    return html`<div class="row" role="group" aria-label="Export history">
-      ${button("csv", "CSV")} ${button("json", "JSON")}
-    </div>`;
-  }
 
   #renderGauges(data: ModulesData) {
     const { cpu, memory, battery, gpus } = data;
@@ -446,7 +412,9 @@ export class PageOverview extends SbPage {
         ${this.renderHeader({
           heading: "Overview",
           description: "Live readings from this system",
-          actions: this.status.isConnected ? this.#renderExport() : undefined,
+          actions: this.status.isConnected
+            ? html`<sb-history-export></sb-history-export>`
+            : undefined,
         })}
         ${
           // Only a failed export needs a message; the download is the success

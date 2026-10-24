@@ -6,6 +6,7 @@ import { customElement, property } from "lit/decorators.js";
 import "~/components/sb-card";
 import "~/components/sb-data-table";
 import "~/components/sb-gauge";
+import "~/components/sb-history-export";
 import "~/components/sb-meter";
 import "~/components/sb-segmented";
 import "~/components/sb-timeseries";
@@ -30,8 +31,8 @@ import {
   processesDashboard,
   systemDashboard,
 } from "~/dashboards/system";
-import { moduleState } from "~/lib/atoms";
-import { metricHistory } from "~/lib/history";
+import { actionResult, moduleState } from "~/lib/atoms";
+import { exportHistory, historyModules, metricHistory } from "~/lib/history";
 import { moduleInfo } from "~/lib/navigation";
 import {
   type DataView,
@@ -176,6 +177,8 @@ export class PageModule extends SbPage {
 
   readonly #history = new AtomController(this, () => metricHistory);
 
+  readonly #export = new AtomController(this, () => exportHistory);
+
   protected get pageTitle(): string {
     return moduleInfo[this.location.params.module].label;
   }
@@ -257,26 +260,38 @@ export class PageModule extends SbPage {
           heading: info.label,
           description: info.description,
           icon: info.icon,
-          actions: html`<sb-segmented
-            narrow-icons
-            label="View"
-            .options=${[
-              {
-                value: "dashboard",
-                label: "Dashboard",
-                icon: mdiViewDashboardOutline,
-                href: this.#viewHref("dashboard"),
-              },
-              {
-                value: "json",
-                label: "JSON",
-                icon: mdiCodeJson,
-                href: this.#viewHref("json"),
-              },
-            ]}
-            .value=${view}
-          ></sb-segmented>`,
+          actions: html`${
+              historyModules.has(module) && this.status.isConnected
+                ? html`<sb-history-export
+                    .module=${module}
+                  ></sb-history-export>`
+                : nothing
+            }<sb-segmented
+              narrow-icons
+              label="View"
+              .options=${[
+                {
+                  value: "dashboard",
+                  label: "Dashboard",
+                  icon: mdiViewDashboardOutline,
+                  href: this.#viewHref("dashboard"),
+                },
+                {
+                  value: "json",
+                  label: "JSON",
+                  icon: mdiCodeJson,
+                  href: this.#viewHref("json"),
+                },
+              ]}
+              .value=${view}
+            ></sb-segmented>`,
         })}
+        ${
+          // Only a failed export needs a message; the download is the success
+          this.#export.value._tag === "Failure"
+            ? this.renderResult(actionResult(this.#export.value, ""))
+            : nothing
+        }
         ${this.gate(() => this.#renderContent(module, view), placeholder)}
       </div>
     `;

@@ -2,6 +2,7 @@ import {
   type HistorySample,
   historyToCsv,
   type MetricHistory as BackendHistory,
+  type ModuleName,
   type SeriesHistory,
 } from "@timmo001/effect-system-bridge";
 import { Effect, Option } from "effect";
@@ -252,7 +253,14 @@ const historyData = Atom.make((get) => {
     // The first fetch waits only for the modules answering as the page
     // opens, so graphs fill straight away
     Effect.delay(Option.isSome(held) ? "1 second" : "200 millis"),
-    Effect.flatMap((bridge) => bridge.getHistory(Option.getOrUndefined(since))),
+    Effect.flatMap((bridge) =>
+      bridge.getHistory(
+        Option.match(since, {
+          onNone: () => ({}),
+          onSome: (time) => ({ since: time }),
+        }),
+      ),
+    ),
     Effect.map((next) =>
       Option.match(held, {
         onNone: () => fromBackend(next),
@@ -272,6 +280,24 @@ export const metricHistory = Atom.make((get): MetricHistory =>
 
 export type ExportFormat = "csv" | "json";
 
+/** The modules whose readings the backend keeps, which can be exported. */
+export const historyModules: ReadonlySet<ModuleName> = new Set([
+  "cpu",
+  "memory",
+  "battery",
+  "system",
+  "networks",
+  "disks",
+  "gpus",
+  "sensors",
+]);
+
+export interface HistoryExport {
+  readonly format: ExportFormat;
+  /** Exports only these modules' readings, when set. */
+  readonly modules?: readonly ModuleName[];
+}
+
 /** Saves a file through the browser's download. */
 const download = (name: string, type: string, contents: string) => {
   const url = URL.createObjectURL(new Blob([contents], { type }));
@@ -284,30 +310,47 @@ const download = (name: string, type: string, contents: string) => {
 };
 
 /**
- * Downloads the backend's whole history, as CSV with a row per reading or
- * as JSON in the shape `GET_HISTORY` returns, named for the host and time.
+ * Downloads the backend's history, or some modules', as CSV with a row per
+ * reading or as JSON in the shape `GET_HISTORY` returns, named for the host,
+ * modules and time.
  */
-export const exportHistory = Atom.fn((format: ExportFormat, get) =>
-  fnSocket(get).pipe(
-    Effect.flatMap((bridge) => bridge.getHistory()),
-    Effect.tap((history) =>
-      Effect.sync(() => {
-        const host = get(latestModuleData).system?.hostname ?? "system";
-        const stamp = new Date().toISOString().slice(0, 16).replace(":", "-");
-        const name = `system-bridge-history-${host}-${stamp}.${format}`;
+export const exportHistory = Atom.fn(
+  ({ format, modules }: HistoryExport, get) => {
+    // Every module needs no filter, and no module in the name
+    const some =
+      modules !== undefined && modules.length < historyModules.size
+        ? modules
+        : undefined;
 
-        if (format === "csv") {
-          download(name, "text/csv", historyToCsv(history));
-        } else {
-          download(
-            name,
-            "application/json",
-            `${JSON.stringify(history, null, 2)}\n`,
-          );
-        }
-      }),
-    ),
-  ),
+    return fnSocket(get).pipe(
+      Effect.flatMap((bridge) =>
+        bridge.getHistory(some === undefined ? {} : { modules: some }),
+      ),
+      Effect.tap((history) =>
+        Effect.sync(() => {
+          const host = get(latestModuleData).system?.hostname ?? "system";
+          const stamp = new Date().toISOString().slice(0, 16).replace(":", "-");
+
+          const name = [
+            "system-bridge-history",
+            host,
+            ...(some ?? []),
+            `${stamp}.${format}`,
+          ].join("-");
+
+          if (format === "csv") {
+            download(name, "text/csv", historyToCsv(history));
+          } else {
+            download(
+              name,
+              "application/json",
+              `${JSON.stringify(history, null, 2)}\n`,
+            );
+          }
+        }),
+      ),
+    );
+  },
 );
 
 /** A GPU's history, or empty series when there's none yet. */
