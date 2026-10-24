@@ -17,4 +17,5 @@ FIXTURE_BLUETOOTH = Bluetooth(
             connected=False,
         ),
     ],
+    powered=True,
 )

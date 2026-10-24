@@ -3,6 +3,10 @@ import { DisplayPowerState, ModuleName } from "./generated/modules.js";
 
 export const EventType = Schema.Literals([
   "AUDIO_CONTROL",
+  "BLUETOOTH_CONNECT",
+  "BLUETOOTH_DISCONNECT",
+  "BLUETOOTH_FORGET",
+  "BLUETOOTH_SET_POWER",
   "COMMAND_EXECUTE",
   "DATA_UPDATE",
   "DESKTOP_CLOSE_WINDOW",
@@ -49,6 +53,10 @@ export type EventType = typeof EventType.Type;
 export const ResponseType = Schema.Literals([
   "APPLICATION_EXITING",
   "AUDIO_CONTROLLED",
+  "BLUETOOTH_CONNECTED",
+  "BLUETOOTH_DISCONNECTED",
+  "BLUETOOTH_FORGOTTEN",
+  "BLUETOOTH_POWER_SET",
   "COMMAND_COMPLETED",
   "COMMAND_EXECUTING",
   "DATA_GET",
@@ -324,6 +332,20 @@ export const AudioControl = Schema.Struct({
 });
 
 export interface AudioControl extends Schema.Schema.Type<typeof AudioControl> {}
+
+/** Names a paired device by its `address` from the bluetooth module. */
+export const BluetoothDeviceRequest = Schema.Struct({ address: Schema.String });
+
+export interface BluetoothDeviceRequest extends Schema.Schema.Type<
+  typeof BluetoothDeviceRequest
+> {}
+
+/** Whether the Bluetooth adapter should be on. */
+export const BluetoothPowerRequest = Schema.Struct({ powered: Schema.Boolean });
+
+export interface BluetoothPowerRequest extends Schema.Schema.Type<
+  typeof BluetoothPowerRequest
+> {}
 
 /** Names a window by its `id` from the desktop module. */
 export const DesktopWindowRequest = Schema.Struct({ id: Schema.String });

@@ -20,6 +20,7 @@ from .exceptions import (
     DataMissingException,
 )
 from .models.audio_control import AudioControl
+from .models.bluetooth_control import BluetoothDeviceRequest, BluetoothPowerRequest
 from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
 from .models.desktop_control import (
@@ -544,15 +545,15 @@ class WebSocketClient(Base):
             response_type=EventType.AUDIO_CONTROLLED,
         )
 
-    async def _desktop_action(
+    async def _action(
         self,
         event: EventType,
         response_type: EventType,
         model: Any,
         request_id: str | None,
     ) -> Response:
-        """Send a desktop action, leaving out the settings that are None."""
-        self._logger.info("Desktop action %s: %s", event, model)
+        """Send an action, leaving out the settings that are None."""
+        self._logger.info("Action %s: %s", event, model)
         return await self.send_message(
             event,
             request_id,
@@ -561,13 +562,65 @@ class WebSocketClient(Base):
             response_type=response_type,
         )
 
+    async def bluetooth_connect(
+        self,
+        model: BluetoothDeviceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Connect a paired device, waiting until it's connected. Linux only."""
+        return await self._action(
+            EventType.BLUETOOTH_CONNECT,
+            EventType.BLUETOOTH_CONNECTED,
+            model,
+            request_id,
+        )
+
+    async def bluetooth_disconnect(
+        self,
+        model: BluetoothDeviceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Disconnect a paired device. Linux only."""
+        return await self._action(
+            EventType.BLUETOOTH_DISCONNECT,
+            EventType.BLUETOOTH_DISCONNECTED,
+            model,
+            request_id,
+        )
+
+    async def bluetooth_forget(
+        self,
+        model: BluetoothDeviceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Forget (unpair) a device. Linux and Windows."""
+        return await self._action(
+            EventType.BLUETOOTH_FORGET,
+            EventType.BLUETOOTH_FORGOTTEN,
+            model,
+            request_id,
+        )
+
+    async def bluetooth_set_power(
+        self,
+        model: BluetoothPowerRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Turn the Bluetooth adapter on or off. Linux only."""
+        return await self._action(
+            EventType.BLUETOOTH_SET_POWER,
+            EventType.BLUETOOTH_POWER_SET,
+            model,
+            request_id,
+        )
+
     async def desktop_close_window(
         self,
         model: DesktopWindowRequest,
         request_id: str | None = None,
     ) -> Response:
         """Ask a window to close, as its close button would."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.DESKTOP_CLOSE_WINDOW,
             EventType.DESKTOP_WINDOW_CLOSED,
             model,
@@ -580,7 +633,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Focus a window, showing its workspace."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.DESKTOP_FOCUS_WINDOW,
             EventType.DESKTOP_WINDOW_FOCUSED,
             model,
@@ -593,7 +646,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Show and focus a workspace. Not on Windows."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.DESKTOP_FOCUS_WORKSPACE,
             EventType.DESKTOP_WORKSPACE_FOCUSED,
             model,
@@ -606,7 +659,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Switch the keyboard layout. Hyprland and Windows only."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.DESKTOP_SET_KEYBOARD_LAYOUT,
             EventType.DESKTOP_KEYBOARD_LAYOUT_SET,
             model,
@@ -619,7 +672,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Make a window fullscreen, maximised or minimised, or not."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.DESKTOP_SET_WINDOW_STATE,
             EventType.DESKTOP_WINDOW_STATE_SET,
             model,
@@ -662,7 +715,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Move a window to a workspace, leaving the focus where it is."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.HYPRLAND_MOVE_WINDOW,
             EventType.HYPRLAND_WINDOW_MOVED,
             model,
@@ -689,7 +742,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Trigger a global shortcut an app registered, as a bind to it would."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.HYPRLAND_RUN_GLOBAL_SHORTCUT,
             EventType.HYPRLAND_GLOBAL_SHORTCUT_RUN,
             model,
@@ -702,7 +755,7 @@ class WebSocketClient(Base):
         request_id: str | None = None,
     ) -> Response:
         """Float or tile a window, and pin or unpin it."""
-        return await self._desktop_action(
+        return await self._action(
             EventType.HYPRLAND_SET_WINDOW,
             EventType.HYPRLAND_WINDOW_SET,
             model,

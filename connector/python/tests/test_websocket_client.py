@@ -20,6 +20,7 @@ from systembridgeconnector.exceptions import (
     DataMissingException,
 )
 from systembridgeconnector.models.audio_control import AudioControl
+from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.desktop_control import DesktopWindowStateRequest
@@ -476,6 +477,20 @@ async def test_audio_control(
     assert response.type == EventType.AUDIO_CONTROLLED
     # Unset controls aren't sent, but an unmute is
     assert response.data == {"id": "speakers", "muted": False, "default": True}
+
+
+@pytest.mark.asyncio
+async def test_bluetooth_set_power(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.bluetooth_set_power(
+        BluetoothPowerRequest(powered=False),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.BLUETOOTH_POWER_SET
+    # Turning it off is sent, not left out as unset
+    assert response.data == {"powered": False}
 
 
 @pytest.mark.asyncio

@@ -35,6 +35,8 @@ import {
 } from "./generated/modules.js";
 import {
   AudioControl,
+  BluetoothDeviceRequest,
+  BluetoothPowerRequest,
   CommandRequest,
   CommandResult,
   DesktopKeyboardLayoutRequest,
@@ -144,6 +146,22 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly audioControl: (
     control: AudioControl,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Connects a paired device, waiting until it's connected. Linux only. */
+  readonly bluetoothConnect: (
+    device: BluetoothDeviceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Disconnects a paired device. Linux only. */
+  readonly bluetoothDisconnect: (
+    device: BluetoothDeviceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Forgets (unpairs) a device. Linux and Windows. */
+  readonly bluetoothForget: (
+    device: BluetoothDeviceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Turns the Bluetooth adapter on or off. Linux only. */
+  readonly bluetoothSetPower: (
+    power: BluetoothPowerRequest,
   ) => Effect.Effect<void, WebSocketError>;
   /** Asks a window to close, as its close button would. */
   readonly desktopCloseWindow: (
@@ -302,6 +320,9 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     options.dataTimeout ?? "10 seconds",
   );
 
+  // The backend allows 30 seconds for a Bluetooth device to connect
+  const bluetoothTimeout = Duration.max(requestTimeout, Duration.seconds(35));
+
   const socket = yield* Socket.makeWebSocket(websocketUrl(options), {
     openTimeout: options.openTimeout ?? "10 seconds",
   });
@@ -423,13 +444,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
       ),
     );
 
-  /** Sends an event, waits for the reply of the expected type and decodes it. */
+  /**
+   * Sends an event, waits for the reply of the expected type and decodes it.
+   * `timeout` overrides the request timeout for an event the backend takes
+   * longer to answer.
+   */
   const call = Effect.fnUntraced(function* <A, I, B>(
     event: EventType,
     expected: ResponseType,
     payload: Schema.Codec<A, I>,
     data: A,
     reply: Schema.Decoder<B>,
+    timeout: Duration.Duration = requestTimeout,
   ) {
     const id = yield* nextId;
 
@@ -442,12 +468,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         Effect.raceFirst(Deferred.await(deferred), Deferred.await(closed)),
       ),
       Effect.timeoutOrElse({
-        duration: requestTimeout,
+        duration: timeout,
         orElse: () =>
           Effect.fail(
             new RequestTimeoutError({
               event,
-              timeoutMs: Duration.toMillis(requestTimeout),
+              timeoutMs: Duration.toMillis(timeout),
             }),
           ),
       }),
@@ -725,6 +751,58 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const bluetoothConnect = Effect.fn("SystemBridgeWebSocket.bluetoothConnect")(
+    function* (device: BluetoothDeviceRequest) {
+      yield* call(
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_CONNECTED",
+        BluetoothDeviceRequest,
+        device,
+        ignoreReply,
+        bluetoothTimeout,
+      );
+    },
+  );
+
+  const bluetoothDisconnect = Effect.fn(
+    "SystemBridgeWebSocket.bluetoothDisconnect",
+  )(function* (device: BluetoothDeviceRequest) {
+    yield* call(
+      "BLUETOOTH_DISCONNECT",
+      "BLUETOOTH_DISCONNECTED",
+      BluetoothDeviceRequest,
+      device,
+      ignoreReply,
+      bluetoothTimeout,
+    );
+  });
+
+  const bluetoothForget = Effect.fn("SystemBridgeWebSocket.bluetoothForget")(
+    function* (device: BluetoothDeviceRequest) {
+      yield* call(
+        "BLUETOOTH_FORGET",
+        "BLUETOOTH_FORGOTTEN",
+        BluetoothDeviceRequest,
+        device,
+        ignoreReply,
+        bluetoothTimeout,
+      );
+    },
+  );
+
+  const bluetoothSetPower = Effect.fn(
+    "SystemBridgeWebSocket.bluetoothSetPower",
+  )(function* (power: BluetoothPowerRequest) {
+    yield* call(
+      "BLUETOOTH_SET_POWER",
+      "BLUETOOTH_POWER_SET",
+      BluetoothPowerRequest,
+      power,
+      ignoreReply,
+      bluetoothTimeout,
+    );
+  });
+
   const discordControl = Effect.fn("SystemBridgeWebSocket.discordControl")(
     function* (control: DiscordControl) {
       yield* call(
@@ -944,6 +1022,10 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     keyboardKeypress,
     keyboardText,
     audioControl,
+    bluetoothConnect,
+    bluetoothDisconnect,
+    bluetoothForget,
+    bluetoothSetPower,
     desktopCloseWindow,
     desktopFocusWindow,
     desktopFocusWorkspace,

@@ -15,5 +15,6 @@
         type='input-keyboard',
       ),
     ]),
+    powered=True,
   )
 # ---

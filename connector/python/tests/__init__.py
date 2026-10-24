@@ -150,6 +150,7 @@ def discord_setup_response(request: Request) -> Response:
 
 CONTROL_RESPONSES = {
     EventType.AUDIO_CONTROL: EventType.AUDIO_CONTROLLED,
+    EventType.BLUETOOTH_SET_POWER: EventType.BLUETOOTH_POWER_SET,
     EventType.DESKTOP_SET_WINDOW_STATE: EventType.DESKTOP_WINDOW_STATE_SET,
     EventType.DISCORD_CONTROL: EventType.DISCORD_CONTROLLED,
     EventType.DISPLAY_CONTROL: EventType.DISPLAY_CONTROLLED,

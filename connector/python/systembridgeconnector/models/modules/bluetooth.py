@@ -23,6 +23,7 @@ class Bluetooth:
     """Bluetooth."""
 
     devices: list[BluetoothDevice] = field(default_factory=list)
+    powered: bool | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
