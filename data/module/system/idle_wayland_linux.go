@@ -41,6 +41,37 @@ type waylandIdleMonitor struct {
 	idle        bool
 	idleSince   time.Time
 	lastAttempt time.Time
+
+	// away is whether the user has been idle for awayAfter, and awayChanged
+	// is told whenever that flips
+	away        bool
+	awayTimer   *time.Timer
+	awayChanged func()
+}
+
+// setAwayChanged sets the function told whenever the user goes away or comes
+// back, connecting to the compositor if it isn't connected yet
+func (m *waylandIdleMonitor) setAwayChanged(fn func()) {
+	m.mu.Lock()
+	m.awayChanged = fn
+	m.mu.Unlock()
+	if fn != nil {
+		m.idleTime()
+	}
+}
+
+// setAway records whether the user is away and, when that changed, returns
+// the function to tell. The caller holds m.mu.
+func (m *waylandIdleMonitor) setAway(away bool) func() {
+	if m.awayTimer != nil {
+		m.awayTimer.Stop()
+		m.awayTimer = nil
+	}
+	if m.away == away {
+		return nil
+	}
+	m.away = away
+	return m.awayChanged
 }
 
 // idleTime returns the seconds since the last input, and false when the
@@ -189,7 +220,11 @@ func (m *waylandIdleMonitor) listen(conn net.Conn, reader *bufio.Reader) {
 		m.mu.Lock()
 		m.connected = false
 		m.idle = false
+		notify := m.setAway(false)
 		m.mu.Unlock()
+		if notify != nil {
+			notify()
+		}
 	}()
 
 	for {
@@ -203,11 +238,31 @@ func (m *waylandIdleMonitor) listen(conn net.Conn, reader *bufio.Reader) {
 			m.mu.Lock()
 			m.idle = true
 			m.idleSince = time.Now().Add(-waylandIdleTimeout)
+			m.setAway(false)
+			var timer *time.Timer
+			timer = time.AfterFunc(awayAfter-waylandIdleTimeout, func() {
+				m.mu.Lock()
+				if m.awayTimer != timer {
+					// The user came back as it fired
+					m.mu.Unlock()
+					return
+				}
+				notify := m.setAway(true)
+				m.mu.Unlock()
+				if notify != nil {
+					notify()
+				}
+			})
+			m.awayTimer = timer
 			m.mu.Unlock()
 		case object == waylandNotificationID && opcode == 1: // resumed
 			m.mu.Lock()
 			m.idle = false
+			notify := m.setAway(false)
 			m.mu.Unlock()
+			if notify != nil {
+				notify()
+			}
 		case object == waylandDisplayID && opcode == 0:
 			slog.Debug("The compositor reported a Wayland protocol error")
 			return
