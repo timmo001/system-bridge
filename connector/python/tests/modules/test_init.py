@@ -8,6 +8,7 @@ from systembridgeconnector.models.modules import (
 )
 
 modules = [
+    Module.AUDIO,
     Module.BATTERY,
     Module.CPU,
     Module.DISCORD,
@@ -45,6 +46,7 @@ def test_modules_data():
     """Test modules data."""
     modules_data = ModulesData()
     assert isinstance(modules_data, ModulesData)
+    assert modules_data.audio is None
     assert modules_data.battery is None
     assert modules_data.cpu is None
     assert modules_data.discord is None

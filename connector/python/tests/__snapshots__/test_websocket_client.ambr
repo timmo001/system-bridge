@@ -84,6 +84,7 @@
 # ---
 # name: test_get_data
   ModulesData(
+    audio=None,
     battery=None,
     cpu=None,
     discord=None,
@@ -487,6 +488,7 @@
 # ---
 # name: test_wait_for_response_timeout
   ModulesData(
+    audio=None,
     battery=None,
     cpu=None,
     discord=None,

@@ -1,6 +1,7 @@
 # serializer version: 1
 # name: test_model_map
   dict({
+    <Model.AUDIO: 'audio'>: <class 'systembridgeconnector.models.modules.audio.Audio'>,
     <Model.BATTERY: 'battery'>: <class 'systembridgeconnector.models.modules.battery.Battery'>,
     <Model.CPU: 'cpu'>: <class 'systembridgeconnector.models.modules.cpu.CPU'>,
     <Model.DATA: 'data'>: <class 'systembridgeconnector.models.modules.ModulesData'>,

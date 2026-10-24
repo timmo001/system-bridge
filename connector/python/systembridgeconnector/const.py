@@ -7,6 +7,7 @@ from .models.keyboard_text import KeyboardText
 from .models.media_directories import MediaDirectory
 from .models.media_files import MediaFile, MediaFiles
 from .models.modules import Module, ModulesData
+from .models.modules.audio import Audio
 from .models.modules.battery import Battery
 from .models.modules.cpu import CPU
 from .models.modules.discord import Discord
@@ -78,6 +79,8 @@ class EventType(StrEnum):
     APPLICATION_EXITING = "APPLICATION_EXITING"
     APPLICATION_UPDATE = "APPLICATION_UPDATE"
     APPLICATION_UPDATING = "APPLICATION_UPDATING"
+    AUDIO_CONTROL = "AUDIO_CONTROL"
+    AUDIO_CONTROLLED = "AUDIO_CONTROLLED"
     COMMAND_COMPLETED = "COMMAND_COMPLETED"
     COMMAND_EXECUTE = "COMMAND_EXECUTE"
     COMMAND_EXECUTING = "COMMAND_EXECUTING"
@@ -171,6 +174,7 @@ class EventSubType(StrEnum):
 class Model(StrEnum):
     """Model Enums."""
 
+    AUDIO = Module.AUDIO
     BATTERY = Module.BATTERY
     CPU = Module.CPU
     DATA = "data"
@@ -198,6 +202,7 @@ class Model(StrEnum):
 
 
 MODEL_MAP = {
+    Model.AUDIO: Audio,
     Model.BATTERY: Battery,
     Model.CPU: CPU,
     Model.DATA: ModulesData,

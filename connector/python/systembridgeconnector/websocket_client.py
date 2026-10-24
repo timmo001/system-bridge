@@ -19,6 +19,7 @@ from .exceptions import (
     ConnectionErrorException,
     DataMissingException,
 )
+from .models.audio_control import AudioControl
 from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
 from .models.discord_control import DiscordControl
@@ -519,18 +520,34 @@ class WebSocketClient(Base):
             response_type=EventType.KEYBOARD_TEXT_SENT,
         )
 
-    async def media_control(
+    async def audio_control(
         self,
-        model: MediaControl,
+        model: AudioControl,
         request_id: str | None = None,
     ) -> Response:
-        """Media control."""
-        self._logger.info("Media control: %s", model)
+        """Set an audio device's volume or mute state, or make it the default."""
+        self._logger.info("Audio control: %s", model)
         return await self.send_message(
-            EventType.MEDIA_CONTROL,
+            EventType.AUDIO_CONTROL,
+            request_id,
+            {key: value for key, value in asdict(model).items() if value is not None},
+            wait_for_response=True,
+            response_type=EventType.AUDIO_CONTROLLED,
+        )
+
+    async def discord_control(
+        self,
+        model: DiscordControl,
+        request_id: str | None = None,
+    ) -> Response:
+        """Discord control."""
+        self._logger.info("Discord control: %s", model)
+        return await self.send_message(
+            EventType.DISCORD_CONTROL,
             request_id,
             asdict(model),
-            wait_for_response=False,
+            wait_for_response=True,
+            response_type=EventType.DISCORD_CONTROLLED,
         )
 
     async def display_control(
@@ -548,19 +565,18 @@ class WebSocketClient(Base):
             response_type=EventType.DISPLAY_CONTROLLED,
         )
 
-    async def discord_control(
+    async def media_control(
         self,
-        model: DiscordControl,
+        model: MediaControl,
         request_id: str | None = None,
     ) -> Response:
-        """Discord control."""
-        self._logger.info("Discord control: %s", model)
+        """Media control."""
+        self._logger.info("Media control: %s", model)
         return await self.send_message(
-            EventType.DISCORD_CONTROL,
+            EventType.MEDIA_CONTROL,
             request_id,
             asdict(model),
-            wait_for_response=True,
-            response_type=EventType.DISCORD_CONTROLLED,
+            wait_for_response=False,
         )
 
     async def send_notification(

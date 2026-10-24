@@ -11,6 +11,7 @@ from aiohttp.test_utils import TestClient
 
 from systembridgeconnector.const import EventSubType, EventType
 from systembridgeconnector.models.fixtures.media_files import FIXTURE_MEDIA_FILES
+from systembridgeconnector.models.fixtures.modules.audio import FIXTURE_AUDIO
 from systembridgeconnector.models.fixtures.modules.battery import FIXTURE_BATTERY
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
 from systembridgeconnector.models.fixtures.modules.discord import FIXTURE_DISCORD
@@ -37,6 +38,7 @@ WEBSOCKET_PATH: Final[str] = "/api/websocket"
 REQUEST_ID: Final[str] = "test"
 
 MODULES_DATA = ModulesData(
+    audio=FIXTURE_AUDIO,
     battery=FIXTURE_BATTERY,
     cpu=FIXTURE_CPU,
     discord=FIXTURE_DISCORD,
@@ -319,6 +321,12 @@ async def process_request(request: Request) -> Response:
         return Response(
             id=request.id,
             type=EventType.KEYBOARD_TEXT_SENT,
+            data=request.data,
+        )
+    if request.event == EventType.AUDIO_CONTROL:
+        return Response(
+            id=request.id,
+            type=EventType.AUDIO_CONTROLLED,
             data=request.data,
         )
     if request.event == EventType.DISCORD_CONTROL:

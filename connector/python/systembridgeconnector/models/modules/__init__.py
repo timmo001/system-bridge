@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+from .audio import Audio
 from .battery import Battery
 from .cpu import CPU
 from .discord import Discord
@@ -20,6 +21,7 @@ from .system import System
 class Module(StrEnum):
     """Module Enum."""
 
+    AUDIO = "audio"
     BATTERY = "battery"
     CPU = "cpu"
     DISCORD = "discord"
@@ -50,6 +52,7 @@ class RegisterDataListener(GetData):
 class ModulesData:
     """Data."""
 
+    audio: Audio | None = None
     battery: Battery | None = None
     cpu: CPU | None = None
     discord: Discord | None = None

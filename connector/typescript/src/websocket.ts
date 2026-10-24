@@ -34,6 +34,7 @@ import {
   ModulesData,
 } from "./generated/modules.js";
 import {
+  AudioControl,
   CommandRequest,
   CommandResult,
   Directory,
@@ -134,11 +135,8 @@ export interface Interface {
   readonly keyboardText: (
     text: KeyboardText,
   ) => Effect.Effect<void, WebSocketError>;
-  readonly mediaControl: (
-    action: MediaAction,
-  ) => Effect.Effect<void, WebSocketError>;
-  readonly displayControl: (
-    control: DisplayControl,
+  readonly audioControl: (
+    control: AudioControl,
   ) => Effect.Effect<void, WebSocketError>;
   readonly discordControl: (
     control: DiscordControl,
@@ -150,6 +148,12 @@ export interface Interface {
     readonly clientId: string;
     readonly clientSecret: Redacted.Redacted;
   }) => Effect.Effect<DiscordSetup, WebSocketError>;
+  readonly displayControl: (
+    control: DisplayControl,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly mediaControl: (
+    action: MediaAction,
+  ) => Effect.Effect<void, WebSocketError>;
   readonly sendNotification: (
     notification: Notification,
   ) => Effect.Effect<void, WebSocketError>;
@@ -672,24 +676,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
-  const mediaControl = Effect.fn("SystemBridgeWebSocket.mediaControl")(
-    function* (action: MediaAction) {
+  const audioControl = Effect.fn("SystemBridgeWebSocket.audioControl")(
+    function* (control: AudioControl) {
       yield* call(
-        "MEDIA_CONTROL",
-        "MEDIA_CONTROLLED",
-        MediaControl,
-        { action },
-        ignoreReply,
-      );
-    },
-  );
-
-  const displayControl = Effect.fn("SystemBridgeWebSocket.displayControl")(
-    function* (control: DisplayControl) {
-      yield* call(
-        "DISPLAY_CONTROL",
-        "DISPLAY_CONTROLLED",
-        DisplayControl,
+        "AUDIO_CONTROL",
+        "AUDIO_CONTROLLED",
+        AudioControl,
         control,
         ignoreReply,
       );
@@ -733,6 +725,30 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
       DiscordSetup,
     );
   });
+
+  const displayControl = Effect.fn("SystemBridgeWebSocket.displayControl")(
+    function* (control: DisplayControl) {
+      yield* call(
+        "DISPLAY_CONTROL",
+        "DISPLAY_CONTROLLED",
+        DisplayControl,
+        control,
+        ignoreReply,
+      );
+    },
+  );
+
+  const mediaControl = Effect.fn("SystemBridgeWebSocket.mediaControl")(
+    function* (action: MediaAction) {
+      yield* call(
+        "MEDIA_CONTROL",
+        "MEDIA_CONTROLLED",
+        MediaControl,
+        { action },
+        ignoreReply,
+      );
+    },
+  );
 
   const sendNotification = Effect.fn("SystemBridgeWebSocket.sendNotification")(
     function* (notification: Notification) {
@@ -783,11 +799,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     executeCommand,
     keyboardKeypress,
     keyboardText,
-    mediaControl,
-    displayControl,
+    audioControl,
     discordControl,
     getDiscordSetup,
     updateDiscordSetup,
+    displayControl,
+    mediaControl,
     sendNotification,
     open,
     power,

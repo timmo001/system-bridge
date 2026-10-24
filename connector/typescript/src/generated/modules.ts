@@ -36,6 +36,7 @@ export const DisplayPowerState = Schema.Literals([
 export type DisplayPowerState = typeof DisplayPowerState.Type;
 
 export const ModuleName = Schema.Literals([
+  "audio",
   "battery",
   "cpu",
   "disks",
@@ -55,6 +56,23 @@ export type ModuleName = typeof ModuleName.Type;
 export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
+
+export const AudioDevice = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  volume: Schema.NullOr(Schema.Finite),
+  muted: Schema.NullOr(Schema.Boolean),
+  default: Schema.Boolean,
+});
+
+export interface AudioDevice extends Schema.Schema.Type<typeof AudioDevice> {}
+
+export const AudioData = Schema.Struct({
+  outputs: Schema.Array(AudioDevice),
+  inputs: Schema.Array(AudioDevice),
+});
+
+export interface AudioData extends Schema.Schema.Type<typeof AudioData> {}
 
 export const BatteryInfo = Schema.Struct({
   name: Schema.String,
@@ -848,6 +866,7 @@ export const SystemData = Schema.Struct({
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}
 
 export interface ModuleData {
+  readonly audio: AudioData;
   readonly battery: BatteryData;
   readonly cpu: CPUData;
   readonly discord: DiscordData;
@@ -867,6 +886,7 @@ export type ModuleDataSchemas = {
 };
 
 export const ModuleDataSchemas: ModuleDataSchemas = {
+  audio: AudioData,
   battery: BatteryData,
   cpu: CPUData,
   discord: DiscordData,
@@ -882,6 +902,7 @@ export const ModuleDataSchemas: ModuleDataSchemas = {
 };
 
 export const ModulesData = Schema.Struct({
+  audio: Schema.optionalKey(AudioData),
   battery: Schema.optionalKey(BatteryData),
   cpu: Schema.optionalKey(CPUData),
   discord: Schema.optionalKey(DiscordData),
@@ -899,6 +920,7 @@ export const ModulesData = Schema.Struct({
 export interface ModulesData extends Schema.Schema.Type<typeof ModulesData> {}
 
 export const ModuleDataUpdate = Schema.Union([
+  Schema.Struct({ module: Schema.Literal("audio"), data: AudioData }),
   Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),
   Schema.Struct({ module: Schema.Literal("cpu"), data: CPUData }),
   Schema.Struct({ module: Schema.Literal("discord"), data: DiscordData }),

@@ -1,0 +1,34 @@
+{
+  "outputs": [
+    {
+      "id": "alsa_output.usb-Generic_USB_Audio-00.HiFi__Speaker__sink",
+      "name": "Headphones",
+      "volume": 50,
+      "muted": false,
+      "default": true
+    },
+    {
+      "id": "alsa_output.usb-Focusrite_Scarlett_2i2_4th_Gen_S2HC9YM522D4DD-00.HiFi__Line1__sink",
+      "name": "Scarlett 2i2 4th Gen Headphones / Line 1-2",
+      "volume": 100,
+      "muted": false,
+      "default": false
+    }
+  ],
+  "inputs": [
+    {
+      "id": "alsa_input.usb-Focusrite_Scarlett_2i2_4th_Gen_S2HC9YM522D4DD-00.HiFi__Mic1__source",
+      "name": "Scarlett 2i2 4th Gen Input 1 Mic/Inst/Line",
+      "volume": 100,
+      "muted": false,
+      "default": true
+    },
+    {
+      "id": "alsa_input.usb-Generic_USB_Audio-00.HiFi__Mic__source",
+      "name": "Microphone",
+      "volume": null,
+      "muted": null,
+      "default": false
+    }
+  ]
+}

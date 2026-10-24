@@ -19,6 +19,7 @@ from systembridgeconnector.exceptions import (
     ConnectionErrorException,
     DataMissingException,
 )
+from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
@@ -460,6 +461,20 @@ async def test_discord_control(
         )
         == snapshot
     )
+
+
+@pytest.mark.asyncio
+async def test_audio_control(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.audio_control(
+        AudioControl(id="speakers", muted=False, default=True),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.AUDIO_CONTROLLED
+    # Unset controls aren't sent, but an unmute is
+    assert response.data == {"id": "speakers", "muted": False, "default": True}
 
 
 @pytest.mark.asyncio

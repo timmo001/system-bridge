@@ -1,0 +1,30 @@
+# serializer version: 1
+# name: test_audio
+  Audio(
+    inputs=list([
+      AudioDevice(
+        default=True,
+        id='alsa_input.usb-Generic_USB_Audio-00.HiFi__Mic__source',
+        muted=False,
+        name='Microphone',
+        volume=80,
+      ),
+    ]),
+    outputs=list([
+      AudioDevice(
+        default=True,
+        id='alsa_output.usb-Generic_USB_Audio-00.HiFi__Speaker__sink',
+        muted=False,
+        name='Headphones',
+        volume=50,
+      ),
+      AudioDevice(
+        default=False,
+        id='alsa_output.pci-0000_00_1f.3.hdmi-stereo',
+        muted=True,
+        name='HDMI Output',
+        volume=100,
+      ),
+    ]),
+  )
+# ---

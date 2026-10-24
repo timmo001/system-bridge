@@ -2,20 +2,23 @@ import { Schema } from "effect";
 import { DisplayPowerState, ModuleName } from "./generated/modules.js";
 
 export const EventType = Schema.Literals([
+  "AUDIO_CONTROL",
+  "COMMAND_EXECUTE",
+  "DATA_UPDATE",
+  "DISCORD_CONTROL",
+  "DISPLAY_CONTROL",
   "EXIT_APPLICATION",
   "GET_DATA",
   "GET_DIRECTORIES",
   "GET_DIRECTORY",
   "GET_DISCORD_SETUP",
   "GET_DISK_MOUNTS",
-  "GET_FILES",
   "GET_FILE",
+  "GET_FILES",
   "GET_HISTORY",
   "GET_SETTINGS",
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
-  "DISCORD_CONTROL",
-  "DISPLAY_CONTROL",
   "MEDIA_CONTROL",
   "NOTIFICATION",
   "OPEN",
@@ -27,8 +30,6 @@ export const EventType = Schema.Literals([
   "POWER_SLEEP",
   "REGISTER_DATA_LISTENER",
   "UNREGISTER_DATA_LISTENER",
-  "DATA_UPDATE",
-  "COMMAND_EXECUTE",
   "UPDATE_DISCORD_SETUP",
   "UPDATE_SETTINGS",
   "VALIDATE_DIRECTORY",
@@ -37,18 +38,25 @@ export const EventType = Schema.Literals([
 export type EventType = typeof EventType.Type;
 
 export const ResponseType = Schema.Literals([
-  "ERROR",
   "APPLICATION_EXITING",
+  "AUDIO_CONTROLLED",
+  "COMMAND_COMPLETED",
+  "COMMAND_EXECUTING",
   "DATA_GET",
+  "DATA_LISTENER_REGISTERED",
+  "DATA_LISTENER_UNREGISTERED",
+  "DATA_UPDATE",
   "DIRECTORIES",
   "DIRECTORY",
-  "DISK_MOUNTS",
+  "DIRECTORY_VALIDATED",
   "DISCORD_CONTROLLED",
   "DISCORD_SETUP",
   "DISCORD_SETUP_UPDATED",
+  "DISK_MOUNTS",
   "DISPLAY_CONTROLLED",
-  "FILES",
+  "ERROR",
   "FILE",
+  "FILES",
   "HISTORY",
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
@@ -61,14 +69,8 @@ export const ResponseType = Schema.Literals([
   "POWER_RESTARTING",
   "POWER_SHUTTINGDOWN",
   "POWER_SLEEPING",
-  "DATA_LISTENER_REGISTERED",
-  "DATA_LISTENER_UNREGISTERED",
-  "DATA_UPDATE",
-  "COMMAND_EXECUTING",
-  "COMMAND_COMPLETED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
-  "DIRECTORY_VALIDATED",
 ]);
 
 export type ResponseType = typeof ResponseType.Type;
@@ -281,6 +283,19 @@ export const MediaAction = Schema.Literals([
 export type MediaAction = typeof MediaAction.Type;
 
 export const MediaControl = Schema.Struct({ action: MediaAction });
+
+/** Sets an output's or input's volume or mute state, or makes it the default. */
+export const AudioControl = Schema.Struct({
+  /** The device's `id` from the audio module. */
+  id: Schema.String,
+  /** Percent, 0-100. */
+  volume: Schema.optionalKey(Schema.Finite),
+  muted: Schema.optionalKey(Schema.Boolean),
+  /** Makes it the default output or input. */
+  default: Schema.optionalKey(Schema.Boolean),
+});
+
+export interface AudioControl extends Schema.Schema.Type<typeof AudioControl> {}
 
 /** Sets a display's brightness, its power state, or both. */
 export const DisplayControl = Schema.Struct({
