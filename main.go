@@ -249,7 +249,7 @@ func main() {
 							if len(data) == 1 {
 								return fmt.Errorf("set --volume, --mute or --default")
 							}
-							return client.Send(cmdCtx, event.EventAudioControl, data)
+							return client.SendWithin(cmdCtx, client.SlowSendTimeout, event.EventAudioControl, data)
 						},
 					},
 					{
@@ -528,7 +528,7 @@ func main() {
 							if len(data) == 1 {
 								return fmt.Errorf("set --brightness or --power")
 							}
-							return client.Send(cmdCtx, event.EventDisplayControl, data)
+							return client.SendWithin(cmdCtx, client.SlowSendTimeout, event.EventDisplayControl, data)
 						},
 					},
 					{
@@ -740,6 +740,10 @@ func main() {
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		tray.Quit()
 		slog.Error("error running cmd", "err", err)
+		// Only the backend logs to the terminal, so say what went wrong there
+		if !shouldLogToStdout() {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
 		os.Exit(1)
 	}
 }
