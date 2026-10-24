@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "timmo.system-bridge",
   "name": "System Bridge",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "author": "Timmo",
   "license": "Apache-2.0",
-  "description": "Local system health from System Bridge",
+  "description": "Local system data and controls from System Bridge",
   "kinds": [
     "service",
     "bar-widget"
@@ -17,14 +17,13 @@
   },
   "barWidget": {
     "displayName": "System Bridge",
-    "description": "Shows CPU, memory, disk, fan, GPU, temperature, and system health",
+    "description": "Shows CPU and memory, with a panel for every System Bridge module",
     "category": "Info",
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
       "primaryOnly": false,
-      "primaryOutput": "",
-      "itemActions": {}
+      "primaryOutput": ""
     },
     "schema": [
       {
