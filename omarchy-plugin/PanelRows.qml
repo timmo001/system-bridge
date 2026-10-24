@@ -448,17 +448,36 @@ QtObject {
     var rows = []
     for (var i = 0; i < service.displays.length; i++) {
       var display = service.displays[i]
+      var name = (text(display.name) || "Display " + (i + 1)) + (display.is_primary === true ? " (primary)" : "")
+      var controllable = num(display.brightness) !== null || present(display.power_state)
       rows.push(row({
-        key: "display-" + (text(display.id) || i), icon: "󰍹",
-        primaryText: (text(display.name) || "Display " + (i + 1)) + (display.is_primary === true ? " (primary)" : ""),
+        key: "display-" + (text(display.id) || i), section: controllable ? name : "", icon: "󰍹",
+        primaryText: controllable ? text(display.id) || name : name,
         secondaryText: join([
           present(display.resolution_horizontal) ? display.resolution_horizontal + " × " + display.resolution_vertical : "",
           num(display.refresh_rate) ? Math.round(num(display.refresh_rate)) + " Hz" : "",
           present(display.x) ? "at " + display.x + ", " + display.y : ""
         ])
       }))
+      if (controllable) displayControls(rows, display, name)
     }
     return rows
+  }
+
+  function displayControls(rows, display, section) {
+    var id = text(display.id)
+    var argv = function(flag, value) { return ["system-bridge", "client", "display", flag, value, id] }
+    var brightness = num(display.brightness)
+    if (brightness !== null) {
+      var current = Math.round(brightness)
+      rows.push(row({ key: "brightness-" + id, section: section, icon: "󰃟", primaryText: "Brightness", secondaryText: percent(brightness), meter: brightness }))
+      rows.push(control("brightness-down-" + id, section, "󰃞", "Dimmer", "To " + Math.max(0, current - 10) + "%", argv("--brightness", String(Math.max(0, current - 10))), current <= 0))
+      rows.push(control("brightness-up-" + id, section, "󰃠", "Brighter", "To " + Math.min(100, current + 10) + "%", argv("--brightness", String(Math.min(100, current + 10))), current >= 100))
+    }
+    if (present(display.power_state)) {
+      var on = display.power_state === "on"
+      rows.push(control("power-" + id, section, on ? "󰶐" : "󰍹", on ? "Turn off" : "Turn on", on ? "On" : "Off", argv("--power", on ? "off" : "on")))
+    }
   }
 
   function diskRows(service) {
