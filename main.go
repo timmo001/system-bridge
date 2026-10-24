@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/timmo001/system-bridge/client"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/discovery"
+	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/tray"
 	"github.com/timmo001/system-bridge/types"
@@ -223,18 +225,51 @@ func main() {
 					{
 						Name:  "open",
 						Usage: "Open the web client",
-						Flags: []cli.Flag{&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"}},
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"},
+							&cli.StringFlag{Name: "path", Usage: "Open a page of the web client, such as /media#media-controls"},
+						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							path := cmd.String("path")
+							if path == "" {
+								path = "/"
+							}
+							if cmd.Bool("settings") {
+								path = "/settings"
+							}
+							if !strings.HasPrefix(path, "/") {
+								return fmt.Errorf("path must start with /: %q", path)
+							}
 							token, err := utils.LoadToken()
 							if err != nil {
 								return fmt.Errorf("load token: %w", err)
 							}
-							path := "/"
-							if cmd.Bool("settings") {
-								path = "/settings"
-							}
 							openWebClientPath(token, path)
 							return nil
+						},
+					},
+					{
+						Name:      "media",
+						Usage:     "Control media playback",
+						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute>",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							action := strings.ToUpper(cmd.Args().First())
+							if action == "" {
+								return fmt.Errorf("a media action is required")
+							}
+							return client.Send(cmdCtx, event.EventMediaControl, map[string]string{"action": action})
+						},
+					},
+					{
+						Name:      "discord",
+						Usage:     "Control Discord voice",
+						ArgsUsage: "<toggle_mute|toggle_deafen|leave_voice_channel|...>",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							action := strings.ToUpper(cmd.Args().First())
+							if action == "" {
+								return fmt.Errorf("a Discord action is required")
+							}
+							return client.Send(cmdCtx, event.EventDiscordControl, map[string]string{"action": action})
 						},
 					},
 					{
@@ -583,7 +618,12 @@ func openWebClient(token string) {
 
 func openWebClientPath(token, path string) {
 	port := utils.GetPort()
-	url := fmt.Sprintf("http://127.0.0.1:%d%s?host=127.0.0.1&port=%d&apiKey=%s", port, path, port, token)
+	// The connection params go before any #section, so the page still scrolls to it.
+	page, section, _ := strings.Cut(path, "#")
+	url := fmt.Sprintf("http://127.0.0.1:%d%s?host=127.0.0.1&port=%d&apiKey=%s", port, page, port, token)
+	if section != "" {
+		url += "#" + section
+	}
 	slog.Info("Opening web client URL", "url", url)
 	if err := browser.OpenURL(url); err != nil {
 		if err := notification.Send(notification.NotificationData{
