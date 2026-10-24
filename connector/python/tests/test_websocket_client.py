@@ -536,6 +536,16 @@ async def test_get_history(
     assert isinstance(history.temperatures[0].samples[0], HistorySample)
     assert history == snapshot
 
+    # The same rows as the CLI's export, so the two stay alike
+    assert history.to_csv().splitlines()[:3] == [
+        "time,metric,id,value,unit",
+        "2023-11-14T22:13:20.000Z,cpu,,12.5,%",
+        "2023-11-14T22:14:20.000Z,cpu,,20,%",
+    ]
+    assert "2023-11-14T22:13:20.000Z,gpu_temperature,gpu0,48,°C" in (
+        history.to_csv().splitlines()
+    )
+
     newer = await mock_websocket_client_listening.get_history(
         since=1700000000000,
         request_id=REQUEST_ID,

@@ -1,9 +1,29 @@
 """History."""
 
+import csv
 from dataclasses import dataclass
+from datetime import UTC, datetime
+import io
 from typing import cast
 
 from systembridgeconnector.models.helpers import filter_unexpected_fields
+
+HISTORY_CSV_HEADER = ("time", "metric", "id", "value", "unit")
+
+
+@dataclass(slots=True)
+class HistoryRow:
+    """One reading in an exported history.
+
+    time is in Unix milliseconds, and id names which GPU, disk, sensor or
+    fan, and is empty for the rest.
+    """
+
+    time: int
+    metric: str
+    id: str
+    value: float
+    unit: str
 
 
 @filter_unexpected_fields
@@ -113,3 +133,69 @@ class MetricHistory:
         ]
         self.temperatures = _series(self.temperatures)
         self.fans = _series(self.fans)
+
+    def rows(self) -> list[HistoryRow]:
+        """Flatten into one row per reading, a metric at a time, oldest first.
+
+        The metrics, IDs and units match the CLI's and the TypeScript
+        connector's exports.
+        """
+        rows: list[HistoryRow] = []
+
+        def add(
+            metric: str, series_id: str, unit: str, samples: list[HistorySample]
+        ) -> None:
+            rows.extend(
+                HistoryRow(sample.time, metric, series_id, sample.value, unit)
+                for sample in samples
+            )
+
+        def add_each(metric: str, unit: str, series: list[SeriesHistory]) -> None:
+            for item in series:
+                add(metric, item.id, unit, item.samples)
+
+        add("cpu", "", "%", self.cpu)
+        add("cpu_temperature", "", "°C", self.cpu_temperature)
+        add("cpu_frequency", "", "MHz", self.cpu_frequency)
+        add("cpu_power", "", "W", self.cpu_power)
+        add("load_average", "", "", self.load_average)
+        add("memory", "", "%", self.memory)
+        add("swap", "", "%", self.swap)
+        add("battery", "", "%", self.battery)
+        add("system_power", "", "W", self.system_power)
+        add("network_receive", "", "B/s", self.network_receive)
+        add("network_send", "", "B/s", self.network_send)
+        add("disk_read", "", "B/s", self.disk_read)
+        add("disk_write", "", "B/s", self.disk_write)
+        add_each("disk_temperature", "°C", self.disk_temperatures)
+        for gpu in self.gpus:
+            add("gpu_core_load", gpu.id, "%", gpu.core_load)
+            add("gpu_memory_load", gpu.id, "%", gpu.memory_load)
+            add("gpu_temperature", gpu.id, "°C", gpu.temperature)
+            add("gpu_power", gpu.id, "W", gpu.power)
+        add_each("temperature", "°C", self.temperatures)
+        add_each("fan", "RPM", self.fans)
+
+        return rows
+
+    def to_csv(self) -> str:
+        """Get the history as CSV, one row per reading, with times in UTC."""
+        output = io.StringIO()
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(HISTORY_CSV_HEADER)
+        for row in self.rows():
+            writer.writerow(
+                (
+                    datetime.fromtimestamp(row.time / 1000, UTC)
+                    .isoformat(timespec="milliseconds")
+                    .replace("+00:00", "Z"),
+                    row.metric,
+                    row.id,
+                    # Whole numbers without ".0", as the CLI writes them
+                    str(int(row.value))
+                    if float(row.value).is_integer()
+                    else repr(float(row.value)),
+                    row.unit,
+                )
+            )
+        return output.getvalue()
