@@ -90,9 +90,9 @@ Configure the backend without editing files:
 
 ## Appearance
 
-The colour mode follows your device's light or dark setting by default. Switch between **System**, **Dark** and **Light** from the header, or on the **Appearance** page.
+The colour mode follows your device's light or dark setting by default. Switch between **System**, **Dark** and **Light** from the header.
 
-On the **Appearance** page, pick one theme for dark and one for light. The web client includes System Bridge's own themes, Catppuccin (Frappé, Macchiato, Mocha and Latte), Tokyo Night (Night, Storm, Moon and Day), Rosé Pine (Main, Moon and Dawn), Midnight, Nord, Dracula, Gruvbox and Solarized.
+On the **Appearance** page, pick one theme for dark and one for light. Themes are grouped by family. The web client includes System Bridge's own themes, Catppuccin (Frappé, Macchiato, Mocha and Latte), Tokyo Night (Night, Storm, Moon and Day), Rosé Pine (Main, Moon and Dawn), Midnight, Nord, Dracula, Gruvbox and Solarized.
 
 Appearance settings are kept in your browser, so each browser can have its own.
 

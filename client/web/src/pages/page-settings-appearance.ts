@@ -1,19 +1,9 @@
-import {
-  mdiCheck,
-  mdiPaletteOutline,
-  mdiThemeLightDark,
-  mdiWeatherNight,
-  mdiWeatherSunny,
-} from "@mdi/js";
-import { Array, Schema } from "effect";
+import { mdiCheck, mdiPaletteOutline } from "@mdi/js";
+import { Array } from "effect";
 import { css, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
-import "~/components/sb-card";
-import "~/components/sb-segmented";
-import "~/components/sb-select";
-import type { SelectOption } from "~/components/sb-select";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { registry } from "~/lib/atoms";
@@ -23,7 +13,7 @@ import {
   defaultDarkTheme,
   defaultLightTheme,
   type Theme,
-  ThemeMode,
+  type ThemeId,
   themeById,
   themeLabel,
   themes,
@@ -31,21 +21,6 @@ import {
 } from "~/lib/themes";
 
 import { SbPage } from "./sb-page";
-
-const isThemeMode = Schema.is(ThemeMode);
-
-const modeOptions = [
-  { value: "system", label: "System", icon: mdiThemeLightDark },
-  { value: "dark", label: "Dark", icon: mdiWeatherNight },
-  { value: "light", label: "Light", icon: mdiWeatherSunny },
-] as const;
-
-const swatches = (theme: Theme) => [
-  theme.colors.bg,
-  theme.colors.accent,
-  theme.colors.chart[1],
-  theme.colors.chart[2],
-];
 
 const OTHER = "Other";
 
@@ -76,16 +51,6 @@ const themeGroups = (
     ...(single.length === 0 ? [] : [[OTHER, single] as const]),
   ];
 };
-
-const themeOptions = (scheme: ColorScheme): readonly SelectOption[] =>
-  themeGroups(scheme).flatMap(([group, members]) =>
-    members.map((theme) => ({
-      value: theme.id,
-      label: themeLabel(theme),
-      group,
-      swatches: swatches(theme),
-    })),
-  );
 
 /** The colour scheme and themes, kept in this browser. */
 @customElement("page-settings-appearance")
@@ -125,6 +90,11 @@ export class PageSettingsAppearance extends SbPage {
         .family {
           grid-column: 1 / -1;
         }
+      }
+
+      .section-title .chip {
+        letter-spacing: normal;
+        text-transform: none;
       }
 
       .family-name {
@@ -281,18 +251,6 @@ export class PageSettingsAppearance extends SbPage {
     }
   };
 
-  #onThemeSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    this.#choose(event.detail.value);
-  };
-
-  #onModeChange = (event: CustomEvent<{ readonly value: string }>) => {
-    const mode = event.detail.value;
-
-    if (isThemeMode(mode)) {
-      registry.set(appearance, { ...this.#appearance.value, mode });
-    }
-  };
-
   /** A theme's card. Under "Other" it's named by its family, not its variant. */
   #renderTheme(theme: Theme, chosen: boolean, other: boolean) {
     const { colors } = theme;
@@ -367,6 +325,21 @@ export class PageSettingsAppearance extends SbPage {
     `;
   }
 
+  /** A scheme's gallery, its heading naming the theme in use. */
+  #renderSection(scheme: ColorScheme, heading: string, chosen: ThemeId) {
+    return html`
+      <section class="stack">
+        <h2 class="section-title row">
+          ${heading}
+          <span class="chip accent"
+            >${themeLabel(themeById(chosen, scheme))}</span
+          >
+        </h2>
+        ${this.#renderGallery(scheme, chosen)}
+      </section>
+    `;
+  }
+
   override render() {
     const current = this.#appearance.value;
 
@@ -375,55 +348,11 @@ export class PageSettingsAppearance extends SbPage {
         ${this.renderHeader({
           heading: "Appearance",
           description:
-            "Colours for this browser. Pick a theme for light and one for dark, and the system can switch between them.",
+            "Colours for this browser. Pick a theme for dark and one for light; switch between them, or follow the system, from the header.",
           icon: mdiPaletteOutline,
         })}
-        <sb-card heading="Colour scheme">
-          <div class="setting">
-            <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label">Mode</span>
-              <span class="hint"
-                >System follows your device's light or dark setting.</span
-              >
-            </span>
-            <sb-segmented
-              label="Mode"
-              .options=${modeOptions}
-              .value=${current.mode}
-              @value-changed=${this.#onModeChange}
-            ></sb-segmented>
-          </div>
-          <div class="setting">
-            <span class="label">Dark theme</span>
-            <sb-select
-              style="width: 16rem"
-              label="Dark theme"
-              search-placeholder="Search themes"
-              .options=${themeOptions("dark")}
-              .value=${current.dark}
-              @value-changed=${this.#onThemeSelect}
-            ></sb-select>
-          </div>
-          <div class="setting">
-            <span class="label">Light theme</span>
-            <sb-select
-              style="width: 16rem"
-              label="Light theme"
-              search-placeholder="Search themes"
-              .options=${themeOptions("light")}
-              .value=${current.light}
-              @value-changed=${this.#onThemeSelect}
-            ></sb-select>
-          </div>
-        </sb-card>
-        <section class="stack">
-          <h2 class="section-title">Dark themes</h2>
-          ${this.#renderGallery("dark", current.dark)}
-        </section>
-        <section class="stack">
-          <h2 class="section-title">Light themes</h2>
-          ${this.#renderGallery("light", current.light)}
-        </section>
+        ${this.#renderSection("dark", "Dark themes", current.dark)}
+        ${this.#renderSection("light", "Light themes", current.light)}
       </div>
     `;
   }
