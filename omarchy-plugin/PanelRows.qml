@@ -14,6 +14,7 @@ QtObject {
   // Nerd Font glyphs, escaped so editors and tools can't drop them. The module
   // icons are the Material Design Icons the web client uses.
   readonly property string audioIcon: "\u{F057E}"
+  readonly property string bluetoothIcon: "\u{F00AF}"
   readonly property string cpuIcon: "\u{F0EE0}"
   readonly property string discordIcon: "\u{F02CE}"
   readonly property string diskIcon: "\u{F02CA}"
@@ -33,6 +34,7 @@ QtObject {
     { module: "system", label: "System", icon: root.systemIcon, area: "System" },
     { module: "audio", label: "Audio", icon: root.audioIcon, area: "Hardware" },
     { module: "battery", label: "Battery", icon: "\u{F0079}", area: "Hardware" },
+    { module: "bluetooth", label: "Bluetooth", icon: root.bluetoothIcon, area: "Hardware" },
     { module: "cpu", label: "CPU", icon: root.cpuIcon, area: "Hardware" },
     { module: "displays", label: "Displays", icon: root.displayIcon, area: "Hardware" },
     { module: "gpus", label: "GPUs", icon: root.gpuIcon, area: "Hardware" },
@@ -141,6 +143,7 @@ QtObject {
     case "gpus": return service.modules.gpus ? quantity(service.gpus.length, "GPU") : ""
     case "sensors": return service.sensors ? quantity(service.temperatures.length, "temperature") : ""
     case "battery": return service.battery ? percent(service.battery.percentage) : ""
+    case "bluetooth": return service.bluetooth ? bluetoothDevices(service).filter(function(device) { return device.connected === true }).length + " connected" : ""
     case "displays": return service.modules.displays ? quantity(service.displays.length, "display") : ""
     case "audio": return audioSummary(service)
     case "disks": return service.disks && Array.isArray(service.disks.devices) ? quantity(service.disks.devices.length, "disk") : ""
@@ -270,6 +273,7 @@ QtObject {
     case "gpus": return gpuRows(service)
     case "sensors": return sensorRows(service)
     case "battery": return batteryRows(service)
+    case "bluetooth": return bluetoothRows(service)
     case "displays": return displayRows(service)
     case "audio": return audioRows(service)
     case "disks": return diskRows(service)
@@ -457,6 +461,43 @@ QtObject {
     case "empty": return "Empty"
     default: return ""
     }
+  }
+
+  // Icons for the freedesktop icon names devices report as their type,
+  // matching the web client's.
+  readonly property var bluetoothIcons: ({
+    "audio-card": "\u{F04C3}",
+    "audio-headphones": "\u{F02CB}",
+    "audio-headset": "\u{F02CE}",
+    "camera-photo": "\u{F0100}",
+    "camera-video": "\u{F0567}",
+    "computer": "\u{F0322}",
+    "input-gaming": "\u{F0297}",
+    "input-keyboard": "\u{F030C}",
+    "input-mouse": "\u{F037D}",
+    "input-tablet": "\u{F04F6}",
+    "network-wireless": "\u{F05A9}",
+    "phone": "\u{F011C}",
+    "printer": "\u{F042A}"
+  })
+
+  function bluetoothDevices(service) {
+    return service.bluetooth && Array.isArray(service.bluetooth.devices) ? service.bluetooth.devices : []
+  }
+
+  function bluetoothRows(service) {
+    var devices = bluetoothDevices(service)
+    var rows = []
+    for (var i = 0; i < devices.length; i++) {
+      var device = devices[i]
+      rows.push(row({
+        key: "bluetooth-" + (text(device.address) || i), section: "Paired devices",
+        icon: bluetoothIcons[text(device.type)] || bluetoothIcon,
+        primaryText: text(device.name) || text(device.address),
+        secondaryText: device.connected === true ? "Connected" : "Not connected"
+      }))
+    }
+    return rows
   }
 
   function audioDevices(service, key) {

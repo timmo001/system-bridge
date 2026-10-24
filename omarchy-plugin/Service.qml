@@ -19,7 +19,7 @@ Item {
   readonly property var listModules: ["gpus", "displays", "processes"]
   readonly property var watchedModules: [
     "system", "processes", "cpu", "memory", "gpus", "sensors", "battery",
-    "displays", "audio", "disks", "networks", "media", "discord"
+    "bluetooth", "displays", "audio", "disks", "networks", "media", "discord"
   ]
 
   readonly property var system: objectData(modules.system) ? modules.system : null
@@ -27,6 +27,7 @@ Item {
   readonly property var memory: objectData(modules.memory) ? modules.memory : null
   readonly property var sensors: objectData(modules.sensors) ? modules.sensors : null
   readonly property var battery: objectData(modules.battery) ? modules.battery : null
+  readonly property var bluetooth: objectData(modules.bluetooth) ? modules.bluetooth : null
   readonly property var audio: objectData(modules.audio) ? modules.audio : null
   readonly property var disks: objectData(modules.disks) ? modules.disks : null
   readonly property var networks: objectData(modules.networks) ? modules.networks : null
