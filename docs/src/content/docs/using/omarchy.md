@@ -42,7 +42,8 @@ readings, and links to the matching part of the web client for anything you set
 up there, such as commands, disk mounts, media directories or Discord. The
 Bluetooth view connects or disconnects a paired device when you select it; the
 desktop view focuses a window or workspace when you select it, switches the
-keyboard layout, and reloads Hyprland's config; the Discord view has mute,
+keyboard layout, reloads Hyprland's config, and centres, groups or splits the
+focused window or cycles to the next or previous one; the Discord view has mute,
 deafen and leave call; the displays view has brightness for each display that
 supports it; and the media view has previous, play or pause, and next.
 

@@ -175,16 +175,17 @@ The response type is `DISPLAY_CONTROLLED`, and the displays module updates strai
 
 ## Hyprland control
 
-On Hyprland, float, pin and move windows, trigger global shortcuts, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+On Hyprland, float, pin and move windows, run dispatchers on the focused window, trigger global shortcuts, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
 
 | Event | Data | Response |
 | --- | --- | --- |
+| `HYPRLAND_DISPATCH` | `dispatcher`, and a `direction` for `move_focus` and `swap_window` | `HYPRLAND_DISPATCHED` |
 | `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
 | `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
 | `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
 | `HYPRLAND_SET_WINDOW` | `id`, and either or both of `floating` and `pinned` as `true` or `false` | `HYPRLAND_WINDOW_SET` |
 
-Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. Only the global shortcuts apps have registered can run, and there's no way to send Hyprland any other command.
+Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. Only the global shortcuts apps have registered and the dispatchers below can run, and there's no way to send Hyprland any other command.
 
 ```json title="Request"
 {
@@ -193,6 +194,55 @@ Moving a window leaves the focus where it is. Hyprland only pins floating window
     "event": "HYPRLAND_RUN_GLOBAL_SHORTCUT",
     "data": {
         "name": "omarchy:panel.omarchy.clock"
+    }
+}
+```
+
+The dispatchers act on the focused window, as their binds would:
+
+| Dispatcher | Effect |
+| --- | --- |
+| `center_window` | Center the window. Floating windows only. |
+| `cycle_next_window` | Focus the next window on the workspace. |
+| `cycle_previous_window` | Focus the previous window on the workspace. |
+| `move_focus` | Move the focus to the window in a `direction`. |
+| `swap_window` | Swap the window with the one in a `direction`. |
+| `toggle_group` | Turn the window into a group, or break up its group. |
+| `toggle_split` | Switch the split the window is in between horizontal and vertical, in the dwindle layout. |
+
+The direction is `down`, `left`, `right` or `up`. When Hyprland refuses, such as centring a tiled window, you get an `ERROR` with its reason.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_DISPATCH",
+    "data": {
+        "dispatcher": "move_focus",
+        "direction": "left"
+    }
+}
+```
+
+## Omarchy control
+
+While the Omarchy shell runs, open, close or toggle its menu and the panels of its plugins. Otherwise these get an `ERROR` with the subtype `INVALID_ACTION`.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `OMARCHY_MENU` | `action`, and the `id` of a menu to open or toggle | `OMARCHY_MENU_CHANGED` |
+| `OMARCHY_PANEL` | `action` and the `id` of a panel | `OMARCHY_PANEL_CHANGED` |
+
+The action is `open`, `close` or `toggle`. The ids are in the [`desktop`](/api/data/#desktop) data's `omarchy`. A menu also opens by one of its `aliases`, so `capture` opens `trigger.capture`. An id the shell doesn't have gets an `ERROR` with the subtype `BAD_REQUEST`.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "OMARCHY_PANEL",
+    "data": {
+        "action": "toggle",
+        "id": "omarchy.audio"
     }
 }
 ```

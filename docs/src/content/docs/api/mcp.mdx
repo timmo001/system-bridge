@@ -179,7 +179,7 @@ Available modules:
 | `battery` | Charge level, charging state, and time remaining. |
 | `bluetooth` | Paired Bluetooth devices and whether they're connected. |
 | `cpu` | Usage, frequency, core counts, and per-core load. |
-| `desktop` | Open windows, workspaces, the keyboard layout and, on Hyprland, its displays, input devices, binds and global shortcuts. |
+| `desktop` | Open windows, workspaces, the keyboard layout, on Hyprland its displays, input devices, binds and global shortcuts, and the Omarchy shell's menus and panels. |
 | `disks` | Mounted devices, partitions, and used/free space. |
 | `displays` | Connected displays, resolution, refresh rate, brightness and power state. |
 | `gpus` | GPU model, load, memory, and temperature. |
@@ -208,6 +208,13 @@ Example arguments:
 ```json
 { "since": 1792857600000, "modules": ["cpu", "memory"] }
 ```
+
+### `system_bridge_hyprland_dispatch`
+
+Run a dispatcher on the focused window on Hyprland, as its bind would. See [Hyprland control](/api/websocket/control/#hyprland-control) for what each does.
+
+- `dispatcher` (required): `center_window`, `cycle_next_window`, `cycle_previous_window`, `move_focus`, `swap_window`, `toggle_group` or `toggle_split`.
+- `direction` (optional): `down`, `left`, `right` or `up`. Needed for `move_focus` and `swap_window`.
 
 ### `system_bridge_hyprland_move_window`
 
@@ -262,6 +269,20 @@ Example arguments:
 ```json
 { "action": "PAUSE" }
 ```
+
+### `system_bridge_omarchy_menu`
+
+Open, close or toggle the Omarchy menu at one of its routes, while the Omarchy shell runs. See [Omarchy control](/api/websocket/control/#omarchy-control).
+
+- `action` (required): `open`, `close` or `toggle`.
+- `id` (optional): A menu `id` or one of its `aliases` from the `desktop` module's `omarchy.menus`, such as `root`. Not needed to close the menu.
+
+### `system_bridge_omarchy_panel`
+
+Open, close or toggle a panel or overlay of an Omarchy shell plugin.
+
+- `action` (required): `open`, `close` or `toggle`.
+- `id` (required): A panel `id` from the `desktop` module's `omarchy.panels`, such as `omarchy.audio`.
 
 ### `system_bridge_run_command`
 

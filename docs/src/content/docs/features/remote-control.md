@@ -110,16 +110,29 @@ The ids are the window and workspace `id`s from the [`desktop`](/api/data/#deskt
 
 ### Hyprland
 
-On Hyprland you can also float, pin and move windows, trigger the global shortcuts apps have registered, and reload the config, from the same places or the CLI:
+On Hyprland you can also float, pin and move windows, move the focus and run other dispatchers on the focused window, trigger the global shortcuts apps have registered, and reload the config, from the same places or the CLI:
 
 ```bash title="Terminal"
 system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
 system-bridge client hyprland move 0x555dbf21c9e0 2
+system-bridge client hyprland dispatch move_focus left
 system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
 system-bridge client hyprland reload
 ```
 
-System Bridge only runs these actions. It can't send Hyprland any other command.
+System Bridge only runs these actions and [dispatchers](/api/websocket/control/#hyprland-control). It can't send Hyprland any other command.
+
+### Omarchy
+
+While the Omarchy shell runs, open, close or toggle its menu at any of its routes, and the panels of its plugins, from the same places or the CLI:
+
+```bash title="Terminal"
+system-bridge client omarchy menu open capture
+system-bridge client omarchy menu close
+system-bridge client omarchy panel toggle omarchy.audio
+```
+
+The menus, panels and the shell's IPC targets are in the [`desktop`](/api/data/#desktop) data's `omarchy`. To call other IPC functions, add them to your [commands](/features/commands/).
 
 ## Displays
 

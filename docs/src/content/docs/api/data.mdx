@@ -182,6 +182,7 @@ The open windows, workspaces and keyboard layout, from Hyprland, another Wayland
 | `windows` | array | The open windows. See below. |
 | `workspaces` | array | The workspaces. Empty on Windows. See below. |
 | `hyprland` | object | What only Hyprland reports, or `null` elsewhere. See below. |
+| `omarchy` | object | What the Omarchy shell can open, or `null` while it isn't running. See below. |
 
 Each window has `id`, `app`, `title`, `pid`, `workspace` (a workspace `id`), `display`, `x`, `y`, `width`, `height`, and whether it's `focused`, `fullscreen`, `maximised`, `minimised`, `floating`, `urgent` and `inhibiting_idle` (keeping the screen awake). `content_type` is what the window says it shows, such as `video` or `game`. Fields a desktop doesn't report are `null`. `title` is `null` unless you turn on **Window titles** on the web client's **Desktop** page.
 
@@ -204,6 +205,14 @@ Each workspace has `id`, `name`, `display`, `windows` (how many), and whether it
 | `submap` | string | The active submap, or `null`. |
 | `group_lock` | boolean | Whether window groups are locked. |
 | `config_errors` | array | Errors in Hyprland's config. |
+
+`omarchy` has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `menus` | array | The Omarchy menu's routes, each with `id` (such as `root` or `trigger.capture`), `name` and `aliases` (other names that open it, such as `capture`). Open one with [`OMARCHY_MENU`](/api/websocket/control/#omarchy-control). |
+| `panels` | array | The panels and overlays of the shell's enabled plugins, each with `id` (such as `omarchy.audio`) and `name`. Open one with [`OMARCHY_PANEL`](/api/websocket/control/#omarchy-control). |
+| `targets` | array | The shell's IPC targets, each with `name` and `functions`. Each function has `name`, `arguments` (each with `name` and `type`) and `returns`. Types are `string`, `int`, `bool`, `real` or, for `returns`, `void`. |
 
 ### `displays`
 
