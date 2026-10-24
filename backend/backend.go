@@ -229,6 +229,16 @@ func (b *Backend) Run(ctx context.Context) error {
 		slog.Info("Data update task processor completed")
 	}()
 
+	// Save the history now and then, and when shutting down, so a restart
+	// keeps it
+	history := b.dataStore.History()
+	go history.SaveEvery(ctx, 5*time.Minute)
+	defer func() {
+		if err := history.Save(); err != nil {
+			slog.Warn("Failed to save history", "error", err)
+		}
+	}()
+
 	// Wait for either context cancellation or server error
 	select {
 	case <-ctx.Done():

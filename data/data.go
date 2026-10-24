@@ -25,6 +25,8 @@ type DataStore struct {
 	// saved holds a hash of each module's data as last written to disk, so
 	// an update that changed nothing does not rewrite the file.
 	saved map[types.ModuleName]uint64
+	// history keeps the recent readings of the graphed metrics
+	history *History
 }
 
 // lazyModules register when they first receive data instead of at startup.
@@ -35,7 +37,10 @@ var lazyModules = map[types.ModuleName]types.Updater{
 }
 
 func NewDataStore() (*DataStore, error) {
-	ds := &DataStore{registry: make(map[types.ModuleName]types.Module, 0)}
+	ds := &DataStore{
+		registry: make(map[types.ModuleName]types.Module, 0),
+		history:  NewHistory(),
+	}
 
 	// Register all modules with validation
 	modules := []types.Updater{
@@ -135,11 +140,16 @@ func (d *DataStore) SetModuleData(name types.ModuleName, data any) error {
 		return fmt.Errorf("module updater is nil for %s", name)
 	}
 
+	now := time.Now()
 	module.Data = data
-	module.Updated = time.Now().Format(time.RFC3339)
+	module.Updated = now.Format(time.RFC3339)
 	if err := d.saveModuleData(module); err != nil {
 		return err
 	}
+
+	// Record before broadcasting, so a client that asks for the history
+	// when the update arrives gets this reading too
+	d.history.Record(data, now)
 
 	// Broadcast the module data update event
 	if eb := bus.GetInstance(); eb != nil {
@@ -193,6 +203,17 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 	}
 
 	return data
+}
+
+// GetHistory returns the graphed metrics' readings taken after a time, in
+// Unix milliseconds. Zero returns them all.
+func (d *DataStore) GetHistory(since int64) types.MetricHistory {
+	return d.history.Since(since)
+}
+
+// History is the store's history, for saving it
+func (d *DataStore) History() *History {
+	return d.history
 }
 
 // persistedModule is the on-disk shape of a module's last data. It matches
@@ -325,13 +346,16 @@ func (d *DataStore) TriggerModuleUpdate(name types.ModuleName) error {
 	}
 
 	// Set the updated data
+	now := time.Now()
 	module.Data = data
-	module.Updated = time.Now().Format(time.RFC3339)
+	module.Updated = now.Format(time.RFC3339)
 
 	// Save the module data
 	if err := d.saveModuleData(module); err != nil {
 		return err
 	}
+
+	d.history.Record(data, now)
 
 	// Broadcast the module data update event
 	if eb := bus.GetInstance(); eb != nil {
