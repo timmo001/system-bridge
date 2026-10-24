@@ -189,6 +189,28 @@ class HyprlandMouse:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class HyprlandBind:
+    """Hyprland Bind.
+
+    key is a key name, code:N for a keycode, or mouse:N for a mouse button.
+    dispatcher and argument are None when the bind runs Lua.
+    """
+
+    key: str
+    locked: bool
+    release: bool
+    repeat: bool
+    long_press: bool
+    non_consuming: bool
+    modifiers: list[str] = field(default_factory=list)
+    submap: str | None = None
+    description: str | None = None
+    dispatcher: str | None = None
+    argument: str | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class HyprlandGlobalShortcut:
     """Hyprland Global Shortcut."""
 
@@ -245,6 +267,7 @@ class Hyprland:
     tablets: list[str] = field(default_factory=list)
     touch: list[str] = field(default_factory=list)
     switches: list[str] = field(default_factory=list)
+    binds: list[HyprlandBind] = field(default_factory=list)
     global_shortcuts: list[HyprlandGlobalShortcut] = field(default_factory=list)
     windows: dict[str, HyprlandWindow] = field(default_factory=dict)
     workspaces: dict[str, HyprlandWorkspace] = field(default_factory=dict)
@@ -269,6 +292,10 @@ class Hyprland:
         self.mice = [
             HyprlandMouse(**cast(dict, m)) if isinstance(m, dict) else m
             for m in self.mice or []
+        ]
+        self.binds = [
+            HyprlandBind(**cast(dict, b)) if isinstance(b, dict) else b
+            for b in self.binds or []
         ]
         self.global_shortcuts = [
             HyprlandGlobalShortcut(**cast(dict, s)) if isinstance(s, dict) else s

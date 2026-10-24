@@ -134,18 +134,50 @@ type hyprlandConfig struct {
 	}
 	ConfigErrors    []string
 	GlobalShortcuts []types.HyprlandGlobalShortcut
+	Binds           []hyprlandBind
 	Status          struct {
 		ConfigProvider string `json:"configProvider"`
 		Backend        string `json:"backend"`
 	}
 }
 
+type hyprlandBind struct {
+	Locked       bool   `json:"locked"`
+	Release      bool   `json:"release"`
+	Repeat       bool   `json:"repeat"`
+	LongPress    bool   `json:"longPress"`
+	NonConsuming bool   `json:"non_consuming"`
+	ModMask      int    `json:"modmask"`
+	Submap       string `json:"submap"`
+	Key          string `json:"key"`
+	KeyCode      int    `json:"keycode"`
+	CatchAll     bool   `json:"catch_all"`
+	Description  string `json:"description"`
+	Dispatcher   string `json:"dispatcher"`
+	Arg          string `json:"arg"`
+}
+
+// hyprlandModifiers are Hyprland's modifier bits, in the order binds name them
+var hyprlandModifiers = []struct {
+	bit  int
+	name string
+}{
+	{64, "SUPER"},
+	{4, "CTRL"},
+	{8, "ALT"},
+	{1, "SHIFT"},
+	{2, "CAPS"},
+	{16, "MOD2"},
+	{32, "MOD3"},
+	{128, "MOD5"},
+}
+
 // hyprlandConfigRequests are the requests for hyprlandConfig, with status last
 // as older versions don't know it
-var hyprlandConfigRequests = []string{"version", "configerrors", "globalshortcuts", "status"}
+var hyprlandConfigRequests = []string{"version", "configerrors", "globalshortcuts", "binds", "status"}
 
 func (c *hyprlandConfig) targets() []any {
-	return []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Status}
+	return []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Binds, &c.Status}
 }
 
 // decodeReplies decodes each reply into its target. Only the last optional
@@ -291,6 +323,7 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		Tablets:         deviceNames(state.Devices.Tablets),
 		Touch:           deviceNames(state.Devices.Touch),
 		Switches:        deviceNames(state.Devices.Switches),
+		Binds:           hyprlandBinds(config.Binds),
 		GlobalShortcuts: []types.HyprlandGlobalShortcut{},
 		Windows:         make(map[string]types.HyprlandWindow, len(state.Clients)),
 		Workspaces:      make(map[string]types.HyprlandWorkspace, len(state.Workspaces)),
@@ -476,6 +509,45 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 
 	data.Hyprland = &hyprland
 	return data
+}
+
+// hyprlandBinds turns Hyprland's binds into the module's, naming their
+// modifiers and keys
+func hyprlandBinds(binds []hyprlandBind) []types.HyprlandBind {
+	out := make([]types.HyprlandBind, 0, len(binds))
+	for _, bind := range binds {
+		modifiers := []string{}
+		for _, modifier := range hyprlandModifiers {
+			if bind.ModMask&modifier.bit != 0 {
+				modifiers = append(modifiers, modifier.name)
+			}
+		}
+		key := bind.Key
+		switch {
+		case bind.CatchAll:
+			key = "catchall"
+		case key == "" && bind.KeyCode != 0:
+			key = "code:" + strconv.Itoa(bind.KeyCode)
+		}
+		item := types.HyprlandBind{
+			Modifiers:    modifiers,
+			Key:          key,
+			Submap:       nonEmpty(bind.Submap),
+			Description:  nonEmpty(bind.Description),
+			Locked:       bind.Locked,
+			Release:      bind.Release,
+			Repeat:       bind.Repeat,
+			LongPress:    bind.LongPress,
+			NonConsuming: bind.NonConsuming,
+		}
+		// A Lua bind's dispatcher and argument are only its function's number
+		if bind.Dispatcher != "__lua" {
+			item.Dispatcher = nonEmpty(bind.Dispatcher)
+			item.Argument = nonEmpty(bind.Arg)
+		}
+		out = append(out, item)
+	}
+	return out
 }
 
 func deviceNames(devices []hyprlandNamed) []string {

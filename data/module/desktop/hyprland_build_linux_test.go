@@ -12,6 +12,24 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
+func TestHyprlandBinds(t *testing.T) {
+	binds := hyprlandBinds([]hyprlandBind{
+		{ModMask: 65, Key: "V", Dispatcher: "__lua", Arg: "12", Description: "Paste"},
+		{ModMask: 0, KeyCode: 172, Submap: "resize", Dispatcher: "global", Arg: "omarchy:menu.root"},
+	})
+	require.Len(t, binds, 2)
+
+	assert.Equal(t, []string{"SUPER", "SHIFT"}, binds[0].Modifiers)
+	assert.Equal(t, "V", binds[0].Key)
+	assert.Nil(t, binds[0].Dispatcher)
+	assert.Nil(t, binds[0].Argument)
+
+	assert.Equal(t, []string{}, binds[1].Modifiers)
+	assert.Equal(t, "code:172", binds[1].Key)
+	assert.Equal(t, "resize", *binds[1].Submap)
+	assert.Equal(t, "omarchy:menu.root", *binds[1].Argument)
+}
+
 func TestBuildHyprland(t *testing.T) {
 	var state hyprlandState
 	replies := []json.RawMessage{

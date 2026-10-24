@@ -5,6 +5,24 @@
     focused_window='0x2',
     focused_workspace='2',
     hyprland=Hyprland(
+      binds=list([
+        HyprlandBind(
+          argument=None,
+          description='Clipboard manager',
+          dispatcher=None,
+          key='V',
+          locked=False,
+          long_press=False,
+          modifiers=list([
+            'SUPER',
+            'CTRL',
+          ]),
+          non_consuming=False,
+          release=False,
+          repeat=False,
+          submap=None,
+        ),
+      ]),
       config_errors=list([
       ]),
       displays=dict({

@@ -220,6 +220,21 @@
     "tablets": [],
     "touch": [],
     "switches": [],
+    "binds": [
+      {
+        "modifiers": ["SUPER", "CTRL"],
+        "key": "V",
+        "submap": null,
+        "description": "Clipboard manager",
+        "dispatcher": null,
+        "argument": null,
+        "locked": false,
+        "release": false,
+        "repeat": false,
+        "long_press": false,
+        "non_consuming": false
+      }
+    ],
     "global_shortcuts": [
       {
         "name": "omarchy:menu.root",

@@ -7,6 +7,7 @@ from systembridgeconnector.models.modules.desktop import (
     DesktopWindow,
     DesktopWorkspace,
     Hyprland,
+    HyprlandBind,
     HyprlandDisplay,
     HyprlandFullscreenMode,
     HyprlandGlobalShortcut,
@@ -140,6 +141,18 @@ FIXTURE_DESKTOP = Desktop(
             ),
         ],
         mice=[HyprlandMouse(name="usb-mouse", speed=0.0, scroll_factor=-1.0)],
+        binds=[
+            HyprlandBind(
+                modifiers=["SUPER", "CTRL"],
+                key="V",
+                description="Clipboard manager",
+                locked=False,
+                release=False,
+                repeat=False,
+                long_press=False,
+                non_consuming=False,
+            ),
+        ],
         global_shortcuts=[
             HyprlandGlobalShortcut(
                 name="omarchy:menu.root",

@@ -77,6 +77,7 @@ type HyprlandData struct {
 	Tablets         []string                     `json:"tablets" mapstructure:"tablets"`
 	Touch           []string                     `json:"touch" mapstructure:"touch"`
 	Switches        []string                     `json:"switches" mapstructure:"switches"`
+	Binds           []HyprlandBind               `json:"binds" mapstructure:"binds"`
 	GlobalShortcuts []HyprlandGlobalShortcut     `json:"global_shortcuts" mapstructure:"global_shortcuts"`
 	Windows         map[string]HyprlandWindow    `json:"windows" mapstructure:"windows"`
 	Workspaces      map[string]HyprlandWorkspace `json:"workspaces" mapstructure:"workspaces"`
@@ -158,6 +159,21 @@ type HyprlandMouse struct {
 	Name         string  `json:"name" mapstructure:"name"`
 	Speed        float64 `json:"speed" mapstructure:"speed"`
 	ScrollFactor float64 `json:"scroll_factor" mapstructure:"scroll_factor"` // -1 when not set
+}
+
+// HyprlandBind is a key or mouse binding, in the config's order
+type HyprlandBind struct {
+	Modifiers    []string `json:"modifiers" mapstructure:"modifiers"` // SUPER, SHIFT, CTRL, ALT, CAPS, MOD2, MOD3 or MOD5
+	Key          string   `json:"key" mapstructure:"key"`             // A key name, code:N for a keycode, or mouse:N for a mouse button
+	Submap       *string  `json:"submap" mapstructure:"submap"`       // null for the default
+	Description  *string  `json:"description" mapstructure:"description"`
+	Dispatcher   *string  `json:"dispatcher" mapstructure:"dispatcher"` // null when the bind runs Lua, which Hyprland doesn't describe
+	Argument     *string  `json:"argument" mapstructure:"argument"`     // The global shortcut's name for the global dispatcher
+	Locked       bool     `json:"locked" mapstructure:"locked"`         // Works on the lock screen
+	Release      bool     `json:"release" mapstructure:"release"`
+	Repeat       bool     `json:"repeat" mapstructure:"repeat"`
+	LongPress    bool     `json:"long_press" mapstructure:"long_press"`
+	NonConsuming bool     `json:"non_consuming" mapstructure:"non_consuming"` // The app gets the key too
 }
 
 // HyprlandGlobalShortcut is a shortcut an app has registered

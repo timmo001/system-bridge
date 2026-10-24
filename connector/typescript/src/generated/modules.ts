@@ -343,6 +343,22 @@ export interface HyprlandMouse extends Schema.Schema.Type<
   typeof HyprlandMouse
 > {}
 
+export const HyprlandBind = Schema.Struct({
+  modifiers: Schema.Array(Schema.String),
+  key: Schema.String,
+  submap: Schema.NullOr(Schema.String),
+  description: Schema.NullOr(Schema.String),
+  dispatcher: Schema.NullOr(Schema.String),
+  argument: Schema.NullOr(Schema.String),
+  locked: Schema.Boolean,
+  release: Schema.Boolean,
+  repeat: Schema.Boolean,
+  long_press: Schema.Boolean,
+  non_consuming: Schema.Boolean,
+});
+
+export interface HyprlandBind extends Schema.Schema.Type<typeof HyprlandBind> {}
+
 export const HyprlandGlobalShortcut = Schema.Struct({
   name: Schema.String,
   description: Schema.String,
@@ -391,6 +407,7 @@ export const HyprlandData = Schema.Struct({
   tablets: Schema.Array(Schema.String),
   touch: Schema.Array(Schema.String),
   switches: Schema.Array(Schema.String),
+  binds: Schema.Array(HyprlandBind),
   global_shortcuts: Schema.Array(HyprlandGlobalShortcut),
   windows: Schema.Record(Schema.String, HyprlandWindow),
   workspaces: Schema.Record(Schema.String, HyprlandWorkspace),
