@@ -1,8 +1,34 @@
 # serializer version: 1
 # name: test_battery
   Battery(
+    ac_connected=True,
+    batteries=list([
+      BatteryInfo(
+        model='model',
+        name='BAT0',
+        percentage=98.4,
+        power=25.5,
+        scope=<BatteryScope.SYSTEM: 'system'>,
+        state=<BatteryState.CHARGING: 'charging'>,
+        time_remaining=12,
+        voltage=12.6,
+      ),
+      BatteryInfo(
+        model='mouse',
+        name='hidpp_battery_1',
+        percentage=96,
+        power=None,
+        scope=<BatteryScope.DEVICE: 'device'>,
+        state=<BatteryState.DISCHARGING: 'discharging'>,
+        time_remaining=None,
+        voltage=None,
+      ),
+    ]),
     is_charging=True,
     percentage=98.4,
+    power=25.5,
+    state=<BatteryState.CHARGING: 'charging'>,
     time_remaining=12,
+    voltage=12.6,
   )
 # ---
