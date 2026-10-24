@@ -1,7 +1,10 @@
 package event_handler
 
 import (
+	"errors"
+	"io/fs"
 	"log/slog"
+	"os"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/browser"
@@ -42,6 +45,22 @@ func RegisterOpenHandler(router *event.MessageRouter) {
 		}
 
 		if data.Path != "" {
+			// The opener runs in the background and can't report a missing
+			// path, so check it first
+			if _, statErr := os.Stat(data.Path); statErr != nil {
+				slog.Warn("Path to open is not accessible", "path", data.Path, "error", statErr)
+				reason := "Path is not accessible"
+				if errors.Is(statErr, fs.ErrNotExist) {
+					reason = "Path does not exist"
+				}
+				return event.MessageResponse{
+					ID:      message.ID,
+					Type:    event.ResponseTypeError,
+					Subtype: event.ResponseSubtypeBadRequest,
+					Message: reason,
+				}
+			}
+
 			err = filesystem.OpenFile(data.Path)
 			if err != nil {
 				slog.Error("Failed to open file", "error", err)
