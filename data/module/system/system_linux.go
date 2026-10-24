@@ -5,6 +5,8 @@ package system
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -274,18 +276,98 @@ func pipeWireCaptureApps(mediaClass string) (apps []string, ok bool) {
 
 // GetPendingReboot best-effort check for common reboot-required files on Debian/Ubuntu.
 // Returns pointer to bool when known, or nil when unknown.
+// GetPendingReboot reports whether a reboot is needed to finish applying
+// updates. It returns nil when none of the checks apply to this system.
 func GetPendingReboot() *bool {
-	candidates := []string{
-		"/run/reboot-required",
-		"/var/run/reboot-required",
-	}
-	for _, p := range candidates {
+	required := true
+	// Debian and Ubuntu flag a pending reboot with a file
+	for _, p := range []string{"/run/reboot-required", "/var/run/reboot-required"} {
 		if _, err := os.Stat(p); err == nil {
-			v := true
-			return &v
+			return &required
 		}
 	}
+
+	// Arch and other distributions that remove the running kernel's modules
+	// when it is upgraded
+	modulesMissing, modulesChecked := runningKernelModulesMissing()
+	if modulesMissing {
+		return &required
+	}
+
+	// Fedora keeps old kernels, so ask dnf
+	if dnfRequired, ok := dnfRebootHint(); ok {
+		return &dnfRequired
+	}
+
+	if modulesChecked {
+		required = false
+		return &required
+	}
 	return nil
+}
+
+const kernelModulesDir = "/lib/modules"
+
+// runningKernelModulesMissing reports whether the running kernel's modules
+// directory is gone. checked is false when there are no kernel modules to
+// compare against, such as in a container or Flatpak sandbox.
+func runningKernelModulesMissing() (missing bool, checked bool) {
+	release, err := os.ReadFile("/proc/sys/kernel/osrelease")
+	if err != nil {
+		slog.Debug("Failed to read kernel release", "error", err)
+		return false, false
+	}
+	entries, err := os.ReadDir(kernelModulesDir)
+	if err != nil || len(entries) == 0 {
+		return false, false
+	}
+
+	_, err = os.Stat(filepath.Join(kernelModulesDir, strings.TrimSpace(string(release))))
+	if err == nil {
+		return false, true
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return true, true
+	}
+	slog.Debug("Failed to check running kernel modules", "error", err)
+	return false, false
+}
+
+const (
+	dnfRebootHintTimeout = 30 * time.Second
+	// dnfRebootHintTTL keeps dnf, which is slow to start, from running on
+	// every update. Its answer only changes after a package transaction.
+	dnfRebootHintTTL = 10 * time.Minute
+)
+
+var dnfRebootHintCache = utils.TTLValue[bool]{TTL: dnfRebootHintTTL, FailTTL: dnfRebootHintTTL}
+
+// dnfRebootHint asks dnf whether core packages were updated since boot. ok is
+// false when dnf or its needs-restarting command isn't available.
+func dnfRebootHint() (required bool, ok bool) {
+	if _, err := exec.LookPath("dnf"); err != nil {
+		return false, false
+	}
+	return dnfRebootHintCache.Get(func() (bool, bool) {
+		ctx, cancel := context.WithTimeout(context.Background(), dnfRebootHintTimeout)
+		defer cancel()
+		// Disabling repositories keeps dnf to the installed packages, so it never
+		// fetches metadata. --reboothint is needed by dnf 4 and accepted by dnf 5.
+		cmd := exec.CommandContext(ctx, "dnf", "--disablerepo=*", "needs-restarting", "--reboothint")
+		cmd.Env = append(os.Environ(), "LC_ALL=C")
+		out, err := cmd.Output()
+		if err == nil {
+			return false, true
+		}
+		// Exit code 1 also means dnf failed, so check for the reboot message
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 &&
+			strings.Contains(string(out), "Reboot is required") {
+			return true, true
+		}
+		slog.Debug("Failed to run dnf needs-restarting", "error", err)
+		return false, false
+	})
 }
 
 // GetPSUPowerUsage attempts to read PSU power usage from hwmon interfaces on Linux.
