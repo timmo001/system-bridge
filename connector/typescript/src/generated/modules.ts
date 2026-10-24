@@ -139,6 +139,7 @@ export interface BluetoothDevice extends Schema.Schema.Type<
 
 export const BluetoothData = Schema.Struct({
   devices: Schema.Array(BluetoothDevice),
+  powered: Schema.NullOr(Schema.Boolean),
 });
 
 export interface BluetoothData extends Schema.Schema.Type<

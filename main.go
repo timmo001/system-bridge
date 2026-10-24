@@ -252,6 +252,7 @@ func main() {
 							return client.SendWithin(cmdCtx, client.SlowSendTimeout, event.EventAudioControl, data)
 						},
 					},
+					bluetoothCommand(),
 					{
 						Name:    "data",
 						Aliases: []string{"d"},

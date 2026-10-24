@@ -6,6 +6,10 @@ type ResponseType string
 const (
 	ResponseTypeApplicationExiting        ResponseType = "APPLICATION_EXITING"
 	ResponseTypeAudioControlled           ResponseType = "AUDIO_CONTROLLED"
+	ResponseTypeBluetoothConnected        ResponseType = "BLUETOOTH_CONNECTED"
+	ResponseTypeBluetoothDisconnected     ResponseType = "BLUETOOTH_DISCONNECTED"
+	ResponseTypeBluetoothForgotten        ResponseType = "BLUETOOTH_FORGOTTEN"
+	ResponseTypeBluetoothPowerSet         ResponseType = "BLUETOOTH_POWER_SET"
 	ResponseTypeCommandCompleted          ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeCommandExecuting          ResponseType = "COMMAND_EXECUTING"
 	ResponseTypeDataGet                   ResponseType = "DATA_GET"

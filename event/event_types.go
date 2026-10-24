@@ -5,6 +5,10 @@ type EventType string
 
 const (
 	EventAudioControl              EventType = "AUDIO_CONTROL"
+	EventBluetoothConnect          EventType = "BLUETOOTH_CONNECT"
+	EventBluetoothDisconnect       EventType = "BLUETOOTH_DISCONNECT"
+	EventBluetoothForget           EventType = "BLUETOOTH_FORGET"
+	EventBluetoothSetPower         EventType = "BLUETOOTH_SET_POWER"
 	EventCommandExecute            EventType = "COMMAND_EXECUTE"
 	EventDataUpdate                EventType = "DATA_UPDATE"
 	EventDesktopCloseWindow        EventType = "DESKTOP_CLOSE_WINDOW"

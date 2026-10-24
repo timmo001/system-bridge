@@ -180,13 +180,17 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 17)
+	require.Len(t, tools.Tools, 21)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
 	}
 	assert.ElementsMatch(t, []string{
 		"system_bridge_audio_control",
+		"system_bridge_bluetooth_connect",
+		"system_bridge_bluetooth_disconnect",
+		"system_bridge_bluetooth_forget",
+		"system_bridge_bluetooth_set_power",
 		"system_bridge_desktop_close_window",
 		"system_bridge_desktop_focus_window",
 		"system_bridge_desktop_focus_workspace",

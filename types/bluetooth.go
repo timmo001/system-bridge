@@ -11,4 +11,5 @@ type BluetoothDevice struct {
 // BluetoothData lists the system's paired Bluetooth devices
 type BluetoothData struct {
 	Devices []BluetoothDevice `json:"devices" mapstructure:"devices"`
+	Powered *bool             `json:"powered" mapstructure:"powered"` // Whether the adapter is on, null when there's no adapter or it can't be read
 }

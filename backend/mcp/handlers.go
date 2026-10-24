@@ -29,6 +29,14 @@ type audioControlInput struct {
 	Default bool     `json:"default,omitempty"`
 }
 
+type bluetoothDeviceInput struct {
+	Address string `json:"address"`
+}
+
+type bluetoothPowerInput struct {
+	Powered bool `json:"powered"`
+}
+
 type displayControlInput struct {
 	ID         string   `json:"id"`
 	Brightness *float64 `json:"brightness,omitempty"`

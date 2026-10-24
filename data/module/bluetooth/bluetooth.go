@@ -2,11 +2,18 @@ package bluetooth
 
 import (
 	"cmp"
+	"errors"
 	"slices"
 	"strings"
 
 	"github.com/timmo001/system-bridge/types"
 )
+
+// ErrUnsupported is returned for an action this platform can't do
+var ErrUnsupported = errors.New("not supported on this platform")
+
+// ErrNotFound is returned when no paired device has the address asked for
+var ErrNotFound = errors.New("no paired device with that address")
 
 // sortDevices orders devices by name, then address
 func sortDevices(devices []types.BluetoothDevice) {

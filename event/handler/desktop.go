@@ -2,16 +2,15 @@ package event_handler
 
 import (
 	"context"
-	"errors"
-	"log/slog"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/data/module/desktop"
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/types"
 )
+
+const desktopTimeout = 10 * time.Second
 
 type DesktopWindowRequestData struct {
 	ID string `json:"id" mapstructure:"id"`
@@ -48,31 +47,31 @@ type HyprlandGlobalShortcutRequestData struct {
 }
 
 func RegisterDesktopHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
-	registerDesktopAction(router, dataStore, event.EventDesktopCloseWindow, event.ResponseTypeDesktopWindowClosed, "Window closed",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopCloseWindow, event.ResponseTypeDesktopWindowClosed, "Window closed",
 		func(request DesktopWindowRequestData) string { return required(request.ID, "No window id provided") },
 		func(ctx context.Context, request DesktopWindowRequestData) error {
 			return desktop.CloseWindow(ctx, request.ID)
 		})
-	registerDesktopAction(router, dataStore, event.EventDesktopFocusWindow, event.ResponseTypeDesktopWindowFocused, "Window focused",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopFocusWindow, event.ResponseTypeDesktopWindowFocused, "Window focused",
 		func(request DesktopWindowRequestData) string { return required(request.ID, "No window id provided") },
 		func(ctx context.Context, request DesktopWindowRequestData) error {
 			return desktop.FocusWindow(ctx, request.ID)
 		})
-	registerDesktopAction(router, dataStore, event.EventDesktopFocusWorkspace, event.ResponseTypeDesktopWorkspaceFocused, "Workspace focused",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopFocusWorkspace, event.ResponseTypeDesktopWorkspaceFocused, "Workspace focused",
 		func(request DesktopWorkspaceRequestData) string {
 			return required(request.ID, "No workspace id provided")
 		},
 		func(ctx context.Context, request DesktopWorkspaceRequestData) error {
 			return desktop.FocusWorkspace(ctx, request.ID)
 		})
-	registerDesktopAction(router, dataStore, event.EventDesktopSetKeyboardLayout, event.ResponseTypeDesktopKeyboardLayoutSet, "Keyboard layout set",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopSetKeyboardLayout, event.ResponseTypeDesktopKeyboardLayoutSet, "Keyboard layout set",
 		func(request DesktopKeyboardLayoutRequestData) string {
 			return required(request.Layout, "No layout provided")
 		},
 		func(ctx context.Context, request DesktopKeyboardLayoutRequestData) error {
 			return desktop.SetKeyboardLayout(ctx, request.Layout)
 		})
-	registerDesktopAction(router, dataStore, event.EventDesktopSetWindowState, event.ResponseTypeDesktopWindowStateSet, "Window state set",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopSetWindowState, event.ResponseTypeDesktopWindowStateSet, "Window state set",
 		func(request DesktopWindowStateRequestData) string {
 			if request.Fullscreen == nil && request.Maximised == nil && request.Minimised == nil {
 				return "Provide fullscreen, maximised or minimised"
@@ -89,7 +88,7 @@ func RegisterDesktopHandlers(router *event.MessageRouter, dataStore *data.DataSt
 }
 
 func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
-	registerDesktopAction(router, dataStore, event.EventHyprlandMoveWindow, event.ResponseTypeHyprlandWindowMoved, "Window moved",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandMoveWindow, event.ResponseTypeHyprlandWindowMoved, "Window moved",
 		func(request HyprlandMoveWindowRequestData) string {
 			if request.Workspace == "" {
 				return "No workspace provided"
@@ -99,19 +98,19 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 		func(ctx context.Context, request HyprlandMoveWindowRequestData) error {
 			return desktop.HyprlandMoveWindow(ctx, request.ID, request.Workspace)
 		})
-	registerDesktopAction(router, dataStore, event.EventHyprlandReloadConfig, event.ResponseTypeHyprlandConfigReloaded, "Config reloaded",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandReloadConfig, event.ResponseTypeHyprlandConfigReloaded, "Config reloaded",
 		func(struct{}) string { return "" },
 		func(ctx context.Context, _ struct{}) error {
 			return desktop.HyprlandReloadConfig(ctx)
 		})
-	registerDesktopAction(router, dataStore, event.EventHyprlandRunGlobalShortcut, event.ResponseTypeHyprlandGlobalShortcutRun, "Global shortcut run",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandRunGlobalShortcut, event.ResponseTypeHyprlandGlobalShortcutRun, "Global shortcut run",
 		func(request HyprlandGlobalShortcutRequestData) string {
 			return required(request.Name, "No shortcut name provided")
 		},
 		func(ctx context.Context, request HyprlandGlobalShortcutRequestData) error {
 			return desktop.HyprlandRunGlobalShortcut(ctx, request.Name)
 		})
-	registerDesktopAction(router, dataStore, event.EventHyprlandSetWindow, event.ResponseTypeHyprlandWindowSet, "Window set",
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandSetWindow, event.ResponseTypeHyprlandWindowSet, "Window set",
 		func(request HyprlandSetWindowRequestData) string {
 			if request.Floating == nil && request.Pinned == nil {
 				return "Provide floating or pinned"
@@ -131,71 +130,4 @@ func required(value string, message string) string {
 		return message
 	}
 	return ""
-}
-
-// registerDesktopAction registers an event that runs a desktop action: it
-// decodes the event's data, refuses it when validate returns a message, runs
-// the action, then refreshes the desktop module
-func registerDesktopAction[T any](
-	router *event.MessageRouter,
-	dataStore *data.DataStore,
-	eventType event.EventType,
-	responseType event.ResponseType,
-	done string,
-	validate func(T) string,
-	run func(context.Context, T) error,
-) {
-	router.RegisterSimpleHandler(eventType, func(connection string, message event.Message) event.MessageResponse {
-		slog.Debug("Received desktop event", "event", eventType, "message", message)
-
-		errorResponse := func(subtype event.ResponseSubtype, msg string) event.MessageResponse {
-			return event.MessageResponse{
-				ID:      message.ID,
-				Type:    event.ResponseTypeError,
-				Subtype: subtype,
-				Message: msg,
-			}
-		}
-
-		var request T
-		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &request})
-		if err == nil && message.Data != nil {
-			err = decoder.Decode(message.Data)
-		}
-		if err != nil {
-			slog.Error("Failed to decode desktop event data", "event", eventType, "error", err)
-			return errorResponse(event.ResponseSubtypeBadRequest, "Failed to decode the event data")
-		}
-		if problem := validate(request); problem != "" {
-			return errorResponse(event.ResponseSubtypeBadRequest, problem)
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if err := run(ctx, request); err != nil {
-			slog.Warn("Desktop action failed", "event", eventType, "error", err)
-			subtype := event.ResponseSubtypeNone
-			switch {
-			case errors.Is(err, desktop.ErrUnsupported):
-				subtype = event.ResponseSubtypeInvalidAction
-			case errors.Is(err, desktop.ErrNotFound):
-				subtype = event.ResponseSubtypeBadRequest
-			}
-			return errorResponse(subtype, err.Error())
-		}
-
-		if dataStore != nil {
-			if err := dataStore.TriggerModuleUpdate(types.ModuleDesktop); err != nil {
-				slog.Warn("Failed to trigger desktop module update", "error", err)
-			}
-		}
-
-		return event.MessageResponse{
-			ID:      message.ID,
-			Type:    responseType,
-			Subtype: event.ResponseSubtypeNone,
-			Data:    message.Data,
-			Message: done,
-		}
-	})
 }

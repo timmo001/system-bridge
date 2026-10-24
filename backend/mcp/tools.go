@@ -26,6 +26,36 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"id"}),
 	}, handlers.handleAudioControl)
 
+	deviceAddress := objectSchema(map[string]any{
+		"address": map[string]any{"type": "string", "description": "Device address from the bluetooth module's devices"},
+	}, []string{"address"})
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_bluetooth_connect",
+		Description: "Connect a paired Bluetooth device, waiting until it's connected. Get addresses from the bluetooth module. Linux only.",
+		InputSchema: deviceAddress,
+	}, eventTool[bluetoothDeviceInput](handlers, event.EventBluetoothConnect))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_bluetooth_disconnect",
+		Description: "Disconnect a paired Bluetooth device. Get addresses from the bluetooth module. Linux only.",
+		InputSchema: deviceAddress,
+	}, eventTool[bluetoothDeviceInput](handlers, event.EventBluetoothDisconnect))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_bluetooth_forget",
+		Description: "Forget (unpair) a Bluetooth device, so it has to be paired again before it can connect. Get addresses from the bluetooth module. Only use this when the user asks to forget or unpair the device.",
+		InputSchema: deviceAddress,
+	}, eventTool[bluetoothDeviceInput](handlers, event.EventBluetoothForget))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_bluetooth_set_power",
+		Description: "Turn the Bluetooth adapter on or off. Turning it off disconnects every device. Linux only.",
+		InputSchema: objectSchema(map[string]any{
+			"powered": map[string]any{"type": "boolean", "description": "Whether the adapter should be on"},
+		}, []string{"powered"}),
+	}, eventTool[bluetoothPowerInput](handlers, event.EventBluetoothSetPower))
+
 	windowID := map[string]any{"type": "string", "description": "Window id from the desktop module's windows"}
 	boolean := func(description string) map[string]any {
 		return map[string]any{"type": "boolean", "description": description}

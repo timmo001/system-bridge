@@ -60,6 +60,10 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 
 - `system_bridge_audio_control` sets an audio device's volume or mute state, or
   makes it the default.
+- `system_bridge_bluetooth_connect` connects a paired Bluetooth device.
+- `system_bridge_bluetooth_disconnect` disconnects a paired Bluetooth device.
+- `system_bridge_bluetooth_forget` forgets (unpairs) a Bluetooth device.
+- `system_bridge_bluetooth_set_power` turns the Bluetooth adapter on or off.
 - `system_bridge_desktop_close_window` asks a window to close.
 - `system_bridge_desktop_focus_window` focuses a window.
 - `system_bridge_desktop_focus_workspace` shows and focuses a workspace.

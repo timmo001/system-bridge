@@ -21,12 +21,17 @@ const watchDebounce = 250 * time.Millisecond
 // system bus connection fails.
 const watchRetry = 30 * time.Second
 
-// watchedProperties are the device properties the module reports. Others,
-// such as the signal strength while scanning, change too often to follow.
-var watchedProperties = []string{"Address", "Alias", "Connected", "Icon", "Paired"}
+// watchedProperties are the properties the module reports, for each
+// interface. Others, such as a device's signal strength while scanning,
+// change too often to follow.
+var watchedProperties = map[string][]string{
+	bluezAdapter1: {"Powered"},
+	bluezDevice1:  {"Address", "Alias", "Connected", "Icon", "Paired"},
+}
 
 // Watch calls changed whenever a device is paired, removed, connected,
-// disconnected or renamed, until ctx is done. It follows BlueZ's signals.
+// disconnected or renamed, or an adapter is turned on or off, until ctx is
+// done. It follows BlueZ's signals.
 func Watch(ctx context.Context, changed func()) {
 	trigger, stop := watch.Debounce(watchDebounce, changed)
 	defer stop()
@@ -72,8 +77,8 @@ func followBlueZ(ctx context.Context, trigger func()) error {
 }
 
 // relevantSignal reports whether a BlueZ signal changes what the module
-// reports: a device's watched properties, a device being added or removed, or
-// BlueZ starting or stopping.
+// reports: a watched property, an adapter or device being added or removed,
+// or BlueZ starting or stopping.
 func relevantSignal(signal *dbus.Signal) bool {
 	switch signal.Name {
 	case "org.freedesktop.DBus.NameOwnerChanged":
@@ -82,12 +87,10 @@ func relevantSignal(signal *dbus.Signal) bool {
 		if len(signal.Body) < 2 {
 			return false
 		}
-		if iface, _ := signal.Body[0].(string); iface != bluezDevice1 {
-			return false
-		}
+		iface, _ := signal.Body[0].(string)
 		properties, _ := signal.Body[1].(map[string]dbus.Variant)
 		for name := range properties {
-			if slices.Contains(watchedProperties, name) {
+			if slices.Contains(watchedProperties[iface], name) {
 				return true
 			}
 		}
@@ -96,14 +99,21 @@ func relevantSignal(signal *dbus.Signal) bool {
 			return false
 		}
 		interfaces, _ := signal.Body[1].(map[string]map[string]dbus.Variant)
-		_, ok := interfaces[bluezDevice1]
-		return ok
+		for iface := range interfaces {
+			if _, ok := watchedProperties[iface]; ok {
+				return true
+			}
+		}
 	case "org.freedesktop.DBus.ObjectManager.InterfacesRemoved":
 		if len(signal.Body) < 2 {
 			return false
 		}
 		interfaces, _ := signal.Body[1].([]string)
-		return slices.Contains(interfaces, bluezDevice1)
+		for _, iface := range interfaces {
+			if _, ok := watchedProperties[iface]; ok {
+				return true
+			}
+		}
 	}
 	return false
 }
