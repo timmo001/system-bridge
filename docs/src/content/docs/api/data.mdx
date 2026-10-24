@@ -96,6 +96,7 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `screenshare` | boolean | Whether you are sharing your screen. `null` until it changes. |
 | `notification` | object | The latest Discord notification: `message_id`, `channel_id`, `title`, `body` and `icon_url`. `null` until one arrives. To open its channel, send `OPEN_TEXT_CHANNEL` with its `channel_id`. |
 | `sounds` | array | The soundboard sounds you can play: `id`, `name`, `server_id` (`null` for Discord's default sounds), `emoji`, and `emoji_url` for custom emoji. |
+| `error` | string | Why the last attempt to connect or sign in failed, such as Discord rejecting the client ID. Left out when there's no problem, and by older versions of System Bridge. |
 
 `call` has:
 
@@ -115,7 +116,7 @@ The state of the local Discord app. This module only exists once Discord is [set
 | `device_id` | string | The selected device. `default` follows the system default. |
 | `devices` | array | Devices Discord can use, each with `id` and `name`. |
 
-Every field other than `connected` and `authenticated` is `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
+Every field other than `connected`, `authenticated` and `error` is `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
 
 ### `displays`
 

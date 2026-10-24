@@ -40,22 +40,29 @@ When the backend opens the web client for you, the host, port, and token are fil
 
 ## Getting around
 
-The search box in the header lists every page. Click it, or press **Ctrl+K** (**⌘K** on macOS), then type to filter and press **Enter** to go.
+The search box in the header lists every page, grouped into **System**, **Hardware**, **Storage and network**, **Apps** and **Settings**. Click it, or press **Ctrl+K** (**⌘K** on macOS), then type to filter and press **Enter** to go.
 
 The chip next to it shows whether the web client is connected. Click it to open the **Connection** page.
 
-Every page has its own address, so you can bookmark it, share it, or reload it and land back where you were. Pages that show tables keep their search, sorting and page in the address too.
+Every page has its own address, so you can bookmark it, share it, or reload it and land back where you were. Pages that show tables keep their search, sorting and page in the address too. A section of a page, such as the commands on the System page, has its own link too.
 
 | Page | Address |
 | --- | --- |
 | Overview | `/` |
-| A data module | `/data/<module>`, such as `/data/cpu` |
-| A module's raw data | `/data/<module>?view=json` |
-| Media controls | `/actions/media` |
-| Notifications | `/actions/notifications` |
-| Open | `/actions/open` |
-| Settings | `/settings`, `/settings/appearance`, `/settings/commands`, `/settings/media`, `/settings/disks` |
+| A data module | `/<module>`, such as `/cpu` |
+| A module's raw data | `/<module>?view=json` |
+| Commands | `/system#commands` |
+| Notifications | `/system#notifications` |
+| Open | `/system#open` |
+| Disk mounts | `/disks#disk-mounts` |
+| Media controls | `/media#media-controls` |
+| Media directories | `/media#media-directories` |
+| Discord controls | `/discord#discord-controls` |
+| Discord setup | `/discord#discord-setup` |
+| Settings | `/settings`, `/settings/appearance` |
 | Connection | `/connection` |
+
+Older addresses, such as `/data/cpu` or `/settings/commands`, take you to the new place.
 
 ## What you can do
 
@@ -63,30 +70,25 @@ Every page has its own address, so you can bookmark it, share it, or reload it a
 
 Live gauges for CPU, memory, GPU, CPU temperature and battery, graphs of CPU, memory and network use, storage, what's playing, and a shortcut to every module.
 
-### Data
+### Modules
 
-Each [data module](/api/websocket/data/) has a dashboard: CPU, memory, disks, displays, GPUs, media, networks, processes, sensors, system information, battery and Discord. Use the **Dashboard** and **JSON** chips at the top of the page to switch between the dashboard and the module's raw data.
+Each [data module](/api/websocket/data/) has a page: system information, processes, CPU, memory, GPUs, sensors, battery, displays, disks, networks, media and Discord. Use the **Dashboard** and **JSON** chips at the top of the page to switch between the dashboard and the module's raw data.
 
 Graphs start with the first readings after the page opens. System Bridge updates most data about once a minute.
 
 Processes and network connections are in tables you can search, sort and page through.
 
-### Actions
+The controls and settings for a module sit on its page, with its data:
 
-Trigger actions on the machine running System Bridge:
-
-- **Media controls**: control what's playing.
-- **Notifications**: send a desktop notification.
-- **Open**: open a URL in the browser, or a file or folder with its app.
+- **System**: run and manage the commands clients can run, send a desktop notification, and open a URL in the browser, or a file or folder with its app.
+- **Disks**: choose which extra mounts the Disks module reports.
+- **Media**: control what's playing, and choose the folders exposed to the media source.
+- **Discord**: mute, deafen, change your audio devices and volumes, voice mode, each call member's volume, and play soundboard sounds. The setup connects System Bridge to the Discord desktop app. See [Discord](/running/#discord).
 
 ### Settings
 
-Configure the backend without editing files:
-
-- **General**: start automatically, the system tray icon, and the log level.
-- **Commands**: allowlisted commands clients can run.
-- **Media directories**: folders exposed to the media source.
-- **Disk mounts**: which extra mounts the Disks module reports.
+- **General**: start automatically, the system tray icon, and the log level. It also links to the settings kept on module pages.
+- **Appearance**: themes. See [Appearance](#appearance).
 
 ## Appearance
 

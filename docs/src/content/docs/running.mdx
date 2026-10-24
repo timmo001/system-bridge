@@ -259,16 +259,19 @@ System Bridge can read and change your Discord voice settings through the local 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create an application.
 2. On the **OAuth2** page, copy the **Client ID** and **Client Secret**.
 3. On the same page, add `http://localhost` as a redirect and save.
-4. Create `discord.json` in the [settings directory](#file-locations):
+4. In the [web client](/using/web-client/), open the **Discord** page. Under **Setup**, enter the client ID and secret, then select **Save and connect**. The setup shows each step as it connects, and any problem Discord reports.
+5. Make sure the Discord desktop app is running. Discord shows an authorization prompt. Approve it with the account that owns the application.
 
-   ```json
-   {
-     "clientId": "YOUR_CLIENT_ID",
-     "clientSecret": "YOUR_CLIENT_SECRET"
-   }
-   ```
+Once you're signed in, the same page has controls for your voice settings, audio devices, call and soundboard.
 
-5. Make sure the Discord desktop app is running. Within 30 seconds, Discord shows an authorization prompt. Approve it with the account that owns the application.
+Instead of the web client, you can send [`UPDATE_DISCORD_SETUP`](/api/websocket/system/#discord-setup), or create `discord.json` in the [settings directory](#file-locations) yourself. System Bridge checks for the file every 30 seconds.
+
+```json
+{
+  "clientId": "YOUR_CLIENT_ID",
+  "clientSecret": "YOUR_CLIENT_SECRET"
+}
+```
 
 System Bridge stores the Discord token in `discord-token.json` in the [settings directory](#file-locations). To authorize again, delete that file. Discord also asks again when a System Bridge update needs new permissions. The [privacy page](/privacy/#discord-permissions) lists each permission and what it's used for. The Discord state is in the [`discord`](/api/data/#discord) data module. To control Discord, send [`DISCORD_CONTROL`](/api/websocket/control/#discord-control).
 

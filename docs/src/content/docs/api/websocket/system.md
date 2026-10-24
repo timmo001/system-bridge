@@ -147,6 +147,63 @@ Send the `UPDATE_SETTINGS` event with the settings object to update. It responds
 Changing `autostart` or `logLevel` is applied immediately by the backend.
 :::
 
+## Discord setup
+
+Read and save the Discord application System Bridge signs in with. See [Discord](/running/#discord) for creating the application.
+
+### Get the Discord setup
+
+Send the `GET_DISCORD_SETUP` event to see how far Discord is set up. It takes no data and responds with the `DISCORD_SETUP` type. The client secret is never sent back.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "GET_DISCORD_SETUP",
+    "data": {}
+}
+```
+
+```json title="Response data"
+{
+    "configured": true,
+    "clientId": "123456789012345678",
+    "redirectUri": "http://localhost",
+    "running": true,
+    "connected": true,
+    "authenticated": false,
+    "error": ""
+}
+```
+
+| Key | Description |
+| --- | --- |
+| `configured` | Valid credentials are saved. |
+| `clientId` | The saved client ID, or empty. |
+| `redirectUri` | The redirect to add on the application's **OAuth2** page. |
+| `running` | The Discord desktop app can be reached. |
+| `connected` | System Bridge is connected to Discord. |
+| `authenticated` | You've approved System Bridge in Discord. |
+| `error` | Why the last attempt to connect or sign in failed, or empty. |
+
+### Update the Discord setup
+
+Send the `UPDATE_DISCORD_SETUP` event with the application's `clientId` and `clientSecret`. System Bridge saves them to `discord.json`, readable only by your user, then connects to Discord straight away. Changing the application drops the saved Discord token, so Discord asks you to approve it again. It responds with the `DISCORD_SETUP_UPDATED` type and the [setup](#get-the-discord-setup).
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "UPDATE_DISCORD_SETUP",
+    "data": {
+        "clientId": "123456789012345678",
+        "clientSecret": "YOUR_CLIENT_SECRET"
+    }
+}
+```
+
+A client ID that isn't the long number from the **OAuth2** page, or a missing secret, returns an `ERROR` response with the `BAD_REQUEST` subtype.
+
 ## Execute command
 
 Run a command from the allowlist defined in your [settings](#settings).

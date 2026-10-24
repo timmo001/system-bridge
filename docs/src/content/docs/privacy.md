@@ -120,7 +120,7 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 | `settings.json` | Your settings, including the command allowlist and media directories |
 | `token` | Your API token, readable only by your user |
 | `data/{module}.json` | The latest data for each module, rewritten on every update |
-| `discord.json` | Your Discord application's credentials, if you set up Discord |
+| `discord.json` | Your Discord application's credentials, if you set up Discord. Readable only by your user when saved from the web client or the API |
 | `discord-token.json` | Your Discord access token, readable only by your user |
 
 The web client stores the host, port and API token you connect with in your browser's local storage. When you open the web client from the system tray, these are passed in the URL.
@@ -137,11 +137,13 @@ The default `WARN` level only logs warnings and errors. If you raise it to `INFO
 
 At `DEBUG`, logs also include the contents of other requests, such as the text in keyboard text requests.
 
+Discord setup requests are never logged with their contents, so your Discord client secret stays out of the logs at every level. The backend never sends the secret back to clients either, and the Python connector hides it in its own logs.
+
 Logs stay on your machine. Before you share them in a bug report, check them and remove your token.
 
 ## Optional: Discord
 
-Nothing happens until you create `discord.json` in the settings directory. Until then, System Bridge only checks for that file every 30 seconds. It doesn't connect to Discord, and the `discord` module doesn't exist.
+Nothing happens until you save your Discord application in the web client or create `discord.json` in the settings directory. Until then, System Bridge only checks for that file every 30 seconds. It doesn't connect to Discord, and the `discord` module doesn't exist.
 
 Once you've set it up:
 
