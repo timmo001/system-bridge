@@ -231,7 +231,7 @@ Panel {
             onBackHovered: filterController.cursorIndex = filterController.indexForKey("action:back")
             iconComponent: Component {
               Text {
-                text: root.viewInfo ? root.viewInfo.icon : "󰒋"
+                text: root.viewInfo ? root.viewInfo.icon : "\u{F0A1D}"
                 color: root.hostWidget ? root.hostWidget.displayColor : root.contentForeground
                 font.family: root.contentFontFamily
                 font.pixelSize: Style.font.display

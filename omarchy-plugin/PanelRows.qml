@@ -11,27 +11,37 @@ import QtQuick
 QtObject {
   id: root
 
-  // Nerd Font glyphs, escaped so editors and tools can't drop them.
-  readonly property string cpuIcon: ""
-  readonly property string memoryIcon: ""
-  readonly property string processIcon: "\u{F0279}"
+  // Nerd Font glyphs, escaped so editors and tools can't drop them. The module
+  // icons are the Material Design Icons the web client uses.
+  readonly property string audioIcon: "\u{F057E}"
+  readonly property string cpuIcon: "\u{F0EE0}"
+  readonly property string discordIcon: "\u{F02CE}"
+  readonly property string diskIcon: "\u{F02CA}"
+  readonly property string displayIcon: "\u{F0379}"
+  readonly property string gpuIcon: "\u{F0FB2}"
+  readonly property string mediaIcon: "\u{F040D}"
+  readonly property string memoryIcon: "\u{F035B}"
+  readonly property string networkIcon: "\u{F0317}"
+  readonly property string processIcon: "\u{F1577}"
+  readonly property string settingsIcon: "\u{F08BB}"
+  readonly property string systemIcon: "\u{F02FD}"
   readonly property string temperatureIcon: "\u{F050F}"
-  readonly property string settingsIcon: "\u{F0493}"
 
-  // In the web client's order, grouped the same way.
+  // Grouped like the web client, alphabetical within each area.
   readonly property var modules: [
-    { module: "system", label: "System", icon: "󰌢", area: "System" },
     { module: "processes", label: "Processes", icon: root.processIcon, area: "System" },
+    { module: "system", label: "System", icon: root.systemIcon, area: "System" },
+    { module: "audio", label: "Audio", icon: root.audioIcon, area: "Hardware" },
+    { module: "battery", label: "Battery", icon: "\u{F0079}", area: "Hardware" },
     { module: "cpu", label: "CPU", icon: root.cpuIcon, area: "Hardware" },
+    { module: "displays", label: "Displays", icon: root.displayIcon, area: "Hardware" },
+    { module: "gpus", label: "GPUs", icon: root.gpuIcon, area: "Hardware" },
     { module: "memory", label: "Memory", icon: root.memoryIcon, area: "Hardware" },
-    { module: "gpus", label: "GPUs", icon: "󰢮", area: "Hardware" },
-    { module: "sensors", label: "Sensors", icon: "󰔏", area: "Hardware" },
-    { module: "battery", label: "Battery", icon: "󰁹", area: "Hardware" },
-    { module: "displays", label: "Displays", icon: "󰍹", area: "Hardware" },
-    { module: "disks", label: "Disks", icon: "󰋊", area: "Storage and network" },
-    { module: "networks", label: "Networks", icon: "󰛳", area: "Storage and network" },
-    { module: "media", label: "Media", icon: "󰝚", area: "Apps" },
-    { module: "discord", label: "Discord", icon: "󰙯", area: "Apps" }
+    { module: "sensors", label: "Sensors", icon: root.temperatureIcon, area: "Hardware" },
+    { module: "disks", label: "Disks", icon: root.diskIcon, area: "Storage and network" },
+    { module: "networks", label: "Networks", icon: root.networkIcon, area: "Storage and network" },
+    { module: "discord", label: "Discord", icon: root.discordIcon, area: "Apps" },
+    { module: "media", label: "Media", icon: root.mediaIcon, area: "Apps" }
   ]
 
   function moduleInfo(module) {
@@ -132,6 +142,7 @@ QtObject {
     case "sensors": return service.sensors ? quantity(service.temperatures.length, "temperature") : ""
     case "battery": return service.battery ? percent(service.battery.percentage) : ""
     case "displays": return service.modules.displays ? quantity(service.displays.length, "display") : ""
+    case "audio": return audioSummary(service)
     case "disks": return service.disks && Array.isArray(service.disks.devices) ? quantity(service.disks.devices.length, "disk") : ""
     case "networks": return service.networks && Array.isArray(service.networks.networks) ? quantity(service.networks.networks.length, "interface") : ""
     case "media": return service.media && present(service.media.title) ? String(service.media.title) : (service.modules.media !== undefined ? "Nothing playing" : "")
@@ -154,9 +165,9 @@ QtObject {
   function nowPlaying(service, section, kind) {
     var media = service.media
     if (!media || !present(media.title))
-      return row({ key: "media-now", section: section, icon: "󰝚", primaryText: "Nothing playing", kind: kind, target: kind === "module" ? "media" : null })
+      return row({ key: "media-now", section: section, icon: mediaIcon, primaryText: "Nothing playing", kind: kind, target: kind === "module" ? "media" : null })
     return row({
-      key: "media-now", section: section, icon: "󰝚",
+      key: "media-now", section: section, icon: mediaIcon,
       primaryText: String(media.title),
       secondaryText: join([text(media.artist), capitalised(media.status) || "Idle"]),
       kind: kind, target: kind === "module" ? "media" : null
@@ -198,7 +209,7 @@ QtObject {
     case "system":
       var system = service.system
       if (system)
-        add({ key: "system", icon: "󰌢", primaryText: "System", secondaryText: join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime)]) })
+        add({ key: "system", icon: systemIcon, primaryText: "System", secondaryText: join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime)]) })
       break
     case "cpu":
       var cpu = service.cpu
@@ -214,7 +225,7 @@ QtObject {
       for (var g = 0; g < service.gpus.length; g++) {
         var gpu = service.gpus[g]
         if (num(gpu.core_load) !== null)
-          add({ key: "gpu-" + (text(gpu.id) || g), icon: "󰢮", primaryText: text(gpu.name) || "GPU " + (g + 1), secondaryText: join([percent(gpu.core_load), temperature(gpu.temperature)]), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90) })
+          add({ key: "gpu-" + (text(gpu.id) || g), icon: gpuIcon, primaryText: text(gpu.name) || "GPU " + (g + 1), secondaryText: join([percent(gpu.core_load), temperature(gpu.temperature)]), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90) })
       }
       break
     case "sensors":
@@ -240,7 +251,7 @@ QtObject {
       break
     case "networks":
       if (service.networkReceiveRate !== null || service.networkSendRate !== null)
-        add({ key: "network", icon: "󰛳", primaryText: "Network", secondaryText: join(["↓ " + rate(service.networkReceiveRate), "↑ " + rate(service.networkSendRate)]) })
+        add({ key: "network", icon: networkIcon, primaryText: "Network", secondaryText: join(["↓ " + rate(service.networkReceiveRate), "↑ " + rate(service.networkSendRate)]) })
       break
     case "media":
       if (service.modules.media !== undefined)
@@ -260,6 +271,7 @@ QtObject {
     case "sensors": return sensorRows(service)
     case "battery": return batteryRows(service)
     case "displays": return displayRows(service)
+    case "audio": return audioRows(service)
     case "disks": return diskRows(service)
     case "networks": return networkRows(service)
     case "media": return mediaRows(service)
@@ -447,6 +459,66 @@ QtObject {
     }
   }
 
+  function audioDevices(service, key) {
+    var devices = service.audio && Array.isArray(service.audio[key]) ? service.audio[key].slice() : []
+    devices.sort(function(left, right) { return text(left.name).localeCompare(text(right.name)) })
+    return devices
+  }
+
+  function audioSummary(service) {
+    var output = audioDevices(service, "outputs").filter(function(device) { return device.default === true })[0]
+    if (!output) return ""
+    if (output.muted === true) return "Muted"
+    return percent(output.volume) || text(output.name)
+  }
+
+  function audioRows(service) {
+    var rows = []
+    var groups = [
+      { key: "outputs", section: "Outputs", icon: "󰕾", mutedIcon: "󰖁" },
+      { key: "inputs", section: "Inputs", icon: "\u{F036C}", mutedIcon: "\u{F036D}" }
+    ]
+    for (var g = 0; g < groups.length; g++) {
+      var group = groups[g]
+      var devices = audioDevices(service, group.key)
+      for (var i = 0; i < devices.length; i++) {
+        var device = devices[i]
+        var muted = device.muted === true
+        rows.push(row({
+          key: "audio-" + group.key + "-" + (text(device.id) || i), section: group.section,
+          icon: muted ? group.mutedIcon : group.icon,
+          primaryText: text(device.name) || text(device.id),
+          secondaryText: join([device.default === true ? "Default" : "", muted ? "Muted" : "", percent(device.volume)]),
+          meter: muted ? null : num(device.volume)
+        }))
+        audioControls(rows, device, group)
+      }
+    }
+    return rows
+  }
+
+  // Volume and mute for the default devices, and a way to switch to the others
+  function audioControls(rows, device, group) {
+    var id = text(device.id)
+    if (!id) return
+    var key = "audio-" + group.key + "-" + id
+    var argv = function(args) { return ["system-bridge", "client", "audio"].concat(args, [id]) }
+    if (device.default !== true) {
+      rows.push(control(key + "-default", group.section, "󰄬", "Make default", text(device.name), argv(["--default"])))
+      return
+    }
+    var volume = num(device.volume)
+    if (volume !== null) {
+      var current = Math.round(volume)
+      rows.push(control(key + "-down", group.section, "󰝞", "Quieter", "To " + Math.max(0, current - 10) + "%", argv(["--volume", String(Math.max(0, current - 10))]), current <= 0))
+      rows.push(control(key + "-up", group.section, "󰝝", "Louder", "To " + Math.min(100, current + 10) + "%", argv(["--volume", String(Math.min(100, current + 10))]), current >= 100))
+    }
+    if (device.muted === true || device.muted === false) {
+      var muted = device.muted === true
+      rows.push(control(key + "-mute", group.section, muted ? group.icon : group.mutedIcon, muted ? "Unmute" : "Mute", text(device.name), argv([muted ? "--mute=false" : "--mute"])))
+    }
+  }
+
   function displayRows(service) {
     var rows = []
     for (var i = 0; i < service.displays.length; i++) {
@@ -531,7 +603,7 @@ QtObject {
       var wifi = network.wifi || {}
       rows.push(row({
         key: "interface-" + (text(network.name) || i), section: "Interfaces",
-        icon: stats.isup === false ? "󰲛" : text(wifi.ssid) ? "󰖩" : "󰛳",
+        icon: stats.isup === false ? "󰲛" : text(wifi.ssid) ? "󰖩" : networkIcon,
         primaryText: text(network.name) || "Interface " + (i + 1),
         secondaryText: join([stats.isup === false ? "Down" : "", text(wifi.ssid), percent(wifi.signal_percent), num(io.bytes_recv_rate) !== null ? "↓ " + rate(io.bytes_recv_rate) : "", num(io.bytes_sent_rate) !== null ? "↑ " + rate(io.bytes_sent_rate) : "", num(stats.speed) > 0 ? stats.speed + " Mb/s" : "", num(wifi.link_rate) > 0 ? Math.round(num(wifi.link_rate)) + " Mb/s" : "", addresses.filter(function(address) { return address !== "" }).join(", ")])
       }))
@@ -555,7 +627,7 @@ QtObject {
         : control("play-pause", "Controls", "󰐊", "Play", "", argv("play"), media.is_play_enabled === false))
       rows.push(control("next", "Controls", "󰒭", "Next", "", argv("next"), media.is_next_enabled === false))
     }
-    rows.push(webRow("web-media", "In the web client", "󰝚", "All controls", "Stop, volume and the media browser", "/media#media-controls"))
+    rows.push(webRow("web-media", "In the web client", mediaIcon, "All controls", "Stop, volume and the media browser", "/media#media-controls"))
     rows.push(webRow("web-media-directories", "In the web client", "󰉋", "Media directories", "Choose the folders System Bridge shares", "/media#media-directories"))
     return rows
   }
@@ -565,7 +637,7 @@ QtObject {
     var discord = service.discord
     if (discord) {
       var user = discord.user
-      reading(rows, "status", "", "󰙯", "Discord", join([discord.connected ? "Connected" : "Not connected", user ? text(user.global_name) || text(user.username) : ""]))
+      reading(rows, "status", "", discordIcon, "Discord", join([discord.connected ? "Connected" : "Not connected", user ? text(user.global_name) || text(user.username) : ""]))
       reading(rows, "error", "", "󰀦", "Problem", text(discord.error))
       var call = discord.call
       if (call)
@@ -578,7 +650,7 @@ QtObject {
           rows.push(control("leave", "Controls", "󰩈", "Leave call", call.channel ? text(call.channel.name) : "", argv("leave_voice_channel")))
       }
     }
-    rows.push(webRow("web-discord", "In the web client", "󰙯", "All controls", "Volumes, devices, members and sounds", "/discord#discord-controls"))
+    rows.push(webRow("web-discord", "In the web client", discordIcon, "All controls", "Volumes, devices, members and sounds", "/discord#discord-controls"))
     rows.push(webRow("web-discord-setup", "In the web client", settingsIcon, "Discord setup", "Connect System Bridge to Discord", "/discord#discord-setup"))
     return rows
   }

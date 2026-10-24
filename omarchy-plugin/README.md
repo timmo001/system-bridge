@@ -2,15 +2,16 @@
 
 An Omarchy bar widget and panel for System Bridge. It shows CPU and memory
 usage in the bar. The panel has an overview of the system and a view for every
-module the web client has a page for, with media, Discord and display controls.
+module the web client has a page for, with audio, Discord, display and media
+controls.
 
 ## Requirements
 
 - Omarchy Quattro
 - [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
   `system-bridge` executable available on `PATH`, in a version with the
-  `client open --path`, `client media`, `client discord` and `client display`
-  commands
+  `client audio`, `client discord`, `client display`, `client media` and
+  `client open --path` commands
 - A running local System Bridge service
 - `zenity` for the quit confirmation prompt
 
