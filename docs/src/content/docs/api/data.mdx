@@ -80,7 +80,7 @@ Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `s
 | Field | Type | Description |
 | --- | --- | --- |
 | `devices` | array | Disks, each with `name`, `partitions`, and `io_counters`. |
-| `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`. |
+| `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`. On Linux it counts physical disks only, so partitions, LUKS and LVM devices aren't counted twice. |
 
 Each partition has `device`, `mount_point`, `filesystem_type`, `options`, `category` (`primary`, `bind`, or `squashfs`), and `usage` (`total`, `used`, `free`, `percent`).
 
@@ -212,7 +212,7 @@ Returns an array of objects, one per process.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `temperatures` | array | Temperature readings with `key`, `temperature`, `high`, and `critical`. |
+| `temperatures` | array | Temperature readings with `key`, `temperature`, `high`, and `critical`. When several chips share a driver, such as NVMe drives or memory modules, the later ones' keys end in a number, such as `nvme_composite_2`. |
 | `fans` | array | Fan readings with `key`, `name`, `label`, `speed_rpm`, `speed_min`, and `speed_max`. On Linux this includes hwmon fans and supported Lian Li UNI HID fan controllers when the process can read `/dev/hidraw*`. |
 | `windows_sensors` | object | Windows-only hardware and NVIDIA sensor tree. |
 
