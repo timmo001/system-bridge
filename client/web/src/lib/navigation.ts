@@ -91,21 +91,24 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
   },
 };
 
-/** Modules in the order the navigation lists them. */
-export const moduleOrder: readonly ModuleName[] = [
-  "system",
-  "cpu",
-  "memory",
-  "disks",
-  "networks",
-  "gpus",
-  "sensors",
-  "battery",
-  "displays",
-  "processes",
-  "media",
-  "discord",
+/** The areas the modules are grouped into, in the order they're listed. */
+const moduleAreas: readonly {
+  readonly label: string;
+  readonly modules: readonly ModuleName[];
+}[] = [
+  { label: "System", modules: ["system", "processes"] },
+  {
+    label: "Hardware",
+    modules: ["cpu", "memory", "gpus", "sensors", "battery", "displays"],
+  },
+  { label: "Storage and network", modules: ["disks", "networks"] },
+  { label: "Apps", modules: ["media", "discord"] },
 ];
+
+/** Modules in the order the navigation lists them. */
+export const moduleOrder: readonly ModuleName[] = moduleAreas.flatMap(
+  (area) => area.modules,
+);
 
 export interface NavItem {
   readonly id: string;
@@ -152,24 +155,10 @@ export const navigation: readonly NavSection[] = [
     label: "",
     items: [routeItem("overview", "Overview", mdiViewDashboardOutline)],
   },
-  {
-    label: "System",
-    items: (["system", "processes"] as const).map(moduleItem),
-  },
-  {
-    label: "Hardware",
-    items: (
-      ["cpu", "memory", "gpus", "sensors", "battery", "displays"] as const
-    ).map(moduleItem),
-  },
-  {
-    label: "Storage and network",
-    items: (["disks", "networks"] as const).map(moduleItem),
-  },
-  {
-    label: "Apps",
-    items: (["media", "discord"] as const).map(moduleItem),
-  },
+  ...moduleAreas.map((area) => ({
+    label: area.label,
+    items: area.modules.map(moduleItem),
+  })),
   {
     label: "Settings",
     items: [
