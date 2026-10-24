@@ -5,6 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 
 import "~/components/sb-card";
 import "~/components/sb-data-table";
+import "~/components/sb-display-controls";
 import "~/components/sb-gauge";
 import "~/components/sb-history-export";
 import "~/components/sb-meter";

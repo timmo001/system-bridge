@@ -5,6 +5,7 @@ import {
   SystemBridgeWebSocket,
   type DataMissingError,
   type DiscordControl,
+  type DisplayControl,
   type MediaAction,
   ModuleDataUpdate,
   type ModulesData,
@@ -404,6 +405,15 @@ export const mediaControl = Atom.fn((action: MediaAction, get) =>
 export const discordControl = Atom.fn((control: DiscordControl, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.discordControl(control)),
+  ),
+);
+
+/** Sets a display's brightness or power state, one atom per display. */
+export const displayControl = Atom.family((id: string) =>
+  Atom.fn((control: Omit<DisplayControl, "id">, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.displayControl({ ...control, id })),
+    ),
   ),
 );
 

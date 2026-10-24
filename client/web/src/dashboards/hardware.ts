@@ -599,7 +599,9 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
 };
 
 /** The displays drawn where they sit relative to each other. */
-const displayLayout = (displays: readonly Display[]) => {
+const displayLayout = (
+  displays: readonly (Display & { readonly x: number; readonly y: number })[],
+) => {
   const left = Math.min(...displays.map((d) => d.x));
   const top = Math.min(...displays.map((d) => d.y));
   const right = Math.max(...displays.map((d) => d.x + d.resolution_horizontal));
@@ -656,14 +658,26 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
       <sb-card
         class="half"
         heading=${display.name}
-        subheading=${display.is_primary ? "Primary" : ""}
+        subheading=${display.is_primary ? "Primary" : display.name === display.id ? "" : display.id}
       >
+        ${
+          display.brightness === null && display.power_state === null
+            ? nothing
+            : html`<sb-display-controls
+                .display=${display}
+              ></sb-display-controls>`
+        }
         ${facts([
           [
             "Resolution",
             `${display.resolution_horizontal} × ${display.resolution_vertical}`,
           ],
-          ["Position", `${display.x}, ${display.y}`],
+          [
+            "Position",
+            display.x === null || display.y === null
+              ? null
+              : `${display.x}, ${display.y}`,
+          ],
           [
             "Size",
             display.width === null || display.height === null
@@ -688,9 +702,23 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
     `,
   );
 
+  // Without a compositor's layout, such as under Wayland, there's nothing to
+  // arrange
+  const placed = displays.flatMap((display) =>
+    display.x === null || display.y === null
+      ? []
+      : [{ ...display, x: display.x, y: display.y }],
+  );
+
   return html`
     <div class="dashboard">
-      <sb-card heading="Arrangement">${displayLayout(displays)}</sb-card>
+      ${
+        placed.length === displays.length
+          ? html`<sb-card heading="Arrangement"
+              >${displayLayout(placed)}</sb-card
+            >`
+          : nothing
+      }
       ${cards}
     </div>
   `;
