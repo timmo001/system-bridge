@@ -84,17 +84,9 @@ func GatherInterfaces(networksData *types.NetworksData) error {
 		isUp := (iface.Flags & net.FlagUp) != 0
 		netif.Stats.IsUp = &isUp
 
-		// Set network interface duplex mode (typically unknown without platform-specific code)
-		duplex := "unknown"
+		var duplex string
+		netif.Stats.Speed, duplex = linkStats(iface.Name)
 		netif.Stats.Duplex = &duplex
-
-		// Set network interface speed
-		speed := 0
-		if len(iface.HardwareAddr) > 0 {
-			// Assume 1Gbps for physical interfaces (just a placeholder)
-			speed = 1000
-		}
-		netif.Stats.Speed = &speed
 
 		// Set MTU
 		mtu := iface.MTU

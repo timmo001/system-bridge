@@ -177,7 +177,7 @@ Details of the current media session: `title`, `artist`, `album_title`, `album_a
 | `connections` | array | Active connections with `fd`, `family`, `type`, `laddr`, `raddr`, `status`, and `pid`. |
 | `io` | object | I/O for all interfaces combined: `bytes_sent`, `bytes_recv`, `packets_sent`, `packets_recv`, `errin`, `errout`, `dropin`, `dropout`, `bytes_sent_rate`, `bytes_recv_rate`. |
 
-Each interface address has `address`, `family`, `netmask`, `broadcast`, and `ptp`; interface `stats` has `isup`, `duplex`, `speed`, `mtu`, and `flags`. Interface `io` has the same fields as the combined `io`, for that interface only.
+Each interface address has `address`, `family`, `netmask`, `broadcast`, and `ptp`; interface `stats` has `isup`, `duplex`, `speed`, `mtu`, and `flags`. `speed` is the link speed in Mb/s, read on Linux only. It is `null` where the system doesn't report one, such as wireless, virtual or disconnected interfaces. Interface `io` has the same fields as the combined `io`, for that interface only.
 
 `bytes_sent_rate` and `bytes_recv_rate` are in bytes per second since the previous reading. They are `null` on the first reading, and when a counter resets.
 
