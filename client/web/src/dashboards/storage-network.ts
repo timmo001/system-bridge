@@ -22,6 +22,8 @@ import type {
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
+import "~/components/sb-bluetooth-actions";
+import "~/components/sb-bluetooth-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import { icon } from "~/components/shared-styles";
 import {
@@ -63,7 +65,7 @@ const bluetoothIcons: ReadonlyMap<string, string> = new Map([
   ["printer", mdiPrinter],
 ]);
 
-const bluetoothDevice = (device: BluetoothDevice) => html`
+const bluetoothDevice = (device: BluetoothDevice, powered: boolean) => html`
   <li>
     ${icon(bluetoothIcons.get(device.type ?? "") ?? mdiBluetooth)}
     <span class="spacer truncate" title=${device.address}>${device.name}</span>
@@ -71,19 +73,31 @@ const bluetoothDevice = (device: BluetoothDevice) => html`
       ><span class="dot"></span
       >${device.connected ? "Connected" : "Not connected"}</span
     >
+    <sb-bluetooth-actions
+      .device=${device}
+      ?powered=${powered}
+    ></sb-bluetooth-actions>
   </li>
 `;
 
 export const bluetoothDashboard = ({ data }: DashboardContext) => {
   const bluetooth = data.bluetooth;
 
-  if (bluetooth === undefined || bluetooth.devices.length === 0) {
+  if (
+    bluetooth === undefined ||
+    (bluetooth.devices.length === 0 && bluetooth.powered === null)
+  ) {
     return noData("paired Bluetooth devices");
   }
 
   const connected = bluetooth.devices.filter((device) => device.connected);
 
-  const rows = bluetooth.devices.map(bluetoothDevice);
+  // Without an adapter state, assume devices can connect and let the backend say
+  const powered = bluetooth.powered !== false;
+
+  const rows = bluetooth.devices.map((device) =>
+    bluetoothDevice(device, powered),
+  );
 
   return html`
     <div class="dashboard">
@@ -91,9 +105,21 @@ export const bluetoothDashboard = ({ data }: DashboardContext) => {
         heading="Paired devices"
         subheading="${connected.length} of ${bluetooth.devices.length} connected"
       >
-        <ul class="list">
-          ${rows}
-        </ul>
+        ${
+          bluetooth.powered === null
+            ? nothing
+            : html`<sb-bluetooth-power
+                slot="actions"
+                ?powered=${bluetooth.powered}
+              ></sb-bluetooth-power>`
+        }
+        ${
+          rows.length === 0
+            ? html`<p class="muted">No paired devices</p>`
+            : html`<ul class="list">
+                ${rows}
+              </ul>`
+        }
       </sb-card>
     </div>
   `;

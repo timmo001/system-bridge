@@ -410,6 +410,34 @@ export const audioControl = Atom.family((id: string) =>
   ),
 );
 
+/** Something to do to a paired Bluetooth device. */
+export type BluetoothAction = "connect" | "disconnect" | "forget";
+
+/** Connects, disconnects or forgets a paired device, one atom per address. */
+export const bluetoothAction = Atom.family((address: string) =>
+  Atom.fn((action: BluetoothAction, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => {
+        switch (action) {
+          case "connect":
+            return bridge.bluetoothConnect({ address });
+          case "disconnect":
+            return bridge.bluetoothDisconnect({ address });
+          case "forget":
+            return bridge.bluetoothForget({ address });
+        }
+      }),
+    ),
+  ),
+);
+
+/** Turns the Bluetooth adapter on or off. */
+export const setBluetoothPower = Atom.fn((powered: boolean, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => bridge.bluetoothSetPower({ powered })),
+  ),
+);
+
 export const discordControl = Atom.fn((control: DiscordControl, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.discordControl(control)),
