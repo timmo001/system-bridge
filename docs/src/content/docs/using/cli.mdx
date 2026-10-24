@@ -179,7 +179,7 @@ For example, the last 6 hours of CPU and GPU readings as JSON:
 system-bridge client history export --module cpu --module gpus --since 6h --format json
 ```
 
-The CSV has a row per reading with the columns `time`, `metric`, `id`, `value` and `unit`. Times are in UTC, and `id` names the GPU, disk, sensor or fan for the readings that have one. The JSON is the history as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event returns it. The web client has the same export in the Export menu on the overview, for every module, and on each module's page, for that module. The TypeScript and Python connectors can write the same CSV.
+The CSV has a row per reading with the columns `time`, `metric`, `id`, `value` and `unit`. Times are in UTC, and `id` names the GPU, disk, sensor or fan for the readings that have one. The JSON is the history as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event returns it. The web client has the same export in the Export menu on the overview and on each module's page. It lists every module with history as a checkbox, ticked to start for the modules that page graphs: all of them on the overview, and the page's own module elsewhere, plus the CPU and GPUs on the System page, whose power graph shows theirs too. The TypeScript and Python connectors can write the same CSV.
 
 ## Backend
 

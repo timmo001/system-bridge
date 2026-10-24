@@ -1,6 +1,6 @@
 import { mdiCodeJson, mdiDownload, mdiFileDelimitedOutline } from "@mdi/js";
 import type { ModuleName } from "@timmo001/effect-system-bridge";
-import { html, LitElement } from "lit";
+import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
 import { AtomController } from "~/controllers/atom-controller";
@@ -30,19 +30,27 @@ const isHistoryModule = (value: string): value is ModuleName =>
   [...historyModules].some((module) => module === value);
 
 /**
- * An Export menu that downloads up to the last 24 hours of readings. Given a
- * `module`, it exports that module's; otherwise the menu lists every module
- * as a checkbox, all checked to start, above the formats.
+ * An Export menu that downloads up to the last 24 hours of readings. It
+ * lists every module with history as a checkbox, above the formats, ticked
+ * to start for `modules`, the ones the page shows.
  */
 @customElement("sb-history-export")
 export class SbHistoryExport extends LitElement {
-  /** Exports only this module's readings, when set. */
-  @property() module: ModuleName | undefined = undefined;
+  /** The modules ticked to start. Every module, when not set. */
+  @property({ attribute: false }) modules: readonly ModuleName[] | undefined =
+    undefined;
 
-  /** The modules ticked in the menu, when there's no `module`. */
+  /** The modules ticked in the menu. */
   @state() private chosen: ReadonlySet<ModuleName> = new Set(historyModules);
 
   readonly #export = new AtomController(this, () => exportHistory);
+
+  // A new page's modules replace the ticks left from the last page
+  protected override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has("modules")) {
+      this.chosen = new Set(this.modules ?? historyModules);
+    }
+  }
 
   #onToggle = (event: CustomEvent<{ value: string; checked: boolean }>) => {
     const { value, checked } = event.detail;
@@ -64,16 +72,11 @@ export class SbHistoryExport extends LitElement {
 
     registry.set(exportHistory, {
       format,
-      modules:
-        this.module === undefined
-          ? [...historyModules].filter((module) => this.chosen.has(module))
-          : [this.module],
+      modules: [...historyModules].filter((module) => this.chosen.has(module)),
     });
   };
 
   #items(): readonly MenuItem[] {
-    if (this.module !== undefined) return formats;
-
     const none = this.chosen.size === 0;
 
     return [
@@ -97,11 +100,7 @@ export class SbHistoryExport extends LitElement {
     return html`<sb-menu-button
       narrow-icon
       label="Export"
-      menu-label=${
-        this.module === undefined
-          ? "Export history"
-          : `Export ${moduleInfo[this.module].label} history`
-      }
+      menu-label="Export history"
       .icon=${mdiDownload}
       .items=${this.#items()}
       ?busy=${this.#export.value.waiting}

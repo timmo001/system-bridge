@@ -69,6 +69,18 @@ const dashboards: Readonly<
 };
 
 /**
+ * The modules whose history each page graphs, ticked to start in its Export
+ * menu. Most graph only their own; the System page's power graph also shows
+ * the CPU's and GPUs'. Made once, so a re-render keeps the user's ticks.
+ */
+const shownHistory: ReadonlyMap<ModuleName, readonly ModuleName[]> = new Map(
+  [...historyModules].map((module) => [
+    module,
+    module === "system" ? ["system", "cpu", "gpus"] : [module],
+  ]),
+);
+
+/**
  * The controls and settings that belong with a module's data, each with an
  * id so a link can go straight to it. `before` sits above the data, the rest
  * under it.
@@ -261,9 +273,9 @@ export class PageModule extends SbPage {
           description: info.description,
           icon: info.icon,
           actions: html`${
-              historyModules.has(module) && this.status.isConnected
+              shownHistory.has(module) && this.status.isConnected
                 ? html`<sb-history-export
-                    .module=${module}
+                    .modules=${shownHistory.get(module)}
                   ></sb-history-export>`
                 : nothing
             }<sb-segmented
