@@ -86,7 +86,6 @@ export const systemDashboard = ({ data }: DashboardContext) => {
           : nothing
       }
       <sb-card
-        class="two-thirds"
         heading=${system.hostname}
         subheading=${system.fqdn === system.hostname ? "" : system.fqdn}
       >
@@ -94,17 +93,24 @@ export const systemDashboard = ({ data }: DashboardContext) => {
           ${stat("Uptime", formatUptime(system.uptime))}
           ${stat("Platform", system.platform)}
           ${stat("Power", system.power_usage === null ? "" : `${formatNumber(system.power_usage)} W`)}
+          ${stat("Users", String(system.users.length))}
         </div>
+      </sb-card>
+      <sb-card class="third" heading="Software">
         ${facts([
           ["System Bridge", system.version],
           ["Platform version", system.platform_version],
           ["Kernel", system.kernel_version],
+          ["Run mode", system.run_mode],
           ["Booted", formatDateTime(system.boot_time * 1000)],
+          ["UUID", html`<span class="mono xsmall">${system.uuid}</span>`],
+        ])}
+      </sb-card>
+      <sb-card class="third" heading="Network">
+        ${facts([
           ["IPv4", system.ip_address_4],
           ["IPv6", system.ip_address_6],
           ["MAC address", system.mac_address],
-          ["UUID", html`<span class="mono xsmall">${system.uuid}</span>`],
-          ["Run mode", system.run_mode],
         ])}
       </sb-card>
       <sb-card class="third" heading="Device">
