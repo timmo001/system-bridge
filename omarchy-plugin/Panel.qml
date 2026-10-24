@@ -21,6 +21,12 @@ Panel {
   readonly property var viewInfo: view === "" ? null : rowBuilder.moduleInfo(view)
   readonly property var panelRows: !service ? []
     : (view === "" ? rowBuilder.overview(service) : rowBuilder.moduleRows(service, view))
+  readonly property bool filtering: filterController.filterText !== ""
+  // Sections the user collapsed, by view, kept while the shell runs.
+  property var collapsedSections: ({})
+  // The filtered rows with a heading before each section. Collapsed sections
+  // keep only their heading, and a filter shows every match.
+  readonly property var displayRows: buildDisplayRows(filterController.filteredModel)
   readonly property bool connected: service !== null && service.connected
   readonly property string serverActionKey: connected ? "action:quit" : "action:start"
   // Header actions sit before the rows; they're flagged as navigation so the
@@ -32,13 +38,44 @@ Panel {
 
   PanelRows { id: rowBuilder }
 
+  function sectionKey(section) { return view + "/" + section }
+  function sectionExpanded(section) { return collapsedSections[sectionKey(section)] !== true }
+  function toggleSection(section) {
+    var next = Object.assign({}, collapsedSections)
+    next[sectionKey(section)] = sectionExpanded(section)
+    collapsedSections = next
+  }
+
+  function buildDisplayRows(rows) {
+    var display = []
+    var section = ""
+    for (var i = 0; i < rows.length; i++) {
+      var entry = rows[i]
+      if (entry.section !== "" && entry.section !== section)
+        display.push(rowBuilder.row({ key: "toggle:" + entry.section, kind: "toggle", section: entry.section, primaryText: entry.section }))
+      section = entry.section
+      if (entry.section === "" || filtering || sectionExpanded(entry.section)) display.push(entry)
+    }
+    return display
+  }
+
+  // Starts on the first row rather than a section heading, so Enter opens
+  // something instead of collapsing the first section.
+  function resetCursor() {
+    filterController.reset()
+    var index = filterController.navigationEntries.findIndex(function(entry) {
+      return entry.navigation !== true && entry.kind !== "toggle"
+    })
+    if (index >= 0) filterController.cursorIndex = index
+  }
+
   function openWeb(path) {
     Util.execArgv(["system-bridge", "client", "open", "--path", path])
   }
 
   function showView(module) {
     view = module
-    filterController.reset()
+    resetCursor()
     Qt.callLater(function() { panelFlick.contentY = 0 })
   }
 
@@ -66,7 +103,9 @@ Panel {
       Util.execArgv(["system-bridge", "backend"])
       return
     }
-    if (entry.kind === "module") {
+    if (entry.kind === "toggle") {
+      root.toggleSection(entry.section)
+    } else if (entry.kind === "module") {
       root.showView(entry.target)
     } else if (entry.kind === "web") {
       if (!root.connected) return
@@ -103,7 +142,7 @@ Panel {
 
   function open() {
     view = ""
-    filterController.reset()
+    resetCursor()
     controller.show()
     Qt.callLater(function() {
       panelFlick.contentY = 0
@@ -122,7 +161,7 @@ Panel {
     var entry = filterController.selectedEntry()
     if (!entry) return null
     if (entry.navigation === true) return header
-    return rowRepeater.itemAt(filterController.filteredModel.indexOf(entry))
+    return rowRepeater.itemAt(root.displayRows.indexOf(entry))
   }
 
   function scrollCursorIntoView() {
@@ -148,7 +187,10 @@ Panel {
       id: filterController
       anchors.fill: parent
       model: root.panelRows
-      navigationModel: root.headerActions.concat(filteredModel)
+      // Headings are only reachable while they can collapse, so not under a filter.
+      navigationModel: root.headerActions.concat(root.filtering
+        ? root.displayRows.filter(function(entry) { return entry.kind !== "toggle" })
+        : root.displayRows)
       backOnEmptyFilter: root.view !== ""
       onActivateRequested: function(entry) { root.activateEntry(entry) }
       onBackRequested: root.showView("")
@@ -261,25 +303,30 @@ Panel {
 
             Repeater {
               id: rowRepeater
-              model: filterController.filteredModel
+              model: root.displayRows
 
               Column {
                 id: rowItem
                 required property int index
                 required property var modelData
-                readonly property bool startsSection: modelData.section !== ""
-                  && (index === 0 || filterController.filteredModel[index - 1].section !== modelData.section)
+                readonly property bool isHeading: modelData.kind === "toggle"
                 width: contentColumn.width
                 spacing: Style.space(2)
 
                 SectionHeading {
-                  visible: rowItem.startsSection
+                  visible: rowItem.isHeading
                   title: rowItem.modelData.section
                   foreground: root.contentForeground
                   fontFamily: root.contentFontFamily
+                  collapsible: rowItem.isHeading && !root.filtering
+                  expanded: root.sectionExpanded(rowItem.modelData.section)
+                  toggleHasCursor: rowItem.isHeading && root.cursorKey === rowItem.modelData.key
+                  onToggleHovered: filterController.cursorIndex = filterController.indexForKey(rowItem.modelData.key)
+                  onToggleRequested: root.activateEntry(rowItem.modelData)
                 }
 
                 CursorSurface {
+                  visible: !rowItem.isHeading
                   width: parent.width
                   implicitHeight: rowColumn.implicitHeight + Style.space(12)
                   hasCursor: filterController.cursorIndex === filterController.indexForKey(rowItem.modelData.key)
