@@ -4,6 +4,7 @@ from systembridgeconnector.models.modules.system import (
     DeviceInfo,
     RunMode,
     System,
+    SystemFailedUnit,
     SystemUser,
 )
 
@@ -54,6 +55,16 @@ FIXTURE_SYSTEM = System(
         bios_version="bios_version",
         chassis_type="chassis_type",
     ),
+    failed_units=[
+        SystemFailedUnit(
+            name="backup.service",
+            description="Backup",
+            scope="system",
+            load_state="loaded",
+            result="exit-code",
+            since=1234,
+        )
+    ],
     idle_time=120,
     locked=False,
 )

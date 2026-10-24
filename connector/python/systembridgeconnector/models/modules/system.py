@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import cast
 
 from systembridgeconnector.models.helpers import filter_unexpected_fields
 
@@ -42,6 +43,19 @@ class DeviceInfo:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class SystemFailedUnit:
+    """System Failed Unit."""
+
+    name: str
+    description: str
+    scope: str
+    load_state: str
+    result: str | None = None
+    since: int | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class System:
     """System."""
 
@@ -68,6 +82,7 @@ class System:
     version_latest: str | None = None
     version_newer_available: bool | None = None
     device_info: DeviceInfo | None = None
+    failed_units: list[SystemFailedUnit] | None = None
     idle_time: int | None = None
     locked: bool | None = None
 
@@ -75,3 +90,8 @@ class System:
         """Post Init."""
         if isinstance(self.device_info, dict):
             self.device_info = DeviceInfo(**self.device_info)
+        if self.failed_units is not None:
+            self.failed_units = [
+                SystemFailedUnit(**cast(dict, u)) if isinstance(u, dict) else u
+                for u in self.failed_units
+            ]

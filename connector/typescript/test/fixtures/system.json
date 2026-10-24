@@ -40,6 +40,16 @@
     "bios_version": "1.0.0",
     "chassis_type": "Notebook"
   },
+  "failed_units": [
+    {
+      "name": "backup.service",
+      "description": "Backup",
+      "scope": "system",
+      "load_state": "loaded",
+      "result": "exit-code",
+      "since": 1792832361
+    }
+  ],
   "idle_time": 120,
   "locked": false
 }

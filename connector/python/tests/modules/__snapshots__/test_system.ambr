@@ -16,6 +16,16 @@
       model='model',
       version='version',
     ),
+    failed_units=list([
+      SystemFailedUnit(
+        description='Backup',
+        load_state='loaded',
+        name='backup.service',
+        result='exit-code',
+        scope='system',
+        since=1234,
+      ),
+    ]),
     fqdn='hostname.local',
     hostname='hostname',
     idle_time=120,

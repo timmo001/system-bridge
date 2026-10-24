@@ -1102,6 +1102,19 @@ export const SystemUser = Schema.Struct({
 
 export interface SystemUser extends Schema.Schema.Type<typeof SystemUser> {}
 
+export const SystemFailedUnit = Schema.Struct({
+  name: Schema.String,
+  description: Schema.String,
+  scope: Schema.String,
+  load_state: Schema.String,
+  result: Schema.NullOr(Schema.String),
+  since: Schema.NullOr(Schema.Finite),
+});
+
+export interface SystemFailedUnit extends Schema.Schema.Type<
+  typeof SystemFailedUnit
+> {}
+
 export const SystemData = Schema.Struct({
   boot_time: Schema.Finite,
   fqdn: Schema.String,
@@ -1126,6 +1139,7 @@ export const SystemData = Schema.Struct({
   version_latest: Schema.NullOr(Schema.String),
   version_newer_available: Schema.NullOr(Schema.Boolean),
   device_info: Schema.NullOr(DeviceInfo),
+  failed_units: Schema.Array(SystemFailedUnit),
   idle_time: Schema.NullOr(Schema.Finite),
   locked: Schema.NullOr(Schema.Boolean),
 });
