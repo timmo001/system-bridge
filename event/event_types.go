@@ -8,6 +8,7 @@ const (
 	EventGetData                EventType = "GET_DATA"
 	EventGetDirectories         EventType = "GET_DIRECTORIES"
 	EventGetDirectory           EventType = "GET_DIRECTORY"
+	EventGetDiscordSetup        EventType = "GET_DISCORD_SETUP"
 	EventGetDiskMounts          EventType = "GET_DISK_MOUNTS"
 	EventGetFiles               EventType = "GET_FILES"
 	EventGetFile                EventType = "GET_FILE"
@@ -28,6 +29,7 @@ const (
 	EventUnregisterDataListener EventType = "UNREGISTER_DATA_LISTENER"
 	EventDataUpdate             EventType = "DATA_UPDATE"
 	EventCommandExecute         EventType = "COMMAND_EXECUTE"
+	EventUpdateDiscordSetup     EventType = "UPDATE_DISCORD_SETUP"
 	EventUpdateSettings         EventType = "UPDATE_SETTINGS"
 	EventValidateDirectory      EventType = "VALIDATE_DIRECTORY"
 )

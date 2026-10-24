@@ -44,8 +44,11 @@ var (
 )
 
 var (
-	mu       sync.Mutex
-	current  *session
+	mu      sync.Mutex
+	current *session
+	// liveConn is the open connection to Discord, from before authorizing,
+	// so new credentials can end the session that uses the old ones.
+	liveConn net.Conn
 	state    types.DiscordData
 	onUpdate func(types.DiscordData)
 	// connection is the latest voice connection status. Discord can send it
@@ -97,15 +100,18 @@ func Run(ctx context.Context, update func(types.DiscordData)) {
 				slog.Debug("Discord is not running")
 			case errors.Is(err, errAuth):
 				slog.Warn("Discord session ended", "error", err)
+				reportError(err)
 				wait = authRetryDelay
 			case err != nil:
 				slog.Warn("Discord session ended", "error", err)
+				reportError(err)
 			}
 		}
 
 		select {
 		case <-ctx.Done():
 			return
+		case <-wake:
 		case <-time.After(wait):
 		}
 	}
@@ -117,10 +123,14 @@ func runSession(ctx context.Context, creds *Credentials) error {
 		return fmt.Errorf("%w: %w", errNoSocket, err)
 	}
 	s := newSession(conn)
+	mu.Lock()
+	liveConn = conn
+	mu.Unlock()
 	defer func() {
 		_ = conn.Close()
 		mu.Lock()
 		current = nil
+		liveConn = nil
 		mu.Unlock()
 		updateState(func(d *types.DiscordData) {
 			*d = types.DiscordData{}
@@ -143,7 +153,10 @@ func runSession(ctx context.Context, creds *Credentials) error {
 		return errors.New("timed out waiting for Discord READY")
 	}
 	slog.Info("Connected to Discord")
-	updateState(func(d *types.DiscordData) { d.Connected = true })
+	updateState(func(d *types.DiscordData) {
+		d.Connected = true
+		d.Error = nil
+	})
 
 	auth, err := authenticate(ctx, s, creds)
 	if err != nil {

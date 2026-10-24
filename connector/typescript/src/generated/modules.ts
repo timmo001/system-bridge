@@ -256,6 +256,7 @@ export const DiscordData = Schema.Struct({
   screenshare: Schema.NullOr(Schema.Boolean),
   sounds: Schema.NullOr(Schema.Array(DiscordSound)),
   notification: Schema.NullOr(DiscordNotification),
+  error: Schema.optionalKey(Schema.NullOr(Schema.String)),
 });
 
 export interface DiscordData extends Schema.Schema.Type<typeof DiscordData> {}

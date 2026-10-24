@@ -34,6 +34,17 @@ func socketPaths() []string {
 	return paths
 }
 
+// socketAvailable reports whether Discord's IPC socket exists, without
+// connecting to it.
+func socketAvailable() bool {
+	for _, path := range socketPaths() {
+		if info, err := os.Stat(path); err == nil && info.Mode()&os.ModeSocket != 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func dial() (net.Conn, error) {
 	for _, path := range socketPaths() {
 		conn, err := net.DialTimeout("unix", path, time.Second)

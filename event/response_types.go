@@ -11,6 +11,8 @@ const (
 	ResponseTypeDirectory                ResponseType = "DIRECTORY"
 	ResponseTypeDiskMounts               ResponseType = "DISK_MOUNTS"
 	ResponseTypeDiscordControlled        ResponseType = "DISCORD_CONTROLLED"
+	ResponseTypeDiscordSetup             ResponseType = "DISCORD_SETUP"
+	ResponseTypeDiscordSetupUpdated      ResponseType = "DISCORD_SETUP_UPDATED"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"

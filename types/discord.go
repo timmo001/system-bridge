@@ -18,6 +18,9 @@ type DiscordData struct {
 	Screenshare    *bool                   `json:"screenshare"`
 	Sounds         *[]DiscordSound         `json:"sounds"`
 	Notification   *DiscordNotification    `json:"notification"`
+	// Error is why the last attempt to connect or sign in failed, until the
+	// next one starts. Left out otherwise, as older backends never send it
+	Error *string `json:"error,omitempty"`
 }
 
 // DiscordUser is the Discord account System Bridge is authorized as
