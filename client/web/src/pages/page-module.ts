@@ -112,16 +112,14 @@ const sections: Partial<
     ></page-settings-media>`,
   },
   discord: {
-    before: html`<page-discord
-      embedded
-      id="discord-controls"
-      class="wide"
-    ></page-discord>`,
-    after: html`<page-settings-discord
-      embedded
-      id="discord-setup"
-      class="wide"
-    ></page-settings-discord>`,
+    after: html`
+      <page-discord embedded id="discord-controls" class="wide"></page-discord>
+      <page-settings-discord
+        embedded
+        id="discord-setup"
+        class="wide"
+      ></page-settings-discord>
+    `,
   },
 };
 
