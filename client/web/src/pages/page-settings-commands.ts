@@ -317,7 +317,12 @@ ${result.stderr}</pre>`
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 16rem">
             ${this.#input("name", "Name", "Restart audio")}
-            ${this.#input("command", "Command", "systemctl")}
+            ${this.#input(
+              "command",
+              "Command",
+              "/usr/bin/systemctl",
+              "The program's full path.",
+            )}
             ${this.#input(
               "arguments",
               "Arguments",
