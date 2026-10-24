@@ -4,10 +4,11 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/settings"
 )
 
 func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, dataStore *data.DataStore) {
-	handlers := toolHandlers{eventRouter: eventRouter, dataStore: dataStore}
+	handlers := toolHandlers{eventRouter: eventRouter, dataStore: dataStore, loadSettings: settings.Load}
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_get_data",
@@ -64,6 +65,49 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{"id"}),
 	}, handlers.handleDisplayControl)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_get_history",
+		Description: "Get recent readings kept for charts (cpu, memory, battery, system, networks, disks, gpus, sensors). Each series is a list of {time, value} samples, with time in Unix milliseconds. Usage is in percent, temperatures in °C, power in watts, and network and disk rates in bytes per second.",
+		InputSchema: objectSchema(map[string]any{
+			"since": map[string]any{
+				"type":        "integer",
+				"description": "Only readings after this time, in Unix milliseconds. Omit for the whole history.",
+				"minimum":     0,
+			},
+			"modules": map[string]any{
+				"type":        "array",
+				"description": "Only these modules' readings. Omit for every module.",
+				"items": map[string]any{
+					"type": "string",
+					"enum": historyModuleNames(),
+				},
+			},
+		}, []string{}),
+	}, handlers.handleGetHistory)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_list_commands",
+		Description: "List the commands the user has allowed System Bridge to run",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, handlers.handleListCommands)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_run_command",
+		Description: "Run a command from the allowlist and wait for it to finish, returning its exit code and output. Get command ids from system_bridge_list_commands.",
+		InputSchema: objectSchema(map[string]any{
+			"id": map[string]any{"type": "string", "description": "Command id from the allowlist"},
+		}, []string{"id"}),
+	}, handlers.handleRunCommand)
+}
+
+func historyModuleNames() []string {
+	modules := data.HistoryModules()
+	names := make([]string, 0, len(modules))
+	for _, module := range modules {
+		names = append(names, string(module))
+	}
+	return names
 }
 
 func objectSchema(properties map[string]any, required []string) map[string]any {

@@ -65,6 +65,15 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   `title` and `message` fields and an optional `icon`.
 - `system_bridge_media_control` performs one of `PLAY`, `PAUSE`, `STOP`, `NEXT`,
   `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN`, or `MUTE`.
+- `system_bridge_display_control` sets a display's brightness or power state.
+- `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
+  with optional `since` and `modules`.
+- `system_bridge_list_commands` lists the command allowlist, and
+  `system_bridge_run_command` runs one and waits for its result through
+  `command.Run`.
+
+Power actions are left out on purpose, as an assistant could trigger them by
+mistake.
 
 Keep tool schemas, typed handler inputs, and the
 [public tools reference](https://system-bridge.timmo.dev/api/mcp/#tools) in sync

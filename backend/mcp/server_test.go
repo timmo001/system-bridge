@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -15,6 +18,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils/handlers/command"
 )
 
 const testToken = "test-token"
@@ -174,7 +180,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 4)
+	require.Len(t, tools.Tools, 7)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
@@ -184,6 +190,9 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_send_notification",
 		"system_bridge_media_control",
 		"system_bridge_display_control",
+		"system_bridge_get_history",
+		"system_bridge_list_commands",
+		"system_bridge_run_command",
 	}, names)
 	assertToolSchemas(t, tools.Tools)
 
@@ -303,6 +312,58 @@ func TestTypedEventHandlers(t *testing.T) {
 			assert.Equal(t, map[string]any{"success": true, "message": tt.responseText}, resultData)
 		})
 	}
+}
+
+func TestGetHistoryTool(t *testing.T) {
+	router := event.NewMessageRouter()
+	handlers := toolHandlers{eventRouter: router}
+	history := types.MetricHistory{CPU: []types.HistorySample{{Time: 2000, Value: 12.5}}}
+
+	var received event.Message
+	router.RegisterHandler(event.EventGetHistory, func(connection string, message event.Message) event.MessageResponse {
+		received = message
+		return event.MessageResponse{Type: event.ResponseTypeHistory, Data: history}
+	})
+
+	result, _, err := handlers.handleGetHistory(t.Context(), nil, getHistoryInput{Since: 1000, Modules: []types.ModuleName{types.ModuleCPU}})
+	require.NoError(t, err)
+	assert.Equal(t, map[string]any{"since": int64(1000), "modules": []types.ModuleName{types.ModuleCPU}}, received.Data)
+	content, ok := result.Content[0].(*sdkmcp.TextContent)
+	require.True(t, ok)
+	var got types.MetricHistory
+	require.NoError(t, json.Unmarshal([]byte(content.Text), &got))
+	assert.Equal(t, history.CPU, got.CPU)
+}
+
+func TestCommandTools(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("uses a shell script")
+	}
+	script := filepath.Join(t.TempDir(), "hello")
+	require.NoError(t, os.WriteFile(script, []byte("#!/bin/sh\necho hello \"$1\"\nexit 3\n"), 0o755))
+	cfg := &settings.Settings{Commands: settings.SettingsCommands{Allowlist: []settings.SettingsCommandDefinition{
+		{ID: "hello", Name: "Hello", Command: script, Arguments: []string{"world"}},
+	}}}
+	handlers := toolHandlers{loadSettings: func() (*settings.Settings, error) { return cfg, nil }}
+
+	result, _, err := handlers.handleListCommands(t.Context(), nil, struct{}{})
+	require.NoError(t, err)
+	content, ok := result.Content[0].(*sdkmcp.TextContent)
+	require.True(t, ok)
+	var commands []settings.SettingsCommandDefinition
+	require.NoError(t, json.Unmarshal([]byte(content.Text), &commands))
+	assert.Equal(t, cfg.Commands.Allowlist, commands)
+
+	result, _, err = handlers.handleRunCommand(t.Context(), nil, runCommandInput{ID: "hello"})
+	require.NoError(t, err)
+	content, ok = result.Content[0].(*sdkmcp.TextContent)
+	require.True(t, ok)
+	var run command.ExecuteResult
+	require.NoError(t, json.Unmarshal([]byte(content.Text), &run))
+	assert.Equal(t, command.ExecuteResult{CommandID: "hello", ExitCode: 3, Stdout: "hello world\n"}, run)
+
+	_, _, err = handlers.handleRunCommand(t.Context(), nil, runCommandInput{ID: "missing"})
+	assert.ErrorIs(t, err, command.ErrCommandNotFound)
 }
 
 func serveMCPRequest(t *testing.T, handler http.Handler, body string) *httptest.ResponseRecorder {

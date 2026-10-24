@@ -11,12 +11,15 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
+	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils/handlers/command"
 )
 
 type toolHandlers struct {
-	eventRouter *event.MessageRouter
-	dataStore   *data.DataStore
+	eventRouter  *event.MessageRouter
+	dataStore    *data.DataStore
+	loadSettings func() (*settings.Settings, error)
 }
 
 type getDataInput struct {
@@ -37,6 +40,15 @@ type displayControlInput struct {
 	ID         string   `json:"id"`
 	Brightness *float64 `json:"brightness,omitempty"`
 	PowerState string   `json:"power_state,omitempty"`
+}
+
+type getHistoryInput struct {
+	Since   int64              `json:"since,omitempty"`
+	Modules []types.ModuleName `json:"modules,omitempty"`
+}
+
+type runCommandInput struct {
+	ID string `json:"id"`
 }
 
 func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, any, error) {
@@ -119,7 +131,51 @@ func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallTool
 	})
 }
 
-// generateID generates a unique request ID
+func (h toolHandlers) handleGetHistory(_ context.Context, _ *sdkmcp.CallToolRequest, input getHistoryInput) (*sdkmcp.CallToolResult, any, error) {
+	arguments := map[string]interface{}{"since": input.Since}
+	if len(input.Modules) > 0 {
+		arguments["modules"] = input.Modules
+	}
+	message := event.Message{
+		ID:    generateID(),
+		Event: event.EventGetHistory,
+		Data:  arguments,
+	}
+
+	response := h.eventRouter.HandleMessage("mcp", message)
+	if response.Type == event.ResponseTypeError {
+		return nil, nil, fmt.Errorf("%s", response.Message)
+	}
+
+	return formatToolResult(response.Data)
+}
+
+func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, any, error) {
+	cfg, err := h.loadSettings()
+	if err != nil {
+		return nil, nil, fmt.Errorf("load settings: %w", err)
+	}
+
+	commands := cfg.Commands.Allowlist
+	if commands == nil {
+		commands = []settings.SettingsCommandDefinition{}
+	}
+	return formatToolResult(commands)
+}
+
+func (h toolHandlers) handleRunCommand(ctx context.Context, _ *sdkmcp.CallToolRequest, input runCommandInput) (*sdkmcp.CallToolResult, any, error) {
+	cfg, err := h.loadSettings()
+	if err != nil {
+		return nil, nil, fmt.Errorf("load settings: %w", err)
+	}
+
+	result, err := command.Run(ctx, command.ExecuteRequest{CommandID: input.ID, RequestID: generateID(), Connection: "mcp"}, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return formatToolResult(result)
+}
 func generateID() string {
 	return fmt.Sprintf("mcp-%d", time.Now().UnixNano())
 }

@@ -170,6 +170,49 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 	return nil
 }
 
+// Run validates and runs a command, waiting for it to finish. It's for
+// callers that answer with the result themselves, such as MCP tools.
+func Run(ctx context.Context, req ExecuteRequest, cfg *settings.Settings) (ExecuteResult, error) {
+	commandDef, err := ValidateCommand(req.CommandID, cfg)
+	if err != nil {
+		slog.Warn(
+			"Command execution denied",
+			"commandID", req.CommandID,
+			"connection", req.Connection,
+			"requestID", req.RequestID,
+			"error", err.Error(),
+		)
+		return ExecuteResult{}, err
+	}
+
+	slog.Info(
+		"Executing command",
+		"commandID", commandDef.ID,
+		"name", commandDef.Name,
+		"command", commandDef.Command,
+		"arguments", commandDef.Arguments,
+		"workingDir", commandDef.WorkingDir,
+		"connection", req.Connection,
+		"requestID", req.RequestID,
+	)
+
+	ctx, cancel := context.WithTimeout(ctx, DefaultCommandTimeout)
+	defer cancel()
+	stop := context.AfterFunc(getServerContext(), cancel)
+	defer stop()
+
+	result := execute(ctx, commandDef)
+	slog.Info(
+		"Command execution completed",
+		"commandID", result.CommandID,
+		"exitCode", result.ExitCode,
+		"error", result.Error,
+		"connection", req.Connection,
+		"requestID", req.RequestID,
+	)
+	return result, nil
+}
+
 // executeAsync runs the command and sends the result via WebSocket
 func executeAsync(req ExecuteRequest, commandDef *settings.SettingsCommandDefinition) {
 	// Create a context with timeout for command execution
