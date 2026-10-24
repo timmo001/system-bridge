@@ -256,8 +256,10 @@ func (ws *WebsocketServer) handleGetDataModule(event bus.Event) {
 
 		module, err := ws.dataStore.GetModule(moduleName)
 		if err != nil {
-			slog.Warn("Data module not registered", "module", moduleName)
-			continue
+			// Lazy modules such as Discord only register once they have data.
+			// Reply without data so the client isn't left waiting for one
+			slog.Debug("Data module not registered", "module", moduleName)
+			module = types.Module{Name: moduleName}
 		}
 
 		if module.Data == nil {
