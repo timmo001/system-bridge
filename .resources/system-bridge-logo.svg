@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 2 124 124">
+  <title>System Bridge</title>
+  <!-- Hangers, from the cables down to the deck -->
+  <path d="M43.9 64V84M49.2 68V84M78.8 68V84M84.1 64V84M21.1 70.9V84M14.3 78.8V84M106.9 70.9V84M113.7 78.8V84" stroke="#5E6F84" stroke-width="3"/>
+  <!-- Side spans down to the deck. They end far enough in that their rounded
+       ends stay on the deck -->
+  <path d="M35 50C26 66 16 78 8 85M93 50C102 66 112 78 120 85" fill="none" stroke="#5E6F84" stroke-width="6" stroke-linecap="round"/>
+  <path d="M35 50C26 66 16 78 8 85M93 50C102 66 112 78 120 85" fill="none" stroke="#74859A" stroke-width="2" stroke-linecap="round"/>
+  <!-- Main span between the machines, with a gentle pulse in the middle -->
+  <path d="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" fill="none" stroke="#5E6F84" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" fill="none" stroke="#74859A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 50C40 62 47 69 55 70h3l3-6 4 9 3-5 2 2h3c6 0 13-8 20-20" fill="none" stroke="#614590" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Left tower: a computer, with its drive slots and power light -->
+  <path fill="#614590" d="M30 36h10a4 4 0 0 1 4 4v44H26V40a4 4 0 0 1 4-4Z"/>
+  <path fill="#5A3F87" d="M26 70 44 61v23H26Z"/>
+  <path d="M31 43h8M31 48h8" stroke="#2A1F42" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="35" cy="56" r="2.3" fill="#A78BFA"/>
+  <!-- Right tower: a server, with its bays and status light -->
+  <path fill="#614590" d="M88 36h10a4 4 0 0 1 4 4v44H84V40a4 4 0 0 1 4-4Z"/>
+  <path fill="#5A3F87" d="M84 70 102 61v23H84Z"/>
+  <path d="M89 43h8M89 48h8M89 53h8" stroke="#2A1F42" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="93" cy="61" r="2.3" fill="#A78BFA"/>
+  <!-- Deck -->
+  <path fill="#8A8783" d="M3 84h122v8H3z"/>
+  <path fill="#A9A6A0" d="M3 84h122v3H3z"/>
+</svg>

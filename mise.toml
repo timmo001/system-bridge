@@ -43,6 +43,11 @@ run = [
   "cd connector/typescript && bunx prettier --write src/generated/modules.ts",
 ]
 
+[tasks."generate:icons"]
+description = "Generate every icon from .resources/system-bridge-logo.svg, then the docs' brand images"
+depends = ["install:js"]
+run = ["bun .scripts/generate-icons.ts", "cd docs && bun run brand"]
+
 [tasks."build:client:web"]
 description = "Build the web client"
 depends = ["generate:schemas"]

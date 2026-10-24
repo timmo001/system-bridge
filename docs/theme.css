@@ -1,12 +1,18 @@
 @import "@timmo001/docs-kit/blume/theme.css";
 
-/* The logo is wider than it is tall, so give the banner a wider image. */
+/* The logo is wider than it is tall, with space above and below the bridge,
+   so show it larger and pull that space in. */
 .home-banner {
-  --home-banner-logo-size: 12rem;
+  --home-banner-logo-size: 14rem;
+}
+
+.home-banner img.home-banner-logo {
+  margin-top: calc(var(--home-banner-logo-size) * -0.2);
+  margin-bottom: calc(var(--home-banner-logo-size) * -0.22);
 }
 
 @media (min-width: 40rem) {
   .home-banner {
-    --home-banner-logo-size: 16rem;
+    --home-banner-logo-size: 20rem;
   }
 }

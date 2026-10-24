@@ -108,13 +108,12 @@ export class SbApp extends LitElement {
         white-space: nowrap;
       }
 
-      /* The icon is white, so it's drawn as a mask in the text colour to show
-         on light themes too */
+      /* The logo is wider than tall in a square image, so crop the space
+         above and below it */
       .brand .logo {
-        width: 1.75rem;
-        height: 1.75rem;
-        background: currentColor;
-        mask: var(--sb-logo) center / contain no-repeat;
+        width: 2.75rem;
+        height: 1.5rem;
+        object-fit: cover;
       }
 
       .jump {
@@ -220,10 +219,13 @@ export class SbApp extends LitElement {
     return html`
       <header>
         <a class="brand" href=${href("overview")}>
-          <span
+          <img
             class="logo"
-            style="--sb-logo: url(${import.meta.env.BASE_URL}icon.svg)"
-          ></span>
+            src="${import.meta.env.BASE_URL}icon.svg"
+            alt=""
+            width="44"
+            height="24"
+          />
           <span>System Bridge</span>
         </a>
         <sb-select
