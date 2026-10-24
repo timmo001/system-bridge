@@ -107,6 +107,14 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
                 : `${formatUptime(system.idle_time)} ago`,
           )}
           ${stat("Session", system.locked === null ? "" : system.locked ? "Locked" : "Unlocked")}
+          ${stat(
+            "Package updates",
+            system.package_updates === null
+              ? ""
+              : system.package_updates === 0
+                ? "Up to date"
+                : `${system.package_updates} waiting`,
+          )}
         </div>
       </sb-card>
       ${
