@@ -75,6 +75,10 @@ var hyprlandSource = &hyprland{events: newHyprlandEvents()}
 func Get(ctx context.Context) (*types.DesktopData, error) {
 	titles := windowTitlesEnabled()
 
+	if _, err := hyprlandDir(); err != nil {
+		return waylandSource.get(titles)
+	}
+
 	hyprlandSource.mu.Lock()
 	defer hyprlandSource.mu.Unlock()
 	if hyprlandSource.following && hyprlandSource.data != nil && hyprlandSource.titles == titles {
@@ -124,7 +128,8 @@ func (h *hyprland) refresh(ctx context.Context, titles bool, read bool) (*types.
 }
 
 // Watch calls changed whenever the desktop changes, until ctx is done. It
-// follows Hyprland's events.
+// follows Hyprland's events, or other Wayland compositors' when Hyprland isn't
+// running.
 func Watch(ctx context.Context, changed func()) {
 	// Set when an event changes what Hyprland's requests report, rather than
 	// only what its events do
@@ -148,7 +153,10 @@ func Watch(ctx context.Context, changed func()) {
 	trigger, stop := watch.Debounce(watchDebounce, check)
 	defer stop()
 
-	watch.Retry(ctx, watchRetry, "hyprland", func(ctx context.Context) error {
+	watch.Retry(ctx, watchRetry, "desktop", func(ctx context.Context) error {
+		if _, err := hyprlandDir(); err != nil {
+			return waylandSource.follow(ctx, changed)
+		}
 		return hyprlandSource.follow(ctx, func(needsRead bool) {
 			if needsRead {
 				read.Store(true)

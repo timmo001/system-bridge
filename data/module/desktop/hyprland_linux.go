@@ -31,7 +31,11 @@ func hyprlandDir() (string, error) {
 	}
 	base := filepath.Join(runtimeDir, "hypr")
 	if signature := os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"); signature != "" {
-		return filepath.Join(base, signature), nil
+		dir := filepath.Join(base, signature)
+		if _, err := os.Stat(filepath.Join(dir, ".socket2.sock")); err != nil {
+			return "", errNoHyprland
+		}
+		return dir, nil
 	}
 
 	entries, err := os.ReadDir(base)
