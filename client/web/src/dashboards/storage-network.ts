@@ -186,6 +186,16 @@ export const networksDashboard = ({
       (address) => [address.family ?? "Address", address.address] as const,
     );
 
+    const wifi = network.wifi;
+
+    const percent =
+      wifi?.signal_percent == null ? null : `${wifi.signal_percent}%`;
+
+    const signal =
+      wifi?.signal == null
+        ? percent
+        : `${wifi.signal} dBm${percent ? ` (${percent})` : ""}`;
+
     return html`
       <sb-card class="third" heading=${network.name ?? "Interface"}>
         <span
@@ -213,6 +223,14 @@ export const networksDashboard = ({
             network.stats?.speed
               ? `${formatNumber(network.stats.speed)} Mb/s`
               : null,
+          ],
+          ["Wi-Fi network", wifi?.ssid],
+          ["Signal", signal],
+          [
+            "Link rate",
+            wifi?.link_rate == null
+              ? null
+              : `${formatNumber(wifi.link_rate)} Mb/s`,
           ],
           ["MTU", network.stats?.mtu],
           ["Duplex", network.stats?.duplex],
