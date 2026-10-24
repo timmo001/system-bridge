@@ -250,6 +250,7 @@ Returns an array of objects, one per process.
 | `camera_usage` | array | Apps using the camera. Linux only. |
 | `microphone_usage` | array | Apps using the microphone. Linux only. |
 | `pending_reboot` | boolean | Whether a reboot is pending. Linux only. |
+| `package_updates` | integer | How many package updates are waiting, from `checkupdates` on Arch, apt on Debian and Ubuntu, dnf on Fedora, or winget on Windows. Checked in the background about once an hour, so it's null until the first check finishes or when no supported package manager is found. Linux and Windows only. |
 | `power_usage` | number | System power draw in watts. Linux only. |
 | `run_mode` | string | How the backend is running. |
 | `idle_time` | number | Seconds since the user's last keyboard or mouse input. On Linux this comes from the Wayland compositor where it supports `ext-idle-notify-v1` (such as Hyprland, sway, niri and KDE), otherwise from logind's idle hint. `null` when neither is available. |
