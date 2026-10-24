@@ -489,7 +489,7 @@ const windowColumns = (() => {
     }),
     column.display({
       id: "actions",
-      header: "",
+      header: "Actions",
       cell: ({ row }) =>
         html`<sb-window-actions
           .window=${row.original.window}
@@ -554,7 +554,7 @@ const workspaceColumns = (() => {
     }),
     column.display({
       id: "actions",
-      header: "",
+      header: "Action",
       cell: ({ row }) => {
         const { workspace, focusable } = row.original;
 
@@ -834,7 +834,7 @@ const shortcutColumns = (() => {
     }),
     column.display({
       id: "actions",
-      header: "",
+      header: "Action",
       cell: ({ row }) => {
         const { shortcut } = row.original;
 
