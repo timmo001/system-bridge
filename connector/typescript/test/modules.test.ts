@@ -3,6 +3,7 @@ import { Effect, Schema } from "effect";
 import { ModuleDataSchemas, ModuleName } from "../src/index.js";
 import audio from "./fixtures/audio.json" with { type: "json" };
 import battery from "./fixtures/battery.json" with { type: "json" };
+import bluetooth from "./fixtures/bluetooth.json" with { type: "json" };
 import cpu from "./fixtures/cpu.json" with { type: "json" };
 import discord from "./fixtures/discord.json" with { type: "json" };
 import disks from "./fixtures/disks.json" with { type: "json" };
@@ -18,6 +19,7 @@ import system from "./fixtures/system.json" with { type: "json" };
 const fixtures = {
   audio,
   battery,
+  bluetooth,
   cpu,
   discord,
   disks,

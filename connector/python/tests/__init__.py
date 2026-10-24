@@ -13,6 +13,7 @@ from systembridgeconnector.const import EventSubType, EventType
 from systembridgeconnector.models.fixtures.media_files import FIXTURE_MEDIA_FILES
 from systembridgeconnector.models.fixtures.modules.audio import FIXTURE_AUDIO
 from systembridgeconnector.models.fixtures.modules.battery import FIXTURE_BATTERY
+from systembridgeconnector.models.fixtures.modules.bluetooth import FIXTURE_BLUETOOTH
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
 from systembridgeconnector.models.fixtures.modules.discord import FIXTURE_DISCORD
 from systembridgeconnector.models.fixtures.modules.disks import FIXTURE_DISKS
@@ -40,6 +41,7 @@ REQUEST_ID: Final[str] = "test"
 MODULES_DATA = ModulesData(
     audio=FIXTURE_AUDIO,
     battery=FIXTURE_BATTERY,
+    bluetooth=FIXTURE_BLUETOOTH,
     cpu=FIXTURE_CPU,
     discord=FIXTURE_DISCORD,
     disks=FIXTURE_DISKS,

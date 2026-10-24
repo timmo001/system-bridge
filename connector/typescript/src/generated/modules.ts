@@ -38,6 +38,7 @@ export type DisplayPowerState = typeof DisplayPowerState.Type;
 export const ModuleName = Schema.Literals([
   "audio",
   "battery",
+  "bluetooth",
   "cpu",
   "disks",
   "discord",
@@ -99,6 +100,25 @@ export const BatteryData = Schema.Struct({
 });
 
 export interface BatteryData extends Schema.Schema.Type<typeof BatteryData> {}
+
+export const BluetoothDevice = Schema.Struct({
+  address: Schema.String,
+  name: Schema.String,
+  type: Schema.NullOr(Schema.String),
+  connected: Schema.Boolean,
+});
+
+export interface BluetoothDevice extends Schema.Schema.Type<
+  typeof BluetoothDevice
+> {}
+
+export const BluetoothData = Schema.Struct({
+  devices: Schema.Array(BluetoothDevice),
+});
+
+export interface BluetoothData extends Schema.Schema.Type<
+  typeof BluetoothData
+> {}
 
 export const CPUFrequency = Schema.Struct({
   current: Schema.NullOr(Schema.Finite),
@@ -868,6 +888,7 @@ export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}
 export interface ModuleData {
   readonly audio: AudioData;
   readonly battery: BatteryData;
+  readonly bluetooth: BluetoothData;
   readonly cpu: CPUData;
   readonly discord: DiscordData;
   readonly disks: DisksData;
@@ -888,6 +909,7 @@ export type ModuleDataSchemas = {
 export const ModuleDataSchemas: ModuleDataSchemas = {
   audio: AudioData,
   battery: BatteryData,
+  bluetooth: BluetoothData,
   cpu: CPUData,
   discord: DiscordData,
   disks: DisksData,
@@ -904,6 +926,7 @@ export const ModuleDataSchemas: ModuleDataSchemas = {
 export const ModulesData = Schema.Struct({
   audio: Schema.optionalKey(AudioData),
   battery: Schema.optionalKey(BatteryData),
+  bluetooth: Schema.optionalKey(BluetoothData),
   cpu: Schema.optionalKey(CPUData),
   discord: Schema.optionalKey(DiscordData),
   disks: Schema.optionalKey(DisksData),
@@ -922,6 +945,7 @@ export interface ModulesData extends Schema.Schema.Type<typeof ModulesData> {}
 export const ModuleDataUpdate = Schema.Union([
   Schema.Struct({ module: Schema.Literal("audio"), data: AudioData }),
   Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),
+  Schema.Struct({ module: Schema.Literal("bluetooth"), data: BluetoothData }),
   Schema.Struct({ module: Schema.Literal("cpu"), data: CPUData }),
   Schema.Struct({ module: Schema.Literal("discord"), data: DiscordData }),
   Schema.Struct({ module: Schema.Literal("disks"), data: DisksData }),

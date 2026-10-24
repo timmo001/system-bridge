@@ -9,6 +9,7 @@ from .models.media_files import MediaFile, MediaFiles
 from .models.modules import Module, ModulesData
 from .models.modules.audio import Audio
 from .models.modules.battery import Battery
+from .models.modules.bluetooth import Bluetooth
 from .models.modules.cpu import CPU
 from .models.modules.discord import Discord
 from .models.modules.disks import Disks
@@ -176,6 +177,7 @@ class Model(StrEnum):
 
     AUDIO = Module.AUDIO
     BATTERY = Module.BATTERY
+    BLUETOOTH = Module.BLUETOOTH
     CPU = Module.CPU
     DATA = "data"
     DISCORD = Module.DISCORD
@@ -204,6 +206,7 @@ class Model(StrEnum):
 MODEL_MAP = {
     Model.AUDIO: Audio,
     Model.BATTERY: Battery,
+    Model.BLUETOOTH: Bluetooth,
     Model.CPU: CPU,
     Model.DATA: ModulesData,
     Model.DISCORD: Discord,

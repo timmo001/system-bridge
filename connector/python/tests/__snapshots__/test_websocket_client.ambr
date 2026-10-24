@@ -86,6 +86,7 @@
   ModulesData(
     audio=None,
     battery=None,
+    bluetooth=None,
     cpu=None,
     discord=None,
     disks=None,
@@ -490,6 +491,7 @@
   ModulesData(
     audio=None,
     battery=None,
+    bluetooth=None,
     cpu=None,
     discord=None,
     disks=None,

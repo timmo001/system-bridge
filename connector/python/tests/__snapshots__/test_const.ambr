@@ -3,6 +3,7 @@
   dict({
     <Model.AUDIO: 'audio'>: <class 'systembridgeconnector.models.modules.audio.Audio'>,
     <Model.BATTERY: 'battery'>: <class 'systembridgeconnector.models.modules.battery.Battery'>,
+    <Model.BLUETOOTH: 'bluetooth'>: <class 'systembridgeconnector.models.modules.bluetooth.Bluetooth'>,
     <Model.CPU: 'cpu'>: <class 'systembridgeconnector.models.modules.cpu.CPU'>,
     <Model.DATA: 'data'>: <class 'systembridgeconnector.models.modules.ModulesData'>,
     <Model.DISCORD: 'discord'>: <class 'systembridgeconnector.models.modules.discord.Discord'>,

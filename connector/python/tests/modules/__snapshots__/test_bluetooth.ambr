@@ -1,0 +1,19 @@
+# serializer version: 1
+# name: test_bluetooth
+  Bluetooth(
+    devices=list([
+      BluetoothDevice(
+        address='80:C3:BA:7B:93:4E',
+        connected=True,
+        name='Headphones',
+        type='audio-headset',
+      ),
+      BluetoothDevice(
+        address='E3:C2:02:B9:C2:62',
+        connected=False,
+        name='Keyboard',
+        type='input-keyboard',
+      ),
+    ]),
+  )
+# ---

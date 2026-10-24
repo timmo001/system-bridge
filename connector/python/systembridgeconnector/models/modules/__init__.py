@@ -5,6 +5,7 @@ from enum import StrEnum
 
 from .audio import Audio
 from .battery import Battery
+from .bluetooth import Bluetooth
 from .cpu import CPU
 from .discord import Discord
 from .disks import Disks
@@ -23,6 +24,7 @@ class Module(StrEnum):
 
     AUDIO = "audio"
     BATTERY = "battery"
+    BLUETOOTH = "bluetooth"
     CPU = "cpu"
     DISCORD = "discord"
     DISKS = "disks"
@@ -54,6 +56,7 @@ class ModulesData:
 
     audio: Audio | None = None
     battery: Battery | None = None
+    bluetooth: Bluetooth | None = None
     cpu: CPU | None = None
     discord: Discord | None = None
     disks: Disks | None = None
