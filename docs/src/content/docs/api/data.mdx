@@ -80,7 +80,9 @@ Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `s
 | Field | Type | Description |
 | --- | --- | --- |
 | `devices` | array | Disks, each with `name`, `partitions`, and `io_counters`. |
-| `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`. On Linux it counts physical disks only, so partitions, LUKS and LVM devices aren't counted twice. |
+| `io_counters` | object | Aggregate I/O: `read_count`, `write_count`, `read_bytes`, `write_bytes`, `read_time`, `write_time`, `read_bytes_rate`, `write_bytes_rate`. On Linux it counts physical disks only, so partitions, LUKS and LVM devices aren't counted twice. |
+
+`read_bytes_rate` and `write_bytes_rate` are in bytes per second since the previous reading, in the total and on each disk. They are `null` on the first reading, and when a counter resets.
 
 Each partition has `device`, `mount_point`, `filesystem_type`, `options`, `category` (`primary`, `bind`, or `squashfs`), and `usage` (`total`, `used`, `free`, `percent`).
 
