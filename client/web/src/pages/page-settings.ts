@@ -77,13 +77,19 @@ export class PageSettings extends SbSettingsPage {
         <div>
           <label class="setting">
             <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label">Start automatically</span>
-              <span class="hint">Start System Bridge when you sign in.</span>
+              <span class="label" id="autostart-label"
+                >Start automatically</span
+              >
+              <span class="hint" id="autostart-hint"
+                >Start System Bridge when you sign in.</span
+              >
             </span>
             <input
               class="switch"
               type="checkbox"
               role="switch"
+              aria-labelledby="autostart-label"
+              aria-describedby="autostart-hint"
               name="autostart"
               .checked=${form.autostart}
               ?disabled=${saving}
@@ -92,8 +98,8 @@ export class PageSettings extends SbSettingsPage {
           </label>
           <label class="setting">
             <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label">Show in the system tray</span>
-              <span class="hint"
+              <span class="label" id="tray-label">Show in the system tray</span>
+              <span class="hint" id="tray-hint"
                 >Hiding takes effect when you save. To show it again, save and
                 restart System Bridge. On macOS, hiding also needs a
                 restart.</span
@@ -103,6 +109,8 @@ export class PageSettings extends SbSettingsPage {
               class="switch"
               type="checkbox"
               role="switch"
+              aria-labelledby="tray-label"
+              aria-describedby="tray-hint"
               name="systemTray"
               .checked=${form.systemTray}
               ?disabled=${saving}

@@ -269,7 +269,7 @@ ${result.stderr}</pre>`
               <button
                 class="button plain icon-only small"
                 type="button"
-                aria-label="Copy ID"
+                aria-label="Copy the ID of ${command.name}"
                 title="Copy ID"
                 data-id=${command.id}
                 @click=${this.#onCopyId}
@@ -282,6 +282,7 @@ ${result.stderr}</pre>`
             <button
               class="button tonal small"
               type="button"
+              aria-label="Run ${command.name}"
               ?disabled=${running || this.isSaving}
               data-id=${command.id}
               @click=${this.#onRun}

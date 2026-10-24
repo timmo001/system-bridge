@@ -137,6 +137,10 @@ export class PageSettingsMedia extends SbSettingsPage {
                 id="path"
                 placeholder="/home/me/Music"
                 required
+                aria-invalid=${addResult?.success === false ? "true" : nothing}
+                aria-describedby=${
+                  addResult?.success === false ? "add-error" : nothing
+                }
                 ?disabled=${busy}
                 .value=${this.path}
                 @input=${this.#onPathInput}
@@ -145,7 +149,9 @@ export class PageSettingsMedia extends SbSettingsPage {
           </div>
           ${
             addResult?.success === false
-              ? html`<span class="error-text">${addResult.message}</span>`
+              ? html`<span class="error-text" id="add-error" role="alert"
+                  >${addResult.message}</span
+                >`
               : nothing
           }
           <div class="row" style="justify-content: flex-end">

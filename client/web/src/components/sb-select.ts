@@ -468,9 +468,9 @@ export class SbSelect extends LitElement {
           <input
             type="search"
             role="combobox"
-            aria-expanded="true"
+            aria-expanded=${this.open ? "true" : "false"}
             aria-controls="${this.#id}-options"
-            aria-activedescendant="${this.#id}-${this.active}"
+            aria-activedescendant=${this.open ? `${this.#id}-${this.active}` : nothing}
             aria-autocomplete="list"
             aria-label=${this.label || this.searchPlaceholder}
             autocomplete="off"

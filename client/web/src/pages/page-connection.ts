@@ -124,12 +124,20 @@ export class PageConnection extends SbPage {
           placeholder=${attributes.placeholder}
           autocomplete="off"
           aria-invalid=${error === undefined ? "false" : "true"}
-          aria-describedby="${key}-hint"
+          aria-describedby=${
+            error === undefined ? `${key}-hint` : `${key}-hint ${key}-error`
+          }
           .value=${this.form[key]}
           @input=${this.#onTextInput}
         />
         <span class="hint" id="${key}-hint">${hint}</span>
-        ${error === undefined ? nothing : html`<span class="error-text">${error}</span>`}
+        ${
+          error === undefined
+            ? nothing
+            : html`<span class="error-text" id="${key}-error" role="alert"
+                >${error}</span
+              >`
+        }
       </div>
     `;
   }
@@ -166,8 +174,8 @@ export class PageConnection extends SbPage {
           </div>
           <label class="setting">
             <span class="stack" style="--sb-stack-gap: 0">
-              <span class="label">Use a secure connection</span>
-              <span class="hint"
+              <span class="label" id="ssl-label">Use a secure connection</span>
+              <span class="hint" id="ssl-hint"
                 >Turn on when System Bridge is behind HTTPS.</span
               >
             </span>
@@ -175,6 +183,8 @@ export class PageConnection extends SbPage {
               class="switch"
               type="checkbox"
               role="switch"
+              aria-labelledby="ssl-label"
+              aria-describedby="ssl-hint"
               .checked=${this.form.ssl}
               @change=${this.#onSslChange}
             />
@@ -189,6 +199,11 @@ export class PageConnection extends SbPage {
                 type=${this.showToken ? "text" : "password"}
                 autocomplete="off"
                 aria-invalid=${tokenError === undefined ? "false" : "true"}
+                aria-describedby=${
+                  tokenError === undefined
+                    ? "token-hint"
+                    : "token-hint token-error"
+                }
                 .value=${this.form.token}
                 @input=${this.#onTextInput}
               />
@@ -202,14 +217,16 @@ export class PageConnection extends SbPage {
                 ${icon(this.showToken ? mdiEyeOff : mdiEye)}
               </button>
             </div>
-            <span class="hint"
+            <span class="hint" id="token-hint"
               >Find it in System Bridge's settings, or with
               <code>system-bridge client token</code>.</span
             >
             ${
               tokenError === undefined
                 ? nothing
-                : html`<span class="error-text">${tokenError}</span>`
+                : html`<span class="error-text" id="token-error" role="alert"
+                    >${tokenError}</span
+                  >`
             }
           </div>
           <div class="row" style="justify-content: flex-end">
