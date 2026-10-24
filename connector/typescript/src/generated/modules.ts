@@ -1139,7 +1139,7 @@ export const SystemData = Schema.Struct({
   version_latest: Schema.NullOr(Schema.String),
   version_newer_available: Schema.NullOr(Schema.Boolean),
   device_info: Schema.NullOr(DeviceInfo),
-  failed_units: Schema.Array(SystemFailedUnit),
+  failed_units: Schema.NullOr(Schema.Array(SystemFailedUnit)),
   idle_time: Schema.NullOr(Schema.Finite),
   locked: Schema.NullOr(Schema.Boolean),
 });

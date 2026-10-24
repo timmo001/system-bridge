@@ -69,7 +69,7 @@ type SystemData struct {
 	VersionNewerAvailable *bool        `json:"version_newer_available" mapstructure:"version_newer_available"`
 	DeviceInfo            *DeviceInfo  `json:"device_info" mapstructure:"device_info"`
 	// FailedUnits are the failed systemd units, or nil without systemd
-	FailedUnits []SystemFailedUnit `json:"failed_units" mapstructure:"failed_units"`
+	FailedUnits *[]SystemFailedUnit `json:"failed_units" mapstructure:"failed_units"`
 	// IdleTime is the seconds since the user's last input
 	IdleTime *uint64 `json:"idle_time" mapstructure:"idle_time"`
 	Locked   *bool   `json:"locked" mapstructure:"locked"`

@@ -44,8 +44,8 @@ type listedUnit struct {
 
 // GetFailedUnits returns the failed system and user units, or nil when
 // neither systemd manager can be reached
-func GetFailedUnits() []types.SystemFailedUnit {
-	var units []types.SystemFailedUnit
+func GetFailedUnits() *[]types.SystemFailedUnit {
+	units := []types.SystemFailedUnit{}
 	reached := false
 	for _, scope := range unitScopes {
 		conn, err := scope.connect()
@@ -69,13 +69,10 @@ func GetFailedUnits() []types.SystemFailedUnit {
 	if !reached {
 		return nil
 	}
-	if units == nil {
-		units = []types.SystemFailedUnit{}
-	}
 	slices.SortStableFunc(units, func(a, b types.SystemFailedUnit) int {
 		return cmp.Or(cmp.Compare(a.Scope, b.Scope), cmp.Compare(a.Name, b.Name))
 	})
-	return units
+	return &units
 }
 
 func listFailedUnits(conn *dbus.Conn) ([]listedUnit, error) {
