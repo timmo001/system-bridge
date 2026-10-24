@@ -48,9 +48,16 @@ The same payloads are pushed over the WebSocket API as [`DATA_UPDATE`](/api/webs
 | --- | --- | --- |
 | `is_charging` | boolean | Whether the battery is charging. |
 | `percentage` | number | Charge level, 0-100. |
-| `time_remaining` | number | Estimated time remaining, in seconds. |
+| `time_remaining` | number | Estimated time until full when charging, or until empty when discharging, in seconds. |
+| `state` | string | `charging`, `discharging`, `full`, `not_charging`, `empty`, or `unknown`. |
+| `power` | number | Power going into or out of the battery, in watts. |
+| `voltage` | number | Battery voltage, in volts. |
+| `ac_connected` | boolean | Whether mains or USB power is connected. |
+| `batteries` | array | Every battery, including connected devices such as a wireless mouse. |
 
-All fields are `null` when no battery is present.
+The top-level battery fields are for the first system battery, and are `null` when there isn't one. `ac_connected` is `null` when the system doesn't report a power supply, as on most desktops, and on macOS.
+
+Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `state`, `percentage`, `time_remaining`, `power`, and `voltage`. On Windows and macOS, batteries are named `BAT0`, `BAT1` and so on, and connected devices usually aren't listed.
 
 ### `cpu`
 
