@@ -29,6 +29,7 @@ The program runs directly, not through a shell, so pipes, `&&` and variables suc
 
 - **Web client**: select **Run** next to the command. When it finishes, the exit code shows under it, with anything the command printed.
 - **API**: send [`COMMAND_EXECUTE`](/api/websocket/system/#execute-command) with the command's ID. You get `COMMAND_EXECUTING` straight away, then `COMMAND_COMPLETED` with the exit code and output once it finishes.
+- **MCP**: an assistant can list the commands with [`system_bridge_list_commands`](/api/mcp/#system_bridge_list_commands) and run one with [`system_bridge_run_command`](/api/mcp/#system_bridge_run_command), which waits for it to finish.
 
 A command can run for up to 5 minutes before System Bridge stops it. Output over 1 MB is cut off. Stopping System Bridge also stops any commands still running.
 

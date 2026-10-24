@@ -28,7 +28,7 @@ Authorization: Bearer YOUR_TOKEN
 A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
 
 :::caution
-The token provides access to MCP tools that can read system data, send notifications, and control media. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
+The token provides access to MCP tools that can read system data, send notifications, control media and displays, and run the commands in your allowlist. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
 :::
 
 ## Home Assistant
@@ -154,6 +154,37 @@ Example arguments:
 { "id": "HDMI-A-2", "brightness": 40 }
 ```
 
+### `system_bridge_get_history`
+
+Get the recent readings System Bridge keeps for its charts, the same as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event. Each series is a list of `{ "time", "value" }` samples, with `time` in Unix milliseconds.
+
+- `since` (optional): Only readings after this time, in Unix milliseconds. Omit it for the whole history.
+- `modules` (optional): Only these modules' readings: `cpu`, `memory`, `battery`, `system`, `networks`, `disks`, `gpus` or `sensors`. Omit it for every module.
+
+Example arguments:
+
+```json
+{ "since": 1792857600000, "modules": ["cpu", "memory"] }
+```
+
+### `system_bridge_list_commands`
+
+List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments` and `workingDir`. It takes no arguments.
+
+### `system_bridge_run_command`
+
+Run a command from the allowlist and wait for it to finish. It returns the command's `exitCode`, `stdout` and `stderr`, and `error` when it couldn't run or timed out. Commands time out after 5 minutes.
+
+- `id` (required): The command's `id` from `system_bridge_list_commands`.
+
+Example arguments:
+
+```json
+{ "id": "backup" }
+```
+
+Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake.
+
 ## Troubleshooting
 
 ### Connection refused
@@ -173,3 +204,4 @@ Example arguments:
 - Check backend logs for the underlying error.
 - For `system_bridge_get_data`, use valid module names (see the table above).
 - For `system_bridge_media_control`, actions must be uppercase (`PLAY`, `PAUSE`, and so on).
+- For `system_bridge_run_command`, the `id` must be in the allowlist. Get the ids from `system_bridge_list_commands`.
