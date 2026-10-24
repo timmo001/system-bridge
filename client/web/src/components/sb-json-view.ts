@@ -201,7 +201,11 @@ export class SbJsonView extends LitElement {
           EditorState.readOnly.of(true),
           lineNumbers(),
           foldGutter(),
-          search({ top: true }),
+          search({
+            top: true,
+            scrollToMatch: (range) =>
+              EditorView.scrollIntoView(range, { y: "center" }),
+          }),
           // Keeps the buttons clear of the search panel above the data
           EditorView.updateListener.of((update) => {
             update.view.requestMeasure({
