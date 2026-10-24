@@ -1,12 +1,11 @@
 import { mdiCodeJson, mdiViewDashboardOutline } from "@mdi/js";
 import type { ModuleName } from "@timmo001/effect-system-bridge";
-import { html, type TemplateResult } from "lit";
+import { css, html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 import "~/components/sb-card";
 import "~/components/sb-data-table";
 import "~/components/sb-gauge";
-import "~/components/sb-json-view";
 import "~/components/sb-meter";
 import "~/components/sb-segmented";
 import "~/components/sb-timeseries";
@@ -71,7 +70,20 @@ const placeholder = html`
  */
 @customElement("page-module")
 export class PageModule extends SbPage {
-  static override styles = [shared, pageStyles, dashboardStyles];
+  static override styles = [
+    shared,
+    pageStyles,
+    dashboardStyles,
+    css`
+      /* The JSON view loads when first shown; hold its space until then */
+      sb-json-view:not(:defined) {
+        display: block;
+        height: var(--sb-json-height, 36rem);
+        border: 1px solid var(--sb-color-border);
+        border-radius: var(--sb-radius-l);
+      }
+    `,
+  ];
 
   @property({ attribute: false }) location!: LocationOf<"module">;
 
@@ -98,6 +110,9 @@ export class PageModule extends SbPage {
 
     // Wait for this module only, so a slow one elsewhere doesn't hold it up
     if (!settled.has(module)) return placeholder;
+
+    // The editor behind the JSON view is large, so it loads only when needed
+    if (view === "json") void import("~/components/sb-json-view");
 
     return view === "json"
       ? html`<sb-json-view
