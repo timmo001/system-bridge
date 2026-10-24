@@ -38,6 +38,8 @@ import {
   Directory,
   DirectoryRequest,
   DiscordControl,
+  DiscordSetup,
+  DiscordSetupRequest,
   Empty,
   type EventType,
   FileInfo,
@@ -127,6 +129,13 @@ export interface Interface {
   readonly discordControl: (
     control: DiscordControl,
   ) => Effect.Effect<void, WebSocketError>;
+  /** How far Discord is set up. */
+  readonly getDiscordSetup: Effect.Effect<DiscordSetup, WebSocketError>;
+  /** Saves the Discord application to authorize as, then connects. */
+  readonly updateDiscordSetup: (credentials: {
+    readonly clientId: string;
+    readonly clientSecret: Redacted.Redacted;
+  }) => Effect.Effect<DiscordSetup, WebSocketError>;
   readonly sendNotification: (
     notification: Notification,
   ) => Effect.Effect<void, WebSocketError>;
@@ -661,6 +670,32 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const getDiscordSetup = call(
+    "GET_DISCORD_SETUP",
+    "DISCORD_SETUP",
+    Empty,
+    {},
+    DiscordSetup,
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.getDiscordSetup"));
+
+  const updateDiscordSetup = Effect.fn(
+    "SystemBridgeWebSocket.updateDiscordSetup",
+  )(function* (credentials: {
+    readonly clientId: string;
+    readonly clientSecret: Redacted.Redacted;
+  }) {
+    return yield* call(
+      "UPDATE_DISCORD_SETUP",
+      "DISCORD_SETUP_UPDATED",
+      DiscordSetupRequest,
+      {
+        clientId: credentials.clientId,
+        clientSecret: Redacted.value(credentials.clientSecret),
+      },
+      DiscordSetup,
+    );
+  });
+
   const sendNotification = Effect.fn("SystemBridgeWebSocket.sendNotification")(
     function* (notification: Notification) {
       yield* call(
@@ -711,6 +746,8 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     keyboardText,
     mediaControl,
     discordControl,
+    getDiscordSetup,
+    updateDiscordSetup,
     sendNotification,
     open,
     power,

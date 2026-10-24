@@ -101,6 +101,47 @@ async def unauthorised_response(_: web.Request):
     )
 
 
+POWER_RESPONSES = {
+    EventType.POWER_SLEEP: EventType.POWER_SLEEPING,
+    EventType.POWER_HIBERNATE: EventType.POWER_HIBERNATING,
+    EventType.POWER_RESTART: EventType.POWER_RESTARTING,
+    EventType.POWER_SHUTDOWN: EventType.POWER_SHUTTINGDOWN,
+    EventType.POWER_LOCK: EventType.POWER_LOCKING,
+    EventType.POWER_LOGOUT: EventType.POWER_LOGGINGOUT,
+}
+
+
+def discord_setup_response(request: Request) -> Response:
+    """Reply to a Discord setup request, accepting only the test secret."""
+    if request.event == EventType.UPDATE_DISCORD_SETUP and (
+        request.data.get("clientSecret") != "test-secret"
+    ):
+        return Response(
+            id=request.id,
+            type=EventType.ERROR,
+            subtype="BAD_REQUEST",
+            data=None,
+            message="client secret is required",
+        )
+    return Response(
+        id=request.id,
+        type=(
+            EventType.DISCORD_SETUP
+            if request.event == EventType.GET_DISCORD_SETUP
+            else EventType.DISCORD_SETUP_UPDATED
+        ),
+        data={
+            "configured": True,
+            "clientId": "100000000000000001",
+            "redirectUri": "http://localhost",
+            "running": True,
+            "connected": False,
+            "authenticated": False,
+            "error": "",
+        },
+    )
+
+
 async def process_request(request: Request) -> Response:
     """Process a request."""
     _LOGGER.info("Event: %s", request.event)
@@ -240,6 +281,8 @@ async def process_request(request: Request) -> Response:
             type=EventType.DISCORD_CONTROLLED,
             data=request.data,
         )
+    if request.event in (EventType.GET_DISCORD_SETUP, EventType.UPDATE_DISCORD_SETUP):
+        return discord_setup_response(request)
     if request.event == EventType.NOTIFICATION:
         return Response(
             id=request.id,
@@ -252,40 +295,10 @@ async def process_request(request: Request) -> Response:
             type=EventType.OPENED,
             data=request.data,
         )
-    if request.event == EventType.POWER_SLEEP:
+    if request.event in POWER_RESPONSES:
         return Response(
             id=request.id,
-            type=EventType.POWER_SLEEPING,
-            data=request.data,
-        )
-    if request.event == EventType.POWER_HIBERNATE:
-        return Response(
-            id=request.id,
-            type=EventType.POWER_HIBERNATING,
-            data=request.data,
-        )
-    if request.event == EventType.POWER_RESTART:
-        return Response(
-            id=request.id,
-            type=EventType.POWER_RESTARTING,
-            data=request.data,
-        )
-    if request.event == EventType.POWER_SHUTDOWN:
-        return Response(
-            id=request.id,
-            type=EventType.POWER_SHUTTINGDOWN,
-            data=request.data,
-        )
-    if request.event == EventType.POWER_LOCK:
-        return Response(
-            id=request.id,
-            type=EventType.POWER_LOCKING,
-            data=request.data,
-        )
-    if request.event == EventType.POWER_LOGOUT:
-        return Response(
-            id=request.id,
-            type=EventType.POWER_LOGGINGOUT,
+            type=POWER_RESPONSES[request.event],
             data=request.data,
         )
     if request.event == EventType.COMMAND_EXECUTE:

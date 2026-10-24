@@ -205,6 +205,8 @@ class Discord:
     screenshare: bool | None = None
     sounds: list[DiscordSound] | None = None
     notification: DiscordNotification | None = None
+    # Why the last attempt to connect or sign in failed, until the next one
+    error: str | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""

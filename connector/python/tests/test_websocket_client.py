@@ -3,6 +3,7 @@
 import asyncio
 from dataclasses import asdict
 from json import dumps
+import logging
 from unittest.mock import Mock, patch
 
 import aiohttp
@@ -21,6 +22,7 @@ from systembridgeconnector.exceptions import (
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
+from systembridgeconnector.models.discord_setup import DiscordSetup
 from systembridgeconnector.models.keyboard_key import KeyboardKey
 from systembridgeconnector.models.keyboard_text import KeyboardText
 from systembridgeconnector.models.media_control import MediaControl
@@ -451,6 +453,48 @@ async def test_discord_control(
         )
         == snapshot
     )
+
+
+@pytest.mark.asyncio
+async def test_get_discord_setup(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    setup = await mock_websocket_client_listening.get_discord_setup(
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(setup, DiscordSetup)
+    assert setup.configured is True
+    assert setup.clientId == "100000000000000001"
+
+
+@pytest.mark.asyncio
+async def test_update_discord_setup(
+    caplog: pytest.LogCaptureFixture,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    caplog.set_level(logging.DEBUG)
+    setup = await mock_websocket_client_listening.update_discord_setup(
+        "100000000000000001",
+        "test-secret",
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(setup, DiscordSetup)
+    assert setup.running is True
+    # The fake backend logs what it receives, so only check the client's logs
+    assert not any(
+        "test-secret" in record.getMessage()
+        for record in caplog.records
+        if record.name.startswith("systembridgeconnector")
+    )
+
+    with pytest.raises(BadRequestException, match="client secret is required"):
+        await mock_websocket_client_listening.update_discord_setup(
+            "100000000000000001",
+            "",
+            request_id=REQUEST_ID,
+        )
 
 
 @pytest.mark.asyncio

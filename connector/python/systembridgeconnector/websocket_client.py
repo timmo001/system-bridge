@@ -22,6 +22,7 @@ from .exceptions import (
 from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
 from .models.discord_control import DiscordControl
+from .models.discord_setup import DiscordSetup, RedactedStr
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_control import MediaControl
@@ -328,6 +329,43 @@ class WebSocketClient(Base):
         )
 
         return Settings(**self._response_dict(response, "update settings"))
+
+    async def get_discord_setup(
+        self,
+        request_id: str | None = None,
+    ) -> DiscordSetup:
+        """Get how far Discord is set up."""
+        self._logger.info("Getting Discord setup")
+        response = await self.send_message(
+            EventType.GET_DISCORD_SETUP,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.DISCORD_SETUP,
+        )
+
+        return DiscordSetup(**self._response_dict(response, "Discord setup"))
+
+    async def update_discord_setup(
+        self,
+        client_id: str,
+        client_secret: str,
+        request_id: str | None = None,
+    ) -> DiscordSetup:
+        """Save the Discord application's credentials and reconnect.
+
+        The secret is redacted from the request in logs.
+        """
+        self._logger.info("Updating Discord setup")
+        response = await self.send_message(
+            EventType.UPDATE_DISCORD_SETUP,
+            request_id,
+            {"clientId": client_id, "clientSecret": RedactedStr(client_secret)},
+            wait_for_response=True,
+            response_type=EventType.DISCORD_SETUP_UPDATED,
+        )
+
+        return DiscordSetup(**self._response_dict(response, "update Discord setup"))
 
     def _response_dict(self, response: Response, name: str) -> dict[str, Any]:
         """Return a response's data, raising on an error, timeout or bad data."""
@@ -724,9 +762,11 @@ class WebSocketClient(Base):
                 is not None
             ):
                 future, response_type = response_tuple
-                if (
-                    response_type is not None
-                    and response_type == message[EventKey.TYPE]
+                # An error for this request answers it, rather than leaving it
+                # to time out
+                if response_type is not None and message[EventKey.TYPE] in (
+                    response_type,
+                    EventType.ERROR,
                 ):
                     response = Response(**message)
 

@@ -39,6 +39,8 @@ const BackendRequest = Schema.fromJsonString(
     event: Schema.String,
     data: Schema.Struct({
       modules: Schema.optionalKey(Schema.Array(Schema.String)),
+      clientId: Schema.optionalKey(Schema.String),
+      clientSecret: Schema.optionalKey(Schema.String),
     }),
   }),
 );
@@ -110,6 +112,24 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           type: "ERROR",
           subtype: "INVALID_ACTION",
           message: "Invalid action",
+        },
+      ];
+    case "UPDATE_DISCORD_SETUP":
+      return [
+        {
+          id,
+          type: "DISCORD_SETUP_UPDATED",
+          subtype: "NONE",
+          data: {
+            // Echoes whether the secret arrived unwrapped, without sending it
+            configured: request.data.clientSecret === "shh",
+            clientId: request.data.clientId ?? "",
+            redirectUri: "http://localhost",
+            running: true,
+            connected: false,
+            authenticated: false,
+            error: "",
+          },
         },
       ];
     case "VALIDATE_DIRECTORY":
@@ -237,6 +257,20 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(files).toEqual([]);
+  });
+
+  test("send the Discord secret unwrapped and decode the setup", async () => {
+    const setup = await run(
+      SystemBridgeWebSocket.use((ws) =>
+        ws.updateDiscordSetup({
+          clientId: "123456789012345678",
+          clientSecret: Redacted.make("shh"),
+        }),
+      ),
+    );
+
+    expect(setup.configured).toBe(true);
+    expect(setup.clientId).toBe("123456789012345678");
   });
 
   test("decode a validation result", async () => {

@@ -6,6 +6,7 @@ export const EventType = Schema.Literals([
   "GET_DATA",
   "GET_DIRECTORIES",
   "GET_DIRECTORY",
+  "GET_DISCORD_SETUP",
   "GET_DISK_MOUNTS",
   "GET_FILES",
   "GET_FILE",
@@ -26,6 +27,7 @@ export const EventType = Schema.Literals([
   "UNREGISTER_DATA_LISTENER",
   "DATA_UPDATE",
   "COMMAND_EXECUTE",
+  "UPDATE_DISCORD_SETUP",
   "UPDATE_SETTINGS",
   "VALIDATE_DIRECTORY",
 ]);
@@ -40,6 +42,8 @@ export const ResponseType = Schema.Literals([
   "DIRECTORY",
   "DISK_MOUNTS",
   "DISCORD_CONTROLLED",
+  "DISCORD_SETUP",
+  "DISCORD_SETUP_UPDATED",
   "FILES",
   "FILE",
   "KEYBOARD_KEY_PRESSED",
@@ -274,19 +278,85 @@ export type MediaAction = typeof MediaAction.Type;
 
 export const MediaControl = Schema.Struct({ action: MediaAction });
 
+export const DiscordAction = Schema.Literals([
+  "JOIN_VOICE_CHANNEL",
+  "LEAVE_VOICE_CHANNEL",
+  "OPEN_TEXT_CHANNEL",
+  "MUTE",
+  "UNMUTE",
+  "TOGGLE_MUTE",
+  "DEAFEN",
+  "UNDEAFEN",
+  "TOGGLE_DEAFEN",
+  "SET_INPUT_VOLUME",
+  "SET_INPUT_DEVICE",
+  "SET_OUTPUT_VOLUME",
+  "SET_OUTPUT_DEVICE",
+  "SET_VOICE_MODE",
+  "SET_VOICE_THRESHOLD",
+  "SET_PUSH_TO_TALK_DELAY",
+  "ENABLE_QOS",
+  "DISABLE_QOS",
+  "TOGGLE_QOS",
+  "ENABLE_SILENCE_WARNING",
+  "DISABLE_SILENCE_WARNING",
+  "TOGGLE_SILENCE_WARNING",
+  "MUTE_USER",
+  "UNMUTE_USER",
+  "TOGGLE_USER_MUTE",
+  "SET_USER_VOLUME",
+  "TOGGLE_VIDEO",
+  "TOGGLE_SCREENSHARE",
+  "PLAY_SOUND",
+]);
+
+export type DiscordAction = typeof DiscordAction.Type;
+
+/** The `mode` for `SET_VOICE_MODE`. */
+export const DiscordVoiceModeType = Schema.Literals([
+  "VOICE_ACTIVITY",
+  "PUSH_TO_TALK",
+]);
+
+export type DiscordVoiceModeType = typeof DiscordVoiceModeType.Type;
+
 export const DiscordControl = Schema.Struct({
-  action: Schema.String,
+  action: DiscordAction,
   channel_id: Schema.optionalKey(Schema.String),
   user_id: Schema.optionalKey(Schema.String),
   sound_id: Schema.optionalKey(Schema.String),
   value: Schema.optionalKey(Schema.NullOr(Schema.Finite)),
   device_id: Schema.optionalKey(Schema.String),
-  mode: Schema.optionalKey(Schema.String),
+  mode: Schema.optionalKey(DiscordVoiceModeType),
 });
 
 export interface DiscordControl extends Schema.Schema.Type<
   typeof DiscordControl
 > {}
+
+/**
+ * How far Discord is set up. The backend never sends the client secret back.
+ */
+export const DiscordSetup = Schema.Struct({
+  /** Valid credentials are saved. */
+  configured: Schema.Boolean,
+  clientId: Schema.String,
+  /** Must be registered as a redirect on the Discord application. */
+  redirectUri: Schema.String,
+  /** The Discord desktop app can be reached. */
+  running: Schema.Boolean,
+  connected: Schema.Boolean,
+  authenticated: Schema.Boolean,
+  /** The latest problem with the credentials or the session, or empty. */
+  error: Schema.String,
+});
+
+export interface DiscordSetup extends Schema.Schema.Type<typeof DiscordSetup> {}
+
+export const DiscordSetupRequest = Schema.Struct({
+  clientId: Schema.String,
+  clientSecret: Schema.String,
+});
 
 export const OpenTarget = Schema.Union([
   Schema.Struct({ path: Schema.String }),
