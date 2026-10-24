@@ -65,7 +65,9 @@ Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `s
 | --- | --- | --- |
 | `count` | number | Number of logical cores. |
 | `frequency` | object | Current, min, and max frequency in MHz (`current`, `min`, `max`). |
-| `load_average` | number | System load average. Unix only; `null` on Windows. |
+| `load_average` | number | System load average over 1 minute. Windows has no load average, so there it's an estimate from the processor queue length. |
+| `load_average_5` | number | System load average over 5 minutes, estimated the same way on Windows. |
+| `load_average_15` | number | System load average over 15 minutes, estimated the same way on Windows. |
 | `per_cpu` | array | Per-core entries with `id`, `frequency`, `power`, `times`, `times_percent`, `usage`, and `voltage`. |
 | `power` | number | Package power draw, in watts. |
 | `stats` | object | Counters: `ctx_switches`, `interrupts`, `soft_interrupts`, `syscalls`. |
@@ -168,8 +170,13 @@ Returns an array of objects, one per GPU. Full metrics require an NVIDIA GPU; ot
 | `memory_used` | number | Used memory. |
 | `memory_total` | number | Total memory. |
 | `power_usage` | number | Power draw in watts. |
+| `power_limit` | number | The power limit in watts, from `nvidia-smi` or amdgpu's power cap. |
 | `temperature` | number | Temperature in degrees Celsius. |
-| `fan_speed` | number | Fan speed. Not currently reported (`null`). |
+| `fan_speed` | number | Fan speed in RPM. On Linux, from AMD cards' hwmon. |
+| `fan_speed_percent` | number | Fan speed as a percentage of its maximum. On Linux, from `nvidia-smi` or AMD cards' hwmon. |
+| `encoder_load` | number | Video encoder use as a percentage. NVIDIA on Linux only. |
+| `decoder_load` | number | Video decoder use as a percentage. NVIDIA on Linux only. |
+| `performance_state` | string | The performance state, from `P0` (fastest) to `P12`. NVIDIA on Linux only. |
 
 ### `media`
 
