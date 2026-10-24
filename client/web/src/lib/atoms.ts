@@ -438,6 +438,27 @@ export const setBluetoothPower = Atom.fn((powered: boolean, get) =>
   ),
 );
 
+/**
+ * Why the Bluetooth actions that failed last time failed: turning the adapter
+ * on or off, and each listed device's. Takes the addresses joined with
+ * newlines, so the family can cache it.
+ */
+export const bluetoothFailures = Atom.family((addresses: string) =>
+  Atom.make((get) =>
+    [
+      get(setBluetoothPower),
+      ...addresses
+        .split("\n")
+        .filter((address) => address.length > 0)
+        .map((address) => get(bluetoothAction(address))),
+    ].flatMap((result) => {
+      const outcome = actionResult(result, "");
+
+      return outcome?.success === false ? [outcome.message] : [];
+    }),
+  ),
+);
+
 export const discordControl = Atom.fn((control: DiscordControl, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.discordControl(control)),

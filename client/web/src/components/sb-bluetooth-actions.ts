@@ -12,12 +12,7 @@ import "./sb-menu-button";
 import type { MenuItem } from "./sb-menu-button";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
-import {
-  actionResult,
-  type BluetoothAction,
-  bluetoothAction,
-  registry,
-} from "~/lib/atoms";
+import { type BluetoothAction, bluetoothAction, registry } from "~/lib/atoms";
 
 /**
  * A menu of a paired device's actions: connect, disconnect or forget it.
@@ -30,9 +25,6 @@ export class SbBluetoothActions extends LitElement {
     css`
       :host {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: var(--sb-space-1);
       }
 
       [popover] {
@@ -177,8 +169,6 @@ export class SbBluetoothActions extends LitElement {
 
     const value = this.#action.value;
 
-    const result = actionResult(value, "");
-
     return html`
       <sb-menu-button
         icon-only
@@ -188,11 +178,6 @@ export class SbBluetoothActions extends LitElement {
         .items=${this.#items(device)}
         @menu-select=${this.#onSelect}
       ></sb-menu-button>
-      ${
-        result?.success === false
-          ? html`<span class="error-text" role="alert">${result.message}</span>`
-          : nothing
-      }
       <div
         id="${this.#id}-confirm"
         popover

@@ -23,6 +23,7 @@ import type {
 import { html, nothing } from "lit";
 
 import "~/components/sb-bluetooth-actions";
+import "~/components/sb-bluetooth-alert";
 import "~/components/sb-bluetooth-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import { icon } from "~/components/shared-styles";
@@ -99,8 +100,11 @@ export const bluetoothDashboard = ({ data }: DashboardContext) => {
     bluetoothDevice(device, powered),
   );
 
+  const addresses = bluetooth.devices.map((device) => device.address);
+
   return html`
     <div class="dashboard">
+      <sb-bluetooth-alert .addresses=${addresses}></sb-bluetooth-alert>
       <sb-card
         heading="Paired devices"
         subheading="${connected.length} of ${bluetooth.devices.length} connected"
