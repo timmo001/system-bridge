@@ -322,7 +322,7 @@ QtObject {
     var range = cpu.frequency && present(cpu.frequency.min) && present(cpu.frequency.max) && num(cpu.frequency.max) > 0
       ? frequency(cpu.frequency.min) + " to " + frequency(cpu.frequency.max) : ""
     reading(rows, "frequency", "", "󰓅", "Frequency", join([frequency(cpu.frequency ? cpu.frequency.current : null), range]))
-    reading(rows, "load", "", "󰓅", "Load average", num(cpu.load_average) === null ? "" : num(cpu.load_average).toFixed(2))
+    reading(rows, "load", "", "󰓅", "Load average", join([cpu.load_average, cpu.load_average_5, cpu.load_average_15].map(function(load) { return num(load) === null ? "" : num(load).toFixed(2) })))
     reading(rows, "temperature", "", temperatureIcon, "Temperature", temperature(cpu.temperature))
     reading(rows, "power", "", "󱐋", "Power", watts(cpu.power))
     reading(rows, "voltage", "", "󱐋", "Voltage", num(cpu.voltage) === null ? "" : num(cpu.voltage).toFixed(2) + " V")
@@ -365,9 +365,11 @@ QtObject {
       if (num(gpu.memory_total) > 0)
         rows.push(row({ key: key + "-memory", section: section, icon: memoryIcon, primaryText: "Memory", secondaryText: mebibytes(gpu.memory_used) + " of " + mebibytes(gpu.memory_total), meter: num(gpu.memory_used) / num(gpu.memory_total) * 100, meterLevel: level(num(gpu.memory_used) / num(gpu.memory_total) * 100, 80, 90) }))
       reading(rows, key + "-clocks", section, "󰓅", "Clocks", join([gpu.core_clock ? "core " + frequency(gpu.core_clock) : "", gpu.memory_clock ? "memory " + frequency(gpu.memory_clock) : ""]))
-      reading(rows, key + "-power", section, "󱐋", "Power", watts(gpu.power_usage))
+      reading(rows, key + "-power", section, "󱐋", "Power", join([watts(gpu.power_usage), num(gpu.power_limit) !== null ? "limit " + watts(gpu.power_limit) : ""]))
       reading(rows, key + "-temperature", section, temperatureIcon, "Temperature", temperature(gpu.temperature))
-      reading(rows, key + "-fan", section, "󰈐", "Fan", percent(gpu.fan_speed))
+      reading(rows, key + "-fan", section, "󰈐", "Fan", join([num(gpu.fan_speed) === null ? "" : Math.round(num(gpu.fan_speed)) + " RPM", percent(gpu.fan_speed_percent)]))
+      reading(rows, key + "-video", section, "󰕧", "Video", join([num(gpu.encoder_load) !== null ? "encode " + percent(gpu.encoder_load) : "", num(gpu.decoder_load) !== null ? "decode " + percent(gpu.decoder_load) : ""]))
+      reading(rows, key + "-state", section, "󰓅", "Performance state", text(gpu.performance_state))
     }
     return rows
   }
