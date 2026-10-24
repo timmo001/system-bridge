@@ -26,6 +26,8 @@ class DiskIOCounters:
     write_bytes: int
     read_time: int
     write_time: int
+    read_bytes_rate: float | None = None
+    write_bytes_rate: float | None = None
 
 
 @filter_unexpected_fields

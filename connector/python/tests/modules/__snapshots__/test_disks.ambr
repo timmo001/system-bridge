@@ -5,9 +5,11 @@
       Disk(
         io_counters=DiskIOCounters(
           read_bytes=1,
+          read_bytes_rate=7.5,
           read_count=3,
           read_time=5,
           write_bytes=2,
+          write_bytes_rate=8.5,
           write_count=4,
           write_time=6,
         ),
@@ -34,9 +36,11 @@
     ]),
     io_counters=DiskIOCounters(
       read_bytes=1,
+      read_bytes_rate=9.5,
       read_count=3,
       read_time=5,
       write_bytes=2,
+      write_bytes_rate=10.5,
       write_count=4,
       write_time=6,
     ),
@@ -46,9 +50,11 @@
   dict({
     'io_counters': dict({
       'read_bytes': 1,
+      'read_bytes_rate': 7.5,
       'read_count': 3,
       'read_time': 5,
       'write_bytes': 2,
+      'write_bytes_rate': 8.5,
       'write_count': 4,
       'write_time': 6,
     }),
@@ -77,9 +83,11 @@
   Disk(
     io_counters=DiskIOCounters(
       read_bytes=1,
+      read_bytes_rate=7.5,
       read_count=3,
       read_time=5,
       write_bytes=2,
+      write_bytes_rate=8.5,
       write_count=4,
       write_time=6,
     ),
@@ -144,9 +152,11 @@
       dict({
         'io_counters': dict({
           'read_bytes': 1,
+          'read_bytes_rate': 7.5,
           'read_count': 3,
           'read_time': 5,
           'write_bytes': 2,
+          'write_bytes_rate': 8.5,
           'write_count': 4,
           'write_time': 6,
         }),
@@ -173,9 +183,11 @@
     ]),
     'io_counters': dict({
       'read_bytes': 1,
+      'read_bytes_rate': 9.5,
       'read_count': 3,
       'read_time': 5,
       'write_bytes': 2,
+      'write_bytes_rate': 10.5,
       'write_count': 4,
       'write_time': 6,
     }),
@@ -187,9 +199,11 @@
       Disk(
         io_counters=DiskIOCounters(
           read_bytes=1,
+          read_bytes_rate=7.5,
           read_count=3,
           read_time=5,
           write_bytes=2,
+          write_bytes_rate=8.5,
           write_count=4,
           write_time=6,
         ),
@@ -216,9 +230,11 @@
     ]),
     io_counters=DiskIOCounters(
       read_bytes=1,
+      read_bytes_rate=9.5,
       read_count=3,
       read_time=5,
       write_bytes=2,
+      write_bytes_rate=10.5,
       write_count=4,
       write_time=6,
     ),

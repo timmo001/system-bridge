@@ -37,6 +37,8 @@ FIXTURE_DISKS = Disks(
                 write_count=4,
                 read_time=5,
                 write_time=6,
+                read_bytes_rate=7.5,
+                write_bytes_rate=8.5,
             ),
             temperature=45.5,
         )
@@ -48,5 +50,7 @@ FIXTURE_DISKS = Disks(
         write_count=4,
         read_time=5,
         write_time=6,
+        read_bytes_rate=9.5,
+        write_bytes_rate=10.5,
     ),
 )
