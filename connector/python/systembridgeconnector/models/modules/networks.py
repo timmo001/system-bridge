@@ -63,6 +63,17 @@ class NetworkIO:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class NetworkWifi:
+    """Network Wi-Fi."""
+
+    ssid: str | None = None
+    signal: int | None = None
+    signal_percent: int | None = None
+    link_rate: float | None = None
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class Network:
     """Network."""
 
@@ -70,6 +81,7 @@ class Network:
     addresses: list[NetworkAddress] | None = None
     stats: NetworkStats | None = None
     io: NetworkIO | None = None
+    wifi: NetworkWifi | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
@@ -89,6 +101,10 @@ class Network:
         if isinstance(self.io, dict):
             io = self.io
             self.io = NetworkIO(**io)
+
+        if isinstance(self.wifi, dict):
+            wifi = self.wifi
+            self.wifi = NetworkWifi(**wifi)
 
 
 @filter_unexpected_fields

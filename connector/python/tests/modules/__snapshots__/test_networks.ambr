@@ -58,6 +58,12 @@
           mtu=2,
           speed=1,
         ),
+        wifi=NetworkWifi(
+          link_rate=866.7,
+          signal=-55,
+          signal_percent=90,
+          ssid='ssid',
+        ),
       ),
     ]),
   )
@@ -121,6 +127,12 @@
           'mtu': 2,
           'speed': 1,
         }),
+        'wifi': dict({
+          'link_rate': 866.7,
+          'signal': -55,
+          'signal_percent': 90,
+          'ssid': 'ssid',
+        }),
       }),
     ]),
   })
@@ -183,6 +195,12 @@
           isup=True,
           mtu=2,
           speed=1,
+        ),
+        wifi=NetworkWifi(
+          link_rate=866.7,
+          signal=-55,
+          signal_percent=90,
+          ssid='ssid',
         ),
       ),
     ]),

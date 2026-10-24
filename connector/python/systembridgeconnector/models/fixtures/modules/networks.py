@@ -7,6 +7,7 @@ from systembridgeconnector.models.modules.networks import (
     NetworkIO,
     Networks,
     NetworkStats,
+    NetworkWifi,
 )
 
 FIXTURE_NETWORKS = Networks(
@@ -65,6 +66,12 @@ FIXTURE_NETWORKS = Networks(
                 dropout=18,
                 bytes_sent_rate=19.5,
                 bytes_recv_rate=20.5,
+            ),
+            wifi=NetworkWifi(
+                ssid="ssid",
+                signal=-55,
+                signal_percent=90,
+                link_rate=866.7,
             ),
         )
     ],
