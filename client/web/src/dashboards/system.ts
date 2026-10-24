@@ -10,6 +10,7 @@ import type {
   DesktopWindow,
   DesktopWorkspace,
   DiscordCallMember,
+  HyprlandBind,
   HyprlandData,
   HyprlandDisplay,
   HyprlandGlobalShortcut,
@@ -663,20 +664,115 @@ const inputRows = (hyprland: HyprlandData): InputRow[] => [
   })),
 ];
 
-const shortcutColumns = (() => {
-  const column = dataTableColumns<HyprlandGlobalShortcut>();
+const mouseButtons = new Map([
+  ["mouse:272", "Left click"],
+  ["mouse:273", "Right click"],
+  ["mouse:274", "Middle click"],
+  ["mouse_down", "Scroll down"],
+  ["mouse_left", "Scroll left"],
+  ["mouse_right", "Scroll right"],
+  ["mouse_up", "Scroll up"],
+]);
+
+/** A bind's keys as you'd press them, such as SUPER + SHIFT + V. */
+const bindKeys = (bind: HyprlandBind) =>
+  [...bind.modifiers, mouseButtons.get(bind.key) ?? bind.key].join(" + ");
+
+const bindColumns = (() => {
+  const column = dataTableColumns<HyprlandBind>();
 
   return column.columns([
-    column.accessor("description", { header: "Description" }),
-    column.accessor("name", {
+    column.accessor(bindKeys, {
+      id: "keys",
+      header: "Keys",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.accessor((bind) => bind.description ?? "", {
+      id: "description",
+      header: "Description",
+    }),
+    column.accessor(
+      (bind) =>
+        bind.dispatcher === null
+          ? "Lua"
+          : [bind.dispatcher, bind.argument].filter(Boolean).join(" "),
+      {
+        id: "action",
+        header: "Action",
+        cell: ({ getValue }) =>
+          html`<span class="mono xsmall">${getValue()}</span>`,
+      },
+    ),
+    column.accessor((bind) => bind.submap ?? "", {
+      id: "submap",
+      header: "Submap",
+    }),
+    column.display({
+      id: "flags",
+      header: "Flags",
+      cell: ({ row }) => {
+        const bind = row.original;
+
+        return html`<span class="row wrap">
+          ${bind.locked ? html`<span class="chip">Lock screen</span>` : nothing}
+          ${bind.release ? html`<span class="chip">On release</span>` : nothing}
+          ${bind.repeat ? html`<span class="chip">Repeats</span>` : nothing}
+          ${bind.long_press ? html`<span class="chip">Long press</span>` : nothing}
+          ${bind.non_consuming ? html`<span class="chip">Passes through</span>` : nothing}
+        </span>`;
+      },
+    }),
+  ]);
+})();
+
+const bindId = (bind: HyprlandBind, index: number) =>
+  `${bind.submap ?? ""}:${bindKeys(bind)}:${index}`;
+
+interface ShortcutRow {
+  readonly shortcut: HyprlandGlobalShortcut;
+  readonly keys: string;
+}
+
+const shortcutColumns = (() => {
+  const column = dataTableColumns<ShortcutRow>();
+
+  return column.columns([
+    column.accessor((row) => row.shortcut.description, {
+      id: "description",
+      header: "Description",
+    }),
+    column.accessor((row) => row.shortcut.name, {
+      id: "name",
       header: "Name",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.accessor("keys", {
+      header: "Keys",
       cell: ({ getValue }) =>
         html`<span class="mono xsmall">${getValue()}</span>`,
     }),
   ]);
 })();
 
-const shortcutId = (shortcut: HyprlandGlobalShortcut) => shortcut.name;
+const shortcutId = (row: ShortcutRow) => row.shortcut.name;
+
+/**
+ * Each shortcut with the keys bound to it. Only binds that use the global
+ * dispatcher say which shortcut they trigger, which Lua binds don't.
+ */
+const shortcutRows = (hyprland: HyprlandData): ShortcutRow[] =>
+  hyprland.global_shortcuts.map((shortcut) => ({
+    shortcut,
+    keys: hyprland.binds
+      .filter(
+        (bind) =>
+          bind.dispatcher === "global" && bind.argument === shortcut.name,
+      )
+      .map(bindKeys)
+      .join(", "),
+  }));
 
 // Where the tables below start; they keep their own changes
 const displayTableState = {
@@ -703,6 +799,15 @@ const shortcutTableState = {
   pageSize: undefined,
 };
 
+// Unsorted, so binds keep the config's order
+const bindTableState = {
+  filter: "",
+  sort: undefined,
+  descending: false,
+  page: 1,
+  pageSize: undefined,
+};
+
 const hyprlandCards = (hyprland: HyprlandData) => {
   const displays = Object.entries(hyprland.displays).map(([id, display]) => ({
     id,
@@ -710,6 +815,8 @@ const hyprlandCards = (hyprland: HyprlandData) => {
   }));
 
   const inputs = inputRows(hyprland);
+
+  const shortcuts = shortcutRows(hyprland);
 
   return html`
     <sb-card class="half" heading="Hyprland">
@@ -747,7 +854,7 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         label="Global shortcuts"
         search-placeholder="Search shortcuts"
         .columns=${shortcutColumns}
-        .data=${hyprland.global_shortcuts}
+        .data=${shortcuts}
         .rowId=${shortcutId}
         .state=${shortcutTableState}
       ></sb-data-table>
@@ -762,6 +869,21 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         .rowId=${inputId}
         .wide=${["details", "name"]}
         .state=${inputTableState}
+      ></sb-data-table>
+    </sb-card>
+    <sb-card
+      heading="Key bindings"
+      subheading="${hyprland.binds.length} in the config"
+    >
+      <sb-data-table
+        local
+        label="Key bindings"
+        search-placeholder="Search key bindings"
+        .columns=${bindColumns}
+        .data=${hyprland.binds}
+        .rowId=${bindId}
+        .wide=${["action", "description"]}
+        .state=${bindTableState}
       ></sb-data-table>
     </sb-card>
   `;
