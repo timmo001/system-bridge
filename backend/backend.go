@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -62,19 +63,38 @@ func New(settings *settings.Settings, dataStore *data.DataStore, token string, w
 	}
 }
 
+// spaFileServer serves the web client. Files are served as they are. Any
+// other path is a page of the client, such as /data/cpu, so it gets the index
+// page at that same URL and the client's router shows the page; a reload or a
+// shared link lands where it was. Paths that look like files, or are under
+// /api/, get a 404 instead, so a missing script isn't answered with a page.
 func spaFileServer(staticFS fs.FS, indexFile string) http.HandlerFunc {
 	fileServer := http.FileServer(http.FS(staticFS))
 	return func(w http.ResponseWriter, r *http.Request) {
-		requestedPath := strings.TrimPrefix(r.URL.Path, "/")
-		if requestedPath == "" {
-			requestedPath = indexFile
+		requestedPath := strings.TrimPrefix(path.Clean(r.URL.Path), "/")
+
+		if requestedPath != "" {
+			if info, err := fs.Stat(staticFS, requestedPath); err == nil && !info.IsDir() {
+				// Vite names built assets by their content, so they never change
+				if strings.HasPrefix(requestedPath, "assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				} else {
+					w.Header().Set("Cache-Control", "no-cache")
+				}
+				fileServer.ServeHTTP(w, r)
+				return
+			}
+
+			if strings.HasPrefix(requestedPath, "api/") || path.Ext(requestedPath) != "" {
+				http.NotFound(w, r)
+				return
+			}
 		}
-		_, err := staticFS.Open(requestedPath)
-		if err != nil {
-			// If not found, serve index.html
-			r.URL.Path = "/" + indexFile
-		}
-		fileServer.ServeHTTP(w, r)
+
+		// Serve the index without changing the URL. Rewriting the path to
+		// /index.html would make the file server redirect to the root.
+		w.Header().Set("Cache-Control", "no-cache")
+		http.ServeFileFS(w, r, staticFS, indexFile)
 	}
 }
 
