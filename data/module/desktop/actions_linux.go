@@ -4,6 +4,7 @@ package desktop
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strconv"
@@ -171,6 +172,49 @@ func SetKeyboardLayout(ctx context.Context, layout string) error {
 	return hyprlandSend(ctx, "switchxkblayout current "+strconv.Itoa(index))
 }
 
+// hyprlandDirections are Hyprland's names for each direction
+var hyprlandDirections = map[types.HyprlandDirection]string{
+	types.HyprlandDirectionDown:  "d",
+	types.HyprlandDirectionLeft:  "l",
+	types.HyprlandDirectionRight: "r",
+	types.HyprlandDirectionUp:    "u",
+}
+
+// HyprlandDispatch runs one of the named dispatchers on the focused window,
+// as its bind would. Moving focus and swapping take a direction.
+func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, direction types.HyprlandDirection) error {
+	data, err := hyprlandCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	var command hyprlandCommand
+	switch dispatcher {
+	case types.HyprlandDispatcherCentreWindow:
+		command = hyprlandCommand{lua: "hl.dsp.window.center()", classic: "centerwindow"}
+	case types.HyprlandDispatcherCycleNextWindow:
+		command = hyprlandCommand{lua: "hl.dsp.window.cycle_next()", classic: "cyclenext"}
+	case types.HyprlandDispatcherCyclePreviousWindow:
+		command = hyprlandCommand{lua: "hl.dsp.window.cycle_next({ next = false })", classic: "cyclenext prev"}
+	case types.HyprlandDispatcherMoveFocus, types.HyprlandDispatcherSwapWindow:
+		short, ok := hyprlandDirections[direction]
+		if !ok {
+			return fmt.Errorf("direction %q: %w", direction, ErrNotFound)
+		}
+		if dispatcher == types.HyprlandDispatcherMoveFocus {
+			command = hyprlandCommand{lua: "hl.dsp.focus({ direction = " + luaString(short) + " })", classic: "movefocus " + short}
+		} else {
+			command = hyprlandCommand{lua: "hl.dsp.window.swap({ direction = " + luaString(short) + " })", classic: "swapwindow " + short}
+		}
+	case types.HyprlandDispatcherToggleGroup:
+		command = hyprlandCommand{lua: "hl.dsp.group.toggle()", classic: "togglegroup"}
+	case types.HyprlandDispatcherToggleSplit:
+		command = hyprlandCommand{lua: `hl.dsp.layout("togglesplit")`, classic: "layoutmsg togglesplit"}
+	default:
+		return fmt.Errorf("dispatcher %q: %w", dispatcher, ErrNotFound)
+	}
+	return hyprlandDispatch(ctx, data, command)
+}
+
 // HyprlandMoveWindow moves a window to a workspace, leaving the focus where
 // it is. The workspace is one listed, or the number of a new one.
 func HyprlandMoveWindow(ctx context.Context, id string, workspace string) error {
@@ -261,6 +305,82 @@ func HyprlandReloadConfig(ctx context.Context) error {
 		return err
 	}
 	return hyprlandSend(ctx, "reload")
+}
+
+func omarchyCurrent(ctx context.Context) (*types.OmarchyData, error) {
+	data, err := current(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if data.Omarchy == nil {
+		return nil, fmt.Errorf("%w: %w", errNoOmarchy, ErrUnsupported)
+	}
+	return data.Omarchy, nil
+}
+
+// omarchyRun opens, closes or toggles a shell plugin's panel
+func omarchyRun(ctx context.Context, plugin string, action types.OmarchyAction, payload string) error {
+	switch action {
+	case types.OmarchyActionClose:
+		_, err := omarchyCall(ctx, "shell", "hide", plugin)
+		return err
+	case types.OmarchyActionOpen:
+		reply, err := omarchyCall(ctx, "shell", "summon", plugin, payload)
+		if err != nil {
+			return err
+		}
+		if reply != "ok" {
+			return fmt.Errorf("the Omarchy shell couldn't open %s", plugin)
+		}
+		return nil
+	case types.OmarchyActionToggle:
+		_, err := omarchyCall(ctx, "shell", "toggle", plugin, payload)
+		return err
+	}
+	return fmt.Errorf("action %q: %w", action, ErrNotFound)
+}
+
+// OmarchyMenu opens, closes or toggles the Omarchy menu at one of its
+// routes. Closing needs no route.
+func OmarchyMenu(ctx context.Context, id string, action types.OmarchyAction) error {
+	data, err := omarchyCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if action != types.OmarchyActionClose || id != "" {
+		// Like the menu, take an alias for its route, ignoring case and with
+		// underscores for hyphens
+		name := strings.ReplaceAll(strings.ToLower(id), "_", "-")
+		index := slices.IndexFunc(data.Menus, func(menu types.OmarchyMenu) bool { return menu.ID == name })
+		if index == -1 {
+			index = slices.IndexFunc(data.Menus, func(menu types.OmarchyMenu) bool {
+				return slices.ContainsFunc(menu.Aliases, func(alias string) bool {
+					return strings.ReplaceAll(strings.ToLower(alias), "_", "-") == name
+				})
+			})
+		}
+		if index == -1 {
+			return fmt.Errorf("menu %q: %w", id, ErrNotFound)
+		}
+		id = data.Menus[index].ID
+	}
+	payload, err := json.Marshal(map[string]string{"menu": id})
+	if err != nil {
+		return err
+	}
+	return omarchyRun(ctx, omarchyMenuPlugin, action, string(payload))
+}
+
+// OmarchyPanel opens, closes or toggles a shell plugin's panel or overlay
+func OmarchyPanel(ctx context.Context, id string, action types.OmarchyAction) error {
+	data, err := omarchyCurrent(ctx)
+	if err != nil {
+		return err
+	}
+	if !slices.ContainsFunc(data.Panels, func(panel types.OmarchyPanel) bool { return panel.ID == id }) {
+		return fmt.Errorf("panel %q: %w", id, ErrNotFound)
+	}
+	return omarchyRun(ctx, id, action, "{}")
 }
 
 func hyprlandCurrent(ctx context.Context) (*types.DesktopData, error) {

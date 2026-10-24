@@ -46,6 +46,26 @@ type HyprlandGlobalShortcutRequestData struct {
 	Name string `json:"name" mapstructure:"name"`
 }
 
+type HyprlandDispatchRequestData struct {
+	Dispatcher types.HyprlandDispatcher `json:"dispatcher" mapstructure:"dispatcher"`
+	Direction  types.HyprlandDirection  `json:"direction" mapstructure:"direction"`
+}
+
+type OmarchyRequestData struct {
+	ID     string              `json:"id" mapstructure:"id"`
+	Action types.OmarchyAction `json:"action" mapstructure:"action"`
+}
+
+func validateOmarchyAction(action types.OmarchyAction) string {
+	switch action {
+	case types.OmarchyActionClose, types.OmarchyActionOpen, types.OmarchyActionToggle:
+		return ""
+	case "":
+		return "No action provided"
+	}
+	return "Action must be open, close or toggle"
+}
+
 func RegisterDesktopHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventDesktopCloseWindow, event.ResponseTypeDesktopWindowClosed, "Window closed",
 		func(request DesktopWindowRequestData) string { return required(request.ID, "No window id provided") },
@@ -88,6 +108,13 @@ func RegisterDesktopHandlers(router *event.MessageRouter, dataStore *data.DataSt
 }
 
 func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandDispatch, event.ResponseTypeHyprlandDispatched, "Dispatched",
+		func(request HyprlandDispatchRequestData) string {
+			return required(string(request.Dispatcher), "No dispatcher provided")
+		},
+		func(ctx context.Context, request HyprlandDispatchRequestData) error {
+			return desktop.HyprlandDispatch(ctx, request.Dispatcher, request.Direction)
+		})
 	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventHyprlandMoveWindow, event.ResponseTypeHyprlandWindowMoved, "Window moved",
 		func(request HyprlandMoveWindowRequestData) string {
 			if request.Workspace == "" {
@@ -122,6 +149,32 @@ func RegisterHyprlandHandlers(router *event.MessageRouter, dataStore *data.DataS
 				Floating: request.Floating,
 				Pinned:   request.Pinned,
 			})
+		})
+}
+
+func RegisterOmarchyHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventOmarchyMenu, event.ResponseTypeOmarchyMenuChanged, "Menu changed",
+		func(request OmarchyRequestData) string {
+			if message := validateOmarchyAction(request.Action); message != "" {
+				return message
+			}
+			if request.Action == types.OmarchyActionClose {
+				return ""
+			}
+			return required(request.ID, "No menu id provided")
+		},
+		func(ctx context.Context, request OmarchyRequestData) error {
+			return desktop.OmarchyMenu(ctx, request.ID, request.Action)
+		})
+	registerAction(router, dataStore, types.ModuleDesktop, desktopTimeout, event.EventOmarchyPanel, event.ResponseTypeOmarchyPanelChanged, "Panel changed",
+		func(request OmarchyRequestData) string {
+			if message := validateOmarchyAction(request.Action); message != "" {
+				return message
+			}
+			return required(request.ID, "No panel id provided")
+		},
+		func(ctx context.Context, request OmarchyRequestData) error {
+			return desktop.OmarchyPanel(ctx, request.ID, request.Action)
 		})
 }
 

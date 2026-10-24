@@ -71,6 +71,11 @@ type getHistoryInput struct {
 	Modules []types.ModuleName `json:"modules,omitempty"`
 }
 
+type hyprlandDispatchInput struct {
+	Dispatcher string `json:"dispatcher"`
+	Direction  string `json:"direction,omitempty"`
+}
+
 type hyprlandGlobalShortcutInput struct {
 	Name string `json:"name"`
 }
@@ -94,6 +99,11 @@ type notificationInput struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
 	Icon    string `json:"icon,omitempty"`
+}
+
+type omarchyInput struct {
+	ID     string `json:"id,omitempty"`
+	Action string `json:"action"`
 }
 
 type runCommandInput struct {

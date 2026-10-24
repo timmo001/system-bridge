@@ -77,6 +77,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   `sensors`, and `system`.
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
+- `system_bridge_hyprland_dispatch` runs a named Hyprland dispatcher, such as
+  moving focus or toggling the split, on the focused window.
 - `system_bridge_hyprland_move_window` moves a window to a workspace on
   Hyprland.
 - `system_bridge_hyprland_reload_config` reloads Hyprland's config.
@@ -87,6 +89,8 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 - `system_bridge_list_commands` lists the command allowlist.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
   `PREVIOUS`, `STOP`, `VOLUME_DOWN`, or `VOLUME_UP`.
+- `system_bridge_omarchy_menu` opens, closes or toggles the Omarchy menu.
+- `system_bridge_omarchy_panel` opens, closes or toggles an Omarchy shell panel.
 - `system_bridge_run_command` runs a command from the allowlist and waits for
   its result through `command.Run`.
 - `system_bridge_send_notification` sends a desktop notification with required

@@ -155,6 +155,23 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleGetHistory)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_dispatch",
+		Description: "Run a Hyprland dispatcher on the focused window, as its bind would",
+		InputSchema: objectSchema(map[string]any{
+			"dispatcher": map[string]any{
+				"type":        "string",
+				"description": "The dispatcher. centre_window only acts on floating windows.",
+				"enum":        []string{"centre_window", "cycle_next_window", "cycle_previous_window", "move_focus", "swap_window", "toggle_group", "toggle_split"},
+			},
+			"direction": map[string]any{
+				"type":        "string",
+				"description": "Direction for move_focus and swap_window",
+				"enum":        []string{"down", "left", "right", "up"},
+			},
+		}, []string{"dispatcher"}),
+	}, eventTool[hyprlandDispatchInput](handlers, event.EventHyprlandDispatch))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_hyprland_move_window",
 		Description: "Move a window to a workspace on Hyprland, leaving the focus where it is",
 		InputSchema: objectSchema(map[string]any{
@@ -207,6 +224,29 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{"action"}),
 	}, handlers.handleMediaControl)
+
+	omarchyAction := map[string]any{
+		"type":        "string",
+		"description": "Whether to open, close or toggle it",
+		"enum":        []string{"close", "open", "toggle"},
+	}
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_omarchy_menu",
+		Description: "Open, close or toggle the Omarchy menu at one of its routes. Get ids from the desktop module's omarchy.menus.",
+		InputSchema: objectSchema(map[string]any{
+			"id":     map[string]any{"type": "string", "description": "Menu id from omarchy.menus, such as root. Not needed to close it."},
+			"action": omarchyAction,
+		}, []string{"action"}),
+	}, eventTool[omarchyInput](handlers, event.EventOmarchyMenu))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_omarchy_panel",
+		Description: "Open, close or toggle an Omarchy shell panel or overlay. Get ids from the desktop module's omarchy.panels.",
+		InputSchema: objectSchema(map[string]any{
+			"id":     map[string]any{"type": "string", "description": "Panel id from omarchy.panels"},
+			"action": omarchyAction,
+		}, []string{"id", "action"}),
+	}, eventTool[omarchyInput](handlers, event.EventOmarchyPanel))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_run_command",

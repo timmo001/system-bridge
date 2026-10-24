@@ -667,6 +667,7 @@ func main() {
 							return nil
 						},
 					},
+					omarchyCommand(),
 					{
 						Name:  "open",
 						Usage: "Open the web client",

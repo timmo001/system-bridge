@@ -43,6 +43,27 @@ export const DisplayPowerState = Schema.Literals([
 
 export type DisplayPowerState = typeof DisplayPowerState.Type;
 
+export const HyprlandDirection = Schema.Literals([
+  "down",
+  "left",
+  "right",
+  "up",
+]);
+
+export type HyprlandDirection = typeof HyprlandDirection.Type;
+
+export const HyprlandDispatcher = Schema.Literals([
+  "centre_window",
+  "cycle_next_window",
+  "cycle_previous_window",
+  "move_focus",
+  "swap_window",
+  "toggle_group",
+  "toggle_split",
+]);
+
+export type HyprlandDispatcher = typeof HyprlandDispatcher.Type;
+
 export const HyprlandFullscreenMode = Schema.Literals([
   "fullscreen",
   "maximised",
@@ -78,6 +99,10 @@ export const ModuleName = Schema.Literals([
 ]);
 
 export type ModuleName = typeof ModuleName.Type;
+
+export const OmarchyAction = Schema.Literals(["close", "open", "toggle"]);
+
+export type OmarchyAction = typeof OmarchyAction.Type;
 
 export const RunMode = Schema.Literals(["standalone"]);
 
@@ -416,6 +441,57 @@ export const HyprlandData = Schema.Struct({
 
 export interface HyprlandData extends Schema.Schema.Type<typeof HyprlandData> {}
 
+export const OmarchyMenu = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  aliases: Schema.Array(Schema.String),
+});
+
+export interface OmarchyMenu extends Schema.Schema.Type<typeof OmarchyMenu> {}
+
+export const OmarchyPanel = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+});
+
+export interface OmarchyPanel extends Schema.Schema.Type<typeof OmarchyPanel> {}
+
+export const OmarchyArgument = Schema.Struct({
+  name: Schema.String,
+  type: Schema.String,
+});
+
+export interface OmarchyArgument extends Schema.Schema.Type<
+  typeof OmarchyArgument
+> {}
+
+export const OmarchyFunction = Schema.Struct({
+  name: Schema.String,
+  arguments: Schema.Array(OmarchyArgument),
+  returns: Schema.String,
+});
+
+export interface OmarchyFunction extends Schema.Schema.Type<
+  typeof OmarchyFunction
+> {}
+
+export const OmarchyTarget = Schema.Struct({
+  name: Schema.String,
+  functions: Schema.Array(OmarchyFunction),
+});
+
+export interface OmarchyTarget extends Schema.Schema.Type<
+  typeof OmarchyTarget
+> {}
+
+export const OmarchyData = Schema.Struct({
+  menus: Schema.Array(OmarchyMenu),
+  panels: Schema.Array(OmarchyPanel),
+  targets: Schema.Array(OmarchyTarget),
+});
+
+export interface OmarchyData extends Schema.Schema.Type<typeof OmarchyData> {}
+
 export const DesktopData = Schema.Struct({
   compositor: DesktopCompositor,
   focused_window: Schema.NullOr(Schema.String),
@@ -424,6 +500,7 @@ export const DesktopData = Schema.Struct({
   windows: Schema.Array(DesktopWindow),
   workspaces: Schema.Array(DesktopWorkspace),
   hyprland: Schema.NullOr(HyprlandData),
+  omarchy: Schema.NullOr(OmarchyData),
 });
 
 export interface DesktopData extends Schema.Schema.Type<typeof DesktopData> {}

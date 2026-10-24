@@ -20,6 +20,7 @@ type DesktopData struct {
 	Windows          []DesktopWindow    `json:"windows" mapstructure:"windows"`
 	Workspaces       []DesktopWorkspace `json:"workspaces" mapstructure:"workspaces"`
 	Hyprland         *HyprlandData      `json:"hyprland" mapstructure:"hyprland"` // Only on Hyprland
+	Omarchy          *OmarchyData       `json:"omarchy" mapstructure:"omarchy"`   // Only while the Omarchy shell runs
 }
 
 // DesktopKeyboard is the active keyboard layout
@@ -212,4 +213,76 @@ type HyprlandWindow struct {
 type HyprlandWorkspace struct {
 	Layout     *string `json:"layout" mapstructure:"layout"` // dwindle, master, scrolling or monocle
 	Persistent bool    `json:"persistent" mapstructure:"persistent"`
+}
+
+// HyprlandDispatcher is a Hyprland dispatcher System Bridge can run
+type HyprlandDispatcher string
+
+const (
+	HyprlandDispatcherCentreWindow        HyprlandDispatcher = "centre_window" // Floating windows only
+	HyprlandDispatcherCycleNextWindow     HyprlandDispatcher = "cycle_next_window"
+	HyprlandDispatcherCyclePreviousWindow HyprlandDispatcher = "cycle_previous_window"
+	HyprlandDispatcherMoveFocus           HyprlandDispatcher = "move_focus"  // Takes a direction
+	HyprlandDispatcherSwapWindow          HyprlandDispatcher = "swap_window" // Takes a direction
+	HyprlandDispatcherToggleGroup         HyprlandDispatcher = "toggle_group"
+	HyprlandDispatcherToggleSplit         HyprlandDispatcher = "toggle_split"
+)
+
+// HyprlandDirection is a direction for a dispatcher
+type HyprlandDirection string
+
+const (
+	HyprlandDirectionDown  HyprlandDirection = "down"
+	HyprlandDirectionLeft  HyprlandDirection = "left"
+	HyprlandDirectionRight HyprlandDirection = "right"
+	HyprlandDirectionUp    HyprlandDirection = "up"
+)
+
+// OmarchyData is what the Omarchy shell can open, and the IPC targets its
+// plugins answer to
+type OmarchyData struct {
+	Menus   []OmarchyMenu   `json:"menus" mapstructure:"menus"`
+	Panels  []OmarchyPanel  `json:"panels" mapstructure:"panels"`
+	Targets []OmarchyTarget `json:"targets" mapstructure:"targets"`
+}
+
+// OmarchyAction is what to do with a panel or menu
+type OmarchyAction string
+
+const (
+	OmarchyActionClose  OmarchyAction = "close"
+	OmarchyActionOpen   OmarchyAction = "open"
+	OmarchyActionToggle OmarchyAction = "toggle"
+)
+
+// OmarchyMenu is a route of the Omarchy menu, such as root or trigger.capture
+type OmarchyMenu struct {
+	ID      string   `json:"id" mapstructure:"id"`
+	Name    string   `json:"name" mapstructure:"name"`
+	Aliases []string `json:"aliases" mapstructure:"aliases"` // Other names that open it, such as capture
+}
+
+// OmarchyPanel is a panel or overlay of an enabled shell plugin
+type OmarchyPanel struct {
+	ID   string `json:"id" mapstructure:"id"`
+	Name string `json:"name" mapstructure:"name"`
+}
+
+// OmarchyTarget is an IPC target and the functions it answers to
+type OmarchyTarget struct {
+	Name      string            `json:"name" mapstructure:"name"`
+	Functions []OmarchyFunction `json:"functions" mapstructure:"functions"`
+}
+
+// OmarchyFunction is an IPC function
+type OmarchyFunction struct {
+	Name      string            `json:"name" mapstructure:"name"`
+	Arguments []OmarchyArgument `json:"arguments" mapstructure:"arguments"`
+	Returns   string            `json:"returns" mapstructure:"returns"` // void, string, int, bool or real
+}
+
+// OmarchyArgument is an IPC function's argument
+type OmarchyArgument struct {
+	Name string `json:"name" mapstructure:"name"`
+	Type string `json:"type" mapstructure:"type"` // string, int, bool or real
 }

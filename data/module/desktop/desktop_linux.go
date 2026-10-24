@@ -123,6 +123,7 @@ func (h *hyprland) refresh(ctx context.Context, titles bool, read bool) (*types.
 	}
 
 	data := buildHyprland(*h.state, *h.config, h.events, titles)
+	data.Omarchy = omarchySource.get(ctx)
 	h.data, h.titles = &data, titles
 	return h.data, nil
 }
