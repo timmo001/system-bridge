@@ -4,6 +4,13 @@ export * from "./errors.js";
 
 export * from "./generated/modules.js";
 
+export {
+  historyCsvHeader,
+  historyRows,
+  historyToCsv,
+  type HistoryRow,
+} from "./history.js";
+
 export * from "./protocol.js";
 
 export {
