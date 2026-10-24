@@ -100,7 +100,10 @@ export class PageModule extends SbPage {
     if (!settled.has(module)) return placeholder;
 
     return view === "json"
-      ? html`<sb-json-view .data=${data[module] ?? null}></sb-json-view>`
+      ? html`<sb-json-view
+          label="${moduleInfo[module].label} data as JSON"
+          .data=${data[module] ?? null}
+        ></sb-json-view>`
       : dashboards[module]({
           data,
           history: this.#history.value,

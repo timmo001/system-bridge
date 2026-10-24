@@ -85,6 +85,9 @@ const format = (data: JsonData): string => {
 export class SbJsonView extends LitElement {
   @property({ attribute: false }) data: JsonData = null;
 
+  /** What the data is, for screen readers. */
+  @property() label = "JSON data";
+
   @state() private copied = false;
 
   @query(".editor") private container?: HTMLElement;
@@ -108,6 +111,7 @@ export class SbJsonView extends LitElement {
           editorTheme,
           highlightStyle,
           EditorView.lineWrapping,
+          EditorView.contentAttributes.of({ "aria-label": this.label }),
         ],
       }),
       parent: this.container,

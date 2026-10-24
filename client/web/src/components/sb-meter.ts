@@ -98,6 +98,13 @@ export class SbMeter extends LitElement {
         aria-valuemin="0"
         aria-valuemax=${this.max}
         aria-valuenow=${known ? (this.value ?? 0) : nothing}
+        aria-valuetext=${
+          this.display && this.display !== "-"
+            ? this.display
+            : known
+              ? `${Math.round(percent)}%`
+              : "Unknown"
+        }
       >
         <div
           class="fill"

@@ -267,6 +267,7 @@ export class PageSettingsAppearance extends SbPage {
         class="theme"
         type="button"
         value=${theme.id}
+        aria-label=${themeLabel(theme)}
         aria-pressed=${chosen ? "true" : "false"}
         @click=${this.#onThemeClick}
       >

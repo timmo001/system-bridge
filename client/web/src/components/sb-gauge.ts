@@ -163,6 +163,16 @@ export class SbGauge extends LitElement {
         aria-valuemin=${this.min}
         aria-valuemax=${this.max}
         aria-valuenow=${known ? (this.value ?? 0) : nothing}
+        aria-valuetext=${
+          known
+            ? [
+                `${this.display || Math.round(this.value ?? 0)}${this.unit}`,
+                this.caption === "-" ? "" : this.caption,
+              ]
+                .filter(Boolean)
+                .join(", ")
+            : "Unknown"
+        }
         aria-label=${this.label || nothing}
       >
         <svg viewBox="0 0 100 100" aria-hidden="true">

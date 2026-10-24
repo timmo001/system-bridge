@@ -7,15 +7,12 @@ import {
   mdiSkipPrevious,
   mdiStop,
   mdiVolumeMinus,
-  mdiVolumeHigh,
-  mdiVolumeLow,
-  mdiVolumeMedium,
   mdiVolumeOff,
   mdiVolumePlus,
 } from "@mdi/js";
 import { MediaAction } from "@timmo001/effect-system-bridge";
 import { Schema } from "effect";
-import { css, html } from "lit";
+import { css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 import "~/components/sb-card";
@@ -49,18 +46,6 @@ const statusLabel = (status: string | null | undefined) =>
   status
     ? `${status.charAt(0).toUpperCase()}${status.slice(1).toLowerCase()}`
     : "Idle";
-
-/** A speaker showing the volume level, from 0 to 1. */
-const volumeIcon = (volume: number | null | undefined) =>
-  volume === null || volume === undefined
-    ? mdiVolumeHigh
-    : volume <= 0
-      ? mdiVolumeOff
-      : volume < 0.34
-        ? mdiVolumeLow
-        : volume < 0.67
-          ? mdiVolumeMedium
-          : mdiVolumeHigh;
 
 const placeholder = html`<span
   class="skeleton"
@@ -170,7 +155,7 @@ export class PageMedia extends SbPage {
          end, whatever their widths */
       .controls {
         display: grid;
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         grid-template-areas: "stop transport levels";
         align-items: center;
         gap: var(--sb-space-3) var(--sb-space-4);
@@ -198,82 +183,77 @@ export class PageMedia extends SbPage {
       }
 
       .controls .volume {
-        min-width: 4.5ch;
-        margin-inline-start: var(--sb-space-1);
+        min-width: 4ch;
+        margin-inline-start: var(--sb-space-0-5);
       }
 
-      /* The volume shows its level. Hover or focus opens the controls in a
-         panel above it, so nothing in the row moves. Touch screens can't
-         hover, so they show the controls in the row instead */
+      /* The volume shows its level, or a muted speaker. Hovering or
+         focusing it turns it into a rounded group that grows to the left
+         with the controls; the level stays put under the pointer. Touch
+         screens can't hover, so they always show the group */
       .controls .levels {
-        position: relative;
+        padding: var(--sb-space-1) var(--sb-space-2) var(--sb-space-1)
+          var(--sb-space-1);
+        border: 1px solid transparent;
+        border-radius: var(--sb-radius-pill);
+        transition:
+          background var(--sb-duration-fast) var(--sb-easing),
+          border-color var(--sb-duration-fast) var(--sb-easing);
+      }
+
+      .controls .volume {
+        display: inline-flex;
+        justify-content: center;
       }
 
       .controls .level {
-        display: grid;
-        place-items: center;
-        width: 3rem;
-        aspect-ratio: 1;
-        color: var(--sb-color-muted);
-        --sb-icon-size: 1.5rem;
+        display: inline-flex;
+        --sb-icon-size: 1.25rem;
+      }
+
+      .controls .reveal .button {
+        width: 2rem;
       }
 
       .controls .reveal {
-        position: absolute;
-        right: 0;
-        bottom: 100%;
-        z-index: 1;
-        /* Bridges the gap, so the pointer can reach the panel */
-        padding-bottom: var(--sb-space-2);
-        visibility: hidden;
+        display: flex;
+        gap: var(--sb-space-0-5);
+        max-width: 0;
+        overflow: hidden;
         opacity: 0;
-        translate: 0 0.25rem;
         transition:
-          opacity var(--sb-duration-fast) var(--sb-easing),
-          translate var(--sb-duration-fast) var(--sb-easing),
-          visibility var(--sb-duration-fast);
+          max-width var(--sb-duration-normal) var(--sb-easing),
+          opacity var(--sb-duration-normal) var(--sb-easing);
       }
 
-      .controls .reveal-panel {
-        display: flex;
-        gap: var(--sb-space-1);
-        padding: var(--sb-space-1);
-        background: var(--sb-color-raised);
-        border: 1px solid var(--sb-color-border);
-        border-radius: var(--sb-radius-pill);
-        box-shadow: var(--sb-shadow-m);
+      .controls .levels:hover,
+      .controls .levels:focus-within {
+        background: var(--sb-color-sunken);
+        border-color: var(--sb-color-border);
       }
 
       .controls .levels:hover .reveal,
       .controls .levels:focus-within .reveal {
-        visibility: visible;
+        max-width: 8rem;
         opacity: 1;
-        translate: 0 0;
       }
 
       @media (hover: none) {
+        .controls .levels {
+          background: var(--sb-color-sunken);
+          border-color: var(--sb-color-border);
+        }
+
         .controls .reveal {
-          position: static;
-          padding: 0;
-          visibility: visible;
+          max-width: none;
           opacity: 1;
-          translate: none;
-        }
-
-        .controls .reveal-panel {
-          padding: 0;
-          background: none;
-          border: 0;
-          box-shadow: none;
-        }
-
-        .controls .level {
-          display: none;
         }
       }
 
-      /* Playback gets a row of its own, the rest share the one under it */
-      @media (max-width: 40rem) {
+      /* Below full width there isn't room for the open volume beside
+         playback, so playback gets a row of its own and the rest share the
+         one under it */
+      @media (max-width: 60rem) {
         .controls {
           grid-template-columns: auto 1fr;
           grid-template-areas:
@@ -345,7 +325,11 @@ export class PageMedia extends SbPage {
   #button(
     action: MediaAction,
     path: string,
-    options: { readonly disabled?: boolean; readonly main?: boolean } = {},
+    options: {
+      readonly disabled?: boolean;
+      readonly main?: boolean;
+      readonly small?: boolean;
+    } = {},
   ) {
     const pending = this.#control.value.waiting && this.sent === action;
 
@@ -355,7 +339,7 @@ export class PageMedia extends SbPage {
 
     // A main button that can't be used is greyed, like the others
     return html`<button
-      class="button round icon-only large ${options.main ? "main" : ""} ${options.main && !disabled ? "filled" : "plain"}"
+      class="button round icon-only ${options.small ? "" : "large"} ${options.main ? "main" : ""} ${options.main && !disabled ? "filled" : "plain"}"
       type="button"
       aria-label=${actionLabels[action]}
       title=${actionLabels[action]}
@@ -389,13 +373,22 @@ export class PageMedia extends SbPage {
 
     return html`
       <sb-card>
-        <div class="player">
+        <div class="player" role="region" aria-label="Player">
           ${
             media?.thumbnail
-              ? html`<img class="art" src=${media.thumbnail} alt="" />`
-              : html`<div class="art">${icon(mdiMusicNote)}</div>`
+              ? html`<img
+                  class="art"
+                  src=${media.thumbnail}
+                  alt=${media.album_title ? `Artwork for ${media.album_title}` : "Artwork"}
+                />`
+              : html`<div class="art" aria-hidden="true">
+                  ${icon(mdiMusicNote)}
+                </div>`
           }
-          <span class="chip status ${playing ? "success" : ""}"
+          <span
+            class="chip status ${playing ? "success" : ""}"
+            role="status"
+            aria-label="Player status: ${statusLabel(media?.status)}"
             >${statusLabel(media?.status)}</span
           >
           <div class="info">
@@ -416,10 +409,15 @@ export class PageMedia extends SbPage {
                 aria-valuemin="0"
                 aria-valuemax=${duration ?? 0}
                 aria-valuenow=${Math.round(position ?? 0)}
+                aria-valuetext=${
+                  position === null || duration === null
+                    ? "Nothing playing"
+                    : `${formatDuration(position)} of ${formatDuration(duration)}`
+                }
               >
                 <span style="width: ${progress ?? 0}%"></span>
               </div>
-              <span class="times muted xsmall tabular">
+              <span class="times muted xsmall tabular" aria-hidden="true">
                 <span
                   >${position === null ? "-:--" : formatDuration(position)}</span
                 >
@@ -434,7 +432,7 @@ export class PageMedia extends SbPage {
                   disabled: media?.is_stop_enabled === false,
                 })}
               </span>
-              <span class="group transport">
+              <span class="group transport" role="group" aria-label="Playback">
                 ${this.#button("PREVIOUS", mdiSkipPrevious, {
                   disabled: media?.is_previous_enabled === false,
                 })}
@@ -453,22 +451,34 @@ export class PageMedia extends SbPage {
                   disabled: media?.is_next_enabled === false,
                 })}
               </span>
-              <span class="group levels">
-                <span class="level" aria-hidden="true"
-                  >${icon(volumeIcon(media?.volume))}</span
-                >
+              <span class="group levels" role="group" aria-label="Volume">
                 <span class="reveal">
-                  <span class="reveal-panel">
-                    ${this.#button("VOLUME_DOWN", mdiVolumeMinus)}
-                    ${this.#button("MUTE", mdiVolumeOff)}
-                    ${this.#button("VOLUME_UP", mdiVolumePlus)}
-                  </span>
+                  ${this.#button("VOLUME_DOWN", mdiVolumeMinus, { small: true })}
+                  ${this.#button("MUTE", mdiVolumeOff, { small: true })}
+                  ${this.#button("VOLUME_UP", mdiVolumePlus, { small: true })}
                 </span>
-                <span class="muted small tabular volume"
-                  >${
+                <!-- The volume, or a muted speaker in its place -->
+                <span
+                  class="muted small tabular volume"
+                  role="status"
+                  aria-label=${
                     media?.volume === null || media?.volume === undefined
-                      ? ""
-                      : formatPercent(media.volume * 100)
+                      ? "Volume unknown"
+                      : media.volume === 0
+                        ? "Muted"
+                        : `Volume ${formatPercent(media.volume * 100)}`
+                  }
+                  >${
+                    media?.volume === 0
+                      ? html`<span
+                          class="level"
+                          title="Muted"
+                          aria-hidden="true"
+                          >${icon(mdiVolumeOff)}</span
+                        >`
+                      : media?.volume === null || media?.volume === undefined
+                        ? nothing
+                        : formatPercent(media.volume * 100)
                   }</span
                 >
               </span>

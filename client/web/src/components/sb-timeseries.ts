@@ -208,12 +208,39 @@ export class SbTimeseries extends LitElement {
         >`,
     );
 
+    // What the chart shows, for screen readers: each line's latest reading
+    const latest = this.series
+      .flatMap((series) => {
+        const last = series.samples.at(-1);
+
+        return last === undefined
+          ? []
+          : [`${series.label} ${this.format(last.value)}`];
+      })
+      .join(", ");
+
     return html`
-      ${this.series.length > 1 ? html`<div class="legend">${legend}</div>` : nothing}
+      ${
+        this.series.length > 1
+          ? html`<div class="legend" aria-hidden="true">${legend}</div>`
+          : nothing
+      }
       ${
         hasData
-          ? html`<tanstack-chart .options=${this.#options}></tanstack-chart>`
-          : html`<div class="waiting small" style="height: ${this.height}px">
+          ? html`<div
+              role="img"
+              aria-label=${`${this.label}${latest ? `. Latest: ${latest}` : ""}`}
+            >
+              <tanstack-chart
+                aria-hidden="true"
+                .options=${this.#options}
+              ></tanstack-chart>
+            </div>`
+          : html`<div
+              class="waiting small"
+              role="status"
+              style="height: ${this.height}px"
+            >
               The graph starts with the next reading. System Bridge updates most
               data about once a minute.
             </div>`
