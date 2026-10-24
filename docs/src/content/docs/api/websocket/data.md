@@ -35,6 +35,20 @@ To receive data whenever it changes, send the `REGISTER_DATA_LISTENER` event wit
 
 The backend replies with a `DATA_LISTENER_REGISTERED` response, then sends a [`DATA_UPDATE`](#receiving-data) message whenever a subscribed module changes.
 
+Most modules refresh once a minute. These also update as soon as something changes on the system:
+
+| Module | Updates when | Platforms |
+| --- | --- | --- |
+| `audio` | An output or input's volume, mute or default changes | Linux, Windows |
+| `battery` | The charger is plugged in or removed, or a battery's charge or state changes | Linux, Windows |
+| `discord` | Anything changes in Discord | All |
+| `displays` | A display is connected or removed. On Linux, also when a built-in panel's brightness changes | Linux, Windows |
+| `media` | The track or playback state changes | Linux |
+| `networks` | An interface comes up or goes down, gains or loses an address, or joins or leaves a Wi-Fi network | Linux, Windows |
+| `system` | The session is locked or unlocked, or the user goes away (a minute without input) or comes back | Linux, Windows |
+
+Readings such as CPU, memory and network traffic are measurements, so they follow the refresh.
+
 To stop receiving updates, send the `UNREGISTER_DATA_LISTENER` event. It takes no data and responds with the `DATA_LISTENER_UNREGISTERED` type.
 
 ```json title="Request"
