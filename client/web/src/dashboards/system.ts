@@ -98,6 +98,15 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
           ${stat("Platform", system.platform)}
           ${stat("Power", system.power_usage === null ? "" : formatWatts(system.power_usage))}
           ${stat("Users", String(system.users.length))}
+          ${stat(
+            "Last input",
+            system.idle_time === null
+              ? ""
+              : system.idle_time < 60
+                ? "Just now"
+                : `${formatUptime(system.idle_time)} ago`,
+          )}
+          ${stat("Session", system.locked === null ? "" : system.locked ? "Locked" : "Unlocked")}
         </div>
       </sb-card>
       ${
