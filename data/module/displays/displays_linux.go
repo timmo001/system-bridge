@@ -3,6 +3,7 @@
 package displays
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,24 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func GetDisplays() ([]types.Display, error) {
+// GetDisplays lists displays from X11 when there's an X server, and from the
+// kernel's DRM connectors otherwise, such as under Wayland, then reads each
+// one's brightness and power state.
+func GetDisplays(ctx context.Context) ([]types.Display, error) {
+	displays, err := x11Displays()
+	if err != nil {
+		slog.Debug("X11 displays unavailable, reading DRM connectors", "error", err)
+		displays, err = drmDisplays(drmPath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	addControls(ctx, displays)
+	return displays, nil
+}
+
+func x11Displays() ([]types.Display, error) {
 	displays := make([]types.Display, 0)
 	var primaryDisplay *types.Display
 
@@ -92,6 +110,8 @@ func GetDisplays() ([]types.Display, error) {
 		// Get physical dimensions in millimeters
 		w := int(info.MmWidth)
 		h := int(info.MmHeight)
+		posX := int(x)
+		posY := int(y)
 		isPrimary := (output == primary.Output)
 		// Pixel clock in MHz (DotClock is Hz)
 		pixelClock := float64(mode.DotClock) / 1000000.0
@@ -101,8 +121,8 @@ func GetDisplays() ([]types.Display, error) {
 			Name:                 name,
 			ResolutionHorizontal: int(resolutionWidth),
 			ResolutionVertical:   int(resolutionHeight),
-			X:                    int(x),
-			Y:                    int(y),
+			X:                    &posX,
+			Y:                    &posY,
 			Width:                &w,
 			Height:               &h,
 			IsPrimary:            &isPrimary,

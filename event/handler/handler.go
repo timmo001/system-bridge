@@ -20,6 +20,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterGetSettingsHandler(router)
 	RegisterKeyboardKeypressHandler(router)
 	RegisterKeyboardTextHandler(router)
+	RegisterDisplayControlHandler(router, dataStore)
 	RegisterMediaControlHandler(router, dataStore)
 	RegisterNotificationHandler(router)
 	RegisterOpenHandler(router)

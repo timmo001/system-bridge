@@ -45,6 +45,25 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{"action"}),
 	}, handlers.handleMediaControl)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_display_control",
+		Description: "Set a display's brightness or power state over DDC/CI, or a built-in panel's backlight. Get display ids from the displays module.",
+		InputSchema: objectSchema(map[string]any{
+			"id": map[string]any{"type": "string", "description": "Display id from the displays module"},
+			"brightness": map[string]any{
+				"type":        "number",
+				"description": "Brightness in percent",
+				"minimum":     0,
+				"maximum":     100,
+			},
+			"power_state": map[string]any{
+				"type":        "string",
+				"description": "Power state to set",
+				"enum":        []string{"on", "standby", "suspend", "off"},
+			},
+		}, []string{"id"}),
+	}, handlers.handleDisplayControl)
 }
 
 func objectSchema(properties map[string]any, required []string) map[string]any {

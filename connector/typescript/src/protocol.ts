@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { ModuleName } from "./generated/modules.js";
+import { DisplayPowerState, ModuleName } from "./generated/modules.js";
 
 export const EventType = Schema.Literals([
   "EXIT_APPLICATION",
@@ -15,6 +15,7 @@ export const EventType = Schema.Literals([
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
   "DISCORD_CONTROL",
+  "DISPLAY_CONTROL",
   "MEDIA_CONTROL",
   "NOTIFICATION",
   "OPEN",
@@ -45,6 +46,7 @@ export const ResponseType = Schema.Literals([
   "DISCORD_CONTROLLED",
   "DISCORD_SETUP",
   "DISCORD_SETUP_UPDATED",
+  "DISPLAY_CONTROLLED",
   "FILES",
   "FILE",
   "HISTORY",
@@ -279,6 +281,19 @@ export const MediaAction = Schema.Literals([
 export type MediaAction = typeof MediaAction.Type;
 
 export const MediaControl = Schema.Struct({ action: MediaAction });
+
+/** Sets a display's brightness, its power state, or both. */
+export const DisplayControl = Schema.Struct({
+  /** The display's `id` from the displays module. */
+  id: Schema.String,
+  /** Percent. */
+  brightness: Schema.optionalKey(Schema.Finite),
+  power_state: Schema.optionalKey(DisplayPowerState),
+});
+
+export interface DisplayControl extends Schema.Schema.Type<
+  typeof DisplayControl
+> {}
 
 export const DiscordAction = Schema.Literals([
   "JOIN_VOICE_CHANNEL",

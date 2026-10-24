@@ -33,6 +33,12 @@ type mediaControlInput struct {
 	Action string `json:"action"`
 }
 
+type displayControlInput struct {
+	ID         string   `json:"id"`
+	Brightness *float64 `json:"brightness,omitempty"`
+	PowerState string   `json:"power_state,omitempty"`
+}
+
 func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, any, error) {
 	result := make(map[string]interface{})
 	for _, moduleName := range input.Modules {
@@ -74,6 +80,31 @@ func (h toolHandlers) handleMediaControl(_ context.Context, _ *sdkmcp.CallToolRe
 	message := event.Message{
 		ID:    generateID(),
 		Event: event.EventMediaControl,
+		Data:  arguments,
+	}
+
+	response := h.eventRouter.HandleMessage("mcp", message)
+	if response.Type == event.ResponseTypeError {
+		return nil, nil, fmt.Errorf("%s", response.Message)
+	}
+
+	return formatToolResult(map[string]interface{}{
+		"success": true,
+		"message": response.Message,
+	})
+}
+
+func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallToolRequest, input displayControlInput) (*sdkmcp.CallToolResult, any, error) {
+	arguments := map[string]interface{}{"id": input.ID}
+	if input.Brightness != nil {
+		arguments["brightness"] = *input.Brightness
+	}
+	if input.PowerState != "" {
+		arguments["power_state"] = input.PowerState
+	}
+	message := event.Message{
+		ID:    generateID(),
+		Event: event.EventDisplayControl,
 		Data:  arguments,
 	}
 

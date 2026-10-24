@@ -47,6 +47,7 @@ int isDisplayBuiltin(CGDirectDisplayID display) {
 */
 import "C"
 import (
+	"context"
 	"fmt"
 	"unsafe"
 
@@ -55,7 +56,7 @@ import (
 	"github.com/timmo001/system-bridge/types"
 )
 
-func GetDisplays() ([]types.Display, error) {
+func GetDisplays(_ context.Context) ([]types.Display, error) {
 	const maxDisplays = 16
 	displays := make([]types.Display, 0)
 
@@ -84,8 +85,8 @@ func GetDisplays() ([]types.Display, error) {
 			Name:                 fmt.Sprintf("Display %d", displayID),
 			ResolutionHorizontal: width,
 			ResolutionVertical:   height,
-			X:                    x,
-			Y:                    y,
+			X:                    &x,
+			Y:                    &y,
 			RefreshRate:          &refreshRate,
 			IsPrimary:            &isPrimary,
 		}

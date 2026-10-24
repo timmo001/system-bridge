@@ -26,6 +26,15 @@ export const DiskMountCategory = Schema.Literals([
 
 export type DiskMountCategory = typeof DiskMountCategory.Type;
 
+export const DisplayPowerState = Schema.Literals([
+  "on",
+  "standby",
+  "suspend",
+  "off",
+]);
+
+export type DisplayPowerState = typeof DisplayPowerState.Type;
+
 export const ModuleName = Schema.Literals([
   "battery",
   "cpu",
@@ -382,13 +391,15 @@ export const Display = Schema.Struct({
   name: Schema.String,
   resolution_horizontal: Schema.Finite,
   resolution_vertical: Schema.Finite,
-  x: Schema.Finite,
-  y: Schema.Finite,
+  x: Schema.NullOr(Schema.Finite),
+  y: Schema.NullOr(Schema.Finite),
   width: Schema.NullOr(Schema.Finite),
   height: Schema.NullOr(Schema.Finite),
   is_primary: Schema.NullOr(Schema.Boolean),
   pixel_clock: Schema.NullOr(Schema.Finite),
   refresh_rate: Schema.NullOr(Schema.Finite),
+  brightness: Schema.NullOr(Schema.Finite),
+  power_state: Schema.NullOr(DisplayPowerState),
 });
 
 export interface Display extends Schema.Schema.Type<typeof Display> {}

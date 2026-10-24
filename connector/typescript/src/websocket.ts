@@ -41,6 +41,7 @@ import {
   DiscordControl,
   DiscordSetup,
   DiscordSetupRequest,
+  DisplayControl,
   Empty,
   type EventType,
   FileInfo,
@@ -135,6 +136,9 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly mediaControl: (
     action: MediaAction,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly displayControl: (
+    control: DisplayControl,
   ) => Effect.Effect<void, WebSocketError>;
   readonly discordControl: (
     control: DiscordControl,
@@ -680,6 +684,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const displayControl = Effect.fn("SystemBridgeWebSocket.displayControl")(
+    function* (control: DisplayControl) {
+      yield* call(
+        "DISPLAY_CONTROL",
+        "DISPLAY_CONTROLLED",
+        DisplayControl,
+        control,
+        ignoreReply,
+      );
+    },
+  );
+
   const discordControl = Effect.fn("SystemBridgeWebSocket.discordControl")(
     function* (control: DiscordControl) {
       yield* call(
@@ -768,6 +784,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     keyboardKeypress,
     keyboardText,
     mediaControl,
+    displayControl,
     discordControl,
     getDiscordSetup,
     updateDiscordSetup,

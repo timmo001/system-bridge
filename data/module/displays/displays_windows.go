@@ -3,6 +3,7 @@
 package displays
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"sync"
@@ -48,7 +49,7 @@ func formatDisplayName(id string) string {
 // leaked them and would eventually panic.
 var (
 	enumMu       sync.Mutex
-	enumDisplays []types.Display
+	enumMonitors []monitor
 	enumCallback = syscall.NewCallback(func(handle syscall.Handle, dc syscall.Handle, rect *RECT, data uintptr) uintptr {
 		var info MONITORINFOEX
 		info.CbSize = uint32(unsafe.Sizeof(info))
@@ -64,6 +65,8 @@ var (
 
 		width := info.Monitor.Right - info.Monitor.Left
 		height := info.Monitor.Bottom - info.Monitor.Top
+		x := int(info.Monitor.Left)
+		y := int(info.Monitor.Top)
 		isPrimary := (info.Flags & 0x1) != 0 // MONITORINFOF_PRIMARY
 		pixelClock := 0.0
 		refreshRate := 0.0
@@ -75,37 +78,58 @@ var (
 			Name:                 formatDisplayName(cleanID),
 			ResolutionHorizontal: int(width),
 			ResolutionVertical:   int(height),
-			X:                    int(info.Monitor.Left),
-			Y:                    int(info.Monitor.Top),
+			X:                    &x,
+			Y:                    &y,
 			IsPrimary:            &isPrimary,
 			PixelClock:           &pixelClock,
 			RefreshRate:          &refreshRate,
 		}
 
-		enumDisplays = append(enumDisplays, display)
+		enumMonitors = append(enumMonitors, monitor{display: display, handle: handle})
 		return 1
 	})
 )
 
-func GetDisplays() ([]types.Display, error) {
+// monitor is a display with the HMONITOR that its controls are reached through
+type monitor struct {
+	display types.Display
+	handle  syscall.Handle
+}
+
+func monitors() ([]monitor, error) {
 	// EnumDisplayMonitors calls back synchronously, so the shared result
 	// slice is only touched while this lock is held.
 	enumMu.Lock()
 	defer enumMu.Unlock()
-	enumDisplays = nil
+	enumMonitors = nil
 
 	ret, _, err := enumDisplayMonitors.Call(0, 0, enumCallback, 0)
 	if ret == 0 {
 		return nil, fmt.Errorf("EnumDisplayMonitors failed: %v", err)
 	}
 
-	displays := enumDisplays
-	enumDisplays = nil
+	found := enumMonitors
+	enumMonitors = nil
+	return found, nil
+}
+
+func GetDisplays(_ context.Context) ([]types.Display, error) {
+	found, err := monitors()
+	if err != nil {
+		return nil, err
+	}
+
+	displays := make([]types.Display, 0, len(found))
+	for _, m := range found {
+		m.display.Brightness, m.display.PowerState = readControls(m.handle)
+		displays = append(displays, m.display)
+	}
 
 	if len(displays) == 0 {
 		slog.Info("No displays found")
 		return displays, nil
 	}
 
+	addPanelBrightness(displays)
 	return displays, nil
 }

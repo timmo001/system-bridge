@@ -18,7 +18,7 @@ func (dm DisplayModule) Update(ctx context.Context) (any, error) {
 	var displaysData types.DisplaysData
 	displaysData = make([]types.Display, 0)
 
-	displays, err := displays.GetDisplays()
+	displays, err := displays.GetDisplays(ctx)
 	if err != nil {
 		slog.Info("Displays unavailable", "error", err)
 		return displaysData, nil

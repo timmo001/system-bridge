@@ -10,6 +10,23 @@
     "height": 190,
     "is_primary": false,
     "pixel_clock": 934,
-    "refresh_rate": 119.9621053323798
+    "refresh_rate": 119.9621053323798,
+    "brightness": 60,
+    "power_state": null
+  },
+  {
+    "id": "HDMI-A-2",
+    "name": "AORUS FO32U2P",
+    "resolution_horizontal": 3840,
+    "resolution_vertical": 2160,
+    "x": null,
+    "y": null,
+    "width": 700,
+    "height": 390,
+    "is_primary": null,
+    "pixel_clock": null,
+    "refresh_rate": null,
+    "brightness": 100,
+    "power_state": "on"
   }
 ]

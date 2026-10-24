@@ -261,6 +261,32 @@ func main() {
 						},
 					},
 					{
+						Name:      "display",
+						Usage:     "Set a display's brightness or power state",
+						ArgsUsage: "<display id>",
+						Flags: []cli.Flag{
+							&cli.FloatFlag{Name: "brightness", Usage: "Brightness in percent"},
+							&cli.StringFlag{Name: "power", Usage: "Power state: on, standby, suspend or off"},
+						},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							id := cmd.Args().First()
+							if id == "" {
+								return fmt.Errorf("a display id is required")
+							}
+							data := map[string]any{"id": id}
+							if cmd.IsSet("brightness") {
+								data["brightness"] = cmd.Float("brightness")
+							}
+							if power := cmd.String("power"); power != "" {
+								data["power_state"] = strings.ToLower(power)
+							}
+							if len(data) == 1 {
+								return fmt.Errorf("set --brightness or --power")
+							}
+							return client.Send(cmdCtx, event.EventDisplayControl, data)
+						},
+					},
+					{
 						Name:      "discord",
 						Usage:     "Control Discord voice",
 						ArgsUsage: "<toggle_mute|toggle_deafen|leave_voice_channel|...>",

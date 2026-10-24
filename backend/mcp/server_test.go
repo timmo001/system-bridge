@@ -174,7 +174,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 3)
+	require.Len(t, tools.Tools, 4)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
@@ -183,6 +183,7 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 		"system_bridge_get_data",
 		"system_bridge_send_notification",
 		"system_bridge_media_control",
+		"system_bridge_display_control",
 	}, names)
 	assertToolSchemas(t, tools.Tools)
 
@@ -266,6 +267,17 @@ func TestTypedEventHandlers(t *testing.T) {
 				return handlers.handleMediaControl(t.Context(), nil, mediaControlInput{Action: "PLAY"})
 			},
 			wantData: map[string]any{"action": "PLAY"},
+		},
+		{
+			name:         "display control",
+			eventType:    event.EventDisplayControl,
+			responseType: event.ResponseTypeDisplayControlled,
+			responseText: "display controlled",
+			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+				brightness := 40.0
+				return handlers.handleDisplayControl(t.Context(), nil, displayControlInput{ID: "HDMI-A-2", Brightness: &brightness})
+			},
+			wantData: map[string]any{"id": "HDMI-A-2", "brightness": 40.0},
 		},
 	}
 

@@ -13,6 +13,7 @@ const (
 	ResponseTypeDiscordControlled        ResponseType = "DISCORD_CONTROLLED"
 	ResponseTypeDiscordSetup             ResponseType = "DISCORD_SETUP"
 	ResponseTypeDiscordSetupUpdated      ResponseType = "DISCORD_SETUP_UPDATED"
+	ResponseTypeDisplayControlled        ResponseType = "DISPLAY_CONTROLLED"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
 	ResponseTypeHistory                  ResponseType = "HISTORY"
