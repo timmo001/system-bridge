@@ -60,6 +60,12 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
 
 - `system_bridge_audio_control` sets an audio device's volume or mute state, or
   makes it the default.
+- `system_bridge_desktop_close_window` asks a window to close.
+- `system_bridge_desktop_focus_window` focuses a window.
+- `system_bridge_desktop_focus_workspace` shows and focuses a workspace.
+- `system_bridge_desktop_set_keyboard_layout` switches the keyboard layout.
+- `system_bridge_desktop_set_window_state` makes a window fullscreen,
+  maximised or minimised, or not.
 - `system_bridge_display_control` sets a display's brightness or power state.
 - `system_bridge_get_data` returns the latest data for requested modules.
   Supported modules are `audio`, `battery`, `bluetooth`, `cpu`, `desktop`,
@@ -67,6 +73,13 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   `sensors`, and `system`.
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
+- `system_bridge_hyprland_move_window` moves a window to a workspace on
+  Hyprland.
+- `system_bridge_hyprland_reload_config` reloads Hyprland's config.
+- `system_bridge_hyprland_run_global_shortcut` triggers a global shortcut an
+  app registered with Hyprland.
+- `system_bridge_hyprland_set_window` floats or tiles, and pins or unpins, a
+  window on Hyprland.
 - `system_bridge_list_commands` lists the command allowlist.
 - `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
   `PREVIOUS`, `STOP`, `VOLUME_DOWN`, or `VOLUME_UP`.

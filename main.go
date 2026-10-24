@@ -450,6 +450,7 @@ func main() {
 							},
 						},
 					},
+					desktopCommand(),
 					{
 						Name:      "discord",
 						Usage:     "Control Discord voice",
@@ -604,6 +605,7 @@ func main() {
 							},
 						},
 					},
+					hyprlandCommand(),
 					{
 						Name:      "media",
 						Usage:     "Control media playback",

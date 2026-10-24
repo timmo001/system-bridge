@@ -26,6 +26,50 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		}, []string{"id"}),
 	}, handlers.handleAudioControl)
 
+	windowID := map[string]any{"type": "string", "description": "Window id from the desktop module's windows"}
+	boolean := func(description string) map[string]any {
+		return map[string]any{"type": "boolean", "description": description}
+	}
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_desktop_close_window",
+		Description: "Ask a window to close, as its close button would. Get window ids from the desktop module.",
+		InputSchema: objectSchema(map[string]any{"id": windowID}, []string{"id"}),
+	}, eventTool[desktopWindowInput](handlers, event.EventDesktopCloseWindow))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_desktop_focus_window",
+		Description: "Focus a window, showing its workspace. Get window ids from the desktop module.",
+		InputSchema: objectSchema(map[string]any{"id": windowID}, []string{"id"}),
+	}, eventTool[desktopWindowInput](handlers, event.EventDesktopFocusWindow))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_desktop_focus_workspace",
+		Description: "Show and focus a workspace. Get workspace ids from the desktop module. Not available on Windows.",
+		InputSchema: objectSchema(map[string]any{
+			"id": map[string]any{"type": "string", "description": "Workspace id from the desktop module's workspaces"},
+		}, []string{"id"}),
+	}, eventTool[desktopWorkspaceInput](handlers, event.EventDesktopFocusWorkspace))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_desktop_set_keyboard_layout",
+		Description: "Switch the keyboard to one of its layouts, from the desktop module's keyboard.layouts. Hyprland and Windows only.",
+		InputSchema: objectSchema(map[string]any{
+			"layout": map[string]any{"type": "string", "description": "Layout from the desktop module's keyboard.layouts"},
+		}, []string{"layout"}),
+	}, eventTool[desktopKeyboardLayoutInput](handlers, event.EventDesktopSetKeyboardLayout))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_desktop_set_window_state",
+		Description: "Make a window fullscreen, maximised or minimised, or not. Leave out a state to keep it. Hyprland can't minimise, and Windows can't make a window fullscreen.",
+		InputSchema: objectSchema(map[string]any{
+			"id":         windowID,
+			"fullscreen": boolean("Whether the window is fullscreen"),
+			"maximised":  boolean("Whether the window is maximised"),
+			"minimised":  boolean("Whether the window is minimised"),
+		}, []string{"id"}),
+	}, eventTool[desktopWindowStateInput](handlers, event.EventDesktopSetWindowState))
+
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_display_control",
 		Description: "Set a display's brightness or power state over DDC/CI, or a built-in panel's backlight. Get display ids from the displays module.",
@@ -79,6 +123,42 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 			},
 		}, []string{}),
 	}, handlers.handleGetHistory)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_move_window",
+		Description: "Move a window to a workspace on Hyprland, leaving the focus where it is",
+		InputSchema: objectSchema(map[string]any{
+			"id": windowID,
+			"workspace": map[string]any{
+				"type":        "string",
+				"description": "Workspace id from the desktop module's workspaces, or the number of a new one",
+			},
+		}, []string{"id", "workspace"}),
+	}, eventTool[hyprlandMoveWindowInput](handlers, event.EventHyprlandMoveWindow))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_reload_config",
+		Description: "Reload Hyprland's config",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, eventTool[struct{}](handlers, event.EventHyprlandReloadConfig))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_run_global_shortcut",
+		Description: "Trigger a global shortcut an app registered with Hyprland, as a bind to it would. Get names from the desktop module's hyprland.global_shortcuts.",
+		InputSchema: objectSchema(map[string]any{
+			"name": map[string]any{"type": "string", "description": "Shortcut name from hyprland.global_shortcuts"},
+		}, []string{"name"}),
+	}, eventTool[hyprlandGlobalShortcutInput](handlers, event.EventHyprlandRunGlobalShortcut))
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_hyprland_set_window",
+		Description: "Float or tile a window on Hyprland, and pin or unpin it. Leave out a setting to keep it.",
+		InputSchema: objectSchema(map[string]any{
+			"id":       windowID,
+			"floating": boolean("Whether the window floats"),
+			"pinned":   boolean("Whether the window is pinned, showing on every workspace"),
+		}, []string{"id"}),
+	}, eventTool[hyprlandSetWindowInput](handlers, event.EventHyprlandSetWindow))
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_commands",

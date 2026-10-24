@@ -35,6 +35,25 @@ type displayControlInput struct {
 	PowerState string   `json:"power_state,omitempty"`
 }
 
+type desktopKeyboardLayoutInput struct {
+	Layout string `json:"layout"`
+}
+
+type desktopWindowInput struct {
+	ID string `json:"id"`
+}
+
+type desktopWindowStateInput struct {
+	ID         string `json:"id"`
+	Fullscreen *bool  `json:"fullscreen,omitempty"`
+	Maximised  *bool  `json:"maximised,omitempty"`
+	Minimised  *bool  `json:"minimised,omitempty"`
+}
+
+type desktopWorkspaceInput struct {
+	ID string `json:"id"`
+}
+
 type getDataInput struct {
 	Modules []types.ModuleName `json:"modules"`
 }
@@ -42,6 +61,21 @@ type getDataInput struct {
 type getHistoryInput struct {
 	Since   int64              `json:"since,omitempty"`
 	Modules []types.ModuleName `json:"modules,omitempty"`
+}
+
+type hyprlandGlobalShortcutInput struct {
+	Name string `json:"name"`
+}
+
+type hyprlandMoveWindowInput struct {
+	ID        string `json:"id"`
+	Workspace string `json:"workspace"`
+}
+
+type hyprlandSetWindowInput struct {
+	ID       string `json:"id"`
+	Floating *bool  `json:"floating,omitempty"`
+	Pinned   *bool  `json:"pinned,omitempty"`
 }
 
 type mediaControlInput struct {
@@ -109,6 +143,35 @@ func (h toolHandlers) handleDisplayControl(_ context.Context, _ *sdkmcp.CallTool
 		"success": true,
 		"message": response.Message,
 	})
+}
+
+// eventTool is a tool handler that sends its input as an event's data
+func eventTool[T any](h toolHandlers, eventType event.EventType) sdkmcp.ToolHandlerFor[T, any] {
+	return func(_ context.Context, _ *sdkmcp.CallToolRequest, input T) (*sdkmcp.CallToolResult, any, error) {
+		encoded, err := json.Marshal(input)
+		if err != nil {
+			return nil, nil, fmt.Errorf("encode tool input: %w", err)
+		}
+		arguments := map[string]interface{}{}
+		if err := json.Unmarshal(encoded, &arguments); err != nil {
+			return nil, nil, fmt.Errorf("encode tool input: %w", err)
+		}
+		message := event.Message{
+			ID:    generateID(),
+			Event: eventType,
+			Data:  arguments,
+		}
+
+		response := h.eventRouter.HandleMessage("mcp", message)
+		if response.Type == event.ResponseTypeError {
+			return nil, nil, fmt.Errorf("%s", response.Message)
+		}
+
+		return formatToolResult(map[string]interface{}{
+			"success": true,
+			"message": response.Message,
+		})
+	}
 }
 
 func (h toolHandlers) handleGetData(_ context.Context, _ *sdkmcp.CallToolRequest, input getDataInput) (*sdkmcp.CallToolResult, any, error) {

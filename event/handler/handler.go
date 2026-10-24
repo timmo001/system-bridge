@@ -8,6 +8,7 @@ import (
 func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterAudioControlHandler(router, dataStore)
 	RegisterCommandExecuteHandler(router)
+	RegisterDesktopHandlers(router, dataStore)
 	RegisterDiscordControlHandler(router)
 	RegisterDisplayControlHandler(router, dataStore)
 	RegisterExitApplicationHandler(router)
@@ -20,6 +21,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterGetFilesHandler(router)
 	RegisterGetHistoryHandler(router, dataStore)
 	RegisterGetSettingsHandler(router)
+	RegisterHyprlandHandlers(router, dataStore)
 	RegisterKeyboardKeypressHandler(router)
 	RegisterKeyboardTextHandler(router)
 	RegisterMediaControlHandler(router, dataStore)

@@ -180,16 +180,25 @@ func assertToolsAndGetData(t *testing.T, ctx context.Context, session *sdkmcp.Cl
 
 	tools, err := session.ListTools(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, tools.Tools, 8)
+	require.Len(t, tools.Tools, 17)
 	names := make([]string, 0, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names = append(names, tool.Name)
 	}
 	assert.ElementsMatch(t, []string{
 		"system_bridge_audio_control",
+		"system_bridge_desktop_close_window",
+		"system_bridge_desktop_focus_window",
+		"system_bridge_desktop_focus_workspace",
+		"system_bridge_desktop_set_keyboard_layout",
+		"system_bridge_desktop_set_window_state",
 		"system_bridge_display_control",
 		"system_bridge_get_data",
 		"system_bridge_get_history",
+		"system_bridge_hyprland_move_window",
+		"system_bridge_hyprland_reload_config",
+		"system_bridge_hyprland_run_global_shortcut",
+		"system_bridge_hyprland_set_window",
 		"system_bridge_list_commands",
 		"system_bridge_media_control",
 		"system_bridge_run_command",
@@ -268,6 +277,17 @@ func TestTypedEventHandlers(t *testing.T) {
 				return handlers.handleAudioControl(t.Context(), nil, audioControlInput{ID: "speakers", Muted: &muted, Default: true})
 			},
 			wantData: map[string]any{"id": "speakers", "muted": false, "default": true},
+		},
+		{
+			name:         "desktop window state",
+			eventType:    event.EventDesktopSetWindowState,
+			responseType: event.ResponseTypeDesktopWindowStateSet,
+			responseText: "window state set",
+			invoke: func() (*sdkmcp.CallToolResult, any, error) {
+				maximised := false
+				return eventTool[desktopWindowStateInput](handlers, event.EventDesktopSetWindowState)(t.Context(), nil, desktopWindowStateInput{ID: "0x1", Maximised: &maximised})
+			},
+			wantData: map[string]any{"id": "0x1", "maximised": false},
 		},
 		{
 			name:         "display control",

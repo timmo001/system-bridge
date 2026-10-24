@@ -6,6 +6,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"slices"
 	"strconv"
@@ -64,6 +65,15 @@ type waylandWorkspace struct {
 	state uint32
 }
 
+// publicID is the compositor's ID for the workspace, or the one System Bridge
+// gave it
+func (w *waylandWorkspace) publicID() string {
+	if w.id != "" {
+		return w.id
+	}
+	return strconv.FormatUint(w.seq, 10)
+}
+
 // waylandState is what the compositor has told one connection
 type waylandState struct {
 	nextObject uint32
@@ -75,7 +85,9 @@ type waylandState struct {
 	workspaces map[uint32]*waylandWorkspace
 
 	toplevelManager  uint32
+	toplevelVersion  uint32
 	workspaceManager uint32
+	seat             uint32
 }
 
 func newWaylandState() *waylandState {
@@ -119,12 +131,19 @@ func (s *waylandState) setup(conn *wayland.Conn) ([]byte, error) {
 		requests = append(requests, s.bindOutput(output)...)
 	}
 	s.toplevelManager = s.newObject()
+	s.toplevelVersion = min(toplevels.Version, 3)
 	requests = append(requests, wayland.Message(wayland.RegistryID, 0,
-		wayland.Bind(toplevels.Name, "zwlr_foreign_toplevel_manager_v1", min(toplevels.Version, 3), s.toplevelManager)...)...)
+		wayland.Bind(toplevels.Name, "zwlr_foreign_toplevel_manager_v1", s.toplevelVersion, s.toplevelManager)...)...)
 	if workspaces, ok := conn.Globals["ext_workspace_manager_v1"]; ok {
 		s.workspaceManager = s.newObject()
 		requests = append(requests, wayland.Message(wayland.RegistryID, 0,
 			wayland.Bind(workspaces.Name, "ext_workspace_manager_v1", 1, s.workspaceManager)...)...)
+	}
+	// Activating a window takes the seat whose focus it gets
+	if seat, ok := conn.Globals["wl_seat"]; ok {
+		s.seat = s.newObject()
+		requests = append(requests, wayland.Message(wayland.RegistryID, 0,
+			wayland.Bind(seat.Name, "wl_seat", 1, s.seat)...)...)
 	}
 	return requests, nil
 }
@@ -323,10 +342,7 @@ func (s *waylandState) build(titles bool) types.DesktopData {
 
 	var active []int
 	for _, workspace := range workspaces {
-		id := workspace.id
-		if id == "" {
-			id = strconv.FormatUint(workspace.seq, 10)
-		}
+		id := workspace.publicID()
 		var display *string
 		if group := s.groups[workspace.group]; group != nil {
 			display = s.outputName(group.outputs)
@@ -365,6 +381,7 @@ func (s *waylandState) build(titles bool) types.DesktopData {
 type waylandDesktop struct {
 	mu     sync.Mutex
 	state  *waylandState // Only while following
+	conn   *wayland.Conn // Only while following
 	data   *types.DesktopData
 	titles bool
 }
@@ -467,11 +484,11 @@ func (w *waylandDesktop) follow(ctx context.Context, changed func()) error {
 	}
 
 	w.mu.Lock()
-	w.state, w.data = state, nil
+	w.state, w.conn, w.data = state, conn, nil
 	w.mu.Unlock()
 	defer func() {
 		w.mu.Lock()
-		w.state, w.data = nil, nil
+		w.state, w.conn, w.data = nil, nil, nil
 		w.mu.Unlock()
 	}()
 
@@ -518,4 +535,97 @@ func (w *waylandDesktop) follow(ctx context.Context, changed func()) error {
 		}
 		trigger()
 	}
+}
+
+// send sends the requests build makes, over the connection being followed
+func (w *waylandDesktop) send(build func(s *waylandState) ([]byte, error)) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.state == nil || w.conn == nil {
+		return errors.New("not connected to the compositor yet")
+	}
+	requests, err := build(w.state)
+	if err != nil {
+		return err
+	}
+	_, err = w.conn.Write(requests)
+	return err
+}
+
+// toplevel is the handle of the window with an ID
+func (s *waylandState) toplevel(id string) (uint32, error) {
+	for object, toplevel := range s.toplevels {
+		if strconv.FormatUint(toplevel.seq, 10) == id {
+			return object, nil
+		}
+	}
+	return 0, fmt.Errorf("window %q: %w", id, ErrNotFound)
+}
+
+func (w *waylandDesktop) activate(id string) error {
+	return w.send(func(s *waylandState) ([]byte, error) {
+		object, err := s.toplevel(id)
+		if err != nil {
+			return nil, err
+		}
+		if s.seat == 0 {
+			return nil, fmt.Errorf("focusing windows without a seat: %w", ErrUnsupported)
+		}
+		return wayland.Message(object, 4, wayland.Uint(s.seat)), nil
+	})
+}
+
+func (w *waylandDesktop) close(id string) error {
+	return w.send(func(s *waylandState) ([]byte, error) {
+		object, err := s.toplevel(id)
+		if err != nil {
+			return nil, err
+		}
+		return wayland.Message(object, 5), nil
+	})
+}
+
+func (w *waylandDesktop) setState(id string, state WindowState) error {
+	return w.send(func(s *waylandState) ([]byte, error) {
+		object, err := s.toplevel(id)
+		if err != nil {
+			return nil, err
+		}
+		// Each request's opcode to set the state, then to unset it
+		var requests []byte
+		for _, change := range []struct {
+			set          *bool
+			setOp, unset uint16
+			args         [][]byte
+		}{
+			{state.Fullscreen, 8, 9, [][]byte{wayland.Uint(0)}}, // Any output
+			{state.Maximised, 0, 1, nil},
+			{state.Minimised, 2, 3, nil},
+		} {
+			if change.set == nil {
+				continue
+			}
+			if change.setOp == 8 && s.toplevelVersion < 2 {
+				return nil, fmt.Errorf("fullscreen on this compositor: %w", ErrUnsupported)
+			}
+			if *change.set {
+				requests = append(requests, wayland.Message(object, change.setOp, change.args...)...)
+			} else {
+				requests = append(requests, wayland.Message(object, change.unset)...)
+			}
+		}
+		return requests, nil
+	})
+}
+
+func (w *waylandDesktop) activateWorkspace(id string) error {
+	return w.send(func(s *waylandState) ([]byte, error) {
+		for object, workspace := range s.workspaces {
+			if workspace.publicID() == id {
+				// activate, then the manager's commit to apply it
+				return append(wayland.Message(object, 1), wayland.Message(s.workspaceManager, 0)...), nil
+			}
+		}
+		return nil, fmt.Errorf("workspace %q: %w", id, ErrNotFound)
+	})
 }
