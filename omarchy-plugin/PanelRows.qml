@@ -278,6 +278,7 @@ QtObject {
       reading(rows, "device", "", "󰟀", "Device", join([text(device.manufacturer), text(device.model)]))
       reading(rows, "uptime", "", "󰅐", "Uptime", duration(system.uptime))
       reading(rows, "pending-reboot", "", "󰜉", "Restart required", yesNo(system.pending_reboot))
+      reading(rows, "package-updates", "", "󰚰", "Package updates", num(system.package_updates) === null ? "" : (num(system.package_updates) === 0 ? "Up to date" : num(system.package_updates) + " waiting"))
       reading(rows, "power", "", "󱐋", "Power", watts(system.power_usage))
       reading(rows, "users", "", "\u{F000E}", "Users", Array.isArray(system.users) ? system.users.map(function(user) { return text(user.name) }).filter(function(name, index, all) { return name !== "" && all.indexOf(name) === index }).join(", ") : "")
       reading(rows, "camera", "", "󰄀", "Camera in use", Array.isArray(system.camera_usage) ? system.camera_usage.join(", ") : "")
