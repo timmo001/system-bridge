@@ -269,7 +269,7 @@ func hyprlandCurrent(ctx context.Context) (*types.DesktopData, error) {
 		return nil, err
 	}
 	if data.Hyprland == nil {
-		return nil, fmt.Errorf("Hyprland isn't running: %w", ErrUnsupported)
+		return nil, fmt.Errorf("no running Hyprland instance: %w", ErrUnsupported)
 	}
 	return data, nil
 }
@@ -311,7 +311,7 @@ func hyprlandSend(ctx context.Context, request string) error {
 		return err
 	}
 	if text := strings.TrimSpace(string(reply)); text != "ok" {
-		return fmt.Errorf("Hyprland refused %q: %s", request, text)
+		return fmt.Errorf("hyprctl refused %q: %s", request, text)
 	}
 	return nil
 }
