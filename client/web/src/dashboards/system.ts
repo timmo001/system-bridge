@@ -2,10 +2,20 @@ import {
   mdiAlertCircleOutline,
   mdiHeadset,
   mdiMicrophone,
+  mdiMonitorShare,
   mdiWebcam,
 } from "@mdi/js";
 import type {
+  DesktopCompositor,
+  DesktopWindow,
+  DesktopWorkspace,
   DiscordCallMember,
+  HyprlandData,
+  HyprlandDisplay,
+  HyprlandReserved,
+  HyprlandScreencast,
+  HyprlandWindow,
+  HyprlandWorkspace,
   Process,
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
@@ -18,6 +28,7 @@ import {
   formatNumber,
   formatPercent,
   formatPlayerStatus,
+  formatQuantity,
   formatUptime,
   formatWatts,
 } from "~/lib/format";
@@ -375,6 +386,365 @@ const member = (call: DiscordCallMember) =>
     ${call.self_mute || call.server_mute ? html`<span class="chip">Muted</span>` : nothing}
     ${call.self_deaf || call.server_deaf ? html`<span class="chip">Deafened</span>` : nothing}
   </li>`;
+
+const hiddenTitle = html`<a
+  href=${href("module", {
+    params: { module: "desktop" },
+    hash: "window-titles",
+  })}
+  >Hidden</a
+>`;
+
+const compositorName = {
+  hyprland: "Hyprland",
+  wayland: "Wayland",
+  windows: "Windows",
+} as const satisfies Record<DesktopCompositor, string>;
+
+/** Chips for what's true of a window, besides being focused. */
+const windowStates = (window: DesktopWindow, extra?: HyprlandWindow) => {
+  const states = [
+    window.fullscreen ? "Fullscreen" : null,
+    window.maximised || extra?.fullscreen_mode === "maximised"
+      ? "Maximised"
+      : null,
+    window.minimised ? "Minimised" : null,
+    window.floating ? "Floating" : null,
+    extra?.pinned ? "Pinned" : null,
+    extra?.hidden ? "Hidden" : null,
+    extra && extra.group.length > 0 ? "Grouped" : null,
+    extra?.xwayland ? "XWayland" : null,
+    window.inhibiting_idle ? "Keeping awake" : null,
+  ].filter((state) => state !== null);
+
+  const chips = states.map((state) => html`<span class="chip">${state}</span>`);
+
+  return html`${window.urgent ? html`<span class="chip warning">Urgent</span>` : nothing}
+  ${chips}`;
+};
+
+interface WindowRow {
+  readonly window: DesktopWindow;
+  readonly workspace: string;
+  readonly extra: HyprlandWindow | undefined;
+}
+
+const windowColumns = (() => {
+  const column = dataTableColumns<WindowRow>();
+
+  return column.columns([
+    column.accessor((row) => row.window.app ?? "", {
+      id: "app",
+      header: "App",
+      cell: ({ getValue, row }) =>
+        html`<span class="row">
+          ${getValue()}
+          ${row.original.window.focused ? html`<span class="chip accent">Focused</span>` : nothing}
+        </span>`,
+    }),
+    column.accessor((row) => row.window.title ?? "", {
+      id: "title",
+      header: "Title",
+      cell: ({ row }) => row.original.window.title ?? hiddenTitle,
+    }),
+    column.accessor("workspace", { header: "Workspace" }),
+    column.accessor((row) => row.window.display ?? "", {
+      id: "display",
+      header: "Display",
+    }),
+    column.accessor(
+      (row) =>
+        row.window.width === null || row.window.height === null
+          ? ""
+          : `${row.window.width} × ${row.window.height}`,
+      { id: "size", header: "Size", enableSorting: false },
+    ),
+    column.accessor((row) => row.window.pid ?? 0, {
+      id: "pid",
+      header: "PID",
+      cell: ({ getValue }) => getValue() || "",
+    }),
+    column.display({
+      id: "state",
+      header: "State",
+      cell: ({ row }) =>
+        html`<span class="row wrap"
+          >${windowStates(row.original.window, row.original.extra)}</span
+        >`,
+    }),
+  ]);
+})();
+
+const windowId = (row: WindowRow) => row.window.id;
+
+const workspaceItem = (
+  workspace: DesktopWorkspace,
+  extra: HyprlandWorkspace | undefined,
+) =>
+  html`<li>
+    <span class="spacer">
+      <strong>${workspace.name ?? workspace.id}</strong>
+      <span class="muted xsmall"
+        >${[
+          workspace.display,
+          workspace.windows === null
+            ? null
+            : formatQuantity(workspace.windows, "window"),
+          extra?.layout,
+        ]
+          .filter(Boolean)
+          .join(" · ")}</span
+      >
+    </span>
+    ${workspace.focused ? html`<span class="chip accent">Focused</span>` : workspace.active ? html`<span class="chip">Shown</span>` : nothing}
+    ${workspace.special ? html`<span class="chip">Special</span>` : nothing}
+    ${workspace.fullscreen ? html`<span class="chip">Fullscreen</span>` : nothing}
+  </li>`;
+
+const reserved = (edges: HyprlandReserved) =>
+  (
+    [
+      ["top", edges.top],
+      ["right", edges.right],
+      ["bottom", edges.bottom],
+      ["left", edges.left],
+    ] as const
+  )
+    .flatMap(([edge, size]) => (size === 0 ? [] : [`${size}px ${edge}`]))
+    .join(", ") || "None";
+
+/** A Hyprland transform, which rotates anticlockwise and may flip first. */
+const transformName = (transform: number) => {
+  const rotation = (transform % 4) * 90;
+  const flipped = transform >= 4;
+
+  if (rotation === 0) return flipped ? "Flipped" : "None";
+
+  return flipped ? `Flipped, ${rotation}°` : `${rotation}°`;
+};
+
+const hyprlandDisplayCard = (id: string, display: HyprlandDisplay) =>
+  html`<sb-card class="half" heading=${id} subheading="Hyprland display">
+    ${facts([
+      ["Scale", `${formatNumber(display.scale)}×`],
+      ["Transform", transformName(display.transform)],
+      ["Format", display.format],
+      ["Colour", display.colour_preset],
+      ["VRR", yesNo(display.vrr)],
+      ["Tearing", yesNo(display.tearing)],
+      ["Direct scanout", yesNo(display.direct_scanout)],
+      ["Powered", yesNo(display.dpms)],
+      ["Mirrors", display.mirror_of],
+      ["Reserved", reserved(display.reserved)],
+      ["Special workspace", display.special_workspace],
+      [
+        "Layers",
+        [
+          ...display.layers.background,
+          ...display.layers.bottom,
+          ...display.layers.top,
+          ...display.layers.overlay,
+        ].join(", "),
+      ],
+    ])}
+  </sb-card>`;
+
+const hyprlandCards = (hyprland: HyprlandData) => {
+  const mainKeyboard = hyprland.keyboards.find((keyboard) => keyboard.main);
+
+  const displays = Object.entries(hyprland.displays).map(([id, display]) =>
+    hyprlandDisplayCard(id, display),
+  );
+
+  const shortcuts = hyprland.global_shortcuts.map(
+    (shortcut) =>
+      html`<li>
+        <span class="spacer">${shortcut.description}</span>
+        <span class="mono xsmall muted">${shortcut.name}</span>
+      </li>`,
+  );
+
+  return html`
+    <sb-card class="half" heading="Hyprland">
+      ${facts([
+        ["Version", hyprland.version.version],
+        [
+          "Commit",
+          html`<span class="mono xsmall"
+            >${hyprland.version.commit.slice(0, 12)}</span
+          >`,
+        ],
+        ["Branch", hyprland.version.branch],
+        ["Config", hyprland.version.config_provider],
+        ["Backend", hyprland.version.backend],
+        ["Submap", hyprland.submap ?? "Default"],
+        ["Group lock", yesNo(hyprland.group_lock)],
+      ])}
+    </sb-card>
+    <sb-card class="half" heading="Input devices">
+      ${facts([
+        ["Main keyboard", mainKeyboard?.name],
+        ["Keymap", mainKeyboard?.active_keymap],
+        ["Options", mainKeyboard?.options],
+        ["Keyboards", hyprland.keyboards.length],
+        ["Mice", hyprland.mice.length],
+        ["Tablets", hyprland.tablets.length],
+        ["Touch", hyprland.touch.length],
+        ["Switches", hyprland.switches.join(", ")],
+      ])}
+    </sb-card>
+    ${displays}
+    <sb-card heading="Global shortcuts" subheading="Registered by apps">
+      ${
+        shortcuts.length === 0
+          ? html`<p class="muted small">No apps have registered shortcuts.</p>`
+          : html`<ul class="list">
+              ${shortcuts}
+            </ul>`
+      }
+    </sb-card>
+  `;
+};
+
+/** What a screen share is sharing, such as a window's app. */
+const screencastLabel = (
+  screencast: HyprlandScreencast,
+  windows: readonly DesktopWindow[],
+) => {
+  switch (screencast.type) {
+    case "monitor":
+      return `Display ${screencast.display ?? ""}`.trim();
+    case "region":
+      return "A region";
+    case "window": {
+      const app = windows.find(
+        (window) => window.id === screencast.window,
+      )?.app;
+
+      return app ? `A window of ${app}` : "A window";
+    }
+  }
+};
+
+export const desktopDashboard = ({ data, location }: DashboardContext) => {
+  const desktop = data.desktop;
+
+  if (!desktop) return noData("desktop");
+
+  const hyprland = desktop.hyprland;
+
+  const workspaceNames = new Map(
+    desktop.workspaces.map((workspace) => [
+      workspace.id,
+      workspace.name ?? workspace.id,
+    ]),
+  );
+
+  const focused = desktop.windows.find(
+    (window) => window.id === desktop.focused_window,
+  );
+
+  const rows = desktop.windows.map((window): WindowRow => ({
+    window,
+    workspace:
+      window.workspace === null
+        ? ""
+        : (workspaceNames.get(window.workspace) ?? window.workspace),
+    extra: hyprland?.windows[window.id],
+  }));
+
+  const configErrors = (hyprland?.config_errors ?? []).map(
+    (error) => html`<li>${error}</li>`,
+  );
+
+  const screencasts = (hyprland?.screencasts ?? [])
+    .map((screencast) => screencastLabel(screencast, desktop.windows))
+    .join(", ");
+
+  const workspaces = desktop.workspaces.map((workspace) =>
+    workspaceItem(workspace, hyprland?.workspaces[workspace.id]),
+  );
+
+  return html`
+    <div class="dashboard">
+      ${
+        configErrors.length === 0
+          ? nothing
+          : html`<div class="alert warning">
+              ${icon(mdiAlertCircleOutline)}
+              <div>
+                <strong>Hyprland's config has errors</strong>
+                <ul>
+                  ${configErrors}
+                </ul>
+              </div>
+            </div>`
+      }
+      ${
+        screencasts === ""
+          ? nothing
+          : html`<div class="alert">
+              ${icon(mdiMonitorShare)}
+              <div>
+                <strong>Your screen is being shared</strong>
+                ${screencasts}
+              </div>
+            </div>`
+      }
+      <sb-card
+        heading=${compositorName[desktop.compositor]}
+        subheading=${hyprland === null ? "" : hyprland.version.version}
+      >
+        <div class="stats">
+          ${stat("Focused", focused?.app ?? "")}
+          ${stat(
+            "Workspace",
+            desktop.focused_workspace === null
+              ? ""
+              : (workspaceNames.get(desktop.focused_workspace) ??
+                  desktop.focused_workspace),
+          )}
+          ${stat("Keyboard", desktop.keyboard.name ?? desktop.keyboard.layout ?? "")}
+          ${stat("Windows", String(desktop.windows.length))}
+          ${stat("Workspaces", desktop.workspaces.length === 0 ? "" : String(desktop.workspaces.length))}
+        </div>
+      </sb-card>
+      <sb-card heading="Windows" subheading="${desktop.windows.length} open">
+        <sb-data-table
+          label="Windows"
+          search-placeholder="Search windows"
+          .columns=${windowColumns}
+          .data=${rows}
+          .rowId=${windowId}
+          .numeric=${["pid"]}
+          .wide=${["title"]}
+          .state=${tableState(location.search, {
+            sort: "app",
+            descending: false,
+          })}
+          @table-state-change=${onTableChange(location)}
+        ></sb-data-table>
+      </sb-card>
+      ${
+        desktop.workspaces.length === 0
+          ? nothing
+          : html`<sb-card class="half" heading="Workspaces">
+              <ul class="list">
+                ${workspaces}
+              </ul>
+            </sb-card>`
+      }
+      <sb-card class="half" heading="Keyboard layout">
+        ${facts([
+          ["Layout", desktop.keyboard.layout],
+          ["Name", desktop.keyboard.name],
+          ["Installed", desktop.keyboard.layouts.join(", ")],
+        ])}
+      </sb-card>
+      ${hyprland === null ? nothing : hyprlandCards(hyprland)}
+    </div>
+  `;
+};
 
 export const discordDashboard = ({ data }: DashboardContext) => {
   const discord = data.discord;

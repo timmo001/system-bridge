@@ -68,6 +68,10 @@ const summary = (module: ModuleName, data: ModulesData): string => {
       return data.displays
         ? formatQuantity(data.displays.length, "display")
         : "";
+    case "desktop":
+      return data.desktop
+        ? formatQuantity(data.desktop.windows.length, "window")
+        : "";
     case "bluetooth":
       return data.bluetooth
         ? `${data.bluetooth.devices.filter((device) => device.connected).length} connected`

@@ -30,6 +30,7 @@ import {
   networksDashboard,
 } from "~/dashboards/storage-network";
 import {
+  desktopDashboard,
   discordDashboard,
   mediaDashboard,
   processesDashboard,
@@ -50,6 +51,7 @@ import "./page-media";
 import "./page-notifications";
 import "./page-open";
 import "./page-settings-commands";
+import "./page-settings-desktop";
 import "./page-settings-discord";
 import "./page-settings-disks";
 import "./page-settings-media";
@@ -62,6 +64,7 @@ const dashboards: Readonly<
   battery: batteryDashboard,
   bluetooth: bluetoothDashboard,
   cpu: cpuDashboard,
+  desktop: desktopDashboard,
   discord: discordDashboard,
   disks: disksDashboard,
   displays: displaysDashboard,
@@ -110,6 +113,13 @@ const sections: Partial<
       <page-notifications embedded id="notifications"></page-notifications>
       <page-open embedded id="open"></page-open>
     `,
+  },
+  desktop: {
+    after: html`<page-settings-desktop
+      embedded
+      id="window-titles"
+      class="wide"
+    ></page-settings-desktop>`,
   },
   disks: {
     after: html`<page-settings-disks

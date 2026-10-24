@@ -1,4 +1,5 @@
 import {
+  mdiApplicationOutline,
   mdiCogOutline,
   mdiConsoleLine,
   mdiContentSave,
@@ -208,10 +209,10 @@ const elsewhere = [
     section: "commands",
   },
   {
-    label: "Media directories",
-    icon: mdiFolderMultipleOutline,
-    module: "media",
-    section: "media-directories",
+    label: "Discord",
+    icon: mdiHeadset,
+    module: "discord",
+    section: "discord-setup",
   },
   {
     label: "Disk mounts",
@@ -220,10 +221,16 @@ const elsewhere = [
     section: "disk-mounts",
   },
   {
-    label: "Discord",
-    icon: mdiHeadset,
-    module: "discord",
-    section: "discord-setup",
+    label: "Media directories",
+    icon: mdiFolderMultipleOutline,
+    module: "media",
+    section: "media-directories",
+  },
+  {
+    label: "Window titles",
+    icon: mdiApplicationOutline,
+    module: "desktop",
+    section: "window-titles",
   },
 ] as const;
 

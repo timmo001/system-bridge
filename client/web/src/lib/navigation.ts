@@ -1,5 +1,6 @@
 import {
   mdiApplicationCogOutline,
+  mdiApplicationOutline,
   mdiBattery,
   mdiBluetooth,
   mdiCogOutline,
@@ -49,6 +50,11 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
     label: "CPU",
     description: "Usage, frequency and each core",
     icon: mdiCpu64Bit,
+  },
+  desktop: {
+    label: "Desktop",
+    description: "Windows, workspaces and the keyboard layout",
+    icon: mdiApplicationOutline,
   },
   discord: {
     label: "Discord",
