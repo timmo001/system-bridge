@@ -40,6 +40,7 @@ FIXTURE_SYSTEM = System(
     ],
     ip_address_6="::1",
     pending_reboot=True,
+    package_updates=3,
     version_latest_url="https://github.com/timmo001/system-bridge/releases/latest",
     version_latest="4.99.0",
     version_newer_available=True,
