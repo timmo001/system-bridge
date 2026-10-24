@@ -243,7 +243,7 @@ Panel {
 
                 PanelActionButton {
                   anchors.verticalCenter: parent.verticalCenter
-                  iconText: root.connected ? "󰩈" : ""
+                  iconText: root.connected ? "󰩈" : ""
                   tooltipText: root.connected ? "Quit System Bridge" : "Start System Bridge"
                   foreground: root.contentForeground
                   fontFamily: root.contentFontFamily

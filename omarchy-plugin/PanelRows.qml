@@ -11,12 +11,19 @@ import QtQuick
 QtObject {
   id: root
 
+  // Nerd Font glyphs, escaped so editors and tools can't drop them.
+  readonly property string cpuIcon: ""
+  readonly property string memoryIcon: ""
+  readonly property string processIcon: "\u{F0279}"
+  readonly property string temperatureIcon: "\u{F050F}"
+  readonly property string settingsIcon: "\u{F0493}"
+
   // In the web client's order, grouped the same way.
   readonly property var modules: [
     { module: "system", label: "System", icon: "󰌢", area: "System" },
-    { module: "processes", label: "Processes", icon: "", area: "System" },
-    { module: "cpu", label: "CPU", icon: "", area: "Hardware" },
-    { module: "memory", label: "Memory", icon: "", area: "Hardware" },
+    { module: "processes", label: "Processes", icon: root.processIcon, area: "System" },
+    { module: "cpu", label: "CPU", icon: root.cpuIcon, area: "Hardware" },
+    { module: "memory", label: "Memory", icon: root.memoryIcon, area: "Hardware" },
     { module: "gpus", label: "GPUs", icon: "󰢮", area: "Hardware" },
     { module: "sensors", label: "Sensors", icon: "󰔏", area: "Hardware" },
     { module: "battery", label: "Battery", icon: "󰁹", area: "Hardware" },
@@ -173,15 +180,15 @@ QtObject {
     var section = "At a glance"
     var cpu = service.cpu
     if (service.cpuUsage !== null)
-      rows.push(row({ key: "cpu", section: section, icon: "", primaryText: "CPU", secondaryText: join([percent(service.cpuUsage), frequency(cpu && cpu.frequency ? cpu.frequency.current : null)]), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90), kind: "module", target: "cpu" }))
+      rows.push(row({ key: "cpu", section: section, icon: cpuIcon, primaryText: "CPU", secondaryText: join([percent(service.cpuUsage), frequency(cpu && cpu.frequency ? cpu.frequency.current : null)]), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90), kind: "module", target: "cpu" }))
     var memory = service.memory && service.memory.virtual ? service.memory.virtual : null
     if (service.memoryPercent !== null)
-      rows.push(row({ key: "memory", section: section, icon: "", primaryText: "Memory", secondaryText: join([percent(service.memoryPercent), memory && present(memory.used) ? bytes(memory.used) + " of " + bytes(memory.total) : ""]), meter: service.memoryPercent, meterLevel: level(service.memoryPercent, 80, 90), kind: "module", target: "memory" }))
+      rows.push(row({ key: "memory", section: section, icon: memoryIcon, primaryText: "Memory", secondaryText: join([percent(service.memoryPercent), memory && present(memory.used) ? bytes(memory.used) + " of " + bytes(memory.total) : ""]), meter: service.memoryPercent, meterLevel: level(service.memoryPercent, 80, 90), kind: "module", target: "memory" }))
     var gpu = service.gpus.length > 0 ? service.gpus[0] : null
     if (gpu && num(gpu.core_load) !== null)
       rows.push(row({ key: "gpu", section: section, icon: "󰢮", primaryText: text(gpu.name) || "GPU", secondaryText: percent(gpu.core_load), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90), kind: "module", target: "gpus" }))
     if (service.cpuTemperature !== null)
-      rows.push(row({ key: "cpu-temperature", section: section, icon: "", primaryText: "CPU temperature", secondaryText: temperature(service.cpuTemperature), meter: Math.min(100, service.cpuTemperature), meterLevel: level(service.cpuTemperature, 80, 90), kind: "module", target: "sensors" }))
+      rows.push(row({ key: "cpu-temperature", section: section, icon: temperatureIcon, primaryText: "CPU temperature", secondaryText: temperature(service.cpuTemperature), meter: Math.min(100, service.cpuTemperature), meterLevel: level(service.cpuTemperature, 80, 90), kind: "module", target: "sensors" }))
     var battery = service.battery
     if (battery && num(battery.percentage) !== null)
       rows.push(row({ key: "battery", section: section, icon: battery.is_charging ? "󰂄" : "󰁹", primaryText: "Battery", secondaryText: join([percent(battery.percentage), battery.is_charging ? "Charging" : ""]), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true), kind: "module", target: "battery" }))
@@ -237,14 +244,14 @@ QtObject {
     if (system) {
       var device = system.device_info || {}
       reading(rows, "hostname", "", "󰌢", "Hostname", text(system.hostname))
-      reading(rows, "platform", "", "", "Platform", join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), text(system.kernel_version)]))
+      reading(rows, "platform", "", "\u{F033D}", "Platform", join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), text(system.kernel_version)]))
       reading(rows, "device", "", "󰟀", "Device", join([text(device.manufacturer), text(device.model)]))
       reading(rows, "uptime", "", "󰅐", "Uptime", duration(system.uptime))
       reading(rows, "pending-reboot", "", "󰜉", "Restart required", yesNo(system.pending_reboot))
       reading(rows, "power", "", "󱐋", "Power", watts(system.power_usage))
-      reading(rows, "users", "", "", "Users", Array.isArray(system.users) ? system.users.map(function(user) { return text(user.name) }).filter(function(name, index, all) { return name !== "" && all.indexOf(name) === index }).join(", ") : "")
+      reading(rows, "users", "", "\u{F000E}", "Users", Array.isArray(system.users) ? system.users.map(function(user) { return text(user.name) }).filter(function(name, index, all) { return name !== "" && all.indexOf(name) === index }).join(", ") : "")
       reading(rows, "camera", "", "󰄀", "Camera in use", Array.isArray(system.camera_usage) ? system.camera_usage.join(", ") : "")
-      reading(rows, "microphone", "", "", "Microphone in use", Array.isArray(system.microphone_usage) ? system.microphone_usage.join(", ") : "")
+      reading(rows, "microphone", "", "\u{F036C}", "Microphone in use", Array.isArray(system.microphone_usage) ? system.microphone_usage.join(", ") : "")
       reading(rows, "ipv4", "Network", "󰩟", "IPv4", text(system.ip_address_4))
       reading(rows, "ipv6", "Network", "󰩟", "IPv6", text(system.ip_address_6))
       reading(rows, "mac", "Network", "󰛳", "MAC address", text(system.mac_address))
@@ -252,7 +259,7 @@ QtObject {
       if (system.version_newer_available === true && present(system.version_latest_url))
         rows.push(row({ key: "update", section: "System Bridge", icon: "󰚰", primaryText: "See what's new", secondaryText: "Release notes for " + text(system.version_latest), kind: "url", target: String(system.version_latest_url) }))
     }
-    rows.push(webRow("web-commands", "In the web client", "", "Commands", "Run and set up commands", "/system#commands"))
+    rows.push(webRow("web-commands", "In the web client", "\u{F018D}", "Commands", "Run and set up commands", "/system#commands"))
     rows.push(webRow("web-notifications", "In the web client", "󰂚", "Notifications", "Send a notification", "/system#notifications"))
     rows.push(webRow("web-open", "In the web client", "󰏌", "Open", "Open a URL or path", "/system#open"))
     return rows
@@ -262,11 +269,11 @@ QtObject {
     var rows = []
     var list = service.processes.slice().sort(function(a, b) { return (num(b.cpu_usage) || 0) - (num(a.cpu_usage) || 0) })
     if (service.modules.processes)
-      reading(rows, "count", "", "", "Running", quantity(service.processes.length, "process", "processes"))
+      reading(rows, "count", "", processIcon, "Running", quantity(service.processes.length, "process", "processes"))
     for (var i = 0; i < Math.min(10, list.length); i++) {
       var process = list[i]
       rows.push(row({
-        key: "process-" + process.id, section: "Busiest", icon: "",
+        key: "process-" + process.id, section: "Busiest", icon: "\u{F08C6}",
         primaryText: text(process.name) || "Process " + process.id,
         secondaryText: join(["CPU " + percent(process.cpu_usage), "memory " + percent((num(process.memory_usage) || 0) * 100), text(process.username)])
       }))
@@ -280,20 +287,20 @@ QtObject {
     var cpu = service.cpu
     if (!cpu) return rows
     if (service.cpuUsage !== null)
-      rows.push(row({ key: "usage", icon: "", primaryText: "Usage", secondaryText: percent(service.cpuUsage), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90) }))
-    reading(rows, "name", "", "", "Processor", join([text(cpu.name), present(cpu.count) ? quantity(num(cpu.count), "thread") : ""]))
+      rows.push(row({ key: "usage", icon: cpuIcon, primaryText: "Usage", secondaryText: percent(service.cpuUsage), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90) }))
+    reading(rows, "name", "", cpuIcon, "Processor", join([text(cpu.name), present(cpu.count) ? quantity(num(cpu.count), "thread") : ""]))
     var range = cpu.frequency && present(cpu.frequency.min) && present(cpu.frequency.max) && num(cpu.frequency.max) > 0
       ? frequency(cpu.frequency.min) + " to " + frequency(cpu.frequency.max) : ""
     reading(rows, "frequency", "", "󰓅", "Frequency", join([frequency(cpu.frequency ? cpu.frequency.current : null), range]))
     reading(rows, "load", "", "󰓅", "Load average", num(cpu.load_average) === null ? "" : num(cpu.load_average).toFixed(2))
-    reading(rows, "temperature", "", "", "Temperature", temperature(cpu.temperature))
+    reading(rows, "temperature", "", temperatureIcon, "Temperature", temperature(cpu.temperature))
     reading(rows, "power", "", "󱐋", "Power", watts(cpu.power))
     reading(rows, "voltage", "", "󱐋", "Voltage", num(cpu.voltage) === null ? "" : num(cpu.voltage).toFixed(2) + " V")
     var cores = Array.isArray(cpu.per_cpu) ? cpu.per_cpu : []
     for (var i = 0; i < cores.length; i++) {
       var core = cores[i]
       rows.push(row({
-        key: "core-" + core.id, section: "Cores", icon: "",
+        key: "core-" + core.id, section: "Cores", icon: cpuIcon,
         primaryText: "Core " + core.id,
         secondaryText: join([percent(core.usage), frequency(core.frequency ? core.frequency.current : null)]),
         meter: num(core.usage), meterLevel: level(core.usage, 80, 90)
@@ -308,9 +315,9 @@ QtObject {
     if (!memory) return rows
     var virtual = memory.virtual
     if (virtual)
-      rows.push(row({ key: "memory", icon: "", primaryText: "Memory", secondaryText: join([percent(virtual.percent), bytes(virtual.used) + " of " + bytes(virtual.total)]), meter: num(virtual.percent), meterLevel: level(virtual.percent, 80, 90) }))
-    if (virtual) reading(rows, "available", "", "", "Available", bytes(virtual.available))
-    if (virtual) reading(rows, "cached", "", "", "Cached", bytes(virtual.cached))
+      rows.push(row({ key: "memory", icon: memoryIcon, primaryText: "Memory", secondaryText: join([percent(virtual.percent), bytes(virtual.used) + " of " + bytes(virtual.total)]), meter: num(virtual.percent), meterLevel: level(virtual.percent, 80, 90) }))
+    if (virtual) reading(rows, "available", "", memoryIcon, "Available", bytes(virtual.available))
+    if (virtual) reading(rows, "cached", "", memoryIcon, "Cached", bytes(virtual.cached))
     var swap = memory.swap
     if (swap && num(swap.total) > 0)
       rows.push(row({ key: "swap", icon: "󰾴", primaryText: "Swap", secondaryText: join([percent(swap.percent), bytes(swap.used) + " of " + bytes(swap.total)]), meter: num(swap.percent), meterLevel: level(swap.percent, 80, 90) }))
@@ -326,10 +333,10 @@ QtObject {
       if (num(gpu.core_load) !== null)
         rows.push(row({ key: key + "-load", section: section, icon: "󰓅", primaryText: "Load", secondaryText: percent(gpu.core_load), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90) }))
       if (num(gpu.memory_total) > 0)
-        rows.push(row({ key: key + "-memory", section: section, icon: "", primaryText: "Memory", secondaryText: mebibytes(gpu.memory_used) + " of " + mebibytes(gpu.memory_total), meter: num(gpu.memory_used) / num(gpu.memory_total) * 100, meterLevel: level(num(gpu.memory_used) / num(gpu.memory_total) * 100, 80, 90) }))
+        rows.push(row({ key: key + "-memory", section: section, icon: memoryIcon, primaryText: "Memory", secondaryText: mebibytes(gpu.memory_used) + " of " + mebibytes(gpu.memory_total), meter: num(gpu.memory_used) / num(gpu.memory_total) * 100, meterLevel: level(num(gpu.memory_used) / num(gpu.memory_total) * 100, 80, 90) }))
       reading(rows, key + "-clocks", section, "󰓅", "Clocks", join([gpu.core_clock ? "core " + frequency(gpu.core_clock) : "", gpu.memory_clock ? "memory " + frequency(gpu.memory_clock) : ""]))
       reading(rows, key + "-power", section, "󱐋", "Power", watts(gpu.power_usage))
-      reading(rows, key + "-temperature", section, "", "Temperature", temperature(gpu.temperature))
+      reading(rows, key + "-temperature", section, temperatureIcon, "Temperature", temperature(gpu.temperature))
       reading(rows, key + "-fan", section, "󰈐", "Fan", percent(gpu.fan_speed))
     }
     return rows
@@ -343,7 +350,7 @@ QtObject {
       var limit = num(sensor.critical) > 0 ? num(sensor.critical) : (num(sensor.high) > 0 ? num(sensor.high) : 100)
       var state = service.reaches(sensor.temperature, sensor.critical) ? "danger" : (service.reaches(sensor.temperature, sensor.high) ? "warning" : "normal")
       rows.push(row({
-        key: "temperature-" + sensor.key + "-" + i, section: "Temperatures", icon: "",
+        key: "temperature-" + sensor.key + "-" + i, section: "Temperatures", icon: temperatureIcon,
         primaryText: text(sensor.key) || "Sensor",
         secondaryText: join([temperature(sensor.temperature), num(sensor.high) > 0 ? "high " + temperature(sensor.high) : "", num(sensor.critical) > 0 ? "critical " + temperature(sensor.critical) : ""]),
         meter: Math.min(100, (num(sensor.temperature) || 0) / limit * 100), meterLevel: state
@@ -403,7 +410,7 @@ QtObject {
         }))
       }
     }
-    rows.push(webRow("web-disk-mounts", "In the web client", "", "Choose disks", "Pick which mounts System Bridge reports", "/disks#disk-mounts"))
+    rows.push(webRow("web-disk-mounts", "In the web client", settingsIcon, "Choose disks", "Pick which mounts System Bridge reports", "/disks#disk-mounts"))
     return rows
   }
 
@@ -468,7 +475,7 @@ QtObject {
       }
     }
     rows.push(webRow("web-discord", "In the web client", "󰙯", "All controls", "Volumes, devices, members and sounds", "/discord#discord-controls"))
-    rows.push(webRow("web-discord-setup", "In the web client", "", "Discord setup", "Connect System Bridge to Discord", "/discord#discord-setup"))
+    rows.push(webRow("web-discord-setup", "In the web client", settingsIcon, "Discord setup", "Connect System Bridge to Discord", "/discord#discord-setup"))
     return rows
   }
 }
