@@ -9,6 +9,7 @@ const written = await writeBrandImages({
   background: "#18181b",
   accent: "#a78bfa",
   outputs: {
+    og: "public/social.png",
     socialPreview: "../.github/social-preview.png",
     logo: "public/logo.png",
     appleTouchIcon: "public/apple-touch-icon.png",

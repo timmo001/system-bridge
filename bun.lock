@@ -65,7 +65,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@astrojs/cloudflare": "14.4.2",
-        "@timmo001/docs-kit": "0.1.1",
+        "@timmo001/docs-kit": "0.1.2",
         "blume": "2.2.4",
         "sharp": "0.35.5",
       },
@@ -710,7 +710,7 @@
 
     "@tanstack/table-core": ["@tanstack/table-core@9.3.1", "", { "dependencies": { "@tanstack/store": "^0.11.2" } }, "sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ=="],
 
-    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.1.1", "", { "dependencies": { "sharp": "0.35.5" }, "peerDependencies": { "blume": "2.2.2" } }, "sha512-jDdAW37CRtYPDqC6Tui5v7znklP9m/HGUrmoisNOUkq06g9uzQcrRTdNDjWA1+btvPf/Cul79qJLENLnfIL3fw=="],
+    "@timmo001/docs-kit": ["@timmo001/docs-kit@0.1.2", "", { "dependencies": { "sharp": "0.35.5" }, "peerDependencies": { "blume": "2.2.4" } }, "sha512-U2v/3t4I4R1W4kLMkFX9NYDaO3fwQdcyUCyuik8+jiNubVj1MWXbHPU7lkLok/+k46EkUlWPI9cRcVQPa4Oumg=="],
 
     "@timmo001/effect-system-bridge": ["@timmo001/effect-system-bridge@workspace:connector/typescript"],
 
