@@ -482,10 +482,21 @@ QtObject {
 
   function diskRows(service) {
     var rows = []
+    var io = service.disks ? service.disks.io_counters : null
+    if (io) {
+      reading(rows, "disk-read", "Activity", "󰁅", "Read", join([rate(io.read_bytes_rate), bytes(io.read_bytes) + " total"]))
+      reading(rows, "disk-write", "Activity", "󰁝", "Written", join([rate(io.write_bytes_rate), bytes(io.write_bytes) + " total"]))
+    }
     var devices = service.disks && Array.isArray(service.disks.devices) ? service.disks.devices : []
     for (var i = 0; i < devices.length; i++) {
       var device = devices[i]
       var section = join([text(device.name), temperature(device.temperature)]) || "Disk " + (i + 1)
+      var deviceIO = device.io_counters
+      if (deviceIO)
+        reading(rows, "disk-io-" + device.name, section, "󰓅", "Activity", join([
+          num(deviceIO.read_bytes_rate) !== null ? "Read " + rate(deviceIO.read_bytes_rate) : "",
+          num(deviceIO.write_bytes_rate) !== null ? "Write " + rate(deviceIO.write_bytes_rate) : ""
+        ]))
       var partitions = Array.isArray(device.partitions) ? device.partitions : []
       for (var j = 0; j < partitions.length; j++) {
         var partition = partitions[j]
