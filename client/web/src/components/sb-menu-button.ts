@@ -157,6 +157,9 @@ export class SbMenuButton extends LitElement {
   @property({ type: Boolean, reflect: true, attribute: "narrow-icon" })
   narrowIcon = false;
 
+  /** Shows only the icon as a plain button, keeping the label for assistive technology and as a tooltip. */
+  @property({ type: Boolean, attribute: "icon-only" }) iconOnly = false;
+
   /** Shows a spinner and disables the trigger while an action runs. */
   @property({ type: Boolean }) busy = false;
 
@@ -364,12 +367,14 @@ export class SbMenuButton extends LitElement {
 
     return html`
       <button
-        class="button small trigger"
+        class="button small trigger ${this.iconOnly ? "plain icon-only" : ""}"
         type="button"
         popovertarget="${this.#id}-menu"
         aria-haspopup="menu"
         aria-expanded=${this.open ? "true" : "false"}
         aria-busy=${this.busy ? "true" : "false"}
+        aria-label=${this.iconOnly ? this.label : nothing}
+        title=${this.iconOnly ? this.label : nothing}
         ?disabled=${this.busy}
         @keydown=${this.#onTriggerKeyDown}
       >
@@ -380,8 +385,12 @@ export class SbMenuButton extends LitElement {
               ? nothing
               : icon(this.icon)
         }
-        <span class="label">${this.label}</span>
-        <span class="chevron row">${icon(mdiChevronDown)}</span>
+        ${
+          this.iconOnly
+            ? nothing
+            : html`<span class="label">${this.label}</span>
+                <span class="chevron row">${icon(mdiChevronDown)}</span>`
+        }
       </button>
       <div
         id="${this.#id}-menu"

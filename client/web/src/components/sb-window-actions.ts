@@ -14,7 +14,7 @@ import { customElement, property } from "lit/decorators.js";
 
 import "./sb-menu-button";
 import type { MenuItem } from "./sb-menu-button";
-import { icon, shared, spinner } from "./shared-styles";
+import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
   actionResult,
@@ -37,8 +37,8 @@ const stateLabels = new Map([
 ]);
 
 /**
- * A window's actions: focus it, close it, and a menu to change its state or,
- * on Hyprland, float, pin or move it.
+ * A menu of a window's actions: focus or close it, change its state and, on
+ * Hyprland, float, pin or move it.
  */
 @customElement("sb-window-actions")
 export class SbWindowActions extends LitElement {
@@ -48,12 +48,7 @@ export class SbWindowActions extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-1);
-      }
-
-      .actions {
-        display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: var(--sb-space-1);
       }
     `,
@@ -77,10 +72,6 @@ export class SbWindowActions extends LitElement {
     if (this.window) registry.set(windowAction(this.window.id), action);
   }
 
-  #onFocus = () => this.#run({ _tag: "focus" });
-
-  #onClose = () => this.#run({ _tag: "close" });
-
   #onToggle = (
     event: CustomEvent<{ readonly value: string; readonly checked: boolean }>,
   ) => {
@@ -100,12 +91,34 @@ export class SbWindowActions extends LitElement {
   };
 
   #onSelect = (event: CustomEvent<{ readonly value: string }>) => {
-    const workspace = event.detail.value.replace(/^workspace:/, "");
+    const value = event.detail.value;
 
-    this.#run({ _tag: "move", workspace });
+    switch (value) {
+      case "close":
+        this.#run({ _tag: "close" });
+        break;
+      case "focus":
+        this.#run({ _tag: "focus" });
+        break;
+      default:
+        this.#run({
+          _tag: "move",
+          workspace: value.replace(/^workspace:/, ""),
+        });
+    }
   };
 
   #items(window: DesktopWindow): MenuItem[] {
+    const actions: MenuItem[] = [
+      {
+        value: "focus",
+        label: "Focus",
+        icon: mdiCursorDefaultClickOutline,
+        disabled: window.focused,
+      },
+      { value: "close", label: "Close", icon: mdiClose },
+    ];
+
     const states = (settableStates.get(this.compositor) ?? []).map(
       (state): MenuItem => ({
         value: state,
@@ -121,7 +134,7 @@ export class SbWindowActions extends LitElement {
       }),
     );
 
-    if (this.compositor !== "hyprland") return states;
+    if (this.compositor !== "hyprland") return [...actions, ...states];
 
     const settings: MenuItem[] = [
       {
@@ -152,7 +165,7 @@ export class SbWindowActions extends LitElement {
           ],
     );
 
-    return [...states, ...settings, ...moves];
+    return [...actions, ...states, ...settings, ...moves];
   }
 
   override render() {
@@ -167,42 +180,15 @@ export class SbWindowActions extends LitElement {
     const name = window.app ?? window.title ?? "window";
 
     return html`
-      <div class="actions">
-        ${
-          window.focused
-            ? nothing
-            : html`<button
-                class="button plain small icon-only"
-                type="button"
-                aria-label="Focus ${name}"
-                title="Focus"
-                ?disabled=${value.waiting}
-                @click=${this.#onFocus}
-              >
-                ${value.waiting ? spinner() : icon(mdiCursorDefaultClickOutline)}
-              </button>`
-        }
-        <sb-menu-button
-          narrow-icon
-          label="More"
-          menu-label="Actions for ${name}"
-          .icon=${mdiDotsHorizontal}
-          .busy=${value.waiting}
-          .items=${this.#items(window)}
-          @menu-toggle=${this.#onToggle}
-          @menu-select=${this.#onSelect}
-        ></sb-menu-button>
-        <button
-          class="button plain small icon-only"
-          type="button"
-          aria-label="Close ${name}"
-          title="Close"
-          ?disabled=${value.waiting}
-          @click=${this.#onClose}
-        >
-          ${icon(mdiClose)}
-        </button>
-      </div>
+      <sb-menu-button
+        icon-only
+        label="Actions for ${name}"
+        .icon=${mdiDotsHorizontal}
+        .busy=${value.waiting}
+        .items=${this.#items(window)}
+        @menu-toggle=${this.#onToggle}
+        @menu-select=${this.#onSelect}
+      ></sb-menu-button>
       ${
         result?.success === false
           ? html`<span class="error-text" role="alert">${result.message}</span>`
