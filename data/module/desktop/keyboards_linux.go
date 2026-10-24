@@ -14,6 +14,11 @@ import (
 // Hyprland calls anything with keys a keyboard, such as power buttons, media
 // keys and a keyboard's own system control device. udev only marks devices
 // with a full set of keys as ID_INPUT_KEYBOARD, so that picks out the real ones.
+// It doesn't know virtual keyboards, such as the one an input method like
+// fcitx5 types through, so those are dropped too.
+//
+// Hyprland's main keyboard is whichever last sent a key, which is often an
+// input method's virtual keyboard. Main is kept on the last real one instead.
 
 // duplicateSuffix is what Hyprland adds to a device's name when another device
 // has it already
@@ -23,10 +28,11 @@ var keyboardNames = struct {
 	mu        sync.Mutex
 	key       string          // Hyprland's keyboard names the result is for
 	keyboards map[string]bool // Hyprland's names for the keyboards udev knows
+	main      string          // The last real keyboard Hyprland called main
 }{}
 
-// realKeyboards drops the devices udev doesn't call keyboards, keeping the main
-// one, as it decides the layout. It keeps them all when udev can't tell.
+// realKeyboards drops the devices udev doesn't call keyboards, and moves main
+// onto a real keyboard. It keeps them all when udev can't tell.
 func realKeyboards(keyboards []hyprlandKeyboard) []hyprlandKeyboard {
 	names := make([]string, 0, len(keyboards))
 	for _, keyboard := range keyboards {
@@ -34,27 +40,42 @@ func realKeyboards(keyboards []hyprlandKeyboard) []hyprlandKeyboard {
 	}
 
 	keyboardNames.mu.Lock()
+	defer keyboardNames.mu.Unlock()
 	key := strings.Join(names, "\n")
 	if keyboardNames.key != key || keyboardNames.keyboards == nil {
 		keyboardNames.key, keyboardNames.keyboards = key, udevKeyboards()
 	}
 	known := keyboardNames.keyboards
-	keyboardNames.mu.Unlock()
 
 	if len(known) == 0 {
 		return keyboards
 	}
 	kept := make([]hyprlandKeyboard, 0, len(keyboards))
+	hasMain := false
 	for _, keyboard := range keyboards {
-		if keyboard.Main || known[keyboard.Name] || known[duplicateSuffix.ReplaceAllString(keyboard.Name, "")] {
+		if known[keyboard.Name] || known[duplicateSuffix.ReplaceAllString(keyboard.Name, "")] {
 			kept = append(kept, keyboard)
+			if keyboard.Main {
+				hasMain = true
+				keyboardNames.main = keyboard.Name
+			}
 		}
+	}
+	if !hasMain && len(kept) > 0 {
+		main := 0
+		for i, keyboard := range kept {
+			if keyboard.Name == keyboardNames.main {
+				main = i
+			}
+		}
+		kept[main].Main = true
 	}
 	return kept
 }
 
 // udevKeyboards returns Hyprland's names for the input devices udev marks as
-// keyboards
+// keyboards. Mice with extra buttons can be marked as both, so those are left
+// out.
 func udevKeyboards() map[string]bool {
 	keyboards := map[string]bool{}
 	devices, _ := filepath.Glob("/sys/class/input/event*")
@@ -64,7 +85,9 @@ func udevKeyboards() map[string]bool {
 			continue
 		}
 		properties, err := os.ReadFile(filepath.Join("/run/udev/data", "c"+strings.TrimSpace(string(number))))
-		if err != nil || !bytes.Contains(properties, []byte("\nE:ID_INPUT_KEYBOARD=1\n")) {
+		if err != nil ||
+			!bytes.Contains(properties, []byte("\nE:ID_INPUT_KEYBOARD=1\n")) ||
+			bytes.Contains(properties, []byte("\nE:ID_INPUT_MOUSE=1\n")) {
 			continue
 		}
 		name, err := os.ReadFile(filepath.Join(device, "device", "name"))
