@@ -30,7 +30,7 @@ token: {token}
 </Tab>
 </Tabs>
 
-`{module}` is one of: `audio`, `battery`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
+`{module}` is one of: `audio`, `battery`, `bluetooth`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
 
 ## Response
 
@@ -77,6 +77,23 @@ On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or 
 The top-level battery fields are for the first system battery, and are `null` when there isn't one. `ac_connected` is `null` when the system doesn't report a power supply, as on most desktops, and on macOS.
 
 Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `state`, `percentage`, `time_remaining`, `power`, and `voltage`. On Windows and macOS, batteries are named `BAT0`, `BAT1` and so on, and connected devices usually aren't listed.
+
+### `bluetooth`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `devices` | array | Paired devices, sorted by name. |
+
+Each device has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `address` | string | The device's Bluetooth address, such as `80:C3:BA:7B:93:4E`. |
+| `name` | string | The device's name, or its address when it has none. |
+| `type` | string | A freedesktop icon name for the kind of device, such as `audio-headset`, `input-keyboard` or `phone`. `null` when it's unknown. |
+| `connected` | boolean | Whether the device is connected. |
+
+On Linux, the devices come from BlueZ. On Windows, only classic Bluetooth devices are listed, so Bluetooth LE devices such as some keyboards and mice are left out. On macOS the list is empty.
 
 ### `cpu`
 
