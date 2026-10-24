@@ -120,10 +120,11 @@ System Bridge keeps these files in the [settings directory](/running/#file-locat
 | `settings.json` | Your settings, including the command allowlist and media directories |
 | `token` | Your API token, readable only by your user |
 | `data/{module}.json` | The latest data for each module, rewritten on every update |
+| `data/history.json` | Up to the last 24 hours of the readings the web client graphs, such as CPU, memory, temperatures and network rates, saved every 5 minutes. Readable only by your user |
 | `discord.json` | Your Discord application's credentials, if you set up Discord. Readable only by your user when saved from the web client or the API |
 | `discord-token.json` | Your Discord access token, readable only by your user |
 
-The web client stores the host, port and API token you connect with in your browser's local storage. When you open the web client from the system tray, these are passed in the URL.
+The web client stores the host, port and API token you connect with in your browser's local storage, along with the graphs' time range. When you open the web client from the system tray, these are passed in the URL.
 
 ### Logs
 
