@@ -4,8 +4,6 @@ An Omarchy bar widget and panel for System Bridge. It shows CPU and memory
 usage in the bar. The panel has an overview of the system and a view for every
 module the web client has a page for, with media and Discord controls.
 
-![System Bridge panel in Omarchy](screenshot.png)
-
 ## Requirements
 
 - Omarchy Quattro
@@ -35,15 +33,20 @@ omarchy plugin add \
 
 ## Use
 
-Select the widget to open its panel. It starts on the overview: CPU, memory,
-GPU, CPU temperature and battery meters, storage, network traffic, what's
-playing, and a row for each module.
+Select the widget to open its panel. It starts on the overview, grouped like
+the web client: system, hardware, storage and network, and apps. Each module
+shows up once, with its live readings where it has them, such as CPU, memory,
+GPU, temperature, battery and disk meters, network traffic and what's playing.
 
 Select a reading or a module to open its view. Each view has the module's
 readings, and links to the matching part of the web client for anything you
 set up there, such as commands, disk mounts, media directories or Discord. The
 media view has previous, play or pause, and next; the Discord view has mute,
 deafen and leave call.
+
+Select a section heading to collapse or expand it. Collapsed sections stay
+collapsed until you expand them again or the shell restarts, and filtering
+shows every match whether its section is collapsed or not.
 
 Type to filter the rows, use Up and Down to move through them, and press Enter
 to select one. Backspace or the back button returns to the overview, and Escape
