@@ -830,6 +830,8 @@ export const SystemData = Schema.Struct({
   version_latest: Schema.NullOr(Schema.String),
   version_newer_available: Schema.NullOr(Schema.Boolean),
   device_info: Schema.NullOr(DeviceInfo),
+  idle_time: Schema.NullOr(Schema.Finite),
+  locked: Schema.NullOr(Schema.Boolean),
 });
 
 export interface SystemData extends Schema.Schema.Type<typeof SystemData> {}

@@ -54,4 +54,7 @@ type SystemData struct {
 	VersionLatest         *string      `json:"version_latest" mapstructure:"version_latest"`
 	VersionNewerAvailable *bool        `json:"version_newer_available" mapstructure:"version_newer_available"`
 	DeviceInfo            *DeviceInfo  `json:"device_info" mapstructure:"device_info"`
+	// IdleTime is the seconds since the user's last input
+	IdleTime *uint64 `json:"idle_time" mapstructure:"idle_time"`
+	Locked   *bool   `json:"locked" mapstructure:"locked"`
 }

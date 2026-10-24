@@ -38,5 +38,7 @@
     "bios_vendor": "Example",
     "bios_version": "1.0.0",
     "chassis_type": "Notebook"
-  }
+  },
+  "idle_time": 120,
+  "locked": false
 }

@@ -182,6 +182,8 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 
 	systemData.RunMode = types.RunModeStandalone // Always set RunMode to standalone
 
+	systemData.IdleTime, systemData.Locked = system.GetIdleState()
+
 	// Populate optional fields when available per-OS
 	// Linux: detect camera usage processes, pending reboot, and PSU power usage via subpackage helpers
 	if infoStat.OS == "linux" || infoStat.Platform == "linux" || strings.Contains(strings.ToLower(infoStat.Platform), "arch") || strings.Contains(strings.ToLower(infoStat.Platform), "ubuntu") || strings.Contains(strings.ToLower(infoStat.Platform), "debian") {
