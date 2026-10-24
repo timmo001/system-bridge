@@ -37,7 +37,7 @@ func FetchHistory(ctx context.Context, since time.Time, modules []types.ModuleNa
 		data["modules"] = modules
 	}
 
-	raw, err := request(ctx, event.EventGetHistory, data)
+	raw, err := request(ctx, sendTimeout, event.EventGetHistory, data)
 	if err != nil {
 		return types.MetricHistory{}, err
 	}

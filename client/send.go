@@ -14,6 +14,10 @@ import (
 
 const sendTimeout = 10 * time.Second
 
+// SlowSendTimeout is for events the backend can take up to 30 seconds on,
+// such as waking a monitor over DDC/CI
+const SlowSendTimeout = 35 * time.Second
+
 type eventRequest struct {
 	ID    string          `json:"id"`
 	Event event.EventType `json:"event"`
@@ -23,18 +27,23 @@ type eventRequest struct {
 
 // Send sends one event to the local backend and waits for its answer.
 func Send(ctx context.Context, eventType event.EventType, data any) error {
-	_, err := request(ctx, eventType, data)
+	return SendWithin(ctx, sendTimeout, eventType, data)
+}
+
+// SendWithin is Send, waiting up to timeout for the answer.
+func SendWithin(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) error {
+	_, err := request(ctx, timeout, eventType, data)
 	return err
 }
 
 // request sends one event to the local backend and returns the data of its
 // answer, undecoded.
-func request(ctx context.Context, eventType event.EventType, data any) (json.RawMessage, error) {
+func request(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {
 	token, err := utils.LoadToken()
 	if err != nil {
 		return nil, fmt.Errorf("load token: %w", err)
 	}
-	ctx, cancel := context.WithTimeout(ctx, sendTimeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	url := fmt.Sprintf("ws://127.0.0.1:%d/api/websocket", utils.GetPort())
