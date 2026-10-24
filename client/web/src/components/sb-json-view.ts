@@ -203,8 +203,12 @@ export class SbJsonView extends LitElement {
           foldGutter(),
           search({
             top: true,
-            scrollToMatch: (range) =>
-              EditorView.scrollIntoView(range, { y: "center" }),
+            // A third of the way down, so the lines before it show too
+            scrollToMatch: (range, view) =>
+              EditorView.scrollIntoView(range, {
+                y: "start",
+                yMargin: view.scrollDOM.clientHeight / 3,
+              }),
           }),
           // Keeps the buttons clear of the search panel above the data
           EditorView.updateListener.of((update) => {
