@@ -75,3 +75,78 @@ This will look something like this:
     "module": "system"
 }
 ```
+
+## Getting history
+
+System Bridge keeps up to the last 24 hours of the graphed readings and keeps them through restarts. It records about one a minute of each:
+
+- CPU usage, temperature, frequency, power and load average
+- Memory, swap and battery
+- System power
+- Network and disk rates, and each disk's temperature
+- Each GPU's core and memory load, temperature and power
+- Each temperature sensor and fan speed
+
+Readings a system doesn't report are left out.
+
+Send the `GET_HISTORY` event to get them. With no data it returns everything it holds. Pass `since`, in Unix milliseconds, to get only readings taken after that time, such as the newest one you already have.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "GET_HISTORY",
+    "data": { "since": 1761300000000 }
+}
+```
+
+It responds with the `HISTORY` type. Each series is a list of readings, oldest first, with `time` in Unix milliseconds. Usage and loads are percentages, temperatures are in °C, frequency is in MHz, power is in watts and fan speeds are in RPM. Network and disk values are rates in bytes per second. Disks are listed by name, and sensors and fans by their key.
+
+```json title="Response"
+{
+    "id": "abc123",
+    "type": "HISTORY",
+    "subtype": "NONE",
+    "data": {
+        "cpu": [
+            { "time": 1761300060000, "value": 12.5 },
+            { "time": 1761300120000, "value": 18.2 }
+        ],
+        "cpu_temperature": [{ "time": 1761300060000, "value": 61 }],
+        "cpu_frequency": [{ "time": 1761300060000, "value": 4850 }],
+        "cpu_power": [{ "time": 1761300060000, "value": 65.2 }],
+        "load_average": [{ "time": 1761300060000, "value": 1.8 }],
+        "memory": [{ "time": 1761300060000, "value": 48.1 }],
+        "swap": [],
+        "battery": [],
+        "system_power": [],
+        "network_receive": [{ "time": 1761300060000, "value": 20480 }],
+        "network_send": [{ "time": 1761300060000, "value": 5120 }],
+        "disk_read": [],
+        "disk_write": [],
+        "disk_temperatures": [
+            {
+                "id": "nvme0n1",
+                "samples": [{ "time": 1761300060000, "value": 42 }]
+            }
+        ],
+        "gpus": [
+            {
+                "id": "gpu0",
+                "core_load": [{ "time": 1761300060000, "value": 7 }],
+                "memory_load": [{ "time": 1761300060000, "value": 31.5 }],
+                "temperature": [{ "time": 1761300060000, "value": 48 }],
+                "power": [{ "time": 1761300060000, "value": 21.4 }]
+            }
+        ],
+        "temperatures": [],
+        "fans": [
+            {
+                "id": "nct6799_fan2",
+                "samples": [{ "time": 1761300060000, "value": 1180 }]
+            }
+        ]
+    },
+    "message": "Got history"
+}
+```

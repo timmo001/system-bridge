@@ -12,6 +12,7 @@ const (
 	EventGetDiskMounts          EventType = "GET_DISK_MOUNTS"
 	EventGetFiles               EventType = "GET_FILES"
 	EventGetFile                EventType = "GET_FILE"
+	EventGetHistory             EventType = "GET_HISTORY"
 	EventGetSettings            EventType = "GET_SETTINGS"
 	EventKeyboardKeypress       EventType = "KEYBOARD_KEYPRESS"
 	EventKeyboardText           EventType = "KEYBOARD_TEXT"

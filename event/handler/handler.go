@@ -15,6 +15,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterGetDiskMountsHandler(router)
 	RegisterGetFilesHandler(router)
 	RegisterGetFileHandler(router)
+	RegisterGetHistoryHandler(router, dataStore)
 	RegisterGetDirectoryHandler(router)
 	RegisterGetSettingsHandler(router)
 	RegisterKeyboardKeypressHandler(router)

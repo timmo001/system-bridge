@@ -15,6 +15,7 @@ const (
 	ResponseTypeDiscordSetupUpdated      ResponseType = "DISCORD_SETUP_UPDATED"
 	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeFile                     ResponseType = "FILE"
+	ResponseTypeHistory                  ResponseType = "HISTORY"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"
 	ResponseTypeKeyboardTextSent         ResponseType = "KEYBOARD_TEXT_SENT"
 	ResponseTypeMediaControlled          ResponseType = "MEDIA_CONTROLLED"
