@@ -187,6 +187,9 @@ func mapGoTypeToEffectSchema(field FieldInfo, parentStruct string, structs map[s
 	if field.IsPtr {
 		schema = fmt.Sprintf("Schema.NullOr(%s)", schema)
 	}
+	if field.IsMap {
+		schema = fmt.Sprintf("Schema.Record(Schema.String, %s)", schema)
+	}
 	if field.OmitEmpty {
 		schema = fmt.Sprintf("Schema.optionalKey(%s)", schema)
 	}
@@ -216,6 +219,9 @@ func mapGoTypeToTypeScript(field FieldInfo, structs map[string]StructInfo, enums
 	}
 	if field.IsPtr {
 		tsType += " | null"
+	}
+	if field.IsMap {
+		tsType = fmt.Sprintf("{ readonly [key: string]: %s }", tsType)
 	}
 	return tsType
 }

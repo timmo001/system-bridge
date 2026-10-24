@@ -11,9 +11,11 @@ import (
 	"runtime"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/event"
 	settingspkg "github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/tray"
+	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils"
 	"github.com/timmo001/system-bridge/utils/handlers/settings"
 	"github.com/timmo001/system-bridge/utils/logging"
@@ -26,7 +28,7 @@ type UpdateSettingsResponseData = settings.Settings
 //go:embed system-bridge.autostart.desktop
 var linuxAutostartDesktopFile []byte
 
-func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
+func RegisterUpdateSettingsHandler(router *event.MessageRouter, dataStore *data.DataStore) {
 	router.RegisterSimpleHandler(event.EventUpdateSettings, func(connection string, message event.Message) event.MessageResponse {
 		slog.Info("Received update settings event", "message", message)
 
@@ -177,6 +179,12 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter) {
 		if originalSettings.LogLevel != newSettings.LogLevel {
 			slog.Info("LogLevel has changed:", "original", originalSettings.LogLevel, "new", newSettings.LogLevel)
 			logging.SetLogLevel(newSettings.LogLevel.ToSlogLevel())
+		}
+
+		if dataStore != nil && originalSettings.Desktop != newSettings.Desktop {
+			if err := dataStore.TriggerModuleUpdate(types.ModuleDesktop); err != nil {
+				slog.Warn("Failed to trigger desktop module update", "error", err)
+			}
 		}
 
 		return event.MessageResponse{

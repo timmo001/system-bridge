@@ -34,6 +34,6 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterRegisterDataListenerHandler(router)
 	RegisterUnregisterDataListenerHandler(router)
 	RegisterUpdateDiscordSetupHandler(router)
-	RegisterUpdateSettingsHandler(router)
+	RegisterUpdateSettingsHandler(router, dataStore)
 	RegisterValidateDirectoryHandler(router)
 }

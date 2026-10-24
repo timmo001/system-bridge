@@ -44,6 +44,7 @@ func TestNewDataStore(t *testing.T) {
 			types.ModuleBattery,
 			types.ModuleBluetooth,
 			types.ModuleCPU,
+			types.ModuleDesktop,
 			types.ModuleDisks,
 			types.ModuleDisplays,
 			types.ModuleGPUs,

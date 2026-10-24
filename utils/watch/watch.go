@@ -50,6 +50,27 @@ func Retry(ctx context.Context, delay time.Duration, name string, follow func(co
 	}
 }
 
+// Changes returns a check that calls changed whenever read returns something
+// different from its last reading, for sources whose events don't all change
+// what a module reports. Readings that fail are skipped.
+func Changes[T any](read func() (T, error), changed func()) (check func()) {
+	var mu sync.Mutex
+	var last T
+	var have bool
+	return func() {
+		mu.Lock()
+		defer mu.Unlock()
+		current, err := read()
+		if err != nil {
+			return
+		}
+		if have && !reflect.DeepEqual(current, last) {
+			changed()
+		}
+		last, have = current, true
+	}
+}
+
 // Poll calls changed whenever read returns something different from its last
 // reading, checking every interval until ctx is done. It's for sources that
 // can't report their changes, so read must be cheap.
@@ -57,21 +78,13 @@ func Poll[T any](ctx context.Context, interval time.Duration, read func() (T, er
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	var last T
-	var have bool
+	check := Changes(read, changed)
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
 		}
-		current, err := read()
-		if err != nil {
-			continue
-		}
-		if have && !reflect.DeepEqual(current, last) {
-			changed()
-		}
-		last, have = current, true
+		check()
 	}
 }

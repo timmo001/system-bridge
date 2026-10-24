@@ -17,7 +17,7 @@ func TestUpdateSettingsPreservesTrayForOlderClients(t *testing.T) {
 	cfg, err := settings.Load()
 	require.NoError(t, err)
 	router := event.NewMessageRouter()
-	RegisterUpdateSettingsHandler(router)
+	RegisterUpdateSettingsHandler(router, nil)
 	for _, enabled := range []bool{true, false} {
 		cfg.SystemTray = enabled
 		require.NoError(t, cfg.Save())
@@ -63,11 +63,12 @@ func TestUpdateSettingsPartialPayloadPreservesOtherFields(t *testing.T) {
 	require.NoError(t, cfg.Save())
 
 	router := event.NewMessageRouter()
-	RegisterUpdateSettingsHandler(router)
+	RegisterUpdateSettingsHandler(router, nil)
 	response := router.HandleMessage("test", event.Message{
 		ID: "settings", Event: event.EventUpdateSettings,
 		Data: map[string]any{
 			"autostart": true,
+			"desktop":   map[string]any{"windowTitles": true},
 			"logLevel":  "INFO",
 		},
 	})
@@ -76,6 +77,7 @@ func TestUpdateSettingsPartialPayloadPreservesOtherFields(t *testing.T) {
 	loaded, err := settings.Load()
 	require.NoError(t, err)
 	require.True(t, loaded.Autostart)
+	require.True(t, loaded.Desktop.WindowTitles)
 	require.True(t, loaded.SystemTray)
 	require.Equal(t, settings.LogLevelInfo, loaded.LogLevel)
 	require.Equal(t, cfg.Hotkeys, loaded.Hotkeys)
@@ -122,6 +124,7 @@ func TestUpdateSettingsPartialPayloadPreservesOtherFields(t *testing.T) {
 	require.False(t, loaded.SystemTray)
 	require.Empty(t, loaded.Commands.Allowlist)
 	require.True(t, loaded.Autostart)
+	require.True(t, loaded.Desktop.WindowTitles)
 	require.Equal(t, settings.LogLevelInfo, loaded.LogLevel)
 	require.Equal(t, []settings.SettingsHotkey{{Name: "close", Key: "ctrl+shift+c"}}, loaded.Hotkeys)
 	require.Equal(t, cfg.Disks.AllowedSecondaryMountPoints, loaded.Disks.AllowedSecondaryMountPoints)

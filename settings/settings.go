@@ -102,12 +102,19 @@ type SettingsDisks struct {
 	AllowedSecondaryMountPoints []string `json:"allowedSecondaryMountPoints" mapstructure:"allowedSecondaryMountPoints"`
 }
 
+// SettingsDesktop holds the desktop module's options. Window titles are off by
+// default, as they can hold private information.
+type SettingsDesktop struct {
+	WindowTitles bool `json:"windowTitles" mapstructure:"windowTitles"`
+}
+
 type Settings struct {
 	Autostart  bool             `json:"autostart" mapstructure:"autostart"`
 	SystemTray bool             `json:"systemTray" mapstructure:"systemTray"`
 	Hotkeys    []SettingsHotkey `json:"hotkeys" mapstructure:"hotkeys"`
 	LogLevel   LogLevel         `json:"logLevel" mapstructure:"logLevel"`
 	Commands   SettingsCommands `json:"commands" mapstructure:"commands"`
+	Desktop    SettingsDesktop  `json:"desktop" mapstructure:"desktop"`
 	Disks      SettingsDisks    `json:"disks" mapstructure:"disks"`
 	Media      SettingsMedia    `json:"media" mapstructure:"media"`
 }
@@ -131,6 +138,7 @@ func Load() (*Settings, error) {
 	viper.SetDefault("systemTray", true)
 	viper.SetDefault("hotkeys", []SettingsHotkey{})
 	viper.SetDefault("logLevel", LogLevelWarn)
+	viper.SetDefault("desktop.windowTitles", false)
 	viper.SetDefault("disks.allowedSecondaryMountPoints", []string{})
 	viper.SetDefault("media.directories", []SettingsMediaDirectory{})
 	viper.SetDefault("commands.allowlist", []SettingsCommandDefinition{})
@@ -223,6 +231,7 @@ func (cfg *Settings) Save() error {
 	viper.Set("hotkeys", cfg.Hotkeys)
 	viper.Set("logLevel", string(cfg.LogLevel))
 	viper.Set("commands.allowlist", cfg.Commands.Allowlist)
+	viper.Set("desktop.windowTitles", cfg.Desktop.WindowTitles)
 	viper.Set("disks.allowedSecondaryMountPoints", cfg.Disks.AllowedSecondaryMountPoints)
 	viper.Set("media.directories", cfg.Media.Directories)
 

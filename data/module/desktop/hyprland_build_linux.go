@@ -1,0 +1,540 @@
+//go:build linux
+
+package desktop
+
+import (
+	"cmp"
+	"encoding/json"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+
+	"github.com/timmo001/system-bridge/types"
+)
+
+type hyprlandWorkspaceRef struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type hyprlandClient struct {
+	Address        string               `json:"address"`
+	Mapped         bool                 `json:"mapped"`
+	Hidden         bool                 `json:"hidden"`
+	At             [2]int               `json:"at"`
+	Size           [2]int               `json:"size"`
+	Workspace      hyprlandWorkspaceRef `json:"workspace"`
+	Floating       bool                 `json:"floating"`
+	Monitor        int                  `json:"monitor"`
+	Class          string               `json:"class"`
+	Title          string               `json:"title"`
+	InitialClass   string               `json:"initialClass"`
+	PID            int                  `json:"pid"`
+	XWayland       bool                 `json:"xwayland"`
+	Pinned         bool                 `json:"pinned"`
+	Fullscreen     int                  `json:"fullscreen"`
+	Grouped        []string             `json:"grouped"`
+	Tags           []string             `json:"tags"`
+	Swallowing     string               `json:"swallowing"`
+	FocusHistoryID int                  `json:"focusHistoryID"`
+	InhibitingIdle bool                 `json:"inhibitingIdle"`
+	XDGTag         string               `json:"xdgTag"`
+	ContentType    string               `json:"contentType"`
+	TearingHint    bool                 `json:"tearingHint"`
+}
+
+type hyprlandWorkspace struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	Monitor       string `json:"monitor"`
+	Windows       int    `json:"windows"`
+	HasFullscreen bool   `json:"hasfullscreen"`
+	IsPersistent  bool   `json:"ispersistent"`
+	TiledLayout   string `json:"tiledLayout"`
+}
+
+type hyprlandMonitor struct {
+	ID                    int                  `json:"id"`
+	Name                  string               `json:"name"`
+	ActiveWorkspace       hyprlandWorkspaceRef `json:"activeWorkspace"`
+	SpecialWorkspace      hyprlandWorkspaceRef `json:"specialWorkspace"`
+	Reserved              [4]int               `json:"reserved"` // left, top, right, bottom
+	Scale                 float64              `json:"scale"`
+	Transform             int                  `json:"transform"`
+	DPMSStatus            bool                 `json:"dpmsStatus"`
+	VRR                   bool                 `json:"vrr"`
+	ActivelyTearing       bool                 `json:"activelyTearing"`
+	DirectScanoutTo       string               `json:"directScanoutTo"`
+	Disabled              bool                 `json:"disabled"`
+	CurrentFormat         string               `json:"currentFormat"`
+	MirrorOf              string               `json:"mirrorOf"`
+	ColorManagementPreset string               `json:"colorManagementPreset"`
+}
+
+type hyprlandNamed struct {
+	Name string `json:"name"`
+}
+
+type hyprlandDevices struct {
+	Keyboards []struct {
+		Name              string `json:"name"`
+		Layout            string `json:"layout"`
+		Variant           string `json:"variant"`
+		Options           string `json:"options"`
+		ActiveLayoutIndex int    `json:"active_layout_index"`
+		ActiveKeymap      string `json:"active_keymap"`
+		Main              bool   `json:"main"`
+	} `json:"keyboards"`
+	Mice []struct {
+		Name         string  `json:"name"`
+		DefaultSpeed float64 `json:"defaultSpeed"`
+		ScrollFactor float64 `json:"scrollFactor"`
+	} `json:"mice"`
+	Tablets  []hyprlandNamed `json:"tablets"`
+	Touch    []hyprlandNamed `json:"touch"`
+	Switches []hyprlandNamed `json:"switches"`
+}
+
+// hyprlandLayers are each display's layer surfaces, by level from 0
+// (background) to 3 (overlay)
+type hyprlandLayers map[string]struct {
+	Levels map[string][]struct {
+		Namespace string `json:"namespace"`
+	} `json:"levels"`
+}
+
+// hyprlandState is what one batch of requests reports
+type hyprlandState struct {
+	ActiveWindow struct {
+		Address string `json:"address"`
+	}
+	ActiveWorkspace hyprlandWorkspace
+	Clients         []hyprlandClient
+	Devices         hyprlandDevices
+	Layers          hyprlandLayers
+	Monitors        []hyprlandMonitor
+	Workspaces      []hyprlandWorkspace
+}
+
+// hyprlandStateRequests are the requests for hyprlandState
+var hyprlandStateRequests = []string{"activewindow", "activeworkspace", "clients", "devices", "layers", "monitors", "workspaces"}
+
+func (s *hyprlandState) targets() []any {
+	return []any{&s.ActiveWindow, &s.ActiveWorkspace, &s.Clients, &s.Devices, &s.Layers, &s.Monitors, &s.Workspaces}
+}
+
+// hyprlandConfig is what only changes when the config reloads
+type hyprlandConfig struct {
+	Version struct {
+		Version string `json:"version"`
+		Tag     string `json:"tag"`
+		Commit  string `json:"commit"`
+		Branch  string `json:"branch"`
+	}
+	ConfigErrors    []string
+	GlobalShortcuts []types.HyprlandGlobalShortcut
+	Status          struct {
+		ConfigProvider string `json:"configProvider"`
+		Backend        string `json:"backend"`
+	}
+}
+
+// hyprlandConfigRequests are the requests for hyprlandConfig, with status last
+// as older versions don't know it
+var hyprlandConfigRequests = []string{"version", "configerrors", "globalshortcuts", "status"}
+
+func (c *hyprlandConfig) targets() []any {
+	return []any{&c.Version, &c.ConfigErrors, &c.GlobalShortcuts, &c.Status}
+}
+
+// decodeReplies decodes each reply into its target. Only the last optional
+// targets may be missing, for requests older versions don't know.
+func decodeReplies(replies []json.RawMessage, targets []any, optional int) error {
+	for i, target := range targets {
+		required := i < len(targets)-optional
+		if i >= len(replies) || replies[i] == nil {
+			if required {
+				return fmt.Errorf("no reply from Hyprland to request %d", i)
+			}
+			continue
+		}
+		if err := json.Unmarshal(replies[i], target); err != nil && required {
+			return fmt.Errorf("error decoding Hyprland's reply: %w", err)
+		}
+	}
+	return nil
+}
+
+type hyprlandScreencast struct {
+	owner string
+	name  string
+}
+
+// hyprlandEvents is what only Hyprland's events report
+type hyprlandEvents struct {
+	submap      string
+	screencasts map[hyprlandScreencast]int // Active sessions sharing each target
+	urgent      map[string]bool
+	groupLock   bool
+}
+
+func newHyprlandEvents() hyprlandEvents {
+	return hyprlandEvents{screencasts: map[hyprlandScreencast]int{}, urgent: map[string]bool{}}
+}
+
+// handle applies an event, reporting whether it changed what's reported
+// without needing a new batch of requests
+func (e *hyprlandEvents) handle(name string, data string) bool {
+	switch name {
+	case "submap":
+		changed := e.submap != data
+		e.submap = data
+		return changed
+	case "lockgroups":
+		locked := data == "1"
+		changed := e.groupLock != locked
+		e.groupLock = locked
+		return changed
+	case "screencastv2":
+		parts := strings.SplitN(data, ",", 3)
+		if len(parts) != 3 {
+			return false
+		}
+		key := hyprlandScreencast{owner: parts[1], name: parts[2]}
+		if parts[0] == "1" {
+			e.screencasts[key]++
+		} else if e.screencasts[key] > 0 {
+			e.screencasts[key]--
+			if e.screencasts[key] == 0 {
+				delete(e.screencasts, key)
+			}
+		}
+		return true
+	case "urgent":
+		e.urgent[hyprlandAddress(data)] = true
+	case "activewindowv2", "closewindow":
+		delete(e.urgent, hyprlandAddress(data))
+	}
+	return false
+}
+
+// screencastType reads a share's owner, which Hyprland gives as a number
+func screencastType(owner string) (types.HyprlandScreencastType, bool) {
+	switch owner {
+	case "0", string(types.HyprlandScreencastTypeMonitor):
+		return types.HyprlandScreencastTypeMonitor, true
+	case "1", string(types.HyprlandScreencastTypeWindow):
+		return types.HyprlandScreencastTypeWindow, true
+	case "2", string(types.HyprlandScreencastTypeRegion):
+		return types.HyprlandScreencastTypeRegion, true
+	}
+	return "", false
+}
+
+func hyprlandFullscreenMode(mode int) types.HyprlandFullscreenMode {
+	switch mode {
+	case 0:
+		return types.HyprlandFullscreenModeNone
+	case 1:
+		return types.HyprlandFullscreenModeMaximised
+	default:
+		return types.HyprlandFullscreenModeFullscreen
+	}
+}
+
+// buildHyprland turns what Hyprland reports into the module's data, leaving
+// out window titles unless titles is set
+func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEvents, titles bool) types.DesktopData {
+	monitorNames := make(map[int]string, len(state.Monitors))
+	visibleWorkspaces := map[int]bool{}
+	for _, monitor := range state.Monitors {
+		monitorNames[monitor.ID] = monitor.Name
+		visibleWorkspaces[monitor.ActiveWorkspace.ID] = true
+		if monitor.SpecialWorkspace.ID != 0 {
+			visibleWorkspaces[monitor.SpecialWorkspace.ID] = true
+		}
+	}
+	monitorName := func(id int) *string {
+		if name, ok := monitorNames[id]; ok {
+			return &name
+		}
+		return nil
+	}
+
+	data := types.DesktopData{
+		Compositor: types.DesktopCompositorHyprland,
+		Keyboard:   types.DesktopKeyboard{Layouts: []string{}},
+		Windows:    make([]types.DesktopWindow, 0, len(state.Clients)),
+		Workspaces: make([]types.DesktopWorkspace, 0, len(state.Workspaces)),
+	}
+	if state.ActiveWorkspace.Name != "" {
+		data.FocusedWorkspace = pointer(strconv.Itoa(state.ActiveWorkspace.ID))
+	}
+
+	hyprland := types.HyprlandData{
+		Version: types.HyprlandVersion{
+			Version:        config.Version.Version,
+			Tag:            config.Version.Tag,
+			Commit:         config.Version.Commit,
+			Branch:         config.Version.Branch,
+			ConfigProvider: nonEmpty(config.Status.ConfigProvider),
+			Backend:        nonEmpty(config.Status.Backend),
+		},
+		Submap:          nonEmpty(events.submap),
+		Screencasts:     []types.HyprlandScreencast{},
+		ConfigErrors:    []string{},
+		GroupLock:       events.groupLock,
+		Displays:        make(map[string]types.HyprlandDisplay, len(state.Monitors)),
+		Keyboards:       make([]types.HyprlandKeyboard, 0, len(state.Devices.Keyboards)),
+		Mice:            make([]types.HyprlandMouse, 0, len(state.Devices.Mice)),
+		Tablets:         deviceNames(state.Devices.Tablets),
+		Touch:           deviceNames(state.Devices.Touch),
+		Switches:        deviceNames(state.Devices.Switches),
+		GlobalShortcuts: []types.HyprlandGlobalShortcut{},
+		Windows:         make(map[string]types.HyprlandWindow, len(state.Clients)),
+		Workspaces:      make(map[string]types.HyprlandWorkspace, len(state.Workspaces)),
+	}
+	for _, configError := range config.ConfigErrors {
+		if configError != "" {
+			hyprland.ConfigErrors = append(hyprland.ConfigErrors, configError)
+		}
+	}
+	if config.GlobalShortcuts != nil {
+		hyprland.GlobalShortcuts = config.GlobalShortcuts
+	}
+
+	for _, client := range state.Clients {
+		if !client.Mapped || client.Address == "" {
+			continue
+		}
+		focused := client.Address == state.ActiveWindow.Address
+		if focused {
+			data.FocusedWindow = pointer(client.Address)
+		}
+		window := types.DesktopWindow{
+			ID:             client.Address,
+			App:            nonEmpty(client.Class),
+			Display:        monitorName(client.Monitor),
+			X:              pointer(client.At[0]),
+			Y:              pointer(client.At[1]),
+			Width:          pointer(client.Size[0]),
+			Height:         pointer(client.Size[1]),
+			Focused:        focused,
+			Fullscreen:     pointer(client.Fullscreen >= 2),
+			Maximised:      pointer(client.Fullscreen == 1),
+			Floating:       pointer(client.Floating),
+			Urgent:         pointer(events.urgent[client.Address]),
+			InhibitingIdle: pointer(client.InhibitingIdle),
+		}
+		if titles {
+			window.Title = nonEmpty(client.Title)
+		}
+		if client.PID > 0 {
+			window.PID = pointer(client.PID)
+		}
+		if client.Workspace.Name != "" {
+			window.Workspace = pointer(strconv.Itoa(client.Workspace.ID))
+		}
+		if client.ContentType != "none" {
+			window.ContentType = nonEmpty(client.ContentType)
+		}
+		data.Windows = append(data.Windows, window)
+
+		extra := types.HyprlandWindow{
+			FullscreenMode: hyprlandFullscreenMode(client.Fullscreen),
+			Pinned:         client.Pinned,
+			XWayland:       client.XWayland,
+			Hidden:         client.Hidden,
+			Group:          orEmpty(client.Grouped),
+			Tags:           orEmpty(client.Tags),
+			FocusHistory:   client.FocusHistoryID,
+			InitialApp:     nonEmpty(client.InitialClass),
+			XDGTag:         nonEmpty(client.XDGTag),
+			TearingHint:    client.TearingHint,
+		}
+		if client.Swallowing != "0x0" {
+			extra.Swallowing = nonEmpty(client.Swallowing)
+		}
+		hyprland.Windows[client.Address] = extra
+	}
+
+	for _, workspace := range state.Workspaces {
+		id := strconv.Itoa(workspace.ID)
+		data.Workspaces = append(data.Workspaces, types.DesktopWorkspace{
+			ID:         id,
+			Name:       nonEmpty(workspace.Name),
+			Display:    nonEmpty(workspace.Monitor),
+			Active:     visibleWorkspaces[workspace.ID],
+			Focused:    data.FocusedWorkspace != nil && *data.FocusedWorkspace == id,
+			Special:    pointer(strings.HasPrefix(workspace.Name, "special:")),
+			Windows:    pointer(workspace.Windows),
+			Fullscreen: pointer(workspace.HasFullscreen),
+		})
+		hyprland.Workspaces[id] = types.HyprlandWorkspace{
+			Layout:     nonEmpty(workspace.TiledLayout),
+			Persistent: workspace.IsPersistent,
+		}
+	}
+	slices.SortStableFunc(data.Workspaces, func(a, b types.DesktopWorkspace) int {
+		left, _ := strconv.Atoi(a.ID)
+		right, _ := strconv.Atoi(b.ID)
+		return cmp.Compare(left, right)
+	})
+
+	for _, monitor := range state.Monitors {
+		if monitor.Disabled {
+			continue
+		}
+		display := types.HyprlandDisplay{
+			Scale:         monitor.Scale,
+			Transform:     monitor.Transform,
+			VRR:           monitor.VRR,
+			Tearing:       monitor.ActivelyTearing,
+			DirectScanout: monitor.DirectScanoutTo != "" && monitor.DirectScanoutTo != "0",
+			ColourPreset:  nonEmpty(monitor.ColorManagementPreset),
+			Format:        nonEmpty(monitor.CurrentFormat),
+			DPMS:          monitor.DPMSStatus,
+			Reserved: types.HyprlandReserved{
+				Left:   monitor.Reserved[0],
+				Top:    monitor.Reserved[1],
+				Right:  monitor.Reserved[2],
+				Bottom: monitor.Reserved[3],
+			},
+			Layers: types.HyprlandLayers{
+				Background: layerNamespaces(state.Layers, monitor.Name, "0"),
+				Bottom:     layerNamespaces(state.Layers, monitor.Name, "1"),
+				Top:        layerNamespaces(state.Layers, monitor.Name, "2"),
+				Overlay:    layerNamespaces(state.Layers, monitor.Name, "3"),
+			},
+		}
+		if mirrorID, err := strconv.Atoi(monitor.MirrorOf); err == nil {
+			display.MirrorOf = monitorName(mirrorID)
+		}
+		if monitor.SpecialWorkspace.ID != 0 {
+			display.SpecialWorkspace = pointer(strconv.Itoa(monitor.SpecialWorkspace.ID))
+		}
+		hyprland.Displays[monitor.Name] = display
+	}
+
+	for _, keyboard := range state.Devices.Keyboards {
+		layouts := []string{}
+		for layout := range strings.SplitSeq(keyboard.Layout, ",") {
+			if layout = strings.TrimSpace(layout); layout != "" {
+				layouts = append(layouts, layout)
+			}
+		}
+		hyprland.Keyboards = append(hyprland.Keyboards, types.HyprlandKeyboard{
+			Name:         keyboard.Name,
+			Layouts:      layouts,
+			Variant:      nonEmpty(keyboard.Variant),
+			Options:      nonEmpty(keyboard.Options),
+			ActiveLayout: keyboard.ActiveLayoutIndex,
+			ActiveKeymap: nonEmpty(keyboard.ActiveKeymap),
+			Main:         keyboard.Main,
+		})
+	}
+	if main := mainKeyboard(hyprland.Keyboards); main != nil {
+		data.Keyboard.Layouts = main.Layouts
+		data.Keyboard.Name = main.ActiveKeymap
+		if main.ActiveLayout >= 0 && main.ActiveLayout < len(main.Layouts) {
+			data.Keyboard.Layout = pointer(main.Layouts[main.ActiveLayout])
+		}
+	}
+	for _, mouse := range state.Devices.Mice {
+		hyprland.Mice = append(hyprland.Mice, types.HyprlandMouse{
+			Name:         mouse.Name,
+			Speed:        mouse.DefaultSpeed,
+			ScrollFactor: mouse.ScrollFactor,
+		})
+	}
+
+	for share := range events.screencasts {
+		shareType, ok := screencastType(share.owner)
+		if !ok {
+			continue
+		}
+		screencast := types.HyprlandScreencast{Type: shareType}
+		if shareType == types.HyprlandScreencastTypeWindow {
+			// Hyprland names a shared window by its title, which is only used to
+			// find its ID
+			screencast.Window = windowWithTitle(state.Clients, share.name)
+		} else if _, ok := hyprland.Displays[share.name]; ok {
+			screencast.Display = pointer(share.name)
+		}
+		hyprland.Screencasts = append(hyprland.Screencasts, screencast)
+	}
+	slices.SortFunc(hyprland.Screencasts, func(a, b types.HyprlandScreencast) int {
+		return cmp.Or(
+			cmp.Compare(a.Type, b.Type),
+			cmp.Compare(valueOf(a.Display), valueOf(b.Display)),
+			cmp.Compare(valueOf(a.Window), valueOf(b.Window)),
+		)
+	})
+
+	data.Hyprland = &hyprland
+	return data
+}
+
+func deviceNames(devices []hyprlandNamed) []string {
+	names := make([]string, 0, len(devices))
+	for _, device := range devices {
+		if device.Name != "" {
+			names = append(names, device.Name)
+		}
+	}
+	return names
+}
+
+func layerNamespaces(layers hyprlandLayers, monitor string, level string) []string {
+	namespaces := []string{}
+	for _, surface := range layers[monitor].Levels[level] {
+		if surface.Namespace != "" {
+			namespaces = append(namespaces, surface.Namespace)
+		}
+	}
+	return namespaces
+}
+
+// mainKeyboard is the keyboard Hyprland marks as main, or the first one
+func mainKeyboard(keyboards []types.HyprlandKeyboard) *types.HyprlandKeyboard {
+	for i := range keyboards {
+		if keyboards[i].Main {
+			return &keyboards[i]
+		}
+	}
+	if len(keyboards) > 0 {
+		return &keyboards[0]
+	}
+	return nil
+}
+
+// windowWithTitle is the ID of the only window with title, or nil when there
+// isn't exactly one
+func windowWithTitle(clients []hyprlandClient, title string) *string {
+	var match *string
+	for _, client := range clients {
+		if client.Title != title || !client.Mapped {
+			continue
+		}
+		if match != nil {
+			return nil
+		}
+		match = pointer(client.Address)
+	}
+	return match
+}
+
+func orEmpty(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
+}
+
+func valueOf(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}

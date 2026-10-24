@@ -47,14 +47,14 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_get_data",
-		Description: "Get system information from data modules (audio, battery, bluetooth, cpu, disks, displays, gpus, media, memory, networks, processes, sensors, system)",
+		Description: "Get system information from data modules (audio, battery, bluetooth, cpu, desktop, disks, displays, gpus, media, memory, networks, processes, sensors, system)",
 		InputSchema: objectSchema(map[string]any{
 			"modules": map[string]any{
 				"type":        "array",
 				"description": "List of module names to fetch data from",
 				"items": map[string]any{
 					"type": "string",
-					"enum": []string{"audio", "battery", "bluetooth", "cpu", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"},
+					"enum": []string{"audio", "battery", "bluetooth", "cpu", "desktop", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"},
 				},
 			},
 		}, []string{"modules"}),

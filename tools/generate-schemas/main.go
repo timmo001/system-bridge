@@ -21,6 +21,7 @@ type FieldInfo struct {
 	Type      string
 	JSONName  string
 	IsArray   bool
+	IsMap     bool // A map with string keys, whose values are Type
 	IsPtr     bool
 	OmitEmpty bool
 }
@@ -62,6 +63,7 @@ var moduleDataTypes = map[string]string{
 	"battery":   "BatteryData",
 	"bluetooth": "BluetoothData",
 	"cpu":       "CPUData",
+	"desktop":   "DesktopData",
 	"disks":     "DisksData",
 	"discord":   "DiscordData",
 	"displays":  "DisplaysData",
@@ -128,13 +130,19 @@ func parseTypesDirectory(dir string) (map[string]StructInfo, map[string]EnumInfo
 							continue
 						}
 
-						fieldType, isArray, isPtr := parseFieldType(field.Type)
+						typeExpr := field.Type
+						mapType, isMap := typeExpr.(*ast.MapType)
+						if isMap {
+							typeExpr = mapType.Value
+						}
+						fieldType, isArray, isPtr := parseFieldType(typeExpr)
 
 						structInfo.Fields = append(structInfo.Fields, FieldInfo{
 							Name:      fieldName,
 							Type:      fieldType,
 							JSONName:  jsonTag,
 							IsArray:   isArray,
+							IsMap:     isMap,
 							IsPtr:     isPtr,
 							OmitEmpty: hasOmitEmpty(field.Tag),
 						})
