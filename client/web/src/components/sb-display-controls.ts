@@ -4,6 +4,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
+import "./sb-range";
 import "./sb-segmented";
 import { shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -87,19 +88,21 @@ export class SbDisplayControls extends LitElement {
         display.brightness === null
           ? nothing
           : html`<div class="level">
-              <input
-                class="range"
-                type="range"
-                id=${id}
-                min="0"
-                max="100"
-                step="1"
-                aria-label="Brightness"
-                aria-valuetext=${formatPercent(display.brightness)}
-                .value=${live(String(Math.round(display.brightness)))}
-                ?disabled=${this.#control.value.waiting}
-                @change=${this.#onBrightness}
-              />
+              <sb-range>
+                <input
+                  class="range"
+                  type="range"
+                  id=${id}
+                  min="0"
+                  max="100"
+                  step="1"
+                  aria-label="Brightness"
+                  aria-valuetext=${formatPercent(display.brightness)}
+                  .value=${live(String(Math.round(display.brightness)))}
+                  ?disabled=${this.#control.value.waiting}
+                  @change=${this.#onBrightness}
+                />
+              </sb-range>
               <output class="muted small tabular" for=${id}
                 >${formatPercent(display.brightness)}</output
               >

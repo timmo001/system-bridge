@@ -26,6 +26,7 @@ import { customElement, state } from "lit/decorators.js";
 import { live } from "lit/directives/live.js";
 
 import "~/components/sb-card";
+import "~/components/sb-range";
 import "~/components/sb-segmented";
 import "~/components/sb-select";
 import { icon } from "~/components/shared-styles";
@@ -290,22 +291,24 @@ export class PageDiscord extends SbPage {
           : `${Math.round(options.value)} ${unit}`;
 
     return html`<div class="level">
-      <input
-        class="range"
-        type="range"
-        id=${options.id}
-        min=${options.min ?? 0}
-        max=${options.max}
-        step=${options.step ?? 1}
-        aria-label=${options.label}
-        aria-valuetext=${text}
-        .value=${live(String(options.value ?? 0))}
-        ?disabled=${options.value === null}
-        data-action=${options.action}
-        data-label=${options.label}
-        data-user=${options.user ?? nothing}
-        @change=${this.#onRange}
-      />
+      <sb-range unit=${unit}>
+        <input
+          class="range"
+          type="range"
+          id=${options.id}
+          min=${options.min ?? 0}
+          max=${options.max}
+          step=${options.step ?? 1}
+          aria-label=${options.label}
+          aria-valuetext=${text}
+          .value=${live(String(options.value ?? 0))}
+          ?disabled=${options.value === null}
+          data-action=${options.action}
+          data-label=${options.label}
+          data-user=${options.user ?? nothing}
+          @change=${this.#onRange}
+        />
+      </sb-range>
       <output class="muted small tabular" for=${options.id}>${text}</output>
     </div>`;
   }
