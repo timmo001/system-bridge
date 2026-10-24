@@ -2,12 +2,14 @@ package types
 
 // DiskIOCounters represents disk I/O statistics
 type DiskIOCounters struct {
-	ReadCount  uint64 `json:"read_count"`
-	WriteCount uint64 `json:"write_count"`
-	ReadBytes  uint64 `json:"read_bytes"`
-	WriteBytes uint64 `json:"write_bytes"`
-	ReadTime   uint64 `json:"read_time"`
-	WriteTime  uint64 `json:"write_time"`
+	ReadCount      uint64   `json:"read_count"`
+	WriteCount     uint64   `json:"write_count"`
+	ReadBytes      uint64   `json:"read_bytes"`
+	WriteBytes     uint64   `json:"write_bytes"`
+	ReadTime       uint64   `json:"read_time"`
+	WriteTime      uint64   `json:"write_time"`
+	ReadBytesRate  *float64 `json:"read_bytes_rate"`
+	WriteBytesRate *float64 `json:"write_bytes_rate"`
 }
 
 // DiskUsage represents disk space usage information

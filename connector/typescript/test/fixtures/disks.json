@@ -66,6 +66,8 @@
     "read_bytes": 365109053440,
     "write_bytes": 2471153591296,
     "read_time": 4701122,
-    "write_time": 3598565128
+    "write_time": 3598565128,
+    "read_bytes_rate": 1048576,
+    "write_bytes_rate": 524288
   }
 }

@@ -334,6 +334,8 @@ export const DiskIOCounters = Schema.Struct({
   write_bytes: Schema.Finite,
   read_time: Schema.Finite,
   write_time: Schema.Finite,
+  read_bytes_rate: Schema.NullOr(Schema.Finite),
+  write_bytes_rate: Schema.NullOr(Schema.Finite),
 });
 
 export interface DiskIOCounters extends Schema.Schema.Type<

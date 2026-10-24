@@ -6,6 +6,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"log/slog"
 
@@ -62,13 +63,16 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 
 	// Get IO counters for all devices
 	ioCounters, err := disk.IOCounters()
+	var ioRates map[string]diskRates
 	if err != nil {
 		slog.Error("Failed to get disk IO counters", "error", err)
 		// Continue without IO counters
 	} else {
 		// Set total IO counters
 		var totalIO types.DiskIOCounters
+		samples := make(map[string]diskBytes, len(ioCounters)+1)
 		for name, counter := range ioCounters {
+			samples[name] = diskBytes{read: counter.ReadBytes, write: counter.WriteBytes}
 			if !countsTowardDiskIOTotal(name) {
 				continue
 			}
@@ -79,6 +83,10 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 			totalIO.ReadTime += counter.ReadTime
 			totalIO.WriteTime += counter.WriteTime
 		}
+		samples[diskTotalKey] = diskBytes{read: totalIO.ReadBytes, write: totalIO.WriteBytes}
+		ioRates = diskRateTracker.update(time.Now(), samples)
+		totalIO.ReadBytesRate = ioRates[diskTotalKey].read
+		totalIO.WriteBytesRate = ioRates[diskTotalKey].write
 		disksData.IOCounters = &totalIO
 	}
 
@@ -125,14 +133,17 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		device.Partitions = append(device.Partitions, diskPartition)
 
 		// Add IO counters for the device if available
-		if counter, ok := ioCounters[diskIOCounterName(deviceName)]; ok {
+		name := diskIOCounterName(deviceName)
+		if counter, ok := ioCounters[name]; ok {
 			device.IOCounters = &types.DiskIOCounters{
-				ReadCount:  counter.ReadCount,
-				WriteCount: counter.WriteCount,
-				ReadBytes:  counter.ReadBytes,
-				WriteBytes: counter.WriteBytes,
-				ReadTime:   counter.ReadTime,
-				WriteTime:  counter.WriteTime,
+				ReadCount:      counter.ReadCount,
+				WriteCount:     counter.WriteCount,
+				ReadBytes:      counter.ReadBytes,
+				WriteBytes:     counter.WriteBytes,
+				ReadTime:       counter.ReadTime,
+				WriteTime:      counter.WriteTime,
+				ReadBytesRate:  ioRates[name].read,
+				WriteBytesRate: ioRates[name].write,
 			}
 		}
 	}
