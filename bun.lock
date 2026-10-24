@@ -46,7 +46,7 @@
       "name": "@timmo001/effect-system-bridge",
       "version": "0.0.0",
       "devDependencies": {
-        "@effect/tsgo": "0.56.0",
+        "@effect/tsgo": "0.56.1",
         "@oxlint/plugins": "1.89.0",
         "@timmo001/oxlint-rules": "0.6.3",
         "@types/bun": "1.4.4",
@@ -193,21 +193,21 @@
 
     "@effect/platform-browser": ["@effect/platform-browser@4.0.6", "", { "peerDependencies": { "effect": "^4.0.6" } }, "sha512-i4bf1+FlUnZypqK0pQ5cq46KhroTgqFGktFn2WorwIk+yc+RuZO6qsF+Sk6lY5uHwdHTOLGMlnlXSJ8u1UG42g=="],
 
-    "@effect/tsgo": ["@effect/tsgo@0.56.0", "", { "optionalDependencies": { "@effect/tsgo-darwin-arm64": "0.56.0", "@effect/tsgo-darwin-x64": "0.56.0", "@effect/tsgo-linux-arm": "0.56.0", "@effect/tsgo-linux-arm64": "0.56.0", "@effect/tsgo-linux-x64": "0.56.0", "@effect/tsgo-win32-arm64": "0.56.0", "@effect/tsgo-win32-x64": "0.56.0" }, "bin": { "effect-tsgo": "dist/effect-tsgo.cjs" } }, "sha512-/S5G8RJjtaVjE/RhwFNTvWQwFAQyDGc+3Ig4Oynvlo3gJu8le4MUgM/DBjoiwkwBsQ+BhufGDCBpwojplerGlw=="],
+    "@effect/tsgo": ["@effect/tsgo@0.56.1", "", { "optionalDependencies": { "@effect/tsgo-darwin-arm64": "0.56.1", "@effect/tsgo-darwin-x64": "0.56.1", "@effect/tsgo-linux-arm": "0.56.1", "@effect/tsgo-linux-arm64": "0.56.1", "@effect/tsgo-linux-x64": "0.56.1", "@effect/tsgo-win32-arm64": "0.56.1", "@effect/tsgo-win32-x64": "0.56.1" }, "bin": { "effect-tsgo": "dist/effect-tsgo.cjs" } }, "sha512-T5dDXNbR3yMkqxopv4KIaEhkv1EQ5jlwJdpzjNBEfCKxH1WanVoBhwU2M0fq+u17ATYWdzMt3vXV896Rz348jA=="],
 
-    "@effect/tsgo-darwin-arm64": ["@effect/tsgo-darwin-arm64@0.56.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-08yYRU3OOw/jKzy582EF741xKvLJ2HK6GO+L2zuSR97b61ES7fER2fxg1xp4mv8u2Fc3bBRvk7026GzdKEGFgw=="],
+    "@effect/tsgo-darwin-arm64": ["@effect/tsgo-darwin-arm64@0.56.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-u+bBq71VkQ7P6jpfvxXWE8Cc8/cx4d8uKGTqfjSMrHeZq1AvZiap1s9SB5DlfhEo7F+UkHe0bqgt1IGMS2mg5w=="],
 
-    "@effect/tsgo-darwin-x64": ["@effect/tsgo-darwin-x64@0.56.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-UQvYvVaam+EVMYm9gfHBx1WpKwLlW+ptjb2UD7qGhZdg+GzxMbl26AhuuqV2t/dN9shZ6EcFE2+++ThISMp/9g=="],
+    "@effect/tsgo-darwin-x64": ["@effect/tsgo-darwin-x64@0.56.1", "", { "os": "darwin", "cpu": "x64" }, "sha512-8SvtdT+GnoVoA35dl3tqNuherO1ONFHaOrHtjYSr8+A56Doc2OGNs8vmoZly/MqmLsv6LdSwn4Z2z8cRsOfoVw=="],
 
-    "@effect/tsgo-linux-arm": ["@effect/tsgo-linux-arm@0.56.0", "", { "os": "linux", "cpu": "arm" }, "sha512-3WuPwP8vQPqKVpfGmKlnguuAZb7NGUyAhIHQjZnaINU6Aim7WczOy2WOmKjDPSKRlonU2WyYT+Q5T3B7f0VTLw=="],
+    "@effect/tsgo-linux-arm": ["@effect/tsgo-linux-arm@0.56.1", "", { "os": "linux", "cpu": "arm" }, "sha512-VZ7i6AjJ5WcchsJRn2e8XNp/7y8mqNgOLqsLEToce8yBXEtIdtWX+3czVtSXRc1njpQ7x3kiAQ8aNGl/vhu9OQ=="],
 
-    "@effect/tsgo-linux-arm64": ["@effect/tsgo-linux-arm64@0.56.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-zzzo/w7lLqiCMuJOI+jbjIuhHob3ccmth1bD9m1E98ukMuHhIqQMOXKU9EreoQkCGeoVrxGqHbXkl6E/+68/Sg=="],
+    "@effect/tsgo-linux-arm64": ["@effect/tsgo-linux-arm64@0.56.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-8mZmBqArSJddSMWjfB7NMRQhn8wsVOlNKL6pHedYFqMIJpb0PQ+dvhtNraNpcRTEKW5qA8fTz/PVGNOB+I8ceg=="],
 
-    "@effect/tsgo-linux-x64": ["@effect/tsgo-linux-x64@0.56.0", "", { "os": "linux", "cpu": "x64" }, "sha512-R0d3dGf8qKPtvjff+J9HL0UjIBIES6xZiU16rMMezI4K52b+DGQkaWi1OX3tSgGivjlV+NSN7UhPJ2pYKufglw=="],
+    "@effect/tsgo-linux-x64": ["@effect/tsgo-linux-x64@0.56.1", "", { "os": "linux", "cpu": "x64" }, "sha512-ialBMBFPswE73wnbIDf+1JippkVp8iX3hJnaITm8hD+brAOUq2r+zZNN1DqWUT+sUEVKh4+eOquOfmt9ujGWmg=="],
 
-    "@effect/tsgo-win32-arm64": ["@effect/tsgo-win32-arm64@0.56.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-uVaLdXULUZx9U30YxlVu5PBiu+1a+9/UT2Ex7jQpIasnJy1CHWlhMbfCD/+7Ez1vqG5fLOvUESoQu5XSjs3Lnw=="],
+    "@effect/tsgo-win32-arm64": ["@effect/tsgo-win32-arm64@0.56.1", "", { "os": "win32", "cpu": "arm64" }, "sha512-MJRQf72vVutBccPMlukukWT6xGpWDWtyFQExwEzxZRwmWXtYOqWw1/ApbwMK+TO5+RedAkwIMXvBKF7BgpsA/A=="],
 
-    "@effect/tsgo-win32-x64": ["@effect/tsgo-win32-x64@0.56.0", "", { "os": "win32", "cpu": "x64" }, "sha512-Cf6SDixFTkp7Aoeg2eRwJps/2BG9lvx2m+iVRjUzxdqkTbCCNKmmOAIyDslNZm2sMwaDUw/iN/BPGqxx7xMxww=="],
+    "@effect/tsgo-win32-x64": ["@effect/tsgo-win32-x64@0.56.1", "", { "os": "win32", "cpu": "x64" }, "sha512-gZU0cnO08PMIYVZOhBZtuq1egCHem2lF6pUCqierqNf+niDxowtDpQevHDKOU1OTeeqk8h2VnwIKUNkRX45Nqw=="],
 
     "@emnapi/core": ["@emnapi/core@1.11.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" } }, "sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ=="],
 
