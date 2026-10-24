@@ -60,6 +60,7 @@ func main() {
 var moduleDataTypes = map[string]string{
 	"audio":     "AudioData",
 	"battery":   "BatteryData",
+	"bluetooth": "BluetoothData",
 	"cpu":       "CPUData",
 	"disks":     "DisksData",
 	"discord":   "DiscordData",

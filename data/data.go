@@ -46,6 +46,7 @@ func NewDataStore() (*DataStore, error) {
 	modules := []types.Updater{
 		data_module.AudioModule{},
 		data_module.BatteryModule{},
+		data_module.BluetoothModule{},
 		data_module.CPUModule{},
 		data_module.DiskModule{},
 		data_module.DisplayModule{},

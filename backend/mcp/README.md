@@ -62,8 +62,9 @@ Tools are registered in `tools.go` and implemented in `handlers.go`:
   makes it the default.
 - `system_bridge_display_control` sets a display's brightness or power state.
 - `system_bridge_get_data` returns the latest data for requested modules.
-  Supported modules are `audio`, `battery`, `cpu`, `disks`, `displays`, `gpus`,
-  `media`, `memory`, `networks`, `processes`, `sensors`, and `system`.
+  Supported modules are `audio`, `battery`, `bluetooth`, `cpu`, `disks`,
+  `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`,
+  and `system`.
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
 - `system_bridge_list_commands` lists the command allowlist.

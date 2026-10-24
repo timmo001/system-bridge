@@ -19,6 +19,7 @@ const closeTimeout = time.Second
 var knownModules = map[types.ModuleName]struct{}{
 	types.ModuleAudio:     {},
 	types.ModuleBattery:   {},
+	types.ModuleBluetooth: {},
 	types.ModuleCPU:       {},
 	types.ModuleDisks:     {},
 	types.ModuleDiscord:   {},

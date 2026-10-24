@@ -42,6 +42,7 @@ func TestNewDataStore(t *testing.T) {
 		expectedModules := []types.ModuleName{
 			types.ModuleAudio,
 			types.ModuleBattery,
+			types.ModuleBluetooth,
 			types.ModuleCPU,
 			types.ModuleDisks,
 			types.ModuleDisplays,

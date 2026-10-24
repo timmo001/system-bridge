@@ -8,6 +8,7 @@ type ModuleName string
 const (
 	ModuleAudio     ModuleName = "audio"
 	ModuleBattery   ModuleName = "battery"
+	ModuleBluetooth ModuleName = "bluetooth"
 	ModuleCPU       ModuleName = "cpu"
 	ModuleDisks     ModuleName = "disks"
 	ModuleDiscord   ModuleName = "discord"

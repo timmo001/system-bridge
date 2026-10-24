@@ -227,7 +227,7 @@ func assertToolSchemas(t *testing.T, tools []*sdkmcp.Tool) {
 	assert.Equal(t, "array", modules["type"])
 	moduleItems := modules["items"].(map[string]any)
 	assert.Equal(t, "string", moduleItems["type"])
-	assert.Equal(t, []any{"audio", "battery", "cpu", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"}, moduleItems["enum"])
+	assert.Equal(t, []any{"audio", "battery", "bluetooth", "cpu", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"}, moduleItems["enum"])
 
 	notification := schemaMap(t, byName["system_bridge_send_notification"])
 	assert.Equal(t, []any{"title", "message"}, notification["required"])
