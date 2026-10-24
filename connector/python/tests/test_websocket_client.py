@@ -23,6 +23,12 @@ from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.discord_setup import DiscordSetup
+from systembridgeconnector.models.history import (
+    GPUHistory,
+    HistorySample,
+    MetricHistory,
+    SeriesHistory,
+)
 from systembridgeconnector.models.keyboard_key import KeyboardKey
 from systembridgeconnector.models.keyboard_text import KeyboardText
 from systembridgeconnector.models.media_control import MediaControl
@@ -511,6 +517,30 @@ async def test_get_disk_mounts(
     assert isinstance(disk_mounts.primary[0].usage, DiskUsage)
     assert isinstance(disk_mounts.secondary.squashfs[0], DiskMountInfo)
     assert disk_mounts == snapshot
+
+
+@pytest.mark.asyncio
+async def test_get_history(
+    snapshot: SnapshotAssertion,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    history = await mock_websocket_client_listening.get_history(
+        request_id=REQUEST_ID,
+    )
+    assert isinstance(history, MetricHistory)
+    assert isinstance(history.cpu[0], HistorySample)
+    assert isinstance(history.gpus[0], GPUHistory)
+    assert isinstance(history.gpus[0].core_load[0], HistorySample)
+    assert isinstance(history.temperatures[0], SeriesHistory)
+    assert isinstance(history.temperatures[0].samples[0], HistorySample)
+    assert history == snapshot
+
+    newer = await mock_websocket_client_listening.get_history(
+        since=1700000000000,
+        request_id=REQUEST_ID,
+    )
+    assert [sample.value for sample in newer.cpu] == [20.0]
 
 
 @pytest.mark.asyncio

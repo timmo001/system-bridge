@@ -208,6 +208,48 @@ async def process_request(request: Request) -> Response:
                 },
             },
         )
+    if request.event == EventType.GET_HISTORY:
+        since = request.data.get("since", 0)
+        cpu = [
+            {"time": 1700000000000, "value": 12.5},
+            {"time": 1700000060000, "value": 20.0},
+        ]
+        return Response(
+            id=request.id,
+            type=EventType.HISTORY,
+            data={
+                "cpu": [sample for sample in cpu if sample["time"] > since],
+                "cpu_temperature": [{"time": 1700000000000, "value": 55.0}],
+                "cpu_frequency": [],
+                "cpu_power": [],
+                "load_average": [],
+                "memory": [{"time": 1700000000000, "value": 50.0}],
+                "swap": [],
+                "battery": [],
+                "system_power": [],
+                "network_receive": [{"time": 1700000060000, "value": 1024.0}],
+                "network_send": [{"time": 1700000060000, "value": 512.0}],
+                "disk_read": [],
+                "disk_write": [],
+                "disk_temperatures": [],
+                "gpus": [
+                    {
+                        "id": "gpu0",
+                        "core_load": [{"time": 1700000000000, "value": 5.0}],
+                        "memory_load": [],
+                        "temperature": [{"time": 1700000000000, "value": 48.0}],
+                        "power": [],
+                    }
+                ],
+                "temperatures": [
+                    {
+                        "id": "k10temp_tctl",
+                        "samples": [{"time": 1700000000000, "value": 60.0}],
+                    }
+                ],
+                "fans": [],
+            },
+        )
     if request.event == EventType.GET_FILES:
         return Response(
             id=request.id,

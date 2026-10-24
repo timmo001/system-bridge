@@ -23,6 +23,7 @@ from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
 from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
+from .models.history import MetricHistory
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
 from .models.media_control import MediaControl
@@ -262,6 +263,26 @@ class WebSocketClient(Base):
         )
 
         return DiskMounts(**self._response_dict(response, "disk mounts"))
+
+    async def get_history(
+        self,
+        since: int | None = None,
+        request_id: str | None = None,
+    ) -> MetricHistory:
+        """Get graph readings from up to the last 24 hours.
+
+        With since, in Unix milliseconds, only readings taken after it.
+        """
+        self._logger.info("Getting history")
+        response = await self.send_message(
+            EventType.GET_HISTORY,
+            request_id,
+            {} if since is None else {"since": since},
+            wait_for_response=True,
+            response_type=EventType.HISTORY,
+        )
+
+        return MetricHistory(**self._response_dict(response, "history"))
 
     async def get_directory(
         self,
