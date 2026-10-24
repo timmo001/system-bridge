@@ -12,6 +12,7 @@ import type {
   DiscordCallMember,
   HyprlandData,
   HyprlandDisplay,
+  HyprlandGlobalShortcut,
   HyprlandReserved,
   HyprlandScreencast,
   HyprlandWindow,
@@ -523,46 +524,192 @@ const transformName = (transform: number) => {
   return flipped ? `Flipped, ${rotation}°` : `${rotation}°`;
 };
 
-const hyprlandDisplayCard = (id: string, display: HyprlandDisplay) =>
-  html`<sb-card class="half" heading=${id} subheading="Hyprland display">
-    ${facts([
-      ["Scale", `${formatNumber(display.scale)}×`],
-      ["Transform", transformName(display.transform)],
-      ["Format", display.format],
-      ["Colour", display.colour_preset],
-      ["VRR", yesNo(display.vrr)],
-      ["Tearing", yesNo(display.tearing)],
-      ["Direct scanout", yesNo(display.direct_scanout)],
-      ["Powered", yesNo(display.dpms)],
-      ["Mirrors", display.mirror_of],
-      ["Reserved", reserved(display.reserved)],
-      ["Special workspace", display.special_workspace],
-      [
-        "Layers",
+interface DisplayRow {
+  readonly id: string;
+  readonly display: HyprlandDisplay;
+}
+
+const displayColumns = (() => {
+  const column = dataTableColumns<DisplayRow>();
+
+  return column.columns([
+    column.accessor("id", { header: "Display" }),
+    column.accessor((row) => row.display.scale, {
+      id: "scale",
+      header: "Scale",
+      cell: ({ getValue }) => `${formatNumber(getValue())}×`,
+    }),
+    column.accessor((row) => transformName(row.display.transform), {
+      id: "transform",
+      header: "Transform",
+    }),
+    column.accessor((row) => row.display.format ?? "", {
+      id: "format",
+      header: "Format",
+    }),
+    column.accessor((row) => row.display.colour_preset ?? "", {
+      id: "colour",
+      header: "Colour",
+    }),
+    column.accessor((row) => reserved(row.display.reserved), {
+      id: "reserved",
+      header: "Reserved",
+      enableSorting: false,
+    }),
+    column.accessor(
+      (row) =>
         [
-          ...display.layers.background,
-          ...display.layers.bottom,
-          ...display.layers.top,
-          ...display.layers.overlay,
+          ...row.display.layers.background,
+          ...row.display.layers.bottom,
+          ...row.display.layers.top,
+          ...row.display.layers.overlay,
         ].join(", "),
-      ],
-    ])}
-  </sb-card>`;
+      { id: "layers", header: "Layers", enableSorting: false },
+    ),
+    column.display({
+      id: "state",
+      header: "State",
+      cell: ({ row }) => {
+        const { display } = row.original;
+
+        return html`<span class="row wrap">
+          ${display.dpms ? nothing : html`<span class="chip">Off</span>`}
+          ${display.vrr ? html`<span class="chip">VRR</span>` : nothing}
+          ${display.tearing ? html`<span class="chip">Tearing</span>` : nothing}
+          ${display.direct_scanout ? html`<span class="chip">Direct scanout</span>` : nothing}
+          ${display.mirror_of === null ? nothing : html`<span class="chip">Mirrors ${display.mirror_of}</span>`}
+          ${display.special_workspace === null ? nothing : html`<span class="chip">Special workspace shown</span>`}
+        </span>`;
+      },
+    }),
+  ]);
+})();
+
+const displayId = (row: DisplayRow) => row.id;
+
+interface InputRow {
+  readonly name: string;
+  readonly type: string;
+  readonly details: string;
+  readonly main: boolean;
+}
+
+const inputColumns = (() => {
+  const column = dataTableColumns<InputRow>();
+
+  return column.columns([
+    column.accessor("name", {
+      header: "Name",
+      cell: ({ getValue, row }) =>
+        html`<span class="row">
+          <span class="mono xsmall">${getValue()}</span>
+          ${row.original.main ? html`<span class="chip accent">Last used</span>` : nothing}
+        </span>`,
+    }),
+    column.accessor("type", { header: "Type" }),
+    column.accessor("details", {
+      header: "Details",
+      enableSorting: false,
+    }),
+  ]);
+})();
+
+const inputId = (row: InputRow) => `${row.type}:${row.name}`;
+
+const inputRows = (hyprland: HyprlandData): InputRow[] => [
+  ...hyprland.keyboards.map((keyboard) => ({
+    name: keyboard.name,
+    type: "Keyboard",
+    details: [
+      keyboard.active_keymap,
+      keyboard.layouts.length > 1 ? keyboard.layouts.join(", ") : null,
+      keyboard.variant,
+      keyboard.options,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    main: keyboard.main,
+  })),
+  ...hyprland.mice.map((mouse) => ({
+    name: mouse.name,
+    type: "Mouse",
+    details: [
+      `Speed ${formatNumber(mouse.speed)}`,
+      mouse.scroll_factor < 0
+        ? null
+        : `Scroll ${formatNumber(mouse.scroll_factor)}×`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    main: false,
+  })),
+  ...hyprland.switches.map((name) => ({
+    name,
+    type: "Switch",
+    details: "",
+    main: false,
+  })),
+  ...hyprland.tablets.map((name) => ({
+    name,
+    type: "Tablet",
+    details: "",
+    main: false,
+  })),
+  ...hyprland.touch.map((name) => ({
+    name,
+    type: "Touch",
+    details: "",
+    main: false,
+  })),
+];
+
+const shortcutColumns = (() => {
+  const column = dataTableColumns<HyprlandGlobalShortcut>();
+
+  return column.columns([
+    column.accessor("description", { header: "Description" }),
+    column.accessor("name", {
+      header: "Name",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+  ]);
+})();
+
+const shortcutId = (shortcut: HyprlandGlobalShortcut) => shortcut.name;
+
+// Where the tables below start; they keep their own changes
+const displayTableState = {
+  filter: "",
+  sort: "id",
+  descending: false,
+  page: 1,
+  pageSize: 10,
+};
+
+const inputTableState = {
+  filter: "",
+  sort: "type",
+  descending: false,
+  page: 1,
+  pageSize: 25,
+};
+
+const shortcutTableState = {
+  filter: "",
+  sort: "description",
+  descending: false,
+  page: 1,
+  pageSize: 25,
+};
 
 const hyprlandCards = (hyprland: HyprlandData) => {
-  const mainKeyboard = hyprland.keyboards.find((keyboard) => keyboard.main);
+  const displays = Object.entries(hyprland.displays).map(([id, display]) => ({
+    id,
+    display,
+  }));
 
-  const displays = Object.entries(hyprland.displays).map(([id, display]) =>
-    hyprlandDisplayCard(id, display),
-  );
-
-  const shortcuts = hyprland.global_shortcuts.map(
-    (shortcut) =>
-      html`<li>
-        <span class="spacer">${shortcut.description}</span>
-        <span class="mono xsmall muted">${shortcut.name}</span>
-      </li>`,
-  );
+  const inputs = inputRows(hyprland);
 
   return html`
     <sb-card class="half" heading="Hyprland">
@@ -581,27 +728,41 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}
     </sb-card>
-    <sb-card class="half" heading="Input devices">
-      ${facts([
-        ["Main keyboard", mainKeyboard?.name],
-        ["Keymap", mainKeyboard?.active_keymap],
-        ["Options", mainKeyboard?.options],
-        ["Keyboards", hyprland.keyboards.length],
-        ["Mice", hyprland.mice.length],
-        ["Tablets", hyprland.tablets.length],
-        ["Touch", hyprland.touch.length],
-        ["Switches", hyprland.switches.join(", ")],
-      ])}
+    <sb-card heading="Displays" subheading="As Hyprland sees them">
+      <sb-data-table
+        local
+        label="Displays"
+        search-placeholder="Search displays"
+        .columns=${displayColumns}
+        .data=${displays}
+        .rowId=${displayId}
+        .numeric=${["scale"]}
+        .wide=${["layers"]}
+        .state=${displayTableState}
+      ></sb-data-table>
     </sb-card>
-    ${displays}
     <sb-card heading="Global shortcuts" subheading="Registered by apps">
-      ${
-        shortcuts.length === 0
-          ? html`<p class="muted small">No apps have registered shortcuts.</p>`
-          : html`<ul class="list">
-              ${shortcuts}
-            </ul>`
-      }
+      <sb-data-table
+        local
+        label="Global shortcuts"
+        search-placeholder="Search shortcuts"
+        .columns=${shortcutColumns}
+        .data=${hyprland.global_shortcuts}
+        .rowId=${shortcutId}
+        .state=${shortcutTableState}
+      ></sb-data-table>
+    </sb-card>
+    <sb-card heading="Input devices" subheading="${inputs.length} connected">
+      <sb-data-table
+        local
+        label="Input devices"
+        search-placeholder="Search input devices"
+        .columns=${inputColumns}
+        .data=${inputs}
+        .rowId=${inputId}
+        .wide=${["details", "name"]}
+        .state=${inputTableState}
+      ></sb-data-table>
     </sb-card>
   `;
 };

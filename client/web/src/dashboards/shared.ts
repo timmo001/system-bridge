@@ -86,9 +86,16 @@ export const dashboardStyles = css`
   }
 
   .stats {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--sb-space-4);
-    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  }
+
+  /* Each stat takes its natural width, so a long value moves to its own line
+     before it wraps */
+  .stats > .stat {
+    flex: 1 1 auto;
+    min-width: 8rem;
   }
 
   .list {

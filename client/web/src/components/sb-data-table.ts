@@ -74,7 +74,8 @@ export const pageSizes = [10, 25, 50, 100] as const;
 /**
  * Rows in a table that sorts, filters and pages them, built on TanStack
  * Table. Its state belongs to the page, which passes it in and gets changes
- * back from `table-state-change`, so it can keep them in the URL.
+ * back from `table-state-change`, so it can keep them in the URL, unless it's
+ * `local`.
  *
  * @fires table-state-change - With the parts of the state that changed.
  */
@@ -260,9 +261,29 @@ export class SbDataTable<T extends RowData> extends LitElement {
 
   @property() label = "";
 
+  /**
+   * Keeps its state itself rather than in the page, for a page with more than
+   * one table. The state passed in is then where it starts.
+   */
+  @property({ type: Boolean }) local = false;
+
+  /** A local table's changes to its state. */
+  #localChanges: Partial<DataTableState> = {};
+
   readonly #table = new TableController<DataTableFeatures, T>(this);
 
+  get #state(): DataTableState {
+    return this.local ? { ...this.state, ...this.#localChanges } : this.state;
+  }
+
   #change(changes: Partial<DataTableState>) {
+    if (this.local) {
+      this.#localChanges = { ...this.#localChanges, ...changes };
+      this.requestUpdate();
+
+      return;
+    }
+
     this.dispatchEvent(
       new CustomEvent("table-state-change", {
         detail: changes,
@@ -351,7 +372,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
   }
 
   override render() {
-    const { filter, sort, descending, page, pageSize } = this.state;
+    const { filter, sort, descending, page, pageSize } = this.#state;
 
     const table = this.#table.table({
       features: dataTableFeatures,
