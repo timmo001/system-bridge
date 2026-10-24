@@ -68,7 +68,10 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 	} else {
 		// Set total IO counters
 		var totalIO types.DiskIOCounters
-		for _, counter := range ioCounters {
+		for name, counter := range ioCounters {
+			if !countsTowardDiskIOTotal(name) {
+				continue
+			}
 			totalIO.ReadCount += counter.ReadCount
 			totalIO.WriteCount += counter.WriteCount
 			totalIO.ReadBytes += counter.ReadBytes
@@ -122,7 +125,7 @@ func (diskModule DiskModule) Update(ctx context.Context) (any, error) {
 		device.Partitions = append(device.Partitions, diskPartition)
 
 		// Add IO counters for the device if available
-		if counter, ok := ioCounters[deviceName]; ok {
+		if counter, ok := ioCounters[diskIOCounterName(deviceName)]; ok {
 			device.IOCounters = &types.DiskIOCounters{
 				ReadCount:  counter.ReadCount,
 				WriteCount: counter.WriteCount,
