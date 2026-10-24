@@ -23,6 +23,7 @@ import type {
   HyprlandWindow,
   HyprlandWorkspace,
   Process,
+  SystemFailedUnit,
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
@@ -65,6 +66,7 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
   if (system === undefined) return noData("system data");
 
   const device = system.device_info;
+  const failedUnits = system.failed_units ?? [];
   const power = powerSeries(data, history);
 
   const users = system.users.map(
@@ -109,6 +111,23 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
               <div>
                 <strong>Restart needed</strong>Updates are waiting for a
                 restart.
+              </div>
+            </div>`
+          : nothing
+      }
+      ${
+        failedUnits.length > 0
+          ? html`<div class="alert warning">
+              ${icon(mdiAlertCircleOutline)}
+              <div>
+                <strong
+                  >${
+                    failedUnits.length === 1
+                      ? "A systemd unit failed"
+                      : `${failedUnits.length} systemd units failed`
+                  }</strong
+                >
+                ${failedUnits.map((unit) => unit.name).join(", ")}
               </div>
             </div>`
           : nothing
@@ -227,8 +246,68 @@ export const systemDashboard = ({ data, history }: DashboardContext) => {
           </li>
         </ul>
       </sb-card>
+      ${
+        system.failed_units === null
+          ? nothing
+          : html`<sb-card heading="Failed units" subheading="From systemd">
+              ${
+                failedUnits.length === 0
+                  ? html`<p class="muted small">Nothing has failed.</p>`
+                  : html`<sb-data-table
+                      local
+                      label="Failed units"
+                      search-placeholder="Search failed units"
+                      .columns=${failedUnitColumns}
+                      .data=${failedUnits}
+                      .rowId=${failedUnitId}
+                      .wide=${["description"]}
+                      .state=${failedUnitTableState}
+                    ></sb-data-table>`
+              }
+            </sb-card>`
+      }
     </div>
   `;
+};
+
+const failedUnitColumns = (() => {
+  const column = dataTableColumns<SystemFailedUnit>();
+
+  return column.columns([
+    column.accessor("name", {
+      header: "Unit",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.accessor("description", { header: "Description" }),
+    column.accessor("scope", {
+      header: "Scope",
+      cell: ({ getValue }) => (getValue() === "user" ? "User" : "System"),
+    }),
+    column.accessor((row) => row.result ?? "", {
+      id: "result",
+      header: "Result",
+    }),
+    column.accessor((row) => row.since ?? 0, {
+      id: "since",
+      header: "Failed",
+      cell: ({ getValue }) => {
+        const since = getValue();
+
+        return since === 0 ? "" : formatAgo(since * 1000);
+      },
+    }),
+  ]);
+})();
+
+const failedUnitId = (unit: SystemFailedUnit) => `${unit.scope}:${unit.name}`;
+
+const failedUnitTableState = {
+  filter: "",
+  sort: "name",
+  descending: false,
+  page: 1,
+  pageSize: undefined,
 };
 
 /**
