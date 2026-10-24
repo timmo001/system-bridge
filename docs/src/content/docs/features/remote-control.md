@@ -1,9 +1,9 @@
 ---
 title: Remote control
-description: Open URLs and files, type and press keys, set display brightness, and sleep, lock or shut down the machine running System Bridge.
+description: Open URLs and files, type and press keys, set audio volumes and display brightness, and sleep, lock or shut down the machine running System Bridge.
 ---
 
-System Bridge can act on the machine it runs on: open a website or file, type text or press keys, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
+System Bridge can act on the machine it runs on: open a website or file, type text or press keys, set an audio device's volume, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
 
 ## Opening a URL or file
 
@@ -44,6 +44,25 @@ Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assi
 | Shut down | `systemctl poweroff` | `shutdown /s` |
 
 On Linux, hibernating needs swap set up for it. Depending on your distribution's polkit rules, suspending or shutting down may ask for a password when System Bridge runs as a service.
+
+## Audio
+
+Set an output's or input's volume, mute or unmute it, or make it the default, from the [web client](/using/web-client/)'s **Audio** page, the API with [`AUDIO_CONTROL`](/api/websocket/control/#audio-control), the [MCP server](/api/mcp/)'s `system_bridge_audio_control` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --volume 40
+system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --mute
+system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --default
+```
+
+The id is the device's `id` from the [`audio`](/api/data/#audio) data, which reports each device's `volume`, `muted` and `default`.
+
+- **Linux** uses `pactl`, so it needs PulseAudio or PipeWire with `pipewire-pulse`.
+- **Windows** uses the system's audio endpoints.
+
+macOS isn't supported yet, so it reports no devices.
+
+Changes made elsewhere, such as with your volume keys or another mixer, show up straight away on Linux and within a second on Windows.
 
 ## Displays
 

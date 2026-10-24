@@ -5,14 +5,16 @@ description: Show System Bridge in the Omarchy bar, with a panel for every modul
 
 The System Bridge Omarchy plugin shows CPU and memory usage in the bar. Select
 the widget to open a panel with an overview of the system and a view for every
-module the web client has a page for, with media, Discord and display controls.
+module the web client has a page for, with audio, Discord, display and media
+controls.
 
 ## Requirements
 
 - Omarchy Quattro
 - System Bridge installed with the `system-bridge` executable available on
-  `PATH`, in a version with the `client open --path`, `client media`,
-  `client discord` and `client display` [CLI commands](/using/cli/)
+  `PATH`, in a version with the `client audio`, `client discord`,
+  `client display`, `client media` and `client open --path`
+  [CLI commands](/using/cli/)
 - A running local System Bridge service
 
 ## Install

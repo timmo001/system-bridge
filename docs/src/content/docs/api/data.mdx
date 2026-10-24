@@ -30,7 +30,7 @@ token: {token}
 </Tab>
 </Tabs>
 
-`{module}` is one of: `battery`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
+`{module}` is one of: `audio`, `battery`, `cpu`, `disks`, `discord`, `displays`, `gpus`, `media`, `memory`, `networks`, `processes`, `sensors`, `system`.
 
 ## Response
 
@@ -41,6 +41,25 @@ Most fields serialise as `null` when the value is unavailable on your platform o
 :::
 
 The same payloads are pushed over the WebSocket API as [`DATA_UPDATE`](/api/websocket/data/#receiving-data) messages.
+
+### `audio`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `outputs` | array | Output devices, such as speakers and headphones. |
+| `inputs` | array | Input devices, such as microphones. |
+
+Each device has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | The device's id: its PulseAudio or PipeWire name on Linux, or its endpoint id on Windows. |
+| `name` | string | The device's description. |
+| `volume` | number | Volume as a percentage, averaged over its channels. It can go over 100 when the volume is boosted. |
+| `muted` | boolean | Whether the device is muted. |
+| `default` | boolean | Whether it's the default output or input. |
+
+On Linux, the devices come from `pactl`, which needs PulseAudio 16 or later, or PipeWire with `pipewire-pulse`. Monitor sources, which capture an output, aren't listed as inputs. On macOS both lists are empty.
 
 ### `battery`
 

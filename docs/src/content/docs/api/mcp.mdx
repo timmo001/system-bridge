@@ -73,6 +73,35 @@ Configure the client to launch `websocat` with the WebSocket URL as its argument
 
 ## Tools
 
+### `system_bridge_audio_control`
+
+Set an audio output's or input's volume or mute state, or make it the default. See [audio control](/api/websocket/control/#audio-control) for what each platform supports.
+
+- `id` (required): The device's `id` from the `audio` module's `outputs` or `inputs`.
+- `volume` (optional): Volume in percent, 0-100.
+- `muted` (optional): `true` to mute the device, `false` to unmute it.
+- `default` (optional): `true` to make it the default output or input.
+
+Example arguments:
+
+```json
+{ "id": "alsa_output.pci-0000_00_1f.3.analog-stereo", "volume": 40 }
+```
+
+### `system_bridge_display_control`
+
+Set a display's brightness or power state. See [display control](/api/websocket/control/#display-control) for what each display supports.
+
+- `id` (required): The display's `id` from the `displays` module.
+- `brightness` (optional): Brightness in percent, 0-100.
+- `power_state` (optional): `on`, `standby`, `suspend` or `off`.
+
+Example arguments:
+
+```json
+{ "id": "HDMI-A-2", "brightness": 40 }
+```
+
 ### `system_bridge_get_data`
 
 Get current system information from one or more data modules. The tool returns each requested module's latest data as JSON.
@@ -83,6 +112,7 @@ Available modules:
 
 | Module | Description |
 | --- | --- |
+| `audio` | Output and input devices, their volume, mute state and which are the defaults. |
 | `battery` | Charge level, charging state, and time remaining. |
 | `cpu` | Usage, frequency, core counts, and per-core load. |
 | `disks` | Mounted devices, partitions, and used/free space. |
@@ -101,19 +131,22 @@ Example arguments:
 { "modules": ["cpu", "memory", "battery"] }
 ```
 
-### `system_bridge_send_notification`
+### `system_bridge_get_history`
 
-Send a desktop notification to the machine running System Bridge.
+Get the recent readings System Bridge keeps for its charts, the same as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event. Each series is a list of `{ "time", "value" }` samples, with `time` in Unix milliseconds.
 
-- `title` (required): The notification title.
-- `message` (required): The notification body text.
-- `icon` (optional): An icon name to display with the notification.
+- `since` (optional): Only readings after this time, in Unix milliseconds. Omit it for the whole history.
+- `modules` (optional): Only these modules' readings: `battery`, `cpu`, `disks`, `gpus`, `memory`, `networks`, `sensors` or `system`. Omit it for every module.
 
 Example arguments:
 
 ```json
-{ "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
+{ "since": 1792857600000, "modules": ["cpu", "memory"] }
 ```
+
+### `system_bridge_list_commands`
+
+List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments` and `workingDir`. It takes no arguments.
 
 ### `system_bridge_media_control`
 
@@ -125,51 +158,20 @@ Available actions:
 
 | Action | Effect |
 | --- | --- |
-| `PLAY` | Resume playback. |
-| `PAUSE` | Pause playback. |
-| `STOP` | Stop playback. |
-| `NEXT` | Skip to the next track. |
-| `PREVIOUS` | Return to the previous track. |
-| `VOLUME_UP` | Raise the volume. |
-| `VOLUME_DOWN` | Lower the volume. |
 | `MUTE` | Toggle mute. |
+| `NEXT` | Skip to the next track. |
+| `PAUSE` | Pause playback. |
+| `PLAY` | Resume playback. |
+| `PREVIOUS` | Return to the previous track. |
+| `STOP` | Stop playback. |
+| `VOLUME_DOWN` | Lower the volume. |
+| `VOLUME_UP` | Raise the volume. |
 
 Example arguments:
 
 ```json
 { "action": "PAUSE" }
 ```
-
-### `system_bridge_display_control`
-
-Set a display's brightness or power state. See [display control](/api/websocket/control/#display-control) for what each display supports.
-
-- `id` (required): The display's `id` from the `displays` module.
-- `brightness` (optional): Brightness in percent, 0-100.
-- `power_state` (optional): `on`, `standby`, `suspend` or `off`.
-
-Example arguments:
-
-```json
-{ "id": "HDMI-A-2", "brightness": 40 }
-```
-
-### `system_bridge_get_history`
-
-Get the recent readings System Bridge keeps for its charts, the same as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event. Each series is a list of `{ "time", "value" }` samples, with `time` in Unix milliseconds.
-
-- `since` (optional): Only readings after this time, in Unix milliseconds. Omit it for the whole history.
-- `modules` (optional): Only these modules' readings: `cpu`, `memory`, `battery`, `system`, `networks`, `disks`, `gpus` or `sensors`. Omit it for every module.
-
-Example arguments:
-
-```json
-{ "since": 1792857600000, "modules": ["cpu", "memory"] }
-```
-
-### `system_bridge_list_commands`
-
-List the [commands](/features/commands/) you've allowed System Bridge to run, with each one's `id`, `name`, `command`, `arguments` and `workingDir`. It takes no arguments.
 
 ### `system_bridge_run_command`
 
@@ -184,6 +186,20 @@ Example arguments:
 ```
 
 Only commands in the allowlist can run. Power actions such as shutdown and restart aren't available as tools, so an assistant can't trigger them by mistake.
+
+### `system_bridge_send_notification`
+
+Send a desktop notification to the machine running System Bridge.
+
+- `title` (required): The notification title.
+- `message` (required): The notification body text.
+- `icon` (optional): An icon name to display with the notification.
+
+Example arguments:
+
+```json
+{ "title": "Build finished", "message": "All tests passed", "icon": "dialog-information" }
+```
 
 ## Troubleshooting
 

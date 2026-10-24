@@ -73,6 +73,30 @@ The volume values are the percentages that Discord's sliders show. In testing, D
 
 The response type is `DISCORD_CONTROLLED`. If Discord is not connected, the response is an `ERROR`.
 
+## Audio control
+
+Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mute state, or to make it the default. Set any of them together. See [audio](/features/remote-control/#audio) for what's supported.
+
+- `id` (required): The device's `id` from the [`audio`](/api/data/#audio) data's `outputs` or `inputs`.
+- `volume` (optional): Volume in percent, 0-100.
+- `muted` (optional): `true` to mute, `false` to unmute.
+- `default` (optional): `true` to make it the default output or input.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "AUDIO_CONTROL",
+    "data": {
+        "id": "alsa_output.pci-0000_00_1f.3.analog-stereo",
+        "volume": 40,
+        "muted": false
+    }
+}
+```
+
+The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id` gets an `ERROR` with the subtype `BAD_REQUEST`, and a platform that can't control audio gets `INVALID_ACTION`.
+
 ## Display control
 
 Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state, or both. See [displays](/features/remote-control/#displays) for what's supported.
