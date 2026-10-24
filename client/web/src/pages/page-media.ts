@@ -7,6 +7,7 @@ import {
   mdiSkipPrevious,
   mdiStop,
   mdiVolumeMinus,
+  mdiVolumeHigh,
   mdiVolumeOff,
   mdiVolumePlus,
 } from "@mdi/js";
@@ -187,6 +188,32 @@ export class PageMedia extends SbPage {
         margin-inline-start: var(--sb-space-1);
       }
 
+      /* Volume steps slide out from beside mute on hover or focus. Touch
+         screens can't hover, so they always show them */
+      .controls .reveal {
+        display: flex;
+        gap: var(--sb-space-1);
+        max-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition:
+          max-width var(--sb-duration-normal) var(--sb-easing),
+          opacity var(--sb-duration-normal) var(--sb-easing);
+      }
+
+      .controls .levels:hover .reveal,
+      .controls .levels:focus-within .reveal {
+        max-width: 7rem;
+        opacity: 1;
+      }
+
+      @media (hover: none) {
+        .controls .reveal {
+          max-width: none;
+          opacity: 1;
+        }
+      }
+
       /* Playback gets a row of its own, the rest share the one under it */
       @media (max-width: 40rem) {
         .controls {
@@ -204,6 +231,12 @@ export class PageMedia extends SbPage {
       .controls .button.main {
         width: 3.5rem;
         --sb-icon-size: 1.75rem;
+      }
+
+      /* Unavailable, it keeps its circle, in grey */
+      .controls .button.main:disabled {
+        background: var(--sb-color-sunken);
+        border-color: var(--sb-color-border);
       }
     `,
   ];
@@ -363,9 +396,14 @@ export class PageMedia extends SbPage {
                 })}
               </span>
               <span class="group levels">
-                ${this.#button("VOLUME_DOWN", mdiVolumeMinus)}
-                ${this.#button("MUTE", mdiVolumeOff)}
-                ${this.#button("VOLUME_UP", mdiVolumePlus)}
+                <span class="reveal">
+                  ${this.#button("VOLUME_DOWN", mdiVolumeMinus)}
+                  ${this.#button("VOLUME_UP", mdiVolumePlus)}
+                </span>
+                ${this.#button(
+                  "MUTE",
+                  media?.volume === 0 ? mdiVolumeOff : mdiVolumeHigh,
+                )}
                 <span class="muted small tabular volume"
                   >${
                     media?.volume === null || media?.volume === undefined
