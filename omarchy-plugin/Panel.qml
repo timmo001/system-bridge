@@ -180,7 +180,6 @@ Panel {
               ? root.formatLastUpdated(root.service.lastUpdateAt, root.service.currentTime)
                 + (root.service.stale ? " · Data is stale" : "")
               : "Waiting for System Bridge"
-            detail: root.connected ? "ONLINE" : "OFFLINE"
             foreground: root.contentForeground
             fontFamily: root.contentFontFamily
             iconOpacity: root.connected ? 1 : 0.5
@@ -200,7 +199,36 @@ Panel {
               Row {
                 spacing: Style.space(4)
 
+                // The status sits with the buttons, not in the title row, so
+                // they all share one centre line.
+                BorderSurface {
+                  anchors.verticalCenter: parent.verticalCenter
+                  implicitWidth: statusText.implicitWidth + Style.space(10)
+                  implicitHeight: statusText.implicitHeight + Style.space(4)
+                  color: "transparent"
+                  borderSpec: Border.controlSpec("normal", root.contentForeground, Commons.Color.accent)
+                  radius: Style.cornerRadius
+
+                  Text {
+                    id: statusText
+                    textFormat: Text.PlainText
+                    anchors.centerIn: parent
+                    text: root.connected ? "ONLINE" : "OFFLINE"
+                    color: Qt.darker(root.contentForeground, 1.4)
+                    font.family: root.contentFontFamily
+                    font.pixelSize: Style.font.body
+                    font.bold: true
+                  }
+                }
+
+                // Space between the status and the buttons.
+                Item {
+                  width: Style.space(4)
+                  height: 1
+                }
+
                 PanelActionButton {
+                  anchors.verticalCenter: parent.verticalCenter
                   enabled: root.connected
                   iconText: "󰖟"
                   tooltipText: root.viewInfo
@@ -214,6 +242,7 @@ Panel {
                 }
 
                 PanelActionButton {
+                  anchors.verticalCenter: parent.verticalCenter
                   iconText: root.connected ? "󰩈" : ""
                   tooltipText: root.connected ? "Quit System Bridge" : "Start System Bridge"
                   foreground: root.contentForeground
