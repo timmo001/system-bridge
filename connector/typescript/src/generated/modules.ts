@@ -3,6 +3,21 @@
 
 import { Schema } from "effect";
 
+export const BatteryScope = Schema.Literals(["system", "device"]);
+
+export type BatteryScope = typeof BatteryScope.Type;
+
+export const BatteryState = Schema.Literals([
+  "charging",
+  "discharging",
+  "full",
+  "not_charging",
+  "empty",
+  "unknown",
+]);
+
+export type BatteryState = typeof BatteryState.Type;
+
 export const DiskMountCategory = Schema.Literals([
   "primary",
   "bind",
@@ -32,10 +47,28 @@ export const RunMode = Schema.Literals(["standalone"]);
 
 export type RunMode = typeof RunMode.Type;
 
+export const BatteryInfo = Schema.Struct({
+  name: Schema.String,
+  model: Schema.NullOr(Schema.String),
+  scope: BatteryScope,
+  state: BatteryState,
+  percentage: Schema.NullOr(Schema.Finite),
+  time_remaining: Schema.NullOr(Schema.Finite),
+  power: Schema.NullOr(Schema.Finite),
+  voltage: Schema.NullOr(Schema.Finite),
+});
+
+export interface BatteryInfo extends Schema.Schema.Type<typeof BatteryInfo> {}
+
 export const BatteryData = Schema.Struct({
   is_charging: Schema.NullOr(Schema.Boolean),
   percentage: Schema.NullOr(Schema.Finite),
   time_remaining: Schema.NullOr(Schema.Finite),
+  state: Schema.NullOr(BatteryState),
+  power: Schema.NullOr(Schema.Finite),
+  voltage: Schema.NullOr(Schema.Finite),
+  ac_connected: Schema.NullOr(Schema.Boolean),
+  batteries: Schema.Array(BatteryInfo),
 });
 
 export interface BatteryData extends Schema.Schema.Type<typeof BatteryData> {}

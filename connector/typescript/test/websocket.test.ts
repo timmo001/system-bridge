@@ -4,7 +4,16 @@ import { SystemBridgeWebSocket } from "../src/index.js";
 
 const token = "test-token";
 
-const battery = { is_charging: true, percentage: 55, time_remaining: null };
+const battery = {
+  is_charging: true,
+  percentage: 55,
+  time_remaining: null,
+  state: "charging",
+  power: 30,
+  voltage: 12.6,
+  ac_connected: true,
+  batteries: [],
+};
 
 const memory = {
   swap: {

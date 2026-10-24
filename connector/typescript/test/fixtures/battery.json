@@ -1,5 +1,31 @@
 {
   "is_charging": false,
   "percentage": 100,
-  "time_remaining": 18745200
+  "time_remaining": null,
+  "state": "full",
+  "power": 0,
+  "voltage": 17.2,
+  "ac_connected": true,
+  "batteries": [
+    {
+      "name": "BAT0",
+      "model": "5B10W13930",
+      "scope": "system",
+      "state": "full",
+      "percentage": 100,
+      "time_remaining": null,
+      "power": 0,
+      "voltage": 17.2
+    },
+    {
+      "name": "hidpp_battery_1",
+      "model": "PRO X SUPERLIGHT 2c",
+      "scope": "device",
+      "state": "discharging",
+      "percentage": 96,
+      "time_remaining": null,
+      "power": null,
+      "voltage": null
+    }
+  ]
 }

@@ -4,7 +4,16 @@ import { SystemBridgeHttp } from "../src/index.js";
 
 const token = "test-token";
 
-const battery = { is_charging: false, percentage: 80, time_remaining: 3600 };
+const battery = {
+  is_charging: false,
+  percentage: 80,
+  time_remaining: 3600,
+  state: "discharging",
+  power: 12.5,
+  voltage: 11.4,
+  ac_connected: false,
+  batteries: [],
+};
 
 let server: ReturnType<typeof Bun.serve>;
 
