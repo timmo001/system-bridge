@@ -22,6 +22,7 @@ from systembridgeconnector.exceptions import (
 from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
+from systembridgeconnector.models.desktop_control import DesktopWindowStateRequest
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.discord_setup import DiscordSetup
 from systembridgeconnector.models.display_control import DisplayControl
@@ -475,6 +476,20 @@ async def test_audio_control(
     assert response.type == EventType.AUDIO_CONTROLLED
     # Unset controls aren't sent, but an unmute is
     assert response.data == {"id": "speakers", "muted": False, "default": True}
+
+
+@pytest.mark.asyncio
+async def test_desktop_set_window_state(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.desktop_set_window_state(
+        DesktopWindowStateRequest(id="0x1", maximised=False),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.DESKTOP_WINDOW_STATE_SET
+    # States left as None aren't sent, but a False one is
+    assert response.data == {"id": "0x1", "maximised": False}
 
 
 @pytest.mark.asyncio

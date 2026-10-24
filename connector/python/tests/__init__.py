@@ -148,6 +148,14 @@ def discord_setup_response(request: Request) -> Response:
     )
 
 
+CONTROL_RESPONSES = {
+    EventType.AUDIO_CONTROL: EventType.AUDIO_CONTROLLED,
+    EventType.DESKTOP_SET_WINDOW_STATE: EventType.DESKTOP_WINDOW_STATE_SET,
+    EventType.DISCORD_CONTROL: EventType.DISCORD_CONTROLLED,
+    EventType.DISPLAY_CONTROL: EventType.DISPLAY_CONTROLLED,
+}
+
+
 async def process_request(request: Request) -> Response:
     """Process a request."""
     _LOGGER.info("Event: %s", request.event)
@@ -327,22 +335,11 @@ async def process_request(request: Request) -> Response:
             type=EventType.KEYBOARD_TEXT_SENT,
             data=request.data,
         )
-    if request.event == EventType.AUDIO_CONTROL:
+    if request.event in CONTROL_RESPONSES:
+        # Controls reply with the data they were sent
         return Response(
             id=request.id,
-            type=EventType.AUDIO_CONTROLLED,
-            data=request.data,
-        )
-    if request.event == EventType.DISCORD_CONTROL:
-        return Response(
-            id=request.id,
-            type=EventType.DISCORD_CONTROLLED,
-            data=request.data,
-        )
-    if request.event == EventType.DISPLAY_CONTROL:
-        return Response(
-            id=request.id,
-            type=EventType.DISPLAY_CONTROLLED,
+            type=CONTROL_RESPONSES[request.event],
             data=request.data,
         )
     if request.event in (EventType.GET_DISCORD_SETUP, EventType.UPDATE_DISCORD_SETUP):

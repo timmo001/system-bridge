@@ -37,6 +37,10 @@ import {
   AudioControl,
   CommandRequest,
   CommandResult,
+  DesktopKeyboardLayoutRequest,
+  DesktopWindowRequest,
+  DesktopWindowStateRequest,
+  DesktopWorkspaceRequest,
   Directory,
   DirectoryRequest,
   DiscordControl,
@@ -48,6 +52,9 @@ import {
   FileInfo,
   GetFilesRequest,
   HistoryRequest,
+  HyprlandGlobalShortcutRequest,
+  HyprlandMoveWindowRequest,
+  HyprlandSetWindowRequest,
   KeyboardKeypress,
   KeyboardText,
   type MediaAction,
@@ -138,6 +145,25 @@ export interface Interface {
   readonly audioControl: (
     control: AudioControl,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Asks a window to close, as its close button would. */
+  readonly desktopCloseWindow: (
+    window: DesktopWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Focuses a window, showing its workspace. */
+  readonly desktopFocusWindow: (
+    window: DesktopWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Shows and focuses a workspace. Not on Windows. */
+  readonly desktopFocusWorkspace: (
+    workspace: DesktopWorkspaceRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Switches the keyboard layout. Hyprland and Windows only. */
+  readonly desktopSetKeyboardLayout: (
+    layout: DesktopKeyboardLayoutRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly desktopSetWindowState: (
+    state: DesktopWindowStateRequest,
+  ) => Effect.Effect<void, WebSocketError>;
   readonly discordControl: (
     control: DiscordControl,
   ) => Effect.Effect<void, WebSocketError>;
@@ -150,6 +176,17 @@ export interface Interface {
   }) => Effect.Effect<DiscordSetup, WebSocketError>;
   readonly displayControl: (
     control: DisplayControl,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly hyprlandMoveWindow: (
+    move: HyprlandMoveWindowRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly hyprlandReloadConfig: Effect.Effect<void, WebSocketError>;
+  /** Triggers a global shortcut an app registered, as a bind to it would. */
+  readonly hyprlandRunGlobalShortcut: (
+    shortcut: HyprlandGlobalShortcutRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  readonly hyprlandSetWindow: (
+    settings: HyprlandSetWindowRequest,
   ) => Effect.Effect<void, WebSocketError>;
   readonly mediaControl: (
     action: MediaAction,
@@ -738,6 +775,113 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const desktopCloseWindow = Effect.fn(
+    "SystemBridgeWebSocket.desktopCloseWindow",
+  )(function* (window: DesktopWindowRequest) {
+    yield* call(
+      "DESKTOP_CLOSE_WINDOW",
+      "DESKTOP_WINDOW_CLOSED",
+      DesktopWindowRequest,
+      window,
+      ignoreReply,
+    );
+  });
+
+  const desktopFocusWindow = Effect.fn(
+    "SystemBridgeWebSocket.desktopFocusWindow",
+  )(function* (window: DesktopWindowRequest) {
+    yield* call(
+      "DESKTOP_FOCUS_WINDOW",
+      "DESKTOP_WINDOW_FOCUSED",
+      DesktopWindowRequest,
+      window,
+      ignoreReply,
+    );
+  });
+
+  const desktopFocusWorkspace = Effect.fn(
+    "SystemBridgeWebSocket.desktopFocusWorkspace",
+  )(function* (workspace: DesktopWorkspaceRequest) {
+    yield* call(
+      "DESKTOP_FOCUS_WORKSPACE",
+      "DESKTOP_WORKSPACE_FOCUSED",
+      DesktopWorkspaceRequest,
+      workspace,
+      ignoreReply,
+    );
+  });
+
+  const desktopSetKeyboardLayout = Effect.fn(
+    "SystemBridgeWebSocket.desktopSetKeyboardLayout",
+  )(function* (layout: DesktopKeyboardLayoutRequest) {
+    yield* call(
+      "DESKTOP_SET_KEYBOARD_LAYOUT",
+      "DESKTOP_KEYBOARD_LAYOUT_SET",
+      DesktopKeyboardLayoutRequest,
+      layout,
+      ignoreReply,
+    );
+  });
+
+  const desktopSetWindowState = Effect.fn(
+    "SystemBridgeWebSocket.desktopSetWindowState",
+  )(function* (state: DesktopWindowStateRequest) {
+    yield* call(
+      "DESKTOP_SET_WINDOW_STATE",
+      "DESKTOP_WINDOW_STATE_SET",
+      DesktopWindowStateRequest,
+      state,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandMoveWindow = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandMoveWindow",
+  )(function* (move: HyprlandMoveWindowRequest) {
+    yield* call(
+      "HYPRLAND_MOVE_WINDOW",
+      "HYPRLAND_WINDOW_MOVED",
+      HyprlandMoveWindowRequest,
+      move,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandReloadConfig = call(
+    "HYPRLAND_RELOAD_CONFIG",
+    "HYPRLAND_CONFIG_RELOADED",
+    Empty,
+    {},
+    ignoreReply,
+  ).pipe(
+    Effect.asVoid,
+    Effect.withSpan("SystemBridgeWebSocket.hyprlandReloadConfig"),
+  );
+
+  const hyprlandRunGlobalShortcut = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandRunGlobalShortcut",
+  )(function* (shortcut: HyprlandGlobalShortcutRequest) {
+    yield* call(
+      "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+      "HYPRLAND_GLOBAL_SHORTCUT_RUN",
+      HyprlandGlobalShortcutRequest,
+      shortcut,
+      ignoreReply,
+    );
+  });
+
+  const hyprlandSetWindow = Effect.fn(
+    "SystemBridgeWebSocket.hyprlandSetWindow",
+  )(function* (settings: HyprlandSetWindowRequest) {
+    yield* call(
+      "HYPRLAND_SET_WINDOW",
+      "HYPRLAND_WINDOW_SET",
+      HyprlandSetWindowRequest,
+      settings,
+      ignoreReply,
+    );
+  });
+
   const mediaControl = Effect.fn("SystemBridgeWebSocket.mediaControl")(
     function* (action: MediaAction) {
       yield* call(
@@ -800,10 +944,19 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     keyboardKeypress,
     keyboardText,
     audioControl,
+    desktopCloseWindow,
+    desktopFocusWindow,
+    desktopFocusWorkspace,
+    desktopSetKeyboardLayout,
+    desktopSetWindowState,
     discordControl,
     getDiscordSetup,
     updateDiscordSetup,
     displayControl,
+    hyprlandMoveWindow,
+    hyprlandReloadConfig,
+    hyprlandRunGlobalShortcut,
+    hyprlandSetWindow,
     mediaControl,
     sendNotification,
     open,

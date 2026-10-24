@@ -22,6 +22,15 @@ from .exceptions import (
 from .models.audio_control import AudioControl
 from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
+from .models.desktop_control import (
+    DesktopKeyboardLayoutRequest,
+    DesktopWindowRequest,
+    DesktopWindowStateRequest,
+    DesktopWorkspaceRequest,
+    HyprlandGlobalShortcutRequest,
+    HyprlandMoveWindowRequest,
+    HyprlandSetWindowRequest,
+)
 from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
 from .models.display_control import DisplayControl
@@ -535,6 +544,88 @@ class WebSocketClient(Base):
             response_type=EventType.AUDIO_CONTROLLED,
         )
 
+    async def _desktop_action(
+        self,
+        event: EventType,
+        response_type: EventType,
+        model: Any,
+        request_id: str | None,
+    ) -> Response:
+        """Send a desktop action, leaving out the settings that are None."""
+        self._logger.info("Desktop action %s: %s", event, model)
+        return await self.send_message(
+            event,
+            request_id,
+            {key: value for key, value in asdict(model).items() if value is not None},
+            wait_for_response=True,
+            response_type=response_type,
+        )
+
+    async def desktop_close_window(
+        self,
+        model: DesktopWindowRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Ask a window to close, as its close button would."""
+        return await self._desktop_action(
+            EventType.DESKTOP_CLOSE_WINDOW,
+            EventType.DESKTOP_WINDOW_CLOSED,
+            model,
+            request_id,
+        )
+
+    async def desktop_focus_window(
+        self,
+        model: DesktopWindowRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Focus a window, showing its workspace."""
+        return await self._desktop_action(
+            EventType.DESKTOP_FOCUS_WINDOW,
+            EventType.DESKTOP_WINDOW_FOCUSED,
+            model,
+            request_id,
+        )
+
+    async def desktop_focus_workspace(
+        self,
+        model: DesktopWorkspaceRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Show and focus a workspace. Not on Windows."""
+        return await self._desktop_action(
+            EventType.DESKTOP_FOCUS_WORKSPACE,
+            EventType.DESKTOP_WORKSPACE_FOCUSED,
+            model,
+            request_id,
+        )
+
+    async def desktop_set_keyboard_layout(
+        self,
+        model: DesktopKeyboardLayoutRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Switch the keyboard layout. Hyprland and Windows only."""
+        return await self._desktop_action(
+            EventType.DESKTOP_SET_KEYBOARD_LAYOUT,
+            EventType.DESKTOP_KEYBOARD_LAYOUT_SET,
+            model,
+            request_id,
+        )
+
+    async def desktop_set_window_state(
+        self,
+        model: DesktopWindowStateRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Make a window fullscreen, maximised or minimised, or not."""
+        return await self._desktop_action(
+            EventType.DESKTOP_SET_WINDOW_STATE,
+            EventType.DESKTOP_WINDOW_STATE_SET,
+            model,
+            request_id,
+        )
+
     async def discord_control(
         self,
         model: DiscordControl,
@@ -563,6 +654,59 @@ class WebSocketClient(Base):
             {key: value for key, value in asdict(model).items() if value is not None},
             wait_for_response=True,
             response_type=EventType.DISPLAY_CONTROLLED,
+        )
+
+    async def hyprland_move_window(
+        self,
+        model: HyprlandMoveWindowRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Move a window to a workspace, leaving the focus where it is."""
+        return await self._desktop_action(
+            EventType.HYPRLAND_MOVE_WINDOW,
+            EventType.HYPRLAND_WINDOW_MOVED,
+            model,
+            request_id,
+        )
+
+    async def hyprland_reload_config(
+        self,
+        request_id: str | None = None,
+    ) -> Response:
+        """Reload Hyprland's config."""
+        self._logger.info("Reloading Hyprland's config")
+        return await self.send_message(
+            EventType.HYPRLAND_RELOAD_CONFIG,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.HYPRLAND_CONFIG_RELOADED,
+        )
+
+    async def hyprland_run_global_shortcut(
+        self,
+        model: HyprlandGlobalShortcutRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Trigger a global shortcut an app registered, as a bind to it would."""
+        return await self._desktop_action(
+            EventType.HYPRLAND_RUN_GLOBAL_SHORTCUT,
+            EventType.HYPRLAND_GLOBAL_SHORTCUT_RUN,
+            model,
+            request_id,
+        )
+
+    async def hyprland_set_window(
+        self,
+        model: HyprlandSetWindowRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Float or tile a window, and pin or unpin it."""
+        return await self._desktop_action(
+            EventType.HYPRLAND_SET_WINDOW,
+            EventType.HYPRLAND_WINDOW_SET,
+            model,
+            request_id,
         )
 
     async def media_control(

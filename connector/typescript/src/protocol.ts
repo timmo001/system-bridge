@@ -5,6 +5,11 @@ export const EventType = Schema.Literals([
   "AUDIO_CONTROL",
   "COMMAND_EXECUTE",
   "DATA_UPDATE",
+  "DESKTOP_CLOSE_WINDOW",
+  "DESKTOP_FOCUS_WINDOW",
+  "DESKTOP_FOCUS_WORKSPACE",
+  "DESKTOP_SET_KEYBOARD_LAYOUT",
+  "DESKTOP_SET_WINDOW_STATE",
   "DISCORD_CONTROL",
   "DISPLAY_CONTROL",
   "EXIT_APPLICATION",
@@ -17,6 +22,10 @@ export const EventType = Schema.Literals([
   "GET_FILES",
   "GET_HISTORY",
   "GET_SETTINGS",
+  "HYPRLAND_MOVE_WINDOW",
+  "HYPRLAND_RELOAD_CONFIG",
+  "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+  "HYPRLAND_SET_WINDOW",
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
   "MEDIA_CONTROL",
@@ -46,6 +55,11 @@ export const ResponseType = Schema.Literals([
   "DATA_LISTENER_REGISTERED",
   "DATA_LISTENER_UNREGISTERED",
   "DATA_UPDATE",
+  "DESKTOP_KEYBOARD_LAYOUT_SET",
+  "DESKTOP_WINDOW_CLOSED",
+  "DESKTOP_WINDOW_FOCUSED",
+  "DESKTOP_WINDOW_STATE_SET",
+  "DESKTOP_WORKSPACE_FOCUSED",
   "DIRECTORIES",
   "DIRECTORY",
   "DIRECTORY_VALIDATED",
@@ -58,6 +72,10 @@ export const ResponseType = Schema.Literals([
   "FILE",
   "FILES",
   "HISTORY",
+  "HYPRLAND_CONFIG_RELOADED",
+  "HYPRLAND_GLOBAL_SHORTCUT_RUN",
+  "HYPRLAND_WINDOW_MOVED",
+  "HYPRLAND_WINDOW_SET",
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
@@ -307,6 +325,46 @@ export const AudioControl = Schema.Struct({
 
 export interface AudioControl extends Schema.Schema.Type<typeof AudioControl> {}
 
+/** Names a window by its `id` from the desktop module. */
+export const DesktopWindowRequest = Schema.Struct({ id: Schema.String });
+
+export interface DesktopWindowRequest extends Schema.Schema.Type<
+  typeof DesktopWindowRequest
+> {}
+
+/**
+ * Makes a window fullscreen, maximised or minimised, or not. A state left out
+ * stays as it is. Hyprland can't minimise, and Windows can't make a window
+ * fullscreen.
+ */
+export const DesktopWindowStateRequest = Schema.Struct({
+  /** The window's `id` from the desktop module. */
+  id: Schema.String,
+  fullscreen: Schema.optionalKey(Schema.Boolean),
+  maximised: Schema.optionalKey(Schema.Boolean),
+  minimised: Schema.optionalKey(Schema.Boolean),
+});
+
+export interface DesktopWindowStateRequest extends Schema.Schema.Type<
+  typeof DesktopWindowStateRequest
+> {}
+
+/** Names a workspace by its `id` from the desktop module. */
+export const DesktopWorkspaceRequest = Schema.Struct({ id: Schema.String });
+
+export interface DesktopWorkspaceRequest extends Schema.Schema.Type<
+  typeof DesktopWorkspaceRequest
+> {}
+
+/** A layout from the desktop module's `keyboard.layouts`. */
+export const DesktopKeyboardLayoutRequest = Schema.Struct({
+  layout: Schema.String,
+});
+
+export interface DesktopKeyboardLayoutRequest extends Schema.Schema.Type<
+  typeof DesktopKeyboardLayoutRequest
+> {}
+
 /** Sets a display's brightness, its power state, or both. */
 export const DisplayControl = Schema.Struct({
   /** The display's `id` from the displays module. */
@@ -374,6 +432,40 @@ export const DiscordControl = Schema.Struct({
 
 export interface DiscordControl extends Schema.Schema.Type<
   typeof DiscordControl
+> {}
+
+/** A global shortcut's `name` from the desktop module's `hyprland.global_shortcuts`. */
+export const HyprlandGlobalShortcutRequest = Schema.Struct({
+  name: Schema.String,
+});
+
+export interface HyprlandGlobalShortcutRequest extends Schema.Schema.Type<
+  typeof HyprlandGlobalShortcutRequest
+> {}
+
+/** Moves a window to a workspace, leaving the focus where it is. */
+export const HyprlandMoveWindowRequest = Schema.Struct({
+  /** The window's `id` from the desktop module. */
+  id: Schema.String,
+  /** A workspace `id` from the desktop module, or the number of a new one. */
+  workspace: Schema.String,
+});
+
+export interface HyprlandMoveWindowRequest extends Schema.Schema.Type<
+  typeof HyprlandMoveWindowRequest
+> {}
+
+/** Floats or tiles a window, and pins or unpins it. A setting left out stays as it is. */
+export const HyprlandSetWindowRequest = Schema.Struct({
+  /** The window's `id` from the desktop module. */
+  id: Schema.String,
+  floating: Schema.optionalKey(Schema.Boolean),
+  /** Shown on every workspace. Only floating windows can be pinned. */
+  pinned: Schema.optionalKey(Schema.Boolean),
+});
+
+export interface HyprlandSetWindowRequest extends Schema.Schema.Type<
+  typeof HyprlandSetWindowRequest
 > {}
 
 /**
