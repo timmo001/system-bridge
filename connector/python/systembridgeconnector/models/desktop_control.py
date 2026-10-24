@@ -16,7 +16,7 @@ class HyprlandDirection(StrEnum):
 class HyprlandDispatcher(StrEnum):
     """A Hyprland dispatcher System Bridge can run on the focused window."""
 
-    CENTRE_WINDOW = "centre_window"
+    CENTER_WINDOW = "center_window"
     CYCLE_NEXT_WINDOW = "cycle_next_window"
     CYCLE_PREVIOUS_WINDOW = "cycle_previous_window"
     MOVE_FOCUS = "move_focus"

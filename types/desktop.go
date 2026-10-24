@@ -219,7 +219,7 @@ type HyprlandWorkspace struct {
 type HyprlandDispatcher string
 
 const (
-	HyprlandDispatcherCentreWindow        HyprlandDispatcher = "centre_window" // Floating windows only
+	HyprlandDispatcherCenterWindow        HyprlandDispatcher = "center_window" // Floating windows only
 	HyprlandDispatcherCycleNextWindow     HyprlandDispatcher = "cycle_next_window"
 	HyprlandDispatcherCyclePreviousWindow HyprlandDispatcher = "cycle_previous_window"
 	HyprlandDispatcherMoveFocus           HyprlandDispatcher = "move_focus"  // Takes a direction

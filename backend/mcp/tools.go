@@ -160,8 +160,8 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 		InputSchema: objectSchema(map[string]any{
 			"dispatcher": map[string]any{
 				"type":        "string",
-				"description": "The dispatcher. centre_window only acts on floating windows.",
-				"enum":        []string{"centre_window", "cycle_next_window", "cycle_previous_window", "move_focus", "swap_window", "toggle_group", "toggle_split"},
+				"description": "The dispatcher. center_window only acts on floating windows.",
+				"enum":        []string{"center_window", "cycle_next_window", "cycle_previous_window", "move_focus", "swap_window", "toggle_group", "toggle_split"},
 			},
 			"direction": map[string]any{
 				"type":        "string",

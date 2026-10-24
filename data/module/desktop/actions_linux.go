@@ -189,7 +189,7 @@ func HyprlandDispatch(ctx context.Context, dispatcher types.HyprlandDispatcher, 
 	}
 	var command hyprlandCommand
 	switch dispatcher {
-	case types.HyprlandDispatcherCentreWindow:
+	case types.HyprlandDispatcherCenterWindow:
 		command = hyprlandCommand{lua: "hl.dsp.window.center()", classic: "centerwindow"}
 	case types.HyprlandDispatcherCycleNextWindow:
 		command = hyprlandCommand{lua: "hl.dsp.window.cycle_next()", classic: "cyclenext"}

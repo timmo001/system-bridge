@@ -1026,7 +1026,7 @@ const directionButtons = (
   );
 
 const dispatcherButtons = [
-  ["centre_window", "Centre", mdiImageFilterCenterFocus],
+  ["center_window", "Center", mdiImageFilterCenterFocus],
   ["cycle_next_window", "Next window", mdiArrowRightBoldBoxOutline],
   ["cycle_previous_window", "Previous window", mdiArrowLeftBoldBoxOutline],
   ["toggle_group", "Toggle group", mdiTab],

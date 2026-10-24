@@ -53,7 +53,7 @@ export const HyprlandDirection = Schema.Literals([
 export type HyprlandDirection = typeof HyprlandDirection.Type;
 
 export const HyprlandDispatcher = Schema.Literals([
-  "centre_window",
+  "center_window",
   "cycle_next_window",
   "cycle_previous_window",
   "move_focus",

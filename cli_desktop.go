@@ -98,7 +98,7 @@ func hyprlandCommand() *cli.Command {
 		Commands: []*cli.Command{
 			{
 				Name:      "dispatch",
-				Usage:     "Run a dispatcher on the focused window: centre_window, cycle_next_window, cycle_previous_window, move_focus, swap_window, toggle_group or toggle_split",
+				Usage:     "Run a dispatcher on the focused window: center_window, cycle_next_window, cycle_previous_window, move_focus, swap_window, toggle_group or toggle_split",
 				ArgsUsage: "<dispatcher> [down|left|right|up]",
 				Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 					dispatcher, direction := cmd.Args().Get(0), cmd.Args().Get(1)
