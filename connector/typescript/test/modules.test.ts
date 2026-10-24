@@ -5,6 +5,7 @@ import audio from "./fixtures/audio.json" with { type: "json" };
 import battery from "./fixtures/battery.json" with { type: "json" };
 import bluetooth from "./fixtures/bluetooth.json" with { type: "json" };
 import cpu from "./fixtures/cpu.json" with { type: "json" };
+import desktop from "./fixtures/desktop.json" with { type: "json" };
 import discord from "./fixtures/discord.json" with { type: "json" };
 import disks from "./fixtures/disks.json" with { type: "json" };
 import displays from "./fixtures/displays.json" with { type: "json" };
@@ -21,6 +22,7 @@ const fixtures = {
   battery,
   bluetooth,
   cpu,
+  desktop,
   discord,
   disks,
   displays,

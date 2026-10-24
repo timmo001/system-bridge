@@ -11,6 +11,7 @@ from .models.modules.audio import Audio
 from .models.modules.battery import Battery
 from .models.modules.bluetooth import Bluetooth
 from .models.modules.cpu import CPU
+from .models.modules.desktop import Desktop
 from .models.modules.discord import Discord
 from .models.modules.disks import Disks
 from .models.modules.displays import Display
@@ -180,6 +181,7 @@ class Model(StrEnum):
     BLUETOOTH = Module.BLUETOOTH
     CPU = Module.CPU
     DATA = "data"
+    DESKTOP = Module.DESKTOP
     DISCORD = Module.DISCORD
     DISKS = Module.DISKS
     DISPLAYS = Module.DISPLAYS
@@ -209,6 +211,7 @@ MODEL_MAP = {
     Model.BLUETOOTH: Bluetooth,
     Model.CPU: CPU,
     Model.DATA: ModulesData,
+    Model.DESKTOP: Desktop,
     Model.DISCORD: Discord,
     Model.DISKS: Disks,
     Model.DISPLAYS: Display,  # Map to Display not list[Display] so it can be mapped

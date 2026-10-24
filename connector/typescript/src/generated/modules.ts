@@ -18,6 +18,14 @@ export const BatteryState = Schema.Literals([
 
 export type BatteryState = typeof BatteryState.Type;
 
+export const DesktopCompositor = Schema.Literals([
+  "hyprland",
+  "wayland",
+  "windows",
+]);
+
+export type DesktopCompositor = typeof DesktopCompositor.Type;
+
 export const DiskMountCategory = Schema.Literals([
   "primary",
   "bind",
@@ -35,11 +43,28 @@ export const DisplayPowerState = Schema.Literals([
 
 export type DisplayPowerState = typeof DisplayPowerState.Type;
 
+export const HyprlandFullscreenMode = Schema.Literals([
+  "fullscreen",
+  "maximised",
+  "none",
+]);
+
+export type HyprlandFullscreenMode = typeof HyprlandFullscreenMode.Type;
+
+export const HyprlandScreencastType = Schema.Literals([
+  "monitor",
+  "region",
+  "window",
+]);
+
+export type HyprlandScreencastType = typeof HyprlandScreencastType.Type;
+
 export const ModuleName = Schema.Literals([
   "audio",
   "battery",
   "bluetooth",
   "cpu",
+  "desktop",
   "disks",
   "discord",
   "displays",
@@ -179,6 +204,211 @@ export const CPUData = Schema.Struct({
 });
 
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
+
+export const DesktopKeyboard = Schema.Struct({
+  layout: Schema.NullOr(Schema.String),
+  name: Schema.NullOr(Schema.String),
+  layouts: Schema.Array(Schema.String),
+});
+
+export interface DesktopKeyboard extends Schema.Schema.Type<
+  typeof DesktopKeyboard
+> {}
+
+export const DesktopWindow = Schema.Struct({
+  id: Schema.String,
+  app: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  pid: Schema.NullOr(Schema.Finite),
+  workspace: Schema.NullOr(Schema.String),
+  display: Schema.NullOr(Schema.String),
+  x: Schema.NullOr(Schema.Finite),
+  y: Schema.NullOr(Schema.Finite),
+  width: Schema.NullOr(Schema.Finite),
+  height: Schema.NullOr(Schema.Finite),
+  focused: Schema.Boolean,
+  fullscreen: Schema.NullOr(Schema.Boolean),
+  maximised: Schema.NullOr(Schema.Boolean),
+  minimised: Schema.NullOr(Schema.Boolean),
+  floating: Schema.NullOr(Schema.Boolean),
+  urgent: Schema.NullOr(Schema.Boolean),
+  inhibiting_idle: Schema.NullOr(Schema.Boolean),
+  content_type: Schema.NullOr(Schema.String),
+});
+
+export interface DesktopWindow extends Schema.Schema.Type<
+  typeof DesktopWindow
+> {}
+
+export const DesktopWorkspace = Schema.Struct({
+  id: Schema.String,
+  name: Schema.NullOr(Schema.String),
+  display: Schema.NullOr(Schema.String),
+  active: Schema.Boolean,
+  focused: Schema.Boolean,
+  special: Schema.NullOr(Schema.Boolean),
+  windows: Schema.NullOr(Schema.Finite),
+  fullscreen: Schema.NullOr(Schema.Boolean),
+});
+
+export interface DesktopWorkspace extends Schema.Schema.Type<
+  typeof DesktopWorkspace
+> {}
+
+export const HyprlandVersion = Schema.Struct({
+  version: Schema.String,
+  tag: Schema.String,
+  commit: Schema.String,
+  branch: Schema.String,
+  config_provider: Schema.NullOr(Schema.String),
+  backend: Schema.NullOr(Schema.String),
+});
+
+export interface HyprlandVersion extends Schema.Schema.Type<
+  typeof HyprlandVersion
+> {}
+
+export const HyprlandScreencast = Schema.Struct({
+  type: HyprlandScreencastType,
+  display: Schema.NullOr(Schema.String),
+  window: Schema.NullOr(Schema.String),
+});
+
+export interface HyprlandScreencast extends Schema.Schema.Type<
+  typeof HyprlandScreencast
+> {}
+
+export const HyprlandReserved = Schema.Struct({
+  top: Schema.Finite,
+  right: Schema.Finite,
+  bottom: Schema.Finite,
+  left: Schema.Finite,
+});
+
+export interface HyprlandReserved extends Schema.Schema.Type<
+  typeof HyprlandReserved
+> {}
+
+export const HyprlandLayers = Schema.Struct({
+  background: Schema.Array(Schema.String),
+  bottom: Schema.Array(Schema.String),
+  top: Schema.Array(Schema.String),
+  overlay: Schema.Array(Schema.String),
+});
+
+export interface HyprlandLayers extends Schema.Schema.Type<
+  typeof HyprlandLayers
+> {}
+
+export const HyprlandDisplay = Schema.Struct({
+  scale: Schema.Finite,
+  transform: Schema.Finite,
+  vrr: Schema.Boolean,
+  tearing: Schema.Boolean,
+  direct_scanout: Schema.Boolean,
+  colour_preset: Schema.NullOr(Schema.String),
+  format: Schema.NullOr(Schema.String),
+  dpms: Schema.Boolean,
+  mirror_of: Schema.NullOr(Schema.String),
+  reserved: HyprlandReserved,
+  special_workspace: Schema.NullOr(Schema.String),
+  layers: HyprlandLayers,
+});
+
+export interface HyprlandDisplay extends Schema.Schema.Type<
+  typeof HyprlandDisplay
+> {}
+
+export const HyprlandKeyboard = Schema.Struct({
+  name: Schema.String,
+  layouts: Schema.Array(Schema.String),
+  variant: Schema.NullOr(Schema.String),
+  options: Schema.NullOr(Schema.String),
+  active_layout: Schema.Finite,
+  active_keymap: Schema.NullOr(Schema.String),
+  main: Schema.Boolean,
+});
+
+export interface HyprlandKeyboard extends Schema.Schema.Type<
+  typeof HyprlandKeyboard
+> {}
+
+export const HyprlandMouse = Schema.Struct({
+  name: Schema.String,
+  speed: Schema.Finite,
+  scroll_factor: Schema.Finite,
+});
+
+export interface HyprlandMouse extends Schema.Schema.Type<
+  typeof HyprlandMouse
+> {}
+
+export const HyprlandGlobalShortcut = Schema.Struct({
+  name: Schema.String,
+  description: Schema.String,
+});
+
+export interface HyprlandGlobalShortcut extends Schema.Schema.Type<
+  typeof HyprlandGlobalShortcut
+> {}
+
+export const HyprlandWindow = Schema.Struct({
+  fullscreen_mode: HyprlandFullscreenMode,
+  pinned: Schema.Boolean,
+  xwayland: Schema.Boolean,
+  hidden: Schema.Boolean,
+  group: Schema.Array(Schema.String),
+  swallowing: Schema.NullOr(Schema.String),
+  tags: Schema.Array(Schema.String),
+  focus_history: Schema.Finite,
+  initial_app: Schema.NullOr(Schema.String),
+  xdg_tag: Schema.NullOr(Schema.String),
+  tearing_hint: Schema.Boolean,
+});
+
+export interface HyprlandWindow extends Schema.Schema.Type<
+  typeof HyprlandWindow
+> {}
+
+export const HyprlandWorkspace = Schema.Struct({
+  layout: Schema.NullOr(Schema.String),
+  persistent: Schema.Boolean,
+});
+
+export interface HyprlandWorkspace extends Schema.Schema.Type<
+  typeof HyprlandWorkspace
+> {}
+
+export const HyprlandData = Schema.Struct({
+  version: HyprlandVersion,
+  submap: Schema.NullOr(Schema.String),
+  screencasts: Schema.Array(HyprlandScreencast),
+  config_errors: Schema.Array(Schema.String),
+  group_lock: Schema.Boolean,
+  displays: Schema.Record(Schema.String, HyprlandDisplay),
+  keyboards: Schema.Array(HyprlandKeyboard),
+  mice: Schema.Array(HyprlandMouse),
+  tablets: Schema.Array(Schema.String),
+  touch: Schema.Array(Schema.String),
+  switches: Schema.Array(Schema.String),
+  global_shortcuts: Schema.Array(HyprlandGlobalShortcut),
+  windows: Schema.Record(Schema.String, HyprlandWindow),
+  workspaces: Schema.Record(Schema.String, HyprlandWorkspace),
+});
+
+export interface HyprlandData extends Schema.Schema.Type<typeof HyprlandData> {}
+
+export const DesktopData = Schema.Struct({
+  compositor: DesktopCompositor,
+  focused_window: Schema.NullOr(Schema.String),
+  focused_workspace: Schema.NullOr(Schema.String),
+  keyboard: DesktopKeyboard,
+  windows: Schema.Array(DesktopWindow),
+  workspaces: Schema.Array(DesktopWorkspace),
+  hyprland: Schema.NullOr(HyprlandData),
+});
+
+export interface DesktopData extends Schema.Schema.Type<typeof DesktopData> {}
 
 export const DeviceInfo = Schema.Struct({
   manufacturer: Schema.NullOr(Schema.String),
@@ -890,6 +1120,7 @@ export interface ModuleData {
   readonly battery: BatteryData;
   readonly bluetooth: BluetoothData;
   readonly cpu: CPUData;
+  readonly desktop: DesktopData;
   readonly discord: DiscordData;
   readonly disks: DisksData;
   readonly displays: DisplaysData;
@@ -911,6 +1142,7 @@ export const ModuleDataSchemas: ModuleDataSchemas = {
   battery: BatteryData,
   bluetooth: BluetoothData,
   cpu: CPUData,
+  desktop: DesktopData,
   discord: DiscordData,
   disks: DisksData,
   displays: DisplaysData,
@@ -928,6 +1160,7 @@ export const ModulesData = Schema.Struct({
   battery: Schema.optionalKey(BatteryData),
   bluetooth: Schema.optionalKey(BluetoothData),
   cpu: Schema.optionalKey(CPUData),
+  desktop: Schema.optionalKey(DesktopData),
   discord: Schema.optionalKey(DiscordData),
   disks: Schema.optionalKey(DisksData),
   displays: Schema.optionalKey(DisplaysData),
@@ -947,6 +1180,7 @@ export const ModuleDataUpdate = Schema.Union([
   Schema.Struct({ module: Schema.Literal("battery"), data: BatteryData }),
   Schema.Struct({ module: Schema.Literal("bluetooth"), data: BluetoothData }),
   Schema.Struct({ module: Schema.Literal("cpu"), data: CPUData }),
+  Schema.Struct({ module: Schema.Literal("desktop"), data: DesktopData }),
   Schema.Struct({ module: Schema.Literal("discord"), data: DiscordData }),
   Schema.Struct({ module: Schema.Literal("disks"), data: DisksData }),
   Schema.Struct({ module: Schema.Literal("displays"), data: DisplaysData }),

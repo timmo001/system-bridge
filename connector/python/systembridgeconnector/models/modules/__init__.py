@@ -7,6 +7,7 @@ from .audio import Audio
 from .battery import Battery
 from .bluetooth import Bluetooth
 from .cpu import CPU
+from .desktop import Desktop
 from .discord import Discord
 from .disks import Disks
 from .displays import Display
@@ -26,6 +27,7 @@ class Module(StrEnum):
     BATTERY = "battery"
     BLUETOOTH = "bluetooth"
     CPU = "cpu"
+    DESKTOP = "desktop"
     DISCORD = "discord"
     DISKS = "disks"
     DISPLAYS = "displays"
@@ -58,6 +60,7 @@ class ModulesData:
     battery: Battery | None = None
     bluetooth: Bluetooth | None = None
     cpu: CPU | None = None
+    desktop: Desktop | None = None
     discord: Discord | None = None
     disks: Disks | None = None
     displays: list[Display] | None = None

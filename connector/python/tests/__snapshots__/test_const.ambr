@@ -6,6 +6,7 @@
     <Model.BLUETOOTH: 'bluetooth'>: <class 'systembridgeconnector.models.modules.bluetooth.Bluetooth'>,
     <Model.CPU: 'cpu'>: <class 'systembridgeconnector.models.modules.cpu.CPU'>,
     <Model.DATA: 'data'>: <class 'systembridgeconnector.models.modules.ModulesData'>,
+    <Model.DESKTOP: 'desktop'>: <class 'systembridgeconnector.models.modules.desktop.Desktop'>,
     <Model.DISCORD: 'discord'>: <class 'systembridgeconnector.models.modules.discord.Discord'>,
     <Model.DISKS: 'disks'>: <class 'systembridgeconnector.models.modules.disks.Disks'>,
     <Model.DISPLAYS: 'displays'>: <class 'systembridgeconnector.models.modules.displays.Display'>,

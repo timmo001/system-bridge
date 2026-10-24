@@ -15,6 +15,7 @@ from systembridgeconnector.models.fixtures.modules.audio import FIXTURE_AUDIO
 from systembridgeconnector.models.fixtures.modules.battery import FIXTURE_BATTERY
 from systembridgeconnector.models.fixtures.modules.bluetooth import FIXTURE_BLUETOOTH
 from systembridgeconnector.models.fixtures.modules.cpu import FIXTURE_CPU
+from systembridgeconnector.models.fixtures.modules.desktop import FIXTURE_DESKTOP
 from systembridgeconnector.models.fixtures.modules.discord import FIXTURE_DISCORD
 from systembridgeconnector.models.fixtures.modules.disks import FIXTURE_DISKS
 from systembridgeconnector.models.fixtures.modules.displays import FIXTURE_DISPLAYS
@@ -43,6 +44,7 @@ MODULES_DATA = ModulesData(
     battery=FIXTURE_BATTERY,
     bluetooth=FIXTURE_BLUETOOTH,
     cpu=FIXTURE_CPU,
+    desktop=FIXTURE_DESKTOP,
     discord=FIXTURE_DISCORD,
     disks=FIXTURE_DISKS,
     displays=FIXTURE_DISPLAYS,
@@ -385,6 +387,7 @@ async def process_request(request: Request) -> Response:
                 "systemTray": True,
                 "hotkeys": [],
                 "logLevel": "WARN",
+                "desktop": {"windowTitles": False},
                 "disks": {"allowedSecondaryMountPoints": []},
                 "media": {"directories": []},
                 "commands": {

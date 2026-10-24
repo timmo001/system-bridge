@@ -6,6 +6,9 @@
       allowlist=list([
       ]),
     ),
+    desktop=SettingsDesktop(
+      windowTitles=False,
+    ),
     disks=SettingsDisks(
       allowedSecondaryMountPoints=list([
       ]),
@@ -76,6 +79,9 @@
           workingDir='',
         ),
       ]),
+    ),
+    desktop=SettingsDesktop(
+      windowTitles=False,
     ),
     disks=SettingsDisks(
       allowedSecondaryMountPoints=list([

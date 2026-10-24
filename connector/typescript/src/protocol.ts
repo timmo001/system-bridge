@@ -170,6 +170,15 @@ export interface SettingsMedia extends Schema.Schema.Type<
   typeof SettingsMedia
 > {}
 
+export const SettingsDesktop = Schema.Struct({
+  /** Whether the desktop module reports window titles, off by default. */
+  windowTitles: Schema.Boolean,
+});
+
+export interface SettingsDesktop extends Schema.Schema.Type<
+  typeof SettingsDesktop
+> {}
+
 export const SettingsDisks = Schema.Struct({
   allowedSecondaryMountPoints: Schema.Array(Schema.String),
 });
@@ -184,6 +193,7 @@ export const Settings = Schema.Struct({
   hotkeys: Schema.Array(SettingsHotkey),
   logLevel: LogLevel,
   commands: SettingsCommands,
+  desktop: SettingsDesktop,
   disks: SettingsDisks,
   media: SettingsMedia,
 });

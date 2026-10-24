@@ -100,6 +100,13 @@ class SettingsCommands:
 
 
 @dataclass
+class SettingsDesktop:
+    """Settings Desktop. Window titles are off by default, as they can be private."""
+
+    windowTitles: bool = False  # noqa: N815
+
+
+@dataclass
 class SettingsDisks:
     """Settings Disks."""
 
@@ -116,6 +123,7 @@ class Settings:
     hotkeys: list[SettingHotkey] = field(default_factory=list)
     logLevel: str = field(default="WARN")  # noqa: N815
     commands: SettingsCommands = field(default_factory=SettingsCommands)
+    desktop: SettingsDesktop = field(default_factory=SettingsDesktop)
     disks: SettingsDisks = field(default_factory=SettingsDisks)
     media: SettingsMedia = field(default_factory=SettingsMedia)
 
@@ -133,6 +141,9 @@ class Settings:
                     for command in self.commands.get("allowlist") or []
                 ]
             )
+
+        if isinstance(self.desktop, dict):
+            self.desktop = SettingsDesktop(**self.desktop)
 
         if isinstance(self.disks, dict):
             self.disks = SettingsDisks(**self.disks)

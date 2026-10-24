@@ -1,0 +1,294 @@
+{
+  "compositor": "hyprland",
+  "focused_window": "0x555dbfe3a6e0",
+  "focused_workspace": "1",
+  "keyboard": {
+    "layout": "gb",
+    "name": "English (UK)",
+    "layouts": [
+      "gb"
+    ]
+  },
+  "windows": [
+    {
+      "id": "0x555dc01ffeb0",
+      "app": "org.omarchy.agent",
+      "title": "Terminal",
+      "pid": 1024681,
+      "workspace": "-98",
+      "display": "HDMI-A-2",
+      "x": 0,
+      "y": 528,
+      "width": 2400,
+      "height": 1326,
+      "focused": false,
+      "fullscreen": false,
+      "maximised": false,
+      "minimised": null,
+      "floating": false,
+      "urgent": false,
+      "inhibiting_idle": false,
+      "content_type": null
+    },
+    {
+      "id": "0x555dbf98b430",
+      "app": "org.qt-project.qml6",
+      "title": null,
+      "pid": 288095,
+      "workspace": "1",
+      "display": "DP-1",
+      "x": -1349,
+      "y": 1633,
+      "width": 1348,
+      "height": 766,
+      "focused": false,
+      "fullscreen": false,
+      "maximised": false,
+      "minimised": null,
+      "floating": false,
+      "urgent": false,
+      "inhibiting_idle": false,
+      "content_type": null
+    },
+    {
+      "id": "0x555dbff99ba0",
+      "app": "com.edde746.plezy",
+      "title": null,
+      "pid": 1107888,
+      "workspace": "2",
+      "display": "HDMI-A-2",
+      "x": 0,
+      "y": 528,
+      "width": 2400,
+      "height": 1326,
+      "focused": false,
+      "fullscreen": false,
+      "maximised": false,
+      "minimised": null,
+      "floating": false,
+      "urgent": false,
+      "inhibiting_idle": false,
+      "content_type": null
+    }
+  ],
+  "workspaces": [
+    {
+      "id": "-98",
+      "name": "special:scratchpad",
+      "display": "HDMI-A-2",
+      "active": false,
+      "focused": false,
+      "special": true,
+      "windows": 1,
+      "fullscreen": false
+    },
+    {
+      "id": "1",
+      "name": "Main",
+      "display": "DP-1",
+      "active": true,
+      "focused": true,
+      "special": false,
+      "windows": 3,
+      "fullscreen": false
+    },
+    {
+      "id": "2",
+      "name": "Terminal",
+      "display": "HDMI-A-2",
+      "active": true,
+      "focused": false,
+      "special": false,
+      "windows": 1,
+      "fullscreen": false
+    }
+  ],
+  "hyprland": {
+    "version": {
+      "version": "0.56.2",
+      "tag": "v0.56.2",
+      "commit": "efb50993780079460b0cbed1363e2166a2de1d9f",
+      "branch": "v0.56.2",
+      "config_provider": "lua",
+      "backend": "drm"
+    },
+    "submap": "resize",
+    "screencasts": [
+      {
+        "type": "window",
+        "display": null,
+        "window": "0x555dc01ffeb0"
+      }
+    ],
+    "config_errors": [],
+    "group_lock": false,
+    "displays": {
+      "DP-1": {
+        "scale": 1.6,
+        "transform": 1,
+        "vrr": false,
+        "tearing": false,
+        "direct_scanout": false,
+        "colour_preset": "srgb",
+        "format": "XRGB8888",
+        "dpms": true,
+        "mirror_of": null,
+        "reserved": {
+          "top": 24,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "special_workspace": null,
+        "layers": {
+          "background": [
+            "omarchy-background"
+          ],
+          "bottom": [],
+          "top": [
+            "omarchy-bar",
+            "omarchy-dock"
+          ],
+          "overlay": [
+            "omarchy-notifications"
+          ]
+        }
+      },
+      "HDMI-A-2": {
+        "scale": 1.6,
+        "transform": 0,
+        "vrr": false,
+        "tearing": false,
+        "direct_scanout": false,
+        "colour_preset": "hdr",
+        "format": "XBGR2101010",
+        "dpms": true,
+        "mirror_of": null,
+        "reserved": {
+          "top": 24,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "special_workspace": null,
+        "layers": {
+          "background": [
+            "omarchy-background"
+          ],
+          "bottom": [],
+          "top": [
+            "omarchy-bar",
+            "omarchy-dock"
+          ],
+          "overlay": [
+            "omarchy-notifications"
+          ]
+        }
+      }
+    },
+    "keyboards": [
+      {
+        "name": "logitech-pro-x-2c",
+        "layouts": [
+          "gb"
+        ],
+        "variant": null,
+        "options": "compose:caps",
+        "active_layout": 0,
+        "active_keymap": "English (UK)",
+        "main": false
+      },
+      {
+        "name": "hl-virtual-keyboard-fcitx5",
+        "layouts": [
+          "gb"
+        ],
+        "variant": null,
+        "options": "compose:caps",
+        "active_layout": 0,
+        "active_keymap": "English (UK)",
+        "main": true
+      }
+    ],
+    "mice": [
+      {
+        "name": "keychron-keychron-k10-pro-consumer-control-1",
+        "speed": 0,
+        "scroll_factor": -1
+      }
+    ],
+    "tablets": [],
+    "touch": [],
+    "switches": [],
+    "global_shortcuts": [
+      {
+        "name": "omarchy:menu.root",
+        "description": "Toggle the root menu"
+      },
+      {
+        "name": "omarchy:menu.apps",
+        "description": "Toggle the apps menu"
+      }
+    ],
+    "windows": {
+      "0x555dbf98b430": {
+        "fullscreen_mode": "none",
+        "pinned": false,
+        "xwayland": false,
+        "hidden": false,
+        "group": [],
+        "swallowing": null,
+        "tags": [
+          "wssetup-ws1-plannotator"
+        ],
+        "focus_history": 2,
+        "initial_app": "org.qt-project.qml6",
+        "xdg_tag": null,
+        "tearing_hint": false
+      },
+      "0x555dbff99ba0": {
+        "fullscreen_mode": "none",
+        "pinned": false,
+        "xwayland": false,
+        "hidden": false,
+        "group": [],
+        "swallowing": null,
+        "tags": [],
+        "focus_history": 3,
+        "initial_app": "com.edde746.plezy",
+        "xdg_tag": null,
+        "tearing_hint": false
+      },
+      "0x555dc01ffeb0": {
+        "fullscreen_mode": "none",
+        "pinned": false,
+        "xwayland": false,
+        "hidden": false,
+        "group": [],
+        "swallowing": null,
+        "tags": [
+          "terminal*",
+          "transparent-window*"
+        ],
+        "focus_history": 4,
+        "initial_app": "org.omarchy.agent",
+        "xdg_tag": null,
+        "tearing_hint": false
+      }
+    },
+    "workspaces": {
+      "-98": {
+        "layout": "dwindle",
+        "persistent": false
+      },
+      "1": {
+        "layout": "dwindle",
+        "persistent": false
+      },
+      "2": {
+        "layout": "dwindle",
+        "persistent": false
+      }
+    }
+  }
+}

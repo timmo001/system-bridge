@@ -8,6 +8,7 @@ from systembridgeconnector.models.settings import (
     Settings,
     SettingsCommandDefinition,
     SettingsCommands,
+    SettingsDesktop,
     SettingsDisks,
 )
 
@@ -37,12 +38,14 @@ def test_settings_from_backend():
                 }
             ]
         },
+        desktop={"windowTitles": True},
         disks={"allowedSecondaryMountPoints": ["/mnt/data"]},
         media={"directories": [{"name": "Music", "path": "/home/user/Music"}]},
     )
     assert settings.systemTray is False
     assert settings.hotkeys == [SettingHotkey(name="Lock", key="ctrl+l")]
     assert isinstance(settings.commands.allowlist[0], SettingsCommandDefinition)
+    assert settings.desktop == SettingsDesktop(windowTitles=True)
     assert settings.disks == SettingsDisks(
         allowedSecondaryMountPoints=["/mnt/data"],
     )
