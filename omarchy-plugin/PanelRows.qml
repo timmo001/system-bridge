@@ -527,11 +527,12 @@ QtObject {
       var addresses = Array.isArray(network.addresses) ? network.addresses.map(function(address) { return text(address.address) }) : []
       var stats = network.stats || {}
       var io = network.io || {}
+      var wifi = network.wifi || {}
       rows.push(row({
         key: "interface-" + (text(network.name) || i), section: "Interfaces",
-        icon: stats.isup === false ? "󰲛" : "󰛳",
+        icon: stats.isup === false ? "󰲛" : text(wifi.ssid) ? "󰖩" : "󰛳",
         primaryText: text(network.name) || "Interface " + (i + 1),
-        secondaryText: join([stats.isup === false ? "Down" : "", num(io.bytes_recv_rate) !== null ? "↓ " + rate(io.bytes_recv_rate) : "", num(io.bytes_sent_rate) !== null ? "↑ " + rate(io.bytes_sent_rate) : "", num(stats.speed) > 0 ? stats.speed + " Mb/s" : "", addresses.filter(function(address) { return address !== "" }).join(", ")])
+        secondaryText: join([stats.isup === false ? "Down" : "", text(wifi.ssid), percent(wifi.signal_percent), num(io.bytes_recv_rate) !== null ? "↓ " + rate(io.bytes_recv_rate) : "", num(io.bytes_sent_rate) !== null ? "↑ " + rate(io.bytes_sent_rate) : "", num(stats.speed) > 0 ? stats.speed + " Mb/s" : "", num(wifi.link_rate) > 0 ? Math.round(num(wifi.link_rate)) + " Mb/s" : "", addresses.filter(function(address) { return address !== "" }).join(", ")])
       }))
     }
     return rows
