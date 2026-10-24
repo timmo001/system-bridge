@@ -64,6 +64,27 @@ macOS isn't supported yet, so it reports no devices.
 
 Changes made elsewhere, such as with your volume keys or another mixer, show up straight away on Linux and within a second on Windows.
 
+## Bluetooth
+
+Connect, disconnect or forget paired devices, and turn Bluetooth on or off, from the [web client](/using/web-client/)'s **Bluetooth** page, the API with [Bluetooth control](/api/websocket/control/#bluetooth-control), the [MCP server](/api/mcp/)'s `system_bridge_bluetooth_*` tools, or the CLI:
+
+```bash title="Terminal"
+system-bridge client bluetooth connect 80:C3:BA:7B:93:4E
+system-bridge client bluetooth disconnect 80:C3:BA:7B:93:4E
+system-bridge client bluetooth forget 80:C3:BA:7B:93:4E
+system-bridge client bluetooth power off
+```
+
+The address is the device's `address` from the [`bluetooth`](/api/data/#bluetooth) data, which also reports whether Bluetooth is `powered`. Pairing a new device isn't supported, as it usually needs a code confirmed on both sides.
+
+| Action | Linux | Windows |
+| --- | --- | --- |
+| Connect or disconnect a device | Yes | No |
+| Forget a device | Yes | Yes |
+| Turn Bluetooth on or off | Yes | No |
+
+Linux uses BlueZ, and turning Bluetooth on or off applies to every adapter. macOS isn't supported yet.
+
 ## Desktop
 
 Focus, close, maximise and make windows fullscreen, show a workspace and switch the keyboard layout from the [web client](/using/web-client/)'s **Desktop** page, the API with [desktop control](/api/websocket/control/#desktop-control), the [MCP server](/api/mcp/)'s `system_bridge_desktop_*` tools, or the CLI:

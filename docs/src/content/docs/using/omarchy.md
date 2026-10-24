@@ -12,9 +12,9 @@ media controls.
 
 - Omarchy Quattro
 - System Bridge installed with the `system-bridge` executable available on
-  `PATH`, in a version with the `client audio`, `client desktop`,
-  `client discord`, `client display`, `client hyprland`, `client media` and
-  `client open --path` [CLI commands](/using/cli/)
+  `PATH`, in a version with the `client audio`, `client bluetooth`,
+  `client desktop`, `client discord`, `client display`, `client hyprland`,
+  `client media` and `client open --path` [CLI commands](/using/cli/)
 - A running local System Bridge service
 
 ## Install
@@ -40,10 +40,11 @@ meters, storage, network traffic, what's playing, and a row for each module.
 Select a reading or a module to open its view. Each view has the module's
 readings, and links to the matching part of the web client for anything you set
 up there, such as commands, disk mounts, media directories or Discord. The
+Bluetooth view connects or disconnects a paired device when you select it; the
 desktop view focuses a window or workspace when you select it, switches the
-keyboard layout, and reloads Hyprland's config; the media view has previous,
-play or pause, and next; the Discord view has mute, deafen and leave call; and
-the displays view has brightness and power for each display that supports them.
+keyboard layout, and reloads Hyprland's config; the Discord view has mute,
+deafen and leave call; the displays view has brightness for each display that
+supports it; and the media view has previous, play or pause, and next.
 
 Type to filter the rows, use Up and Down to move through them, and press Enter
 to select one. Backspace or the back button returns to the overview, and Escape

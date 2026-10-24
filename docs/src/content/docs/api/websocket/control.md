@@ -97,6 +97,32 @@ Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mut
 
 The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id` gets an `ERROR` with the subtype `BAD_REQUEST`, and a platform that can't control audio gets `INVALID_ACTION`.
 
+## Bluetooth control
+
+Connect, disconnect or forget a paired device, and turn Bluetooth on or off. Addresses are the device `address`es from the [`bluetooth`](/api/data/#bluetooth) data. See [Bluetooth](/features/remote-control/#bluetooth) for what each platform supports.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `BLUETOOTH_CONNECT` | `address` | `BLUETOOTH_CONNECTED` |
+| `BLUETOOTH_DISCONNECT` | `address` | `BLUETOOTH_DISCONNECTED` |
+| `BLUETOOTH_FORGET` | `address` | `BLUETOOTH_FORGOTTEN` |
+| `BLUETOOTH_SET_POWER` | `powered`, `true` or `false` | `BLUETOOTH_POWER_SET` |
+
+Forgetting a device unpairs it, so it has to be paired again before it can connect.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "BLUETOOTH_CONNECT",
+    "data": {
+        "address": "80:C3:BA:7B:93:4E"
+    }
+}
+```
+
+The response comes once the device has connected, which can take up to 30 seconds, and the bluetooth module updates straight after. An unknown address gets an `ERROR` with the subtype `BAD_REQUEST`, and something the platform can't do gets `INVALID_ACTION`.
+
 ## Desktop control
 
 Focus, close and change windows, show a workspace, and switch the keyboard layout. Window and workspace IDs are the `id`s from the [`desktop`](/api/data/#desktop) data. See [desktop](/features/remote-control/#desktop) for what each desktop supports.

@@ -83,6 +83,7 @@ Each item in `batteries` has `name`, `model`, `scope` (`system` or `device`), `s
 | Field | Type | Description |
 | --- | --- | --- |
 | `devices` | array | Paired devices, sorted by name. |
+| `powered` | boolean | Whether Bluetooth is on: `true` when any adapter is on. `null` when there's no adapter, and on Windows and macOS. |
 
 Each device has:
 
