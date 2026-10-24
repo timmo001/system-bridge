@@ -193,11 +193,13 @@ Details of the current media session: `title`, `artist`, `album_title`, `album_a
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `networks` | array | Interfaces, each with `name`, `addresses`, `stats`, and `io`. |
+| `networks` | array | Interfaces, each with `name`, `addresses`, `stats`, `io`, and `wifi`. |
 | `connections` | array | Active connections with `fd`, `family`, `type`, `laddr`, `raddr`, `status`, and `pid`. |
 | `io` | object | I/O for all interfaces combined: `bytes_sent`, `bytes_recv`, `packets_sent`, `packets_recv`, `errin`, `errout`, `dropin`, `dropout`, `bytes_sent_rate`, `bytes_recv_rate`. |
 
 Each interface address has `address`, `family`, `netmask`, `broadcast`, and `ptp`; interface `stats` has `isup`, `duplex`, `speed`, `mtu`, and `flags`. `speed` is the link speed in Mb/s, read on Linux only. It is `null` where the system doesn't report one, such as wireless, virtual or disconnected interfaces. Interface `io` has the same fields as the combined `io`, for that interface only.
+
+Interface `wifi` is `null` on wired and virtual interfaces. On wireless interfaces it has `ssid` (the network name), `signal` (signal strength in dBm), `signal_percent` (0 to 100, where -50 dBm or stronger is 100) and `link_rate` (the transmit rate in Mb/s). These are `null` while the interface isn't connected. It's read through nl80211 on Linux, so it works with NetworkManager, iwd and wpa_supplicant, and through the WLAN API on Windows. It's always `null` on macOS.
 
 `bytes_sent_rate` and `bytes_recv_rate` are in bytes per second since the previous reading. They are `null` on the first reading, and when a counter resets.
 
