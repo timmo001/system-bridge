@@ -416,7 +416,19 @@ QtObject {
           rows.push(control("layout-" + layouts[k], "Keyboard", "\u{F030C}", "Switch to " + layouts[k], "", argv("layout", text(layouts[k]))))
     if (desktop.hyprland)
       rows.push(control("hyprland-reload", "Hyprland", "\u{F0453}", "Reload config", text(desktop.hyprland.version ? desktop.hyprland.version.version : ""), ["system-bridge", "client", "hyprland", "reload"]))
-    rows.push(webRow("web-desktop", "In the web client", desktopIcon, "All controls", "Close, move, float and pin windows, and global shortcuts", "/desktop"))
+    if (desktop.hyprland) {
+      var dispatchers = [
+        ["center_window", "\u{F02F1}", "Center", "Floating windows only", true],
+        ["cycle_next_window", "\u{F0736}", "Next window", "", false],
+        ["cycle_previous_window", "\u{F0733}", "Previous window", "", false],
+        ["toggle_group", "\u{F04E9}", "Toggle group", "", true],
+        ["toggle_split", "\u{F093C}", "Toggle split", "", true]
+      ]
+      var unfocused = desktop.focused_window === null || desktop.focused_window === undefined
+      for (var d = 0; d < dispatchers.length; d++)
+        rows.push(control("dispatch-" + dispatchers[d][0], "Focused window", dispatchers[d][1], dispatchers[d][2], dispatchers[d][3], ["system-bridge", "client", "hyprland", "dispatch", dispatchers[d][0]], unfocused && dispatchers[d][4]))
+    }
+    rows.push(webRow("web-desktop", "In the web client", desktopIcon, "All controls", "Close, move, float and pin windows, move focus, global shortcuts, and Omarchy menus and panels", "/desktop"))
     return rows
   }
 
