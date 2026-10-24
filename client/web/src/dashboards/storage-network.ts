@@ -183,6 +183,20 @@ export const networksDashboard = ({
         >
         ${facts([
           [
+            "Receiving",
+            network.io?.bytes_recv_rate == null
+              ? null
+              : formatRate(network.io.bytes_recv_rate),
+          ],
+          [
+            "Sending",
+            network.io?.bytes_sent_rate == null
+              ? null
+              : formatRate(network.io.bytes_sent_rate),
+          ],
+          ["Received", network.io ? formatBytes(network.io.bytes_recv) : null],
+          ["Sent", network.io ? formatBytes(network.io.bytes_sent) : null],
+          [
             "Speed",
             network.stats?.speed
               ? `${formatNumber(network.stats.speed)} Mb/s`

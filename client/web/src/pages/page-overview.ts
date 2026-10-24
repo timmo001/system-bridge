@@ -199,7 +199,13 @@ export class PageOverview extends SbPage {
                   .warning=${20}
                   .danger=${10}
                   inverted
-                  caption=${battery.is_charging ? "Charging" : ""}
+                  caption=${
+                    battery.is_charging
+                      ? "Charging"
+                      : battery.ac_connected
+                        ? "Plugged in"
+                        : ""
+                  }
                 ></sb-gauge>`
           }
         </div>

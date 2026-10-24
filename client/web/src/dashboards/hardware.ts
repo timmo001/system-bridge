@@ -1,5 +1,6 @@
-import { mdiBatteryCharging, mdiFan, mdiPowerPlug } from "@mdi/js";
+import { mdiBattery, mdiBatteryCharging, mdiFan, mdiPowerPlug } from "@mdi/js";
 import type {
+  BatteryState,
   CPUTimes,
   Display,
   SensorsWindowsHardware,
@@ -483,12 +484,57 @@ export const sensorsDashboard = ({ data, history }: DashboardContext) => {
   `;
 };
 
+const batteryStateLabels: Readonly<Record<BatteryState, string>> = {
+  charging: "Charging",
+  discharging: "Discharging",
+  full: "Full",
+  not_charging: "Not charging",
+  empty: "Empty",
+  unknown: "Unknown",
+};
+
 export const batteryDashboard = ({ data, history }: DashboardContext) => {
   const battery = data.battery;
 
-  if (battery?.percentage == null) return noData("battery");
+  if (battery === undefined) return noData("battery");
+
+  // The top-level fields describe the first system battery, when it has a charge
+  const primary =
+    battery.percentage == null
+      ? null
+      : (battery.batteries.find((item) => item.scope === "system") ?? null);
+
+  const others = battery.batteries.filter((item) => item !== primary);
+
+  if (battery.percentage == null && others.length === 0)
+    return noData("battery");
 
   const remaining = battery.time_remaining;
+  const state = battery.state ?? (battery.is_charging ? "charging" : "unknown");
+  const charging = state === "charging";
+
+  const otherMeters = others.map(
+    (item) =>
+      html`<sb-meter
+        label=${item.model ?? item.name}
+        .value=${item.percentage}
+        display=${formatPercent(item.percentage)}
+        caption=${batteryStateLabels[item.state]}
+        .warning=${20}
+        .danger=${10}
+        inverted
+      ></sb-meter>`,
+  );
+
+  const otherCard = html`<sb-card
+    heading=${primary ? "Other batteries" : "Batteries"}
+  >
+    <div class="meters">${otherMeters}</div>
+  </sb-card>`;
+
+  if (battery.percentage == null) {
+    return html`<div class="dashboard">${otherCard}</div>`;
+  }
 
   return html`
     <div class="dashboard">
@@ -500,21 +546,41 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
             .warning=${20}
             .danger=${10}
             inverted
-            caption=${battery.is_charging ? "Charging" : "On battery"}
+            caption=${batteryStateLabels[state]}
           ></sb-gauge>
         </div>
         <div class="row" style="justify-content: center">
-          <span class="chip ${battery.is_charging ? "success" : ""}">
-            ${icon(battery.is_charging ? mdiBatteryCharging : mdiPowerPlug)}
-            ${battery.is_charging ? "Charging" : "Discharging"}
+          <span class="chip ${charging ? "success" : ""}">
+            ${icon(
+              charging
+                ? mdiBatteryCharging
+                : battery.ac_connected
+                  ? mdiPowerPlug
+                  : mdiBattery,
+            )}
+            ${
+              battery.ac_connected === null
+                ? batteryStateLabels[state]
+                : battery.ac_connected
+                  ? "Plugged in"
+                  : "On battery"
+            }
           </span>
         </div>
         ${facts([
+          ["State", batteryStateLabels[state]],
           [
-            "Time remaining",
+            charging ? "Time to full" : "Time to empty",
             remaining === null || remaining < 0
               ? null
               : formatUptime(remaining),
+          ],
+          ["Power", battery.power === null ? null : formatWatts(battery.power)],
+          [
+            "Voltage",
+            battery.voltage === null
+              ? null
+              : `${formatNumber(battery.voltage)} V`,
           ],
         ])}
       </sb-card>
@@ -527,6 +593,7 @@ export const batteryDashboard = ({ data, history }: DashboardContext) => {
           .height=${240}
         ></sb-timeseries>
       </sb-card>
+      ${others.length > 0 ? otherCard : nothing}
     </div>
   `;
 };
