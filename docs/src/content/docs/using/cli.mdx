@@ -67,6 +67,20 @@ system-bridge client audio alsa_output.pci-0000_00_1f.3.analog-stereo --volume 4
 
 The id is the device's `id` from the [`audio`](/api/data/#audio) data. Use `--mute` to mute it and `--default` to make it the default output or input. See [audio](/features/remote-control/#audio) for what each platform supports.
 
+## Desktop
+
+Focus, close or change a window, show a workspace, or switch the keyboard layout:
+
+```bash
+system-bridge client desktop focus 0x555dbf21c9e0
+system-bridge client desktop close 0x555dbf21c9e0
+system-bridge client desktop state 0x555dbf21c9e0 --fullscreen --maximised=false
+system-bridge client desktop workspace 2
+system-bridge client desktop layout us
+```
+
+The ids are the window and workspace `id`s from the [`desktop`](/api/data/#desktop) data. `state` takes `--fullscreen`, `--maximised` and `--minimised`, each turned off with `=false`. See [desktop](/features/remote-control/#desktop) for what each desktop supports.
+
 ## Discord
 
 Control Discord voice, once [Discord is set up](/features/discord/):
@@ -86,6 +100,19 @@ system-bridge client display HDMI-A-2 --brightness 40 --power on
 ```
 
 The id is the display's `id` from the [`displays`](/api/data/#displays) data. The power state is one of `on`, `standby`, `suspend` or `off`. See [displays](/features/remote-control/#displays) for what each display supports.
+
+## Hyprland
+
+On Hyprland, float or pin a window, move it to another workspace, trigger a global shortcut an app registered, or reload the config:
+
+```bash
+system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
+system-bridge client hyprland move 0x555dbf21c9e0 2
+system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
+system-bridge client hyprland reload
+```
+
+`set` takes `--floating` and `--pinned`, each turned off with `=false`. Shortcut names are in the [`desktop`](/api/data/#desktop) data's `hyprland.global_shortcuts`.
 
 ## Media
 

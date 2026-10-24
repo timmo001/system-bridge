@@ -1,9 +1,9 @@
 ---
 title: Control
-description: Control media, Discord and displays, send notifications, open files and URLs, and change the power state over the WebSocket API.
+description: Control media, Discord, displays, windows and workspaces, send notifications, open files and URLs, and change the power state over the WebSocket API.
 ---
 
-Control playback, Discord and displays, send notifications, open files and URLs, and manage system power state.
+Control playback, Discord, displays, windows and workspaces, send notifications, open files and URLs, and manage system power state.
 
 ## Media control
 
@@ -97,6 +97,34 @@ Send the `AUDIO_CONTROL` event to set an audio output's or input's volume or mut
 
 The response type is `AUDIO_CONTROLLED`, and the audio module updates straight after. An unknown `id` gets an `ERROR` with the subtype `BAD_REQUEST`, and a platform that can't control audio gets `INVALID_ACTION`.
 
+## Desktop control
+
+Focus, close and change windows, show a workspace, and switch the keyboard layout. Window and workspace IDs are the `id`s from the [`desktop`](/api/data/#desktop) data. See [desktop](/features/remote-control/#desktop) for what each desktop supports.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `DESKTOP_CLOSE_WINDOW` | `id` | `DESKTOP_WINDOW_CLOSED` |
+| `DESKTOP_FOCUS_WINDOW` | `id` | `DESKTOP_WINDOW_FOCUSED` |
+| `DESKTOP_FOCUS_WORKSPACE` | `id` | `DESKTOP_WORKSPACE_FOCUSED` |
+| `DESKTOP_SET_KEYBOARD_LAYOUT` | `layout`, one of the keyboard's `layouts` | `DESKTOP_KEYBOARD_LAYOUT_SET` |
+| `DESKTOP_SET_WINDOW_STATE` | `id`, and any of `fullscreen`, `maximised` and `minimised` as `true` or `false` | `DESKTOP_WINDOW_STATE_SET` |
+
+Closing a window asks it to close, as its close button does, so an app may ask to save first.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "DESKTOP_SET_WINDOW_STATE",
+    "data": {
+        "id": "0x555dbf21c9e0",
+        "fullscreen": true
+    }
+}
+```
+
+The desktop module updates straight after. An unknown window, workspace or layout gets an `ERROR` with the subtype `BAD_REQUEST`, and something the desktop can't do gets `INVALID_ACTION`.
+
 ## Display control
 
 Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state, or both. See [displays](/features/remote-control/#displays) for what's supported.
@@ -118,6 +146,30 @@ Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state,
 ```
 
 The response type is `DISPLAY_CONTROLLED`, and the displays module updates straight after. A display that can't be controlled that way gets an `ERROR` with the subtype `INVALID_ACTION`.
+
+## Hyprland control
+
+On Hyprland, float, pin and move windows, trigger global shortcuts, and reload the config. Anywhere else these get an `ERROR` with the subtype `INVALID_ACTION`.
+
+| Event | Data | Response |
+| --- | --- | --- |
+| `HYPRLAND_MOVE_WINDOW` | `id`, and the `workspace` to move it to | `HYPRLAND_WINDOW_MOVED` |
+| `HYPRLAND_RELOAD_CONFIG` | None | `HYPRLAND_CONFIG_RELOADED` |
+| `HYPRLAND_RUN_GLOBAL_SHORTCUT` | `name`, from the `global_shortcuts` in the [`desktop`](/api/data/#desktop) data's `hyprland` | `HYPRLAND_GLOBAL_SHORTCUT_RUN` |
+| `HYPRLAND_SET_WINDOW` | `id`, and either or both of `floating` and `pinned` as `true` or `false` | `HYPRLAND_WINDOW_SET` |
+
+Moving a window leaves the focus where it is. Hyprland only pins floating windows, so pinning a tiled window floats it first, and tiling a pinned window unpins it. Only the global shortcuts apps have registered can run, and there's no way to send Hyprland any other command.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "HYPRLAND_RUN_GLOBAL_SHORTCUT",
+    "data": {
+        "name": "omarchy:panel.omarchy.clock"
+    }
+}
+```
 
 ## Send notification
 

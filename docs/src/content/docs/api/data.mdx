@@ -168,6 +168,42 @@ The state of the local Discord app. This module only exists once Discord is [set
 
 Every field other than `connected`, `authenticated` and `error` is `null` until System Bridge is authenticated. Changes are pushed when they happen in Discord.
 
+### `desktop`
+
+The open windows, workspaces and keyboard layout, from Hyprland, another Wayland desktop, or Windows. Changes are pushed when they happen, except on Windows, which is checked every second. It's left out on macOS and X11.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `compositor` | string | `hyprland`, `wayland` for other Wayland desktops, or `windows`. |
+| `focused_window` | string | The focused window's `id`, or `null`. |
+| `focused_workspace` | string | The focused workspace's `id`, or `null`. |
+| `keyboard` | object | `layout` (the active layout, such as `gb`), `name` (such as `English (UK)`) and `layouts` (every installed layout). |
+| `windows` | array | The open windows. See below. |
+| `workspaces` | array | The workspaces. Empty on Windows. See below. |
+| `hyprland` | object | What only Hyprland reports, or `null` elsewhere. See below. |
+
+Each window has `id`, `app`, `title`, `pid`, `workspace` (a workspace `id`), `display`, `x`, `y`, `width`, `height`, and whether it's `focused`, `fullscreen`, `maximised`, `minimised`, `floating`, `urgent` and `inhibiting_idle` (keeping the screen awake). `content_type` is what the window says it shows, such as `video` or `game`. Fields a desktop doesn't report are `null`. `title` is `null` unless you turn on **Window titles** on the web client's **Desktop** page.
+
+Window ids are Hyprland's window addresses, Windows' window handles, or numbers System Bridge gives windows on other Wayland desktops. Use them with [desktop control](/api/websocket/control/#desktop-control).
+
+Each workspace has `id`, `name`, `display`, `windows` (how many), and whether it's `active` (shown on its display), `focused`, `special` (a Hyprland scratchpad) and `fullscreen`.
+
+`hyprland` has:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `version` | object | `version`, `tag`, `commit`, `branch`, `config_provider` (`lua` or `hyprlang`) and `backend`. |
+| `windows` | object | More about each window, by `id`: `fullscreen_mode`, `pinned`, `xwayland`, `hidden`, `group`, `swallowing`, `tags`, `focus_history`, `initial_app`, `xdg_tag` and `tearing_hint`. |
+| `workspaces` | object | More about each workspace, by `id`: `layout` and `persistent`. |
+| `displays` | object | More about each display, by name: `scale`, `transform`, `format`, `colour_preset`, `reserved`, `layers`, `dpms`, `vrr`, `tearing`, `direct_scanout`, `mirror_of` and `special_workspace`. |
+| `keyboards`, `mice`, `switches`, `tablets`, `touch` | array | The input devices Hyprland sees. |
+| `binds` | array | The config's key bindings, in order. |
+| `global_shortcuts` | array | The shortcuts apps registered, each with `name` and `description`. Run one with [`HYPRLAND_RUN_GLOBAL_SHORTCUT`](/api/websocket/control/#hyprland-control). |
+| `screencasts` | array | What's being shared, if anything. |
+| `submap` | string | The active submap, or `null`. |
+| `group_lock` | boolean | Whether window groups are locked. |
+| `config_errors` | array | Errors in Hyprland's config. |
+
 ### `displays`
 
 Returns an array of objects, one per display.

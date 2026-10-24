@@ -1,9 +1,9 @@
 ---
 title: Remote control
-description: Open URLs and files, type and press keys, set audio volumes and display brightness, and sleep, lock or shut down the machine running System Bridge.
+description: Open URLs and files, type and press keys, control windows, set audio volumes and display brightness, and sleep, lock or shut down the machine running System Bridge.
 ---
 
-System Bridge can act on the machine it runs on: open a website or file, type text or press keys, set an audio device's volume, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
+System Bridge can act on the machine it runs on: open a website or file, type text or press keys, focus and arrange windows, set an audio device's volume, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
 
 ## Opening a URL or file
 
@@ -63,6 +63,42 @@ The id is the device's `id` from the [`audio`](/api/data/#audio) data, which rep
 macOS isn't supported yet, so it reports no devices.
 
 Changes made elsewhere, such as with your volume keys or another mixer, show up straight away on Linux and within a second on Windows.
+
+## Desktop
+
+Focus, close, maximise and make windows fullscreen, show a workspace and switch the keyboard layout from the [web client](/using/web-client/)'s **Desktop** page, the API with [desktop control](/api/websocket/control/#desktop-control), the [MCP server](/api/mcp/)'s `system_bridge_desktop_*` tools, or the CLI:
+
+```bash title="Terminal"
+system-bridge client desktop focus 0x555dbf21c9e0
+system-bridge client desktop state 0x555dbf21c9e0 --fullscreen
+system-bridge client desktop close 0x555dbf21c9e0
+system-bridge client desktop workspace 2
+system-bridge client desktop layout us
+```
+
+The ids are the window and workspace `id`s from the [`desktop`](/api/data/#desktop) data.
+
+| Action | Hyprland | Other Wayland desktops | Windows |
+| --- | --- | --- | --- |
+| Focus or close a window | Yes | Yes | Yes |
+| Fullscreen | Yes | Yes | No |
+| Maximise | Yes | Yes | Yes |
+| Minimise | No | Yes | Yes |
+| Show a workspace | Yes | Yes | No |
+| Switch keyboard layout | Yes | No | Yes |
+
+### Hyprland
+
+On Hyprland you can also float, pin and move windows, trigger the global shortcuts apps have registered, and reload the config, from the same places or the CLI:
+
+```bash title="Terminal"
+system-bridge client hyprland set 0x555dbf21c9e0 --floating --pinned
+system-bridge client hyprland move 0x555dbf21c9e0 2
+system-bridge client hyprland shortcut omarchy:panel.omarchy.clock
+system-bridge client hyprland reload
+```
+
+System Bridge only runs these actions. It can't send Hyprland any other command.
 
 ## Displays
 

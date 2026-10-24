@@ -28,7 +28,7 @@ Authorization: Bearer YOUR_TOKEN
 A missing or invalid token is rejected with `401 Unauthorized`. See [how to find your token](/using/cli/#token).
 
 :::caution
-The token provides access to MCP tools that can read system data, send notifications, control media and displays, and run the commands in your allowlist. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
+The token provides access to MCP tools that can read system data, send notifications, control media, displays and windows, and run the commands in your allowlist. Treat token-bearing URLs as secrets, and use HTTPS when the connection crosses an untrusted network.
 :::
 
 ## Home Assistant
@@ -88,6 +88,45 @@ Example arguments:
 { "id": "alsa_output.pci-0000_00_1f.3.analog-stereo", "volume": 40 }
 ```
 
+### `system_bridge_desktop_close_window`
+
+Ask a window to close, as its close button does. See [desktop control](/api/websocket/control/#desktop-control).
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
+
+### `system_bridge_desktop_focus_window`
+
+Focus a window, switching to its workspace.
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
+
+### `system_bridge_desktop_focus_workspace`
+
+Show and focus a workspace. Not available on Windows.
+
+- `id` (required): The workspace's `id` from the `desktop` module's `workspaces`.
+
+### `system_bridge_desktop_set_keyboard_layout`
+
+Switch the keyboard to one of its layouts. Not available on Wayland desktops other than Hyprland.
+
+- `layout` (required): One of the `desktop` module's `keyboard.layouts`.
+
+### `system_bridge_desktop_set_window_state`
+
+Make a window fullscreen, maximised or minimised, or not. Set any of them together.
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
+- `fullscreen` (optional): `true` or `false`. Not available on Windows.
+- `maximised` (optional): `true` or `false`.
+- `minimised` (optional): `true` or `false`. Not available on Hyprland.
+
+Example arguments:
+
+```json
+{ "id": "0x555dbf21c9e0", "fullscreen": true }
+```
+
 ### `system_bridge_display_control`
 
 Set a display's brightness or power state. See [display control](/api/websocket/control/#display-control) for what each display supports.
@@ -116,6 +155,7 @@ Available modules:
 | `battery` | Charge level, charging state, and time remaining. |
 | `bluetooth` | Paired Bluetooth devices and whether they're connected. |
 | `cpu` | Usage, frequency, core counts, and per-core load. |
+| `desktop` | Open windows, workspaces, the keyboard layout and, on Hyprland, its displays, input devices, binds and global shortcuts. |
 | `disks` | Mounted devices, partitions, and used/free space. |
 | `displays` | Connected displays, resolution, refresh rate, brightness and power state. |
 | `gpus` | GPU model, load, memory, and temperature. |
@@ -144,6 +184,31 @@ Example arguments:
 ```json
 { "since": 1792857600000, "modules": ["cpu", "memory"] }
 ```
+
+### `system_bridge_hyprland_move_window`
+
+Move a window to another workspace on Hyprland, leaving the focus where it is. See [Hyprland control](/api/websocket/control/#hyprland-control).
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
+- `workspace` (required): The workspace to move it to.
+
+### `system_bridge_hyprland_reload_config`
+
+Reload Hyprland's config. It takes no arguments.
+
+### `system_bridge_hyprland_run_global_shortcut`
+
+Trigger a global shortcut an app registered with Hyprland, such as one that opens a panel.
+
+- `name` (required): A `name` from the `desktop` module's `hyprland.global_shortcuts`.
+
+### `system_bridge_hyprland_set_window`
+
+Float or tile a window on Hyprland, and pin or unpin it. Pinning a tiled window floats it first.
+
+- `id` (required): The window's `id` from the `desktop` module's `windows`.
+- `floating` (optional): `true` to float the window, `false` to tile it.
+- `pinned` (optional): `true` to show it on every workspace, `false` to unpin it.
 
 ### `system_bridge_list_commands`
 
