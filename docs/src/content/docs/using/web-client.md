@@ -25,41 +25,76 @@ By default the backend serves the web client on port `9170`. When opened for you
 
 ## Connecting
 
-The web client connects to the backend over the WebSocket API. On the connection screen, set:
+The web client connects to the backend over the WebSocket API. On the **Connection** page, set:
 
-- **Host**: the hostname or IP address of the machine running System Bridge (pre-filled with `0.0.0.0`).
+- **Host**: the hostname or IP address of the machine running System Bridge. It starts with the address you opened the web client from.
 - **Port**: the backend port (default `9170`).
-- **Use SSL**: enable if the backend is served over HTTPS.
-- **API Token**: your System Bridge token.
+- **Use a secure connection**: turn on when the backend is served over HTTPS.
+- **API token**: your System Bridge token.
 
-You need your token to connect. See [how to find your token](/running/#token).
+You need your token to connect. See [how to find your token](/running/#token). The settings are kept in your browser.
 
 :::tip
 When the backend opens the web client for you, the host, port, and token are filled in automatically.
 :::
 
+## Getting around
+
+The search box in the header lists every page. Click it, or press **Ctrl+K** (**⌘K** on macOS), then type to filter and press **Enter** to go.
+
+The chip next to it shows whether the web client is connected. Click it to open the **Connection** page.
+
+Every page has its own address, so you can bookmark it, share it, or reload it and land back where you were. Pages that show tables keep their search, sorting and page in the address too.
+
+| Page | Address |
+| --- | --- |
+| Overview | `/` |
+| A data module | `/data/<module>`, such as `/data/cpu` |
+| A module's raw data | `/data/<module>?view=json` |
+| Media controls | `/actions/media` |
+| Notifications | `/actions/notifications` |
+| Open | `/actions/open` |
+| Settings | `/settings`, `/settings/appearance`, `/settings/commands`, `/settings/media`, `/settings/disks` |
+| Connection | `/connection` |
+
 ## What you can do
+
+### Overview
+
+Live gauges for CPU, memory, GPU, CPU temperature and battery, graphs of CPU, memory and network use, storage, what's playing, and a shortcut to every module.
 
 ### Data
 
-View real-time data from every [data module](/api/websocket/data/), including CPU, memory, disks, displays, GPUs, media, networks, processes, sensors, and system information.
+Each [data module](/api/websocket/data/) has a dashboard: CPU, memory, disks, displays, GPUs, media, networks, processes, sensors, system information, battery and Discord. Use the **Dashboard** and **JSON** chips at the top of the page to switch between the dashboard and the module's raw data.
 
-### Settings
+Graphs start with the first readings after the page opens. System Bridge updates most data about once a minute.
 
-Configure the backend without editing files:
-
-- **General**: core application settings.
-- **Media Directories**: folders exposed to the media source.
-- **Commands**: allowlisted commands the backend can run.
-- **Disks**: disk and filesystem options.
+Processes and network connections are in tables you can search, sort and page through.
 
 ### Actions
 
 Trigger actions on the machine running System Bridge:
 
-- **Notifications**: send a system notification.
-- **Open**: open a path or URL with the default application.
-- **Media Controls**: control currently playing media.
+- **Media controls**: control what's playing.
+- **Notifications**: send a desktop notification.
+- **Open**: open a URL in the browser, or a file or folder with its app.
+
+### Settings
+
+Configure the backend without editing files:
+
+- **General**: start automatically, the system tray icon, and the log level.
+- **Commands**: allowlisted commands clients can run.
+- **Media directories**: folders exposed to the media source.
+- **Disk mounts**: which extra mounts the Disks module reports.
+
+## Appearance
+
+The colour mode follows your device's light or dark setting by default. Switch between **System**, **Dark** and **Light** from the header, or on the **Appearance** page.
+
+On the **Appearance** page, pick one theme for dark and one for light. The web client includes System Bridge's own themes, Catppuccin (Frappé, Macchiato, Mocha and Latte), Tokyo Night (Night, Storm, Moon and Day), Rosé Pine (Main, Moon and Dawn), Midnight, Nord, Dracula, Gruvbox and Solarized.
+
+Appearance settings are kept in your browser, so each browser can have its own.
 
 ## Next steps
 
