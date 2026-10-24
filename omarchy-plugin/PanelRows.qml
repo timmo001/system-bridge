@@ -629,7 +629,7 @@ QtObject {
     for (var i = 0; i < service.displays.length; i++) {
       var display = service.displays[i]
       var name = (text(display.name) || "Display " + (i + 1)) + (display.is_primary === true ? " (primary)" : "")
-      var controllable = num(display.brightness) !== null || present(display.power_state)
+      var controllable = num(display.brightness) !== null
       rows.push(row({
         key: "display-" + (text(display.id) || i), section: controllable ? name : "", icon: "󰍹",
         primaryText: controllable ? text(display.id) || name : name,
@@ -653,10 +653,6 @@ QtObject {
       rows.push(row({ key: "brightness-" + id, section: section, icon: "󰃟", primaryText: "Brightness", secondaryText: percent(brightness), meter: brightness }))
       rows.push(control("brightness-down-" + id, section, "󰃞", "Dimmer", "To " + Math.max(0, current - 10) + "%", argv("--brightness", String(Math.max(0, current - 10))), current <= 0))
       rows.push(control("brightness-up-" + id, section, "󰃠", "Brighter", "To " + Math.min(100, current + 10) + "%", argv("--brightness", String(Math.min(100, current + 10))), current >= 100))
-    }
-    if (present(display.power_state)) {
-      var on = display.power_state === "on"
-      rows.push(control("power-" + id, section, on ? "󰶐" : "󰍹", on ? "Turn off" : "Turn on", on ? "On" : "Off", argv("--power", on ? "off" : "on")))
     }
   }
 
