@@ -68,7 +68,7 @@ const editorTheme = EditorView.theme({
     color: "var(--sb-color-text)",
     backgroundColor: "var(--sb-color-raised)",
   },
-  ".cm-panels-bottom": { borderTop: "1px solid var(--sb-color-border)" },
+  ".cm-panels-top": { borderBottom: "1px solid var(--sb-color-border)" },
   ".cm-panel.cm-search": {
     display: "flex",
     flexWrap: "wrap",
@@ -184,6 +184,7 @@ export class SbJsonView extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     this.#resize.observe(document.documentElement);
+    window.addEventListener("keydown", this.#findShortcut, true);
   }
 
   protected override firstUpdated(): void {
@@ -200,7 +201,20 @@ export class SbJsonView extends LitElement {
           EditorState.readOnly.of(true),
           lineNumbers(),
           foldGutter(),
-          search(),
+          search({ top: true }),
+          // Keeps the buttons clear of the search panel above the data
+          EditorView.updateListener.of((update) => {
+            update.view.requestMeasure({
+              read: (view) => {
+                const panels = view.dom.querySelector(".cm-panels-top");
+
+                return panels instanceof HTMLElement ? panels.offsetHeight : 0;
+              },
+              write: (height) => {
+                this.style.setProperty("--sb-json-panel", `${height}px`);
+              },
+            });
+          }),
           keymap.of(searchKeymap),
           searchPhrases,
           editorTheme,
@@ -231,10 +245,27 @@ export class SbJsonView extends LitElement {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.#resize.disconnect();
+    window.removeEventListener("keydown", this.#findShortcut, true);
     clearTimeout(this.#copiedTimer);
     this.#view?.destroy();
     this.#view = undefined;
   }
+
+  // While the view is shown, Ctrl+F anywhere searches the data rather than
+  // the page
+  #findShortcut = (event: KeyboardEvent) => {
+    const find =
+      (event.ctrlKey || event.metaKey) &&
+      !event.altKey &&
+      !event.shiftKey &&
+      event.key.toLowerCase() === "f";
+
+    if (!find || this.#view === undefined) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    openSearchPanel(this.#view);
+  };
 
   #toggleSearch = () => {
     if (this.#view === undefined) return;
@@ -281,7 +312,7 @@ export class SbJsonView extends LitElement {
 
         .tools {
           position: absolute;
-          top: var(--sb-space-2);
+          top: calc(var(--sb-json-panel, 0px) + var(--sb-space-2));
           right: var(--sb-space-3);
           z-index: 1;
           display: flex;
@@ -318,7 +349,7 @@ export class SbJsonView extends LitElement {
       <div class="tools">
         <button
           type="button"
-          title="Search (Ctrl+F in the data)"
+          title="Search (Ctrl+F)"
           @click=${this.#toggleSearch}
         >
           ${icon(mdiMagnify)} Search
