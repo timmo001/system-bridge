@@ -170,9 +170,16 @@ Available flags:
 
 - `--format` or `-f`: `csv` (the default) or `json`
 - `--since` or `-s`: Only readings from this long ago, such as `1h` or `30m`
+- `--module` or `-m`: Only this module's readings. Repeat it for more. History is kept for `cpu`, `memory`, `battery`, `system`, `networks`, `disks`, `gpus` and `sensors`
 - `--output` or `-o`: Write to this file instead of standard output
 
-The CSV has a row per reading with the columns `time`, `metric`, `id`, `value` and `unit`. Times are in UTC, and `id` names the GPU, disk, sensor or fan for the readings that have one. The JSON is the history as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event returns it. The web client's overview has the same export, and the TypeScript and Python connectors can write the same CSV.
+For example, the last 6 hours of CPU and GPU readings as JSON:
+
+```bash
+system-bridge client history export --module cpu --module gpus --since 6h --format json
+```
+
+The CSV has a row per reading with the columns `time`, `metric`, `id`, `value` and `unit`. Times are in UTC, and `id` names the GPU, disk, sensor or fan for the readings that have one. The JSON is the history as the [`GET_HISTORY`](/api/websocket/data/#getting-history) event returns it. The web client has the same export in the Export menu on the overview, for every module, and on each module's page, for that module. The TypeScript and Python connectors can write the same CSV.
 
 ## Backend
 

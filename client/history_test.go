@@ -36,6 +36,6 @@ func TestWriteHistoryCSV(t *testing.T) {
 }
 
 func TestExportHistory_UnknownFormat(t *testing.T) {
-	err := ExportHistory(t.Context(), &strings.Builder{}, "xml", 0)
+	err := ExportHistory(t.Context(), &strings.Builder{}, ExportOptions{Format: "xml"})
 	assert.ErrorContains(t, err, `unknown format "xml"`)
 }

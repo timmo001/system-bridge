@@ -27,11 +27,14 @@ type HistoryRow struct {
 var HistoryCSVHeader = []string{"time", "metric", "id", "value", "unit"}
 
 // FetchHistory gets the backend's history, only readings taken after since
-// when it isn't zero.
-func FetchHistory(ctx context.Context, since time.Time) (types.MetricHistory, error) {
+// when it isn't zero, and only these modules' readings when there are any.
+func FetchHistory(ctx context.Context, since time.Time, modules []types.ModuleName) (types.MetricHistory, error) {
 	data := map[string]any{}
 	if !since.IsZero() {
 		data["since"] = since.UnixMilli()
+	}
+	if len(modules) > 0 {
+		data["modules"] = modules
 	}
 
 	raw, err := request(ctx, event.EventGetHistory, data)
@@ -46,24 +49,33 @@ func FetchHistory(ctx context.Context, since time.Time) (types.MetricHistory, er
 	return history, nil
 }
 
-// ExportHistory writes the backend's history as "csv" or "json". A since
-// above zero limits it to that long before now.
-func ExportHistory(ctx context.Context, w io.Writer, format string, since time.Duration) error {
+// ExportOptions picks what an export holds and how it's written
+type ExportOptions struct {
+	// Format is "csv" or "json"
+	Format string
+	// Since limits the export to this long before now, when above zero
+	Since time.Duration
+	// Modules limits the export to these modules' readings, when set
+	Modules []types.ModuleName
+}
+
+// ExportHistory writes the backend's history
+func ExportHistory(ctx context.Context, w io.Writer, options ExportOptions) error {
 	write := WriteHistoryCSV
-	switch format {
+	switch options.Format {
 	case "csv":
 	case "json":
 		write = WriteHistoryJSON
 	default:
-		return fmt.Errorf("unknown format %q: use csv or json", format)
+		return fmt.Errorf("unknown format %q: use csv or json", options.Format)
 	}
 
 	var from time.Time
-	if since > 0 {
-		from = time.Now().Add(-since)
+	if options.Since > 0 {
+		from = time.Now().Add(-options.Since)
 	}
 
-	history, err := FetchHistory(ctx, from)
+	history, err := FetchHistory(ctx, from, options.Modules)
 	if err != nil {
 		return err
 	}

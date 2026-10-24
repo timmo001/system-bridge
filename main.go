@@ -408,23 +408,53 @@ func main() {
 										Aliases: []string{"s"},
 										Usage:   "Only readings from this long ago, such as 1h or 30m",
 									},
+									&cli.StringSliceFlag{
+										Name:    "module",
+										Aliases: []string{"m"},
+										Usage:   "Only this module's readings (repeat for more): cpu, memory, battery, system, networks, disks, gpus or sensors",
+									},
 									&cli.StringFlag{
 										Name:    "output",
 										Aliases: []string{"o"},
 										Usage:   "Write to this file instead of standard output",
 									},
 								},
+								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
+									args := os.Args
+									if len(args) >= 2 {
+										prev := args[len(args)-2]
+										if prev == "--module" || prev == "-m" {
+											for _, module := range data.HistoryModules() {
+												_, _ = fmt.Fprintln(cmd.Root().Writer, string(module))
+											}
+											return
+										}
+									}
+									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
+								},
 								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									options := client.ExportOptions{
+										Format: cmd.String("format"),
+										Since:  cmd.Duration("since"),
+									}
+									for _, name := range cmd.StringSlice("module") {
+										module := types.ModuleName(name)
+										if !data.HasHistory(module) {
+											return fmt.Errorf("no history is kept for %q: use cpu, memory, battery, system, networks, disks, gpus or sensors", name)
+										}
+										options.Modules = append(options.Modules, module)
+									}
+
 									output := cmd.String("output")
 									if output == "" {
-										return client.ExportHistory(cmdCtx, cmd.Root().Writer, cmd.String("format"), cmd.Duration("since"))
+										return client.ExportHistory(cmdCtx, cmd.Root().Writer, options)
 									}
 
 									file, err := os.Create(output)
 									if err != nil {
 										return fmt.Errorf("create %s: %w", output, err)
 									}
-									if err := client.ExportHistory(cmdCtx, file, cmd.String("format"), cmd.Duration("since")); err != nil {
+									if err := client.ExportHistory(cmdCtx, file, options); err != nil {
 										_ = file.Close()
 										return err
 									}
