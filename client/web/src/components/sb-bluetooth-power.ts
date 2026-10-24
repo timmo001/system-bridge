@@ -12,7 +12,7 @@ const powerOptions = [
   { value: "off", label: "Off", icon: mdiBluetoothOff },
 ] as const;
 
-/** Turns the Bluetooth adapter on or off. Failures show in `sb-bluetooth-alert`. */
+/** Turns the Bluetooth adapter on or off. Failures show in `sb-action-alert`. */
 @customElement("sb-bluetooth-power")
 export class SbBluetoothPower extends LitElement {
   static override styles = [shared];

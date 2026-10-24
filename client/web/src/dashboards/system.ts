@@ -1,12 +1,22 @@
 import {
   mdiAlertCircleOutline,
+  mdiArrowDown,
+  mdiArrowLeft,
+  mdiArrowLeftBoldBoxOutline,
+  mdiArrowRight,
+  mdiArrowRightBoldBoxOutline,
+  mdiArrowSplitVertical,
+  mdiArrowUp,
+  mdiClose,
   mdiEyeOutline,
   mdiHeadset,
+  mdiImageFilterCenterFocus,
   mdiKeyboardOutline,
   mdiMicrophone,
   mdiMonitorShare,
   mdiPlay,
   mdiReload,
+  mdiTab,
   mdiWebcam,
 } from "@mdi/js";
 import type {
@@ -22,17 +32,29 @@ import type {
   HyprlandScreencast,
   HyprlandWindow,
   HyprlandWorkspace,
+  OmarchyData,
+  OmarchyFunction,
+  OmarchyMenu,
+  OmarchyPanel,
+  OmarchyTarget,
   Process,
   SystemFailedUnit,
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
+import "~/components/sb-action-alert";
 import "~/components/sb-action-button";
 import { dataTableColumns } from "~/components/sb-data-table";
+import "~/components/sb-omarchy-actions";
 import "~/components/sb-window-actions";
 import { icon } from "~/components/shared-styles";
 import {
+  closeOmarchyMenu,
+  desktopFailures,
   focusWorkspace,
+  type HyprlandDirectionalDispatcher,
+  hyprlandDispatch,
+  hyprlandDispatchTowards,
   reloadHyprlandConfig,
   runGlobalShortcut,
   setKeyboardLayout,
@@ -980,6 +1002,211 @@ const bindTableState = {
   pageSize: undefined,
 };
 
+const directionIcons = [
+  ["left", "Left", mdiArrowLeft],
+  ["down", "Down", mdiArrowDown],
+  ["up", "Up", mdiArrowUp],
+  ["right", "Right", mdiArrowRight],
+] as const;
+
+/** Buttons that run a dispatcher towards each direction, like h, j, k and l. */
+const directionButtons = (
+  dispatcher: HyprlandDirectionalDispatcher,
+  verb: string,
+) =>
+  directionIcons.map(
+    ([direction, name, path]) =>
+      html`<sb-action-button
+        icon-only
+        quiet
+        label="${verb} ${name.toLowerCase()}"
+        .icon=${path}
+        .atom=${hyprlandDispatchTowards(dispatcher)(direction)}
+      ></sb-action-button>`,
+  );
+
+const dispatcherButtons = [
+  ["centre_window", "Centre", mdiImageFilterCenterFocus],
+  ["cycle_next_window", "Next window", mdiArrowRightBoldBoxOutline],
+  ["cycle_previous_window", "Previous window", mdiArrowLeftBoldBoxOutline],
+  ["toggle_group", "Toggle group", mdiTab],
+  ["toggle_split", "Toggle split", mdiArrowSplitVertical],
+] as const;
+
+const dispatcherCard = () => {
+  const buttons = dispatcherButtons.map(
+    ([dispatcher, label, path]) =>
+      html`<sb-action-button
+        quiet
+        label=${label}
+        .icon=${path}
+        .atom=${hyprlandDispatch(dispatcher)}
+      ></sb-action-button>`,
+  );
+
+  return html`
+    <sb-card class="half" heading="Focused window" subheading="Dispatchers">
+      ${facts([
+        [
+          "Move focus",
+          html`<div class="row">
+            ${directionButtons("move_focus", "Focus")}
+          </div>`,
+        ],
+        [
+          "Swap",
+          html`<div class="row">
+            ${directionButtons("swap_window", "Swap")}
+          </div>`,
+        ],
+      ])}
+      <div class="row wrap">${buttons}</div>
+    </sb-card>
+  `;
+};
+
+const omarchyMenuColumns = (() => {
+  const column = dataTableColumns<OmarchyMenu>();
+
+  return column.columns([
+    column.accessor("name", { header: "Name" }),
+    column.accessor("id", {
+      header: "Route",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.accessor((menu) => menu.aliases.join(", "), {
+      id: "aliases",
+      header: "Aliases",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.display({
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) =>
+        html`<sb-omarchy-actions
+          kind="menu"
+          .item=${row.original}
+        ></sb-omarchy-actions>`,
+    }),
+  ]);
+})();
+
+const omarchyPanelColumns = (() => {
+  const column = dataTableColumns<OmarchyPanel>();
+
+  return column.columns([
+    column.accessor("name", { header: "Name" }),
+    column.accessor("id", {
+      header: "ID",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.display({
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) =>
+        html`<sb-omarchy-actions
+          kind="panel"
+          .item=${row.original}
+        ></sb-omarchy-actions>`,
+    }),
+  ]);
+})();
+
+/** How a function is called, such as `seek(seconds: int): void`. */
+const omarchySignature = (fn: OmarchyFunction) =>
+  `${fn.name}(${fn.arguments
+    .map((argument) => `${argument.name}: ${argument.type}`)
+    .join(", ")}): ${fn.returns}`;
+
+const omarchyTargetColumns = (() => {
+  const column = dataTableColumns<OmarchyTarget>();
+
+  return column.columns([
+    column.accessor("name", {
+      header: "Target",
+      cell: ({ getValue }) =>
+        html`<span class="mono xsmall">${getValue()}</span>`,
+    }),
+    column.accessor(
+      (target) => target.functions.map(omarchySignature).join(", "),
+      {
+        id: "functions",
+        header: "Functions",
+        cell: ({ getValue }) =>
+          html`<span class="mono xsmall">${getValue()}</span>`,
+      },
+    ),
+  ]);
+})();
+
+const omarchyId = (item: OmarchyMenu | OmarchyPanel | OmarchyTarget) =>
+  "id" in item ? item.id : item.name;
+
+const omarchyTableState = {
+  filter: "",
+  sort: "name",
+  descending: false,
+  page: 1,
+  pageSize: undefined,
+};
+
+// By route, which groups them by where they sit in the menu
+const omarchyMenuTableState = { ...omarchyTableState, sort: "id" };
+
+const omarchyCards = (omarchy: OmarchyData) => html`
+  <sb-card heading="Omarchy menus" subheading="${omarchy.menus.length} routes">
+    <sb-action-button
+      slot="actions"
+      quiet
+      label="Close menu"
+      .icon=${mdiClose}
+      .atom=${closeOmarchyMenu}
+    ></sb-action-button>
+    <sb-data-table
+      local
+      label="Omarchy menus"
+      search-placeholder="Search menus"
+      .columns=${omarchyMenuColumns}
+      .data=${omarchy.menus}
+      .rowId=${omarchyId}
+      .wide=${["aliases"]}
+      .state=${omarchyMenuTableState}
+    ></sb-data-table>
+  </sb-card>
+  <sb-card
+    heading="Omarchy panels"
+    subheading="${omarchy.panels.length} from enabled plugins"
+  >
+    <sb-data-table
+      local
+      label="Omarchy panels"
+      search-placeholder="Search panels"
+      .columns=${omarchyPanelColumns}
+      .data=${omarchy.panels}
+      .rowId=${omarchyId}
+      .state=${omarchyTableState}
+    ></sb-data-table>
+  </sb-card>
+  <sb-card
+    heading="Omarchy shell IPC"
+    subheading="${omarchy.targets.length} targets"
+  >
+    <sb-data-table
+      local
+      label="Omarchy shell IPC targets"
+      search-placeholder="Search targets"
+      .columns=${omarchyTargetColumns}
+      .data=${omarchy.targets}
+      .rowId=${omarchyId}
+      .wide=${["functions"]}
+      .state=${omarchyTableState}
+    ></sb-data-table>
+  </sb-card>
+`;
+
 const hyprlandCards = (hyprland: HyprlandData) => {
   const displays = Object.entries(hyprland.displays).map(([id, display]) => ({
     id,
@@ -992,6 +1219,13 @@ const hyprlandCards = (hyprland: HyprlandData) => {
 
   return html`
     <sb-card class="half" heading="Hyprland">
+      <sb-action-button
+        slot="actions"
+        quiet
+        label="Reload config"
+        .icon=${mdiReload}
+        .atom=${reloadHyprlandConfig}
+      ></sb-action-button>
       ${facts([
         ["Version", hyprland.version.version],
         [
@@ -1006,14 +1240,8 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         ["Submap", hyprland.submap ?? "Default"],
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}
-      <div class="row">
-        <sb-action-button
-          label="Reload config"
-          .icon=${mdiReload}
-          .atom=${reloadHyprlandConfig}
-        ></sb-action-button>
-      </div>
     </sb-card>
+    ${dispatcherCard()}
     <sb-card heading="Displays" subheading="As Hyprland sees them">
       <sb-data-table
         local
@@ -1131,6 +1359,13 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     focusable: desktop.compositor !== "windows",
   }));
 
+  const failures = desktopFailures(
+    [
+      ...(desktop.omarchy?.menus ?? []).map((menu) => `menu:${menu.id}`),
+      ...(desktop.omarchy?.panels ?? []).map((panel) => `panel:${panel.id}`),
+    ].join("\n"),
+  );
+
   // Other Wayland desktops can't switch layouts for you
   const layouts =
     desktop.compositor === "wayland"
@@ -1149,6 +1384,7 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
 
   return html`
     <div class="dashboard">
+      <sb-action-alert .failures=${failures}></sb-action-alert>
       ${
         configErrors.length === 0
           ? nothing
@@ -1239,6 +1475,7 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
         }
       </sb-card>
       ${hyprland === null ? nothing : hyprlandCards(hyprland)}
+      ${desktop.omarchy === null ? nothing : omarchyCards(desktop.omarchy)}
     </div>
   `;
 };

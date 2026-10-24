@@ -8,11 +8,14 @@ import {
   type DesktopWindowStateRequest,
   type DiscordControl,
   type DisplayControl,
+  HyprlandDirection,
+  HyprlandDispatcher,
   type HyprlandSetWindowRequest,
   type MediaAction,
   ModuleDataUpdate,
   type ModulesData,
   type Notification,
+  type OmarchyAction,
   type OpenTarget,
   type Settings,
   type SettingsMediaDirectory,
@@ -93,6 +96,15 @@ export function actionResult<A>(
     }),
   };
 }
+
+/** Why an action failed, if it did, for an alert listing failures. */
+const failureMessage = (
+  result: AsyncResult.AsyncResult<unknown, BridgeError>,
+): string[] => {
+  const outcome = actionResult(result, "");
+
+  return outcome?.success === false ? [outcome.message] : [];
+};
 
 /** The connection settings, saved to local storage when they change. */
 export const connectionSettings = Atom.writable(
@@ -451,11 +463,7 @@ export const bluetoothFailures = Atom.family((addresses: string) =>
         .split("\n")
         .filter((address) => address.length > 0)
         .map((address) => get(bluetoothAction(address))),
-    ].flatMap((result) => {
-      const outcome = actionResult(result, "");
-
-      return outcome?.success === false ? [outcome.message] : [];
-    }),
+    ].flatMap(failureMessage),
   ),
 );
 
@@ -546,6 +554,89 @@ export const runGlobalShortcut = Atom.family((name: string) =>
 
 export const reloadHyprlandConfig = Atom.fn((_: undefined, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.hyprlandReloadConfig)),
+);
+
+/** Runs a dispatcher that takes no direction on the focused window. */
+export const hyprlandDispatch = Atom.family((dispatcher: HyprlandDispatcher) =>
+  Atom.fn((_: undefined, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.hyprlandDispatch({ dispatcher })),
+    ),
+  ),
+);
+
+/** The dispatchers that take a direction. */
+export type HyprlandDirectionalDispatcher = "move_focus" | "swap_window";
+
+/** Runs a dispatcher towards a direction, one atom per pair. */
+export const hyprlandDispatchTowards = Atom.family(
+  (dispatcher: HyprlandDirectionalDispatcher) =>
+    Atom.family((direction: HyprlandDirection) =>
+      Atom.fn((_: undefined, get) =>
+        fnSocket(get).pipe(
+          Effect.flatMap((bridge) =>
+            bridge.hyprlandDispatch({ dispatcher, direction }),
+          ),
+        ),
+      ),
+    ),
+);
+
+/** Opens, closes or toggles the Omarchy menu at a route, one atom per route. */
+export const omarchyMenu = Atom.family((id: string) =>
+  Atom.fn((action: OmarchyAction, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.omarchyMenu({ id, action })),
+    ),
+  ),
+);
+
+/** Closes the Omarchy menu, whichever route is open. */
+export const closeOmarchyMenu = Atom.fn((_: undefined, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => bridge.omarchyMenu({ action: "close" })),
+  ),
+);
+
+/** Opens, closes or toggles an Omarchy shell panel, one atom per panel. */
+export const omarchyPanel = Atom.family((id: string) =>
+  Atom.fn((action: OmarchyAction, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.omarchyPanel({ id, action })),
+    ),
+  ),
+);
+
+/**
+ * Why the Hyprland and Omarchy actions that failed last time failed:
+ * reloading the config, the dispatchers, and each listed menu and panel's.
+ * Takes the menu and panel ids listed, as `menu:<id>` and `panel:<id>` joined
+ * with newlines, so the family can cache it.
+ */
+export const desktopFailures = Atom.family((ids: string) =>
+  Atom.make((get) => [
+    ...failureMessage(get(reloadHyprlandConfig)),
+    ...HyprlandDispatcher.literals.flatMap((dispatcher) =>
+      dispatcher === "move_focus" || dispatcher === "swap_window"
+        ? HyprlandDirection.literals.flatMap((direction) =>
+            failureMessage(get(hyprlandDispatchTowards(dispatcher)(direction))),
+          )
+        : failureMessage(get(hyprlandDispatch(dispatcher))),
+    ),
+    ...failureMessage(get(closeOmarchyMenu)),
+    ...ids
+      .split("\n")
+      .filter((id) => id.length > 0)
+      .flatMap((id) =>
+        failureMessage(
+          get(
+            id.startsWith("menu:")
+              ? omarchyMenu(id.slice("menu:".length))
+              : omarchyPanel(id.slice("panel:".length)),
+          ),
+        ),
+      ),
+  ]),
 );
 
 /** Runs an allowlisted command, one atom per command. */

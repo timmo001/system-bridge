@@ -40,6 +40,9 @@ export class SbActionButton extends LitElement {
   /** Shows only the icon, keeping the label for assistive technology. */
   @property({ type: Boolean, attribute: "icon-only" }) iconOnly = false;
 
+  /** Leaves out why it failed, for pages that show it in `sb-action-alert`. */
+  @property({ type: Boolean }) quiet = false;
+
   readonly #result = new AtomController(this, () => this.atom ?? idle);
 
   #onClick = () => {
@@ -70,7 +73,7 @@ export class SbActionButton extends LitElement {
         ${leading} ${this.iconOnly ? nothing : this.label}
       </button>
       ${
-        result?.success === false
+        result?.success === false && !this.quiet
           ? html`<span class="error-text" role="alert">${result.message}</span>`
           : nothing
       }

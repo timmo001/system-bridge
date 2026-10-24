@@ -22,11 +22,12 @@ import type {
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
+import "~/components/sb-action-alert";
 import "~/components/sb-bluetooth-actions";
-import "~/components/sb-bluetooth-alert";
 import "~/components/sb-bluetooth-power";
 import { dataTableColumns } from "~/components/sb-data-table";
 import { icon } from "~/components/shared-styles";
+import { bluetoothFailures } from "~/lib/atoms";
 import {
   formatBytes,
   formatCount,
@@ -100,11 +101,13 @@ export const bluetoothDashboard = ({ data }: DashboardContext) => {
     bluetoothDevice(device, powered),
   );
 
-  const addresses = bluetooth.devices.map((device) => device.address);
+  const failures = bluetoothFailures(
+    bluetooth.devices.map((device) => device.address).join("\n"),
+  );
 
   return html`
     <div class="dashboard">
-      <sb-bluetooth-alert .addresses=${addresses}></sb-bluetooth-alert>
+      <sb-action-alert .failures=${failures}></sb-action-alert>
       <sb-card
         heading="Paired devices"
         subheading="${connected.length} of ${bluetooth.devices.length} connected"

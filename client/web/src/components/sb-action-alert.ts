@@ -1,14 +1,17 @@
 import { mdiAlertCircleOutline } from "@mdi/js";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { Atom } from "effect/reactivity";
 
 import { icon, shared } from "./shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
-import { bluetoothFailures } from "~/lib/atoms";
 
-/** Why the Bluetooth actions taken on the page failed, if any did. */
-@customElement("sb-bluetooth-alert")
-export class SbBluetoothAlert extends LitElement {
+/** Read until the alert has failures to watch. */
+const none = Atom.make((): readonly string[] => []);
+
+/** Why the actions taken on the page failed, if any did. */
+@customElement("sb-action-alert")
+export class SbActionAlert extends LitElement {
   static override styles = [
     shared,
     css`
@@ -23,12 +26,12 @@ export class SbBluetoothAlert extends LitElement {
     `,
   ];
 
-  /** The addresses of the devices listed, whose actions to report. */
-  @property({ attribute: false }) addresses: readonly string[] = [];
+  /** Why each failed action failed, such as `bluetoothFailures`. */
+  @property({ attribute: false }) failures: Atom.Atom<
+    readonly string[]
+  > | null = null;
 
-  readonly #failures = new AtomController(this, () =>
-    bluetoothFailures(this.addresses.join("\n")),
-  );
+  readonly #failures = new AtomController(this, () => this.failures ?? none);
 
   override render() {
     const failures = this.#failures.value;
@@ -51,6 +54,6 @@ export class SbBluetoothAlert extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "sb-bluetooth-alert": SbBluetoothAlert;
+    "sb-action-alert": SbActionAlert;
   }
 }
