@@ -610,11 +610,21 @@ export const NetworkIO = Schema.Struct({
 
 export interface NetworkIO extends Schema.Schema.Type<typeof NetworkIO> {}
 
+export const NetworkWifi = Schema.Struct({
+  ssid: Schema.NullOr(Schema.String),
+  signal: Schema.NullOr(Schema.Finite),
+  signal_percent: Schema.NullOr(Schema.Finite),
+  link_rate: Schema.NullOr(Schema.Finite),
+});
+
+export interface NetworkWifi extends Schema.Schema.Type<typeof NetworkWifi> {}
+
 export const Network = Schema.Struct({
   name: Schema.NullOr(Schema.String),
   addresses: Schema.Array(NetworkAddress),
   stats: Schema.NullOr(NetworkStats),
   io: Schema.NullOr(NetworkIO),
+  wifi: Schema.NullOr(NetworkWifi),
 });
 
 export interface Network extends Schema.Schema.Type<typeof Network> {}

@@ -52,7 +52,8 @@
         "dropout": 0,
         "bytes_sent_rate": null,
         "bytes_recv_rate": null
-      }
+      },
+      "wifi": null
     },
     {
       "name": "wlan0",
@@ -75,7 +76,7 @@
       "stats": {
         "isup": true,
         "duplex": "unknown",
-        "speed": 1000,
+        "speed": null,
         "mtu": 1500,
         "flags": ["up", "broadcast"]
       },
@@ -90,6 +91,12 @@
         "dropout": 821,
         "bytes_sent_rate": 2048.5,
         "bytes_recv_rate": 65536.25
+      },
+      "wifi": {
+        "ssid": "Example",
+        "signal": -55,
+        "signal_percent": 90,
+        "link_rate": 866.7
       }
     }
   ]

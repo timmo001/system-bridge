@@ -18,12 +18,14 @@ func GatherInterfaces(networksData *types.NetworksData) error {
 	}
 
 	// Process network interfaces
+	wifiByName := wifiInterfaces()
 	for _, iface := range ifaces {
 		name := iface.Name
 		netif := types.Network{
 			Name:      &name,
 			Addresses: make([]types.NetworkAddress, 0),
 			Stats:     &types.NetworkStats{},
+			Wifi:      wifiByName[iface.Name],
 		}
 
 		// Get interface addresses

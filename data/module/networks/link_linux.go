@@ -11,7 +11,8 @@ import (
 
 // linkStats reads an interface's link speed in Mb/s and its duplex mode from
 // sysfs. The kernel gives no speed for interfaces that are down, wireless or
-// virtual, so speed is nil for those.
+// virtual, so speed is nil for those. Wireless interfaces report their link
+// rate in wifi instead.
 func linkStats(name string) (speed *int, duplex string) {
 	dir := filepath.Join("/sys/class/net", name)
 

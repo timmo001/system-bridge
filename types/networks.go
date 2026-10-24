@@ -44,12 +44,23 @@ type NetworkIO struct {
 	BytesRecvRate *float64 `json:"bytes_recv_rate"`
 }
 
-// Network represents information about a network interface
+// NetworkWifi represents a wireless interface's connection. The fields are
+// null while the interface isn't connected.
+type NetworkWifi struct {
+	SSID          *string  `json:"ssid"`
+	Signal        *int     `json:"signal"`
+	SignalPercent *int     `json:"signal_percent"`
+	LinkRate      *float64 `json:"link_rate"`
+}
+
+// Network represents information about a network interface. Wifi is null for
+// interfaces that aren't wireless.
 type Network struct {
 	Name      *string          `json:"name"`
 	Addresses []NetworkAddress `json:"addresses"`
 	Stats     *NetworkStats    `json:"stats"`
 	IO        *NetworkIO       `json:"io"`
+	Wifi      *NetworkWifi     `json:"wifi"`
 }
 
 // NetworksData represents information about all network interfaces and connections
