@@ -11,41 +11,20 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	handlers := toolHandlers{eventRouter: eventRouter, dataStore: dataStore, loadSettings: settings.Load}
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
-		Name:        "system_bridge_get_data",
-		Description: "Get system information from data modules (cpu, memory, disks, battery, displays, gpus, media, network, processes, system, sensors)",
+		Name:        "system_bridge_audio_control",
+		Description: "Set an audio output's or input's volume or mute state, or make it the default. Get device ids from the audio module.",
 		InputSchema: objectSchema(map[string]any{
-			"modules": map[string]any{
-				"type":        "array",
-				"description": "List of module names to fetch data from",
-				"items": map[string]any{
-					"type": "string",
-					"enum": []string{"battery", "cpu", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"},
-				},
+			"id": map[string]any{"type": "string", "description": "Device id from the audio module's outputs or inputs"},
+			"volume": map[string]any{
+				"type":        "number",
+				"description": "Volume in percent",
+				"minimum":     0,
+				"maximum":     100,
 			},
-		}, []string{"modules"}),
-	}, handlers.handleGetData)
-
-	sdkmcp.AddTool(server, &sdkmcp.Tool{
-		Name:        "system_bridge_send_notification",
-		Description: "Send a desktop notification to the system",
-		InputSchema: objectSchema(map[string]any{
-			"title":   map[string]any{"type": "string", "description": "Notification title"},
-			"message": map[string]any{"type": "string", "description": "Notification message body"},
-			"icon":    map[string]any{"type": "string", "description": "Icon name (optional)"},
-		}, []string{"title", "message"}),
-	}, handlers.handleNotification)
-
-	sdkmcp.AddTool(server, &sdkmcp.Tool{
-		Name:        "system_bridge_media_control",
-		Description: "Control media playback on the system",
-		InputSchema: objectSchema(map[string]any{
-			"action": map[string]any{
-				"type":        "string",
-				"description": "Media control action to perform (must be uppercase)",
-				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"},
-			},
-		}, []string{"action"}),
-	}, handlers.handleMediaControl)
+			"muted":   map[string]any{"type": "boolean", "description": "Whether to mute the device"},
+			"default": map[string]any{"type": "boolean", "description": "Make the device the default output or input"},
+		}, []string{"id"}),
+	}, handlers.handleAudioControl)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_display_control",
@@ -67,8 +46,23 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleDisplayControl)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_get_data",
+		Description: "Get system information from data modules (audio, battery, cpu, disks, displays, gpus, media, memory, networks, processes, sensors, system)",
+		InputSchema: objectSchema(map[string]any{
+			"modules": map[string]any{
+				"type":        "array",
+				"description": "List of module names to fetch data from",
+				"items": map[string]any{
+					"type": "string",
+					"enum": []string{"audio", "battery", "cpu", "disks", "displays", "gpus", "media", "memory", "networks", "processes", "sensors", "system"},
+				},
+			},
+		}, []string{"modules"}),
+	}, handlers.handleGetData)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_get_history",
-		Description: "Get recent readings kept for charts (cpu, memory, battery, system, networks, disks, gpus, sensors). Each series is a list of {time, value} samples, with time in Unix milliseconds. Usage is in percent, temperatures in °C, power in watts, and network and disk rates in bytes per second.",
+		Description: "Get recent readings kept for charts (battery, cpu, disks, gpus, memory, networks, sensors, system). Each series is a list of {time, value} samples, with time in Unix milliseconds. Usage is in percent, temperatures in °C, power in watts, and network and disk rates in bytes per second.",
 		InputSchema: objectSchema(map[string]any{
 			"since": map[string]any{
 				"type":        "integer",
@@ -93,12 +87,34 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 	}, handlers.handleListCommands)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_media_control",
+		Description: "Control media playback on the system",
+		InputSchema: objectSchema(map[string]any{
+			"action": map[string]any{
+				"type":        "string",
+				"description": "Media control action to perform (must be uppercase)",
+				"enum":        []string{"PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "VOLUME_UP", "VOLUME_DOWN", "MUTE"},
+			},
+		}, []string{"action"}),
+	}, handlers.handleMediaControl)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_run_command",
 		Description: "Run a command from the allowlist and wait for it to finish, returning its exit code and output. Get command ids from system_bridge_list_commands.",
 		InputSchema: objectSchema(map[string]any{
 			"id": map[string]any{"type": "string", "description": "Command id from the allowlist"},
 		}, []string{"id"}),
 	}, handlers.handleRunCommand)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_send_notification",
+		Description: "Send a desktop notification to the system",
+		InputSchema: objectSchema(map[string]any{
+			"title":   map[string]any{"type": "string", "description": "Notification title"},
+			"message": map[string]any{"type": "string", "description": "Notification message body"},
+			"icon":    map[string]any{"type": "string", "description": "Icon name (optional)"},
+		}, []string{"title", "message"}),
+	}, handlers.handleNotification)
 }
 
 func historyModuleNames() []string {

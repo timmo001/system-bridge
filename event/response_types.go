@@ -4,18 +4,25 @@ package event
 type ResponseType string
 
 const (
-	ResponseTypeError                    ResponseType = "ERROR"
 	ResponseTypeApplicationExiting       ResponseType = "APPLICATION_EXITING"
+	ResponseTypeAudioControlled          ResponseType = "AUDIO_CONTROLLED"
+	ResponseTypeCommandCompleted         ResponseType = "COMMAND_COMPLETED"
+	ResponseTypeCommandExecuting         ResponseType = "COMMAND_EXECUTING"
 	ResponseTypeDataGet                  ResponseType = "DATA_GET"
+	ResponseTypeDataListenerRegistered   ResponseType = "DATA_LISTENER_REGISTERED"
+	ResponseTypeDataListenerUnregistered ResponseType = "DATA_LISTENER_UNREGISTERED"
+	ResponseTypeDataUpdate               ResponseType = "DATA_UPDATE"
 	ResponseTypeDirectories              ResponseType = "DIRECTORIES"
 	ResponseTypeDirectory                ResponseType = "DIRECTORY"
-	ResponseTypeDiskMounts               ResponseType = "DISK_MOUNTS"
+	ResponseTypeDirectoryValidated       ResponseType = "DIRECTORY_VALIDATED"
 	ResponseTypeDiscordControlled        ResponseType = "DISCORD_CONTROLLED"
 	ResponseTypeDiscordSetup             ResponseType = "DISCORD_SETUP"
 	ResponseTypeDiscordSetupUpdated      ResponseType = "DISCORD_SETUP_UPDATED"
+	ResponseTypeDiskMounts               ResponseType = "DISK_MOUNTS"
 	ResponseTypeDisplayControlled        ResponseType = "DISPLAY_CONTROLLED"
-	ResponseTypeFiles                    ResponseType = "FILES"
+	ResponseTypeError                    ResponseType = "ERROR"
 	ResponseTypeFile                     ResponseType = "FILE"
+	ResponseTypeFiles                    ResponseType = "FILES"
 	ResponseTypeHistory                  ResponseType = "HISTORY"
 	ResponseTypeKeyboardKeyPressed       ResponseType = "KEYBOARD_KEY_PRESSED"
 	ResponseTypeKeyboardTextSent         ResponseType = "KEYBOARD_TEXT_SENT"
@@ -28,14 +35,8 @@ const (
 	ResponseTypePowerRestarting          ResponseType = "POWER_RESTARTING"
 	ResponseTypePowerShuttingdown        ResponseType = "POWER_SHUTTINGDOWN"
 	ResponseTypePowerSleeping            ResponseType = "POWER_SLEEPING"
-	ResponseTypeDataListenerRegistered   ResponseType = "DATA_LISTENER_REGISTERED"
-	ResponseTypeDataListenerUnregistered ResponseType = "DATA_LISTENER_UNREGISTERED"
-	ResponseTypeDataUpdate               ResponseType = "DATA_UPDATE"
-	ResponseTypeCommandExecuting         ResponseType = "COMMAND_EXECUTING"
-	ResponseTypeCommandCompleted         ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeSettingsResult           ResponseType = "SETTINGS_RESULT"
 	ResponseTypeSettingsUpdated          ResponseType = "SETTINGS_UPDATED"
-	ResponseTypeDirectoryValidated       ResponseType = "DIRECTORY_VALIDATED"
 )
 
 type ResponseSubtype string

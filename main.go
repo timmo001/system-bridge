@@ -223,270 +223,33 @@ func main() {
 				// },
 				Commands: []*cli.Command{
 					{
-						Name:  "open",
-						Usage: "Open the web client",
+						Name:      "audio",
+						Usage:     "Set an audio output's or input's volume or mute, or make it the default",
+						ArgsUsage: "<device id>",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"},
-							&cli.StringFlag{Name: "path", Usage: "Open a page of the web client, such as /media#media-controls"},
-						},
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							path := cmd.String("path")
-							if path == "" {
-								path = "/"
-							}
-							if cmd.Bool("settings") {
-								path = "/settings"
-							}
-							if !strings.HasPrefix(path, "/") {
-								return fmt.Errorf("path must start with /: %q", path)
-							}
-							token, err := utils.LoadToken()
-							if err != nil {
-								return fmt.Errorf("load token: %w", err)
-							}
-							openWebClientPath(token, path)
-							return nil
-						},
-					},
-					{
-						Name:      "media",
-						Usage:     "Control media playback",
-						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute>",
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							action := strings.ToUpper(cmd.Args().First())
-							if action == "" {
-								return fmt.Errorf("a media action is required")
-							}
-							return client.Send(cmdCtx, event.EventMediaControl, map[string]string{"action": action})
-						},
-					},
-					{
-						Name:      "display",
-						Usage:     "Set a display's brightness or power state",
-						ArgsUsage: "<display id>",
-						Flags: []cli.Flag{
-							&cli.FloatFlag{Name: "brightness", Usage: "Brightness in percent"},
-							&cli.StringFlag{Name: "power", Usage: "Power state: on, standby, suspend or off"},
+							&cli.FloatFlag{Name: "volume", Usage: "Volume in percent"},
+							&cli.BoolFlag{Name: "mute", Usage: "Mute the device, or unmute it with --mute=false"},
+							&cli.BoolFlag{Name: "default", Usage: "Make the device the default output or input"},
 						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
 							id := cmd.Args().First()
 							if id == "" {
-								return fmt.Errorf("a display id is required")
+								return fmt.Errorf("an audio device id is required")
 							}
 							data := map[string]any{"id": id}
-							if cmd.IsSet("brightness") {
-								data["brightness"] = cmd.Float("brightness")
+							if cmd.IsSet("volume") {
+								data["volume"] = cmd.Float("volume")
 							}
-							if power := cmd.String("power"); power != "" {
-								data["power_state"] = strings.ToLower(power)
+							if cmd.IsSet("mute") {
+								data["muted"] = cmd.Bool("mute")
+							}
+							if cmd.Bool("default") {
+								data["default"] = true
 							}
 							if len(data) == 1 {
-								return fmt.Errorf("set --brightness or --power")
+								return fmt.Errorf("set --volume, --mute or --default")
 							}
-							return client.Send(cmdCtx, event.EventDisplayControl, data)
-						},
-					},
-					{
-						Name:      "discord",
-						Usage:     "Control Discord voice",
-						ArgsUsage: "<toggle_mute|toggle_deafen|leave_voice_channel|...>",
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							action := strings.ToUpper(cmd.Args().First())
-							if action == "" {
-								return fmt.Errorf("a Discord action is required")
-							}
-							return client.Send(cmdCtx, event.EventDiscordControl, map[string]string{"action": action})
-						},
-					},
-					{
-						Name:  "quit",
-						Usage: "Confirm and quit the local System Bridge backend",
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
-								return nil
-							}
-							if err := client.Quit(cmdCtx); err != nil {
-								reportDesktopError("Failed to quit System Bridge", err)
-								return err
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "token",
-						Aliases: []string{"t"},
-						Usage:   "Print the API token",
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							token, err := utils.LoadToken()
-							if err != nil {
-								return fmt.Errorf("error loading token: %w", err)
-							}
-							fmt.Println(token)
-							return nil
-						},
-					},
-					{
-						Name:    "notification",
-						Aliases: []string{"notify", "n"},
-						Usage:   "Send a notification",
-						Flags: []cli.Flag{
-							&cli.StringFlag{
-								Name:  "title",
-								Usage: "The title of the notification",
-								Value: "System Bridge",
-							},
-							&cli.StringFlag{
-								Name:  "message",
-								Usage: "The message of the notification",
-								Value: "Hello, world!",
-							},
-							&cli.StringFlag{
-								Name:  "icon",
-								Usage: "The icon of the notification",
-								Value: "system-bridge",
-							},
-							&cli.StringFlag{
-								Name:  "sound",
-								Usage: "Path to a sound file to play with the notification (Linux only)",
-							},
-							&cli.StringFlag{
-								Name:  "action-url",
-								Usage: "URL to open when notification is clicked (Linux only)",
-							},
-							&cli.StringFlag{
-								Name:  "action-path",
-								Usage: "File/folder path to open when notification is clicked (Linux only)",
-							},
-						},
-						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							err := notification.Send(notification.NotificationData{
-								Title:      cmd.String("title"),
-								Message:    cmd.String("message"),
-								Icon:       cmd.String("icon"),
-								Sound:      cmd.String("sound"),
-								ActionURL:  cmd.String("action-url"),
-								ActionPath: cmd.String("action-path"),
-							})
-							if err != nil {
-								slog.Warn("Failed to send notification", "err", err)
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "discovery",
-						Aliases: []string{"disc"},
-						Usage:   "Service discovery commands",
-						Commands: []*cli.Command{
-							{
-								Name:  "list",
-								Usage: "List discovered services",
-								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-									discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
-									if err := discoveryManager.Start(); err != nil {
-										return fmt.Errorf("failed to start discovery manager: %w", err)
-									}
-									defer func() {
-										if err := discoveryManager.Stop(); err != nil {
-											fmt.Fprintf(os.Stderr, "Error stopping discovery manager: %v\n", err)
-										}
-									}()
-
-									// Wait a moment for services to be discovered
-									time.Sleep(2 * time.Second)
-
-									services, err := discoveryManager.DiscoverServices()
-									if err != nil {
-										return fmt.Errorf("failed to discover services: %w", err)
-									}
-
-									if len(services) == 0 {
-										fmt.Println("No services discovered")
-										return nil
-									}
-
-									fmt.Printf("Discovered %d services:\n", len(services))
-									for _, service := range services {
-										fmt.Printf("- %s (%s:%d) [%s]\n", service.Hostname, service.IP, service.Port, service.Type)
-									}
-
-									return nil
-								},
-							},
-						},
-					},
-					{
-						Name:  "history",
-						Usage: "Read the history of the graphed readings",
-						Commands: []*cli.Command{
-							{
-								Name:  "export",
-								Usage: "Export up to the last 24 hours of readings as CSV or JSON",
-								Flags: []cli.Flag{
-									&cli.StringFlag{
-										Name:    "format",
-										Aliases: []string{"f"},
-										Usage:   "csv (a row per reading) or json (as GET_HISTORY returns it)",
-										Value:   "csv",
-									},
-									&cli.DurationFlag{
-										Name:    "since",
-										Aliases: []string{"s"},
-										Usage:   "Only readings from this long ago, such as 1h or 30m",
-									},
-									&cli.StringSliceFlag{
-										Name:    "module",
-										Aliases: []string{"m"},
-										Usage:   "Only this module's readings (repeat for more): cpu, memory, battery, system, networks, disks, gpus or sensors",
-									},
-									&cli.StringFlag{
-										Name:    "output",
-										Aliases: []string{"o"},
-										Usage:   "Write to this file instead of standard output",
-									},
-								},
-								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
-									args := os.Args
-									if len(args) >= 2 {
-										prev := args[len(args)-2]
-										if prev == "--module" || prev == "-m" {
-											for _, module := range data.HistoryModules() {
-												_, _ = fmt.Fprintln(cmd.Root().Writer, string(module))
-											}
-											return
-										}
-									}
-									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
-								},
-								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-									options := client.ExportOptions{
-										Format: cmd.String("format"),
-										Since:  cmd.Duration("since"),
-									}
-									for _, name := range cmd.StringSlice("module") {
-										module := types.ModuleName(name)
-										if !data.HasHistory(module) {
-											return fmt.Errorf("no history is kept for %q: use cpu, memory, battery, system, networks, disks, gpus or sensors", name)
-										}
-										options.Modules = append(options.Modules, module)
-									}
-
-									output := cmd.String("output")
-									if output == "" {
-										return client.ExportHistory(cmdCtx, cmd.Root().Writer, options)
-									}
-
-									file, err := os.Create(output)
-									if err != nil {
-										return fmt.Errorf("create %s: %w", output, err)
-									}
-									if err := client.ExportHistory(cmdCtx, file, options); err != nil {
-										_ = file.Close()
-										return err
-									}
-									return file.Close()
-								},
-							},
+							return client.Send(cmdCtx, event.EventAudioControl, data)
 						},
 					},
 					{
@@ -685,6 +448,273 @@ func main() {
 									return nil
 								},
 							},
+						},
+					},
+					{
+						Name:      "discord",
+						Usage:     "Control Discord voice",
+						ArgsUsage: "<toggle_mute|toggle_deafen|leave_voice_channel|...>",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							action := strings.ToUpper(cmd.Args().First())
+							if action == "" {
+								return fmt.Errorf("a Discord action is required")
+							}
+							return client.Send(cmdCtx, event.EventDiscordControl, map[string]string{"action": action})
+						},
+					},
+					{
+						Name:    "discovery",
+						Aliases: []string{"disc"},
+						Usage:   "Service discovery commands",
+						Commands: []*cli.Command{
+							{
+								Name:  "list",
+								Usage: "List discovered services",
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									discoveryManager := discovery.NewDiscoveryManager(utils.GetPort())
+									if err := discoveryManager.Start(); err != nil {
+										return fmt.Errorf("failed to start discovery manager: %w", err)
+									}
+									defer func() {
+										if err := discoveryManager.Stop(); err != nil {
+											fmt.Fprintf(os.Stderr, "Error stopping discovery manager: %v\n", err)
+										}
+									}()
+
+									// Wait a moment for services to be discovered
+									time.Sleep(2 * time.Second)
+
+									services, err := discoveryManager.DiscoverServices()
+									if err != nil {
+										return fmt.Errorf("failed to discover services: %w", err)
+									}
+
+									if len(services) == 0 {
+										fmt.Println("No services discovered")
+										return nil
+									}
+
+									fmt.Printf("Discovered %d services:\n", len(services))
+									for _, service := range services {
+										fmt.Printf("- %s (%s:%d) [%s]\n", service.Hostname, service.IP, service.Port, service.Type)
+									}
+
+									return nil
+								},
+							},
+						},
+					},
+					{
+						Name:      "display",
+						Usage:     "Set a display's brightness or power state",
+						ArgsUsage: "<display id>",
+						Flags: []cli.Flag{
+							&cli.FloatFlag{Name: "brightness", Usage: "Brightness in percent"},
+							&cli.StringFlag{Name: "power", Usage: "Power state: on, standby, suspend or off"},
+						},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							id := cmd.Args().First()
+							if id == "" {
+								return fmt.Errorf("a display id is required")
+							}
+							data := map[string]any{"id": id}
+							if cmd.IsSet("brightness") {
+								data["brightness"] = cmd.Float("brightness")
+							}
+							if power := cmd.String("power"); power != "" {
+								data["power_state"] = strings.ToLower(power)
+							}
+							if len(data) == 1 {
+								return fmt.Errorf("set --brightness or --power")
+							}
+							return client.Send(cmdCtx, event.EventDisplayControl, data)
+						},
+					},
+					{
+						Name:  "history",
+						Usage: "Read the history of the graphed readings",
+						Commands: []*cli.Command{
+							{
+								Name:  "export",
+								Usage: "Export up to the last 24 hours of readings as CSV or JSON",
+								Flags: []cli.Flag{
+									&cli.StringFlag{
+										Name:    "format",
+										Aliases: []string{"f"},
+										Usage:   "csv (a row per reading) or json (as GET_HISTORY returns it)",
+										Value:   "csv",
+									},
+									&cli.DurationFlag{
+										Name:    "since",
+										Aliases: []string{"s"},
+										Usage:   "Only readings from this long ago, such as 1h or 30m",
+									},
+									&cli.StringSliceFlag{
+										Name:    "module",
+										Aliases: []string{"m"},
+										Usage:   "Only this module's readings (repeat for more): battery, cpu, disks, gpus, memory, networks, sensors or system",
+									},
+									&cli.StringFlag{
+										Name:    "output",
+										Aliases: []string{"o"},
+										Usage:   "Write to this file instead of standard output",
+									},
+								},
+								ShellComplete: func(cmdCtx context.Context, cmd *cli.Command) {
+									args := os.Args
+									if len(args) >= 2 {
+										prev := args[len(args)-2]
+										if prev == "--module" || prev == "-m" {
+											for _, module := range data.HistoryModules() {
+												_, _ = fmt.Fprintln(cmd.Root().Writer, string(module))
+											}
+											return
+										}
+									}
+									cli.DefaultCompleteWithFlags(cmdCtx, cmd)
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									options := client.ExportOptions{
+										Format: cmd.String("format"),
+										Since:  cmd.Duration("since"),
+									}
+									for _, name := range cmd.StringSlice("module") {
+										module := types.ModuleName(name)
+										if !data.HasHistory(module) {
+											return fmt.Errorf("no history is kept for %q: use battery, cpu, disks, gpus, memory, networks, sensors or system", name)
+										}
+										options.Modules = append(options.Modules, module)
+									}
+
+									output := cmd.String("output")
+									if output == "" {
+										return client.ExportHistory(cmdCtx, cmd.Root().Writer, options)
+									}
+
+									file, err := os.Create(output)
+									if err != nil {
+										return fmt.Errorf("create %s: %w", output, err)
+									}
+									if err := client.ExportHistory(cmdCtx, file, options); err != nil {
+										_ = file.Close()
+										return err
+									}
+									return file.Close()
+								},
+							},
+						},
+					},
+					{
+						Name:      "media",
+						Usage:     "Control media playback",
+						ArgsUsage: "<play|pause|next|previous|stop|volume_up|volume_down|mute>",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							action := strings.ToUpper(cmd.Args().First())
+							if action == "" {
+								return fmt.Errorf("a media action is required")
+							}
+							return client.Send(cmdCtx, event.EventMediaControl, map[string]string{"action": action})
+						},
+					},
+					{
+						Name:    "notification",
+						Aliases: []string{"notify", "n"},
+						Usage:   "Send a notification",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:  "title",
+								Usage: "The title of the notification",
+								Value: "System Bridge",
+							},
+							&cli.StringFlag{
+								Name:  "message",
+								Usage: "The message of the notification",
+								Value: "Hello, world!",
+							},
+							&cli.StringFlag{
+								Name:  "icon",
+								Usage: "The icon of the notification",
+								Value: "system-bridge",
+							},
+							&cli.StringFlag{
+								Name:  "sound",
+								Usage: "Path to a sound file to play with the notification (Linux only)",
+							},
+							&cli.StringFlag{
+								Name:  "action-url",
+								Usage: "URL to open when notification is clicked (Linux only)",
+							},
+							&cli.StringFlag{
+								Name:  "action-path",
+								Usage: "File/folder path to open when notification is clicked (Linux only)",
+							},
+						},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							err := notification.Send(notification.NotificationData{
+								Title:      cmd.String("title"),
+								Message:    cmd.String("message"),
+								Icon:       cmd.String("icon"),
+								Sound:      cmd.String("sound"),
+								ActionURL:  cmd.String("action-url"),
+								ActionPath: cmd.String("action-path"),
+							})
+							if err != nil {
+								slog.Warn("Failed to send notification", "err", err)
+							}
+							return nil
+						},
+					},
+					{
+						Name:  "open",
+						Usage: "Open the web client",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "settings", Usage: "Open General Settings"},
+							&cli.StringFlag{Name: "path", Usage: "Open a page of the web client, such as /media#media-controls"},
+						},
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							path := cmd.String("path")
+							if path == "" {
+								path = "/"
+							}
+							if cmd.Bool("settings") {
+								path = "/settings"
+							}
+							if !strings.HasPrefix(path, "/") {
+								return fmt.Errorf("path must start with /: %q", path)
+							}
+							token, err := utils.LoadToken()
+							if err != nil {
+								return fmt.Errorf("load token: %w", err)
+							}
+							openWebClientPath(token, path)
+							return nil
+						},
+					},
+					{
+						Name:  "quit",
+						Usage: "Confirm and quit the local System Bridge backend",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+								return nil
+							}
+							if err := client.Quit(cmdCtx); err != nil {
+								reportDesktopError("Failed to quit System Bridge", err)
+								return err
+							}
+							return nil
+						},
+					},
+					{
+						Name:    "token",
+						Aliases: []string{"t"},
+						Usage:   "Print the API token",
+						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+							token, err := utils.LoadToken()
+							if err != nil {
+								return fmt.Errorf("error loading token: %w", err)
+							}
+							fmt.Println(token)
+							return nil
 						},
 					},
 				},

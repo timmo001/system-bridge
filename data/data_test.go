@@ -40,6 +40,7 @@ func TestNewDataStore(t *testing.T) {
 
 		// Check that default modules are registered
 		expectedModules := []types.ModuleName{
+			types.ModuleAudio,
 			types.ModuleBattery,
 			types.ModuleCPU,
 			types.ModuleDisks,

@@ -58,19 +58,21 @@ the connection. Use `wss://` when connecting through TLS.
 
 Tools are registered in `tools.go` and implemented in `handlers.go`:
 
-- `system_bridge_get_data` returns the latest data for requested modules.
-  Supported modules are `battery`, `cpu`, `disks`, `displays`, `gpus`, `media`,
-  `memory`, `networks`, `processes`, `sensors`, and `system`.
-- `system_bridge_send_notification` sends a desktop notification with required
-  `title` and `message` fields and an optional `icon`.
-- `system_bridge_media_control` performs one of `PLAY`, `PAUSE`, `STOP`, `NEXT`,
-  `PREVIOUS`, `VOLUME_UP`, `VOLUME_DOWN`, or `MUTE`.
+- `system_bridge_audio_control` sets an audio device's volume or mute state, or
+  makes it the default.
 - `system_bridge_display_control` sets a display's brightness or power state.
+- `system_bridge_get_data` returns the latest data for requested modules.
+  Supported modules are `audio`, `battery`, `cpu`, `disks`, `displays`, `gpus`,
+  `media`, `memory`, `networks`, `processes`, `sensors`, and `system`.
 - `system_bridge_get_history` returns the chart history, through `GET_HISTORY`,
   with optional `since` and `modules`.
-- `system_bridge_list_commands` lists the command allowlist, and
-  `system_bridge_run_command` runs one and waits for its result through
-  `command.Run`.
+- `system_bridge_list_commands` lists the command allowlist.
+- `system_bridge_media_control` performs one of `MUTE`, `NEXT`, `PAUSE`, `PLAY`,
+  `PREVIOUS`, `STOP`, `VOLUME_DOWN`, or `VOLUME_UP`.
+- `system_bridge_run_command` runs a command from the allowlist and waits for
+  its result through `command.Run`.
+- `system_bridge_send_notification` sends a desktop notification with required
+  `title` and `message` fields and an optional `icon`.
 
 Power actions are left out on purpose, as an assistant could trigger them by
 mistake.

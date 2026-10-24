@@ -17,6 +17,7 @@ import (
 const closeTimeout = time.Second
 
 var knownModules = map[types.ModuleName]struct{}{
+	types.ModuleAudio:     {},
 	types.ModuleBattery:   {},
 	types.ModuleCPU:       {},
 	types.ModuleDisks:     {},

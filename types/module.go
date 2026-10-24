@@ -6,6 +6,7 @@ import "context"
 type ModuleName string
 
 const (
+	ModuleAudio     ModuleName = "audio"
 	ModuleBattery   ModuleName = "battery"
 	ModuleCPU       ModuleName = "cpu"
 	ModuleDisks     ModuleName = "disks"

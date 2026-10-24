@@ -58,6 +58,7 @@ func main() {
 
 // moduleDataTypes maps each module name to the type of its data.
 var moduleDataTypes = map[string]string{
+	"audio":     "AudioData",
 	"battery":   "BatteryData",
 	"cpu":       "CPUData",
 	"disks":     "DisksData",

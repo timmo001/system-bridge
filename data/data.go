@@ -44,6 +44,7 @@ func NewDataStore() (*DataStore, error) {
 
 	// Register all modules with validation
 	modules := []types.Updater{
+		data_module.AudioModule{},
 		data_module.BatteryModule{},
 		data_module.CPUModule{},
 		data_module.DiskModule{},
