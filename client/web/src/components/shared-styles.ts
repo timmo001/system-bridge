@@ -254,8 +254,11 @@ export const shared = css`
     --sb-icon-size: 1.5rem;
   }
 
+  /* Always square, so a round one is a circle */
   .button.icon-only {
     width: 2.25rem;
+    min-height: 0;
+    aspect-ratio: 1;
     padding: 0;
   }
 
@@ -276,6 +279,11 @@ export const shared = css`
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+  }
+
+  .button.plain:disabled,
+  .button.plain[aria-disabled="true"] {
+    color: var(--sb-color-muted);
   }
 
   .spin {
