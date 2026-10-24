@@ -9,7 +9,7 @@ System Bridge reads your system's state into data modules and keeps them up to d
 
 | Module | What's in it |
 | --- | --- |
-| `system` | Hostname, platform, uptime, signed-in users, versions, and which apps are using the camera or microphone. |
+| `system` | Hostname, platform, uptime, signed-in users, versions, failed systemd units, and which apps are using the camera or microphone. |
 | `processes` | Running processes with their CPU and memory use. |
 | `cpu` | Usage, frequency, temperature, power and each core's load. |
 | `memory` | Physical memory and swap. |

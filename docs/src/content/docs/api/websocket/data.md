@@ -46,7 +46,7 @@ Most modules refresh once a minute. These also update as soon as something chang
 | `displays` | A display is connected or removed. On Linux, also when a built-in panel's brightness changes | Linux, Windows |
 | `media` | The track or playback state changes | Linux |
 | `networks` | An interface comes up or goes down, gains or loses an address, or joins or leaves a Wi-Fi network | Linux, Windows |
-| `system` | The session is locked or unlocked, or the user goes away (a minute without input) or comes back | Linux, Windows |
+| `system` | The session is locked or unlocked, the user goes away (a minute without input) or comes back, or a systemd unit fails or recovers (Linux) | Linux, Windows |
 
 Readings such as CPU, memory and network traffic are measurements, so they follow the refresh.
 
