@@ -552,6 +552,12 @@ async def test_get_history(
     )
     assert [sample.value for sample in newer.cpu] == [20.0]
 
+    sensors_only = await mock_websocket_client_listening.get_history(
+        modules=[Module.SENSORS],
+        request_id=REQUEST_ID,
+    )
+    assert sensors_only.cpu == []
+
 
 @pytest.mark.asyncio
 async def test_send_notification(

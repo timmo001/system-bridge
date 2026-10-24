@@ -31,7 +31,7 @@ from .models.media_directories import MediaDirectory
 from .models.media_files import FileInfo, MediaFile, MediaFiles
 from .models.media_get_file import MediaGetFile
 from .models.media_get_files import MediaGetFiles
-from .models.modules import GetData, ModulesData, RegisterDataListener
+from .models.modules import GetData, Module, ModulesData, RegisterDataListener
 from .models.modules.disks import DiskMounts
 from .models.notification import Notification
 from .models.open_path import OpenPath
@@ -267,17 +267,24 @@ class WebSocketClient(Base):
     async def get_history(
         self,
         since: int | None = None,
+        modules: list[Module] | None = None,
         request_id: str | None = None,
     ) -> MetricHistory:
         """Get graph readings from up to the last 24 hours.
 
-        With since, in Unix milliseconds, only readings taken after it.
+        With since, in Unix milliseconds, only readings taken after it, and
+        with modules, only those modules' readings.
         """
         self._logger.info("Getting history")
+        request: dict[str, Any] = {}
+        if since is not None:
+            request["since"] = since
+        if modules:
+            request["modules"] = [str(module) for module in modules]
         response = await self.send_message(
             EventType.GET_HISTORY,
             request_id,
-            {} if since is None else {"since": since},
+            request,
             wait_for_response=True,
             response_type=EventType.HISTORY,
         )

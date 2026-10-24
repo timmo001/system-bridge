@@ -210,6 +210,10 @@ async def process_request(request: Request) -> Response:
         )
     if request.event == EventType.GET_HISTORY:
         since = request.data.get("since", 0)
+        # Enough of the backend's module filter to check the request
+        modules = request.data.get("modules")
+        if modules and "cpu" not in modules:
+            since = 2**62
         cpu = [
             {"time": 1700000000000, "value": 12.5},
             {"time": 1700000060000, "value": 20.0},
