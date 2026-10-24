@@ -1,5 +1,25 @@
-import { mdiArrowDown, mdiArrowUp } from "@mdi/js";
-import type { NetworkConnection } from "@timmo001/effect-system-bridge";
+import {
+  mdiArrowDown,
+  mdiArrowUp,
+  mdiBluetooth,
+  mdiCamera,
+  mdiCellphone,
+  mdiGamepadVariant,
+  mdiHeadphones,
+  mdiHeadset,
+  mdiKeyboard,
+  mdiLaptop,
+  mdiMouse,
+  mdiPrinter,
+  mdiSpeaker,
+  mdiTablet,
+  mdiVideo,
+  mdiWifi,
+} from "@mdi/js";
+import type {
+  BluetoothDevice,
+  NetworkConnection,
+} from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
 import { dataTableColumns } from "~/components/sb-data-table";
@@ -25,6 +45,59 @@ import {
 
 const lastValue = (samples: readonly { readonly value: number }[]) =>
   samples.at(-1)?.value ?? null;
+
+/** Icons for the freedesktop icon names that devices report as their type. */
+const bluetoothIcons: ReadonlyMap<string, string> = new Map([
+  ["audio-card", mdiSpeaker],
+  ["audio-headphones", mdiHeadphones],
+  ["audio-headset", mdiHeadset],
+  ["camera-photo", mdiCamera],
+  ["camera-video", mdiVideo],
+  ["computer", mdiLaptop],
+  ["input-gaming", mdiGamepadVariant],
+  ["input-keyboard", mdiKeyboard],
+  ["input-mouse", mdiMouse],
+  ["input-tablet", mdiTablet],
+  ["network-wireless", mdiWifi],
+  ["phone", mdiCellphone],
+  ["printer", mdiPrinter],
+]);
+
+const bluetoothDevice = (device: BluetoothDevice) => html`
+  <li>
+    ${icon(bluetoothIcons.get(device.type ?? "") ?? mdiBluetooth)}
+    <span class="spacer truncate" title=${device.address}>${device.name}</span>
+    <span class="chip ${device.connected ? "success" : ""}"
+      ><span class="dot"></span
+      >${device.connected ? "Connected" : "Not connected"}</span
+    >
+  </li>
+`;
+
+export const bluetoothDashboard = ({ data }: DashboardContext) => {
+  const bluetooth = data.bluetooth;
+
+  if (bluetooth === undefined || bluetooth.devices.length === 0) {
+    return noData("paired Bluetooth devices");
+  }
+
+  const connected = bluetooth.devices.filter((device) => device.connected);
+
+  const rows = bluetooth.devices.map(bluetoothDevice);
+
+  return html`
+    <div class="dashboard">
+      <sb-card
+        heading="Paired devices"
+        subheading="${connected.length} of ${bluetooth.devices.length} connected"
+      >
+        <ul class="list">
+          ${rows}
+        </ul>
+      </sb-card>
+    </div>
+  `;
+};
 
 export const disksDashboard = ({ data, history }: DashboardContext) => {
   const disks = data.disks;

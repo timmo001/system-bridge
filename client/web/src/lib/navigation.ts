@@ -1,6 +1,7 @@
 import {
   mdiApplicationCogOutline,
   mdiBattery,
+  mdiBluetooth,
   mdiCogOutline,
   mdiCpu64Bit,
   mdiExpansionCardVariant,
@@ -38,6 +39,11 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
     label: "Battery",
     description: "Charge and time remaining",
     icon: mdiBattery,
+  },
+  bluetooth: {
+    label: "Bluetooth",
+    description: "Paired devices and whether they're connected",
+    icon: mdiBluetooth,
   },
   cpu: {
     label: "CPU",

@@ -25,6 +25,7 @@ import {
 } from "~/dashboards/hardware";
 import { type DashboardContext, dashboardStyles } from "~/dashboards/shared";
 import {
+  bluetoothDashboard,
   disksDashboard,
   networksDashboard,
 } from "~/dashboards/storage-network";
@@ -59,6 +60,7 @@ const dashboards: Readonly<
 > = {
   audio: audioDashboard,
   battery: batteryDashboard,
+  bluetooth: bluetoothDashboard,
   cpu: cpuDashboard,
   discord: discordDashboard,
   disks: disksDashboard,
