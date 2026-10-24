@@ -5,8 +5,10 @@ import {
   SystemBridgeWebSocket,
   type AudioControl,
   type DataMissingError,
+  type DesktopWindowStateRequest,
   type DiscordControl,
   type DisplayControl,
+  type HyprlandSetWindowRequest,
   type MediaAction,
   ModuleDataUpdate,
   type ModulesData,
@@ -425,6 +427,76 @@ export const displayControl = Atom.family((id: string) =>
 
 export const mediaControl = Atom.fn((action: MediaAction, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(action))),
+);
+
+/** Something to do to a window. */
+export type WindowAction =
+  | { readonly _tag: "close" }
+  | { readonly _tag: "focus" }
+  | { readonly _tag: "move"; readonly workspace: string }
+  | {
+      readonly _tag: "set";
+      readonly settings: Omit<HyprlandSetWindowRequest, "id">;
+    }
+  | {
+      readonly _tag: "state";
+      readonly state: Omit<DesktopWindowStateRequest, "id">;
+    };
+
+/** Focuses, closes, moves or changes a window, one atom per window. */
+export const windowAction = Atom.family((id: string) =>
+  Atom.fn((action: WindowAction, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => {
+        switch (action._tag) {
+          case "close":
+            return bridge.desktopCloseWindow({ id });
+          case "focus":
+            return bridge.desktopFocusWindow({ id });
+          case "move":
+            return bridge.hyprlandMoveWindow({
+              id,
+              workspace: action.workspace,
+            });
+          case "set":
+            return bridge.hyprlandSetWindow({ ...action.settings, id });
+          case "state":
+            return bridge.desktopSetWindowState({ ...action.state, id });
+        }
+      }),
+    ),
+  ),
+);
+
+/** Shows and focuses a workspace, one atom per workspace. */
+export const focusWorkspace = Atom.family((id: string) =>
+  Atom.fn((_: undefined, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.desktopFocusWorkspace({ id })),
+    ),
+  ),
+);
+
+/** Switches to a keyboard layout, one atom per layout. */
+export const setKeyboardLayout = Atom.family((layout: string) =>
+  Atom.fn((_: undefined, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.desktopSetKeyboardLayout({ layout })),
+    ),
+  ),
+);
+
+/** Triggers a Hyprland global shortcut, one atom per shortcut. */
+export const runGlobalShortcut = Atom.family((name: string) =>
+  Atom.fn((_: undefined, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.hyprlandRunGlobalShortcut({ name })),
+    ),
+  ),
+);
+
+export const reloadHyprlandConfig = Atom.fn((_: undefined, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.hyprlandReloadConfig)),
 );
 
 /** Runs an allowlisted command, one atom per command. */

@@ -1,8 +1,12 @@
 import {
   mdiAlertCircleOutline,
+  mdiEyeOutline,
   mdiHeadset,
+  mdiKeyboardOutline,
   mdiMicrophone,
   mdiMonitorShare,
+  mdiPlay,
+  mdiReload,
   mdiWebcam,
 } from "@mdi/js";
 import type {
@@ -22,8 +26,16 @@ import type {
 } from "@timmo001/effect-system-bridge";
 import { html, nothing } from "lit";
 
+import "~/components/sb-action-button";
 import { dataTableColumns } from "~/components/sb-data-table";
+import "~/components/sb-window-actions";
 import { icon } from "~/components/shared-styles";
+import {
+  focusWorkspace,
+  reloadHyprlandConfig,
+  runGlobalShortcut,
+  setKeyboardLayout,
+} from "~/lib/atoms";
 import {
   formatAgo,
   formatDateTime,
@@ -428,6 +440,8 @@ interface WindowRow {
   readonly window: DesktopWindow;
   readonly workspace: string;
   readonly extra: HyprlandWindow | undefined;
+  readonly compositor: DesktopCompositor;
+  readonly workspaces: readonly DesktopWorkspace[];
 }
 
 const windowColumns = (() => {
@@ -473,6 +487,17 @@ const windowColumns = (() => {
           >${windowStates(row.original.window, row.original.extra)}</span
         >`,
     }),
+    column.display({
+      id: "actions",
+      header: "",
+      cell: ({ row }) =>
+        html`<sb-window-actions
+          .window=${row.original.window}
+          .extra=${row.original.extra}
+          .compositor=${row.original.compositor}
+          .workspaces=${row.original.workspaces}
+        ></sb-window-actions>`,
+    }),
   ]);
 })();
 
@@ -481,6 +506,8 @@ const windowId = (row: WindowRow) => row.window.id;
 interface WorkspaceRow {
   readonly workspace: DesktopWorkspace;
   readonly extra: HyprlandWorkspace | undefined;
+  /** Windows can't switch workspaces for you. */
+  readonly focusable: boolean;
 }
 
 const workspaceColumns = (() => {
@@ -523,6 +550,22 @@ const workspaceColumns = (() => {
           ${workspace.fullscreen ? html`<span class="chip">Fullscreen</span>` : nothing}
           ${extra?.persistent ? html`<span class="chip">Persistent</span>` : nothing}
         </span>`;
+      },
+    }),
+    column.display({
+      id: "actions",
+      header: "",
+      cell: ({ row }) => {
+        const { workspace, focusable } = row.original;
+
+        return workspace.focused || !focusable
+          ? nothing
+          : html`<sb-action-button
+              icon-only
+              label="Show ${workspace.name ?? workspace.id}"
+              .icon=${mdiEyeOutline}
+              .atom=${focusWorkspace(workspace.id)}
+            ></sb-action-button>`;
       },
     }),
   ]);
@@ -789,6 +832,20 @@ const shortcutColumns = (() => {
       cell: ({ getValue }) =>
         html`<span class="mono xsmall">${getValue()}</span>`,
     }),
+    column.display({
+      id: "actions",
+      header: "",
+      cell: ({ row }) => {
+        const { shortcut } = row.original;
+
+        return html`<sb-action-button
+          icon-only
+          label=${shortcut.description || shortcut.name}
+          .icon=${mdiPlay}
+          .atom=${runGlobalShortcut(shortcut.name)}
+        ></sb-action-button>`;
+      },
+    }),
   ]);
 })();
 
@@ -870,6 +927,13 @@ const hyprlandCards = (hyprland: HyprlandData) => {
         ["Submap", hyprland.submap ?? "Default"],
         ["Group lock", yesNo(hyprland.group_lock)],
       ])}
+      <div class="row">
+        <sb-action-button
+          label="Reload config"
+          .icon=${mdiReload}
+          .atom=${reloadHyprlandConfig}
+        ></sb-action-button>
+      </div>
     </sb-card>
     <sb-card heading="Displays" subheading="As Hyprland sees them">
       <sb-data-table
@@ -970,6 +1034,8 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
         ? ""
         : (workspaceNames.get(window.workspace) ?? window.workspace),
     extra: hyprland?.windows[window.id],
+    compositor: desktop.compositor,
+    workspaces: desktop.workspaces,
   }));
 
   const configErrors = (hyprland?.config_errors ?? []).map(
@@ -983,7 +1049,24 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
   const workspaces = desktop.workspaces.map((workspace): WorkspaceRow => ({
     workspace,
     extra: hyprland?.workspaces[workspace.id],
+    focusable: desktop.compositor !== "windows",
   }));
+
+  // Other Wayland desktops can't switch layouts for you
+  const layouts =
+    desktop.compositor === "wayland"
+      ? []
+      : desktop.keyboard.layouts.flatMap((layout) =>
+          layout === desktop.keyboard.layout
+            ? []
+            : [
+                html`<sb-action-button
+                  label=${layout}
+                  .icon=${mdiKeyboardOutline}
+                  .atom=${setKeyboardLayout(layout)}
+                ></sb-action-button>`,
+              ],
+        );
 
   return html`
     <div class="dashboard">
@@ -1067,6 +1150,14 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
           ["Name", desktop.keyboard.name],
           ["Installed", desktop.keyboard.layouts.join(", ")],
         ])}
+        ${
+          layouts.length === 0
+            ? nothing
+            : html`<div class="row wrap">
+                <span class="muted small">Switch to</span>
+                ${layouts}
+              </div>`
+        }
       </sb-card>
       ${hyprland === null ? nothing : hyprlandCards(hyprland)}
     </div>
