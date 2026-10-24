@@ -77,17 +77,18 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 		return mediaData, nil
 	}
 
-	// Try to decode into expected structure first; fall back to generic map if needed
+	// NowPlaying.exe prints snake_case keys, leaving out what SMTC doesn't
+	// report as null
 	var metadata struct {
-		Title      string  `json:"Title"`
-		Artist     string  `json:"Artist"`
-		AlbumTitle string  `json:"AlbumTitle"`
-		Status     string  `json:"Status"`
-		Duration   float64 `json:"Duration"`
-		Position   float64 `json:"Position"`
-		PlayerName string  `json:"PlayerName"`
-		Shuffle    bool    `json:"Shuffle"`
-		RepeatMode string  `json:"RepeatMode"`
+		Title      string  `json:"title"`
+		Artist     string  `json:"artist"`
+		AlbumTitle string  `json:"album_title"`
+		Status     string  `json:"status"`
+		Duration   float64 `json:"duration"`
+		Position   float64 `json:"position"`
+		PlayerName string  `json:"type"`
+		Shuffle    bool    `json:"shuffle"`
+		RepeatMode string  `json:"repeat"`
 	}
 	if err := json.Unmarshal([]byte(output), &metadata); err != nil {
 		// best-effort parse: try map[string]any to avoid fatal behavior
@@ -97,31 +98,31 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			return mediaData, nil
 		}
 		// extract common fields if present
-		if v, ok := generic["Title"].(string); ok {
+		if v, ok := generic["title"].(string); ok {
 			metadata.Title = v
 		}
-		if v, ok := generic["Artist"].(string); ok {
+		if v, ok := generic["artist"].(string); ok {
 			metadata.Artist = v
 		}
-		if v, ok := generic["AlbumTitle"].(string); ok {
+		if v, ok := generic["album_title"].(string); ok {
 			metadata.AlbumTitle = v
 		}
-		if v, ok := generic["Status"].(string); ok {
+		if v, ok := generic["status"].(string); ok {
 			metadata.Status = v
 		}
-		if v, ok := generic["PlayerName"].(string); ok {
+		if v, ok := generic["type"].(string); ok {
 			metadata.PlayerName = v
 		}
-		if v, ok := generic["Shuffle"].(bool); ok {
+		if v, ok := generic["shuffle"].(bool); ok {
 			metadata.Shuffle = v
 		}
-		if v, ok := generic["RepeatMode"].(string); ok {
+		if v, ok := generic["repeat"].(string); ok {
 			metadata.RepeatMode = v
 		}
-		if v, ok := generic["Duration"].(float64); ok {
+		if v, ok := generic["duration"].(float64); ok {
 			metadata.Duration = v
 		}
-		if v, ok := generic["Position"].(float64); ok {
+		if v, ok := generic["position"].(float64); ok {
 			metadata.Position = v
 		}
 	}
