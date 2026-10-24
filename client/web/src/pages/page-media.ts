@@ -24,7 +24,12 @@ import {
   mediaControl,
   registry,
 } from "~/lib/atoms";
-import { formatAgo, formatDuration, formatPercent } from "~/lib/format";
+import {
+  formatAgo,
+  formatDuration,
+  formatPercent,
+  formatPlayerStatus as statusLabel,
+} from "~/lib/format";
 
 import { SbPage } from "./sb-page";
 
@@ -40,12 +45,6 @@ const actionLabels: Readonly<Record<MediaAction, string>> = {
   VOLUME_DOWN: "Volume down",
   MUTE: "Mute",
 };
-
-/** A player's status in sentence case, as players report it in any case. */
-const statusLabel = (status: string | null | undefined) =>
-  status
-    ? `${status.charAt(0).toUpperCase()}${status.slice(1).toLowerCase()}`
-    : "Idle";
 
 const placeholder = html`<span
   class="skeleton"

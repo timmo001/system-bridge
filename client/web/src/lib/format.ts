@@ -50,6 +50,15 @@ export const formatNumber = (value: number | null | undefined): string =>
 export const formatCount = (value: number | null | undefined): string =>
   value === null || value === undefined ? "-" : compact.format(value);
 
+/**
+ * A media player's status in sentence case, such as "Playing", since players
+ * report it in any case.
+ */
+export const formatPlayerStatus = (status: string | null | undefined) =>
+  status
+    ? `${status.charAt(0).toUpperCase()}${status.slice(1).toLowerCase()}`
+    : "Idle";
+
 const plurals = new Intl.PluralRules(locale);
 
 /** A count of things, such as "1 disk" or "3 disks". */

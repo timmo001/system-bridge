@@ -15,6 +15,7 @@ import {
   formatBytes,
   formatFrequency,
   formatPercent,
+  formatPlayerStatus,
   formatQuantity,
   formatRate,
   formatUptime,
@@ -262,7 +263,7 @@ export class PageOverview extends SbPage {
                   <span
                     class="chip"
                     style="align-self: flex-start; margin-top: var(--sb-space-1)"
-                    >${media.status ?? "Unknown"}</span
+                    >${formatPlayerStatus(media.status)}</span
                   >
                 </div>
               </div>`

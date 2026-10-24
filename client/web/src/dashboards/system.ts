@@ -18,6 +18,7 @@ import {
   formatDuration,
   formatNumber,
   formatPercent,
+  formatPlayerStatus,
   formatUptime,
 } from "~/lib/format";
 import { href } from "~/lib/router";
@@ -353,7 +354,7 @@ export const mediaDashboard = ({ data }: DashboardContext) => {
       </sb-card>
       <sb-card class="third" heading="Details">
         ${facts([
-          ["Status", media.status],
+          ["Status", formatPlayerStatus(media.status)],
           ["Type", media.type],
           [
             "Volume",

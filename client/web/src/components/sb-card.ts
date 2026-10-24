@@ -146,7 +146,11 @@ export class SbCard extends LitElement {
 
     return this.href === ""
       ? html`<div class="heading">${content}</div>`
-      : html`<a class="heading" href=${this.href}>
+      : html`<a
+          class="heading"
+          href=${this.href}
+          aria-label=${[this.heading, this.subheading].filter(Boolean).join(", ")}
+        >
           ${content}<span class="chevron row">${icon(mdiChevronRight)}</span>
         </a>`;
   }
