@@ -61,6 +61,12 @@ export const dashboardStyles = css`
     column-gap: var(--sb-space-4);
   }
 
+  .audio-devices > * + * {
+    margin-top: var(--sb-space-3);
+    padding-top: var(--sb-space-3);
+    border-top: 1px solid var(--sb-color-border);
+  }
+
   .stat {
     display: flex;
     flex-direction: column;

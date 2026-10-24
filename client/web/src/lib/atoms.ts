@@ -3,6 +3,7 @@ import {
   ConnectionError,
   ModuleName,
   SystemBridgeWebSocket,
+  type AudioControl,
   type DataMissingError,
   type DiscordControl,
   type DisplayControl,
@@ -398,8 +399,13 @@ export const open = Atom.fn((target: OpenTarget, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.open(target))),
 );
 
-export const mediaControl = Atom.fn((action: MediaAction, get) =>
-  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(action))),
+/** Sets an audio device's volume or mute, or makes it the default, one atom per device. */
+export const audioControl = Atom.family((id: string) =>
+  Atom.fn((control: Omit<AudioControl, "id">, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) => bridge.audioControl({ ...control, id })),
+    ),
+  ),
 );
 
 export const discordControl = Atom.fn((control: DiscordControl, get) =>
@@ -415,6 +421,10 @@ export const displayControl = Atom.family((id: string) =>
       Effect.flatMap((bridge) => bridge.displayControl({ ...control, id })),
     ),
   ),
+);
+
+export const mediaControl = Atom.fn((action: MediaAction, get) =>
+  fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(action))),
 );
 
 /** Runs an allowlisted command, one atom per command. */

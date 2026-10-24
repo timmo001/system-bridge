@@ -3,6 +3,7 @@ import type { ModuleName } from "@timmo001/effect-system-bridge";
 import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
+import "~/components/sb-audio-device";
 import "~/components/sb-card";
 import "~/components/sb-data-table";
 import "~/components/sb-display-controls";
@@ -14,6 +15,7 @@ import "~/components/sb-timeseries";
 import { pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
+  audioDashboard,
   batteryDashboard,
   cpuDashboard,
   displaysDashboard,
@@ -55,6 +57,7 @@ import { SbPage } from "./sb-page";
 const dashboards: Readonly<
   Record<ModuleName, (context: DashboardContext) => TemplateResult>
 > = {
+  audio: audioDashboard,
   battery: batteryDashboard,
   cpu: cpuDashboard,
   discord: discordDashboard,

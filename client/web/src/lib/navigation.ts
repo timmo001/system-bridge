@@ -15,6 +15,7 @@ import {
   mdiPlayCircleOutline,
   mdiThermometer,
   mdiViewDashboardOutline,
+  mdiVolumeHigh,
 } from "@mdi/js";
 import { ModuleName } from "@timmo001/effect-system-bridge";
 import { Schema } from "effect";
@@ -28,86 +29,77 @@ export interface ModuleInfo {
 }
 
 export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
-  system: {
-    label: "System",
-    description:
-      "Host, platform and uptime, with commands, notifications and opening",
-    icon: mdiInformationOutline,
-  },
-  cpu: {
-    label: "CPU",
-    description: "Usage, frequency and each core",
-    icon: mdiCpu64Bit,
-  },
-  memory: {
-    label: "Memory",
-    description: "Physical memory and swap",
-    icon: mdiMemory,
-  },
-  disks: {
-    label: "Disks",
-    description: "Partitions, space and activity, and which mounts to show",
-    icon: mdiHarddisk,
-  },
-  networks: {
-    label: "Networks",
-    description: "Interfaces, traffic and connections",
-    icon: mdiLan,
-  },
-  gpus: {
-    label: "GPUs",
-    description: "Load, memory, clocks and power",
-    icon: mdiExpansionCardVariant,
-  },
-  sensors: {
-    label: "Sensors",
-    description: "Temperatures and fans",
-    icon: mdiThermometer,
+  audio: {
+    label: "Audio",
+    description: "Output and input devices, their volume and the defaults",
+    icon: mdiVolumeHigh,
   },
   battery: {
     label: "Battery",
     description: "Charge and time remaining",
     icon: mdiBattery,
   },
-  displays: {
-    label: "Displays",
-    description: "Resolution, position and refresh rate",
-    icon: mdiMonitor,
-  },
-  processes: {
-    label: "Processes",
-    description: "Running processes and their usage",
-    icon: mdiApplicationCogOutline,
-  },
-  media: {
-    label: "Media",
-    description: "What's playing, its controls and your media directories",
-    icon: mdiPlayCircleOutline,
+  cpu: {
+    label: "CPU",
+    description: "Usage, frequency and each core",
+    icon: mdiCpu64Bit,
   },
   discord: {
     label: "Discord",
     description: "Voice controls, calls and setup",
     icon: mdiHeadset,
   },
+  disks: {
+    label: "Disks",
+    description: "Partitions, space and activity, and which mounts to show",
+    icon: mdiHarddisk,
+  },
+  displays: {
+    label: "Displays",
+    description: "Resolution, position and refresh rate",
+    icon: mdiMonitor,
+  },
+  gpus: {
+    label: "GPUs",
+    description: "Load, memory, clocks and power",
+    icon: mdiExpansionCardVariant,
+  },
+  media: {
+    label: "Media",
+    description: "What's playing, its controls and your media directories",
+    icon: mdiPlayCircleOutline,
+  },
+  memory: {
+    label: "Memory",
+    description: "Physical memory and swap",
+    icon: mdiMemory,
+  },
+  networks: {
+    label: "Networks",
+    description: "Interfaces, traffic and connections",
+    icon: mdiLan,
+  },
+  processes: {
+    label: "Processes",
+    description: "Running processes and their usage",
+    icon: mdiApplicationCogOutline,
+  },
+  sensors: {
+    label: "Sensors",
+    description: "Temperatures and fans",
+    icon: mdiThermometer,
+  },
+  system: {
+    label: "System",
+    description:
+      "Host, platform and uptime, with commands, notifications and opening",
+    icon: mdiInformationOutline,
+  },
 };
 
-/** The areas the modules are grouped into, in the order they're listed. */
-const moduleAreas: readonly {
-  readonly label: string;
-  readonly modules: readonly ModuleName[];
-}[] = [
-  { label: "System", modules: ["system", "processes"] },
-  {
-    label: "Hardware",
-    modules: ["cpu", "memory", "gpus", "sensors", "battery", "displays"],
-  },
-  { label: "Storage and network", modules: ["disks", "networks"] },
-  { label: "Apps", modules: ["media", "discord"] },
-];
-
-/** Modules in the order the navigation lists them. */
-export const moduleOrder: readonly ModuleName[] = moduleAreas.flatMap(
-  (area) => area.modules,
+/** Modules in the order the navigation lists them, by label. */
+export const moduleOrder: readonly ModuleName[] = [...ModuleName.literals].sort(
+  (a, b) => moduleInfo[a].label.localeCompare(moduleInfo[b].label),
 );
 
 export interface NavItem {
@@ -149,23 +141,25 @@ const moduleItem = (module: ModuleName): NavItem => ({
     location.name === "module" && location.params.module === module,
 });
 
-/** The pages, grouped into areas. */
+/** The pages, then the settings. */
 export const navigation: readonly NavSection[] = [
   {
     label: "",
-    items: [routeItem("overview", "Overview", mdiViewDashboardOutline)],
+    items: [
+      routeItem("overview", "Overview", mdiViewDashboardOutline),
+      ...moduleOrder.map(moduleItem),
+    ],
   },
-  ...moduleAreas.map((area) => ({
-    label: area.label,
-    items: area.modules.map(moduleItem),
-  })),
   {
     label: "Settings",
     items: [
       routeItem("settings", "General", mdiCogOutline),
       routeItem("settingsAppearance", "Appearance", mdiPaletteOutline),
-      routeItem("connection", "Connection", mdiLanConnect),
     ],
+  },
+  {
+    label: "Connection",
+    items: [routeItem("connection", "Connection", mdiLanConnect)],
   },
 ];
 

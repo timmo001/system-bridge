@@ -1,5 +1,6 @@
 import { mdiBattery, mdiBatteryCharging, mdiFan, mdiPowerPlug } from "@mdi/js";
 import type {
+  AudioDevice,
   BatteryState,
   CPUTimes,
   Display,
@@ -739,6 +740,40 @@ export const displaysDashboard = ({ data }: DashboardContext) => {
           : nothing
       }
       ${cards}
+    </div>
+  `;
+};
+
+const audioCard = (heading: string, devices: readonly AudioDevice[]) => {
+  const rows = [...devices]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(
+      (device) => html`<sb-audio-device .device=${device}></sb-audio-device>`,
+    );
+
+  return html`<sb-card class="half" heading=${heading}>
+    ${
+      devices.length === 0
+        ? html`<p class="muted small">None reported.</p>`
+        : html`<div class="audio-devices">${rows}</div>`
+    }
+  </sb-card>`;
+};
+
+export const audioDashboard = ({ data }: DashboardContext) => {
+  const audio = data.audio;
+
+  if (
+    audio === undefined ||
+    (audio.outputs.length === 0 && audio.inputs.length === 0)
+  ) {
+    return noData("audio devices");
+  }
+
+  return html`
+    <div class="dashboard">
+      ${audioCard("Outputs", audio.outputs)}
+      ${audioCard("Inputs", audio.inputs)}
     </div>
   `;
 };

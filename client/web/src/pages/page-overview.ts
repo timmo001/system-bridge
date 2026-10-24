@@ -68,6 +68,18 @@ const summary = (module: ModuleName, data: ModulesData): string => {
       return data.displays
         ? formatQuantity(data.displays.length, "display")
         : "";
+    case "audio": {
+      const output = data.audio?.outputs.find((device) => device.default);
+
+      if (output === undefined) return "";
+
+      if (output.muted) return "Muted";
+
+      return output.volume === null
+        ? output.name
+        : formatPercent(output.volume);
+    }
+
     case "processes":
       return data.processes ? `${data.processes.length} running` : "";
     case "media":
