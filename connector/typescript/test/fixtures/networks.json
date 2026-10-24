@@ -18,7 +18,9 @@
     "errin": 0,
     "errout": 0,
     "dropin": 0,
-    "dropout": 821
+    "dropout": 821,
+    "bytes_sent_rate": 2048.5,
+    "bytes_recv_rate": 65536.25
   },
   "networks": [
     {
@@ -38,6 +40,18 @@
         "speed": 0,
         "mtu": 65536,
         "flags": ["up", "loopback"]
+      },
+      "io": {
+        "bytes_sent": 1048576,
+        "bytes_recv": 1048576,
+        "packets_sent": 2048,
+        "packets_recv": 2048,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0,
+        "bytes_sent_rate": null,
+        "bytes_recv_rate": null
       }
     },
     {
@@ -64,6 +78,18 @@
         "speed": 1000,
         "mtu": 1500,
         "flags": ["up", "broadcast"]
+      },
+      "io": {
+        "bytes_sent": 12906237257,
+        "bytes_recv": 177912130447,
+        "packets_sent": 18520639,
+        "packets_recv": 130764896,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 821,
+        "bytes_sent_rate": 2048.5,
+        "bytes_recv_rate": 65536.25
       }
     }
   ]

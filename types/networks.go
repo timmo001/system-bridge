@@ -29,16 +29,19 @@ type NetworkConnection struct {
 	PID    *int    `json:"pid"`
 }
 
-// NetworkIO represents network I/O statistics
+// NetworkIO represents network I/O statistics. The rates are in bytes per
+// second since the previous reading, and are null on the first reading.
 type NetworkIO struct {
-	BytesSent   *int64 `json:"bytes_sent"`
-	BytesRecv   *int64 `json:"bytes_recv"`
-	PacketsSent *int64 `json:"packets_sent"`
-	PacketsRecv *int64 `json:"packets_recv"`
-	ErrIn       *int64 `json:"errin"`
-	ErrOut      *int64 `json:"errout"`
-	DropIn      *int64 `json:"dropin"`
-	DropOut     *int64 `json:"dropout"`
+	BytesSent     *int64   `json:"bytes_sent"`
+	BytesRecv     *int64   `json:"bytes_recv"`
+	PacketsSent   *int64   `json:"packets_sent"`
+	PacketsRecv   *int64   `json:"packets_recv"`
+	ErrIn         *int64   `json:"errin"`
+	ErrOut        *int64   `json:"errout"`
+	DropIn        *int64   `json:"dropin"`
+	DropOut       *int64   `json:"dropout"`
+	BytesSentRate *float64 `json:"bytes_sent_rate"`
+	BytesRecvRate *float64 `json:"bytes_recv_rate"`
 }
 
 // Network represents information about a network interface
@@ -46,6 +49,7 @@ type Network struct {
 	Name      *string          `json:"name"`
 	Addresses []NetworkAddress `json:"addresses"`
 	Stats     *NetworkStats    `json:"stats"`
+	IO        *NetworkIO       `json:"io"`
 }
 
 // NetworksData represents information about all network interfaces and connections

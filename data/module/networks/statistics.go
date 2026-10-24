@@ -2,73 +2,135 @@ package networks
 
 import (
 	"log/slog"
+	"sync"
+	"time"
 
 	psnet "github.com/shirou/gopsutil/v4/net"
 	"github.com/timmo001/system-bridge/types"
 )
 
-// gatherIOStatistics collects network I/O statistics
-func GatherIOStatistics(networksData *types.NetworksData) {
-	// Get network I/O stats for all interfaces combined
-	ioTotal, err := psnet.IOCounters(false) // pernic=false for total stats
-	if err != nil {
-		slog.Warn("Error getting total network I/O counters", "error", err)
-		setDefaultIOStats(networksData)
-		return
-	}
+// totalKey holds the counters summed across every interface. Interface names
+// are never empty, so it can't clash with one.
+const totalKey = ""
 
-	if len(ioTotal) == 0 {
-		setDefaultIOStats(networksData)
-		return
-	}
+// minRateInterval keeps readings taken close together, such as a data request
+// just after a scheduled update, from giving noisy rates. Those readings reuse
+// the previous rates.
+const minRateInterval = time.Second
 
-	io := ioTotal[0] // Get the aggregate stats
-
-	bytesSent := int64(io.BytesSent)
-	bytesRecv := int64(io.BytesRecv)
-	packetsSent := int64(io.PacketsSent)
-	packetsRecv := int64(io.PacketsRecv)
-	errIn := int64(io.Errin)
-	errOut := int64(io.Errout)
-	dropIn := int64(io.Dropin)
-	dropOut := int64(io.Dropout)
-
-	networkIO := types.NetworkIO{
-		BytesSent:   &bytesSent,
-		BytesRecv:   &bytesRecv,
-		PacketsSent: &packetsSent,
-		PacketsRecv: &packetsRecv,
-		ErrIn:       &errIn,
-		ErrOut:      &errOut,
-		DropIn:      &dropIn,
-		DropOut:     &dropOut,
-	}
-
-	networksData.IO = &networkIO
+type ioRates struct {
+	sent *float64
+	recv *float64
 }
 
-// setDefaultIOStats sets default (zero) values for I/O statistics
-func setDefaultIOStats(networksData *types.NetworksData) {
-	// Fallback to zeros if unable to get stats
-	bytesSent := int64(0)
-	bytesRecv := int64(0)
-	packetsSent := int64(0)
-	packetsRecv := int64(0)
-	errIn := int64(0)
-	errOut := int64(0)
-	dropIn := int64(0)
-	dropOut := int64(0)
+// ioRateTracker works out transfer rates from the change in counters since
+// the previous reading.
+type ioRateTracker struct {
+	mu       sync.Mutex
+	time     time.Time
+	counters map[string]psnet.IOCountersStat
+	rates    map[string]ioRates
+}
 
-	networkIO := types.NetworkIO{
-		BytesSent:   &bytesSent,
-		BytesRecv:   &bytesRecv,
-		PacketsSent: &packetsSent,
-		PacketsRecv: &packetsRecv,
-		ErrIn:       &errIn,
-		ErrOut:      &errOut,
-		DropIn:      &dropIn,
-		DropOut:     &dropOut,
+var rateTracker ioRateTracker
+
+// update stores counters as the new baseline and returns the rates since the
+// previous one, by interface name. The returned map must not be changed.
+func (t *ioRateTracker) update(now time.Time, counters map[string]psnet.IOCountersStat) map[string]ioRates {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	elapsed := now.Sub(t.time)
+	if t.counters != nil && elapsed < minRateInterval {
+		return t.rates
 	}
 
-	networksData.IO = &networkIO
+	rates := make(map[string]ioRates, len(counters))
+	if t.counters != nil {
+		seconds := elapsed.Seconds()
+		for name, current := range counters {
+			if previous, ok := t.counters[name]; ok {
+				rates[name] = ioRates{
+					sent: byteRate(previous.BytesSent, current.BytesSent, seconds),
+					recv: byteRate(previous.BytesRecv, current.BytesRecv, seconds),
+				}
+			}
+		}
+	}
+	t.time, t.counters, t.rates = now, counters, rates
+	return rates
+}
+
+func byteRate(previous, current uint64, seconds float64) *float64 {
+	// Counters reset when an interface is recreated, and the total drops when
+	// one goes away
+	if current < previous {
+		return nil
+	}
+	rate := float64(current-previous) / seconds
+	return &rate
+}
+
+// GatherIOStatistics collects network I/O statistics for all interfaces
+// combined and for each interface in networksData.Networks, so it must run
+// after GatherInterfaces.
+func GatherIOStatistics(networksData *types.NetworksData) {
+	perInterface, err := psnet.IOCounters(true)
+	if err != nil {
+		slog.Warn("Error getting network I/O counters", "error", err)
+		networksData.IO = toNetworkIO(psnet.IOCountersStat{}, ioRates{})
+		return
+	}
+
+	counters := make(map[string]psnet.IOCountersStat, len(perInterface)+1)
+	var total psnet.IOCountersStat
+	for _, c := range perInterface {
+		counters[c.Name] = c
+		total.BytesSent += c.BytesSent
+		total.BytesRecv += c.BytesRecv
+		total.PacketsSent += c.PacketsSent
+		total.PacketsRecv += c.PacketsRecv
+		total.Errin += c.Errin
+		total.Errout += c.Errout
+		total.Dropin += c.Dropin
+		total.Dropout += c.Dropout
+	}
+	counters[totalKey] = total
+
+	rates := rateTracker.update(time.Now(), counters)
+
+	networksData.IO = toNetworkIO(total, rates[totalKey])
+	for i := range networksData.Networks {
+		network := &networksData.Networks[i]
+		if network.Name == nil {
+			continue
+		}
+		if c, ok := counters[*network.Name]; ok {
+			network.IO = toNetworkIO(c, rates[*network.Name])
+		}
+	}
+}
+
+func toNetworkIO(c psnet.IOCountersStat, rates ioRates) *types.NetworkIO {
+	bytesSent := int64(c.BytesSent)
+	bytesRecv := int64(c.BytesRecv)
+	packetsSent := int64(c.PacketsSent)
+	packetsRecv := int64(c.PacketsRecv)
+	errIn := int64(c.Errin)
+	errOut := int64(c.Errout)
+	dropIn := int64(c.Dropin)
+	dropOut := int64(c.Dropout)
+
+	return &types.NetworkIO{
+		BytesSent:     &bytesSent,
+		BytesRecv:     &bytesRecv,
+		PacketsSent:   &packetsSent,
+		PacketsRecv:   &packetsRecv,
+		ErrIn:         &errIn,
+		ErrOut:        &errOut,
+		DropIn:        &dropIn,
+		DropOut:       &dropOut,
+		BytesSentRate: rates.sent,
+		BytesRecvRate: rates.recv,
+	}
 }

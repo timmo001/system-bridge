@@ -25,11 +25,11 @@ func (nm NetworkModule) Update(ctx context.Context) (any, error) {
 
 	networks.GatherConnections(&networksData)
 
-	networks.GatherIOStatistics(&networksData)
-
 	err := networks.GatherInterfaces(&networksData)
 	if err != nil {
 		slog.Error("Error gathering network interfaces", "error", err)
 	}
+
+	networks.GatherIOStatistics(&networksData)
 	return networksData, nil
 }

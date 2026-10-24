@@ -542,10 +542,26 @@ export const NetworkStats = Schema.Struct({
 
 export interface NetworkStats extends Schema.Schema.Type<typeof NetworkStats> {}
 
+export const NetworkIO = Schema.Struct({
+  bytes_sent: Schema.NullOr(Schema.Finite),
+  bytes_recv: Schema.NullOr(Schema.Finite),
+  packets_sent: Schema.NullOr(Schema.Finite),
+  packets_recv: Schema.NullOr(Schema.Finite),
+  errin: Schema.NullOr(Schema.Finite),
+  errout: Schema.NullOr(Schema.Finite),
+  dropin: Schema.NullOr(Schema.Finite),
+  dropout: Schema.NullOr(Schema.Finite),
+  bytes_sent_rate: Schema.NullOr(Schema.Finite),
+  bytes_recv_rate: Schema.NullOr(Schema.Finite),
+});
+
+export interface NetworkIO extends Schema.Schema.Type<typeof NetworkIO> {}
+
 export const Network = Schema.Struct({
   name: Schema.NullOr(Schema.String),
   addresses: Schema.Array(NetworkAddress),
   stats: Schema.NullOr(NetworkStats),
+  io: Schema.NullOr(NetworkIO),
 });
 
 export interface Network extends Schema.Schema.Type<typeof Network> {}
@@ -563,19 +579,6 @@ export const NetworkConnection = Schema.Struct({
 export interface NetworkConnection extends Schema.Schema.Type<
   typeof NetworkConnection
 > {}
-
-export const NetworkIO = Schema.Struct({
-  bytes_sent: Schema.NullOr(Schema.Finite),
-  bytes_recv: Schema.NullOr(Schema.Finite),
-  packets_sent: Schema.NullOr(Schema.Finite),
-  packets_recv: Schema.NullOr(Schema.Finite),
-  errin: Schema.NullOr(Schema.Finite),
-  errout: Schema.NullOr(Schema.Finite),
-  dropin: Schema.NullOr(Schema.Finite),
-  dropout: Schema.NullOr(Schema.Finite),
-});
-
-export interface NetworkIO extends Schema.Schema.Type<typeof NetworkIO> {}
 
 export const NetworksData = Schema.Struct({
   connections: Schema.Array(NetworkConnection),
