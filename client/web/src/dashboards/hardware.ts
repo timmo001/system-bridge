@@ -100,7 +100,12 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
         <div class="stats">
           ${stat("Cores", String(cpu.count ?? cpu.per_cpu.length))}
           ${stat("Temperature", formatTemperature(cpu.temperature))}
-          ${stat("Load average", formatNumber(cpu.load_average))}
+          ${stat(
+            "Load average",
+            [cpu.load_average, cpu.load_average_5, cpu.load_average_15]
+              .flatMap((load) => (load === null ? [] : [formatNumber(load)]))
+              .join(" · "),
+          )}
           ${stat("Power", formatWatts(cpu.power))}
         </div>
       </sb-card>
@@ -317,8 +322,22 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
         <div class="stats">
           ${stat("Temperature", formatTemperature(gpu.temperature))}
           ${stat("Power", formatWatts(gpu.power_usage))}
-          ${stat("Fan", formatRpm(gpu.fan_speed))}
+          ${stat("Power limit", formatWatts(gpu.power_limit))}
+          ${stat(
+            "Fan",
+            [
+              gpu.fan_speed === null ? "" : formatRpm(gpu.fan_speed),
+              gpu.fan_speed_percent === null
+                ? ""
+                : formatPercent(gpu.fan_speed_percent),
+            ]
+              .filter((value) => value !== "")
+              .join(" · "),
+          )}
           ${stat("Memory clock", formatFrequency(gpu.memory_clock))}
+          ${stat("Encoder", formatPercent(gpu.encoder_load))}
+          ${stat("Decoder", formatPercent(gpu.decoder_load))}
+          ${stat("Performance state", gpu.performance_state ?? "")}
         </div>
       </sb-card>
     `;
