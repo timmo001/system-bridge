@@ -18,6 +18,7 @@ import (
 	"github.com/timmo001/system-bridge/backend/websocket"
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
+	"github.com/timmo001/system-bridge/data/module/audio"
 	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
@@ -111,6 +112,12 @@ func (b *Backend) Run(ctx context.Context) error {
 
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
+
+	go audio.Watch(ctx, func() {
+		if err := b.dataStore.TriggerModuleUpdate(types.ModuleAudio); err != nil {
+			slog.Warn("Failed to update audio module data", "error", err)
+		}
+	})
 
 	go discord.Run(ctx, func(d types.DiscordData) {
 		if err := b.dataStore.SetModuleData(types.ModuleDiscord, d); err != nil {
