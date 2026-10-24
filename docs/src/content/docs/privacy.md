@@ -15,7 +15,7 @@ This page lists every way the app communicates, so you can decide what to allow.
 | [Network discovery](#network-discovery) | Both | Port `1900`, mDNS | Always |
 | [Update check](#update-check) | Outgoing | `api.github.com` | Up to 12 an hour |
 | [DNS lookups](#dns-lookups) | Outgoing | Your DNS server | Every minute |
-| [Discord](#optional-discord) | Outgoing | `discord.com` | [If set up](/running/#discord) |
+| [Discord](#optional-discord) | Outgoing | `discord.com` | [If set up](/features/discord/) |
 
 "Always" means whenever the backend runs. The API server and network discovery are reachable from your local network. Apart from Discord, which only runs if you set it up, none of these can currently be turned off.
 

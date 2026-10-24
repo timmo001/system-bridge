@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: WebSocket API
 description: Connect to the System Bridge WebSocket API and understand the request, response, and error message formats shared across every event.
 ---
 

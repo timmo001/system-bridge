@@ -1,39 +1,37 @@
 ---
 name: system-bridge-landing-content-updates
-description: Update the System Bridge marketing landing page in the Astro + Starlight docs site. Use when editing the landing page (docs/src/content/docs/index.mdx), its LandingCard/CardGrid components, or the landing styles.
+description: Update the System Bridge docs home page, built with Blume and @timmo001/docs-kit. Use when editing docs/src/content/docs/index.mdx, its cards, the home banner, or the logos and brand images.
 ---
 
-# Landing Content Updates
+# Home Page Updates
 
-Use when adjusting the marketing landing page content.
+Use when changing the docs home page at `/`.
 
-## Where to Edit
+## Where to edit
 
-- Landing page content: `docs/src/content/docs/index.mdx`.
-- Custom components: `docs/src/components/` (e.g. `LandingCard.astro`).
-- Landing styles: `docs/src/styles/landing.css`.
+- Content: `docs/src/content/docs/index.mdx`. Its `title` and `description` show in the home banner.
+- Banner: docs-kit's `HomeBanner`, added in `docs/components.ts`. Size it with the `--home-banner-*` properties in `docs/theme.css`. Change the banner itself in the docs-kit repository.
+- Logos: `docs/public/logo-light.svg` and `docs/public/logo-dark.svg`. Share cards and brand images use `docs/src/assets/logo.svg`; run `bun run brand` from `docs/` after changing it, and upload `.github/social-preview.png` in the repository settings by hand.
 
-## Common Patterns
+## Patterns
 
-- Use `CardGrid` + `LandingCard` for feature/module lists.
-- Use `Icon` from `astro-icon/components` for icons.
-- Keep external links with `target="_blank"` + `rel="noopener noreferrer"`.
-
-## Example Card
+- Group links into sections of `Card`s in a `CardGroup`. Every card links somewhere, usually a feature or using page.
+- Icons are Lucide names, such as `gauge`, `terminal` or `headphones`.
+- Use a table for lists that don't link anywhere, such as the modules.
 
 ```mdx
-<LandingCard title="System Information">
-  <Icon slot="icon" name="mdi:information-outline" />
-  Access your system's information via the data modules using the API/WebSocket.
-</LandingCard>
+<CardGroup cols={3}>
+  <Card title="Monitoring" href="/features/monitoring" icon="gauge">
+    Watch CPU, memory, disks, networks, sensors and more.
+  </Card>
+</CardGroup>
 ```
 
-## Content Tips
+## Copy
 
-- Keep copy short and descriptive.
-- Prefer active voice and concrete benefits.
-- Avoid changing layout structure unless required.
+- Keep each card to a sentence about what the reader can do.
+- Write in plain UK English, with no em-dashes or marketing tone.
 
-## Quick Local Check
+## Check it
 
-Run `bun run dev` from `docs/` and verify the page at `/` on desktop and mobile widths.
+With `mise run serve:docs` running, open `https://docs.system-bridge.localhost/` at desktop and phone widths, in light and dark mode. Then build with `bun run build --isolated` from `docs/`.

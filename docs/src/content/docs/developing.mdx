@@ -3,13 +3,9 @@ title: Developing
 description: Build, run, and test System Bridge from source.
 ---
 
-import { Steps } from '@astrojs/starlight/components';
-
 This guide covers the contributor workflow for building and running System Bridge locally. End-user install steps are on the [Install](/install/) page.
 
 ## Prerequisites
-
-<Steps>
 
 1. Install [`mise`](https://mise.jdx.dev/installing-mise.html) (recommended). `mise.toml` pins the Go, Bun, and Node versions used by local development and CI.
 
@@ -26,8 +22,6 @@ This guide covers the contributor workflow for building and running System Bridg
    ```bash
    mise run deps
    ```
-
-</Steps>
 
 :::note
 **Building without mise:** `mise run` tasks require `mise`. If you cannot install it, put compatible versions of `go`, `bun`, and `node` (see `mise.toml`) on your `PATH` and run the underlying commands from the `[tasks]` section directly.
@@ -135,11 +129,13 @@ Pass several tasks to one run to execute them in parallel, for example `mise run
 
 ## Documentation site
 
-Docs live in `docs/` (Astro + Starlight). From the repo root:
+Docs live in `docs/`, built with [Blume](https://github.com/haydenbleasel/blume) and [`@timmo001/docs-kit`](https://github.com/timmo001/docs-kit). From the repo root:
 
 ```bash
-mise run docs:dev    # dev server
-mise run docs:build  # production build (validates internal links)
+mise run docs:dev       # dev server
+mise run docs:build     # production build, failing on content errors
+mise run docs:validate  # check every link and anchor
+mise run docs:lint      # lint the Markdown
 ```
 
 See `docs/AGENTS.md` for authoring conventions.

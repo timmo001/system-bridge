@@ -1,5 +1,5 @@
 ---
-title: Media - Get File Data
+title: Media file data
 description: Download a media file from the machine running System Bridge over the HTTP API.
 ---
 

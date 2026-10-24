@@ -1,5 +1,6 @@
 ---
 title: CLI
+description: Get your token, send notifications, read and stream data, and run the backend from the terminal.
 ---
 
 The System Bridge CLI provides commands to interact with the System Bridge backend. Most commands live under the `system-bridge client` subcommand, while `backend`, `version` and `completions` are top-level commands. Running `system-bridge` without a subcommand shows help.
@@ -41,6 +42,40 @@ Available flags:
 - `--sound`: Path to a sound file to play with the notification (Linux only)
 - `--action-url`: URL to open when the notification is clicked (Linux only)
 - `--action-path`: File/folder path to open when the notification is clicked (Linux only)
+
+## Web client
+
+Open the web client in your browser, already connected to this system:
+
+```bash
+system-bridge client open
+```
+
+Add `--settings` to open General Settings, or `--path` to open any page, including a section of one:
+
+```bash
+system-bridge client open --path /media#media-controls
+```
+
+## Media
+
+Control what's playing on the backend's system:
+
+```bash
+system-bridge client media pause
+```
+
+The action is one of `play`, `pause`, `next`, `previous`, `stop`, `volume_up`, `volume_down` or `mute`.
+
+## Discord
+
+Control Discord voice, once [Discord is set up](/features/discord/):
+
+```bash
+system-bridge client discord toggle_mute
+```
+
+Actions that need nothing else work here, such as `mute`, `unmute`, `toggle_mute`, `deafen`, `undeafen`, `toggle_deafen`, `leave_voice_channel`, `toggle_video` and `toggle_screenshare`. Use the web client or the API for actions that take a channel, user, device or value.
 
 ## Discovery
 

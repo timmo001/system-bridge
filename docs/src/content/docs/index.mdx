@@ -1,141 +1,108 @@
 ---
 title: System Bridge
-description: Monitor and control your system with a local API and WebSocket.
-template: splash
-hero:
-  tagline: A bridge for your systems.
-  image:
-    file: ../../assets/logo.svg
-    alt: System Bridge logo
-  actions:
-    - text: Download & Install
-      link: /install/
-      icon: right-arrow
-    - text: View Docs
-      link: /overview/
-      icon: right-arrow
-      variant: minimal
+description: Monitor and control your system from the web client, Home Assistant, the terminal or your own code.
 ---
 
-import { CardGrid, LinkButton } from '@astrojs/starlight/components';
-import { Icon } from 'astro-icon/components';
-import LandingCard from '../../components/LandingCard.astro';
+System Bridge runs on your computer and shares what it's doing, such as CPU, memory, disks, media and Discord, with the [web client](/using/web-client), [Home Assistant](/using/home-assistant), the [CLI](/using/cli) and your own code. It can also control your computer: play and pause media, show notifications, run commands you choose, and more.
 
-<p class="sb-lede">
-  System Bridge is an application for your desktop that allows you to monitor and control your system.
-</p>
+<CardGroup cols={2}>
+  <Card title="Download and install" href="/install" icon="download">
+    Install System Bridge on Linux or Windows.
+  </Card>
+  <Card title="Run it" href="/running" icon="play">
+    Start it from the desktop, the terminal or a service, and find your token.
+  </Card>
+</CardGroup>
 
-## Features
+## What it does
 
-<CardGrid>
-  <LandingCard title="System Information">
-    <Icon slot="icon" name="mdi:information-outline" />
-    Access your system's information via the data modules using the API/WebSocket.
-  </LandingCard>
-  <LandingCard title="Open files and URLs">
-    <Icon slot="icon" name="mdi:cogs" />
-    Automate your system by opening a URL/path via the API/WebSocket.
-  </LandingCard>
-  <LandingCard title="Send Notifications">
-    <Icon slot="icon" name="mdi:bell" />
-    Send system notifications via the API/WebSocket.
-  </LandingCard>
-  <LandingCard title="AI / MCP Integration">
-    <Icon slot="icon" name="mdi:robot-outline" />
-    Connect agents to your system with the built-in
-    <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> server,
-    or feed the docs to a model with <a href="/llms/">llms.txt</a>.
-  </LandingCard>
-  <LandingCard title="Cross-Platform">
-    <Icon slot="icon" name="mdi:desktop-tower-monitor" />
-    Compatible with Windows and Linux.
-  </LandingCard>
-  <LandingCard title="Integrated with Home Assistant">
-    <Icon slot="icon" name="mdi:home-assistant" />
-    Interact with your Bridges using
-    <a href="https://www.home-assistant.io/integrations/system_bridge" target="_blank" rel="noopener noreferrer">Home Assistant</a>.
-    See the <a href="/using/home-assistant/">Home Assistant guide</a> to get started.
-  </LandingCard>
-  <LandingCard title="Android Companion App">
-    <Icon slot="icon" name="mdi:android" />
-    Available on the
-    <a href="https://play.google.com/store/apps/details?id=dev.timmo.systembridge" target="_blank" rel="noopener noreferrer">Play Store</a>.
-    Source is on
-    <a href="https://github.com/timmo001/system-bridge-android-companion" target="_blank" rel="noopener noreferrer">GitHub</a>.
-  </LandingCard>
-</CardGrid>
+<CardGroup cols={3}>
+  <Card title="Monitoring" href="/features/monitoring" icon="gauge">
+    Watch CPU, memory, disks, networks, sensors and more in the web client, Home Assistant or the terminal.
+  </Card>
+  <Card title="Commands" href="/features/commands" icon="terminal">
+    Run programs you choose on your machine from the web client or any client with your token.
+  </Card>
+  <Card title="Notifications" href="/features/notifications" icon="bell">
+    Show desktop notifications from the web client, the terminal, Home Assistant or an agent.
+  </Card>
+  <Card title="Media" href="/features/media" icon="circle-play">
+    See and control what's playing, and share media folders with Home Assistant.
+  </Card>
+  <Card title="Remote control" href="/features/remote-control" icon="mouse-pointer-click">
+    Open URLs and files, type and press keys, and sleep, lock or shut down your machine.
+  </Card>
+  <Card title="Discord" href="/features/discord" icon="headphones">
+    Mute, deafen, change your audio devices and volumes, and play soundboard sounds.
+  </Card>
+</CardGroup>
 
-## Modules
+## Ways to use it
 
-<CardGrid>
-  <LandingCard title="Battery">
-    <Icon slot="icon" name="mdi:battery-charging" />
-    Battery level, capacity and configuration.
-  </LandingCard>
-  <LandingCard title="CPU">
-    <Icon slot="icon" name="mdi:cpu-64-bit" />
-    CPU usage, clock speed, and configuration.
-  </LandingCard>
-  <LandingCard title="Disks">
-    <Icon slot="icon" name="mdi:harddisk" />
-    Disk and filesystem information.
-  </LandingCard>
-  <LandingCard title="Display">
-    <Icon slot="icon" name="mdi:monitor" />
-    Display information.
-  </LandingCard>
-  <LandingCard title="GPU">
-    <Icon slot="icon" name="mdi:expansion-card" />
-    Graphics card configuration and usage.
-  </LandingCard>
-  <LandingCard title="Media">
-    <Icon slot="icon" name="mdi:video-vintage" />
-    Media player information.
-  </LandingCard>
-  <LandingCard title="Memory">
-    <Icon slot="icon" name="mdi:memory" />
-    Memory configuration and usage.
-  </LandingCard>
-  <LandingCard title="Network">
-    <Icon slot="icon" name="mdi:network-outline" />
-    Networking information.
-  </LandingCard>
-  <LandingCard title="Processes">
-    <Icon slot="icon" name="mdi:window-maximize" />
-    Process information.
-  </LandingCard>
-  <LandingCard title="Sensors">
-    <Icon slot="icon" name="mdi:chip" />
-    Sensor data.
-  </LandingCard>
-  <LandingCard title="System">
-    <Icon slot="icon" name="mdi:desktop-tower" />
-    System information.
-  </LandingCard>
-</CardGrid>
+<CardGroup cols={3}>
+  <Card title="Desktop" href="/using/desktop" icon="monitor">
+    The app launcher entry and system tray.
+  </Card>
+  <Card title="Web client" href="/using/web-client" icon="layout-dashboard">
+    Dashboards, controls and settings in your browser.
+  </Card>
+  <Card title="CLI" href="/using/cli" icon="square-terminal">
+    Read data, send notifications and run the backend from the terminal.
+  </Card>
+  <Card title="Home Assistant" href="/using/home-assistant" icon="house">
+    Sensors, a media player, notifications and actions for your automations.
+  </Card>
+  <Card title="Omarchy" href="/using/omarchy" icon="panel-top">
+    System Bridge's health in the Omarchy bar and panel.
+  </Card>
+  <Card title="Android" href="https://play.google.com/store/apps/details?id=dev.timmo.systembridge" icon="smartphone">
+    The companion app on the Play Store.
+  </Card>
+</CardGroup>
 
-## Links / Resources
+## Build on it
 
-<CardGrid>
-  <LandingCard title="Discussions">
-    <Icon slot="icon" name="mdi:forum-outline" />
-    Participate in discussions and get help here.
-    <LinkButton href="https://github.com/timmo001/system-bridge/discussions" variant="secondary" target="_blank" rel="noopener noreferrer">
-      Open discussions
-    </LinkButton>
-  </LandingCard>
-  <LandingCard title="Suggest a Feature / Report a Bug">
-    <Icon slot="icon" name="mdi:notebook-plus-outline" />
-    Thought of a feature that could be added? Found an issue? Suggest it here.
-    <LinkButton href="https://github.com/timmo001/system-bridge/issues" variant="secondary" target="_blank" rel="noopener noreferrer">
-      Open issues
-    </LinkButton>
-  </LandingCard>
-  <LandingCard title="Contribute to the Application">
-    <Icon slot="icon" name="mdi:github" />
-    Contribute to the project by submitting a pull request.
-    <LinkButton href="https://github.com/timmo001/system-bridge" variant="secondary" target="_blank" rel="noopener noreferrer">
-      View repository
-    </LinkButton>
-  </LandingCard>
-</CardGrid>
+<CardGroup cols={3}>
+  <Card title="API" href="/api" icon="braces">
+    The HTTP and WebSocket APIs, with every event and data field.
+  </Card>
+  <Card title="MCP server" href="/api/mcp" icon="bot">
+    Let agents read your system's data and control it over the Model Context Protocol.
+  </Card>
+  <Card title="Docs for agents" href="/llms" icon="book-open">
+    These docs as `llms.txt`, Markdown, and an MCP server agents can search.
+  </Card>
+</CardGroup>
+
+## What it reports
+
+| Module | What's in it |
+| --- | --- |
+| System | Hostname, platform, uptime, users, and which apps are using the camera or microphone |
+| Processes | Running processes with their CPU and memory use |
+| CPU | Usage, frequency, temperature and each core's load |
+| Memory | Physical memory and swap |
+| GPUs | Load, memory, clocks, temperature and power |
+| Sensors | Temperatures and fan speeds |
+| Battery | Charge, charging state and time remaining |
+| Displays | Resolution, position and refresh rate |
+| Disks | Partitions, space and activity |
+| Networks | Interfaces, addresses, traffic and connections |
+| Media | What's playing and its position |
+| Discord | Your voice state and call |
+
+See [Monitoring](/features/monitoring) for every way to read them.
+
+## Get help
+
+<CardGroup cols={3}>
+  <Card title="Discussions" href="https://github.com/timmo001/system-bridge/discussions" icon="messages-square">
+    Ask questions and get help.
+  </Card>
+  <Card title="Issues" href="https://github.com/timmo001/system-bridge/issues" icon="bug">
+    Report a bug or suggest a feature.
+  </Card>
+  <Card title="Contribute" href="/developing" icon="git-pull-request">
+    Build, run and test System Bridge from source.
+  </Card>
+</CardGroup>

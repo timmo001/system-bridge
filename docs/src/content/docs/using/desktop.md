@@ -22,4 +22,5 @@ While the backend is running, a System Bridge icon appears in your system tray. 
 ## Next steps
 
 - Monitor and control your system from the [web client](/using/web-client/).
+- See what System Bridge can do under **Features**, starting with [monitoring](/features/monitoring/).
 - Prefer the terminal? Use the [CLI](/using/cli/).

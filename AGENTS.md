@@ -24,7 +24,7 @@ mise tasks
 - **MCP Server**: Model Context Protocol server
 - **Web Client**: Lit + Vite (embedded in Go binary at `client/web/`)
 - **CLI**: Command-line interface
-- **Docs**: Astro + Starlight site at `docs/` (deployed separately)
+- **Docs**: Blume site at `docs/`, using `@timmo001/docs-kit`, deployed separately as a Cloudflare Worker with a docs MCP server at `/mcp`
 - **Omarchy plugin**: Publishable source at `omarchy-plugin/`; generated mirror at `timmo001/omarchy-system-bridge`
 - **Python connector**: `systembridgeconnector` at `connector/python/`, used by the Home Assistant integration. Published to PyPI with each stable release, using the release tag as its version
 - **TypeScript connector**: `@timmo001/effect-system-bridge` at `connector/typescript/`, an Effect v4 connector used by the web client. Published to npm and JSR with each stable release, using the release tag as its version
@@ -41,7 +41,7 @@ mise tasks
 - Prefer the `serve:*` mise tasks over foreground `run:*` tasks when starting long-running dev servers from an agent or background workflow.
 - `mise run serve:backend` starts the backend through pitchfork. It stands in for the installed service, so it keeps the fixed port `9170` and is also at `https://backend.system-bridge.localhost`. Pitchfork won't start a daemon whose port is taken, so the oneshot `backend-prep` daemon first stops any production `system-bridge` that owns `:9170` (systemd, Hyprland, desktop autostart, or manual shell) and records it; an `on_exit` hook restores it when dev stops, and skips it on a restart.
 - `mise run serve:web` starts the Vite web client through pitchfork. It has no production counterpart. It serves `http://127.0.0.1:7680/`, or the next free port, and is always at `https://web.system-bridge.localhost` through the Pitchfork proxy; connect it to the backend on `localhost:9170`.
-- `mise run serve:docs` starts the Astro docs site through pitchfork. It serves `http://127.0.0.1:7660/`, or the next free port, and is always at `https://docs.system-bridge.localhost`. Manage it with `mise run serve:docs:status`, `:logs`, `:restart` and `:stop`. Do not run `astro dev` or `mise run docs:dev` in the foreground from an agent.
+- `mise run serve:docs` starts the Blume docs site through pitchfork. It serves `http://127.0.0.1:7660/`, or the next free port, and is always at `https://docs.system-bridge.localhost`. Manage it with `mise run serve:docs:status`, `:logs`, `:restart` and `:stop`. Do not run `blume dev` or `mise run docs:dev` in the foreground from an agent. While it runs, `blume build` refuses to run, so check a change with `bun run build --isolated` from `docs/`.
 - Test the web client and docs through those HTTPS addresses. Never add the proxy's own port, such as `:8443`, even if Pitchfork prints one: that means the 443 redirect is missing (it's lost on reboot), so run `pitchfork proxy doctor`, then `pitchfork proxy setup -y` to restore it. Use the `127.0.0.1` port only when the proxy isn't running.
 - Use `mise run serve:status`, `mise run serve:logs`, `mise run serve:restart`, and `mise run serve:stop` for status, logs, restart, and cleanup.
 - Keep direct `mise run run:*` usage for foreground debugging only, or when pitchfork is unavailable.
@@ -92,5 +92,5 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-connector-python` - Python connector tasks, code style and release versioning
 - `system-bridge-connector-typescript` - TypeScript connector layout, generated schemas, tasks and release versioning
 - `system-bridge-release` - version, publish and sense-check a release (assets, PyPI, Arch, AUR)
-- `system-bridge-docs-page-workflow` - add or restructure Starlight docs pages
+- `system-bridge-docs-page-workflow` - add or restructure docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page

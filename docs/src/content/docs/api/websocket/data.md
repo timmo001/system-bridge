@@ -1,5 +1,6 @@
 ---
 title: Data
+description: Request module data, subscribe to live updates, and handle the data messages over the WebSocket API.
 ---
 
 Request system data on demand, subscribe to live updates, and handle the messages the backend sends back.

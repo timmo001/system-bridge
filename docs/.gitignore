@@ -2,19 +2,19 @@
 logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
+bun-debug.log*
 
 # Dependencies
 node_modules
 
 # Build output
 dist
-dist-ssr
-*.local
 
-# Astro generated types
+# Generated runtime and types
 .astro/
+.blume/
+.blume-verify/
+.wrangler/
 
 # Environment
 .env

@@ -47,6 +47,10 @@ jobs:
         working-directory: docs
         run: bun run build
 
+      - name: Check links
+        working-directory: docs
+        run: bun run validate
+
       - name: Validate Cloudflare Workers upload
         working-directory: docs
         run: bun run deploy --dry-run

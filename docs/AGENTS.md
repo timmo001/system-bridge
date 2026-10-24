@@ -1,158 +1,52 @@
 # System Bridge Docs - Agent Guide
 
-This directory holds the System Bridge documentation site built with Astro + Starlight.
-Keep changes small, aligned with existing patterns, and focused on content and UI.
+This directory holds the System Bridge documentation site, built with Blume and `@timmo001/docs-kit`. Keep changes focused on content, and keep shared layout, theme and config changes in the docs-kit repository rather than copying them here.
 
-## Quick Commands
+## Commands
 
 Run from `docs/`:
 
-- Install deps: `bun install`
-- Dev server: `bun run dev` (alias: `bun run start`)
-- Build: `bun run build`
-- Preview build: `bun run preview`
-- Validate Worker upload: `bun run deploy --dry-run`
-- Upload preview Worker version: `bun run deploy:preview`
-- Deploy Worker: `bun run deploy`
-- Astro CLI: `bun run astro -- --help`
+- Install deps: `bun install` (the docs are part of the root Bun workspace)
+- Build: `bun run build` (strict: fails on content errors)
+- Check links and anchors: `bun run validate`
+- Preview the build: `bun run preview`
+- Regenerate brand images: `bun run brand`
+- Validate the Worker upload: `bun run deploy --dry-run`
 
-From the repo root: `mise run docs:build`. From an agent, start the dev server in the background with `mise run serve:docs`; it is at `https://docs.system-bridge.localhost` (see the root `AGENTS.md`). Use `mise run docs:dev` only for foreground debugging.
+From the repo root: `mise run docs:build`, `mise run docs:validate` and `mise run docs:lint`. From an agent, start the dev server in the background with `mise run serve:docs`; it is at `https://docs.system-bridge.localhost`. While it runs, `blume build` refuses to run, so use `bun run build --isolated` to check a change. Use `mise run docs:dev` only for foreground debugging.
 
-## Lint / Test
+## Stack
 
-- Markdown lint runs from the repo root with `mise run docs:lint`.
-- No tests are configured in this repo.
-- Running a single test is not applicable here.
-- If you add lint/tests, update `package.json` and this file with exact commands.
+- Blume (Astro-based) with `@timmo001/docs-kit` for the config, home banner, header GitHub link and theme.
+- Server output on Cloudflare Workers, so the docs MCP server at `/mcp` works. `llms.txt`, `llms-full.txt` and a Markdown copy of each page are generated too.
+- Bun only. Pin dependencies to exact versions.
 
-## Package Manager
+## Layout
 
-- Use `bun` only (matches the rest of the System Bridge monorepo).
-- Do not add npm/yarn/pnpm commands to docs or scripts.
+- Content: `src/content/docs/` (Markdown and MDX with frontmatter). File names are kebab-case and map to routes.
+- Site details, sidebar and redirects: `blume.config.ts`.
+- Layout components: `components.ts`. Blume reads it without running it, so import components there directly.
+- Theme: `theme.css`, which starts with docs-kit's theme import.
+- Logos: `public/logo-light.svg` and `public/logo-dark.svg` for the header and banner, `src/assets/logo.svg` for share cards and brand images.
+- Generated: `.blume/`, `.blume-verify/` and `dist/`. Never edit them.
 
-## Tech Stack
+## Writing pages
 
-- Astro 6.x with Starlight docs.
-- Tailwind CSS with `tailwindcss-fluid-type`.
-- `astro-icon` for SVG icons.
-- Static output site; no server runtime in this repo.
+- Frontmatter needs `title` and `description`.
+- Start headings at `##`, in order.
+- Callouts (`:::note`, `:::tip`, `:::warning`, `:::danger`) and components only render in `.mdx` files. Use `.mdx` for any page that needs them.
+- Components need no imports: `Card`, `CardGroup`, `Tabs` and `Tab`, `Steps` and `Step`, `Badge` and more. Icons are Lucide names, such as `terminal` or `gauge`.
+- Internal links are root-relative, such as `/features/commands` or `/api/websocket/control#media-control`. `bun run validate` checks them.
+- External links open in a new tab automatically.
+- Tag every code fence with a language. Put a title after it, such as ` ```ini title="~/.config/autostart/system-bridge.desktop" `.
+- Write in plain UK English, with no em-dashes.
 
-## Repo Layout
+## Navigation
 
-- Docs content: `src/content/docs/` (Markdown/MDX with frontmatter).
-- UI components: `src/components/` (.astro).
-- Layouts: `src/layouts/`.
-- Styles: `src/styles/` and component `<style>` blocks.
-- Public assets: `public/`.
-- Build output: `dist/` (generated; do not edit).
-- Worker deployment config: `wrangler.jsonc`.
+- Add every new page to the sidebar in `blume.config.ts`.
+- When a page moves or is renamed, add a redirect from its old route in `blume.config.ts`.
 
-## Content Authoring (Always On)
+## Project skills
 
-- Use YAML frontmatter; include `title` and `description` when available.
-- File names in `src/content/docs/` are kebab-case and map to routes.
-- Keep headings in natural order (H2 under page title).
-- Use Starlight callouts: `:::note`, `:::tip`, `:::caution`, `:::danger`.
-- External links should include `target="_blank"` and `rel="noopener noreferrer"` when in Astro/MDX.
-- Use language tags on code fences (e.g. `bash`, `json`, `ts`).
-- Prefer short, action-oriented paragraphs; avoid wall-of-text updates.
-
-## Astro / MDX Patterns
-
-- Keep imports and data in the frontmatter block (`---`).
-- Use ESM imports only.
-- For icons, use `Icon` from `astro-icon/components`.
-- When linking within docs, use absolute `/docs/...` paths.
-- Preserve existing component structures unless refactors are required.
-
-## Client Scripts (Astro)
-
-- Place client scripts near the end of the component.
-- Guard DOM lookups (`querySelector`) before use.
-- Prefer `addEventListener` over inline handlers.
-- Keep scripts small; do not introduce heavy client logic.
-- Avoid global side effects unless the component already does so.
-
-## Tailwind + CSS
-
-- Prefer Tailwind utility classes for layout/spacing/typography.
-- Use CSS variables already defined in the theme (see `tailwind.config.cjs`).
-- Use `<style>` blocks for small component-scoped rules only.
-- Avoid adding new global CSS unless necessary; keep it in `src/styles/`.
-
-## Images and Assets
-
-- Store shared assets in `src/assets/`.
-- Reference assets with relative paths from MDX frontmatter when needed.
-- Provide descriptive `alt` text for images.
-- Prefer optimized formats (SVG/WEBP) when adding new assets.
-
-## Imports
-
-- Order imports: external packages first, then local files.
-- Use relative paths for local imports; no path aliases are configured.
-- Match the quote style used in the file you are editing.
-
-## Formatting
-
-- Match existing indentation and whitespace in the file.
-- Do not reformat unrelated lines or reorder content without need.
-- Keep JSX/MDX attributes on multiple lines when already split.
-
-## Workspace Hygiene
-
-- Avoid editing generated output like `dist/`.
-- Do not touch `node_modules/`.
-- Keep changes focused; avoid broad refactors.
-- Preserve content order unless a change requires reflow.
-
-## Docs Routing
-
-- Nested doc routes map to nested folders (e.g. `websocket/open-url.md`).
-- Keep slugs consistent with sidebar labels and internal links.
-- Use `/docs/...` for internal links in prose.
-
-## Types and Error Handling
-
-- Astro uses strict TS config; keep types explicit in scripts when needed.
-- Guard DOM queries with null checks or optional chaining.
-- Avoid throwing in client scripts; fail quietly for missing elements.
-
-## Naming Conventions
-
-- Components: `PascalCase.astro` (e.g. `LandingCard.astro`).
-- Docs files: kebab-case (e.g. `open-url.md`).
-- IDs/classes: descriptive and consistent with existing patterns.
-
-## Accessibility
-
-- Provide alt text for images and icons used as images.
-- Buttons/interactive icons need `aria-label`.
-- Ensure focusable elements remain keyboard-accessible.
-
-## Quality Checks
-
-- Run `mise run serve:docs` from the repo root for quick visual verification at `https://docs.system-bridge.localhost`.
-- Run `bun run build` before publishing changes that touch layout or config.
-- Run `bun run deploy --dry-run` after the build when changing hosting config.
-- Confirm nav links and sidebar entries resolve correctly.
-
-## Updating Navigation
-
-- Sidebar and site metadata live in `astro.config.mjs`.
-- Keep sidebar labels human-readable and slugs consistent with doc routes.
-
-## Cursor / Copilot Rules
-
-- No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
-- No Copilot instructions found in `.github/copilot-instructions.md`.
-
-## Project Skills (Use for Infrequent Tasks)
-
-Docs workflows live as project skills in the repo root at `.agents/skills/` and
-load on demand:
-
-- `system-bridge-docs-page-workflow` - add or restructure a Starlight docs page
-- `system-bridge-landing-content-updates` - edit the landing page content
-
-Keep this file focused on always-needed guidance. Move rare workflows to skills.
+- `system-bridge-docs-page-workflow` - add or restructure a docs page
+- `system-bridge-landing-content-updates` - edit the home page

@@ -1,5 +1,6 @@
 ---
 title: Input
+description: Press keys and type text on the machine running System Bridge over the WebSocket API.
 ---
 
 Simulate keyboard input on the host machine.

@@ -1,8 +1,7 @@
 ---
-title: Download & Install
+title: Download and install
+description: Install System Bridge on Linux or Windows from the AUR, a package or the installer.
 ---
-
-import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 Download the package for your platform from the [releases page](https://github.com/timmo001/system-bridge/releases).
 
@@ -19,78 +18,92 @@ Stable builds are attached to the releases page. Development builds from the lat
 :::
 
 <Tabs syncKey="os">
-  <TabItem label="Linux">
-    Install the package that matches your distribution's package manager.
+<Tab title="Linux">
 
-    <Tabs syncKey="distro">
-      <TabItem label="Arch Linux">
-        Install from the AUR with an AUR helper such as [yay](https://github.com/Jguer/yay).
+Install the package that matches your distribution's package manager.
 
-        For the latest stable release, use the [system-bridge](https://aur.archlinux.org/packages/system-bridge) package:
+<Tabs syncKey="distro">
+<Tab title="Arch Linux">
 
-        ```bash
-        yay -S system-bridge
-        ```
+Install from the AUR with an AUR helper such as [yay](https://github.com/Jguer/yay).
 
-        For the development branch, use the [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) package. This builds and installs the application from the latest `dev` branch, which is updated automatically every commit:
+For the latest stable release, use the [system-bridge](https://aur.archlinux.org/packages/system-bridge) package:
 
-        ```bash
-        yay -S system-bridge-git
-        ```
+```bash
+yay -S system-bridge
+```
 
-        Alternatively, install the `.pkg.tar.zst` from the releases page or downloaded workflow asset directly:
+For the development branch, use the [system-bridge-git](https://aur.archlinux.org/packages/system-bridge-git) package. This builds and installs the application from the latest `dev` branch, which is updated automatically every commit:
 
-        ```bash
-        sudo pacman -U system-bridge-*-x86_64.pkg.tar.zst
-        ```
-      </TabItem>
-      <TabItem label="Debian / Ubuntu">
-        Install the `.deb` asset with `apt` so dependencies are resolved automatically:
+```bash
+yay -S system-bridge-git
+```
 
-        ```bash
-        sudo apt install ./system-bridge_<version>_<arch>.deb
-        ```
+Alternatively, install the `.pkg.tar.zst` from the releases page or downloaded workflow asset directly:
 
-        You can also install it with `dpkg`:
+```bash
+sudo pacman -U system-bridge-*-x86_64.pkg.tar.zst
+```
 
-        ```bash
-        sudo dpkg -i system-bridge_<version>_<arch>.deb
-        ```
-      </TabItem>
-      <TabItem label="Fedora / RHEL">
-        Install the `.rpm` asset with `dnf`:
+</Tab>
+<Tab title="Debian / Ubuntu">
 
-        ```bash
-        sudo dnf install ./system-bridge-<version>.<arch>.rpm
-        ```
-      </TabItem>
-      <TabItem label="Flatpak">
-        Install the `.flatpak` bundle:
+Install the `.deb` asset with `apt` so dependencies are resolved automatically:
 
-        ```bash
-        flatpak install system-bridge-<version>.flatpak
-        ```
+```bash
+sudo apt install ./system-bridge_<version>_<arch>.deb
+```
 
-        Then run it with:
+You can also install it with `dpkg`:
 
-        ```bash
-        flatpak run dev.timmo.system-bridge
-        ```
-      </TabItem>
-    </Tabs>
-  </TabItem>
-  <TabItem label="Windows">
-    Run the `system-bridge-<version>-setup.exe` installer to install the application. After installation completes, you can start System Bridge from the Start Menu shortcut.
-  </TabItem>
-  <TabItem label="macOS">
-    macOS is not officially supported and has no prebuilt packages. You can still build it from source and test it for yourself.
+```bash
+sudo dpkg -i system-bridge_<version>_<arch>.deb
+```
 
-    See [Developing](/developing/) for the full build, run, and test workflow from source.
+</Tab>
+<Tab title="Fedora / RHEL">
 
-    :::note
-    Please do not submit feedback or bug reports for macOS, as it is not supported. Contributions are welcome if you would like to help improve macOS support.
-    :::
-  </TabItem>
+Install the `.rpm` asset with `dnf`:
+
+```bash
+sudo dnf install ./system-bridge-<version>.<arch>.rpm
+```
+
+</Tab>
+<Tab title="Flatpak">
+
+Install the `.flatpak` bundle:
+
+```bash
+flatpak install system-bridge-<version>.flatpak
+```
+
+Then run it with:
+
+```bash
+flatpak run dev.timmo.system-bridge
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="Windows">
+
+Run the `system-bridge-<version>-setup.exe` installer to install the application. After installation completes, you can start System Bridge from the Start Menu shortcut.
+
+</Tab>
+<Tab title="macOS">
+
+macOS is not officially supported and has no prebuilt packages. You can still build it from source and test it for yourself.
+
+See [Developing](/developing) for the full build, run, and test workflow from source.
+
+:::note
+Please do not submit feedback or bug reports for macOS, as it is not supported. Contributions are welcome if you would like to help improve macOS support.
+:::
+
+</Tab>
 </Tabs>
 
 ## Optional dependencies
@@ -103,15 +116,16 @@ System Bridge reads most hardware metrics directly from the kernel, so these too
 | `nvidia-utils` | `nvidia-smi` | NVIDIA GPU metrics. Intel and AMD GPUs use the kernel `drm`/`hwmon` interfaces and need nothing extra. |
 | `pciutils` | `lspci` | Friendly GPU model names. GPUs are still detected without it, but fall back to a generic name. |
 | `pipewire` (Arch), `pipewire-bin` (Debian / Ubuntu), `pipewire-utils` (Fedora) | `pw-dump` | Names the apps using the microphone or camera. Without it, microphone usage falls back to ALSA, which names the sound server instead of the app. |
+| `playerctl` | `playerctl` | What's playing, and [media controls](/features/media). Without it, the Media module is empty and media controls do nothing. |
 | `zenity` | `zenity` | The confirmation before **Quit** or **Hide system tray**. Without it, those actions can't be confirmed, so they don't run. |
 
-The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire and `zenity`, so `apt` and `dnf` install them by default. The Arch package lists all of these as optional dependencies, which `pacman` shows but doesn't install.
+The `.deb` and `.rpm` packages recommend `pciutils`, PipeWire, `playerctl` and `zenity`, so `apt` and `dnf` install them by default. The Arch package lists all of these as optional dependencies, which `pacman` shows but doesn't install.
 
 Windows needs no optional tools.
 
 ## Next steps
 
-- Start System Bridge: see [Running](/running/).
-- Monitor and control your system from the [web client](/using/web-client/).
-- Explore the [CLI](/using/cli/) and get your [token](/using/cli/#token).
-- Connect it to [Home Assistant](/using/home-assistant/).
+- Start System Bridge: see [Running](/running).
+- Monitor and control your system from the [web client](/using/web-client).
+- Explore the [CLI](/using/cli) and get your [token](/using/cli#token).
+- Connect it to [Home Assistant](/using/home-assistant).

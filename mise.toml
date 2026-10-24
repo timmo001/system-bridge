@@ -402,15 +402,23 @@ run = "./system-bridge-linux version"
 run_windows = "./system-bridge.exe version"
 
 [tasks."docs:dev"]
-description = "Run the docs site dev server (Astro + Starlight)"
+description = "Run the docs site dev server (Blume)"
+depends = ["install:js"]
 dir = "docs"
-run = "bun run dev"
+# A reused Vite cache makes every page fail to resolve Astro's ClientRouter script
+run = ["rm -rf .blume/.cache/vite", "bun run dev"]
 
 [tasks."docs:build"]
-description = "Build the docs site (validates internal links)"
+description = "Build the docs site, failing on content errors"
 depends = ["install:js"]
 dir = "docs"
 run = "bun run build"
+
+[tasks."docs:validate"]
+description = "Check every link and anchor in the docs"
+depends = ["install:js"]
+dir = "docs"
+run = "bun run validate"
 
 [tasks."docs:lint"]
 description = "Lint docs markdown with the docs ruleset"

@@ -3,8 +3,6 @@ title: Home Assistant
 description: Monitor and control System Bridge from Home Assistant.
 ---
 
-import { Steps } from '@astrojs/starlight/components';
-
 System Bridge integrates with [Home Assistant](https://www.home-assistant.io/integrations/system_bridge), so you can monitor and control your machine from your Home Assistant instance. The integration uses a local push connection and is maintained by the System Bridge author.
 
 :::tip
@@ -22,13 +20,9 @@ System Bridge can be auto-discovered by Home Assistant. When an instance is foun
 
 To add it manually:
 
-<Steps>
-
 1. In Home Assistant, go to **Settings > Devices & services**.
 2. Select **Add Integration** and choose **System Bridge**.
 3. Enter the host and your token when prompted, then follow the on-screen steps.
-
-</Steps>
 
 ## Features
 
@@ -69,5 +63,6 @@ Trigger actions on the machine running System Bridge:
 
 ## Next steps
 
+- See what each feature does in more detail: [monitoring](/features/monitoring/), [notifications](/features/notifications/), [media](/features/media/) and [remote control](/features/remote-control/).
 - Read the official [integration documentation](https://www.home-assistant.io/integrations/system_bridge) for entity names, action parameters, and examples.
 - Connect to System Bridge directly with the [API and WebSocket](/api/).

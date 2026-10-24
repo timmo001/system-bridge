@@ -1,23 +1,29 @@
 ---
-title: LLMs
-description: Feed the System Bridge documentation to an agent using llms.txt.
+title: Docs for agents
+description: Give an agent these docs as llms.txt, a page's Markdown, or a docs MCP server it can search.
 ---
 
-The System Bridge documentation is published in formats that an agent can read directly, following the [llms.txt](https://llmstxt.org) convention. Point an agent at one of these files to give it the docs as context.
+These docs are published in forms an agent can read directly, so it can answer questions about System Bridge or write code against it.
 
-## Available files
+| URL | Use |
+| --- | --- |
+| [`/llms.txt`](https://system-bridge.timmo.dev/llms.txt) | An index of every page, so the agent can pick what it needs |
+| [`/llms-full.txt`](https://system-bridge.timmo.dev/llms-full.txt) | Every page in one file |
+| `/{page}.md` | One page as Markdown, such as [`/features/commands.md`](https://system-bridge.timmo.dev/features/commands.md) |
+| [`/mcp`](https://system-bridge.timmo.dev/mcp) | An MCP server for these docs, with search, page and navigation tools |
 
-- [`/llms.txt`](https://system-bridge.timmo.dev/llms.txt) - an index of the documentation with links to each section. Use this when you want the agent to pick what it needs.
-- [`/llms-full.txt`](https://system-bridge.timmo.dev/llms-full.txt) - the entire documentation in a single file. Use this for the most complete context.
-- [`/llms-small.txt`](https://system-bridge.timmo.dev/llms-small.txt) - a trimmed version for smaller context windows.
+They're generated from the docs when the site is built, so they always match it.
 
-These files are generated from the docs at build time, so they stay in sync with the rest of the site.
+## Docs MCP server
 
-## How to use them
+Connect an agent to `https://system-bridge.timmo.dev/mcp` with the Streamable HTTP transport. It has `search_docs`, `get_page`, `list_pages` and `get_navigation` tools, and needs no token. For example, with Claude Code:
 
-- Paste one of the URLs above into an agent and ask it to read the page.
-- Use the actions in the page header on any docs page to copy the page as Markdown, then paste it straight into an agent. This gives the agent the content directly, so it does not need to fetch the page over the web.
+```bash
+claude mcp add --transport http system-bridge-docs https://system-bridge.timmo.dev/mcp
+```
 
-## Relationship to MCP
+Each page's menu also has **Connect to MCP**, with the setup for Claude Code, Codex, Cursor and VS Code, and actions to copy the page as Markdown or open it in a chat.
 
-`llms.txt` gives an agent the documentation. The [MCP server](/api/mcp/) goes further and lets an agent read live system data and control your machine over the [Model Context Protocol](https://modelcontextprotocol.io). Use `llms.txt` to help an agent understand System Bridge, and the MCP server to let it act on your system.
+## The docs MCP server and System Bridge's MCP server
+
+The docs MCP server only reads these docs. System Bridge's own [MCP server](/api/mcp) runs on your machine and lets an agent read live data and control it. Use both to have an agent that knows how System Bridge works and can use it.

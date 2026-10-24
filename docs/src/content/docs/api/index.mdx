@@ -3,8 +3,6 @@ title: API
 description: Reference for the System Bridge HTTP, WebSocket and MCP interfaces.
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-
 System Bridge exposes your system over a local API. There are three ways to interact with it: an HTTP API for simple request/response calls, a WebSocket API for live data and control, and an MCP server for agents.
 
 The [WebSocket API](/api/websocket/) is the primary interface and covers most operations: live data, input, media and power control, notifications, settings, and commands. Reach for HTTP only when you want a quick one-off read of status or a module's current data.
@@ -37,11 +35,17 @@ The `GET /api` and `GET /api/health` endpoints do not require a token.
 
 ## Protocols
 
-<CardGrid>
-  <LinkCard title="WebSocket" href="/api/websocket/" description="Live data subscriptions and system control. Covers most operations." />
-  <LinkCard title="HTTP" href="/api/status/" description="Request/response endpoints for status and module data." />
-  <LinkCard title="MCP Server" href="/api/mcp/" description="Connect agents over the Model Context Protocol." />
-</CardGrid>
+<CardGroup cols={3}>
+  <Card title="WebSocket" href="/api/websocket" icon="radio-tower">
+    Live data subscriptions and system control. Covers most operations.
+  </Card>
+  <Card title="HTTP" href="/api/http" icon="globe">
+    Request/response endpoints for status and module data.
+  </Card>
+  <Card title="MCP server" href="/api/mcp" icon="bot">
+    Connect agents over the Model Context Protocol.
+  </Card>
+</CardGroup>
 
 ### When to use which
 

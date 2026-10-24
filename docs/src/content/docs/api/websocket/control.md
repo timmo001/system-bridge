@@ -1,5 +1,6 @@
 ---
 title: Control
+description: Control media and Discord, send notifications, open files and URLs, and change the power state over the WebSocket API.
 ---
 
 Control playback and Discord, send notifications, open files and URLs, and manage system power state.
@@ -32,7 +33,7 @@ Available actions:
 
 ## Discord control
 
-Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, toggle your camera or screenshare, play a soundboard sound, or change your Discord voice settings. Discord must be [set up](/running/#discord) first.
+Send the `DISCORD_CONTROL` event with an `action` to join or leave voice channels, open a text channel, toggle your camera or screenshare, play a soundboard sound, or change your Discord voice settings. Discord must be [set up](/features/discord/) first.
 
 Available actions:
 

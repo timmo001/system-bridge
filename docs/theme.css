@@ -1,0 +1,12 @@
+@import "@timmo001/docs-kit/blume/theme.css";
+
+/* The logo is wider than it is tall, so give the banner a wider image. */
+.home-banner {
+  --home-banner-logo-size: 12rem;
+}
+
+@media (min-width: 40rem) {
+  .home-banner {
+    --home-banner-logo-size: 16rem;
+  }
+}
