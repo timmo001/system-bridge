@@ -113,7 +113,6 @@ export class PageMedia extends SbPage {
         height: 100%;
         background: var(--sb-color-accent);
         border-radius: inherit;
-        transition: width 1s linear;
       }
 
       .progress .times {
