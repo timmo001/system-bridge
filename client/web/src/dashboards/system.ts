@@ -684,7 +684,7 @@ const displayTableState = {
   sort: "id",
   descending: false,
   page: 1,
-  pageSize: 10,
+  pageSize: undefined,
 };
 
 const inputTableState = {
@@ -692,7 +692,7 @@ const inputTableState = {
   sort: "type",
   descending: false,
   page: 1,
-  pageSize: 25,
+  pageSize: undefined,
 };
 
 const shortcutTableState = {
@@ -700,7 +700,7 @@ const shortcutTableState = {
   sort: "description",
   descending: false,
   page: 1,
-  pageSize: 25,
+  pageSize: undefined,
 };
 
 const hyprlandCards = (hyprland: HyprlandData) => {

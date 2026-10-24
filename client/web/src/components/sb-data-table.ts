@@ -66,10 +66,34 @@ export interface DataTableState {
   readonly descending: boolean;
   /** From 1. */
   readonly page: number;
-  readonly pageSize: number;
+  /** Undefined until chosen, when the table uses the rows saved for it. */
+  readonly pageSize: number | undefined;
 }
 
 export const pageSizes = [10, 25, 50, 100] as const;
+
+const defaultPageSize = 25;
+
+/** Where a table's chosen rows are kept, by its label. */
+const rowsKey = (label: string) => `system-bridge-table-rows:${label}`;
+
+const savedRows = (label: string) => {
+  try {
+    const rows = Number(localStorage.getItem(rowsKey(label)));
+
+    return pageSizes.find((size) => size === rows);
+  } catch {
+    return undefined;
+  }
+};
+
+const saveRows = (label: string, rows: number) => {
+  try {
+    localStorage.setItem(rowsKey(label), String(rows));
+  } catch {
+    // The browser may not allow storage; the choice then lasts the page
+  }
+};
 
 /**
  * Rows in a table that sorts, filters and pages them, built on TanStack
@@ -242,7 +266,7 @@ export class SbDataTable<T extends RowData> extends LitElement {
     sort: undefined,
     descending: false,
     page: 1,
-    pageSize: 25,
+    pageSize: undefined,
   };
 
   /** Gives each row a stable identity across updates. */
@@ -319,7 +343,10 @@ export class SbDataTable<T extends RowData> extends LitElement {
 
   #onPageSizeChange = (event: Event) => {
     if (event.target instanceof HTMLSelectElement) {
-      this.#change({ pageSize: Number(event.target.value), page: 1 });
+      const pageSize = Number(event.target.value);
+
+      if (this.label !== "") saveRows(this.label, pageSize);
+      this.#change({ pageSize, page: 1 });
     }
   };
 
@@ -372,7 +399,10 @@ export class SbDataTable<T extends RowData> extends LitElement {
   }
 
   override render() {
-    const { filter, sort, descending, page, pageSize } = this.#state;
+    const { filter, sort, descending, page } = this.#state;
+
+    const pageSize =
+      this.#state.pageSize ?? savedRows(this.label) ?? defaultPageSize;
 
     const table = this.#table.table({
       features: dataTableFeatures,

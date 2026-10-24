@@ -256,7 +256,6 @@ export const tableState = (
   defaults: {
     readonly sort: string;
     readonly descending: boolean;
-    readonly pageSize?: number;
   },
 ): DataTableState => ({
   filter: search.q ?? "",
@@ -264,7 +263,7 @@ export const tableState = (
   descending:
     search.order === undefined ? defaults.descending : search.order === "desc",
   page: search.page ?? 1,
-  pageSize: search.size ?? defaults.pageSize ?? 25,
+  pageSize: search.size,
 });
 
 /**
