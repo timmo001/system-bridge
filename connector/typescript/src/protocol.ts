@@ -10,6 +10,7 @@ export const EventType = Schema.Literals([
   "GET_DISK_MOUNTS",
   "GET_FILES",
   "GET_FILE",
+  "GET_HISTORY",
   "GET_SETTINGS",
   "KEYBOARD_KEYPRESS",
   "KEYBOARD_TEXT",
@@ -46,6 +47,7 @@ export const ResponseType = Schema.Literals([
   "DISCORD_SETUP_UPDATED",
   "FILES",
   "FILE",
+  "HISTORY",
   "KEYBOARD_KEY_PRESSED",
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
@@ -367,6 +369,11 @@ export type OpenTarget = typeof OpenTarget.Type;
 
 export const ModulesRequest = Schema.Struct({
   modules: Schema.Array(ModuleName),
+});
+
+/** `since` is in Unix milliseconds. Without it, the whole history is sent. */
+export const HistoryRequest = Schema.Struct({
+  since: Schema.optionalKey(Schema.Int),
 });
 
 export const DirectoryRequest = Schema.Struct({ base: Schema.String });

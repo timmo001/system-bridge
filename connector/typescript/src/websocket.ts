@@ -28,6 +28,7 @@ import {
 } from "./errors.js";
 import {
   DiskMountsResponse,
+  MetricHistory,
   ModuleDataUpdate,
   type ModuleName,
   ModulesData,
@@ -44,6 +45,7 @@ import {
   type EventType,
   FileInfo,
   GetFilesRequest,
+  HistoryRequest,
   KeyboardKeypress,
   KeyboardText,
   type MediaAction,
@@ -94,6 +96,13 @@ export interface Interface {
     modules: ReadonlyArray<ModuleName>,
   ) => Effect.Effect<void, WebSocketError>;
   readonly unregisterDataListener: Effect.Effect<void, WebSocketError>;
+  /**
+   * Graph readings from up to the last 24 hours, or only those taken after
+   * `since`, in Unix milliseconds.
+   */
+  readonly getHistory: (
+    since?: number,
+  ) => Effect.Effect<MetricHistory, WebSocketError>;
   readonly getDirectories: Effect.Effect<
     ReadonlyArray<MediaDirectory>,
     WebSocketError
@@ -525,6 +534,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     Effect.withSpan("SystemBridgeWebSocket.unregisterDataListener"),
   );
 
+  const getHistory = Effect.fn("SystemBridgeWebSocket.getHistory")(function* (
+    since?: number,
+  ) {
+    return yield* call(
+      "GET_HISTORY",
+      "HISTORY",
+      HistoryRequest,
+      since === undefined ? {} : { since },
+      MetricHistory,
+    );
+  });
+
   const getDirectories = call(
     "GET_DIRECTORIES",
     "DIRECTORIES",
@@ -733,6 +754,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     getData,
     registerDataListener,
     unregisterDataListener,
+    getHistory,
     getDirectories,
     getDirectory,
     getFiles,

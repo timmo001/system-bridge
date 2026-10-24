@@ -392,6 +392,25 @@ export const GPU = Schema.Struct({
 
 export interface GPU extends Schema.Schema.Type<typeof GPU> {}
 
+export const HistorySample = Schema.Struct({
+  time: Schema.Finite,
+  value: Schema.Finite,
+});
+
+export interface HistorySample extends Schema.Schema.Type<
+  typeof HistorySample
+> {}
+
+export const GPUHistory = Schema.Struct({
+  id: Schema.String,
+  core_load: Schema.Array(HistorySample),
+  memory_load: Schema.Array(HistorySample),
+  temperature: Schema.Array(HistorySample),
+  power: Schema.Array(HistorySample),
+});
+
+export interface GPUHistory extends Schema.Schema.Type<typeof GPUHistory> {}
+
 export const GPUsData = Schema.Array(GPU);
 
 export type GPUsData = typeof GPUsData.Type;
@@ -459,6 +478,39 @@ export const MemoryData = Schema.Struct({
 });
 
 export interface MemoryData extends Schema.Schema.Type<typeof MemoryData> {}
+
+export const SeriesHistory = Schema.Struct({
+  id: Schema.String,
+  samples: Schema.Array(HistorySample),
+});
+
+export interface SeriesHistory extends Schema.Schema.Type<
+  typeof SeriesHistory
+> {}
+
+export const MetricHistory = Schema.Struct({
+  cpu: Schema.Array(HistorySample),
+  cpu_temperature: Schema.Array(HistorySample),
+  cpu_frequency: Schema.Array(HistorySample),
+  cpu_power: Schema.Array(HistorySample),
+  load_average: Schema.Array(HistorySample),
+  memory: Schema.Array(HistorySample),
+  swap: Schema.Array(HistorySample),
+  battery: Schema.Array(HistorySample),
+  system_power: Schema.Array(HistorySample),
+  network_receive: Schema.Array(HistorySample),
+  network_send: Schema.Array(HistorySample),
+  disk_read: Schema.Array(HistorySample),
+  disk_write: Schema.Array(HistorySample),
+  disk_temperatures: Schema.Array(SeriesHistory),
+  gpus: Schema.Array(GPUHistory),
+  temperatures: Schema.Array(SeriesHistory),
+  fans: Schema.Array(SeriesHistory),
+});
+
+export interface MetricHistory extends Schema.Schema.Type<
+  typeof MetricHistory
+> {}
 
 export const Module = Schema.Struct({
   module: ModuleName,
