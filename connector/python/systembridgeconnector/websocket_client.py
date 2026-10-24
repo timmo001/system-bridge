@@ -23,6 +23,7 @@ from .models.command_execute import ExecuteRequest
 from .models.command_result import ExecuteResult
 from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
+from .models.display_control import DisplayControl
 from .models.history import MetricHistory
 from .models.keyboard_key import KeyboardKey
 from .models.keyboard_text import KeyboardText
@@ -530,6 +531,21 @@ class WebSocketClient(Base):
             request_id,
             asdict(model),
             wait_for_response=False,
+        )
+
+    async def display_control(
+        self,
+        model: DisplayControl,
+        request_id: str | None = None,
+    ) -> Response:
+        """Set a display's brightness or power state."""
+        self._logger.info("Display control: %s", model)
+        return await self.send_message(
+            EventType.DISPLAY_CONTROL,
+            request_id,
+            {key: value for key, value in asdict(model).items() if value is not None},
+            wait_for_response=True,
+            response_type=EventType.DISPLAY_CONTROLLED,
         )
 
     async def discord_control(

@@ -23,6 +23,7 @@ from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.discord_setup import DiscordSetup
+from systembridgeconnector.models.display_control import DisplayControl
 from systembridgeconnector.models.history import (
     GPUHistory,
     HistorySample,
@@ -459,6 +460,20 @@ async def test_discord_control(
         )
         == snapshot
     )
+
+
+@pytest.mark.asyncio
+async def test_display_control(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.display_control(
+        DisplayControl(id="HDMI-A-2", brightness=40),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.DISPLAY_CONTROLLED
+    # Unset controls aren't sent
+    assert response.data == {"id": "HDMI-A-2", "brightness": 40}
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,6 @@
 """Fixtures for displays module."""
 
-from systembridgeconnector.models.modules.displays import Display
+from systembridgeconnector.models.modules.displays import Display, DisplayPowerState
 
 FIXTURE_DISPLAYS = [
     Display(
@@ -15,5 +15,7 @@ FIXTURE_DISPLAYS = [
         is_primary=True,
         pixel_clock=60.0,
         refresh_rate=60.0,
+        brightness=80.0,
+        power_state=DisplayPowerState.ON,
     )
 ]

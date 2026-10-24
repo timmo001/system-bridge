@@ -327,6 +327,12 @@ async def process_request(request: Request) -> Response:
             type=EventType.DISCORD_CONTROLLED,
             data=request.data,
         )
+    if request.event == EventType.DISPLAY_CONTROL:
+        return Response(
+            id=request.id,
+            type=EventType.DISPLAY_CONTROLLED,
+            data=request.data,
+        )
     if request.event in (EventType.GET_DISCORD_SETUP, EventType.UPDATE_DISCORD_SETUP):
         return discord_setup_response(request)
     if request.event == EventType.NOTIFICATION:

@@ -2,11 +2,13 @@
 # name: test_displays
   list([
     Display(
+      brightness=80.0,
       height=1080,
       id='abc123',
       is_primary=True,
       name='name',
       pixel_clock=60.0,
+      power_state=<DisplayPowerState.ON: 'on'>,
       refresh_rate=60.0,
       resolution_horizontal=1920,
       resolution_vertical=1080,
