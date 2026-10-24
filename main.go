@@ -390,6 +390,50 @@ func main() {
 						},
 					},
 					{
+						Name:  "history",
+						Usage: "Read the history of the graphed readings",
+						Commands: []*cli.Command{
+							{
+								Name:  "export",
+								Usage: "Export up to the last 24 hours of readings as CSV or JSON",
+								Flags: []cli.Flag{
+									&cli.StringFlag{
+										Name:    "format",
+										Aliases: []string{"f"},
+										Usage:   "csv (a row per reading) or json (as GET_HISTORY returns it)",
+										Value:   "csv",
+									},
+									&cli.DurationFlag{
+										Name:    "since",
+										Aliases: []string{"s"},
+										Usage:   "Only readings from this long ago, such as 1h or 30m",
+									},
+									&cli.StringFlag{
+										Name:    "output",
+										Aliases: []string{"o"},
+										Usage:   "Write to this file instead of standard output",
+									},
+								},
+								Action: func(cmdCtx context.Context, cmd *cli.Command) error {
+									output := cmd.String("output")
+									if output == "" {
+										return client.ExportHistory(cmdCtx, cmd.Root().Writer, cmd.String("format"), cmd.Duration("since"))
+									}
+
+									file, err := os.Create(output)
+									if err != nil {
+										return fmt.Errorf("create %s: %w", output, err)
+									}
+									if err := client.ExportHistory(cmdCtx, file, cmd.String("format"), cmd.Duration("since")); err != nil {
+										_ = file.Close()
+										return err
+									}
+									return file.Close()
+								},
+							},
+						},
+					},
+					{
 						Name:    "data",
 						Aliases: []string{"d"},
 						Usage:   "List and run data modules",

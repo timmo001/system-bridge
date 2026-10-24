@@ -150,3 +150,5 @@ It responds with the `HISTORY` type. Each series is a list of readings, oldest f
     "message": "Got history"
 }
 ```
+
+To save the history to a file, use [`system-bridge client history export`](/using/cli/#export-history) or the export on the web client's overview. The TypeScript connector's `historyToCsv` and the Python connector's `MetricHistory.to_csv()` write the same CSV.

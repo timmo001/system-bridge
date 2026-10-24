@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -22,9 +23,16 @@ type eventRequest struct {
 
 // Send sends one event to the local backend and waits for its answer.
 func Send(ctx context.Context, eventType event.EventType, data any) error {
+	_, err := request(ctx, eventType, data)
+	return err
+}
+
+// request sends one event to the local backend and returns the data of its
+// answer, undecoded.
+func request(ctx context.Context, eventType event.EventType, data any) (json.RawMessage, error) {
 	token, err := utils.LoadToken()
 	if err != nil {
-		return fmt.Errorf("load token: %w", err)
+		return nil, fmt.Errorf("load token: %w", err)
 	}
 	ctx, cancel := context.WithTimeout(ctx, sendTimeout)
 	defer cancel()
@@ -35,7 +43,7 @@ func Send(ctx context.Context, eventType event.EventType, data any) error {
 		if response != nil && response.Body != nil {
 			_ = response.Body.Close()
 		}
-		return fmt.Errorf("connect to websocket: %w", err)
+		return nil, fmt.Errorf("connect to websocket: %w", err)
 	}
 	defer func() { _ = conn.Close() }()
 	stopCancellation := context.AfterFunc(ctx, func() { _ = conn.Close() })
@@ -43,19 +51,23 @@ func Send(ctx context.Context, eventType event.EventType, data any) error {
 
 	id := uuid.NewString()
 	if err := conn.WriteJSON(eventRequest{ID: id, Event: eventType, Data: data, Token: token}); err != nil {
-		return watchError(ctx, "send event", err)
+		return nil, watchError(ctx, "send event", err)
 	}
 	for {
 		responseMessage, err := readResponse(conn)
 		if err != nil {
-			return watchError(ctx, "await event response", err)
+			return nil, watchError(ctx, "await event response", err)
 		}
 		if responseMessage.ID != id {
 			continue
 		}
 		if responseMessage.Type == event.ResponseTypeError {
-			return serverError(responseMessage)
+			return nil, serverError(responseMessage)
 		}
-		return nil
+		// readResponse keeps the data as raw JSON
+		if raw, ok := responseMessage.Data.(*json.RawMessage); ok && raw != nil {
+			return *raw, nil
+		}
+		return nil, nil
 	}
 }
