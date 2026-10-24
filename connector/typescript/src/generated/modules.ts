@@ -835,6 +835,7 @@ export const SystemData = Schema.Struct({
   microphone_usage: Schema.Array(Schema.String),
   ip_address_6: Schema.String,
   pending_reboot: Schema.NullOr(Schema.Boolean),
+  package_updates: Schema.NullOr(Schema.Finite),
   run_mode: RunMode,
   version_latest_url: Schema.NullOr(Schema.String),
   version_latest: Schema.NullOr(Schema.String),

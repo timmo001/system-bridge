@@ -25,6 +25,7 @@
   "microphone_usage": [],
   "ip_address_6": "",
   "pending_reboot": null,
+  "package_updates": 3,
   "run_mode": "standalone",
   "version_latest_url": "https://github.com/timmo001/system-bridge/releases/latest",
   "version_latest": "5.11.1",

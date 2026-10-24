@@ -49,6 +49,7 @@ type SystemData struct {
 	MicrophoneUsage       []string     `json:"microphone_usage" mapstructure:"microphone_usage"`
 	IPAddress6            string       `json:"ip_address_6" mapstructure:"ip_address_6"`
 	PendingReboot         *bool        `json:"pending_reboot" mapstructure:"pending_reboot"`
+	PackageUpdates        *int         `json:"package_updates" mapstructure:"package_updates"`
 	RunMode               RunMode      `json:"run_mode" mapstructure:"run_mode"`
 	VersionLatestURL      *string      `json:"version_latest_url" mapstructure:"version_latest_url"`
 	VersionLatest         *string      `json:"version_latest" mapstructure:"version_latest"`
