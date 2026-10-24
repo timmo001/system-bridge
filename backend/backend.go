@@ -19,6 +19,10 @@ import (
 	"github.com/timmo001/system-bridge/bus"
 	"github.com/timmo001/system-bridge/data"
 	"github.com/timmo001/system-bridge/data/module/audio"
+	"github.com/timmo001/system-bridge/data/module/battery"
+	"github.com/timmo001/system-bridge/data/module/displays"
+	"github.com/timmo001/system-bridge/data/module/networks"
+	"github.com/timmo001/system-bridge/data/module/system"
 	"github.com/timmo001/system-bridge/discord"
 	"github.com/timmo001/system-bridge/discovery"
 	"github.com/timmo001/system-bridge/event"
@@ -113,11 +117,21 @@ func (b *Backend) Run(ctx context.Context) error {
 	// Setup event handlers
 	event_handler.RegisterHandlers(b.eventRouter, b.dataStore)
 
-	go audio.Watch(ctx, func() {
-		if err := b.dataStore.TriggerModuleUpdate(types.ModuleAudio); err != nil {
-			slog.Warn("Failed to update audio module data", "error", err)
-		}
-	})
+	// These modules follow changes on the system, so they update as soon as
+	// one happens rather than on their next refresh
+	for module, watch := range map[types.ModuleName]func(context.Context, func()){
+		types.ModuleAudio:    audio.Watch,
+		types.ModuleBattery:  battery.Watch,
+		types.ModuleDisplays: displays.Watch,
+		types.ModuleNetworks: networks.Watch,
+		types.ModuleSystem:   system.Watch,
+	} {
+		go watch(ctx, func() {
+			if err := b.dataStore.TriggerModuleUpdate(module); err != nil {
+				slog.Warn("Failed to update module data", "module", module, "error", err)
+			}
+		})
+	}
 
 	go discord.Run(ctx, func(d types.DiscordData) {
 		if err := b.dataStore.SetModuleData(types.ModuleDiscord, d); err != nil {
