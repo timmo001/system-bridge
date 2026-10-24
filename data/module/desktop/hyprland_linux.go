@@ -19,7 +19,7 @@ import (
 // synchronously and freezes until the connection closes
 const hyprlandTimeout = 2 * time.Second
 
-var errNoHyprland = errors.New("Hyprland isn't running")
+var errNoHyprland = errors.New("no running Hyprland instance")
 
 // hyprlandDir is the running Hyprland instance's socket directory. The backend
 // can start outside Hyprland's environment, such as from systemd, so without
