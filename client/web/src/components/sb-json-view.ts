@@ -4,10 +4,17 @@ import {
   HighlightStyle,
   syntaxHighlighting,
 } from "@codemirror/language";
+import {
+  closeSearchPanel,
+  openSearchPanel,
+  search,
+  searchKeymap,
+  searchPanelOpen,
+} from "@codemirror/search";
 import { EditorState } from "@codemirror/state";
-import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { mdiCheck, mdiContentCopy } from "@mdi/js";
+import { mdiCheck, mdiContentCopy, mdiMagnify } from "@mdi/js";
 import type { ModulesData } from "@timmo001/effect-system-bridge";
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
@@ -48,6 +55,61 @@ const editorTheme = EditorView.theme({
   ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
     backgroundColor: "var(--sb-color-accent-soft) !important",
   },
+  ".cm-searchMatch": {
+    backgroundColor:
+      "color-mix(in oklab, var(--sb-color-warning) 30%, transparent)",
+    borderRadius: "var(--sb-radius-s)",
+  },
+  ".cm-searchMatch-selected": {
+    backgroundColor:
+      "color-mix(in oklab, var(--sb-color-accent) 45%, transparent)",
+  },
+  ".cm-panels": {
+    color: "var(--sb-color-text)",
+    backgroundColor: "var(--sb-color-raised)",
+  },
+  ".cm-panels-bottom": { borderTop: "1px solid var(--sb-color-border)" },
+  ".cm-panel.cm-search": {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "var(--sb-space-2)",
+    padding:
+      "var(--sb-space-2) var(--sb-space-10) var(--sb-space-2) var(--sb-space-3)",
+    fontFamily: "var(--sb-font-body)",
+    fontSize: "var(--sb-font-size-xs)",
+  },
+  ".cm-search br": { display: "none" },
+  ".cm-panel.cm-search label": {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "var(--sb-space-1)",
+  },
+  ".cm-textfield, .cm-button": {
+    height: "1.875rem",
+    margin: "0",
+    padding: "0 var(--sb-space-2)",
+    font: "inherit",
+    color: "var(--sb-color-text)",
+    backgroundColor: "var(--sb-color-sunken)",
+    backgroundImage: "none",
+    border: "1px solid var(--sb-color-border)",
+    borderRadius: "var(--sb-radius-m)",
+  },
+  ".cm-textfield:focus": {
+    outline: "none",
+    borderColor: "var(--sb-color-accent)",
+  },
+  ".cm-button": { cursor: "pointer" },
+  ".cm-button:hover": { borderColor: "var(--sb-color-accent)" },
+  ".cm-panel.cm-search [name=close]": {
+    top: "50%",
+    right: "var(--sb-space-3)",
+    transform: "translateY(-50%)",
+    fontSize: "var(--sb-font-size-l)",
+    color: "var(--sb-color-muted)",
+    cursor: "pointer",
+  },
 });
 
 const highlightStyle = syntaxHighlighting(
@@ -61,6 +123,18 @@ const highlightStyle = syntaxHighlighting(
     { tag: tags.separator, color: "var(--sb-color-muted)" },
   ]),
 );
+
+/** The search panel's words, in sentence case like the rest of the client. */
+const searchPhrases = EditorState.phrases.of({
+  Find: "Search",
+  next: "Next",
+  previous: "Previous",
+  all: "All",
+  "match case": "Match case",
+  regexp: "Regex",
+  "by word": "Whole word",
+  close: "Close",
+});
 
 /** Any module's data, as the connector decoded it. */
 export type JsonData = ModulesData[keyof ModulesData] | null;
@@ -96,7 +170,25 @@ export class SbJsonView extends LitElement {
 
   #copiedTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // Fills the window below where the view starts, which moves as the page
+  // header wraps or the window resizes
+  readonly #resize = new ResizeObserver(() => {
+    this.#measure();
+  });
+
+  #measure() {
+    const top = this.getBoundingClientRect().top + window.scrollY;
+    this.style.setProperty("--sb-json-top", `${top}px`);
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.#resize.observe(document.documentElement);
+  }
+
   protected override firstUpdated(): void {
+    this.#measure();
+
     if (!this.container) return;
 
     this.#view = new EditorView({
@@ -104,10 +196,13 @@ export class SbJsonView extends LitElement {
         doc: format(this.data),
         extensions: [
           json(),
-          EditorView.editable.of(false),
+          // Read-only but focusable, so the keyboard can select and search
           EditorState.readOnly.of(true),
           lineNumbers(),
           foldGutter(),
+          search(),
+          keymap.of(searchKeymap),
+          searchPhrases,
           editorTheme,
           highlightStyle,
           EditorView.lineWrapping,
@@ -135,10 +230,18 @@ export class SbJsonView extends LitElement {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.#resize.disconnect();
     clearTimeout(this.#copiedTimer);
     this.#view?.destroy();
     this.#view = undefined;
   }
+
+  #toggleSearch = () => {
+    if (this.#view === undefined) return;
+
+    if (searchPanelOpen(this.#view.state)) closeSearchPanel(this.#view);
+    else openSearchPanel(this.#view);
+  };
 
   #copy = async () => {
     try {
@@ -159,7 +262,13 @@ export class SbJsonView extends LitElement {
         :host {
           position: relative;
           display: block;
-          height: var(--sb-json-height, 36rem);
+          height: var(
+            --sb-json-height,
+            max(
+              20rem,
+              calc(100dvh - var(--sb-json-top, 0px) - var(--sb-space-12))
+            )
+          );
           overflow: hidden;
           border: 1px solid var(--sb-color-border);
           border-radius: var(--sb-radius-l);
@@ -170,11 +279,16 @@ export class SbJsonView extends LitElement {
           inset: 0;
         }
 
-        button {
+        .tools {
           position: absolute;
           top: var(--sb-space-2);
           right: var(--sb-space-3);
           z-index: 1;
+          display: flex;
+          gap: var(--sb-space-2);
+        }
+
+        button {
           display: inline-flex;
           align-items: center;
           gap: var(--sb-space-1-5);
@@ -201,10 +315,19 @@ export class SbJsonView extends LitElement {
         }
       </style>
       <div class="editor"></div>
-      <button type="button" @click=${this.#copy}>
-        ${icon(this.copied ? mdiCheck : mdiContentCopy)}
-        ${this.copied ? "Copied" : "Copy"}
-      </button>
+      <div class="tools">
+        <button
+          type="button"
+          title="Search (Ctrl+F in the data)"
+          @click=${this.#toggleSearch}
+        >
+          ${icon(mdiMagnify)} Search
+        </button>
+        <button type="button" @click=${this.#copy}>
+          ${icon(this.copied ? mdiCheck : mdiContentCopy)}
+          ${this.copied ? "Copied" : "Copy"}
+        </button>
+      </div>
     `;
   }
 }
