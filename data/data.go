@@ -206,9 +206,10 @@ func (d *DataStore) GetAllModuleData() map[types.ModuleName]any {
 }
 
 // GetHistory returns the graphed metrics' readings taken after a time, in
-// Unix milliseconds. Zero returns them all.
-func (d *DataStore) GetHistory(since int64) types.MetricHistory {
-	return d.history.Since(since)
+// Unix milliseconds. Zero returns them all. With modules, only those
+// modules' readings are returned.
+func (d *DataStore) GetHistory(since int64, modules ...types.ModuleName) types.MetricHistory {
+	return d.history.Since(since, modules...)
 }
 
 // History is the store's history, for saving it

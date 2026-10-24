@@ -89,14 +89,17 @@ System Bridge keeps up to the last 24 hours of the graphed readings and keeps th
 
 Readings a system doesn't report are left out.
 
-Send the `GET_HISTORY` event to get them. With no data it returns everything it holds. Pass `since`, in Unix milliseconds, to get only readings taken after that time, such as the newest one you already have.
+Send the `GET_HISTORY` event to get them. With no data it returns everything it holds. Both of these are optional:
+
+- `since`, in Unix milliseconds, returns only readings taken after that time, such as the newest one you already have.
+- `modules` returns only those modules' readings: `cpu`, `memory`, `battery`, `system`, `networks`, `disks`, `gpus` or `sensors`. The other series come back as empty lists. Any other module is answered with a `BAD_REQUEST` error.
 
 ```json title="Request"
 {
     "id": "abc123",
     "token": "abc123",
     "event": "GET_HISTORY",
-    "data": { "since": 1761300000000 }
+    "data": { "since": 1761300000000, "modules": ["cpu", "gpus"] }
 }
 ```
 
@@ -151,4 +154,4 @@ It responds with the `HISTORY` type. Each series is a list of readings, oldest f
 }
 ```
 
-To save the history to a file, use [`system-bridge client history export`](/using/cli/#export-history) or the export on the web client's overview. The TypeScript connector's `historyToCsv` and the Python connector's `MetricHistory.to_csv()` write the same CSV.
+To save the history to a file, use [`system-bridge client history export`](/using/cli/#export-history) or the web client's Export menu, on the overview or a module's page. The TypeScript connector's `historyToCsv` and the Python connector's `MetricHistory.to_csv()` write the same CSV.

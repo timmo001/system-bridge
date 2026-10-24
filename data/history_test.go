@@ -92,6 +92,27 @@ func TestHistory_Record(t *testing.T) {
 		assert.Empty(t, m.GPUs[0].CoreLoad)
 	})
 
+	t.Run("Modules keep only their own readings", func(t *testing.T) {
+		h := &History{counters: make(map[string]counter)}
+		rpm := 1200.0
+
+		h.Record(cpu(10), start)
+		h.Record(types.MemoryData{Virtual: &types.MemoryVirtual{Percent: new(float64)}}, start)
+		h.Record(types.SensorsData{Fans: []types.Fan{{SensorKey: "fan1", SpeedRPM: &rpm}}}, start)
+
+		m := h.Since(0, types.ModuleCPU, types.ModuleSensors)
+		assert.Len(t, m.CPU, 1)
+		assert.Len(t, m.Fans, 1)
+
+		// Filtered out series are empty lists, not null, so clients that
+		// expect every key still decode it
+		require.NotNil(t, m.Memory)
+		assert.Empty(t, m.Memory)
+		b, err := json.Marshal(m)
+		require.NoError(t, err)
+		assert.NotContains(t, string(b), "null")
+	})
+
 	t.Run("Since returns only newer readings", func(t *testing.T) {
 		h := &History{counters: make(map[string]counter)}
 

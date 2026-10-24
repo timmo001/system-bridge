@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -279,9 +280,69 @@ func (h *History) trim(cutoff int64) {
 	})
 }
 
+// historyModules are the modules whose readings the history keeps
+var historyModules = []types.ModuleName{
+	types.ModuleCPU,
+	types.ModuleMemory,
+	types.ModuleBattery,
+	types.ModuleSystem,
+	types.ModuleNetworks,
+	types.ModuleDisks,
+	types.ModuleGPUs,
+	types.ModuleSensors,
+}
+
+// HistoryModules are the modules whose readings the history keeps, to filter
+// it by
+func HistoryModules() []types.ModuleName {
+	return slices.Clone(historyModules)
+}
+
+// HasHistory is whether the history keeps a module's readings
+func HasHistory(module types.ModuleName) bool {
+	return slices.Contains(historyModules, module)
+}
+
+// onlyModules empties the series of every module not listed. Emptied series
+// stay as empty lists, so the history keeps its shape.
+func onlyModules(m types.MetricHistory, modules []types.ModuleName) types.MetricHistory {
+	filtered := mapSeries(m, func([]types.HistorySample) []types.HistorySample {
+		return []types.HistorySample{}
+	})
+	keep := func(module types.ModuleName) bool { return slices.Contains(modules, module) }
+
+	if keep(types.ModuleCPU) {
+		filtered.CPU, filtered.CPUTemperature, filtered.CPUFrequency = m.CPU, m.CPUTemperature, m.CPUFrequency
+		filtered.CPUPower, filtered.LoadAverage = m.CPUPower, m.LoadAverage
+	}
+	if keep(types.ModuleMemory) {
+		filtered.Memory, filtered.Swap = m.Memory, m.Swap
+	}
+	if keep(types.ModuleBattery) {
+		filtered.Battery = m.Battery
+	}
+	if keep(types.ModuleSystem) {
+		filtered.SystemPower = m.SystemPower
+	}
+	if keep(types.ModuleNetworks) {
+		filtered.NetworkReceive, filtered.NetworkSend = m.NetworkReceive, m.NetworkSend
+	}
+	if keep(types.ModuleDisks) {
+		filtered.DiskRead, filtered.DiskWrite, filtered.DiskTemperatures = m.DiskRead, m.DiskWrite, m.DiskTemperatures
+	}
+	if keep(types.ModuleGPUs) {
+		filtered.GPUs = m.GPUs
+	}
+	if keep(types.ModuleSensors) {
+		filtered.Temperatures, filtered.Fans = m.Temperatures, m.Fans
+	}
+
+	return filtered
+}
+
 // Since copies the readings taken after a time, in Unix milliseconds. Zero
-// copies them all.
-func (h *History) Since(since int64) types.MetricHistory {
+// copies them all. With modules, only those modules' readings are copied.
+func (h *History) Since(since int64, modules ...types.ModuleName) types.MetricHistory {
 	if h == nil {
 		return types.MetricHistory{}
 	}
@@ -289,7 +350,11 @@ func (h *History) Since(since int64) types.MetricHistory {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	return h.since(since)
+	copied := h.since(since)
+	if len(modules) == 0 {
+		return copied
+	}
+	return onlyModules(copied, modules)
 }
 
 func (h *History) since(since int64) types.MetricHistory {
