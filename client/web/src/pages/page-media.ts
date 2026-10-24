@@ -8,6 +8,8 @@ import {
   mdiStop,
   mdiVolumeMinus,
   mdiVolumeHigh,
+  mdiVolumeLow,
+  mdiVolumeMedium,
   mdiVolumeOff,
   mdiVolumePlus,
 } from "@mdi/js";
@@ -47,6 +49,18 @@ const statusLabel = (status: string | null | undefined) =>
   status
     ? `${status.charAt(0).toUpperCase()}${status.slice(1).toLowerCase()}`
     : "Idle";
+
+/** A speaker showing the volume level, from 0 to 1. */
+const volumeIcon = (volume: number | null | undefined) =>
+  volume === null || volume === undefined
+    ? mdiVolumeHigh
+    : volume <= 0
+      ? mdiVolumeOff
+      : volume < 0.34
+        ? mdiVolumeLow
+        : volume < 0.67
+          ? mdiVolumeMedium
+          : mdiVolumeHigh;
 
 const placeholder = html`<span
   class="skeleton"
@@ -188,29 +202,73 @@ export class PageMedia extends SbPage {
         margin-inline-start: var(--sb-space-1);
       }
 
-      /* Volume steps slide out from beside mute on hover or focus. Touch
-         screens can't hover, so they always show them */
+      /* The volume shows its level. Hover or focus opens the controls in a
+         panel above it, so nothing in the row moves. Touch screens can't
+         hover, so they show the controls in the row instead */
+      .controls .levels {
+        position: relative;
+      }
+
+      .controls .level {
+        display: grid;
+        place-items: center;
+        width: 3rem;
+        aspect-ratio: 1;
+        color: var(--sb-color-muted);
+        --sb-icon-size: 1.5rem;
+      }
+
       .controls .reveal {
+        position: absolute;
+        right: 0;
+        bottom: 100%;
+        z-index: 1;
+        /* Bridges the gap, so the pointer can reach the panel */
+        padding-bottom: var(--sb-space-2);
+        visibility: hidden;
+        opacity: 0;
+        translate: 0 0.25rem;
+        transition:
+          opacity var(--sb-duration-fast) var(--sb-easing),
+          translate var(--sb-duration-fast) var(--sb-easing),
+          visibility var(--sb-duration-fast);
+      }
+
+      .controls .reveal-panel {
         display: flex;
         gap: var(--sb-space-1);
-        max-width: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition:
-          max-width var(--sb-duration-normal) var(--sb-easing),
-          opacity var(--sb-duration-normal) var(--sb-easing);
+        padding: var(--sb-space-1);
+        background: var(--sb-color-raised);
+        border: 1px solid var(--sb-color-border);
+        border-radius: var(--sb-radius-pill);
+        box-shadow: var(--sb-shadow-m);
       }
 
       .controls .levels:hover .reveal,
       .controls .levels:focus-within .reveal {
-        max-width: 7rem;
+        visibility: visible;
         opacity: 1;
+        translate: 0 0;
       }
 
       @media (hover: none) {
         .controls .reveal {
-          max-width: none;
+          position: static;
+          padding: 0;
+          visibility: visible;
           opacity: 1;
+          translate: none;
+        }
+
+        .controls .reveal-panel {
+          padding: 0;
+          background: none;
+          border: 0;
+          box-shadow: none;
+        }
+
+        .controls .level {
+          display: none;
         }
       }
 
@@ -396,14 +454,16 @@ export class PageMedia extends SbPage {
                 })}
               </span>
               <span class="group levels">
+                <span class="level" aria-hidden="true"
+                  >${icon(volumeIcon(media?.volume))}</span
+                >
                 <span class="reveal">
-                  ${this.#button("VOLUME_DOWN", mdiVolumeMinus)}
-                  ${this.#button("VOLUME_UP", mdiVolumePlus)}
+                  <span class="reveal-panel">
+                    ${this.#button("VOLUME_DOWN", mdiVolumeMinus)}
+                    ${this.#button("MUTE", mdiVolumeOff)}
+                    ${this.#button("VOLUME_UP", mdiVolumePlus)}
+                  </span>
                 </span>
-                ${this.#button(
-                  "MUTE",
-                  media?.volume === 0 ? mdiVolumeOff : mdiVolumeHigh,
-                )}
                 <span class="muted small tabular volume"
                   >${
                     media?.volume === null || media?.volume === undefined
