@@ -86,7 +86,7 @@ Available modules:
 | `battery` | Charge level, charging state, and time remaining. |
 | `cpu` | Usage, frequency, core counts, and per-core load. |
 | `disks` | Mounted devices, partitions, and used/free space. |
-| `displays` | Connected displays, resolution, and refresh rate. |
+| `displays` | Connected displays, resolution, refresh rate, brightness and power state. |
 | `gpus` | GPU model, load, memory, and temperature. |
 | `media` | Currently playing media: title, artist, and playback state. |
 | `memory` | Physical and virtual memory usage. |
@@ -138,6 +138,20 @@ Example arguments:
 
 ```json
 { "action": "PAUSE" }
+```
+
+### `system_bridge_display_control`
+
+Set a display's brightness or power state. See [display control](/api/websocket/control/#display-control) for what each display supports.
+
+- `id` (required): The display's `id` from the `displays` module.
+- `brightness` (optional): Brightness in percent, 0-100.
+- `power_state` (optional): `on`, `standby`, `suspend` or `off`.
+
+Example arguments:
+
+```json
+{ "id": "HDMI-A-2", "brightness": 40 }
 ```
 
 ## Troubleshooting

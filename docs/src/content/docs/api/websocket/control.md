@@ -1,9 +1,9 @@
 ---
 title: Control
-description: Control media and Discord, send notifications, open files and URLs, and change the power state over the WebSocket API.
+description: Control media, Discord and displays, send notifications, open files and URLs, and change the power state over the WebSocket API.
 ---
 
-Control playback and Discord, send notifications, open files and URLs, and manage system power state.
+Control playback, Discord and displays, send notifications, open files and URLs, and manage system power state.
 
 ## Media control
 
@@ -72,6 +72,28 @@ The volume values are the percentages that Discord's sliders show. In testing, D
 ```
 
 The response type is `DISCORD_CONTROLLED`. If Discord is not connected, the response is an `ERROR`.
+
+## Display control
+
+Send the `DISPLAY_CONTROL` event to set a display's brightness, its power state, or both. See [displays](/features/remote-control/#displays) for what's supported.
+
+- `id` (required): The display's `id` from the [`displays`](/api/data/#displays) data.
+- `brightness` (optional): Brightness in percent, 0-100.
+- `power_state` (optional): `on`, `standby`, `suspend` or `off`. External monitors only.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "DISPLAY_CONTROL",
+    "data": {
+        "id": "HDMI-A-2",
+        "brightness": 40
+    }
+}
+```
+
+The response type is `DISPLAY_CONTROLLED`, and the displays module updates straight after. A display that can't be controlled that way gets an `ERROR` with the subtype `INVALID_ACTION`.
 
 ## Send notification
 

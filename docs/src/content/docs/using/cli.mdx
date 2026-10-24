@@ -77,6 +77,16 @@ system-bridge client discord toggle_mute
 
 Actions that need nothing else work here, such as `mute`, `unmute`, `toggle_mute`, `deafen`, `undeafen`, `toggle_deafen`, `leave_voice_channel`, `toggle_video` and `toggle_screenshare`. Use the web client or the API for actions that take a channel, user, device or value.
 
+## Displays
+
+Set a display's brightness in percent, its power state, or both:
+
+```bash
+system-bridge client display HDMI-A-2 --brightness 40 --power on
+```
+
+The id is the display's `id` from the [`displays`](/api/data/#displays) data. The power state is one of `on`, `standby`, `suspend` or `off`. See [displays](/features/remote-control/#displays) for what each display supports.
+
 ## Discovery
 
 ### List Services

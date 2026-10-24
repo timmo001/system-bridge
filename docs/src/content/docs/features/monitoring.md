@@ -16,7 +16,7 @@ System Bridge reads your system's state into data modules and keeps them up to d
 | `gpus` | Load, memory, clocks, temperature and power for each GPU. |
 | `sensors` | Temperatures and fan speeds. |
 | `battery` | Charge, whether it's charging, and time remaining. |
-| `displays` | Resolution, position and refresh rate of each display. |
+| `displays` | Resolution, position, refresh rate, brightness and power state of each display. |
 | `disks` | Partitions, used and free space, and read and write activity. |
 | `networks` | Interfaces, addresses, traffic and connections. |
 | `media` | What's playing and its position. |

@@ -132,19 +132,23 @@ Every field other than `connected`, `authenticated` and `error` is `null` until 
 
 Returns an array of objects, one per display.
 
+On Linux without an X server, such as under Wayland, the displays come from the kernel's DRM connectors instead. Then `name` is the monitor's model from its EDID, the resolution is its preferred one, and the position, `is_primary`, `pixel_clock` and `refresh_rate` are `null`.
+
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | string | Display identifier. |
+| `id` | string | Display identifier. On Linux, the connector, such as `HDMI-A-2`. |
 | `name` | string | Display name. |
 | `resolution_horizontal` | number | Horizontal resolution in pixels. |
 | `resolution_vertical` | number | Vertical resolution in pixels. |
-| `x` | number | X position in the virtual desktop. |
-| `y` | number | Y position in the virtual desktop. |
+| `x` | number \| null | X position in the virtual desktop. |
+| `y` | number \| null | Y position in the virtual desktop. |
 | `width` | number | Physical width in millimetres. Linux only. |
 | `height` | number | Physical height in millimetres. Linux only. |
 | `is_primary` | boolean | Whether this is the primary display. |
 | `pixel_clock` | number | Pixel clock. |
 | `refresh_rate` | number | Refresh rate in Hz. |
+| `brightness` | number \| null | Brightness in percent, over DDC/CI or from a built-in panel's backlight. `null` when it can't be read. |
+| `power_state` | string \| null | `on`, `standby`, `suspend` or `off`, over DDC/CI. `null` when it can't be read. |
 
 ### `gpus`
 

@@ -1,9 +1,9 @@
 ---
 title: Remote control
-description: Open URLs and files, type and press keys, and sleep, lock or shut down the machine running System Bridge.
+description: Open URLs and files, type and press keys, set display brightness, and sleep, lock or shut down the machine running System Bridge.
 ---
 
-System Bridge can act on the machine it runs on: open a website or file, type text or press keys, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
+System Bridge can act on the machine it runs on: open a website or file, type text or press keys, set a display's brightness, and change its power state. Home Assistant automations use these to, for example, open a dashboard on a wall display in the morning or lock the computer when you leave.
 
 ## Opening a URL or file
 
@@ -44,6 +44,22 @@ Sleep, hibernate, lock, log out, restart or shut down the machine from Home Assi
 | Shut down | `systemctl poweroff` | `shutdown /s` |
 
 On Linux, hibernating needs swap set up for it. Depending on your distribution's polkit rules, suspending or shutting down may ask for a password when System Bridge runs as a service.
+
+## Displays
+
+Set a display's brightness, or turn a monitor off and on, from the API with [`DISPLAY_CONTROL`](/api/websocket/control/#display-control), the [MCP server](/api/mcp/)'s `system_bridge_display_control` tool, or the CLI:
+
+```bash title="Terminal"
+system-bridge client display HDMI-A-2 --brightness 40
+system-bridge client display HDMI-A-2 --power off
+```
+
+The [`displays`](/api/data/#displays) data reports each display's `brightness` and `power_state`.
+
+- **External monitors** are controlled over DDC/CI, which most monitors support, though some turn it off by default in their own menu. On Linux this needs [ddcutil](https://www.ddcutil.com/), and access to `/dev/i2c-*`, usually by being in the `i2c` group. On Windows it works through the monitor's driver.
+- **Built-in laptop panels** use their backlight. They have brightness but no power state. On Linux, System Bridge sets the backlight through logind, so it needs to run in, or as the user of, an active login session.
+
+Not every monitor answers DDC/CI. Those report `null`, and controlling them returns an error. macOS isn't supported yet.
 
 ## Security
 
