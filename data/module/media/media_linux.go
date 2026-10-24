@@ -16,7 +16,7 @@ import (
 
 func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 	// On Linux, we'll use playerctl to get media information
-	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}"}`, "--all-players")
+	cmd := exec.Command("playerctl", "metadata", "--format", `{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","duration":"{{mpris:length}}","position":"{{position}}","status":"{{status}}","playerName":"{{playerName}}","volume":"{{volume}}","shuffle":"{{shuffle}}","loopStatus":"{{loopStatus}}","artUrl":"{{mpris:artUrl}}"}`, "--all-players")
 	output, err := cmd.Output()
 	if err != nil {
 		// Info logging for playerctl errors (expected when no media player running)
@@ -45,6 +45,7 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			Volume     string `json:"volume"`
 			Shuffle    string `json:"shuffle"`
 			LoopStatus string `json:"loopStatus"`
+			ArtURL     string `json:"artUrl"`
 		}
 
 		parseSingle := func(b []byte) (*playerMetadata, error) {
@@ -107,6 +108,14 @@ func getMediaData(mediaData types.MediaData) (types.MediaData, error) {
 			mediaData.Title = &chosen.Title
 			mediaData.Artist = &chosen.Artist
 			mediaData.AlbumTitle = &chosen.Album
+
+			// Only art a client can load itself: a web or data URL. A file
+			// URL points at this machine's disk
+			if strings.HasPrefix(chosen.ArtURL, "https://") ||
+				strings.HasPrefix(chosen.ArtURL, "http://") ||
+				strings.HasPrefix(chosen.ArtURL, "data:image/") {
+				mediaData.Thumbnail = &chosen.ArtURL
+			}
 
 			// Normalize status to HA-expected constants
 			if chosen.Status != "" {
