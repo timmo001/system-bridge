@@ -9,7 +9,11 @@ import "~/components/sb-meter";
 import "~/components/sb-timeseries";
 import { icon, pageStyles, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
-import { dashboardStyles } from "~/dashboards/shared";
+import {
+  dashboardStyles,
+  powerSeries,
+  temperatureSeries,
+} from "~/dashboards/shared";
 import { moduleState } from "~/lib/atoms";
 import {
   formatBytes,
@@ -18,7 +22,9 @@ import {
   formatPlayerStatus,
   formatQuantity,
   formatRate,
+  formatTemperature,
   formatUptime,
+  formatWatts,
 } from "~/lib/format";
 import { metricHistory } from "~/lib/history";
 import { moduleInfo, moduleOrder } from "~/lib/navigation";
@@ -283,6 +289,8 @@ export class PageOverview extends SbPage {
   #renderContent() {
     const { data, settled } = this.#modules.value;
     const history = this.#history.value;
+    const temperatures = temperatureSeries(data, history);
+    const power = powerSeries(data, history);
 
     // The gauges at the top need these; the other cards fill in as they come
     if (!settled.has("cpu") || !settled.has("memory")) return placeholder;
@@ -354,6 +362,36 @@ export class PageOverview extends SbPage {
             .format=${formatRate}
           ></sb-timeseries>
         </sb-card>
+        ${
+          temperatures.length === 0
+            ? nothing
+            : html`<sb-card
+                class="half"
+                heading="Temperatures"
+                href=${href("module", { params: { module: "sensors" } })}
+              >
+                <sb-timeseries
+                  label="CPU and GPU temperatures over time"
+                  .series=${temperatures}
+                  .format=${formatTemperature}
+                ></sb-timeseries>
+              </sb-card>`
+        }
+        ${
+          power.length === 0
+            ? nothing
+            : html`<sb-card
+                class="half"
+                heading="Power"
+                href=${href("module", { params: { module: "system" } })}
+              >
+                <sb-timeseries
+                  label="Power use over time"
+                  .series=${power}
+                  .format=${formatWatts}
+                ></sb-timeseries>
+              </sb-card>`
+        }
         ${this.#renderStorage(data)} ${this.#renderMedia(data)}
         <sb-card
           heading="Modules"

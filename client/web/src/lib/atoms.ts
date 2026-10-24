@@ -223,7 +223,7 @@ const connected = (
     : Effect.fail(new ConnectionError({ message: state.error }));
 
 /** The connected socket, failing when there isn't one. */
-const socket = (get: Atom.AtomContext) =>
+export const socket = (get: Atom.AtomContext) =>
   get.result(connection).pipe(Effect.flatMap(connected));
 
 const fnSocket = (get: Atom.FnContext) =>

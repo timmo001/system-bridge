@@ -19,25 +19,29 @@ import {
   formatPercent,
   formatPlayerStatus,
   formatUptime,
+  formatWatts,
 } from "~/lib/format";
 import { href } from "~/lib/router";
 
 import {
   type DashboardContext,
   facts,
+  graphCard,
   noData,
   onTableChange,
+  powerSeries,
   stat,
   tableState,
   yesNo,
 } from "./shared";
 
-export const systemDashboard = ({ data }: DashboardContext) => {
+export const systemDashboard = ({ data, history }: DashboardContext) => {
   const system = data.system;
 
   if (system === undefined) return noData("system data");
 
   const device = system.device_info;
+  const power = powerSeries(data, history);
 
   const users = system.users.map(
     (user) =>
@@ -92,10 +96,22 @@ export const systemDashboard = ({ data }: DashboardContext) => {
         <div class="stats">
           ${stat("Uptime", formatUptime(system.uptime))}
           ${stat("Platform", system.platform)}
-          ${stat("Power", system.power_usage === null ? "" : `${formatNumber(system.power_usage)} W`)}
+          ${stat("Power", system.power_usage === null ? "" : formatWatts(system.power_usage))}
           ${stat("Users", String(system.users.length))}
         </div>
       </sb-card>
+      ${
+        power.length === 0
+          ? nothing
+          : graphCard({
+              heading: "Power over time",
+              label: "Power use over time",
+              series: power,
+              format: formatWatts,
+              height: 220,
+              width: "full",
+            })
+      }
       <sb-card class="third" heading="Software">
         ${facts([
           ["System Bridge", system.version],

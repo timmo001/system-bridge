@@ -16,6 +16,7 @@ import {
 import {
   type DashboardContext,
   facts,
+  graphCard,
   noData,
   onTableChange,
   stat,
@@ -101,6 +102,20 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
           ${stat("Writes", formatCount(io?.write_count))}
         </div>
       </sb-card>
+      ${
+        history.diskTemperatures.size === 0
+          ? nothing
+          : graphCard({
+              heading: "Temperature",
+              label: "Disk temperatures over time",
+              series: [...history.diskTemperatures].map(([name, samples]) => ({
+                label: name,
+                samples,
+              })),
+              format: formatTemperature,
+              width: "full",
+            })
+      }
       ${cards}
     </div>
   `;

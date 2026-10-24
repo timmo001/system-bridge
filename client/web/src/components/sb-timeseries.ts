@@ -3,11 +3,17 @@ import { crosshair } from "@tanstack/charts/crosshair";
 import { defineChartElement } from "@tanstack/charts/lit";
 import { scaleLinear } from "@tanstack/charts/scales/linear";
 import { tooltip } from "@tanstack/charts/tooltip";
+import { Schema } from "effect";
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
+import { AtomController } from "~/controllers/atom-controller";
+import { registry } from "~/lib/atoms";
 import type { Series } from "~/lib/history";
+import { HistoryRange, historyRange } from "~/lib/preferences";
 
+import "./sb-segmented";
+import type { SegmentOption } from "./sb-segmented";
 import { shared } from "./shared-styles";
 
 defineChartElement();
@@ -21,21 +27,56 @@ interface Row {
   readonly id: string;
   /** Seconds before the newest sample, as a negative number. */
   readonly seconds: number;
+  /** The same, in the axis's unit. */
+  readonly x: number;
   readonly value: number;
   readonly series: string;
+}
+
+interface ShownSeries {
+  readonly label: string;
+  readonly samples: Series;
+  readonly average: number;
+  readonly peak: number;
 }
 
 /** The narrowest time span a chart shows, in seconds. */
 const minimumWindow = 60;
 
-/** How long before the newest reading, such as "45s" or "12m". */
+/** Each range's span in seconds, and how it reads in a sentence. */
+const ranges: Record<HistoryRange, { seconds: number; text: string }> = {
+  "1h": { seconds: 60 * 60, text: "last hour" },
+  "6h": { seconds: 6 * 60 * 60, text: "last 6 hours" },
+  "24h": { seconds: 24 * 60 * 60, text: "last 24 hours" },
+};
+
+const rangeOptions: readonly SegmentOption[] = HistoryRange.literals.map(
+  (range) => ({ value: range, label: range }),
+);
+
+const isHistoryRange = Schema.is(HistoryRange);
+
+/** How long before the newest reading, such as "45s", "12m" or "3h". */
 const agoTick = (seconds: number) => {
   const ago = Math.round(-seconds);
 
   if (ago === 0) return "now";
 
-  return ago < 120 ? `${ago}s` : `${Math.round(ago / 60)}m`;
+  if (ago < 60) return `${ago}s`;
+
+  return ago < 7200 ? `${Math.round(ago / 60)}m` : `${Math.round(ago / 3600)}h`;
 };
+
+/**
+ * The time axis's unit for a span in seconds. The axis counts in it, so its
+ * evenly spaced ticks land on whole minutes or hours rather than odd seconds.
+ */
+const axisUnit = (span: number) =>
+  span <= 180
+    ? { seconds: 1, suffix: "s" }
+    : span <= 3 * 60 * 60
+      ? { seconds: 60, suffix: "m" }
+      : { seconds: 60 * 60, suffix: "h" };
 
 /**
  * Recent readings over time, drawn with TanStack Charts. One series gets a
@@ -54,11 +95,23 @@ export class SbTimeseries extends LitElement {
         color: var(--sb-color-muted);
       }
 
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sb-space-2) var(--sb-space-4);
+        margin-bottom: var(--sb-space-2);
+      }
+
       .legend {
         display: flex;
         flex-wrap: wrap;
         gap: var(--sb-space-1) var(--sb-space-4);
-        margin-bottom: var(--sb-space-2);
+      }
+
+      .toolbar sb-segmented {
+        margin-inline-start: auto;
       }
 
       .legend span {
@@ -72,6 +125,25 @@ export class SbTimeseries extends LitElement {
         width: 0.625rem;
         height: 0.625rem;
         border-radius: 0.1875rem;
+      }
+
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sb-space-1) var(--sb-space-4);
+        margin: var(--sb-space-2) 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .summary strong {
+        font-weight: var(--sb-font-weight-semibold);
+        font-variant-numeric: tabular-nums;
+        color: var(--sb-color-text);
+      }
+
+      .summary span {
+        color: var(--sb-color-text);
       }
 
       .waiting {
@@ -101,7 +173,15 @@ export class SbTimeseries extends LitElement {
 
   @property() label = "";
 
+  readonly #range = new AtomController(this, () => historyRange);
+
   #options: object | undefined;
+
+  /** The series with readings in range, and their average and peak. */
+  #shown: readonly ShownSeries[] = [];
+
+  /** The range the options were built for. */
+  #builtRange: HistoryRange | undefined;
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (
@@ -109,33 +189,82 @@ export class SbTimeseries extends LitElement {
       changed.has("max") ||
       changed.has("height") ||
       changed.has("format") ||
-      changed.has("label")
+      changed.has("label") ||
+      this.#range.value !== this.#builtRange
     ) {
-      this.#options = this.#build();
+      this.#builtRange = this.#range.value;
+      this.#options = this.#build(this.#builtRange);
     }
   }
 
-  #build() {
+  #onRangeChanged = (event: CustomEvent<{ value: string }>) => {
+    const range = event.detail.value;
+
+    if (isHistoryRange(range)) registry.set(historyRange, range);
+  };
+
+  #build(range: HistoryRange) {
     const newest = Math.max(
       0,
       ...this.series.map((series) => series.samples.at(-1)?.time ?? 0),
     );
 
-    const rows: Row[] = this.series.flatMap((series) =>
-      series.samples.map((sample) => ({
-        id: `${series.label}-${sample.time}`,
-        seconds: (sample.time - newest) / 1000,
-        value: sample.value,
-        series: series.label,
-      })),
-    );
+    const start = newest - ranges[range].seconds * 1000;
 
-    const single = this.series.length === 1;
-    const format = this.format;
+    // Only the series with readings in range, so the legend's colours match
+    // the lines the chart draws
+    this.#shown = this.series.flatMap((series) => {
+      const samples = series.samples.filter((sample) => sample.time >= start);
+
+      if (samples.length === 0) return [];
+
+      const values = samples.map((sample) => sample.value);
+
+      return [
+        {
+          label: series.label,
+          samples,
+          average:
+            values.reduce((sum, value) => sum + value, 0) / values.length,
+          peak: Math.max(...values),
+        },
+      ];
+    });
 
     // At least a minute across, so a few seconds of history isn't stretched
     // over the whole width; new readings grow in from the right
-    const oldest = Math.min(-minimumWindow, ...rows.map((row) => row.seconds));
+    const oldestSeconds = Math.min(
+      -minimumWindow,
+      ...this.#shown.map(
+        (series) => ((series.samples[0]?.time ?? newest) - newest) / 1000,
+      ),
+    );
+
+    const unit = axisUnit(-oldestSeconds);
+    const oldest = oldestSeconds / unit.seconds;
+
+    const rows: Row[] = this.#shown.flatMap((series) =>
+      series.samples.map((sample) => {
+        const seconds = (sample.time - newest) / 1000;
+
+        return {
+          id: `${series.label}-${sample.time}`,
+          seconds,
+          x: seconds / unit.seconds,
+          value: sample.value,
+          series: series.label,
+        };
+      }),
+    );
+
+    const unitTick = (x: number) => {
+      const ago = Math.round(-x * 10) / 10;
+
+      return ago === 0 ? "now" : `${ago}${unit.suffix}`;
+    };
+
+    const single = this.#shown.length === 1;
+    const format = this.format;
 
     // Configured instances keep their domain; factories would infer one
     const y =
@@ -148,7 +277,7 @@ export class SbTimeseries extends LitElement {
         ...(single
           ? [
               areaY(rows, {
-                x: "seconds",
+                x: "x",
                 y1: 0,
                 y2: "value",
                 fillOpacity: 0.14,
@@ -156,7 +285,7 @@ export class SbTimeseries extends LitElement {
             ]
           : []),
         lineY(rows, {
-          x: "seconds",
+          x: "x",
           y: "value",
           z: "series",
           strokeWidth: 2,
@@ -167,7 +296,7 @@ export class SbTimeseries extends LitElement {
         x: {
           scale: scaleLinear().domain([oldest, 0]),
           axis: {
-            ticks: { format: agoTick, size: 0 },
+            ticks: { format: unitTick, size: 0 },
             // Start the oldest label at the axis, clear of the y labels
             tickLabels: {
               anchor: ({ index }) => (index === 0 ? "start" : undefined),
@@ -192,15 +321,18 @@ export class SbTimeseries extends LitElement {
 
     return {
       definition,
-      ariaLabel: this.label || "Recent readings",
+      ariaLabel: `${this.label || "Recent readings"}, ${ranges[range].text}`,
       height: this.height,
     };
   }
 
   override render() {
-    const hasData = this.series.some((series) => series.samples.length > 1);
+    const range = this.#range.value;
+    const shown = this.#shown;
+    const single = shown.length === 1;
+    const hasData = shown.some((series) => series.samples.length > 1);
 
-    const legend = this.series.map(
+    const legend = shown.map(
       (series, index) =>
         html`<span
           ><i style="background: var(--sb-color-chart-${(index % 6) + 1})"></i
@@ -209,7 +341,7 @@ export class SbTimeseries extends LitElement {
     );
 
     // What the chart shows, for screen readers: each line's latest reading
-    const latest = this.series
+    const latest = shown
       .flatMap((series) => {
         const last = series.samples.at(-1);
 
@@ -219,30 +351,59 @@ export class SbTimeseries extends LitElement {
       })
       .join(", ");
 
+    const summary = shown.map(
+      (series) =>
+        html`<li>
+          ${single ? nothing : html`<span>${series.label}</span>`} average
+          <strong>${this.format(series.average)}</strong>, peak
+          <strong>${this.format(series.peak)}</strong>
+        </li>`,
+    );
+
+    const description = `${this.label}, ${ranges[range].text}`;
+
     return html`
       ${
-        this.series.length > 1
-          ? html`<div class="legend" aria-hidden="true">${legend}</div>`
+        hasData
+          ? html`<div class="toolbar">
+              ${
+                shown.length > 1
+                  ? html`<div class="legend" aria-hidden="true">${legend}</div>`
+                  : nothing
+              }
+              <sb-segmented
+                label=${`Time range for ${this.label || "the graph"}`}
+                .options=${rangeOptions}
+                .value=${range}
+                @value-changed=${this.#onRangeChanged}
+              ></sb-segmented>
+            </div>`
           : nothing
       }
       ${
         hasData
           ? html`<div
-              role="img"
-              aria-label=${`${this.label}${latest ? `. Latest: ${latest}` : ""}`}
-            >
-              <tanstack-chart
-                aria-hidden="true"
-                .options=${this.#options}
-              ></tanstack-chart>
-            </div>`
+                role="img"
+                aria-label=${`${description}${latest ? `. Latest: ${latest}` : ""}`}
+              >
+                <tanstack-chart
+                  aria-hidden="true"
+                  .options=${this.#options}
+                ></tanstack-chart>
+              </div>
+              <ul
+                class="summary"
+                aria-label=${`Summary, ${ranges[range].text}`}
+              >
+                ${summary}
+              </ul>`
           : html`<div
               class="waiting small"
               role="status"
               style="height: ${this.height}px"
             >
-              The graph starts with the next reading. System Bridge updates most
-              data about once a minute.
+              The graph starts with the next reading. System Bridge records
+              about one a minute and keeps 24 hours.
             </div>`
       }
     `;

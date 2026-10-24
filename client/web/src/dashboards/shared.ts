@@ -1,8 +1,10 @@
 import type { ModulesData } from "@timmo001/effect-system-bridge";
+
 import { css, html, nothing, type TemplateResult } from "lit";
 
 import type { DataTableState } from "~/components/sb-data-table";
-import type { MetricHistory } from "~/lib/history";
+import type { TimeSeries } from "~/components/sb-timeseries";
+import { gpuHistory, type MetricHistory, type Series } from "~/lib/history";
 import { type LocationOf, type ModuleSearch, updateSearch } from "~/lib/router";
 
 export interface DashboardContext {
@@ -108,6 +110,84 @@ export const dashboardStyles = css`
     border-radius: var(--sb-radius-l);
   }
 `;
+
+export interface GraphCard {
+  readonly heading: string;
+  readonly subheading?: string;
+  /** Describes the graph for screen readers. */
+  readonly label: string;
+  readonly series: readonly TimeSeries[];
+  readonly format: (value: number) => string;
+  /** Fixes the top of the scale, such as 100 for percentages. */
+  readonly max?: number;
+  readonly height?: number;
+  /** The card's width in the dashboard grid. */
+  readonly width?: "half" | "third" | "two-thirds" | "full";
+}
+
+/** A card with a graph of readings over time. */
+export const graphCard = (graph: GraphCard) =>
+  html`<sb-card
+    class=${graph.width === "full" ? "" : (graph.width ?? "half")}
+    heading=${graph.heading}
+    subheading=${graph.subheading ?? ""}
+  >
+    <sb-timeseries
+      label=${graph.label}
+      .series=${graph.series}
+      .format=${graph.format}
+      .max=${graph.max}
+      .height=${graph.height ?? 180}
+    ></sb-timeseries>
+  </sb-card>`;
+
+/**
+ * Whether a graph has anything to show: a current reading, or readings
+ * recorded before. Graphs for things this system doesn't report are left out.
+ */
+export const hasReadings = (
+  current: number | null | undefined,
+  ...series: readonly Series[]
+) =>
+  (current !== null && current !== undefined) ||
+  series.some((samples) => samples.length > 0);
+
+/** The CPU's and each GPU's temperature, where they're reported. */
+export const temperatureSeries = (
+  data: ModulesData,
+  history: MetricHistory,
+): readonly TimeSeries[] => [
+  ...(hasReadings(data.cpu?.temperature, history.cpuTemperature)
+    ? [{ label: "CPU", samples: history.cpuTemperature }]
+    : []),
+  ...(data.gpus ?? []).flatMap((gpu) => {
+    const samples = gpuHistory(history, gpu.id).temperature;
+
+    return hasReadings(gpu.temperature, samples)
+      ? [{ label: gpu.name, samples }]
+      : [];
+  }),
+];
+
+/** The system's, the CPU's and each GPU's power, where they're reported. */
+export const powerSeries = (
+  data: ModulesData,
+  history: MetricHistory,
+): readonly TimeSeries[] => [
+  ...(hasReadings(data.system?.power_usage, history.systemPower)
+    ? [{ label: "System", samples: history.systemPower }]
+    : []),
+  ...(hasReadings(data.cpu?.power, history.cpuPower)
+    ? [{ label: "CPU", samples: history.cpuPower }]
+    : []),
+  ...(data.gpus ?? []).flatMap((gpu) => {
+    const samples = gpuHistory(history, gpu.id).power;
+
+    return hasReadings(gpu.power_usage, samples)
+      ? [{ label: gpu.name, samples }]
+      : [];
+  }),
+];
 
 /** The formatters' text for a value that isn't known. */
 const missing = (value: string | number | TemplateResult | null | undefined) =>

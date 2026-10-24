@@ -83,6 +83,9 @@ export const formatTemperature = (celsius: number | null | undefined) =>
     ? "-"
     : `${decimal.format(celsius)} °C`;
 
+export const formatRpm = (rpm: number | null | undefined) =>
+  rpm === null || rpm === undefined ? "-" : `${whole.format(rpm)} RPM`;
+
 export const formatWatts = (watts: number | null | undefined) =>
   watts === null || watts === undefined ? "-" : `${decimal.format(watts)} W`;
 

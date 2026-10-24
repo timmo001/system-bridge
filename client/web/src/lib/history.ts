@@ -1,166 +1,274 @@
-import type { ModulesData } from "@timmo001/effect-system-bridge";
-import { Option } from "effect";
-import { Atom } from "effect/reactivity";
+import type {
+  HistorySample,
+  MetricHistory as BackendHistory,
+  SeriesHistory,
+} from "@timmo001/effect-system-bridge";
+import { Effect, Option } from "effect";
+import { AsyncResult, Atom } from "effect/reactivity";
 
-import { latestModuleData } from "./atoms";
+import { type BridgeError, latestModuleData, socket } from "./atoms";
 
-/** How many samples each series keeps. */
-export const historyLength = 90;
+/** How far back the backend keeps readings, in milliseconds. */
+export const historyWindow = 24 * 60 * 60 * 1000;
 
-export interface Sample {
-  /** When the sample arrived, in milliseconds. */
-  readonly time: number;
-  readonly value: number;
-}
+export type Sample = HistorySample;
 
 export type Series = readonly Sample[];
 
-/** A counter's last reading, to turn the next into a rate. */
-interface Counter {
-  readonly time: number;
-  readonly value: number;
+/** A GPU's loads in percent, temperature in °C and power in watts. */
+export interface GpuHistory {
+  readonly coreLoad: Series;
+  readonly memoryLoad: Series;
+  readonly temperature: Series;
+  readonly power: Series;
 }
 
+/**
+ * Usage is in percent, temperatures in °C, frequency in MHz, power in watts,
+ * fan speeds in RPM, and network and disk values in bytes per second.
+ */
 export interface MetricHistory {
   readonly cpu: Series;
+  readonly cpuTemperature: Series;
+  readonly cpuFrequency: Series;
+  readonly cpuPower: Series;
+  readonly loadAverage: Series;
   readonly memory: Series;
   readonly swap: Series;
   readonly battery: Series;
+  readonly systemPower: Series;
   readonly networkReceive: Series;
   readonly networkSend: Series;
   readonly diskRead: Series;
   readonly diskWrite: Series;
-  /** Each GPU's core load, by GPU ID. */
-  readonly gpus: ReadonlyMap<string, Series>;
-  /** The module data each series last read, so unchanged modules add nothing. */
-  readonly seen: ModulesData;
-  readonly counters: ReadonlyMap<string, Counter>;
+  /** By disk name. */
+  readonly diskTemperatures: ReadonlyMap<string, Series>;
+  /** By GPU ID. */
+  readonly gpus: ReadonlyMap<string, GpuHistory>;
+  /** By sensor key. */
+  readonly temperatures: ReadonlyMap<string, Series>;
+  /** By fan key. */
+  readonly fans: ReadonlyMap<string, Series>;
 }
+
+const noGpu: GpuHistory = {
+  coreLoad: [],
+  memoryLoad: [],
+  temperature: [],
+  power: [],
+};
 
 const empty: MetricHistory = {
   cpu: [],
+  cpuTemperature: [],
+  cpuFrequency: [],
+  cpuPower: [],
+  loadAverage: [],
   memory: [],
   swap: [],
   battery: [],
+  systemPower: [],
   networkReceive: [],
   networkSend: [],
   diskRead: [],
   diskWrite: [],
+  diskTemperatures: new Map(),
   gpus: new Map(),
-  seen: {},
-  counters: new Map(),
+  temperatures: new Map(),
+  fans: new Map(),
 };
 
-const push = (series: Series, time: number, value: number | null): Series =>
-  value === null || !Number.isFinite(value)
-    ? series
-    : [...series.slice(-(historyLength - 1)), { time, value }];
+const byId = (list: readonly SeriesHistory[]) =>
+  new Map(list.map((series) => [series.id, series.samples]));
 
-/** The rate a counter rose at since its last reading, in units per second. */
-const rate = (
-  counters: Map<string, Counter>,
-  key: string,
-  time: number,
-  value: number | null | undefined,
-): number | null => {
-  if (value === null || value === undefined) return null;
+const fromBackend = (history: BackendHistory): MetricHistory => ({
+  cpu: history.cpu,
+  cpuTemperature: history.cpu_temperature,
+  cpuFrequency: history.cpu_frequency,
+  cpuPower: history.cpu_power,
+  loadAverage: history.load_average,
+  memory: history.memory,
+  swap: history.swap,
+  battery: history.battery,
+  systemPower: history.system_power,
+  networkReceive: history.network_receive,
+  networkSend: history.network_send,
+  diskRead: history.disk_read,
+  diskWrite: history.disk_write,
+  diskTemperatures: byId(history.disk_temperatures),
+  gpus: new Map(
+    history.gpus.map((gpu) => [
+      gpu.id,
+      {
+        coreLoad: gpu.core_load,
+        memoryLoad: gpu.memory_load,
+        temperature: gpu.temperature,
+        power: gpu.power,
+      },
+    ]),
+  ),
+  temperatures: byId(history.temperatures),
+  fans: byId(history.fans),
+});
 
-  const previous = counters.get(key);
+/** Every series held, for finding the newest reading. */
+const allSeries = (history: MetricHistory): readonly Series[] => [
+  history.cpu,
+  history.cpuTemperature,
+  history.cpuFrequency,
+  history.cpuPower,
+  history.loadAverage,
+  history.memory,
+  history.swap,
+  history.battery,
+  history.systemPower,
+  history.networkReceive,
+  history.networkSend,
+  history.diskRead,
+  history.diskWrite,
+  ...history.diskTemperatures.values(),
+  ...[...history.gpus.values()].flatMap((gpu) => [
+    gpu.coreLoad,
+    gpu.memoryLoad,
+    gpu.temperature,
+    gpu.power,
+  ]),
+  ...history.temperatures.values(),
+  ...history.fans.values(),
+];
 
-  counters.set(key, { time, value });
+/** The time of the newest reading held, if there is one. */
+const newest = (history: MetricHistory): number | undefined => {
+  const times = allSeries(history).flatMap(
+    (series) => series.at(-1)?.time ?? [],
+  );
 
-  if (previous === undefined || time <= previous.time) return null;
-
-  // A counter that went down was reset, such as after a resume
-  if (value < previous.value) return null;
-
-  return ((value - previous.value) * 1000) / (time - previous.time);
+  return times.length === 0 ? undefined : Math.max(...times);
 };
 
-const record = (
-  history: MetricHistory,
-  data: ModulesData,
-  time: number,
+/** Joins two maps of history by key, dropping keys left with nothing. */
+const joinMaps = <A>(
+  held: ReadonlyMap<string, A>,
+  next: ReadonlyMap<string, A>,
+  join: (held: A | undefined, next: A | undefined) => A,
+  isEmpty: (value: A) => boolean,
+): ReadonlyMap<string, A> => {
+  const joined = new Map<string, A>();
+
+  for (const key of new Set([...held.keys(), ...next.keys()])) {
+    const value = join(held.get(key), next.get(key));
+
+    if (!isEmpty(value)) joined.set(key, value);
+  }
+
+  return joined;
+};
+
+/** Adds the newer readings to each series and drops those past the window. */
+const merge = (
+  held: MetricHistory,
+  next: MetricHistory,
+  now: number,
 ): MetricHistory => {
-  const { seen } = history;
-  const counters = new Map(history.counters);
-  let next = { ...history, seen: data };
+  const cutoff = now - historyWindow;
 
-  if (data.cpu !== undefined && data.cpu !== seen.cpu) {
-    next = { ...next, cpu: push(next.cpu, time, data.cpu.usage) };
-  }
+  const join = (a: Series = [], b: Series = []): Series =>
+    [...a, ...b].filter((sample) => sample.time > cutoff);
 
-  if (data.memory !== undefined && data.memory !== seen.memory) {
-    next = {
-      ...next,
-      memory: push(next.memory, time, data.memory.virtual?.percent ?? null),
-      swap: push(next.swap, time, data.memory.swap?.percent ?? null),
-    };
-  }
+  const joinSeries = (
+    a: ReadonlyMap<string, Series>,
+    b: ReadonlyMap<string, Series>,
+  ) => joinMaps(a, b, join, (series) => series.length === 0);
 
-  if (data.battery !== undefined && data.battery !== seen.battery) {
-    next = {
-      ...next,
-      battery: push(next.battery, time, data.battery.percentage),
-    };
-  }
-
-  if (data.networks !== undefined && data.networks !== seen.networks) {
-    const io = data.networks.io;
-
-    next = {
-      ...next,
-      networkReceive: push(
-        next.networkReceive,
-        time,
-        rate(counters, "network-receive", time, io?.bytes_recv),
-      ),
-      networkSend: push(
-        next.networkSend,
-        time,
-        rate(counters, "network-send", time, io?.bytes_sent),
-      ),
-    };
-  }
-
-  if (data.disks !== undefined && data.disks !== seen.disks) {
-    const io = data.disks.io_counters;
-
-    next = {
-      ...next,
-      diskRead: push(
-        next.diskRead,
-        time,
-        rate(counters, "disk-read", time, io?.read_bytes),
-      ),
-      diskWrite: push(
-        next.diskWrite,
-        time,
-        rate(counters, "disk-write", time, io?.write_bytes),
-      ),
-    };
-  }
-
-  if (data.gpus !== undefined && data.gpus !== seen.gpus) {
-    const gpus = new Map(next.gpus);
-
-    for (const gpu of data.gpus) {
-      gpus.set(gpu.id, push(gpus.get(gpu.id) ?? [], time, gpu.core_load));
-    }
-
-    next = { ...next, gpus };
-  }
-
-  return { ...next, counters };
+  return {
+    cpu: join(held.cpu, next.cpu),
+    cpuTemperature: join(held.cpuTemperature, next.cpuTemperature),
+    cpuFrequency: join(held.cpuFrequency, next.cpuFrequency),
+    cpuPower: join(held.cpuPower, next.cpuPower),
+    loadAverage: join(held.loadAverage, next.loadAverage),
+    memory: join(held.memory, next.memory),
+    swap: join(held.swap, next.swap),
+    battery: join(held.battery, next.battery),
+    systemPower: join(held.systemPower, next.systemPower),
+    networkReceive: join(held.networkReceive, next.networkReceive),
+    networkSend: join(held.networkSend, next.networkSend),
+    diskRead: join(held.diskRead, next.diskRead),
+    diskWrite: join(held.diskWrite, next.diskWrite),
+    diskTemperatures: joinSeries(held.diskTemperatures, next.diskTemperatures),
+    gpus: joinMaps(
+      held.gpus,
+      next.gpus,
+      (a = noGpu, b = noGpu) => ({
+        coreLoad: join(a.coreLoad, b.coreLoad),
+        memoryLoad: join(a.memoryLoad, b.memoryLoad),
+        temperature: join(a.temperature, b.temperature),
+        power: join(a.power, b.power),
+      }),
+      (gpu) =>
+        gpu.coreLoad.length +
+          gpu.memoryLoad.length +
+          gpu.temperature.length +
+          gpu.power.length ===
+        0,
+    ),
+    temperatures: joinSeries(held.temperatures, next.temperatures),
+    fans: joinSeries(held.fans, next.fans),
+  };
 };
+
+/** The data of the modules that have graphs, so others don't refetch. */
+const graphedData = Atom.make((get) => {
+  const { cpu, memory, battery, system, networks, disks, gpus, sensors } =
+    get(latestModuleData);
+
+  return [
+    cpu,
+    memory,
+    battery,
+    system,
+    networks,
+    disks,
+    gpus,
+    sensors,
+  ] as const;
+});
 
 /**
- * Recent readings of the main metrics, for graphs. Kept for the whole visit,
- * so moving between pages doesn't lose them.
+ * The backend's readings, fetched in full once and then only the newer ones
+ * as graphed modules update. Modules arrive in a burst each minute, and each
+ * one restarts the wait before a refetch, so the burst sends one request.
  */
-export const metricHistory = Atom.make((get): MetricHistory => {
-  const data = get(latestModuleData);
-  const previous = Option.getOrElse(get.self<MetricHistory>(), () => empty);
+const historyData = Atom.make((get) => {
+  get(graphedData);
 
-  return record(previous, data, Date.now());
+  const held = get
+    .self<AsyncResult.AsyncResult<MetricHistory, BridgeError>>()
+    .pipe(Option.flatMap(AsyncResult.value));
+
+  const since = held.pipe(Option.flatMapNullishOr(newest));
+
+  return socket(get).pipe(
+    // The first fetch waits only for the modules answering as the page
+    // opens, so graphs fill straight away
+    Effect.delay(Option.isSome(held) ? "1 second" : "200 millis"),
+    Effect.flatMap((bridge) => bridge.getHistory(Option.getOrUndefined(since))),
+    Effect.map((next) =>
+      Option.match(held, {
+        onNone: () => fromBackend(next),
+        onSome: (history) => merge(history, fromBackend(next), Date.now()),
+      }),
+    ),
+  );
 }).pipe(Atom.keepAlive);
+
+/**
+ * Recent readings of the main metrics, for graphs. Keeps the last readings
+ * through refetches and reconnects.
+ */
+export const metricHistory = Atom.make((get): MetricHistory =>
+  AsyncResult.getOrElse(get(historyData), () => empty),
+);
+
+/** A GPU's history, or empty series when there's none yet. */
+export const gpuHistory = (history: MetricHistory, id: string): GpuHistory =>
+  history.gpus.get(id) ?? noGpu;

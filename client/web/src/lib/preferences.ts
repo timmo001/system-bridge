@@ -48,6 +48,18 @@ export const appearance = Atom.kvs({
   }),
 }).pipe(Atom.keepAlive);
 
+export const HistoryRange = Schema.Literals(["1h", "6h", "24h"]);
+
+export type HistoryRange = typeof HistoryRange.Type;
+
+/** How far back the graphs show, shared by every graph. */
+export const historyRange = Atom.kvs({
+  runtime: storage,
+  key: "system-bridge-history-range",
+  schema: HistoryRange,
+  defaultValue: (): HistoryRange => "1h",
+}).pipe(Atom.keepAlive);
+
 /** Applies the chosen themes to the page whenever they change. */
 export const appliedTheme = Atom.make((get) => {
   const { mode, light, dark } = get(appearance);

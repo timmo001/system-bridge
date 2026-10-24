@@ -17,10 +17,20 @@ import {
   formatPercent,
   formatTemperature,
   formatUptime,
+  formatRpm,
   formatWatts,
 } from "~/lib/format";
+import { gpuHistory } from "~/lib/history";
 
-import { type DashboardContext, facts, noData, stat, yesNo } from "./shared";
+import {
+  type DashboardContext,
+  facts,
+  graphCard,
+  hasReadings,
+  noData,
+  stat,
+  yesNo,
+} from "./shared";
 
 const percent = (value: number) => formatPercent(value);
 
@@ -102,6 +112,46 @@ export const cpuDashboard = ({ data, history }: DashboardContext) => {
           .height=${240}
         ></sb-timeseries>
       </sb-card>
+      ${
+        hasReadings(cpu.temperature, history.cpuTemperature)
+          ? graphCard({
+              heading: "Temperature",
+              label: "CPU temperature over time",
+              series: [{ label: "CPU", samples: history.cpuTemperature }],
+              format: formatTemperature,
+            })
+          : nothing
+      }
+      ${
+        hasReadings(cpu.power, history.cpuPower)
+          ? graphCard({
+              heading: "Power",
+              label: "CPU power over time",
+              series: [{ label: "CPU", samples: history.cpuPower }],
+              format: formatWatts,
+            })
+          : nothing
+      }
+      ${
+        hasReadings(frequency?.current, history.cpuFrequency)
+          ? graphCard({
+              heading: "Frequency",
+              label: "CPU frequency over time",
+              series: [{ label: "CPU", samples: history.cpuFrequency }],
+              format: formatFrequency,
+            })
+          : nothing
+      }
+      ${
+        hasReadings(cpu.load_average, history.loadAverage)
+          ? graphCard({
+              heading: "Load average",
+              label: "Load average over time",
+              series: [{ label: "Load", samples: history.loadAverage }],
+              format: formatNumber,
+            })
+          : nothing
+      }
       <sb-card heading="Cores" subheading="Usage of each logical core">
         <div class="meters compact">${cores}</div>
       </sb-card>
@@ -237,6 +287,8 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
         ? (gpu.memory_used / gpu.memory_total) * 100
         : gpu.memory_load;
 
+    const recorded = gpuHistory(history, gpu.id);
+
     return html`
       <sb-card class="half" heading=${gpu.name} subheading="GPU ${gpu.id}">
         <div class="gauges">
@@ -252,8 +304,11 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
           ></sb-gauge>
         </div>
         <sb-timeseries
-          label="${gpu.name} core load over time"
-          .series=${[{ label: "Core", samples: history.gpus.get(gpu.id) ?? [] }]}
+          label="${gpu.name} core and memory load over time"
+          .series=${[
+            { label: "Core", samples: recorded.coreLoad },
+            { label: "Memory", samples: recorded.memoryLoad },
+          ]}
           .max=${100}
           .format=${percent}
           .height=${150}
@@ -261,17 +316,50 @@ export const gpusDashboard = ({ data, history }: DashboardContext) => {
         <div class="stats">
           ${stat("Temperature", formatTemperature(gpu.temperature))}
           ${stat("Power", formatWatts(gpu.power_usage))}
-          ${stat(
-            "Fan",
-            gpu.fan_speed === null ? "-" : `${formatNumber(gpu.fan_speed)} RPM`,
-          )}
+          ${stat("Fan", formatRpm(gpu.fan_speed))}
           ${stat("Memory clock", formatFrequency(gpu.memory_clock))}
         </div>
       </sb-card>
     `;
   });
 
-  return html`<div class="dashboard">${cards}</div>`;
+  const temperatures = gpus.filter((gpu) =>
+    hasReadings(gpu.temperature, gpuHistory(history, gpu.id).temperature),
+  );
+
+  const powered = gpus.filter((gpu) =>
+    hasReadings(gpu.power_usage, gpuHistory(history, gpu.id).power),
+  );
+
+  return html`<div class="dashboard">
+    ${cards}
+    ${
+      temperatures.length === 0
+        ? nothing
+        : graphCard({
+            heading: "Temperature",
+            label: "GPU temperatures over time",
+            series: temperatures.map((gpu) => ({
+              label: gpu.name,
+              samples: gpuHistory(history, gpu.id).temperature,
+            })),
+            format: formatTemperature,
+          })
+    }
+    ${
+      powered.length === 0
+        ? nothing
+        : graphCard({
+            heading: "Power",
+            label: "GPU power over time",
+            series: powered.map((gpu) => ({
+              label: gpu.name,
+              samples: gpuHistory(history, gpu.id).power,
+            })),
+            format: formatWatts,
+          })
+    }
+  </div>`;
 };
 
 /** A Windows sensor's reading, which LibreHardwareMonitor gives untyped. */
@@ -300,10 +388,49 @@ const windowsHardware = (hardware: SensorsWindowsHardware): TemplateResult => {
   </sb-card>`;
 };
 
-export const sensorsDashboard = ({ data }: DashboardContext) => {
+export const sensorsDashboard = ({ data, history }: DashboardContext) => {
   const sensors = data.sensors;
 
   if (sensors === undefined) return noData("sensor data");
+
+  // Sensors and fans that went away still show in the graphs by their key
+  const fanNames = new Map(
+    sensors.fans.map((fan) => [fan.key, fan.name || fan.label || fan.key]),
+  );
+
+  // Side by side when there are both, otherwise across the page
+  const width =
+    history.temperatures.size > 0 && history.fans.size > 0 ? "half" : "full";
+
+  const temperatureGraph =
+    history.temperatures.size === 0
+      ? nothing
+      : graphCard({
+          heading: "Temperatures over time",
+          label: "Sensor temperatures over time",
+          series: [...history.temperatures].map(([key, samples]) => ({
+            label: key,
+            samples,
+          })),
+          format: formatTemperature,
+          height: 220,
+          width,
+        });
+
+  const fanGraph =
+    history.fans.size === 0
+      ? nothing
+      : graphCard({
+          heading: "Fan speeds over time",
+          label: "Fan speeds over time",
+          series: [...history.fans].map(([key, samples]) => ({
+            label: fanNames.get(key) ?? key,
+            samples,
+          })),
+          format: formatRpm,
+          height: 220,
+          width,
+        });
 
   const hardware = (sensors.windows_sensors?.hardware ?? []).map(
     windowsHardware,
@@ -328,14 +455,13 @@ export const sensorsDashboard = ({ data }: DashboardContext) => {
       html`<li>
         ${icon(mdiFan)}
         <span class="spacer">${fan.label || fan.name}</span>
-        <span class="tabular"
-          >${fan.speed_rpm === null ? "-" : `${formatNumber(fan.speed_rpm)} RPM`}</span
-        >
+        <span class="tabular">${formatRpm(fan.speed_rpm)}</span>
       </li>`,
   );
 
   return html`
     <div class="dashboard">
+      ${temperatureGraph} ${fanGraph}
       <sb-card heading="Temperatures">
         ${
           temperatures.length === 0
