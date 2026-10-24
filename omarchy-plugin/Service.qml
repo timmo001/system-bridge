@@ -80,6 +80,13 @@ Item {
 
   function updateNetworkRates(data) {
     var io = objectData(data.io) ? data.io : null
+    // Newer backends work the rates out themselves
+    if (io && io.bytes_recv_rate !== undefined) {
+      networkReceiveRate = numberOrNull(io.bytes_recv_rate)
+      networkSendRate = numberOrNull(io.bytes_sent_rate)
+      lastNetworkCounters = null
+      return
+    }
     var received = numberOrNull(io ? io.bytes_recv : null)
     var sent = numberOrNull(io ? io.bytes_sent : null)
     var now = Date.now()

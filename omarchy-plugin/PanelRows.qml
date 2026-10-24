@@ -224,7 +224,7 @@ QtObject {
     case "battery":
       var battery = service.battery
       if (battery && num(battery.percentage) !== null)
-        add({ key: "battery", icon: battery.is_charging ? "󰂄" : "󰁹", primaryText: "Battery", secondaryText: join([percent(battery.percentage), battery.is_charging ? "Charging" : ""]), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true) })
+        add({ key: "battery", icon: batteryIcon(battery), primaryText: "Battery", secondaryText: join([percent(battery.percentage), battery.is_charging ? "Charging" : (battery.ac_connected === true ? "Plugged in" : "")]), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true) })
       break
     case "disks":
       var partitions = primaryPartitions(service)
@@ -397,12 +397,51 @@ QtObject {
   function batteryRows(service) {
     var rows = []
     var battery = service.battery
+    if (!battery) return rows
+    var batteries = Array.isArray(battery.batteries) ? battery.batteries : []
     // Systems without a battery still report charging as false.
-    if (!battery || num(battery.percentage) === null) return rows
-    rows.push(row({ key: "charge", icon: battery.is_charging ? "󰂄" : "󰁹", primaryText: "Charge", secondaryText: percent(battery.percentage), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true) }))
-    reading(rows, "charging", "", "󰚥", "Charging", yesNo(battery.is_charging))
-    reading(rows, "remaining", "", "󰅐", "Time remaining", num(battery.time_remaining) > 0 ? duration(battery.time_remaining) : "")
+    if (num(battery.percentage) !== null) {
+      rows.push(row({ key: "charge", icon: batteryIcon(battery), primaryText: "Charge", secondaryText: percent(battery.percentage), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true) }))
+      reading(rows, "state", "", "󰚥", "State", batteryStateText(battery.state) || (battery.is_charging === true ? "Charging" : ""))
+      reading(rows, "source", "", "󰚥", "Power source", battery.ac_connected === true ? "Plugged in" : (battery.ac_connected === false ? "Battery" : ""))
+      reading(rows, "remaining", "", "󰅐", battery.state === "charging" ? "Time to full" : "Time remaining", num(battery.time_remaining) > 0 ? duration(battery.time_remaining) : "")
+      reading(rows, "power", "", "󱐋", "Power", watts(battery.power))
+      reading(rows, "voltage", "", "󱐋", "Voltage", num(battery.voltage) === null ? "" : num(battery.voltage).toFixed(1) + " V")
+    }
+    var primaryFound = false
+    for (var i = 0; i < batteries.length; i++) {
+      var item = batteries[i]
+      // The first system battery is the one shown above
+      if (item.scope === "system" && !primaryFound && num(battery.percentage) !== null) {
+        primaryFound = true
+        continue
+      }
+      rows.push(row({
+        key: "battery-" + (text(item.name) || i), section: "Batteries",
+        icon: item.state === "charging" ? "󰂄" : "󰁹",
+        primaryText: text(item.model) || text(item.name) || "Battery " + (i + 1),
+        secondaryText: join([percent(item.percentage), batteryStateText(item.state)]),
+        meter: num(item.percentage), meterLevel: level(item.percentage, 20, 10, true)
+      }))
+    }
     return rows
+  }
+
+  function batteryIcon(battery) {
+    if (battery.is_charging === true) return "󰂄"
+    if (battery.ac_connected === true) return "󰚥"
+    return "󰁹"
+  }
+
+  function batteryStateText(state) {
+    switch (state) {
+    case "charging": return "Charging"
+    case "discharging": return "Discharging"
+    case "full": return "Full"
+    case "not_charging": return "Not charging"
+    case "empty": return "Empty"
+    default: return ""
+    }
   }
 
   function displayRows(service) {
@@ -455,11 +494,12 @@ QtObject {
       var network = interfaces[i]
       var addresses = Array.isArray(network.addresses) ? network.addresses.map(function(address) { return text(address.address) }) : []
       var stats = network.stats || {}
+      var io = network.io || {}
       rows.push(row({
         key: "interface-" + (text(network.name) || i), section: "Interfaces",
         icon: stats.isup === false ? "󰲛" : "󰛳",
         primaryText: text(network.name) || "Interface " + (i + 1),
-        secondaryText: join([stats.isup === false ? "Down" : "", num(stats.speed) > 0 ? stats.speed + " Mb/s" : "", addresses.filter(function(address) { return address !== "" }).join(", ")])
+        secondaryText: join([stats.isup === false ? "Down" : "", num(io.bytes_recv_rate) !== null ? "↓ " + rate(io.bytes_recv_rate) : "", num(io.bytes_sent_rate) !== null ? "↑ " + rate(io.bytes_sent_rate) : "", num(stats.speed) > 0 ? stats.speed + " Mb/s" : "", addresses.filter(function(address) { return address !== "" }).join(", ")])
       }))
     }
     return rows
