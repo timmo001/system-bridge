@@ -67,7 +67,11 @@ export type WebSocketError =
 export interface WebSocketOptions extends ConnectionOptions {
   /** How long to wait for a reply to a request. Defaults to 8 seconds. */
   readonly requestTimeout?: Duration.Input;
-  /** How long `getData` waits for every module. Defaults to 10 seconds. */
+  /**
+   * How long `getData` waits for the backend to answer for every module.
+   * Modules it has no data for are answered at once, so this only applies
+   * when it doesn't reply at all. Defaults to 10 seconds.
+   */
   readonly dataTimeout?: Duration.Input;
   /** How long to wait for the socket to open. Defaults to 10 seconds. */
   readonly openTimeout?: Duration.Input;
@@ -416,35 +420,49 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   ) {
     const wanted = new Set<string>(modules);
 
+    // The backend replies for every module asked for, with null data when it
+    // has none, so a module has answered once any reply for it arrives
+    const answered = new Set<string>();
+
     const received = new Map<string, WebSocketResponse["data"]>();
+
+    const missingError = (missing: ReadonlyArray<ModuleName>) =>
+      new DataMissingError({
+        modules: missing,
+        message: `No data received for ${missing.join(", ")}`,
+      });
 
     yield* PubSub.take(subscription).pipe(
       Effect.tap((response) =>
         Effect.sync(() => {
           if (
             Predicate.isNotUndefined(response.module) &&
-            wanted.has(response.module) &&
-            Predicate.isNotNullish(response.data)
+            wanted.has(response.module)
           ) {
-            received.set(response.module, response.data);
+            answered.add(response.module);
+
+            if (Predicate.isNotNullish(response.data)) {
+              received.set(response.module, response.data);
+            }
           }
         }),
       ),
-      Effect.repeat({ until: () => received.size === wanted.size }),
+      Effect.repeat({ until: () => answered.size === wanted.size }),
+      // Only a backend that never answers waits this long
       Effect.timeoutOrElse({
         duration: dataTimeout,
-        orElse: () => {
-          const missing = modules.filter((module) => !received.has(module));
-
-          return Effect.fail(
-            new DataMissingError({
-              modules: missing,
-              message: `No data received for ${missing.join(", ")}`,
-            }),
-          );
-        },
+        orElse: () =>
+          Effect.fail(
+            missingError(modules.filter((module) => !received.has(module))),
+          ),
       }),
     );
+
+    const missing = modules.filter((module) => !received.has(module));
+
+    if (missing.length > 0) {
+      return yield* missingError(missing);
+    }
 
     return yield* Schema.decodeEffect(ModulesData)(
       Object.fromEntries(received),

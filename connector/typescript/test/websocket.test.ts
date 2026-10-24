@@ -184,7 +184,9 @@ describe("SystemBridgeWebSocket", () => {
     expect(data.memory?.virtual?.total).toBe(4);
   });
 
-  test("report modules that never arrive", async () => {
+  test("report modules the backend has no data for, without waiting", async () => {
+    const started = performance.now();
+
     const missing = await run(
       SystemBridgeWebSocket.use((ws) => ws.getData(["battery", "cpu"])).pipe(
         Effect.flatMap(() => Effect.fail("expected a DataMissingError")),
@@ -195,6 +197,9 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(missing).toEqual(["cpu"]);
+    // The backend answers for cpu with null data; that's the answer, so the
+    // 500ms data timeout must not be reached
+    expect(performance.now() - started).toBeLessThan(400);
   });
 
   test("stream updates, skipping empty and invalid ones", async () => {
