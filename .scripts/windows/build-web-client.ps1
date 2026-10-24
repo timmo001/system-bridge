@@ -10,13 +10,13 @@ if (!(Test-Path 'client/web/dist/index.html')) { Write-Host 'ERROR: client/web/d
 if (!(Get-ChildItem 'client/web/dist/assets/*.css' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: CSS files not found in client/web/dist/assets/'; Get-ChildItem 'client/web/dist/assets/' -ErrorAction SilentlyContinue; exit 1 }
 if (!(Get-ChildItem 'client/web/dist/assets/*.js' -ErrorAction SilentlyContinue)) { Write-Host 'ERROR: JS files not found in client/web/dist/assets/'; Get-ChildItem 'client/web/dist/assets/' -ErrorAction SilentlyContinue; exit 1 }
 
-Write-Host "Verifying Tailwind CSS compilation..."
+Write-Host "Verifying the design tokens are in the CSS..."
 $css = Get-ChildItem 'client/web/dist/assets/*.css' -ErrorAction SilentlyContinue | Select-Object -First 1 | Get-Content -Raw
-if ($css -match '@layer utilities|--tw-|\.(flex|grid|hidden|block)\{') {
-    Write-Host '  [OK] Found Tailwind CSS patterns'
+if ($css -match '--sb-color-') {
+    Write-Host '  [OK] Found the design tokens'
 } else {
-    Write-Host 'ERROR: Tailwind CSS compilation failed - no utility classes found'
-    Write-Host 'This may indicate that @tailwindcss/vite plugin did not run properly'
+    Write-Host 'ERROR: The CSS has no --sb-color-* design tokens'
+    Write-Host 'Check client/web/src/styles/tokens.css is imported by src/app.ts'
     exit 1
 }
 

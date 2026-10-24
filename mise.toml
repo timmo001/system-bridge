@@ -75,31 +75,18 @@ if ! ls client/web/dist/assets/*.js >/dev/null 2>&1; then
 	ls -la client/web/dist/assets/ || true
 	exit 1
 fi
-echo "Verifying Tailwind CSS compilation..."
+echo "Verifying the design tokens are in the CSS..."
 CSS_FILE=$(find client/web/dist/assets -name "*.css" -type f 2>/dev/null | head -1)
 if [ -z "$CSS_FILE" ]; then
-	echo "ERROR: No CSS file found for Tailwind verification"
+	echo "ERROR: No CSS file found to verify"
 	exit 1
 fi
-TAILWIND_FOUND=0
-if grep -qE "@layer utilities" "$CSS_FILE" 2>/dev/null; then
-	echo "  ✓ Found @layer utilities"
-	TAILWIND_FOUND=1
-fi
-if grep -qE "\.(flex|grid|hidden|block)\{" "$CSS_FILE" 2>/dev/null; then
-	echo "  ✓ Found Tailwind utility classes"
-	TAILWIND_FOUND=1
-fi
-if grep -qE "--tw-" "$CSS_FILE" 2>/dev/null; then
-	echo "  ✓ Found Tailwind CSS custom properties"
-	TAILWIND_FOUND=1
-fi
-if [ "$TAILWIND_FOUND" -eq 0 ]; then
-	echo "ERROR: Tailwind CSS compilation failed - no utility classes found"
-	echo "Expected @layer utilities, utility classes (.flex, .grid, etc.), or --tw-* properties"
-	echo "This may indicate that @tailwindcss/vite plugin did not run properly"
+if ! grep -q -- "--sb-color-" "$CSS_FILE" 2>/dev/null; then
+	echo "ERROR: The CSS has no --sb-color-* design tokens"
+	echo "Check client/web/src/styles/tokens.css is imported by src/app.ts"
 	exit 1
 fi
+echo "  ✓ Found the design tokens"
 echo "✓ Build files verified and ready for embedding"
 '''
 run_windows = "powershell -ExecutionPolicy Bypass -File ./.scripts/windows/build-web-client.ps1"

@@ -37,6 +37,9 @@ export class AtomController<A> implements ReactiveController {
 
     this.#unsubscribe?.();
     this.#atom = atom;
+    // Compute it first, so working out its first value isn't reported as a
+    // change that needs another render
+    registry.get(atom);
     this.#unsubscribe = registry.subscribe(atom, () =>
       this.#host.requestUpdate(),
     );

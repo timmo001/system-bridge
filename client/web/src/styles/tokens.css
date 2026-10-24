@@ -1,0 +1,177 @@
+/*
+ * Design tokens, after Home Assistant's core and typography globals and Web
+ * Awesome's scale, in rem so everything follows the browser's font size.
+ * Colours come from the active theme (`src/lib/themes.ts`), which writes the
+ * `--sb-color-*` variables into a style element before the first paint.
+ * Components use these tokens instead of raw values.
+ */
+:root {
+  /* Fallback colours until a theme is applied */
+  --sb-color-bg: #f7f7f8;
+  --sb-color-surface: #ffffff;
+  --sb-color-raised: #ffffff;
+  --sb-color-sunken: #eef0f3;
+  --sb-color-text: #18181b;
+  --sb-color-muted: #63636e;
+  --sb-color-border: #e2e2e6;
+  --sb-color-accent: #2563eb;
+  --sb-color-on-accent: #ffffff;
+  --sb-color-success: #16a34a;
+  --sb-color-warning: #d97706;
+  --sb-color-danger: #dc2626;
+  --sb-color-info: #0891b2;
+  --sb-color-chart-1: #2563eb;
+  --sb-color-chart-2: #f97316;
+  --sb-color-chart-3: #16a34a;
+  --sb-color-chart-4: #9333ea;
+  --sb-color-chart-5: #db2777;
+  --sb-color-chart-6: #0891b2;
+
+  /* Derived colours */
+  --sb-color-hover: color-mix(in oklab, var(--sb-color-text) 7%, transparent);
+  --sb-color-active: color-mix(in oklab, var(--sb-color-text) 12%, transparent);
+  --sb-color-accent-soft: color-mix(
+    in oklab,
+    var(--sb-color-accent) 16%,
+    transparent
+  );
+  --sb-color-success-soft: color-mix(
+    in oklab,
+    var(--sb-color-success) 16%,
+    transparent
+  );
+  --sb-color-warning-soft: color-mix(
+    in oklab,
+    var(--sb-color-warning) 16%,
+    transparent
+  );
+  --sb-color-danger-soft: color-mix(
+    in oklab,
+    var(--sb-color-danger) 16%,
+    transparent
+  );
+  --sb-color-focus: color-mix(
+    in oklab,
+    var(--sb-color-accent) 60%,
+    transparent
+  );
+  --sb-color-scrim: oklch(0% 0 0 / 45%);
+  --sb-shadow-s: 0 1px 2px oklch(0% 0 0 / 12%);
+  --sb-shadow-m: 0 0.25rem 0.75rem oklch(0% 0 0 / 16%);
+  --sb-shadow-l: 0 0.75rem 2rem oklch(0% 0 0 / 28%);
+
+  /* TanStack Charts palette, from the theme */
+  --ts-chart-1: var(--sb-color-chart-1);
+  --ts-chart-2: var(--sb-color-chart-2);
+  --ts-chart-3: var(--sb-color-chart-3);
+  --ts-chart-4: var(--sb-color-chart-4);
+  --ts-chart-5: var(--sb-color-chart-5);
+  --ts-chart-6: var(--sb-color-chart-6);
+  --ts-chart-tooltip-background: var(--sb-color-raised);
+  --ts-chart-tooltip-color: var(--sb-color-text);
+  --ts-chart-tooltip-border: 1px solid var(--sb-color-border);
+  --ts-chart-tooltip-border-radius: var(--sb-radius-m);
+  --ts-chart-tooltip-shadow: var(--sb-shadow-m);
+
+  /* Type */
+  --sb-font-body:
+    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sb-font-code:
+    ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  --sb-font-size-2xs: 0.6875rem;
+  --sb-font-size-xs: 0.75rem;
+  --sb-font-size-s: 0.875rem;
+  --sb-font-size-m: 1rem;
+  --sb-font-size-l: 1.125rem;
+  --sb-font-size-xl: 1.25rem;
+  --sb-font-size-2xl: 1.5rem;
+  --sb-font-size-3xl: 2rem;
+  --sb-font-weight-normal: 400;
+  --sb-font-weight-medium: 500;
+  --sb-font-weight-semibold: 600;
+  --sb-font-weight-bold: 700;
+  --sb-line-height-condensed: 1.2;
+  --sb-line-height-normal: 1.5;
+
+  /* Spacing, in quarter rem steps */
+  --sb-space-0-5: 0.125rem;
+  --sb-space-1: 0.25rem;
+  --sb-space-1-5: 0.375rem;
+  --sb-space-2: 0.5rem;
+  --sb-space-3: 0.75rem;
+  --sb-space-4: 1rem;
+  --sb-space-5: 1.25rem;
+  --sb-space-6: 1.5rem;
+  --sb-space-8: 2rem;
+  --sb-space-10: 2.5rem;
+  --sb-space-12: 3rem;
+
+  /* Shape */
+  --sb-radius-s: 0.375rem;
+  --sb-radius-m: 0.5rem;
+  --sb-radius-l: 0.75rem;
+  --sb-radius-xl: 1rem;
+  --sb-radius-pill: 9999px;
+
+  /* Layout */
+  --sb-header-height: 3.5rem;
+  --sb-content-width: 90rem;
+  --sb-gutter: var(--sb-space-6);
+
+  /* Motion */
+  --sb-duration-fast: 120ms;
+  --sb-duration-normal: 220ms;
+  --sb-easing: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --sb-gutter: var(--sb-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --sb-duration-fast: 1ms;
+    --sb-duration-normal: 1ms;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+  /* Keep the scrollbar's room, so pages don't shift as content loads */
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--sb-font-body);
+  font-size: var(--sb-font-size-m);
+  line-height: var(--sb-line-height-normal);
+  color: var(--sb-color-text);
+  background: var(--sb-color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--sb-color-accent-soft);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--sb-color-muted) 60%, transparent)
+    transparent;
+}
+
+/* Hide custom elements until they upgrade, so nothing flashes unstyled */
+:not(:defined) {
+  visibility: hidden;
+}

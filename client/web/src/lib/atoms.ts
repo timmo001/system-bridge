@@ -5,7 +5,7 @@ import {
   SystemBridgeWebSocket,
   type DataMissingError,
   type MediaAction,
-  type ModuleDataUpdate,
+  ModuleDataUpdate,
   type ModulesData,
   type Notification,
   type OpenTarget,
@@ -21,6 +21,7 @@ import {
   Option,
   Redacted,
   Schedule,
+  Schema,
   Stream,
   Struct,
 } from "effect";
@@ -226,36 +227,91 @@ const socket = (get: Atom.AtomContext) =>
 const fnSocket = (get: Atom.FnContext) =>
   get.result(connection).pipe(Effect.flatMap(connected));
 
-/** Every module's data, kept up to date by the backend's data listener. */
+/**
+ * The module data so far, and which modules have answered. A module that
+ * answered without data, or timed out, isn't reported on this system.
+ */
+export interface ModuleState {
+  readonly data: ModulesData;
+  readonly settled: ReadonlySet<ModuleName>;
+}
+
+const noModules: ModuleState = { data: {}, settled: new Set() };
+
+/** One module's data, or that it settled without any. */
+type ModuleEvent =
+  | { readonly _tag: "Data"; readonly update: ModuleDataUpdate }
+  | { readonly _tag: "Missing"; readonly module: ModuleName };
+
+const applyEvent = (state: ModuleState, event: ModuleEvent): ModuleState => {
+  const module = event._tag === "Data" ? event.update.module : event.module;
+  const settled = new Set(state.settled).add(module);
+
+  return event._tag === "Data"
+    ? {
+        data: Struct.assign(state.data, {
+          [event.update.module]: event.update.data,
+        }),
+        settled,
+      }
+    : { data: state.data, settled };
+};
+
+/**
+ * Every module's data, kept up to date by the backend's data listener. Each
+ * module is asked for on its own, so a page shows as soon as its module
+ * answers, and one that never reports, such as Discord when it isn't
+ * running, holds up nothing else.
+ */
 export const moduleData = Atom.make((get) =>
   Stream.unwrap(
     Effect.gen(function* () {
       const bridge = yield* socket(get);
 
-      const initial = yield* bridge
-        .getData(ModuleName.literals)
-        .pipe(
-          Effect.catchTag("DataMissingError", () =>
-            Effect.succeed<ModulesData>({}),
-          ),
-        );
-
       yield* bridge.registerDataListener(ModuleName.literals);
 
-      return bridge.updates.pipe(
-        Stream.scan(
-          () => initial,
-          (data: ModulesData, update: ModuleDataUpdate): ModulesData =>
-            Struct.assign(data, { [update.module]: update.data }),
+      const initial = Stream.fromIterable(ModuleName.literals).pipe(
+        Stream.mapEffect(
+          (module) =>
+            bridge.getData([module]).pipe(
+              Effect.map((data): ModuleEvent => {
+                const update = Option.getOrUndefined(
+                  decodeModuleUpdate({ module, data: data[module] }),
+                );
+
+                return update === undefined
+                  ? { _tag: "Missing", module }
+                  : { _tag: "Data", update };
+              }),
+              Effect.catch(() =>
+                Effect.succeed<ModuleEvent>({ _tag: "Missing", module }),
+              ),
+            ),
+          { concurrency: "unbounded" },
         ),
+      );
+
+      const updates = bridge.updates.pipe(
+        Stream.map((update): ModuleEvent => ({ _tag: "Data", update })),
+      );
+
+      return Stream.merge(initial, updates).pipe(
+        Stream.scan(() => noModules, applyEvent),
       );
     }),
   ),
 ).pipe(Atom.keepAlive);
 
+const decodeModuleUpdate = Schema.decodeUnknownOption(ModuleDataUpdate);
+
+/** The latest module state, kept through reconnects. */
+export const moduleState = Atom.make((get): ModuleState =>
+  AsyncResult.getOrElse(get(moduleData), () => noModules),
+);
+
 /** The latest module data, kept through reconnects. */
-export const latestModuleData = Atom.make((get): ModulesData =>
-  AsyncResult.getOrElse(get(moduleData), () => ({})),
+export const latestModuleData = Atom.make(
+  (get): ModulesData => get(moduleState).data,
 );
 
 export const settings = Atom.make((get) =>

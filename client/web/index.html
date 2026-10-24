@@ -5,11 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="light dark" />
     <title>System Bridge</title>
+    <style>
+      html {
+        background: var(--sb-color-bg, Canvas);
+        color: var(--sb-color-text, CanvasText);
+      }
+    </style>
+    <script>
+      // Apply the last theme before the first paint, so a reload never
+      // flashes the wrong colours. The app keeps this up to date.
+      try {
+        const css = localStorage.getItem("system-bridge-theme-css");
+
+        if (css) {
+          const style = document.createElement("style");
+
+          style.id = "sb-theme";
+          style.textContent = css;
+          document.head.append(style);
+        }
+      } catch {
+        // Storage can be unavailable, such as in a private window
+      }
+    </script>
     <script type="module" src="/src/app.ts"></script>
   </head>
   <body>
-    <app-root></app-root>
+    <sb-app></sb-app>
   </body>
 </html>

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Verification script for system-bridge release packages
-# Ensures that embedded web client contains proper Tailwind CSS
+# Ensures that the embedded web client contains its stylesheet
 
 set -e
 
@@ -80,43 +80,17 @@ if command -v curl >/dev/null 2>&1; then
         echo "Fetching CSS file: $CSS_URL"
         CSS_CONTENT=$(curl -s "http://localhost:$PORT$CSS_URL")
         
-        # Check for Tailwind CSS v4 patterns:
-        # 1. @layer utilities - the utilities layer from Tailwind
-        # 2. --tw-* CSS custom properties
-        # 3. Common utility classes like .flex, .grid, .hidden
-        TAILWIND_FOUND=0
-        
-        if echo "$CSS_CONTENT" | grep -qE "@layer utilities"; then
-            echo "✓ CSS contains @layer utilities"
-            TAILWIND_FOUND=1
-        fi
-        
-        if echo "$CSS_CONTENT" | grep -qE "--tw-"; then
-            echo "✓ CSS contains Tailwind CSS custom properties (--tw-*)"
-            TAILWIND_FOUND=1
-        fi
-        
-        if echo "$CSS_CONTENT" | grep -qE "\.(flex|grid|hidden|block)\{"; then
-            echo "✓ CSS contains Tailwind utility classes"
-            TAILWIND_FOUND=1
-        fi
-        
-        if [ "$TAILWIND_FOUND" -eq 0 ]; then
-            echo "ERROR: CSS does not contain Tailwind CSS patterns"
-            echo "Expected to find: @layer utilities, --tw-* properties, or utility classes"
+        # The global stylesheet holds the design tokens; component styles
+        # ship in the JavaScript
+        if echo "$CSS_CONTENT" | grep -q -- "--sb-color-"; then
+            echo "✓ CSS contains the design tokens"
+        else
+            echo "ERROR: CSS does not contain the --sb-color-* design tokens"
             echo "First 500 characters of CSS:"
             echo "$CSS_CONTENT" | head -c 500
             echo ""
             cleanup_server
             exit 1
-        fi
-        
-        # Check CSS size
-        CSS_SIZE=$(echo "$CSS_CONTENT" | wc -c)
-        if [ "$CSS_SIZE" -lt 10000 ]; then
-            echo "WARNING: CSS seems small ($CSS_SIZE bytes). Expected at least 10KB for full Tailwind build."
-        else
-            echo "✓ CSS file size is reasonable ($CSS_SIZE bytes)"
         fi
     else
         echo "ERROR: Could not extract CSS URL from index page"

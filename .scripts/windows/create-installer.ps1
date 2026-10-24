@@ -126,18 +126,10 @@ function Verify-CSSInclusion {
                             $cssResponse = Invoke-WebRequest -Uri "http://localhost:$PORT$cssUrl" -TimeoutSec 5 -ErrorAction Stop
                             $cssContent = $cssResponse.Content
                             
-                            if ($cssContent -match 'tw-') {
-                                Write-Host "✓ CSS contains Tailwind utility classes"
-                                
-                                # Check CSS size
-                                $cssSize = $cssContent.Length
-                                if ($cssSize -lt 10000) {
-                                    Write-Warning "CSS seems small ($cssSize bytes). Expected at least 10KB for full Tailwind build."
-                                } else {
-                                    Write-Host "✓ CSS file size is reasonable ($cssSize bytes)"
-                                }
+                            if ($cssContent -match '--sb-color-') {
+                                Write-Host "✓ CSS contains the design tokens"
                             } else {
-                                Write-Error "CSS does not contain Tailwind utility classes"
+                                Write-Error "CSS does not contain the --sb-color-* design tokens"
                                 Write-Host "First 200 characters of CSS:"
                                 $cssContent.Substring(0, [Math]::Min(200, $cssContent.Length))
                                 Stop-Process -Id $serverProcess.Id -Force -ErrorAction SilentlyContinue

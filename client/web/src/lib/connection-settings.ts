@@ -23,12 +23,20 @@ const decodeStoredSettings = Schema.decodeUnknownSync(
   Schema.fromJsonString(ConnectionSettings),
 );
 
-const defaultConnectionSettings: ConnectionSettings = {
-  host: "0.0.0.0",
-  port: 9170,
-  ssl: false,
-  token: null,
-};
+/**
+ * Where to connect before anything is saved. A built client is served by
+ * System Bridge itself, so it starts with the server it came from; the dev
+ * server isn't System Bridge, so it starts with the usual local backend.
+ */
+const defaultConnectionSettings: ConnectionSettings = import.meta.env.DEV
+  ? { host: "localhost", port: 9170, ssl: false, token: null }
+  : {
+      host: location.hostname,
+      port:
+        Number(location.port) || (location.protocol === "https:" ? 443 : 80),
+      ssl: location.protocol === "https:",
+      token: null,
+    };
 
 const STORAGE_KEY = "system-bridge-connection";
 
