@@ -5,11 +5,12 @@ package audio
 import (
 	"bufio"
 	"context"
-	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/timmo001/system-bridge/utils/watch"
 )
 
 // watchDebounce groups the bursts of events one change makes, such as a
@@ -23,19 +24,15 @@ const watchRetry = 5 * time.Second
 // Watch calls changed whenever an output, an input or the defaults change,
 // until ctx is done. It follows pactl subscribe.
 func Watch(ctx context.Context, changed func()) {
-	for {
-		if err := subscribe(ctx, changed); err != nil && ctx.Err() == nil {
-			slog.Debug("Stopped following audio events", "error", err)
-		}
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(watchRetry):
-		}
-	}
+	trigger, stop := watch.Debounce(watchDebounce, changed)
+	defer stop()
+
+	watch.Retry(ctx, watchRetry, "pactl", func(ctx context.Context) error {
+		return subscribe(ctx, trigger)
+	})
 }
 
-func subscribe(ctx context.Context, changed func()) error {
+func subscribe(ctx context.Context, trigger func()) error {
 	cmd := exec.CommandContext(ctx, "pactl", "subscribe")
 	cmd.Env = append(os.Environ(), "LC_ALL=C")
 	out, err := cmd.StdoutPipe()
@@ -46,22 +43,10 @@ func subscribe(ctx context.Context, changed func()) error {
 		return err
 	}
 
-	var timer *time.Timer
-	defer func() {
-		if timer != nil {
-			timer.Stop()
-		}
-	}()
-
 	scanner := bufio.NewScanner(out)
 	for scanner.Scan() {
-		if !relevantEvent(scanner.Text()) {
-			continue
-		}
-		if timer == nil {
-			timer = time.AfterFunc(watchDebounce, changed)
-		} else {
-			timer.Reset(watchDebounce)
+		if relevantEvent(scanner.Text()) {
+			trigger()
 		}
 	}
 	return cmd.Wait()
