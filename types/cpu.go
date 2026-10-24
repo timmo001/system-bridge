@@ -37,18 +37,20 @@ type PerCPU struct {
 
 // CPUData represents overall CPU information
 type CPUData struct {
-	Count        *int          `json:"count"`
-	Name         *string       `json:"name"`
-	Vendor       *string       `json:"vendor"`
-	Family       *string       `json:"family"`
-	Frequency    *CPUFrequency `json:"frequency"`
-	LoadAverage  *float64      `json:"load_average"`
-	PerCPU       []PerCPU      `json:"per_cpu"`
-	Power        *float64      `json:"power"`
-	Stats        *CPUStats     `json:"stats"`
-	Temperature  *float64      `json:"temperature"`
-	Times        *CPUTimes     `json:"times"`
-	TimesPercent *CPUTimes     `json:"times_percent"`
-	Usage        *float64      `json:"usage"`
-	Voltage      *float64      `json:"voltage"`
+	Count         *int          `json:"count"`
+	Name          *string       `json:"name"`
+	Vendor        *string       `json:"vendor"`
+	Family        *string       `json:"family"`
+	Frequency     *CPUFrequency `json:"frequency"`
+	LoadAverage   *float64      `json:"load_average"`
+	LoadAverage5  *float64      `json:"load_average_5"`
+	LoadAverage15 *float64      `json:"load_average_15"`
+	PerCPU        []PerCPU      `json:"per_cpu"`
+	Power         *float64      `json:"power"`
+	Stats         *CPUStats     `json:"stats"`
+	Temperature   *float64      `json:"temperature"`
+	Times         *CPUTimes     `json:"times"`
+	TimesPercent  *CPUTimes     `json:"times_percent"`
+	Usage         *float64      `json:"usage"`
+	Voltage       *float64      `json:"voltage"`
 }

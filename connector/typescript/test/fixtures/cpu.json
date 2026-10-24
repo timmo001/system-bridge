@@ -9,6 +9,8 @@
     "max": 4800
   },
   "load_average": 9.69,
+  "load_average_5": 7.12,
+  "load_average_15": 5.48,
   "per_cpu": [
     {
       "id": 0,

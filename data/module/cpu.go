@@ -126,8 +126,10 @@ func (cpuModule CPUModule) Update(ctx context.Context) (any, error) {
 
 	// Get load average where supported (Unix systems)
 	if load, err := load.Avg(); err == nil {
-		loadAvg := load.Load1
-		cpuData.LoadAverage = &loadAvg
+		load1, load5, load15 := load.Load1, load.Load5, load.Load15
+		cpuData.LoadAverage = &load1
+		cpuData.LoadAverage5 = &load5
+		cpuData.LoadAverage15 = &load15
 	}
 
 	// Get CPU temperature where available

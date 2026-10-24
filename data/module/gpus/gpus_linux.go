@@ -56,7 +56,7 @@ func getGPUs() ([]types.GPU, error) {
 func getNVIDIAGPUs() []types.GPU {
 	gpuList := make([]types.GPU, 0)
 
-	cmd := exec.Command("nvidia-smi", "--query-gpu=gpu_name,memory.total,memory.used,memory.free,utilization.gpu,clocks.current.graphics,clocks.current.memory,power.draw,temperature.gpu", "--format=csv,noheader,nounits")
+	cmd := exec.Command("nvidia-smi", "--query-gpu=gpu_name,memory.total,memory.used,memory.free,utilization.gpu,clocks.current.graphics,clocks.current.memory,power.draw,temperature.gpu,fan.speed,utilization.encoder,utilization.decoder,power.limit,pstate", "--format=csv,noheader,nounits")
 	output, err := cmd.Output()
 	if err != nil {
 		return gpuList
@@ -65,7 +65,7 @@ func getNVIDIAGPUs() []types.GPU {
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
 		fields := strings.Split(line, ",")
-		if len(fields) < 9 {
+		if len(fields) < 14 {
 			continue
 		}
 		name := strings.TrimSpace(fields[0])
@@ -84,21 +84,44 @@ func getNVIDIAGPUs() []types.GPU {
 		}
 
 		gpuList = append(gpuList, types.GPU{
-			ID:          fmt.Sprintf("nvidia-%d", len(gpuList)),
-			Name:        name,
-			CoreClock:   &coreClock,
-			CoreLoad:    &coreLoad,
-			MemoryClock: &memoryClock,
-			MemoryLoad:  &memoryLoad,
-			MemoryFree:  &memoryFree,
-			MemoryUsed:  &memoryUsed,
-			MemoryTotal: &memoryTotal,
-			PowerUsage:  &powerUsage,
-			Temperature: &temperature,
+			ID:               fmt.Sprintf("nvidia-%d", len(gpuList)),
+			Name:             name,
+			CoreClock:        &coreClock,
+			CoreLoad:         &coreLoad,
+			DecoderLoad:      nvidiaFloat(fields[11]),
+			EncoderLoad:      nvidiaFloat(fields[10]),
+			FanSpeedPercent:  nvidiaFloat(fields[9]),
+			MemoryClock:      &memoryClock,
+			MemoryLoad:       &memoryLoad,
+			MemoryFree:       &memoryFree,
+			MemoryUsed:       &memoryUsed,
+			MemoryTotal:      &memoryTotal,
+			PerformanceState: nvidiaString(fields[13]),
+			PowerLimit:       nvidiaFloat(fields[12]),
+			PowerUsage:       &powerUsage,
+			Temperature:      &temperature,
 		})
 	}
 
 	return gpuList
+}
+
+// nvidiaFloat parses an nvidia-smi value, giving nil for ones the GPU doesn't
+// report, such as "[N/A]" for the fan on a passively cooled card.
+func nvidiaFloat(field string) *float64 {
+	v, err := strconv.ParseFloat(strings.TrimSpace(field), 64)
+	if err != nil {
+		return nil
+	}
+	return &v
+}
+
+func nvidiaString(field string) *string {
+	s := strings.TrimSpace(field)
+	if s == "" || strings.HasPrefix(s, "[") {
+		return nil
+	}
+	return &s
 }
 
 // getDRMGPUs enumerates real PCI GPUs exposed under /sys/class/drm and reads
@@ -164,14 +187,12 @@ func getDRMGPUs(skipNVIDIA bool) []types.GPU {
 		if v := readGPULoad(devPath); v != nil {
 			gpu.CoreLoad = v
 		}
-		if temp, power := readGPUHwmon(devPath); temp != nil || power != nil {
-			if temp != nil {
-				gpu.Temperature = temp
-			}
-			if power != nil {
-				gpu.PowerUsage = power
-			}
-		}
+		hwmon := readGPUHwmon(devPath)
+		gpu.Temperature = hwmon.temperature
+		gpu.PowerUsage = hwmon.power
+		gpu.PowerLimit = hwmon.powerLimit
+		gpu.FanSpeed = hwmon.fanSpeed
+		gpu.FanSpeedPercent = hwmon.fanSpeedPercent
 		if total, used := readGPUMemory(devPath); total != nil {
 			gpu.MemoryTotal = total
 			if used != nil {
@@ -321,27 +342,55 @@ func readXeBusyPercent(devPath string) *float64 {
 	return clampPercent(busy)
 }
 
-// readGPUHwmon reads temperature (Celsius) and power (Watts) from any hwmon
-// device attached under the GPU's DRM device. Discrete Intel Arc and AMD cards
-// expose these; integrated GPUs typically do not.
-func readGPUHwmon(devPath string) (temp *float64, power *float64) {
+type gpuHwmon struct {
+	temperature     *float64
+	power           *float64
+	powerLimit      *float64
+	fanSpeed        *float64
+	fanSpeedPercent *float64
+}
+
+// readGPUHwmon reads temperature (Celsius), power and its cap (Watts), and fan
+// speed (RPM and percent) from any hwmon device attached under the GPU's DRM
+// device. Discrete Intel Arc and AMD cards expose these; integrated GPUs
+// typically have no fan or cap.
+func readGPUHwmon(devPath string) gpuHwmon {
+	var r gpuHwmon
 	hwmons, err := filepath.Glob(filepath.Join(devPath, "hwmon", "hwmon*"))
 	if err != nil {
-		return nil, nil
+		return r
 	}
 	sort.Strings(hwmons)
 	for _, h := range hwmons {
-		if temp == nil {
-			temp = readHwmonGPUTemp(h)
+		if r.temperature == nil {
+			r.temperature = readHwmonGPUTemp(h)
 		}
-		if power == nil {
-			if p := readSysFloat(filepath.Join(h, "power1_input")); p != nil {
-				watts := *p / 1_000_000.0
-				power = &watts
+		if r.power == nil {
+			r.power = readMicrowatts(filepath.Join(h, "power1_input"))
+		}
+		if r.powerLimit == nil {
+			r.powerLimit = readMicrowatts(filepath.Join(h, "power1_cap"))
+		}
+		if r.fanSpeed == nil {
+			r.fanSpeed = readSysFloat(filepath.Join(h, "fan1_input"))
+		}
+		if r.fanSpeedPercent == nil {
+			// pwm1 is the fan's duty cycle, from 0 to 255
+			if pwm := readSysFloat(filepath.Join(h, "pwm1")); pwm != nil {
+				r.fanSpeedPercent = clampPercent(*pwm / 255 * 100)
 			}
 		}
 	}
-	return temp, power
+	return r
+}
+
+func readMicrowatts(path string) *float64 {
+	v := readSysFloat(path)
+	if v == nil {
+		return nil
+	}
+	watts := *v / 1_000_000.0
+	return &watts
 }
 
 // readHwmonGPUTemp prefers a labelled GPU/edge/junction temperature and falls
