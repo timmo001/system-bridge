@@ -313,11 +313,97 @@ class Hyprland:
 
 @filter_unexpected_fields
 @dataclass(slots=True)
+class OmarchyMenu:
+    """A route of the Omarchy menu, such as root or trigger.capture."""
+
+    id: str
+    name: str
+    aliases: list[str] = field(default_factory=list)
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class OmarchyPanel:
+    """A panel or overlay of an enabled Omarchy shell plugin."""
+
+    id: str
+    name: str
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class OmarchyArgument:
+    """An Omarchy shell IPC function's argument."""
+
+    name: str
+    type: str
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class OmarchyFunction:
+    """An Omarchy shell IPC function."""
+
+    name: str
+    returns: str
+    arguments: list[OmarchyArgument] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.arguments = [
+            OmarchyArgument(**cast(dict, a)) if isinstance(a, dict) else a
+            for a in self.arguments or []
+        ]
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class OmarchyTarget:
+    """An Omarchy shell IPC target and the functions it answers to."""
+
+    name: str
+    functions: list[OmarchyFunction] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.functions = [
+            OmarchyFunction(**cast(dict, f)) if isinstance(f, dict) else f
+            for f in self.functions or []
+        ]
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
+class Omarchy:
+    """What the Omarchy shell can open, and the IPC targets its plugins answer to."""
+
+    menus: list[OmarchyMenu] = field(default_factory=list)
+    panels: list[OmarchyPanel] = field(default_factory=list)
+    targets: list[OmarchyTarget] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Post Init."""
+        self.menus = [
+            OmarchyMenu(**cast(dict, m)) if isinstance(m, dict) else m
+            for m in self.menus or []
+        ]
+        self.panels = [
+            OmarchyPanel(**cast(dict, p)) if isinstance(p, dict) else p
+            for p in self.panels or []
+        ]
+        self.targets = [
+            OmarchyTarget(**cast(dict, t)) if isinstance(t, dict) else t
+            for t in self.targets or []
+        ]
+
+
+@filter_unexpected_fields
+@dataclass(slots=True)
 class Desktop:
     """Desktop: its windows, workspaces and keyboard layout.
 
-    Fields a platform can't provide are None, and hyprland is only set on
-    Hyprland.
+    Fields a platform can't provide are None, hyprland is only set on
+    Hyprland, and omarchy only while the Omarchy shell runs.
     """
 
     compositor: DesktopCompositor
@@ -327,6 +413,7 @@ class Desktop:
     windows: list[DesktopWindow] = field(default_factory=list)
     workspaces: list[DesktopWorkspace] = field(default_factory=list)
     hyprland: Hyprland | None = None
+    omarchy: Omarchy | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
@@ -344,3 +431,6 @@ class Desktop:
 
         if isinstance(self.hyprland, dict):
             self.hyprland = Hyprland(**self.hyprland)
+
+        if isinstance(self.omarchy, dict):
+            self.omarchy = Omarchy(**self.omarchy)

@@ -1,5 +1,11 @@
 import { Schema } from "effect";
-import { DisplayPowerState, ModuleName } from "./generated/modules.js";
+import {
+  DisplayPowerState,
+  HyprlandDirection,
+  HyprlandDispatcher,
+  ModuleName,
+  OmarchyAction,
+} from "./generated/modules.js";
 
 export const EventType = Schema.Literals([
   "AUDIO_CONTROL",
@@ -26,6 +32,7 @@ export const EventType = Schema.Literals([
   "GET_FILES",
   "GET_HISTORY",
   "GET_SETTINGS",
+  "HYPRLAND_DISPATCH",
   "HYPRLAND_MOVE_WINDOW",
   "HYPRLAND_RELOAD_CONFIG",
   "HYPRLAND_RUN_GLOBAL_SHORTCUT",
@@ -34,6 +41,8 @@ export const EventType = Schema.Literals([
   "KEYBOARD_TEXT",
   "MEDIA_CONTROL",
   "NOTIFICATION",
+  "OMARCHY_MENU",
+  "OMARCHY_PANEL",
   "OPEN",
   "POWER_HIBERNATE",
   "POWER_LOCK",
@@ -81,6 +90,7 @@ export const ResponseType = Schema.Literals([
   "FILES",
   "HISTORY",
   "HYPRLAND_CONFIG_RELOADED",
+  "HYPRLAND_DISPATCHED",
   "HYPRLAND_GLOBAL_SHORTCUT_RUN",
   "HYPRLAND_WINDOW_MOVED",
   "HYPRLAND_WINDOW_SET",
@@ -88,6 +98,8 @@ export const ResponseType = Schema.Literals([
   "KEYBOARD_TEXT_SENT",
   "MEDIA_CONTROLLED",
   "NOTIFICATION_SENT",
+  "OMARCHY_MENU_CHANGED",
+  "OMARCHY_PANEL_CHANGED",
   "OPENED",
   "POWER_HIBERNATING",
   "POWER_LOCKING",
@@ -456,6 +468,17 @@ export interface DiscordControl extends Schema.Schema.Type<
   typeof DiscordControl
 > {}
 
+/** Runs a dispatcher on the focused window, as its bind would. */
+export const HyprlandDispatchRequest = Schema.Struct({
+  dispatcher: HyprlandDispatcher,
+  /** Needed by `move_focus` and `swap_window`. */
+  direction: Schema.optionalKey(HyprlandDirection),
+});
+
+export interface HyprlandDispatchRequest extends Schema.Schema.Type<
+  typeof HyprlandDispatchRequest
+> {}
+
 /** A global shortcut's `name` from the desktop module's `hyprland.global_shortcuts`. */
 export const HyprlandGlobalShortcutRequest = Schema.Struct({
   name: Schema.String,
@@ -488,6 +511,29 @@ export const HyprlandSetWindowRequest = Schema.Struct({
 
 export interface HyprlandSetWindowRequest extends Schema.Schema.Type<
   typeof HyprlandSetWindowRequest
+> {}
+
+/**
+ * Opens, closes or toggles the Omarchy menu at a route from the desktop
+ * module's `omarchy.menus`, or one of its aliases. Closing needs no `id`.
+ */
+export const OmarchyMenuRequest = Schema.Struct({
+  action: OmarchyAction,
+  id: Schema.optionalKey(Schema.String),
+});
+
+export interface OmarchyMenuRequest extends Schema.Schema.Type<
+  typeof OmarchyMenuRequest
+> {}
+
+/** Opens, closes or toggles a panel from the desktop module's `omarchy.panels`. */
+export const OmarchyPanelRequest = Schema.Struct({
+  id: Schema.String,
+  action: OmarchyAction,
+});
+
+export interface OmarchyPanelRequest extends Schema.Schema.Type<
+  typeof OmarchyPanelRequest
 > {}
 
 /**

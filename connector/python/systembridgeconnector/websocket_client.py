@@ -28,9 +28,12 @@ from .models.desktop_control import (
     DesktopWindowRequest,
     DesktopWindowStateRequest,
     DesktopWorkspaceRequest,
+    HyprlandDispatchRequest,
     HyprlandGlobalShortcutRequest,
     HyprlandMoveWindowRequest,
     HyprlandSetWindowRequest,
+    OmarchyMenuRequest,
+    OmarchyPanelRequest,
 )
 from .models.discord_control import DiscordControl
 from .models.discord_setup import DiscordSetup, RedactedStr
@@ -709,6 +712,19 @@ class WebSocketClient(Base):
             response_type=EventType.DISPLAY_CONTROLLED,
         )
 
+    async def hyprland_dispatch(
+        self,
+        model: HyprlandDispatchRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Run a dispatcher on the focused window, as its bind would."""
+        return await self._action(
+            EventType.HYPRLAND_DISPATCH,
+            EventType.HYPRLAND_DISPATCHED,
+            model,
+            request_id,
+        )
+
     async def hyprland_move_window(
         self,
         model: HyprlandMoveWindowRequest,
@@ -789,6 +805,32 @@ class WebSocketClient(Base):
             model.to_payload(),
             wait_for_response=True,
             response_type=EventType.NOTIFICATION_SENT,
+        )
+
+    async def omarchy_menu(
+        self,
+        model: OmarchyMenuRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Open, close or toggle the Omarchy menu at a route."""
+        return await self._action(
+            EventType.OMARCHY_MENU,
+            EventType.OMARCHY_MENU_CHANGED,
+            model,
+            request_id,
+        )
+
+    async def omarchy_panel(
+        self,
+        model: OmarchyPanelRequest,
+        request_id: str | None = None,
+    ) -> Response:
+        """Open, close or toggle an Omarchy shell panel."""
+        return await self._action(
+            EventType.OMARCHY_PANEL,
+            EventType.OMARCHY_PANEL_CHANGED,
+            model,
+            request_id,
         )
 
     async def open_path(

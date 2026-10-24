@@ -16,6 +16,12 @@ from systembridgeconnector.models.modules.desktop import (
     HyprlandScreencast,
     HyprlandWindow,
     HyprlandWorkspace,
+    Omarchy,
+    OmarchyArgument,
+    OmarchyFunction,
+    OmarchyMenu,
+    OmarchyPanel,
+    OmarchyTarget,
 )
 
 
@@ -39,6 +45,14 @@ def test_desktop_dict():
     assert isinstance(desktop.hyprland.displays["DP-1"].reserved, HyprlandReserved)
     assert isinstance(desktop.hyprland.windows["0x2"], HyprlandWindow)
     assert isinstance(desktop.hyprland.workspaces["-98"], HyprlandWorkspace)
+    assert isinstance(desktop.omarchy, Omarchy)
+    assert isinstance(desktop.omarchy.menus[0], OmarchyMenu)
+    assert isinstance(desktop.omarchy.panels[0], OmarchyPanel)
+    assert isinstance(desktop.omarchy.targets[0], OmarchyTarget)
+    assert isinstance(desktop.omarchy.targets[0].functions[0], OmarchyFunction)
+    assert isinstance(
+        desktop.omarchy.targets[0].functions[0].arguments[0], OmarchyArgument
+    )
 
 
 def test_desktop_windows():

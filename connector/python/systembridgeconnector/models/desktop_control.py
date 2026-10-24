@@ -1,6 +1,36 @@
 """Desktop Control."""
 
 from dataclasses import dataclass
+from enum import StrEnum
+
+
+class HyprlandDirection(StrEnum):
+    """A direction for a Hyprland dispatcher."""
+
+    DOWN = "down"
+    LEFT = "left"
+    RIGHT = "right"
+    UP = "up"
+
+
+class HyprlandDispatcher(StrEnum):
+    """A Hyprland dispatcher System Bridge can run on the focused window."""
+
+    CENTRE_WINDOW = "centre_window"
+    CYCLE_NEXT_WINDOW = "cycle_next_window"
+    CYCLE_PREVIOUS_WINDOW = "cycle_previous_window"
+    MOVE_FOCUS = "move_focus"
+    SWAP_WINDOW = "swap_window"
+    TOGGLE_GROUP = "toggle_group"
+    TOGGLE_SPLIT = "toggle_split"
+
+
+class OmarchyAction(StrEnum):
+    """What to do with an Omarchy shell panel or menu."""
+
+    CLOSE = "close"
+    OPEN = "open"
+    TOGGLE = "toggle"
 
 
 @dataclass(slots=True)
@@ -40,6 +70,18 @@ class DesktopWorkspaceRequest:
 
 
 @dataclass(slots=True)
+class HyprlandDispatchRequest:
+    """Hyprland Dispatch Request.
+
+    Runs a dispatcher on the focused window, as its bind would. move_focus and
+    swap_window take a direction.
+    """
+
+    dispatcher: HyprlandDispatcher
+    direction: HyprlandDirection | None = None
+
+
+@dataclass(slots=True)
 class HyprlandGlobalShortcutRequest:
     """A global shortcut's name from the desktop module's hyprland.global_shortcuts."""
 
@@ -69,3 +111,23 @@ class HyprlandSetWindowRequest:
     id: str
     floating: bool | None = None
     pinned: bool | None = None
+
+
+@dataclass(slots=True)
+class OmarchyMenuRequest:
+    """Omarchy Menu Request.
+
+    Opens, closes or toggles the Omarchy menu at a route from the desktop
+    module's omarchy.menus, or one of its aliases. Closing needs no id.
+    """
+
+    action: OmarchyAction
+    id: str | None = None
+
+
+@dataclass(slots=True)
+class OmarchyPanelRequest:
+    """A panel from the desktop module's omarchy.panels, and what to do with it."""
+
+    id: str
+    action: OmarchyAction

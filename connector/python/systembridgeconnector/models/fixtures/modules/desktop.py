@@ -20,6 +20,12 @@ from systembridgeconnector.models.modules.desktop import (
     HyprlandVersion,
     HyprlandWindow,
     HyprlandWorkspace,
+    Omarchy,
+    OmarchyArgument,
+    OmarchyFunction,
+    OmarchyMenu,
+    OmarchyPanel,
+    OmarchyTarget,
 )
 
 FIXTURE_DESKTOP = Desktop(
@@ -185,5 +191,28 @@ FIXTURE_DESKTOP = Desktop(
             "1": HyprlandWorkspace(layout="dwindle", persistent=True),
             "2": HyprlandWorkspace(layout="master", persistent=False),
         },
+    ),
+    omarchy=Omarchy(
+        menus=[
+            OmarchyMenu(id="root", name="Omarchy menu"),
+            OmarchyMenu(
+                id="trigger.capture",
+                name="Capture",
+                aliases=["capture", "screenshot"],
+            ),
+        ],
+        panels=[OmarchyPanel(id="omarchy.audio", name="Audio")],
+        targets=[
+            OmarchyTarget(
+                name="media",
+                functions=[
+                    OmarchyFunction(
+                        name="seek",
+                        returns="void",
+                        arguments=[OmarchyArgument(name="seconds", type="int")],
+                    ),
+                ],
+            ),
+        ],
     ),
 )

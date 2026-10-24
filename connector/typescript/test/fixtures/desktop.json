@@ -2,6 +2,21 @@
   "compositor": "hyprland",
   "focused_window": "0x555dbfe3a6e0",
   "focused_workspace": "1",
+  "omarchy": {
+    "menus": [
+      { "id": "root", "name": "Omarchy menu", "aliases": [] },
+      { "id": "trigger.capture", "name": "Capture", "aliases": ["capture", "screenshot"] }
+    ],
+    "panels": [{ "id": "omarchy.audio", "name": "Audio" }],
+    "targets": [
+      {
+        "name": "media",
+        "functions": [
+          { "name": "seek", "arguments": [{ "name": "seconds", "type": "int" }], "returns": "void" }
+        ]
+      }
+    ]
+  },
   "keyboard": {
     "layout": "gb",
     "name": "English (UK)",

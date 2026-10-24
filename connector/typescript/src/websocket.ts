@@ -54,6 +54,7 @@ import {
   FileInfo,
   GetFilesRequest,
   HistoryRequest,
+  HyprlandDispatchRequest,
   HyprlandGlobalShortcutRequest,
   HyprlandMoveWindowRequest,
   HyprlandSetWindowRequest,
@@ -64,6 +65,8 @@ import {
   MediaDirectory,
   ModulesRequest,
   Notification,
+  OmarchyMenuRequest,
+  OmarchyPanelRequest,
   OpenTarget,
   PathRequest,
   type ResponseType,
@@ -195,6 +198,10 @@ export interface Interface {
   readonly displayControl: (
     control: DisplayControl,
   ) => Effect.Effect<void, WebSocketError>;
+  /** Runs a dispatcher on the focused window, as its bind would. */
+  readonly hyprlandDispatch: (
+    dispatch: HyprlandDispatchRequest,
+  ) => Effect.Effect<void, WebSocketError>;
   readonly hyprlandMoveWindow: (
     move: HyprlandMoveWindowRequest,
   ) => Effect.Effect<void, WebSocketError>;
@@ -211,6 +218,14 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly sendNotification: (
     notification: Notification,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Opens, closes or toggles the Omarchy menu at a route. */
+  readonly omarchyMenu: (
+    menu: OmarchyMenuRequest,
+  ) => Effect.Effect<void, WebSocketError>;
+  /** Opens, closes or toggles an Omarchy shell panel. */
+  readonly omarchyPanel: (
+    panel: OmarchyPanelRequest,
   ) => Effect.Effect<void, WebSocketError>;
   readonly open: (target: OpenTarget) => Effect.Effect<void, WebSocketError>;
   readonly power: (action: PowerAction) => Effect.Effect<void, WebSocketError>;
@@ -913,6 +928,18 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     );
   });
 
+  const hyprlandDispatch = Effect.fn("SystemBridgeWebSocket.hyprlandDispatch")(
+    function* (dispatch: HyprlandDispatchRequest) {
+      yield* call(
+        "HYPRLAND_DISPATCH",
+        "HYPRLAND_DISPATCHED",
+        HyprlandDispatchRequest,
+        dispatch,
+        ignoreReply,
+      );
+    },
+  );
+
   const hyprlandMoveWindow = Effect.fn(
     "SystemBridgeWebSocket.hyprlandMoveWindow",
   )(function* (move: HyprlandMoveWindowRequest) {
@@ -984,6 +1011,30 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     },
   );
 
+  const omarchyMenu = Effect.fn("SystemBridgeWebSocket.omarchyMenu")(function* (
+    menu: OmarchyMenuRequest,
+  ) {
+    yield* call(
+      "OMARCHY_MENU",
+      "OMARCHY_MENU_CHANGED",
+      OmarchyMenuRequest,
+      menu,
+      ignoreReply,
+    );
+  });
+
+  const omarchyPanel = Effect.fn("SystemBridgeWebSocket.omarchyPanel")(
+    function* (panel: OmarchyPanelRequest) {
+      yield* call(
+        "OMARCHY_PANEL",
+        "OMARCHY_PANEL_CHANGED",
+        OmarchyPanelRequest,
+        panel,
+        ignoreReply,
+      );
+    },
+  );
+
   const open = Effect.fn("SystemBridgeWebSocket.open")(function* (
     target: OpenTarget,
   ) {
@@ -1035,12 +1086,15 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     getDiscordSetup,
     updateDiscordSetup,
     displayControl,
+    hyprlandDispatch,
     hyprlandMoveWindow,
     hyprlandReloadConfig,
     hyprlandRunGlobalShortcut,
     hyprlandSetWindow,
     mediaControl,
     sendNotification,
+    omarchyMenu,
+    omarchyPanel,
     open,
     power,
     exitBackend,

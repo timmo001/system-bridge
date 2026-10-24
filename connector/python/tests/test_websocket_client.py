@@ -23,7 +23,11 @@ from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
 from systembridgeconnector.models.command_result import ExecuteResult
-from systembridgeconnector.models.desktop_control import DesktopWindowStateRequest
+from systembridgeconnector.models.desktop_control import (
+    DesktopWindowStateRequest,
+    OmarchyAction,
+    OmarchyMenuRequest,
+)
 from systembridgeconnector.models.discord_control import DiscordAction, DiscordControl
 from systembridgeconnector.models.discord_setup import DiscordSetup
 from systembridgeconnector.models.display_control import DisplayControl
@@ -519,6 +523,20 @@ async def test_display_control(
     assert response.type == EventType.DISPLAY_CONTROLLED
     # Unset controls aren't sent
     assert response.data == {"id": "HDMI-A-2", "brightness": 40}
+
+
+@pytest.mark.asyncio
+async def test_omarchy_menu_close(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test the websocket client."""
+    response = await mock_websocket_client_listening.omarchy_menu(
+        OmarchyMenuRequest(action=OmarchyAction.CLOSE),
+        request_id=REQUEST_ID,
+    )
+    assert response.type == EventType.OMARCHY_MENU_CHANGED
+    # Closing sends no id
+    assert response.data == {"action": "close"}
 
 
 @pytest.mark.asyncio

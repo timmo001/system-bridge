@@ -162,6 +162,47 @@
       ]),
       name='English (UK)',
     ),
+    omarchy=Omarchy(
+      menus=list([
+        OmarchyMenu(
+          aliases=list([
+          ]),
+          id='root',
+          name='Omarchy menu',
+        ),
+        OmarchyMenu(
+          aliases=list([
+            'capture',
+            'screenshot',
+          ]),
+          id='trigger.capture',
+          name='Capture',
+        ),
+      ]),
+      panels=list([
+        OmarchyPanel(
+          id='omarchy.audio',
+          name='Audio',
+        ),
+      ]),
+      targets=list([
+        OmarchyTarget(
+          functions=list([
+            OmarchyFunction(
+              arguments=list([
+                OmarchyArgument(
+                  name='seconds',
+                  type='int',
+                ),
+              ]),
+              name='seek',
+              returns='void',
+            ),
+          ]),
+          name='media',
+        ),
+      ]),
+    ),
     windows=list([
       DesktopWindow(
         app='chromium',
