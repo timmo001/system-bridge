@@ -240,7 +240,11 @@ export class PageOverview extends SbPage {
     const media = data.media;
 
     return html`
-      <sb-card class="half" heading="Now playing" href=${href("media")}>
+      <sb-card
+        class="half"
+        heading="Now playing"
+        href=${href("module", { params: { module: "media" } })}
+      >
         ${
           media?.title
             ? html`<div class="row" style="--sb-row-gap: var(--sb-space-4)">

@@ -1,14 +1,18 @@
 import { mdiFolderOpenOutline, mdiOpenInNew, mdiWeb } from "@mdi/js";
+import { Schema } from "effect";
 import { html } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 
 import "~/components/sb-segmented";
 import { icon, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import { actionResult, open, registry } from "~/lib/atoms";
-import { href, type LocationOf, type OpenTargetType } from "~/lib/router";
 
 import { SbPage } from "./sb-page";
+
+const OpenTargetType = Schema.Literals(["url", "path"]);
+
+type OpenTargetType = typeof OpenTargetType.Type;
 
 const kinds: Readonly<
   Record<
@@ -35,25 +39,20 @@ const kinds: Readonly<
   },
 };
 
-/** URL is the default, so it keeps the search empty. */
 const kindOptions = (["url", "path"] as const).map((value) => ({
   value,
   label: kinds[value].label,
   icon: value === "url" ? mdiWeb : mdiFolderOpenOutline,
-  href: href("open", {
-    search: { type: value === "url" ? undefined : value },
-  }),
 }));
 
-/**
- * Open a URL or a file on this system. Whether it's a URL or a path is in
- * the search, so a link can go straight to either.
- */
+const isOpenTargetType = Schema.is(OpenTargetType);
+
+/** Open a URL or a file on this system. */
 @customElement("page-open")
 export class PageOpen extends SbPage {
-  @property({ attribute: false }) location!: LocationOf<"open">;
-
   readonly #open = new AtomController(this, () => open);
+
+  @state() private kind: OpenTargetType = "url";
 
   @state() private values: Readonly<Record<OpenTargetType, string>> = {
     url: "",
@@ -64,10 +63,14 @@ export class PageOpen extends SbPage {
 
   protected readonly pageTitle = "Open";
 
+  #onKindChange = (event: CustomEvent<{ readonly value: string }>) => {
+    if (isOpenTargetType(event.detail.value)) this.kind = event.detail.value;
+  };
+
   #onSubmit = (event: SubmitEvent) => {
     event.preventDefault();
 
-    const kind = this.location.search.type ?? "url";
+    const kind = this.kind;
     const value = this.values[kind].trim();
 
     if (value === "") return;
@@ -78,9 +81,7 @@ export class PageOpen extends SbPage {
 
   #onInput = (event: InputEvent) => {
     if (event.target instanceof HTMLInputElement) {
-      const kind = this.location.search.type ?? "url";
-
-      this.values = { ...this.values, [kind]: event.target.value };
+      this.values = { ...this.values, [this.kind]: event.target.value };
     }
   };
 
@@ -94,6 +95,7 @@ export class PageOpen extends SbPage {
           label="What to open"
           .options=${kindOptions}
           .value=${kind}
+          @value-changed=${this.#onKindChange}
         ></sb-segmented>
         <div class="field">
           <label for="target">${info.label}</label>
@@ -122,7 +124,7 @@ export class PageOpen extends SbPage {
   }
 
   override render() {
-    const kind = this.location.search.type ?? "url";
+    const kind = this.kind;
 
     return html`
       <div class="page narrow">

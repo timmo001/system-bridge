@@ -2,7 +2,6 @@ import {
   mdiMusicNote,
   mdiPause,
   mdiPlay,
-  mdiPlayCircleOutline,
   mdiSkipNext,
   mdiSkipPrevious,
   mdiStop,
@@ -502,11 +501,8 @@ export class PageMedia extends SbPage {
 
     return html`
       <div class="page narrow">
-        ${this.renderHeader({
-          heading: "Media controls",
-          description: "Control what's playing on this system",
-          icon: mdiPlayCircleOutline,
-        })}
+        <!-- On the Media page, the player sits right under its heading, so it
+          needs none of its own -->
         ${this.renderResult(
           result,
           result?.success === false

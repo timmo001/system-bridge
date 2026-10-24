@@ -4,6 +4,7 @@ import {
   ModuleName,
   SystemBridgeWebSocket,
   type DataMissingError,
+  type DiscordControl,
   type MediaAction,
   ModuleDataUpdate,
   type ModulesData,
@@ -62,7 +63,8 @@ export function errorMessage(error: BridgeError): string {
     case "RequestTimeoutError":
       return "System Bridge didn't reply in time. Please try again.";
     default:
-      return error.message;
+      // The backend's messages are Go errors, which start in lower case
+      return `${error.message.charAt(0).toUpperCase()}${error.message.slice(1)}`;
   }
 }
 
@@ -353,6 +355,38 @@ export const addMediaDirectory = Atom.fn(
     }),
 );
 
+/**
+ * Where the Discord connection is up to. Changes only when it connects,
+ * disconnects, signs in or fails, so the setup below re-reads at those
+ * moments.
+ */
+const discordProgress = Atom.make((get): string => {
+  const discord = get(latestModuleData).discord;
+
+  return `${String(discord?.connected)}:${String(discord?.authenticated)}:${discord?.error ?? ""}`;
+});
+
+/** How far Discord is set up, kept current as the connection changes. */
+export const discordSetup = Atom.make((get) => {
+  get(discordProgress);
+
+  return socket(get).pipe(Effect.flatMap((bridge) => bridge.getDiscordSetup));
+});
+
+/** Saves the Discord application to authorize as. */
+export const updateDiscordSetup = Atom.fn(
+  (credentials: { clientId: string; clientSecret: string }, get) =>
+    fnSocket(get).pipe(
+      Effect.flatMap((bridge) =>
+        bridge.updateDiscordSetup({
+          clientId: credentials.clientId,
+          clientSecret: Redacted.make(credentials.clientSecret),
+        }),
+      ),
+      Effect.tap(() => Effect.sync(() => get.refresh(discordSetup))),
+    ),
+);
+
 export const sendNotification = Atom.fn((notification: Notification, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.sendNotification(notification)),
@@ -365,6 +399,12 @@ export const open = Atom.fn((target: OpenTarget, get) =>
 
 export const mediaControl = Atom.fn((action: MediaAction, get) =>
   fnSocket(get).pipe(Effect.flatMap((bridge) => bridge.mediaControl(action))),
+);
+
+export const discordControl = Atom.fn((control: DiscordControl, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => bridge.discordControl(control)),
+  ),
 );
 
 /** Runs an allowlisted command, one atom per command. */

@@ -54,31 +54,38 @@ export const ModuleSearch = Schema.Struct({
 
 export interface ModuleSearch extends Schema.Schema.Type<typeof ModuleSearch> {}
 
-export const OpenTargetType = Schema.Literals(["url", "path"]);
-
-export type OpenTargetType = typeof OpenTargetType.Type;
-
 export const routes = {
   overview: route("/", NoParams, NoSearch),
+  // Only module names match, so the other routes' paths are free
   module: route(
-    "/data/:module",
+    "/:module",
     Schema.Struct({ module: ModuleName }),
     ModuleSearch,
   ),
   connection: route("/connection", NoParams, NoSearch),
-  media: route("/actions/media", NoParams, NoSearch),
-  notifications: route("/actions/notifications", NoParams, NoSearch),
-  open: route(
-    "/actions/open",
-    NoParams,
-    Schema.Struct({ type: Schema.optional(OpenTargetType) }),
-  ),
   settings: route("/settings", NoParams, NoSearch),
   settingsAppearance: route("/settings/appearance", NoParams, NoSearch),
-  settingsCommands: route("/settings/commands", NoParams, NoSearch),
-  settingsDisks: route("/settings/disks", NoParams, NoSearch),
-  settingsMedia: route("/settings/media", NoParams, NoSearch),
 } as const;
+
+/**
+ * Pages that became sections of a module's page, by their old path, so old
+ * links and bookmarks still land in the right place.
+ */
+interface MovedPage {
+  readonly module: ModuleName;
+  /** The section's id on the module's page. */
+  readonly section: string;
+}
+
+const moved = new Map<string, MovedPage>([
+  ["/actions/media", { module: "media", section: "media-controls" }],
+  ["/actions/notifications", { module: "system", section: "notifications" }],
+  ["/actions/open", { module: "system", section: "open" }],
+  ["/settings/commands", { module: "system", section: "commands" }],
+  ["/settings/media", { module: "media", section: "media-directories" }],
+  ["/settings/disks", { module: "disks", section: "disk-mounts" }],
+  ["/settings/discord", { module: "discord", section: "discord-setup" }],
+]);
 
 type Routes = typeof routes;
 
@@ -196,6 +203,37 @@ const parse = (url: URL): Location => {
   }
 
   return { name: "notFound", path };
+};
+
+/**
+ * Where an old address lives now, if it moved: a module's page under
+ * `/data/`, or a page that became a section of one.
+ */
+const movedTo = (url: URL): string | undefined => {
+  const path = url.pathname.startsWith(basePath)
+    ? url.pathname.slice(basePath.length)
+    : url.pathname;
+
+  const parts = segments(path);
+
+  if (parts.length === 2 && parts[0] === "data") {
+    return `${basePath}/${parts[1] ?? ""}${url.search}${url.hash}`;
+  }
+
+  const target = moved.get(`/${parts.join("/")}`);
+
+  return target === undefined
+    ? undefined
+    : `${basePath}/${target.module}#${target.section}`;
+};
+
+/** The page the URL points at, first swapping a moved address for its new one. */
+const read = (): Location => {
+  const target = movedTo(new URL(location.href));
+
+  if (target !== undefined) history.replaceState(null, "", target);
+
+  return parse(new URL(location.href));
 };
 
 type HrefOptions<K extends RouteName> = {
@@ -346,31 +384,17 @@ const rememberScroll = () => {
 let cancelRestore: (() => void) | undefined;
 
 /**
- * Scrolls back to where this URL was. The page grows as its data arrives, so
- * this waits until it's tall enough, rather than letting the browser try
- * once while the page is still short and land at the top.
+ * Runs `attempt` until it reports that it's done, each time the page grows,
+ * for up to five seconds. Someone scrolling or typing stops it.
  */
-const restoreScroll = () => {
+const scrollWhenReady = (attempt: () => boolean) => {
   cancelRestore?.();
 
-  const target = scrollPositions()[location.href] ?? 0;
-
-  if (target <= 0) {
-    window.scrollTo(0, 0);
-
-    return;
-  }
-
-  const root = document.documentElement;
-
-  const attempt = () => {
-    if (root.scrollHeight - window.innerHeight >= target) {
-      window.scrollTo(0, target);
-      stop();
-    }
+  const run = () => {
+    if (attempt()) stop();
   };
 
-  const observer = new ResizeObserver(attempt);
+  const observer = new ResizeObserver(run);
   const timer = setTimeout(() => stop(), 5000);
 
   const stop = () => {
@@ -397,9 +421,49 @@ const restoreScroll = () => {
       if (cancelRestore !== stop) return;
 
       observer.observe(document.body);
-      attempt();
+      run();
     }),
   );
+};
+
+/**
+ * Scrolls back to where this URL was. The page grows as its data arrives, so
+ * this waits until it's tall enough, rather than letting the browser try
+ * once while the page is still short and land at the top.
+ */
+const restoreScroll = () => {
+  const target = scrollPositions()[location.href] ?? 0;
+
+  if (target <= 0) {
+    cancelRestore?.();
+    window.scrollTo(0, 0);
+
+    return;
+  }
+
+  const root = document.documentElement;
+
+  scrollWhenReady(() => {
+    if (root.scrollHeight - window.innerHeight < target) return false;
+
+    window.scrollTo(0, target);
+
+    return true;
+  });
+};
+
+/**
+ * Scrolls a section to the top of the page, such as the one a link's hash
+ * names. Like restoring the scroll, it waits for the page to grow enough.
+ */
+export const scrollToSection = (section: Element): void => {
+  scrollWhenReady(() => {
+    section.scrollIntoView({ block: "start" });
+
+    const margin = Number.parseFloat(getComputedStyle(section).scrollMarginTop);
+
+    return Math.abs(section.getBoundingClientRect().top - (margin || 0)) < 2;
+  });
 };
 
 /**
@@ -407,7 +471,7 @@ const restoreScroll = () => {
  * reload, and the back and forward buttons follow it, as do scroll positions.
  */
 export const currentLocation = Atom.readable((get) => {
-  const update = () => get.setSelf(parse(new URL(location.href)));
+  const update = () => get.setSelf(read());
 
   const onPopState = () => {
     update();
@@ -437,7 +501,7 @@ export const currentLocation = Atom.readable((get) => {
     document.removeEventListener("click", onClick);
   });
 
-  return parse(new URL(location.href));
+  return read();
 }).pipe(Atom.keepAlive);
 
 /**

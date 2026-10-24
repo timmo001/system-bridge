@@ -634,6 +634,25 @@ export const pageStyles = css`
     --sb-page-width: 56rem;
   }
 
+  /* A section of another page takes the room that page gives it, under a
+     smaller heading */
+  :host([embedded]) .page {
+    gap: var(--sb-space-4);
+    max-width: none;
+    margin: 0;
+  }
+
+  :host([embedded]) .page-header .tile {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--sb-radius-m);
+    --sb-icon-size: 1.375rem;
+  }
+
+  :host([embedded]) .page-header h2 {
+    font-size: var(--sb-font-size-l);
+  }
+
   .page-header {
     display: flex;
     flex-wrap: wrap;

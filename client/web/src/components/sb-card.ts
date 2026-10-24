@@ -57,7 +57,7 @@ export class SbCard extends LitElement {
         border-radius: var(--sb-radius-m);
       }
 
-      a.heading:hover h2 {
+      a.heading:hover :is(h2, h3) {
         text-decoration: underline;
         text-underline-offset: 0.2em;
       }
@@ -68,7 +68,8 @@ export class SbCard extends LitElement {
         min-width: 0;
       }
 
-      h2 {
+      h2,
+      h3 {
         font-size: var(--sb-font-size-m);
       }
 
@@ -131,11 +132,31 @@ export class SbCard extends LitElement {
     }
   };
 
+  /**
+   * Whether the card is in a section of a page, which has a heading of its
+   * own, so the card's heading goes a level under it.
+   */
+  #inSection(): boolean {
+    let root = this.getRootNode();
+
+    while (root instanceof ShadowRoot) {
+      if (root.host.hasAttribute("embedded")) return true;
+
+      root = root.host.getRootNode();
+    }
+
+    return false;
+  }
+
   #renderHeading() {
     const content = html`
       ${this.icon === "" ? nothing : icon(this.icon)}
       <span class="titles">
-        <h2 class="truncate">${this.heading}</h2>
+        ${
+          this.#inSection()
+            ? html`<h3 class="truncate">${this.heading}</h3>`
+            : html`<h2 class="truncate">${this.heading}</h2>`
+        }
         ${
           this.subheading === ""
             ? nothing

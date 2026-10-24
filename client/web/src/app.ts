@@ -17,22 +17,16 @@ import { icon, shared } from "./components/shared-styles";
 import { AtomController } from "./controllers/atom-controller";
 import { connectionSettings, connectionStatus, registry } from "./lib/atoms";
 import { DOCS_URL } from "./lib/links";
-import { moduleItems, type NavItem, navigation } from "./lib/navigation";
+import { type NavItem, navigation } from "./lib/navigation";
 import { appearance, appliedTheme } from "./lib/preferences";
 import { currentLocation, href, type Location, navigate } from "./lib/router";
 import { ThemeMode } from "./lib/themes";
 import "./pages/page-connection";
-import "./pages/page-media";
 import "./pages/page-module";
 import "./pages/page-not-found";
-import "./pages/page-notifications";
-import "./pages/page-open";
 import "./pages/page-overview";
 import "./pages/page-settings";
 import "./pages/page-settings-appearance";
-import "./pages/page-settings-commands";
-import "./pages/page-settings-disks";
-import "./pages/page-settings-media";
 
 const isThemeMode = Schema.is(ThemeMode);
 
@@ -43,18 +37,13 @@ const modeOptions = [
 ] as const;
 
 /**
- * Every page, for the select in the header, which is the app's navigation:
- * the overview, each module on its own, then the actions and settings.
+ * Every page, for the select in the header, which is the app's navigation,
+ * grouped by area.
  */
-const jumpItems: readonly (NavItem & { readonly group: string })[] = [
-  ...navigation.flatMap((section) =>
-    section.items.flatMap((item) =>
-      item.id === "data"
-        ? moduleItems.map((module) => ({ ...module, group: "Data" }))
-        : [{ ...item, group: section.label || "Pages" }],
-    ),
-  ),
-];
+const jumpItems: readonly (NavItem & { readonly group: string })[] =
+  navigation.flatMap((section) =>
+    section.items.map((item) => ({ ...item, group: section.label || "Pages" })),
+  );
 
 const jumpOptions: readonly SelectOption[] = jumpItems.map((item) => ({
   value: item.href,
@@ -71,22 +60,10 @@ const renderPage = (location: Location) => {
       return html`<page-module .location=${location}></page-module>`;
     case "connection":
       return html`<page-connection></page-connection>`;
-    case "media":
-      return html`<page-media></page-media>`;
-    case "notifications":
-      return html`<page-notifications></page-notifications>`;
-    case "open":
-      return html`<page-open .location=${location}></page-open>`;
     case "settings":
       return html`<page-settings></page-settings>`;
     case "settingsAppearance":
       return html`<page-settings-appearance></page-settings-appearance>`;
-    case "settingsCommands":
-      return html`<page-settings-commands></page-settings-commands>`;
-    case "settingsDisks":
-      return html`<page-settings-disks></page-settings-disks>`;
-    case "settingsMedia":
-      return html`<page-settings-media></page-settings-media>`;
     case "notFound":
       return html`<page-not-found .path=${location.path}></page-not-found>`;
   }

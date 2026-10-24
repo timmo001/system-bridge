@@ -5,6 +5,7 @@ import {
   mdiRefresh,
 } from "@mdi/js";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
+import { property } from "lit/decorators.js";
 
 import { pageStyles, icon, shared } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
@@ -28,10 +29,14 @@ export interface PageHeader {
 /**
  * The base for every page: shadow DOM with the shared styles, the browser
  * tab's title, a common header, and a gate for content that needs the
- * connection.
+ * connection. A page can also be a section of another, such as the commands
+ * on the System page.
  */
 export abstract class SbPage extends LitElement {
   static override styles = [shared, pageStyles];
+
+  /** Shown as a section of another page: an h2 heading, and no tab title. */
+  @property({ type: Boolean, reflect: true }) embedded = false;
 
   readonly #status = new AtomController(this, () => connectionStatus);
 
@@ -43,7 +48,7 @@ export abstract class SbPage extends LitElement {
   }
 
   protected override updated(): void {
-    document.title = documentTitle(this.pageTitle);
+    if (!this.embedded) document.title = documentTitle(this.pageTitle);
   }
 
   protected renderHeader(header: PageHeader): TemplateResult {
@@ -55,7 +60,11 @@ export abstract class SbPage extends LitElement {
             : html`<span class="tile">${icon(header.icon)}</span>`
         }
         <div class="titles">
-          <h1>${header.heading}</h1>
+          ${
+            this.embedded
+              ? html`<h2>${header.heading}</h2>`
+              : html`<h1>${header.heading}</h1>`
+          }
           ${
             header.description === undefined
               ? nothing

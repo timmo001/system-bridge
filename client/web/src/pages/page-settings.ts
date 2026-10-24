@@ -1,11 +1,21 @@
-import { mdiCogOutline, mdiContentSave } from "@mdi/js";
+import {
+  mdiCogOutline,
+  mdiConsoleLine,
+  mdiContentSave,
+  mdiFolderMultipleOutline,
+  mdiHarddisk,
+  mdiHeadset,
+} from "@mdi/js";
 import { LogLevel, type Settings } from "@timmo001/effect-system-bridge";
 import { Schema, Struct } from "effect";
-import { html } from "lit";
+import { css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import "~/components/sb-card";
 import "~/components/sb-select";
 import { icon, spinner } from "~/components/shared-styles";
+import { moduleInfo } from "~/lib/navigation";
+import { href } from "~/lib/router";
 
 import { SbSettingsPage } from "./sb-settings-page";
 
@@ -29,6 +39,28 @@ const logLevels = [
 /** System Bridge's own behaviour: starting, the tray and logging. */
 @customElement("page-settings")
 export class PageSettings extends SbSettingsPage {
+  static override styles = [
+    ...SbSettingsPage.styles,
+    css`
+      .links {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+        gap: var(--sb-space-2);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .links .button {
+        justify-content: flex-start;
+        width: 100%;
+        height: auto;
+        padding-block: var(--sb-space-2);
+        text-align: start;
+      }
+    `,
+  ];
+
   @state() private form: Settings | undefined;
 
   protected readonly pageTitle = "General settings";
@@ -154,10 +186,65 @@ export class PageSettings extends SbSettingsPage {
         })}
         ${this.renderResult(this.saveResult)}
         ${this.gate(() => this.#renderForm(), placeholder)}
+        <sb-card
+          heading="More settings"
+          subheading="Kept with the data they change"
+        >
+          <ul class="links">
+            ${elsewhereLinks}
+          </ul>
+        </sb-card>
       </div>
     `;
   }
 }
+
+/** Settings that live with their module's data now. */
+const elsewhere = [
+  {
+    label: "Commands",
+    icon: mdiConsoleLine,
+    module: "system",
+    section: "commands",
+  },
+  {
+    label: "Media directories",
+    icon: mdiFolderMultipleOutline,
+    module: "media",
+    section: "media-directories",
+  },
+  {
+    label: "Disk mounts",
+    icon: mdiHarddisk,
+    module: "disks",
+    section: "disk-mounts",
+  },
+  {
+    label: "Discord",
+    icon: mdiHeadset,
+    module: "discord",
+    section: "discord-setup",
+  },
+] as const;
+
+const elsewhereLinks = elsewhere.map(
+  (item) =>
+    html`<li>
+      <a
+        class="button plain"
+        href=${href("module", {
+          params: { module: item.module },
+          hash: item.section,
+        })}
+      >
+        ${icon(item.icon)}
+        <span class="stack" style="--sb-stack-gap: 0">
+          <span>${item.label}</span>
+          <span class="hint">On the ${moduleInfo[item.module].label} page</span>
+        </span>
+      </a>
+    </li>`,
+);
 
 const placeholder = html`<span
   class="skeleton"

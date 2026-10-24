@@ -1,7 +1,7 @@
 import {
   mdiAlertCircleOutline,
+  mdiHeadset,
   mdiMicrophone,
-  mdiMusicNote,
   mdiWebcam,
 } from "@mdi/js";
 import type {
@@ -15,7 +15,6 @@ import { icon } from "~/components/shared-styles";
 import {
   formatAgo,
   formatDateTime,
-  formatDuration,
   formatNumber,
   formatPercent,
   formatPlayerStatus,
@@ -291,68 +290,10 @@ export const mediaDashboard = ({ data }: DashboardContext) => {
 
   if (media === undefined) return noData("media");
 
-  const playing = Boolean(media.title || media.artist);
-
-  const percent =
-    media.position !== null && media.duration
-      ? (media.position / media.duration) * 100
-      : null;
-
+  // The player above it on the page shows what's playing
   return html`
     <div class="dashboard">
-      <sb-card class="two-thirds" heading="Now playing">
-        <a slot="actions" class="button tonal small" href=${href("media")}
-          >Controls</a
-        >
-        ${
-          playing
-            ? html`<div
-                class="row"
-                style="--sb-row-gap: var(--sb-space-5); align-items: flex-start"
-              >
-                ${
-                  media.thumbnail
-                    ? html`<img
-                        src=${media.thumbnail}
-                        alt=""
-                        width="112"
-                        height="112"
-                        style="border-radius: var(--sb-radius-l); object-fit: cover"
-                      />`
-                    : html`<span
-                        class="row"
-                        style="justify-content: center; width: 7rem; height: 7rem; background: var(--sb-color-sunken); border-radius: var(--sb-radius-l); --sb-icon-size: 2.5rem; color: var(--sb-color-muted)"
-                        >${icon(mdiMusicNote)}</span
-                      >`
-                }
-                <div
-                  class="stack"
-                  style="flex: 1; min-width: 0; --sb-stack-gap: var(--sb-space-1)"
-                >
-                  <h2 class="truncate">${media.title ?? "Unknown title"}</h2>
-                  <span class="muted truncate">${media.artist ?? ""}</span>
-                  <span class="muted small truncate"
-                    >${media.album_title ?? ""}</span
-                  >
-                  ${
-                    percent === null
-                      ? nothing
-                      : html`<sb-meter
-                          .value=${percent}
-                          display="${formatDuration(media.position ?? 0)} / ${formatDuration(media.duration ?? 0)}"
-                          .warning=${101}
-                          .danger=${101}
-                        ></sb-meter>`
-                  }
-                </div>
-              </div>`
-            : html`<div class="empty">
-                ${icon(mdiMusicNote)}
-                <p>Nothing is playing.</p>
-              </div>`
-        }
-      </sb-card>
-      <sb-card class="third" heading="Details">
+      <sb-card heading="Details">
         ${facts([
           ["Status", formatPlayerStatus(media.status)],
           ["Type", media.type],
@@ -405,7 +346,27 @@ const member = (call: DiscordCallMember) =>
 export const discordDashboard = ({ data }: DashboardContext) => {
   const discord = data.discord;
 
-  if (discord === undefined) return noData("Discord data");
+  // The module only exists once Discord is set up
+  if (discord === undefined) {
+    return html`<sb-card>
+      <div class="empty">
+        ${icon(mdiHeadset)}
+        <p>Discord isn't set up yet.</p>
+        <p class="muted small">
+          Connect System Bridge to the Discord desktop app to see your voice
+          settings and calls here.
+        </p>
+        <a
+          class="button filled"
+          href=${href("module", {
+            params: { module: "discord" },
+            hash: "discord-setup",
+          })}
+          >Set up Discord</a
+        >
+      </div>
+    </sb-card>`;
+  }
 
   const members = discord.call?.members.map(member) ?? [];
 
@@ -421,6 +382,24 @@ export const discordDashboard = ({ data }: DashboardContext) => {
             >${discord.authenticated ? "Signed in" : "Not signed in"}</span
           >
         </div>
+        ${
+          discord.error
+            ? html`<div class="alert danger" role="alert">
+                ${icon(mdiAlertCircleOutline)}
+                <div>
+                  <strong>Couldn't connect to Discord</strong>
+                  ${discord.error}
+                  <a
+                    href=${href("module", {
+                      params: { module: "discord" },
+                      hash: "discord-setup",
+                    })}
+                    >Check the setup</a
+                  >
+                </div>
+              </div>`
+            : nothing
+        }
         ${facts([
           ["User", discord.user?.global_name ?? discord.user?.username],
           ["Muted", yesNo(discord.mute)],

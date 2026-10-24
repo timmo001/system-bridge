@@ -1,13 +1,9 @@
 import {
   mdiApplicationCogOutline,
   mdiBattery,
-  mdiBellOutline,
-  mdiChartLine,
   mdiCogOutline,
-  mdiConsoleLine,
   mdiCpu64Bit,
   mdiExpansionCardVariant,
-  mdiFolderMultipleOutline,
   mdiHarddisk,
   mdiHeadset,
   mdiInformationOutline,
@@ -15,7 +11,6 @@ import {
   mdiLanConnect,
   mdiMemory,
   mdiMonitor,
-  mdiOpenInNew,
   mdiPaletteOutline,
   mdiPlayCircleOutline,
   mdiThermometer,
@@ -35,7 +30,8 @@ export interface ModuleInfo {
 export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
   system: {
     label: "System",
-    description: "Host, platform, uptime and users",
+    description:
+      "Host, platform and uptime, with commands, notifications and opening",
     icon: mdiInformationOutline,
   },
   cpu: {
@@ -50,7 +46,7 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
   },
   disks: {
     label: "Disks",
-    description: "Partitions, space and activity",
+    description: "Partitions, space and activity, and which mounts to show",
     icon: mdiHarddisk,
   },
   networks: {
@@ -85,12 +81,12 @@ export const moduleInfo: Readonly<Record<ModuleName, ModuleInfo>> = {
   },
   media: {
     label: "Media",
-    description: "What's playing now",
+    description: "What's playing, its controls and your media directories",
     icon: mdiPlayCircleOutline,
   },
   discord: {
     label: "Discord",
-    description: "Voice, calls and notifications",
+    description: "Voice controls, calls and setup",
     icon: mdiHeadset,
   },
 };
@@ -138,48 +134,47 @@ const routeItem = (
 });
 
 /**
- * Each module's page. The navigation has one entry for them all; the page's
- * own tabs switch between them, and the quick jump lists each one.
+ * A module's page, which holds its data along with the controls and settings
+ * that go with it.
  */
-export const moduleItems: readonly NavItem[] = moduleOrder.map((module) => ({
+const moduleItem = (module: ModuleName): NavItem => ({
   id: `module-${module}`,
   label: moduleInfo[module].label,
   icon: moduleInfo[module].icon,
   href: href("module", { params: { module } }),
   matches: (location) =>
     location.name === "module" && location.params.module === module,
-}));
+});
 
+/** The pages, grouped into areas. */
 export const navigation: readonly NavSection[] = [
   {
     label: "",
-    items: [
-      routeItem("overview", "Overview", mdiViewDashboardOutline),
-      {
-        id: "data",
-        label: "Data",
-        icon: mdiChartLine,
-        href: href("module", { params: { module: "system" } }),
-        matches: (location) => location.name === "module",
-      },
-    ],
+    items: [routeItem("overview", "Overview", mdiViewDashboardOutline)],
   },
   {
-    label: "Actions",
-    items: [
-      routeItem("media", "Media controls", mdiPlayCircleOutline),
-      routeItem("notifications", "Notifications", mdiBellOutline),
-      routeItem("open", "Open", mdiOpenInNew),
-    ],
+    label: "System",
+    items: (["system", "processes"] as const).map(moduleItem),
+  },
+  {
+    label: "Hardware",
+    items: (
+      ["cpu", "memory", "gpus", "sensors", "battery", "displays"] as const
+    ).map(moduleItem),
+  },
+  {
+    label: "Storage and network",
+    items: (["disks", "networks"] as const).map(moduleItem),
+  },
+  {
+    label: "Apps",
+    items: (["media", "discord"] as const).map(moduleItem),
   },
   {
     label: "Settings",
     items: [
       routeItem("settings", "General", mdiCogOutline),
       routeItem("settingsAppearance", "Appearance", mdiPaletteOutline),
-      routeItem("settingsCommands", "Commands", mdiConsoleLine),
-      routeItem("settingsMedia", "Media directories", mdiFolderMultipleOutline),
-      routeItem("settingsDisks", "Disk mounts", mdiHarddisk),
       routeItem("connection", "Connection", mdiLanConnect),
     ],
   },
