@@ -40,6 +40,8 @@ tools are not required. Installing them improves detection on some systems:
     Fedora): names the apps using the microphone or camera. Without it,
     microphone usage falls back to ALSA, which names the sound server instead
     of the app.
+  - `playerctl`: reads what's playing and controls it. Without it, the Media
+    module is empty and media controls do nothing.
   - `zenity`: shows the confirmation before **Quit** or **Hide system tray**.
     Without it, those actions can't be confirmed, so they don't run.
 

@@ -9,6 +9,7 @@ ExclusiveArch:  x86_64
 # Optional runtime tools that improve hardware detection when present.
 Recommends:     pciutils
 Recommends:     pipewire-utils
+Recommends:     playerctl
 Recommends:     zenity
 Suggests:       lm_sensors
 Suggests:       nvidia-smi

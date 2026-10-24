@@ -17,6 +17,7 @@ optdepends=('lm_sensors: broader temperature and fan sensor coverage'
             'nvidia-utils: NVIDIA GPU metrics via nvidia-smi'
             'pciutils: GPU model identification via lspci'
             'pipewire: name apps using the microphone or camera via pw-dump'
+            'playerctl: media player data and controls'
             'zenity: tray and desktop confirmation prompts')
 provides=('system-bridge')
 options=('!strip')
