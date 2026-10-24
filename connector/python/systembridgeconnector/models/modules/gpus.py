@@ -14,11 +14,16 @@ class GPU:
     name: str
     core_clock: float | None = None
     core_load: float | None = None
+    decoder_load: float | None = None
+    encoder_load: float | None = None
     fan_speed: float | None = None
+    fan_speed_percent: float | None = None
     memory_clock: float | None = None
     memory_load: float | None = None
     memory_free: float | None = None
     memory_used: float | None = None
     memory_total: float | None = None
+    performance_state: str | None = None
+    power_limit: float | None = None
     power_usage: float | None = None
     temperature: float | None = None

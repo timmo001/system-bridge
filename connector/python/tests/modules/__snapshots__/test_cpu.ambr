@@ -9,6 +9,8 @@
       min=0.8,
     ),
     load_average=1.5,
+    load_average_15=1.0,
+    load_average_5=1.25,
     name='name',
     per_cpu=list([
       PerCPU(
@@ -74,6 +76,8 @@
       'min': 0.8,
     }),
     'load_average': 1.5,
+    'load_average_15': 1.0,
+    'load_average_5': 1.25,
     'name': 'name',
     'per_cpu': list([
       dict({
@@ -139,6 +143,8 @@
       min=0.8,
     ),
     load_average=1.5,
+    load_average_15=1.0,
+    load_average_5=1.25,
     name='name',
     per_cpu=list([
       PerCPU(

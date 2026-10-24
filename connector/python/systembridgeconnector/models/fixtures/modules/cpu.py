@@ -19,6 +19,8 @@ FIXTURE_CPU = CPU(
         max=3.1,
     ),
     load_average=1.5,
+    load_average_5=1.25,
+    load_average_15=1.0,
     per_cpu=[
         PerCPU(
             id=0,

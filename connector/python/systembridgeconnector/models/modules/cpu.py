@@ -75,6 +75,8 @@ class CPU:
     family: str | None = None
     frequency: CPUFrequency | None = None
     load_average: float | None = None
+    load_average_5: float | None = None
+    load_average_15: float | None = None
     per_cpu: list[PerCPU] | None = None
     power: float | None = None
     stats: CPUStats | None = None
