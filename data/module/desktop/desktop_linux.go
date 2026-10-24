@@ -112,6 +112,7 @@ func (h *hyprland) refresh(ctx context.Context, titles bool, read bool) (*types.
 		if err := decodeReplies(replies, targets, optional); err != nil {
 			return nil, err
 		}
+		state.Devices.Keyboards = realKeyboards(state.Devices.Keyboards)
 		h.state = &state
 		if h.config == nil {
 			h.config = &config

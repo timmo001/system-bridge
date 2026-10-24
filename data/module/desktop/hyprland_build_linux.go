@@ -76,17 +76,19 @@ type hyprlandNamed struct {
 	Name string `json:"name"`
 }
 
+type hyprlandKeyboard struct {
+	Name              string `json:"name"`
+	Layout            string `json:"layout"`
+	Variant           string `json:"variant"`
+	Options           string `json:"options"`
+	ActiveLayoutIndex int    `json:"active_layout_index"`
+	ActiveKeymap      string `json:"active_keymap"`
+	Main              bool   `json:"main"`
+}
+
 type hyprlandDevices struct {
-	Keyboards []struct {
-		Name              string `json:"name"`
-		Layout            string `json:"layout"`
-		Variant           string `json:"variant"`
-		Options           string `json:"options"`
-		ActiveLayoutIndex int    `json:"active_layout_index"`
-		ActiveKeymap      string `json:"active_keymap"`
-		Main              bool   `json:"main"`
-	} `json:"keyboards"`
-	Mice []struct {
+	Keyboards []hyprlandKeyboard `json:"keyboards"`
+	Mice      []struct {
 		Name         string  `json:"name"`
 		DefaultSpeed float64 `json:"defaultSpeed"`
 		ScrollFactor float64 `json:"scrollFactor"`
