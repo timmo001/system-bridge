@@ -147,7 +147,7 @@ QtObject {
     case "gpus": return service.modules.gpus ? quantity(service.gpus.length, "GPU") : ""
     case "sensors": return service.sensors ? quantity(service.temperatures.length, "temperature") : ""
     case "battery": return service.battery ? percent(service.battery.percentage) : ""
-    case "bluetooth": return service.bluetooth ? bluetoothDevices(service).filter(function(device) { return device.connected === true }).length + " connected" : ""
+    case "bluetooth": return service.bluetooth ? (service.bluetooth.powered === false ? "Off" : bluetoothDevices(service).filter(function(device) { return device.connected === true }).length + " connected") : ""
     case "displays": return service.modules.displays ? quantity(service.displays.length, "display") : ""
     case "audio": return audioSummary(service)
     case "disks": return service.disks && Array.isArray(service.disks.devices) ? quantity(service.disks.devices.length, "disk") : ""
@@ -549,18 +549,26 @@ QtObject {
     return service.bluetooth && Array.isArray(service.bluetooth.devices) ? service.bluetooth.devices : []
   }
 
+  // Selecting a device connects or disconnects it.
   function bluetoothRows(service) {
     var devices = bluetoothDevices(service)
+    var off = service.bluetooth && service.bluetooth.powered === false
     var rows = []
+    if (off) reading(rows, "bluetooth-off", "", "\u{F00B2}", "Bluetooth", "Off")
     for (var i = 0; i < devices.length; i++) {
       var device = devices[i]
-      rows.push(row({
-        key: "bluetooth-" + (text(device.address) || i), section: "Paired devices",
-        icon: bluetoothIcons[text(device.type)] || bluetoothIcon,
-        primaryText: text(device.name) || text(device.address),
-        secondaryText: device.connected === true ? "Connected" : "Not connected"
-      }))
+      var address = text(device.address)
+      var connected = device.connected === true
+      var details = connected ? "Connected · select to disconnect" : off ? "Not connected" : "Not connected · select to connect"
+      rows.push(control(
+        "bluetooth-" + (address || i), "Paired devices",
+        bluetoothIcons[text(device.type)] || bluetoothIcon,
+        text(device.name) || address, details,
+        ["system-bridge", "client", "bluetooth", connected ? "disconnect" : "connect", address],
+        !address || (off && !connected)))
     }
+    if (service.bluetooth)
+      rows.push(webRow("web-bluetooth", "In the web client", bluetoothIcon, "All controls", "Turn Bluetooth on or off, and forget devices", "/bluetooth"))
     return rows
   }
 
