@@ -67,6 +67,8 @@ class System:
     version_latest: str | None = None
     version_newer_available: bool | None = None
     device_info: DeviceInfo | None = None
+    idle_time: int | None = None
+    locked: bool | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""

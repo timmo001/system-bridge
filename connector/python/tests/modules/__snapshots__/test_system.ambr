@@ -18,9 +18,11 @@
     ),
     fqdn='hostname.local',
     hostname='hostname',
+    idle_time=120,
     ip_address_4='192.168.1.100',
     ip_address_6='::1',
     kernel_version='6.1.0',
+    locked=False,
     mac_address='00:00:00:00:00:00',
     microphone_usage=list([
       'microphone1',

@@ -53,4 +53,6 @@ FIXTURE_SYSTEM = System(
         bios_version="bios_version",
         chassis_type="chassis_type",
     ),
+    idle_time=120,
+    locked=False,
 )
