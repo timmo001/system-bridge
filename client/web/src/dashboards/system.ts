@@ -30,7 +30,6 @@ import {
   formatNumber,
   formatPercent,
   formatPlayerStatus,
-  formatQuantity,
   formatUptime,
   formatWatts,
 } from "~/lib/format";
@@ -479,29 +478,66 @@ const windowColumns = (() => {
 
 const windowId = (row: WindowRow) => row.window.id;
 
-const workspaceItem = (
-  workspace: DesktopWorkspace,
-  extra: HyprlandWorkspace | undefined,
-) =>
-  html`<li>
-    <span class="spacer">
-      <strong>${workspace.name ?? workspace.id}</strong>
-      <span class="muted xsmall"
-        >${[
-          workspace.display,
-          workspace.windows === null
-            ? null
-            : formatQuantity(workspace.windows, "window"),
-          extra?.layout,
-        ]
-          .filter(Boolean)
-          .join(" · ")}</span
-      >
-    </span>
-    ${workspace.focused ? html`<span class="chip accent">Focused</span>` : workspace.active ? html`<span class="chip">Shown</span>` : nothing}
-    ${workspace.special ? html`<span class="chip">Special</span>` : nothing}
-    ${workspace.fullscreen ? html`<span class="chip">Fullscreen</span>` : nothing}
-  </li>`;
+interface WorkspaceRow {
+  readonly workspace: DesktopWorkspace;
+  readonly extra: HyprlandWorkspace | undefined;
+}
+
+const workspaceColumns = (() => {
+  const column = dataTableColumns<WorkspaceRow>();
+
+  return column.columns([
+    column.accessor((row) => row.workspace.name ?? row.workspace.id, {
+      id: "name",
+      header: "Name",
+      cell: ({ getValue, row }) => {
+        const { workspace } = row.original;
+
+        return html`<span class="row">
+          ${getValue()}
+          ${workspace.focused ? html`<span class="chip accent">Focused</span>` : workspace.active ? html`<span class="chip">Shown</span>` : nothing}
+        </span>`;
+      },
+    }),
+    column.accessor((row) => row.workspace.display ?? "", {
+      id: "display",
+      header: "Display",
+    }),
+    column.accessor((row) => row.workspace.windows ?? 0, {
+      id: "windows",
+      header: "Windows",
+      cell: ({ row }) => row.original.workspace.windows ?? "",
+    }),
+    column.accessor((row) => row.extra?.layout ?? "", {
+      id: "layout",
+      header: "Layout",
+    }),
+    column.display({
+      id: "state",
+      header: "State",
+      cell: ({ row }) => {
+        const { workspace, extra } = row.original;
+
+        return html`<span class="row wrap">
+          ${workspace.special ? html`<span class="chip">Special</span>` : nothing}
+          ${workspace.fullscreen ? html`<span class="chip">Fullscreen</span>` : nothing}
+          ${extra?.persistent ? html`<span class="chip">Persistent</span>` : nothing}
+        </span>`;
+      },
+    }),
+  ]);
+})();
+
+const workspaceId = (row: WorkspaceRow) => row.workspace.id;
+
+// Unsorted, so workspaces keep their ID order
+const workspaceTableState = {
+  filter: "",
+  sort: undefined,
+  descending: false,
+  page: 1,
+  pageSize: undefined,
+};
 
 const reserved = (edges: HyprlandReserved) =>
   (
@@ -944,9 +980,10 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
     .map((screencast) => screencastLabel(screencast, desktop.windows))
     .join(", ");
 
-  const workspaces = desktop.workspaces.map((workspace) =>
-    workspaceItem(workspace, hyprland?.workspaces[workspace.id]),
-  );
+  const workspaces = desktop.workspaces.map((workspace): WorkspaceRow => ({
+    workspace,
+    extra: hyprland?.workspaces[workspace.id],
+  }));
 
   return html`
     <div class="dashboard">
@@ -1011,10 +1048,17 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
       ${
         desktop.workspaces.length === 0
           ? nothing
-          : html`<sb-card class="half" heading="Workspaces">
-              <ul class="list">
-                ${workspaces}
-              </ul>
+          : html`<sb-card heading="Workspaces">
+              <sb-data-table
+                local
+                label="Workspaces"
+                search-placeholder="Search workspaces"
+                .columns=${workspaceColumns}
+                .data=${workspaces}
+                .rowId=${workspaceId}
+                .numeric=${["windows"]}
+                .state=${workspaceTableState}
+              ></sb-data-table>
             </sb-card>`
       }
       <sb-card class="half" heading="Keyboard layout">
