@@ -282,14 +282,14 @@ export type ExportFormat = "csv" | "json";
 
 /** The modules whose readings the backend keeps, which can be exported. */
 export const historyModules: ReadonlySet<ModuleName> = new Set([
-  "cpu",
-  "memory",
   "battery",
-  "system",
-  "networks",
+  "cpu",
   "disks",
   "gpus",
+  "memory",
+  "networks",
   "sensors",
+  "system",
 ]);
 
 export interface HistoryExport {

@@ -282,14 +282,14 @@ func (h *History) trim(cutoff int64) {
 
 // historyModules are the modules whose readings the history keeps
 var historyModules = []types.ModuleName{
-	types.ModuleCPU,
-	types.ModuleMemory,
 	types.ModuleBattery,
-	types.ModuleSystem,
-	types.ModuleNetworks,
+	types.ModuleCPU,
 	types.ModuleDisks,
 	types.ModuleGPUs,
+	types.ModuleMemory,
+	types.ModuleNetworks,
 	types.ModuleSensors,
+	types.ModuleSystem,
 }
 
 // HistoryModules are the modules whose readings the history keeps, to filter
