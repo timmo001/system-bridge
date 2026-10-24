@@ -203,6 +203,7 @@ func (sm SystemModule) Update(ctx context.Context) (any, error) {
 		if di := system.GetDeviceInfo(); di != nil {
 			systemData.DeviceInfo = di
 		}
+		systemData.FailedUnits = system.GetFailedUnits()
 	}
 
 	// Get version information

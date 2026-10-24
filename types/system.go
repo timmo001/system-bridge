@@ -30,6 +30,19 @@ type DeviceInfo struct {
 	ChassisType  *string `json:"chassis_type" mapstructure:"chassis_type"`
 }
 
+// SystemFailedUnit is a systemd unit that failed
+type SystemFailedUnit struct {
+	Name        string `json:"name" mapstructure:"name"`
+	Description string `json:"description" mapstructure:"description"`
+	// Scope is system for the system manager's units and user for the user's
+	Scope     string `json:"scope" mapstructure:"scope"`
+	LoadState string `json:"load_state" mapstructure:"load_state"`
+	// Result is why it failed, such as exit-code, signal, timeout or oom-kill
+	Result *string `json:"result" mapstructure:"result"`
+	// Since is when it failed, in Unix seconds
+	Since *int64 `json:"since" mapstructure:"since"`
+}
+
 // SystemData represents system information
 type SystemData struct {
 	BootTime              uint64       `json:"boot_time" mapstructure:"boot_time"`
@@ -55,6 +68,8 @@ type SystemData struct {
 	VersionLatest         *string      `json:"version_latest" mapstructure:"version_latest"`
 	VersionNewerAvailable *bool        `json:"version_newer_available" mapstructure:"version_newer_available"`
 	DeviceInfo            *DeviceInfo  `json:"device_info" mapstructure:"device_info"`
+	// FailedUnits are the failed systemd units, or nil without systemd
+	FailedUnits []SystemFailedUnit `json:"failed_units" mapstructure:"failed_units"`
 	// IdleTime is the seconds since the user's last input
 	IdleTime *uint64 `json:"idle_time" mapstructure:"idle_time"`
 	Locked   *bool   `json:"locked" mapstructure:"locked"`
