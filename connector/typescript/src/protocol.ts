@@ -371,10 +371,18 @@ export const ModulesRequest = Schema.Struct({
   modules: Schema.Array(ModuleName),
 });
 
-/** `since` is in Unix milliseconds. Without it, the whole history is sent. */
+/**
+ * `since` is in Unix milliseconds, and `modules` limits the history to those
+ * modules' readings. Without them, the whole history is sent.
+ */
 export const HistoryRequest = Schema.Struct({
   since: Schema.optionalKey(Schema.Int),
+  modules: Schema.optionalKey(Schema.Array(ModuleName)),
 });
+
+export interface HistoryRequest extends Schema.Schema.Type<
+  typeof HistoryRequest
+> {}
 
 export const DirectoryRequest = Schema.Struct({ base: Schema.String });
 

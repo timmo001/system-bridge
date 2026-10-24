@@ -97,11 +97,12 @@ export interface Interface {
   ) => Effect.Effect<void, WebSocketError>;
   readonly unregisterDataListener: Effect.Effect<void, WebSocketError>;
   /**
-   * Graph readings from up to the last 24 hours, or only those taken after
-   * `since`, in Unix milliseconds.
+   * Graph readings from up to the last 24 hours. `since`, in Unix
+   * milliseconds, keeps only those taken after it, and `modules` only those
+   * modules' readings.
    */
   readonly getHistory: (
-    since?: number,
+    request?: HistoryRequest,
   ) => Effect.Effect<MetricHistory, WebSocketError>;
   readonly getDirectories: Effect.Effect<
     ReadonlyArray<MediaDirectory>,
@@ -535,13 +536,13 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   );
 
   const getHistory = Effect.fn("SystemBridgeWebSocket.getHistory")(function* (
-    since?: number,
+    request: HistoryRequest = {},
   ) {
     return yield* call(
       "GET_HISTORY",
       "HISTORY",
       HistoryRequest,
-      since === undefined ? {} : { since },
+      request,
       MetricHistory,
     );
   });
