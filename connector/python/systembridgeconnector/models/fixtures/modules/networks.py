@@ -30,6 +30,8 @@ FIXTURE_NETWORKS = Networks(
         errout=6,
         dropin=7,
         dropout=8,
+        bytes_sent_rate=9.5,
+        bytes_recv_rate=10.5,
     ),
     networks=[
         Network(
@@ -51,6 +53,18 @@ FIXTURE_NETWORKS = Networks(
                     "flag1",
                     "flag2",
                 ],
+            ),
+            io=NetworkIO(
+                bytes_sent=11,
+                bytes_recv=12,
+                packets_sent=13,
+                packets_recv=14,
+                errin=15,
+                errout=16,
+                dropin=17,
+                dropout=18,
+                bytes_sent_rate=19.5,
+                bytes_recv_rate=20.5,
             ),
         )
     ],

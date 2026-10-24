@@ -57,6 +57,8 @@ class NetworkIO:
     errout: int | None = None
     dropin: int | None = None
     dropout: int | None = None
+    bytes_sent_rate: float | None = None
+    bytes_recv_rate: float | None = None
 
 
 @filter_unexpected_fields
@@ -67,6 +69,7 @@ class Network:
     name: str | None = None
     addresses: list[NetworkAddress] | None = None
     stats: NetworkStats | None = None
+    io: NetworkIO | None = None
 
     def __post_init__(self) -> None:
         """Post Init."""
@@ -82,6 +85,10 @@ class Network:
         if isinstance(self.stats, dict):
             stats = self.stats
             self.stats = NetworkStats(**stats)
+
+        if isinstance(self.io, dict):
+            io = self.io
+            self.io = NetworkIO(**io)
 
 
 @filter_unexpected_fields
