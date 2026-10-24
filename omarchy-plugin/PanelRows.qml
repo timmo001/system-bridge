@@ -108,6 +108,7 @@ QtObject {
     return word === "" ? "" : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
   }
   function yesNo(value) { return value === true ? "Yes" : (value === false ? "No" : "") }
+  function failedUnits(system) { return system && Array.isArray(system.failed_units) ? system.failed_units : [] }
 
   // The level a meter shows: inverted meters, like battery charge, warn low.
   function level(value, warning, danger, inverted) {
@@ -215,7 +216,7 @@ QtObject {
     case "system":
       var system = service.system
       if (system)
-        add({ key: "system", icon: systemIcon, primaryText: "System", secondaryText: join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime)]) })
+        add({ key: "system", icon: systemIcon, primaryText: "System", secondaryText: join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime), failedUnits(system).length > 0 ? quantity(failedUnits(system).length, "failed unit") : ""]) })
       break
     case "cpu":
       var cpu = service.cpu
@@ -299,6 +300,8 @@ QtObject {
       reading(rows, "uptime", "", "󰅐", "Uptime", duration(system.uptime))
       reading(rows, "pending-reboot", "", "󰜉", "Restart required", yesNo(system.pending_reboot))
       reading(rows, "package-updates", "", "󰚰", "Package updates", num(system.package_updates) === null ? "" : (num(system.package_updates) === 0 ? "Up to date" : num(system.package_updates) + " waiting"))
+      if (Array.isArray(system.failed_units))
+        reading(rows, "failed-units", "", "\u{F05D6}", "Failed units", system.failed_units.length === 0 ? "None" : String(system.failed_units.length))
       reading(rows, "power", "", "󱐋", "Power", watts(system.power_usage))
       reading(rows, "users", "", "\u{F000E}", "Users", Array.isArray(system.users) ? system.users.map(function(user) { return text(user.name) }).filter(function(name, index, all) { return name !== "" && all.indexOf(name) === index }).join(", ") : "")
       reading(rows, "camera", "", "󰄀", "Camera in use", Array.isArray(system.camera_usage) ? system.camera_usage.join(", ") : "")
@@ -309,6 +312,13 @@ QtObject {
       reading(rows, "version", "System Bridge", "󰒋", "Version", join([text(system.version), system.version_newer_available === true ? text(system.version_latest) + " available" : (system.version_newer_available === false ? "Up to date" : "")]))
       if (system.version_newer_available === true && present(system.version_latest_url))
         rows.push(row({ key: "update", section: "System Bridge", icon: "󰚰", primaryText: "See what's new", secondaryText: "Release notes for " + text(system.version_latest), kind: "url", target: String(system.version_latest_url) }))
+      failedUnits(system).forEach(function(unit) {
+        rows.push(row({
+          key: "failed-" + text(unit.scope) + "-" + text(unit.name), section: "Failed units", icon: "\u{F05D6}",
+          primaryText: text(unit.name),
+          secondaryText: join([text(unit.description), text(unit.scope) === "user" ? "user" : "system", text(unit.result)])
+        }))
+      })
     }
     rows.push(webRow("web-commands", "In the web client", "\u{F018D}", "Commands", "Run and set up commands", "/system#commands"))
     rows.push(webRow("web-notifications", "In the web client", "󰂚", "Notifications", "Send a notification", "/system#notifications"))
