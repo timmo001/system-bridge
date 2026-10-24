@@ -2,16 +2,16 @@
 
 An Omarchy bar widget and panel for System Bridge. It shows CPU and memory
 usage in the bar. The panel has an overview of the system and a view for every
-module the web client has a page for, with audio, Discord, display and media
-controls.
+module the web client has a page for, with audio, desktop, Discord, display and
+media controls.
 
 ## Requirements
 
 - Omarchy Quattro
 - [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
   `system-bridge` executable available on `PATH`, in a version with the
-  `client audio`, `client discord`, `client display`, `client media` and
-  `client open --path` commands
+  `client audio`, `client desktop`, `client discord`, `client display`,
+  `client hyprland`, `client media` and `client open --path` commands
 - A running local System Bridge service
 - `zenity` for the quit confirmation prompt
 
@@ -43,9 +43,10 @@ GPU, temperature, battery and disk meters, network traffic and what's playing.
 Select a reading or a module to open its view. Each view has the module's
 readings, and links to the matching part of the web client for anything you
 set up there, such as commands, disk mounts, media directories or Discord. The
-media view has previous, play or pause, and next; the Discord view has mute,
-deafen and leave call; and the displays view has brightness and power for each
-display that supports them.
+desktop view focuses a window or workspace when you select it, switches the
+keyboard layout, and reloads Hyprland's config; the media view has previous,
+play or pause, and next; the Discord view has mute, deafen and leave call; and
+the displays view has brightness and power for each display that supports them.
 
 Select a section heading to collapse or expand it. Collapsed sections stay
 collapsed until you expand them again or the shell restarts, and filtering
@@ -105,10 +106,10 @@ The plugin starts one long-running local data process, which watches every
 System Bridge module:
 
 ```text
-system-bridge client data watch --module system --module processes ...
+system-bridge client data watch --module desktop --module system ...
 ```
 
 It reads System Bridge settings and its local authentication token through the
 System Bridge client. Its buttons run `system-bridge client` commands to open
-the web client, control media, Discord and displays, and quit or start System
-Bridge.
+the web client, control the desktop, media, Discord and displays, and quit or
+start System Bridge.

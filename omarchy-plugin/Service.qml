@@ -18,7 +18,7 @@ Item {
   // Modules that report a list rather than an object.
   readonly property var listModules: ["gpus", "displays", "processes"]
   readonly property var watchedModules: [
-    "system", "processes", "cpu", "memory", "gpus", "sensors", "battery",
+    "desktop", "system", "processes", "cpu", "memory", "gpus", "sensors", "battery",
     "bluetooth", "displays", "audio", "disks", "networks", "media", "discord"
   ]
 
@@ -29,6 +29,7 @@ Item {
   readonly property var battery: objectData(modules.battery) ? modules.battery : null
   readonly property var bluetooth: objectData(modules.bluetooth) ? modules.bluetooth : null
   readonly property var audio: objectData(modules.audio) ? modules.audio : null
+  readonly property var desktop: objectData(modules.desktop) ? modules.desktop : null
   readonly property var disks: objectData(modules.disks) ? modules.disks : null
   readonly property var networks: objectData(modules.networks) ? modules.networks : null
   readonly property var media: objectData(modules.media) ? modules.media : null

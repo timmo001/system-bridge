@@ -16,6 +16,7 @@ QtObject {
   readonly property string audioIcon: "\u{F057E}"
   readonly property string bluetoothIcon: "\u{F00AF}"
   readonly property string cpuIcon: "\u{F0EE0}"
+  readonly property string desktopIcon: "\u{F0614}"
   readonly property string discordIcon: "\u{F02CE}"
   readonly property string diskIcon: "\u{F02CA}"
   readonly property string displayIcon: "\u{F0379}"
@@ -30,6 +31,7 @@ QtObject {
 
   // Grouped like the web client, alphabetical within each area.
   readonly property var modules: [
+    { module: "desktop", label: "Desktop", icon: root.desktopIcon, area: "System" },
     { module: "processes", label: "Processes", icon: root.processIcon, area: "System" },
     { module: "system", label: "System", icon: root.systemIcon, area: "System" },
     { module: "audio", label: "Audio", icon: root.audioIcon, area: "Hardware" },
@@ -139,6 +141,7 @@ QtObject {
     case "system": return service.system ? "Up " + duration(service.system.uptime) : ""
     case "processes": return service.modules.processes ? service.processes.length + " running" : ""
     case "cpu": return percent(service.cpuUsage)
+    case "desktop": return focusedWindowText(service)
     case "memory": return percent(service.memoryPercent)
     case "gpus": return service.modules.gpus ? quantity(service.gpus.length, "GPU") : ""
     case "sensors": return service.sensors ? quantity(service.temperatures.length, "temperature") : ""
@@ -269,6 +272,7 @@ QtObject {
     case "system": return systemRows(service)
     case "processes": return processRows(service)
     case "cpu": return cpuRows(service)
+    case "desktop": return desktopRows(service)
     case "memory": return memoryRows(service)
     case "gpus": return gpuRows(service)
     case "sensors": return sensorRows(service)
@@ -353,6 +357,56 @@ QtObject {
         meter: num(core.usage), meterLevel: level(core.usage, 80, 90)
       }))
     }
+    return rows
+  }
+
+  function desktopWindows(service) {
+    return service.desktop && Array.isArray(service.desktop.windows) ? service.desktop.windows : []
+  }
+  function desktopWorkspaces(service) {
+    return service.desktop && Array.isArray(service.desktop.workspaces) ? service.desktop.workspaces : []
+  }
+  function windowName(window) { return text(window.app) || text(window.title) || "Window" }
+  function focusedWindowText(service) {
+    var windows = desktopWindows(service)
+    for (var i = 0; i < windows.length; i++)
+      if (windows[i].focused === true) return windowName(windows[i])
+    return service.desktop ? "Nothing focused" : ""
+  }
+
+  // Selecting a window or workspace focuses it.
+  function desktopRows(service) {
+    var rows = []
+    var desktop = service.desktop
+    if (!desktop) return rows
+    var argv = function(action, value) { return ["system-bridge", "client", "desktop", action, value] }
+    var workspaces = desktopWorkspaces(service)
+    var names = {}
+    for (var w = 0; w < workspaces.length; w++)
+      names[workspaces[w].id] = text(workspaces[w].name) || text(workspaces[w].id)
+    var windows = desktopWindows(service)
+    for (var i = 0; i < windows.length; i++) {
+      var window = windows[i]
+      var details = join([text(window.title), window.workspace === null ? "" : names[window.workspace] || text(window.workspace), window.focused === true ? "Focused" : ""])
+      rows.push(control("window-" + window.id, "Windows", "\u{F08C6}", windowName(window), details, argv("focus", text(window.id)), window.focused === true))
+    }
+    // Windows can't switch workspaces for you
+    if (desktop.compositor !== "windows")
+      for (var j = 0; j < workspaces.length; j++) {
+        var workspace = workspaces[j]
+        rows.push(control("workspace-" + workspace.id, "Workspaces", "\u{F11D9}", names[workspace.id], join([text(workspace.display), num(workspace.windows) === null ? "" : quantity(num(workspace.windows), "window"), workspace.focused === true ? "Focused" : ""]), argv("workspace", text(workspace.id)), workspace.focused === true))
+      }
+    var keyboard = desktop.keyboard || {}
+    var layouts = Array.isArray(keyboard.layouts) ? keyboard.layouts : []
+    reading(rows, "keyboard", "Keyboard", "\u{F030C}", "Layout", join([text(keyboard.layout), text(keyboard.name)]))
+    // Other Wayland desktops can't switch layouts for you
+    if (desktop.compositor !== "wayland")
+      for (var k = 0; k < layouts.length; k++)
+        if (layouts[k] !== keyboard.layout)
+          rows.push(control("layout-" + layouts[k], "Keyboard", "\u{F030C}", "Switch to " + layouts[k], "", argv("layout", text(layouts[k]))))
+    if (desktop.hyprland)
+      rows.push(control("hyprland-reload", "Hyprland", "\u{F0453}", "Reload config", text(desktop.hyprland.version ? desktop.hyprland.version.version : ""), ["system-bridge", "client", "hyprland", "reload"]))
+    rows.push(webRow("web-desktop", "In the web client", desktopIcon, "All controls", "Close, move, float and pin windows, and global shortcuts", "/desktop"))
     return rows
   }
 
