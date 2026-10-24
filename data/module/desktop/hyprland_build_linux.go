@@ -76,19 +76,17 @@ type hyprlandNamed struct {
 	Name string `json:"name"`
 }
 
-type hyprlandKeyboard struct {
-	Name              string `json:"name"`
-	Layout            string `json:"layout"`
-	Variant           string `json:"variant"`
-	Options           string `json:"options"`
-	ActiveLayoutIndex int    `json:"active_layout_index"`
-	ActiveKeymap      string `json:"active_keymap"`
-	Main              bool   `json:"main"`
-}
-
 type hyprlandDevices struct {
-	Keyboards []hyprlandKeyboard `json:"keyboards"`
-	Mice      []struct {
+	Keyboards []struct {
+		Name              string `json:"name"`
+		Layout            string `json:"layout"`
+		Variant           string `json:"variant"`
+		Options           string `json:"options"`
+		ActiveLayoutIndex int    `json:"active_layout_index"`
+		ActiveKeymap      string `json:"active_keymap"`
+		Main              bool   `json:"main"`
+	} `json:"keyboards"`
+	Mice []struct {
 		Name         string  `json:"name"`
 		DefaultSpeed float64 `json:"defaultSpeed"`
 		ScrollFactor float64 `json:"scrollFactor"`
@@ -360,6 +358,8 @@ func buildHyprland(state hyprlandState, config hyprlandConfig, events hyprlandEv
 		}
 		hyprland.Windows[client.Address] = extra
 	}
+	// Hyprland lists windows in an order that shifts as focus moves
+	slices.SortFunc(data.Windows, func(a, b types.DesktopWindow) int { return cmp.Compare(a.ID, b.ID) })
 
 	for _, workspace := range state.Workspaces {
 		id := strconv.Itoa(workspace.ID)

@@ -150,14 +150,14 @@ type HyprlandKeyboard struct {
 	Options      *string  `json:"options" mapstructure:"options"`
 	ActiveLayout int      `json:"active_layout" mapstructure:"active_layout"`
 	ActiveKeymap *string  `json:"active_keymap" mapstructure:"active_keymap"`
-	Main         bool     `json:"main" mapstructure:"main"`
+	Main         bool     `json:"main" mapstructure:"main"` // The keyboard that last sent a key, which can be an input method's virtual keyboard
 }
 
 // HyprlandMouse is a pointer device
 type HyprlandMouse struct {
 	Name         string  `json:"name" mapstructure:"name"`
 	Speed        float64 `json:"speed" mapstructure:"speed"`
-	ScrollFactor float64 `json:"scroll_factor" mapstructure:"scroll_factor"`
+	ScrollFactor float64 `json:"scroll_factor" mapstructure:"scroll_factor"` // -1 when not set
 }
 
 // HyprlandGlobalShortcut is a shortcut an app has registered

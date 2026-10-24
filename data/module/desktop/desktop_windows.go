@@ -3,9 +3,11 @@
 package desktop
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -136,6 +138,8 @@ func read(titles bool) types.DesktopData {
 		}
 		data.Windows = append(data.Windows, window)
 	}
+	// EnumWindows lists them front to back, which shifts as focus moves
+	slices.SortFunc(data.Windows, func(a, b types.DesktopWindow) int { return cmp.Compare(a.ID, b.ID) })
 	return data
 }
 
