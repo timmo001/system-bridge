@@ -71,6 +71,18 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
           disk.io_counters === null
             ? nothing
             : facts([
+                [
+                  "Reading",
+                  disk.io_counters.read_bytes_rate === null
+                    ? null
+                    : formatRate(disk.io_counters.read_bytes_rate),
+                ],
+                [
+                  "Writing",
+                  disk.io_counters.write_bytes_rate === null
+                    ? null
+                    : formatRate(disk.io_counters.write_bytes_rate),
+                ],
                 ["Read", formatBytes(disk.io_counters.read_bytes)],
                 ["Written", formatBytes(disk.io_counters.write_bytes)],
               ])
@@ -94,8 +106,8 @@ export const disksDashboard = ({ data, history }: DashboardContext) => {
       </sb-card>
       <sb-card class="third" heading="Totals">
         <div class="stats">
-          ${stat("Reading", formatRate(lastValue(history.diskRead)))}
-          ${stat("Writing", formatRate(lastValue(history.diskWrite)))}
+          ${stat("Reading", formatRate(io?.read_bytes_rate))}
+          ${stat("Writing", formatRate(io?.write_bytes_rate))}
           ${stat("Read", formatBytes(io?.read_bytes))}
           ${stat("Written", formatBytes(io?.write_bytes))}
           ${stat("Reads", formatCount(io?.read_count))}
