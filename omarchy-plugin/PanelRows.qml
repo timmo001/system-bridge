@@ -163,6 +163,8 @@ QtObject {
     })
   }
 
+  // Notices first, then every module once under its area: its live readings
+  // where it has any, otherwise a row with its summary.
   function overview(service) {
     var rows = []
     var system = service.system
@@ -176,46 +178,74 @@ QtObject {
     if (service.pendingReboot === true)
       rows.push(row({ key: "pending-reboot", icon: "󰜉", primaryText: "Restart required", secondaryText: "Updates are waiting for a restart", kind: "module", target: "system" }))
 
-    var glance = system ? join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime)]) : ""
-    var section = "At a glance"
-    var cpu = service.cpu
-    if (service.cpuUsage !== null)
-      rows.push(row({ key: "cpu", section: section, icon: cpuIcon, primaryText: "CPU", secondaryText: join([percent(service.cpuUsage), frequency(cpu && cpu.frequency ? cpu.frequency.current : null)]), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90), kind: "module", target: "cpu" }))
-    var memory = service.memory && service.memory.virtual ? service.memory.virtual : null
-    if (service.memoryPercent !== null)
-      rows.push(row({ key: "memory", section: section, icon: memoryIcon, primaryText: "Memory", secondaryText: join([percent(service.memoryPercent), memory && present(memory.used) ? bytes(memory.used) + " of " + bytes(memory.total) : ""]), meter: service.memoryPercent, meterLevel: level(service.memoryPercent, 80, 90), kind: "module", target: "memory" }))
-    var gpu = service.gpus.length > 0 ? service.gpus[0] : null
-    if (gpu && num(gpu.core_load) !== null)
-      rows.push(row({ key: "gpu", section: section, icon: "󰢮", primaryText: text(gpu.name) || "GPU", secondaryText: percent(gpu.core_load), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90), kind: "module", target: "gpus" }))
-    if (service.cpuTemperature !== null)
-      rows.push(row({ key: "cpu-temperature", section: section, icon: temperatureIcon, primaryText: "CPU temperature", secondaryText: temperature(service.cpuTemperature), meter: Math.min(100, service.cpuTemperature), meterLevel: level(service.cpuTemperature, 80, 90), kind: "module", target: "sensors" }))
-    var battery = service.battery
-    if (battery && num(battery.percentage) !== null)
-      rows.push(row({ key: "battery", section: section, icon: battery.is_charging ? "󰂄" : "󰁹", primaryText: "Battery", secondaryText: join([percent(battery.percentage), battery.is_charging ? "Charging" : ""]), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true), kind: "module", target: "battery" }))
-    if (glance !== "")
-      rows.push(row({ key: "uptime", section: section, icon: "󰅐", primaryText: "System", secondaryText: glance, kind: "module", target: "system" }))
-
-    var partitions = primaryPartitions(service)
-    for (var i = 0; i < partitions.length; i++) {
-      var usage = partitions[i].usage
-      rows.push(row({
-        key: "disk-" + partitions[i].mount_point, section: "Storage", icon: "󰋊",
-        primaryText: text(partitions[i].mount_point),
-        secondaryText: usage ? join([percent(usage.percent), bytes(usage.free) + " free"]) : "",
-        meter: usage ? num(usage.percent) : null, meterLevel: usage ? level(usage.percent, 80, 92) : "normal",
-        kind: "module", target: "disks"
-      }))
-    }
-
-    if (service.networkReceiveRate !== null || service.networkSendRate !== null)
-      rows.push(row({ key: "network", section: "Network", icon: "󰛳", primaryText: "Traffic", secondaryText: join(["↓ " + rate(service.networkReceiveRate), "↑ " + rate(service.networkSendRate)]), kind: "module", target: "networks" }))
-
-    if (service.modules.media !== undefined)
-      rows.push(nowPlaying(service, "Now playing", "module"))
-
     for (var m = 0; m < modules.length; m++) {
       var info = modules[m]
-      rows.push(row({ key: "module-" + info.module, section: "Modules", icon: info.icon, primaryText: info.label, secondaryText: summary(service, info.module), kind: "module", target: info.module }))
+      var readings = overviewReadings(service, info.module, info.area)
+      if (readings.length === 0)
+        readings = [row({ key: "module-" + info.module, section: info.area, icon: info.icon, primaryText: info.label, secondaryText: summary(service, info.module), kind: "module", target: info.module })]
+      rows = rows.concat(readings)
+    }
+    return rows
+  }
+
+  /** A module's live readings for the overview, each opening its view. */
+  function overviewReadings(service, module, section) {
+    var rows = []
+    function add(fields) {
+      rows.push(row(Object.assign({ section: section, kind: "module", target: module }, fields)))
+    }
+    switch (module) {
+    case "system":
+      var system = service.system
+      if (system)
+        add({ key: "system", icon: "󰌢", primaryText: "System", secondaryText: join([text(system.platform) + (present(system.platform_version) ? " " + system.platform_version : ""), "up " + duration(system.uptime)]) })
+      break
+    case "cpu":
+      var cpu = service.cpu
+      if (service.cpuUsage !== null)
+        add({ key: "cpu", icon: cpuIcon, primaryText: "CPU", secondaryText: join([percent(service.cpuUsage), frequency(cpu && cpu.frequency ? cpu.frequency.current : null)]), meter: service.cpuUsage, meterLevel: level(service.cpuUsage, 80, 90) })
+      break
+    case "memory":
+      var memory = service.memory && service.memory.virtual ? service.memory.virtual : null
+      if (service.memoryPercent !== null)
+        add({ key: "memory", icon: memoryIcon, primaryText: "Memory", secondaryText: join([percent(service.memoryPercent), memory && present(memory.used) ? bytes(memory.used) + " of " + bytes(memory.total) : ""]), meter: service.memoryPercent, meterLevel: level(service.memoryPercent, 80, 90) })
+      break
+    case "gpus":
+      for (var g = 0; g < service.gpus.length; g++) {
+        var gpu = service.gpus[g]
+        if (num(gpu.core_load) !== null)
+          add({ key: "gpu-" + (text(gpu.id) || g), icon: "󰢮", primaryText: text(gpu.name) || "GPU " + (g + 1), secondaryText: join([percent(gpu.core_load), temperature(gpu.temperature)]), meter: num(gpu.core_load), meterLevel: level(gpu.core_load, 80, 90) })
+      }
+      break
+    case "sensors":
+      if (service.cpuTemperature !== null)
+        add({ key: "cpu-temperature", icon: temperatureIcon, primaryText: "CPU temperature", secondaryText: temperature(service.cpuTemperature), meter: Math.min(100, service.cpuTemperature), meterLevel: level(service.cpuTemperature, 80, 90) })
+      break
+    case "battery":
+      var battery = service.battery
+      if (battery && num(battery.percentage) !== null)
+        add({ key: "battery", icon: battery.is_charging ? "󰂄" : "󰁹", primaryText: "Battery", secondaryText: join([percent(battery.percentage), battery.is_charging ? "Charging" : ""]), meter: num(battery.percentage), meterLevel: level(battery.percentage, 20, 10, true) })
+      break
+    case "disks":
+      var partitions = primaryPartitions(service)
+      for (var i = 0; i < partitions.length; i++) {
+        var usage = partitions[i].usage
+        add({
+          key: "disk-" + partitions[i].mount_point, icon: "󰋊",
+          primaryText: text(partitions[i].mount_point),
+          secondaryText: usage ? join([percent(usage.percent), bytes(usage.free) + " free"]) : "",
+          meter: usage ? num(usage.percent) : null, meterLevel: usage ? level(usage.percent, 80, 92) : "normal"
+        })
+      }
+      break
+    case "networks":
+      if (service.networkReceiveRate !== null || service.networkSendRate !== null)
+        add({ key: "network", icon: "󰛳", primaryText: "Network", secondaryText: join(["↓ " + rate(service.networkReceiveRate), "↑ " + rate(service.networkSendRate)]) })
+      break
+    case "media":
+      if (service.modules.media !== undefined)
+        rows.push(nowPlaying(service, section, "module"))
+      break
     }
     return rows
   }
