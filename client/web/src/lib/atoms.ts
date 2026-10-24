@@ -226,7 +226,7 @@ const connected = (
 export const socket = (get: Atom.AtomContext) =>
   get.result(connection).pipe(Effect.flatMap(connected));
 
-const fnSocket = (get: Atom.FnContext) =>
+export const fnSocket = (get: Atom.FnContext) =>
   get.result(connection).pipe(Effect.flatMap(connected));
 
 /**

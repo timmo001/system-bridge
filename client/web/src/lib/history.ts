@@ -1,12 +1,13 @@
-import type {
-  HistorySample,
-  MetricHistory as BackendHistory,
-  SeriesHistory,
+import {
+  type HistorySample,
+  historyToCsv,
+  type MetricHistory as BackendHistory,
+  type SeriesHistory,
 } from "@timmo001/effect-system-bridge";
 import { Effect, Option } from "effect";
 import { AsyncResult, Atom } from "effect/reactivity";
 
-import { type BridgeError, latestModuleData, socket } from "./atoms";
+import { type BridgeError, fnSocket, latestModuleData, socket } from "./atoms";
 
 /** How far back the backend keeps readings, in milliseconds. */
 export const historyWindow = 24 * 60 * 60 * 1000;
@@ -267,6 +268,46 @@ const historyData = Atom.make((get) => {
  */
 export const metricHistory = Atom.make((get): MetricHistory =>
   AsyncResult.getOrElse(get(historyData), () => empty),
+);
+
+export type ExportFormat = "csv" | "json";
+
+/** Saves a file through the browser's download. */
+const download = (name: string, type: string, contents: string) => {
+  const url = URL.createObjectURL(new Blob([contents], { type }));
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Downloads the backend's whole history, as CSV with a row per reading or
+ * as JSON in the shape `GET_HISTORY` returns, named for the host and time.
+ */
+export const exportHistory = Atom.fn((format: ExportFormat, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => bridge.getHistory()),
+    Effect.tap((history) =>
+      Effect.sync(() => {
+        const host = get(latestModuleData).system?.hostname ?? "system";
+        const stamp = new Date().toISOString().slice(0, 16).replace(":", "-");
+        const name = `system-bridge-history-${host}-${stamp}.${format}`;
+
+        if (format === "csv") {
+          download(name, "text/csv", historyToCsv(history));
+        } else {
+          download(
+            name,
+            "application/json",
+            `${JSON.stringify(history, null, 2)}\n`,
+          );
+        }
+      }),
+    ),
+  ),
 );
 
 /** A GPU's history, or empty series when there's none yet. */
