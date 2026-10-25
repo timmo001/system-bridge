@@ -2,6 +2,7 @@ package networks
 
 import (
 	"log/slog"
+	"slices"
 	"sync"
 	"time"
 
@@ -72,8 +73,8 @@ func byteRate(previous, current uint64, seconds float64) *float64 {
 }
 
 // GatherIOStatistics collects network I/O statistics for all interfaces
-// combined and for each interface in networksData.Networks, so it must run
-// after GatherInterfaces.
+// combined, leaving out loopback, and for each interface in
+// networksData.Networks, so it must run after GatherInterfaces.
 func GatherIOStatistics(networksData *types.NetworksData) {
 	perInterface, err := psnet.IOCounters(true)
 	if err != nil {
@@ -82,10 +83,16 @@ func GatherIOStatistics(networksData *types.NetworksData) {
 		return
 	}
 
+	loopback := loopbackInterfaces(networksData.Networks)
 	counters := make(map[string]psnet.IOCountersStat, len(perInterface)+1)
 	var total psnet.IOCountersStat
 	for _, c := range perInterface {
 		counters[c.Name] = c
+		// Local traffic never leaves the machine, and counting it would
+		// swamp the total
+		if loopback[c.Name] {
+			continue
+		}
 		total.BytesSent += c.BytesSent
 		total.BytesRecv += c.BytesRecv
 		total.PacketsSent += c.PacketsSent
@@ -109,6 +116,19 @@ func GatherIOStatistics(networksData *types.NetworksData) {
 			network.IO = toNetworkIO(c, rates[*network.Name])
 		}
 	}
+}
+
+func loopbackInterfaces(networks []types.Network) map[string]bool {
+	loopback := make(map[string]bool)
+	for _, network := range networks {
+		if network.Name == nil || network.Stats == nil {
+			continue
+		}
+		if slices.Contains(network.Stats.Flags, "loopback") {
+			loopback[*network.Name] = true
+		}
+	}
+	return loopback
 }
 
 func toNetworkIO(c psnet.IOCountersStat, rates ioRates) *types.NetworkIO {
