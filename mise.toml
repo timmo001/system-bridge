@@ -44,6 +44,16 @@ run = [
   "cd connector/typescript && bunx prettier --write src/generated/modules.ts",
 ]
 
+[tasks."drift:connectors"]
+description = "Compare the Python and TypeScript connectors with the backend before a release"
+depends = ["generate:schemas"]
+# The TypeScript module data schemas are generated, so they're in sync once
+# regenerating them changes nothing
+run = [
+  "git diff --exit-code --stat -- connector/typescript/src/generated/modules.ts",
+  "go run ./tools/check-connector-drift",
+]
+
 [tasks."generate:icons"]
 description = "Generate every icon from .resources/system-bridge-logo.svg, then the docs' brand images"
 depends = ["install:js"]
