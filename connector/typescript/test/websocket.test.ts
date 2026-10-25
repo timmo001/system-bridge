@@ -169,6 +169,23 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           data: { valid: true },
         },
       ];
+    case "GET_FILE":
+      // filesystem.FileInfo, not a GET_FILES item
+      return [
+        {
+          id,
+          type: "FILE",
+          subtype: "NONE",
+          data: {
+            name: "notes.txt",
+            path: "/tmp/notes.txt",
+            size: 12,
+            modified: 1700000000000,
+            extension: "txt",
+            mime_type: "text/plain; charset=utf-8",
+          },
+        },
+      ];
     default:
       return [];
   }
@@ -317,6 +334,15 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(valid).toBe(true);
+  });
+
+  test("decode one file's details", async () => {
+    const file = await run(
+      SystemBridgeWebSocket.use((ws) => ws.getFile("/tmp/notes.txt")),
+    );
+
+    expect(file.modified).toBe(1700000000000);
+    expect(file.mime_type).toBe("text/plain; charset=utf-8");
   });
 
   test.each([

@@ -53,6 +53,7 @@ import {
   DisplayControl,
   Empty,
   type EventType,
+  FileDetails,
   FileInfo,
   GetFilesRequest,
   HistoryRequest,
@@ -131,7 +132,9 @@ export interface Interface {
   readonly getFiles: (
     request: GetFilesRequest,
   ) => Effect.Effect<ReadonlyArray<FileInfo>, WebSocketError>;
-  readonly getFile: (path: string) => Effect.Effect<FileInfo, WebSocketError>;
+  readonly getFile: (
+    path: string,
+  ) => Effect.Effect<FileDetails, WebSocketError>;
   readonly getDiskMounts: Effect.Effect<DiskMountsResponse, WebSocketError>;
   readonly getSettings: Effect.Effect<Settings, WebSocketError>;
   readonly updateSettings: (
@@ -726,7 +729,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   const getFile = Effect.fn("SystemBridgeWebSocket.getFile")(function* (
     path: string,
   ) {
-    return yield* call("GET_FILE", "FILE", PathRequest, { path }, FileInfo);
+    return yield* call("GET_FILE", "FILE", PathRequest, { path }, FileDetails);
   });
 
   const getDiskMounts = call(

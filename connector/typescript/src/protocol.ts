@@ -283,6 +283,20 @@ export const FileInfo = Schema.Struct({
 
 export interface FileInfo extends Schema.Schema.Type<typeof FileInfo> {}
 
+/** One file's details, from `GET_FILE`. */
+export const FileDetails = Schema.Struct({
+  name: Schema.String,
+  path: Schema.String,
+  size: Schema.Finite,
+  /** Unix milliseconds. */
+  modified: Schema.Finite,
+  /** Without the leading dot. */
+  extension: Schema.String,
+  mime_type: Schema.String,
+});
+
+export interface FileDetails extends Schema.Schema.Type<typeof FileDetails> {}
+
 export const ValidateDirectoryResult = Schema.Struct({
   valid: Schema.Boolean,
 });

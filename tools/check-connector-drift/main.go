@@ -68,7 +68,7 @@ var handlerPairs = map[string]pairing{
 	// GET_DIRECTORIES
 	"DirectoryInfo": {[]string{"MediaDirectory"}, []string{"MediaDirectory"}},
 	// GET_FILE
-	"FileInfo": {[]string{"FileInfo"}, []string{"FileInfo"}},
+	"FileInfo": {[]string{"FileDetails"}, []string{"FileInfo"}},
 	// GET_FILES
 	"GetFileResponseData": {[]string{"FileInfo"}, []string{"MediaFile"}},
 
