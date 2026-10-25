@@ -38,6 +38,7 @@ import {
   AudioControl,
   BluetoothDeviceRequest,
   BluetoothPowerRequest,
+  CommandIdRequest,
   CommandRequest,
   CommandResult,
   DesktopKeyboardLayoutRequest,
@@ -72,6 +73,7 @@ import {
   PathRequest,
   type ResponseType,
   Settings,
+  SettingsCommandDefinition,
   ValidateDirectoryResult,
   WebSocketResponse,
 } from "./protocol.js";
@@ -138,6 +140,23 @@ export interface Interface {
   readonly validateDirectory: (
     path: string,
   ) => Effect.Effect<boolean, WebSocketError>;
+  /**
+   * The settings each time any client changes them, so a page can show
+   * another client's changes before saving over them.
+   */
+  readonly settingsChanges: Stream.Stream<Settings>;
+  /** Adds one command to the allowlist, leaving the others as they are. */
+  readonly addCommand: (
+    command: SettingsCommandDefinition,
+  ) => Effect.Effect<Settings, WebSocketError>;
+  /** Changes one saved command, failing if another client removed it. */
+  readonly updateCommand: (
+    command: SettingsCommandDefinition,
+  ) => Effect.Effect<Settings, WebSocketError>;
+  /** Removes one command from the allowlist. */
+  readonly removeCommand: (
+    id: string,
+  ) => Effect.Effect<Settings, WebSocketError>;
   /** The ready-made commands, and whether each can run on the backend's system. */
   readonly getCommandPrefabs: Effect.Effect<
     ReadonlyArray<CommandPrefab>,
@@ -361,6 +380,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     PubSub.shutdown,
   );
 
+  // Settings the backend sends every client when any of them changes them
+  const settingsResponses = yield* Effect.acquireRelease(
+    PubSub.sliding<WebSocketResponse>(1),
+    PubSub.shutdown,
+  );
+
   const closed = yield* Deferred.make<never, ConnectionError>();
 
   const prefix = (yield* Random.nextInt).toString(36);
@@ -393,6 +418,12 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
   const onResponse = Effect.fnUntraced(function* (response: WebSocketResponse) {
     if (response.type === "DATA_UPDATE") {
       yield* PubSub.publish(responses, response);
+
+      return;
+    }
+
+    if (response.type === "SETTINGS_CHANGED") {
+      yield* PubSub.publish(settingsResponses, response);
 
       return;
     }
@@ -518,6 +549,22 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
         Effect.catch((error) =>
           Effect.logWarning(
             `Skipping an unreadable ${response.module ?? "module"} update`,
+            error.message,
+          ).pipe(Effect.as(Result.fail(response))),
+        ),
+      ),
+    ),
+  );
+
+  const settingsChanges: Stream.Stream<Settings> = Stream.fromPubSub(
+    settingsResponses,
+  ).pipe(
+    Stream.filterMapEffect((response) =>
+      Schema.decodeUnknownEffect(Settings)(response.data).pipe(
+        Effect.map(Result.succeed),
+        Effect.catch((error) =>
+          Effect.logWarning(
+            "Skipping unreadable changed settings",
             error.message,
           ).pipe(Effect.as(Result.fail(response))),
         ),
@@ -697,6 +744,38 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     {},
     Settings,
   ).pipe(Effect.withSpan("SystemBridgeWebSocket.getSettings"));
+
+  const changeCommand = (
+    event: "COMMAND_ADD" | "COMMAND_UPDATE",
+    expected: "COMMAND_ADDED" | "COMMAND_UPDATED",
+  ) =>
+    Effect.fn(`SystemBridgeWebSocket.${event}`)(function* (
+      command: SettingsCommandDefinition,
+    ) {
+      return yield* call(
+        event,
+        expected,
+        SettingsCommandDefinition,
+        command,
+        Settings,
+      );
+    });
+
+  const addCommand = changeCommand("COMMAND_ADD", "COMMAND_ADDED");
+
+  const updateCommand = changeCommand("COMMAND_UPDATE", "COMMAND_UPDATED");
+
+  const removeCommand = Effect.fn("SystemBridgeWebSocket.removeCommand")(
+    function* (id: string) {
+      return yield* call(
+        "COMMAND_REMOVE",
+        "COMMAND_REMOVED",
+        CommandIdRequest,
+        { id },
+        Settings,
+      );
+    },
+  );
 
   const getCommandPrefabs = call(
     "GET_COMMAND_PREFABS",
@@ -1083,6 +1162,10 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     getSettings,
     updateSettings,
     validateDirectory,
+    settingsChanges,
+    addCommand,
+    updateCommand,
+    removeCommand,
     getCommandPrefabs,
     executeCommand,
     keyboardKeypress,

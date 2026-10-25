@@ -13,7 +13,10 @@ export const EventType = Schema.Literals([
   "BLUETOOTH_DISCONNECT",
   "BLUETOOTH_FORGET",
   "BLUETOOTH_SET_POWER",
+  "COMMAND_ADD",
   "COMMAND_EXECUTE",
+  "COMMAND_REMOVE",
+  "COMMAND_UPDATE",
   "DATA_UPDATE",
   "DESKTOP_CLOSE_WINDOW",
   "DESKTOP_FOCUS_WINDOW",
@@ -67,9 +70,12 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_DISCONNECTED",
   "BLUETOOTH_FORGOTTEN",
   "BLUETOOTH_POWER_SET",
+  "COMMAND_ADDED",
   "COMMAND_COMPLETED",
   "COMMAND_EXECUTING",
   "COMMAND_PREFABS",
+  "COMMAND_REMOVED",
+  "COMMAND_UPDATED",
   "DATA_GET",
   "DATA_LISTENER_REGISTERED",
   "DATA_LISTENER_UNREGISTERED",
@@ -109,6 +115,7 @@ export const ResponseType = Schema.Literals([
   "POWER_RESTARTING",
   "POWER_SHUTTINGDOWN",
   "POWER_SLEEPING",
+  "SETTINGS_CHANGED",
   "SETTINGS_RESULT",
   "SETTINGS_UPDATED",
 ]);
@@ -596,6 +603,8 @@ export const DirectoryRequest = Schema.Struct({ base: Schema.String });
 export const PathRequest = Schema.Struct({ path: Schema.String });
 
 export const CommandRequest = Schema.Struct({ commandID: Schema.String });
+
+export const CommandIdRequest = Schema.Struct({ id: Schema.String });
 
 export const GetFilesRequest = Schema.Struct({
   base: Schema.String,
