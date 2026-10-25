@@ -1,0 +1,29 @@
+---
+name: Tooling drift
+
+# Opens a review pull request for each Omarchy release newer than the one
+# recorded in tooling.yml, through the tooling-drift tool pinned in mise.toml.
+# See the tooling-drift skill.
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tooling-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    if: github.repository == 'timmo001/system-bridge'
+    uses: timmo001/workflows/.github/workflows/tooling-drift.yml@6e3616d0d48c9c8ed9865b648107140b99b16551 # 20261024.0
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    secrets:
+      token: ${{ secrets.TOOLING_DRIFT_TOKEN }}

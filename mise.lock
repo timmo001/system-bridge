@@ -144,6 +144,14 @@ url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-win-x64.zip"
 checksum = "sha256:b3efd5c70cba3308ed46e7e699a9b8aac075bbc6b027fcb39c84c31acc25e2b4"
 url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1-win-x64.zip"
 
+[[tools."npm:@timmo001/tooling-drift"]]
+version = "0.1.4"
+aube = { path = ".mise/locks/npm-timmo001-tooling-drift/0.1.4~556c7cb7", digest = "sha256:247a2527890183564390c8fa797956798cacda8fb713bb0980693b0eb94d8ae0" }
+backend = "npm:@timmo001/tooling-drift"
+
+[tools."npm:@timmo001/tooling-drift".options]
+allow_low_downloads = "true"
+
 [[tools.python]]
 version = "3.14.9"
 backend = "core:python"

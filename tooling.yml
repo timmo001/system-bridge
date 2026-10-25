@@ -1,0 +1,12 @@
+---
+# Tool releases System Bridge was last reviewed against. The tooling-drift
+# tool (mise run tooling:status / tooling:publish) compares each with the
+# latest release and opens a pull request for review when it moves; its
+# README documents this file.
+assignee: timmo001
+dispatch:
+  - lint-general.yml
+tools:
+  - repo: omacom/omarchy
+    reviewed: v4.0.6
+    review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes).
