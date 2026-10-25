@@ -51,9 +51,12 @@ const emptyForm: CommandForm = {
   arguments: "",
 };
 
+/** A prefab with no program runs inside System Bridge itself. */
+const builtIn = "Built into System Bridge";
+
 /** How a command shows in the list: the program it runs and its arguments. */
 const commandLine = (command: string, args: readonly string[]) =>
-  [command, ...args].join(" ");
+  command === "" ? builtIn : [command, ...args].join(" ");
 
 const isFormKey = (name: string): name is keyof CommandForm =>
   name in emptyForm;
@@ -456,7 +459,9 @@ ${result.stderr}</pre>`
             ${this.#input(
               "command",
               "Command",
-              prefab?.command || "/usr/bin/systemctl",
+              prefab === undefined
+                ? "/usr/bin/systemctl"
+                : prefab.command || builtIn,
               prefab === undefined
                 ? "The program's full path."
                 : "Optional. Leave empty to use the program shown, or give your own program's full path.",
