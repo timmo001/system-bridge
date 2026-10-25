@@ -697,8 +697,11 @@ func main() {
 					{
 						Name:  "quit",
 						Usage: "Confirm and quit the local System Bridge backend",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "yes", Aliases: []string{"y"}, Usage: "Quit without asking for confirmation"},
+						},
 						Action: func(cmdCtx context.Context, cmd *cli.Command) error {
-							if !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
+							if !cmd.Bool("yes") && !confirmDesktopAction(cmdCtx, "Quit System Bridge", confirmation.QuitMessage) {
 								return nil
 							}
 							if err := client.Quit(cmdCtx); err != nil {
