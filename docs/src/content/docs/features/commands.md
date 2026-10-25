@@ -25,11 +25,28 @@ System Bridge checks a command when it's added and again before each run:
 
 The program runs directly, not through a shell, so pipes, `&&` and variables such as `$HOME` aren't expanded. To use them, put them in a script and add the script.
 
+## Prefab commands
+
+Prefabs are ready-made commands for common tasks. Each one picks the right program for the platform, so you don't need its path.
+
+1. Under **Add a command**, pick the prefab from **Type**. Its name and the program it would run fill in.
+2. Leave **Command** empty to use that program, and select **Add**.
+
+System Bridge looks for the program each time the command runs, so installing or moving a tool later doesn't need the command adding again. A prefab whose tools aren't installed is greyed out, with the tool to install. If one you've added stops being available, the reason shows under it and **Run** is turned off.
+
+To use your own program instead, such as a script of yours, fill in **Command** and **Arguments**. The command keeps the prefab's name and its ID, so clients using it carry on working.
+
+| Prefab | Linux | Windows | macOS |
+| --- | --- | --- | --- |
+| **Lock screen** (`lock`) | `loginctl lock-session` | `rundll32.exe user32.dll,LockWorkStation` | `pmset displaysleepnow` |
+
+Like any other command, a prefab only runs once it's on your list.
+
 ## Running a command
 
 - **Web client**: select **Run** next to the command. When it finishes, the exit code shows under it, with anything the command printed.
 - **API**: send [`COMMAND_EXECUTE`](/api/websocket/system/#execute-command) with the command's ID. You get `COMMAND_EXECUTING` straight away, then `COMMAND_COMPLETED` with the exit code and output once it finishes.
-- **MCP**: an assistant can list the commands with [`system_bridge_list_commands`](/api/mcp/#system_bridge_list_commands) and run one with [`system_bridge_run_command`](/api/mcp/#system_bridge_run_command), which waits for it to finish.
+- **MCP**: an assistant can list the commands with [`system_bridge_list_commands`](/api/mcp/#system_bridge_list_commands), see the prefabs with [`system_bridge_list_command_prefabs`](/api/mcp/#system_bridge_list_command_prefabs), and run one with [`system_bridge_run_command`](/api/mcp/#system_bridge_run_command), which waits for it to finish.
 
 A command can run for up to 5 minutes before System Bridge stops it. Output over 1 MB is cut off. Stopping System Bridge also stops any commands still running.
 

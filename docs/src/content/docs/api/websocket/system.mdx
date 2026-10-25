@@ -140,7 +140,7 @@ Send the `UPDATE_SETTINGS` event with the settings object to update. It responds
 | `autostart` | boolean | Start the backend automatically when you log in. |
 | `logLevel` | string | One of `DEBUG`, `INFO`, `WARN`, `ERROR`. Defaults to `WARN`. |
 | `hotkeys` | array | List of `{ name, key }` hotkey bindings. |
-| `commands.allowlist` | array | Commands that can be run via [Execute Command](#execute-command). Each entry is `{ id, name, command, workingDir, arguments }`. |
+| `commands.allowlist` | array | Commands that can be run via [Execute Command](#execute-command). Each entry is `{ id, name, command, workingDir, arguments, prefab }`. `prefab` is a [prefab](#list-command-prefabs)'s ID, or empty. With a prefab and an empty `command`, the prefab's program runs. |
 | `disks.allowedSecondaryMountPoints` | array | Secondary mount points to include in disk data. |
 | `media.directories` | array | Custom media directories as `{ name, path }`, exposed as [base directories](#files--directories). |
 
@@ -227,6 +227,39 @@ The command runs asynchronously. You receive a `COMMAND_EXECUTING` response imme
 :::caution
 Only commands present in `commands.allowlist` can be executed. Requesting an unknown command returns an `ERROR` response with the `COMMAND_NOT_FOUND` subtype.
 :::
+
+### List command prefabs
+
+Send the `GET_COMMAND_PREFABS` event to list the [prefab commands](/features/commands/#prefab-commands) and whether each can run on this system. It takes no data and responds with the `COMMAND_PREFABS` type. A prefab only runs once it's added to `commands.allowlist`.
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "GET_COMMAND_PREFABS",
+    "data": {}
+}
+```
+
+```json title="Response data"
+[
+    {
+        "id": "lock",
+        "name": "Lock screen",
+        "description": "Lock the screen",
+        "available": true,
+        "command": "/usr/bin/loginctl",
+        "arguments": ["lock-session"],
+        "reason": ""
+    }
+]
+```
+
+| Key | Description |
+| --- | --- |
+| `available` | A program for it was found on this system. |
+| `command`, `arguments` | What it would run, or empty when it isn't available. |
+| `reason` | Why it isn't available, such as which tool to install, or empty. |
 
 ## Exit application
 
