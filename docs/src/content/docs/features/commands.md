@@ -27,7 +27,7 @@ The program runs directly, not through a shell, so pipes, `&&` and variables suc
 
 ## Prefab commands
 
-Prefabs are ready-made commands for common tasks. Each one picks the right program for the platform, so you don't need its path.
+Prefabs are ready-made commands for common tasks. Each one picks the right program for the platform and desktop, so you don't need its path.
 
 1. Under **Add a command**, pick the prefab from **Type**. Its name and the program it would run fill in.
 2. Leave **Command** empty to use that program, and select **Add**.
@@ -36,11 +36,43 @@ System Bridge looks for the program each time the command runs, so installing or
 
 To use your own program instead, such as a script of yours, fill in **Command** and **Arguments**. The command keeps the prefab's name and its ID, so clients using it carry on working.
 
-| Prefab | Linux | Windows | macOS |
-| --- | --- | --- | --- |
-| **Lock screen** (`lock`) | `loginctl lock-session` | `rundll32.exe user32.dll,LockWorkStation` | `pmset displaysleepnow` |
+On Windows and macOS each prefab has one way to run:
+
+| Prefab | Windows | macOS |
+| --- | --- | --- |
+| **Lock screen** (`lock`) | `rundll32.exe user32.dll,LockWorkStation` | `pmset displaysleepnow` |
+| **Screenshot** (`screenshot`) | Built in, capturing every display | `screencapture` |
+| **Screenshot of a window** (`screenshot-window`) | Built in, capturing the focused window | `screencapture`, which asks you to pick the window |
+| **Screenshot of a region** (`screenshot-region`) | Not available | `screencapture` |
+
+On Linux, System Bridge works out which desktop is running, even when it's started outside it such as from systemd, and uses the first program in the list that suits that desktop and is installed. Each desktop's own tools come first, with Omarchy's ahead of the rest on Hyprland, then popular tools that work on more than one desktop.
+
+| Prefab | Hyprland and Omarchy | KDE Plasma | GNOME | Other Wayland | X11 |
+| --- | --- | --- | --- | --- | --- |
+| **Lock screen** | `omarchy-system-lock`, `loginctl` | `loginctl` | `loginctl` | `loginctl` | `loginctl` |
+| **Screenshot** | `omasnap`, `grimblast`, `grim`, `flameshot` | `spectacle`, `flameshot` | `gnome-screenshot`, `flameshot` | `grim`, `flameshot` | `flameshot`, `scrot`, `maim` |
+| **Screenshot of a window** | `omasnap`, `grimblast`, `hyprshot` | `spectacle` | `gnome-screenshot` | | `scrot` |
+| **Screenshot of a region** | `omasnap`, `grimblast`, `hyprshot`, `flameshot` | `spectacle`, `flameshot` | `gnome-screenshot`, `flameshot` | `flameshot` | `flameshot`, `scrot`, `maim` |
+
+On Omarchy, **Screenshot** captures the focused monitor, and **Screenshot of a window** asks you to pick the window, as Omarchy's own screenshot tool does.
 
 Like any other command, a prefab only runs once it's on your list.
+
+### Screenshots
+
+Screenshots are saved as PNGs to a **Screenshots** folder in your pictures folder (`$XDG_PICTURES_DIR` when it's set, or `Pictures` in your home folder), named by the time they were taken, such as `screenshot-20261025-143000.png`. Tools that name their own files, such as `omasnap`, keep their name. When one finishes, its output is the file's full path. If the program finishes without saving anything, such as when you cancel picking a region, the command reports that nothing was saved.
+
+Prefabs that ask you to pick a window or region need someone at the computer.
+
+When you give a screenshot prefab your own program, put these in its arguments where the file should go:
+
+| Placeholder | Becomes |
+| --- | --- |
+| `{output}` | The file's full path |
+| `{outputDir}` | The folder it's saved in |
+| `{outputName}` | The file's name |
+
+For example, to capture a single display on Wayland, use `/usr/bin/grim` with the arguments `-o, DP-1, {output}`, swapping `DP-1` for the display's name. Only commands added from a prefab have their placeholders filled in. A program that picks its own file name works too, as long as it saves into the folder: the newest file it saves there becomes the output.
 
 ## Running a command
 
