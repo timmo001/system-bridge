@@ -32,6 +32,9 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter, dataStore *data.
 	router.RegisterSimpleHandler(event.EventUpdateSettings, func(connection string, message event.Message) event.MessageResponse {
 		slog.Info("Received update settings event", "message", message)
 
+		settingsWrite.Lock()
+		defer settingsWrite.Unlock()
+
 		currentSettings, err := settings.Load()
 		if err != nil {
 			slog.Error("Failed to load settings", "error", err)
@@ -105,6 +108,7 @@ func RegisterUpdateSettingsHandler(router *event.MessageRouter, dataStore *data.
 		}
 
 		slog.Info("Settings updated", "original", originalSettings, "new", newSettings)
+		broadcastSettings(currentSettings)
 		if !newSettings.SystemTray {
 			tray.Quit()
 		}

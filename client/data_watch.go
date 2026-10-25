@@ -123,15 +123,22 @@ func Watch(ctx context.Context, options WatchOptions) error {
 		return watchError(ctx, "register data listener", err)
 	}
 
-	responseMessage, err := readResponse(conn)
-	if err != nil {
-		return watchError(ctx, "await data listener acknowledgement", err)
-	}
-	if responseMessage.Type == event.ResponseTypeError {
-		return serverError(responseMessage)
-	}
-	if responseMessage.ID != registerID || responseMessage.Type != event.ResponseTypeDataListenerRegistered {
-		return fmt.Errorf("unexpected data listener acknowledgement: id %q, type %q", responseMessage.ID, responseMessage.Type)
+	// Messages for every client, such as a settings change, can arrive first
+	for {
+		responseMessage, err := readResponse(conn)
+		if err != nil {
+			return watchError(ctx, "await data listener acknowledgement", err)
+		}
+		if responseMessage.ID != registerID {
+			continue
+		}
+		if responseMessage.Type == event.ResponseTypeError {
+			return serverError(responseMessage)
+		}
+		if responseMessage.Type != event.ResponseTypeDataListenerRegistered {
+			return fmt.Errorf("unexpected data listener acknowledgement: id %q, type %q", responseMessage.ID, responseMessage.Type)
+		}
+		break
 	}
 
 	if err := conn.WriteJSON(websocketRequest{

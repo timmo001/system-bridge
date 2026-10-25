@@ -65,6 +65,27 @@ func (ws *WebsocketServer) sendPayloadWithLock(connInfo *connectionInfo, payload
 	}
 }
 
+// BroadcastMessage sends a message to every connection, for changes every
+// client should hear about, such as the settings
+func (ws *WebsocketServer) BroadcastMessage(message event.MessageResponse) {
+	payload, err := json.Marshal(message)
+	if err != nil {
+		slog.Error("Failed to encode broadcast", "error", err, "type", message.Type)
+		return
+	}
+
+	ws.mutex.RLock()
+	connections := make([]*connectionInfo, 0, len(ws.connections))
+	for _, connInfo := range ws.connections {
+		connections = append(connections, connInfo)
+	}
+	ws.mutex.RUnlock()
+
+	for _, connInfo := range connections {
+		ws.sendPayloadWithLock(connInfo, payload, false)
+	}
+}
+
 func (ws *WebsocketServer) SendMessageToAddress(address string, message event.MessageResponse) bool {
 	// Find the connectionInfo for this address
 	ws.mutex.RLock()
