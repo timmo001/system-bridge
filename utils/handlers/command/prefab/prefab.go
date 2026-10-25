@@ -30,8 +30,17 @@ type candidate struct {
 }
 
 // Builtin runs a prefab inside System Bridge, for platforms with no program
-// to run. It gets the prefab's arguments with their placeholders filled in.
-type Builtin func(ctx context.Context, arguments []string) error
+// to run. It gets the prefab's arguments with their placeholders filled in,
+// and returns what it has to report as the command's output.
+type Builtin func(ctx context.Context, arguments []string) (string, error)
+
+// saves is a built-in whose only result is the file it saves, which the
+// command reports itself
+func saves(run func(ctx context.Context, arguments []string) error) Builtin {
+	return func(ctx context.Context, arguments []string) (string, error) {
+		return "", run(ctx, arguments)
+	}
+}
 
 // Prefab is a ready-made command
 type Prefab struct {
@@ -48,6 +57,21 @@ type Prefab struct {
 	// check, when set, says why the prefab can't run here before any program
 	// is looked for, such as a monitor that isn't connected
 	check func() error
+	// validateArguments, when set, means the command's own arguments are what
+	// the prefab runs with, such as an Omarchy IPC call, and checks them
+	validateArguments func(arguments []string) error
+}
+
+// TakesArguments reports whether the prefab runs with the command's own
+// arguments rather than its built-in ones
+func (p Prefab) TakesArguments() bool { return p.validateArguments != nil }
+
+// ValidateArguments checks the arguments a command passes to the prefab
+func (p Prefab) ValidateArguments(arguments []string) error {
+	if p.validateArguments == nil {
+		return nil
+	}
+	return p.validateArguments(arguments)
 }
 
 // Resolved is what a prefab runs here: a program, or its built-in when Run is
@@ -211,6 +235,7 @@ var catalogue = []Prefab{
 			"darwin": {{program: "screencapture", arguments: []string{"-x", "-i", outputPlaceholder}}},
 		},
 	},
+	omarchyIPCPrefab,
 }
 
 var (

@@ -107,12 +107,14 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 func runBuiltin(ctx context.Context, commandDef *settings.SettingsCommandDefinition, run prefab.Builtin, arguments []string) ExecuteResult {
 	result := ExecuteResult{CommandID: commandDef.ID, ExitCode: -1}
 
-	if err := run(ctx, arguments); err != nil {
+	stdout, err := run(ctx, arguments)
+	if err != nil {
 		result.ExitCode = 1
 		result.Stderr = err.Error()
 		return result
 	}
 	result.ExitCode = 0
+	result.Stdout = stdout
 	return result
 }
 

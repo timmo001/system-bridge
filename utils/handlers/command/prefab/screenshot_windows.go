@@ -17,12 +17,17 @@ import (
 
 var procGetWindowRect = windows.NewLazySystemDLL("user32.dll").NewProc("GetWindowRect")
 
-// Windows can always capture, so its built-ins need no check
-var screenshotBuiltinWhen func() bool
+// Windows captures without a program, and can always capture, so its
+// built-ins need no check
+var (
+	screenshotBuiltin       = saves(captureScreen)
+	screenshotWindowBuiltin = saves(captureWindow)
+	screenshotBuiltinWhen   func() bool
+)
 
-// screenshotBuiltin captures every display, as one image covering their
-// combined bounds
-func screenshotBuiltin(_ context.Context, arguments []string) error {
+// captureScreen captures every display, as one image covering their combined
+// bounds
+func captureScreen(_ context.Context, arguments []string) error {
 	displays := screenshot.NumActiveDisplays()
 	if displays == 0 {
 		return errors.New("no displays found")
@@ -34,8 +39,8 @@ func screenshotBuiltin(_ context.Context, arguments []string) error {
 	return captureTo(bounds, arguments)
 }
 
-// screenshotWindowBuiltin captures the foreground window
-func screenshotWindowBuiltin(_ context.Context, arguments []string) error {
+// captureWindow captures the foreground window
+func captureWindow(_ context.Context, arguments []string) error {
 	hwnd := windows.GetForegroundWindow()
 	if hwnd == 0 {
 		return errors.New("no window has focus")

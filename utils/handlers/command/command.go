@@ -99,7 +99,12 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 					return nil, fmt.Errorf("%w: %w", ErrCommandPathInvalid, err)
 				}
 				resolved := *command
-				resolved.Command, resolved.Arguments = run.Command, run.Arguments
+				resolved.Command = run.Command
+				// A prefab that takes the command's own arguments, such as an
+				// Omarchy IPC call, keeps them
+				if !p.TakesArguments() {
+					resolved.Arguments = run.Arguments
+				}
 				// A built-in has no program on disk to check; execute runs it
 				if run.Run != nil {
 					return &resolved, nil

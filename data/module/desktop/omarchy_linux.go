@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/timmo001/system-bridge/types"
+	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
 )
 
 // omarchyTimeout limits each call to the Omarchy shell
@@ -43,6 +44,14 @@ type omarchy struct {
 }
 
 var omarchySource = &omarchy{}
+
+// The command prefabs call the shell's IPC functions through the same socket
+func init() {
+	prefab.SetOmarchyShell(func() bool {
+		_, err := omarchySocket()
+		return err == nil
+	}, omarchyCall)
+}
 
 func omarchyPath() string {
 	if path := os.Getenv("OMARCHY_PATH"); path != "" {

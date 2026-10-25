@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/timmo001/system-bridge/settings"
+	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
 )
 
 func TestValidateCommand(t *testing.T) {
@@ -386,6 +387,34 @@ func TestValidatePrefabCommand(t *testing.T) {
 		assert.True(t, errors.Is(err, ErrCommandPathInvalid))
 		assert.Contains(t, err.Error(), "install loginctl to use Lock screen")
 	})
+}
+
+func TestOmarchyIPCCommand(t *testing.T) {
+	var called []string
+	prefab.SetOmarchyShell(
+		func() bool { return true },
+		func(_ context.Context, target string, function string, arguments ...string) (string, error) {
+			called = append([]string{target, function}, arguments...)
+			return "paused", nil
+		},
+	)
+	t.Cleanup(func() { prefab.SetOmarchyShell(nil, nil) })
+
+	cfg := &settings.Settings{
+		Commands: settings.SettingsCommands{
+			Allowlist: []settings.SettingsCommandDefinition{
+				{ID: "pause", Name: "Pause", Prefab: "omarchy-ipc", Arguments: []string{"media", "pause", "now"}},
+			},
+		},
+	}
+
+	commandDef, err := ValidateCommand("pause", cfg)
+	require.NoError(t, err)
+
+	result := execute(context.Background(), commandDef)
+	assert.Equal(t, []string{"media", "pause", "now"}, called, "the command's own arguments make the call")
+	assert.Equal(t, 0, result.ExitCode)
+	assert.Equal(t, "paused", result.Stdout)
 }
 
 func TestExecuteWithContext(t *testing.T) {

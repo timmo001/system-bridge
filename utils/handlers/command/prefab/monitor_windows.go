@@ -25,11 +25,11 @@ func monitorLabel(id string) string { return "display " + id }
 
 // monitorBuiltin captures one display's bounds
 func monitorBuiltin(id string) Builtin {
-	return func(_ context.Context, arguments []string) error {
+	return saves(func(_ context.Context, arguments []string) error {
 		number, err := strconv.Atoi(id)
 		if err != nil || number < 1 || number > screenshot.NumActiveDisplays() {
 			return fmt.Errorf("%s isn't connected", monitorLabel(id))
 		}
 		return captureTo(screenshot.GetDisplayBounds(number-1), arguments)
-	}
+	})
 }

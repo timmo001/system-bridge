@@ -279,6 +279,23 @@ func TestSave(t *testing.T) {
 		assert.Empty(t, loadedSettings.Commands.Allowlist[0].Command)
 	})
 
+	t.Run("Save rejects an Omarchy shell call without a function", func(t *testing.T) {
+		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
+
+		settings, err := Load()
+		require.NoError(t, err)
+
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "Media", Prefab: "omarchy-ipc", Arguments: []string{"media"}},
+		}
+
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "needs a target and a function")
+	})
+
 	t.Run("Save rejects an unknown prefab", func(t *testing.T) {
 		viper.Reset()
 		configPath := filepath.Join(tempDir, "settings.json")

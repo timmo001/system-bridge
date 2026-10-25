@@ -202,8 +202,14 @@ func (cfg *Settings) Validate() error {
 	seenIDs := make(map[string]bool)
 	for i, cmd := range cfg.Commands.Allowlist {
 		if cmd.Prefab != "" {
-			if _, ok := prefab.Get(cmd.Prefab); !ok {
+			p, ok := prefab.Get(cmd.Prefab)
+			if !ok {
 				return fmt.Errorf("command at index %d: unknown prefab %q", i, cmd.Prefab)
+			}
+			if cmd.Command == "" {
+				if err := p.ValidateArguments(cmd.Arguments); err != nil {
+					return fmt.Errorf("command at index %d: %w", i, err)
+				}
 			}
 		}
 

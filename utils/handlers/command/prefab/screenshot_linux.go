@@ -18,7 +18,7 @@ import (
 // Desktops without a screenshot tool System Bridge knows capture through the
 // desktop portal, which needs no extra program
 var (
-	screenshotBuiltin       Builtin     = portalScreenshot
+	screenshotBuiltin       Builtin     = saves(portalScreenshot)
 	screenshotBuiltinWhen   func() bool = portalAvailable
 	screenshotWindowBuiltin Builtin
 )
