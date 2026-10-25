@@ -18,6 +18,7 @@ import {
   type OmarchyAction,
   type OpenTarget,
   type Settings,
+  type SettingsCommandDefinition,
   type SettingsMediaDirectory,
   type WebSocketError,
 } from "@timmo001/effect-system-bridge";
@@ -332,8 +333,21 @@ export const latestModuleData = Atom.make(
   (get): ModulesData => get(moduleState).data,
 );
 
+/**
+ * The backend's settings, kept up to date with changes from any client, so a
+ * page never saves over another tab's changes with a stale copy.
+ */
 export const settings = Atom.make((get) =>
-  socket(get).pipe(Effect.flatMap((bridge) => bridge.getSettings)),
+  Stream.unwrap(
+    socket(get).pipe(
+      Effect.map((bridge) =>
+        Stream.merge(
+          Stream.fromEffect(bridge.getSettings),
+          bridge.settingsChanges,
+        ),
+      ),
+    ),
+  ),
 ).pipe(Atom.keepAlive);
 
 export const diskMounts = Atom.make((get) =>
@@ -348,6 +362,33 @@ export const updateSettings = Atom.fn((next: Settings, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.updateSettings(next)),
     Effect.tap(() => Effect.sync(() => get.refresh(settings))),
+  ),
+);
+
+/** One change to the command allowlist. */
+export type CommandChange =
+  | {
+      readonly kind: "add" | "update";
+      readonly command: SettingsCommandDefinition;
+    }
+  | { readonly kind: "remove"; readonly id: string };
+
+/**
+ * Adds, changes or removes one command, leaving the rest as the backend has
+ * them. The new settings arrive through `settings` like any other change.
+ */
+export const changeCommand = Atom.fn((change: CommandChange, get) =>
+  fnSocket(get).pipe(
+    Effect.flatMap((bridge) => {
+      switch (change.kind) {
+        case "add":
+          return bridge.addCommand(change.command);
+        case "update":
+          return bridge.updateCommand(change.command);
+        case "remove":
+          return bridge.removeCommand(change.id);
+      }
+    }),
   ),
 );
 

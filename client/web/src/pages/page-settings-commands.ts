@@ -24,7 +24,10 @@ import "~/components/sb-card";
 import { icon, pageStyles, shared, spinner } from "~/components/shared-styles";
 import { AtomController } from "~/controllers/atom-controller";
 import {
+  actionResult,
   type BridgeError,
+  type CommandChange,
+  changeCommand,
   commandExecutions,
   commandPrefabs,
   errorMessage,
@@ -295,14 +298,19 @@ export class PageSettingsCommands extends SbSettingsPage {
     }
   }
 
-  #save(commands: readonly SettingsCommandDefinition[]) {
-    const current = this.settings;
+  readonly #change = new AtomController(this, () => changeCommand);
 
-    if (current !== undefined) {
-      this.saveSettings(
-        Struct.assign(current, { commands: { allowlist: commands } }),
-      );
-    }
+  /** Saving covers command changes as well as settings. */
+  protected override get isSaving(): boolean {
+    return super.isSaving || this.#change.value.waiting;
+  }
+
+  /**
+   * Sends just the one change, so the backend keeps any other client's
+   * changes to the other commands.
+   */
+  #save(change: CommandChange) {
+    registry.set(changeCommand, change);
   }
 
   /** The command an action button is for, from its `data-id`. */
@@ -327,9 +335,7 @@ export class PageSettingsCommands extends SbSettingsPage {
   #onRemove = (event: MouseEvent) => {
     const id = this.#commandId(event);
 
-    if (id !== undefined) {
-      this.#save(this.commands.filter((command) => command.id !== id));
-    }
+    if (id !== undefined) this.#save({ kind: "remove", id });
   };
 
   /** Opens the popover for one part of a command, beside its edit button. */
@@ -376,14 +382,16 @@ export class PageSettingsCommands extends SbSettingsPage {
 
     const value = editing.value.trim();
 
+    const command = this.commands.find(({ id }) => id === editing.id);
+
     this.editPopover?.hidePopover();
-    this.#save(
-      this.commands.map((command) =>
-        command.id === editing.id
-          ? withPart(command, editing.field, value)
-          : command,
-      ),
-    );
+
+    if (command !== undefined) {
+      this.#save({
+        kind: "update",
+        command: withPart(command, editing.field, value),
+      });
+    }
   };
 
   /** A name can't be empty, nor can a custom command's program. */
@@ -555,7 +563,7 @@ export class PageSettingsCommands extends SbSettingsPage {
     };
 
     this.#adding = definition.id;
-    this.#save([...this.commands, definition]);
+    this.#save({ kind: "add", command: definition });
   };
 
   #input(
@@ -1052,6 +1060,7 @@ ${result.stderr}</pre>`
           icon: mdiConsoleLine,
         })}
         ${this.renderResult(this.saveResult)}
+        ${this.renderResult(actionResult(this.#change.value, "Command saved."))}
         ${this.gate(
           () => this.#renderContent(),
           html`<span
