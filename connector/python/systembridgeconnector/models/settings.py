@@ -81,15 +81,21 @@ class SettingsMedia:
     directories: list[SettingDirectory] = field(default_factory=list)
 
 
+@filter_unexpected_fields
 @dataclass
 class SettingsCommandDefinition:
-    """Settings Command Definition."""
+    """Settings Command Definition.
+
+    With a prefab and an empty command, the backend runs the prefab's program
+    for its platform.
+    """
 
     id: str
     name: str
-    command: str
+    command: str = ""
     workingDir: str = ""  # noqa: N815
     arguments: list[str] = field(default_factory=list)
+    prefab: str = ""
 
 
 @dataclass

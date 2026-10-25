@@ -397,11 +397,47 @@ async def process_request(request: Request) -> Response:
                             "command": "/usr/bin/test",
                             "workingDir": "",
                             "arguments": [],
-                        }
+                            "prefab": "",
+                        },
+                        {
+                            "id": "lock-command-id",
+                            "name": "Lock screen",
+                            "command": "",
+                            "workingDir": "",
+                            "arguments": [],
+                            "prefab": "lock",
+                            "addedLater": True,
+                        },
                     ]
                 },
             },
             message="Got settings",
+        )
+    if request.event == EventType.GET_COMMAND_PREFABS:
+        return Response(
+            id=request.id,
+            type=EventType.COMMAND_PREFABS,
+            data=[
+                {
+                    "id": "lock",
+                    "name": "Lock screen",
+                    "description": "Lock the screen",
+                    "available": True,
+                    "command": "/usr/bin/loginctl",
+                    "arguments": ["lock-session"],
+                    "reason": "",
+                },
+                {
+                    "id": "screenshot",
+                    "name": "Screenshot",
+                    "description": "Capture every display",
+                    "available": False,
+                    "command": "",
+                    "arguments": [],
+                    "reason": "install grim to use Screenshot",
+                },
+            ],
+            message="Got command prefabs",
         )
 
     return Response(

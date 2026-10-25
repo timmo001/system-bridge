@@ -22,6 +22,7 @@ from systembridgeconnector.exceptions import (
 from systembridgeconnector.models.audio_control import AudioControl
 from systembridgeconnector.models.bluetooth_control import BluetoothPowerRequest
 from systembridgeconnector.models.command_execute import ExecuteRequest
+from systembridgeconnector.models.command_prefab import CommandPrefab
 from systembridgeconnector.models.command_result import ExecuteResult
 from systembridgeconnector.models.desktop_control import (
     DesktopWindowStateRequest,
@@ -821,6 +822,19 @@ async def test_get_commands(
     assert commands.allowlist is not None
     assert len(commands.allowlist) > 0
     assert commands == snapshot
+
+
+@pytest.mark.asyncio
+async def test_get_command_prefabs(
+    snapshot: SnapshotAssertion,
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test getting command prefabs."""
+    prefabs = await mock_websocket_client_listening.get_command_prefabs(
+        request_id=REQUEST_ID,
+    )
+    assert all(isinstance(prefab, CommandPrefab) for prefab in prefabs)
+    assert prefabs == snapshot
 
 
 @pytest.mark.asyncio

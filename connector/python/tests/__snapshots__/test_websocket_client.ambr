@@ -68,6 +68,31 @@
     type='N/A',
   )
 # ---
+# name: test_get_command_prefabs
+  list([
+    CommandPrefab(
+      arguments=list([
+        'lock-session',
+      ]),
+      available=True,
+      command='/usr/bin/loginctl',
+      description='Lock the screen',
+      id='lock',
+      name='Lock screen',
+      reason='',
+    ),
+    CommandPrefab(
+      arguments=list([
+      ]),
+      available=False,
+      command='',
+      description='Capture every display',
+      id='screenshot',
+      name='Screenshot',
+      reason='install grim to use Screenshot',
+    ),
+  ])
+# ---
 # name: test_get_commands
   SettingsCommands(
     allowlist=list([
@@ -77,6 +102,16 @@
         command='/usr/bin/test',
         id='test-command-id',
         name='Test Command',
+        prefab='',
+        workingDir='',
+      ),
+      SettingsCommandDefinition(
+        arguments=list([
+        ]),
+        command='',
+        id='lock-command-id',
+        name='Lock screen',
+        prefab='lock',
         workingDir='',
       ),
     ]),

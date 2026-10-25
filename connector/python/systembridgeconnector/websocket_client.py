@@ -22,6 +22,7 @@ from .exceptions import (
 from .models.audio_control import AudioControl
 from .models.bluetooth_control import BluetoothDeviceRequest, BluetoothPowerRequest
 from .models.command_execute import ExecuteRequest
+from .models.command_prefab import CommandPrefab
 from .models.command_result import ExecuteResult
 from .models.desktop_control import (
     DesktopKeyboardLayoutRequest,
@@ -1042,6 +1043,36 @@ class WebSocketClient(Base):
             allowlist.append(SettingsCommandDefinition(**cmd_data))
 
         return SettingsCommands(allowlist=allowlist)
+
+    async def get_command_prefabs(
+        self,
+        request_id: str | None = None,
+    ) -> list[CommandPrefab]:
+        """Get the ready-made commands and whether each can run on the server."""
+        self._logger.info("Getting command prefabs")
+        response = await self.send_message(
+            EventType.GET_COMMAND_PREFABS,
+            request_id,
+            {},
+            wait_for_response=True,
+            response_type=EventType.COMMAND_PREFABS,
+        )
+
+        if response.type == EventType.ERROR:
+            if response.subtype == "TIMEOUT":
+                raise ConnectionErrorException(
+                    response.message or "Timeout waiting for command prefabs response"
+                )
+            raise BadRequestException(
+                response.message or "Failed to get command prefabs"
+            )
+
+        if not isinstance(response.data, list):
+            raise TypeError(
+                f"Command prefabs response data must be a list, got {type(response.data).__name__}"
+            )
+
+        return [CommandPrefab(**prefab) for prefab in response.data]
 
     async def listen(
         self,
