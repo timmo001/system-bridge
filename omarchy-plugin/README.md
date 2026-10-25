@@ -10,9 +10,9 @@ display and media controls.
 - Omarchy Quattro
 - [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
   `system-bridge` executable available on `PATH`, in a version with the
-  `client audio`, `client bluetooth`, `client desktop`, `client discord`,
-  `client display`, `client hyprland`, `client media`, `client open --path`
-  and `client quit --yes` commands
+  `client audio`, `client bluetooth`, `client command`, `client desktop`,
+  `client discord`, `client display`, `client hyprland`, `client media`,
+  `client open --path` and `client quit --yes` commands
 - A running local System Bridge service
 
 ## Install
@@ -113,4 +113,7 @@ system-bridge client data watch --module desktop --module system ...
 It reads System Bridge settings and its local authentication token through the
 System Bridge client. Its buttons run `system-bridge client` commands to open
 the web client, control Bluetooth devices, the desktop, Discord, displays and
-media, and quit or start System Bridge.
+media, run your allowlisted commands, and quit or start System Bridge. The
+System view lists those commands, read with
+`system-bridge client command list --json` every minute, and selecting one runs
+it with `system-bridge client command run`.

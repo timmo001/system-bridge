@@ -289,6 +289,19 @@ QtObject {
     return []
   }
 
+  // A row to run each allowlisted command, showing what it runs
+  function commandRows(service) {
+    var commands = Array.isArray(service.commands) ? service.commands : []
+    return commands.filter(function(command) { return present(command.id) }).map(function(command) {
+      var args = Array.isArray(command.arguments) ? command.arguments : []
+      var runs = present(command.command)
+        ? [text(command.command)].concat(args).join(" ")
+        : join([text(command.prefab), args.join(" ")])
+      return control("command-" + command.id, "Commands", "\u{F018D}", text(command.name) || text(command.id), runs,
+        ["system-bridge", "client", "command", "run", String(command.id)])
+    })
+  }
+
   function systemRows(service) {
     var rows = []
     var system = service.system
@@ -320,6 +333,7 @@ QtObject {
         }))
       })
     }
+    commandRows(service).forEach(function(command) { rows.push(command) })
     rows.push(webRow("web-commands", "In the web client", "\u{F018D}", "Commands", "Run and set up commands", "/system#commands"))
     rows.push(webRow("web-notifications", "In the web client", "󰂚", "Notifications", "Send a notification", "/system#notifications"))
     rows.push(webRow("web-open", "In the web client", "󰏌", "Open", "Open a URL or path", "/system#open"))

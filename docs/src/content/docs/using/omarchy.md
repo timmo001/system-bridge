@@ -46,7 +46,9 @@ desktop view focuses a window or workspace when you select it, switches the
 keyboard layout, reloads Hyprland's config, and centres, groups or splits the
 focused window or cycles to the next or previous one; the Discord view has mute,
 deafen and leave call; the displays view has brightness for each display that
-supports it; and the media view has previous, play or pause, and next.
+supports it; the media view has previous, play or pause, and next; and the
+system view lists your [commands](/features/commands/), running one when you
+select it.
 
 Type to filter the rows, use Up and Down to move through them, and press Enter
 to select one. Backspace or the back button returns to the overview, and Escape
@@ -92,4 +94,5 @@ source before installing it.
 This plugin starts `system-bridge client data watch` and reads System Bridge's
 local settings and authentication token through that client. Its buttons run
 `system-bridge client` commands to open the web client, control the desktop,
-media, Discord and displays, and quit or start System Bridge.
+media, Discord and displays, run your allowlisted commands, and quit or start
+System Bridge.

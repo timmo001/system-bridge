@@ -14,6 +14,8 @@ Item {
   property var networkReceiveRate: null
   property var networkSendRate: null
   property var lastNetworkCounters: null
+  // The allowlisted commands, from system-bridge client command list.
+  property var commands: []
 
   // Modules that report a list rather than an object.
   readonly property var listModules: ["gpus", "displays", "processes"]
@@ -163,4 +165,31 @@ Item {
     repeat: true
     onTriggered: root.currentTime = Date.now()
   }
+
+  // Commands only change from the web client, so a minute is soon enough
+  Process {
+    id: commandsProcess
+    running: true
+    command: ["system-bridge", "client", "command", "list", "--json"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var list = JSON.parse(String(text || "").trim())
+          root.commands = Array.isArray(list) ? list : []
+        } catch (error) {
+          // Keep the last list when the backend doesn't answer
+        }
+      }
+    }
+  }
+
+  Timer {
+    interval: 60000
+    running: true
+    repeat: true
+    onTriggered: if (!commandsProcess.running) commandsProcess.running = true
+  }
+
+  onConnectedChanged: if (connected && !commandsProcess.running) commandsProcess.running = true
 }
