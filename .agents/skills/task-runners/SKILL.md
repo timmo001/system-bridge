@@ -1,7 +1,7 @@
 ---
 name: task-runners
 license: Apache-2.0
-description: Run and write project tasks so checks, builds, tests and dev servers finish fast - run only what a change needs, in parallel, skipping work that is already up to date. Use when running linters, type checks, test suites or builds; when writing or reviewing task runner config (mise.toml, package.json scripts, justfile, deno.json, Makefile, pitchfork.toml) or CI steps; or when a check, build or task run is slow.
+description: Run only the checks a change needs, in parallel, and write task config that skips up-to-date work. Use when running lints, type checks, tests or builds, editing task runner config or CI steps, or when a run is slow.
 ---
 
 # Task Runners

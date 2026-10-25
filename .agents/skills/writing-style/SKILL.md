@@ -2,15 +2,10 @@
 name: writing-style
 license: Apache-2.0
 description: >
-  Write commit messages, PR and issue text and comments, docs (README), code
-  comments, and user-facing strings (notifications, UI labels, toasts, error
-  messages) in the project owner's voice: concise, human, UK English, no
-  em-dashes, no robotic or marketing tone. Use when writing, editing, or
-  reviewing these, including requests to make writing sound natural or remove
-  jargon, and before adding screenshots, images or videos to a PR, issue or
-  comment: gh pr/issue create, edit and comment upload them with --attach,
-  so never ask the user to drag them in. Keep the meaning and follow the
-  repo's established writing style.
+  Write commits, PR and issue text, docs, code comments and user-facing strings
+  in the owner's concise, human UK English voice. Use when writing, editing or
+  reviewing these, making text sound natural, or attaching images or videos to
+  a PR or issue.
 ---
 
 # Writing Style
