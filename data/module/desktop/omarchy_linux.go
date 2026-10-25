@@ -45,12 +45,13 @@ type omarchy struct {
 
 var omarchySource = &omarchy{}
 
-// The command prefabs call the shell's IPC functions through the same socket
+// The command prefabs call the shell's IPC functions, falling back to qs ipc
+// for the ones its socket skips
 func init() {
 	prefab.SetOmarchyShell(func() bool {
 		_, err := omarchySocket()
 		return err == nil
-	}, omarchyCall)
+	}, omarchyIPC)
 }
 
 func omarchyPath() string {
@@ -149,7 +150,43 @@ func omarchyCall(ctx context.Context, target string, function string, arguments 
 	if output, ok := strings.CutPrefix(reply, "OK\x1f"); ok {
 		return strings.TrimRight(output, "\n"), nil
 	}
-	return "", fmt.Errorf("the Omarchy shell has no %s %s taking %d arguments", target, function, len(arguments))
+	return "", omarchySkipped{target: target, function: function, arguments: len(arguments)}
+}
+
+// omarchySkipped is the shell's socket running nothing. It only answers for
+// the shell's own registry; other targets, such as plugins', answer qs ipc.
+type omarchySkipped struct {
+	target    string
+	function  string
+	arguments int
+}
+
+func (e omarchySkipped) Error() string {
+	return fmt.Sprintf("the Omarchy shell has no %s %s taking %d arguments", e.target, e.function, e.arguments)
+}
+
+// omarchyIPC calls any IPC function the shell lists: through its socket, or
+// through qs ipc, as omarchy-shell does, when the socket skips it
+func omarchyIPC(ctx context.Context, target string, function string, arguments ...string) (string, error) {
+	output, err := omarchyCall(ctx, target, function, arguments...)
+	if !errors.As(err, &omarchySkipped{}) {
+		return output, err
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, omarchyTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "qs", append([]string{"ipc", "-n", "-p", omarchyPath() + "/shell", "call", target, function}, arguments...)...)
+	cmd.Env = append(os.Environ(), "WAYLAND_DISPLAY="+waylandDisplay())
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	out, runErr := cmd.Output()
+	if runErr != nil {
+		if message := strings.TrimSpace(stderr.String()); message != "" {
+			return "", fmt.Errorf("the Omarchy shell couldn't run %s %s: %s", target, function, message)
+		}
+		return "", fmt.Errorf("the Omarchy shell couldn't run %s %s: %w", target, function, runErr)
+	}
+	return strings.TrimRight(string(out), "\n"), nil
 }
 
 // get reports the shell, or nil when it isn't running
