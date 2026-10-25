@@ -107,18 +107,22 @@ async def mock_websocket_session_generator(
                 _LOGGER.debug("Sent text message")
 
                 if response.type == EventType.DATA_GET:
-                    data_response = Response(
-                        id=response.id,
-                        type=EventType.DATA_UPDATE,
-                        module=Module.SYSTEM,
-                        data=asdict(FIXTURE_SYSTEM),
-                    )
+                    # Like the backend, answer every module asked for, with
+                    # no data for those it has none for. Only system has data
+                    for module in response.data.get("modules", []):
+                        data_response = Response(
+                            id=response.id,
+                            type=EventType.DATA_UPDATE,
+                            module=module,
+                            data=(
+                                asdict(FIXTURE_SYSTEM)
+                                if module == Module.SYSTEM
+                                else None
+                            ),
+                        )
 
-                    _LOGGER.info(
-                        "Data requested, sending system data: %s",
-                        data_response,
-                    )
-                    await ws.send_str(dumps(asdict(data_response)))
+                        _LOGGER.info("Data requested, sending: %s", data_response)
+                        await ws.send_str(dumps(asdict(data_response)))
                 elif response.type == EventType.DATA_LISTENER_REGISTERED:
                     data_response = Response(
                         id=response.id,

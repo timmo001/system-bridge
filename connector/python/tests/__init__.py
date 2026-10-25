@@ -154,8 +154,72 @@ CONTROL_RESPONSES = {
     EventType.DESKTOP_SET_WINDOW_STATE: EventType.DESKTOP_WINDOW_STATE_SET,
     EventType.DISCORD_CONTROL: EventType.DISCORD_CONTROLLED,
     EventType.DISPLAY_CONTROL: EventType.DISPLAY_CONTROLLED,
+    EventType.MEDIA_CONTROL: EventType.MEDIA_CONTROLLED,
     EventType.OMARCHY_MENU: EventType.OMARCHY_MENU_CHANGED,
 }
+
+COMMAND_CHANGE_RESPONSES = {
+    EventType.COMMAND_ADD: EventType.COMMAND_ADDED,
+    EventType.COMMAND_REMOVE: EventType.COMMAND_REMOVED,
+    EventType.COMMAND_UPDATE: EventType.COMMAND_UPDATED,
+}
+
+SETTINGS_DATA: Final[dict[str, Any]] = {
+    "autostart": False,
+    "systemTray": True,
+    "hotkeys": [],
+    "logLevel": "WARN",
+    "desktop": {"windowTitles": False},
+    "disks": {"allowedSecondaryMountPoints": []},
+    "media": {"directories": []},
+    "commands": {
+        "allowlist": [
+            {
+                "id": "test-command-id",
+                "name": "Test Command",
+                "command": "/usr/bin/test",
+                "workingDir": "",
+                "arguments": [],
+                "prefab": "",
+            },
+            {
+                "id": "lock-command-id",
+                "name": "Lock screen",
+                "command": "",
+                "workingDir": "",
+                "arguments": [],
+                "prefab": "lock",
+                "addedLater": True,
+            },
+        ]
+    },
+}
+
+
+def command_change_response(request: Request) -> Response:
+    """Reply to a command change with the settings it would save."""
+    allowlist = [
+        command
+        for command in SETTINGS_DATA["commands"]["allowlist"]
+        if command["id"] != request.data["id"]
+    ]
+    if request.event == EventType.COMMAND_UPDATE and len(allowlist) == len(
+        SETTINGS_DATA["commands"]["allowlist"]
+    ):
+        return Response(
+            id=request.id,
+            type=EventType.ERROR,
+            subtype=EventSubType.BAD_REQUEST,
+            data=None,
+            message=f"there's no command with ID {request.data['id']}",
+        )
+    if request.event != EventType.COMMAND_REMOVE:
+        allowlist.append(request.data)
+    return Response(
+        id=request.id,
+        type=COMMAND_CHANGE_RESPONSES[request.event],
+        data={**SETTINGS_DATA, "commands": {"allowlist": allowlist}},
+    )
 
 
 async def process_request(request: Request) -> Response:
@@ -312,6 +376,8 @@ async def process_request(request: Request) -> Response:
             data=None,
             message="Listener unregistered",
         )
+    if request.event in COMMAND_CHANGE_RESPONSES:
+        return command_change_response(request)
     if request.event == EventType.UPDATE_SETTINGS:
         return Response(
             id=request.id,
@@ -381,36 +447,7 @@ async def process_request(request: Request) -> Response:
         return Response(
             id=request.id,
             type=EventType.SETTINGS_RESULT,
-            data={
-                "autostart": False,
-                "systemTray": True,
-                "hotkeys": [],
-                "logLevel": "WARN",
-                "desktop": {"windowTitles": False},
-                "disks": {"allowedSecondaryMountPoints": []},
-                "media": {"directories": []},
-                "commands": {
-                    "allowlist": [
-                        {
-                            "id": "test-command-id",
-                            "name": "Test Command",
-                            "command": "/usr/bin/test",
-                            "workingDir": "",
-                            "arguments": [],
-                            "prefab": "",
-                        },
-                        {
-                            "id": "lock-command-id",
-                            "name": "Lock screen",
-                            "command": "",
-                            "workingDir": "",
-                            "arguments": [],
-                            "prefab": "lock",
-                            "addedLater": True,
-                        },
-                    ]
-                },
-            },
+            data=SETTINGS_DATA,
             message="Got settings",
         )
     if request.event == EventType.GET_COMMAND_PREFABS:

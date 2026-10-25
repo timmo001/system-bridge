@@ -55,7 +55,9 @@ from .models.open_url import OpenUrl
 from .models.request import Request
 from .models.response import Response
 from .models.settings import Settings, SettingsCommandDefinition, SettingsCommands
-from .models.update import Update
+
+# The backend allows 30 seconds for a Bluetooth device to connect
+BLUETOOTH_TIMEOUT = 35.0
 
 
 class WebSocketClient(Base):
@@ -115,20 +117,6 @@ class WebSocketClient(Base):
             )
             raise ConnectionErrorException(error) from error
 
-    async def application_update(
-        self,
-        model: Update,
-        request_id: str | None = None,
-    ) -> Response:
-        """Update application."""
-        self._logger.info("Updating application")
-        return await self.send_message(
-            EventType.APPLICATION_UPDATE,
-            request_id,
-            asdict(model),
-            wait_for_response=False,
-        )
-
     async def exit_backend(
         self,
         request_id: str | None = None,
@@ -153,6 +141,10 @@ class WebSocketClient(Base):
 
         modules_data = ModulesData()
 
+        # The backend replies for every module asked for, with no data when it
+        # has none, so a module has answered once any reply for it arrives
+        answered: set[str] = set()
+
         async def handle_module(
             module_name: str,
             module: Any,
@@ -160,12 +152,18 @@ class WebSocketClient(Base):
             """Handle returned data."""
             self._logger.debug("Set new data for: %s", module_name)
             setattr(modules_data, module_name, module)
+            answered.add(module_name)
+
+        async def handle_no_data(module_name: str) -> None:
+            """Handle a module the backend has no data for."""
+            answered.add(module_name)
 
         listener_task = asyncio.create_task(
             self.listen(
                 callback=handle_module,
                 accept_other_types=False,
                 name="Get data WebSocket Listener",
+                no_data_callback=handle_no_data,
             ),
             name="Get data WebSocket Listener",
         )
@@ -178,29 +176,29 @@ class WebSocketClient(Base):
             response_type=EventType.DATA_GET,
         )
 
-        # Wait for all data modules to be set
-        try:
-            async with asyncio.timeout(timeout):
-                while not all(
-                    getattr(modules_data, module_name) is not None
-                    for module_name in model.modules
-                ):
-                    await asyncio.sleep(0.1)
-                    if listener_task.done():
-                        break
-        except TimeoutError as exception:
-            modules_missing = [
+        def modules_missing() -> list[str]:
+            return [
                 module_name
                 for module_name in model.modules
                 if getattr(modules_data, module_name) is None
             ]
+
+        # Wait for every module to answer. Only a backend that never answers
+        # waits for the timeout
+        try:
+            async with asyncio.timeout(timeout):
+                while not all(module_name in answered for module_name in model.modules):
+                    await asyncio.sleep(0.1)
+                    if listener_task.done():
+                        break
+        except TimeoutError as exception:
             self._logger.error(
                 "Timeout waiting for data after %s seconds. Modules missing: %s",
                 timeout,
-                modules_missing,
+                modules_missing(),
             )
             raise DataMissingException(
-                f"Timeout waiting for data after {timeout} seconds. Modules missing: {modules_missing}"
+                f"Timeout waiting for data after {timeout} seconds. Modules missing: {modules_missing()}"
             ) from exception
         finally:
             self._logger.debug("Cancelling listener task")
@@ -213,6 +211,10 @@ class WebSocketClient(Base):
                 and (listener_exception := listener_task.exception()) is not None
             ):
                 raise listener_exception
+
+        if missing := modules_missing():
+            self._logger.error("No data received for modules: %s", missing)
+            raise DataMissingException(f"No data received for modules: {missing}")
 
         return modules_data
 
@@ -373,6 +375,64 @@ class WebSocketClient(Base):
         )
 
         return Settings(**self._response_dict(response, "update settings"))
+
+    async def _change_command(
+        self,
+        event: EventType,
+        response_type: EventType,
+        data: dict[str, Any],
+        request_id: str | None,
+    ) -> Settings:
+        """Change one command in the allowlist, returning the saved settings."""
+        self._logger.info("Command change %s: %s", event, data.get("id"))
+        response = await self.send_message(
+            event,
+            request_id,
+            data,
+            wait_for_response=True,
+            response_type=response_type,
+        )
+
+        return Settings(**self._response_dict(response, "command change"))
+
+    async def add_command(
+        self,
+        command: SettingsCommandDefinition,
+        request_id: str | None = None,
+    ) -> Settings:
+        """Add one command to the allowlist, leaving the others as they are."""
+        return await self._change_command(
+            EventType.COMMAND_ADD,
+            EventType.COMMAND_ADDED,
+            asdict(command),
+            request_id,
+        )
+
+    async def update_command(
+        self,
+        command: SettingsCommandDefinition,
+        request_id: str | None = None,
+    ) -> Settings:
+        """Change one saved command, failing if another client removed it."""
+        return await self._change_command(
+            EventType.COMMAND_UPDATE,
+            EventType.COMMAND_UPDATED,
+            asdict(command),
+            request_id,
+        )
+
+    async def remove_command(
+        self,
+        command_id: str,
+        request_id: str | None = None,
+    ) -> Settings:
+        """Remove one command from the allowlist."""
+        return await self._change_command(
+            EventType.COMMAND_REMOVE,
+            EventType.COMMAND_REMOVED,
+            {"id": command_id},
+            request_id,
+        )
 
     async def get_discord_setup(
         self,
@@ -555,6 +615,7 @@ class WebSocketClient(Base):
         response_type: EventType,
         model: Any,
         request_id: str | None,
+        timeout: float | None = None,
     ) -> Response:
         """Send an action, leaving out the settings that are None."""
         self._logger.info("Action %s: %s", event, model)
@@ -564,6 +625,7 @@ class WebSocketClient(Base):
             {key: value for key, value in asdict(model).items() if value is not None},
             wait_for_response=True,
             response_type=response_type,
+            timeout=timeout,
         )
 
     async def bluetooth_connect(
@@ -577,6 +639,7 @@ class WebSocketClient(Base):
             EventType.BLUETOOTH_CONNECTED,
             model,
             request_id,
+            BLUETOOTH_TIMEOUT,
         )
 
     async def bluetooth_disconnect(
@@ -590,6 +653,7 @@ class WebSocketClient(Base):
             EventType.BLUETOOTH_DISCONNECTED,
             model,
             request_id,
+            BLUETOOTH_TIMEOUT,
         )
 
     async def bluetooth_forget(
@@ -603,6 +667,7 @@ class WebSocketClient(Base):
             EventType.BLUETOOTH_FORGOTTEN,
             model,
             request_id,
+            BLUETOOTH_TIMEOUT,
         )
 
     async def bluetooth_set_power(
@@ -616,6 +681,7 @@ class WebSocketClient(Base):
             EventType.BLUETOOTH_POWER_SET,
             model,
             request_id,
+            BLUETOOTH_TIMEOUT,
         )
 
     async def desktop_close_window(
@@ -790,7 +856,8 @@ class WebSocketClient(Base):
             EventType.MEDIA_CONTROL,
             request_id,
             asdict(model),
-            wait_for_response=False,
+            wait_for_response=True,
+            response_type=EventType.MEDIA_CONTROLLED,
         )
 
     async def send_notification(
@@ -1079,8 +1146,15 @@ class WebSocketClient(Base):
         callback: Callable[[str, Any], Awaitable[None]] | None = None,
         accept_other_types: bool = False,
         name: str = "WebSocket Listener",
+        settings_callback: Callable[[Settings], Awaitable[None]] | None = None,
+        no_data_callback: Callable[[str], Awaitable[None]] | None = None,
     ) -> None:
-        """Listen for messages and map to modules."""
+        """Listen for messages and map to modules.
+
+        settings_callback gets the settings each time any client changes them.
+        no_data_callback gets a module's name when the backend answers for it
+        with no data.
+        """
 
         async def _callback_message(message: dict) -> None:
             """Message Callback."""
@@ -1185,6 +1259,22 @@ class WebSocketClient(Base):
                         if isinstance(message[EventKey.DATA], list)
                         else model_cls(**message[EventKey.DATA]),
                     )
+            elif (
+                message[EventKey.TYPE] == EventType.DATA_UPDATE
+                and no_data_callback is not None
+                and message.get(EventKey.MODULE)
+            ):
+                self._logger.debug(
+                    "[%s] No data for: %s", name, message[EventKey.MODULE]
+                )
+                await no_data_callback(message[EventKey.MODULE])
+            elif (
+                message[EventKey.TYPE] == EventType.SETTINGS_CHANGED
+                and settings_callback is not None
+                and isinstance(message.get(EventKey.DATA), dict)
+            ):
+                self._logger.debug("[%s] Settings changed", name)
+                await settings_callback(Settings(**message[EventKey.DATA]))
             else:
                 self._logger.debug(
                     "[%s] Other message: %s",

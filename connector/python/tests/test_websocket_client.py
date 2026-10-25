@@ -55,8 +55,11 @@ from systembridgeconnector.models.notification import Notification
 from systembridgeconnector.models.open_path import OpenPath
 from systembridgeconnector.models.open_url import OpenUrl
 from systembridgeconnector.models.response import Response
-from systembridgeconnector.models.settings import Settings, SettingsCommands
-from systembridgeconnector.models.update import Update
+from systembridgeconnector.models.settings import (
+    Settings,
+    SettingsCommandDefinition,
+    SettingsCommands,
+)
 from systembridgeconnector.websocket_client import WebSocketClient
 
 from . import API_HOST, REQUEST_ID, ClientSessionGenerator
@@ -87,8 +90,7 @@ async def test_connection_closed(mock_websocket_client_connected: WebSocketClien
     await mock_websocket_client_connected.close()
 
     with pytest.raises(ConnectionClosedException):
-        await mock_websocket_client_connected.application_update(
-            Update(version="1.0.0"),
+        await mock_websocket_client_connected.exit_backend(
             request_id=REQUEST_ID,
         )
 
@@ -99,21 +101,6 @@ async def test_close(mock_websocket_client_connected: WebSocketClient):
     await mock_websocket_client_connected.close()
 
     assert not mock_websocket_client_connected.connected
-
-
-@pytest.mark.asyncio
-async def test_application_update(
-    snapshot: SnapshotAssertion,
-    mock_websocket_client_connected: WebSocketClient,
-):
-    """Test the websocket client."""
-    assert (
-        await mock_websocket_client_connected.application_update(
-            Update(version="1.0.0"),
-            request_id=REQUEST_ID,
-        )
-        == snapshot
-    )
 
 
 @pytest.mark.asyncio
@@ -364,6 +351,74 @@ async def test_update_settings(
 
 
 @pytest.mark.asyncio
+async def test_change_commands(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test adding, changing and removing one command at a time."""
+    command = SettingsCommandDefinition(id="new-command-id", name="New")
+
+    settings = await mock_websocket_client_listening.add_command(command)
+    assert [c.id for c in settings.commands.allowlist] == [
+        "test-command-id",
+        "lock-command-id",
+        "new-command-id",
+    ]
+
+    settings = await mock_websocket_client_listening.update_command(
+        SettingsCommandDefinition(id="test-command-id", name="Renamed")
+    )
+    assert settings.commands.allowlist[-1].name == "Renamed"
+
+    settings = await mock_websocket_client_listening.remove_command("test-command-id")
+    assert [c.id for c in settings.commands.allowlist] == ["lock-command-id"]
+
+
+@pytest.mark.asyncio
+async def test_update_removed_command(
+    mock_websocket_client_listening: WebSocketClient,
+):
+    """Test changing a command another client removed raises."""
+    with pytest.raises(BadRequestException, match="no command"):
+        await mock_websocket_client_listening.update_command(
+            SettingsCommandDefinition(id="removed-command-id", name="Gone")
+        )
+
+
+@pytest.mark.asyncio
+async def test_listen_settings_changed(
+    mock_websocket_client_connected: WebSocketClient,
+):
+    """Test a listener gets the settings when another client changes them."""
+    changed: list[Settings] = []
+
+    async def settings_callback(settings: Settings) -> None:
+        changed.append(settings)
+
+    with (
+        patch.object(
+            mock_websocket_client_connected,
+            "receive_message",
+            side_effect=[
+                {
+                    "id": "system",
+                    "type": EventType.SETTINGS_CHANGED,
+                    "subtype": EventSubType.NONE,
+                    "data": {"autostart": True},
+                    "message": "Settings changed",
+                },
+                ConnectionClosedException("Connection closed to server"),
+            ],
+        ),
+        pytest.raises(ConnectionClosedException),
+    ):
+        await mock_websocket_client_connected.listen(
+            settings_callback=settings_callback
+        )
+
+    assert changed == [Settings(autostart=True)]
+
+
+@pytest.mark.asyncio
 async def test_get_settings_error(
     mock_websocket_client_listening: WebSocketClient,
 ):
@@ -442,17 +497,15 @@ async def test_keyboard_text(
 
 @pytest.mark.asyncio
 async def test_media_control(
-    snapshot: SnapshotAssertion,
-    mock_websocket_client_connected: WebSocketClient,
+    mock_websocket_client_listening: WebSocketClient,
 ):
-    """Test the websocket client."""
-    assert (
-        await mock_websocket_client_connected.media_control(
-            MediaControl(action="play"),
-            request_id=REQUEST_ID,
-        )
-        == snapshot
+    """Test media control waits for the backend's reply."""
+    response = await mock_websocket_client_listening.media_control(
+        MediaControl(action="PLAY"),
+        request_id=REQUEST_ID,
     )
+    assert response.type == EventType.MEDIA_CONTROLLED
+    assert response.data["action"] == "PLAY"
 
 
 @pytest.mark.asyncio
@@ -1136,12 +1189,8 @@ async def test_request_ids_are_unique(
     mock_websocket_client_connected: WebSocketClient,
 ):
     """Test each request gets its own ID when none is given."""
-    first = await mock_websocket_client_connected.media_control(
-        MediaControl(action="PLAY")
-    )
-    second = await mock_websocket_client_connected.media_control(
-        MediaControl(action="PLAY")
-    )
+    first = await mock_websocket_client_connected.exit_backend()
+    second = await mock_websocket_client_connected.exit_backend()
 
     assert first.id != second.id
 
@@ -1150,13 +1199,14 @@ async def test_request_ids_are_unique(
 async def test_get_data_data_missing(
     mock_websocket_client_connected: WebSocketClient,
 ):
-    """Test the websocket client."""
-    with pytest.raises(DataMissingException):
-        await mock_websocket_client_connected.get_data(
-            GetData(modules=[Module.CPU]),
-            request_id=REQUEST_ID,
-            timeout=1,
-        )
+    """Test a module the backend has no data for fails without waiting."""
+    async with asyncio.timeout(5):
+        with pytest.raises(DataMissingException, match="cpu"):
+            await mock_websocket_client_connected.get_data(
+                GetData(modules=[Module.SYSTEM, Module.CPU]),
+                request_id=REQUEST_ID,
+                timeout=30,
+            )
 
 
 @pytest.mark.asyncio
@@ -1236,8 +1286,7 @@ async def test_bad_token(
     await websocket_client.connect()
 
     assert (
-        await websocket_client.application_update(
-            Update(version="1.0.0"),
+        await websocket_client.exit_backend(
             request_id=REQUEST_ID,
         )
         == snapshot
