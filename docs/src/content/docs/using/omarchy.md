@@ -14,7 +14,8 @@ media controls.
 - System Bridge installed with the `system-bridge` executable available on
   `PATH`, in a version with the `client audio`, `client bluetooth`,
   `client desktop`, `client discord`, `client display`, `client hyprland`,
-  `client media` and `client open --path` [CLI commands](/using/cli/)
+  `client media`, `client open --path` and `client quit --yes`
+  [CLI commands](/using/cli/)
 - A running local System Bridge service
 
 ## Install

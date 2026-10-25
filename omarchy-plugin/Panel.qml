@@ -94,7 +94,7 @@ Panel {
     if (entry.key === "action:quit") {
       if (!root.connected) return
       root.close()
-      Util.execArgv(["system-bridge", "client", "quit"])
+      Util.execArgv(["system-bridge", "client", "quit", "--yes"])
       return
     }
     if (entry.key === "action:start") {

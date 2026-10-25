@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timmo.system-bridge",
   "name": "System Bridge",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": "Timmo",
   "license": "Apache-2.0",
   "description": "Local system data and controls from System Bridge",

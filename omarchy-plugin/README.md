@@ -11,10 +11,9 @@ display and media controls.
 - [System Bridge installed](https://system-bridge.timmo.dev/install/) with the
   `system-bridge` executable available on `PATH`, in a version with the
   `client audio`, `client bluetooth`, `client desktop`, `client discord`,
-  `client display`, `client hyprland`, `client media` and `client open --path`
-  commands
+  `client display`, `client hyprland`, `client media`, `client open --path`
+  and `client quit --yes` commands
 - A running local System Bridge service
-- `zenity` for the quit confirmation prompt
 
 ## Install
 
@@ -59,7 +58,7 @@ to select one. Backspace or the back button returns to the overview, and Escape
 clears the filter or closes the panel.
 
 The header has two buttons: one opens the current view in the web client, and
-the other asks for confirmation before quitting System Bridge. While
+the other quits System Bridge straight away. While
 disconnected, the quit button starts System Bridge with
 `system-bridge backend`.
 
