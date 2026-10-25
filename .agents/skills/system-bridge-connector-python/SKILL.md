@@ -24,7 +24,7 @@ All tasks live in the root `mise.toml` and run from the repository root. mise pr
 
 ## Code Style
 
-- **Python**: the `requires-python` version in `pyproject.toml`, which follows Home Assistant
+- **Python**: the `requires-python` version in `pyproject.toml`, which follows Home Assistant. So do the `aiohttp` floor and the Ruff and pylint rules; `tooling.yml` tracks Core releases, and its tooling drift pull request is the reminder to bring them in line
 - **Formatting**: 4-space indentation, Ruff formatter, 88 char line length
 - **Imports**: sorted by Ruff, group first-party imports
 - **Types**: Use type hints, prefer `|` union syntax, dataclasses with slots

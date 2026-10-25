@@ -7,6 +7,9 @@ assignee: timmo001
 dispatch:
   - lint-general.yml
 tools:
+  - repo: home-assistant/core
+    reviewed: 2026.10.4
+    review: Bring the Python connector in line with Core's pyproject.toml at the new tag (requires-python, the aiohttp pin and the Ruff and pylint rules connector/python/pyproject.toml copies), and check homeassistant/components/system_bridge for calls into the connector that changed or that it no longer supports.
   - repo: omacom/omarchy
     reviewed: v4.0.6
     review: Check the Omarchy plugin under omarchy-plugin/, the desktop module's Omarchy shell IPC, menus and panels in data/module/desktop (omarchy_linux.go, actions_linux.go), and the Omarchy tools the command prefabs run in utils/handlers/command/prefab/prefab.go (omarchy-system-lock, and omasnap with OMASNAP_SCREENSHOT_DIR and its fullscreen, windows and region modes).
