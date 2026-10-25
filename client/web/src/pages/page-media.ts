@@ -1,4 +1,6 @@
 import {
+  mdiAlertCircleOutline,
+  mdiCheckCircleOutline,
   mdiMusicNote,
   mdiPause,
   mdiPlay,
@@ -263,6 +265,55 @@ export class PageMedia extends SbPage {
         }
       }
 
+      .footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: start;
+        justify-content: space-between;
+        gap: var(--sb-space-1) var(--sb-space-4);
+        min-height: 1lh;
+        margin-top: var(--sb-space-3);
+      }
+
+      .footer .outcome {
+        display: flex;
+        min-width: 0;
+      }
+
+      .footer .message {
+        display: inline-flex;
+        align-items: start;
+        gap: var(--sb-space-1);
+        text-align: start;
+        animation: fade-in var(--sb-duration-normal) var(--sb-easing);
+        --sb-icon-size: 1em;
+      }
+
+      .footer .message > .icon {
+        flex: none;
+        margin-top: 0.15em;
+      }
+
+      .footer .message.success > .icon {
+        color: var(--sb-color-success);
+      }
+
+      .footer .message.danger {
+        color: var(--sb-color-danger);
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 40rem) {
+        .footer {
+          justify-content: center;
+        }
+      }
+
       .controls .button.main {
         width: 3.5rem;
         --sb-icon-size: 1.75rem;
@@ -367,6 +418,11 @@ export class PageMedia extends SbPage {
       position === null || !duration
         ? null
         : Math.min(100, (position / duration) * 100);
+
+    const result = actionResult(
+      this.#control.value,
+      `${this.sent === null ? "Action" : actionLabels[this.sent]} sent.`,
+    );
 
     return html`
       <sb-card>
@@ -480,13 +536,41 @@ export class PageMedia extends SbPage {
                 >
               </span>
             </div>
-            <span class="muted xsmall" style="margin-top: var(--sb-space-3)">
-              ${
-                media?.updated_at === null || media?.updated_at === undefined
-                  ? "No updates yet"
-                  : `Updated ${formatAgo(media.updated_at * 1000)}`
-              }
-            </span>
+            <div class="footer xsmall">
+              <span class="muted">
+                ${
+                  media?.updated_at === null || media?.updated_at === undefined
+                    ? "No updates yet"
+                    : `Updated ${formatAgo(media.updated_at * 1000)}`
+                }
+              </span>
+              <!-- Always there, so the outcome of a control fades in without
+                moving anything -->
+              <span class="outcome" role="status" aria-live="polite">
+                ${
+                  result === null
+                    ? nothing
+                    : html`<span
+                        class="message ${result.success ? "success" : "danger"}"
+                      >
+                        ${icon(
+                          result.success
+                            ? mdiCheckCircleOutline
+                            : mdiAlertCircleOutline,
+                        )}
+                        <span
+                          >${result.message}
+                          ${
+                            result.success
+                              ? nothing
+                              : html`Check a player is running and supports it.
+                                  On Linux this needs <code>playerctl</code>.`
+                          }</span
+                        >
+                      </span>`
+                }
+              </span>
+            </div>
           </div>
         </div>
       </sb-card>
@@ -494,24 +578,10 @@ export class PageMedia extends SbPage {
   }
 
   override render() {
-    const result = actionResult(
-      this.#control.value,
-      `${this.sent === null ? "Action" : actionLabels[this.sent]} sent.`,
-    );
-
     return html`
       <div class="page narrow">
         <!-- On the Media page, the player sits right under its heading, so it
           needs none of its own -->
-        ${this.renderResult(
-          result,
-          result?.success === false
-            ? html`<span class="muted"
-                >Check a player is running and supports it. On Linux this needs
-                <code>playerctl</code>.</span
-              >`
-            : undefined,
-        )}
         ${this.gate(() => this.#renderPlayer(), placeholder)}
       </div>
     `;
