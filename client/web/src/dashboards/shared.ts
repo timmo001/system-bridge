@@ -98,6 +98,27 @@ export const dashboardStyles = css`
     min-width: 8rem;
   }
 
+  .focused-window {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sb-space-0-5);
+    margin-bottom: var(--sb-space-4);
+    padding-bottom: var(--sb-space-4);
+    border-bottom: 1px solid var(--sb-color-border);
+  }
+
+  .focused-window .name,
+  .focused-window .app {
+    font-size: var(--sb-font-size-xs);
+    color: var(--sb-color-muted);
+  }
+
+  .focused-window .title {
+    overflow-wrap: anywhere;
+    font-size: var(--sb-font-size-xl);
+    font-weight: var(--sb-font-weight-semibold);
+  }
+
   .list {
     display: flex;
     flex-direction: column;

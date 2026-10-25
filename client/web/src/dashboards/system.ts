@@ -1413,8 +1413,16 @@ export const desktopDashboard = ({ data, location }: DashboardContext) => {
         heading=${compositorName[desktop.compositor]}
         subheading=${hyprland === null ? "" : hyprland.version.version}
       >
+        ${
+          focused === undefined
+            ? nothing
+            : html`<div class="focused-window">
+                <span class="name">Focused window</span>
+                <span class="title">${focused.title ?? focused.app}</span>
+                ${focused.title ? html`<span class="app">${focused.app}</span>` : nothing}
+              </div>`
+        }
         <div class="stats">
-          ${stat("Focused", focused?.app ?? "")}
           ${stat(
             "Workspace",
             desktop.focused_workspace === null
