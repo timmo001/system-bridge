@@ -8,12 +8,13 @@ import {
 import type {
   CommandPrefab,
   CommandResult,
+  OmarchyTarget,
   Settings,
   SettingsCommandDefinition,
 } from "@timmo001/effect-system-bridge";
 import { Option, Struct } from "effect";
 import { AsyncResult } from "effect/reactivity";
-import { css, html, nothing } from "lit";
+import { css, html, nothing, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
@@ -26,6 +27,7 @@ import {
   commandPrefabs,
   errorMessage,
   executeCommand,
+  latestModuleData,
   registry,
 } from "~/lib/atoms";
 import { generateUUID } from "~/lib/utils";
@@ -41,6 +43,9 @@ interface CommandForm {
   readonly command: string;
   readonly workingDir: string;
   readonly arguments: string;
+  /** An Omarchy shell call's IPC target and function. */
+  readonly target: string;
+  readonly function: string;
 }
 
 const emptyForm: CommandForm = {
@@ -49,7 +54,21 @@ const emptyForm: CommandForm = {
   command: "",
   workingDir: "",
   arguments: "",
+  target: "",
+  function: "",
 };
+
+/**
+ * The prefab that calls an Omarchy shell IPC function. Its arguments are the
+ * target, the function, then the function's own arguments.
+ */
+const omarchyIPC = "omarchy-ipc";
+
+const splitArguments = (value: string) =>
+  value
+    .split(",")
+    .map((argument) => argument.trim())
+    .filter((argument) => argument !== "");
 
 /** A prefab with no program runs inside System Bridge itself. */
 const builtIn = "Built into System Bridge";
@@ -120,6 +139,8 @@ export class PageSettingsCommands extends SbSettingsPage {
 
   readonly #prefabs = new AtomController(this, () => commandPrefabs);
 
+  readonly #modules = new AtomController(this, () => latestModuleData);
+
   @state() private commands: readonly SettingsCommandDefinition[] = [];
 
   @state() private form: CommandForm = emptyForm;
@@ -189,6 +210,23 @@ export class PageSettingsCommands extends SbSettingsPage {
       : this.#prefabList.find((prefab) => prefab.id === id);
   }
 
+  /** The Omarchy shell's IPC targets, from the desktop module. */
+  get #omarchyTargets(): readonly OmarchyTarget[] {
+    return this.#modules.value.desktop?.omarchy?.targets ?? [];
+  }
+
+  /** Picking a target starts its function afresh. */
+  #onIpcChange = (event: Event) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLSelectElement)) return;
+
+    this.form =
+      target.name === "target"
+        ? { ...this.form, target: target.value, function: "" }
+        : { ...this.form, function: target.value };
+  };
+
   /** Fields are named after their key in the form. */
   #onInput = (event: InputEvent) => {
     const target = event.target;
@@ -218,7 +256,31 @@ export class PageSettingsCommands extends SbSettingsPage {
   #canAdd(): boolean {
     const { prefab, name, command } = this.form;
 
-    return name.trim() !== "" && (prefab !== "" || command.trim() !== "");
+    if (name.trim() === "") return false;
+
+    if (prefab === omarchyIPC) {
+      return this.form.target !== "" && this.form.function !== "";
+    }
+
+    return prefab !== "" || command.trim() !== "";
+  }
+
+  /** What a new command runs with, from the form. */
+  #formArguments(): readonly string[] {
+    const { prefab, command, target } = this.form;
+
+    if (prefab === omarchyIPC) {
+      return [
+        target,
+        this.form.function,
+        ...splitArguments(this.form.arguments),
+      ];
+    }
+
+    // Without a program of its own, a prefab uses its own arguments
+    return prefab !== "" && command.trim() === ""
+      ? []
+      : splitArguments(this.form.arguments);
   }
 
   #onSubmit = (event: SubmitEvent) => {
@@ -232,16 +294,10 @@ export class PageSettingsCommands extends SbSettingsPage {
       id: generateUUID(),
       name: name.trim(),
       prefab,
-      // Empty keeps the prefab's own program, and its arguments with it
-      command: command.trim(),
+      // Empty keeps the prefab's own program
+      command: prefab === omarchyIPC ? "" : command.trim(),
       workingDir: workingDir.trim(),
-      arguments:
-        command.trim() === ""
-          ? []
-          : this.form.arguments
-              .split(",")
-              .map((argument) => argument.trim())
-              .filter((argument) => argument !== ""),
+      arguments: this.#formArguments(),
     };
 
     this.#adding = definition.id;
@@ -321,7 +377,10 @@ ${result.stderr}</pre>`
       command.arguments,
     );
 
-    if (usesPrefab) {
+    if (command.prefab === omarchyIPC) {
+      // The call itself: the target, function and its arguments
+      line = command.arguments.join(" ");
+    } else if (usesPrefab) {
       line =
         prefab?.available === true
           ? commandLine(prefab.command, prefab.arguments)
@@ -446,6 +505,109 @@ ${result.stderr}</pre>`
     `;
   }
 
+  #ipcSelect(
+    key: "target" | "function",
+    label: string,
+    options: readonly TemplateResult[],
+    hint: string,
+  ) {
+    return html`
+      <div class="field">
+        <label for="ipc-${key}">${label}</label>
+        <select
+          class="input mono"
+          id="ipc-${key}"
+          name=${key}
+          aria-describedby="ipc-${key}-hint"
+          required
+          ?disabled=${this.isSaving}
+          .value=${this.form[key]}
+          @change=${this.#onIpcChange}
+        >
+          <option value="">Choose…</option>
+          ${options}
+        </select>
+        <span class="hint" id="ipc-${key}-hint">${hint}</span>
+      </div>
+    `;
+  }
+
+  /** An Omarchy shell call's target, function and the function's arguments. */
+  #renderIpcFields() {
+    const targets = this.#omarchyTargets;
+    const target = targets.find(({ name }) => name === this.form.target);
+    const functions = target?.functions ?? [];
+    const chosen = functions.find(({ name }) => name === this.form.function);
+
+    const signature = (
+      argumentsList: OmarchyTarget["functions"][number]["arguments"],
+    ) => argumentsList.map(({ name, type }) => `${name}: ${type}`).join(", ");
+
+    const targetOptions = targets.map(
+      ({ name }) =>
+        html`<option value=${name} ?selected=${name === this.form.target}>
+          ${name}
+        </option>`,
+    );
+
+    const functionOptions = functions.map(
+      ({ name, arguments: argumentsList }) =>
+        html`<option value=${name} ?selected=${name === this.form.function}>
+          ${name}(${signature(argumentsList)})
+        </option>`,
+    );
+
+    let argumentsHint = "Pick a function to see what it takes.";
+
+    if (chosen !== undefined) {
+      argumentsHint =
+        chosen.arguments.length === 0
+          ? "This function takes none."
+          : `Separated by commas, in order: ${signature(chosen.arguments)}.`;
+    }
+
+    return html`
+      ${this.#ipcSelect(
+        "target",
+        "Target",
+        targetOptions,
+        "An IPC target the Omarchy shell answers to.",
+      )}
+      ${this.#ipcSelect(
+        "function",
+        "Function",
+        functionOptions,
+        "What to call on it. Its answer is the command's output.",
+      )}
+      ${this.#input("arguments", "Arguments", "", argumentsHint)}
+    `;
+  }
+
+  /** A program and its arguments, for a custom command or a prefab's override. */
+  #renderProgramFields(prefab: CommandPrefab | undefined) {
+    return html`
+      ${this.#input(
+        "command",
+        "Command",
+        prefab === undefined ? "/usr/bin/systemctl" : prefab.command || builtIn,
+        prefab === undefined
+          ? "The program's full path."
+          : "Optional. Leave empty to use the program shown, or give your own program's full path.",
+      )}
+      ${this.#input(
+        "arguments",
+        "Arguments",
+        prefab === undefined
+          ? "--user, restart, pipewire"
+          : prefab.arguments.join(", "),
+        prefab === undefined
+          ? "Separated by commas."
+          : "Separated by commas. Only used with your own program.",
+      )}
+      ${this.#input("workingDir", "Working directory", "/home/me", "Optional.")}
+    `;
+  }
+
   #renderContent() {
     const saving = this.isSaving;
     const prefab = this.#prefab(this.form.prefab);
@@ -456,27 +618,11 @@ ${result.stderr}</pre>`
           <div class="grid" style="--sb-grid-min: 16rem">
             ${this.#renderPrefabSelect()}
             ${this.#input("name", "Name", prefab?.name ?? "Restart audio")}
-            ${this.#input(
-              "command",
-              "Command",
-              prefab === undefined
-                ? "/usr/bin/systemctl"
-                : prefab.command || builtIn,
-              prefab === undefined
-                ? "The program's full path."
-                : "Optional. Leave empty to use the program shown, or give your own program's full path.",
-            )}
-            ${this.#input(
-              "arguments",
-              "Arguments",
-              prefab === undefined
-                ? "--user, restart, pipewire"
-                : prefab.arguments.join(", "),
-              prefab === undefined
-                ? "Separated by commas."
-                : "Separated by commas. Only used with your own program.",
-            )}
-            ${this.#input("workingDir", "Working directory", "/home/me", "Optional.")}
+            ${
+              this.form.prefab === omarchyIPC
+                ? this.#renderIpcFields()
+                : this.#renderProgramFields(prefab)
+            }
           </div>
           <div class="row" style="justify-content: flex-end">
             <button

@@ -74,6 +74,12 @@ When none of these is installed, **Screenshot** asks the desktop portal instead,
 
 Like any other command, a prefab only runs once it's on your list.
 
+### Omarchy shell calls
+
+On Omarchy, **Omarchy shell call** (`omarchy-ipc`) calls one of the Omarchy shell's IPC functions, such as `media playPause` or `notifications dismissAll`, so you can allow just the calls you want. Pick it from **Type**, then pick a **Target** and a **Function** from the ones the shell answers to. If the function takes arguments, fill them in, separated by commas, in the order shown. Whatever the function answers is the command's output.
+
+The command's arguments hold the target, the function, then the function's own arguments, so through the [API](/api/websocket/system/#settings-keys) the entry for `media playPause` has `"prefab": "omarchy-ipc"` and `"arguments": ["media", "playPause"]`. The call fails, saying so, if the shell isn't running or no longer has that function.
+
 ### Screenshots
 
 Screenshots are saved as PNGs to a **Screenshots** folder in your pictures folder (`$XDG_PICTURES_DIR` when it's set, or `Pictures` in your home folder), named by the time they were taken, such as `screenshot-20261025-143000.png`. Tools that name their own files, such as `omasnap`, keep their name. When one finishes, its output is the file's full path. If the program finishes without saving anything, such as when you cancel picking a region, the command reports that nothing was saved.
