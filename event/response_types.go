@@ -12,6 +12,7 @@ const (
 	ResponseTypeBluetoothPowerSet         ResponseType = "BLUETOOTH_POWER_SET"
 	ResponseTypeCommandCompleted          ResponseType = "COMMAND_COMPLETED"
 	ResponseTypeCommandExecuting          ResponseType = "COMMAND_EXECUTING"
+	ResponseTypeCommandPrefabs            ResponseType = "COMMAND_PREFABS"
 	ResponseTypeDataGet                   ResponseType = "DATA_GET"
 	ResponseTypeDataListenerRegistered    ResponseType = "DATA_LISTENER_REGISTERED"
 	ResponseTypeDataListenerUnregistered  ResponseType = "DATA_LISTENER_UNREGISTERED"

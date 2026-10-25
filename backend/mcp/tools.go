@@ -209,9 +209,15 @@ func registerTools(server *sdkmcp.Server, eventRouter *event.MessageRouter, data
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_list_commands",
-		Description: "List the commands the user has allowed System Bridge to run",
+		Description: "List the commands the user has allowed System Bridge to run. An entry with a prefab and no command runs that prefab's program for the platform.",
 		InputSchema: objectSchema(map[string]any{}, []string{}),
 	}, handlers.handleListCommands)
+
+	sdkmcp.AddTool(server, &sdkmcp.Tool{
+		Name:        "system_bridge_list_command_prefabs",
+		Description: "List the ready-made commands System Bridge has, such as locking the screen, with whether each can run on this system, what it would run, and why not. They only run once the user adds them to the allowlist.",
+		InputSchema: objectSchema(map[string]any{}, []string{}),
+	}, handlers.handleListCommandPrefabs)
 
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "system_bridge_media_control",

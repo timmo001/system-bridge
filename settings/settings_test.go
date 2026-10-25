@@ -256,6 +256,45 @@ func TestSave(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "empty command")
 	})
+
+	t.Run("Save and load a prefab whose tools aren't installed", func(t *testing.T) {
+		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
+		t.Setenv("PATH", t.TempDir())
+
+		settings, err := Load()
+		require.NoError(t, err)
+
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "Lock", Prefab: "lock"},
+		}
+		require.NoError(t, settings.Save())
+
+		viper.Reset()
+		loadedSettings, err := Load()
+		require.NoError(t, err)
+		require.Len(t, loadedSettings.Commands.Allowlist, 1)
+		assert.Equal(t, "lock", loadedSettings.Commands.Allowlist[0].Prefab)
+		assert.Empty(t, loadedSettings.Commands.Allowlist[0].Command)
+	})
+
+	t.Run("Save rejects an unknown prefab", func(t *testing.T) {
+		viper.Reset()
+		configPath := filepath.Join(tempDir, "settings.json")
+		_ = os.Remove(configPath)
+
+		settings, err := Load()
+		require.NoError(t, err)
+
+		settings.Commands.Allowlist = []SettingsCommandDefinition{
+			{ID: "cmd1", Name: "Nothing", Prefab: "nothing"},
+		}
+
+		err = settings.Save()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), `unknown prefab "nothing"`)
+	})
 }
 
 func TestSettingsStructs(t *testing.T) {

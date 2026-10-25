@@ -13,6 +13,7 @@ import (
 	"github.com/timmo001/system-bridge/event"
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
 )
 
 var (
@@ -86,6 +87,22 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 	for i := range cfg.Commands.Allowlist {
 		command := &cfg.Commands.Allowlist[i]
 		if command.ID == commandID {
+			// A prefab without a command of its own runs the program it finds
+			// for this platform. The copy keeps the saved entry free of paths.
+			if command.Prefab != "" && command.Command == "" {
+				p, ok := prefab.Get(command.Prefab)
+				if !ok {
+					return nil, fmt.Errorf("%w: unknown prefab %q", ErrCommandPathInvalid, command.Prefab)
+				}
+				path, arguments, err := p.Resolve()
+				if err != nil {
+					return nil, fmt.Errorf("%w: %w", ErrCommandPathInvalid, err)
+				}
+				resolved := *command
+				resolved.Command, resolved.Arguments = path, arguments
+				command = &resolved
+			}
+
 			// Validate required fields
 			if command.Command == "" {
 				return nil, fmt.Errorf("%w: %s", ErrCommandEmpty, commandID)
@@ -135,6 +152,7 @@ func Execute(req ExecuteRequest, cfg *settings.Settings) error {
 		"Executing command",
 		"commandID", commandDef.ID,
 		"name", commandDef.Name,
+		"prefab", commandDef.Prefab,
 		"command", commandDef.Command,
 		"arguments", commandDef.Arguments,
 		"workingDir", commandDef.WorkingDir,
@@ -189,6 +207,7 @@ func Run(ctx context.Context, req ExecuteRequest, cfg *settings.Settings) (Execu
 		"Executing command",
 		"commandID", commandDef.ID,
 		"name", commandDef.Name,
+		"prefab", commandDef.Prefab,
 		"command", commandDef.Command,
 		"arguments", commandDef.Arguments,
 		"workingDir", commandDef.WorkingDir,

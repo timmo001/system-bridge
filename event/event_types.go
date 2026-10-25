@@ -19,6 +19,7 @@ const (
 	EventDiscordControl            EventType = "DISCORD_CONTROL"
 	EventDisplayControl            EventType = "DISPLAY_CONTROL"
 	EventExitApplication           EventType = "EXIT_APPLICATION"
+	EventGetCommandPrefabs         EventType = "GET_COMMAND_PREFABS"
 	EventGetData                   EventType = "GET_DATA"
 	EventGetDirectories            EventType = "GET_DIRECTORIES"
 	EventGetDirectory              EventType = "GET_DIRECTORY"

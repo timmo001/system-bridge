@@ -13,6 +13,7 @@ func RegisterHandlers(router *event.MessageRouter, dataStore *data.DataStore) {
 	RegisterDiscordControlHandler(router)
 	RegisterDisplayControlHandler(router, dataStore)
 	RegisterExitApplicationHandler(router)
+	RegisterGetCommandPrefabsHandler(router)
 	RegisterGetDataHandler(router)
 	RegisterGetDirectoriesHandler(router)
 	RegisterGetDirectoryHandler(router)

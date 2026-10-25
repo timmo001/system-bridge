@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"github.com/timmo001/system-bridge/utils"
+	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
 )
 
 // LogLevel represents the logging level as a string enum
@@ -83,6 +84,10 @@ type SettingsCommandDefinition struct {
 	Command    string   `json:"command" mapstructure:"command"`
 	WorkingDir string   `json:"workingDir" mapstructure:"workingDir"`
 	Arguments  []string `json:"arguments" mapstructure:"arguments"`
+	// Prefab is the ID of a ready-made command. With no Command it runs the
+	// prefab's program for the platform; with one, Command and Arguments
+	// replace it.
+	Prefab string `json:"prefab" mapstructure:"prefab"`
 }
 
 type SettingsCommands struct {
@@ -196,8 +201,19 @@ func (cfg *Settings) Validate() error {
 	// Check for duplicate command IDs
 	seenIDs := make(map[string]bool)
 	for i, cmd := range cfg.Commands.Allowlist {
-		// Validate individual command
-		if err := utils.ValidateCommand(cmd.ID, cmd.Name, cmd.Command, cmd.WorkingDir, cmd.Arguments); err != nil {
+		if cmd.Prefab != "" {
+			if _, ok := prefab.Get(cmd.Prefab); !ok {
+				return fmt.Errorf("command at index %d: unknown prefab %q", i, cmd.Prefab)
+			}
+		}
+
+		// A prefab without a command looks up its program when it runs, so a
+		// missing tool doesn't stop the settings loading
+		if cmd.Prefab != "" && cmd.Command == "" {
+			if cmd.ID == "" || cmd.Name == "" {
+				return fmt.Errorf("command at index %d: needs an ID and a name", i)
+			}
+		} else if err := utils.ValidateCommand(cmd.ID, cmd.Name, cmd.Command, cmd.WorkingDir, cmd.Arguments); err != nil {
 			return fmt.Errorf("command at index %d: %w", i, err)
 		}
 

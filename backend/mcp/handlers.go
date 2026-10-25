@@ -14,6 +14,7 @@ import (
 	"github.com/timmo001/system-bridge/settings"
 	"github.com/timmo001/system-bridge/types"
 	"github.com/timmo001/system-bridge/utils/handlers/command"
+	"github.com/timmo001/system-bridge/utils/handlers/command/prefab"
 )
 
 type toolHandlers struct {
@@ -236,6 +237,10 @@ func (h toolHandlers) handleListCommands(_ context.Context, _ *sdkmcp.CallToolRe
 		commands = []settings.SettingsCommandDefinition{}
 	}
 	return formatToolResult(commands)
+}
+
+func (h toolHandlers) handleListCommandPrefabs(_ context.Context, _ *sdkmcp.CallToolRequest, _ struct{}) (*sdkmcp.CallToolResult, any, error) {
+	return formatToolResult(prefab.List())
 }
 
 func (h toolHandlers) handleMediaControl(_ context.Context, _ *sdkmcp.CallToolRequest, input mediaControlInput) (*sdkmcp.CallToolResult, any, error) {

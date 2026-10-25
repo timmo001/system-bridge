@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -304,6 +305,46 @@ func TestValidateCommand(t *testing.T) {
 		assert.Nil(t, commandDef)
 		assert.True(t, errors.Is(err, ErrCommandNotFound))
 		assert.Contains(t, err.Error(), "not found in allowlist")
+	})
+}
+
+func TestValidatePrefabCommand(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("the lock prefab's Linux program is faked through PATH")
+	}
+
+	cfg := &settings.Settings{
+		Commands: settings.SettingsCommands{
+			Allowlist: []settings.SettingsCommandDefinition{
+				{ID: "lock-command", Name: "Lock", Prefab: "lock"},
+			},
+		},
+	}
+
+	t.Run("Runs the prefab's program for the platform", func(t *testing.T) {
+		binDir := t.TempDir()
+		loginctl := filepath.Join(binDir, "loginctl")
+		require.NoError(t, os.WriteFile(loginctl, []byte("#!/bin/sh\necho \"$@\"\n"), 0755))
+		t.Setenv("PATH", binDir)
+
+		commandDef, err := ValidateCommand("lock-command", cfg)
+		require.NoError(t, err)
+		assert.Equal(t, loginctl, commandDef.Command)
+		assert.Equal(t, []string{"lock-session"}, commandDef.Arguments)
+		assert.Empty(t, cfg.Commands.Allowlist[0].Command, "the saved entry keeps no path")
+
+		result := execute(context.Background(), commandDef)
+		assert.Equal(t, 0, result.ExitCode)
+		assert.Equal(t, "lock-session\n", result.Stdout)
+	})
+
+	t.Run("Says which tool to install when none is found", func(t *testing.T) {
+		t.Setenv("PATH", t.TempDir())
+
+		commandDef, err := ValidateCommand("lock-command", cfg)
+		assert.Nil(t, commandDef)
+		assert.True(t, errors.Is(err, ErrCommandPathInvalid))
+		assert.Contains(t, err.Error(), "install loginctl to use Lock screen")
 	})
 }
 
