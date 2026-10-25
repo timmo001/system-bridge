@@ -45,6 +45,9 @@ type Prefab struct {
 	builtin          Builtin
 	builtinWhen      func() bool
 	builtinArguments []string
+	// check, when set, says why the prefab can't run here before any program
+	// is looked for, such as a monitor that isn't connected
+	check func() error
 }
 
 // Resolved is what a prefab runs here: a program, or its built-in when Run is
@@ -215,12 +218,16 @@ var (
 	goos     = runtime.GOOS
 )
 
-// Get returns the prefab with the given ID
+// Get returns the prefab with the given ID, including a screenshot of any one
+// monitor
 func Get(id string) (Prefab, bool) {
 	for _, p := range catalogue {
 		if p.ID == id {
 			return p, true
 		}
+	}
+	if monitor, ok := monitorID(id); ok {
+		return monitorPrefab(monitor), true
 	}
 	return Prefab{}, false
 }
@@ -228,6 +235,11 @@ func Get(id string) (Prefab, bool) {
 // Resolve picks the first candidate that applies here and is installed, or
 // the prefab's built-in when it has one
 func (p Prefab) Resolve() (Resolved, error) {
+	if p.check != nil {
+		if err := p.check(); err != nil {
+			return Resolved{}, err
+		}
+	}
 	tried := []string{}
 	for _, c := range p.candidates[goos] {
 		if c.when != nil && !c.when() {
@@ -254,11 +266,12 @@ func Env(extra []string) []string {
 	return append(sessionEnv(), extra...)
 }
 
-// List returns every prefab and how it would run here. A built-in has no
-// command.
+// List returns every prefab and how it would run here, with a screenshot of
+// each monitor when there's more than one. A built-in has no command.
 func List() []types.CommandPrefab {
-	prefabs := make([]types.CommandPrefab, 0, len(catalogue))
-	for _, p := range catalogue {
+	all := append(slices.Clone(catalogue), monitorPrefabs()...)
+	prefabs := make([]types.CommandPrefab, 0, len(all))
+	for _, p := range all {
 		info := types.CommandPrefab{
 			ID:          p.ID,
 			Name:        p.Name,

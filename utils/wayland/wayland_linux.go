@@ -95,6 +95,64 @@ func Connect(timeout time.Duration) (*Conn, error) {
 	return c, nil
 }
 
+// OutputNames connects to the compositor and returns its outputs' names, such
+// as DP-1, in the order it announced them. Outputs older than wl_output
+// version 4 have no name and are left out.
+func OutputNames(timeout time.Duration) ([]string, error) {
+	conn, err := Connect(timeout)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = conn.Close() }()
+	if err := conn.SetDeadline(time.Now().Add(timeout)); err != nil {
+		return nil, err
+	}
+
+	// Bind each output, then sync: the compositor sends an output's name as
+	// soon as it's bound, so every name arrives before the sync is done
+	outputs := map[uint32]int{}
+	next := uint32(FirstFreeID)
+	var requests []byte
+	for i, output := range conn.Outputs {
+		if output.Version < 4 {
+			continue
+		}
+		outputs[next] = i
+		requests = append(requests, Message(RegistryID, 0, Bind(output.Name, "wl_output", 4, next)...)...)
+		next++
+	}
+	sync := next
+	requests = append(requests, Message(DisplayID, 0, Uint(sync))...)
+	if _, err := conn.Write(requests); err != nil {
+		return nil, err
+	}
+
+	names := make([]string, len(conn.Outputs))
+	for {
+		object, opcode, body, err := ReadMessage(conn.Reader)
+		if err != nil {
+			return nil, err
+		}
+		switch {
+		case object == sync && opcode == 0:
+			found := make([]string, 0, len(names))
+			for _, name := range names {
+				if name != "" {
+					found = append(found, name)
+				}
+			}
+			return found, nil
+		case object == DisplayID && opcode == 0:
+			return nil, errors.New("the compositor reported an error")
+		case opcode == 4: // wl_output.name
+			if i, ok := outputs[object]; ok {
+				args := Args(body)
+				names[i], _ = args.String()
+			}
+		}
+	}
+}
+
 // Socket is the compositor's socket from WAYLAND_DISPLAY, or the first one in
 // the runtime directory when the backend runs as a service started without it
 func Socket() (string, error) {

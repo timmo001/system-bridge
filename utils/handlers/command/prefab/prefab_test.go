@@ -75,6 +75,16 @@ func TestResolve(t *testing.T) {
 	}
 }
 
+func TestGetMonitor(t *testing.T) {
+	// A saved monitor screenshot stays valid while that monitor is unplugged
+	p, ok := Get("screenshot-monitor:DP-1")
+	require.True(t, ok)
+	assert.Equal(t, "screenshot-monitor:DP-1", p.ID)
+
+	_, ok = Get("screenshot-monitor:")
+	assert.False(t, ok, "a monitor screenshot needs a monitor")
+}
+
 func stub(t *testing.T, os string, installed []string) {
 	t.Helper()
 	originalGOOS, originalLookPath := goos, lookPath

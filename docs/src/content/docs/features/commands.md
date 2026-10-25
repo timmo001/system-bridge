@@ -66,6 +66,8 @@ On Linux, System Bridge works out which desktop is running, even when it's start
 
 On Omarchy, **Screenshot** captures the focused monitor, and **Screenshot of a window** asks you to pick the window, as Omarchy's own screenshot tool does.
 
+With more than one monitor connected, **Type** also lists a screenshot of each monitor, such as **Screenshot of DP-1** (`screenshot-monitor:DP-1`), so you can capture the one you want. On Linux these use `grim`, on Hyprland and other wlroots desktops, and on Windows they're built in, numbered from **display 1**. If the monitor is unplugged later, the command stays and says the monitor isn't connected until it's back.
+
 When none of these is installed, **Screenshot** asks the desktop portal instead, which most Linux desktops have. GNOME and KDE ask you to allow it the first time.
 
 **Open the file manager** and **Open a terminal** return as soon as the app starts, and the app stays open after the command finishes. **Get the clipboard** returns the clipboard's text as its output. Setting the clipboard isn't a prefab, as a command can't take text from the client.
@@ -86,7 +88,7 @@ When you give a screenshot prefab your own program, put these in its arguments w
 | `{outputDir}` | The folder it's saved in |
 | `{outputName}` | The file's name |
 
-For example, to capture a single display on Wayland, use `/usr/bin/grim` with the arguments `-o, DP-1, {output}`, swapping `DP-1` for the display's name. Only commands added from a prefab have their placeholders filled in. A program that picks its own file name works too, as long as it saves into the folder: the newest file it saves there becomes the output.
+Only commands added from a prefab have their placeholders filled in. A program that picks its own file name works too, as long as it saves into the folder: the newest file it saves there becomes the output.
 
 ## Running a command
 
