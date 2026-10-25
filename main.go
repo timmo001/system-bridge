@@ -253,6 +253,7 @@ func main() {
 						},
 					},
 					bluetoothCommand(),
+					commandCommand(),
 					{
 						Name:    "data",
 						Aliases: []string{"d"},

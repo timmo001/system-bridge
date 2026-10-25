@@ -88,6 +88,18 @@ system-bridge client bluetooth power on
 
 The address is the device's `address` from the [`bluetooth`](/api/data/#bluetooth) data. See [Bluetooth](/features/remote-control/#bluetooth) for what each platform supports.
 
+## Commands
+
+List the [commands](/features/commands/) on your list and the prefabs, and run one by its ID:
+
+```bash
+system-bridge client command list
+system-bridge client command prefabs
+system-bridge client command run 9ef69bc3-62f8-4d86-952d-5f498bbddf0f
+```
+
+`run` waits for the command to finish, prints its output, and exits with its exit code, so scripts can check it. Add `--json` to `list` or `prefabs` for JSON.
+
 ## Desktop
 
 Focus, close or change a window, show a workspace, or switch the keyboard layout:

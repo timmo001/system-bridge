@@ -39,6 +39,12 @@ func SendWithin(ctx context.Context, timeout time.Duration, eventType event.Even
 // request sends one event to the local backend and returns the data of its
 // answer, undecoded.
 func request(ctx context.Context, timeout time.Duration, eventType event.EventType, data any) (json.RawMessage, error) {
+	return requestReply(ctx, timeout, eventType, data, "")
+}
+
+// requestReply is request, waiting for a reply of the given type when it's
+// set, for events such as COMMAND_EXECUTE that answer more than once
+func requestReply(ctx context.Context, timeout time.Duration, eventType event.EventType, data any, reply event.ResponseType) (json.RawMessage, error) {
 	token, err := utils.LoadToken()
 	if err != nil {
 		return nil, fmt.Errorf("load token: %w", err)
@@ -72,6 +78,9 @@ func request(ctx context.Context, timeout time.Duration, eventType event.EventTy
 		}
 		if responseMessage.Type == event.ResponseTypeError {
 			return nil, serverError(responseMessage)
+		}
+		if reply != "" && responseMessage.Type != reply {
+			continue
 		}
 		// readResponse keeps the data as raw JSON
 		if raw, ok := responseMessage.Data.(*json.RawMessage); ok && raw != nil {
