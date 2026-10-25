@@ -29,6 +29,7 @@ All tasks live in the root `mise.toml` and run from the repository root. They de
 - **Format**: `mise run format:connector:typescript`
 - **Test**: `mise run test:connector:typescript` (`bun test`)
 - **Build**: `mise run build:connector:typescript`
+- **Drift from the backend and the Python connector**: `mise run drift:connectors`, after adding or changing an event, reply or hand-written model
 
 `mise run check` and `mise run lint:all` include the connector.
 

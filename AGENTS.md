@@ -34,6 +34,7 @@ mise tasks
 - **Build system**: Always use mise tasks (`mise run <task>`), not direct `go build`
 - **Package manager**: bun for all JavaScript/TypeScript. `client/web`, `connector/typescript` and `docs` are Bun workspaces sharing the root `bun.lock`; install with `mise run install:js` (or `bun install` in any of them). The web client takes the connector as `workspace:*`
 - **Schema sync**: Run `mise run generate:schemas` after changing Go types in `types/`. Never hand-edit `connector/typescript/src/generated/modules.ts` - it is generated
+- **Connector drift**: Run `mise run drift:connectors` after adding or changing an event, reply or model, and before every release. It compares both connectors with the backend
 - **OS-specific code**: Use build tags in subpackages (see [architecture.md](.agents/architecture.md))
 - **Logo and icons**: `.resources/system-bridge-logo.svg` is the only source. After changing it, run `mise run generate:icons`, which rewrites the app, tray, web client and docs icons, the README banner and the docs' brand images. Never edit those by hand
 
@@ -92,6 +93,6 @@ Task-scoped skills load on demand from `.agents/skills/` (registered via `skills
 - `system-bridge-troubleshooting` - build/runtime fixes and per-OS file locations
 - `system-bridge-connector-python` - Python connector tasks, code style and release versioning
 - `system-bridge-connector-typescript` - TypeScript connector layout, generated schemas, tasks and release versioning
-- `system-bridge-release` - version, publish and sense-check a release (assets, PyPI, Arch, AUR)
+- `system-bridge-release` - check the connectors for drift, then version, publish and sense-check a release (assets, PyPI, Arch, AUR)
 - `system-bridge-docs-page-workflow` - add or restructure docs pages
 - `system-bridge-landing-content-updates` - edit the docs landing page

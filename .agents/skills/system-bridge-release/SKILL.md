@@ -1,6 +1,6 @@
 ---
 name: system-bridge-release
-description: Release System Bridge and its Python and TypeScript connectors. Use when preparing or publishing a GitHub release, choosing the next version, checking what a release published (release assets, PyPI, npm, JSR, the Arch package repository and AUR), or debugging the release jobs in build-and-package-application.yml.
+description: Release System Bridge and its Python and TypeScript connectors. Use when preparing or publishing a GitHub release, choosing the next version, checking what a release published (release assets, PyPI, npm, JSR, the Arch package repository and AUR), checking the connectors for drift from the backend, or debugging the release jobs in build-and-package-application.yml.
 ---
 
 # Releasing System Bridge
@@ -19,6 +19,18 @@ Releasing is a public, irreversible publish. Create a tag or release only when t
 ## Release
 
 Check `dev` has passed CI first, especially Build and package application, so the release builds the same commit that passed.
+
+### Connector drift
+
+Both connectors ship with the release, so check they match the backend first:
+
+```bash
+mise run drift:connectors
+```
+
+It regenerates the TypeScript module data schemas and fails if that changes them, then runs `tools/check-connector-drift`. That lists the events, replies, error subtypes and modules a connector doesn't know or still knows after the backend dropped them, the events and replies each client never sends or handles, and the fields of the hand-written models (Python module data, both connectors' settings and requests) that differ from the Go structs. A `+field` is only in the backend, a `-field` only in the connector.
+
+Bring each connector in line, or, when a difference is deliberate, add it with a reason to the tool's `unhandledReplies`, `ignoredFields` or `handlerPairs`. A new request struct in `event/handler` needs a `handlerPairs` entry before the check passes. It reads declarations, so it can't catch behaviour such as a timeout shorter than the backend allows; compare the clients by hand for changes like that. Run it until it reports no drift, and commit the fixes before the release.
 
 ### Notes
 
