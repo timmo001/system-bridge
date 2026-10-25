@@ -38,8 +38,9 @@ type Prefab struct {
 	// candidates are tried in order, keyed by runtime.GOOS
 	candidates map[string][]candidate
 	// builtin runs when no candidate applies. It is only set on the platforms
-	// it's built for.
+	// it's built for, and builtinWhen, when set, says whether it can run here.
 	builtin          Builtin
+	builtinWhen      func() bool
 	builtinArguments []string
 }
 
@@ -92,6 +93,7 @@ var catalogue = []Prefab{
 			"darwin": {{program: "screencapture", arguments: []string{"-x", outputPlaceholder}}},
 		},
 		builtin:          screenshotBuiltin,
+		builtinWhen:      screenshotBuiltinWhen,
 		builtinArguments: []string{outputPlaceholder},
 	},
 	{
@@ -160,7 +162,7 @@ func (p Prefab) Resolve() (Resolved, error) {
 			return Resolved{Command: path, Arguments: slices.Clone(c.arguments), Env: slices.Clone(c.env)}, nil
 		}
 	}
-	if p.builtin != nil {
+	if p.builtin != nil && (p.builtinWhen == nil || p.builtinWhen()) {
 		return Resolved{Arguments: slices.Clone(p.builtinArguments), Run: p.builtin}, nil
 	}
 	if len(tried) == 0 {

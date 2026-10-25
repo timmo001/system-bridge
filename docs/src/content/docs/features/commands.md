@@ -50,11 +50,13 @@ On Linux, System Bridge works out which desktop is running, even when it's start
 | Prefab | Hyprland and Omarchy | KDE Plasma | GNOME | Other Wayland | X11 |
 | --- | --- | --- | --- | --- | --- |
 | **Lock screen** | `omarchy-system-lock`, `loginctl` | `loginctl` | `loginctl` | `loginctl` | `loginctl` |
-| **Screenshot** | `omasnap`, `grimblast`, `grim`, `flameshot` | `spectacle`, `flameshot` | `gnome-screenshot`, `flameshot` | `grim`, `flameshot` | `flameshot`, `scrot`, `maim` |
+| **Screenshot** | `omasnap`, `grimblast`, `grim`, `flameshot`, portal | `spectacle`, `flameshot`, portal | `gnome-screenshot`, `flameshot`, portal | `grim`, `flameshot`, portal | `flameshot`, `scrot`, `maim`, portal |
 | **Screenshot of a window** | `omasnap`, `grimblast`, `hyprshot` | `spectacle` | `gnome-screenshot` | | `scrot` |
 | **Screenshot of a region** | `omasnap`, `grimblast`, `hyprshot`, `flameshot` | `spectacle`, `flameshot` | `gnome-screenshot`, `flameshot` | `flameshot` | `flameshot`, `scrot`, `maim` |
 
 On Omarchy, **Screenshot** captures the focused monitor, and **Screenshot of a window** asks you to pick the window, as Omarchy's own screenshot tool does.
+
+When none of these is installed, **Screenshot** asks the desktop portal instead, which most Linux desktops have. GNOME and KDE ask you to allow it the first time.
 
 Like any other command, a prefab only runs once it's on your list.
 

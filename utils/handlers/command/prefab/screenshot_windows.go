@@ -17,6 +17,9 @@ import (
 
 var procGetWindowRect = windows.NewLazySystemDLL("user32.dll").NewProc("GetWindowRect")
 
+// Windows can always capture, so its built-ins need no check
+var screenshotBuiltinWhen func() bool
+
 // screenshotBuiltin captures every display, as one image covering their
 // combined bounds
 func screenshotBuiltin(_ context.Context, arguments []string) error {
