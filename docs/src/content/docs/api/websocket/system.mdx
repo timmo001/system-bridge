@@ -133,6 +133,40 @@ Send the `UPDATE_SETTINGS` event with the settings object to update. It responds
 }
 ```
 
+`UPDATE_SETTINGS` replaces the whole `commands.allowlist`, so two clients saving at once can undo each other's commands. To change one command, use the events below.
+
+### Add, change or remove a command
+
+Each of these changes one command in `commands.allowlist` and leaves the rest as they're saved, then responds with the updated settings.
+
+| Event | Data | Response type |
+| --- | --- | --- |
+| `COMMAND_ADD` | The command, as in [`commands.allowlist`](#settings-keys) | `COMMAND_ADDED` |
+| `COMMAND_UPDATE` | The command with its new values, matched by `id` | `COMMAND_UPDATED` |
+| `COMMAND_REMOVE` | `{ "id": "..." }` | `COMMAND_REMOVED` |
+
+```json title="Request"
+{
+    "id": "abc123",
+    "token": "abc123",
+    "event": "COMMAND_UPDATE",
+    "data": {
+        "id": "9ef69bc3-62f8-4d86-952d-5f498bbddf0f",
+        "name": "Say hi",
+        "command": "/usr/bin/echo",
+        "arguments": ["hi"],
+        "workingDir": "",
+        "prefab": ""
+    }
+}
+```
+
+Adding a command whose ID is already on the list, or changing one that isn't (such as one another client removed), returns an `ERROR` response. Removing a command that isn't on the list does nothing. A command is checked the same way as through `UPDATE_SETTINGS`.
+
+### Settings changes
+
+Whenever the settings are saved, through any of the events above, every connected client gets a `SETTINGS_CHANGED` message with the `id` `system` and the new settings as its data, so it can show them without asking again.
+
 ### Settings keys
 
 | Key | Type | Description |
