@@ -7,8 +7,7 @@ from dataclasses import dataclass
 class MediaGetFile:
     """Media Get File.
 
-    path is the absolute path to the file. The backend does not use base.
+    path is the absolute path to the file.
     """
 
-    base: str
     path: str

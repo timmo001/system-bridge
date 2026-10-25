@@ -2,6 +2,5 @@
 # name: test_media_control
   MediaControl(
     action='PLAY',
-    value=True,
   )
 # ---

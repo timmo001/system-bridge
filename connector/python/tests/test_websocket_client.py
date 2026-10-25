@@ -284,7 +284,6 @@ async def test_get_file(
     """Test the websocket client."""
     file_info = await mock_websocket_client_listening.get_file(
         MediaGetFile(
-            base="documents",
             path="/home/user/documents/test.txt",
         ),
         request_id=REQUEST_ID,

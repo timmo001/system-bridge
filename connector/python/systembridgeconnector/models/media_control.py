@@ -2,22 +2,16 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 
 class MediaAction(Enum):
-    """Media Action."""
+    """Media Action. The backend supports only these."""
 
     PLAY = "PLAY"
     PAUSE = "PAUSE"
     STOP = "STOP"
     PREVIOUS = "PREVIOUS"
     NEXT = "NEXT"
-    SEEK = "SEEK"
-    REWIND = "REWIND"
-    FASTFORWARD = "FASTFORWARD"
-    SHUFFLE = "SHUFFLE"
-    REPEAT = "REPEAT"
     MUTE = "MUTE"
     VOLUME_DOWN = "VOLUME_DOWN"
     VOLUME_UP = "VOLUME_UP"
@@ -30,4 +24,3 @@ class MediaControl:
     """Media Control."""
 
     action: str
-    value: Any | None = None

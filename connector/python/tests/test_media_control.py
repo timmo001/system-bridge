@@ -9,7 +9,6 @@ def test_media_control(snapshot: SnapshotAssertion):
     """Test the media_control."""
     media_control = MediaControl(
         action=MediaAction.PLAY.value,
-        value=True,
     )
     assert isinstance(media_control, MediaControl)
     assert media_control == snapshot
