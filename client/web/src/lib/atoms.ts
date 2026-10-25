@@ -340,6 +340,10 @@ export const diskMounts = Atom.make((get) =>
   socket(get).pipe(Effect.flatMap((bridge) => bridge.getDiskMounts)),
 );
 
+export const commandPrefabs = Atom.make((get) =>
+  socket(get).pipe(Effect.flatMap((bridge) => bridge.getCommandPrefabs)),
+);
+
 export const updateSettings = Atom.fn((next: Settings, get) =>
   fnSocket(get).pipe(
     Effect.flatMap((bridge) => bridge.updateSettings(next)),

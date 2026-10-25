@@ -6,6 +6,7 @@ import {
   mdiTrashCanOutline,
 } from "@mdi/js";
 import type {
+  CommandPrefab,
   CommandResult,
   Settings,
   SettingsCommandDefinition,
@@ -22,6 +23,7 @@ import { AtomController } from "~/controllers/atom-controller";
 import {
   type BridgeError,
   commandExecutions,
+  commandPrefabs,
   errorMessage,
   executeCommand,
   registry,
@@ -33,6 +35,8 @@ import { SbSettingsPage } from "./sb-settings-page";
 type CommandOutcome = Omit<CommandResult, "commandID">;
 
 interface CommandForm {
+  /** A prefab's ID, or empty for a custom command. */
+  readonly prefab: string;
   readonly name: string;
   readonly command: string;
   readonly workingDir: string;
@@ -40,11 +44,16 @@ interface CommandForm {
 }
 
 const emptyForm: CommandForm = {
+  prefab: "",
   name: "",
   command: "",
   workingDir: "",
   arguments: "",
 };
+
+/** How a command shows in the list: the program it runs and its arguments. */
+const commandLine = (command: string, args: readonly string[]) =>
+  [command, ...args].join(" ");
 
 const isFormKey = (name: string): name is keyof CommandForm =>
   name in emptyForm;
@@ -106,6 +115,8 @@ export class PageSettingsCommands extends SbSettingsPage {
     commandExecutions(this.commands.map((command) => command.id).join("\n")),
   );
 
+  readonly #prefabs = new AtomController(this, () => commandPrefabs);
+
   @state() private commands: readonly SettingsCommandDefinition[] = [];
 
   @state() private form: CommandForm = emptyForm;
@@ -164,6 +175,17 @@ export class PageSettingsCommands extends SbSettingsPage {
     }
   };
 
+  /** The prefabs the backend has, or none until they load. */
+  get #prefabList(): readonly CommandPrefab[] {
+    return Option.getOrElse(AsyncResult.value(this.#prefabs.value), () => []);
+  }
+
+  #prefab(id: string): CommandPrefab | undefined {
+    return id === ""
+      ? undefined
+      : this.#prefabList.find((prefab) => prefab.id === id);
+  }
+
   /** Fields are named after their key in the form. */
   #onInput = (event: InputEvent) => {
     const target = event.target;
@@ -173,22 +195,50 @@ export class PageSettingsCommands extends SbSettingsPage {
     }
   };
 
+  /** Picking a prefab names the command after it, unless it has a name of its own. */
+  #onPrefabChange = (event: Event) => {
+    if (!(event.target instanceof HTMLSelectElement)) return;
+
+    const previous = this.#prefab(this.form.prefab);
+    const next = this.#prefab(event.target.value);
+
+    const named =
+      this.form.name.trim() !== "" && this.form.name !== previous?.name;
+
+    this.form = {
+      ...this.form,
+      prefab: event.target.value,
+      name: named ? this.form.name : (next?.name ?? ""),
+    };
+  };
+
+  #canAdd(): boolean {
+    const { prefab, name, command } = this.form;
+
+    return name.trim() !== "" && (prefab !== "" || command.trim() !== "");
+  }
+
   #onSubmit = (event: SubmitEvent) => {
     event.preventDefault();
 
-    const { name, command, workingDir } = this.form;
+    if (!this.#canAdd()) return;
 
-    if (name.trim() === "" || command.trim() === "") return;
+    const { prefab, name, command, workingDir } = this.form;
 
     const definition: SettingsCommandDefinition = {
       id: generateUUID(),
       name: name.trim(),
+      prefab,
+      // Empty keeps the prefab's own program, and its arguments with it
       command: command.trim(),
       workingDir: workingDir.trim(),
-      arguments: this.form.arguments
-        .split(",")
-        .map((argument) => argument.trim())
-        .filter((argument) => argument !== ""),
+      arguments:
+        command.trim() === ""
+          ? []
+          : this.form.arguments
+              .split(",")
+              .map((argument) => argument.trim())
+              .filter((argument) => argument !== ""),
     };
 
     this.#adding = definition.id;
@@ -209,12 +259,19 @@ export class PageSettingsCommands extends SbSettingsPage {
           id=${key}
           name=${key}
           placeholder=${placeholder}
-          ?required=${key === "name" || key === "command"}
+          aria-describedby=${hint === undefined ? nothing : `${key}-hint`}
+          ?required=${
+            key === "name" || (key === "command" && this.form.prefab === "")
+          }
           ?disabled=${this.isSaving}
           .value=${this.form[key]}
           @input=${this.#onInput}
         />
-        ${hint === undefined ? nothing : html`<span class="hint">${hint}</span>`}
+        ${
+          hint === undefined
+            ? nothing
+            : html`<span class="hint" id="${key}-hint">${hint}</span>`
+        }
       </div>
     `;
   }
@@ -247,6 +304,26 @@ ${result.stderr}</pre>`
   #renderCommand(command: SettingsCommandDefinition) {
     const execution = this.#executions.value.get(command.id);
     const running = execution?.waiting ?? false;
+    const prefab = this.#prefab(command.prefab);
+    // With no program of its own, a prefab runs the one the backend finds
+    const usesPrefab = command.prefab !== "" && command.command === "";
+
+    const unavailable =
+      usesPrefab && prefab !== undefined && !prefab.available
+        ? prefab.reason
+        : undefined;
+
+    let line: string | undefined = commandLine(
+      command.command,
+      command.arguments,
+    );
+
+    if (usesPrefab) {
+      line =
+        prefab?.available === true
+          ? commandLine(prefab.command, prefab.arguments)
+          : undefined;
+    }
 
     return html`
       <div class="command">
@@ -256,7 +333,25 @@ ${result.stderr}</pre>`
             style="flex: 1; min-width: 12rem; --sb-stack-gap: var(--sb-space-1)"
           >
             <strong>${command.name}</strong>
-            <code>${[command.command, ...command.arguments].join(" ")}</code>
+            ${
+              command.prefab === ""
+                ? nothing
+                : html`<span class="chip info" style="align-self: start">
+                    ${prefab?.name ?? command.prefab}
+                    ${usesPrefab ? "prefab" : "prefab, with your program"}
+                  </span>`
+            }
+            ${line === undefined ? nothing : html`<code>${line}</code>`}
+            ${
+              unavailable === undefined
+                ? nothing
+                : html`<span
+                    class="chip danger"
+                    style="align-self: start"
+                    id="unavailable-${command.id}"
+                    >${unavailable}</span
+                  >`
+            }
             ${
               command.workingDir
                 ? html`<span class="muted xsmall"
@@ -283,7 +378,12 @@ ${result.stderr}</pre>`
               class="button tonal small"
               type="button"
               aria-label="Run ${command.name}"
-              ?disabled=${running || this.isSaving}
+              aria-describedby=${
+                unavailable === undefined
+                  ? nothing
+                  : `unavailable-${command.id}`
+              }
+              ?disabled=${running || this.isSaving || unavailable !== undefined}
               data-id=${command.id}
               @click=${this.#onRun}
             >
@@ -309,25 +409,67 @@ ${result.stderr}</pre>`
     `;
   }
 
+  #renderPrefabSelect() {
+    const options = this.#prefabList.map(
+      (prefab) =>
+        html`<option
+          value=${prefab.id}
+          ?disabled=${!prefab.available}
+          ?selected=${prefab.id === this.form.prefab}
+        >
+          ${prefab.available ? prefab.name : `${prefab.name}: ${prefab.reason}`}
+        </option>`,
+    );
+
+    return html`
+      <div class="field">
+        <label for="prefab">Type</label>
+        <select
+          class="input"
+          id="prefab"
+          name="prefab"
+          aria-describedby="prefab-hint"
+          ?disabled=${this.isSaving}
+          .value=${this.form.prefab}
+          @change=${this.#onPrefabChange}
+        >
+          <option value="">Custom</option>
+          ${options}
+        </select>
+        <span class="hint" id="prefab-hint"
+          >A ready-made command, or your own program.</span
+        >
+      </div>
+    `;
+  }
+
   #renderContent() {
     const saving = this.isSaving;
+    const prefab = this.#prefab(this.form.prefab);
 
     return html`
       <sb-card heading="Add a command">
         <form class="stack" @submit=${this.#onSubmit}>
           <div class="grid" style="--sb-grid-min: 16rem">
-            ${this.#input("name", "Name", "Restart audio")}
+            ${this.#renderPrefabSelect()}
+            ${this.#input("name", "Name", prefab?.name ?? "Restart audio")}
             ${this.#input(
               "command",
               "Command",
-              "/usr/bin/systemctl",
-              "The program's full path.",
+              prefab?.command || "/usr/bin/systemctl",
+              prefab === undefined
+                ? "The program's full path."
+                : "Optional. Leave empty to use the program shown, or give your own program's full path.",
             )}
             ${this.#input(
               "arguments",
               "Arguments",
-              "--user, restart, pipewire",
-              "Separated by commas.",
+              prefab === undefined
+                ? "--user, restart, pipewire"
+                : prefab.arguments.join(", "),
+              prefab === undefined
+                ? "Separated by commas."
+                : "Separated by commas. Only used with your own program.",
             )}
             ${this.#input("workingDir", "Working directory", "/home/me", "Optional.")}
           </div>
@@ -335,11 +477,7 @@ ${result.stderr}</pre>`
             <button
               class="button filled"
               type="submit"
-              ?disabled=${
-                saving ||
-                this.form.name.trim() === "" ||
-                this.form.command.trim() === ""
-              }
+              ?disabled=${saving || !this.#canAdd()}
             >
               ${saving ? spinner() : icon(mdiPlus)} Add
             </button>

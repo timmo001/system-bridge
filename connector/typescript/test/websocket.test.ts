@@ -112,6 +112,25 @@ const repliesFor = (request: BackendRequest): ReadonlyArray<Reply> => {
           data: { commandID: "build", exitCode: 0, stdout: "ok", stderr: "" },
         },
       ];
+    case "GET_COMMAND_PREFABS":
+      return [
+        {
+          id,
+          type: "COMMAND_PREFABS",
+          subtype: "NONE",
+          data: [
+            {
+              id: "lock",
+              name: "Lock screen",
+              description: "Lock the screen",
+              available: false,
+              command: "",
+              arguments: [],
+              reason: "install loginctl to use Lock screen",
+            },
+          ],
+        },
+      ];
     case "GET_FILES":
       return [{ id, type: "FILES", subtype: "NONE", data: null }];
     case "MEDIA_CONTROL":
@@ -258,6 +277,16 @@ describe("SystemBridgeWebSocket", () => {
     );
 
     expect(result.stdout).toBe("ok");
+  });
+
+  test("decode the command prefabs", async () => {
+    const prefabs = await run(
+      SystemBridgeWebSocket.use((ws) => ws.getCommandPrefabs),
+    );
+
+    expect(prefabs.map((prefab) => prefab.reason)).toEqual([
+      "install loginctl to use Lock screen",
+    ]);
   });
 
   test("treat a null file list as empty", async () => {

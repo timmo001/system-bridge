@@ -23,6 +23,7 @@ export const EventType = Schema.Literals([
   "DISCORD_CONTROL",
   "DISPLAY_CONTROL",
   "EXIT_APPLICATION",
+  "GET_COMMAND_PREFABS",
   "GET_DATA",
   "GET_DIRECTORIES",
   "GET_DIRECTORY",
@@ -68,6 +69,7 @@ export const ResponseType = Schema.Literals([
   "BLUETOOTH_POWER_SET",
   "COMMAND_COMPLETED",
   "COMMAND_EXECUTING",
+  "COMMAND_PREFABS",
   "DATA_GET",
   "DATA_LISTENER_REGISTERED",
   "DATA_LISTENER_UNREGISTERED",
@@ -177,6 +179,11 @@ export const SettingsCommandDefinition = Schema.Struct({
   command: Schema.String,
   workingDir: Schema.String,
   arguments: Schema.Array(Schema.String),
+  /**
+   * A prefab's ID, or empty for a custom command. With an empty `command`,
+   * the backend runs the prefab's program for its platform.
+   */
+  prefab: Schema.String,
 });
 
 export interface SettingsCommandDefinition extends Schema.Schema.Type<

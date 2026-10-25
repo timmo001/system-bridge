@@ -231,6 +231,20 @@ export const CPUData = Schema.Struct({
 
 export interface CPUData extends Schema.Schema.Type<typeof CPUData> {}
 
+export const CommandPrefab = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  description: Schema.String,
+  available: Schema.Boolean,
+  command: Schema.String,
+  arguments: Schema.Array(Schema.String),
+  reason: Schema.String,
+});
+
+export interface CommandPrefab extends Schema.Schema.Type<
+  typeof CommandPrefab
+> {}
+
 export const DesktopKeyboard = Schema.Struct({
   layout: Schema.NullOr(Schema.String),
   name: Schema.NullOr(Schema.String),

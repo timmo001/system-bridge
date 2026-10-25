@@ -27,6 +27,7 @@ import {
   RequestTimeoutError,
 } from "./errors.js";
 import {
+  CommandPrefab,
   DiskMountsResponse,
   MetricHistory,
   ModuleDataUpdate,
@@ -137,6 +138,11 @@ export interface Interface {
   readonly validateDirectory: (
     path: string,
   ) => Effect.Effect<boolean, WebSocketError>;
+  /** The ready-made commands, and whether each can run on the backend's system. */
+  readonly getCommandPrefabs: Effect.Effect<
+    ReadonlyArray<CommandPrefab>,
+    WebSocketError
+  >;
   /** Runs an allowlisted command and waits for it to finish. */
   readonly executeCommand: (
     commandID: string,
@@ -692,6 +698,14 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     Settings,
   ).pipe(Effect.withSpan("SystemBridgeWebSocket.getSettings"));
 
+  const getCommandPrefabs = call(
+    "GET_COMMAND_PREFABS",
+    "COMMAND_PREFABS",
+    Empty,
+    {},
+    Schema.Array(CommandPrefab),
+  ).pipe(Effect.withSpan("SystemBridgeWebSocket.getCommandPrefabs"));
+
   const updateSettings = Effect.fn("SystemBridgeWebSocket.updateSettings")(
     function* (settings: Settings) {
       return yield* call(
@@ -1069,6 +1083,7 @@ export const make = Effect.fnUntraced(function* (options: WebSocketOptions) {
     getSettings,
     updateSettings,
     validateDirectory,
+    getCommandPrefabs,
     executeCommand,
     keyboardKeypress,
     keyboardText,
