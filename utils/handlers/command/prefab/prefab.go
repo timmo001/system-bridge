@@ -21,6 +21,9 @@ type candidate struct {
 	// env is extra KEY=VALUE variables for the program, which can use the
 	// output placeholders
 	env []string
+	// detach starts the program without waiting for it, for apps that keep
+	// running, such as a terminal
+	detach bool
 	// when reports whether the candidate applies to this session, such as its
 	// desktop. Nil means it always does.
 	when func() bool
@@ -52,7 +55,9 @@ type Resolved struct {
 	// Env is the program's extra variables, before their placeholders are
 	// filled in
 	Env []string
-	Run Builtin
+	// Detach starts the program without waiting for it
+	Detach bool
+	Run    Builtin
 }
 
 // Each desktop's own tools come first, with Omarchy's ahead on Hyprland as
@@ -73,6 +78,77 @@ var catalogue = []Prefab{
 			},
 			"windows": {{program: "rundll32.exe", arguments: []string{"user32.dll,LockWorkStation"}}},
 			"darwin":  {{program: "pmset", arguments: []string{"displaysleepnow"}}},
+		},
+	},
+	{
+		ID:          "sleep",
+		Name:        "Sleep",
+		Description: "Put the computer to sleep",
+		candidates: map[string][]candidate{
+			"linux":   {{program: "systemctl", arguments: []string{"suspend"}}},
+			"windows": {{program: "rundll32.exe", arguments: []string{"powrprof.dll,SetSuspendState", "0,1,0"}}},
+			"darwin":  {{program: "pmset", arguments: []string{"sleepnow"}}},
+		},
+	},
+	{
+		ID:          "logout",
+		Name:        "Log out",
+		Description: "Log out of the desktop, closing apps",
+		candidates: map[string][]candidate{
+			"linux": {
+				{program: "omarchy-system", arguments: []string{"logout"}, when: onHyprland},
+				{program: "hyprctl", arguments: []string{"dispatch", "exit"}, when: onHyprland},
+				{program: "qdbus6", arguments: []string{"org.kde.Shutdown", "/Shutdown", "logout"}, when: onKDE},
+				{program: "qdbus", arguments: []string{"org.kde.Shutdown", "/Shutdown", "logout"}, when: onKDE},
+				{program: "gnome-session-quit", arguments: []string{"--logout", "--no-prompt"}, when: onGNOME},
+				{program: "loginctl", arguments: []string{"terminate-session", "auto"}},
+			},
+			"windows": {{program: "shutdown.exe", arguments: []string{"/l"}}},
+			"darwin":  {{program: "osascript", arguments: []string{"-e", `tell application "System Events" to log out`}}},
+		},
+	},
+	{
+		ID:          "file-manager",
+		Name:        "Open the file manager",
+		Description: "Open the file manager at the home folder",
+		candidates: map[string][]candidate{
+			"linux": {
+				{program: "omarchy-launch-nautilus", when: onHyprland, detach: true},
+				{program: "xdg-open", arguments: []string{homePlaceholder}, detach: true},
+			},
+			"windows": {{program: "explorer.exe", arguments: []string{homePlaceholder}, detach: true}},
+			"darwin":  {{program: "open", arguments: []string{homePlaceholder}}},
+		},
+	},
+	{
+		ID:          "terminal",
+		Name:        "Open a terminal",
+		Description: "Open a terminal window",
+		candidates: map[string][]candidate{
+			"linux": {
+				{program: "omarchy-launch-terminal", when: onHyprland, detach: true},
+				{program: "konsole", when: onKDE, detach: true},
+				{program: "kgx", when: onGNOME, detach: true},
+				{program: "gnome-terminal", when: onGNOME, detach: true},
+				{program: "xdg-terminal-exec", detach: true},
+				{program: "x-terminal-emulator", when: onX11, detach: true},
+			},
+			"windows": {{program: "wt.exe", detach: true}},
+			"darwin":  {{program: "open", arguments: []string{"-a", "Terminal"}}},
+		},
+	},
+	{
+		ID:          "clipboard",
+		Name:        "Get the clipboard",
+		Description: "Return the text on the clipboard",
+		candidates: map[string][]candidate{
+			"linux": {
+				{program: "wl-paste", arguments: []string{"--no-newline"}, when: onWayland},
+				{program: "xclip", arguments: []string{"-selection", "clipboard", "-o"}, when: onX11},
+				{program: "xsel", arguments: []string{"--clipboard", "--output"}, when: onX11},
+			},
+			"windows": {{program: "powershell.exe", arguments: []string{"-NoProfile", "-NonInteractive", "-Command", "Get-Clipboard -Raw"}}},
+			"darwin":  {{program: "pbpaste"}},
 		},
 	},
 	{
@@ -159,7 +235,7 @@ func (p Prefab) Resolve() (Resolved, error) {
 		}
 		tried = append(tried, c.program)
 		if path, err := lookPath(c.program); err == nil {
-			return Resolved{Command: path, Arguments: slices.Clone(c.arguments), Env: slices.Clone(c.env)}, nil
+			return Resolved{Command: path, Arguments: slices.Clone(c.arguments), Env: slices.Clone(c.env), Detach: c.detach}, nil
 		}
 	}
 	if p.builtin != nil && (p.builtinWhen == nil || p.builtinWhen()) {

@@ -5,6 +5,7 @@ package prefab
 import "os"
 
 // Desktop candidates only apply on Linux
+func onWayland() bool  { return false }
 func onHyprland() bool { return false }
 func onKDE() bool      { return false }
 func onGNOME() bool    { return false }

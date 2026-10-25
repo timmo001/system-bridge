@@ -36,6 +36,11 @@ func desktop() string {
 	return ""
 }
 
+func onWayland() bool {
+	_, err := wayland.Socket()
+	return err == nil
+}
+
 func onHyprland() bool { return desktop() == "hyprland" }
 func onKDE() bool      { return desktop() == "kde" }
 func onGNOME() bool    { return desktop() == "gnome" }
@@ -43,7 +48,7 @@ func onGNOME() bool    { return desktop() == "gnome" }
 // onWlroots is a Wayland session on a compositor grim can capture, which
 // GNOME and KDE aren't
 func onWlroots() bool {
-	if _, err := wayland.Socket(); err != nil {
+	if !onWayland() {
 		return false
 	}
 	switch desktop() {
@@ -66,7 +71,7 @@ func x11Display() string {
 
 // onX11 is an X11 session with no Wayland compositor, for the X11 tools
 func onX11() bool {
-	if _, err := wayland.Socket(); err == nil {
+	if onWayland() {
 		return false
 	}
 	return x11Display() != ""

@@ -9,12 +9,14 @@ import (
 	"time"
 )
 
-// Placeholders in a prefab's arguments and variables for the file it saves.
-// Tools such as hyprshot take the folder and the file name separately.
+// Placeholders in a prefab's arguments and variables for the file it saves,
+// and the home folder. Tools such as hyprshot take the folder and the file
+// name separately.
 const (
 	outputPlaceholder     = "{output}"
 	outputDirPlaceholder  = "{outputDir}"
 	outputNamePlaceholder = "{outputName}"
+	homePlaceholder       = "{home}"
 )
 
 var now = time.Now
@@ -45,10 +47,22 @@ func hasPlaceholder(value string) bool {
 		strings.Contains(value, outputNamePlaceholder)
 }
 
-// Expand fills in the output placeholders in arguments and KEY=VALUE
-// variables, creating the folder they point to. Without placeholders they come
-// back as they are, with an empty Output.
+// Expand fills in {home} with the home folder, and the output placeholders in
+// arguments and KEY=VALUE variables, creating the folder they point to.
+// Without output placeholders the Output is empty.
 func Expand(arguments []string, env []string) ([]string, []string, Output, error) {
+	if slices.ContainsFunc(arguments, func(argument string) bool { return strings.Contains(argument, homePlaceholder) }) {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil, nil, Output{}, fmt.Errorf("find the home folder: %w", err)
+		}
+		expanded := make([]string, len(arguments))
+		for i, argument := range arguments {
+			expanded[i] = strings.ReplaceAll(argument, homePlaceholder, home)
+		}
+		arguments = expanded
+	}
+
 	if !slices.ContainsFunc(arguments, hasPlaceholder) && !slices.ContainsFunc(env, hasPlaceholder) {
 		return arguments, env, Output{}, nil
 	}

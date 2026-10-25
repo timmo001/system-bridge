@@ -66,10 +66,13 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 	}
 
 	arguments, env, output := commandDef.Arguments, []string(nil), prefab.Output{}
+	detach := false
 	if commandDef.Prefab != "" {
-		// Variables belong to the prefab's own program, not an override
+		// Variables and detaching belong to the prefab's own program, not an
+		// override
 		if resolved.Command != "" && resolved.Command == commandDef.Command {
 			env = resolved.Env
+			detach = resolved.Detach
 		}
 		var err error
 		arguments, env, output, err = prefab.Expand(commandDef.Arguments, env)
@@ -81,9 +84,12 @@ func execute(ctx context.Context, commandDef *settings.SettingsCommandDefinition
 	}
 
 	started := time.Now().Truncate(time.Second)
-	if builtin {
+	switch {
+	case builtin:
 		result = runBuiltin(ctx, commandDef, resolved.Run, arguments)
-	} else {
+	case detach:
+		result = startProgram(commandDef, arguments, env)
+	default:
 		result = runProgram(ctx, commandDef, arguments, env)
 	}
 
@@ -106,6 +112,28 @@ func runBuiltin(ctx context.Context, commandDef *settings.SettingsCommandDefinit
 		result.Stderr = err.Error()
 		return result
 	}
+	result.ExitCode = 0
+	return result
+}
+
+// startProgram starts an app that keeps running, such as a terminal, and
+// returns once it has started. It runs in a session of its own, outside the
+// command's timeout, so it outlives the command and System Bridge.
+func startProgram(commandDef *settings.SettingsCommandDefinition, arguments []string, env []string) ExecuteResult {
+	result := ExecuteResult{CommandID: commandDef.ID, ExitCode: -1}
+
+	// No shell here either: the program runs directly, as in runProgram
+	cmd := exec.Command(commandDef.Command, arguments...)
+	cmd.Env = env
+	cmd.Dir = commandDef.WorkingDir
+	detachProcess(cmd)
+	if err := cmd.Start(); err != nil {
+		result.Error = err.Error()
+		return result
+	}
+	// Reap it when it exits
+	go func() { _ = cmd.Wait() }()
+
 	result.ExitCode = 0
 	return result
 }

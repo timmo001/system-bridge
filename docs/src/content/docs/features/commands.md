@@ -41,6 +41,11 @@ On Windows and macOS each prefab has one way to run:
 | Prefab | Windows | macOS |
 | --- | --- | --- |
 | **Lock screen** (`lock`) | `rundll32.exe user32.dll,LockWorkStation` | `pmset displaysleepnow` |
+| **Sleep** (`sleep`) | `rundll32.exe powrprof.dll,SetSuspendState 0,1,0` | `pmset sleepnow` |
+| **Log out** (`logout`) | `shutdown.exe /l` | `osascript`, telling System Events to log out |
+| **Open the file manager** (`file-manager`) | `explorer.exe` at your home folder | `open` at your home folder |
+| **Open a terminal** (`terminal`) | `wt.exe` (Windows Terminal) | `open -a Terminal` |
+| **Get the clipboard** (`clipboard`) | `powershell.exe Get-Clipboard` | `pbpaste` |
 | **Screenshot** (`screenshot`) | Built in, capturing every display | `screencapture` |
 | **Screenshot of a window** (`screenshot-window`) | Built in, capturing the focused window | `screencapture`, which asks you to pick the window |
 | **Screenshot of a region** (`screenshot-region`) | Not available | `screencapture` |
@@ -50,6 +55,11 @@ On Linux, System Bridge works out which desktop is running, even when it's start
 | Prefab | Hyprland and Omarchy | KDE Plasma | GNOME | Other Wayland | X11 |
 | --- | --- | --- | --- | --- | --- |
 | **Lock screen** | `omarchy-system-lock`, `loginctl` | `loginctl` | `loginctl` | `loginctl` | `loginctl` |
+| **Sleep** | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` | `systemctl suspend` |
+| **Log out** | `omarchy-system logout`, `hyprctl dispatch exit`, `loginctl` | `qdbus6` or `qdbus`, `loginctl` | `gnome-session-quit`, `loginctl` | `loginctl` | `loginctl` |
+| **Open the file manager** | `omarchy-launch-nautilus`, `xdg-open` | `xdg-open` | `xdg-open` | `xdg-open` | `xdg-open` |
+| **Open a terminal** | `omarchy-launch-terminal`, `xdg-terminal-exec` | `konsole`, `xdg-terminal-exec` | `kgx` or `gnome-terminal`, `xdg-terminal-exec` | `xdg-terminal-exec` | `xdg-terminal-exec`, `x-terminal-emulator` |
+| **Get the clipboard** | `wl-paste` | `wl-paste` | `wl-paste` | `wl-paste` | `xclip`, `xsel` |
 | **Screenshot** | `omasnap`, `grimblast`, `grim`, `flameshot`, portal | `spectacle`, `flameshot`, portal | `gnome-screenshot`, `flameshot`, portal | `grim`, `flameshot`, portal | `flameshot`, `scrot`, `maim`, portal |
 | **Screenshot of a window** | `omasnap`, `grimblast`, `hyprshot` | `spectacle` | `gnome-screenshot` | | `scrot` |
 | **Screenshot of a region** | `omasnap`, `grimblast`, `hyprshot`, `flameshot` | `spectacle`, `flameshot` | `gnome-screenshot`, `flameshot` | `flameshot` | `flameshot`, `scrot`, `maim` |
@@ -57,6 +67,8 @@ On Linux, System Bridge works out which desktop is running, even when it's start
 On Omarchy, **Screenshot** captures the focused monitor, and **Screenshot of a window** asks you to pick the window, as Omarchy's own screenshot tool does.
 
 When none of these is installed, **Screenshot** asks the desktop portal instead, which most Linux desktops have. GNOME and KDE ask you to allow it the first time.
+
+**Open the file manager** and **Open a terminal** return as soon as the app starts, and the app stays open after the command finishes. **Get the clipboard** returns the clipboard's text as its output. Setting the clipboard isn't a prefab, as a command can't take text from the client.
 
 Like any other command, a prefab only runs once it's on your list.
 
