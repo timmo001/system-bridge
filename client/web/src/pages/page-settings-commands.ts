@@ -1,4 +1,6 @@
 import {
+  mdiCheck,
+  mdiClose,
   mdiConsoleLine,
   mdiContentCopy,
   mdiPlay,
@@ -15,7 +17,7 @@ import type {
 import { Option, Struct } from "effect";
 import { AsyncResult } from "effect/reactivity";
 import { css, html, nothing, type TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
 import "~/components/sb-card";
@@ -64,6 +66,37 @@ const emptyForm: CommandForm = {
  */
 const omarchyIPC = "omarchy-ipc";
 
+/** The parts of a saved command that can be edited one at a time. */
+const editFields = {
+  name: "name",
+  command: "program",
+  arguments: "arguments",
+  workingDir: "working directory",
+} as const;
+
+type EditField = keyof typeof editFields;
+
+const isEditField = (field: string | undefined): field is EditField =>
+  field !== undefined && field in editFields;
+
+/** The command with one part changed to what was typed. */
+const withPart = (
+  command: SettingsCommandDefinition,
+  field: EditField,
+  value: string,
+): SettingsCommandDefinition => {
+  switch (field) {
+    case "name":
+      return Struct.assign(command, { name: value });
+    case "command":
+      return Struct.assign(command, { command: value });
+    case "workingDir":
+      return Struct.assign(command, { workingDir: value });
+    case "arguments":
+      return Struct.assign(command, { arguments: splitArguments(value) });
+  }
+};
+
 const splitArguments = (value: string) =>
   value
     .split(",")
@@ -106,18 +139,104 @@ export class PageSettingsCommands extends SbSettingsPage {
     shared,
     pageStyles,
     css`
+      /* Two lines a command: its name and actions, then what it runs */
       .command {
         display: flex;
         flex-direction: column;
-        gap: var(--sb-space-3);
-        padding: var(--sb-space-4);
+        gap: var(--sb-space-1);
+        padding: var(--sb-space-2) var(--sb-space-3);
         background: var(--sb-color-sunken);
-        border-radius: var(--sb-radius-l);
+        border-radius: var(--sb-radius-m);
       }
 
-      .command code {
-        font-size: var(--sb-font-size-s);
+      .head {
+        display: flex;
+        align-items: center;
+        gap: var(--sb-space-2);
+      }
+
+      .title {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--sb-space-2);
+        min-width: 0;
+      }
+
+      .actions {
+        flex: none;
+      }
+
+      .title .chip {
+        min-height: 1.25rem;
+        padding: 0 var(--sb-space-2);
+      }
+
+      .details {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: var(--sb-space-3);
+        row-gap: var(--sb-space-1);
+        font-size: var(--sb-font-size-xs);
+      }
+
+      .details code {
+        font-size: var(--sb-font-size-xs);
         overflow-wrap: anywhere;
+      }
+
+      .details .id {
+        display: inline-flex;
+        align-items: center;
+        margin-inline-start: auto;
+        color: var(--sb-color-muted);
+      }
+
+      /* A part of a command that opens its edit popover */
+      .editable {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        min-width: 0;
+        padding: 0.125rem var(--sb-space-1);
+        margin-inline: calc(-1 * var(--sb-space-1));
+        font: inherit;
+        color: inherit;
+        text-align: start;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        border-radius: var(--sb-radius-s);
+      }
+
+      .editable:hover:not(:disabled),
+      .editable[aria-expanded="true"] {
+        background: var(--sb-color-surface);
+      }
+
+      .editable:focus-visible {
+        outline: 2px solid var(--sb-color-accent);
+        outline-offset: 1px;
+      }
+
+      .editable:disabled {
+        cursor: default;
+      }
+
+      .edit-popover {
+        position: fixed;
+        inset: unset;
+        width: 22rem;
+        max-width: calc(100vw - 1rem);
+        margin: 0;
+        padding: var(--sb-space-3);
+        color: var(--sb-color-text);
+        background: var(--sb-color-raised);
+        border: 1px solid var(--sb-color-border);
+        border-radius: var(--sb-radius-l);
+        box-shadow: var(--sb-shadow-l);
       }
 
       pre {
@@ -144,6 +263,20 @@ export class PageSettingsCommands extends SbSettingsPage {
   @state() private commands: readonly SettingsCommandDefinition[] = [];
 
   @state() private form: CommandForm = emptyForm;
+
+  /** The part of a command being edited, with what's typed so far. */
+  @state() private editing: {
+    readonly id: string;
+    readonly field: EditField;
+    readonly value: string;
+  } | null = null;
+
+  @query("#edit-popover") private editPopover!: HTMLElement | null;
+
+  @query("#edit-value") private editInput!: HTMLInputElement | null;
+
+  /** The edit button the popover opened from. */
+  #editAnchor: HTMLButtonElement | null = null;
 
   /** The ID of a command being added, so the form clears once it's saved. */
   #adding: string | null = null;
@@ -198,6 +331,127 @@ export class PageSettingsCommands extends SbSettingsPage {
       this.#save(this.commands.filter((command) => command.id !== id));
     }
   };
+
+  /** Opens the popover for one part of a command, beside its edit button. */
+  #onEditStart = (event: MouseEvent) => {
+    const button = event.currentTarget;
+
+    if (!(button instanceof HTMLButtonElement)) return;
+
+    const command = this.commands.find(({ id }) => id === button.dataset.id);
+    const field = button.dataset.field;
+
+    if (command === undefined || !isEditField(field)) return;
+
+    this.#editAnchor = button;
+    this.editing = {
+      id: command.id,
+      field,
+      value:
+        field === "arguments" ? command.arguments.join(", ") : command[field],
+    };
+    this.editPopover?.showPopover();
+  };
+
+  #onEditInput = (event: InputEvent) => {
+    if (this.editing !== null && event.target instanceof HTMLInputElement) {
+      this.editing = { ...this.editing, value: event.target.value };
+    }
+  };
+
+  #onEditCancel = () => {
+    this.editPopover?.hidePopover();
+  };
+
+  /**
+   * Saves just this part. The ID stays, so clients using the command carry on.
+   * The backend checks a new program or folder like any other command.
+   */
+  #onEditSubmit = (event: SubmitEvent) => {
+    event.preventDefault();
+
+    const editing = this.editing;
+
+    if (editing === null || !this.#canSaveEdit()) return;
+
+    const value = editing.value.trim();
+
+    this.editPopover?.hidePopover();
+    this.#save(
+      this.commands.map((command) =>
+        command.id === editing.id
+          ? withPart(command, editing.field, value)
+          : command,
+      ),
+    );
+  };
+
+  /** A name can't be empty, nor can a custom command's program. */
+  #canSaveEdit(): boolean {
+    const editing = this.editing;
+
+    if (editing === null) return false;
+
+    const command = this.commands.find(({ id }) => id === editing.id);
+    const empty = editing.value.trim() === "";
+
+    if (editing.field === "name") return !empty;
+
+    if (editing.field === "command") return !empty || command?.prefab !== "";
+
+    return true;
+  }
+
+  #positionEdit = () => {
+    const anchor = this.#editAnchor;
+    const popover = this.editPopover;
+
+    if (anchor === null || popover === null) return;
+
+    const rect = anchor.getBoundingClientRect();
+    const gap = 6;
+    const below = window.innerHeight - rect.bottom - gap;
+
+    const top =
+      below >= popover.offsetHeight || below >= rect.top
+        ? rect.bottom + gap
+        : Math.max(gap, rect.top - gap - popover.offsetHeight);
+
+    const left = Math.min(
+      Math.max(gap, rect.left),
+      window.innerWidth - popover.offsetWidth - gap,
+    );
+
+    popover.style.top = `${top}px`;
+    popover.style.left = `${left}px`;
+  };
+
+  /** Keeps the popover by its button, and returns focus to it on close. */
+  #onEditToggle = (event: ToggleEvent) => {
+    if (event.newState === "open") {
+      this.#positionEdit();
+      window.addEventListener("resize", this.#positionEdit);
+      window.addEventListener("scroll", this.#positionEdit, true);
+      void this.updateComplete.then(() => {
+        this.editInput?.focus();
+        this.editInput?.select();
+      });
+
+      return;
+    }
+
+    window.removeEventListener("resize", this.#positionEdit);
+    window.removeEventListener("scroll", this.#positionEdit, true);
+    this.#editAnchor?.focus();
+    this.#editAnchor = null;
+    this.editing = null;
+  };
+
+  override disconnectedCallback(): void {
+    window.removeEventListener("resize", this.#positionEdit);
+    window.removeEventListener("scroll", this.#positionEdit, true);
+    super.disconnectedCallback();
+  }
 
   /** The prefabs the backend has, or none until they load. */
   get #prefabList(): readonly CommandPrefab[] {
@@ -372,70 +626,41 @@ ${result.stderr}</pre>`
         ? prefab.reason
         : undefined;
 
-    let line: string | undefined = commandLine(
-      command.command,
-      command.arguments,
-    );
+    // The badge only adds anything when the name doesn't already say it
+    let badge = "";
 
-    if (command.prefab === omarchyIPC) {
-      // The call itself: the target, function and its arguments
-      line = command.arguments.join(" ");
-    } else if (usesPrefab) {
-      line =
-        prefab?.available === true
-          ? commandLine(prefab.command, prefab.arguments)
-          : undefined;
+    if (command.prefab !== "") {
+      const prefabName = prefab?.name ?? command.prefab;
+
+      if (!usesPrefab) badge = `${prefabName}, your program`;
+      else if (prefabName !== command.name) badge = prefabName;
     }
 
     return html`
       <div class="command">
-        <div class="row wrap" style="align-items: flex-start">
-          <div
-            class="stack"
-            style="flex: 1; min-width: 12rem; --sb-stack-gap: var(--sb-space-1)"
-          >
-            <strong>${command.name}</strong>
+        <div class="head">
+          <div class="title">
+            ${this.#editButton(
+              command,
+              "name",
+              html`<strong>${command.name}</strong>`,
+            )}
             ${
-              command.prefab === ""
+              badge === ""
                 ? nothing
-                : html`<span class="chip info" style="align-self: start">
-                    ${prefab?.name ?? command.prefab}
-                    ${usesPrefab ? "prefab" : "prefab, with your program"}
-                  </span>`
+                : html`<span class="chip info small">${badge}</span>`
             }
-            ${line === undefined ? nothing : html`<code>${line}</code>`}
             ${
               unavailable === undefined
                 ? nothing
                 : html`<span
-                    class="chip danger"
-                    style="align-self: start"
+                    class="chip danger small"
                     id="unavailable-${command.id}"
                     >${unavailable}</span
                   >`
             }
-            ${
-              command.workingDir
-                ? html`<span class="muted xsmall"
-                    >In ${command.workingDir}</span
-                  >`
-                : nothing
-            }
-            <span class="row muted xsmall">
-              <span class="mono">${command.id}</span>
-              <button
-                class="button plain icon-only small"
-                type="button"
-                aria-label="Copy the ID of ${command.name}"
-                title="Copy ID"
-                data-id=${command.id}
-                @click=${this.#onCopyId}
-              >
-                ${icon(mdiContentCopy)}
-              </button>
-            </span>
           </div>
-          <div class="row">
+          <div class="row actions">
             <button
               class="button tonal small"
               type="button"
@@ -464,9 +689,171 @@ ${result.stderr}</pre>`
             </button>
           </div>
         </div>
+        <div class="details">
+          ${this.#renderRuns(command, prefab, usesPrefab)}
+          <span class="id">
+            <span class="mono">${command.id}</span>
+            <button
+              class="button plain icon-only small"
+              type="button"
+              aria-label="Copy the ID of ${command.name}"
+              title="Copy ID"
+              data-id=${command.id}
+              @click=${this.#onCopyId}
+            >
+              ${icon(mdiContentCopy)}
+            </button>
+          </span>
+        </div>
         ${this.#renderOutcome(
           execution === undefined || running ? undefined : outcome(execution),
         )}
+      </div>
+    `;
+  }
+
+  /** One part of a command, which opens the edit popover for it. */
+  #editButton(
+    command: SettingsCommandDefinition,
+    field: EditField,
+    content: TemplateResult,
+  ) {
+    const open =
+      this.editing?.id === command.id && this.editing.field === field;
+
+    return html`<button
+      class="editable"
+      type="button"
+      aria-label="Edit the ${editFields[field]} of ${command.name}"
+      aria-haspopup="dialog"
+      aria-controls="edit-popover"
+      aria-expanded=${open ? "true" : "false"}
+      ?disabled=${this.isSaving}
+      data-id=${command.id}
+      data-field=${field}
+      @click=${this.#onEditStart}
+    >
+      ${content}
+    </button>`;
+  }
+
+  /**
+   * What a command runs: its program and arguments, each its own button. A
+   * prefab with no program of its own shows the one it runs, and an Omarchy
+   * shell call shows the call.
+   */
+  #renderRuns(
+    command: SettingsCommandDefinition,
+    prefab: CommandPrefab | undefined,
+    usesPrefab: boolean,
+  ) {
+    if (command.prefab === omarchyIPC) {
+      return this.#editButton(
+        command,
+        "arguments",
+        html`<code>${command.arguments.join(" ")}</code>`,
+      );
+    }
+
+    let program = html`<code>${command.command}</code>`;
+
+    if (usesPrefab) {
+      program =
+        prefab?.available === true
+          ? html`<code>${commandLine(prefab.command, prefab.arguments)}</code>`
+          : html`<span class="muted">not available here</span>`;
+    }
+
+    return html`
+      ${this.#editButton(command, "command", program)}
+      ${
+        usesPrefab
+          ? nothing
+          : this.#editButton(
+              command,
+              "arguments",
+              command.arguments.length === 0
+                ? html`<span class="muted">no arguments</span>`
+                : html`<code>${command.arguments.join(" ")}</code>`,
+            )
+      }
+      ${this.#editButton(
+        command,
+        "workingDir",
+        html`<span class="muted"
+          >${
+            command.workingDir === ""
+              ? "no working directory"
+              : `in ${command.workingDir}`
+          }</span
+        >`,
+      )}
+    `;
+  }
+
+  /** The popover that edits one part of a command, by the part's button. */
+  #renderEditPopover() {
+    const editing = this.editing;
+    const command = this.commands.find(({ id }) => id === editing?.id);
+    const field = editing?.field ?? "name";
+
+    let hint = "What the command is called in lists.";
+
+    if (field === "command") {
+      hint =
+        command?.prefab === ""
+          ? "The program's full path."
+          : "Your own program's full path, or leave it empty to use the prefab's.";
+    } else if (field === "arguments") {
+      hint =
+        command?.prefab === omarchyIPC
+          ? "The target, the function, then its arguments, separated by commas."
+          : "Separated by commas.";
+    } else if (field === "workingDir") {
+      hint = "Where the program runs. Leave it empty for none.";
+    }
+
+    return html`
+      <div
+        id="edit-popover"
+        class="edit-popover"
+        popover
+        role="dialog"
+        aria-labelledby="edit-heading"
+        @toggle=${this.#onEditToggle}
+      >
+        <form class="stack" @submit=${this.#onEditSubmit}>
+          <label id="edit-heading" for="edit-value"
+            >Edit the
+            ${editFields[field]}${
+              command === undefined ? "" : ` of ${command.name}`
+            }</label
+          >
+          <input
+            id="edit-value"
+            class="input ${field === "name" ? "" : "mono"}"
+            aria-describedby="edit-hint"
+            .value=${editing?.value ?? ""}
+            @input=${this.#onEditInput}
+          />
+          <span class="hint" id="edit-hint">${hint}</span>
+          <div class="row" style="justify-content: flex-end">
+            <button
+              class="button plain small"
+              type="button"
+              @click=${this.#onEditCancel}
+            >
+              ${icon(mdiClose)} Cancel
+            </button>
+            <button
+              class="button filled small"
+              type="submit"
+              ?disabled=${this.isSaving || !this.#canSaveEdit()}
+            >
+              ${icon(mdiCheck)} Save
+            </button>
+          </div>
+        </form>
       </div>
     `;
   }
@@ -651,6 +1038,7 @@ ${result.stderr}</pre>`
               </div>`
         }
       </sb-card>
+      ${this.#renderEditPopover()}
     `;
   }
 

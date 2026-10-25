@@ -104,6 +104,12 @@ Only commands added from a prefab have their placeholders filled in. A program t
 
 A command can run for up to 5 minutes before System Bridge stops it. Output over 1 MB is cut off. Stopping System Bridge also stops any commands still running.
 
+## Editing a command
+
+Each part of a command in the list is a button: its name, the program, the arguments and the working directory. Select one to change just that part in a small popover, then select **Save**. The command keeps its ID, so clients using it carry on working.
+
+Changing a prefab command's program gives it your own program in place of the prefab's. Leave the program empty to go back to the prefab's. System Bridge checks a new program or working directory the same way as when a command is added.
+
 ## Removing a command
 
 Select the bin button next to the command. Clients can't run it from then on.
