@@ -94,12 +94,16 @@ func ValidateCommand(commandID string, cfg *settings.Settings) (*settings.Settin
 				if !ok {
 					return nil, fmt.Errorf("%w: unknown prefab %q", ErrCommandPathInvalid, command.Prefab)
 				}
-				path, arguments, err := p.Resolve()
+				run, err := p.Resolve()
 				if err != nil {
 					return nil, fmt.Errorf("%w: %w", ErrCommandPathInvalid, err)
 				}
 				resolved := *command
-				resolved.Command, resolved.Arguments = path, arguments
+				resolved.Command, resolved.Arguments = run.Command, run.Arguments
+				// A built-in has no program on disk to check; execute runs it
+				if run.Run != nil {
+					return &resolved, nil
+				}
 				command = &resolved
 			}
 

@@ -54,7 +54,7 @@ func TestResolve(t *testing.T) {
 			name:      "says when the platform has no candidates",
 			goos:      "windows",
 			installed: []string{"gnome-screenshot"},
-			wantErr:   "Screenshot isn't available on this system",
+			wantErr:   "Screenshot isn't available on this desktop",
 		},
 	}
 
@@ -62,15 +62,15 @@ func TestResolve(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			stub(t, tt.goos, tt.installed)
 
-			command, arguments, err := screenshot.Resolve()
+			resolved, err := screenshot.Resolve()
 
 			if tt.wantErr != "" {
 				require.EqualError(t, err, tt.wantErr)
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.wantCommand, command)
-			assert.Equal(t, tt.wantArguments, arguments)
+			assert.Equal(t, tt.wantCommand, resolved.Command)
+			assert.Equal(t, tt.wantArguments, resolved.Arguments)
 		})
 	}
 }

@@ -34,6 +34,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli/v3 v3.14.0
+	github.com/vcaesar/screenshot v0.40.0
 	github.com/yusufpapurcu/wmi v1.2.4
 	golang.org/x/sys v0.49.0
 	golang.org/x/time v0.16.0
@@ -72,7 +73,6 @@ require (
 	github.com/vcaesar/gops v0.43.0 // indirect
 	github.com/vcaesar/imgo v0.44.0 // indirect
 	github.com/vcaesar/keycode v0.20.0 // indirect
-	github.com/vcaesar/screenshot v0.40.0 // indirect
 	github.com/vcaesar/tt v0.40.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect

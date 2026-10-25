@@ -312,6 +312,11 @@ func TestValidatePrefabCommand(t *testing.T) {
 	if runtime.GOOS != "linux" {
 		t.Skip("the lock prefab's Linux program is faked through PATH")
 	}
+	// Away from any desktop session, so the host's desktop doesn't pick
+	// another program
+	t.Setenv("XDG_CURRENT_DESKTOP", "")
+	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
+	t.Setenv("XDG_RUNTIME_DIR", t.TempDir())
 
 	cfg := &settings.Settings{
 		Commands: settings.SettingsCommands{
@@ -336,6 +341,41 @@ func TestValidatePrefabCommand(t *testing.T) {
 		result := execute(context.Background(), commandDef)
 		assert.Equal(t, 0, result.ExitCode)
 		assert.Equal(t, "lock-session\n", result.Stdout)
+	})
+
+	t.Run("Returns the saved file's path, or says nothing was saved", func(t *testing.T) {
+		binDir := t.TempDir()
+		saves := filepath.Join(binDir, "saves")
+		require.NoError(t, os.WriteFile(saves, []byte("#!/bin/sh\n: > \"$1\"\n"), 0755))
+		skips := filepath.Join(binDir, "skips")
+		require.NoError(t, os.WriteFile(skips, []byte("#!/bin/sh\nexit 0\n"), 0755))
+
+		for _, tt := range []struct {
+			program   string
+			wantSaved bool
+		}{
+			{program: saves, wantSaved: true},
+			{program: skips},
+		} {
+			// Each run gets its own folder, as both save under the same name
+			t.Setenv("XDG_PICTURES_DIR", t.TempDir())
+			// An override keeps the prefab, so its placeholders are filled in
+			result := execute(context.Background(), &settings.SettingsCommandDefinition{
+				ID:        "shot",
+				Prefab:    "screenshot",
+				Command:   tt.program,
+				Arguments: []string{"{output}"},
+			})
+
+			assert.Equal(t, 0, result.ExitCode)
+			if tt.wantSaved {
+				assert.Empty(t, result.Error)
+				assert.FileExists(t, result.Stdout)
+				assert.Contains(t, filepath.Base(result.Stdout), "screenshot-")
+			} else {
+				assert.Contains(t, result.Error, "nothing was saved to")
+			}
+		}
 	})
 
 	t.Run("Says which tool to install when none is found", func(t *testing.T) {
