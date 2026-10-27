@@ -173,6 +173,28 @@ interface SelectOption {
 }
 
 /** The sections about one disk, GPU, display or interface, and what they list. */
+// Sections that draw a history graph, and sections with percentage tiles
+const HISTORY_SECTIONS = new Set<string>([
+  "overview-load",
+  "overview-power",
+  "overview-temperatures",
+  "cpu-history",
+  "memory-history",
+  "disk-activity",
+  "gpu",
+  "network",
+  "interface",
+  "processes",
+]);
+
+const PERCENTAGE_SECTIONS = new Set<string>([
+  "battery",
+  "cpu",
+  "memory",
+  "mount",
+  "gpu",
+]);
+
 const ITEM_KINDS = new Map<string, ItemKind>([
   ["mount", "mount"],
   ["gpu", "gpu"],
@@ -269,36 +291,44 @@ const generalSchema = (
           : []),
       ]
     : []),
-  {
-    name: "hours_to_show",
-    selector: {
-      number: {
-        min: 1,
-        max: 48,
-        mode: "slider",
-        slider_ticks: true,
-        unit_of_measurement: "h",
-      },
-    },
-  },
-  {
-    name: "tile_feature",
-    selector: {
-      select: {
-        mode: "box",
-        box_max_columns: 3,
-        options: TILE_FEATURES.map((value) => ({
-          value,
-          label: TILE_FEATURE_LABELS.get(value) ?? value,
-          description: TILE_FEATURE_DESCRIPTIONS.get(value),
-          image: {
-            src: tileFeatureImage(value, false),
-            src_dark: tileFeatureImage(value, true),
+  ...(!("section" in config) || HISTORY_SECTIONS.has(config.section)
+    ? [
+        {
+          name: "hours_to_show",
+          selector: {
+            number: {
+              min: 1,
+              max: 48,
+              mode: "slider",
+              slider_ticks: true,
+              unit_of_measurement: "h",
+            },
           },
-        })),
-      },
-    },
-  },
+        },
+      ]
+    : []),
+  ...(!("section" in config) || PERCENTAGE_SECTIONS.has(config.section)
+    ? [
+        {
+          name: "tile_feature",
+          selector: {
+            select: {
+              mode: "box",
+              box_max_columns: 3,
+              options: TILE_FEATURES.map((value) => ({
+                value,
+                label: TILE_FEATURE_LABELS.get(value) ?? value,
+                description: TILE_FEATURE_DESCRIPTIONS.get(value),
+                image: {
+                  src: tileFeatureImage(value, false),
+                  src_dark: tileFeatureImage(value, true),
+                },
+              })),
+            },
+          },
+        },
+      ]
+    : []),
 ];
 
 const isDashboardConfig = (
